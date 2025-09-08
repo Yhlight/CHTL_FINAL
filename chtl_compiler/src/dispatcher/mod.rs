@@ -1,5 +1,5 @@
 // This module will contain the main compiler pipeline dispatcher.
-use crate::{ast, chtl_js, context::Context, generator, parser};
+use crate::{ast, chtl_js, context::Context, errors::ChtlError, generator, parser};
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -8,16 +8,28 @@ use std::path::{Path, PathBuf};
 fn process_file_and_imports(
     path: &Path,
     processed_files: &mut HashSet<PathBuf>,
-) -> Result<Vec<ast::Document<'static>>, String> {
-    let canonical_path = path.canonicalize().map_err(|e| e.to_string())?;
+) -> Result<Vec<ast::Document<'static>>, ChtlError> {
+    let canonical_path = path.canonicalize().map_err(|e| ChtlError::IoError {
+        path: path.to_path_buf(),
+        source: e,
+    })?;
     if processed_files.contains(&canonical_path) {
-        return Ok(Vec::new()); // Already processed, return empty vec.
+        // A circular dependency is not a compiler error, just a signal to stop processing.
+        // However, if the main file itself is part of a cycle in a way that it's skipped,
+        // the logic in `compile` will catch that it couldn't be loaded.
+        return Ok(Vec::new());
     }
     processed_files.insert(canonical_path);
 
-    let source = fs::read_to_string(path).map_err(|e| e.to_string())?;
+    let source = fs::read_to_string(path).map_err(|e| ChtlError::IoError {
+        path: path.to_path_buf(),
+        source: e,
+    })?;
     let static_source: &'static str = Box::leak(source.into_boxed_str());
-    let document = parser::parse(static_source).map_err(|e| e.to_string())?;
+    let document = parser::parse(static_source).map_err(|e| ChtlError::ParseError {
+        path: path.to_path_buf(),
+        message: e.to_string(),
+    })?;
 
     let mut modules_to_process = Vec::new();
     // First, find all `use` statements in the current document.
@@ -41,7 +53,7 @@ fn process_file_and_imports(
     Ok(all_docs)
 }
 
-pub fn compile(source_path: &Path) -> Result<String, String> {
+pub fn compile(source_path: &Path) -> Result<String, ChtlError> {
     // 1. Recursively parse the entire dependency tree.
     let mut processed_files = HashSet::new();
     let all_docs = process_file_and_imports(source_path, &mut processed_files)?;
@@ -71,7 +83,7 @@ pub fn compile(source_path: &Path) -> Result<String, String> {
     }
 
     // 3. The first document is our main entry point for rendering.
-    let main_ast = all_docs.get(0).ok_or_else(|| "Failed to process the main source file.".to_string())?;
+    let main_ast = all_docs.get(0).ok_or_else(|| ChtlError::Generic("Failed to process the main source file.".to_string()))?;
 
     // 4. Walk the main AST to extract script and hoisted style content.
     let mut script_content = String::new();
@@ -80,7 +92,10 @@ pub fn compile(source_path: &Path) -> Result<String, String> {
 
     // 5. Compile the collected CHTL JS content.
     let generated_js = if !script_content.is_empty() {
-        let chtl_js_ast = chtl_js::parser::parse(&script_content).map_err(|e| e.to_string())?;
+        let chtl_js_ast = chtl_js::parser::parse(&script_content).map_err(|e| ChtlError::ParseError {
+            path: source_path.to_path_buf(), // CHTL-JS errors are attributed to the main file
+            message: e.to_string(),
+        })?;
         chtl_js::generator::generate(&chtl_js_ast)
     } else {
         String::new()
