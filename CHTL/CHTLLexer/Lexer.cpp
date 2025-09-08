@@ -117,6 +117,10 @@ Token Lexer::getNextToken() {
             current += 10;
             return makeToken(TokenType::KEYWORD_TEMPLATE, "[Template]");
         }
+        if (source.substr(current, 8) == "[Custom]") {
+            current += 8;
+            return makeToken(TokenType::KEYWORD_CUSTOM, "[Custom]");
+        }
     }
 
     if (peek() == '@') {
@@ -148,7 +152,7 @@ Token Lexer::getNextToken() {
         case ';': advance(); return makeToken(TokenType::SEMICOLON, ";");
     }
 
-    // Fallback for unquoted literals
+    // Fallback for unquoted literals like '16px'
     size_t start = current;
     while (!isspace(peek()) && peek() != ';' && peek() != '}' && peek() != '{' && !isAtEnd()) {
         advance();

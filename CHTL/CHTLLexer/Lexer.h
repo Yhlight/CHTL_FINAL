@@ -10,11 +10,8 @@ public:
     Token getNextToken();
     char peek();
     char peekNext();
-    void enterRawMode();
-    void exitRawMode();
 
 private:
-    bool rawMode = false;
     std::string source;
     size_t current = 0;
     int line = 1;
@@ -28,5 +25,4 @@ private:
     void skipWhitespaceAndComments();
     Token identifier();
     Token stringLiteral();
-    Token number();
 };

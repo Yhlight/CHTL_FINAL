@@ -3,6 +3,7 @@
 #include "../CHTLNode/ElementTemplateNode.h"
 #include "../CHTLNode/StyleTemplateNode.h"
 #include "../CHTLNode/VarTemplateNode.h"
+#include "../CHTLNode/CustomElementNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
 #include <iostream>
 #include <algorithm>
@@ -19,6 +20,7 @@ Parser::Parser(Lexer& lexer) : lexer(lexer) {
 }
 
 void Parser::advance() {
+    previousToken = currentToken;
     currentToken = nextToken;
     nextToken = lexer.getNextToken();
 }
@@ -63,6 +65,7 @@ std::unique_ptr<ElementNode> Parser::parse() {
 
 std::unique_ptr<BaseNode> Parser::declaration() {
     if (check(TokenType::KEYWORD_TEMPLATE)) return templateDeclaration();
+    if (check(TokenType::KEYWORD_CUSTOM)) return customDeclaration();
     if (check(TokenType::IDENTIFIER) && checkNext(TokenType::LEFT_BRACE)) return element();
     if (check(TokenType::TEXT)) return textNode();
     if (check(TokenType::STYLE)) return styleNode();
@@ -187,9 +190,9 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
                 consume(TokenType::COLON, "Expect ':' after property name.");
                 node->properties[key] = parseValue();
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-            } else if (check(TokenType::AT_STYLE) || match(TokenType::KEYWORD_INHERIT)) {
-                match(TokenType::KEYWORD_INHERIT);
-                consume(TokenType::AT_STYLE, "Expect '@Style' for inheritance.");
+            } else if (check(TokenType::AT_STYLE) || check(TokenType::KEYWORD_INHERIT)) {
+                bool isInherit = match(TokenType::KEYWORD_INHERIT);
+                if (!isInherit) consume(TokenType::AT_STYLE, "Expect '@Style' for inheritance.");
                 std::string baseTemplateName = currentToken.lexeme;
                 consume(TokenType::IDENTIFIER, "Expect base template name.");
                 consume(TokenType::SEMICOLON, "Expect ';' after base template usage.");
@@ -213,9 +216,9 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
         consume(TokenType::IDENTIFIER, "Expect template name.");
         consume(TokenType::LEFT_BRACE, "Expect '{' after name.");
         while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
-            if (check(TokenType::AT_ELEMENT) || match(TokenType::KEYWORD_INHERIT)) {
-                match(TokenType::KEYWORD_INHERIT);
-                consume(TokenType::AT_ELEMENT, "Expect '@Element' for inheritance.");
+            if (check(TokenType::AT_ELEMENT) || check(TokenType::KEYWORD_INHERIT)) {
+                bool isInherit = match(TokenType::KEYWORD_INHERIT);
+                if(!isInherit) consume(TokenType::AT_ELEMENT, "Expect '@Element' for inheritance.");
                 std::string baseTemplateName = currentToken.lexeme;
                 consume(TokenType::IDENTIFIER, "Expect base template name.");
                 consume(TokenType::SEMICOLON, "Expect ';' after base template usage.");
@@ -277,8 +280,6 @@ std::string Parser::parseValue() {
     }
 
     std::string value;
-    // This is a simplified value parser that takes one token.
-    // It should be enhanced to handle multi-token values like '16px'.
     if (check(TokenType::STRING) || check(TokenType::IDENTIFIER)) {
         value = currentToken.lexeme;
         advance();
@@ -287,4 +288,30 @@ std::string Parser::parseValue() {
         advance();
     }
     return value;
+}
+
+std::unique_ptr<BaseNode> Parser::customDeclaration() {
+    consume(TokenType::KEYWORD_CUSTOM, "Expect '[Custom]' keyword.");
+
+    if (match(TokenType::AT_ELEMENT)) {
+        auto node = std::make_unique<CustomElementNode>();
+        node->name = currentToken.lexeme;
+        consume(TokenType::IDENTIFIER, "Expect custom element name.");
+        consume(TokenType::LEFT_BRACE, "Expect '{' after name.");
+
+        while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
+            auto child = declaration();
+            if (child) {
+                setParent(node.get(), child.get());
+                node->children.push_back(std::move(child));
+            }
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' after body.");
+        customElementTemplates[node->name] = std::move(node);
+    } else {
+        std::cerr << "Parse Error: Expected '@Element' after '[Custom]' at line " << currentToken.line << std::endl;
+        advance();
+    }
+
+    return nullptr;
 }

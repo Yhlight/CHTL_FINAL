@@ -4,18 +4,19 @@
 #include <vector>
 
 enum class TokenType {
-    // Single-character tokens.
+    // Single-character tokens
     LEFT_BRACE, RIGHT_BRACE,
     LEFT_PAREN, RIGHT_PAREN,
     COLON, EQUAL, SEMICOLON,
 
-    // Literals.
+    // Literals
     IDENTIFIER, STRING,
 
     // Keywords
     TEXT,
     STYLE,
     KEYWORD_TEMPLATE,
+    KEYWORD_CUSTOM,
     KEYWORD_INHERIT,
     AT_STYLE,
     AT_ELEMENT,
@@ -26,7 +27,7 @@ enum class TokenType {
     BLOCK_COMMENT,
     GENERATOR_COMMENT,
 
-    // End of file.
+    // End of file
     END_OF_FILE
 };
 

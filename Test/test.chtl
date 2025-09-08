@@ -26,6 +26,12 @@
     p { text { "This is also from the inherited box." } }
 }
 
+[Custom] @Element MyComponent {
+    div {
+        h3 { text { "Title" } }
+    }
+}
+
 html {
     body {
         div {

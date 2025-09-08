@@ -12,6 +12,7 @@
 #include "../CHTLNode/ElementTemplateNode.h"
 #include "../CHTLNode/StyleTemplateNode.h"
 #include "../CHTLNode/VarTemplateNode.h"
+#include "../CHTLNode/CustomElementNode.h"
 
 class Parser {
 public:
@@ -21,11 +22,13 @@ public:
     std::map<std::string, std::unique_ptr<ElementTemplateNode>> elementTemplates;
     std::map<std::string, std::unique_ptr<StyleTemplateNode>> styleTemplates;
     std::map<std::string, std::unique_ptr<VarTemplateNode>> varTemplates;
+    std::map<std::string, std::unique_ptr<CustomElementNode>> customElementTemplates;
 
 private:
     Lexer& lexer;
     Token currentToken;
     Token nextToken;
+    Token previousToken; // Needed for inherit keyword check
 
     void advance();
     bool match(TokenType type);
@@ -35,6 +38,7 @@ private:
 
     std::unique_ptr<BaseNode> declaration();
     std::unique_ptr<BaseNode> templateDeclaration();
+    std::unique_ptr<BaseNode> customDeclaration();
     std::unique_ptr<ElementNode> element();
     std::unique_ptr<TextNode> textNode();
     std::unique_ptr<StyleNode> styleNode();
