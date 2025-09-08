@@ -2,7 +2,7 @@ use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
 
-use crate::ast::{Attribute, Document, Element, Node};
+use crate::ast::{Attribute, CssProperty, Document, Element, Node, StyleContent, TemplateDefinition, TemplateElementGroup, TemplateStyleGroup, TemplateVarGroup, TemplateVariable, TopLevelDefinition};
 use crate::css_parser;
 
 #[derive(Parser)]
@@ -10,19 +10,79 @@ use crate::css_parser;
 pub struct ChtlParser;
 
 pub fn parse(source: &str) -> Result<Document, pest::error::Error<Rule>> {
-    let mut pairs = ChtlParser::parse(Rule::chtl_file, source)?;
-    let file_pair = pairs.next().unwrap();
+    let file_pair = ChtlParser::parse(Rule::chtl_file, source)?.next().unwrap();
 
-    let children = file_pair.into_inner()
-        .find(|pair| pair.as_rule() == Rule::inner_content)
-        .unwrap()
-        .into_inner()
-        .filter(|pair| pair.as_rule() != Rule::COMMENT && pair.as_rule() != Rule::attribute)
-        .map(build_node)
-        .collect();
+    let mut definitions = Vec::new();
+    let mut children = Vec::new();
 
-    Ok(Document { children })
+    if let Some(file_content_pair) = file_pair.into_inner().find(|p| p.as_rule() == Rule::file_content) {
+        for pair in file_content_pair.into_inner() {
+            match pair.as_rule() {
+                Rule::template_definition => {
+                    definitions.push(TopLevelDefinition::Template(build_template_definition(pair)));
+                }
+                Rule::element | Rule::text_node | Rule::style_block | Rule::script_block => {
+                    children.push(build_node(pair));
+                }
+                Rule::COMMENT | Rule::EOI => { /* ignore */ }
+                _ => unreachable!("Unexpected top-level rule: {:?}", pair.as_rule()),
+            }
+        }
+    }
+
+    Ok(Document { definitions, children })
 }
+
+fn build_template_definition(pair: Pair<Rule>) -> TemplateDefinition {
+    let inner = pair.into_inner().next().unwrap();
+    match inner.as_rule() {
+        Rule::style_template => {
+            let mut parts = inner.into_inner();
+            let name = parts.next().unwrap().as_str();
+            let content = parts.next().unwrap().into_inner().map(build_style_template_content).collect();
+            TemplateDefinition::Style(TemplateStyleGroup { name, content })
+        }
+        Rule::element_template => {
+            let mut parts = inner.into_inner();
+            let name = parts.next().unwrap().as_str();
+            let children = parts.filter(|p| p.as_rule() != Rule::COMMENT).map(build_node).collect();
+            TemplateDefinition::Element(TemplateElementGroup { name, children })
+        }
+        Rule::var_template => {
+            let mut parts = inner.into_inner();
+            let name = parts.next().unwrap().as_str();
+            let variables = parts.map(|v| {
+                 let mut v_inner = v.into_inner();
+                 let key = v_inner.next().unwrap().as_str();
+                 let value = v_inner.next().unwrap().as_str().trim_matches(|c| c == '"' || c == '\'');
+                 TemplateVariable { key, value }
+            }).collect();
+            TemplateDefinition::Var(TemplateVarGroup { name, variables })
+        }
+        _ => unreachable!("Unexpected template type: {:?}", inner.as_rule()),
+    }
+}
+
+fn build_style_template_content(pair: Pair<Rule>) -> StyleContent {
+    match pair.as_rule() {
+        Rule::property => {
+            let mut p_inner = pair.into_inner();
+            let key = p_inner.next().unwrap().as_str();
+            let value = p_inner.next().unwrap().as_str().trim().trim_matches(|c| c == '"' || c == '\'');
+            StyleContent::Property(CssProperty { key, value })
+        }
+        Rule::style_template_usage => {
+            let name = pair.into_inner().next().unwrap().as_str();
+            StyleContent::StyleTemplateUsage { name }
+        }
+        Rule::inherit_style => {
+            let name = pair.into_inner().next().unwrap().as_str();
+            StyleContent::InheritStyleTemplate { name }
+        }
+        _ => unreachable!("Unexpected style template content: {:?}", pair.as_rule()),
+    }
+}
+
 
 fn build_node(pair: Pair<Rule>) -> Node {
     match pair.as_rule() {
@@ -44,7 +104,7 @@ fn build_node(pair: Pair<Rule>) -> Node {
                         attributes.push(Attribute { key, value });
                     }
                     Rule::COMMENT => { /* ignore */ }
-                    _ => { // Any other rule is a child node
+                    _ => {
                         children.push(build_node(content_pair));
                     }
                 }
@@ -63,22 +123,62 @@ fn build_node(pair: Pair<Rule>) -> Node {
         }
         Rule::style_block => {
             let content = pair.into_inner().next().unwrap().as_str();
-            // Sub-parse the content of the style block
-            let properties = css_parser::parse(content).unwrap_or_else(|_| vec![]);
-            Node::StyleBlock(properties)
+            let style_content = css_parser::parse(content).unwrap_or_else(|_| vec![]);
+            Node::StyleBlock(style_content)
         }
         Rule::script_block => {
             let content = pair.into_inner().next().unwrap().as_str();
             Node::ScriptBlock(content)
         }
-        _ => unreachable!("Unexpected rule: {:?}", pair.as_rule()),
+        Rule::element_template_usage => {
+            let name = pair.into_inner().next().unwrap().as_str();
+            Node::ElementTemplateUsage { name }
+        }
+        _ => unreachable!("Unexpected node rule: {:?}", pair.as_rule()),
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::{Attribute, CssProperty, Document, Element, Node, StyleContent};
+    use crate::ast::*;
+
+    #[test]
+    fn test_parse_template_definitions() {
+        let source = r#"
+            [Template] @Style DefaultText {
+                color: "black";
+                line-height: 1.6;
+            }
+
+            [Template] @Element Box {
+                div {}
+            }
+        "#;
+
+        let doc = parse(source).unwrap();
+        assert!(doc.children.is_empty());
+        assert_eq!(doc.definitions.len(), 2);
+
+        // Check style template
+        match &doc.definitions[0] {
+            TopLevelDefinition::Template(TemplateDefinition::Style(st)) => {
+                assert_eq!(st.name, "DefaultText");
+                assert_eq!(st.content.len(), 2);
+                assert_eq!(st.content[0], StyleContent::Property(CssProperty { key: "color", value: "black" }));
+            }
+            _ => panic!("Expected a style template"),
+        }
+
+        // Check element template
+        match &doc.definitions[1] {
+            TopLevelDefinition::Template(TemplateDefinition::Element(et)) => {
+                assert_eq!(et.name, "Box");
+                assert_eq!(et.children.len(), 1);
+            }
+            _ => panic!("Expected an element template"),
+        }
+    }
 
     #[test]
     fn test_parse_simple_elements() {
@@ -88,6 +188,7 @@ mod tests {
         "#;
 
         let expected_doc = Document {
+            definitions: vec![],
             children: vec![
                 Node::Element(Element {
                     tag_name: "div",
@@ -116,6 +217,7 @@ mod tests {
         "#;
 
         let expected_doc = Document {
+            definitions: vec![],
             children: vec![
                 Node::Element(Element {
                     tag_name: "div",
@@ -142,6 +244,7 @@ mod tests {
         "#;
 
         let expected_doc = Document {
+            definitions: vec![],
             children: vec![
                 Node::Element(Element {
                     tag_name: "div",
@@ -174,6 +277,7 @@ mod tests {
         "#;
 
         let expected_doc = Document {
+            definitions: vec![],
             children: vec![
                 Node::Element(Element {
                     tag_name: "div",

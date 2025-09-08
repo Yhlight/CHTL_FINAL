@@ -11,7 +11,7 @@ pub fn parse(source: &str) -> Result<Vec<StyleContent>, pest::error::Error<Rule>
     let pairs = CssParser::parse(Rule::style_content, source)?.next().unwrap().into_inner();
 
     let content = pairs
-        .filter(|pair| pair.as_rule() == Rule::property || pair.as_rule() == Rule::ruleset)
+        .filter(|pair| pair.as_rule() == Rule::property || pair.as_rule() == Rule::ruleset || pair.as_rule() == Rule::style_template_usage)
         .map(build_style_content)
         .collect();
 
@@ -22,6 +22,10 @@ fn build_style_content(pair: Pair<Rule>) -> StyleContent {
     match pair.as_rule() {
         Rule::property => StyleContent::Property(build_css_property(pair)),
         Rule::ruleset => StyleContent::Ruleset(build_css_ruleset(pair)),
+        Rule::style_template_usage => {
+            let name = pair.into_inner().next().unwrap().as_str();
+            StyleContent::StyleTemplateUsage { name }
+        }
         _ => unreachable!(),
     }
 }
@@ -61,7 +65,7 @@ mod tests {
 
         // Check first property
         match &content[0] {
-            StyleContent::Property(p) => assert_eq!(*p, CssProperty { key: "color", value: "red" }),
+            StyleContent::Property(p) => assert_eq!(p, &CssProperty { key: "color", value: "red" }),
             _ => panic!("Expected a property"),
         }
 
@@ -78,7 +82,7 @@ mod tests {
 
         // Check second property
         match &content[2] {
-            StyleContent::Property(p) => assert_eq!(*p, CssProperty { key: "font-size", value: "16px" }),
+            StyleContent::Property(p) => assert_eq!(p, &CssProperty { key: "font-size", value: "16px" }),
             _ => panic!("Expected a property"),
         }
     }

@@ -1,5 +1,6 @@
 pub mod ast;
 pub mod chtl_js;
+pub mod context;
 pub mod css_parser;
 pub mod dispatcher;
 pub mod generator;

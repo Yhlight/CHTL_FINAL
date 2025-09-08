@@ -3,8 +3,11 @@
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
 COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
 
-// The content of a style block can be properties or full rulesets
-style_content = { SOI ~ (property | ruleset | COMMENT)* ~ EOI }
+// The content of a style block can be properties, rulesets, or style template usages
+style_content = { SOI ~ (property | ruleset | style_template_usage | COMMENT)* ~ EOI }
+
+identifier = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+style_template_usage = { "@Style" ~ identifier ~ ";" }
 
 // A single property for inline styles
 property = { property_key ~ ":" ~ property_value ~ (";" | &"}") }
