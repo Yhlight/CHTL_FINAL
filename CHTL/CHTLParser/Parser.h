@@ -11,6 +11,7 @@
 #include "../CHTLNode/StyleTemplateNode.h"
 #include "../CHTLNode/VarTemplateNode.h"
 #include "../CHTLNode/CustomStyleNode.h"
+#include "../CHTLNode/CustomElementNode.h"
 
 class StyleNode; // Forward declaration
 
@@ -24,6 +25,7 @@ public:
     std::map<std::string, std::unique_ptr<StyleTemplateNode>> styleTemplates;
     std::map<std::string, std::unique_ptr<VarTemplateNode>> varTemplates;
     std::map<std::string, std::unique_ptr<CustomStyleNode>> customStyleTemplates;
+    std::map<std::string, std::unique_ptr<CustomElementNode>> customElementTemplates;
 
 private:
     Lexer& lexer;
@@ -45,4 +47,5 @@ private:
     std::unique_ptr<StyleNode> styleNode();
     void attributes(ElementNode& element);
     std::string parseValue();
+    void handleCustomElementUsage(const std::string& templateName, ElementNode* parentNode);
 };

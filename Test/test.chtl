@@ -33,6 +33,14 @@
     }
 }
 
+[Custom] @Element MyComponent {
+    div {
+        class: "component-wrapper";
+        h3 { text { "Component Title" } }
+        p { text { "Component paragraph." } }
+    }
+}
+
 [Custom] @Style ButtonBase {
     border: "1px solid black";
     padding: "5px 10px";
@@ -84,6 +92,15 @@ html {
             }
             @Element MyBox;
             @Element InheritedBox;
+
+            @Element MyComponent {
+                h3 {
+                    style { color: green; }
+                }
+                p {
+                    style { font-style: italic; }
+                }
+            }
 
             [Origin] @Html {
                 <!-- This is a raw HTML comment -->
