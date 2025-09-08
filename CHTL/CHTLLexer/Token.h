@@ -8,6 +8,7 @@ enum class TokenType {
     LEFT_BRACE, RIGHT_BRACE,
     LEFT_PAREN, RIGHT_PAREN,
     COLON, EQUAL, SEMICOLON,
+    COMMA,
 
     // Literals.
     IDENTIFIER, STRING,
@@ -16,6 +17,7 @@ enum class TokenType {
     TEXT,
     STYLE,
     KEYWORD_TEMPLATE,
+    KEYWORD_CUSTOM,
     AT_STYLE,
     AT_ELEMENT,
     AT_VAR,

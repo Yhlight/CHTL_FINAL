@@ -17,6 +17,12 @@
     }
 }
 
+[Custom] @Style MyCustomStyle {
+    border: "1px solid black";
+    color,
+    font-size;
+}
+
 html {
     head {
         title {

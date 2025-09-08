@@ -140,10 +140,15 @@ Token Lexer::getNextToken() {
         case ':': return makeToken(TokenType::COLON, ":");
         case '=': return makeToken(TokenType::EQUAL, "=");
         case ';': return makeToken(TokenType::SEMICOLON, ";");
+        case ',': return makeToken(TokenType::COMMA, ",");
         case '[':
             if (source.substr(current, 8) == "Template]") {
                 current += 8;
                 return makeToken(TokenType::KEYWORD_TEMPLATE, "[Template]");
+            }
+            if (source.substr(current, 7) == "Custom]") {
+                current += 7;
+                return makeToken(TokenType::KEYWORD_CUSTOM, "[Custom]");
             }
             break;
         case '@':

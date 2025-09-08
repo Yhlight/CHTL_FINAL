@@ -6,6 +6,7 @@
 #include "../CHTLNode/TemplateUsageNode.h"
 #include <iostream>
 
+
 Parser::Parser(Lexer& lexer) : lexer(lexer) {
     advance();
     advance(); // Initialize both currentToken and nextToken
@@ -58,6 +59,9 @@ std::unique_ptr<ElementNode> Parser::parse() {
 std::unique_ptr<BaseNode> Parser::declaration() {
     if (check(TokenType::KEYWORD_TEMPLATE)) {
         return templateDeclaration();
+    }
+    if (check(TokenType::KEYWORD_CUSTOM)) {
+        return customDeclaration();
     }
     if (check(TokenType::IDENTIFIER)) {
         if (checkNext(TokenType::LEFT_BRACE)) {
@@ -273,6 +277,47 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
     }
 
     return nullptr; // Template declarations don't produce a node in the main AST
+}
+
+std::unique_ptr<BaseNode> Parser::customDeclaration() {
+    consume(TokenType::KEYWORD_CUSTOM, "Expect '[Custom]' keyword.");
+
+    if (match(TokenType::AT_STYLE)) {
+        auto node = std::make_unique<CustomStyleNode>();
+        node->name = currentToken.lexeme;
+        consume(TokenType::IDENTIFIER, "Expect custom style name.");
+        consume(TokenType::LEFT_BRACE, "Expect '{' after name.");
+
+        while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
+            if (check(TokenType::IDENTIFIER)) {
+                std::string key = currentToken.lexeme;
+                advance();
+
+                if (match(TokenType::COLON)) { // Valued property
+                    node->properties[key] = parseValue();
+                    consume(TokenType::SEMICOLON, "Expect ';' after valued property.");
+                } else { // Valueless property
+                    node->valuelessProperties.push_back(key);
+                    if (match(TokenType::COMMA)) {
+                        // Continue parsing more valueless properties
+                        continue;
+                    }
+                    consume(TokenType::SEMICOLON, "Expect ';' after valueless property list.");
+                }
+            } else {
+                std::cerr << "Parse Error: Unexpected token in custom style at line " << currentToken.line << std::endl;
+                advance();
+            }
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' after body.");
+        customStyleTemplates[node->name] = std::move(node);
+
+    } else {
+        std::cerr << "Parse Error: Expected '@Style' after '[Custom]' at line " << currentToken.line << std::endl;
+        advance();
+    }
+
+    return nullptr; // Custom declarations don't produce a node in the main AST
 }
 
 std::string Parser::parseValue() {
