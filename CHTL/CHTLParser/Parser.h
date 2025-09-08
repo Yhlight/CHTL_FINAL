@@ -50,9 +50,17 @@ private:
 
     struct Selector {
         std::string tagName;
-        int index = -1;
+        int index = -1; // -1 means no index was provided
     };
+
+    enum class PatchType { Modify, InsertAfter, InsertBefore, InsertAtTop, InsertAtBottom, Replace, Delete };
+    struct Patch {
+        PatchType type;
+        Selector selector;
+        std::unique_ptr<ElementNode> payload; // For Modify, Insert, Replace
+    };
+
     Selector parseSelector();
-    BaseNode* findNodeByTag(BaseNode* root, const std::string& tagName);
+    BaseNode* findNodeBySelector(BaseNode* root, const Selector& selector);
     void mergeStyles(ElementNode* targetNode, ElementNode* specNode);
 };

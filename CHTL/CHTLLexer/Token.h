@@ -7,10 +7,11 @@ enum class TokenType {
     // Single-character tokens
     LEFT_BRACE, RIGHT_BRACE,
     LEFT_PAREN, RIGHT_PAREN,
+    LEFT_BRACKET, RIGHT_BRACKET,
     COLON, EQUAL, SEMICOLON,
 
     // Literals
-    IDENTIFIER, STRING,
+    IDENTIFIER, STRING, NUMBER,
 
     // Keywords
     TEXT,
@@ -19,6 +20,12 @@ enum class TokenType {
     KEYWORD_CUSTOM,
     KEYWORD_INHERIT,
     KEYWORD_DELETE,
+    KEYWORD_INSERT,
+    KEYWORD_AFTER,
+    KEYWORD_BEFORE,
+    KEYWORD_REPLACE,
+    KEYWORD_ATTOP,
+    KEYWORD_ATBOTTOM,
     AT_STYLE,
     AT_ELEMENT,
     AT_VAR,

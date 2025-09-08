@@ -314,41 +314,77 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
     return nullptr;
 }
 
-BaseNode* Parser::findNodeByTag(BaseNode* root, const std::string& tagName) {
+Parser::Selector Parser::parseSelector() {
+    Selector selector;
+    selector.tagName = currentToken.lexeme;
+    consume(TokenType::IDENTIFIER, "Expect a tag name for the selector.");
+
+    if (match(TokenType::LEFT_BRACKET)) {
+        if (check(TokenType::NUMBER)) {
+            try {
+                selector.index = std::stoi(currentToken.lexeme);
+            } catch (const std::invalid_argument& e) {
+                std::cerr << "Parse Error: Invalid number for index at line " << currentToken.line << std::endl;
+                selector.index = -1;
+            } catch (const std::out_of_range& e) {
+                std::cerr << "Parse Error: Index number out of range at line " << currentToken.line << std::endl;
+                selector.index = -1;
+            }
+            advance();
+        } else {
+            std::cerr << "Parse Error: Expect a number inside brackets for index." << std::endl;
+        }
+        consume(TokenType::RIGHT_BRACKET, "Expect ']' after index.");
+    }
+    return selector;
+}
+
+BaseNode* Parser::findNodeBySelector(BaseNode* root, const Parser::Selector& selector) {
     if (!root) return nullptr;
 
+    std::vector<BaseNode*> candidates;
     std::vector<BaseNode*> queue;
 
-    // Seed the queue with initial children
     if (auto* customElem = dynamic_cast<CustomElementNode*>(root)) {
         for (const auto& child : customElem->children) {
             queue.push_back(child.get());
         }
     } else if (auto* elem = dynamic_cast<ElementNode*>(root)) {
-        // This case is for searching within a standard element, if ever needed.
         for (const auto& child : elem->children) {
             queue.push_back(child.get());
         }
-    } else {
-        // Not a container, can't search.
-        return nullptr;
     }
 
     size_t head = 0;
     while(head < queue.size()) {
         BaseNode* current = queue[head++];
         if (auto* elem = dynamic_cast<ElementNode*>(current)) {
-            if (elem->tagName == tagName) {
-                return elem; // Found it
+            if (elem->tagName == selector.tagName) {
+                candidates.push_back(elem);
             }
-            // Add this element's children to the queue for deeper searching
             for (const auto& child : elem->children) {
                 queue.push_back(child.get());
             }
         }
     }
 
-    return nullptr; // Not found
+    if (selector.index != -1) {
+        if (selector.index >= 0 && static_cast<size_t>(selector.index) < candidates.size()) {
+            return candidates[selector.index];
+        } else {
+            std::cerr << "Parse Warning: Index " << selector.index << " for tag '" << selector.tagName << "' is out of bounds." << std::endl;
+            return nullptr;
+        }
+    }
+
+    if (!candidates.empty()) {
+        if (candidates.size() > 1) {
+             std::cerr << "Parse Warning: Multiple elements with tag '" << selector.tagName << "' found. Use an index to specify one." << std::endl;
+        }
+        return candidates[0];
+    }
+
+    return nullptr;
 }
 
 void Parser::mergeStyles(ElementNode* targetNode, ElementNode* specNode) {
@@ -410,13 +446,8 @@ std::string Parser::parseValue() {
 void Parser::handleCustomElementUsage(const std::string& templateName, ElementNode* parentNode) {
     if (!customElementTemplates.count(templateName)) {
         std::cerr << "Parse Error: Custom element template '" << templateName << "' not found." << std::endl;
-        // The calling function `element()` already matched a '{', so we need to skip until the matching '}'
         int braceCount = 1;
-        while (braceCount > 0 && !check(TokenType::END_OF_FILE)) {
-            advance();
-            if (check(TokenType::LEFT_BRACE)) braceCount++;
-            if (check(TokenType::RIGHT_BRACE)) braceCount--;
-        }
+        while (braceCount > 0 && !check(TokenType::END_OF_FILE)) { advance(); if(check(TokenType::LEFT_BRACE)) braceCount++; if(check(TokenType::RIGHT_BRACE)) braceCount--; }
         return;
     }
     const auto& baseTmpl = customElementTemplates.at(templateName);
@@ -428,35 +459,144 @@ void Parser::handleCustomElementUsage(const std::string& templateName, ElementNo
         return;
     }
 
-    // The call site already consumed the '{', so we parse the content.
+    // --- Phase 1: Collect Patches ---
+    std::vector<Patch> patches;
     while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
-        if (check(TokenType::IDENTIFIER) && checkNext(TokenType::LEFT_BRACE)) {
-            auto specNode = element();
-            if (!specNode) continue;
+        Patch patch;
+        patch.payload = std::make_unique<ElementNode>();
 
-            BaseNode* targetBaseNode = findNodeByTag(clonedCustomElement, specNode->tagName);
-            if (auto* targetNode = dynamic_cast<ElementNode*>(targetBaseNode)) {
-
-                for (const auto& attr : specNode->attributes) {
-                    targetNode->attributes[attr.first] = attr.second;
+        if (check(TokenType::IDENTIFIER)) {
+            patch.type = PatchType::Modify;
+            patch.selector = parseSelector();
+            consume(TokenType::LEFT_BRACE, "Expect '{' after selector.");
+            while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
+                if (check(TokenType::IDENTIFIER) && checkNext(TokenType::COLON)) attributes(*patch.payload);
+                else if (check(TokenType::STYLE)) patch.payload->children.push_back(styleNode());
+                else {
+                    auto child = declaration();
+                    if(child) patch.payload->children.push_back(std::move(child));
                 }
-
-                mergeStyles(targetNode, specNode.get());
-
-                for (auto& child : specNode->children) {
-                    if (dynamic_cast<StyleNode*>(child.get())) {
-                        continue;
-                    }
-                    setParent(targetNode, child.get());
-                    targetNode->children.push_back(std::move(child));
-                }
-
-            } else {
-                std::cerr << "Parse Warning: Element '" << specNode->tagName << "' in specialization not found in custom template '" << templateName << "'. Ignoring." << std::endl;
             }
-        } else {
-            std::cerr << "Parse Error: Unexpected token '" << currentToken.lexeme << "' in specialization block for '" << templateName << "'." << std::endl;
+            consume(TokenType::RIGHT_BRACE, "Expect '}' after specialization body.");
+        } else if (match(TokenType::KEYWORD_INSERT)) {
+            TokenType position = currentToken.type;
             advance();
+            if (position == TokenType::KEYWORD_AFTER) patch.type = PatchType::InsertAfter;
+            else if (position == TokenType::KEYWORD_BEFORE) patch.type = PatchType::InsertBefore;
+            else if (position == TokenType::KEYWORD_REPLACE) patch.type = PatchType::Replace;
+            else if (position == TokenType::KEYWORD_ATTOP) patch.type = PatchType::InsertAtTop;
+            else if (position == TokenType::KEYWORD_ATBOTTOM) patch.type = PatchType::InsertAtBottom;
+
+            if (patch.type != PatchType::InsertAtTop && patch.type != PatchType::InsertAtBottom) {
+                patch.selector = parseSelector();
+            }
+
+            consume(TokenType::LEFT_BRACE, "Expect '{' for insert block.");
+            while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
+                auto newNode = declaration();
+                if(newNode) patch.payload->children.push_back(std::move(newNode));
+            }
+            consume(TokenType::RIGHT_BRACE, "Expect '}' after insert block.");
+        } else if (match(TokenType::KEYWORD_DELETE)) {
+            patch.type = PatchType::Delete;
+            patch.selector = parseSelector();
+            patch.payload = nullptr;
+            consume(TokenType::SEMICOLON, "Expect ';' after delete selector.");
+        } else {
+             std::cerr << "Parse Error: Unexpected token '" << currentToken.lexeme << "' in specialization block." << std::endl;
+             advance();
+             continue;
+        }
+        patches.push_back(std::move(patch));
+    }
+
+    // --- Phase 2: Apply Patches ---
+    for (auto& patch : patches) {
+        BaseNode* targetNode = (patch.type != PatchType::InsertAtTop && patch.type != PatchType::InsertAtBottom)
+                             ? findNodeBySelector(clonedCustomElement, patch.selector)
+                             : nullptr;
+
+        std::vector<std::unique_ptr<BaseNode>>* parentChildren = nullptr;
+        BaseNode* parentNodeForPatch = nullptr;
+
+        if (patch.type != PatchType::InsertAtTop && patch.type != PatchType::InsertAtBottom) {
+            if (!targetNode || !targetNode->parent) {
+                std::cerr << "Parse Warning: Target for patch not found or has no parent." << std::endl;
+                continue;
+            }
+            parentNodeForPatch = targetNode->parent;
+            if(auto* p = dynamic_cast<ElementNode*>(parentNodeForPatch)) parentChildren = &p->children;
+            else if(auto* p = dynamic_cast<CustomElementNode*>(parentNodeForPatch)) parentChildren = &p->children;
+        } else {
+            parentNodeForPatch = clonedCustomElement;
+            parentChildren = &clonedCustomElement->children;
+        }
+
+        if (!parentChildren) {
+            std::cerr << "Internal Error: Could not get children list from parent." << std::endl;
+            continue;
+        }
+
+        auto it = (targetNode) ? std::find_if(parentChildren->begin(), parentChildren->end(),
+            [&](const std::unique_ptr<BaseNode>& p) { return p.get() == targetNode; }) : parentChildren->end();
+
+        switch (patch.type) {
+            case PatchType::Modify:
+                if (auto* target = dynamic_cast<ElementNode*>(targetNode)) {
+                    for (const auto& attr : patch.payload->attributes) target->attributes[attr.first] = attr.second;
+                    mergeStyles(target, patch.payload.get());
+                    for (auto& child : patch.payload->children) {
+                        if (dynamic_cast<StyleNode*>(child.get())) continue;
+                        setParent(target, child.get());
+                        target->children.push_back(std::move(child));
+                    }
+                }
+                break;
+            case PatchType::InsertAfter:
+                 if (it != parentChildren->end()) {
+                    for(auto& node : patch.payload->children) setParent(parentNodeForPatch, node.get());
+                    parentChildren->insert(std::next(it), std::make_move_iterator(patch.payload->children.begin()), std::make_move_iterator(patch.payload->children.end()));
+                 }
+                break;
+            case PatchType::InsertBefore:
+                 if (it != parentChildren->end()) {
+                    for(auto& node : patch.payload->children) setParent(parentNodeForPatch, node.get());
+                    parentChildren->insert(it, std::make_move_iterator(patch.payload->children.begin()), std::make_move_iterator(patch.payload->children.end()));
+                 }
+                break;
+            case PatchType::Replace:
+                if (it != parentChildren->end()) {
+                    for(auto& node : patch.payload->children) setParent(parentNodeForPatch, node.get());
+                    it = parentChildren->erase(it);
+                    parentChildren->insert(it, std::make_move_iterator(patch.payload->children.begin()), std::make_move_iterator(patch.payload->children.end()));
+                }
+                break;
+            case PatchType::InsertAtTop:
+            case PatchType::InsertAtBottom:
+                {
+                    BaseNode* insertionParent = parentNodeForPatch;
+                    std::vector<std::unique_ptr<BaseNode>>* insertionChildren = parentChildren;
+
+                    if (clonedCustomElement->children.size() == 1) {
+                        if (auto* singleRoot = dynamic_cast<ElementNode*>(clonedCustomElement->children[0].get())) {
+                            insertionParent = singleRoot;
+                            insertionChildren = &singleRoot->children;
+                        }
+                    }
+                    for(auto& node : patch.payload->children) setParent(insertionParent, node.get());
+
+                    if(patch.type == PatchType::InsertAtTop) {
+                        insertionChildren->insert(insertionChildren->begin(), std::make_move_iterator(patch.payload->children.begin()), std::make_move_iterator(patch.payload->children.end()));
+                    } else {
+                        insertionChildren->insert(insertionChildren->end(), std::make_move_iterator(patch.payload->children.begin()), std::make_move_iterator(patch.payload->children.end()));
+                    }
+                }
+                break;
+            case PatchType::Delete:
+                if (it != parentChildren->end()) {
+                    parentChildren->erase(it);
+                }
+                break;
         }
     }
 

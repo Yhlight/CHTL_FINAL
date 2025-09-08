@@ -89,6 +89,22 @@ Token Lexer::identifier() {
     if (text == "style") return makeToken(TokenType::STYLE, text);
     if (text == "inherit") return makeToken(TokenType::KEYWORD_INHERIT, text);
     if (text == "delete") return makeToken(TokenType::KEYWORD_DELETE, text);
+    if (text == "insert") return makeToken(TokenType::KEYWORD_INSERT, text);
+    if (text == "after") return makeToken(TokenType::KEYWORD_AFTER, text);
+    if (text == "before") return makeToken(TokenType::KEYWORD_BEFORE, text);
+    if (text == "replace") return makeToken(TokenType::KEYWORD_REPLACE, text);
+    if (text == "at") { // For "at top" and "at bottom"
+        size_t nextPos = current;
+        while (isspace(source[nextPos])) nextPos++;
+        if (source.substr(nextPos, 3) == "top") {
+            current = nextPos + 3;
+            return makeToken(TokenType::KEYWORD_ATTOP, "at top");
+        }
+        if (source.substr(nextPos, 6) == "bottom") {
+            current = nextPos + 6;
+            return makeToken(TokenType::KEYWORD_ATBOTTOM, "at bottom");
+        }
+    }
     return makeToken(TokenType::IDENTIFIER, text);
 }
 
@@ -104,6 +120,15 @@ Token Lexer::stringLiteral() {
     std::string value = source.substr(start, current - start);
     advance();
     return makeToken(TokenType::STRING, value);
+}
+
+Token Lexer::number() {
+    size_t start = current;
+    while (isdigit(peek())) {
+        advance();
+    }
+    std::string text = source.substr(start, current - start);
+    return makeToken(TokenType::NUMBER, text);
 }
 
 Token Lexer::getNextToken() {
@@ -140,6 +165,7 @@ Token Lexer::getNextToken() {
     }
 
     char c = peek();
+    if (isdigit(c)) return number();
     if (isalpha(c) || c == '_') return identifier();
     if (c == '"' || c == '\'') return stringLiteral();
 
@@ -151,6 +177,8 @@ Token Lexer::getNextToken() {
         case ':': advance(); return makeToken(TokenType::COLON, ":");
         case '=': advance(); return makeToken(TokenType::EQUAL, "=");
         case ';': advance(); return makeToken(TokenType::SEMICOLON, ";");
+        case '[': advance(); return makeToken(TokenType::LEFT_BRACKET, "[");
+        case ']': advance(); return makeToken(TokenType::RIGHT_BRACKET, "]");
     }
 
     // Fallback for unquoted literals like '16px'

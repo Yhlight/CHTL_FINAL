@@ -61,6 +61,19 @@
     background-color: "white";
 }
 
+// --- Advanced Specialization Tests ---
+[Custom] @Element AdvancedWidget {
+    widget-container {
+        header { text { "Header" } }
+        content {
+            div { id: "div-0"; }
+            div { id: "div-1"; }
+            span { id: "span-0"; }
+        }
+        footer { text { "Footer" } }
+    }
+}
+
 
 html {
     body {
@@ -80,16 +93,12 @@ html {
         div {
             id: "card1";
             style {
-                // Usage with specialization for a valueless property
-                @Style CardStyle {
-                    border-radius: "8px";
-                }
+                @Style CardStyle { border-radius: "8px"; }
             }
         }
         div {
             id: "card2";
             style {
-                // Override a default value
                 @Style CardStyle {
                     border-radius: "4px";
                     border: "2px dotted blue";
@@ -99,11 +108,30 @@ html {
         div {
             id: "card3";
             style {
-                // Delete a property
                 @Style CardStyle {
                     border-radius: "12px";
                     delete box-shadow;
                 }
+            }
+        }
+
+        // --- Testing Advanced Specialization ---
+        @Element AdvancedWidget {
+            // 1. Indexed Access Test
+            div[1] {
+                style { border: "2px solid green"; }
+            }
+
+            // 2. Deletion Tests
+            delete span;
+            delete footer;
+
+            // 3. Insertion Tests
+            insert after header {
+                hr {} // self-closing tag
+            }
+            insert at bottom {
+                p { text { "Appended at the very bottom." } }
             }
         }
     }
