@@ -94,6 +94,8 @@ Token Lexer::identifier() {
     std::string text = source.substr(start, current - start);
     if (text == "text") return makeToken(TokenType::TEXT, text);
     if (text == "style") return makeToken(TokenType::STYLE, text);
+    if (text == "from") return makeToken(TokenType::KEYWORD_FROM, text);
+    if (text == "as") return makeToken(TokenType::KEYWORD_AS, text);
     if (text == "inherit") return makeToken(TokenType::KEYWORD_INHERIT, text);
     if (text == "delete") return makeToken(TokenType::KEYWORD_DELETE, text);
     if (text == "insert") return makeToken(TokenType::KEYWORD_INSERT, text);
@@ -158,6 +160,10 @@ Token Lexer::getNextToken() {
             current += 8;
             return makeToken(TokenType::KEYWORD_ORIGIN, "[Origin]");
         }
+        if (source.substr(current, 8) == "[Import]") {
+            current += 8;
+            return makeToken(TokenType::KEYWORD_IMPORT, "[Import]");
+        }
     }
 
     if (peek() == '@') {
@@ -180,6 +186,7 @@ Token Lexer::getNextToken() {
         case ';': advance(); return makeToken(TokenType::SEMICOLON, ";");
         case '[': advance(); return makeToken(TokenType::LEFT_BRACKET, "[");
         case ']': advance(); return makeToken(TokenType::RIGHT_BRACKET, "]");
+        case ',': advance(); return makeToken(TokenType::COMMA, ",");
         case '.': advance(); return makeToken(TokenType::DOT, ".");
         case '#': advance(); return makeToken(TokenType::HASH, "#");
         case '&':

@@ -174,7 +174,15 @@ void Generator::visit(StyleRuleNode& node) {
 }
 
 void Generator::visit(OriginNode& node) {
-    output << node.content;
+    if (!node.name_to_lookup.empty()) {
+        if (parser.namedOriginBlocks.count(node.name_to_lookup)) {
+            output << parser.namedOriginBlocks.at(node.name_to_lookup)->content;
+        } else {
+            std::cerr << "Generator Error: Named origin block '" << node.name_to_lookup << "' not found." << std::endl;
+        }
+    } else {
+        output << node.content;
+    }
 }
 
 // =================================================================

@@ -1,0 +1,17 @@
+[Template] @Var Sizing {
+    base_width: 100;
+    multiplier: 2;
+}
+
+[Template] @Style ExpressiveBox {
+    width: Sizing(base_width) * Sizing(multiplier); // Should be 200
+    height: width / 2; // Should access the *evaluated* width, so 100
+    background-color: width > 150 ? "blue" : "red"; // Should be blue
+}
+
+div {
+    style {
+        @Style ExpressiveBox;
+    }
+    text { "This box should be 200px wide and 100px high, with a blue background." }
+}

@@ -1,0 +1,23 @@
+// Test for specific, named imports
+
+[Import] [Custom] @Element Card from "Test/imports/lib.chtl";
+[Import] [Template] @Style ButtonStyle from "Test/imports/lib.chtl";
+
+html {
+    body {
+        h1 { text { "Specific Import Test" } }
+
+        // This should work because Card was imported
+        @Element Card {
+            h4 { text { "A Specifically Imported Card" } }
+        }
+
+        // This should work because ButtonStyle was imported
+        button {
+            style {
+                @Style ButtonStyle;
+            }
+            text { "A Specifically Styled Button" }
+        }
+    }
+}

@@ -10,6 +10,8 @@
 #include "../CHTLNode/StyleRuleNode.h"
 #include <iostream>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 
 void setParent(BaseNode* parent, BaseNode* child) {
     if (parent && child) {
@@ -70,6 +72,7 @@ std::unique_ptr<BaseNode> Parser::declaration() {
     if (check(TokenType::KEYWORD_TEMPLATE)) return templateDeclaration();
     if (check(TokenType::KEYWORD_CUSTOM)) return customDeclaration();
     if (check(TokenType::KEYWORD_ORIGIN)) return originDeclaration();
+    if (check(TokenType::KEYWORD_IMPORT)) return importDeclaration();
     if (check(TokenType::IDENTIFIER) && checkNext(TokenType::LEFT_BRACE)) return element();
     if (check(TokenType::TEXT)) return textNode();
     if (check(TokenType::STYLE)) return styleNode();
@@ -77,6 +80,136 @@ std::unique_ptr<BaseNode> Parser::declaration() {
     std::cerr << "Parse Error: Unexpected token " << currentToken.lexeme << " at line " << currentToken.line << std::endl;
     advance();
     return nullptr;
+}
+
+std::unique_ptr<BaseNode> Parser::importDeclaration() {
+    consume(TokenType::KEYWORD_IMPORT, "Expect '[Import]' keyword.");
+    auto node = std::make_unique<ImportNode>();
+
+    // Parse optional category like [Custom] or [Template]
+    if (match(TokenType::KEYWORD_TEMPLATE)) node->category = ImportCategory::TEMPLATE;
+    else if (match(TokenType::KEYWORD_CUSTOM)) node->category = ImportCategory::CUSTOM;
+    else if (match(TokenType::KEYWORD_ORIGIN)) node->category = ImportCategory::ORIGIN;
+
+    // Parse the type, like @Element or @Chtl
+    if (match(TokenType::AT)) {
+        if (currentToken.type == TokenType::IDENTIFIER) {
+            std::string typeStr = currentToken.lexeme;
+            if (typeStr == "Element") node->type = ImportType::ELEMENT;
+            else if (typeStr == "Style") node->type = ImportType::STYLE;
+            else if (typeStr == "Var") node->type = ImportType::VAR;
+            else if (typeStr == "Html") node->type = ImportType::HTML;
+            else if (typeStr == "JavaScript") node->type = ImportType::JAVASCRIPT;
+            else if (typeStr == "Chtl") {
+                node->category = ImportCategory::CHTL; // Override category
+                node->type = ImportType::ALL;
+            }
+            else {
+                 std::cerr << "Parse Error: Unknown import type '@" << typeStr << "'." << std::endl;
+                 return nullptr;
+            }
+            advance();
+        } else {
+            std::cerr << "Parse Error: Expect type name after '@' in import." << std::endl;
+            return nullptr;
+        }
+    } else {
+        // This handles wildcard imports like '[Import] [Custom] from ...'
+        if (node->category != ImportCategory::NONE) {
+            node->type = ImportType::ALL;
+        } else {
+            std::cerr << "Parse Error: Invalid import statement. Expect category or type." << std::endl;
+            return nullptr;
+        }
+    }
+
+    // Parse specific identifiers if this isn't a wildcard/type import
+    if (node->type != ImportType::ALL && check(TokenType::IDENTIFIER)) {
+        do {
+            node->specific_imports.push_back(currentToken.lexeme);
+            consume(TokenType::IDENTIFIER, "Expect identifier.");
+        } while (match(TokenType::COMMA));
+    }
+
+    consume(TokenType::KEYWORD_FROM, "Expect 'from' keyword in import statement.");
+
+    if (check(TokenType::STRING) || check(TokenType::IDENTIFIER)) {
+        node->path = currentToken.lexeme;
+        advance();
+    } else {
+        std::cerr << "Parse Error: Expected a path string or literal." << std::endl;
+        return nullptr;
+    }
+
+    if (match(TokenType::KEYWORD_AS)) {
+        node->alias = currentToken.lexeme;
+        consume(TokenType::IDENTIFIER, "Expect alias name after 'as'.");
+    }
+
+    consume(TokenType::SEMICOLON, "Expect ';' after import statement.");
+
+    handleImport(*node);
+
+    // Imports are handled entirely during parsing and don't create a node in the AST.
+    return nullptr;
+}
+
+void Parser::handleImport(const ImportNode& node) {
+    std::ifstream file(node.path);
+    if (!file.is_open()) {
+        std::cerr << "Parse Error: Could not open import file " << node.path << std::endl;
+        return;
+    }
+
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    std::string source = buffer.str();
+
+    if (node.category == ImportCategory::CHTL || node.category == ImportCategory::CUSTOM || node.category == ImportCategory::TEMPLATE) {
+        Lexer importedLexer(source);
+        Parser importedParser(importedLexer);
+        importedParser.parse();
+
+        bool specific_import = !node.specific_imports.empty();
+
+        if (specific_import) {
+            for (const auto& name : node.specific_imports) {
+                bool found = false;
+                if (node.category == ImportCategory::TEMPLATE && node.type == ImportType::ELEMENT) {
+                    if(importedParser.elementTemplates.count(name)) { this->elementTemplates[name] = std::move(importedParser.elementTemplates.at(name)); found = true; }
+                } else if (node.category == ImportCategory::TEMPLATE && node.type == ImportType::STYLE) {
+                    if(importedParser.styleTemplates.count(name)) { this->styleTemplates[name] = std::move(importedParser.styleTemplates.at(name)); found = true; }
+                } else if (node.category == ImportCategory::TEMPLATE && node.type == ImportType::VAR) {
+                    if(importedParser.varTemplates.count(name)) { this->varTemplates[name] = std::move(importedParser.varTemplates.at(name)); found = true; }
+                } else if (node.category == ImportCategory::CUSTOM && node.type == ImportType::ELEMENT) {
+                    if(importedParser.customElementTemplates.count(name)) { this->customElementTemplates[name] = std::move(importedParser.customElementTemplates.at(name)); found = true; }
+                } else if (node.category == ImportCategory::CUSTOM && node.type == ImportType::STYLE) {
+                    if(importedParser.customStyleTemplates.count(name)) { this->customStyleTemplates[name] = std::move(importedParser.customStyleTemplates.at(name)); found = true; }
+                }
+                if (!found) {
+                    std::cerr << "Parse Error: Could not find specific import '" << name << "' in file " << node.path << std::endl;
+                }
+            }
+        } else { // Wildcard or whole-file import
+            for (auto& tpl : importedParser.elementTemplates) this->elementTemplates[tpl.first] = std::move(tpl.second);
+            for (auto& tpl : importedParser.styleTemplates) this->styleTemplates[tpl.first] = std::move(tpl.second);
+            for (auto& tpl : importedParser.varTemplates) this->varTemplates[tpl.first] = std::move(tpl.second);
+            for (auto& tpl : importedParser.customElementTemplates) this->customElementTemplates[tpl.first] = std::move(tpl.second);
+            for (auto& tpl : importedParser.customStyleTemplates) this->customStyleTemplates[tpl.first] = std::move(tpl.second);
+        }
+
+    } else if (node.type == ImportType::HTML || node.type == ImportType::STYLE || node.type == ImportType::JAVASCRIPT) {
+        if (!node.alias.empty()) {
+            auto originNode = std::make_unique<OriginNode>();
+            originNode->content = source;
+            namedOriginBlocks[node.alias] = std::move(originNode);
+        } else {
+            // As per spec, HTML/CSS require 'as'. JS without 'as' is skipped.
+            if (node.type != ImportType::JAVASCRIPT) {
+                 std::cerr << "Parse Warning: Import of " << node.path << " requires an 'as' alias." << std::endl;
+            }
+        }
+    }
 }
 
 // =================================================================
@@ -175,14 +308,13 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
         if (match(TokenType::EQUAL)) {
             auto newValue = parseExpression();
             consume(TokenType::RIGHT_PAREN, "Expect ')' after specialized value.");
-            // For now, we are just returning the new value. The generator will need to handle this.
+            // This is a specialization, so we just return the new expression.
             return newValue;
         } else {
             consume(TokenType::RIGHT_PAREN, "Expect ')' after variable name.");
             if (varTemplates.count(templateName) && varTemplates[templateName]->variables.count(varName)) {
-                // We create a new token and a literal node from the looked-up value.
-                Token valueToken = {TokenType::STRING, varTemplates[templateName]->variables[varName], currentToken.line, currentToken.column, currentToken.position};
-                return std::make_unique<LiteralNode>(valueToken);
+                // Clone the expression tree from the template.
+                return std::unique_ptr<ExpressionNode>(static_cast<ExpressionNode*>(varTemplates[templateName]->variables[varName]->clone().release()));
             }
             std::cerr << "Parse Error: Variable " << templateName << "(" << varName << ") not found." << std::endl;
             return nullptr;
@@ -217,43 +349,52 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 std::unique_ptr<BaseNode> Parser::originDeclaration() {
     consume(TokenType::KEYWORD_ORIGIN, "Expect '[Origin]' keyword.");
     consume(TokenType::AT, "Expect '@' before origin type.");
-    consume(TokenType::IDENTIFIER, "Expect type name after '@'.");
+    consume(TokenType::IDENTIFIER, "Expect type name after '@'."); // e.g. @Html
 
-    if (check(TokenType::IDENTIFIER)) {
+    auto node = std::make_unique<OriginNode>();
+
+    if (check(TokenType::IDENTIFIER) && !checkNext(TokenType::LEFT_BRACE)) {
+        // Usage form: [Origin] @Html myFile;
+        node->name_to_lookup = currentToken.lexeme;
+        advance();
+        consume(TokenType::SEMICOLON, "Expect ';' after named origin usage.");
+    } else {
+        // Definition form: [Origin] @Html (optional name) { ... }
+        if (check(TokenType::IDENTIFIER)) {
+            // We don't do anything with the name in a block definition for now
+            advance();
+        }
+
+        consume(TokenType::LEFT_BRACE, "Expect '{' for origin block definition.");
+
+        // Use the old, safer method for raw content parsing
+        size_t start = previousToken.position + previousToken.lexeme.length();
+        const std::string& source = lexer.getSource();
+        int braceCount = 1;
+        size_t currentPos = lexer.getCurrentPosition();
+
+        while (braceCount > 0 && currentPos < source.length()) {
+            if (source[currentPos] == '{') braceCount++;
+            else if (source[currentPos] == '}') braceCount--;
+            currentPos++;
+        }
+
+        if (braceCount > 0) {
+            std::cerr << "Parse Error: Unterminated [Origin] block." << std::endl;
+            // Fast-forward to end to prevent further errors
+            while(!check(TokenType::END_OF_FILE)) advance();
+            return nullptr;
+        }
+
+        node->content = source.substr(start, currentPos - start - 1);
+
+        // Manually advance the lexer past the raw block
+        lexer.setPosition(currentPos);
+        // We need to fully refresh the parser's token buffer.
+        advance();
         advance();
     }
 
-    consume(TokenType::LEFT_BRACE, "Expect '{' after [Origin] declaration.");
-
-    size_t start = previousToken.position + previousToken.lexeme.length();
-
-    const std::string& source = lexer.getSource();
-    int braceCount = 1;
-    size_t end = start;
-    while (braceCount > 0 && end < source.length()) {
-        if (source[end] == '{') {
-            braceCount++;
-        } else if (source[end] == '}') {
-            braceCount--;
-        }
-        end++;
-    }
-
-    if (braceCount > 0) {
-        std::cerr << "Parse Error: Unterminated [Origin] block." << std::endl;
-        while(!check(TokenType::END_OF_FILE)) advance();
-        return nullptr;
-    }
-
-    std::string rawContent = source.substr(start, end - 1 - start);
-
-    lexer.setPosition(end);
-
-    advance();
-    advance();
-
-    auto node = std::make_unique<OriginNode>();
-    node->content = rawContent;
     return node;
 }
 
@@ -302,6 +443,12 @@ std::unique_ptr<ElementNode> Parser::element() {
                 handleCustomElementUsage(templateName, node.get());
             } else {
                 std::cerr << "Parse Error: Expect ';' or '{' after @Element usage at line " << currentToken.line << std::endl;
+            }
+        } else if (check(TokenType::KEYWORD_ORIGIN)) {
+            auto child = originDeclaration();
+            if (child) {
+                setParent(node.get(), child.get());
+                node->children.push_back(std::move(child));
             }
         } else {
             std::cerr << "Parse Error: Unexpected token '" << currentToken.lexeme << "' in element '" << node->tagName << "'." << std::endl;
@@ -384,8 +531,9 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
             if (match(TokenType::SEMICOLON)) {
                  if (styleTemplates.count(templateName)) {
                     for (const auto& prop : styleTemplates.at(templateName)->properties) {
-                        Token token = {TokenType::STRING, prop.second, currentToken.line, currentToken.column, currentToken.position};
-                        node->inlineProperties[prop.first] = std::make_unique<LiteralNode>(token);
+                        if (prop.second) {
+                            node->inlineProperties[prop.first] = std::unique_ptr<ExpressionNode>(static_cast<ExpressionNode*>(prop.second->clone().release()));
+                        }
                     }
                 } else if (customStyleTemplates.count(templateName)) {
                     const auto& tmpl = customStyleTemplates.at(templateName);
@@ -489,12 +637,7 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
                 std::string key = currentToken.lexeme;
                 advance();
                 consume(TokenType::COLON, "Expect ':' after property name.");
-                auto expr = parseExpression();
-                if (auto* lit = dynamic_cast<LiteralNode*>(expr.get())) {
-                    node->properties[key] = lit->value.lexeme;
-                } else {
-                    std::cerr << "Parse Warning: Expressions in style template definitions are not fully supported yet." << std::endl;
-                }
+                node->properties[key] = parseExpression();
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
             } else if (match(TokenType::AT) || match(TokenType::KEYWORD_INHERIT)) {
                 if(previousToken.type != TokenType::KEYWORD_INHERIT) consume(TokenType::IDENTIFIER, "Expect 'Style' for inheritance.");
@@ -503,7 +646,9 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
                 consume(TokenType::SEMICOLON, "Expect ';' after base template usage.");
                 if (styleTemplates.count(baseTemplateName)) {
                     for (const auto& prop : styleTemplates.at(baseTemplateName)->properties) {
-                        node->properties[prop.first] = prop.second;
+                        if (prop.second) {
+                            node->properties[prop.first] = std::unique_ptr<ExpressionNode>(static_cast<ExpressionNode*>(prop.second->clone().release()));
+                        }
                     }
                 } else {
                     std::cerr << "Parse Error: Base style template '" << baseTemplateName << "' not found." << std::endl;
@@ -555,12 +700,7 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
                 std::string key = currentToken.lexeme;
                 advance();
                 consume(TokenType::COLON, "Expect ':' after variable name.");
-                auto expr = parseExpression();
-                 if (auto* lit = dynamic_cast<LiteralNode*>(expr.get())) {
-                    node->variables[key] = lit->value.lexeme;
-                } else {
-                    std::cerr << "Parse Warning: Expressions in var template definitions are not fully supported yet." << std::endl;
-                }
+                node->variables[key] = parseExpression();
                 consume(TokenType::SEMICOLON, "Expect ';' after variable value.");
             } else {
                 std::cerr << "Parse Error: Unexpected token in var template." << std::endl;

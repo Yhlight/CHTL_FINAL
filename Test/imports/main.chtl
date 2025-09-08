@@ -1,0 +1,31 @@
+// Import the entire CHTL library file
+[Import] @Chtl from "Test/imports/lib.chtl";
+
+// Import the raw HTML file with an alias
+[Import] @Html from "Test/imports/raw.html" as RawContent;
+
+html {
+    head {
+        title { text { "Import Test" } }
+    }
+    body {
+        h1 { text { "Testing Imports" } }
+
+        // Use the imported style template
+        button {
+            style {
+                @Style ButtonStyle;
+                background-color: "lightblue";
+            }
+            text { "Styled Button" }
+        }
+
+        // Use the imported custom element
+        @Element Card {
+            h4 { text { "Custom Title" } }
+        }
+
+        // Use the imported raw HTML file
+        [Origin] @Html RawContent;
+    }
+}
