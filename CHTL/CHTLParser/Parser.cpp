@@ -187,6 +187,52 @@ std::unique_ptr<BaseNode> Parser::namespaceDeclaration() {
     return nullptr; // Namespaces are a parse-time construct
 }
 
+void Parser::constraintDeclaration(ElementNode* parent) {
+    if (!parent) return;
+
+    do {
+        Constraint c;
+        if (match(TokenType::KEYWORD_CUSTOM)) c.category = ImportCategory::CUSTOM;
+        else if (match(TokenType::KEYWORD_TEMPLATE)) c.category = ImportCategory::TEMPLATE;
+
+        if (match(TokenType::AT)) {
+            // Type constraint like '@Html' or '@Element'
+            if (currentToken.lexeme == "Html") c.type = ImportType::HTML; // Special case for generic HTML tags
+            else if (currentToken.lexeme == "Element") c.type = ImportType::ELEMENT;
+            else if (currentToken.lexeme == "Style") c.type = ImportType::STYLE;
+            else if (currentToken.lexeme == "Var") c.type = ImportType::VAR;
+            advance();
+        } else {
+            // A precise name constraint like 'span' or 'Box'
+            c.name = currentToken.lexeme;
+            consume(TokenType::IDENTIFIER, "Expect identifier for constraint.");
+        }
+        parent->constraints.push_back(c);
+    } while (match(TokenType::COMMA));
+
+    consume(TokenType::SEMICOLON, "Expect ';' after except declaration.");
+}
+
+bool Parser::isViolatingConstraint(const std::string& tagName, ElementNode* context) {
+    // Iterate through the stack of parent elements, from closest to furthest.
+    for (auto it = elementStack.rbegin(); it != elementStack.rend(); ++it) {
+        ElementNode* ancestor = *it;
+        for (const auto& constraint : ancestor->constraints) {
+            // Check for precise name match
+            if (!constraint.name.empty() && constraint.name == tagName) {
+                std::cerr << "Constraint Violation: Element <" << tagName << "> is not allowed inside <" << ancestor->tagName << ">." << std::endl;
+                return true;
+            }
+            // Check for @Html type match (which applies to all regular tags)
+            if (constraint.type == ImportType::HTML) {
+                std::cerr << "Constraint Violation: HTML elements like <" << tagName << "> are not allowed inside <" << ancestor->tagName << "> due to '@Html' constraint." << std::endl;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 std::unique_ptr<BaseNode> Parser::configurationDeclaration() {
     consume(TokenType::KEYWORD_CONFIGURATION, "Expect '[Configuration]' keyword.");
 
@@ -534,15 +580,30 @@ std::unique_ptr<ElementNode> Parser::element() {
     node->tagName = currentToken.lexeme;
     advance();
     consume(TokenType::LEFT_BRACE, "Expect '{' after element name.");
+
+    elementStack.push_back(node.get());
+
     while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
         if (check(TokenType::IDENTIFIER)) {
             if (checkNext(TokenType::COLON)) {
                 attributes(*node);
             } else if (checkNext(TokenType::LEFT_BRACE)) {
-                auto child = element();
-                if (child) {
-                    setParent(node.get(), child.get());
-                    node->children.push_back(std::move(child));
+                if (isViolatingConstraint(currentToken.lexeme, node.get())) {
+                    // Skip this element
+                    advance(); // consume identifier
+                    advance(); // consume '{'
+                    int braceCount = 1;
+                    while (braceCount > 0 && !check(TokenType::END_OF_FILE)) {
+                        if (check(TokenType::LEFT_BRACE)) braceCount++;
+                        else if (check(TokenType::RIGHT_BRACE)) braceCount--;
+                        advance();
+                    }
+                } else {
+                    auto child = element();
+                    if (child) {
+                        setParent(node.get(), child.get());
+                        node->children.push_back(std::move(child));
+                    }
                 }
             } else {
                 std::cerr << "Parse Error: Unexpected token after identifier '" << currentToken.lexeme << "'" << std::endl;
@@ -588,12 +649,17 @@ std::unique_ptr<ElementNode> Parser::element() {
                 setParent(node.get(), child.get());
                 node->children.push_back(std::move(child));
             }
+        } else if (match(TokenType::KEYWORD_EXCEPT)) {
+            constraintDeclaration(node.get());
         } else {
             std::cerr << "Parse Error: Unexpected token '" << currentToken.lexeme << "' in element '" << node->tagName << "'." << std::endl;
             advance();
         }
     }
     consume(TokenType::RIGHT_BRACE, "Expect '}' after element block.");
+
+    elementStack.pop_back();
+
     return node;
 }
 

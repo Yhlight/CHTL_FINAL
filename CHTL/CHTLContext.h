@@ -33,6 +33,7 @@ struct ConfigurationState {
         keyword_map[TokenType::KEYWORD_INSERT] = {"insert"};
         keyword_map[TokenType::KEYWORD_FROM] = {"from"};
         keyword_map[TokenType::KEYWORD_AS] = {"as"};
+        keyword_map[TokenType::KEYWORD_EXCEPT] = {"except"};
     }
 };
 

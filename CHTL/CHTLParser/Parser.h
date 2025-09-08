@@ -47,6 +47,7 @@ private:
     Lexer& lexer;
     std::string currentNamespace = "::global";
     bool used_explicit_namespace = false;
+    std::vector<ElementNode*> elementStack;
     void handleImport(const ImportNode& node);
     Token currentToken;
     Token nextToken;
@@ -71,6 +72,9 @@ private:
     void attributes(ElementNode& element);
     std::unique_ptr<ExpressionNode> parseValue();
     void handleCustomElementUsage(const std::string& templateName, const std::string& ns, ElementNode* parentNode);
+
+    void constraintDeclaration(ElementNode* parent);
+    bool isViolatingConstraint(const std::string& tagName, ElementNode* context);
 
     // Expression Parsing
     std::unique_ptr<ExpressionNode> parseExpression();
