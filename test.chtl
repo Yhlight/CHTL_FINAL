@@ -1,0 +1,42 @@
+-- A test file for the CHTL compiler --
+
+[Template] @Style DefaultText
+{
+    color: black;
+    font-size: 16px;
+}
+
+[Custom] @Style ButtonBase
+{
+    inherit @Style DefaultText;
+    border: 1px solid black;
+    padding;
+    border-radius: 5px;
+    delete font-size;
+}
+
+[Template] @Element MyButton
+{
+    button {
+        style {
+            @Style ButtonBase {
+                padding: 10px;
+            }
+        }
+        text { "Click Me" }
+    }
+}
+
+html {
+    lang: "en";
+
+    head {
+        title { text { "CHTL Test" } }
+    }
+    body {
+        h1 { text { "Test Page" } }
+
+        -- Using the element template --
+        @Element MyButton;
+    }
+}
