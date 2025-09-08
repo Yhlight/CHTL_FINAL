@@ -39,6 +39,7 @@ private:
     std::unique_ptr<BaseNode> declaration();
     std::unique_ptr<BaseNode> templateDeclaration();
     std::unique_ptr<BaseNode> customDeclaration();
+    std::unique_ptr<BaseNode> originDeclaration();
     std::unique_ptr<ElementNode> element();
     std::unique_ptr<TextNode> textNode();
     std::unique_ptr<StyleNode> styleNode();

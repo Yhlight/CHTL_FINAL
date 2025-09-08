@@ -91,6 +91,14 @@ Token Lexer::identifier() {
     return makeToken(TokenType::IDENTIFIER, text);
 }
 
+void Lexer::enterRawMode() {
+    rawMode = true;
+}
+
+void Lexer::exitRawMode() {
+    rawMode = false;
+}
+
 Token Lexer::stringLiteral() {
     char quote = advance(); // Consume the opening quote
     size_t start = current;
@@ -111,6 +119,27 @@ Token Lexer::stringLiteral() {
 
 
 Token Lexer::getNextToken() {
+    if (rawMode) {
+        size_t start = current;
+        int braceCount = 1;
+        while (!isAtEnd() && braceCount > 0) {
+            if (peek() == '{') {
+                braceCount++;
+            } else if (peek() == '}') {
+                braceCount--;
+            }
+            if (braceCount > 0) {
+                 if (peek() == '\n') {
+                    line++;
+                    column = 1;
+                }
+                advance();
+            }
+        }
+        std::string raw = source.substr(start, current - start);
+        return makeToken(TokenType::RAW_STRING, raw);
+    }
+
     skipWhitespaceAndComments();
 
     if (isAtEnd()) {
@@ -150,6 +179,10 @@ Token Lexer::getNextToken() {
             if (source.substr(current, 7) == "Custom]") {
                 current += 7;
                 return makeToken(TokenType::KEYWORD_CUSTOM, "[Custom]");
+            }
+            if (source.substr(current, 7) == "Origin]") {
+                current += 7;
+                return makeToken(TokenType::KEYWORD_ORIGIN, "[Origin]");
             }
             break;
         case '@':

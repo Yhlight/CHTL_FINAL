@@ -4,6 +4,7 @@
 #include "../CHTLNode/StyleTemplateNode.h"
 #include "../CHTLNode/VarTemplateNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
+#include "../CHTLNode/OriginNode.h"
 #include <iostream>
 
 
@@ -62,6 +63,9 @@ std::unique_ptr<BaseNode> Parser::declaration() {
     }
     if (check(TokenType::KEYWORD_CUSTOM)) {
         return customDeclaration();
+    }
+    if (check(TokenType::KEYWORD_ORIGIN)) {
+        return originDeclaration();
     }
     if (check(TokenType::IDENTIFIER)) {
         if (checkNext(TokenType::LEFT_BRACE)) {
@@ -353,6 +357,34 @@ std::unique_ptr<BaseNode> Parser::customDeclaration() {
     }
 
     return nullptr; // Custom declarations don't produce a node in the main AST
+}
+
+std::unique_ptr<BaseNode> Parser::originDeclaration() {
+    consume(TokenType::KEYWORD_ORIGIN, "Expect '[Origin]' keyword.");
+    auto node = std::make_unique<OriginNode>();
+
+    if (check(TokenType::AT_STYLE) || check(TokenType::AT_ELEMENT) || check(TokenType::AT_VAR)) {
+         node->type = currentToken.lexeme;
+         advance();
+    } else if (check(TokenType::IDENTIFIER)) { // For custom types like @Vue
+        node->type = currentToken.lexeme;
+        advance();
+    } else {
+        consume(TokenType::IDENTIFIER, "Expect origin type identifier (e.g., @Html).");
+    }
+
+    consume(TokenType::LEFT_BRACE, "Expect '{' after origin declaration.");
+
+    lexer.enterRawMode();
+    Token rawToken = lexer.getNextToken();
+    if(rawToken.type == TokenType::RAW_STRING) {
+        node->rawContent = rawToken.lexeme;
+    }
+    lexer.exitRawMode();
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after origin block.");
+
+    return node;
 }
 
 std::string Parser::parseValue() {

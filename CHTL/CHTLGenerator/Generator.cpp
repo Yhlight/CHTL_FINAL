@@ -81,3 +81,7 @@ void Generator::visit(TemplateUsageNode& node) {
         }
     }
 }
+
+void Generator::visit(OriginNode& node) {
+    output << node.rawContent;
+}

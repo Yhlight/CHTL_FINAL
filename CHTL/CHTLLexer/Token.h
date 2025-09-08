@@ -11,7 +11,7 @@ enum class TokenType {
     COMMA,
 
     // Literals.
-    IDENTIFIER, STRING,
+    IDENTIFIER, STRING, RAW_STRING,
 
     // Keywords
     TEXT,
@@ -19,6 +19,7 @@ enum class TokenType {
     KEYWORD_TEMPLATE,
     KEYWORD_CUSTOM,
     KEYWORD_DELETE,
+    KEYWORD_ORIGIN,
     AT_STYLE,
     AT_ELEMENT,
     AT_VAR,

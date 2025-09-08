@@ -66,6 +66,13 @@ html {
                 }
             }
             @Element MyBox;
+
+            [Origin] @Html {
+                <!-- This is a raw HTML comment -->
+                <div class="raw-html">
+                    <p>This should be passed through as-is.</p>
+                </div>
+            }
         }
     }
 }
