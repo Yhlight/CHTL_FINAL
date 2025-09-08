@@ -12,6 +12,14 @@ public:
 
     void accept(AstVisitor& visitor) override {
         // Template definitions are not visited directly.
-        // They are expanded at usage sites.
+    }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        auto node = std::make_unique<ElementTemplateNode>();
+        node->name = this->name;
+        for (const auto& child : this->children) {
+            node->children.push_back(child->clone());
+        }
+        return node;
     }
 };

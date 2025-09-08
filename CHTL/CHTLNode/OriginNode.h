@@ -11,4 +11,11 @@ public:
     void accept(AstVisitor& visitor) override {
         visitor.visit(*this);
     }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        auto node = std::make_unique<OriginNode>();
+        node->type = this->type;
+        node->rawContent = this->rawContent;
+        return node;
+    }
 };

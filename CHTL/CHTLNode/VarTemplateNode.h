@@ -12,4 +12,11 @@ public:
     void accept(AstVisitor& visitor) override {
         // Template definitions are not visited directly.
     }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        auto node = std::make_unique<VarTemplateNode>();
+        node->name = this->name;
+        node->variables = this->variables;
+        return node;
+    }
 };

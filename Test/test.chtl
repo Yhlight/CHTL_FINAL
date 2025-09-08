@@ -5,9 +5,25 @@
     secondary: blue;
 }
 
-[Template] @Style DefaultText {
-    color: black;
+[Template] @Style BaseStyle {
+    font-family: Arial;
     font-size: 16px;
+    color: black;
+}
+
+[Template] @Style InheritedStyle {
+    @Style BaseStyle;
+    color: blue; // Override base
+}
+
+[Template] @Element BaseBox {
+    p { text { "This is from the base box." } }
+}
+
+[Template] @Element InheritedBox {
+    h2 { text { "Title from Inherited Box" } }
+    @Element BaseBox;
+    p { text { "This is also from the inherited box." } }
 }
 
 [Template] @Element MyBox {
@@ -54,6 +70,7 @@ html {
                     // Delete a property
                     delete padding;
                 }
+                @Style InheritedStyle;
             }
 
             h1 {
@@ -66,6 +83,7 @@ html {
                 }
             }
             @Element MyBox;
+            @Element InheritedBox;
 
             [Origin] @Html {
                 <!-- This is a raw HTML comment -->

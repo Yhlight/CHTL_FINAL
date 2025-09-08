@@ -88,6 +88,7 @@ Token Lexer::identifier() {
     if (text == "text") return makeToken(TokenType::TEXT, text);
     if (text == "style") return makeToken(TokenType::STYLE, text);
     if (text == "delete") return makeToken(TokenType::KEYWORD_DELETE, text);
+    if (text == "inherit") return makeToken(TokenType::KEYWORD_INHERIT, text);
     return makeToken(TokenType::IDENTIFIER, text);
 }
 

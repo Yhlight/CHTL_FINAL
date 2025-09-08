@@ -261,6 +261,20 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
                     advance();
                 }
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+            } else if (check(TokenType::AT_STYLE) || check(TokenType::KEYWORD_INHERIT)) { // Style Template Inheritance
+                match(TokenType::KEYWORD_INHERIT); // Consume 'inherit' if it exists
+                consume(TokenType::AT_STYLE, "Expect '@Style' after inherit keyword or for implicit inheritance.");
+                std::string baseTemplateName = currentToken.lexeme;
+                consume(TokenType::IDENTIFIER, "Expect base template name.");
+                consume(TokenType::SEMICOLON, "Expect ';' after base template usage.");
+                if (styleTemplates.count(baseTemplateName)) {
+                    const auto& baseTmpl = styleTemplates.at(baseTemplateName);
+                    for (const auto& prop : baseTmpl->properties) {
+                        node->properties[prop.first] = prop.second;
+                    }
+                } else {
+                    std::cerr << "Parse Error: Base style template '" << baseTemplateName << "' not found at line " << currentToken.line << std::endl;
+                }
             } else {
                 std::cerr << "Parse Error: Unexpected token in style template at line " << currentToken.line << std::endl;
                 advance();
@@ -276,9 +290,25 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
         consume(TokenType::LEFT_BRACE, "Expect '{' after template name.");
 
         while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
-            auto child = declaration();
-            if (child) {
-                node->children.push_back(std::move(child));
+            if (check(TokenType::AT_ELEMENT) || check(TokenType::KEYWORD_INHERIT)) { // Element Template Inheritance
+                match(TokenType::KEYWORD_INHERIT); // Consume 'inherit' if it exists
+                consume(TokenType::AT_ELEMENT, "Expect '@Element' after inherit keyword or for implicit inheritance.");
+                std::string baseTemplateName = currentToken.lexeme;
+                consume(TokenType::IDENTIFIER, "Expect base template name.");
+                consume(TokenType::SEMICOLON, "Expect ';' after base template usage.");
+                if (elementTemplates.count(baseTemplateName)) {
+                    const auto& baseTmpl = elementTemplates.at(baseTemplateName);
+                    for (const auto& child : baseTmpl->children) {
+                        node->children.push_back(child->clone());
+                    }
+                } else {
+                    std::cerr << "Parse Error: Base element template '" << baseTemplateName << "' not found at line " << currentToken.line << std::endl;
+                }
+            } else {
+                auto child = declaration();
+                if (child) {
+                    node->children.push_back(std::move(child));
+                }
             }
         }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after template body.");

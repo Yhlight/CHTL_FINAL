@@ -20,6 +20,7 @@ enum class TokenType {
     KEYWORD_CUSTOM,
     KEYWORD_DELETE,
     KEYWORD_ORIGIN,
+    KEYWORD_INHERIT,
     AT_STYLE,
     AT_ELEMENT,
     AT_VAR,

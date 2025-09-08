@@ -15,4 +15,12 @@ public:
     void accept(AstVisitor& visitor) override {
         // Custom definitions are not visited directly.
     }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        auto node = std::make_unique<CustomStyleNode>();
+        node->name = this->name;
+        node->properties = this->properties;
+        node->valuelessProperties = this->valuelessProperties;
+        return node;
+    }
 };
