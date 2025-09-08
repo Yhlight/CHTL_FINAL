@@ -6,6 +6,7 @@
 enum class TokenType {
     // Single-character tokens.
     LEFT_BRACE, RIGHT_BRACE,
+    LEFT_PAREN, RIGHT_PAREN,
     COLON, EQUAL, SEMICOLON,
 
     // Literals.
@@ -17,6 +18,7 @@ enum class TokenType {
     KEYWORD_TEMPLATE,
     AT_STYLE,
     AT_ELEMENT,
+    AT_VAR,
 
     // Comments
     LINE_COMMENT,

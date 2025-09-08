@@ -1,5 +1,10 @@
 // This is a test CHTL file.
 
+[Template] @Var MyColors {
+    primary: red;
+    secondary: blue;
+}
+
 [Template] @Style DefaultText {
     color: black;
     font-size: 16px;
@@ -30,7 +35,7 @@ html {
             style {
                 width: 100px;
                 height: 200px;
-                background-color: red;
+                background-color: MyColors(primary);
                 @Style DefaultText;
             }
 

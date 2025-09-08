@@ -9,6 +9,7 @@
 #include <map>
 #include "../CHTLNode/ElementTemplateNode.h"
 #include "../CHTLNode/StyleTemplateNode.h"
+#include "../CHTLNode/VarTemplateNode.h"
 
 class StyleNode; // Forward declaration
 
@@ -20,6 +21,7 @@ public:
     // Make template stores public for the generator to access
     std::map<std::string, std::unique_ptr<ElementTemplateNode>> elementTemplates;
     std::map<std::string, std::unique_ptr<StyleTemplateNode>> styleTemplates;
+    std::map<std::string, std::unique_ptr<VarTemplateNode>> varTemplates;
 
 private:
     Lexer& lexer;
@@ -38,4 +40,5 @@ private:
     std::unique_ptr<TextNode> textNode();
     std::unique_ptr<StyleNode> styleNode();
     void attributes(ElementNode& element);
+    std::string parseValue();
 };

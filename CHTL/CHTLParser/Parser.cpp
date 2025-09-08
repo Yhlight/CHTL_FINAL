@@ -2,6 +2,7 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/ElementTemplateNode.h"
 #include "../CHTLNode/StyleTemplateNode.h"
+#include "../CHTLNode/VarTemplateNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
 #include <iostream>
 
@@ -147,16 +148,7 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
             advance(); // consume property name
 
             consume(TokenType::COLON, "Expect ':' after style property name.");
-
-            if (check(TokenType::STRING) || check(TokenType::IDENTIFIER)) {
-                node->properties[key] = currentToken.lexeme;
-                advance(); // consume property value
-            } else {
-                std::cerr << "Parse Error: Expected style property value at line " << currentToken.line << std::endl;
-                // Allow for recovery by advancing
-                advance();
-            }
-
+            node->properties[key] = parseValue();
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
         } else if (match(TokenType::AT_STYLE)) {
             // This is a bit of a hack. A StyleNode can't have a TemplateUsageNode as a child.
@@ -198,12 +190,7 @@ void Parser::attributes(ElementNode& element) {
         advance(); // consume key
 
         if (match(TokenType::COLON) || match(TokenType::EQUAL)) {
-            if (check(TokenType::STRING) || check(TokenType::IDENTIFIER)) {
-                element.attributes[key] = currentToken.lexeme;
-                advance();
-            } else {
-                 std::cerr << "Parse Error: Expected attribute value at line " << currentToken.line << std::endl;
-            }
+            element.attributes[key] = parseValue();
             consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
         }
     }
@@ -254,10 +241,72 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
         consume(TokenType::RIGHT_BRACE, "Expect '}' after template body.");
         elementTemplates[node->name] = std::move(node);
 
+    } else if (match(TokenType::AT_VAR)) {
+        auto node = std::make_unique<VarTemplateNode>();
+        node->name = currentToken.lexeme;
+        consume(TokenType::IDENTIFIER, "Expect template name.");
+        consume(TokenType::LEFT_BRACE, "Expect '{' after template name.");
+
+        while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
+            if (check(TokenType::IDENTIFIER)) {
+                std::string key = currentToken.lexeme;
+                advance();
+                consume(TokenType::COLON, "Expect ':' after variable name.");
+                if (check(TokenType::STRING) || check(TokenType::IDENTIFIER)) {
+                    node->variables[key] = currentToken.lexeme;
+                    advance();
+                } else {
+                    std::cerr << "Parse Error: Expected variable value at line " << currentToken.line << std::endl;
+                    advance();
+                }
+                consume(TokenType::SEMICOLON, "Expect ';' after variable value.");
+            } else {
+                std::cerr << "Parse Error: Unexpected token in var template at line " << currentToken.line << std::endl;
+                advance();
+            }
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' after template body.");
+        varTemplates[node->name] = std::move(node);
     } else {
-        std::cerr << "Parse Error: Expected '@Style' or '@Element' after '[Template]' at line " << currentToken.line << std::endl;
+        std::cerr << "Parse Error: Expected '@Style', '@Element', or '@Var' after '[Template]' at line " << currentToken.line << std::endl;
         advance();
     }
 
     return nullptr; // Template declarations don't produce a node in the main AST
+}
+
+std::string Parser::parseValue() {
+    if (check(TokenType::IDENTIFIER) && checkNext(TokenType::LEFT_PAREN)) {
+        std::string templateName = currentToken.lexeme;
+        advance(); // consume template name
+        consume(TokenType::LEFT_PAREN, "Expect '(' after variable template name.");
+
+        std::string varName = currentToken.lexeme;
+        consume(TokenType::IDENTIFIER, "Expect variable name inside parentheses.");
+        consume(TokenType::RIGHT_PAREN, "Expect ')' after variable name.");
+
+        if (varTemplates.count(templateName)) {
+            const auto& tmpl = varTemplates.at(templateName);
+            if (tmpl->variables.count(varName)) {
+                return tmpl->variables.at(varName);
+            } else {
+                std::cerr << "Parse Error: Variable '" << varName << "' not found in template '" << templateName << "' at line " << currentToken.line << std::endl;
+                return ""; // Return empty string on error
+            }
+        } else {
+            std::cerr << "Parse Error: Variable template '" << templateName << "' not found at line " << currentToken.line << std::endl;
+            return ""; // Return empty string on error
+        }
+    }
+
+    // If not a variable template usage, it's a simple value
+    if (check(TokenType::STRING) || check(TokenType::IDENTIFIER)) {
+        std::string value = currentToken.lexeme;
+        advance();
+        return value;
+    }
+
+    std::cerr << "Parse Error: Expected a value (string, identifier, or variable usage) at line " << currentToken.line << std::endl;
+    advance(); // Consume the unexpected token
+    return ""; // Return empty string on error
 }

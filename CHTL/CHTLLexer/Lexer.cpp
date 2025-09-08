@@ -133,6 +133,8 @@ Token Lexer::getNextToken() {
     }
 
     switch (c) {
+        case '(': return makeToken(TokenType::LEFT_PAREN, "(");
+        case ')': return makeToken(TokenType::RIGHT_PAREN, ")");
         case '{': return makeToken(TokenType::LEFT_BRACE, "{");
         case '}': return makeToken(TokenType::RIGHT_BRACE, "}");
         case ':': return makeToken(TokenType::COLON, ":");
@@ -152,6 +154,10 @@ Token Lexer::getNextToken() {
             if (source.substr(current, 7) == "Element") {
                 current += 7;
                 return makeToken(TokenType::AT_ELEMENT, "@Element");
+            }
+            if (source.substr(current, 3) == "Var") {
+                current += 3;
+                return makeToken(TokenType::AT_VAR, "@Var");
             }
             break;
     }
