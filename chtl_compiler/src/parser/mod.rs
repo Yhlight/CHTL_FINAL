@@ -2,7 +2,7 @@ use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
 
-use crate::ast::{Attribute, CssProperty, CssValue, CustomDefinition, CustomStyleGroup, Document, Element, Node, StyleContent, TemplateDefinition, TemplateElementGroup, TemplateStyleGroup, TemplateVarGroup, TemplateVariable, TopLevelDefinition};
+use crate::ast::{Attribute, ChildSelector, CssProperty, CssValue, CustomDefinition, CustomElementGroup, CustomStyleGroup, CustomVarGroup, Document, Element, ElementSpecialization, Node, StyleContent, TemplateDefinition, TemplateElementGroup, TemplateStyleGroup, TemplateVarGroup, TemplateVariable, TopLevelDefinition};
 use crate::css_parser;
 
 #[derive(Parser)]
@@ -24,7 +24,7 @@ pub fn parse(source: &str) -> Result<Document, pest::error::Error<Rule>> {
                 Rule::custom_definition => {
                     definitions.push(TopLevelDefinition::Custom(build_custom_definition(pair)));
                 }
-                Rule::element | Rule::text_node | Rule::style_block | Rule::script_block => {
+                Rule::element | Rule::text_node | Rule::style_block | Rule::script_block | Rule::element_template_usage => {
                     children.push(build_node(pair));
                 }
                 Rule::COMMENT | Rule::EOI => { /* ignore */ }
@@ -45,7 +45,23 @@ fn build_custom_definition(pair: Pair<Rule>) -> CustomDefinition {
             let content = parts.next().unwrap().into_inner().filter(|p| p.as_rule() != Rule::COMMENT).flat_map(build_style_template_content_items).collect();
             CustomDefinition::Style(CustomStyleGroup { name, content })
         }
-        // ... other custom types ...
+        Rule::element_template => {
+            let mut parts = inner.into_inner();
+            let name = parts.next().unwrap().as_str();
+            let children = parts.filter(|p| p.as_rule() != Rule::COMMENT).map(build_node).collect();
+            CustomDefinition::Element(CustomElementGroup { name, children })
+        }
+        Rule::var_template => {
+            let mut parts = inner.into_inner();
+            let name = parts.next().unwrap().as_str();
+            let variables = parts.map(|v| {
+                 let mut v_inner = v.into_inner();
+                 let key = v_inner.next().unwrap().as_str();
+                 let value = v_inner.next().unwrap().as_str().trim_matches(|c| c == '"' || c == '\'');
+                 TemplateVariable { key, value }
+            }).collect();
+            CustomDefinition::Var(CustomVarGroup { name, variables })
+        }
         _ => unreachable!("Unexpected custom type: {:?}", inner.as_rule()),
     }
 }
@@ -152,8 +168,39 @@ fn build_node(pair: Pair<Rule>) -> Node {
             Node::ScriptBlock(content)
         }
         Rule::element_template_usage => {
-            let name = pair.into_inner().next().unwrap().as_str();
-            Node::ElementTemplateUsage { name }
+            let mut inner = pair.into_inner();
+            let name = inner.next().unwrap().as_str();
+            let mut specializations = Vec::new();
+
+            if let Some(spec_block) = inner.next() { // It's an optional specialization_block
+                for spec_rule in spec_block.into_inner() {
+                    if spec_rule.as_rule() == Rule::specialization_rule {
+                        let mut rule_parts = spec_rule.into_inner();
+                        let selector_pair = rule_parts.next().unwrap();
+                        let modifications_pair = rule_parts.next().unwrap();
+
+                        let mut selector_parts = selector_pair.into_inner();
+                        let tag_name = selector_parts.next().unwrap().as_str();
+                        let mut index = None;
+                        if let Some(index_group_pair) = selector_parts.next() {
+                            if index_group_pair.as_rule() == Rule::index_group {
+                                let index_val_pair = index_group_pair.into_inner().next().unwrap();
+                                index = Some(index_val_pair.as_str().parse::<usize>().unwrap());
+                            }
+                        }
+
+                        let modifications = modifications_pair.into_inner()
+                            .filter(|p| p.as_rule() != Rule::COMMENT)
+                            .map(build_node).collect();
+
+                        specializations.push(ElementSpecialization {
+                            selector: ChildSelector { tag_name, index },
+                            modifications,
+                        });
+                    }
+                }
+            }
+            Node::ElementTemplateUsage { name, specializations }
         }
         _ => unreachable!("Unexpected node rule: {:?}", pair.as_rule()),
     }
@@ -163,6 +210,42 @@ fn build_node(pair: Pair<Rule>) -> Node {
 mod tests {
     use super::*;
     use crate::ast::*;
+
+    #[test]
+    fn test_parse_definitions() {
+        let source = r#"
+            [Template] @Style DefaultText {
+                color: "black";
+            }
+
+            [Custom] @Element Box {
+                div {}
+            }
+        "#;
+
+        let doc = parse(source).unwrap();
+        assert!(doc.children.is_empty());
+        assert_eq!(doc.definitions.len(), 2);
+
+        // Check template
+        match &doc.definitions[0] {
+            TopLevelDefinition::Template(TemplateDefinition::Style(st)) => {
+                assert_eq!(st.name, "DefaultText");
+                assert_eq!(st.content.len(), 1);
+                assert_eq!(st.content[0], StyleContent::Property(CssProperty { key: "color", value: Some(CssValue::Literal("black")) }));
+            }
+            _ => panic!("Expected a style template"),
+        }
+
+        // Check custom
+        match &doc.definitions[1] {
+            TopLevelDefinition::Custom(CustomDefinition::Element(et)) => {
+                assert_eq!(et.name, "Box");
+                assert_eq!(et.children.len(), 1);
+            }
+            _ => panic!("Expected a custom element"),
+        }
+    }
 
     #[test]
     fn test_parse_valueless_properties() {
@@ -206,5 +289,35 @@ mod tests {
 
         let parsed_doc = parse(source).unwrap();
         assert_eq!(parsed_doc, expected_doc);
+    }
+
+    #[test]
+    fn test_parse_element_specialization() {
+        let source = r#"
+            body {
+                @Element Box {
+                    div[0] {
+                        style { color: red; }
+                    }
+                }
+            }
+        "#;
+        let doc = parse(source).unwrap();
+        let body = doc.children.get(0).unwrap();
+        if let Node::Element(body_elem) = body {
+            let usage = body_elem.children.get(0).unwrap();
+            if let Node::ElementTemplateUsage { name, specializations } = usage {
+                assert_eq!(*name, "Box");
+                assert_eq!(specializations.len(), 1);
+                let spec = &specializations[0];
+                assert_eq!(spec.selector.tag_name, "div");
+                assert_eq!(spec.selector.index, Some(0));
+                assert_eq!(spec.modifications.len(), 1);
+            } else {
+                panic!("Expected ElementTemplateUsage");
+            }
+        } else {
+            panic!("Expected body element");
+        }
     }
 }

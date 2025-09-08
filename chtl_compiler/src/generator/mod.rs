@@ -18,7 +18,7 @@ fn generate_node(html: &mut String, node: &Node, context: &Context) {
         Node::Text(text_content) => {
             html.push_str(text_content);
         }
-        Node::ElementTemplateUsage { name } => {
+        Node::ElementTemplateUsage { name, specializations: _ } => {
             if let Some(template) = context.element_templates.get(name) {
                 for child_node in &template.children {
                     generate_node(html, child_node, context);

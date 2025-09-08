@@ -18,7 +18,12 @@ file_content = { (custom_definition | template_definition | element | text_node 
 // --- Content inside an Element ---
 element_content = { (attribute | element_template_usage | text_node | style_block | script_block | element | COMMENT)* }
 
-element_template_usage = { "@Element" ~ identifier ~ ";" }
+element_template_usage = { "@Element" ~ identifier ~ (";" | specialization_block) }
+specialization_block = { "{" ~ specialization_rule* ~ "}" }
+specialization_rule = { child_selector ~ "{" ~ element_content ~ "}" }
+child_selector = { identifier ~ index_group? }
+index_group = { "[" ~ index_val ~ "]" }
+index_val = { ASCII_DIGIT+ }
 
 // --- Rules ---
 custom_definition = { "[Custom]" ~ (style_template | element_template | var_template) }
