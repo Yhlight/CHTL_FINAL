@@ -7,7 +7,6 @@ pub struct Document<'a> {
 #[derive(Debug, PartialEq)]
 pub enum TopLevelDefinition<'a> {
     Template(TemplateDefinition<'a>),
-    // Future: Custom, Namespace, etc.
 }
 
 #[derive(Debug, PartialEq)]
@@ -41,9 +40,6 @@ pub struct TemplateVariable<'a> {
     pub value: &'a str,
 }
 
-
-// --- Renderable Nodes ---
-
 #[derive(Debug, PartialEq)]
 pub enum Node<'a> {
     Element(Element<'a>),
@@ -64,7 +60,19 @@ pub enum StyleContent<'a> {
 #[derive(Debug, PartialEq, Clone)]
 pub struct CssProperty<'a> {
     pub key: &'a str,
-    pub value: &'a str,
+    pub value: CssValue<'a>, // Changed from &'a str
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum CssValue<'a> {
+    Literal(&'a str),
+    Variable(VarUsage<'a>),
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct VarUsage<'a> {
+    pub group_name: &'a str,
+    pub var_name: &'a str,
 }
 
 #[derive(Debug, PartialEq, Clone)]

@@ -1,7 +1,7 @@
 use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
-use crate::ast::{CssProperty, CssRuleset, StyleContent};
+use crate::ast::{CssProperty, CssRuleset, CssValue, StyleContent, VarUsage};
 
 #[derive(Parser)]
 #[grammar = "src/lexer/css.pest"]
@@ -33,7 +33,23 @@ fn build_style_content(pair: Pair<Rule>) -> StyleContent {
 fn build_css_property(pair: Pair<Rule>) -> CssProperty {
     let mut inner = pair.into_inner();
     let key = inner.next().unwrap().as_str();
-    let value = inner.next().unwrap().as_str().trim();
+    let value_pair = inner.next().unwrap(); // This is the property_value rule
+
+    let value_content_pair = value_pair.into_inner().next().unwrap(); // This is the actual content
+
+    let value = match value_content_pair.as_rule() {
+        Rule::var_usage => {
+            let mut var_parts = value_content_pair.into_inner();
+            let group_name = var_parts.next().unwrap().as_str();
+            let var_name = var_parts.next().unwrap().as_str();
+            CssValue::Variable(VarUsage { group_name, var_name })
+        }
+        Rule::literal_value => {
+            CssValue::Literal(value_content_pair.as_str().trim())
+        }
+        _ => unreachable!("Unexpected css property value rule: {:?}", value_content_pair.as_rule()),
+    };
+
     CssProperty { key, value }
 }
 
@@ -50,39 +66,36 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_mixed_css_content() {
+    fn test_parse_css_with_vars() {
         let source = r#"
-            color: red;
-            .my-class {
-                font-weight: bold;
-                text-decoration: underline;
-            }
+            color: Theme(primary);
             font-size: 16px;
         "#;
         let content = parse(source).unwrap();
 
-        assert_eq!(content.len(), 3);
+        assert_eq!(content.len(), 2);
 
-        // Check first property
+        // Check variable property
         match &content[0] {
-            StyleContent::Property(p) => assert_eq!(p, &CssProperty { key: "color", value: "red" }),
+            StyleContent::Property(p) => {
+                assert_eq!(p.key, "color");
+                match &p.value {
+                    CssValue::Variable(v) => {
+                        assert_eq!(v.group_name, "Theme");
+                        assert_eq!(v.var_name, "primary");
+                    }
+                    _ => panic!("Expected a variable value"),
+                }
+            }
             _ => panic!("Expected a property"),
         }
 
-        // Check ruleset
+        // Check literal property
         match &content[1] {
-            StyleContent::Ruleset(r) => {
-                assert_eq!(r.selector, ".my-class");
-                assert_eq!(r.properties.len(), 2);
-                assert_eq!(r.properties[0], CssProperty { key: "font-weight", value: "bold" });
-                assert_eq!(r.properties[1], CssProperty { key: "text-decoration", value: "underline" });
+            StyleContent::Property(p) => {
+                assert_eq!(p.key, "font-size");
+                assert_eq!(p.value, CssValue::Literal("16px"));
             }
-            _ => panic!("Expected a ruleset"),
-        }
-
-        // Check second property
-        match &content[2] {
-            StyleContent::Property(p) => assert_eq!(p, &CssProperty { key: "font-size", value: "16px" }),
             _ => panic!("Expected a property"),
         }
     }

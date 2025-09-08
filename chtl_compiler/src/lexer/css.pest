@@ -10,9 +10,12 @@ identifier = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
 style_template_usage = { "@Style" ~ identifier ~ ";" }
 
 // A single property for inline styles
-property = { property_key ~ ":" ~ property_value ~ (";" | &"}") }
+property = { property_key ~ ":" ~ property_value ~ (";" | &"}" | &EOI) }
 property_key = @{ (ASCII_ALPHA | "-")+ }
-property_value = @{ ( !(";" | "}") ~ ANY )* }
+property_value = { var_usage | literal_value }
+
+var_usage = { identifier ~ "(" ~ identifier ~ ")" }
+literal_value = @{ ( !(";" | "}") ~ ANY )* }
 
 // A full ruleset to be hoisted
 ruleset = { selector ~ "{" ~ property* ~ "}" }

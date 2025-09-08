@@ -2,7 +2,7 @@ use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
 
-use crate::ast::{Attribute, CssProperty, Document, Element, Node, StyleContent, TemplateDefinition, TemplateElementGroup, TemplateStyleGroup, TemplateVarGroup, TemplateVariable, TopLevelDefinition};
+use crate::ast::{Attribute, CssProperty, CssValue, Document, Element, Node, StyleContent, TemplateDefinition, TemplateElementGroup, TemplateStyleGroup, TemplateVarGroup, TemplateVariable, TopLevelDefinition};
 use crate::css_parser;
 
 #[derive(Parser)]
@@ -39,7 +39,9 @@ fn build_template_definition(pair: Pair<Rule>) -> TemplateDefinition {
         Rule::style_template => {
             let mut parts = inner.into_inner();
             let name = parts.next().unwrap().as_str();
-            let content = parts.next().unwrap().into_inner().map(build_style_template_content).collect();
+            let content = parts.next().unwrap().into_inner()
+                .filter(|p| p.as_rule() != Rule::COMMENT)
+                .map(build_style_template_content).collect();
             TemplateDefinition::Style(TemplateStyleGroup { name, content })
         }
         Rule::element_template => {
@@ -69,7 +71,7 @@ fn build_style_template_content(pair: Pair<Rule>) -> StyleContent {
             let mut p_inner = pair.into_inner();
             let key = p_inner.next().unwrap().as_str();
             let value = p_inner.next().unwrap().as_str().trim().trim_matches(|c| c == '"' || c == '\'');
-            StyleContent::Property(CssProperty { key, value })
+            StyleContent::Property(CssProperty { key, value: CssValue::Literal(value) })
         }
         Rule::style_template_usage => {
             let name = pair.into_inner().next().unwrap().as_str();
@@ -165,7 +167,7 @@ mod tests {
             TopLevelDefinition::Template(TemplateDefinition::Style(st)) => {
                 assert_eq!(st.name, "DefaultText");
                 assert_eq!(st.content.len(), 2);
-                assert_eq!(st.content[0], StyleContent::Property(CssProperty { key: "color", value: "black" }));
+                assert_eq!(st.content[0], StyleContent::Property(CssProperty { key: "color", value: CssValue::Literal("black") }));
             }
             _ => panic!("Expected a style template"),
         }
@@ -251,7 +253,7 @@ mod tests {
                     attributes: vec![],
                     children: vec![
                         Node::StyleBlock(vec![
-                            StyleContent::Property(CssProperty { key: "color", value: "red" })
+                            StyleContent::Property(CssProperty { key: "color", value: CssValue::Literal("red") })
                         ]),
                         Node::ScriptBlock("const a = 1; "),
                     ],

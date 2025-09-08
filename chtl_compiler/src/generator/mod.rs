@@ -1,4 +1,4 @@
-use crate::ast::{Document, Element, Node, StyleContent};
+use crate::ast::{Document, Element, Node, StyleContent, CssValue};
 use crate::context::Context;
 use std::collections::HashSet;
 
@@ -30,22 +30,34 @@ fn generate_node(html: &mut String, node: &Node, context: &Context) {
     }
 }
 
-fn apply_style_template<'a>(name: &'a str, context: &Context<'a>, style_string: &mut String, stack: &mut HashSet<&'a str>) {
-    if !stack.insert(name) {
-        // Circular dependency detected, stop recursion.
-        return;
+fn get_css_value<'a>(value: &'a CssValue<'a>, context: &Context<'a>) -> String {
+    match value {
+        CssValue::Literal(s) => s.to_string(),
+        CssValue::Variable(usage) => {
+            if let Some(var_group) = context.var_templates.get(usage.group_name) {
+                if let Some(variable) = var_group.variables.iter().find(|v| v.key == usage.var_name) {
+                    return variable.value.to_string();
+                }
+            }
+            String::new() // Return empty string if var not found
+        }
     }
+}
+
+fn apply_style_template<'a>(name: &'a str, context: &Context<'a>, style_string: &mut String, stack: &mut HashSet<&'a str>) {
+    if !stack.insert(name) { return; }
 
     if let Some(template) = context.style_templates.get(name) {
         for item in &template.content {
             match item {
                 StyleContent::Property(prop) => {
-                    style_string.push_str(&format!("{}:{};", prop.key, prop.value));
+                    let value = get_css_value(&prop.value, context);
+                    style_string.push_str(&format!("{}:{};", prop.key, value));
                 }
                 StyleContent::StyleTemplateUsage { name: inherited_name } | StyleContent::InheritStyleTemplate { name: inherited_name } => {
                     apply_style_template(inherited_name, context, style_string, stack);
                 }
-                _ => {} // Ignore rulesets
+                _ => {}
             }
         }
     }
@@ -63,7 +75,8 @@ fn generate_element(html: &mut String, element: &Element, context: &Context) {
             for sc in style_contents {
                 match sc {
                     StyleContent::Property(prop) => {
-                        style_string.push_str(&format!("{}:{};", prop.key, prop.value));
+                         let value = get_css_value(&prop.value, context);
+                         style_string.push_str(&format!("{}:{};", prop.key, value));
                     }
                     StyleContent::StyleTemplateUsage { name } => {
                         let mut stack = HashSet::new();
@@ -77,7 +90,7 @@ fn generate_element(html: &mut String, element: &Element, context: &Context) {
                             if auto_id.is_none() { auto_id = Some(id_name.split_whitespace().next().unwrap_or("").to_string()); }
                         }
                     }
-                    _ => {} // Ignore inherit here, it's only for inside templates
+                    _ => {}
                 }
             }
         }
@@ -116,22 +129,22 @@ fn generate_element(html: &mut String, element: &Element, context: &Context) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::{CssProperty, Document, Element, Node, TemplateStyleGroup, StyleContent};
+    use crate::ast::{CssProperty, CssValue, Document, Element, Node, TemplateStyleGroup, StyleContent};
 
     #[test]
     fn test_style_template_inheritance() {
         let base_template = TemplateStyleGroup {
             name: "Base",
             content: vec![
-                StyleContent::Property(CssProperty { key: "font-family", value: "sans-serif"}),
-                StyleContent::Property(CssProperty { key: "color", value: "black"}),
+                StyleContent::Property(CssProperty { key: "font-family", value: CssValue::Literal("sans-serif")}),
+                StyleContent::Property(CssProperty { key: "color", value: CssValue::Literal("black")}),
             ]
         };
         let theme_template = TemplateStyleGroup {
             name: "Theme",
             content: vec![
                 StyleContent::StyleTemplateUsage { name: "Base" },
-                StyleContent::Property(CssProperty { key: "color", value: "blue"}), // Override
+                StyleContent::Property(CssProperty { key: "color", value: CssValue::Literal("blue")}),
             ]
         };
 
