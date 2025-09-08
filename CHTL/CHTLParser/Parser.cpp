@@ -79,6 +79,141 @@ std::unique_ptr<BaseNode> Parser::declaration() {
     return nullptr;
 }
 
+// =================================================================
+// Expression Parsing
+// =================================================================
+
+std::unique_ptr<ExpressionNode> Parser::parseExpression() {
+    return parseTernary();
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseTernary() {
+    auto expr = parseLogicalOr();
+
+    if (match(TokenType::QUESTION)) {
+        auto trueExpr = parseTernary();
+        consume(TokenType::COLON, "Expect ':' after true expression in ternary operator.");
+        auto falseExpr = parseTernary();
+        return std::make_unique<TernaryOpNode>(std::move(expr), std::move(trueExpr), std::move(falseExpr));
+    }
+
+    return expr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseLogicalOr() {
+    auto expr = parseLogicalAnd();
+    while (match(TokenType::OR_OR)) {
+        Token op = previousToken;
+        auto right = parseLogicalAnd();
+        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseLogicalAnd() {
+    auto expr = parseEquality();
+    while (match(TokenType::AND_AND)) {
+        Token op = previousToken;
+        auto right = parseEquality();
+        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseEquality() {
+    auto expr = parseComparison();
+    while (match(TokenType::EQUAL_EQUAL) || match(TokenType::NOT_EQUAL)) {
+        Token op = previousToken;
+        auto right = parseComparison();
+        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseComparison() {
+    auto expr = parseTerm();
+    while (match(TokenType::GREATER) || match(TokenType::GREATER_EQUAL) || match(TokenType::LESS) || match(TokenType::LESS_EQUAL)) {
+        Token op = previousToken;
+        auto right = parseTerm();
+        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseTerm() {
+    auto expr = parseFactor();
+    while (match(TokenType::PLUS) || match(TokenType::MINUS)) {
+        Token op = previousToken;
+        auto right = parseFactor();
+        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseFactor() {
+    auto expr = parsePrimary();
+    while (match(TokenType::STAR) || match(TokenType::SLASH)) {
+        Token op = previousToken;
+        auto right = parsePrimary();
+        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
+    if (match(TokenType::STRING) || match(TokenType::NUMBER)) {
+        return std::make_unique<LiteralNode>(previousToken);
+    }
+
+    if (check(TokenType::IDENTIFIER) && checkNext(TokenType::LEFT_PAREN)) {
+        std::string templateName = currentToken.lexeme;
+        advance(); // consume template name
+        advance(); // consume '('
+        std::string varName = currentToken.lexeme;
+        consume(TokenType::IDENTIFIER, "Expect variable name inside parentheses.");
+
+        if (match(TokenType::EQUAL)) {
+            auto newValue = parseExpression();
+            consume(TokenType::RIGHT_PAREN, "Expect ')' after specialized value.");
+            // For now, we are just returning the new value. The generator will need to handle this.
+            return newValue;
+        } else {
+            consume(TokenType::RIGHT_PAREN, "Expect ')' after variable name.");
+            if (varTemplates.count(templateName) && varTemplates[templateName]->variables.count(varName)) {
+                // We create a new token and a literal node from the looked-up value.
+                Token valueToken = {TokenType::STRING, varTemplates[templateName]->variables[varName], currentToken.line, currentToken.column, currentToken.position};
+                return std::make_unique<LiteralNode>(valueToken);
+            }
+            std::cerr << "Parse Error: Variable " << templateName << "(" << varName << ") not found." << std::endl;
+            return nullptr;
+        }
+    }
+
+    if (match(TokenType::IDENTIFIER)) {
+        return std::make_unique<PropertyAccessNode>(previousToken);
+    }
+
+    if (match(TokenType::DOT)) {
+        std::string selector = "." + currentToken.lexeme;
+        advance();
+        consume(TokenType::DOT, "Expect '.' between selector and property.");
+        selector += "." + currentToken.lexeme;
+        advance();
+        return std::make_unique<PropertyAccessNode>(Token{TokenType::IDENTIFIER, selector, previousToken.line, previousToken.column, previousToken.position});
+    }
+
+    if (match(TokenType::LEFT_PAREN)) {
+        auto expr = parseExpression();
+        consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
+        return expr;
+    }
+
+    // Default case for simple unquoted values
+    auto literal = std::make_unique<LiteralNode>(currentToken);
+    advance();
+    return literal;
+}
+
 std::unique_ptr<BaseNode> Parser::originDeclaration() {
     consume(TokenType::KEYWORD_ORIGIN, "Expect '[Origin]' keyword.");
     consume(TokenType::AT, "Expect '@' before origin type.");
@@ -199,7 +334,7 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
             std::string key = currentToken.lexeme;
             advance();
             consume(TokenType::COLON, "Expect ':' after style property name.");
-            node->inlineProperties[key] = parseValue();
+            node->inlineProperties[key] = parseExpression();
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
         } else if (check(TokenType::DOT) || check(TokenType::HASH) || check(TokenType::AMPERSAND)) {
             auto rule = std::make_unique<StyleRuleNode>();
@@ -231,7 +366,12 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
                 std::string key = currentToken.lexeme;
                 consume(TokenType::IDENTIFIER, "Expect property name.");
                 consume(TokenType::COLON, "Expect ':' after property name.");
-                rule->properties[key] = parseValue();
+                auto expr = parseExpression();
+                if (auto* lit = dynamic_cast<LiteralNode*>(expr.get())) {
+                    rule->properties[key] = lit->value.lexeme;
+                } else {
+                    std::cerr << "Parse Warning: Expressions are not supported in nested style rules." << std::endl;
+                }
                 consume(TokenType::SEMICOLON, "Expect ';' after property value.");
             }
             consume(TokenType::RIGHT_BRACE, "Expect '}' after rule block.");
@@ -244,11 +384,15 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
             if (match(TokenType::SEMICOLON)) {
                  if (styleTemplates.count(templateName)) {
                     for (const auto& prop : styleTemplates.at(templateName)->properties) {
-                        node->inlineProperties[prop.first] = prop.second;
+                        Token token = {TokenType::STRING, prop.second, currentToken.line, currentToken.column, currentToken.position};
+                        node->inlineProperties[prop.first] = std::make_unique<LiteralNode>(token);
                     }
                 } else if (customStyleTemplates.count(templateName)) {
                     const auto& tmpl = customStyleTemplates.at(templateName);
-                    for(const auto& prop : tmpl->properties) node->inlineProperties[prop.first] = prop.second;
+                    for(const auto& prop : tmpl->properties) {
+                        Token token = {TokenType::STRING, prop.second, currentToken.line, currentToken.column, currentToken.position};
+                        node->inlineProperties[prop.first] = std::make_unique<LiteralNode>(token);
+                    }
                 } else {
                      std::cerr << "Parse Error: Style template '" << templateName << "' not found." << std::endl;
                 }
@@ -273,7 +417,16 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
                         std::string key = currentToken.lexeme;
                         advance();
                         consume(TokenType::COLON, "Expect ':' for property specialization.");
-                        specializedProps[key] = parseValue();
+                        // This is tricky. We are parsing an expression, but need to store a string.
+                        // For now, we will assume specialization doesn't use expressions.
+                        // This will need to be addressed by the generator later.
+                        // A proper fix would be to change how custom templates are stored.
+                        auto expr = parseExpression();
+                        if (auto* lit = dynamic_cast<LiteralNode*>(expr.get())) {
+                            specializedProps[key] = lit->value.lexeme;
+                        } else {
+                             std::cerr << "Parse Warning: Expressions in custom style specialization are not fully supported yet." << std::endl;
+                        }
                         consume(TokenType::SEMICOLON, "Expect ';' after property value.");
                     } else {
                         std::cerr << "Parse Error: Unexpected token in custom style specialization." << std::endl;
@@ -283,7 +436,8 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
                 consume(TokenType::RIGHT_BRACE, "Expect '}' after specialization block.");
 
                 for (const auto& prop : specializedProps) {
-                    node->inlineProperties[prop.first] = prop.second;
+                    Token token = {TokenType::STRING, prop.second, currentToken.line, currentToken.column, currentToken.position};
+                    node->inlineProperties[prop.first] = std::make_unique<LiteralNode>(token);
                 }
             } else {
                 std::cerr << "Parse Error: Expect '{' or ';' after @Style usage." << std::endl;
@@ -303,7 +457,12 @@ void Parser::attributes(ElementNode& element) {
         std::string key = currentToken.lexeme;
         advance();
         consume(TokenType::COLON, "Expect ':' after attribute name.");
-        element.attributes[key] = parseValue();
+        auto expr = parseExpression();
+        if (auto* lit = dynamic_cast<LiteralNode*>(expr.get())) {
+            element.attributes[key] = lit->value.lexeme;
+        } else {
+            std::cerr << "Parse Warning: Expressions in attributes are not supported." << std::endl;
+        }
         consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
     }
 }
@@ -330,7 +489,12 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
                 std::string key = currentToken.lexeme;
                 advance();
                 consume(TokenType::COLON, "Expect ':' after property name.");
-                node->properties[key] = parseValue();
+                auto expr = parseExpression();
+                if (auto* lit = dynamic_cast<LiteralNode*>(expr.get())) {
+                    node->properties[key] = lit->value.lexeme;
+                } else {
+                    std::cerr << "Parse Warning: Expressions in style template definitions are not fully supported yet." << std::endl;
+                }
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
             } else if (match(TokenType::AT) || match(TokenType::KEYWORD_INHERIT)) {
                 if(previousToken.type != TokenType::KEYWORD_INHERIT) consume(TokenType::IDENTIFIER, "Expect 'Style' for inheritance.");
@@ -391,7 +555,12 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
                 std::string key = currentToken.lexeme;
                 advance();
                 consume(TokenType::COLON, "Expect ':' after variable name.");
-                node->variables[key] = parseValue();
+                auto expr = parseExpression();
+                 if (auto* lit = dynamic_cast<LiteralNode*>(expr.get())) {
+                    node->variables[key] = lit->value.lexeme;
+                } else {
+                    std::cerr << "Parse Warning: Expressions in var template definitions are not fully supported yet." << std::endl;
+                }
                 consume(TokenType::SEMICOLON, "Expect ';' after variable value.");
             } else {
                 std::cerr << "Parse Error: Unexpected token in var template." << std::endl;
@@ -505,44 +674,17 @@ void Parser::mergeStyles(ElementNode* targetNode, ElementNode* specNode) {
     }
 
     for (const auto& prop : specStyleNode->inlineProperties) {
-        targetStyleNode->inlineProperties[prop.first] = prop.second;
+        if (prop.second) {
+            targetStyleNode->inlineProperties[prop.first] = std::unique_ptr<ExpressionNode>(static_cast<ExpressionNode*>(prop.second->clone().release()));
+        }
     }
     for (const auto& rule : specStyleNode->rules) {
         targetStyleNode->rules.push_back(std::unique_ptr<StyleRuleNode>(static_cast<StyleRuleNode*>(rule->clone().release())));
     }
 }
 
-std::string Parser::parseValue() {
-    if (check(TokenType::IDENTIFIER) && checkNext(TokenType::LEFT_PAREN)) {
-        std::string templateName = currentToken.lexeme;
-        advance();
-        consume(TokenType::LEFT_PAREN, "Expect '(' after variable template name.");
-        std::string varName = currentToken.lexeme;
-        consume(TokenType::IDENTIFIER, "Expect variable name inside parentheses.");
-
-        if (match(TokenType::EQUAL)) {
-            std::string newValue = parseValue();
-            consume(TokenType::RIGHT_PAREN, "Expect ')' after specialized value.");
-            return newValue;
-        } else {
-            consume(TokenType::RIGHT_PAREN, "Expect ')' after variable name.");
-            if (varTemplates.count(templateName) && varTemplates[templateName]->variables.count(varName)) {
-                return varTemplates[templateName]->variables[varName];
-            }
-            std::cerr << "Parse Error: Variable " << templateName << "(" << varName << ") not found." << std::endl;
-            return "";
-        }
-    }
-
-    std::string value;
-    if (check(TokenType::STRING) || check(TokenType::IDENTIFIER)) {
-        value = currentToken.lexeme;
-        advance();
-    } else {
-        std::cerr << "Parse Error: Expected a value at line " << currentToken.line << std::endl;
-        advance();
-    }
-    return value;
+std::unique_ptr<ExpressionNode> Parser::parseValue() {
+    return parseExpression();
 }
 
 void Parser::handleCustomElementUsage(const std::string& templateName, ElementNode* parentNode) {
@@ -746,7 +888,12 @@ std::unique_ptr<BaseNode> Parser::customDeclaration() {
                 std::string key = currentToken.lexeme;
                 advance();
                 if (match(TokenType::COLON)) {
-                    node->properties[key] = parseValue();
+                    auto expr = parseExpression();
+                    if (auto* lit = dynamic_cast<LiteralNode*>(expr.get())) {
+                        node->properties[key] = lit->value.lexeme;
+                    } else {
+                        std::cerr << "Parse Warning: Expressions are not supported in custom style definitions." << std::endl;
+                    }
                     consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
                 } else if (match(TokenType::SEMICOLON)) {
                     node->valuelessProperties.push_back(key);

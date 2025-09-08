@@ -15,6 +15,7 @@
 #include "../CHTLNode/CustomElementNode.h"
 #include "../CHTLNode/CustomStyleTemplateNode.h"
 #include "../CHTLNode/OriginNode.h"
+#include "../CHTLNode/ExpressionNode.h"
 
 class Parser {
 public:
@@ -47,8 +48,19 @@ private:
     std::unique_ptr<TextNode> textNode();
     std::unique_ptr<StyleNode> styleNode();
     void attributes(ElementNode& element);
-    std::string parseValue();
+    std::unique_ptr<ExpressionNode> parseValue();
     void handleCustomElementUsage(const std::string& templateName, ElementNode* parentNode);
+
+    // Expression Parsing
+    std::unique_ptr<ExpressionNode> parseExpression();
+    std::unique_ptr<ExpressionNode> parseTernary();
+    std::unique_ptr<ExpressionNode> parseLogicalOr();
+    std::unique_ptr<ExpressionNode> parseLogicalAnd();
+    std::unique_ptr<ExpressionNode> parseEquality();
+    std::unique_ptr<ExpressionNode> parseComparison();
+    std::unique_ptr<ExpressionNode> parseTerm();
+    std::unique_ptr<ExpressionNode> parseFactor();
+    std::unique_ptr<ExpressionNode> parsePrimary();
 
     struct Selector {
         std::string tagName;

@@ -24,6 +24,7 @@ private:
     bool isAtEnd();
     Token makeToken(TokenType type, const std::string& lexeme);
     Token errorToken(const std::string& message);
+    bool match(char expected);
 
     void skipWhitespaceAndComments();
     Token identifier();

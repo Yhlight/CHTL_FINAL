@@ -27,6 +27,13 @@ Token Lexer::makeToken(TokenType type, const std::string& lexeme) {
     return Token{type, lexeme, line, column - (int)lexeme.length(), current - lexeme.length()};
 }
 
+bool Lexer::match(char expected) {
+    if (isAtEnd()) return false;
+    if (source[current] != expected) return false;
+    current++;
+    return true;
+}
+
 Token Lexer::errorToken(const std::string& message) {
     return Token{TokenType::END_OF_FILE, message, line, column, current};
 }
@@ -175,7 +182,31 @@ Token Lexer::getNextToken() {
         case ']': advance(); return makeToken(TokenType::RIGHT_BRACKET, "]");
         case '.': advance(); return makeToken(TokenType::DOT, ".");
         case '#': advance(); return makeToken(TokenType::HASH, "#");
-        case '&': advance(); return makeToken(TokenType::AMPERSAND, "&");
+        case '&':
+            advance();
+            if (match('&')) return makeToken(TokenType::AND_AND, "&&");
+            return makeToken(TokenType::AMPERSAND, "&");
+        case '|':
+            advance();
+            if (match('|')) return makeToken(TokenType::OR_OR, "||");
+            return makeToken(TokenType::IDENTIFIER, "|"); // Or some other default
+        case '>':
+            advance();
+            if (match('=')) return makeToken(TokenType::GREATER_EQUAL, ">=");
+            return makeToken(TokenType::GREATER, ">");
+        case '<':
+            advance();
+            if (match('=')) return makeToken(TokenType::LESS_EQUAL, "<=");
+            return makeToken(TokenType::LESS, "<");
+        case '!':
+            advance();
+            if (match('=')) return makeToken(TokenType::NOT_EQUAL, "!=");
+            return makeToken(TokenType::IDENTIFIER, "!"); // Or some other default
+        case '?': advance(); return makeToken(TokenType::QUESTION, "?");
+        case '/': advance(); return makeToken(TokenType::SLASH, "/");
+        case '*': advance(); return makeToken(TokenType::STAR, "*");
+        case '+': advance(); return makeToken(TokenType::PLUS, "+");
+        case '-': advance(); return makeToken(TokenType::MINUS, "-");
     }
 
     // Fallback for unquoted literals like '16px'

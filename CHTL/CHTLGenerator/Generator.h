@@ -5,6 +5,7 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
+#include "../CHTLNode/ExpressionNode.h"
 #include <string>
 #include <sstream>
 
@@ -27,4 +28,18 @@ private:
     Parser& parser;
     std::stringstream output;
     std::stringstream global_css;
+    ElementNode* currentElement = nullptr; // Context for expression evaluation
+
+    // Expression Evaluation
+    struct Value {
+        double number = 0;
+        std::string string;
+        bool isNumeric = false;
+    };
+
+    Value evaluateExpression(ExpressionNode& node);
+    Value evaluateBinaryOp(BinaryOpNode& node);
+    Value evaluateTernaryOp(TernaryOpNode& node);
+    Value evaluatePropertyAccess(PropertyAccessNode& node);
+    Value evaluateLiteral(LiteralNode& node);
 };

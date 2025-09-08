@@ -10,6 +10,14 @@ enum class TokenType {
     LEFT_BRACKET, RIGHT_BRACKET,
     COLON, EQUAL, SEMICOLON,
     DOT, HASH, AMPERSAND,
+    QUESTION, SLASH, STAR, PLUS, MINUS,
+
+    // Two-character tokens
+    EQUAL_EQUAL, NOT_EQUAL,
+    GREATER_EQUAL, LESS_EQUAL,
+    AND_AND, OR_OR,
+    GREATER, LESS,
+
 
     // Literals
     IDENTIFIER, STRING, NUMBER,

@@ -33,6 +33,9 @@ std::string Generator::generate(ElementNode& root) {
 }
 
 void Generator::visit(ElementNode& node) {
+    auto* oldContext = currentElement;
+    currentElement = &node;
+
     // --- Pre-computation Step ---
     // Process style rules before generating the tag
     for (const auto& child : node.children) {
@@ -91,7 +94,8 @@ void Generator::visit(ElementNode& node) {
     for (const auto& child : node.children) {
         if (auto* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             for (const auto& prop : styleNode->inlineProperties) {
-                style_ss << prop.first << ":" << prop.second << ";";
+                Value result = evaluateExpression(*prop.second);
+                style_ss << prop.first << ":" << result.string << ";";
             }
         }
     }
@@ -131,6 +135,8 @@ void Generator::visit(ElementNode& node) {
     }
 
     output << "</" << node.tagName << ">";
+
+    currentElement = oldContext;
 }
 
 void Generator::visit(TextNode& node) {
@@ -169,4 +175,99 @@ void Generator::visit(StyleRuleNode& node) {
 
 void Generator::visit(OriginNode& node) {
     output << node.content;
+}
+
+// =================================================================
+// Expression Evaluation
+// =================================================================
+
+Generator::Value Generator::evaluateExpression(ExpressionNode& node) {
+    if (auto* lit = dynamic_cast<LiteralNode*>(&node)) {
+        return evaluateLiteral(*lit);
+    }
+    if (auto* binOp = dynamic_cast<BinaryOpNode*>(&node)) {
+        return evaluateBinaryOp(*binOp);
+    }
+    if (auto* ternOp = dynamic_cast<TernaryOpNode*>(&node)) {
+        return evaluateTernaryOp(*ternOp);
+    }
+    if (auto* propAccess = dynamic_cast<PropertyAccessNode*>(&node)) {
+        return evaluatePropertyAccess(*propAccess);
+    }
+    std::cerr << "Generator Error: Unknown expression node type." << std::endl;
+    return {0, "", false};
+}
+
+Generator::Value Generator::evaluateLiteral(LiteralNode& node) {
+    try {
+        size_t first_non_digit = node.value.lexeme.find_first_not_of("-.0123456789");
+        if (first_non_digit == std::string::npos) {
+            return {std::stod(node.value.lexeme), node.value.lexeme, true};
+        }
+    } catch (const std::invalid_argument&) {
+        // Not a number, treat as string
+    }
+    return {0, node.value.lexeme, false};
+}
+
+Generator::Value Generator::evaluatePropertyAccess(PropertyAccessNode& node) {
+    if (!currentElement) {
+        std::cerr << "Generator Error: Cannot access property '" << node.property.lexeme << "' outside of an element context." << std::endl;
+        return {0, "", false};
+    }
+
+    // For now, only look at the current element's inline styles
+    for (const auto& child : currentElement->children) {
+        if (auto* styleNode = dynamic_cast<StyleNode*>(child.get())) {
+            if (styleNode->inlineProperties.count(node.property.lexeme)) {
+                // If the property itself is an expression, evaluate it.
+                return evaluateExpression(*styleNode->inlineProperties.at(node.property.lexeme));
+            }
+        }
+    }
+
+    std::cerr << "Generator Warning: Property '" << node.property.lexeme << "' not found on current element." << std::endl;
+    return {0, "", false};
+}
+
+Generator::Value Generator::evaluateTernaryOp(TernaryOpNode& node) {
+    Value condition = evaluateExpression(*node.condition);
+    if (condition.isNumeric && condition.number != 0) {
+        return evaluateExpression(*node.trueExpression);
+    }
+    if (!condition.isNumeric && !condition.string.empty()) {
+        return evaluateExpression(*node.trueExpression);
+    }
+    return evaluateExpression(*node.falseExpression);
+}
+
+Generator::Value Generator::evaluateBinaryOp(BinaryOpNode& node) {
+    Value left = evaluateExpression(*node.left);
+    Value right = evaluateExpression(*node.right);
+
+    if (!left.isNumeric || !right.isNumeric) {
+        // For now, only support operations on numeric values
+        std::cerr << "Generator Warning: Performing operations on non-numeric values is not fully supported." << std::endl;
+        if (node.op.type == TokenType::EQUAL_EQUAL) return { (left.string == right.string) ? 1.0 : 0.0, "", true };
+        if (node.op.type == TokenType::NOT_EQUAL) return { (left.string != right.string) ? 1.0 : 0.0, "", true };
+        return {0, "", false};
+    }
+
+    switch (node.op.type) {
+        case TokenType::PLUS:          return {left.number + right.number, std::to_string(left.number + right.number), true};
+        case TokenType::MINUS:         return {left.number - right.number, std::to_string(left.number - right.number), true};
+        case TokenType::STAR:          return {left.number * right.number, std::to_string(left.number * right.number), true};
+        case TokenType::SLASH:         return {left.number / right.number, std::to_string(left.number / right.number), true};
+        case TokenType::GREATER:       return {(left.number > right.number) ? 1.0 : 0.0, "", true};
+        case TokenType::GREATER_EQUAL: return {(left.number >= right.number) ? 1.0 : 0.0, "", true};
+        case TokenType::LESS:          return {(left.number < right.number) ? 1.0 : 0.0, "", true};
+        case TokenType::LESS_EQUAL:    return {(left.number <= right.number) ? 1.0 : 0.0, "", true};
+        case TokenType::EQUAL_EQUAL:   return {(left.number == right.number) ? 1.0 : 0.0, "", true};
+        case TokenType::NOT_EQUAL:     return {(left.number != right.number) ? 1.0 : 0.0, "", true};
+        case TokenType::AND_AND:       return {(left.number != 0 && right.number != 0) ? 1.0 : 0.0, "", true};
+        case TokenType::OR_OR:         return {(left.number != 0 || right.number != 0) ? 1.0 : 0.0, "", true};
+        default:
+            std::cerr << "Generator Error: Unknown binary operator '" << node.op.lexeme << "'." << std::endl;
+            return {0, "", false};
+    }
 }
