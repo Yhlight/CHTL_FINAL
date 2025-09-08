@@ -26,6 +26,16 @@ fn build_style_content(pair: Pair<Rule>) -> StyleContent {
             let name = pair.into_inner().next().unwrap().as_str();
             StyleContent::StyleTemplateUsage { name }
         }
+        Rule::custom_style_usage => {
+            let mut inner = pair.into_inner();
+            let name = inner.next().unwrap().as_str();
+            let properties = inner.map(build_css_property).collect();
+            StyleContent::CustomStyleUsage { name, properties }
+        }
+        Rule::delete_property => {
+            let keys_to_delete = pair.into_inner().map(|p| p.as_str()).collect();
+            StyleContent::Delete(keys_to_delete)
+        }
         _ => unreachable!(),
     }
 }
@@ -33,9 +43,9 @@ fn build_style_content(pair: Pair<Rule>) -> StyleContent {
 fn build_css_property(pair: Pair<Rule>) -> CssProperty {
     let mut inner = pair.into_inner();
     let key = inner.next().unwrap().as_str();
-    let value_pair = inner.next().unwrap(); // This is the property_value rule
+    let value_pair = inner.next().unwrap();
 
-    let value_content_pair = value_pair.into_inner().next().unwrap(); // This is the actual content
+    let value_content_pair = value_pair.into_inner().next().unwrap();
 
     let value = match value_content_pair.as_rule() {
         Rule::var_usage => {
@@ -50,7 +60,7 @@ fn build_css_property(pair: Pair<Rule>) -> CssProperty {
         _ => unreachable!("Unexpected css property value rule: {:?}", value_content_pair.as_rule()),
     };
 
-    CssProperty { key, value }
+    CssProperty { key, value: Some(value) }
 }
 
 fn build_css_ruleset(pair: Pair<Rule>) -> CssRuleset {
@@ -75,12 +85,11 @@ mod tests {
 
         assert_eq!(content.len(), 2);
 
-        // Check variable property
         match &content[0] {
             StyleContent::Property(p) => {
                 assert_eq!(p.key, "color");
                 match &p.value {
-                    CssValue::Variable(v) => {
+                    Some(CssValue::Variable(v)) => {
                         assert_eq!(v.group_name, "Theme");
                         assert_eq!(v.var_name, "primary");
                     }
@@ -90,11 +99,10 @@ mod tests {
             _ => panic!("Expected a property"),
         }
 
-        // Check literal property
         match &content[1] {
             StyleContent::Property(p) => {
                 assert_eq!(p.key, "font-size");
-                assert_eq!(p.value, CssValue::Literal("16px"));
+                assert_eq!(p.value, Some(CssValue::Literal("16px")));
             }
             _ => panic!("Expected a property"),
         }

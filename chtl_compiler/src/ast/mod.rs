@@ -88,12 +88,14 @@ pub enum StyleContent<'a> {
     Ruleset(CssRuleset<'a>),
     StyleTemplateUsage { name: &'a str },
     InheritStyleTemplate { name: &'a str },
+    CustomStyleUsage { name: &'a str, properties: Vec<CssProperty<'a>> },
+    Delete(Vec<&'a str>),
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct CssProperty<'a> {
     pub key: &'a str,
-    pub value: CssValue<'a>,
+    pub value: Option<CssValue<'a>>, // Value is now optional
 }
 
 #[derive(Debug, PartialEq, Clone)]
