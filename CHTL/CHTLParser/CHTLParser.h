@@ -10,7 +10,6 @@
 
 namespace CHTL {
 
-// Forward declaration
 class TemplateUsageNode;
 
 class CHTLParser {
@@ -36,6 +35,7 @@ private:
     void parseSpecializationBlock(TemplateUsageNode* usageNode);
     std::unique_ptr<BaseNode> parseInsertStatement();
     std::unique_ptr<BaseNode> parseDeleteStatement();
+    std::unique_ptr<BaseNode> parseElementTemplateUsage(); // Added
 };
 
 } // namespace CHTL
