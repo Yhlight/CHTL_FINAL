@@ -17,11 +17,14 @@
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/ExpressionNode.h"
 #include "../CHTLNode/ImportNode.h"
+#include "../CHTLContext.h"
 
 class Parser {
 public:
-    Parser(Lexer& lexer);
+    Parser(Lexer& lexer, std::shared_ptr<ConfigurationState> config);
     std::unique_ptr<ElementNode> parse();
+    void parseConfiguration(); // New method for pre-scanning
+    std::shared_ptr<ConfigurationState> config;
 
     using StringMap = std::map<std::string, std::string>;
 
@@ -61,6 +64,7 @@ private:
     std::unique_ptr<BaseNode> originDeclaration();
     std::unique_ptr<BaseNode> importDeclaration();
     std::unique_ptr<BaseNode> namespaceDeclaration();
+    std::unique_ptr<BaseNode> configurationDeclaration();
     std::unique_ptr<ElementNode> element();
     std::unique_ptr<TextNode> textNode();
     std::unique_ptr<StyleNode> styleNode();

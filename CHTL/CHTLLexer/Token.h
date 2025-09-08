@@ -30,6 +30,7 @@ enum class TokenType {
     KEYWORD_ORIGIN,
     KEYWORD_IMPORT,
     KEYWORD_NAMESPACE,
+    KEYWORD_CONFIGURATION,
     KEYWORD_FROM,
     KEYWORD_AS,
     KEYWORD_INHERIT,
@@ -58,3 +59,5 @@ struct Token {
     int column;
     size_t position;
 };
+
+TokenType stringToTokenType(const std::string& s);

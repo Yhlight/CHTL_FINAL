@@ -1,4 +1,5 @@
 #include "Parser.h"
+#include "../CHTLContext.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/ElementTemplateNode.h"
 #include "../CHTLNode/StyleTemplateNode.h"
@@ -8,6 +9,7 @@
 #include "../CHTLNode/TemplateUsageNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/StyleRuleNode.h"
+#include "../CHTLNode/ConfigNode.h"
 #include <iostream>
 #include <algorithm>
 #include <fstream>
@@ -19,7 +21,8 @@ void setParent(BaseNode* parent, BaseNode* child) {
     }
 }
 
-Parser::Parser(Lexer& lexer) : lexer(lexer) {
+Parser::Parser(Lexer& lexer, std::shared_ptr<ConfigurationState> config)
+    : lexer(lexer), config(config) {
     advance();
     advance();
 }
@@ -74,6 +77,7 @@ std::unique_ptr<BaseNode> Parser::declaration() {
     if (check(TokenType::KEYWORD_ORIGIN)) return originDeclaration();
     if (check(TokenType::KEYWORD_IMPORT)) return importDeclaration();
     if (check(TokenType::KEYWORD_NAMESPACE)) return namespaceDeclaration();
+    if (check(TokenType::KEYWORD_CONFIGURATION)) return configurationDeclaration();
     if (check(TokenType::IDENTIFIER) && checkNext(TokenType::LEFT_BRACE)) return element();
     if (check(TokenType::TEXT)) return textNode();
     if (check(TokenType::STYLE)) return styleNode();
@@ -183,6 +187,76 @@ std::unique_ptr<BaseNode> Parser::namespaceDeclaration() {
     return nullptr; // Namespaces are a parse-time construct
 }
 
+std::unique_ptr<BaseNode> Parser::configurationDeclaration() {
+    consume(TokenType::KEYWORD_CONFIGURATION, "Expect '[Configuration]' keyword.");
+
+    // For now, we only support unnamed configurations that apply globally.
+    // The logic to handle named configs can be added later.
+    if (check(TokenType::AT)) {
+        // This is a named config, we parse but do not apply it.
+        advance(); // Consume @
+        consume(TokenType::IDENTIFIER, "Expect config name after '@'.");
+    }
+
+    consume(TokenType::LEFT_BRACE, "Expect '{' after [Configuration].");
+
+    while(!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
+        if (check(TokenType::LEFT_BRACKET) && nextToken.lexeme == "Name") {
+            advance(); // consume '['
+            advance(); // consume 'Name'
+            consume(TokenType::RIGHT_BRACKET, "Expect ']' after 'Name'.");
+            consume(TokenType::LEFT_BRACE, "Expect '{' after [Name] block.");
+            while(!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
+                std::string key_str = currentToken.lexeme;
+                TokenType key_enum = stringToTokenType(key_str);
+                consume(TokenType::IDENTIFIER, "Expect keyword identifier (e.g., KEYWORD_TEXT).");
+                consume(TokenType::EQUAL, "Expect '=' after key.");
+
+                std::vector<std::string> values;
+                if (check(TokenType::STRING) || check(TokenType::IDENTIFIER)) {
+                    values.push_back(currentToken.lexeme);
+                    advance();
+                } else {
+                     std::cerr << "Parse Error: Expect string or identifier for keyword value." << std::endl;
+                     advance();
+                }
+                config->keyword_map[key_enum] = values;
+                consume(TokenType::SEMICOLON, "Expect ';' after value.");
+            }
+            consume(TokenType::RIGHT_BRACE, "Expect '}' to close [Name] block.");
+        } else {
+            std::string key = currentToken.lexeme;
+            consume(TokenType::IDENTIFIER, "Expect configuration key.");
+            consume(TokenType::EQUAL, "Expect '=' after configuration key.");
+
+            if (currentToken.lexeme == "true") {
+                if (key == "DEBUG_MODE") config->debug_mode = true;
+            } else if (currentToken.lexeme == "false") {
+                if (key == "DEBUG_MODE") config->debug_mode = false;
+            } else if (currentToken.type == TokenType::NUMBER) {
+                if (key == "INDEX_INITIAL_COUNT") config->index_initial_count = std::stoi(currentToken.lexeme);
+            } else {
+                std::cerr << "Parse Warning: Unsupported value for configuration key '" << key << "'." << std::endl;
+            }
+            advance();
+            consume(TokenType::SEMICOLON, "Expect ';' after configuration value.");
+        }
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to close configuration block.");
+    return nullptr; // Configs are parse-time only
+}
+
+void Parser::parseConfiguration() {
+    while(!check(TokenType::END_OF_FILE)) {
+        if (check(TokenType::KEYWORD_CONFIGURATION)) {
+            configurationDeclaration();
+        } else {
+            advance();
+        }
+    }
+}
+
 void Parser::handleImport(const ImportNode& node) {
     std::ifstream file(node.path);
     if (!file.is_open()) {
@@ -195,8 +269,8 @@ void Parser::handleImport(const ImportNode& node) {
     std::string source = buffer.str();
 
     if (node.category == ImportCategory::CHTL || node.category == ImportCategory::CUSTOM || node.category == ImportCategory::TEMPLATE) {
-        Lexer importedLexer(source);
-        Parser importedParser(importedLexer);
+        Lexer importedLexer(source, this->config);
+        Parser importedParser(importedLexer, this->config);
         importedParser.parse();
 
         bool specific_import = !node.specific_imports.empty();

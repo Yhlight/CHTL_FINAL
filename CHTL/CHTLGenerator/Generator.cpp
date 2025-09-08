@@ -5,7 +5,7 @@
 #include <iostream>
 #include <algorithm>
 
-Generator::Generator(Parser& parser) : parser(parser) {}
+Generator::Generator(Parser& parser, std::shared_ptr<ConfigurationState> config) : parser(parser) {}
 
 std::string Generator::generate(ElementNode& root) {
     // Single pass to generate all content into the main output buffer.

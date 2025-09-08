@@ -1,0 +1,25 @@
+// Test for the [Configuration] system
+
+[Configuration] {
+    [Name] {
+        KEYWORD_TEMPLATE = "[Blueprint]";
+        KEYWORD_STYLE = "css";
+    }
+}
+
+// Now, use the re-defined keywords
+[Blueprint] @Style MyBlueTheme {
+    background-color: "blue";
+    color: "white";
+}
+
+div {
+    // use 'css' instead of 'style'
+    css {
+        @Style MyBlueTheme;
+        padding: "20px";
+    }
+    text {
+        "This div should have a blue background and white text."
+    }
+}

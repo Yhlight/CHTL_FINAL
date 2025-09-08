@@ -10,10 +10,11 @@
 #include <sstream>
 
 class Parser;
+class ConfigurationState;
 
 class Generator : public AstVisitor {
 public:
-    Generator(Parser& parser);
+    Generator(Parser& parser, std::shared_ptr<ConfigurationState> config);
     std::string generate(ElementNode& root);
 
     void visit(ElementNode& node) override;
