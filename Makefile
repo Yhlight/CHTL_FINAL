@@ -1,6 +1,6 @@
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -I.
+CXXFLAGS = -std=c++17 -Wall -I. -static
 
 # Source files
 SRCS = main.cpp \

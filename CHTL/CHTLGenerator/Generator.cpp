@@ -1,4 +1,8 @@
 #include "Generator.h"
+#include "CHTL/CHTLParser/Parser.h"
+#include <iostream>
+
+Generator::Generator(Parser& parser) : parser(parser) {}
 
 std::string Generator::generate(ElementNode& root) {
     // The root node from the parser is a dummy node.
@@ -63,4 +67,17 @@ void Generator::visit(TextNode& node) {
 void Generator::visit(StyleNode& node) {
     // This will be implemented in the next step.
     // For now, we do nothing.
+}
+
+void Generator::visit(TemplateUsageNode& node) {
+    if (node.type == TemplateType::ELEMENT) {
+        if (parser.elementTemplates.count(node.name)) {
+            const auto& tmpl = parser.elementTemplates.at(node.name);
+            for (const auto& child : tmpl->children) {
+                child->accept(*this);
+            }
+        } else {
+            std::cerr << "Generator Error: Element template '" << node.name << "' not found." << std::endl;
+        }
+    }
 }

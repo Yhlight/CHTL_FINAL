@@ -1,5 +1,8 @@
 #include "Parser.h"
 #include "../CHTLNode/StyleNode.h"
+#include "../CHTLNode/ElementTemplateNode.h"
+#include "../CHTLNode/StyleTemplateNode.h"
+#include "../CHTLNode/TemplateUsageNode.h"
 #include <iostream>
 
 Parser::Parser(Lexer& lexer) : lexer(lexer) {
@@ -52,6 +55,9 @@ std::unique_ptr<ElementNode> Parser::parse() {
 }
 
 std::unique_ptr<BaseNode> Parser::declaration() {
+    if (check(TokenType::KEYWORD_TEMPLATE)) {
+        return templateDeclaration();
+    }
     if (check(TokenType::IDENTIFIER)) {
         if (checkNext(TokenType::LEFT_BRACE)) {
             return element();
@@ -99,6 +105,13 @@ std::unique_ptr<ElementNode> Parser::element() {
             if (child) {
                 node->children.push_back(std::move(child));
             }
+        } else if (match(TokenType::AT_ELEMENT)) {
+            auto usageNode = std::make_unique<TemplateUsageNode>();
+            usageNode->type = TemplateType::ELEMENT;
+            usageNode->name = currentToken.lexeme;
+            consume(TokenType::IDENTIFIER, "Expect template name after '@Element'.");
+            consume(TokenType::SEMICOLON, "Expect ';' after element template usage.");
+            node->children.push_back(std::move(usageNode));
         } else {
             std::cerr << "Parse Error: Unexpected token " << currentToken.lexeme << " in element " << node->tagName << " at line " << currentToken.line << std::endl;
             advance();
@@ -145,6 +158,30 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
             }
 
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+        } else if (match(TokenType::AT_STYLE)) {
+            // This is a bit of a hack. A StyleNode can't have a TemplateUsageNode as a child.
+            // The template usage should be handled by the generator by merging properties.
+            // For now, I'll just parse it and the generator will have to handle it.
+            // A better approach would be to have a separate list for template usages.
+            // Let's create a new node type that can hold both properties and template usages.
+            // That's too much refactoring for now.
+
+            // The simplest approach is to expand the style template here in the parser.
+            // This avoids changing the generator logic too much.
+
+            // Let's try that.
+            std::string templateName = currentToken.lexeme;
+            consume(TokenType::IDENTIFIER, "Expect template name after '@Style'.");
+            consume(TokenType::SEMICOLON, "Expect ';' after style template usage.");
+
+            if (styleTemplates.count(templateName)) {
+                const auto& tmpl = styleTemplates.at(templateName);
+                for (const auto& prop : tmpl->properties) {
+                    node->properties[prop.first] = prop.second;
+                }
+            } else {
+                std::cerr << "Parse Error: Style template '" << templateName << "' not found at line " << currentToken.line << std::endl;
+            }
         } else {
             std::cerr << "Parse Error: Unexpected token " << currentToken.lexeme << " in style block at line " << currentToken.line << std::endl;
             advance(); // Advance to avoid infinite loops
@@ -170,4 +207,57 @@ void Parser::attributes(ElementNode& element) {
             consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
         }
     }
+}
+
+std::unique_ptr<BaseNode> Parser::templateDeclaration() {
+    consume(TokenType::KEYWORD_TEMPLATE, "Expect '[Template]' keyword.");
+
+    if (match(TokenType::AT_STYLE)) {
+        auto node = std::make_unique<StyleTemplateNode>();
+        node->name = currentToken.lexeme;
+        consume(TokenType::IDENTIFIER, "Expect template name.");
+        consume(TokenType::LEFT_BRACE, "Expect '{' after template name.");
+
+        while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
+            if (check(TokenType::IDENTIFIER)) {
+                std::string key = currentToken.lexeme;
+                advance();
+                consume(TokenType::COLON, "Expect ':' after style property name.");
+                if (check(TokenType::STRING) || check(TokenType::IDENTIFIER)) {
+                    node->properties[key] = currentToken.lexeme;
+                    advance();
+                } else {
+                    std::cerr << "Parse Error: Expected style property value at line " << currentToken.line << std::endl;
+                    advance();
+                }
+                consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+            } else {
+                std::cerr << "Parse Error: Unexpected token in style template at line " << currentToken.line << std::endl;
+                advance();
+            }
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' after template body.");
+        styleTemplates[node->name] = std::move(node);
+
+    } else if (match(TokenType::AT_ELEMENT)) {
+        auto node = std::make_unique<ElementTemplateNode>();
+        node->name = currentToken.lexeme;
+        consume(TokenType::IDENTIFIER, "Expect template name.");
+        consume(TokenType::LEFT_BRACE, "Expect '{' after template name.");
+
+        while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
+            auto child = declaration();
+            if (child) {
+                node->children.push_back(std::move(child));
+            }
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' after template body.");
+        elementTemplates[node->name] = std::move(node);
+
+    } else {
+        std::cerr << "Parse Error: Expected '@Style' or '@Element' after '[Template]' at line " << currentToken.line << std::endl;
+        advance();
+    }
+
+    return nullptr; // Template declarations don't produce a node in the main AST
 }

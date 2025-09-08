@@ -138,6 +138,22 @@ Token Lexer::getNextToken() {
         case ':': return makeToken(TokenType::COLON, ":");
         case '=': return makeToken(TokenType::EQUAL, "=");
         case ';': return makeToken(TokenType::SEMICOLON, ";");
+        case '[':
+            if (source.substr(current, 8) == "Template]") {
+                current += 8;
+                return makeToken(TokenType::KEYWORD_TEMPLATE, "[Template]");
+            }
+            break;
+        case '@':
+            if (source.substr(current, 5) == "Style") {
+                current += 5;
+                return makeToken(TokenType::AT_STYLE, "@Style");
+            }
+            if (source.substr(current, 7) == "Element") {
+                current += 7;
+                return makeToken(TokenType::AT_ELEMENT, "@Element");
+            }
+            break;
     }
 
     // Unquoted literals for attributes and text

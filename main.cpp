@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
         std::unique_ptr<ElementNode> ast = parser.parse();
 
         if (ast) {
-            Generator generator;
+            Generator generator(parser);
             std::string html = generator.generate(*ast);
             std::cout << html << std::endl;
         } else {
