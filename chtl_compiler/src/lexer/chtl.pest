@@ -1,0 +1,25 @@
+// CHTL Grammar for Pest
+
+// Silent rules for whitespace and comments
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = _{ block_comment | line_comment }
+block_comment = { "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+line_comment = { "//" ~ (!("\r" | "\n") ~ ANY)* }
+
+// Basic building blocks
+identifier = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+string_literal = @{ "\"" ~ ( !("\"") ~ ANY )* ~ "\"" | "'" ~ ( !("'") ~ ANY )* ~ "'" }
+bare_literal = @{ (ASCII_ALPHANUMERIC | "_" | "." | "/" | ":" | "-" )+ } // Simplified for now
+
+// Basic structure
+chtl_file = { SOI ~ inner_content ~ EOI }
+inner_content = { (element | text_node | style_block | script_block | COMMENT)* }
+
+element = { identifier ~ "{" ~ inner_content ~ "}" }
+text_node = { "text" ~ "{" ~ (string_literal | bare_literal) ~ "}" }
+
+style_block = { "style" ~ "{" ~ style_content ~ "}" }
+style_content = @{ ( !("}") ~ ANY )* }
+
+script_block = { "script" ~ "{" ~ script_content ~ "}" }
+script_content = @{ ( !("}") ~ ANY )* }

@@ -1,0 +1,15 @@
+// CHTL JS Grammar
+
+// Silent whitespace
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+
+// Top-level rule for a CHTL JS script
+script_content = { SOI ~ (enhanced_selector | other_code)+ ~ EOI }
+
+// Enhanced selector {{...}}
+enhanced_selector = { "{{" ~ inner_selector ~ "}}" }
+inner_selector = @{ ( !("}}") ~ ANY )* }
+
+// For now, capture any other code as a single token.
+// This will be refined later.
+other_code = @{ ( !("{{") ~ ANY )+ }

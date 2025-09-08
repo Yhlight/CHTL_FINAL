@@ -1,0 +1,10 @@
+[package]
+name = "chtl_compiler"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.5.47", features = ["derive"] }
+notify = "8.2.0"
+pest = "2.8.1"
+pest_derive = "2.8.1"

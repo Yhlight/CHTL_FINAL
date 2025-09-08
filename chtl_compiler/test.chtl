@@ -1,0 +1,6 @@
+body {
+    div {}
+    script {
+        const el = "div";
+    }
+}
