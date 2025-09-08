@@ -7,6 +7,7 @@
 #include "CHTL/CHTLNode/InsertRuleNode.h"
 #include "CHTL/CHTLNode/OriginNode.h"
 #include "CHTL/CHTLNode/OriginUsageNode.h"
+#include "CHTL/CHTLNode/CommentNode.h"
 #include "CHTL/ExpressionNode/LiteralExpr.h"
 #include "CHTL/Evaluator/Evaluator.h"
 #include <stdexcept>
@@ -43,8 +44,13 @@ void Generator::generateNode(const BaseNode* node) {
         case NodeType::CustomUsage: generateCustomUsage(static_cast<const CustomUsageNode*>(node)); break;
         case NodeType::Origin: generateOrigin(static_cast<const OriginNode*>(node)); break;
         case NodeType::OriginUsage: generateOriginUsage(static_cast<const OriginUsageNode*>(node)); break;
+        case NodeType::Comment: generateComment(static_cast<const CommentNode*>(node)); break;
         default: break;
     }
+}
+
+void Generator::generateComment(const CommentNode* comment) {
+    m_output += "<!-- " + comment->getText() + " -->";
 }
 
 void Generator::generateOriginUsage(const OriginUsageNode* node) {

@@ -8,6 +8,7 @@ enum class NodeType {
     Document,
     Element,
     Text,
+    Comment,
     Attribute,
 
     StyleBlock,

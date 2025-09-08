@@ -50,7 +50,9 @@ Token Lexer::nextToken() {
         case '>': return makeToken(TokenType::GreaterThan, ">");
         case '<': return makeToken(TokenType::LessThan, "<");
         case '+': return makeToken(TokenType::Plus, "+");
-        case '-': return makeToken(TokenType::Minus, "-");
+        case '-':
+            if (match('-')) { return makeGeneratorComment(); }
+            return makeToken(TokenType::Minus, "-");
         case '*': return makeToken(TokenType::Star, "*");
         case ':': if (match(':')) return makeToken(TokenType::ColonColon, "::"); return makeToken(TokenType::Colon, ":");
         case '&': if (match('&')) return makeToken(TokenType::LogicalAnd, "&&"); return makeToken(TokenType::Ampersand, "&");
@@ -82,7 +84,24 @@ Token Lexer::makeIdentifierOrUnquotedLiteral() {
 Token Lexer::makeString(char quote_type) { m_start = m_current; while (peek() != quote_type && m_current < m_source.length()) { if (peek() == '\n') m_line++; advance(); } if (m_current >= m_source.length()) return makeToken(TokenType::Unexpected, "Unterminated string"); std::string value = m_source.substr(m_start, m_current - m_start); advance(); return makeToken(TokenType::StringLiteral, value); }
 void Lexer::skipLineComment() { while (peek() != '\n' && m_current < m_source.length()) advance(); }
 void Lexer::skipBlockComment() { while (m_current < m_source.length() - 1) { if (peek() == '*' && m_source[m_current + 1] == '/') { advance(); advance(); return; } if (peek() == '\n') m_line++; advance(); } }
-void Lexer::skipGeneratorComment() { while (peek() != '\n' && m_current < m_source.length()) advance(); }
+
+Token Lexer::makeGeneratorComment() {
+    m_start = m_current; // m_current is after the '--'
+    while (peek() != '\n' && peek() != '}' && m_current < m_source.length()) {
+        advance();
+    }
+    std::string value = m_source.substr(m_start, m_current - m_start);
+    // Trim from both ends
+    size_t first = value.find_first_not_of(" \t");
+    if (std::string::npos == first) {
+        value = "";
+    } else {
+        size_t last = value.find_last_not_of(" \t");
+        value = value.substr(first, (last - first + 1));
+    }
+    return makeToken(TokenType::GeneratorComment, value);
+}
+
 char Lexer::peek() const { if (m_current >= m_source.length()) return '\0'; return m_source[m_current]; }
 char Lexer::advance() { return m_source[m_current++]; }
 bool Lexer::match(char expected) { if (m_current >= m_source.length()) return false; if (m_source[m_current] != expected) return false; m_current++; return true; }

@@ -2,6 +2,7 @@
 #include "../CHTLLoader/CHTLLoader.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
+#include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/AttributeNode.h"
 #include "../CHTLNode/StyleBlockNode.h"
 #include "../CHTLNode/StylePropertyNode.h"
@@ -309,7 +310,15 @@ std::unique_ptr<BaseNode> Parser::parseNode() {
     if (peek().type == TokenType::At) {
         return parseUsage();
     }
+     if (peek().type == TokenType::GeneratorComment) {
+        return parseGeneratorComment();
+    }
     throw std::runtime_error("Unexpected token while parsing a node: " + peek().value);
+}
+
+std::unique_ptr<BaseNode> Parser::parseGeneratorComment() {
+    const Token& token = consume(TokenType::GeneratorComment, "Expected a generator comment.");
+    return std::make_unique<CommentNode>(token.value);
 }
 
 std::unique_ptr<ElementNode> Parser::parseElement() {
@@ -317,25 +326,35 @@ std::unique_ptr<ElementNode> Parser::parseElement() {
     auto element = std::make_unique<ElementNode>(tagName);
     consume(TokenType::OpenBrace, "Expected '{' after element tag name.");
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        if (check(TokenType::Identifier) && peek().value == "style") {
+        if (check(TokenType::GeneratorComment)) {
+            element->addChild(parseGeneratorComment());
+        }
+        else if (check(TokenType::Identifier) && peek().value == "style") {
             element->setStyleBlock(std::unique_ptr<StyleBlockNode>(static_cast<StyleBlockNode*>(parseStyleBlock().release())));
         } else if (check(TokenType::At) || (check(TokenType::LeftBracket) && m_tokens[m_current + 1].value == "Origin")) {
              element->addChild(parseNode());
-        } else {
-            // It could be an attribute or a child element. We need to lookahead.
+        } else if (check(TokenType::Identifier)) {
+             // It could be an attribute or a child element. We need to lookahead.
             size_t lookahead_pos = m_current;
+            std::string identifier = m_tokens[lookahead_pos].value;
             // Scan for what looks like an identifier sequence
             while(lookahead_pos < m_tokens.size() && (m_tokens[lookahead_pos].type == TokenType::Identifier || m_tokens[lookahead_pos].type == TokenType::Minus)) { lookahead_pos++; }
 
-            // If it's followed by a ':' or '=', it's an attribute.
+            // If it's followed by a ':' or '=', it's an attribute or special property.
             if (lookahead_pos < m_tokens.size() && (m_tokens[lookahead_pos].type == TokenType::Colon || m_tokens[lookahead_pos].type == TokenType::Equals)) {
-                parseAttributes(element.get());
+                if (identifier == "text") {
+                    parseTextAttribute(element.get());
+                } else {
+                    parseAttributes(element.get());
+                }
             } else {
                 auto childNode = parseNode();
                 if (childNode) {
                     element->addChild(std::move(childNode));
                 }
             }
+        } else {
+            throw std::runtime_error("Unexpected token in element body: " + peek().value);
         }
     }
     consume(TokenType::CloseBrace, "Expected '}' to close element.");
@@ -368,13 +387,64 @@ std::unique_ptr<BaseNode> Parser::parseStyleContent() {
 std::unique_ptr<BaseNode> Parser::parseTextElement() {
     consume(TokenType::Identifier, "Expected 'text' keyword.");
     consume(TokenType::OpenBrace, "Expected '{' after 'text' keyword.");
-    const Token& content = advance();
-    if (content.type != TokenType::StringLiteral && content.type != TokenType::Identifier) {
-        throw std::runtime_error("Expected string or unquoted literal inside text block.");
+
+    std::string text_content;
+    // If the next token is a single string literal, just use its value.
+    if (peek().type == TokenType::StringLiteral) {
+        text_content = advance().value;
+    } else {
+        // Otherwise, consume all tokens until the closing brace.
+        size_t start_pos = peek().start;
+        size_t end_pos = start_pos;
+        while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+            end_pos = advance().end;
+        }
+        if (end_pos > start_pos) {
+            text_content = m_source.substr(start_pos, end_pos - start_pos);
+            // Trim whitespace from the raw string content
+            size_t first = text_content.find_first_not_of(" \t\n\r");
+            if (std::string::npos == first) {
+                text_content = "";
+            } else {
+                size_t last = text_content.find_last_not_of(" \t\n\r");
+                text_content = text_content.substr(first, (last - first + 1));
+            }
+        }
     }
-    auto textNode = std::make_unique<TextNode>(content.value);
-    consume(TokenType::CloseBrace, "Expected '}' to close text block.");
+
+    auto textNode = std::make_unique<TextNode>(text_content);
+    consume(TokenType::CloseBrace, "Expected '}' to close text block. Found token '" + peek().value + "' instead.");
     return textNode;
+}
+
+void Parser::parseTextAttribute(ElementNode* element) {
+    consume(TokenType::Identifier, "Expected 'text' keyword."); // consume 'text'
+    if (!match({TokenType::Colon, TokenType::Equals})) {
+        throw std::runtime_error("Expected ':' or '=' after 'text' attribute.");
+    }
+    std::string value;
+    if(peek().type == TokenType::StringLiteral) {
+        value = advance().value;
+    } else {
+        // Handle unquoted text for consistency
+        size_t start_pos = peek().start;
+        size_t end_pos = start_pos;
+        while (!check(TokenType::Semicolon) && !isAtEnd()) {
+            end_pos = advance().end;
+        }
+         if (end_pos > start_pos) {
+            value = m_source.substr(start_pos, end_pos - start_pos);
+            size_t first = value.find_first_not_of(" \t\n\r");
+            if (std::string::npos != first) {
+                size_t last = value.find_last_not_of(" \t\n\r");
+                value = value.substr(first, (last - first + 1));
+            } else {
+                value = "";
+            }
+        }
+    }
+    consume(TokenType::Semicolon, "Expected ';' after text attribute value.");
+    element->addChild(std::make_unique<TextNode>(value));
 }
 
 void Parser::parseAttributes(ElementNode* element) {

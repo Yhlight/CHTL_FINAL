@@ -100,10 +100,24 @@ void test_advanced_conditionals() {
     run_test("Phase 5.C: Advanced Conditional Expression", src, "<div id=\"box\" style=\"width: 100px;\"></div><div style=\"height: 80px;\"></div>");
 }
 
+void test_text_node() { run_test("Phase 1: Text Node", "div{ text{ \"Hello World\" } }", "<div>Hello World</div>"); }
+void test_text_node_unquoted() { run_test("Phase 1: Unquoted Text Node", "div{ text{ Hello World } }", "<div>Hello World</div>"); }
+void test_text_attribute() { run_test("Phase 1: Text Attribute", "div{ text: \"Hello Again\"; }", "<div>Hello Again</div>"); }
+
+void test_comments() {
+    run_test("Phase 6: Single-line Comment", "div{ \n// this is a comment\n }", "<div></div>");
+    run_test("Phase 6: End-of-line Comment", "div{} // another comment", "<div></div>");
+    run_test("Phase 6: Multi-line Comment", "div{ /* comment \n goes here */ }", "<div></div>");
+    run_test("Phase 6: Generator Comment", "div{ -- this becomes an html comment }", "<div><!-- this becomes an html comment --></div>");
+}
+
 
 int main() {
     std::cout << "--- Running CHTL Full Test Suite ---" << std::endl;
     test_simple_element();
+    test_text_node();
+    test_text_node_unquoted();
+    test_text_attribute();
     test_attributes();
     test_inline_style_generation();
     test_conditional_true();
@@ -121,6 +135,7 @@ int main() {
     test_variable_template();
     test_origin_blocks();
     test_advanced_conditionals();
+    test_comments();
     std::cout << "------------------------------------" << std::endl;
     return 0;
 }

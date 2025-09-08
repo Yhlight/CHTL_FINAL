@@ -4,6 +4,7 @@
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
+#include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
 #include "../CHTLNode/CustomUsageNode.h"
 #include "../CHTLNode/OriginNode.h"
@@ -27,6 +28,7 @@ private:
     void generateNode(const BaseNode* node);
     void generateElement(const ElementNode* element);
     void generateText(const TextNode* text);
+    void generateComment(const CommentNode* comment);
     void generateTemplateUsage(const TemplateUsageNode* node, const ElementNode* parentElement);
     void generateCustomUsage(const CustomUsageNode* node);
     void generateOrigin(const OriginNode* node);

@@ -29,7 +29,7 @@ private:
     bool match(char expected); // New helper function
     void skipLineComment();
     void skipBlockComment();
-    void skipGeneratorComment();
+    Token makeGeneratorComment();
 
     const std::string& m_source;
     size_t m_start = 0;

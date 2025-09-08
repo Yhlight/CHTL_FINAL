@@ -31,7 +31,9 @@ private:
     std::unique_ptr<BaseNode> parseNode();
     std::unique_ptr<ElementNode> parseElement();
     std::unique_ptr<BaseNode> parseTextElement();
+    std::unique_ptr<BaseNode> parseGeneratorComment();
     void parseAttributes(ElementNode* element);
+    void parseTextAttribute(ElementNode* element);
     std::string parseIdentifierSequence();
 
     // Top Level Directives
