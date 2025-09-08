@@ -1,0 +1,13 @@
+// This library has no explicit namespace.
+
+[Template] @Style PanelStyle {
+    border: "2px dashed blue";
+    background-color: "#eef";
+}
+
+[Template] @Element Panel {
+    div {
+        style { @Style PanelStyle; }
+        h3 { text { "Panel Title" } }
+    }
+}

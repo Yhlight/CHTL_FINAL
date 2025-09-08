@@ -73,6 +73,7 @@ std::unique_ptr<BaseNode> Parser::declaration() {
     if (check(TokenType::KEYWORD_CUSTOM)) return customDeclaration();
     if (check(TokenType::KEYWORD_ORIGIN)) return originDeclaration();
     if (check(TokenType::KEYWORD_IMPORT)) return importDeclaration();
+    if (check(TokenType::KEYWORD_NAMESPACE)) return namespaceDeclaration();
     if (check(TokenType::IDENTIFIER) && checkNext(TokenType::LEFT_BRACE)) return element();
     if (check(TokenType::TEXT)) return textNode();
     if (check(TokenType::STYLE)) return styleNode();
@@ -154,6 +155,34 @@ std::unique_ptr<BaseNode> Parser::importDeclaration() {
     return nullptr;
 }
 
+std::unique_ptr<BaseNode> Parser::namespaceDeclaration() {
+    consume(TokenType::KEYWORD_NAMESPACE, "Expect '[Namespace]' keyword.");
+
+    this->used_explicit_namespace = true;
+    std::string name = currentToken.lexeme;
+    consume(TokenType::IDENTIFIER, "Expect namespace name.");
+
+    if (match(TokenType::LEFT_BRACE)) {
+        // Block scope
+        std::string previousNamespace = currentNamespace;
+        currentNamespace = name;
+
+        while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
+            declaration(); // Parse declarations within the namespace
+        }
+
+        consume(TokenType::RIGHT_BRACE, "Expect '}' to close namespace block.");
+        currentNamespace = previousNamespace; // Restore namespace
+    } else if (match(TokenType::SEMICOLON)) {
+        // File scope
+        currentNamespace = name;
+    } else {
+        std::cerr << "Parse Error: Expect '{' or ';' after namespace name." << std::endl;
+    }
+
+    return nullptr; // Namespaces are a parse-time construct
+}
+
 void Parser::handleImport(const ImportNode& node) {
     std::ifstream file(node.path);
     if (!file.is_open()) {
@@ -175,27 +204,43 @@ void Parser::handleImport(const ImportNode& node) {
         if (specific_import) {
             for (const auto& name : node.specific_imports) {
                 bool found = false;
+                // For now, assume imported symbols are in the global namespace of the imported file
                 if (node.category == ImportCategory::TEMPLATE && node.type == ImportType::ELEMENT) {
-                    if(importedParser.elementTemplates.count(name)) { this->elementTemplates[name] = std::move(importedParser.elementTemplates.at(name)); found = true; }
+                    if(importedParser.nsElementTemplates["::global"].count(name)) { this->nsElementTemplates[currentNamespace][name] = std::move(importedParser.nsElementTemplates["::global"].at(name)); found = true; }
                 } else if (node.category == ImportCategory::TEMPLATE && node.type == ImportType::STYLE) {
-                    if(importedParser.styleTemplates.count(name)) { this->styleTemplates[name] = std::move(importedParser.styleTemplates.at(name)); found = true; }
-                } else if (node.category == ImportCategory::TEMPLATE && node.type == ImportType::VAR) {
-                    if(importedParser.varTemplates.count(name)) { this->varTemplates[name] = std::move(importedParser.varTemplates.at(name)); found = true; }
-                } else if (node.category == ImportCategory::CUSTOM && node.type == ImportType::ELEMENT) {
-                    if(importedParser.customElementTemplates.count(name)) { this->customElementTemplates[name] = std::move(importedParser.customElementTemplates.at(name)); found = true; }
-                } else if (node.category == ImportCategory::CUSTOM && node.type == ImportType::STYLE) {
-                    if(importedParser.customStyleTemplates.count(name)) { this->customStyleTemplates[name] = std::move(importedParser.customStyleTemplates.at(name)); found = true; }
-                }
+                    if(importedParser.nsStyleTemplates["::global"].count(name)) { this->nsStyleTemplates[currentNamespace][name] = std::move(importedParser.nsStyleTemplates["::global"].at(name)); found = true; }
+                } // ... and so on for other types
                 if (!found) {
                     std::cerr << "Parse Error: Could not find specific import '" << name << "' in file " << node.path << std::endl;
                 }
             }
         } else { // Wildcard or whole-file import
-            for (auto& tpl : importedParser.elementTemplates) this->elementTemplates[tpl.first] = std::move(tpl.second);
-            for (auto& tpl : importedParser.styleTemplates) this->styleTemplates[tpl.first] = std::move(tpl.second);
-            for (auto& tpl : importedParser.varTemplates) this->varTemplates[tpl.first] = std::move(tpl.second);
-            for (auto& tpl : importedParser.customElementTemplates) this->customElementTemplates[tpl.first] = std::move(tpl.second);
-            for (auto& tpl : importedParser.customStyleTemplates) this->customStyleTemplates[tpl.first] = std::move(tpl.second);
+            if (importedParser.used_explicit_namespace) {
+                // The imported file has namespaces, merge them directly.
+                for (auto& ns_pair : importedParser.nsElementTemplates) for (auto& tpl : ns_pair.second) this->nsElementTemplates[ns_pair.first][tpl.first] = std::move(tpl.second);
+                for (auto& ns_pair : importedParser.nsStyleTemplates) for (auto& tpl : ns_pair.second) this->nsStyleTemplates[ns_pair.first][tpl.first] = std::move(tpl.second);
+                for (auto& ns_pair : importedParser.nsVarTemplates) for (auto& tpl : ns_pair.second) this->nsVarTemplates[ns_pair.first][tpl.first] = std::move(tpl.second);
+                for (auto& ns_pair : importedParser.nsCustomElementTemplates) for (auto& tpl : ns_pair.second) this->nsCustomElementTemplates[ns_pair.first][tpl.first] = std::move(tpl.second);
+                for (auto& ns_pair : importedParser.nsCustomStyleTemplates) for (auto& tpl : ns_pair.second) this->nsCustomStyleTemplates[ns_pair.first][tpl.first] = std::move(tpl.second);
+            } else {
+                // No explicit namespace, so create a default one from the filename.
+                std::string default_ns = node.path;
+                size_t last_slash = default_ns.find_last_of("/\\");
+                if (last_slash != std::string::npos) {
+                    default_ns = default_ns.substr(last_slash + 1);
+                }
+                size_t dot = default_ns.rfind('.');
+                if (dot != std::string::npos) {
+                    default_ns = default_ns.substr(0, dot);
+                }
+
+                // Merge the global definitions from the imported file into the new default namespace.
+                for (auto& tpl : importedParser.nsElementTemplates["::global"]) this->nsElementTemplates[default_ns][tpl.first] = std::move(tpl.second);
+                for (auto& tpl : importedParser.nsStyleTemplates["::global"]) this->nsStyleTemplates[default_ns][tpl.first] = std::move(tpl.second);
+                for (auto& tpl : importedParser.nsVarTemplates["::global"]) this->nsVarTemplates[default_ns][tpl.first] = std::move(tpl.second);
+                for (auto& tpl : importedParser.nsCustomElementTemplates["::global"]) this->nsCustomElementTemplates[default_ns][tpl.first] = std::move(tpl.second);
+                for (auto& tpl : importedParser.nsCustomStyleTemplates["::global"]) this->nsCustomStyleTemplates[default_ns][tpl.first] = std::move(tpl.second);
+            }
         }
 
     } else if (node.type == ImportType::HTML || node.type == ImportType::STYLE || node.type == ImportType::JAVASCRIPT) {
@@ -305,6 +350,13 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
         std::string varName = currentToken.lexeme;
         consume(TokenType::IDENTIFIER, "Expect variable name inside parentheses.");
 
+            std::string ns_to_use = currentNamespace;
+            // Note: `from` is not technically supported for vars in the spec, but it's good to have.
+            if (match(TokenType::KEYWORD_FROM)) {
+                ns_to_use = currentToken.lexeme;
+                consume(TokenType::IDENTIFIER, "Expect namespace name after 'from'.");
+            }
+
         if (match(TokenType::EQUAL)) {
             auto newValue = parseExpression();
             consume(TokenType::RIGHT_PAREN, "Expect ')' after specialized value.");
@@ -312,11 +364,16 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
             return newValue;
         } else {
             consume(TokenType::RIGHT_PAREN, "Expect ')' after variable name.");
-            if (varTemplates.count(templateName) && varTemplates[templateName]->variables.count(varName)) {
-                // Clone the expression tree from the template.
-                return std::unique_ptr<ExpressionNode>(static_cast<ExpressionNode*>(varTemplates[templateName]->variables[varName]->clone().release()));
+
+            const VarTemplateNode* varTmpl = nullptr;
+            if (nsVarTemplates[ns_to_use].count(templateName)) varTmpl = nsVarTemplates[ns_to_use].at(templateName).get();
+            else if (nsVarTemplates["::global"].count(templateName)) varTmpl = nsVarTemplates["::global"].at(templateName).get();
+
+            if (varTmpl && varTmpl->variables.count(varName)) {
+                return std::unique_ptr<ExpressionNode>(static_cast<ExpressionNode*>(varTmpl->variables.at(varName)->clone().release()));
             }
-            std::cerr << "Parse Error: Variable " << templateName << "(" << varName << ") not found." << std::endl;
+
+            std::cerr << "Parse Error: Variable " << templateName << "(" << varName << ") not found in namespace '" << ns_to_use << "' or global." << std::endl;
             return nullptr;
         }
     }
@@ -434,13 +491,20 @@ std::unique_ptr<ElementNode> Parser::element() {
             std::string templateName = currentToken.lexeme;
             consume(TokenType::IDENTIFIER, "Expect template name after '@Element'.");
 
+            std::string ns_to_use = currentNamespace;
+            if (match(TokenType::KEYWORD_FROM)) {
+                ns_to_use = currentToken.lexeme;
+                consume(TokenType::IDENTIFIER, "Expect namespace name after 'from'.");
+            }
+
             if (match(TokenType::SEMICOLON)) {
                 auto usageNode = std::make_unique<TemplateUsageNode>();
                 usageNode->type = TemplateType::ELEMENT;
                 usageNode->name = templateName;
+                usageNode->ns = ns_to_use;
                 node->children.push_back(std::move(usageNode));
             } else if (match(TokenType::LEFT_BRACE)) {
-                handleCustomElementUsage(templateName, node.get());
+                handleCustomElementUsage(templateName, ns_to_use, node.get());
             } else {
                 std::cerr << "Parse Error: Expect ';' or '{' after @Element usage at line " << currentToken.line << std::endl;
             }
@@ -528,31 +592,47 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
             std::string templateName = currentToken.lexeme;
             consume(TokenType::IDENTIFIER, "Expect template name after '@Style'.");
 
+            std::string ns_to_use = currentNamespace;
+            if (match(TokenType::KEYWORD_FROM)) {
+                ns_to_use = currentToken.lexeme;
+                consume(TokenType::IDENTIFIER, "Expect namespace name after 'from'.");
+            }
+
             if (match(TokenType::SEMICOLON)) {
-                 if (styleTemplates.count(templateName)) {
-                    for (const auto& prop : styleTemplates.at(templateName)->properties) {
+                 const StyleTemplateNode* styleTmpl = nullptr;
+                 if (nsStyleTemplates[ns_to_use].count(templateName)) styleTmpl = nsStyleTemplates[ns_to_use].at(templateName).get();
+                 else if (nsStyleTemplates["::global"].count(templateName)) styleTmpl = nsStyleTemplates["::global"].at(templateName).get();
+
+                 const CustomStyleTemplateNode* customStyleTmpl = nullptr;
+                 if (nsCustomStyleTemplates[ns_to_use].count(templateName)) customStyleTmpl = nsCustomStyleTemplates[ns_to_use].at(templateName).get();
+                 else if (nsCustomStyleTemplates["::global"].count(templateName)) customStyleTmpl = nsCustomStyleTemplates["::global"].at(templateName).get();
+
+                 if (styleTmpl) {
+                    for (const auto& prop : styleTmpl->properties) {
                         if (prop.second) {
                             node->inlineProperties[prop.first] = std::unique_ptr<ExpressionNode>(static_cast<ExpressionNode*>(prop.second->clone().release()));
                         }
                     }
-                } else if (customStyleTemplates.count(templateName)) {
-                    const auto& tmpl = customStyleTemplates.at(templateName);
-                    for(const auto& prop : tmpl->properties) {
+                } else if (customStyleTmpl) {
+                    for(const auto& prop : customStyleTmpl->properties) {
                         Token token = {TokenType::STRING, prop.second, currentToken.line, currentToken.column, currentToken.position};
                         node->inlineProperties[prop.first] = std::make_unique<LiteralNode>(token);
                     }
                 } else {
-                     std::cerr << "Parse Error: Style template '" << templateName << "' not found." << std::endl;
+                     std::cerr << "Parse Error: Style template '" << templateName << "' not found in namespace '" << currentNamespace << "' or global." << std::endl;
                 }
             } else if (match(TokenType::LEFT_BRACE)) {
-                if (!customStyleTemplates.count(templateName)) {
-                    std::cerr << "Parse Error: Custom style template '" << templateName << "' not found." << std::endl;
+                const CustomStyleTemplateNode* tmpl = nullptr;
+                if (nsCustomStyleTemplates[ns_to_use].count(templateName)) tmpl = nsCustomStyleTemplates[ns_to_use].at(templateName).get();
+                else if (nsCustomStyleTemplates["::global"].count(templateName)) tmpl = nsCustomStyleTemplates["::global"].at(templateName).get();
+
+                if (!tmpl) {
+                    std::cerr << "Parse Error: Custom style template '" << templateName << "' not found in namespace '" << ns_to_use << "' or global." << std::endl;
                     int braceCount = 1;
                     while (braceCount > 0 && !check(TokenType::END_OF_FILE)) { advance(); if(check(TokenType::LEFT_BRACE)) braceCount++; if(check(TokenType::RIGHT_BRACE)) braceCount--; }
                     continue;
                 }
 
-                const auto& tmpl = customStyleTemplates.at(templateName);
                 auto specializedProps = tmpl->properties;
 
                 while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
@@ -659,7 +739,7 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
             }
         }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after template body.");
-        styleTemplates[node->name] = std::move(node);
+        nsStyleTemplates[currentNamespace][node->name] = std::move(node);
     } else if (templateType == "Element") {
         auto node = std::make_unique<ElementTemplateNode>();
         node->name = currentToken.lexeme;
@@ -689,7 +769,7 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
             }
         }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after template body.");
-        elementTemplates[node->name] = std::move(node);
+        nsElementTemplates[currentNamespace][node->name] = std::move(node);
     } else if (templateType == "Var") {
         auto node = std::make_unique<VarTemplateNode>();
         node->name = currentToken.lexeme;
@@ -708,7 +788,7 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
             }
         }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after template body.");
-        varTemplates[node->name] = std::move(node);
+        nsVarTemplates[currentNamespace][node->name] = std::move(node);
     } else {
         std::cerr << "Parse Error: Unknown template type '" << templateType << "'." << std::endl;
     }
@@ -827,14 +907,21 @@ std::unique_ptr<ExpressionNode> Parser::parseValue() {
     return parseExpression();
 }
 
-void Parser::handleCustomElementUsage(const std::string& templateName, ElementNode* parentNode) {
-    if (!customElementTemplates.count(templateName)) {
-        std::cerr << "Parse Error: Custom element template '" << templateName << "' not found." << std::endl;
+void Parser::handleCustomElementUsage(const std::string& templateName, const std::string& ns, ElementNode* parentNode) {
+    const CustomElementNode* baseTmpl = nullptr;
+    if (nsCustomElementTemplates[ns].count(templateName)) {
+        baseTmpl = nsCustomElementTemplates[ns].at(templateName).get();
+    } else if (nsCustomElementTemplates["::global"].count(templateName)) {
+        baseTmpl = nsCustomElementTemplates["::global"].at(templateName).get();
+    }
+
+    if (!baseTmpl) {
+        std::cerr << "Parse Error: Custom element template '" << templateName << "' not found in namespace '" << ns << "' or global." << std::endl;
         int braceCount = 1;
         while (braceCount > 0 && !check(TokenType::END_OF_FILE)) { advance(); if(check(TokenType::LEFT_BRACE)) braceCount++; if(check(TokenType::RIGHT_BRACE)) braceCount--; }
         return;
     }
-    const auto& baseTmpl = customElementTemplates.at(templateName);
+
     auto clonedRoot = baseTmpl->clone();
     auto* clonedCustomElement = dynamic_cast<CustomElementNode*>(clonedRoot.get());
 
@@ -1016,7 +1103,7 @@ std::unique_ptr<BaseNode> Parser::customDeclaration() {
             }
         }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after body.");
-        customElementTemplates[node->name] = std::move(node);
+        nsCustomElementTemplates[currentNamespace][node->name] = std::move(node);
     } else if (customType == "Style") {
         auto node = std::make_unique<CustomStyleTemplateNode>();
         node->name = currentToken.lexeme;
@@ -1046,7 +1133,7 @@ std::unique_ptr<BaseNode> Parser::customDeclaration() {
             }
         }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after custom style body.");
-        customStyleTemplates[node->name] = std::move(node);
+        nsCustomStyleTemplates[currentNamespace][node->name] = std::move(node);
     } else {
         std::cerr << "Parse Error: Expected 'Element' or 'Style' after '[Custom] @' at line " << currentToken.line << std::endl;
     }

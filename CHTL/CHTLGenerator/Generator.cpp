@@ -149,18 +149,24 @@ void Generator::visit(StyleNode& node) {
 
 void Generator::visit(TemplateUsageNode& node) {
     if (node.type == TemplateType::ELEMENT) {
-        if (parser.elementTemplates.count(node.name)) {
-            const auto& tmpl = parser.elementTemplates.at(node.name);
+        const ElementTemplateNode* tmpl = nullptr;
+        if (parser.nsElementTemplates[node.ns].count(node.name)) tmpl = parser.nsElementTemplates[node.ns].at(node.name).get();
+        else if (parser.nsElementTemplates["::global"].count(node.name)) tmpl = parser.nsElementTemplates["::global"].at(node.name).get();
+
+        const CustomElementNode* customTmpl = nullptr;
+        if (parser.nsCustomElementTemplates[node.ns].count(node.name)) customTmpl = parser.nsCustomElementTemplates[node.ns].at(node.name).get();
+        else if (parser.nsCustomElementTemplates["::global"].count(node.name)) customTmpl = parser.nsCustomElementTemplates["::global"].at(node.name).get();
+
+        if (tmpl) {
             for (const auto& child : tmpl->children) {
                 child->accept(*this);
             }
-        } else if (parser.customElementTemplates.count(node.name)) {
-            const auto& tmpl = parser.customElementTemplates.at(node.name);
-            for (const auto& child : tmpl->children) {
+        } else if (customTmpl) {
+            for (const auto& child : customTmpl->children) {
                 child->accept(*this);
             }
         } else {
-            std::cerr << "Generator Error: Element template '" << node.name << "' not found." << std::endl;
+            std::cerr << "Generator Error: Element template '" << node.name << "' not found in namespace '" << node.ns << "' or global." << std::endl;
         }
     }
 }

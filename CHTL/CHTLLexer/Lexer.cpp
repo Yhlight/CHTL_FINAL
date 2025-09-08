@@ -164,6 +164,10 @@ Token Lexer::getNextToken() {
             current += 8;
             return makeToken(TokenType::KEYWORD_IMPORT, "[Import]");
         }
+        if (source.substr(current, 11) == "[Namespace]") {
+            current += 11;
+            return makeToken(TokenType::KEYWORD_NAMESPACE, "[Namespace]");
+        }
     }
 
     if (peek() == '@') {

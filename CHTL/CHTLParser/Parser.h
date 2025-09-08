@@ -23,6 +23,8 @@ public:
     Parser(Lexer& lexer);
     std::unique_ptr<ElementNode> parse();
 
+    using StringMap = std::map<std::string, std::string>;
+
     std::map<std::string, std::unique_ptr<ElementTemplateNode>> elementTemplates;
     std::map<std::string, std::unique_ptr<StyleTemplateNode>> styleTemplates;
     std::map<std::string, std::unique_ptr<VarTemplateNode>> varTemplates;
@@ -30,8 +32,18 @@ public:
     std::map<std::string, std::unique_ptr<CustomStyleTemplateNode>> customStyleTemplates;
     std::map<std::string, std::unique_ptr<OriginNode>> namedOriginBlocks;
 
+    // Namespaced Symbol Tables
+    std::map<std::string, std::map<std::string, std::unique_ptr<ElementTemplateNode>>> nsElementTemplates;
+    std::map<std::string, std::map<std::string, std::unique_ptr<StyleTemplateNode>>> nsStyleTemplates;
+    std::map<std::string, std::map<std::string, std::unique_ptr<VarTemplateNode>>> nsVarTemplates;
+    std::map<std::string, std::map<std::string, std::unique_ptr<CustomElementNode>>> nsCustomElementTemplates;
+    std::map<std::string, std::map<std::string, std::unique_ptr<CustomStyleTemplateNode>>> nsCustomStyleTemplates;
+
+
 private:
     Lexer& lexer;
+    std::string currentNamespace = "::global";
+    bool used_explicit_namespace = false;
     void handleImport(const ImportNode& node);
     Token currentToken;
     Token nextToken;
@@ -48,12 +60,13 @@ private:
     std::unique_ptr<BaseNode> customDeclaration();
     std::unique_ptr<BaseNode> originDeclaration();
     std::unique_ptr<BaseNode> importDeclaration();
+    std::unique_ptr<BaseNode> namespaceDeclaration();
     std::unique_ptr<ElementNode> element();
     std::unique_ptr<TextNode> textNode();
     std::unique_ptr<StyleNode> styleNode();
     void attributes(ElementNode& element);
     std::unique_ptr<ExpressionNode> parseValue();
-    void handleCustomElementUsage(const std::string& templateName, ElementNode* parentNode);
+    void handleCustomElementUsage(const std::string& templateName, const std::string& ns, ElementNode* parentNode);
 
     // Expression Parsing
     std::unique_ptr<ExpressionNode> parseExpression();

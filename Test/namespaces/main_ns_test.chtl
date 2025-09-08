@@ -1,0 +1,15 @@
+// Import both libraries
+[Import] @Chtl from "Test/namespaces/lib_with_ns.chtl";
+[Import] @Chtl from "Test/namespaces/lib_no_ns.chtl";
+
+html {
+    body {
+        // Use component from the explicit 'forms' namespace
+        @Element LabeledInput from forms {
+            label { text { "Your Name" } }
+        }
+
+        // Use component from the default 'lib_no_ns' namespace
+        @Element Panel from lib_no_ns;
+    }
+}
