@@ -11,6 +11,7 @@
 #include "../CHTLContext/CHTLContext.h"
 #include <string>
 #include <map>
+#include <vector>
 
 namespace CHTL {
 
@@ -25,10 +26,15 @@ private:
     void generateElement(const ElementNode* element);
     void generateText(const TextNode* text);
     void generateTemplateUsage(const TemplateUsageNode* node, const ElementNode* parentElement);
-    void generateCustomUsage(const CustomUsageNode* node); // Moved to be a member function
+    void generateCustomUsage(const CustomUsageNode* node);
 
     void expandStyleProperties(const BaseNode* container,
                                std::map<std::string, const StylePropertyNode*>& properties);
+
+    // New helper to find the target for an insert rule
+    std::vector<std::unique_ptr<BaseNode>>::iterator
+        findInsertionPoint(const std::string& selector,
+                           std::vector<std::unique_ptr<BaseNode>>& nodes);
 
     std::string m_output;
     std::string m_global_css;

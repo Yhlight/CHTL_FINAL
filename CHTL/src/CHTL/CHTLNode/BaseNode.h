@@ -20,14 +20,15 @@ enum class NodeType {
     CustomDefinition,
     CustomUsage,
 
+    // Specialization Rule Nodes
     DeleteRule,
+    InsertRule,
 };
 
 class BaseNode {
 public:
     virtual ~BaseNode() = default;
     virtual NodeType getType() const = 0;
-    // Add a virtual clone method for deep copying the AST
     virtual std::unique_ptr<BaseNode> clone() const = 0;
 };
 

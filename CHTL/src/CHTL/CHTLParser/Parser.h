@@ -4,7 +4,6 @@
 #include "../CHTLContext/CHTLContext.h"
 #include "../CHTLNode/DocumentNode.h"
 #include "../CHTLNode/BaseNode.h"
-// All other specific nodes are included by Parser.cpp as needed
 #include "../ExpressionNode/Expr.h"
 
 #include <vector>
@@ -14,7 +13,7 @@
 
 namespace CHTL {
 
-class ElementNode; // Forward-declare instead of include
+class ElementNode; // Forward-declare
 
 class Parser {
 public:
@@ -25,24 +24,24 @@ private:
     // Main parsing functions
     std::unique_ptr<BaseNode> parseNode();
     std::unique_ptr<ElementNode> parseElement();
-    std::unique_ptr<BaseNode> parseTextElement(); // Can return different types
+    std::unique_ptr<BaseNode> parseTextElement();
     void parseAttributes(ElementNode* element);
     std::string parseIdentifierSequence();
 
     // Template & Custom parsing
     void parseTopLevelDefinition();
     void parseTemplateDefinition();
-    std::unique_ptr<BaseNode> parseUsage();
     void parseCustomDefinition();
+    std::unique_ptr<BaseNode> parseUsage();
     std::unique_ptr<BaseNode> parseCustomUsage();
     std::unique_ptr<BaseNode> parseSpecializationRule();
-
+    std::unique_ptr<BaseNode> parseInsertRule(); // New helper for insert
 
     // Style-parsing functions
-    std::unique_ptr<BaseNode> parseStyleBlock(); // Can return different types
+    std::unique_ptr<BaseNode> parseStyleBlock();
     std::unique_ptr<BaseNode> parseStyleContent();
-    std::unique_ptr<BaseNode> parseStyleProperty(); // Can return different types
-    std::unique_ptr<BaseNode> parseStyleSelector(); // Can return different types
+    std::unique_ptr<BaseNode> parseStyleProperty();
+    std::unique_ptr<BaseNode> parseStyleSelector();
 
     // Expression-parsing functions
     std::unique_ptr<Expr> parseExpression();

@@ -4,12 +4,14 @@
 #include "CHTL/CHTLNode/StyleSelectorNode.h"
 #include "CHTL/CHTLNode/CustomUsageNode.h"
 #include "CHTL/CHTLNode/DeleteRuleNode.h"
+#include "CHTL/CHTLNode/InsertRuleNode.h"
 #include "CHTL/ExpressionNode/LiteralExpr.h"
 #include "CHTL/Evaluator/Evaluator.h"
 #include <stdexcept>
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <regex>
 
 namespace CHTL {
 
@@ -52,7 +54,6 @@ void Generator::expandStyleProperties(const BaseNode* container, std::map<std::s
     if (container->getType() == NodeType::StyleBlock) children = &(static_cast<const StyleBlockNode*>(container)->getChildren());
     else if (container->getType() == NodeType::TemplateDefinition) children = &(static_cast<const TemplateDefinitionNode*>(container)->getChildren());
     else if (container->getType() == NodeType::CustomDefinition) children = &(static_cast<const CustomDefinitionNode*>(container)->getChildren());
-
     if (!children) return;
 
     for (const auto& child : *children) {
@@ -65,17 +66,14 @@ void Generator::expandStyleProperties(const BaseNode* container, std::map<std::s
                 const TemplateDefinitionNode* baseTemplate = m_context->getTemplate(usageNode->getTemplateName());
                 expandStyleProperties(baseTemplate, properties);
             }
-        } else if (child->getType() == NodeType::CustomUsage) { // NEW LOGIC
+        } else if (child->getType() == NodeType::CustomUsage) {
             const auto* usageNode = static_cast<const CustomUsageNode*>(child.get());
             if (usageNode->getCustomType() == "Style") {
                 const CustomDefinitionNode* baseDef = m_context->getCustom(usageNode->getCustomName());
-                // First, expand the base definition to populate the properties
                 expandStyleProperties(baseDef, properties);
-                // Then, apply specializations
                 for (const auto& rule : usageNode->getSpecializations()) {
                     if (rule->getType() == NodeType::DeleteRule) {
-                        const auto* deleteRule = static_cast<const DeleteRuleNode*>(rule.get());
-                        properties.erase(deleteRule->getTarget());
+                        properties.erase(static_cast<const DeleteRuleNode*>(rule.get())->getTarget());
                     }
                 }
             }
@@ -91,6 +89,30 @@ void Generator::generateTemplateUsage(const TemplateUsageNode* node, const Eleme
     }
 }
 
+std::vector<std::unique_ptr<BaseNode>>::iterator
+Generator::findInsertionPoint(const std::string& selector, std::vector<std::unique_ptr<BaseNode>>& nodes) {
+    std::regex re("(\\w+)\\[(\\d+)\\]");
+    std::smatch match;
+    if (std::regex_match(selector, match, re) && match.size() == 3) {
+        std::string tag = match[1].str();
+        int index = std::stoi(match[2].str());
+        int count = 0;
+        for (auto it = nodes.begin(); it != nodes.end(); ++it) {
+            if ((*it)->getType() == NodeType::Element && static_cast<ElementNode*>((*it).get())->getTagName() == tag) {
+                if (count == index) return it;
+                count++;
+            }
+        }
+    } else {
+         for (auto it = nodes.begin(); it != nodes.end(); ++it) {
+            if ((*it)->getType() == NodeType::Element && static_cast<ElementNode*>((*it).get())->getTagName() == selector) {
+                return it;
+            }
+        }
+    }
+    return nodes.end();
+}
+
 void Generator::generateCustomUsage(const CustomUsageNode* usageNode) {
     const CustomDefinitionNode* def = m_context->getCustom(usageNode->getCustomName());
     if (!def) { m_output += "<!-- Custom definition not found: " + usageNode->getCustomName() + " -->"; return; }
@@ -101,12 +123,29 @@ void Generator::generateCustomUsage(const CustomUsageNode* usageNode) {
     for (const auto& rule : usageNode->getSpecializations()) {
         if (rule->getType() == NodeType::DeleteRule) {
             const auto* deleteRule = static_cast<const DeleteRuleNode*>(rule.get());
-            const std::string& target = deleteRule->getTarget();
             mutable_ast.erase(std::remove_if(mutable_ast.begin(), mutable_ast.end(),
-                [&](const std::unique_ptr<BaseNode>& node) {
-                    if (node->getType() == NodeType::Element) { return static_cast<ElementNode*>(node.get())->getTagName() == target; }
-                    return false;
-                }), mutable_ast.end());
+                [&](const auto& node){ return node->getType() == NodeType::Element && static_cast<ElementNode*>(node.get())->getTagName() == deleteRule->getTarget(); }), mutable_ast.end());
+        }
+        else if (rule->getType() == NodeType::InsertRule) {
+            const auto* insertRule = static_cast<const InsertRuleNode*>(rule.get());
+            auto target_it = findInsertionPoint(insertRule->getTarget(), mutable_ast);
+            std::vector<std::unique_ptr<BaseNode>> content_to_insert;
+            for(const auto& n : insertRule->getContent()) { content_to_insert.push_back(n->clone()); }
+
+            if (insertRule->getMode() == "at top") {
+                mutable_ast.insert(mutable_ast.begin(), std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end()));
+            } else if (insertRule->getMode() == "at bottom") {
+                mutable_ast.insert(mutable_ast.end(), std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end()));
+            } else if (target_it != mutable_ast.end()) {
+                if (insertRule->getMode() == "before") {
+                    mutable_ast.insert(target_it, std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end()));
+                } else if (insertRule->getMode() == "after") {
+                    mutable_ast.insert(std::next(target_it), std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end()));
+                } else if (insertRule->getMode() == "replace") {
+                    target_it = mutable_ast.erase(target_it);
+                    mutable_ast.insert(target_it, std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end()));
+                }
+            }
         }
     }
 
@@ -118,7 +157,6 @@ void Generator::generateCustomUsage(const CustomUsageNode* usageNode) {
 void Generator::generateElement(const ElementNode* element) {
     std::map<std::string, std::string> attributes;
     for (const auto& attr : element->getAttributes()) { attributes[attr->getKey()] = attr->getValue(); }
-
     if (element->getStyleBlock()) {
         std::map<std::string, const StylePropertyNode*> final_properties;
         expandStyleProperties(element->getStyleBlock(), final_properties);
@@ -147,15 +185,12 @@ void Generator::generateElement(const ElementNode* element) {
             }
         }
     }
-
     m_output += "<" + element->getTagName();
     for(const auto& pair : attributes) { m_output += " " + pair.first + "=\"" + pair.second + "\""; }
     m_output += ">";
-
     for (const auto& child : element->getChildren()) {
         generateNode(child.get());
     }
-
     m_output += "</" + element->getTagName() + ">";
 }
 

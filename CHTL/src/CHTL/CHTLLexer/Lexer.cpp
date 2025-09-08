@@ -4,9 +4,15 @@
 
 namespace CHTL {
 
-// Keyword map for easy lookup
 static std::map<std::string, TokenType> keywords = {
-    {"delete", TokenType::KeywordDelete}
+    {"delete", TokenType::KeywordDelete},
+    {"insert", TokenType::KeywordInsert},
+    {"after", TokenType::KeywordAfter},
+    {"before", TokenType::KeywordBefore},
+    {"replace", TokenType::KeywordReplace},
+    {"at", TokenType::Identifier}, // "at" is part of "at top", parser will handle it
+    {"top", TokenType::Identifier},
+    {"bottom", TokenType::Identifier},
 };
 
 Lexer::Lexer(const std::string& source) : m_source(source) {}
@@ -23,11 +29,8 @@ std::vector<Token> Lexer::tokenize() {
 
 Token Lexer::nextToken() {
     m_start = m_current;
-
     if (m_current >= m_source.length()) return makeToken(TokenType::EndOfFile);
-
     char c = advance();
-
     switch (c) {
         case ' ': case '\r': case '\t': return nextToken();
         case '\n': m_line++; return nextToken();
@@ -55,7 +58,6 @@ Token Lexer::nextToken() {
             if (match('*')) { skipBlockComment(); return nextToken(); }
             return makeToken(TokenType::Slash, "/");
     }
-
     m_current--;
     return makeIdentifierOrUnquotedLiteral();
 }
@@ -64,31 +66,17 @@ Token Lexer::makeIdentifierOrUnquotedLiteral() {
     m_start = m_current;
     while (m_current < m_source.length()) {
         char c = peek();
-        if (std::isalnum(c) || c == '_') {
-            advance();
-        } else {
-            break;
-        }
+        if (std::isalnum(c) || c == '_') { advance(); }
+        else { break; }
     }
     std::string value = m_source.substr(m_start, m_current - m_start);
-
-    // Check if the identifier is a keyword
     if (keywords.count(value)) {
         return makeToken(keywords.at(value), value);
     }
-
     return makeToken(TokenType::Identifier, value);
 }
 
-Token Lexer::makeString(char quote_type) {
-    m_start = m_current;
-    while (peek() != quote_type && m_current < m_source.length()) { if (peek() == '\n') m_line++; advance(); }
-    if (m_current >= m_source.length()) return makeToken(TokenType::Unexpected, "Unterminated string");
-    std::string value = m_source.substr(m_start, m_current - m_start);
-    advance();
-    return makeToken(TokenType::StringLiteral, value);
-}
-
+Token Lexer::makeString(char quote_type) { m_start = m_current; while (peek() != quote_type && m_current < m_source.length()) { if (peek() == '\n') m_line++; advance(); } if (m_current >= m_source.length()) return makeToken(TokenType::Unexpected, "Unterminated string"); std::string value = m_source.substr(m_start, m_current - m_start); advance(); return makeToken(TokenType::StringLiteral, value); }
 void Lexer::skipLineComment() { while (peek() != '\n' && m_current < m_source.length()) advance(); }
 void Lexer::skipBlockComment() { while (m_current < m_source.length() - 1) { if (peek() == '*' && m_source[m_current + 1] == '/') { advance(); advance(); return; } if (peek() == '\n') m_line++; advance(); } }
 void Lexer::skipGeneratorComment() { while (peek() != '\n' && m_current < m_source.length()) advance(); }

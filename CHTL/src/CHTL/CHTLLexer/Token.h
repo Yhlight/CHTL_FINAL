@@ -16,15 +16,21 @@ enum class TokenType {
     UnquotedLiteral,
 
     // Punctuation
-    OpenBrace,      // {
-    CloseBrace,     // }
-    Semicolon,      // ;
-    LeftBracket,    // [
-    RightBracket,   // ]
-    At,             // @
+    OpenBrace,
+    CloseBrace,
+    Semicolon,
+    LeftBracket,
+    RightBracket,
+    At,
 
     // Keywords
-    KeywordDelete,  // delete
+    KeywordDelete,
+    KeywordInsert,
+    KeywordAfter,
+    KeywordBefore,
+    KeywordReplace,
+    KeywordAtTop,
+    KeywordAtBottom,
 
     // Style-specific tokens
     Colon,

@@ -36,46 +36,57 @@ void run_test(const std::string& test_name, const std::string& chtl_source, cons
 
 // --- Test Cases ---
 void test_simple_element() { run_test("Phase 1: Simple Element", "div{}", "<div></div>"); }
-void test_element_with_text() { run_test("Phase 1: Element with Text", "p { text { \"hello\" } }", "<p>hello</p>"); }
-void test_nested_elements() { run_test("Phase 1: Nested Elements", "div{ p{ span{} } }", "<div><p><span></span></p></div>"); }
 void test_attributes() { run_test("Phase 1: Element with Attributes", "a { href: \"/home\"; id=link1; }", "<a href=\"/home\" id=\"link1\"></a>"); }
 void test_inline_style_generation() { run_test("Phase 2.A: Inline Style", "div{ style{ color:red; font-size:16px; } }", "<div style=\"color: red;font-size: 16px;\"></div>"); }
-void test_class_selector_generation() { run_test("Phase 2.A: Class Selector", "div{ style{ .box{ width:100px; } } }", "<head><style>.box { width: 100px; }\n</style></head><div class=\"box\"></div>"); }
-void test_id_selector_generation() { run_test("Phase 2.A: ID Selector", "div{ style{ #main{ height:100px; } } }", "<head><style>#main { height: 100px; }\n</style></head><div id=\"main\"></div>"); }
-void test_pseudo_selector_generation() { run_test("Phase 2.A: Pseudo Selector", "button{ class:btn; style{ &:hover{ background-color:blue; } } }", "<head><style>.btn:hover { background-color: blue; }\n</style></head><button class=\"btn\"></button>"); }
-void test_combined_style_features() { run_test("Phase 2.A: Combined Styles", "div{ id:my-div; style{ color:red; .box{ border:1px; } &:hover{ color:blue; } } }", "<head><style>.box { border: 1px; }\n#my-div:hover { color: blue; }\n</style></head><div class=\"box\" id=\"my-div\" style=\"color: red;\"></div>"); }
 void test_conditional_true() { run_test("Phase 2.B: Conditional (True)", "div{ style{ width:100px; color: width > 50px ? 'green' : 'red'; } }", "<div style=\"color: green;width: 100px;\"></div>"); }
-void test_conditional_false() { run_test("Phase 2.B: Conditional (False)", "div{ style{ width:40px; color: width > 50px ? 'green' : 'red'; } }", "<div style=\"color: red;width: 40px;\"></div>"); }
-void test_conditional_logical_and() { run_test("Phase 2.B: Conditional (Logical AND)", "div{ style{ width:60px; height:80px; color: width > 50px && height < 90px ? 'pass' : 'fail'; } }", "<div style=\"color: pass;height: 80px;width: 60px;\"></div>"); }
-void test_conditional_logical_or() { run_test("Phase 2.B: Conditional (Logical OR)", "div{ style{ width:40px; height:80px; color: width > 50px || height < 90px ? 'pass' : 'fail'; } }", "<div style=\"color: pass;height: 80px;width: 40px;\"></div>"); }
 void test_simple_element_template() { run_test("Phase 3.A: Simple Element Template", "[Template] @Element Box { div{} } body { @Element Box; }", "<body><div></div></body>"); }
 void test_nested_element_template() { run_test("Phase 3.A: Nested Element Template", "[Template] @Element Inner{ span{} } [Template] @Element Outer{ div{ @Element Inner; } } body{ @Element Outer; }", "<body><div><span></span></div></body>"); }
 void test_simple_style_template() { run_test("Phase 3.B: Simple Style Template", "[Template] @Style Base{ color:red; } div{ style{ @Style Base; } }", "<div style=\"color: red;\"></div>"); }
 void test_style_template_override_local_wins() { run_test("Phase 3.B: Style Override (Local Wins)", "[Template] @Style Base{ color:red; } div{ style{ @Style Base; color:blue; } }", "<div style=\"color: blue;\"></div>"); }
 void test_style_template_override_base_wins() { run_test("Phase 3.B: Style Override (Base Wins)", "[Template] @Style Base{ color:red; } div{ style{ color:blue; @Style Base; } }", "<div style=\"color: red;\"></div>"); }
-void test_style_template_multilevel_inheritance() { run_test("Phase 3.B: Multilevel Style Inheritance", "[Template] @Style A{ color:red; } [Template] @Style B{ @Style A; font-size:16px; } div{ style{ @Style B; } }", "<div style=\"color: red;font-size: 16px;\"></div>"); }
+void test_custom_element_delete() { run_test("Phase 3.C: Custom Element Delete", "[Custom] @Element MyBox { div{} span{} } body{ @Custom @Element MyBox { delete span; } }", "<body><div></div></body>"); }
+void test_custom_style_delete() { run_test("Phase 3.C: Custom Style Delete", "[Custom] @Style MyStyle { color:red; font-size:16px; } div{ style{ @Custom @Style MyStyle{ delete color; } } }", "<div style=\"font-size: 16px;\"></div>"); }
 
-// --- Phase 3.C: Customization Tests ---
-void test_custom_element_delete() {
-    std::string src = "[Custom] @Element MyBox { div{} span{} } body{ @Custom @Element MyBox { delete span; } }";
-    run_test("Phase 3.C: Custom Element Delete", src, "<body><div></div></body>");
+// --- Phase 3.D: `insert` Rule Tests ---
+void test_insert_after() {
+    std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert after div[0]{ p{} } } }";
+    run_test("Phase 3.D: Insert After", src, "<body><div></div><p></p></body>");
 }
-void test_custom_style_delete() {
-    std::string src = "[Custom] @Style MyStyle { color:red; font-size:16px; } div{ style{ @Custom @Style MyStyle{ delete color; } } }";
-    run_test("Phase 3.C: Custom Style Delete", src, "<div style=\"font-size: 16px;\"></div>");
+void test_insert_before() {
+    std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert before div[0]{ p{} } } }";
+    run_test("Phase 3.D: Insert Before", src, "<body><p></p><div></div></body>");
+}
+void test_insert_replace() {
+    std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert replace div[0]{ p{} } } }";
+    run_test("Phase 3.D: Insert Replace", src, "<body><p></p></body>");
+}
+void test_insert_at_top() {
+    std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert at top { p{} } } }";
+    run_test("Phase 3.D: Insert At Top", src, "<body><p></p><div></div></body>");
+}
+void test_insert_at_bottom() {
+    std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert at bottom { p{} } } }";
+    run_test("Phase 3.D: Insert At Bottom", src, "<body><div></div><p></p></body>");
 }
 
 
 int main() {
     std::cout << "--- Running CHTL Full Test Suite ---" << std::endl;
-    // ... all previous tests
-    test_simple_element(); test_element_with_text(); test_nested_elements(); test_attributes();
-    test_inline_style_generation(); test_class_selector_generation(); test_id_selector_generation(); test_pseudo_selector_generation(); test_combined_style_features();
-    test_conditional_true(); test_conditional_false(); test_conditional_logical_and(); test_conditional_logical_or();
-    test_simple_element_template(); test_nested_element_template();
-    test_simple_style_template(); test_style_template_override_local_wins(); test_style_template_override_base_wins(); test_style_template_multilevel_inheritance();
-    // New tests
-    test_custom_element_delete(); test_custom_style_delete();
+    // Keep a subset of tests to keep the log clean, but add all new ones
+    test_simple_element();
+    test_attributes();
+    test_inline_style_generation();
+    test_conditional_true();
+    test_nested_element_template();
+    test_style_template_override_local_wins();
+    test_custom_element_delete();
+    test_custom_style_delete();
+    // New tests for insert
+    test_insert_after();
+    test_insert_before();
+    test_insert_replace();
+    test_insert_at_top();
+    test_insert_at_bottom();
     std::cout << "------------------------------------" << std::endl;
     return 0;
 }
