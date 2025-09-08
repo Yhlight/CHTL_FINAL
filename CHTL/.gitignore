@@ -1,0 +1,7 @@
+# Ignore the build directory, which contains temporary build artifacts.
+build/
+
+# Ignore common temporary files
+*.swp
+*~
+.DS_Store
