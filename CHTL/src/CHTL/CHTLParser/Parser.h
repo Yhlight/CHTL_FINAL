@@ -14,10 +14,13 @@
 namespace CHTL {
 
 class ElementNode; // Forward-declare
+class CHTLLoader; // Forward-declare
 
 class Parser {
 public:
-    explicit Parser(const std::vector<Token>& tokens, CHTLContext& context);
+    // Constructor now takes the loader to handle imports, and the current file path for context
+    explicit Parser(const std::vector<Token>& tokens, CHTLContext& context, CHTLLoader& loader, std::string current_path);
+
     std::unique_ptr<DocumentNode> parse();
 
 private:
@@ -28,14 +31,18 @@ private:
     void parseAttributes(ElementNode* element);
     std::string parseIdentifierSequence();
 
-    // Template & Custom parsing
+    // Top Level Directives
     void parseTopLevelDefinition();
     void parseTemplateDefinition();
     void parseCustomDefinition();
+    void parseNamespaceDefinition();
+    void parseImportDefinition();
+
+    // Usage Directives
     std::unique_ptr<BaseNode> parseUsage();
     std::unique_ptr<BaseNode> parseCustomUsage();
     std::unique_ptr<BaseNode> parseSpecializationRule();
-    std::unique_ptr<BaseNode> parseInsertRule(); // New helper for insert
+    std::unique_ptr<BaseNode> parseInsertRule();
 
     // Style-parsing functions
     std::unique_ptr<BaseNode> parseStyleBlock();
@@ -52,15 +59,18 @@ private:
     std::unique_ptr<Expr> parsePrimary();
 
     // Token manipulation helpers
+    bool check(TokenType type) const;
     const Token& peek() const;
     const Token& advance();
     bool isAtEnd() const;
-    bool check(TokenType type) const;
     bool match(std::initializer_list<TokenType> types);
     const Token& consume(TokenType type, const std::string& message);
 
     const std::vector<Token>& m_tokens;
     CHTLContext& m_context;
+    CHTLLoader& m_loader; // Reference to the loader for handling imports
+    std::string m_current_path; // The path of the file being parsed
+    std::string m_current_namespace; // The current active namespace
     size_t m_current = 0;
 };
 

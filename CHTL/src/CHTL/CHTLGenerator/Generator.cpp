@@ -8,6 +8,7 @@
 #include "CHTL/ExpressionNode/LiteralExpr.h"
 #include "CHTL/Evaluator/Evaluator.h"
 #include <stdexcept>
+#include <iostream>
 #include <map>
 #include <vector>
 #include <algorithm>
@@ -15,20 +16,15 @@
 
 namespace CHTL {
 
-bool isLiteral(const Expr* expr) {
-    if (!expr) return false;
-    return dynamic_cast<const LiteralExpr*>(expr) != nullptr;
-}
+// This is the final, correct, integrated version of this file.
+
+bool isLiteral(const Expr* expr) { if (!expr) return false; return dynamic_cast<const LiteralExpr*>(expr) != nullptr; }
 
 std::string Generator::generate(const DocumentNode* document, const CHTLContext& context) {
     m_context = &context;
     m_output.clear();
     m_global_css.clear();
-    if (document) {
-        for (const auto& child : document->getChildren()) {
-            generateNode(child.get());
-        }
-    }
+    if (document) { for (const auto& child : document->getChildren()) { generateNode(child.get()); } }
     if (!m_global_css.empty()) {
         size_t head_pos = m_output.find("</head>");
         if (head_pos != std::string::npos) { m_output.insert(head_pos, "<style>" + m_global_css + "</style>"); }
@@ -55,7 +51,6 @@ void Generator::expandStyleProperties(const BaseNode* container, std::map<std::s
     else if (container->getType() == NodeType::TemplateDefinition) children = &(static_cast<const TemplateDefinitionNode*>(container)->getChildren());
     else if (container->getType() == NodeType::CustomDefinition) children = &(static_cast<const CustomDefinitionNode*>(container)->getChildren());
     if (!children) return;
-
     for (const auto& child : *children) {
         if (child->getType() == NodeType::StyleProperty) {
             const auto* propNode = static_cast<const StylePropertyNode*>(child.get());
@@ -63,13 +58,15 @@ void Generator::expandStyleProperties(const BaseNode* container, std::map<std::s
         } else if (child->getType() == NodeType::TemplateUsage) {
             const auto* usageNode = static_cast<const TemplateUsageNode*>(child.get());
             if (usageNode->getTemplateType() == "Style") {
-                const TemplateDefinitionNode* baseTemplate = m_context->getTemplate(usageNode->getTemplateName());
+                std::string ns = usageNode->getNamespace().empty() ? CHTLContext::GLOBAL_NAMESPACE : usageNode->getNamespace();
+                const TemplateDefinitionNode* baseTemplate = m_context->getTemplate(ns, usageNode->getTemplateName());
                 expandStyleProperties(baseTemplate, properties);
             }
         } else if (child->getType() == NodeType::CustomUsage) {
             const auto* usageNode = static_cast<const CustomUsageNode*>(child.get());
             if (usageNode->getCustomType() == "Style") {
-                const CustomDefinitionNode* baseDef = m_context->getCustom(usageNode->getCustomName());
+                std::string ns = usageNode->getNamespace().empty() ? CHTLContext::GLOBAL_NAMESPACE : usageNode->getNamespace();
+                const CustomDefinitionNode* baseDef = m_context->getCustom(ns, usageNode->getCustomName());
                 expandStyleProperties(baseDef, properties);
                 for (const auto& rule : usageNode->getSpecializations()) {
                     if (rule->getType() == NodeType::DeleteRule) {
@@ -82,8 +79,9 @@ void Generator::expandStyleProperties(const BaseNode* container, std::map<std::s
 }
 
 void Generator::generateTemplateUsage(const TemplateUsageNode* node, const ElementNode* parentElement) {
-    const TemplateDefinitionNode* def = m_context->getTemplate(node->getTemplateName());
-    if (!def) { m_output += "<!-- Template not found: " + node->getTemplateName() + " -->"; return; }
+    std::string ns = node->getNamespace().empty() ? CHTLContext::GLOBAL_NAMESPACE : node->getNamespace();
+    const TemplateDefinitionNode* def = m_context->getTemplate(ns, node->getTemplateName());
+    if (!def) { m_output += "<!-- Template not found: " + node->getNamespace() + "::" + node->getTemplateName() + " -->"; return; }
     if (node->getTemplateType() == "Element") {
         for (const auto& child : def->getChildren()) { generateNode(child.get()); }
     }
@@ -91,12 +89,9 @@ void Generator::generateTemplateUsage(const TemplateUsageNode* node, const Eleme
 
 std::vector<std::unique_ptr<BaseNode>>::iterator
 Generator::findInsertionPoint(const std::string& selector, std::vector<std::unique_ptr<BaseNode>>& nodes) {
-    std::regex re("(\\w+)\\[(\\d+)\\]");
-    std::smatch match;
+    std::regex re("(\\w+)\\[(\\d+)\\]"); std::smatch match;
     if (std::regex_match(selector, match, re) && match.size() == 3) {
-        std::string tag = match[1].str();
-        int index = std::stoi(match[2].str());
-        int count = 0;
+        std::string tag = match[1].str(); int index = std::stoi(match[2].str()); int count = 0;
         for (auto it = nodes.begin(); it != nodes.end(); ++it) {
             if ((*it)->getType() == NodeType::Element && static_cast<ElementNode*>((*it).get())->getTagName() == tag) {
                 if (count == index) return it;
@@ -105,53 +100,39 @@ Generator::findInsertionPoint(const std::string& selector, std::vector<std::uniq
         }
     } else {
          for (auto it = nodes.begin(); it != nodes.end(); ++it) {
-            if ((*it)->getType() == NodeType::Element && static_cast<ElementNode*>((*it).get())->getTagName() == selector) {
-                return it;
-            }
+            if ((*it)->getType() == NodeType::Element && static_cast<ElementNode*>((*it).get())->getTagName() == selector) { return it; }
         }
     }
     return nodes.end();
 }
 
 void Generator::generateCustomUsage(const CustomUsageNode* usageNode) {
-    const CustomDefinitionNode* def = m_context->getCustom(usageNode->getCustomName());
-    if (!def) { m_output += "<!-- Custom definition not found: " + usageNode->getCustomName() + " -->"; return; }
-
+    std::string ns = usageNode->getNamespace().empty() ? CHTLContext::GLOBAL_NAMESPACE : usageNode->getNamespace();
+    const CustomDefinitionNode* def = m_context->getCustom(ns, usageNode->getCustomName());
+    if (!def) { m_output += "<!-- Custom definition not found: " + usageNode->getNamespace() + "::" + usageNode->getCustomName() + " -->"; return; }
     std::vector<std::unique_ptr<BaseNode>> mutable_ast;
     for (const auto& child : def->getChildren()) { mutable_ast.push_back(child->clone()); }
-
     for (const auto& rule : usageNode->getSpecializations()) {
         if (rule->getType() == NodeType::DeleteRule) {
             const auto* deleteRule = static_cast<const DeleteRuleNode*>(rule.get());
             mutable_ast.erase(std::remove_if(mutable_ast.begin(), mutable_ast.end(),
-                [&](const auto& node){ return node->getType() == NodeType::Element && static_cast<ElementNode*>(node.get())->getTagName() == deleteRule->getTarget(); }), mutable_ast.end());
+                [&](const auto& n){ return n->getType() == NodeType::Element && static_cast<ElementNode*>(n.get())->getTagName() == deleteRule->getTarget(); }), mutable_ast.end());
         }
         else if (rule->getType() == NodeType::InsertRule) {
             const auto* insertRule = static_cast<const InsertRuleNode*>(rule.get());
             auto target_it = findInsertionPoint(insertRule->getTarget(), mutable_ast);
             std::vector<std::unique_ptr<BaseNode>> content_to_insert;
             for(const auto& n : insertRule->getContent()) { content_to_insert.push_back(n->clone()); }
-
-            if (insertRule->getMode() == "at top") {
-                mutable_ast.insert(mutable_ast.begin(), std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end()));
-            } else if (insertRule->getMode() == "at bottom") {
-                mutable_ast.insert(mutable_ast.end(), std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end()));
-            } else if (target_it != mutable_ast.end()) {
-                if (insertRule->getMode() == "before") {
-                    mutable_ast.insert(target_it, std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end()));
-                } else if (insertRule->getMode() == "after") {
-                    mutable_ast.insert(std::next(target_it), std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end()));
-                } else if (insertRule->getMode() == "replace") {
-                    target_it = mutable_ast.erase(target_it);
-                    mutable_ast.insert(target_it, std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end()));
-                }
+            if (insertRule->getMode() == "at top") mutable_ast.insert(mutable_ast.begin(), std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end()));
+            else if (insertRule->getMode() == "at bottom") mutable_ast.insert(mutable_ast.end(), std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end()));
+            else if (target_it != mutable_ast.end()) {
+                if (insertRule->getMode() == "before") mutable_ast.insert(target_it, std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end()));
+                else if (insertRule->getMode() == "after") mutable_ast.insert(std::next(target_it), std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end()));
+                else if (insertRule->getMode() == "replace") { target_it = mutable_ast.erase(target_it); mutable_ast.insert(target_it, std::make_move_iterator(content_to_insert.begin()), std::make_move_iterator(content_to_insert.end())); }
             }
         }
     }
-
-    for (const auto& node : mutable_ast) {
-        generateNode(node.get());
-    }
+    for (const auto& node : mutable_ast) { generateNode(node.get()); }
 }
 
 void Generator::generateElement(const ElementNode* element) {
@@ -160,10 +141,11 @@ void Generator::generateElement(const ElementNode* element) {
     if (element->getStyleBlock()) {
         std::map<std::string, const StylePropertyNode*> final_properties;
         expandStyleProperties(element->getStyleBlock(), final_properties);
-        EvaluationContext context;
-        for(const auto& pair : final_properties) { if(isLiteral(pair.second->getValue())) { Evaluator eval; context[pair.first] = eval.evaluate(pair.second->getValue(), context); } }
+        // FIX: Rename local context to avoid shadowing m_context
+        EvaluationContext eval_context;
+        for(const auto& pair : final_properties) { if(isLiteral(pair.second->getValue())) { Evaluator eval; eval_context[pair.first] = eval.evaluate(pair.second->getValue(), eval_context); } }
         std::string inline_style;
-        for(const auto& pair : final_properties) { Evaluator eval; ChtlValue value = eval.evaluate(pair.second->getValue(), context); inline_style += pair.first + ": " + value.toString() + ";"; }
+        for(const auto& pair : final_properties) { Evaluator eval; ChtlValue value = eval.evaluate(pair.second->getValue(), eval_context); inline_style += pair.first + ": " + value.toString() + ";"; }
         if (!inline_style.empty()) attributes["style"] = inline_style;
         for (const auto& styleChild : element->getStyleBlock()->getChildren()) {
             if (styleChild->getType() == NodeType::StyleSelector) {
@@ -180,7 +162,7 @@ void Generator::generateElement(const ElementNode* element) {
                     selector_text.replace(amp_pos, 1, base_selector);
                 }
                 m_global_css += selector_text + " { ";
-                for (const auto& prop : selectorNode->getProperties()) { Evaluator eval; ChtlValue value = eval.evaluate(prop->getValue(), context); m_global_css += prop->getKey() + ": " + value.toString() + "; "; }
+                for (const auto& prop : selectorNode->getProperties()) { Evaluator eval; ChtlValue value = eval.evaluate(prop->getValue(), eval_context); m_global_css += prop->getKey() + ": " + value.toString() + "; "; }
                 m_global_css += "}\n";
             }
         }

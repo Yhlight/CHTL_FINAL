@@ -10,9 +10,9 @@ static std::map<std::string, TokenType> keywords = {
     {"after", TokenType::KeywordAfter},
     {"before", TokenType::KeywordBefore},
     {"replace", TokenType::KeywordReplace},
-    {"at", TokenType::Identifier}, // "at" is part of "at top", parser will handle it
-    {"top", TokenType::Identifier},
-    {"bottom", TokenType::Identifier},
+    {"from", TokenType::KeywordFrom},
+    {"as", TokenType::KeywordAs},
+    // Note: "at", "top", "bottom" are handled by the parser as identifiers
 };
 
 Lexer::Lexer(const std::string& source) : m_source(source) {}

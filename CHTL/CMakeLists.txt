@@ -9,22 +9,19 @@ include_directories(src)
 
 # --- Source File Definitions ---
 
-# Define the list of core compiler source files
 set(COMPILER_SOURCES
     src/CHTL/CHTLLexer/Lexer.cpp
     src/CHTL/CHTLParser/Parser.cpp
     src/CHTL/CHTLGenerator/Generator.cpp
     src/CHTL/Evaluator/ExprStringifier.cpp
     src/CHTL/Evaluator/Evaluator.cpp
-    src/CHTL/CHTLContext/CHTLContext.cpp # Add the new context
+    src/CHTL/CHTLContext/CHTLContext.cpp
+    src/CHTL/CHTLLoader/CHTLLoader.cpp # Add the new loader
 )
 
 # --- Executable Target Definitions ---
 
-# 1. The main compiler executable
 add_executable(chtl src/main.cpp ${COMPILER_SOURCES})
-
-# 2. The test suite executable
 add_executable(run_tests src/Test/run_tests.cpp ${COMPILER_SOURCES})
 
 # Optional: Add a custom test target for integration with CTest

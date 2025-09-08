@@ -1,25 +1,43 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 #include <stdexcept>
 
 #include "CHTL/CHTLLexer/Lexer.h"
 #include "CHTL/CHTLParser/Parser.h"
 #include "CHTL/CHTLGenerator/Generator.h"
+#include "CHTL/CHTLLoader/CHTLLoader.h"
 #include "CHTL/CHTLNode/DocumentNode.h"
 #include "CHTL/CHTLContext/CHTLContext.h"
 
-void run_test(const std::string& test_name, const std::string& chtl_source, const std::string& expected_html) {
+// New test runner for multi-file projects
+void run_multi_file_test(
+    const std::string& test_name,
+    const std::map<std::string, std::string>& file_system,
+    const std::string& entry_point,
+    const std::string& expected_html
+) {
     std::cout << "Running test: " << test_name << " ... ";
     std::string actual_html;
     try {
-        CHTL::Lexer lexer(chtl_source);
-        auto tokens = lexer.tokenize();
         CHTL::CHTLContext context;
-        CHTL::Parser parser(tokens, context);
-        auto ast = parser.parse();
+
+        // Create a file provider that reads from our map
+        CHTL::CHTLLoader::FileProvider file_provider =
+            [&file_system](const std::string& path) -> std::string {
+            if (file_system.count(path)) {
+                return file_system.at(path);
+            }
+            throw std::runtime_error("File not found in mock filesystem: " + path);
+        };
+
+        CHTL::CHTLLoader loader(file_provider);
+        auto ast = loader.loadAndParse(entry_point, context);
+
         CHTL::Generator generator;
         actual_html = generator.generate(ast.get(), context);
+
     } catch (const std::exception& e) {
         std::cout << "\n  [FAIL] Test crashed with exception: " << e.what() << std::endl;
         return;
@@ -34,6 +52,13 @@ void run_test(const std::string& test_name, const std::string& chtl_source, cons
     }
 }
 
+// Keep the old run_test for simplicity, just adapt it to the new runner
+void run_test(const std::string& test_name, const std::string& chtl_source, const std::string& expected_html) {
+    std::map<std::string, std::string> file_system;
+    file_system["test.chtl"] = chtl_source;
+    run_multi_file_test(test_name, file_system, "test.chtl", expected_html);
+}
+
 // --- Test Cases ---
 void test_simple_element() { run_test("Phase 1: Simple Element", "div{}", "<div></div>"); }
 void test_attributes() { run_test("Phase 1: Element with Attributes", "a { href: \"/home\"; id=link1; }", "<a href=\"/home\" id=\"link1\"></a>"); }
@@ -46,33 +71,23 @@ void test_style_template_override_local_wins() { run_test("Phase 3.B: Style Over
 void test_style_template_override_base_wins() { run_test("Phase 3.B: Style Override (Base Wins)", "[Template] @Style Base{ color:red; } div{ style{ color:blue; @Style Base; } }", "<div style=\"color: red;\"></div>"); }
 void test_custom_element_delete() { run_test("Phase 3.C: Custom Element Delete", "[Custom] @Element MyBox { div{} span{} } body{ @Custom @Element MyBox { delete span; } }", "<body><div></div></body>"); }
 void test_custom_style_delete() { run_test("Phase 3.C: Custom Style Delete", "[Custom] @Style MyStyle { color:red; font-size:16px; } div{ style{ @Custom @Style MyStyle{ delete color; } } }", "<div style=\"font-size: 16px;\"></div>"); }
+void test_insert_after() { std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert after div[0]{ p{} } } }"; run_test("Phase 3.D: Insert After", src, "<body><div></div><p></p></body>"); }
+void test_insert_before() { std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert before div[0]{ p{} } } }"; run_test("Phase 3.D: Insert Before", src, "<body><p></p><div></div></body>"); }
+void test_insert_replace() { std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert replace div[0]{ p{} } } }"; run_test("Phase 3.D: Insert Replace", src, "<body><p></p></body>"); }
+void test_insert_at_top() { std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert at top { p{} } } }"; run_test("Phase 3.D: Insert At Top", src, "<body><p></p><div></div></body>"); }
+void test_insert_at_bottom() { std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert at bottom { p{} } } }"; run_test("Phase 3.D: Insert At Bottom", src, "<body><div></div><p></p></body>"); }
+void test_namespaced_template() { run_test("Phase 4.A: Namespaced Template Usage", "[Namespace] MyUI { [Template] @Element Button { button{} } } body{ @Element MyUI::Button; }", "<body><button></button></body>"); }
 
-// --- Phase 3.D: `insert` Rule Tests ---
-void test_insert_after() {
-    std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert after div[0]{ p{} } } }";
-    run_test("Phase 3.D: Insert After", src, "<body><div></div><p></p></body>");
-}
-void test_insert_before() {
-    std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert before div[0]{ p{} } } }";
-    run_test("Phase 3.D: Insert Before", src, "<body><p></p><div></div></body>");
-}
-void test_insert_replace() {
-    std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert replace div[0]{ p{} } } }";
-    run_test("Phase 3.D: Insert Replace", src, "<body><p></p></body>");
-}
-void test_insert_at_top() {
-    std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert at top { p{} } } }";
-    run_test("Phase 3.D: Insert At Top", src, "<body><p></p><div></div></body>");
-}
-void test_insert_at_bottom() {
-    std::string src = "[Custom] @Element Box{ div{} } body{ @Custom @Element Box{ insert at bottom { p{} } } }";
-    run_test("Phase 3.D: Insert At Bottom", src, "<body><div></div><p></p></body>");
+void test_multi_file_import() {
+    std::map<std::string, std::string> fs;
+    fs["/project/main.chtl"] = "[Import] @Chtl from \"./lib.chtl\" as MyLib; body{ @Element MyLib::Card; }";
+    fs["/project/lib.chtl"] = "[Namespace] MyLib { [Template] @Element Card { div{} } }";
+    run_multi_file_test("Phase 4.B: Multi-file Import", fs, "/project/main.chtl", "<body><div></div></body>");
 }
 
 
 int main() {
     std::cout << "--- Running CHTL Full Test Suite ---" << std::endl;
-    // Keep a subset of tests to keep the log clean, but add all new ones
     test_simple_element();
     test_attributes();
     test_inline_style_generation();
@@ -81,12 +96,13 @@ int main() {
     test_style_template_override_local_wins();
     test_custom_element_delete();
     test_custom_style_delete();
-    // New tests for insert
     test_insert_after();
     test_insert_before();
     test_insert_replace();
     test_insert_at_top();
     test_insert_at_bottom();
+    test_namespaced_template();
+    test_multi_file_import();
     std::cout << "------------------------------------" << std::endl;
     return 0;
 }

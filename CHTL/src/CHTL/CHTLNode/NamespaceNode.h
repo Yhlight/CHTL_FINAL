@@ -1,38 +1,39 @@
 #pragma once
 
 #include "BaseNode.h"
+#include <string>
 #include <vector>
 #include <memory>
-#include <utility> // For std::move
 
 namespace CHTL {
 
-class DocumentNode : public BaseNode {
+// Represents a `[Namespace]` block.
+class NamespaceNode : public BaseNode {
 public:
-    DocumentNode() = default;
+    explicit NamespaceNode(std::string name) : m_name(std::move(name)) {}
 
-    NodeType getType() const override { return NodeType::Document; }
+    NodeType getType() const override { return NodeType::Namespace; }
 
     std::unique_ptr<BaseNode> clone() const override {
-        auto newNode = std::make_unique<DocumentNode>();
+        auto newNode = std::make_unique<NamespaceNode>(m_name);
         for (const auto& child : m_children) {
             newNode->addChild(child->clone());
         }
         return newNode;
     }
 
+    const std::string& getName() const { return m_name; }
+
     void addChild(std::unique_ptr<BaseNode> child) {
         m_children.push_back(std::move(child));
     }
 
-    const std::vector<std::unique_ptr<BaseNode>>& getChildren() const { return m_children; }
-
-    // New method to transfer ownership of children out of this node
-    std::vector<std::unique_ptr<BaseNode>> takeChildren() {
-        return std::move(m_children);
+    const std::vector<std::unique_ptr<BaseNode>>& getChildren() const {
+        return m_children;
     }
 
 private:
+    std::string m_name;
     std::vector<std::unique_ptr<BaseNode>> m_children;
 };
 

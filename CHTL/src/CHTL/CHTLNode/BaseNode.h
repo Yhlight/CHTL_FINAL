@@ -20,9 +20,12 @@ enum class NodeType {
     CustomDefinition,
     CustomUsage,
 
-    // Specialization Rule Nodes
     DeleteRule,
     InsertRule,
+
+    // New types for Import/Namespace
+    Import,
+    Namespace,
 };
 
 class BaseNode {

@@ -8,23 +8,26 @@
 
 namespace CHTL {
 
-// The CHTLContext class holds state that is shared across the entire
-// compilation pipeline, such as the registry of defined templates and custom blocks.
+// Using the correct, memory-safe unique_ptr implementation.
+template<typename T>
+using ItemRegistry = std::map<std::string, std::unique_ptr<T>>;
+template<typename T>
+using NamespacedRegistry = std::map<std::string, ItemRegistry<T>>;
+
 class CHTLContext {
 public:
     CHTLContext() = default;
+    static const std::string GLOBAL_NAMESPACE;
 
-    // Template registry
-    void registerTemplate(std::unique_ptr<TemplateDefinitionNode> templateNode);
-    const TemplateDefinitionNode* getTemplate(const std::string& name) const;
+    void registerTemplate(const std::string& ns, std::unique_ptr<TemplateDefinitionNode> templateNode);
+    const TemplateDefinitionNode* getTemplate(const std::string& ns, const std::string& name) const;
 
-    // Custom registry
-    void registerCustom(std::unique_ptr<CustomDefinitionNode> customNode);
-    const CustomDefinitionNode* getCustom(const std::string& name) const;
+    void registerCustom(const std::string& ns, std::unique_ptr<CustomDefinitionNode> customNode);
+    const CustomDefinitionNode* getCustom(const std::string& ns, const std::string& name) const;
 
 private:
-    std::map<std::string, std::unique_ptr<TemplateDefinitionNode>> m_templates;
-    std::map<std::string, std::unique_ptr<CustomDefinitionNode>> m_customs;
+    NamespacedRegistry<TemplateDefinitionNode> m_templates;
+    NamespacedRegistry<CustomDefinitionNode> m_customs;
 };
 
 } // namespace CHTL

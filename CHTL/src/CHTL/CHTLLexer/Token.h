@@ -31,6 +31,9 @@ enum class TokenType {
     KeywordReplace,
     KeywordAtTop,
     KeywordAtBottom,
+    KeywordFrom,
+    KeywordAs,
+    // Note: [Import] and [Namespace] are parsed as bracket + identifier
 
     // Style-specific tokens
     Colon,
