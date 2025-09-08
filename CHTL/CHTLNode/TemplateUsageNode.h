@@ -12,7 +12,6 @@ class TemplateUsageNode : public BaseNode {
 public:
     TemplateType type;
     std::string name;
-    std::string ns; // The namespace to look in
 
     void accept(AstVisitor& visitor) override {
         visitor.visit(*this);
@@ -22,7 +21,6 @@ public:
         auto node = std::make_unique<TemplateUsageNode>();
         node->type = this->type;
         node->name = this->name;
-        node->ns = this->ns;
         return node;
     }
 };

@@ -5,10 +5,8 @@ CXXFLAGS = -std=c++17 -Wall -I. -static
 # Source files
 SRCS = main.cpp \
        CHTL/CHTLLexer/Lexer.cpp \
-       CHTL/CHTLLexer/Token.cpp \
        CHTL/CHTLParser/Parser.cpp \
        CHTL/CHTLGenerator/Generator.cpp \
-       CHTL/CHTLJS/Preprocessor.cpp \
        CHTL/CHTLNode/CustomStyleTemplateNode.cpp \
        CHTL/CHTLNode/StyleRuleNode.cpp \
        CHTL/CHTLNode/OriginNode.cpp

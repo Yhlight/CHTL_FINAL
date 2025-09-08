@@ -9,7 +9,7 @@ enum class TokenType {
     LEFT_PAREN, RIGHT_PAREN,
     LEFT_BRACKET, RIGHT_BRACKET,
     COLON, EQUAL, SEMICOLON,
-    DOT, HASH, AMPERSAND, COMMA,
+    DOT, HASH, AMPERSAND,
     QUESTION, SLASH, STAR, PLUS, MINUS,
 
     // Two-character tokens
@@ -28,12 +28,6 @@ enum class TokenType {
     KEYWORD_TEMPLATE,
     KEYWORD_CUSTOM,
     KEYWORD_ORIGIN,
-    KEYWORD_IMPORT,
-    KEYWORD_NAMESPACE,
-    KEYWORD_CONFIGURATION,
-    KEYWORD_FROM,
-    KEYWORD_AS,
-    KEYWORD_EXCEPT,
     KEYWORD_SCRIPT,
     KEYWORD_INHERIT,
     KEYWORD_DELETE,
@@ -61,5 +55,3 @@ struct Token {
     int column;
     size_t position;
 };
-
-TokenType stringToTokenType(const std::string& s);

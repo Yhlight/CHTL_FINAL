@@ -1,7 +1,0 @@
-// Test for parsing after an origin block
-
-[Origin] @Html {
-    <div>Raw HTML</div>
-}
-
-h1 { text { "This should parse correctly." } }

@@ -4,8 +4,6 @@
 #include "CHTL/CHTLLexer/Lexer.h"
 #include "CHTL/CHTLParser/Parser.h"
 #include "CHTL/CHTLGenerator/Generator.h"
-#include "CHTL/CHTLContext.h"
-#include <memory>
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -24,19 +22,12 @@ int main(int argc, char* argv[]) {
     std::string source = buffer.str();
 
     try {
-        // 1. Pre-scan for configuration
-        auto config = std::make_shared<ConfigurationState>();
-        Lexer pre_lexer(source, config);
-        Parser pre_parser(pre_lexer, config);
-        pre_parser.parseConfiguration();
-
-        // 2. Main parse with loaded configuration
-        Lexer lexer(source, config);
-        Parser parser(lexer, config);
+        Lexer lexer(source);
+        Parser parser(lexer);
         std::unique_ptr<ElementNode> ast = parser.parse();
 
         if (ast) {
-            Generator generator(parser, config);
+            Generator generator(parser);
             std::string html = generator.generate(*ast);
             std::cout << html << std::endl;
         } else {

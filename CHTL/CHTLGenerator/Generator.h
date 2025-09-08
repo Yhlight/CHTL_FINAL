@@ -5,17 +5,15 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
-#include "../CHTLNode/ExpressionNode.h"
-#include "../CHTLJS/Preprocessor.h"
 #include <string>
 #include <sstream>
+#include "../CHTLNode/ExpressionNode.h"
 
 class Parser;
-class ConfigurationState;
 
 class Generator : public AstVisitor {
 public:
-    Generator(Parser& parser, std::shared_ptr<ConfigurationState> config);
+    Generator(Parser& parser);
     std::string generate(ElementNode& root);
 
     void visit(ElementNode& node) override;
@@ -25,14 +23,11 @@ public:
     void visit(class CustomStyleTemplateNode& node) override;
     void visit(class StyleRuleNode& node) override;
     void visit(class OriginNode& node) override;
-    void visit(class ScriptNode& node) override;
 
 private:
     Parser& parser;
-    CHTLJS_Preprocessor js_preprocessor;
     std::stringstream output;
     std::stringstream global_css;
-    std::stringstream global_js;
     ElementNode* currentElement = nullptr; // Context for expression evaluation
 
     // Expression Evaluation

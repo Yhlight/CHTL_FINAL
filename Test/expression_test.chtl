@@ -10,16 +10,16 @@ div {
         // Comparison and property access
         border: width > 50 ? "1px solid black" : "none";
 
-        // Complex expression
+        // Complex expression with logical operators
         box-shadow: width > 50 && height > 150 ? "5px 5px 10px #888" : "none";
 
         // Arithmetic
-        font-size: 10 + 6; // should be 16
+        font-size: 10 + 6;
 
-        // Chained ternary (not supported by parser yet, but good to have)
-        // outline: width > 200 ? "blue" : (width > 100 ? "purple" : "orange");
+        // String comparison
+        outline: "test" == "test" ? "2px solid blue" : "none";
     }
     text {
-        "This box should have a green background, a black border, and a shadow."
+        "This box should have a green background, a black border, a shadow, and a blue outline."
     }
 }

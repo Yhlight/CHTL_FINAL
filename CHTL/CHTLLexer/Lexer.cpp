@@ -2,8 +2,7 @@
 #include <cctype>
 #include <iostream>
 
-Lexer::Lexer(const std::string& source, std::shared_ptr<ConfigurationState> config)
-    : source(source), config(config) {}
+Lexer::Lexer(const std::string& source) : source(source) {}
 
 char Lexer::advance() {
     column++;
@@ -93,21 +92,15 @@ Token Lexer::identifier() {
         advance();
     }
     std::string text = source.substr(start, current - start);
-
-    // Check against configured keywords
-    for (const auto& pair : config->keyword_map) {
-        for (const auto& keyword : pair.second) {
-            if (text == keyword) {
-                // Found a keyword match. Return the correct token type.
-                return makeToken(pair.first, text);
-            }
-        }
-    }
-
-    // Special handling for 'at top' / 'at bottom' which are two words
-    // This is still hardcoded as it's a multi-word keyword.
-    // A more advanced system could handle this too.
-    if (text == "at") {
+    if (text == "text") return makeToken(TokenType::TEXT, text);
+    if (text == "style") return makeToken(TokenType::STYLE, text);
+    if (text == "inherit") return makeToken(TokenType::KEYWORD_INHERIT, text);
+    if (text == "delete") return makeToken(TokenType::KEYWORD_DELETE, text);
+    if (text == "insert") return makeToken(TokenType::KEYWORD_INSERT, text);
+    if (text == "after") return makeToken(TokenType::KEYWORD_AFTER, text);
+    if (text == "before") return makeToken(TokenType::KEYWORD_BEFORE, text);
+    if (text == "replace") return makeToken(TokenType::KEYWORD_REPLACE, text);
+    if (text == "at") { // For "at top" and "at bottom"
         size_t nextPos = current;
         while (isspace(source[nextPos])) nextPos++;
         if (source.substr(nextPos, 3) == "top") {
@@ -119,7 +112,6 @@ Token Lexer::identifier() {
             return makeToken(TokenType::KEYWORD_ATBOTTOM, "at bottom");
         }
     }
-
     return makeToken(TokenType::IDENTIFIER, text);
 }
 
@@ -154,20 +146,17 @@ Token Lexer::getNextToken() {
     }
 
     if (peek() == '[') {
-        // Check for bracketed keywords from config
-        std::vector<TokenType> bracketedTypes = {
-            TokenType::KEYWORD_TEMPLATE, TokenType::KEYWORD_CUSTOM, TokenType::KEYWORD_ORIGIN,
-            TokenType::KEYWORD_IMPORT, TokenType::KEYWORD_NAMESPACE, TokenType::KEYWORD_CONFIGURATION
-        };
-        for (TokenType type : bracketedTypes) {
-            if (config->keyword_map.count(type)) {
-                for (const auto& keyword : config->keyword_map.at(type)) {
-                    if (source.substr(current, keyword.length()) == keyword) {
-                        current += keyword.length();
-                        return makeToken(type, keyword);
-                    }
-                }
-            }
+        if (source.substr(current, 10) == "[Template]") {
+            current += 10;
+            return makeToken(TokenType::KEYWORD_TEMPLATE, "[Template]");
+        }
+        if (source.substr(current, 8) == "[Custom]") {
+            current += 8;
+            return makeToken(TokenType::KEYWORD_CUSTOM, "[Custom]");
+        }
+        if (source.substr(current, 8) == "[Origin]") {
+            current += 8;
+            return makeToken(TokenType::KEYWORD_ORIGIN, "[Origin]");
         }
     }
 
@@ -187,21 +176,19 @@ Token Lexer::getNextToken() {
         case '{': advance(); return makeToken(TokenType::LEFT_BRACE, "{");
         case '}': advance(); return makeToken(TokenType::RIGHT_BRACE, "}");
         case ':': advance(); return makeToken(TokenType::COLON, ":");
-        case '=': advance(); return makeToken(TokenType::EQUAL, "=");
+        case '=':
+            advance();
+            if (match('=')) return makeToken(TokenType::EQUAL_EQUAL, "==");
+            return makeToken(TokenType::EQUAL, "=");
         case ';': advance(); return makeToken(TokenType::SEMICOLON, ";");
         case '[': advance(); return makeToken(TokenType::LEFT_BRACKET, "[");
         case ']': advance(); return makeToken(TokenType::RIGHT_BRACKET, "]");
-        case ',': advance(); return makeToken(TokenType::COMMA, ",");
         case '.': advance(); return makeToken(TokenType::DOT, ".");
         case '#': advance(); return makeToken(TokenType::HASH, "#");
-        case '&':
-            advance();
-            if (match('&')) return makeToken(TokenType::AND_AND, "&&");
-            return makeToken(TokenType::AMPERSAND, "&");
         case '|':
             advance();
             if (match('|')) return makeToken(TokenType::OR_OR, "||");
-            return makeToken(TokenType::IDENTIFIER, "|"); // Or some other default
+            return makeToken(TokenType::IDENTIFIER, "|");
         case '>':
             advance();
             if (match('=')) return makeToken(TokenType::GREATER_EQUAL, ">=");
@@ -213,12 +200,16 @@ Token Lexer::getNextToken() {
         case '!':
             advance();
             if (match('=')) return makeToken(TokenType::NOT_EQUAL, "!=");
-            return makeToken(TokenType::IDENTIFIER, "!"); // Or some other default
+            return makeToken(TokenType::IDENTIFIER, "!");
         case '?': advance(); return makeToken(TokenType::QUESTION, "?");
         case '/': advance(); return makeToken(TokenType::SLASH, "/");
         case '*': advance(); return makeToken(TokenType::STAR, "*");
         case '+': advance(); return makeToken(TokenType::PLUS, "+");
         case '-': advance(); return makeToken(TokenType::MINUS, "-");
+        case '&':
+            advance();
+            if (match('&')) return makeToken(TokenType::AND_AND, "&&");
+            return makeToken(TokenType::AMPERSAND, "&");
     }
 
     // Fallback for unquoted literals like '16px'
