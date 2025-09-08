@@ -34,6 +34,7 @@ struct ConfigurationState {
         keyword_map[TokenType::KEYWORD_FROM] = {"from"};
         keyword_map[TokenType::KEYWORD_AS] = {"as"};
         keyword_map[TokenType::KEYWORD_EXCEPT] = {"except"};
+        keyword_map[TokenType::KEYWORD_SCRIPT] = {"script"};
     }
 };
 

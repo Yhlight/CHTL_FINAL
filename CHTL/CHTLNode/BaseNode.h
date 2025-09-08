@@ -11,6 +11,7 @@ class TemplateUsageNode;
 class CustomStyleTemplateNode;
 class StyleRuleNode;
 class OriginNode;
+class ScriptNode;
 
 class AstVisitor {
 public:
@@ -22,6 +23,7 @@ public:
     virtual void visit(CustomStyleTemplateNode& node) = 0;
     virtual void visit(StyleRuleNode& node) = 0;
     virtual void visit(OriginNode& node) = 0;
+    virtual void visit(ScriptNode& node) = 0;
 };
 
 class BaseNode {

@@ -18,6 +18,7 @@
 #include "../CHTLNode/ExpressionNode.h"
 #include "../CHTLNode/ImportNode.h"
 #include "../CHTLContext.h"
+#include "../CHTLNode/ScriptNode.h"
 
 class Parser {
 public:
@@ -69,6 +70,7 @@ private:
     std::unique_ptr<ElementNode> element();
     std::unique_ptr<TextNode> textNode();
     std::unique_ptr<StyleNode> styleNode();
+    std::unique_ptr<ScriptNode> scriptNode();
     void attributes(ElementNode& element);
     std::unique_ptr<ExpressionNode> parseValue();
     void handleCustomElementUsage(const std::string& templateName, const std::string& ns, ElementNode* parentNode);

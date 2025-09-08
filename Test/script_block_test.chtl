@@ -1,0 +1,19 @@
+// Test for local script blocks and the CHTL JS pre-processor
+
+div {
+    id: "test-div";
+    class: "widget";
+
+    script {
+        // This is a regular javascript comment
+        console.log("Hello from inside a script block!");
+
+        const myDiv = {{.widget}}; // This should be replaced
+
+        myDiv.addEventListener('click', () => {
+            console.log('Div was clicked!');
+            const anotherRef = {{#test-div}}; // This should also be replaced
+            anotherRef.style.color = 'red';
+        });
+    }
+}

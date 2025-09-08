@@ -575,6 +575,37 @@ std::unique_ptr<BaseNode> Parser::originDeclaration() {
     return node;
 }
 
+std::unique_ptr<ScriptNode> Parser::scriptNode() {
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'script'.");
+
+    auto node = std::make_unique<ScriptNode>();
+
+    size_t start = previousToken.position + previousToken.lexeme.length();
+    const std::string& source = lexer.getSource();
+    int braceCount = 1;
+    size_t currentPos = lexer.getCurrentPosition();
+
+    while (braceCount > 0 && currentPos < source.length()) {
+        if (source[currentPos] == '{') braceCount++;
+        else if (source[currentPos] == '}') braceCount--;
+        currentPos++;
+    }
+
+    if (braceCount > 0) {
+        std::cerr << "Parse Error: Unterminated script block." << std::endl;
+        while(!check(TokenType::END_OF_FILE)) advance();
+        return nullptr;
+    }
+
+    node->content = source.substr(start, currentPos - start - 1);
+
+    lexer.setPosition(currentPos);
+    advance();
+    advance();
+
+    return node;
+}
+
 std::unique_ptr<ElementNode> Parser::element() {
     auto node = std::make_unique<ElementNode>();
     node->tagName = currentToken.lexeme;
@@ -649,6 +680,12 @@ std::unique_ptr<ElementNode> Parser::element() {
                 setParent(node.get(), child.get());
                 node->children.push_back(std::move(child));
             }
+        } else if (match(TokenType::KEYWORD_SCRIPT)) {
+            auto child = scriptNode();
+            if (child) {
+                setParent(node.get(), child.get());
+                node->children.push_back(std::move(child));
+            }
         } else if (match(TokenType::KEYWORD_EXCEPT)) {
             constraintDeclaration(node.get());
         } else {
@@ -664,7 +701,6 @@ std::unique_ptr<ElementNode> Parser::element() {
 }
 
 std::unique_ptr<TextNode> Parser::textNode() {
-    consume(TokenType::TEXT, "Expect 'text' keyword.");
     consume(TokenType::LEFT_BRACE, "Expect '{' after 'text'.");
     auto node = std::make_unique<TextNode>();
     if (check(TokenType::STRING) || check(TokenType::IDENTIFIER)) {
@@ -676,7 +712,6 @@ std::unique_ptr<TextNode> Parser::textNode() {
 }
 
 std::unique_ptr<StyleNode> Parser::styleNode() {
-    consume(TokenType::STYLE, "Expect 'style' keyword.");
     consume(TokenType::LEFT_BRACE, "Expect '{' after 'style'.");
     auto node = std::make_unique<StyleNode>();
 
