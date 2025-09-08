@@ -1,10 +1,10 @@
 #include "CHTLGenerator.h"
-#include "../CHTLNode/ElementNode.h"
-#include "../CHTLNode/TextNode.h"
-#include "../CHTLNode/CommentNode.h"
-#include "../CHTLNode/StyleNode.h"
-#include "../CHTLNode/TemplateUsageNode.h"
-#include "../CHTLNode/ModificationNode.h"
+#include "CHTL/CHTLNode/ElementNode.h"
+#include "CHTL/CHTLNode/TextNode.h"
+#include "CHTL/CHTLNode/CommentNode.h"
+#include "CHTL/CHTLNode/StyleNode.h"
+#include "CHTL/CHTLNode/TemplateUsageNode.h"
+#include "CHTL/CHTLNode/ModificationNode.h"
 #include <stdexcept>
 #include <unordered_set>
 #include <algorithm>
@@ -15,12 +15,35 @@ namespace CHTL {
 
 const std::unordered_set<std::string> voidElements = { "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr" };
 
-void resolveStyleTemplate(const std::string& name, const CHTLContext& context, std::map<std::string, std::string>& properties) { /* ... */ }
-void resolveCustomStyleTemplate(const std::string& name, const CHTLContext& context, std::map<std::string, std::string>& properties) { /* ... */ }
-ElementNode* findNodeBySelector(std::vector<std::unique_ptr<BaseNode>>& nodes, const std::string& selector) { return nullptr; }
+// --- visitStyleNode and its helpers ---
+void resolveStyleTemplate(const std::string& name, const CHTLContext& context, std::map<std::string, std::string>& properties) {
+    const StyleTemplate* tpl = context.getStyleTemplate(name);
+    if (!tpl) return;
+    for (const auto& prop : tpl->properties) { properties[prop.first] = prop.second; }
+}
+
+void CHTLGenerator::visitStyleNode(const StyleNode& node, ElementNode& parent) {
+    std::map<std::string, std::string> resolved_properties;
+    for (const auto& rule : node.getRules()) {
+        if (rule.selector == "@Style") {
+            const std::string& tplName = rule.properties.at(0).second;
+            resolveStyleTemplate(tplName, m_context, resolved_properties);
+        } else if (rule.selector.empty()) {
+            for (const auto& prop : rule.properties) {
+                resolved_properties[prop.first] = prop.second;
+            }
+        }
+    }
+    std::string inline_style;
+    for (const auto& prop : resolved_properties) {
+        inline_style += prop.first + ":" + prop.second + ";";
+    }
+    if (!inline_style.empty()) {
+        parent.setAttribute("style", (parent.getAttributes().count("style") ? parent.getAttributes().at("style") : "") + inline_style);
+    }
+}
 
 
-// Corrected the typo CHTLLContext -> CHTLContext
 CHTLGenerator::CHTLGenerator(CHTLContext& context) : m_context(context), m_indentLevel(0) {}
 
 std::string CHTLGenerator::generate(BaseNode& root) {
@@ -28,9 +51,11 @@ std::string CHTLGenerator::generate(BaseNode& root) {
     m_globalCss.clear();
     m_indentLevel = -1;
     visit(root);
-    size_t head_pos = m_output.find("</head>");
-    if (head_pos != std::string::npos && !m_globalCss.empty()) {
-        m_output.insert(head_pos, "  <style>\n" + m_globalCss + "  </style>\n");
+    if (!m_globalCss.empty()) {
+        size_t head_pos = m_output.find("</head>");
+        if (head_pos != std::string::npos) {
+            m_output.insert(head_pos, "  <style>\n" + m_globalCss + "  </style>\n");
+        }
     }
     return m_output;
 }
@@ -46,17 +71,20 @@ void CHTLGenerator::visit(BaseNode& node) {
         case NodeType::Text: visitText(static_cast<const TextNode&>(node)); break;
         case NodeType::Comment: visitComment(static_cast<const CommentNode&>(node)); break;
         case NodeType::TemplateUsage: visitTemplateUsage(static_cast<TemplateUsageNode&>(node)); break;
-        case NodeType::Style: break;
         default: break;
     }
 }
 
 void CHTLGenerator::visitTemplateUsage(TemplateUsageNode& node) {
-    // ... implementation ...
-}
-
-void CHTLGenerator::visitStyleNode(const StyleNode& node, ElementNode& parent) {
-    // ... implementation ...
+    if (node.getTemplateType() == TemplateType::Element) {
+        const ElementTemplate* tpl = m_context.getElementTemplate(node.getTemplateName());
+        if (tpl) {
+            for (auto& child : tpl->nodes) {
+                auto cloned_child = child->clone();
+                visit(*cloned_child);
+            }
+        }
+    }
 }
 
 void CHTLGenerator::visitElement(ElementNode& node) {

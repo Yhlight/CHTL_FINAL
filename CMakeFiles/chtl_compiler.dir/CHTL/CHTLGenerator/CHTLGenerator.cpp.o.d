@@ -166,14 +166,11 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/erase_if.h /usr/include/c++/13/utility \
  /usr/include/c++/13/bits/stl_relops.h /usr/include/c++/13/optional \
- /app/CHTL/CHTLGenerator/../CHTLNode/ElementNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/BaseNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/TextNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/CommentNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/StyleNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/TemplateUsageNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/ModificationNode.h \
- /usr/include/c++/13/stdexcept /usr/include/c++/13/unordered_set \
+ /app/CHTL/CHTLNode/ElementNode.h /app/CHTL/CHTLNode/BaseNode.h \
+ /app/CHTL/CHTLNode/TextNode.h /app/CHTL/CHTLNode/CommentNode.h \
+ /app/CHTL/CHTLNode/StyleNode.h /app/CHTL/CHTLNode/TemplateUsageNode.h \
+ /app/CHTL/CHTLNode/ModificationNode.h /usr/include/c++/13/stdexcept \
+ /usr/include/c++/13/unordered_set \
  /usr/include/c++/13/bits/unordered_set.h /usr/include/c++/13/algorithm \
  /usr/include/c++/13/bits/stl_algo.h \
  /usr/include/c++/13/bits/algorithmfwd.h \

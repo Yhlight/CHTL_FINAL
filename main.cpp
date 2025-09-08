@@ -22,19 +22,19 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        // 1. Initialize Lexer and Context
+        // 1. Initialize
         CHTL::CHTLLexer lexer(source);
         CHTL::CHTLContext context;
 
-        // 2. Parse the source to build the AST and populate the context
+        // 2. Parse
         CHTL::CHTLParser parser(lexer, context);
         std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
 
-        // 3. Generate HTML from the AST
+        // 3. Generate
         CHTL::CHTLGenerator generator(context);
         std::string html = generator.generate(*ast);
 
-        // 4. Output the result
+        // 4. Output
         std::cout << html << std::endl;
 
     } catch (const std::runtime_error& e) {
