@@ -19,6 +19,17 @@ pub fn compile(source: &str) -> Result<String, String> {
                 ast::TemplateDefinition::Var(vt) => {
                     context.var_templates.insert(vt.name, vt);
                 }
+            },
+            ast::TopLevelDefinition::Custom(custom_def) => match custom_def {
+                ast::CustomDefinition::Style(st) => {
+                    context.custom_style_templates.insert(st.name, st);
+                }
+                ast::CustomDefinition::Element(et) => {
+                    context.custom_element_templates.insert(et.name, et);
+                }
+                ast::CustomDefinition::Var(vt) => {
+                    context.custom_var_templates.insert(vt.name, vt);
+                }
             }
         }
     }

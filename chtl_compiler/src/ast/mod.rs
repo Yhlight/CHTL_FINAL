@@ -7,7 +7,10 @@ pub struct Document<'a> {
 #[derive(Debug, PartialEq)]
 pub enum TopLevelDefinition<'a> {
     Template(TemplateDefinition<'a>),
+    Custom(CustomDefinition<'a>),
 }
+
+// --- Template Definitions ---
 
 #[derive(Debug, PartialEq)]
 pub enum TemplateDefinition<'a> {
@@ -40,6 +43,36 @@ pub struct TemplateVariable<'a> {
     pub value: &'a str,
 }
 
+// --- Custom Definitions ---
+
+#[derive(Debug, PartialEq)]
+pub enum CustomDefinition<'a> {
+    Style(CustomStyleGroup<'a>),
+    Element(CustomElementGroup<'a>),
+    Var(CustomVarGroup<'a>),
+}
+
+#[derive(Debug, PartialEq)]
+pub struct CustomStyleGroup<'a> {
+    pub name: &'a str,
+    pub content: Vec<StyleContent<'a>>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct CustomElementGroup<'a> {
+    pub name: &'a str,
+    pub children: Vec<Node<'a>>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct CustomVarGroup<'a> {
+    pub name: &'a str,
+    pub variables: Vec<TemplateVariable<'a>>,
+}
+
+
+// --- Renderable Nodes & Content ---
+
 #[derive(Debug, PartialEq)]
 pub enum Node<'a> {
     Element(Element<'a>),
@@ -60,7 +93,7 @@ pub enum StyleContent<'a> {
 #[derive(Debug, PartialEq, Clone)]
 pub struct CssProperty<'a> {
     pub key: &'a str,
-    pub value: CssValue<'a>, // Changed from &'a str
+    pub value: CssValue<'a>,
 }
 
 #[derive(Debug, PartialEq, Clone)]

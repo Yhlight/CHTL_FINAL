@@ -13,7 +13,7 @@ bare_literal = @{ (ASCII_ALPHANUMERIC | "_" | "." | "/" | ":" | "-" )+ } // Simp
 
 // --- Top Level Structure ---
 chtl_file = { SOI ~ file_content ~ EOI }
-file_content = { (template_definition | element | text_node | style_block | script_block | COMMENT)* }
+file_content = { (custom_definition | template_definition | element | text_node | style_block | script_block | COMMENT)* }
 
 // --- Content inside an Element ---
 element_content = { (attribute | element_template_usage | text_node | style_block | script_block | element | COMMENT)* }
@@ -21,6 +21,7 @@ element_content = { (attribute | element_template_usage | text_node | style_bloc
 element_template_usage = { "@Element" ~ identifier ~ ";" }
 
 // --- Rules ---
+custom_definition = { "[Custom]" ~ (style_template | element_template | var_template) }
 template_definition = { "[Template]" ~ (style_template | element_template | var_template) }
 style_template = { "@Style" ~ identifier ~ "{" ~ style_template_content ~ "}" }
 style_template_content = { (property | style_template_usage | inherit_style)* }

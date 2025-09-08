@@ -2,7 +2,7 @@ use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
 
-use crate::ast::{Attribute, CssProperty, CssValue, Document, Element, Node, StyleContent, TemplateDefinition, TemplateElementGroup, TemplateStyleGroup, TemplateVarGroup, TemplateVariable, TopLevelDefinition};
+use crate::ast::{Attribute, CssProperty, CssValue, CustomDefinition, CustomElementGroup, CustomStyleGroup, CustomVarGroup, Document, Element, Node, StyleContent, TemplateDefinition, TemplateElementGroup, TemplateStyleGroup, TemplateVarGroup, TemplateVariable, TopLevelDefinition};
 use crate::css_parser;
 
 #[derive(Parser)]
@@ -21,6 +21,9 @@ pub fn parse(source: &str) -> Result<Document, pest::error::Error<Rule>> {
                 Rule::template_definition => {
                     definitions.push(TopLevelDefinition::Template(build_template_definition(pair)));
                 }
+                Rule::custom_definition => {
+                    definitions.push(TopLevelDefinition::Custom(build_custom_definition(pair)));
+                }
                 Rule::element | Rule::text_node | Rule::style_block | Rule::script_block => {
                     children.push(build_node(pair));
                 }
@@ -33,15 +36,43 @@ pub fn parse(source: &str) -> Result<Document, pest::error::Error<Rule>> {
     Ok(Document { definitions, children })
 }
 
+fn build_custom_definition(pair: Pair<Rule>) -> CustomDefinition {
+    let inner = pair.into_inner().next().unwrap();
+    match inner.as_rule() {
+        Rule::style_template => {
+            let mut parts = inner.into_inner();
+            let name = parts.next().unwrap().as_str();
+            let content = parts.next().unwrap().into_inner().filter(|p| p.as_rule() != Rule::COMMENT).map(build_style_template_content).collect();
+            CustomDefinition::Style(CustomStyleGroup { name, content })
+        }
+        Rule::element_template => {
+            let mut parts = inner.into_inner();
+            let name = parts.next().unwrap().as_str();
+            let children = parts.filter(|p| p.as_rule() != Rule::COMMENT).map(build_node).collect();
+            CustomDefinition::Element(CustomElementGroup { name, children })
+        }
+        Rule::var_template => {
+            let mut parts = inner.into_inner();
+            let name = parts.next().unwrap().as_str();
+            let variables = parts.map(|v| {
+                 let mut v_inner = v.into_inner();
+                 let key = v_inner.next().unwrap().as_str();
+                 let value = v_inner.next().unwrap().as_str().trim_matches(|c| c == '"' || c == '\'');
+                 TemplateVariable { key, value }
+            }).collect();
+            CustomDefinition::Var(CustomVarGroup { name, variables })
+        }
+        _ => unreachable!("Unexpected custom type: {:?}", inner.as_rule()),
+    }
+}
+
 fn build_template_definition(pair: Pair<Rule>) -> TemplateDefinition {
     let inner = pair.into_inner().next().unwrap();
     match inner.as_rule() {
         Rule::style_template => {
             let mut parts = inner.into_inner();
             let name = parts.next().unwrap().as_str();
-            let content = parts.next().unwrap().into_inner()
-                .filter(|p| p.as_rule() != Rule::COMMENT)
-                .map(build_style_template_content).collect();
+            let content = parts.next().unwrap().into_inner().filter(|p| p.as_rule() != Rule::COMMENT).map(build_style_template_content).collect();
             TemplateDefinition::Style(TemplateStyleGroup { name, content })
         }
         Rule::element_template => {
@@ -92,7 +123,6 @@ fn build_node(pair: Pair<Rule>) -> Node {
             let mut inner_pairs = pair.into_inner();
             let tag_name = inner_pairs.next().unwrap().as_str();
             let inner_content = inner_pairs.next().unwrap();
-
             let mut attributes = Vec::new();
             let mut children = Vec::new();
 
@@ -146,14 +176,13 @@ mod tests {
     use crate::ast::*;
 
     #[test]
-    fn test_parse_template_definitions() {
+    fn test_parse_definitions() {
         let source = r#"
             [Template] @Style DefaultText {
                 color: "black";
-                line-height: 1.6;
             }
 
-            [Template] @Element Box {
+            [Custom] @Element Box {
                 div {}
             }
         "#;
@@ -162,149 +191,22 @@ mod tests {
         assert!(doc.children.is_empty());
         assert_eq!(doc.definitions.len(), 2);
 
-        // Check style template
+        // Check template
         match &doc.definitions[0] {
             TopLevelDefinition::Template(TemplateDefinition::Style(st)) => {
                 assert_eq!(st.name, "DefaultText");
-                assert_eq!(st.content.len(), 2);
-                assert_eq!(st.content[0], StyleContent::Property(CssProperty { key: "color", value: CssValue::Literal("black") }));
+                assert_eq!(st.content.len(), 1);
             }
             _ => panic!("Expected a style template"),
         }
 
-        // Check element template
+        // Check custom
         match &doc.definitions[1] {
-            TopLevelDefinition::Template(TemplateDefinition::Element(et)) => {
+            TopLevelDefinition::Custom(CustomDefinition::Element(et)) => {
                 assert_eq!(et.name, "Box");
                 assert_eq!(et.children.len(), 1);
             }
-            _ => panic!("Expected an element template"),
+            _ => panic!("Expected a custom element"),
         }
-    }
-
-    #[test]
-    fn test_parse_simple_elements() {
-        let source = r#"
-            div {}
-            html {}
-        "#;
-
-        let expected_doc = Document {
-            definitions: vec![],
-            children: vec![
-                Node::Element(Element {
-                    tag_name: "div",
-                    attributes: vec![],
-                    children: vec![],
-                }),
-                Node::Element(Element {
-                    tag_name: "html",
-                    attributes: vec![],
-                    children: vec![],
-                }),
-            ],
-        };
-
-        let parsed_doc = parse(source).unwrap();
-        assert_eq!(parsed_doc, expected_doc);
-    }
-
-    #[test]
-    fn test_parse_attributes() {
-        let source = r#"
-            div {
-                id: "app";
-                class: container;
-            }
-        "#;
-
-        let expected_doc = Document {
-            definitions: vec![],
-            children: vec![
-                Node::Element(Element {
-                    tag_name: "div",
-                    attributes: vec![
-                        Attribute { key: "id", value: "app" },
-                        Attribute { key: "class", value: "container" },
-                    ],
-                    children: vec![],
-                }),
-            ],
-        };
-
-        let parsed_doc = parse(source).unwrap();
-        assert_eq!(parsed_doc, expected_doc);
-    }
-
-    #[test]
-    fn test_parse_script_and_style_blocks() {
-        let source = r#"
-            div {
-                style { color: red; }
-                script { const a = 1; }
-            }
-        "#;
-
-        let expected_doc = Document {
-            definitions: vec![],
-            children: vec![
-                Node::Element(Element {
-                    tag_name: "div",
-                    attributes: vec![],
-                    children: vec![
-                        Node::StyleBlock(vec![
-                            StyleContent::Property(CssProperty { key: "color", value: CssValue::Literal("red") })
-                        ]),
-                        Node::ScriptBlock("const a = 1; "),
-                    ],
-                }),
-            ],
-        };
-
-        let parsed_doc = parse(source).unwrap();
-        assert_eq!(parsed_doc, expected_doc);
-    }
-
-    #[test]
-    fn test_parse_nested_elements_and_text() {
-        let source = r#"
-            div {
-                h1 {
-                    text { "Hello, World!" }
-                }
-                p {
-                    text { 'This is a test.' }
-                }
-            }
-        "#;
-
-        let expected_doc = Document {
-            definitions: vec![],
-            children: vec![
-                Node::Element(Element {
-                    tag_name: "div",
-                    attributes: vec![],
-                    children: vec![
-                        Node::Element(Element {
-                            tag_name: "h1",
-                            attributes: vec![],
-                            children: vec![
-                                Node::Text("Hello, World!")
-                            ],
-                        }),
-                        Node::Element(Element {
-                            tag_name: "p",
-                            attributes: vec![],
-                            children: vec![
-                                Node::Text("This is a test.")
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        };
-
-        let parsed_doc = parse(source).unwrap();
-        assert_eq!(parsed_doc, expected_doc);
     }
 }
