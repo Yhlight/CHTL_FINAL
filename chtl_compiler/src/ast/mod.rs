@@ -7,13 +7,25 @@ pub struct Document<'a> {
 pub enum Node<'a> {
     Element(Element<'a>),
     Text(&'a str),
-    StyleBlock(&'a str),
+    StyleBlock(Vec<CssProperty<'a>>),
     ScriptBlock(&'a str),
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct CssProperty<'a> {
+    pub key: &'a str,
+    pub value: &'a str,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Attribute<'a> {
+    pub key: &'a str,
+    pub value: &'a str,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Element<'a> {
     pub tag_name: &'a str,
+    pub attributes: Vec<Attribute<'a>>,
     pub children: Vec<Node<'a>>,
-    // Will add attributes, style blocks, etc. later
 }
