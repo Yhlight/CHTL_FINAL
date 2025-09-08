@@ -20,8 +20,10 @@ public:
     void visit(StyleNode& node) override;
     void visit(TemplateUsageNode& node) override;
     void visit(class CustomStyleTemplateNode& node) override;
+    void visit(class StyleRuleNode& node) override;
 
 private:
     Parser& parser;
     std::stringstream output;
+    std::stringstream global_css;
 };

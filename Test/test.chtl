@@ -117,21 +117,41 @@ html {
 
         // --- Testing Advanced Specialization ---
         @Element AdvancedWidget {
-            // 1. Indexed Access Test
-            div[1] {
-                style { border: "2px solid green"; }
-            }
-
-            // 2. Deletion Tests
+            div[1] { style { border: "2px solid green"; } }
             delete span;
             delete footer;
+            insert after header { hr {} }
+            insert at bottom { p { text { "Appended at the very bottom." } } }
+        }
 
-            // 3. Insertion Tests
-            insert after header {
-                hr {} // self-closing tag
+        // --- Testing Advanced Style Blocks ---
+        div {
+            style {
+                // Test auto class generation
+                .widget {
+                    padding: "10px";
+                    background-color: "lightblue";
+                }
+
+                // Test contextual '&' selector
+                &:hover {
+                    background-color: "blue";
+                }
             }
-            insert at bottom {
-                p { text { "Appended at the very bottom." } }
+            text { "This is a widget." }
+        }
+        div {
+            id: "my-thing"; // Pre-existing ID
+            style {
+                // Test auto ID generation (should be ignored due to existing id)
+                #thing {
+                    border: "1px solid red";
+                }
+
+                // Test '&' with pre-existing ID
+                &:hover {
+                    border-color: "green";
+                }
             }
         }
     }

@@ -179,6 +179,9 @@ Token Lexer::getNextToken() {
         case ';': advance(); return makeToken(TokenType::SEMICOLON, ";");
         case '[': advance(); return makeToken(TokenType::LEFT_BRACKET, "[");
         case ']': advance(); return makeToken(TokenType::RIGHT_BRACKET, "]");
+        case '.': advance(); return makeToken(TokenType::DOT, ".");
+        case '#': advance(); return makeToken(TokenType::HASH, "#");
+        case '&': advance(); return makeToken(TokenType::AMPERSAND, "&");
     }
 
     // Fallback for unquoted literals like '16px'

@@ -146,67 +146,74 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
     consume(TokenType::STYLE, "Expect 'style' keyword.");
     consume(TokenType::LEFT_BRACE, "Expect '{' after 'style'.");
     auto node = std::make_unique<StyleNode>();
+
     while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
         if (check(TokenType::IDENTIFIER) && checkNext(TokenType::COLON)) {
+            // Inline property
             std::string key = currentToken.lexeme;
             advance();
             consume(TokenType::COLON, "Expect ':' after style property name.");
-            node->properties[key] = parseValue();
+            node->inlineProperties[key] = parseValue();
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-        } else if (match(TokenType::AT_STYLE)) {
-            std::string templateName = currentToken.lexeme;
-            consume(TokenType::IDENTIFIER, "Expect template name after '@Style'.");
+        } else if (check(TokenType::DOT) || check(TokenType::HASH) || check(TokenType::AMPERSAND)) {
+            // Nested style rule
+            auto rule = std::make_unique<StyleRuleNode>();
+            std::string selector_str;
 
-            if (match(TokenType::LEFT_BRACE)) {
-                // --- Custom Style Specialization ---
-                if (!customStyleTemplates.count(templateName)) {
-                    std::cerr << "Parse Error: Custom style template '" << templateName << "' not found." << std::endl;
-                    // Skip block
-                    int braceCount = 1;
-                    while (braceCount > 0 && !check(TokenType::END_OF_FILE)) { advance(); if(check(TokenType::LEFT_BRACE)) braceCount++; if(check(TokenType::RIGHT_BRACE)) braceCount--; }
-                    continue;
-                }
-
-                const auto& tmpl = customStyleTemplates.at(templateName);
-                auto specializedProps = tmpl->properties; // Clone base properties
-
-                while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
-                    if (match(TokenType::KEYWORD_DELETE)) {
-                        std::string keyToDelete = currentToken.lexeme;
-                        consume(TokenType::IDENTIFIER, "Expect property name after 'delete'.");
-                        consume(TokenType::SEMICOLON, "Expect ';' after property name.");
-                        specializedProps.erase(keyToDelete);
-                    } else if (check(TokenType::IDENTIFIER)) {
-                        std::string key = currentToken.lexeme;
-                        advance();
-                        consume(TokenType::COLON, "Expect ':' for property specialization.");
-                        specializedProps[key] = parseValue();
-                        consume(TokenType::SEMICOLON, "Expect ';' after property value.");
-                    } else {
-                        std::cerr << "Parse Error: Unexpected token in custom style specialization." << std::endl;
+            if (match(TokenType::AMPERSAND)) {
+                selector_str = "&";
+                if (check(TokenType::COLON)) {
+                    selector_str += currentToken.lexeme; // Add first ':'
+                    advance();
+                    if (check(TokenType::COLON)) { // Handle pseudo-elements like ::before
+                        selector_str += currentToken.lexeme;
                         advance();
                     }
+                    selector_str += currentToken.lexeme;
+                    consume(TokenType::IDENTIFIER, "Expect pseudo-class/element name after ':'.");
                 }
-                consume(TokenType::RIGHT_BRACE, "Expect '}' after specialization block.");
+            } else { // DOT or HASH
+                selector_str = currentToken.lexeme; // '.' or '#'
+                advance();
+                selector_str += currentToken.lexeme;
+                consume(TokenType::IDENTIFIER, "Expect identifier after '.' or '#'.");
+            }
 
-                // Apply specialized properties to the node
-                for (const auto& prop : specializedProps) {
-                    node->properties[prop.first] = prop.second;
-                }
+            rule->selector = selector_str;
 
-            } else if (match(TokenType::SEMICOLON)) {
-                // --- Simple Template Inclusion ---
-                if (styleTemplates.count(templateName)) {
+            consume(TokenType::LEFT_BRACE, "Expect '{' after selector.");
+            while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
+                std::string key = currentToken.lexeme;
+                consume(TokenType::IDENTIFIER, "Expect property name.");
+                consume(TokenType::COLON, "Expect ':' after property name.");
+                rule->properties[key] = parseValue();
+                consume(TokenType::SEMICOLON, "Expect ';' after property value.");
+            }
+            consume(TokenType::RIGHT_BRACE, "Expect '}' after rule block.");
+            node->rules.push_back(std::move(rule));
+        } else if (match(TokenType::AT_STYLE)) {
+            // For now, @Style usage will just merge into inline properties.
+            // This can be expanded later.
+            std::string templateName = currentToken.lexeme;
+            consume(TokenType::IDENTIFIER, "Expect template name after '@Style'.");
+            if (match(TokenType::SEMICOLON)) {
+                 if (styleTemplates.count(templateName)) {
                     for (const auto& prop : styleTemplates.at(templateName)->properties) {
-                        node->properties[prop.first] = prop.second;
+                        node->inlineProperties[prop.first] = prop.second;
                     }
                 } else {
                      std::cerr << "Parse Error: Style template '" << templateName << "' not found." << std::endl;
                 }
             } else {
-                std::cerr << "Parse Error: Expect '{' or ';' after @Style usage." << std::endl;
+                 // TODO: Handle specialized @Style usage in the new structure
+                 std::cerr << "Parse Warning: Specialized @Style usage is not fully supported in this context yet." << std::endl;
+                 consume(TokenType::LEFT_BRACE, "Skipping specialized style block.");
+                 int braceCount = 1;
+                 while(braceCount > 0 && !check(TokenType::END_OF_FILE)) { advance(); if(check(TokenType::LEFT_BRACE)) braceCount++; if(check(TokenType::RIGHT_BRACE)) braceCount--;}
+                 consume(TokenType::RIGHT_BRACE, "Skipped block.");
             }
-        } else {
+        }
+        else {
             std::cerr << "Parse Error: Unexpected token '" << currentToken.lexeme << "' in style block." << std::endl;
             advance();
         }
@@ -412,8 +419,11 @@ void Parser::mergeStyles(ElementNode* targetNode, ElementNode* specNode) {
         targetNode->children.push_back(std::move(newStyleNode));
     }
 
-    for (const auto& prop : specStyleNode->properties) {
-        targetStyleNode->properties[prop.first] = prop.second;
+    for (const auto& prop : specStyleNode->inlineProperties) {
+        targetStyleNode->inlineProperties[prop.first] = prop.second;
+    }
+    for (const auto& rule : specStyleNode->rules) {
+        targetStyleNode->rules.push_back(std::unique_ptr<StyleRuleNode>(static_cast<StyleRuleNode*>(rule->clone().release())));
     }
 }
 

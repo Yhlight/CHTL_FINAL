@@ -9,6 +9,7 @@ enum class TokenType {
     LEFT_PAREN, RIGHT_PAREN,
     LEFT_BRACKET, RIGHT_BRACKET,
     COLON, EQUAL, SEMICOLON,
+    DOT, HASH, AMPERSAND,
 
     // Literals
     IDENTIFIER, STRING, NUMBER,
