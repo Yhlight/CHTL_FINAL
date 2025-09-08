@@ -18,6 +18,9 @@ enum class TokenType {
     // Punctuation
     OpenBrace,
     CloseBrace,
+    OpenParen,
+    CloseParen,
+    Comma,
     Semicolon,
     LeftBracket,
     RightBracket,
@@ -65,6 +68,8 @@ struct Token {
     std::string value;
     int line;
     int column;
+    size_t start = 0;
+    size_t end = 0;
 };
 
 } // namespace CHTL

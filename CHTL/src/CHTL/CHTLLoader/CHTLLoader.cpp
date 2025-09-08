@@ -62,7 +62,7 @@ std::unique_ptr<DocumentNode> CHTLLoader::loadAndParse(const std::string& entry_
         Lexer lexer(source);
         auto tokens = lexer.tokenize();
 
-        Parser parser(tokens, context, *this, current_file);
+        Parser parser(source, tokens, context, *this, current_file);
         std::unique_ptr<DocumentNode> file_ast = parser.parse();
 
         // We only care about the side-effects of parsing (populating the context).

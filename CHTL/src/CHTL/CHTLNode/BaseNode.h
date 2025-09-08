@@ -26,6 +26,14 @@ enum class NodeType {
     // New types for Import/Namespace
     Import,
     Namespace,
+
+    // Variables
+    VariableDefinition,
+    VariableGroupDefinition,
+
+    // Raw Embedding
+    Origin,
+    OriginUsage,
 };
 
 class BaseNode {

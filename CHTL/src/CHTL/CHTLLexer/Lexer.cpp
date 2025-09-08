@@ -34,6 +34,9 @@ Token Lexer::nextToken() {
     switch (c) {
         case ' ': case '\r': case '\t': return nextToken();
         case '\n': m_line++; return nextToken();
+        case '(': return makeToken(TokenType::OpenParen, "(");
+        case ')': return makeToken(TokenType::CloseParen, ")");
+        case ',': return makeToken(TokenType::Comma, ",");
         case '{': return makeToken(TokenType::OpenBrace, "{");
         case '}': return makeToken(TokenType::CloseBrace, "}");
         case '=': return makeToken(TokenType::Equals, "=");
@@ -83,6 +86,6 @@ void Lexer::skipGeneratorComment() { while (peek() != '\n' && m_current < m_sour
 char Lexer::peek() const { if (m_current >= m_source.length()) return '\0'; return m_source[m_current]; }
 char Lexer::advance() { return m_source[m_current++]; }
 bool Lexer::match(char expected) { if (m_current >= m_source.length()) return false; if (m_source[m_current] != expected) return false; m_current++; return true; }
-Token Lexer::makeToken(TokenType type, const std::string& value) const { return {type, value, m_line, 0}; }
+Token Lexer::makeToken(TokenType type, const std::string& value) const { return {type, value, m_line, 0, m_start, m_current}; }
 
 } // namespace CHTL

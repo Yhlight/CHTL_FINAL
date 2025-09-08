@@ -9,6 +9,7 @@ class TernaryExpr;
 class BinaryExpr;
 class LiteralExpr;
 class VariableExpr;
+class FunctionCallExpr;
 
 class ExprVisitor {
 public:
@@ -17,6 +18,7 @@ public:
     virtual void visit(const BinaryExpr& expr) = 0;
     virtual void visit(const LiteralExpr& expr) = 0;
     virtual void visit(const VariableExpr& expr) = 0;
+    virtual void visit(const FunctionCallExpr& expr) = 0;
 };
 
 class Expr {

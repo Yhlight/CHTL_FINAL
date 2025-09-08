@@ -5,6 +5,8 @@
 #include "CHTL/CHTLNode/CustomUsageNode.h"
 #include "CHTL/CHTLNode/DeleteRuleNode.h"
 #include "CHTL/CHTLNode/InsertRuleNode.h"
+#include "CHTL/CHTLNode/OriginNode.h"
+#include "CHTL/CHTLNode/OriginUsageNode.h"
 #include "CHTL/ExpressionNode/LiteralExpr.h"
 #include "CHTL/Evaluator/Evaluator.h"
 #include <stdexcept>
@@ -16,12 +18,11 @@
 
 namespace CHTL {
 
-// This is the final, correct, integrated version of this file.
-
 bool isLiteral(const Expr* expr) { if (!expr) return false; return dynamic_cast<const LiteralExpr*>(expr) != nullptr; }
 
 std::string Generator::generate(const DocumentNode* document, const CHTLContext& context) {
     m_context = &context;
+    m_root_node = document;
     m_output.clear();
     m_global_css.clear();
     if (document) { for (const auto& child : document->getChildren()) { generateNode(child.get()); } }
@@ -40,8 +41,23 @@ void Generator::generateNode(const BaseNode* node) {
         case NodeType::Text: generateText(static_cast<const TextNode*>(node)); break;
         case NodeType::TemplateUsage: generateTemplateUsage(static_cast<const TemplateUsageNode*>(node), nullptr); break;
         case NodeType::CustomUsage: generateCustomUsage(static_cast<const CustomUsageNode*>(node)); break;
+        case NodeType::Origin: generateOrigin(static_cast<const OriginNode*>(node)); break;
+        case NodeType::OriginUsage: generateOriginUsage(static_cast<const OriginUsageNode*>(node)); break;
         default: break;
     }
+}
+
+void Generator::generateOriginUsage(const OriginUsageNode* node) {
+    const OriginNode* def = m_context->getOrigin(CHTLContext::GLOBAL_NAMESPACE, node->getName());
+     if (def) {
+        generateOrigin(def);
+    } else {
+        m_output += "<!-- Named origin block not found: " + node->getName() + " -->";
+    }
+}
+
+void Generator::generateOrigin(const OriginNode* node) {
+    m_output += node->getContent();
 }
 
 void Generator::expandStyleProperties(const BaseNode* container, std::map<std::string, const StylePropertyNode*>& properties) {
@@ -135,17 +151,49 @@ void Generator::generateCustomUsage(const CustomUsageNode* usageNode) {
     for (const auto& node : mutable_ast) { generateNode(node.get()); }
 }
 
+const ElementNode* Generator::findNodeBySelector(const BaseNode* searchRoot, const std::string& selector) const {
+    if (!searchRoot) return nullptr;
+
+    if (searchRoot->getType() == NodeType::Element) {
+        const auto* el = static_cast<const ElementNode*>(searchRoot);
+        if (selector[0] == '#') {
+            std::string id = selector.substr(1);
+            for(const auto& attr : el->getAttributes()) {
+                if(attr->getKey() == "id" && attr->getValue() == id) return el;
+            }
+        }
+    }
+
+    const std::vector<std::unique_ptr<BaseNode>>* children = nullptr;
+    if (searchRoot->getType() == NodeType::Document) children = &static_cast<const DocumentNode*>(searchRoot)->getChildren();
+    else if (searchRoot->getType() == NodeType::Element) children = &static_cast<const ElementNode*>(searchRoot)->getChildren();
+
+    if (children) {
+        for (const auto& child : *children) {
+            const ElementNode* found = findNodeBySelector(child.get(), selector);
+            if (found) return found;
+        }
+    }
+
+    return nullptr;
+}
+
+
 void Generator::generateElement(const ElementNode* element) {
     std::map<std::string, std::string> attributes;
     for (const auto& attr : element->getAttributes()) { attributes[attr->getKey()] = attr->getValue(); }
     if (element->getStyleBlock()) {
         std::map<std::string, const StylePropertyNode*> final_properties;
         expandStyleProperties(element->getStyleBlock(), final_properties);
-        // FIX: Rename local context to avoid shadowing m_context
+
         EvaluationContext eval_context;
-        for(const auto& pair : final_properties) { if(isLiteral(pair.second->getValue())) { Evaluator eval; eval_context[pair.first] = eval.evaluate(pair.second->getValue(), eval_context); } }
+        NodeResolver resolver = [this](const std::string& selector) {
+            return this->findNodeBySelector(this->m_root_node, selector);
+        };
+
+        for(const auto& pair : final_properties) { if(isLiteral(pair.second->getValue())) { Evaluator eval; eval_context[pair.first] = eval.evaluate(pair.second->getValue(), *m_context, eval_context, resolver); } }
         std::string inline_style;
-        for(const auto& pair : final_properties) { Evaluator eval; ChtlValue value = eval.evaluate(pair.second->getValue(), eval_context); inline_style += pair.first + ": " + value.toString() + ";"; }
+        for(const auto& pair : final_properties) { Evaluator eval; ChtlValue value = eval.evaluate(pair.second->getValue(), *m_context, eval_context, resolver); inline_style += pair.first + ": " + value.toString() + ";"; }
         if (!inline_style.empty()) attributes["style"] = inline_style;
         for (const auto& styleChild : element->getStyleBlock()->getChildren()) {
             if (styleChild->getType() == NodeType::StyleSelector) {
@@ -162,7 +210,7 @@ void Generator::generateElement(const ElementNode* element) {
                     selector_text.replace(amp_pos, 1, base_selector);
                 }
                 m_global_css += selector_text + " { ";
-                for (const auto& prop : selectorNode->getProperties()) { Evaluator eval; ChtlValue value = eval.evaluate(prop->getValue(), eval_context); m_global_css += prop->getKey() + ": " + value.toString() + "; "; }
+                for (const auto& prop : selectorNode->getProperties()) { Evaluator eval; ChtlValue value = eval.evaluate(prop->getValue(), *m_context, eval_context, resolver); m_global_css += prop->getKey() + ": " + value.toString() + "; "; }
                 m_global_css += "}\n";
             }
         }

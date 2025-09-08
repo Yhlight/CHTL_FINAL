@@ -85,6 +85,21 @@ void test_multi_file_import() {
     run_multi_file_test("Phase 4.B: Multi-file Import", fs, "/project/main.chtl", "<body><div></div></body>");
 }
 
+void test_variable_template() {
+    run_test("Phase 5.A: Variable Template Usage", "[Template] @Var MyTheme { primary: 'red'; } div { style { color: MyTheme(primary); } }", "<div style=\"color: red;\"></div>");
+}
+
+void test_origin_blocks() {
+    run_test("Phase 5.B: Immediate Origin Block", "body { [Origin] @Html { <p>raw html</p> } }", "<body> <p>raw html</p> </body>");
+    std::string named_origin_src = "[Origin] @Html MyRawBlock { <span>Raw Span</span> } body{ [Origin] @MyRawBlock; }";
+    run_test("Phase 5.B: Named Origin Block Usage", named_origin_src, "<body> <span>Raw Span</span> </body>");
+}
+
+void test_advanced_conditionals() {
+    std::string src = "div { id: box; style { width: 100px; } } div { style { height: #box.width > 50px ? 80px : 30px; } }";
+    run_test("Phase 5.C: Advanced Conditional Expression", src, "<div id=\"box\" style=\"width: 100px;\"></div><div style=\"height: 80px;\"></div>");
+}
+
 
 int main() {
     std::cout << "--- Running CHTL Full Test Suite ---" << std::endl;
@@ -103,6 +118,9 @@ int main() {
     test_insert_at_bottom();
     test_namespaced_template();
     test_multi_file_import();
+    test_variable_template();
+    test_origin_blocks();
+    test_advanced_conditionals();
     std::cout << "------------------------------------" << std::endl;
     return 0;
 }

@@ -4,6 +4,8 @@
 #include "../CHTLContext/CHTLContext.h"
 #include "../CHTLNode/DocumentNode.h"
 #include "../CHTLNode/BaseNode.h"
+#include "../CHTLNode/VariableDefinitionNode.h"
+#include "../CHTLNode/OriginNode.h"
 #include "../ExpressionNode/Expr.h"
 
 #include <vector>
@@ -15,11 +17,12 @@ namespace CHTL {
 
 class ElementNode; // Forward-declare
 class CHTLLoader; // Forward-declare
+class OriginNode; // Forward-declare
 
 class Parser {
 public:
     // Constructor now takes the loader to handle imports, and the current file path for context
-    explicit Parser(const std::vector<Token>& tokens, CHTLContext& context, CHTLLoader& loader, std::string current_path);
+    explicit Parser(const std::string& source, const std::vector<Token>& tokens, CHTLContext& context, CHTLLoader& loader, std::string current_path);
 
     std::unique_ptr<DocumentNode> parse();
 
@@ -34,6 +37,8 @@ private:
     // Top Level Directives
     void parseTopLevelDefinition();
     void parseTemplateDefinition();
+    void parseVariableGroupDefinition();
+    std::unique_ptr<VariableDefinitionNode> parseVariableDefinition();
     void parseCustomDefinition();
     void parseNamespaceDefinition();
     void parseImportDefinition();
@@ -41,6 +46,7 @@ private:
     // Usage Directives
     std::unique_ptr<BaseNode> parseUsage();
     std::unique_ptr<BaseNode> parseCustomUsage();
+    std::unique_ptr<BaseNode> parseOrigin();
     std::unique_ptr<BaseNode> parseSpecializationRule();
     std::unique_ptr<BaseNode> parseInsertRule();
 
@@ -66,6 +72,7 @@ private:
     bool match(std::initializer_list<TokenType> types);
     const Token& consume(TokenType type, const std::string& message);
 
+    const std::string& m_source;
     const std::vector<Token>& m_tokens;
     CHTLContext& m_context;
     CHTLLoader& m_loader; // Reference to the loader for handling imports

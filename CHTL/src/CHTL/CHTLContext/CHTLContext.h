@@ -2,6 +2,8 @@
 
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/CustomDefinitionNode.h"
+#include "../CHTLNode/VariableGroupDefinitionNode.h"
+#include "../CHTLNode/OriginNode.h"
 #include <string>
 #include <map>
 #include <memory>
@@ -25,9 +27,17 @@ public:
     void registerCustom(const std::string& ns, std::unique_ptr<CustomDefinitionNode> customNode);
     const CustomDefinitionNode* getCustom(const std::string& ns, const std::string& name) const;
 
+    void registerVariableGroup(const std::string& ns, std::unique_ptr<VariableGroupDefinitionNode> varGroupNode);
+    const VariableGroupDefinitionNode* getVariableGroup(const std::string& ns, const std::string& name) const;
+
+    void registerOrigin(const std::string& ns, std::unique_ptr<OriginNode> originNode);
+    const OriginNode* getOrigin(const std::string& ns, const std::string& name) const;
+
 private:
     NamespacedRegistry<TemplateDefinitionNode> m_templates;
     NamespacedRegistry<CustomDefinitionNode> m_customs;
+    NamespacedRegistry<VariableGroupDefinitionNode> m_variable_groups;
+    NamespacedRegistry<OriginNode> m_origins;
 };
 
 } // namespace CHTL

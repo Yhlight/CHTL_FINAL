@@ -6,6 +6,8 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
 #include "../CHTLNode/CustomUsageNode.h"
+#include "../CHTLNode/OriginNode.h"
+#include "../CHTLNode/OriginUsageNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/StylePropertyNode.h"
 #include "../CHTLContext/CHTLContext.h"
@@ -27,6 +29,8 @@ private:
     void generateText(const TextNode* text);
     void generateTemplateUsage(const TemplateUsageNode* node, const ElementNode* parentElement);
     void generateCustomUsage(const CustomUsageNode* node);
+    void generateOrigin(const OriginNode* node);
+    void generateOriginUsage(const OriginUsageNode* node);
 
     void expandStyleProperties(const BaseNode* container,
                                std::map<std::string, const StylePropertyNode*>& properties);
@@ -36,9 +40,14 @@ private:
         findInsertionPoint(const std::string& selector,
                            std::vector<std::unique_ptr<BaseNode>>& nodes);
 
+    // Helper for advanced conditional expressions
+    const ElementNode* findNodeBySelector(const BaseNode* searchRoot, const std::string& selector) const;
+
+
     std::string m_output;
     std::string m_global_css;
     const CHTLContext* m_context = nullptr;
+    const DocumentNode* m_root_node = nullptr;
 };
 
 } // namespace CHTL
