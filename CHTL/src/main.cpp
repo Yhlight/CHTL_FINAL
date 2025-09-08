@@ -11,24 +11,31 @@
 int main() {
     std::string source = R"(
         html {
-            head {
-                title { text { "My CHTL Page" } }
-            }
+            head {}
             body {
-                id = main;
-                class: "container";
+                div {
+                    id: my-div; // Manually set ID
+                    style {
+                        // This should become an inline style
+                        color: red;
 
-                h1 {
-                    text { "Welcome to CHTL!" }
-                }
-                p {
-                    text { "This is generated from CHTL source." }
+                        // This should be added to the class attribute and global styles
+                        .box {
+                            border: 1px solid black;
+                        }
+
+                        // This should use the element's context and go to global styles
+                        &:hover {
+                            border-color: blue;
+                        }
+                    }
+                    text { "Styled Box" }
                 }
             }
         }
     )";
 
-    std::cout << "--- CHTL Compiler End-to-End Test ---" << std::endl;
+    std::cout << "--- CHTL CSS Generation Test ---" << std::endl;
     std::cout << "\n--- Source Code ---\n" << source << std::endl;
 
     try {
@@ -54,7 +61,7 @@ int main() {
         return 1;
     }
 
-    std::cout << "\n-------------------------------------" << std::endl;
+    std::cout << "\n--------------------------------" << std::endl;
 
     return 0;
 }

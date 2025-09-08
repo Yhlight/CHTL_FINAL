@@ -26,6 +26,7 @@ private:
     // Utility functions for navigating the source.
     char peek() const;
     char advance();
+    bool match(char expected); // New helper function
     void skipLineComment();
     void skipBlockComment();
     void skipGeneratorComment();

@@ -11,7 +11,11 @@ enum class NodeType {
     Element,
     Text,
     Attribute,
-    // Other node types like Style, Script, Template, etc., will be added later.
+
+    // Style-related node types
+    StyleBlock,
+    StyleProperty,
+    StyleSelector,
 };
 
 // The abstract base class for all nodes in the CHTL Abstract Syntax Tree.

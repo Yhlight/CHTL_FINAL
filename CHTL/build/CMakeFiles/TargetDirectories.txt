@@ -1,4 +1,0 @@
-/app/CHTL/build/CMakeFiles/chtl.dir
-/app/CHTL/build/CMakeFiles/run_tests.dir
-/app/CHTL/build/CMakeFiles/edit_cache.dir
-/app/CHTL/build/CMakeFiles/rebuild_cache.dir

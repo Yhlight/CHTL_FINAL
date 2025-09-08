@@ -12,21 +12,27 @@ enum class TokenType {
     Unexpected,
 
     // Literals
-    Identifier,         // e.g., div, id, color
+    Identifier,         // e.g., div, id, color, background-color
     StringLiteral,      // e.g., "hello world"
-    UnquotedLiteral,    // e.g., red, 100px, some-class-name
+    UnquotedLiteral,    // e.g., red, 100px (Currently handled by Identifier, may be split later)
 
     // Punctuation
     OpenBrace,          // {
     CloseBrace,         // }
-    Colon,              // :
-    Equals,             // =
     Semicolon,          // ;
 
+    // Style-specific tokens
+    Colon,              // :
+    ColonColon,         // ::
+    Equals,             // =
+    Dot,                // .
+    Hash,               // #
+    Ampersand,          // &
+
     // Comments (Note: The lexer will skip these, but the types are defined for potential future use)
-    LineComment,        // // ...
-    BlockComment,       // /* ... */
-    GeneratorComment,   // -- ...
+    LineComment,
+    BlockComment,
+    GeneratorComment,
 };
 
 // Represents a single token extracted from the source code.

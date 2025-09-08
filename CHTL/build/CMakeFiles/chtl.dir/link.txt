@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/chtl.dir/src/main.cpp.o CMakeFiles/chtl.dir/src/CHTL/CHTLLexer/Lexer.cpp.o CMakeFiles/chtl.dir/src/CHTL/CHTLParser/Parser.cpp.o CMakeFiles/chtl.dir/src/CHTL/CHTLGenerator/Generator.cpp.o -o chtl

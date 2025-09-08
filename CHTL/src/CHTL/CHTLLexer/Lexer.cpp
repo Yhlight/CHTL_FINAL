@@ -26,85 +26,57 @@ Token Lexer::nextToken() {
 
     switch (c) {
         // Whitespace
-        case ' ':
-        case '\r':
-        case '\t':
-            return nextToken(); // Skip whitespace and get the next token
-        case '\n':
-            m_line++;
-            return nextToken(); // Skip newline and get the next token
+        case ' ': case '\r': case '\t': return nextToken();
+        case '\n': m_line++; return nextToken();
 
         // Single-character tokens
         case '{': return makeToken(TokenType::OpenBrace, "{");
         case '}': return makeToken(TokenType::CloseBrace, "}");
-        case ':': return makeToken(TokenType::Colon, ":");
         case '=': return makeToken(TokenType::Equals, "=");
         case ';': return makeToken(TokenType::Semicolon, ";");
+        case '.': return makeToken(TokenType::Dot, ".");
+        case '#': return makeToken(TokenType::Hash, "#");
+        case '&': return makeToken(TokenType::Ampersand, "&");
+
+        // Multi-character tokens
+        case ':':
+            if (match(':')) return makeToken(TokenType::ColonColon, "::");
+            return makeToken(TokenType::Colon, ":");
 
         // String literals
-        case '"':
-        case '\'':
-            return makeString(c);
+        case '"': case '\'': return makeString(c);
 
-        // Comments or division
+        // Comments
         case '/':
-            if (peek() == '/') {
-                skipLineComment();
-                return nextToken(); // Rerun to get the next valid token
-            }
-            if (peek() == '*') {
-                skipBlockComment();
-                return nextToken(); // Rerun to get the next valid token
-            }
-            // If not a comment, it's part of an unquoted literal, fall through.
+            if (match('/')) { skipLineComment(); return nextToken(); }
+            if (match('*')) { skipBlockComment(); return nextToken(); }
             break;
 
-        // Generator comments
         case '-':
-            if (peek() == '-') {
-                skipGeneratorComment();
-                return nextToken(); // Rerun to get the next valid token
-            }
-            // If not a generator comment, it's part of an unquoted literal, fall through.
+            if (match('-')) { skipGeneratorComment(); return nextToken(); }
             break;
     }
 
-    // If we fall through, it's an identifier or unquoted literal.
-    // Backtrack one character since we consumed it in the switch.
     m_current--;
     return makeIdentifierOrUnquotedLiteral();
 }
 
 Token Lexer::makeIdentifierOrUnquotedLiteral() {
     m_start = m_current;
-
-    // Consume characters until a delimiter is found.
     while (m_current < m_source.length()) {
         char c = peek();
-        if (std::isspace(c) || c == '{' || c == '}' || c == ':' || c == ';' || c == '=') {
+        if (std::isalnum(c) || c == '_' || c == '-') {
+            advance();
+        } else {
             break;
         }
-        // Check for comment starts as delimiters
-        if (c == '/' && m_current + 1 < m_source.length() && (m_source[m_current+1] == '/' || m_source[m_current+1] == '*')) {
-            break;
-        }
-        if (c == '-' && m_current + 1 < m_source.length() && m_source[m_current+1] == '-') {
-            break;
-        }
-        advance();
     }
-
     std::string value = m_source.substr(m_start, m_current - m_start);
-
-    // According to CHTL spec, element names and attributes are identifiers.
-    // Values can be unquoted literals. For now, we will classify anything
-    // that is not a keyword as Identifier, as the parser will determine its role.
-    // This simplifies the lexer.
     return makeToken(TokenType::Identifier, value);
 }
 
 Token Lexer::makeString(char quote_type) {
-    m_start = m_current; // Start after the opening quote
+    m_start = m_current;
     while (peek() != quote_type && m_current < m_source.length()) {
         if (peek() == '\n') m_line++;
         advance();
@@ -115,35 +87,26 @@ Token Lexer::makeString(char quote_type) {
     }
 
     std::string value = m_source.substr(m_start, m_current - m_start);
-    advance(); // Consume the closing quote
+    advance();
     return makeToken(TokenType::StringLiteral, value);
 }
 
 void Lexer::skipLineComment() {
-    while (peek() != '\n' && m_current < m_source.length()) {
-        advance();
-    }
+    while (peek() != '\n' && m_current < m_source.length()) advance();
 }
 
 void Lexer::skipBlockComment() {
-    advance(); // Consume the '*'
     while (m_current < m_source.length() - 1) {
         if (peek() == '*' && m_source[m_current + 1] == '/') {
-            advance(); // consume '*'
-            advance(); // consume '/'
-            return;
+            advance(); advance(); return;
         }
         if (peek() == '\n') m_line++;
         advance();
     }
-    // Note: No error handling for unterminated block comments for now.
 }
 
 void Lexer::skipGeneratorComment() {
-    advance(); // consume the second '-'
-    while (peek() != '\n' && m_current < m_source.length()) {
-        advance();
-    }
+    while (peek() != '\n' && m_current < m_source.length()) advance();
 }
 
 char Lexer::peek() const {
@@ -155,9 +118,14 @@ char Lexer::advance() {
     return m_source[m_current++];
 }
 
+bool Lexer::match(char expected) {
+    if (m_current >= m_source.length()) return false;
+    if (m_source[m_current] != expected) return false;
+    m_current++;
+    return true;
+}
+
 Token Lexer::makeToken(TokenType type, const std::string& value) const {
-    // The column would be more accurate if we tracked it properly.
-    // This is an approximation.
     return {type, value, m_line, 0};
 }
 
