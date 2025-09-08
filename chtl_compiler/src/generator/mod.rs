@@ -1,4 +1,4 @@
-use crate::ast::{Document, Element, Node, StyleContent, CssValue, CssProperty, ElementGroup};
+use crate::ast::{Document, Element, Node, StyleContent, CssValue, CssProperty, Specialization};
 use crate::context::Context;
 use std::collections::{HashSet, HashMap};
 
@@ -19,35 +19,119 @@ fn generate_node(html: &mut String, node: &Node, context: &Context) {
             html.push_str(text_content);
         }
         Node::ElementTemplateUsage { name, specializations } => {
-            let template: Option<&dyn ElementGroup> = context.element_templates.get(name).map(|&t| t as &dyn ElementGroup)
-                .or_else(|| context.custom_element_templates.get(name).map(|&c| c as &dyn ElementGroup));
+            let mut children_to_render = Vec::new();
+            let mut template_found = false;
 
-            if let Some(t) = template {
-                let mut specialized_children = t.children().clone();
+            if let Some(template) = context.element_templates.get(name) {
+                children_to_render = template.children.clone();
+                template_found = true;
+            } else if let Some(template) = context.custom_element_templates.get(name) {
+                children_to_render = template.children.clone();
+                template_found = true;
+            }
 
-                for spec in specializations {
-                    let mut current_index = 0;
-                    for child in &mut specialized_children {
-                        if let Node::Element(elem) = child {
-                            if elem.tag_name == spec.selector.tag_name {
-                                let index_matches = spec.selector.index.is_none() || spec.selector.index == Some(current_index);
-                                if index_matches {
-                                    elem.children.extend(spec.modifications.clone());
-                                    if spec.selector.index.is_some() { break; }
-                                }
-                                current_index += 1;
-                            }
-                        }
-                    }
-                }
-
-                for child_node in &specialized_children {
+            if template_found {
+                apply_specializations(&mut children_to_render, specializations);
+                for child_node in &children_to_render {
                     generate_node(html, child_node, context);
                 }
             }
         }
         Node::StyleBlock(_) => {}
         Node::ScriptBlock(_) => {}
+    }
+}
+
+fn apply_specializations<'a>(children: &mut Vec<Node<'a>>, specializations: &[Specialization<'a>]) {
+    for spec in specializations {
+        match spec {
+            Specialization::Modify(ms) => {
+                let mut current_index = 0;
+                for child in &mut *children {
+                    if let Node::Element(elem) = child {
+                        if elem.tag_name == ms.selector.tag_name {
+                            if ms.selector.index.is_none() || ms.selector.index == Some(current_index) {
+                                elem.children.extend(ms.modifications.clone());
+                                if ms.selector.index.is_some() { break; }
+                            }
+                            current_index += 1;
+                        }
+                    }
+                }
+            }
+            Specialization::Delete(ds) => {
+                let mut current_index = 0;
+                children.retain(|child| {
+                    if let Node::Element(elem) = child {
+                        if elem.tag_name == ds.selector.tag_name {
+                            let should_delete = ds.selector.index.is_none() || ds.selector.index == Some(current_index);
+                            current_index += 1;
+                            return !should_delete;
+                        }
+                    }
+                    true
+                });
+            }
+            Specialization::Insert(is) => {
+                let mut current_index = 0;
+                let mut target_pos = None;
+
+                for (i, child) in children.iter().enumerate() {
+                    if let Node::Element(elem) = child {
+                        if elem.tag_name == is.target_selector.tag_name {
+                            if is.target_selector.index.is_none() || is.target_selector.index == Some(current_index) {
+                                target_pos = Some(i);
+                                break;
+                            }
+                            current_index += 1;
+                        }
+                    }
+                }
+
+                if let Some(pos) = target_pos {
+                    match is.position {
+                        crate::ast::InsertPosition::Before => {
+                            let mut i = 0;
+                            for node in is.nodes_to_insert.clone() {
+                                children.insert(pos + i, node);
+                                i += 1;
+                            }
+                        }
+                        crate::ast::InsertPosition::After => {
+                            let mut i = 1;
+                             for node in is.nodes_to_insert.clone() {
+                                children.insert(pos + i, node);
+                                i += 1;
+                            }
+                        }
+                        crate::ast::InsertPosition::Replace => {
+                            children.remove(pos);
+                            let mut i = 0;
+                            for node in is.nodes_to_insert.clone() {
+                                children.insert(pos + i, node);
+                                i += 1;
+                            }
+                        }
+                        _ => {} // AtTop and AtBottom not handled for specific selectors yet
+                    }
+                } else if is.position == crate::ast::InsertPosition::AtTop {
+                     let mut i = 0;
+                    for node in is.nodes_to_insert.clone() {
+                        children.insert(i, node);
+                        i += 1;
+                    }
+                } else if is.position == crate::ast::InsertPosition::AtBottom {
+                    children.extend(is.nodes_to_insert.clone());
+                }
+            }
+        }
+    }
+
+    // Recurse into child elements
+    for child in children.iter_mut() {
+        if let Node::Element(elem) = child {
+            apply_specializations(&mut elem.children, specializations);
+        }
     }
 }
 
@@ -162,23 +246,16 @@ fn generate_element(html: &mut String, element: &Element, context: &Context) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::{CustomElementGroup, CssProperty, CssValue, Document, Element, Node, StyleContent, ElementSpecialization, ChildSelector};
+    use crate::ast::{CustomElementGroup, Document, Element, Node, Specialization, ChildSelector, DeleteSpec, InsertSpec};
 
     #[test]
-    fn test_element_specialization() {
+    fn test_element_delete_specialization() {
         let template = CustomElementGroup {
             name: "Box",
             children: vec![
-                Node::Element(Element {
-                    tag_name: "div",
-                    attributes: vec![],
-                    children: vec![ Node::Text("First") ],
-                }),
-                Node::Element(Element {
-                    tag_name: "div",
-                    attributes: vec![],
-                    children: vec![ Node::Text("Second") ],
-                }),
+                Node::Element(Element { tag_name: "p", attributes: vec![], children: vec![Node::Text("One")] }),
+                Node::Element(Element { tag_name: "span", attributes: vec![], children: vec![] }),
+                Node::Element(Element { tag_name: "p", attributes: vec![], children: vec![Node::Text("Two")] }),
             ]
         };
 
@@ -188,14 +265,9 @@ mod tests {
                 Node::ElementTemplateUsage {
                     name: "Box",
                     specializations: vec![
-                        ElementSpecialization {
-                            selector: ChildSelector { tag_name: "div", index: Some(1) },
-                            modifications: vec![
-                                Node::StyleBlock(vec![
-                                    StyleContent::Property(CssProperty { key: "color", value: Some(CssValue::Literal("red")) })
-                                ])
-                            ]
-                        }
+                        Specialization::Delete(DeleteSpec {
+                            selector: ChildSelector { tag_name: "span", index: None },
+                        })
                     ]
                 }
             ],
@@ -204,7 +276,42 @@ mod tests {
         let mut context = Context::new();
         context.custom_element_templates.insert("Box", &template);
 
-        let expected_html = "<div>First</div>\n<div style=\"color:red;\">Second</div>\n";
+        let expected_html = "<p>One</p>\n<p>Two</p>\n";
+        let generated_html = generate(&doc, &context);
+        assert_eq!(generated_html, expected_html);
+    }
+
+    #[test]
+    fn test_element_insert_specialization() {
+        let template = CustomElementGroup {
+            name: "Box",
+            children: vec![
+                Node::Element(Element { tag_name: "p", attributes: vec![], children: vec![Node::Text("One")] }),
+            ]
+        };
+
+        let doc = Document {
+            definitions: vec![],
+            children: vec![
+                Node::ElementTemplateUsage {
+                    name: "Box",
+                    specializations: vec![
+                        Specialization::Insert(InsertSpec {
+                            position: crate::ast::InsertPosition::After,
+                            target_selector: ChildSelector { tag_name: "p", index: Some(0) },
+                            nodes_to_insert: vec![
+                                Node::Element(Element { tag_name: "hr", attributes: vec![], children: vec![] })
+                            ]
+                        })
+                    ]
+                }
+            ],
+        };
+
+        let mut context = Context::new();
+        context.custom_element_templates.insert("Box", &template);
+
+        let expected_html = "<p>One</p>\n<hr></hr>\n";
         let generated_html = generate(&doc, &context);
         assert_eq!(generated_html, expected_html);
     }

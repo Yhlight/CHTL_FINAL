@@ -100,6 +100,44 @@ fn extract_hoisted_blocks(nodes: &[ast::Node], script_content: &mut String, styl
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn test_end_to_end_delete_specialization() {
+        let source = r#"
+            [Custom] @Element Box {
+                div class: "container" {
+                    p { text { "Hello" } }
+                    span { text { "Delete me" } }
+                }
+            }
+
+            @Element Box {
+                delete span;
+            }
+        "#;
+        let expected_html = "<div class=\"container\"><p>Hello</p>\n</div>\n";
+        let result = super::compile(source).unwrap();
+        assert_eq!(result.trim(), expected_html.trim());
+    }
+
+    #[test]
+    fn test_end_to_end_insert_specialization() {
+        let source = r#"
+            [Custom] @Element Box {
+                div class: "container" {
+                    p { text { "Hello" } }
+                }
+            }
+
+            @Element Box {
+                insert after p {
+                    hr {}
+                }
+            }
+        "#;
+        let expected_html = "<div class=\"container\"><p>Hello</p>\n<hr></hr>\n</div>\n";
+        let result = super::compile(source).unwrap();
+        assert_eq!(result.trim(), expected_html.trim());
+    }
 
     #[test]
     fn test_valueless_property_usage() {

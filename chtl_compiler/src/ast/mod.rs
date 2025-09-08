@@ -10,8 +10,6 @@ pub enum TopLevelDefinition<'a> {
     Custom(CustomDefinition<'a>),
 }
 
-// --- Template & Custom Definitions ---
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum TemplateDefinition<'a> {
     Style(TemplateStyleGroup<'a>),
@@ -44,23 +42,6 @@ pub struct TemplateElementGroup<'a> {
     pub children: Vec<Node<'a>>,
 }
 
-// Trait for any group of elements (Template or Custom)
-pub trait ElementGroup<'a> {
-    fn children(&self) -> &Vec<Node<'a>>;
-}
-
-impl<'a> ElementGroup<'a> for TemplateElementGroup<'a> {
-    fn children(&self) -> &Vec<Node<'a>> {
-        &self.children
-    }
-}
-
-impl<'a> ElementGroup<'a> for CustomElementGroup<'a> {
-    fn children(&self) -> &Vec<Node<'a>> {
-        &self.children
-    }
-}
-
 #[derive(Debug, PartialEq, Clone)]
 pub struct CustomElementGroup<'a> {
     pub name: &'a str,
@@ -85,8 +66,6 @@ pub struct TemplateVariable<'a> {
     pub value: &'a str,
 }
 
-// --- Renderable Nodes & Content ---
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum Node<'a> {
     Element(Element<'a>),
@@ -95,14 +74,42 @@ pub enum Node<'a> {
     ScriptBlock(&'a str),
     ElementTemplateUsage {
         name: &'a str,
-        specializations: Vec<ElementSpecialization<'a>>,
+        specializations: Vec<Specialization<'a>>,
     },
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct ElementSpecialization<'a> {
+pub enum Specialization<'a> {
+    Modify(ModifySpec<'a>),
+    Insert(InsertSpec<'a>),
+    Delete(DeleteSpec<'a>),
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct ModifySpec<'a> {
     pub selector: ChildSelector<'a>,
     pub modifications: Vec<Node<'a>>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct InsertSpec<'a> {
+    pub position: InsertPosition,
+    pub target_selector: ChildSelector<'a>,
+    pub nodes_to_insert: Vec<Node<'a>>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct DeleteSpec<'a> {
+    pub selector: ChildSelector<'a>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum InsertPosition {
+    Before,
+    After,
+    Replace,
+    AtTop,
+    AtBottom,
 }
 
 #[derive(Debug, PartialEq, Clone)]

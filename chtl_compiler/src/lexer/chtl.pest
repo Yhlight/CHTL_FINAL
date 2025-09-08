@@ -13,14 +13,17 @@ bare_literal = @{ (ASCII_ALPHANUMERIC | "_" | "." | "/" | ":" | "-" )+ } // Simp
 
 // --- Top Level Structure ---
 chtl_file = { SOI ~ file_content ~ EOI }
-file_content = { (custom_definition | template_definition | element | text_node | style_block | script_block | COMMENT)* }
+file_content = { (custom_definition | template_definition | element | text_node | style_block | script_block | element_template_usage | COMMENT)* }
 
 // --- Content inside an Element ---
-element_content = { (attribute | element_template_usage | text_node | style_block | script_block | element | COMMENT)* }
+element_content = { (element_template_usage | text_node | style_block | script_block | element | COMMENT)* }
 
 element_template_usage = { "@Element" ~ identifier ~ (";" | specialization_block) }
-specialization_block = { "{" ~ specialization_rule* ~ "}" }
+specialization_block = { "{" ~ (specialization_rule | insert_rule | delete_rule)* ~ "}" }
 specialization_rule = { child_selector ~ "{" ~ element_content ~ "}" }
+insert_rule = { "insert" ~ insert_position ~ child_selector ~ "{" ~ element_content ~ "}" }
+insert_position = { "before" | "after" | "replace" | ("at" ~ ("top" | "bottom")) }
+delete_rule = { "delete" ~ child_selector ~ ";" }
 child_selector = { identifier ~ index_group? }
 index_group = { "[" ~ index_val ~ "]" }
 index_val = { ASCII_DIGIT+ }
@@ -41,9 +44,9 @@ property = { property_key ~ ":" ~ (string_literal | bare_literal) ~ (";" | &"}")
 property_key = @{ (ASCII_ALPHA | "-")+ }
 var_declaration = { identifier ~ ":" ~ (string_literal | bare_literal) ~ (";" | &"}") }
 
-attribute = { identifier ~ (":" | "=") ~ (string_literal | bare_literal) ~ ";" }
+attribute = { identifier ~ (":" | "=") ~ (string_literal | bare_literal) }
 
-element = { identifier ~ "{" ~ element_content ~ "}" }
+element = { identifier ~ attribute* ~ "{" ~ element_content ~ "}" }
 text_node = { "text" ~ "{" ~ (string_literal | bare_literal) ~ "}" }
 
 style_block = { "style" ~ "{" ~ inner_block_content ~ "}" }
