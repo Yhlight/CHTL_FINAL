@@ -1,33 +1,84 @@
 // This module will contain the main compiler pipeline dispatcher.
 use crate::{ast, chtl_js, context::Context, generator, parser};
+use std::collections::HashSet;
+use std::fs;
+use std::path::{Path, PathBuf};
 
-pub fn compile(source: &str) -> Result<String, String> {
-    // 1. Parse the main CHTL source code
-    let chtl_ast = parser::parse(source).map_err(|e| e.to_string())?;
+/// Recursively processes a file and its imports, returning a flattened list of all parsed documents.
+fn process_file_and_imports(
+    path: &Path,
+    processed_files: &mut HashSet<PathBuf>,
+) -> Result<Vec<ast::Document<'static>>, String> {
+    let canonical_path = path.canonicalize().map_err(|e| e.to_string())?;
+    if processed_files.contains(&canonical_path) {
+        return Ok(Vec::new()); // Already processed, return empty vec.
+    }
+    processed_files.insert(canonical_path);
 
-    // 2. Build the compilation context from definitions
+    let source = fs::read_to_string(path).map_err(|e| e.to_string())?;
+    let static_source: &'static str = Box::leak(source.into_boxed_str());
+    let document = parser::parse(static_source).map_err(|e| e.to_string())?;
+
+    let mut modules_to_process = Vec::new();
+    // First, find all `use` statements in the current document.
+    for def in &document.definitions {
+        if let ast::TopLevelDefinition::Use(use_stmt) = def {
+            let parent_dir = path.parent().unwrap_or_else(|| Path::new(""));
+            let module_path = parent_dir.join(use_stmt.path);
+            modules_to_process.push(module_path);
+        }
+    }
+
+    // Start building the final list of docs, beginning with the current one.
+    let mut all_docs = vec![document];
+
+    // After the borrow on `document` is finished, we can recurse and extend the list.
+    for module_path in modules_to_process {
+        let imported_docs = process_file_and_imports(&module_path, processed_files)?;
+        all_docs.extend(imported_docs);
+    }
+
+    Ok(all_docs)
+}
+
+pub fn compile(source_path: &Path) -> Result<String, String> {
+    // 1. Recursively parse the entire dependency tree.
+    let mut processed_files = HashSet::new();
+    let all_docs = process_file_and_imports(source_path, &mut processed_files)?;
+
+    // 2. Build the compilation context from all discovered definitions.
     let mut context = Context::new();
-    for def in &chtl_ast.definitions {
-        match def {
-            ast::TopLevelDefinition::Template(template_def) => match template_def {
-                ast::TemplateDefinition::Style(st) => { context.style_templates.insert(st.name, st); }
-                ast::TemplateDefinition::Element(et) => { context.element_templates.insert(et.name, et); }
-                ast::TemplateDefinition::Var(vt) => { context.var_templates.insert(vt.name, vt); }
-            },
-            ast::TopLevelDefinition::Custom(custom_def) => match custom_def {
-                ast::CustomDefinition::Style(st) => { context.custom_style_templates.insert(st.name, st); }
-                ast::CustomDefinition::Element(et) => { context.custom_element_templates.insert(et.name, et); }
-                ast::CustomDefinition::Var(vt) => { context.custom_var_templates.insert(vt.name, vt); }
+    for doc in &all_docs {
+        for def in &doc.definitions {
+            match def {
+                ast::TopLevelDefinition::Use(_) => { /* Ignore here, already handled */ }
+                ast::TopLevelDefinition::Template(template_def) => {
+                    match template_def {
+                        ast::TemplateDefinition::Style(st) => { context.style_templates.insert(st.name, st); },
+                        ast::TemplateDefinition::Element(et) => { context.element_templates.insert(et.name, et); },
+                        ast::TemplateDefinition::Var(vt) => { context.var_templates.insert(vt.name, vt); },
+                    };
+                }
+                ast::TopLevelDefinition::Custom(custom_def) => {
+                     match custom_def {
+                        ast::CustomDefinition::Style(st) => { context.custom_style_templates.insert(st.name, st); },
+                        ast::CustomDefinition::Element(et) => { context.custom_element_templates.insert(et.name, et); },
+                        ast::CustomDefinition::Var(vt) => { context.custom_var_templates.insert(vt.name, vt); },
+                    };
+                }
             }
         }
     }
 
-    // 3. Walk the CHTL AST to extract script and hoisted style content
+    // 3. The first document is our main entry point for rendering.
+    let main_ast = all_docs.get(0).ok_or_else(|| "Failed to process the main source file.".to_string())?;
+
+    // 4. Walk the main AST to extract script and hoisted style content.
     let mut script_content = String::new();
     let mut style_content = String::new();
-    extract_hoisted_blocks(&chtl_ast.children, &mut script_content, &mut style_content, &context);
+    extract_hoisted_blocks(&main_ast.children, &mut script_content, &mut style_content, &context);
 
-    // 4. Compile the collected CHTL JS content
+    // 5. Compile the collected CHTL JS content.
     let generated_js = if !script_content.is_empty() {
         let chtl_js_ast = chtl_js::parser::parse(&script_content).map_err(|e| e.to_string())?;
         chtl_js::generator::generate(&chtl_js_ast)
@@ -35,10 +86,10 @@ pub fn compile(source: &str) -> Result<String, String> {
         String::new()
     };
 
-    // 5. Generate the base HTML from the CHTL AST
-    let mut generated_html = generator::generate(&chtl_ast, &context);
+    // 6. Generate the base HTML from the main AST.
+    let mut generated_html = generator::generate(main_ast, &context);
 
-    // 6. Merge the generated code into the HTML
+    // 7. Merge the generated code into the HTML.
     if !style_content.is_empty() {
         let style_tag = format!("<style>{}</style>", style_content);
         if let Some(pos) = generated_html.find("</head>") {
@@ -74,7 +125,12 @@ fn get_css_value<'a>(value: &'a Option<ast::CssValue<'a>>, context: &Context<'a>
     }
 }
 
-fn extract_hoisted_blocks(nodes: &[ast::Node], script_content: &mut String, style_content: &mut String, context: &Context) {
+fn extract_hoisted_blocks(
+    nodes: &[ast::Node],
+    script_content: &mut String,
+    style_content: &mut String,
+    context: &Context,
+) {
     for node in nodes {
         if let ast::Node::Element(element) = node {
             extract_hoisted_blocks(&element.children, script_content, style_content, context);
@@ -98,10 +154,18 @@ fn extract_hoisted_blocks(nodes: &[ast::Node], script_content: &mut String, styl
     }
 }
 
+
 #[cfg(test)]
 mod tests {
+    use std::fs::File;
+    use std::io::Write;
+    use tempfile::tempdir;
+
     #[test]
     fn test_end_to_end_delete_specialization() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("main.chtl");
+        let mut file = File::create(&file_path).unwrap();
         let source = r#"
             [Custom] @Element Box {
                 div class: "container" {
@@ -114,13 +178,18 @@ mod tests {
                 delete span;
             }
         "#;
+        file.write_all(source.as_bytes()).unwrap();
+
         let expected_html = "<div class=\"container\"><p>Hello</p>\n</div>\n";
-        let result = super::compile(source).unwrap();
+        let result = super::compile(&file_path).unwrap();
         assert_eq!(result.trim(), expected_html.trim());
     }
 
     #[test]
     fn test_end_to_end_insert_specialization() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("main.chtl");
+        let mut file = File::create(&file_path).unwrap();
         let source = r#"
             [Custom] @Element Box {
                 div class: "container" {
@@ -134,29 +203,43 @@ mod tests {
                 }
             }
         "#;
+        file.write_all(source.as_bytes()).unwrap();
+
         let expected_html = "<div class=\"container\"><p>Hello</p>\n<hr></hr>\n</div>\n";
-        let result = super::compile(source).unwrap();
+        let result = super::compile(&file_path).unwrap();
         assert_eq!(result.trim(), expected_html.trim());
     }
 
     #[test]
-    fn test_valueless_property_usage() {
-        let _source = r#"
-            [Custom] @Style Flexy {
-                display;
-                justify-content;
-            }
-            div {
-                style {
-                    @Style Flexy {
-                        display: flex;
-                        justify-content: center;
-                    }
+    fn test_module_import() {
+        let dir = tempdir().unwrap();
+
+        let module_path = dir.path().join("components.cmod");
+        let mut module_file = File::create(&module_path).unwrap();
+        let module_source = r#"
+            [Custom] @Element MyButton {
+                button class: "btn" {
+                    text { "Click Me" }
                 }
             }
         "#;
-        // This test will fail until the generator is updated to handle this usage syntax.
-        // let result = compile(source).unwrap();
-        // assert!(result.contains("style=\"display:flex;justify-content:center;\""));
+        module_file.write_all(module_source.as_bytes()).unwrap();
+
+        let main_path = dir.path().join("main.chtl");
+        let mut main_file = File::create(&main_path).unwrap();
+        let main_source = r#"
+            use "./components.cmod";
+
+            @Element MyButton {}
+        "#;
+        main_file.write_all(main_source.as_bytes()).unwrap();
+
+        let expected_html = "<button class=\"btn\">Click Me</button>\n";
+        let result = super::compile(&main_path).unwrap();
+        assert_eq!(result.trim(), expected_html.trim());
     }
+
+    // This test is commented out as it's for a feature not yet fully implemented.
+    // #[test]
+    // fn test_valueless_property_usage() { ... }
 }

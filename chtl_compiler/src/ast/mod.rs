@@ -5,7 +5,13 @@ pub struct Document<'a> {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+pub struct UseStatement<'a> {
+    pub path: &'a str,
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum TopLevelDefinition<'a> {
+    Use(UseStatement<'a>),
     Template(TemplateDefinition<'a>),
     Custom(CustomDefinition<'a>),
 }

@@ -2,7 +2,7 @@ use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
 
-use crate::ast::{Attribute, ChildSelector, CssProperty, CssValue, CustomDefinition, CustomElementGroup, CustomStyleGroup, CustomVarGroup, Document, Element, InsertPosition, InsertSpec, DeleteSpec, ModifySpec, Node, Specialization, StyleContent, TemplateDefinition, TemplateElementGroup, TemplateStyleGroup, TemplateVarGroup, TemplateVariable, TopLevelDefinition};
+use crate::ast::{Attribute, ChildSelector, CssProperty, CssValue, CustomDefinition, CustomElementGroup, CustomStyleGroup, CustomVarGroup, Document, Element, InsertPosition, InsertSpec, DeleteSpec, ModifySpec, Node, Specialization, StyleContent, TemplateDefinition, TemplateElementGroup, TemplateStyleGroup, TemplateVarGroup, TemplateVariable, TopLevelDefinition, UseStatement};
 use crate::css_parser;
 
 #[derive(Parser)]
@@ -17,6 +17,11 @@ pub fn parse(source: &str) -> Result<Document, pest::error::Error<Rule>> {
     if let Some(file_content_pair) = file_pair.into_inner().find(|p| p.as_rule() == Rule::file_content) {
         for pair in file_content_pair.into_inner() {
             match pair.as_rule() {
+                Rule::use_statement => {
+                    let path_pair = pair.into_inner().next().unwrap();
+                    let path = path_pair.as_str().trim_matches(|c| c == '"' || c == '\'');
+                    definitions.push(TopLevelDefinition::Use(UseStatement { path }));
+                }
                 Rule::template_definition => {
                     definitions.push(TopLevelDefinition::Template(build_template_definition(pair)));
                 }
@@ -230,6 +235,31 @@ fn build_node(pair: Pair<Rule>) -> Node {
 mod tests {
     use super::*;
     use crate::ast::*;
+
+    #[test]
+    fn test_parse_use_statement() {
+        let source = r#"
+            use "./components.cmod";
+            use 'styles/main.css';
+        "#;
+        let doc = parse(source).unwrap();
+        assert!(doc.children.is_empty());
+        assert_eq!(doc.definitions.len(), 2);
+
+        match &doc.definitions[0] {
+            TopLevelDefinition::Use(stmt) => {
+                assert_eq!(stmt.path, "./components.cmod");
+            }
+            _ => panic!("Expected UseStatement"),
+        }
+
+        match &doc.definitions[1] {
+            TopLevelDefinition::Use(stmt) => {
+                assert_eq!(stmt.path, "styles/main.css");
+            }
+            _ => panic!("Expected UseStatement"),
+        }
+    }
 
     #[test]
     fn test_parse_definitions() {

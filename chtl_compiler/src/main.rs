@@ -26,17 +26,9 @@ struct Args {
 
 /// Reads, compiles, and writes the file, handling all errors.
 fn compile_and_write(input_path: &Path, output_path: &Option<PathBuf>) {
-    // Read the input file content
-    let source = match fs::read_to_string(input_path) {
-        Ok(content) => content,
-        Err(e) => {
-            eprintln!("Error reading input file '{}': {}", input_path.display(), e);
-            return; // Don't exit in watch mode
-        }
-    };
-
-    // Compile the source code
-    match compile(&source) {
+    // The dispatcher now handles file reading.
+    // Compile the source code by passing the path.
+    match compile(input_path) {
         Ok(html) => {
             // Write to output file or stdout
             if let Some(path) = output_path {
