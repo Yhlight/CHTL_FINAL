@@ -87,6 +87,7 @@ Token Lexer::identifier() {
     std::string text = source.substr(start, current - start);
     if (text == "text") return makeToken(TokenType::TEXT, text);
     if (text == "style") return makeToken(TokenType::STYLE, text);
+    if (text == "delete") return makeToken(TokenType::KEYWORD_DELETE, text);
     return makeToken(TokenType::IDENTIFIER, text);
 }
 

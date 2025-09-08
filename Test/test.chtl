@@ -17,10 +17,14 @@
     }
 }
 
-[Custom] @Style MyCustomStyle {
+[Custom] @Style ButtonBase {
     border: "1px solid black";
+    padding: "5px 10px";
+    font-weight: bold;
+
+    // Valueless properties
     color,
-    font-size;
+    background-color;
 }
 
 html {
@@ -39,10 +43,17 @@ html {
             class: "container";
 
             style {
-                width: 100px;
-                height: 200px;
-                background-color: MyColors(primary);
-                @Style DefaultText;
+                @Style ButtonBase {
+                    // Provide values for valueless properties
+                    color: white;
+                    background-color: MyColors(secondary);
+
+                    // Override a valued property
+                    border: "2px solid green";
+
+                    // Delete a property
+                    delete padding;
+                }
             }
 
             h1 {

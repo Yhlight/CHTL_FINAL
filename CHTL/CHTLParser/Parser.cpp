@@ -155,28 +155,63 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
             node->properties[key] = parseValue();
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
         } else if (match(TokenType::AT_STYLE)) {
-            // This is a bit of a hack. A StyleNode can't have a TemplateUsageNode as a child.
-            // The template usage should be handled by the generator by merging properties.
-            // For now, I'll just parse it and the generator will have to handle it.
-            // A better approach would be to have a separate list for template usages.
-            // Let's create a new node type that can hold both properties and template usages.
-            // That's too much refactoring for now.
-
-            // The simplest approach is to expand the style template here in the parser.
-            // This avoids changing the generator logic too much.
-
-            // Let's try that.
             std::string templateName = currentToken.lexeme;
             consume(TokenType::IDENTIFIER, "Expect template name after '@Style'.");
-            consume(TokenType::SEMICOLON, "Expect ';' after style template usage.");
 
-            if (styleTemplates.count(templateName)) {
-                const auto& tmpl = styleTemplates.at(templateName);
-                for (const auto& prop : tmpl->properties) {
+            if (match(TokenType::SEMICOLON)) { // Regular template usage
+                if (styleTemplates.count(templateName)) {
+                    const auto& tmpl = styleTemplates.at(templateName);
+                    for (const auto& prop : tmpl->properties) {
+                        node->properties[prop.first] = prop.second;
+                    }
+                } else {
+                    std::cerr << "Parse Error: Style template '" << templateName << "' not found at line " << currentToken.line << std::endl;
+                }
+            } else if (match(TokenType::LEFT_BRACE)) { // Custom style usage
+                if (!customStyleTemplates.count(templateName)) {
+                    std::cerr << "Parse Error: Custom style template '" << templateName << "' not found at line " << currentToken.line << std::endl;
+                    // Consume the block to recover
+                    while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) { advance(); }
+                    consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
+                    return nullptr;
+                }
+
+                const auto& baseTmpl = customStyleTemplates.at(templateName);
+                std::map<std::string, std::string> specializedProps = baseTmpl->properties;
+                std::vector<std::string> propsToDelete;
+
+                while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
+                    if (match(TokenType::KEYWORD_DELETE)) {
+                        do {
+                            propsToDelete.push_back(currentToken.lexeme);
+                            consume(TokenType::IDENTIFIER, "Expect property name after 'delete'.");
+                        } while (match(TokenType::COMMA));
+                        consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
+                    } else if (check(TokenType::IDENTIFIER)) {
+                        std::string key = currentToken.lexeme;
+                        advance();
+                        consume(TokenType::COLON, "Expect ':' after property name.");
+                        specializedProps[key] = parseValue();
+                        consume(TokenType::SEMICOLON, "Expect ';' after property value.");
+                    } else {
+                        std::cerr << "Parse Error: Unexpected token in custom style usage at line " << currentToken.line << std::endl;
+                        advance();
+                    }
+                }
+
+                // Process deletions
+                for (const auto& prop : propsToDelete) {
+                    specializedProps.erase(prop);
+                }
+
+                // Merge the specialized properties into the current style node
+                for (const auto& prop : specializedProps) {
                     node->properties[prop.first] = prop.second;
                 }
+
+                consume(TokenType::RIGHT_BRACE, "Expect '}' after custom style usage block.");
             } else {
-                std::cerr << "Parse Error: Style template '" << templateName << "' not found at line " << currentToken.line << std::endl;
+                std::cerr << "Parse Error: Expect ';' or '{' after @Style usage at line " << currentToken.line << std::endl;
             }
         } else {
             std::cerr << "Parse Error: Unexpected token " << currentToken.lexeme << " in style block at line " << currentToken.line << std::endl;
