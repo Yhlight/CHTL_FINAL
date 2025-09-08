@@ -5,11 +5,10 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
-#include "../CHTLNode/OriginNode.h"
 #include <string>
 #include <sstream>
 
-class Parser; // Forward declaration
+class Parser;
 
 class Generator : public AstVisitor {
 public:
@@ -20,7 +19,6 @@ public:
     void visit(TextNode& node) override;
     void visit(StyleNode& node) override;
     void visit(TemplateUsageNode& node) override;
-    void visit(OriginNode& node) override;
 
 private:
     Parser& parser;

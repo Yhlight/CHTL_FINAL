@@ -21,7 +21,9 @@ public:
         node->tagName = this->tagName;
         node->attributes = this->attributes;
         for (const auto& child : this->children) {
-            node->children.push_back(child->clone());
+            auto clonedChild = child->clone();
+            clonedChild->parent = node.get();
+            node->children.push_back(std::move(clonedChild));
         }
         return node;
     }

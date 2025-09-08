@@ -10,7 +10,7 @@ public:
     std::map<std::string, std::string> properties;
 
     void accept(AstVisitor& visitor) override {
-        // Template definitions are not visited directly.
+        // Not visited directly
     }
 
     std::unique_ptr<BaseNode> clone() const override {

@@ -28,7 +28,7 @@ Token Lexer::makeToken(TokenType type, const std::string& lexeme) {
 }
 
 Token Lexer::errorToken(const std::string& message) {
-    return Token{TokenType::END_OF_FILE, message, line, column}; // Using EOF as an error indicator for now
+    return Token{TokenType::END_OF_FILE, message, line, column};
 }
 
 void Lexer::skipWhitespaceAndComments() {
@@ -49,8 +49,8 @@ void Lexer::skipWhitespaceAndComments() {
                 if (peekNext() == '/') {
                     while (peek() != '\n' && !isAtEnd()) advance();
                 } else if (peekNext() == '*') {
-                    advance(); // Consume '/'
-                    advance(); // Consume '*'
+                    advance();
+                    advance();
                     while (!(peek() == '*' && peekNext() == '/') && !isAtEnd()) {
                         if (peek() == '\n') {
                             line++;
@@ -59,8 +59,8 @@ void Lexer::skipWhitespaceAndComments() {
                         advance();
                     }
                     if (!isAtEnd()) {
-                        advance(); // Consume '*'
-                        advance(); // Consume '/'
+                        advance();
+                        advance();
                     }
                 } else {
                     return;
@@ -87,131 +87,77 @@ Token Lexer::identifier() {
     std::string text = source.substr(start, current - start);
     if (text == "text") return makeToken(TokenType::TEXT, text);
     if (text == "style") return makeToken(TokenType::STYLE, text);
-    if (text == "delete") return makeToken(TokenType::KEYWORD_DELETE, text);
     if (text == "inherit") return makeToken(TokenType::KEYWORD_INHERIT, text);
     return makeToken(TokenType::IDENTIFIER, text);
 }
 
-void Lexer::enterRawMode() {
-    rawMode = true;
-}
-
-void Lexer::exitRawMode() {
-    rawMode = false;
-}
-
 Token Lexer::stringLiteral() {
-    char quote = advance(); // Consume the opening quote
+    char quote = peek();
+    advance();
     size_t start = current;
     while (peek() != quote && !isAtEnd()) {
         if (peek() == '\n') line++;
         advance();
     }
-
-    if (isAtEnd()) {
-        return errorToken("Unterminated string.");
-    }
-
-    advance(); // Consume the closing quote.
-
-    std::string value = source.substr(start, current - start -1);
+    if (isAtEnd()) return errorToken("Unterminated string.");
+    std::string value = source.substr(start, current - start);
+    advance();
     return makeToken(TokenType::STRING, value);
 }
 
-
 Token Lexer::getNextToken() {
-    if (rawMode) {
-        size_t start = current;
-        int braceCount = 1;
-        while (!isAtEnd() && braceCount > 0) {
-            if (peek() == '{') {
-                braceCount++;
-            } else if (peek() == '}') {
-                braceCount--;
-            }
-            if (braceCount > 0) {
-                 if (peek() == '\n') {
-                    line++;
-                    column = 1;
-                }
-                advance();
-            }
-        }
-        std::string raw = source.substr(start, current - start);
-        return makeToken(TokenType::RAW_STRING, raw);
-    }
-
     skipWhitespaceAndComments();
 
     if (isAtEnd()) {
         return makeToken(TokenType::END_OF_FILE, "");
     }
 
-    char c = advance();
-
-    if (isalpha(c) || c == '_') {
-        // Backtrack one character as identifier() expects to start at the beginning of the identifier.
-        current--;
-        column--;
-        return identifier();
+    if (peek() == '[') {
+        if (source.substr(current, 10) == "[Template]") {
+            current += 10;
+            return makeToken(TokenType::KEYWORD_TEMPLATE, "[Template]");
+        }
     }
 
-    if (c == '"' || c == '\'') {
-         // Backtrack one character as stringLiteral() expects to start at the opening quote.
-        current--;
-        column--;
-        return stringLiteral();
+    if (peek() == '@') {
+        if (source.substr(current, 6) == "@Style") {
+            current += 6;
+            return makeToken(TokenType::AT_STYLE, "@Style");
+        }
+        if (source.substr(current, 8) == "@Element") {
+            current += 8;
+            return makeToken(TokenType::AT_ELEMENT, "@Element");
+        }
+        if (source.substr(current, 4) == "@Var") {
+            current += 4;
+            return makeToken(TokenType::AT_VAR, "@Var");
+        }
     }
+
+    char c = peek();
+    if (isalpha(c) || c == '_') return identifier();
+    if (c == '"' || c == '\'') return stringLiteral();
 
     switch (c) {
-        case '(': return makeToken(TokenType::LEFT_PAREN, "(");
-        case ')': return makeToken(TokenType::RIGHT_PAREN, ")");
-        case '{': return makeToken(TokenType::LEFT_BRACE, "{");
-        case '}': return makeToken(TokenType::RIGHT_BRACE, "}");
-        case ':': return makeToken(TokenType::COLON, ":");
-        case '=': return makeToken(TokenType::EQUAL, "=");
-        case ';': return makeToken(TokenType::SEMICOLON, ";");
-        case ',': return makeToken(TokenType::COMMA, ",");
-        case '[':
-            if (source.substr(current, 8) == "Template]") {
-                current += 8;
-                return makeToken(TokenType::KEYWORD_TEMPLATE, "[Template]");
-            }
-            if (source.substr(current, 7) == "Custom]") {
-                current += 7;
-                return makeToken(TokenType::KEYWORD_CUSTOM, "[Custom]");
-            }
-            if (source.substr(current, 7) == "Origin]") {
-                current += 7;
-                return makeToken(TokenType::KEYWORD_ORIGIN, "[Origin]");
-            }
-            break;
-        case '@':
-            if (source.substr(current, 5) == "Style") {
-                current += 5;
-                return makeToken(TokenType::AT_STYLE, "@Style");
-            }
-            if (source.substr(current, 7) == "Element") {
-                current += 7;
-                return makeToken(TokenType::AT_ELEMENT, "@Element");
-            }
-            if (source.substr(current, 3) == "Var") {
-                current += 3;
-                return makeToken(TokenType::AT_VAR, "@Var");
-            }
-            break;
+        case '(': advance(); return makeToken(TokenType::LEFT_PAREN, "(");
+        case ')': advance(); return makeToken(TokenType::RIGHT_PAREN, ")");
+        case '{': advance(); return makeToken(TokenType::LEFT_BRACE, "{");
+        case '}': advance(); return makeToken(TokenType::RIGHT_BRACE, "}");
+        case ':': advance(); return makeToken(TokenType::COLON, ":");
+        case '=': advance(); return makeToken(TokenType::EQUAL, "=");
+        case ';': advance(); return makeToken(TokenType::SEMICOLON, ";");
     }
 
-    // Unquoted literals for attributes and text
-    if (isalnum(c) || c == '#') { // Simple check for things that can start an unquoted literal
-        size_t start = current - 1;
-         while (!isspace(peek()) && peek() != ';' && peek() != '}' && !isAtEnd()) {
-            advance();
-        }
+    // Fallback for unquoted literals
+    size_t start = current;
+    while (!isspace(peek()) && peek() != ';' && peek() != '}' && peek() != '{' && !isAtEnd()) {
+        advance();
+    }
+    if (current > start) {
         std::string text = source.substr(start, current - start);
         return makeToken(TokenType::STRING, text);
     }
 
-
+    advance();
     return errorToken("Unexpected character.");
 }

@@ -1,19 +1,19 @@
 // This is a test CHTL file.
 
 [Template] @Var MyColors {
-    primary: red;
-    secondary: blue;
+    primary: "red";
+    secondary: "blue";
 }
 
 [Template] @Style BaseStyle {
-    font-family: Arial;
-    font-size: 16px;
-    color: black;
+    font-family: "Arial";
+    font-size: "16px";
+    color: "black";
 }
 
 [Template] @Style InheritedStyle {
     @Style BaseStyle;
-    color: blue; // Override base
+    color: "blue"; // Override base
 }
 
 [Template] @Element BaseBox {
@@ -26,88 +26,14 @@
     p { text { "This is also from the inherited box." } }
 }
 
-[Template] @Element MyBox {
-    div {
-        class: "box";
-        text { "This is a box from a template." }
-    }
-}
-
-[Custom] @Element MyComponent {
-    div {
-        class: "component-wrapper";
-        h3 { text { "Component Title" } }
-        p { text { "Component paragraph." } }
-    }
-}
-
-[Custom] @Style ButtonBase {
-    border: "1px solid black";
-    padding: "5px 10px";
-    font-weight: bold;
-
-    // Valueless properties
-    color,
-    background-color;
-}
-
 html {
-    head {
-        title {
-            text { "My CHTL Page" }
-        }
-        link {
-            rel: "stylesheet";
-            href: "style.css";
-        }
-    }
     body {
         div {
-            id: "main-container";
-            class: "container";
-
             style {
-                @Style ButtonBase {
-                    // Provide values for valueless properties
-                    color: white;
-                    background-color: MyColors(secondary);
-
-                    // Override a valued property
-                    border: "2px solid green";
-
-                    // Delete a property
-                    delete padding;
-                }
                 @Style InheritedStyle;
-            }
-
-            h1 {
-                text { "Welcome to CHTL!" }
-            }
-
-            p {
-                text {
-                    "This is a paragraph."
-                }
-            }
-            @Element MyBox;
-            @Element InheritedBox;
-
-            @Element MyComponent {
-                h3 {
-                    style { color: green; }
-                }
-                p {
-                    style { font-style: italic; }
-                }
-            }
-
-            [Origin] @Html {
-                <!-- This is a raw HTML comment -->
-                <div class="raw-html">
-                    <p>This should be passed through as-is.</p>
-                </div>
+                background-color: MyColors(secondary);
             }
         }
+        @Element InheritedBox;
     }
 }

@@ -5,8 +5,6 @@
 Generator::Generator(Parser& parser) : parser(parser) {}
 
 std::string Generator::generate(ElementNode& root) {
-    // The root node from the parser is a dummy node.
-    // We should generate its children.
     for (auto& child : root.children) {
         child->accept(*this);
     }
@@ -20,7 +18,6 @@ void Generator::visit(ElementNode& node) {
         output << " " << attr.first << "=\"" << attr.second << "\"";
     }
 
-    // Collect inline styles from StyleNode children
     std::stringstream style_ss;
     for (const auto& child : node.children) {
         if (auto* styleNode = dynamic_cast<StyleNode*>(child.get())) {
@@ -29,12 +26,10 @@ void Generator::visit(ElementNode& node) {
             }
         }
     }
-
     if (style_ss.rdbuf()->in_avail() > 0) {
         output << " style=\"" << style_ss.str() << "\"";
     }
 
-    // Check for self-closing tags, a simple list for now.
     std::vector<std::string> selfClosingTags = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"};
     bool isSelfClosing = false;
     for(const auto& tag : selfClosingTags) {
@@ -65,8 +60,7 @@ void Generator::visit(TextNode& node) {
 }
 
 void Generator::visit(StyleNode& node) {
-    // This will be implemented in the next step.
-    // For now, we do nothing.
+    // Handled in visit(ElementNode&)
 }
 
 void Generator::visit(TemplateUsageNode& node) {
@@ -80,8 +74,4 @@ void Generator::visit(TemplateUsageNode& node) {
             std::cerr << "Generator Error: Element template '" << node.name << "' not found." << std::endl;
         }
     }
-}
-
-void Generator::visit(OriginNode& node) {
-    output << node.rawContent;
 }

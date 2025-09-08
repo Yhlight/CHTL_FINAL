@@ -28,4 +28,5 @@ private:
     void skipWhitespaceAndComments();
     Token identifier();
     Token stringLiteral();
+    Token number();
 };
