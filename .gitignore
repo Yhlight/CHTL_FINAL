@@ -1,0 +1,5 @@
+# Compiled object files
+*.o
+
+# Executable
+chtl_compiler

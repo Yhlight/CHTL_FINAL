@@ -1,0 +1,29 @@
+// This is a test CHTL file.
+
+html {
+    head {
+        title {
+            text { "My CHTL Page" }
+        }
+        link {
+            rel: "stylesheet";
+            href: "style.css";
+        }
+    }
+    body {
+        div {
+            id: "main-container";
+            class: "container";
+
+            h1 {
+                text { "Welcome to CHTL!" }
+            }
+
+            p {
+                text {
+                    "This is a paragraph."
+                }
+            }
+        }
+    }
+}
