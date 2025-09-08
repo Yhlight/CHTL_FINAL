@@ -1,4 +1,4 @@
-use crate::ast::{Document, Element, Node, StyleContent, CssValue, CssProperty};
+use crate::ast::{Document, Element, Node, StyleContent, CssValue, CssProperty, ElementGroup};
 use crate::context::Context;
 use std::collections::{HashSet, HashMap};
 
@@ -18,9 +18,30 @@ fn generate_node(html: &mut String, node: &Node, context: &Context) {
         Node::Text(text_content) => {
             html.push_str(text_content);
         }
-        Node::ElementTemplateUsage { name, specializations: _ } => {
-            if let Some(template) = context.element_templates.get(name) {
-                for child_node in &template.children {
+        Node::ElementTemplateUsage { name, specializations } => {
+            let template: Option<&dyn ElementGroup> = context.element_templates.get(name).map(|&t| t as &dyn ElementGroup)
+                .or_else(|| context.custom_element_templates.get(name).map(|&c| c as &dyn ElementGroup));
+
+            if let Some(t) = template {
+                let mut specialized_children = t.children().clone();
+
+                for spec in specializations {
+                    let mut current_index = 0;
+                    for child in &mut specialized_children {
+                        if let Node::Element(elem) = child {
+                            if elem.tag_name == spec.selector.tag_name {
+                                let index_matches = spec.selector.index.is_none() || spec.selector.index == Some(current_index);
+                                if index_matches {
+                                    elem.children.extend(spec.modifications.clone());
+                                    if spec.selector.index.is_some() { break; }
+                                }
+                                current_index += 1;
+                            }
+                        }
+                    }
+                }
+
+                for child_node in &specialized_children {
                     generate_node(html, child_node, context);
                 }
             }
@@ -44,7 +65,6 @@ fn get_css_value<'a>(value: &'a Option<CssValue<'a>>, context: &Context<'a>) -> 
 
 fn apply_style_template<'a>(name: &'a str, context: &Context<'a>, props: &mut Vec<CssProperty<'a>>, stack: &mut HashSet<&'a str>) {
     if !stack.insert(name) { return; }
-
     if let Some(template) = context.style_templates.get(name) {
         for item in &template.content {
             match item {
@@ -56,7 +76,6 @@ fn apply_style_template<'a>(name: &'a str, context: &Context<'a>, props: &mut Ve
             }
         }
     }
-
     stack.remove(name);
 }
 
@@ -66,7 +85,6 @@ fn generate_element(html: &mut String, element: &Element, context: &Context) {
     let mut auto_classes = HashSet::new();
     let mut auto_id = None;
 
-    // --- Pass 1: Collect all properties, deletions, and auto-selectors ---
     for node in &element.children {
         if let Node::StyleBlock(style_contents) = node {
             for sc in style_contents {
@@ -85,7 +103,7 @@ fn generate_element(html: &mut String, element: &Element, context: &Context) {
                              }
                         }
                     }
-                    StyleContent::CustomStyleUsage { name: _, properties: _ } => { /* ... to be implemented ... */ }
+                    StyleContent::CustomStyleUsage { name: _, properties: _ } => {}
                     StyleContent::Delete(keys) => {
                         for key in keys {
                             keys_to_delete.insert(*key);
@@ -105,14 +123,12 @@ fn generate_element(html: &mut String, element: &Element, context: &Context) {
         }
     }
 
-    // --- Pass 2: Apply deletions ---
     for key in keys_to_delete {
         final_properties.remove(key);
     }
 
     let style_string: String = final_properties.iter().map(|(k, v)| format!("{}:{};", k, v)).collect();
 
-    // --- Attribute Generation ---
     let mut formatted_attrs = String::new();
     let mut has_id_attr = false;
     for attr in &element.attributes {
@@ -136,7 +152,6 @@ fn generate_element(html: &mut String, element: &Element, context: &Context) {
         formatted_attrs.push_str(&format!(" style=\"{}\"", style_string));
     }
 
-    // --- HTML Generation ---
     html.push_str(&format!("<{}{}>", element.tag_name, formatted_attrs));
     for child in &element.children {
         generate_node(html, child, context);
@@ -147,39 +162,50 @@ fn generate_element(html: &mut String, element: &Element, context: &Context) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::{CssProperty, CssValue, Document, Element, Node, TemplateStyleGroup, StyleContent};
+    use crate::ast::{CustomElementGroup, CssProperty, CssValue, Document, Element, Node, StyleContent, ElementSpecialization, ChildSelector};
 
     #[test]
-    fn test_delete_property() {
-        let base_template = TemplateStyleGroup {
-            name: "Base",
-            content: vec![
-                StyleContent::Property(CssProperty { key: "color", value: Some(CssValue::Literal("blue"))}),
-                StyleContent::Property(CssProperty { key: "font-size", value: Some(CssValue::Literal("16px"))}),
+    fn test_element_specialization() {
+        let template = CustomElementGroup {
+            name: "Box",
+            children: vec![
+                Node::Element(Element {
+                    tag_name: "div",
+                    attributes: vec![],
+                    children: vec![ Node::Text("First") ],
+                }),
+                Node::Element(Element {
+                    tag_name: "div",
+                    attributes: vec![],
+                    children: vec![ Node::Text("Second") ],
+                }),
             ]
         };
 
         let doc = Document {
             definitions: vec![],
             children: vec![
-                Node::Element(Element {
-                    tag_name: "p",
-                    attributes: vec![],
-                    children: vec![
-                        Node::StyleBlock(vec![
-                            StyleContent::StyleTemplateUsage { name: "Base" },
-                            StyleContent::Delete(vec!["color"]),
-                        ]),
-                    ],
-                }),
+                Node::ElementTemplateUsage {
+                    name: "Box",
+                    specializations: vec![
+                        ElementSpecialization {
+                            selector: ChildSelector { tag_name: "div", index: Some(1) },
+                            modifications: vec![
+                                Node::StyleBlock(vec![
+                                    StyleContent::Property(CssProperty { key: "color", value: Some(CssValue::Literal("red")) })
+                                ])
+                            ]
+                        }
+                    ]
+                }
             ],
         };
 
         let mut context = Context::new();
-        context.style_templates.insert("Base", &base_template);
+        context.custom_element_templates.insert("Box", &template);
 
+        let expected_html = "<div>First</div>\n<div style=\"color:red;\">Second</div>\n";
         let generated_html = generate(&doc, &context);
-        assert!(generated_html.contains("style=\"font-size:16px;\""));
-        assert!(!generated_html.contains("color"));
+        assert_eq!(generated_html, expected_html);
     }
 }

@@ -1,10 +1,10 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Document<'a> {
     pub definitions: Vec<TopLevelDefinition<'a>>,
     pub children: Vec<Node<'a>>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TopLevelDefinition<'a> {
     Template(TemplateDefinition<'a>),
     Custom(CustomDefinition<'a>),
@@ -12,51 +12,68 @@ pub enum TopLevelDefinition<'a> {
 
 // --- Template & Custom Definitions ---
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TemplateDefinition<'a> {
     Style(TemplateStyleGroup<'a>),
     Element(TemplateElementGroup<'a>),
     Var(TemplateVarGroup<'a>),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum CustomDefinition<'a> {
     Style(CustomStyleGroup<'a>),
     Element(CustomElementGroup<'a>),
     Var(CustomVarGroup<'a>),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct TemplateStyleGroup<'a> {
     pub name: &'a str,
     pub content: Vec<StyleContent<'a>>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct CustomStyleGroup<'a> {
     pub name: &'a str,
     pub content: Vec<StyleContent<'a>>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct TemplateElementGroup<'a> {
     pub name: &'a str,
     pub children: Vec<Node<'a>>,
 }
 
-#[derive(Debug, PartialEq)]
+// Trait for any group of elements (Template or Custom)
+pub trait ElementGroup<'a> {
+    fn children(&self) -> &Vec<Node<'a>>;
+}
+
+impl<'a> ElementGroup<'a> for TemplateElementGroup<'a> {
+    fn children(&self) -> &Vec<Node<'a>> {
+        &self.children
+    }
+}
+
+impl<'a> ElementGroup<'a> for CustomElementGroup<'a> {
+    fn children(&self) -> &Vec<Node<'a>> {
+        &self.children
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub struct CustomElementGroup<'a> {
     pub name: &'a str,
     pub children: Vec<Node<'a>>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct TemplateVarGroup<'a> {
     pub name: &'a str,
     pub variables: Vec<TemplateVariable<'a>>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct CustomVarGroup<'a> {
     pub name: &'a str,
     pub variables: Vec<TemplateVariable<'a>>,
@@ -70,7 +87,7 @@ pub struct TemplateVariable<'a> {
 
 // --- Renderable Nodes & Content ---
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Node<'a> {
     Element(Element<'a>),
     Text(&'a str),
@@ -82,13 +99,13 @@ pub enum Node<'a> {
     },
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct ElementSpecialization<'a> {
     pub selector: ChildSelector<'a>,
-    pub modifications: Vec<Node<'a>>, // For now, we only support adding/overwriting children
+    pub modifications: Vec<Node<'a>>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct ChildSelector<'a> {
     pub tag_name: &'a str,
     pub index: Option<usize>,
@@ -128,13 +145,13 @@ pub struct CssRuleset<'a> {
     pub properties: Vec<CssProperty<'a>>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Attribute<'a> {
     pub key: &'a str,
     pub value: &'a str,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Element<'a> {
     pub tag_name: &'a str,
     pub attributes: Vec<Attribute<'a>>,
