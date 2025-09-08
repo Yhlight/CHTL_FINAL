@@ -13,6 +13,7 @@ enum class TokenType {
 
     // Keywords
     TEXT,
+    STYLE,
 
     // Comments
     LINE_COMMENT,

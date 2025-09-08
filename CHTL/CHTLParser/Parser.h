@@ -7,6 +7,8 @@
 #include <vector>
 #include <memory>
 
+class StyleNode; // Forward declaration
+
 class Parser {
 public:
     Parser(Lexer& lexer);
@@ -26,5 +28,6 @@ private:
     std::unique_ptr<BaseNode> declaration();
     std::unique_ptr<ElementNode> element();
     std::unique_ptr<TextNode> textNode();
+    std::unique_ptr<StyleNode> styleNode();
     void attributes(ElementNode& element);
 };

@@ -3,6 +3,7 @@
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
+#include "../CHTLNode/StyleNode.h"
 #include <string>
 #include <sstream>
 
@@ -12,6 +13,7 @@ public:
 
     void visit(ElementNode& node) override;
     void visit(TextNode& node) override;
+    void visit(StyleNode& node) override;
 
 private:
     std::stringstream output;

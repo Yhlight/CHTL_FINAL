@@ -7,6 +7,7 @@
 // Forward declarations to avoid circular dependencies
 class ElementNode;
 class TextNode;
+class StyleNode;
 
 // Visitor pattern for traversing the AST
 class AstVisitor {
@@ -14,6 +15,7 @@ public:
     virtual ~AstVisitor() = default;
     virtual void visit(ElementNode& node) = 0;
     virtual void visit(TextNode& node) = 0;
+    virtual void visit(StyleNode& node) = 0;
 };
 
 class BaseNode {

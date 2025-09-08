@@ -16,6 +16,20 @@ void Generator::visit(ElementNode& node) {
         output << " " << attr.first << "=\"" << attr.second << "\"";
     }
 
+    // Collect inline styles from StyleNode children
+    std::stringstream style_ss;
+    for (const auto& child : node.children) {
+        if (auto* styleNode = dynamic_cast<StyleNode*>(child.get())) {
+            for (const auto& prop : styleNode->properties) {
+                style_ss << prop.first << ":" << prop.second << ";";
+            }
+        }
+    }
+
+    if (style_ss.rdbuf()->in_avail() > 0) {
+        output << " style=\"" << style_ss.str() << "\"";
+    }
+
     // Check for self-closing tags, a simple list for now.
     std::vector<std::string> selfClosingTags = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"};
     bool isSelfClosing = false;
@@ -34,7 +48,9 @@ void Generator::visit(ElementNode& node) {
     output << ">";
 
     for (auto& child : node.children) {
-        child->accept(*this);
+        if (dynamic_cast<StyleNode*>(child.get()) == nullptr) {
+            child->accept(*this);
+        }
     }
 
     output << "</" << node.tagName << ">";
@@ -42,4 +58,9 @@ void Generator::visit(ElementNode& node) {
 
 void Generator::visit(TextNode& node) {
     output << node.content;
+}
+
+void Generator::visit(StyleNode& node) {
+    // This will be implemented in the next step.
+    // For now, we do nothing.
 }

@@ -1,4 +1,5 @@
 #include "Parser.h"
+#include "../CHTLNode/StyleNode.h"
 #include <iostream>
 
 Parser::Parser(Lexer& lexer) : lexer(lexer) {
@@ -59,6 +60,9 @@ std::unique_ptr<BaseNode> Parser::declaration() {
     if (check(TokenType::TEXT)) {
         return textNode();
     }
+    if (check(TokenType::STYLE)) {
+        return styleNode();
+    }
 
     std::cerr << "Parse Error: Unexpected token " << currentToken.lexeme << " at line " << currentToken.line << std::endl;
     advance();
@@ -90,6 +94,11 @@ std::unique_ptr<ElementNode> Parser::element() {
             if (child) {
                 node->children.push_back(std::move(child));
             }
+        } else if (check(TokenType::STYLE)) {
+            auto child = styleNode();
+            if (child) {
+                node->children.push_back(std::move(child));
+            }
         } else {
             std::cerr << "Parse Error: Unexpected token " << currentToken.lexeme << " in element " << node->tagName << " at line " << currentToken.line << std::endl;
             advance();
@@ -110,6 +119,39 @@ std::unique_ptr<TextNode> Parser::textNode() {
         advance();
     }
     consume(TokenType::RIGHT_BRACE, "Expect '}' after text content.");
+    return node;
+}
+
+std::unique_ptr<StyleNode> Parser::styleNode() {
+    consume(TokenType::STYLE, "Expect 'style' keyword.");
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'style'.");
+
+    auto node = std::make_unique<StyleNode>();
+
+    while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
+        if (check(TokenType::IDENTIFIER)) {
+            std::string key = currentToken.lexeme;
+            advance(); // consume property name
+
+            consume(TokenType::COLON, "Expect ':' after style property name.");
+
+            if (check(TokenType::STRING) || check(TokenType::IDENTIFIER)) {
+                node->properties[key] = currentToken.lexeme;
+                advance(); // consume property value
+            } else {
+                std::cerr << "Parse Error: Expected style property value at line " << currentToken.line << std::endl;
+                // Allow for recovery by advancing
+                advance();
+            }
+
+            consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+        } else {
+            std::cerr << "Parse Error: Unexpected token " << currentToken.lexeme << " in style block at line " << currentToken.line << std::endl;
+            advance(); // Advance to avoid infinite loops
+        }
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after style block.");
     return node;
 }
 

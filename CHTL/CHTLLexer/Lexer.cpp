@@ -81,11 +81,12 @@ void Lexer::skipWhitespaceAndComments() {
 
 Token Lexer::identifier() {
     size_t start = current;
-    while (isalnum(peek()) || peek() == '_') {
+    while (isalnum(peek()) || peek() == '_' || peek() == '-') {
         advance();
     }
     std::string text = source.substr(start, current - start);
     if (text == "text") return makeToken(TokenType::TEXT, text);
+    if (text == "style") return makeToken(TokenType::STYLE, text);
     return makeToken(TokenType::IDENTIFIER, text);
 }
 
