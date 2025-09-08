@@ -1,22 +1,22 @@
 #include "Generator.h"
-#include "../CHTLNode/StyleBlockNode.h"
-#include "../CHTLNode/StylePropertyNode.h"
-#include "../CHTLNode/StyleSelectorNode.h"
-#include "../ExpressionNode/LiteralExpr.h"
-#include "../Evaluator/Evaluator.h"
+#include "CHTL/CHTLNode/StyleBlockNode.h"
+#include "CHTL/CHTLNode/StylePropertyNode.h"
+#include "CHTL/CHTLNode/StyleSelectorNode.h"
+#include "CHTL/ExpressionNode/LiteralExpr.h"
+#include "CHTL/Evaluator/Evaluator.h"
 #include <stdexcept>
 #include <map>
 
 namespace CHTL {
 
-// Helper to check if an expression is a simple literal that can be evaluated early.
+// Function to check if an expression is a simple literal that can be evaluated early.
 bool isLiteral(const Expr* expr) {
     if (!expr) return false;
-    // This is a bit of a hack. A better way would be a visitor.
     return dynamic_cast<const LiteralExpr*>(expr) != nullptr;
 }
 
-std::string Generator::generate(const DocumentNode* document) {
+std::string Generator::generate(const DocumentNode* document, const CHTLContext& context) {
+    m_context = &context;
     m_output.clear();
     m_global_css.clear();
     if (document) {
@@ -28,8 +28,7 @@ std::string Generator::generate(const DocumentNode* document) {
     if (!m_global_css.empty()) {
         size_t head_pos = m_output.find("</head>");
         if (head_pos != std::string::npos) {
-            std::string style_tag = "<style>" + m_global_css + "</style>";
-            m_output.insert(head_pos, style_tag);
+            m_output.insert(head_pos, "<style>" + m_global_css + "</style>");
         } else {
             m_output = "<head><style>" + m_global_css + "</style></head>" + m_output;
         }
@@ -46,24 +45,38 @@ void Generator::generateNode(const BaseNode* node) {
         case NodeType::Text:
             generateText(static_cast<const TextNode*>(node));
             break;
+        case NodeType::TemplateUsage:
+            generateTemplateUsage(static_cast<const TemplateUsageNode*>(node), nullptr);
+            break;
         default:
             break;
     }
 }
 
-void Generator::generateElement(const ElementNode* element) {
-    std::string inline_style;
-    std::map<std::string, std::string> attributes;
-    EvaluationContext context;
+void Generator::generateTemplateUsage(const TemplateUsageNode* node, const ElementNode* parentElement) {
+    const TemplateDefinitionNode* def = m_context->getTemplate(node->getTemplateName());
+    if (!def) {
+        m_output += "<!-- Template not found: " + node->getTemplateName() + " -->";
+        return;
+    }
 
+    if (node->getTemplateType() == "Element") {
+        for (const auto& child : def->getChildren()) {
+            generateNode(child.get());
+        }
+    }
+}
+
+void Generator::generateElement(const ElementNode* element) {
+    std::map<std::string, std::string> attributes;
     for (const auto& attr : element->getAttributes()) {
         attributes[attr->getKey()] = attr->getValue();
     }
 
     if (element->getStyleBlock()) {
+        EvaluationContext context;
         const auto* styleBlock = element->getStyleBlock();
 
-        // First pass: evaluate all simple literal properties to build the context
         for (const auto& styleChild : styleBlock->getChildren()) {
             if (styleChild->getType() == NodeType::StyleProperty) {
                 const auto* prop = static_cast<const StylePropertyNode*>(styleChild.get());
@@ -74,7 +87,7 @@ void Generator::generateElement(const ElementNode* element) {
             }
         }
 
-        // Second pass: evaluate all properties (including complex ones) and generate CSS
+        std::string inline_style;
         for (const auto& styleChild : styleBlock->getChildren()) {
             if (styleChild->getType() == NodeType::StyleProperty) {
                 const auto* prop = static_cast<const StylePropertyNode*>(styleChild.get());
@@ -82,19 +95,15 @@ void Generator::generateElement(const ElementNode* element) {
                 ChtlValue value = eval.evaluate(prop->getValue(), context);
                 inline_style += prop->getKey() + ": " + value.toString() + ";";
             } else if (styleChild->getType() == NodeType::StyleSelector) {
-                // ... (This logic remains largely the same, but needs to use the evaluator too)
                 const auto* selectorNode = static_cast<const StyleSelectorNode*>(styleChild.get());
                 std::string selector_text = selectorNode->getSelector();
 
-                if (selector_text[0] == '.') {
-                    attributes["class"] += (attributes["class"].empty() ? "" : " ") + selector_text.substr(1);
-                } else if (selector_text[0] == '#') {
-                    attributes["id"] = selector_text.substr(1);
-                }
+                if (selector_text[0] == '.') attributes["class"] += (attributes["class"].empty() ? "" : " ") + selector_text.substr(1);
+                else if (selector_text[0] == '#') attributes["id"] = selector_text.substr(1);
 
                 size_t amp_pos = selector_text.find('&');
                 if (amp_pos != std::string::npos) {
-                     std::string base_selector;
+                    std::string base_selector;
                     if (attributes.count("id") > 0 && !attributes.at("id").empty()) base_selector = "#" + attributes.at("id");
                     else if (attributes.count("class") > 0 && !attributes.at("class").empty()) base_selector = "." + attributes.at("class").substr(0, attributes.at("class").find(' '));
                     else base_selector = element->getTagName();
@@ -110,20 +119,19 @@ void Generator::generateElement(const ElementNode* element) {
                 m_global_css += "}\n";
             }
         }
-    }
-
-    if (!inline_style.empty()) {
-        attributes["style"] = inline_style;
+        if (!inline_style.empty()) attributes["style"] = inline_style;
     }
 
     m_output += "<" + element->getTagName();
-    for(const auto& pair : attributes) {
-        m_output += " " + pair.first + "=\"" + pair.second + "\"";
-    }
+    for(const auto& pair : attributes) { m_output += " " + pair.first + "=\"" + pair.second + "\""; }
     m_output += ">";
 
     for (const auto& child : element->getChildren()) {
-        generateNode(child.get());
+        if (child->getType() == NodeType::TemplateUsage) {
+            generateTemplateUsage(static_cast<const TemplateUsageNode*>(child.get()), element);
+        } else {
+            generateNode(child.get());
+        }
     }
 
     m_output += "</" + element->getTagName() + ">";

@@ -16,9 +16,12 @@ enum class TokenType {
     UnquotedLiteral,
 
     // Punctuation
-    OpenBrace,
-    CloseBrace,
-    Semicolon,
+    OpenBrace,      // {
+    CloseBrace,     // }
+    Semicolon,      // ;
+    LeftBracket,    // [
+    RightBracket,   // ]
+    At,             // @
 
     // Style-specific tokens
     Colon,
@@ -29,15 +32,15 @@ enum class TokenType {
     Ampersand,
 
     // Expression operators
-    QuestionMark,       // ?
-    GreaterThan,        // >
-    LessThan,           // <
-    Plus,               // +
-    Minus,              // -
-    Star,               // *
-    Slash,              // /
-    LogicalAnd,         // &&
-    LogicalOr,          // ||
+    QuestionMark,
+    GreaterThan,
+    LessThan,
+    Plus,
+    Minus,
+    Star,
+    Slash,
+    LogicalAnd,
+    LogicalOr,
 
     // Comments
     LineComment,

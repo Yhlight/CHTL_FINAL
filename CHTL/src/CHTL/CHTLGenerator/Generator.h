@@ -4,28 +4,34 @@
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
+#include "../CHTLNode/TemplateUsageNode.h"
+#include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../CHTLNode/StylePropertyNode.h"
+#include "../CHTLContext/CHTLContext.h"
 #include <string>
+#include <map>
 
 namespace CHTL {
 
-// The Generator class is responsible for traversing the Abstract Syntax Tree (AST)
-// and producing the final output code, which for now is HTML with CSS.
 class Generator {
 public:
     Generator() = default;
 
-    // The main entry point for code generation.
-    std::string generate(const DocumentNode* document);
+    std::string generate(const DocumentNode* document, const CHTLContext& context);
 
 private:
     void generateNode(const BaseNode* node);
     void generateElement(const ElementNode* element);
     void generateText(const TextNode* text);
+    void generateTemplateUsage(const TemplateUsageNode* node, const ElementNode* parentElement);
 
-    // The output string for the main HTML content.
+    // New helper to recursively collect properties from an inheritance chain of style templates
+    void collectStyleProperties(const TemplateDefinitionNode* styleTemplate,
+                                std::map<std::string, const StylePropertyNode*>& properties);
+
     std::string m_output;
-    // The output string for collecting global CSS rules.
     std::string m_global_css;
+    const CHTLContext* m_context = nullptr;
 };
 
 } // namespace CHTL

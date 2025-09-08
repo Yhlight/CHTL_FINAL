@@ -15,7 +15,8 @@ set(COMPILER_SOURCES
     src/CHTL/CHTLParser/Parser.cpp
     src/CHTL/CHTLGenerator/Generator.cpp
     src/CHTL/Evaluator/ExprStringifier.cpp
-    src/CHTL/Evaluator/Evaluator.cpp # Add the new evaluator
+    src/CHTL/Evaluator/Evaluator.cpp
+    src/CHTL/CHTLContext/CHTLContext.cpp # Add the new context
 )
 
 # --- Executable Target Definitions ---

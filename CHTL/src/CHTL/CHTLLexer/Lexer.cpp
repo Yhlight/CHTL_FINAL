@@ -36,6 +36,9 @@ Token Lexer::nextToken() {
         case ';': return makeToken(TokenType::Semicolon, ";");
         case '.': return makeToken(TokenType::Dot, ".");
         case '#': return makeToken(TokenType::Hash, "#");
+        case '[': return makeToken(TokenType::LeftBracket, "[");
+        case ']': return makeToken(TokenType::RightBracket, "]");
+        case '@': return makeToken(TokenType::At, "@");
 
         // Operators
         case '?': return makeToken(TokenType::QuestionMark, "?");
@@ -65,15 +68,12 @@ Token Lexer::nextToken() {
             return makeToken(TokenType::Slash, "/");
     }
 
-    // If it's not a known symbol, it must be an identifier/literal
     m_current--;
     return makeIdentifierOrUnquotedLiteral();
 }
 
 Token Lexer::makeIdentifierOrUnquotedLiteral() {
     m_start = m_current;
-    // Identifiers can now only contain alphanumerics and underscores.
-    // Hyphens are handled as separate Minus tokens.
     while (m_current < m_source.length()) {
         char c = peek();
         if (std::isalnum(c) || c == '_') {
