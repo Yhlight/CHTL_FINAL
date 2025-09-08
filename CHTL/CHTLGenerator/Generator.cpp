@@ -1,5 +1,6 @@
 #include "Generator.h"
 #include "CHTL/CHTLParser/Parser.h"
+#include "CHTL/CHTLNode/CustomStyleTemplateNode.h"
 #include <iostream>
 
 Generator::Generator(Parser& parser) : parser(parser) {}
@@ -70,8 +71,17 @@ void Generator::visit(TemplateUsageNode& node) {
             for (const auto& child : tmpl->children) {
                 child->accept(*this);
             }
+        } else if (parser.customElementTemplates.count(node.name)) {
+            const auto& tmpl = parser.customElementTemplates.at(node.name);
+            for (const auto& child : tmpl->children) {
+                child->accept(*this);
+            }
         } else {
             std::cerr << "Generator Error: Element template '" << node.name << "' not found." << std::endl;
         }
     }
+}
+
+void Generator::visit(CustomStyleTemplateNode& node) {
+    // Declaration node, nothing to generate.
 }

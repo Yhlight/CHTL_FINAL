@@ -6,7 +6,8 @@ CXXFLAGS = -std=c++17 -Wall -I. -static
 SRCS = main.cpp \
        CHTL/CHTLLexer/Lexer.cpp \
        CHTL/CHTLParser/Parser.cpp \
-       CHTL/CHTLGenerator/Generator.cpp
+       CHTL/CHTLGenerator/Generator.cpp \
+       CHTL/CHTLNode/CustomStyleTemplateNode.cpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)

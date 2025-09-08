@@ -13,6 +13,7 @@
 #include "../CHTLNode/StyleTemplateNode.h"
 #include "../CHTLNode/VarTemplateNode.h"
 #include "../CHTLNode/CustomElementNode.h"
+#include "../CHTLNode/CustomStyleTemplateNode.h"
 
 class Parser {
 public:
@@ -23,6 +24,7 @@ public:
     std::map<std::string, std::unique_ptr<StyleTemplateNode>> styleTemplates;
     std::map<std::string, std::unique_ptr<VarTemplateNode>> varTemplates;
     std::map<std::string, std::unique_ptr<CustomElementNode>> customElementTemplates;
+    std::map<std::string, std::unique_ptr<CustomStyleTemplateNode>> customStyleTemplates;
 
 private:
     Lexer& lexer;
@@ -44,4 +46,13 @@ private:
     std::unique_ptr<StyleNode> styleNode();
     void attributes(ElementNode& element);
     std::string parseValue();
+    void handleCustomElementUsage(const std::string& templateName, ElementNode* parentNode);
+
+    struct Selector {
+        std::string tagName;
+        int index = -1;
+    };
+    Selector parseSelector();
+    BaseNode* findNodeByTag(BaseNode* root, const std::string& tagName);
+    void mergeStyles(ElementNode* targetNode, ElementNode* specNode);
 };

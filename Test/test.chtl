@@ -32,14 +32,79 @@
     }
 }
 
+[Custom] @Element CustomCard {
+    container {
+        id: "default-card";
+        header {
+            class: "card-header";
+            style {
+                background-color: "#eee";
+                padding: "10px";
+            }
+            text { "Default Header" }
+        }
+        content {
+            class: "card-content";
+            style {
+                padding: "15px";
+            }
+            text { "Default content." }
+        }
+    }
+}
+
+// --- Test Cases for [Custom] @Style ---
+[Custom] @Style CardStyle {
+    border: "1px solid black";
+    border-radius; // valueless property
+    box-shadow: "5px 5px 10px #ccc";
+    background-color: "white";
+}
+
+
 html {
     body {
-        div {
-            style {
-                @Style InheritedStyle;
-                background-color: MyColors(secondary);
+        // --- Testing Custom Elements ---
+        @Element MyComponent;
+        @Element CustomCard {
+            header {
+                class: "special-header";
+                style { color: "purple"; }
+            }
+            content {
+                text { "Some extra text added during specialization." }
             }
         }
-        @Element InheritedBox;
+
+        // --- Testing Custom Style Specialization ---
+        div {
+            id: "card1";
+            style {
+                // Usage with specialization for a valueless property
+                @Style CardStyle {
+                    border-radius: "8px";
+                }
+            }
+        }
+        div {
+            id: "card2";
+            style {
+                // Override a default value
+                @Style CardStyle {
+                    border-radius: "4px";
+                    border: "2px dotted blue";
+                }
+            }
+        }
+        div {
+            id: "card3";
+            style {
+                // Delete a property
+                @Style CardStyle {
+                    border-radius: "12px";
+                    delete box-shadow;
+                }
+            }
+        }
     }
 }

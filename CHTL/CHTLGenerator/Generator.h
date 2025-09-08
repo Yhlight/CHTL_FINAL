@@ -19,6 +19,7 @@ public:
     void visit(TextNode& node) override;
     void visit(StyleNode& node) override;
     void visit(TemplateUsageNode& node) override;
+    void visit(class CustomStyleTemplateNode& node) override;
 
 private:
     Parser& parser;
