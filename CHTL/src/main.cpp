@@ -10,32 +10,16 @@
 
 int main() {
     std::string source = R"(
-        html {
-            head {}
-            body {
-                div {
-                    id: my-div; // Manually set ID
-                    style {
-                        // This should become an inline style
-                        color: red;
-
-                        // This should be added to the class attribute and global styles
-                        .box {
-                            border: 1px solid black;
-                        }
-
-                        // This should use the element's context and go to global styles
-                        &:hover {
-                            border-color: blue;
-                        }
-                    }
-                    text { "Styled Box" }
-                }
+        div {
+            style {
+                width: 100px;
+                // This color should evaluate to green because width > 50px
+                background-color: width > 50px ? "green" : "red";
             }
         }
     )";
 
-    std::cout << "--- CHTL CSS Generation Test ---" << std::endl;
+    std::cout << "--- CHTL Expression Evaluator Test ---" << std::endl;
     std::cout << "\n--- Source Code ---\n" << source << std::endl;
 
     try {
@@ -48,7 +32,7 @@ int main() {
         std::unique_ptr<CHTL::DocumentNode> ast = parser.parse();
         std::cout << "\n--- Lexing and Parsing Successful ---" << std::endl;
 
-        // 3. Generating
+        // 3. Generating (which now includes evaluation)
         CHTL::Generator generator;
         std::string html = generator.generate(ast.get());
         std::cout << "--- Code Generation Successful ---" << std::endl;
@@ -61,7 +45,7 @@ int main() {
         return 1;
     }
 
-    std::cout << "\n--------------------------------" << std::endl;
+    std::cout << "\n------------------------------------" << std::endl;
 
     return 0;
 }

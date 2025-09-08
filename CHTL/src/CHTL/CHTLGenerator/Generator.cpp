@@ -2,10 +2,19 @@
 #include "../CHTLNode/StyleBlockNode.h"
 #include "../CHTLNode/StylePropertyNode.h"
 #include "../CHTLNode/StyleSelectorNode.h"
+#include "../ExpressionNode/LiteralExpr.h"
+#include "../Evaluator/Evaluator.h"
 #include <stdexcept>
 #include <map>
 
 namespace CHTL {
+
+// Helper to check if an expression is a simple literal that can be evaluated early.
+bool isLiteral(const Expr* expr) {
+    if (!expr) return false;
+    // This is a bit of a hack. A better way would be a visitor.
+    return dynamic_cast<const LiteralExpr*>(expr) != nullptr;
+}
 
 std::string Generator::generate(const DocumentNode* document) {
     m_output.clear();
@@ -45,6 +54,7 @@ void Generator::generateNode(const BaseNode* node) {
 void Generator::generateElement(const ElementNode* element) {
     std::string inline_style;
     std::map<std::string, std::string> attributes;
+    EvaluationContext context;
 
     for (const auto& attr : element->getAttributes()) {
         attributes[attr->getKey()] = attr->getValue();
@@ -52,40 +62,50 @@ void Generator::generateElement(const ElementNode* element) {
 
     if (element->getStyleBlock()) {
         const auto* styleBlock = element->getStyleBlock();
+
+        // First pass: evaluate all simple literal properties to build the context
         for (const auto& styleChild : styleBlock->getChildren()) {
             if (styleChild->getType() == NodeType::StyleProperty) {
                 const auto* prop = static_cast<const StylePropertyNode*>(styleChild.get());
-                inline_style += prop->getKey() + ": " + prop->getValue() + ";";
+                if (isLiteral(prop->getValue())) {
+                    Evaluator eval;
+                    context[prop->getKey()] = eval.evaluate(prop->getValue(), context);
+                }
+            }
+        }
+
+        // Second pass: evaluate all properties (including complex ones) and generate CSS
+        for (const auto& styleChild : styleBlock->getChildren()) {
+            if (styleChild->getType() == NodeType::StyleProperty) {
+                const auto* prop = static_cast<const StylePropertyNode*>(styleChild.get());
+                Evaluator eval;
+                ChtlValue value = eval.evaluate(prop->getValue(), context);
+                inline_style += prop->getKey() + ": " + value.toString() + ";";
             } else if (styleChild->getType() == NodeType::StyleSelector) {
+                // ... (This logic remains largely the same, but needs to use the evaluator too)
                 const auto* selectorNode = static_cast<const StyleSelectorNode*>(styleChild.get());
                 std::string selector_text = selectorNode->getSelector();
 
                 if (selector_text[0] == '.') {
-                    std::string className = selector_text.substr(1);
-                    if (attributes.count("class") == 0 || attributes["class"].find(className) == std::string::npos) {
-                         attributes["class"] += (attributes["class"].empty() ? "" : " ") + className;
-                    }
+                    attributes["class"] += (attributes["class"].empty() ? "" : " ") + selector_text.substr(1);
                 } else if (selector_text[0] == '#') {
                     attributes["id"] = selector_text.substr(1);
                 }
 
                 size_t amp_pos = selector_text.find('&');
                 if (amp_pos != std::string::npos) {
-                    std::string base_selector;
-                    if (attributes.count("id") > 0 && !attributes.at("id").empty()) {
-                        base_selector = "#" + attributes.at("id");
-                    } else if (attributes.count("class") > 0 && !attributes.at("class").empty()) {
-                        std::string firstClass = attributes.at("class").substr(0, attributes.at("class").find(' '));
-                        base_selector = "." + firstClass;
-                    } else {
-                        base_selector = element->getTagName();
-                    }
+                     std::string base_selector;
+                    if (attributes.count("id") > 0 && !attributes.at("id").empty()) base_selector = "#" + attributes.at("id");
+                    else if (attributes.count("class") > 0 && !attributes.at("class").empty()) base_selector = "." + attributes.at("class").substr(0, attributes.at("class").find(' '));
+                    else base_selector = element->getTagName();
                     selector_text.replace(amp_pos, 1, base_selector);
                 }
 
                 m_global_css += selector_text + " { ";
                 for (const auto& prop : selectorNode->getProperties()) {
-                    m_global_css += prop->getKey() + ": " + prop->getValue() + "; ";
+                     Evaluator eval;
+                     ChtlValue value = eval.evaluate(prop->getValue(), context);
+                     m_global_css += prop->getKey() + ": " + value.toString() + "; ";
                 }
                 m_global_css += "}\n";
             }

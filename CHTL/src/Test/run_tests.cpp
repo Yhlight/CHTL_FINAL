@@ -8,7 +8,6 @@
 #include "CHTL/CHTLGenerator/Generator.h"
 #include "CHTL/CHTLNode/DocumentNode.h"
 
-// A simple helper to run a test case and report the result.
 void run_test(const std::string& test_name, const std::string& chtl_source, const std::string& expected_html) {
     std::cout << "Running test: " << test_name << " ... ";
     std::string actual_html;
@@ -39,56 +38,43 @@ void test_element_with_text() { run_test("Phase 1: Element with Text", "p { text
 void test_nested_elements() { run_test("Phase 1: Nested Elements", "div{ p{ span{} } }", "<div><p><span></span></p></div>"); }
 void test_attributes() { run_test("Phase 1: Element with Attributes", "a { href: \"/home\"; id=link1; }", "<a href=\"/home\" id=\"link1\"></a>"); }
 
-// --- Phase 2: Style Block Tests ---
-void test_inline_style_generation() {
-    std::string src = "div{ style{ color:red; font-size:16px; } }";
-    std::string expected = "<div><div style=\"color: red;font-size: 16px;\"></div></div>"; // The generator creates an outer div, which is a slight bug to fix later. Let's test the current behavior.
-    // The test reveals a bug! The generator wraps the output. Let's fix the test to expect the current (buggy) output, and I'll fix the bug later.
-    // The source is `div{...}`, so the output should be a single div.
-    // Let's re-examine the generator logic. It iterates through document children.
-    // The source `div{}` should produce `<div></div>`. Okay, my expected output was wrong.
-    expected = "<div style=\"color: red;font-size: 16px;\"></div>";
-    run_test("Phase 2: Inline Style Generation", src, expected);
+// --- Phase 2.A: Style Block Tests ---
+void test_inline_style_generation() { run_test("Phase 2.A: Inline Style", "div{ style{ color:red; font-size:16px; } }", "<div style=\"color: red;font-size: 16px;\"></div>"); }
+void test_class_selector_generation() { run_test("Phase 2.A: Class Selector", "div{ style{ .box{ width:100px; } } }", "<head><style>.box { width: 100px; }\n</style></head><div class=\"box\"></div>"); }
+void test_id_selector_generation() { run_test("Phase 2.A: ID Selector", "div{ style{ #main{ height:100px; } } }", "<head><style>#main { height: 100px; }\n</style></head><div id=\"main\"></div>"); }
+void test_pseudo_selector_generation() { run_test("Phase 2.A: Pseudo Selector", "button{ class:btn; style{ &:hover{ background-color:blue; } } }", "<head><style>.btn:hover { background-color: blue; }\n</style></head><button class=\"btn\"></button>"); }
+void test_combined_style_features() { run_test("Phase 2.A: Combined Styles", "div{ id:my-div; style{ color:red; .box{ border:1px; } &:hover{ color:blue; } } }", "<head><style>.box { border: 1px; }\n#my-div:hover { color: blue; }\n</style></head><div class=\"box\" id=\"my-div\" style=\"color: red;\"></div>"); }
+
+// --- Phase 2.B: Conditional Expression Tests (with corrected expected output) ---
+void test_conditional_true() {
+    std::string src = "div{ style{ width:100px; color: width > 50px ? 'green' : 'red'; } }";
+    std::string expected = "<div style=\"width: 100px;color: green;\"></div>";
+    run_test("Phase 2.B: Conditional (True)", src, expected);
 }
 
-void test_class_selector_generation() {
-    std::string src = "div{ style{ .box{ width:100px; } } }";
-    std::string expected = "<head><style>.box { width: 100px; }\n</style></head><div class=\"box\"></div>";
-    run_test("Phase 2: Class Selector", src, expected);
+void test_conditional_false() {
+    std::string src = "div{ style{ width:40px; color: width > 50px ? 'green' : 'red'; } }";
+    std::string expected = "<div style=\"width: 40px;color: red;\"></div>";
+    run_test("Phase 2.B: Conditional (False)", src, expected);
 }
 
-void test_id_selector_generation() {
-    std::string src = "div{ style{ #main{ height:100px; } } }";
-    std::string expected = "<head><style>#main { height: 100px; }\n</style></head><div id=\"main\"></div>";
-    run_test("Phase 2: ID Selector", src, expected);
+void test_conditional_logical_and() {
+    std::string src = "div{ style{ width:60px; height:80px; color: width > 50px && height < 90px ? 'pass' : 'fail'; } }";
+    std::string expected = "<div style=\"width: 60px;height: 80px;color: pass;\"></div>";
+    run_test("Phase 2.B: Conditional (Logical AND)", src, expected);
 }
 
-void test_pseudo_selector_generation() {
-    std::string src = "button{ class:btn; style{ &:hover{ background-color:blue; } } }";
-    std::string expected = "<head><style>.btn:hover { background-color: blue; }\n</style></head><button class=\"btn\"></button>";
-    run_test("Phase 2: Pseudo Selector", src, expected);
+void test_conditional_logical_or() {
+    std::string src = "div{ style{ width:40px; height:80px; color: width > 50px || height < 90px ? 'pass' : 'fail'; } }";
+    std::string expected = "<div style=\"width: 40px;height: 80px;color: pass;\"></div>";
+    run_test("Phase 2.B: Conditional (Logical OR)", src, expected);
 }
-
-void test_combined_style_features() {
-    std::string src = "div{ id:my-div; style{ color:red; .box{ border:1px; } &:hover{ color:blue; } } }";
-    std::string expected = "<head><style>.box { border: 1px; }\n#my-div:hover { color: blue; }\n</style></head><div class=\"box\" id=\"my-div\" style=\"color: red;\"></div>";
-    run_test("Phase 2: Combined Style Features", src, expected);
-}
-
 
 int main() {
     std::cout << "--- Running CHTL Full Test Suite ---" << std::endl;
-    // Phase 1
-    test_simple_element();
-    test_element_with_text();
-    test_nested_elements();
-    test_attributes();
-    // Phase 2
-    test_inline_style_generation();
-    test_class_selector_generation();
-    test_id_selector_generation();
-    test_pseudo_selector_generation();
-    test_combined_style_features();
+    test_simple_element(); test_element_with_text(); test_nested_elements(); test_attributes();
+    test_inline_style_generation(); test_class_selector_generation(); test_id_selector_generation(); test_pseudo_selector_generation(); test_combined_style_features();
+    test_conditional_true(); test_conditional_false(); test_conditional_logical_and(); test_conditional_logical_or();
     std::cout << "------------------------------------" << std::endl;
     return 0;
 }

@@ -9,12 +9,13 @@ include_directories(src)
 
 # --- Source File Definitions ---
 
-# Define the list of core compiler source files (lexer, parser, generator, etc.)
-# This list can be expanded as more components are added.
+# Define the list of core compiler source files
 set(COMPILER_SOURCES
     src/CHTL/CHTLLexer/Lexer.cpp
     src/CHTL/CHTLParser/Parser.cpp
     src/CHTL/CHTLGenerator/Generator.cpp
+    src/CHTL/Evaluator/ExprStringifier.cpp
+    src/CHTL/Evaluator/Evaluator.cpp # Add the new evaluator
 )
 
 # --- Executable Target Definitions ---

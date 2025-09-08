@@ -29,43 +29,54 @@ Token Lexer::nextToken() {
         case ' ': case '\r': case '\t': return nextToken();
         case '\n': m_line++; return nextToken();
 
-        // Single-character tokens
+        // Punctuation
         case '{': return makeToken(TokenType::OpenBrace, "{");
         case '}': return makeToken(TokenType::CloseBrace, "}");
         case '=': return makeToken(TokenType::Equals, "=");
         case ';': return makeToken(TokenType::Semicolon, ";");
         case '.': return makeToken(TokenType::Dot, ".");
         case '#': return makeToken(TokenType::Hash, "#");
-        case '&': return makeToken(TokenType::Ampersand, "&");
 
-        // Multi-character tokens
+        // Operators
+        case '?': return makeToken(TokenType::QuestionMark, "?");
+        case '>': return makeToken(TokenType::GreaterThan, ">");
+        case '<': return makeToken(TokenType::LessThan, "<");
+        case '+': return makeToken(TokenType::Plus, "+");
+        case '-': return makeToken(TokenType::Minus, "-");
+        case '*': return makeToken(TokenType::Star, "*");
+
         case ':':
             if (match(':')) return makeToken(TokenType::ColonColon, "::");
             return makeToken(TokenType::Colon, ":");
+        case '&':
+            if (match('&')) return makeToken(TokenType::LogicalAnd, "&&");
+            return makeToken(TokenType::Ampersand, "&");
+        case '|':
+            if (match('|')) return makeToken(TokenType::LogicalOr, "||");
+            return makeToken(TokenType::Unexpected, "|");
 
         // String literals
         case '"': case '\'': return makeString(c);
 
-        // Comments
+        // Comments or Slash operator
         case '/':
             if (match('/')) { skipLineComment(); return nextToken(); }
             if (match('*')) { skipBlockComment(); return nextToken(); }
-            break;
-
-        case '-':
-            if (match('-')) { skipGeneratorComment(); return nextToken(); }
-            break;
+            return makeToken(TokenType::Slash, "/");
     }
 
+    // If it's not a known symbol, it must be an identifier/literal
     m_current--;
     return makeIdentifierOrUnquotedLiteral();
 }
 
 Token Lexer::makeIdentifierOrUnquotedLiteral() {
     m_start = m_current;
+    // Identifiers can now only contain alphanumerics and underscores.
+    // Hyphens are handled as separate Minus tokens.
     while (m_current < m_source.length()) {
         char c = peek();
-        if (std::isalnum(c) || c == '_' || c == '-') {
+        if (std::isalnum(c) || c == '_') {
             advance();
         } else {
             break;
@@ -81,52 +92,18 @@ Token Lexer::makeString(char quote_type) {
         if (peek() == '\n') m_line++;
         advance();
     }
-
-    if (m_current >= m_source.length()) {
-        return makeToken(TokenType::Unexpected, "Unterminated string");
-    }
-
+    if (m_current >= m_source.length()) return makeToken(TokenType::Unexpected, "Unterminated string");
     std::string value = m_source.substr(m_start, m_current - m_start);
     advance();
     return makeToken(TokenType::StringLiteral, value);
 }
 
-void Lexer::skipLineComment() {
-    while (peek() != '\n' && m_current < m_source.length()) advance();
-}
-
-void Lexer::skipBlockComment() {
-    while (m_current < m_source.length() - 1) {
-        if (peek() == '*' && m_source[m_current + 1] == '/') {
-            advance(); advance(); return;
-        }
-        if (peek() == '\n') m_line++;
-        advance();
-    }
-}
-
-void Lexer::skipGeneratorComment() {
-    while (peek() != '\n' && m_current < m_source.length()) advance();
-}
-
-char Lexer::peek() const {
-    if (m_current >= m_source.length()) return '\0';
-    return m_source[m_current];
-}
-
-char Lexer::advance() {
-    return m_source[m_current++];
-}
-
-bool Lexer::match(char expected) {
-    if (m_current >= m_source.length()) return false;
-    if (m_source[m_current] != expected) return false;
-    m_current++;
-    return true;
-}
-
-Token Lexer::makeToken(TokenType type, const std::string& value) const {
-    return {type, value, m_line, 0};
-}
+void Lexer::skipLineComment() { while (peek() != '\n' && m_current < m_source.length()) advance(); }
+void Lexer::skipBlockComment() { while (m_current < m_source.length() - 1) { if (peek() == '*' && m_source[m_current + 1] == '/') { advance(); advance(); return; } if (peek() == '\n') m_line++; advance(); } }
+void Lexer::skipGeneratorComment() { while (peek() != '\n' && m_current < m_source.length()) advance(); }
+char Lexer::peek() const { if (m_current >= m_source.length()) return '\0'; return m_source[m_current]; }
+char Lexer::advance() { return m_source[m_current++]; }
+bool Lexer::match(char expected) { if (m_current >= m_source.length()) return false; if (m_source[m_current] != expected) return false; m_current++; return true; }
+Token Lexer::makeToken(TokenType type, const std::string& value) const { return {type, value, m_line, 0}; }
 
 } // namespace CHTL
