@@ -6,10 +6,10 @@
 #include "CHTL/Evaluator/Evaluator.h"
 #include <stdexcept>
 #include <map>
+#include <vector>
 
 namespace CHTL {
 
-// Function to check if an expression is a simple literal that can be evaluated early.
 bool isLiteral(const Expr* expr) {
     if (!expr) return false;
     return dynamic_cast<const LiteralExpr*>(expr) != nullptr;
@@ -53,13 +53,37 @@ void Generator::generateNode(const BaseNode* node) {
     }
 }
 
+void Generator::expandStyleProperties(const BaseNode* container, std::map<std::string, const StylePropertyNode*>& properties) {
+    if (!container) return;
+
+    const std::vector<std::unique_ptr<BaseNode>>* children = nullptr;
+    if (container->getType() == NodeType::StyleBlock) {
+        children = &(static_cast<const StyleBlockNode*>(container)->getChildren());
+    } else if (container->getType() == NodeType::TemplateDefinition) {
+        children = &(static_cast<const TemplateDefinitionNode*>(container)->getChildren());
+    }
+    if (!children) return;
+
+    for (const auto& child : *children) {
+        if (child->getType() == NodeType::StyleProperty) {
+            const auto* propNode = static_cast<const StylePropertyNode*>(child.get());
+            properties[propNode->getKey()] = propNode;
+        } else if (child->getType() == NodeType::TemplateUsage) {
+            const auto* usageNode = static_cast<const TemplateUsageNode*>(child.get());
+            if (usageNode->getTemplateType() == "Style") {
+                const TemplateDefinitionNode* baseTemplate = m_context->getTemplate(usageNode->getTemplateName());
+                expandStyleProperties(baseTemplate, properties);
+            }
+        }
+    }
+}
+
 void Generator::generateTemplateUsage(const TemplateUsageNode* node, const ElementNode* parentElement) {
     const TemplateDefinitionNode* def = m_context->getTemplate(node->getTemplateName());
     if (!def) {
         m_output += "<!-- Template not found: " + node->getTemplateName() + " -->";
         return;
     }
-
     if (node->getTemplateType() == "Element") {
         for (const auto& child : def->getChildren()) {
             generateNode(child.get());
@@ -74,27 +98,27 @@ void Generator::generateElement(const ElementNode* element) {
     }
 
     if (element->getStyleBlock()) {
-        EvaluationContext context;
-        const auto* styleBlock = element->getStyleBlock();
+        std::map<std::string, const StylePropertyNode*> final_properties;
+        expandStyleProperties(element->getStyleBlock(), final_properties);
 
-        for (const auto& styleChild : styleBlock->getChildren()) {
-            if (styleChild->getType() == NodeType::StyleProperty) {
-                const auto* prop = static_cast<const StylePropertyNode*>(styleChild.get());
-                if (isLiteral(prop->getValue())) {
-                    Evaluator eval;
-                    context[prop->getKey()] = eval.evaluate(prop->getValue(), context);
-                }
+        EvaluationContext context;
+        for(const auto& pair : final_properties) {
+            if(isLiteral(pair.second->getValue())) {
+                Evaluator eval;
+                context[pair.first] = eval.evaluate(pair.second->getValue(), context);
             }
         }
 
         std::string inline_style;
-        for (const auto& styleChild : styleBlock->getChildren()) {
-            if (styleChild->getType() == NodeType::StyleProperty) {
-                const auto* prop = static_cast<const StylePropertyNode*>(styleChild.get());
-                Evaluator eval;
-                ChtlValue value = eval.evaluate(prop->getValue(), context);
-                inline_style += prop->getKey() + ": " + value.toString() + ";";
-            } else if (styleChild->getType() == NodeType::StyleSelector) {
+        for(const auto& pair : final_properties) {
+            Evaluator eval;
+            ChtlValue value = eval.evaluate(pair.second->getValue(), context);
+            inline_style += pair.first + ": " + value.toString() + ";";
+        }
+        if (!inline_style.empty()) attributes["style"] = inline_style;
+
+        for (const auto& styleChild : element->getStyleBlock()->getChildren()) {
+            if (styleChild->getType() == NodeType::StyleSelector) {
                 const auto* selectorNode = static_cast<const StyleSelectorNode*>(styleChild.get());
                 std::string selector_text = selectorNode->getSelector();
 
@@ -119,7 +143,6 @@ void Generator::generateElement(const ElementNode* element) {
                 m_global_css += "}\n";
             }
         }
-        if (!inline_style.empty()) attributes["style"] = inline_style;
     }
 
     m_output += "<" + element->getTagName();

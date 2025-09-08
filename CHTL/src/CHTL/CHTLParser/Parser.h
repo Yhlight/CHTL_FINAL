@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../CHTLLexer/Token.h"
-#include "../CHTLContext/CHTLContext.h" // Include the new context
+#include "../CHTLContext/CHTLContext.h"
 #include "../CHTLNode/DocumentNode.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
@@ -23,9 +23,7 @@ namespace CHTL {
 
 class Parser {
 public:
-    // Constructor now takes a context to store template definitions
     explicit Parser(const std::vector<Token>& tokens, CHTLContext& context);
-
     std::unique_ptr<DocumentNode> parse();
 
 private:
@@ -36,9 +34,10 @@ private:
     void parseAttributes(ElementNode* element);
     std::string parseIdentifierSequence();
 
-    // New template parsing functions
+    // Template parsing
     void parseTemplateDefinition();
     std::unique_ptr<TemplateUsageNode> parseTemplateUsage();
+    void parseStyleTemplateContent(TemplateDefinitionNode* templateNode); // New helper
 
     // Style-parsing functions
     std::unique_ptr<StyleBlockNode> parseStyleBlock();
@@ -63,7 +62,7 @@ private:
     const Token& consume(TokenType type, const std::string& message);
 
     const std::vector<Token>& m_tokens;
-    CHTLContext& m_context; // Reference to the shared context
+    CHTLContext& m_context;
     size_t m_current = 0;
 };
 

@@ -25,9 +25,9 @@ private:
     void generateText(const TextNode* text);
     void generateTemplateUsage(const TemplateUsageNode* node, const ElementNode* parentElement);
 
-    // New helper to recursively collect properties from an inheritance chain of style templates
-    void collectStyleProperties(const TemplateDefinitionNode* styleTemplate,
-                                std::map<std::string, const StylePropertyNode*>& properties);
+    // New helper to recursively collect and resolve properties from style blocks and templates.
+    void expandStyleProperties(const BaseNode* container,
+                               std::map<std::string, const StylePropertyNode*>& properties);
 
     std::string m_output;
     std::string m_global_css;

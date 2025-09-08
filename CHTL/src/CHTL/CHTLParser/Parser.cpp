@@ -13,12 +13,9 @@ namespace CHTL {
 Parser::Parser(const std::vector<Token>& tokens, CHTLContext& context)
     : m_tokens(tokens), m_context(context) {}
 
-// --- Main Parser Logic ---
-
 std::unique_ptr<DocumentNode> Parser::parse() {
     auto document = std::make_unique<DocumentNode>();
     while (!isAtEnd()) {
-        // At the top level, we can have template definitions or regular nodes.
         if (match({TokenType::LeftBracket})) {
             parseTemplateDefinition();
         } else {
@@ -29,7 +26,7 @@ std::unique_ptr<DocumentNode> Parser::parse() {
 }
 
 void Parser::parseTemplateDefinition() {
-    consume(TokenType::Identifier, "Expected 'Template' keyword."); // Assume it's "Template" for now
+    consume(TokenType::Identifier, "Expected 'Template' keyword.");
     consume(TokenType::RightBracket, "Expected ']' after 'Template'.");
     consume(TokenType::At, "Expected '@' for template type.");
 
@@ -39,22 +36,34 @@ void Parser::parseTemplateDefinition() {
     auto templateNode = std::make_unique<TemplateDefinitionNode>(typeToken.value, nameToken.value);
 
     consume(TokenType::OpenBrace, "Expected '{' to start template body.");
-    while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        // The content of the template is just a regular CHTL node
-        templateNode->addChild(parseNode());
-    }
-    consume(TokenType::CloseBrace, "Expected '}' to close template body.");
 
+    if (typeToken.value == "Style") {
+        parseStyleTemplateContent(templateNode.get());
+    } else { // For Element templates
+        while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+            templateNode->addChild(parseNode());
+        }
+    }
+
+    consume(TokenType::CloseBrace, "Expected '}' to close template body.");
     m_context.registerTemplate(std::move(templateNode));
 }
 
+void Parser::parseStyleTemplateContent(TemplateDefinitionNode* templateNode) {
+    while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+        if (check(TokenType::At)) {
+            templateNode->addChild(parseTemplateUsage());
+        } else {
+            templateNode->addChild(parseStyleProperty());
+        }
+    }
+}
 
 std::unique_ptr<BaseNode> Parser::parseNode() {
     if (peek().type == TokenType::Identifier) {
         if (peek().value == "text") return parseTextElement();
         return parseElement();
     }
-    // A template usage can also be a node
     if (peek().type == TokenType::At) {
         return parseTemplateUsage();
     }
@@ -66,54 +75,15 @@ std::unique_ptr<TemplateUsageNode> Parser::parseTemplateUsage() {
     const Token& typeToken = consume(TokenType::Identifier, "Expected template type.");
     const Token& nameToken = consume(TokenType::Identifier, "Expected template name.");
     consume(TokenType::Semicolon, "Expected ';' after template usage.");
-
     return std::make_unique<TemplateUsageNode>(typeToken.value, nameToken.value);
 }
 
-std::unique_ptr<BaseNode> Parser::parseStyleContent() {
-    if (match({TokenType::At})) {
-        // Backtrack one token so parseTemplateUsage can consume the '@'
-        m_current--;
-        return parseTemplateUsage();
-    }
-    if (check(TokenType::Dot) || check(TokenType::Hash) || check(TokenType::Ampersand)) return parseStyleSelector();
-    if (check(TokenType::Identifier)) {
-        size_t lookahead_pos = m_current;
-        while(lookahead_pos < m_tokens.size() && (m_tokens[lookahead_pos].type == TokenType::Identifier || m_tokens[lookahead_pos].type == TokenType::Minus)) { lookahead_pos++; }
-        if (lookahead_pos < m_tokens.size() && m_tokens[lookahead_pos].type == TokenType::OpenBrace) return parseStyleSelector();
-        return parseStyleProperty();
-    }
-    throw std::runtime_error("Unexpected token in style block: " + peek().value);
-}
-
-
-// ... (rest of the file is the same, adding placeholders to keep it short)
-
-std::unique_ptr<ElementNode> Parser::parseElement() {
-    std::string tagName = parseIdentifierSequence();
-    auto element = std::make_unique<ElementNode>(tagName);
-    consume(TokenType::OpenBrace, "Expected '{' after element tag name.");
-    while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        if (check(TokenType::Identifier) && peek().value == "style") {
-            element->setStyleBlock(parseStyleBlock());
-        } else if (check(TokenType::At)) {
-             element->addChild(parseTemplateUsage());
-        } else {
-            size_t lookahead_pos = m_current;
-            while(lookahead_pos < m_tokens.size() && (m_tokens[lookahead_pos].type == TokenType::Identifier || m_tokens[lookahead_pos].type == TokenType::Minus)) { lookahead_pos++; }
-            if (lookahead_pos < m_tokens.size() && (m_tokens[lookahead_pos].type == TokenType::Colon || m_tokens[lookahead_pos].type == TokenType::Equals)) {
-                parseAttributes(element.get());
-            } else {
-                element->addChild(parseNode());
-            }
-        }
-    }
-    consume(TokenType::CloseBrace, "Expected '}' to close element.");
-    return element;
-}
+// ... (Rest of the file is the same as the last correct version)
+std::unique_ptr<ElementNode> Parser::parseElement() { std::string tagName = parseIdentifierSequence(); auto element = std::make_unique<ElementNode>(tagName); consume(TokenType::OpenBrace, "Expected '{' after element tag name."); while (!check(TokenType::CloseBrace) && !isAtEnd()) { if (check(TokenType::Identifier) && peek().value == "style") { element->setStyleBlock(parseStyleBlock()); } else if (check(TokenType::At)) { element->addChild(parseTemplateUsage()); } else { size_t lookahead_pos = m_current; while(lookahead_pos < m_tokens.size() && (m_tokens[lookahead_pos].type == TokenType::Identifier || m_tokens[lookahead_pos].type == TokenType::Minus)) { lookahead_pos++; } if (lookahead_pos < m_tokens.size() && (m_tokens[lookahead_pos].type == TokenType::Colon || m_tokens[lookahead_pos].type == TokenType::Equals)) { parseAttributes(element.get()); } else { element->addChild(parseNode()); } } } consume(TokenType::CloseBrace, "Expected '}' to close element."); return element; }
 std::unique_ptr<TextNode> Parser::parseTextElement() { consume(TokenType::Identifier, "Expected 'text' keyword."); consume(TokenType::OpenBrace, "Expected '{' after 'text' keyword."); const Token& content = advance(); if (content.type != TokenType::StringLiteral && content.type != TokenType::Identifier) { throw std::runtime_error("Expected string or unquoted literal inside text block."); } auto textNode = std::make_unique<TextNode>(content.value); consume(TokenType::CloseBrace, "Expected '}' to close text block."); return textNode; }
 void Parser::parseAttributes(ElementNode* element) { std::string key = parseIdentifierSequence(); if (!match({TokenType::Colon, TokenType::Equals})) { throw std::runtime_error("Expected ':' or '=' after attribute key."); } std::string value; if(peek().type == TokenType::StringLiteral) { value = advance().value; } else { value = parseIdentifierSequence(); } consume(TokenType::Semicolon, "Expected ';' after attribute value."); element->addAttribute(std::make_unique<AttributeNode>(key, value)); }
 std::unique_ptr<StyleBlockNode> Parser::parseStyleBlock() { consume(TokenType::Identifier, "Expected 'style' keyword."); consume(TokenType::OpenBrace, "Expected '{' after 'style'."); auto styleBlock = std::make_unique<StyleBlockNode>(); while (!check(TokenType::CloseBrace) && !isAtEnd()) { styleBlock->addChild(parseStyleContent()); } consume(TokenType::CloseBrace, "Expected '}' to close style block."); return styleBlock; }
+std::unique_ptr<BaseNode> Parser::parseStyleContent() { if (match({TokenType::At})) { m_current--; return parseTemplateUsage(); } if (check(TokenType::Dot) || check(TokenType::Hash) || check(TokenType::Ampersand)) return parseStyleSelector(); if (check(TokenType::Identifier)) { size_t lookahead_pos = m_current; while(lookahead_pos < m_tokens.size() && (m_tokens[lookahead_pos].type == TokenType::Identifier || m_tokens[lookahead_pos].type == TokenType::Minus)) { lookahead_pos++; } if (lookahead_pos < m_tokens.size() && m_tokens[lookahead_pos].type == TokenType::OpenBrace) return parseStyleSelector(); return parseStyleProperty(); } throw std::runtime_error("Unexpected token in style block: " + peek().value); }
 std::unique_ptr<StylePropertyNode> Parser::parseStyleProperty() { std::string key = parseIdentifierSequence(); consume(TokenType::Colon, "Expected ':' after style property name."); auto value = parseExpression(); consume(TokenType::Semicolon, "Expected ';' after style property value."); return std::make_unique<StylePropertyNode>(key, std::move(value)); }
 std::unique_ptr<StyleSelectorNode> Parser::parseStyleSelector() { std::string selector_str; while (!check(TokenType::OpenBrace) && !isAtEnd()) { selector_str += advance().value; } auto selectorNode = std::make_unique<StyleSelectorNode>(selector_str); consume(TokenType::OpenBrace, "Expected '{' after selector."); while (!check(TokenType::CloseBrace) && !isAtEnd()) { selectorNode->addProperty(parseStyleProperty()); } consume(TokenType::CloseBrace, "Expected '}' to close selector block."); return selectorNode; }
 std::unique_ptr<Expr> Parser::parseExpression() { return parseTernary(); }

@@ -18,7 +18,13 @@ cmake ..
 echo "--- Running Make to compile all targets ---"
 make
 
+echo ""
 echo "--- Running Test Suite ---"
 ./run_tests
 
+echo ""
+echo "--- Running Main Executable for Manual Verification ---"
+./chtl
+
+echo ""
 echo "--- CHTL build and test script finished ---"
