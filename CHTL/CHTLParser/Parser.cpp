@@ -8,6 +8,7 @@
 #include "../CHTLNode/TemplateUsageNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/StyleRuleNode.h"
+#include "../CHTLNode/ExpressionNode.h"
 #include <iostream>
 #include <algorithm>
 
@@ -78,6 +79,7 @@ std::unique_ptr<BaseNode> Parser::declaration() {
     advance();
     return nullptr;
 }
+
 
 // =================================================================
 // Expression Parsing
@@ -166,12 +168,9 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
     }
 
     if (match(TokenType::IDENTIFIER)) {
-        // This could be a literal identifier (like 'red') or a property access (like 'width')
-        // The generator will have to figure out which it is.
         if (check(TokenType::LEFT_PAREN)) {
-            // This is a variable template usage
             std::string templateName = previousToken.lexeme;
-            advance(); // consume '('
+            advance();
             std::string varName = currentToken.lexeme;
             consume(TokenType::IDENTIFIER, "Expect variable name inside parentheses.");
             if (match(TokenType::EQUAL)) {
@@ -192,7 +191,6 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
     }
 
     if (match(TokenType::DOT)) {
-        // This is for selectors like .box.width
         std::string selector = "." + currentToken.lexeme;
         advance();
         consume(TokenType::DOT, "Expect '.' between selector and property.");
@@ -207,7 +205,6 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
         return expr;
     }
 
-    // Default case for simple unquoted values
     auto literal = std::make_unique<LiteralNode>(currentToken);
     advance();
     return literal;
@@ -225,16 +222,12 @@ std::unique_ptr<BaseNode> Parser::originDeclaration() {
     consume(TokenType::LEFT_BRACE, "Expect '{' after [Origin] declaration.");
 
     size_t start = previousToken.position + previousToken.lexeme.length();
-
     const std::string& source = lexer.getSource();
     int braceCount = 1;
     size_t end = start;
     while (braceCount > 0 && end < source.length()) {
-        if (source[end] == '{') {
-            braceCount++;
-        } else if (source[end] == '}') {
-            braceCount--;
-        }
+        if (source[end] == '{') braceCount++;
+        else if (source[end] == '}') braceCount--;
         end++;
     }
 
@@ -244,15 +237,11 @@ std::unique_ptr<BaseNode> Parser::originDeclaration() {
         return nullptr;
     }
 
-    std::string rawContent = source.substr(start, end - 1 - start);
-
-    lexer.setPosition(end);
-
-    advance();
-    advance();
-
     auto node = std::make_unique<OriginNode>();
-    node->content = rawContent;
+    node->content = source.substr(start, end - 1 - start);
+    lexer.setPosition(end);
+    advance();
+    advance();
     return node;
 }
 
@@ -291,7 +280,6 @@ std::unique_ptr<ElementNode> Parser::element() {
             consume(TokenType::IDENTIFIER, "Expect 'Element' after '@'.");
             std::string templateName = currentToken.lexeme;
             consume(TokenType::IDENTIFIER, "Expect template name after '@Element'.");
-
             if (match(TokenType::SEMICOLON)) {
                 auto usageNode = std::make_unique<TemplateUsageNode>();
                 usageNode->type = TemplateType::ELEMENT;
@@ -327,7 +315,6 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
     consume(TokenType::STYLE, "Expect 'style' keyword.");
     consume(TokenType::LEFT_BRACE, "Expect '{' after 'style'.");
     auto node = std::make_unique<StyleNode>();
-
     while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
         if (check(TokenType::IDENTIFIER) && checkNext(TokenType::COLON)) {
             std::string key = currentToken.lexeme;
@@ -338,7 +325,6 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
         } else if (check(TokenType::DOT) || check(TokenType::HASH) || check(TokenType::AMPERSAND)) {
             auto rule = std::make_unique<StyleRuleNode>();
             std::string selector_str;
-
             if (match(TokenType::AMPERSAND)) {
                 selector_str = "&";
                 if (check(TokenType::COLON)) {
@@ -357,9 +343,7 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
                 selector_str += currentToken.lexeme;
                 consume(TokenType::IDENTIFIER, "Expect identifier after '.' or '#'.");
             }
-
             rule->selector = selector_str;
-
             consume(TokenType::LEFT_BRACE, "Expect '{' after selector.");
             while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
                 std::string key = currentToken.lexeme;
@@ -379,7 +363,6 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
             consume(TokenType::IDENTIFIER, "Expect 'Style' after '@'.");
             std::string templateName = currentToken.lexeme;
             consume(TokenType::IDENTIFIER, "Expect template name after '@Style'.");
-
             if (match(TokenType::SEMICOLON)) {
                  if (styleTemplates.count(templateName)) {
                     for (const auto& prop : styleTemplates.at(templateName)->properties) {
@@ -402,10 +385,8 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
                     while (braceCount > 0 && !check(TokenType::END_OF_FILE)) { advance(); if(check(TokenType::LEFT_BRACE)) braceCount++; if(check(TokenType::RIGHT_BRACE)) braceCount--; }
                     continue;
                 }
-
                 const auto& tmpl = customStyleTemplates.at(templateName);
                 auto specializedProps = tmpl->properties;
-
                 while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
                     if (match(TokenType::KEYWORD_DELETE)) {
                         std::string keyToDelete = currentToken.lexeme;
@@ -429,7 +410,6 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
                     }
                 }
                 consume(TokenType::RIGHT_BRACE, "Expect '}' after specialization block.");
-
                 for (const auto& prop : specializedProps) {
                     Token token = {TokenType::STRING, prop.second, currentToken.line, currentToken.column, currentToken.position};
                     node->inlineProperties[prop.first] = std::make_unique<LiteralNode>(token);
@@ -465,15 +445,12 @@ void Parser::attributes(ElementNode& element) {
 std::unique_ptr<BaseNode> Parser::templateDeclaration() {
     consume(TokenType::KEYWORD_TEMPLATE, "Expect '[Template]' keyword.");
     consume(TokenType::AT, "Expect '@' before template type.");
-
     if (currentToken.type != TokenType::IDENTIFIER) {
         std::cerr << "Parse Error: Expect template type (Style, Element, Var) after '@'." << std::endl;
         return nullptr;
     }
-
     std::string templateType = currentToken.lexeme;
     advance();
-
     if (templateType == "Style") {
         auto node = std::make_unique<StyleTemplateNode>();
         node->name = currentToken.lexeme;
@@ -574,7 +551,6 @@ Parser::Selector Parser::parseSelector() {
     Selector selector;
     selector.tagName = currentToken.lexeme;
     consume(TokenType::IDENTIFIER, "Expect a tag name for the selector.");
-
     if (match(TokenType::LEFT_BRACKET)) {
         if (check(TokenType::NUMBER)) {
             try {
@@ -597,10 +573,8 @@ Parser::Selector Parser::parseSelector() {
 
 BaseNode* Parser::findNodeBySelector(BaseNode* root, const Parser::Selector& selector) {
     if (!root) return nullptr;
-
     std::vector<BaseNode*> candidates;
     std::vector<BaseNode*> queue;
-
     if (auto* customElem = dynamic_cast<CustomElementNode*>(root)) {
         for (const auto& child : customElem->children) {
             queue.push_back(child.get());
@@ -610,7 +584,6 @@ BaseNode* Parser::findNodeBySelector(BaseNode* root, const Parser::Selector& sel
             queue.push_back(child.get());
         }
     }
-
     size_t head = 0;
     while(head < queue.size()) {
         BaseNode* current = queue[head++];
@@ -623,7 +596,6 @@ BaseNode* Parser::findNodeBySelector(BaseNode* root, const Parser::Selector& sel
             }
         }
     }
-
     if (selector.index != -1) {
         if (selector.index >= 0 && static_cast<size_t>(selector.index) < candidates.size()) {
             return candidates[selector.index];
@@ -632,21 +604,18 @@ BaseNode* Parser::findNodeBySelector(BaseNode* root, const Parser::Selector& sel
             return nullptr;
         }
     }
-
     if (!candidates.empty()) {
         if (candidates.size() > 1) {
              std::cerr << "Parse Warning: Multiple elements with tag '" << selector.tagName << "' found. Use an index to specify one." << std::endl;
         }
         return candidates[0];
     }
-
     return nullptr;
 }
 
 void Parser::mergeStyles(ElementNode* targetNode, ElementNode* specNode) {
     StyleNode* targetStyleNode = nullptr;
     StyleNode* specStyleNode = nullptr;
-
     for (const auto& child : specNode->children) {
         if (auto* sn = dynamic_cast<StyleNode*>(child.get())) {
             specStyleNode = sn;
@@ -654,7 +623,6 @@ void Parser::mergeStyles(ElementNode* targetNode, ElementNode* specNode) {
         }
     }
     if (!specStyleNode) return;
-
     for (const auto& child : targetNode->children) {
         if (auto* sn = dynamic_cast<StyleNode*>(child.get())) {
             targetStyleNode = sn;
@@ -667,7 +635,6 @@ void Parser::mergeStyles(ElementNode* targetNode, ElementNode* specNode) {
         targetStyleNode = newStyleNode.get();
         targetNode->children.push_back(std::move(newStyleNode));
     }
-
     for (const auto& prop : specStyleNode->inlineProperties) {
         if (prop.second) {
             targetStyleNode->inlineProperties[prop.first] = std::unique_ptr<ExpressionNode>(static_cast<ExpressionNode*>(prop.second->clone().release()));
@@ -692,17 +659,14 @@ void Parser::handleCustomElementUsage(const std::string& templateName, ElementNo
     const auto& baseTmpl = customElementTemplates.at(templateName);
     auto clonedRoot = baseTmpl->clone();
     auto* clonedCustomElement = dynamic_cast<CustomElementNode*>(clonedRoot.get());
-
     if (!clonedCustomElement) {
         std::cerr << "Internal Error: Cloned template is not a CustomElementNode." << std::endl;
         return;
     }
-
     std::vector<Patch> patches;
     while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
         Patch patch;
         patch.payload = std::make_unique<ElementNode>();
-
         if (check(TokenType::IDENTIFIER)) {
             patch.type = PatchType::Modify;
             patch.selector = parseSelector();
@@ -724,11 +688,9 @@ void Parser::handleCustomElementUsage(const std::string& templateName, ElementNo
             else if (position == TokenType::KEYWORD_REPLACE) patch.type = PatchType::Replace;
             else if (position == TokenType::KEYWORD_ATTOP) patch.type = PatchType::InsertAtTop;
             else if (position == TokenType::KEYWORD_ATBOTTOM) patch.type = PatchType::InsertAtBottom;
-
             if (patch.type != PatchType::InsertAtTop && patch.type != PatchType::InsertAtBottom) {
                 patch.selector = parseSelector();
             }
-
             consume(TokenType::LEFT_BRACE, "Expect '{' for insert block.");
             while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
                 auto newNode = declaration();
@@ -747,15 +709,12 @@ void Parser::handleCustomElementUsage(const std::string& templateName, ElementNo
         }
         patches.push_back(std::move(patch));
     }
-
     for (auto& patch : patches) {
         BaseNode* targetNode = (patch.type != PatchType::InsertAtTop && patch.type != PatchType::InsertAtBottom)
                              ? findNodeBySelector(clonedCustomElement, patch.selector)
                              : nullptr;
-
         std::vector<std::unique_ptr<BaseNode>>* parentChildren = nullptr;
         BaseNode* parentNodeForPatch = nullptr;
-
         if (patch.type != PatchType::InsertAtTop && patch.type != PatchType::InsertAtBottom) {
             if (!targetNode || !targetNode->parent) {
                 std::cerr << "Parse Warning: Target for patch not found or has no parent." << std::endl;
@@ -768,15 +727,12 @@ void Parser::handleCustomElementUsage(const std::string& templateName, ElementNo
             parentNodeForPatch = clonedCustomElement;
             parentChildren = &clonedCustomElement->children;
         }
-
         if (!parentChildren) {
             std::cerr << "Internal Error: Could not get children list from parent." << std::endl;
             continue;
         }
-
         auto it = (targetNode) ? std::find_if(parentChildren->begin(), parentChildren->end(),
             [&](const std::unique_ptr<BaseNode>& p) { return p.get() == targetNode; }) : parentChildren->end();
-
         switch (patch.type) {
             case PatchType::Modify:
                 if (auto* target = dynamic_cast<ElementNode*>(targetNode)) {
@@ -813,7 +769,6 @@ void Parser::handleCustomElementUsage(const std::string& templateName, ElementNo
                 {
                     BaseNode* insertionParent = parentNodeForPatch;
                     std::vector<std::unique_ptr<BaseNode>>* insertionChildren = parentChildren;
-
                     if (clonedCustomElement->children.size() == 1) {
                         if (auto* singleRoot = dynamic_cast<ElementNode*>(clonedCustomElement->children[0].get())) {
                             insertionParent = singleRoot;
@@ -821,7 +776,6 @@ void Parser::handleCustomElementUsage(const std::string& templateName, ElementNo
                         }
                     }
                     for(auto& node : patch.payload->children) setParent(insertionParent, node.get());
-
                     if(patch.type == PatchType::InsertAtTop) {
                         insertionChildren->insert(insertionChildren->begin(), std::make_move_iterator(patch.payload->children.begin()), std::make_move_iterator(patch.payload->children.end()));
                     } else {
@@ -836,33 +790,27 @@ void Parser::handleCustomElementUsage(const std::string& templateName, ElementNo
                 break;
         }
     }
-
     for (auto& child : clonedCustomElement->children) {
         setParent(parentNode, child.get());
         parentNode->children.push_back(std::move(child));
     }
-
     consume(TokenType::RIGHT_BRACE, "Expect '}' after custom element specialization block.");
 }
 
 std::unique_ptr<BaseNode> Parser::customDeclaration() {
     consume(TokenType::KEYWORD_CUSTOM, "Expect '[Custom]' keyword.");
     consume(TokenType::AT, "Expect '@' before custom type.");
-
     if (currentToken.type != TokenType::IDENTIFIER) {
         std::cerr << "Parse Error: Expect custom type (Style, Element) after '@'." << std::endl;
         return nullptr;
     }
-
     std::string customType = currentToken.lexeme;
     advance();
-
     if (customType == "Element") {
         auto node = std::make_unique<CustomElementNode>();
         node->name = currentToken.lexeme;
         consume(TokenType::IDENTIFIER, "Expect custom element name.");
         consume(TokenType::LEFT_BRACE, "Expect '{' after name.");
-
         while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
             auto child = declaration();
             if (child) {
@@ -877,7 +825,6 @@ std::unique_ptr<BaseNode> Parser::customDeclaration() {
         node->name = currentToken.lexeme;
         consume(TokenType::IDENTIFIER, "Expect custom style name.");
         consume(TokenType::LEFT_BRACE, "Expect '{' after name.");
-
         while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
             if (check(TokenType::IDENTIFIER)) {
                 std::string key = currentToken.lexeme;
@@ -905,6 +852,5 @@ std::unique_ptr<BaseNode> Parser::customDeclaration() {
     } else {
         std::cerr << "Parse Error: Expected 'Element' or 'Style' after '[Custom] @' at line " << currentToken.line << std::endl;
     }
-
     return nullptr;
 }

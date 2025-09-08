@@ -176,15 +176,15 @@ Token Lexer::getNextToken() {
         case '{': advance(); return makeToken(TokenType::LEFT_BRACE, "{");
         case '}': advance(); return makeToken(TokenType::RIGHT_BRACE, "}");
         case ':': advance(); return makeToken(TokenType::COLON, ":");
-        case '=':
-            advance();
-            if (match('=')) return makeToken(TokenType::EQUAL_EQUAL, "==");
-            return makeToken(TokenType::EQUAL, "=");
         case ';': advance(); return makeToken(TokenType::SEMICOLON, ";");
         case '[': advance(); return makeToken(TokenType::LEFT_BRACKET, "[");
         case ']': advance(); return makeToken(TokenType::RIGHT_BRACKET, "]");
         case '.': advance(); return makeToken(TokenType::DOT, ".");
         case '#': advance(); return makeToken(TokenType::HASH, "#");
+        case '=':
+            advance();
+            if (match('=')) return makeToken(TokenType::EQUAL_EQUAL, "==");
+            return makeToken(TokenType::EQUAL, "=");
         case '|':
             advance();
             if (match('|')) return makeToken(TokenType::OR_OR, "||");
