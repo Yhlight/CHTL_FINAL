@@ -21,6 +21,7 @@ public:
     void visit(TemplateUsageNode& node) override;
     void visit(class CustomStyleTemplateNode& node) override;
     void visit(class StyleRuleNode& node) override;
+    void visit(class OriginNode& node) override;
 
 private:
     Parser& parser;

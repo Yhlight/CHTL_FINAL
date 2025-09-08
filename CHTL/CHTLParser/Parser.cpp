@@ -6,6 +6,8 @@
 #include "../CHTLNode/CustomElementNode.h"
 #include "../CHTLNode/CustomStyleTemplateNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
+#include "../CHTLNode/OriginNode.h"
+#include "../CHTLNode/StyleRuleNode.h"
 #include <iostream>
 #include <algorithm>
 
@@ -67,6 +69,7 @@ std::unique_ptr<ElementNode> Parser::parse() {
 std::unique_ptr<BaseNode> Parser::declaration() {
     if (check(TokenType::KEYWORD_TEMPLATE)) return templateDeclaration();
     if (check(TokenType::KEYWORD_CUSTOM)) return customDeclaration();
+    if (check(TokenType::KEYWORD_ORIGIN)) return originDeclaration();
     if (check(TokenType::IDENTIFIER) && checkNext(TokenType::LEFT_BRACE)) return element();
     if (check(TokenType::TEXT)) return textNode();
     if (check(TokenType::STYLE)) return styleNode();
@@ -74,6 +77,49 @@ std::unique_ptr<BaseNode> Parser::declaration() {
     std::cerr << "Parse Error: Unexpected token " << currentToken.lexeme << " at line " << currentToken.line << std::endl;
     advance();
     return nullptr;
+}
+
+std::unique_ptr<BaseNode> Parser::originDeclaration() {
+    consume(TokenType::KEYWORD_ORIGIN, "Expect '[Origin]' keyword.");
+    consume(TokenType::AT, "Expect '@' before origin type.");
+    consume(TokenType::IDENTIFIER, "Expect type name after '@'.");
+
+    if (check(TokenType::IDENTIFIER)) {
+        advance();
+    }
+
+    consume(TokenType::LEFT_BRACE, "Expect '{' after [Origin] declaration.");
+
+    size_t start = previousToken.position + previousToken.lexeme.length();
+
+    const std::string& source = lexer.getSource();
+    int braceCount = 1;
+    size_t end = start;
+    while (braceCount > 0 && end < source.length()) {
+        if (source[end] == '{') {
+            braceCount++;
+        } else if (source[end] == '}') {
+            braceCount--;
+        }
+        end++;
+    }
+
+    if (braceCount > 0) {
+        std::cerr << "Parse Error: Unterminated [Origin] block." << std::endl;
+        while(!check(TokenType::END_OF_FILE)) advance();
+        return nullptr;
+    }
+
+    std::string rawContent = source.substr(start, end - 1 - start);
+
+    lexer.setPosition(end);
+
+    advance();
+    advance();
+
+    auto node = std::make_unique<OriginNode>();
+    node->content = rawContent;
+    return node;
 }
 
 std::unique_ptr<ElementNode> Parser::element() {
@@ -107,16 +153,17 @@ std::unique_ptr<ElementNode> Parser::element() {
                 setParent(node.get(), child.get());
                 node->children.push_back(std::move(child));
             }
-        } else if (match(TokenType::AT_ELEMENT)) {
+        } else if (match(TokenType::AT)) {
+            consume(TokenType::IDENTIFIER, "Expect 'Element' after '@'.");
             std::string templateName = currentToken.lexeme;
             consume(TokenType::IDENTIFIER, "Expect template name after '@Element'.");
 
-            if (match(TokenType::SEMICOLON)) { // Regular template usage
+            if (match(TokenType::SEMICOLON)) {
                 auto usageNode = std::make_unique<TemplateUsageNode>();
                 usageNode->type = TemplateType::ELEMENT;
                 usageNode->name = templateName;
                 node->children.push_back(std::move(usageNode));
-            } else if (match(TokenType::LEFT_BRACE)) { // Custom element usage with specialization
+            } else if (match(TokenType::LEFT_BRACE)) {
                 handleCustomElementUsage(templateName, node.get());
             } else {
                 std::cerr << "Parse Error: Expect ';' or '{' after @Element usage at line " << currentToken.line << std::endl;
@@ -149,31 +196,29 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
 
     while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
         if (check(TokenType::IDENTIFIER) && checkNext(TokenType::COLON)) {
-            // Inline property
             std::string key = currentToken.lexeme;
             advance();
             consume(TokenType::COLON, "Expect ':' after style property name.");
             node->inlineProperties[key] = parseValue();
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
         } else if (check(TokenType::DOT) || check(TokenType::HASH) || check(TokenType::AMPERSAND)) {
-            // Nested style rule
             auto rule = std::make_unique<StyleRuleNode>();
             std::string selector_str;
 
             if (match(TokenType::AMPERSAND)) {
                 selector_str = "&";
                 if (check(TokenType::COLON)) {
-                    selector_str += currentToken.lexeme; // Add first ':'
+                    selector_str += currentToken.lexeme;
                     advance();
-                    if (check(TokenType::COLON)) { // Handle pseudo-elements like ::before
+                    if (check(TokenType::COLON)) {
                         selector_str += currentToken.lexeme;
                         advance();
                     }
                     selector_str += currentToken.lexeme;
                     consume(TokenType::IDENTIFIER, "Expect pseudo-class/element name after ':'.");
                 }
-            } else { // DOT or HASH
-                selector_str = currentToken.lexeme; // '.' or '#'
+            } else {
+                selector_str = currentToken.lexeme;
                 advance();
                 selector_str += currentToken.lexeme;
                 consume(TokenType::IDENTIFIER, "Expect identifier after '.' or '#'.");
@@ -191,26 +236,57 @@ std::unique_ptr<StyleNode> Parser::styleNode() {
             }
             consume(TokenType::RIGHT_BRACE, "Expect '}' after rule block.");
             node->rules.push_back(std::move(rule));
-        } else if (match(TokenType::AT_STYLE)) {
-            // For now, @Style usage will just merge into inline properties.
-            // This can be expanded later.
+        } else if (match(TokenType::AT)) {
+            consume(TokenType::IDENTIFIER, "Expect 'Style' after '@'.");
             std::string templateName = currentToken.lexeme;
             consume(TokenType::IDENTIFIER, "Expect template name after '@Style'.");
+
             if (match(TokenType::SEMICOLON)) {
                  if (styleTemplates.count(templateName)) {
                     for (const auto& prop : styleTemplates.at(templateName)->properties) {
                         node->inlineProperties[prop.first] = prop.second;
                     }
+                } else if (customStyleTemplates.count(templateName)) {
+                    const auto& tmpl = customStyleTemplates.at(templateName);
+                    for(const auto& prop : tmpl->properties) node->inlineProperties[prop.first] = prop.second;
                 } else {
                      std::cerr << "Parse Error: Style template '" << templateName << "' not found." << std::endl;
                 }
+            } else if (match(TokenType::LEFT_BRACE)) {
+                if (!customStyleTemplates.count(templateName)) {
+                    std::cerr << "Parse Error: Custom style template '" << templateName << "' not found." << std::endl;
+                    int braceCount = 1;
+                    while (braceCount > 0 && !check(TokenType::END_OF_FILE)) { advance(); if(check(TokenType::LEFT_BRACE)) braceCount++; if(check(TokenType::RIGHT_BRACE)) braceCount--; }
+                    continue;
+                }
+
+                const auto& tmpl = customStyleTemplates.at(templateName);
+                auto specializedProps = tmpl->properties;
+
+                while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
+                    if (match(TokenType::KEYWORD_DELETE)) {
+                        std::string keyToDelete = currentToken.lexeme;
+                        consume(TokenType::IDENTIFIER, "Expect property name after 'delete'.");
+                        consume(TokenType::SEMICOLON, "Expect ';' after property name.");
+                        specializedProps.erase(keyToDelete);
+                    } else if (check(TokenType::IDENTIFIER)) {
+                        std::string key = currentToken.lexeme;
+                        advance();
+                        consume(TokenType::COLON, "Expect ':' for property specialization.");
+                        specializedProps[key] = parseValue();
+                        consume(TokenType::SEMICOLON, "Expect ';' after property value.");
+                    } else {
+                        std::cerr << "Parse Error: Unexpected token in custom style specialization." << std::endl;
+                        advance();
+                    }
+                }
+                consume(TokenType::RIGHT_BRACE, "Expect '}' after specialization block.");
+
+                for (const auto& prop : specializedProps) {
+                    node->inlineProperties[prop.first] = prop.second;
+                }
             } else {
-                 // TODO: Handle specialized @Style usage in the new structure
-                 std::cerr << "Parse Warning: Specialized @Style usage is not fully supported in this context yet." << std::endl;
-                 consume(TokenType::LEFT_BRACE, "Skipping specialized style block.");
-                 int braceCount = 1;
-                 while(braceCount > 0 && !check(TokenType::END_OF_FILE)) { advance(); if(check(TokenType::LEFT_BRACE)) braceCount++; if(check(TokenType::RIGHT_BRACE)) braceCount--;}
-                 consume(TokenType::RIGHT_BRACE, "Skipped block.");
+                std::cerr << "Parse Error: Expect '{' or ';' after @Style usage." << std::endl;
             }
         }
         else {
@@ -234,8 +310,17 @@ void Parser::attributes(ElementNode& element) {
 
 std::unique_ptr<BaseNode> Parser::templateDeclaration() {
     consume(TokenType::KEYWORD_TEMPLATE, "Expect '[Template]' keyword.");
+    consume(TokenType::AT, "Expect '@' before template type.");
 
-    if (match(TokenType::AT_STYLE)) {
+    if (currentToken.type != TokenType::IDENTIFIER) {
+        std::cerr << "Parse Error: Expect template type (Style, Element, Var) after '@'." << std::endl;
+        return nullptr;
+    }
+
+    std::string templateType = currentToken.lexeme;
+    advance();
+
+    if (templateType == "Style") {
         auto node = std::make_unique<StyleTemplateNode>();
         node->name = currentToken.lexeme;
         consume(TokenType::IDENTIFIER, "Expect template name.");
@@ -247,9 +332,8 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
                 consume(TokenType::COLON, "Expect ':' after property name.");
                 node->properties[key] = parseValue();
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-            } else if (check(TokenType::AT_STYLE) || check(TokenType::KEYWORD_INHERIT)) {
-                bool isInherit = match(TokenType::KEYWORD_INHERIT);
-                if (!isInherit) consume(TokenType::AT_STYLE, "Expect '@Style' for inheritance.");
+            } else if (match(TokenType::AT) || match(TokenType::KEYWORD_INHERIT)) {
+                if(previousToken.type != TokenType::KEYWORD_INHERIT) consume(TokenType::IDENTIFIER, "Expect 'Style' for inheritance.");
                 std::string baseTemplateName = currentToken.lexeme;
                 consume(TokenType::IDENTIFIER, "Expect base template name.");
                 consume(TokenType::SEMICOLON, "Expect ';' after base template usage.");
@@ -267,15 +351,14 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
         }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after template body.");
         styleTemplates[node->name] = std::move(node);
-    } else if (match(TokenType::AT_ELEMENT)) {
+    } else if (templateType == "Element") {
         auto node = std::make_unique<ElementTemplateNode>();
         node->name = currentToken.lexeme;
         consume(TokenType::IDENTIFIER, "Expect template name.");
         consume(TokenType::LEFT_BRACE, "Expect '{' after name.");
         while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
-            if (check(TokenType::AT_ELEMENT) || check(TokenType::KEYWORD_INHERIT)) {
-                bool isInherit = match(TokenType::KEYWORD_INHERIT);
-                if(!isInherit) consume(TokenType::AT_ELEMENT, "Expect '@Element' for inheritance.");
+            if (match(TokenType::AT) || match(TokenType::KEYWORD_INHERIT)) {
+                if(previousToken.type != TokenType::KEYWORD_INHERIT) consume(TokenType::IDENTIFIER, "Expect 'Element' for inheritance.");
                 std::string baseTemplateName = currentToken.lexeme;
                 consume(TokenType::IDENTIFIER, "Expect base template name.");
                 consume(TokenType::SEMICOLON, "Expect ';' after base template usage.");
@@ -298,7 +381,7 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
         }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after template body.");
         elementTemplates[node->name] = std::move(node);
-    } else if (match(TokenType::AT_VAR)) {
+    } else if (templateType == "Var") {
         auto node = std::make_unique<VarTemplateNode>();
         node->name = currentToken.lexeme;
         consume(TokenType::IDENTIFIER, "Expect template name.");
@@ -317,6 +400,8 @@ std::unique_ptr<BaseNode> Parser::templateDeclaration() {
         }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after template body.");
         varTemplates[node->name] = std::move(node);
+    } else {
+        std::cerr << "Parse Error: Unknown template type '" << templateType << "'." << std::endl;
     }
     return nullptr;
 }
@@ -434,12 +519,19 @@ std::string Parser::parseValue() {
         consume(TokenType::LEFT_PAREN, "Expect '(' after variable template name.");
         std::string varName = currentToken.lexeme;
         consume(TokenType::IDENTIFIER, "Expect variable name inside parentheses.");
-        consume(TokenType::RIGHT_PAREN, "Expect ')' after variable name.");
-        if (varTemplates.count(templateName) && varTemplates[templateName]->variables.count(varName)) {
-            return varTemplates[templateName]->variables[varName];
+
+        if (match(TokenType::EQUAL)) {
+            std::string newValue = parseValue();
+            consume(TokenType::RIGHT_PAREN, "Expect ')' after specialized value.");
+            return newValue;
+        } else {
+            consume(TokenType::RIGHT_PAREN, "Expect ')' after variable name.");
+            if (varTemplates.count(templateName) && varTemplates[templateName]->variables.count(varName)) {
+                return varTemplates[templateName]->variables[varName];
+            }
+            std::cerr << "Parse Error: Variable " << templateName << "(" << varName << ") not found." << std::endl;
+            return "";
         }
-        std::cerr << "Parse Error: Variable " << templateName << "(" << varName << ") not found." << std::endl;
-        return "";
     }
 
     std::string value;
@@ -469,7 +561,6 @@ void Parser::handleCustomElementUsage(const std::string& templateName, ElementNo
         return;
     }
 
-    // --- Phase 1: Collect Patches ---
     std::vector<Patch> patches;
     while (!check(TokenType::RIGHT_BRACE) && !check(TokenType::END_OF_FILE)) {
         Patch patch;
@@ -520,7 +611,6 @@ void Parser::handleCustomElementUsage(const std::string& templateName, ElementNo
         patches.push_back(std::move(patch));
     }
 
-    // --- Phase 2: Apply Patches ---
     for (auto& patch : patches) {
         BaseNode* targetNode = (patch.type != PatchType::InsertAtTop && patch.type != PatchType::InsertAtBottom)
                              ? findNodeBySelector(clonedCustomElement, patch.selector)
@@ -620,8 +710,17 @@ void Parser::handleCustomElementUsage(const std::string& templateName, ElementNo
 
 std::unique_ptr<BaseNode> Parser::customDeclaration() {
     consume(TokenType::KEYWORD_CUSTOM, "Expect '[Custom]' keyword.");
+    consume(TokenType::AT, "Expect '@' before custom type.");
 
-    if (match(TokenType::AT_ELEMENT)) {
+    if (currentToken.type != TokenType::IDENTIFIER) {
+        std::cerr << "Parse Error: Expect custom type (Style, Element) after '@'." << std::endl;
+        return nullptr;
+    }
+
+    std::string customType = currentToken.lexeme;
+    advance();
+
+    if (customType == "Element") {
         auto node = std::make_unique<CustomElementNode>();
         node->name = currentToken.lexeme;
         consume(TokenType::IDENTIFIER, "Expect custom element name.");
@@ -636,7 +735,7 @@ std::unique_ptr<BaseNode> Parser::customDeclaration() {
         }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after body.");
         customElementTemplates[node->name] = std::move(node);
-    } else if (match(TokenType::AT_STYLE)) {
+    } else if (customType == "Style") {
         auto node = std::make_unique<CustomStyleTemplateNode>();
         node->name = currentToken.lexeme;
         consume(TokenType::IDENTIFIER, "Expect custom style name.");
@@ -647,11 +746,9 @@ std::unique_ptr<BaseNode> Parser::customDeclaration() {
                 std::string key = currentToken.lexeme;
                 advance();
                 if (match(TokenType::COLON)) {
-                    // Property with value
                     node->properties[key] = parseValue();
                     consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
                 } else if (match(TokenType::SEMICOLON)) {
-                    // Valueless property
                     node->valuelessProperties.push_back(key);
                 } else {
                     std::cerr << "Parse Error: Unexpected token after property name '" << key << "' in custom style." << std::endl;
@@ -663,10 +760,8 @@ std::unique_ptr<BaseNode> Parser::customDeclaration() {
         }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after custom style body.");
         customStyleTemplates[node->name] = std::move(node);
-
     } else {
-        std::cerr << "Parse Error: Expected '@Element' or '@Style' after '[Custom]' at line " << currentToken.line << std::endl;
-        advance();
+        std::cerr << "Parse Error: Expected 'Element' or 'Style' after '[Custom] @' at line " << currentToken.line << std::endl;
     }
 
     return nullptr;

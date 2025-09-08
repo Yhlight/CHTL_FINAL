@@ -8,6 +8,9 @@ class Lexer {
 public:
     Lexer(const std::string& source);
     Token getNextToken();
+    void setPosition(size_t pos) { current = pos; }
+    const std::string& getSource() const { return source; }
+    size_t getCurrentPosition() const { return current; }
     char peek();
     char peekNext();
 

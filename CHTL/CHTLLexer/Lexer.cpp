@@ -24,11 +24,11 @@ bool Lexer::isAtEnd() {
 }
 
 Token Lexer::makeToken(TokenType type, const std::string& lexeme) {
-    return Token{type, lexeme, line, column - (int)lexeme.length()};
+    return Token{type, lexeme, line, column - (int)lexeme.length(), current - lexeme.length()};
 }
 
 Token Lexer::errorToken(const std::string& message) {
-    return Token{TokenType::END_OF_FILE, message, line, column};
+    return Token{TokenType::END_OF_FILE, message, line, column, current};
 }
 
 void Lexer::skipWhitespaceAndComments() {
@@ -147,21 +147,15 @@ Token Lexer::getNextToken() {
             current += 8;
             return makeToken(TokenType::KEYWORD_CUSTOM, "[Custom]");
         }
+        if (source.substr(current, 8) == "[Origin]") {
+            current += 8;
+            return makeToken(TokenType::KEYWORD_ORIGIN, "[Origin]");
+        }
     }
 
     if (peek() == '@') {
-        if (source.substr(current, 6) == "@Style") {
-            current += 6;
-            return makeToken(TokenType::AT_STYLE, "@Style");
-        }
-        if (source.substr(current, 8) == "@Element") {
-            current += 8;
-            return makeToken(TokenType::AT_ELEMENT, "@Element");
-        }
-        if (source.substr(current, 4) == "@Var") {
-            current += 4;
-            return makeToken(TokenType::AT_VAR, "@Var");
-        }
+        advance();
+        return makeToken(TokenType::AT, "@");
     }
 
     char c = peek();

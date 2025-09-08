@@ -1,13 +1,15 @@
 #include "Generator.h"
 #include "CHTL/CHTLParser/Parser.h"
 #include "CHTL/CHTLNode/StyleRuleNode.h"
+#include "CHTL/CHTLNode/OriginNode.h"
 #include <iostream>
 #include <algorithm>
 
 Generator::Generator(Parser& parser) : parser(parser) {}
 
 std::string Generator::generate(ElementNode& root) {
-    // First pass to process the tree and generate the main output
+    // Single pass to generate all content into the main output buffer.
+    // The visit methods will have the side effect of populating global_css.
     for (auto& child : root.children) {
         child->accept(*this);
     }
@@ -16,10 +18,15 @@ std::string Generator::generate(ElementNode& root) {
     std::string css_output = global_css.str();
 
     if (!css_output.empty()) {
-        // We need to inject the style block, typically into the <head> or at the start of <body>
-        // For simplicity, we'll prepend it to the whole output.
-        // A more robust solution would find the </head> tag.
-        return "<style>\n" + css_output + "</style>\n" + main_output;
+        std::string style_block = "<style>\n" + css_output + "</style>\n";
+
+        // Inject the style block after the <body> tag, or at the beginning if not found.
+        size_t body_pos = main_output.find("<body>");
+        if (body_pos != std::string::npos) {
+            main_output.insert(body_pos + 6, style_block);
+        } else {
+            main_output = style_block + main_output;
+        }
     }
 
     return main_output;
@@ -158,4 +165,8 @@ void Generator::visit(CustomStyleTemplateNode& node) {
 
 void Generator::visit(StyleRuleNode& node) {
     // Handled in visit(ElementNode&)
+}
+
+void Generator::visit(OriginNode& node) {
+    output << node.content;
 }

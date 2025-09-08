@@ -74,6 +74,13 @@
     }
 }
 
+// --- Origin Block Test (global) ---
+[Origin] @Html {
+    <!-- This is a raw HTML comment that should be preserved -->
+    <div id="raw-html">
+        <p>This is raw, un-parsed HTML.</p>
+    </div>
+}
 
 html {
     body {
@@ -127,13 +134,10 @@ html {
         // --- Testing Advanced Style Blocks ---
         div {
             style {
-                // Test auto class generation
                 .widget {
                     padding: "10px";
                     background-color: "lightblue";
                 }
-
-                // Test contextual '&' selector
                 &:hover {
                     background-color: "blue";
                 }
@@ -141,17 +145,22 @@ html {
             text { "This is a widget." }
         }
         div {
-            id: "my-thing"; // Pre-existing ID
+            id: "my-thing";
             style {
-                // Test auto ID generation (should be ignored due to existing id)
                 #thing {
                     border: "1px solid red";
                 }
-
-                // Test '&' with pre-existing ID
                 &:hover {
                     border-color: "green";
                 }
+            }
+        }
+
+        // --- Testing Variable Specialization ---
+        div {
+            style {
+                color: MyColors(primary = "green");
+                border-color: MyColors(primary);
             }
         }
     }

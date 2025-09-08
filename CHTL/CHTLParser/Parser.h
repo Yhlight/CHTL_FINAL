@@ -14,6 +14,7 @@
 #include "../CHTLNode/VarTemplateNode.h"
 #include "../CHTLNode/CustomElementNode.h"
 #include "../CHTLNode/CustomStyleTemplateNode.h"
+#include "../CHTLNode/OriginNode.h"
 
 class Parser {
 public:
@@ -41,6 +42,7 @@ private:
     std::unique_ptr<BaseNode> declaration();
     std::unique_ptr<BaseNode> templateDeclaration();
     std::unique_ptr<BaseNode> customDeclaration();
+    std::unique_ptr<BaseNode> originDeclaration();
     std::unique_ptr<ElementNode> element();
     std::unique_ptr<TextNode> textNode();
     std::unique_ptr<StyleNode> styleNode();

@@ -8,7 +8,8 @@ SRCS = main.cpp \
        CHTL/CHTLParser/Parser.cpp \
        CHTL/CHTLGenerator/Generator.cpp \
        CHTL/CHTLNode/CustomStyleTemplateNode.cpp \
-       CHTL/CHTLNode/StyleRuleNode.cpp
+       CHTL/CHTLNode/StyleRuleNode.cpp \
+       CHTL/CHTLNode/OriginNode.cpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)

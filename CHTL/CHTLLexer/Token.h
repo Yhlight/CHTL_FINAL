@@ -19,6 +19,7 @@ enum class TokenType {
     STYLE,
     KEYWORD_TEMPLATE,
     KEYWORD_CUSTOM,
+    KEYWORD_ORIGIN,
     KEYWORD_INHERIT,
     KEYWORD_DELETE,
     KEYWORD_INSERT,
@@ -27,9 +28,7 @@ enum class TokenType {
     KEYWORD_REPLACE,
     KEYWORD_ATTOP,
     KEYWORD_ATBOTTOM,
-    AT_STYLE,
-    AT_ELEMENT,
-    AT_VAR,
+    AT,
 
     // Comments
     LINE_COMMENT,
@@ -45,4 +44,5 @@ struct Token {
     std::string lexeme;
     int line;
     int column;
+    size_t position;
 };
