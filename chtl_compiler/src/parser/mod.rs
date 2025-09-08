@@ -78,7 +78,7 @@ fn build_node(pair: Pair<Rule>) -> Node {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::*;
+    use crate::ast::{Attribute, CssProperty, Document, Element, Node, StyleContent};
 
     #[test]
     fn test_parse_simple_elements() {
@@ -148,7 +148,7 @@ mod tests {
                     attributes: vec![],
                     children: vec![
                         Node::StyleBlock(vec![
-                            CssProperty { key: "color", value: "red" }
+                            StyleContent::Property(CssProperty { key: "color", value: "red" })
                         ]),
                         Node::ScriptBlock("const a = 1; "),
                     ],

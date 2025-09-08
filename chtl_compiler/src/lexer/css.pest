@@ -1,13 +1,16 @@
-// Pest grammar for CSS properties inside a style block
+// Pest grammar for CSS content inside a style block
 
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
 COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
 
-// Top-level rule for a list of properties
-properties = { SOI ~ (property | COMMENT)* ~ EOI }
+// The content of a style block can be properties or full rulesets
+style_content = { SOI ~ (property | ruleset | COMMENT)* ~ EOI }
 
-property = { property_key ~ ":" ~ property_value ~ (";" | &"}" | &EOI) }
+// A single property for inline styles
+property = { property_key ~ ":" ~ property_value ~ (";" | &"}") }
 property_key = @{ (ASCII_ALPHA | "-")+ }
-
-// A value can be a complex string, ending at a semicolon or a closing brace
 property_value = @{ ( !(";" | "}") ~ ANY )* }
+
+// A full ruleset to be hoisted
+ruleset = { selector ~ "{" ~ property* ~ "}" }
+selector = @{ (!("{") ~ ANY)+ } // Simplistic selector for now

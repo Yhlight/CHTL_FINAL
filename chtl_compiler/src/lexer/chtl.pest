@@ -20,8 +20,9 @@ attribute = { identifier ~ (":" | "=") ~ (string_literal | bare_literal) ~ ";" }
 element = { identifier ~ "{" ~ inner_content ~ "}" }
 text_node = { "text" ~ "{" ~ (string_literal | bare_literal) ~ "}" }
 
-style_block = { "style" ~ "{" ~ style_content ~ "}" }
-style_content = @{ ( !("}") ~ ANY )* }
+style_block = { "style" ~ "{" ~ inner_block_content ~ "}" }
+script_block = { "script" ~ "{" ~ inner_block_content ~ "}" }
 
-script_block = { "script" ~ "{" ~ script_content ~ "}" }
-script_content = @{ ( !("}") ~ ANY )* }
+// This rule captures any content inside a block with balanced braces.
+// It matches either a full nested block `{...}` or any character that is not a brace.
+inner_block_content = @{ ( "{" ~ inner_block_content ~ "}" | !("{" | "}") ~ ANY )* }
