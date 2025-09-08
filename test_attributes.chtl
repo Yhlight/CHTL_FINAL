@@ -1,0 +1,10 @@
+html {
+    -- This element has an attribute
+    body {
+        id: "main-body";
+        div {
+            class: "container";
+            text { "This is a div with a class." }
+        }
+    }
+}

@@ -1,3 +1,0 @@
-/app/CMakeFiles/chtl_compiler.dir
-/app/CMakeFiles/edit_cache.dir
-/app/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,10 @@
+div {
+    -- Attributes with unquoted literals
+    class: container;
+    width: 100px;
+    font-weight: 700;
+    color: red;
+
+    -- Text with unquoted literal
+    text { hello }
+}

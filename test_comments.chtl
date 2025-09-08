@@ -1,0 +1,5 @@
+// This comment should be ignored.
+/* This multi-line comment
+   should also be ignored. */
+-- This is a generator comment.
+-- This is another one.

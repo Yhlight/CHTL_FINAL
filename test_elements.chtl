@@ -1,0 +1,16 @@
+-- Test for basic nested elements --
+html {
+    head {
+        title {
+            -- A title will go here
+        }
+    }
+    body {
+        div {
+            -- A div inside the body
+        }
+        span {
+            -- A span inside the body
+        }
+    }
+}
