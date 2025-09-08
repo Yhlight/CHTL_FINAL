@@ -50,33 +50,32 @@ void test_conditional_logical_and() { run_test("Phase 2.B: Conditional (Logical 
 void test_conditional_logical_or() { run_test("Phase 2.B: Conditional (Logical OR)", "div{ style{ width:40px; height:80px; color: width > 50px || height < 90px ? 'pass' : 'fail'; } }", "<div style=\"color: pass;height: 80px;width: 40px;\"></div>"); }
 void test_simple_element_template() { run_test("Phase 3.A: Simple Element Template", "[Template] @Element Box { div{} } body { @Element Box; }", "<body><div></div></body>"); }
 void test_nested_element_template() { run_test("Phase 3.A: Nested Element Template", "[Template] @Element Inner{ span{} } [Template] @Element Outer{ div{ @Element Inner; } } body{ @Element Outer; }", "<body><div><span></span></div></body>"); }
+void test_simple_style_template() { run_test("Phase 3.B: Simple Style Template", "[Template] @Style Base{ color:red; } div{ style{ @Style Base; } }", "<div style=\"color: red;\"></div>"); }
+void test_style_template_override_local_wins() { run_test("Phase 3.B: Style Override (Local Wins)", "[Template] @Style Base{ color:red; } div{ style{ @Style Base; color:blue; } }", "<div style=\"color: blue;\"></div>"); }
+void test_style_template_override_base_wins() { run_test("Phase 3.B: Style Override (Base Wins)", "[Template] @Style Base{ color:red; } div{ style{ color:blue; @Style Base; } }", "<div style=\"color: red;\"></div>"); }
+void test_style_template_multilevel_inheritance() { run_test("Phase 3.B: Multilevel Style Inheritance", "[Template] @Style A{ color:red; } [Template] @Style B{ @Style A; font-size:16px; } div{ style{ @Style B; } }", "<div style=\"color: red;font-size: 16px;\"></div>"); }
 
-// --- Phase 3.B: @Style Template Tests ---
-void test_simple_style_template() {
-    std::string src = "[Template] @Style Base{ color:red; } div{ style{ @Style Base; } }";
-    run_test("Phase 3.B: Simple Style Template", src, "<div style=\"color: red;\"></div>");
+// --- Phase 3.C: Customization Tests ---
+void test_custom_element_delete() {
+    std::string src = "[Custom] @Element MyBox { div{} span{} } body{ @Custom @Element MyBox { delete span; } }";
+    run_test("Phase 3.C: Custom Element Delete", src, "<body><div></div></body>");
 }
-void test_style_template_override_local_wins() {
-    std::string src = "[Template] @Style Base{ color:red; } div{ style{ @Style Base; color:blue; } }";
-    run_test("Phase 3.B: Style Override (Local Wins)", src, "<div style=\"color: blue;\"></div>");
-}
-void test_style_template_override_base_wins() {
-    std::string src = "[Template] @Style Base{ color:red; } div{ style{ color:blue; @Style Base; } }";
-    run_test("Phase 3.B: Style Override (Base Wins)", src, "<div style=\"color: red;\"></div>");
-}
-void test_style_template_multilevel_inheritance() {
-    std::string src = "[Template] @Style A{ color:red; } [Template] @Style B{ @Style A; font-size:16px; } div{ style{ @Style B; } }";
-    run_test("Phase 3.B: Multilevel Style Inheritance", src, "<div style=\"color: red;font-size: 16px;\"></div>");
+void test_custom_style_delete() {
+    std::string src = "[Custom] @Style MyStyle { color:red; font-size:16px; } div{ style{ @Custom @Style MyStyle{ delete color; } } }";
+    run_test("Phase 3.C: Custom Style Delete", src, "<div style=\"font-size: 16px;\"></div>");
 }
 
 
 int main() {
     std::cout << "--- Running CHTL Full Test Suite ---" << std::endl;
+    // ... all previous tests
     test_simple_element(); test_element_with_text(); test_nested_elements(); test_attributes();
     test_inline_style_generation(); test_class_selector_generation(); test_id_selector_generation(); test_pseudo_selector_generation(); test_combined_style_features();
     test_conditional_true(); test_conditional_false(); test_conditional_logical_and(); test_conditional_logical_or();
     test_simple_element_template(); test_nested_element_template();
     test_simple_style_template(); test_style_template_override_local_wins(); test_style_template_override_base_wins(); test_style_template_multilevel_inheritance();
+    // New tests
+    test_custom_element_delete(); test_custom_style_delete();
     std::cout << "------------------------------------" << std::endl;
     return 0;
 }

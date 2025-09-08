@@ -1,7 +1,13 @@
 #include "Lexer.h"
 #include <cctype>
+#include <map>
 
 namespace CHTL {
+
+// Keyword map for easy lookup
+static std::map<std::string, TokenType> keywords = {
+    {"delete", TokenType::KeywordDelete}
+};
 
 Lexer::Lexer(const std::string& source) : m_source(source) {}
 
@@ -18,18 +24,13 @@ std::vector<Token> Lexer::tokenize() {
 Token Lexer::nextToken() {
     m_start = m_current;
 
-    if (m_current >= m_source.length()) {
-        return makeToken(TokenType::EndOfFile);
-    }
+    if (m_current >= m_source.length()) return makeToken(TokenType::EndOfFile);
 
     char c = advance();
 
     switch (c) {
-        // Whitespace
         case ' ': case '\r': case '\t': return nextToken();
         case '\n': m_line++; return nextToken();
-
-        // Punctuation
         case '{': return makeToken(TokenType::OpenBrace, "{");
         case '}': return makeToken(TokenType::CloseBrace, "}");
         case '=': return makeToken(TokenType::Equals, "=");
@@ -39,29 +40,16 @@ Token Lexer::nextToken() {
         case '[': return makeToken(TokenType::LeftBracket, "[");
         case ']': return makeToken(TokenType::RightBracket, "]");
         case '@': return makeToken(TokenType::At, "@");
-
-        // Operators
         case '?': return makeToken(TokenType::QuestionMark, "?");
         case '>': return makeToken(TokenType::GreaterThan, ">");
         case '<': return makeToken(TokenType::LessThan, "<");
         case '+': return makeToken(TokenType::Plus, "+");
         case '-': return makeToken(TokenType::Minus, "-");
         case '*': return makeToken(TokenType::Star, "*");
-
-        case ':':
-            if (match(':')) return makeToken(TokenType::ColonColon, "::");
-            return makeToken(TokenType::Colon, ":");
-        case '&':
-            if (match('&')) return makeToken(TokenType::LogicalAnd, "&&");
-            return makeToken(TokenType::Ampersand, "&");
-        case '|':
-            if (match('|')) return makeToken(TokenType::LogicalOr, "||");
-            return makeToken(TokenType::Unexpected, "|");
-
-        // String literals
+        case ':': if (match(':')) return makeToken(TokenType::ColonColon, "::"); return makeToken(TokenType::Colon, ":");
+        case '&': if (match('&')) return makeToken(TokenType::LogicalAnd, "&&"); return makeToken(TokenType::Ampersand, "&");
+        case '|': if (match('|')) return makeToken(TokenType::LogicalOr, "||"); return makeToken(TokenType::Unexpected, "|");
         case '"': case '\'': return makeString(c);
-
-        // Comments or Slash operator
         case '/':
             if (match('/')) { skipLineComment(); return nextToken(); }
             if (match('*')) { skipBlockComment(); return nextToken(); }
@@ -83,15 +71,18 @@ Token Lexer::makeIdentifierOrUnquotedLiteral() {
         }
     }
     std::string value = m_source.substr(m_start, m_current - m_start);
+
+    // Check if the identifier is a keyword
+    if (keywords.count(value)) {
+        return makeToken(keywords.at(value), value);
+    }
+
     return makeToken(TokenType::Identifier, value);
 }
 
 Token Lexer::makeString(char quote_type) {
     m_start = m_current;
-    while (peek() != quote_type && m_current < m_source.length()) {
-        if (peek() == '\n') m_line++;
-        advance();
-    }
+    while (peek() != quote_type && m_current < m_source.length()) { if (peek() == '\n') m_line++; advance(); }
     if (m_current >= m_source.length()) return makeToken(TokenType::Unexpected, "Unterminated string");
     std::string value = m_source.substr(m_start, m_current - m_start);
     advance();

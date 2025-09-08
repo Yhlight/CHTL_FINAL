@@ -2,15 +2,19 @@
 
 #include "BaseNode.h"
 #include <string>
+#include <memory>
 
 namespace CHTL {
 
-// Represents a text literal within the document, e.g., the content inside a `text { ... }` block.
 class TextNode : public BaseNode {
 public:
     explicit TextNode(const std::string& text) : m_text(text) {}
 
     NodeType getType() const override { return NodeType::Text; }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        return std::make_unique<TextNode>(m_text);
+    }
 
     const std::string& getText() const { return m_text; }
 

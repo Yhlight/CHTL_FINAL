@@ -6,8 +6,6 @@
 
 namespace CHTL {
 
-// Represents a binary operation, e.g., `width > 50px` or `cond1 && cond2`.
-// It holds the left and right sub-expressions and the operator token.
 class BinaryExpr : public Expr {
 public:
     BinaryExpr(std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right)
@@ -15,6 +13,10 @@ public:
 
     void accept(ExprVisitor& visitor) const override {
         visitor.visit(*this);
+    }
+
+    std::unique_ptr<Expr> clone() const override {
+        return std::make_unique<BinaryExpr>(m_left->clone(), m_operator, m_right->clone());
     }
 
     const Expr* getLeft() const { return m_left.get(); }

@@ -5,6 +5,7 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
+#include "../CHTLNode/CustomUsageNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/StylePropertyNode.h"
 #include "../CHTLContext/CHTLContext.h"
@@ -24,8 +25,8 @@ private:
     void generateElement(const ElementNode* element);
     void generateText(const TextNode* text);
     void generateTemplateUsage(const TemplateUsageNode* node, const ElementNode* parentElement);
+    void generateCustomUsage(const CustomUsageNode* node); // Moved to be a member function
 
-    // New helper to recursively collect and resolve properties from style blocks and templates.
     void expandStyleProperties(const BaseNode* container,
                                std::map<std::string, const StylePropertyNode*>& properties);
 

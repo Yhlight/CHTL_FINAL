@@ -7,23 +7,23 @@
 
 namespace CHTL {
 
-class TemplateDefinitionNode : public BaseNode {
+class CustomDefinitionNode : public BaseNode {
 public:
-    TemplateDefinitionNode(std::string type, std::string name)
-        : m_templateType(std::move(type)), m_templateName(std::move(name)) {}
+    CustomDefinitionNode(std::string type, std::string name)
+        : m_customType(std::move(type)), m_customName(std::move(name)) {}
 
-    NodeType getType() const override { return NodeType::TemplateDefinition; }
+    NodeType getType() const override { return NodeType::CustomDefinition; }
 
     std::unique_ptr<BaseNode> clone() const override {
-        auto newNode = std::make_unique<TemplateDefinitionNode>(m_templateType, m_templateName);
+        auto newNode = std::make_unique<CustomDefinitionNode>(m_customType, m_customName);
         for (const auto& child : m_children) {
             newNode->addChild(child->clone());
         }
         return newNode;
     }
 
-    const std::string& getTemplateType() const { return m_templateType; }
-    const std::string& getTemplateName() const { return m_templateName; }
+    const std::string& getCustomType() const { return m_customType; }
+    const std::string& getCustomName() const { return m_customName; }
 
     void addChild(std::unique_ptr<BaseNode> child) {
         m_children.push_back(std::move(child));
@@ -34,8 +34,8 @@ public:
     }
 
 private:
-    std::string m_templateType;
-    std::string m_templateName;
+    std::string m_customType;
+    std::string m_customName;
     std::vector<std::unique_ptr<BaseNode>> m_children;
 };
 

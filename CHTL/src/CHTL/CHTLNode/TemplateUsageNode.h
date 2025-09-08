@@ -2,18 +2,20 @@
 
 #include "BaseNode.h"
 #include <string>
+#include <memory>
 
 namespace CHTL {
 
-// Represents the usage of a template, e.g., `@Style DefaultText;`
-// This node acts as a placeholder that the generator will replace
-// with the content of the referenced template.
 class TemplateUsageNode : public BaseNode {
 public:
     TemplateUsageNode(std::string type, std::string name)
         : m_templateType(std::move(type)), m_templateName(std::move(name)) {}
 
     NodeType getType() const override { return NodeType::TemplateUsage; }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        return std::make_unique<TemplateUsageNode>(m_templateType, m_templateName);
+    }
 
     const std::string& getTemplateType() const { return m_templateType; }
     const std::string& getTemplateName() const { return m_templateName; }

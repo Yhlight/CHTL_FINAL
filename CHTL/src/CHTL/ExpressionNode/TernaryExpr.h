@@ -5,9 +5,6 @@
 
 namespace CHTL {
 
-// Represents a ternary conditional operation, e.g., `condition ? then : else`.
-// It holds three sub-expressions for the condition, the 'then' branch,
-// and the 'else' branch.
 class TernaryExpr : public Expr {
 public:
     TernaryExpr(std::unique_ptr<Expr> condition, std::unique_ptr<Expr> thenBranch, std::unique_ptr<Expr> elseBranch)
@@ -15,6 +12,10 @@ public:
 
     void accept(ExprVisitor& visitor) const override {
         visitor.visit(*this);
+    }
+
+    std::unique_ptr<Expr> clone() const override {
+        return std::make_unique<TernaryExpr>(m_condition->clone(), m_thenBranch->clone(), m_elseBranch->clone());
     }
 
     const Expr* getCondition() const { return m_condition.get(); }

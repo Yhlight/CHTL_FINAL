@@ -8,13 +8,19 @@
 
 namespace CHTL {
 
-// Represents a CSS selector block, e.g., `.my-class { ... }` or `&:hover { ... }`.
-// These will be translated into global CSS rules.
 class StyleSelectorNode : public BaseNode {
 public:
     explicit StyleSelectorNode(const std::string& selector) : m_selector(selector) {}
 
     NodeType getType() const override { return NodeType::StyleSelector; }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        auto newNode = std::make_unique<StyleSelectorNode>(m_selector);
+        for (const auto& prop : m_properties) {
+            newNode->addProperty(std::unique_ptr<StylePropertyNode>(static_cast<StylePropertyNode*>(prop->clone().release())));
+        }
+        return newNode;
+    }
 
     const std::string& getSelector() const { return m_selector; }
 

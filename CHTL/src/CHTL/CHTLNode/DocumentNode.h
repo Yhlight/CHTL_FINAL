@@ -6,13 +6,19 @@
 
 namespace CHTL {
 
-// Represents the root of the entire CHTL document.
-// It acts as a container for all top-level nodes.
 class DocumentNode : public BaseNode {
 public:
     DocumentNode() = default;
 
     NodeType getType() const override { return NodeType::Document; }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        auto newNode = std::make_unique<DocumentNode>();
+        for (const auto& child : m_children) {
+            newNode->addChild(child->clone());
+        }
+        return newNode;
+    }
 
     void addChild(std::unique_ptr<BaseNode> child) {
         m_children.push_back(std::move(child));

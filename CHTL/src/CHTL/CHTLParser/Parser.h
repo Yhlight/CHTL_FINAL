@@ -3,15 +3,8 @@
 #include "../CHTLLexer/Token.h"
 #include "../CHTLContext/CHTLContext.h"
 #include "../CHTLNode/DocumentNode.h"
-#include "../CHTLNode/ElementNode.h"
-#include "../CHTLNode/TextNode.h"
-#include "../CHTLNode/AttributeNode.h"
 #include "../CHTLNode/BaseNode.h"
-#include "../CHTLNode/StyleBlockNode.h"
-#include "../CHTLNode/StylePropertyNode.h"
-#include "../CHTLNode/StyleSelectorNode.h"
-#include "../CHTLNode/TemplateDefinitionNode.h"
-#include "../CHTLNode/TemplateUsageNode.h"
+// All other specific nodes are included by Parser.cpp as needed
 #include "../ExpressionNode/Expr.h"
 
 #include <vector>
@@ -20,6 +13,8 @@
 #include <initializer_list>
 
 namespace CHTL {
+
+class ElementNode; // Forward-declare instead of include
 
 class Parser {
 public:
@@ -30,20 +25,24 @@ private:
     // Main parsing functions
     std::unique_ptr<BaseNode> parseNode();
     std::unique_ptr<ElementNode> parseElement();
-    std::unique_ptr<TextNode> parseTextElement();
+    std::unique_ptr<BaseNode> parseTextElement(); // Can return different types
     void parseAttributes(ElementNode* element);
     std::string parseIdentifierSequence();
 
-    // Template parsing
+    // Template & Custom parsing
+    void parseTopLevelDefinition();
     void parseTemplateDefinition();
-    std::unique_ptr<TemplateUsageNode> parseTemplateUsage();
-    void parseStyleTemplateContent(TemplateDefinitionNode* templateNode); // New helper
+    std::unique_ptr<BaseNode> parseUsage();
+    void parseCustomDefinition();
+    std::unique_ptr<BaseNode> parseCustomUsage();
+    std::unique_ptr<BaseNode> parseSpecializationRule();
+
 
     // Style-parsing functions
-    std::unique_ptr<StyleBlockNode> parseStyleBlock();
+    std::unique_ptr<BaseNode> parseStyleBlock(); // Can return different types
     std::unique_ptr<BaseNode> parseStyleContent();
-    std::unique_ptr<StylePropertyNode> parseStyleProperty();
-    std::unique_ptr<StyleSelectorNode> parseStyleSelector();
+    std::unique_ptr<BaseNode> parseStyleProperty(); // Can return different types
+    std::unique_ptr<BaseNode> parseStyleSelector(); // Can return different types
 
     // Expression-parsing functions
     std::unique_ptr<Expr> parseExpression();

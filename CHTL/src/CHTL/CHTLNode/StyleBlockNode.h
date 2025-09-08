@@ -6,17 +6,21 @@
 
 namespace CHTL {
 
-// Represents a `style { ... }` block within an element.
-// It acts as a container for both direct style properties (which become inline styles)
-// and selector blocks (which become global CSS rules).
 class StyleBlockNode : public BaseNode {
 public:
     StyleBlockNode() = default;
 
     NodeType getType() const override { return NodeType::StyleBlock; }
 
+    std::unique_ptr<BaseNode> clone() const override {
+        auto newNode = std::make_unique<StyleBlockNode>();
+        for (const auto& child : m_children) {
+            newNode->addChild(child->clone());
+        }
+        return newNode;
+    }
+
     void addChild(std::unique_ptr<BaseNode> child) {
-        // Note: The parser will ensure children are either StylePropertyNode or StyleSelectorNode.
         m_children.push_back(std::move(child));
     }
 

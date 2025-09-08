@@ -23,6 +23,9 @@ enum class TokenType {
     RightBracket,   // ]
     At,             // @
 
+    // Keywords
+    KeywordDelete,  // delete
+
     // Style-specific tokens
     Colon,
     ColonColon,
