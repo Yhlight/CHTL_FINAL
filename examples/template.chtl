@@ -1,0 +1,47 @@
+[Template] @Style ButtonStyle
+{
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+[Template] @Element Button
+{
+    button
+    {
+        style
+        {
+            @Style ButtonStyle;
+        }
+        
+        text
+        {
+            Click me
+        }
+    }
+}
+
+html
+{
+    body
+    {
+        @Element Button;
+        
+        button
+        {
+            style
+            {
+                @Style ButtonStyle;
+                background-color: #28a745;
+            }
+            
+            text
+            {
+                Green Button
+            }
+        }
+    }
+}
