@@ -195,7 +195,7 @@ fn build_node(pair: Pair<Rule>) -> Node {
             if let Some(spec_block) = inner.next() {
                 for spec_rule in spec_block.into_inner() {
                     match spec_rule.as_rule() {
-                        Rule::specialization_rule => {
+                        Rule::modify_rule => {
                             let mut rule_parts = spec_rule.into_inner();
                             let selector = build_child_selector(rule_parts.next().unwrap());
                             let modifications = rule_parts.next().unwrap().into_inner().map(build_node).collect();
@@ -277,10 +277,10 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_element_specialization() {
+    fn test_parse_modify_specialization() {
         let source = r#"
             @Element Box {
-                div[0] {
+                modify div[0] {
                     style { color: red; }
                 }
             }
@@ -293,6 +293,7 @@ mod tests {
             if let Specialization::Modify(spec) = &specializations[0] {
                 assert_eq!(spec.selector.tag_name, "div");
                 assert_eq!(spec.selector.index, Some(0));
+                assert_eq!(spec.modifications.len(), 1);
             } else {
                 panic!("Expected Modify specialization");
             }

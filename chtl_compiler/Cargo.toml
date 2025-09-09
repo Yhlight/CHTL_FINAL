@@ -9,6 +9,7 @@ notify = "8.2.0"
 pest = "2.8.1"
 pest_derive = "2.8.1"
 thiserror = "1.0"
+bumpalo = "3.16.0"
 
 [dev-dependencies]
 tempfile = "3.1.0"

@@ -47,12 +47,18 @@ fn apply_specializations<'a>(children: &mut Vec<Node<'a>>, specializations: &[Sp
         match spec {
             Specialization::Modify(ms) => {
                 let mut current_index = 0;
-                for child in &mut *children {
+                for child in children.iter_mut() {
                     if let Node::Element(elem) = child {
                         if elem.tag_name == ms.selector.tag_name {
-                            if ms.selector.index.is_none() || ms.selector.index == Some(current_index) {
-                                elem.children.extend(ms.modifications.clone());
-                                if ms.selector.index.is_some() { break; }
+                            let should_modify =
+                                ms.selector.index.is_none() || ms.selector.index == Some(current_index);
+                            if should_modify {
+                                // Replace the children of the matched element
+                                elem.children = ms.modifications.clone();
+                                // If we were targeting a specific index, we're done with this rule
+                                if ms.selector.index.is_some() {
+                                    break;
+                                }
                             }
                             current_index += 1;
                         }
@@ -246,7 +252,43 @@ fn generate_element(html: &mut String, element: &Element, context: &Context) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::{CustomElementGroup, Document, Element, Node, Specialization, ChildSelector, DeleteSpec, InsertSpec};
+    use crate::ast::{CustomElementGroup, Document, Element, Node, Specialization, ChildSelector, DeleteSpec, InsertSpec, ModifySpec};
+
+    #[test]
+    fn test_element_modify_specialization() {
+        let template = CustomElementGroup {
+            name: "Box",
+            children: vec![
+                Node::Element(Element {
+                    tag_name: "div",
+                    attributes: vec![],
+                    children: vec![Node::Text("Original Content")]
+                }),
+            ]
+        };
+
+        let doc = Document {
+            definitions: vec![],
+            children: vec![
+                Node::ElementTemplateUsage {
+                    name: "Box",
+                    specializations: vec![
+                        Specialization::Modify(ModifySpec {
+                            selector: ChildSelector { tag_name: "div", index: None },
+                            modifications: vec![Node::Text("New Content")]
+                        })
+                    ]
+                }
+            ],
+        };
+
+        let mut context = Context::new();
+        context.custom_element_templates.insert("Box", &template);
+
+        let expected_html = "<div>New Content</div>\n";
+        let generated_html = generate(&doc, &context);
+        assert_eq!(generated_html, expected_html);
+    }
 
     #[test]
     fn test_element_delete_specialization() {

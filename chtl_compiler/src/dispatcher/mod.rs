@@ -1,22 +1,21 @@
 // This module will contain the main compiler pipeline dispatcher.
 use crate::{ast, chtl_js, context::Context, errors::ChtlError, generator, parser};
+use bumpalo::Bump;
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 
 /// Recursively processes a file and its imports, returning a flattened list of all parsed documents.
-fn process_file_and_imports(
+fn process_file_and_imports<'a>(
     path: &Path,
+    arena: &'a Bump,
     processed_files: &mut HashSet<PathBuf>,
-) -> Result<Vec<ast::Document<'static>>, ChtlError> {
+) -> Result<Vec<ast::Document<'a>>, ChtlError> {
     let canonical_path = path.canonicalize().map_err(|e| ChtlError::IoError {
         path: path.to_path_buf(),
         source: e,
     })?;
     if processed_files.contains(&canonical_path) {
-        // A circular dependency is not a compiler error, just a signal to stop processing.
-        // However, if the main file itself is part of a cycle in a way that it's skipped,
-        // the logic in `compile` will catch that it couldn't be loaded.
         return Ok(Vec::new());
     }
     processed_files.insert(canonical_path);
@@ -25,14 +24,13 @@ fn process_file_and_imports(
         path: path.to_path_buf(),
         source: e,
     })?;
-    let static_source: &'static str = Box::leak(source.into_boxed_str());
-    let document = parser::parse(static_source).map_err(|e| ChtlError::ParseError {
+    let source_in_arena: &'a str = arena.alloc_str(&source);
+    let document = parser::parse(source_in_arena).map_err(|e| ChtlError::ParseError {
         path: path.to_path_buf(),
         message: e.to_string(),
     })?;
 
     let mut modules_to_process = Vec::new();
-    // First, find all `use` statements in the current document.
     for def in &document.definitions {
         if let ast::TopLevelDefinition::Use(use_stmt) = def {
             let parent_dir = path.parent().unwrap_or_else(|| Path::new(""));
@@ -41,12 +39,9 @@ fn process_file_and_imports(
         }
     }
 
-    // Start building the final list of docs, beginning with the current one.
     let mut all_docs = vec![document];
-
-    // After the borrow on `document` is finished, we can recurse and extend the list.
     for module_path in modules_to_process {
-        let imported_docs = process_file_and_imports(&module_path, processed_files)?;
+        let imported_docs = process_file_and_imports(&module_path, arena, processed_files)?;
         all_docs.extend(imported_docs);
     }
 
@@ -54,16 +49,19 @@ fn process_file_and_imports(
 }
 
 pub fn compile(source_path: &Path) -> Result<String, ChtlError> {
+    // Create the arena for this compilation
+    let arena = Bump::new();
+
     // 1. Recursively parse the entire dependency tree.
     let mut processed_files = HashSet::new();
-    let all_docs = process_file_and_imports(source_path, &mut processed_files)?;
+    let all_docs = process_file_and_imports(source_path, &arena, &mut processed_files)?;
 
     // 2. Build the compilation context from all discovered definitions.
     let mut context = Context::new();
     for doc in &all_docs {
         for def in &doc.definitions {
             match def {
-                ast::TopLevelDefinition::Use(_) => { /* Ignore here, already handled */ }
+                ast::TopLevelDefinition::Use(_) => {}
                 ast::TopLevelDefinition::Template(template_def) => {
                     match template_def {
                         ast::TemplateDefinition::Style(st) => { context.style_templates.insert(st.name, st); },
@@ -82,18 +80,15 @@ pub fn compile(source_path: &Path) -> Result<String, ChtlError> {
         }
     }
 
-    // 3. The first document is our main entry point for rendering.
     let main_ast = all_docs.get(0).ok_or_else(|| ChtlError::Generic("Failed to process the main source file.".to_string()))?;
 
-    // 4. Walk the main AST to extract script and hoisted style content.
     let mut script_content = String::new();
     let mut style_content = String::new();
     extract_hoisted_blocks(&main_ast.children, &mut script_content, &mut style_content, &context);
 
-    // 5. Compile the collected CHTL JS content.
     let generated_js = if !script_content.is_empty() {
         let chtl_js_ast = chtl_js::parser::parse(&script_content).map_err(|e| ChtlError::ParseError {
-            path: source_path.to_path_buf(), // CHTL-JS errors are attributed to the main file
+            path: source_path.to_path_buf(),
             message: e.to_string(),
         })?;
         chtl_js::generator::generate(&chtl_js_ast)
@@ -101,10 +96,8 @@ pub fn compile(source_path: &Path) -> Result<String, ChtlError> {
         String::new()
     };
 
-    // 6. Generate the base HTML from the main AST.
     let mut generated_html = generator::generate(main_ast, &context);
 
-    // 7. Merge the generated code into the HTML.
     if !style_content.is_empty() {
         let style_tag = format!("<style>{}</style>", style_content);
         if let Some(pos) = generated_html.find("</head>") {
@@ -251,6 +244,31 @@ mod tests {
 
         let expected_html = "<button class=\"btn\">Click Me</button>\n";
         let result = super::compile(&main_path).unwrap();
+        assert_eq!(result.trim(), expected_html.trim());
+    }
+
+    #[test]
+    fn test_end_to_end_modify_specialization() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("main.chtl");
+        let mut file = File::create(&file_path).unwrap();
+        let source = r#"
+            [Custom] @Element Box {
+                div {
+                    p { text { "Original" } }
+                }
+            }
+
+            @Element Box {
+                modify div {
+                    h1 { text { "Modified" } }
+                }
+            }
+        "#;
+        file.write_all(source.as_bytes()).unwrap();
+
+        let expected_html = "<div><h1>Modified</h1>\n</div>\n";
+        let result = super::compile(&file_path).unwrap();
         assert_eq!(result.trim(), expected_html.trim());
     }
 

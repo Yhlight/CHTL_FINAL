@@ -20,8 +20,8 @@ file_content = { (use_statement | custom_definition | template_definition | elem
 element_content = { (element_template_usage | text_node | style_block | script_block | element | COMMENT)* }
 
 element_template_usage = { "@Element" ~ identifier ~ (";" | specialization_block) }
-specialization_block = { "{" ~ (specialization_rule | insert_rule | delete_rule)* ~ "}" }
-specialization_rule = { child_selector ~ "{" ~ element_content ~ "}" }
+specialization_block = { "{" ~ (modify_rule | insert_rule | delete_rule)* ~ "}" }
+modify_rule = { "modify" ~ child_selector ~ "{" ~ element_content ~ "}" }
 insert_rule = { "insert" ~ insert_position ~ child_selector ~ "{" ~ element_content ~ "}" }
 insert_position = { "before" | "after" | "replace" | ("at" ~ ("top" | "bottom")) }
 delete_rule = { "delete" ~ child_selector ~ ";" }
