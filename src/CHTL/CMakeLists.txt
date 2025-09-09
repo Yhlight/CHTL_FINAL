@@ -11,6 +11,15 @@ add_library(CHTLCore STATIC
     CHTLImport.cpp
     CHTLConstraints.cpp
     CHTLConfig.cpp
+    CHTLJS.cpp
+    CHTLJSAnimation.cpp
+    CHTLJSVirtualObject.cpp
+    CHTLJSRouter.cpp
+    CHTLJSCompiler.cpp
+    CHTLJSProcessor.cpp
+    CHTLModule.cpp
+    CHTLScanner.cpp
+    CHTLCli.cpp
 )
 
 target_include_directories(CHTLCore PUBLIC

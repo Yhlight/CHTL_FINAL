@@ -1,0 +1,322 @@
+// CHTL JS 扩展语法测试文件
+
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                "CHTL JS Test"
+            }
+        }
+        
+        style
+        {
+            .btn {
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+            
+            .btn:hover {
+                background-color: #0056b3;
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            id: "app";
+            class: "container";
+            
+            h1
+            {
+                text
+                {
+                    "CHTL JS 扩展语法测试"
+                }
+            }
+            
+            div
+            {
+                class: "demo-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "文件加载器测试"
+                    }
+                }
+                
+                button
+                {
+                    class: "btn";
+                    id: "load-btn";
+                    
+                    text
+                    {
+                        "加载模块"
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "demo-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "增强选择器测试"
+                    }
+                }
+                
+                div
+                {
+                    class: "selector-demo";
+                    
+                    p
+                    {
+                        text
+                        {
+                            "选择器演示内容"
+                        }
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "demo-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "事件监听器测试"
+                    }
+                }
+                
+                button
+                {
+                    class: "btn";
+                    id: "event-btn";
+                    
+                    text
+                    {
+                        "点击我"
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "demo-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "动画测试"
+                    }
+                }
+                
+                div
+                {
+                    class: "animation-demo";
+                    id: "animate-box";
+                    
+                    style
+                    {
+                        width: 100px;
+                        height: 100px;
+                        background-color: red;
+                        margin: 20px 0;
+                    }
+                    
+                    text
+                    {
+                        "动画盒子"
+                    }
+                }
+                
+                button
+                {
+                    class: "btn";
+                    id: "animate-btn";
+                    
+                    text
+                    {
+                        "开始动画"
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "demo-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "虚对象测试"
+                    }
+                }
+                
+                button
+                {
+                    class: "btn";
+                    id: "virtual-btn";
+                    
+                    text
+                    {
+                        "虚对象测试"
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "demo-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "路由测试"
+                    }
+                }
+                
+                nav
+                {
+                    a
+                    {
+                        href: "#home";
+                        text
+                        {
+                            "首页"
+                        }
+                    }
+                    
+                    a
+                    {
+                        href: "#about";
+                        text
+                        {
+                            "关于"
+                        }
+                    }
+                    
+                    a
+                    {
+                        href: "#contact";
+                        text
+                        {
+                            "联系"
+                        }
+                    }
+                }
+            }
+        }
+        
+        script
+        {
+            // 文件加载器测试
+            fileloader
+            {
+                load: "utils.js";
+            }
+            
+            // 增强选择器测试
+            const selectorDemo = {{.selector-demo}};
+            const selectorDemoP = {{.selector-demo p}};
+            
+            // 事件监听器测试
+            listen
+            {
+                click: "console.log('按钮被点击了!');",
+                mouseenter: "this.style.backgroundColor = '#0056b3';",
+                mouseleave: "this.style.backgroundColor = '#007bff';"
+            }
+            
+            // 事件委托测试
+            delegate
+            {
+                target: ".btn",
+                click: "console.log('委托事件触发:', event.target);"
+            }
+            
+            // 动画测试
+            animate
+            {
+                target: "#animate-box",
+                duration: 2000,
+                easing: "ease-in-out",
+                begin: "console.log('动画开始');",
+                when: "this.style.transform = 'translateX(' + (progress * 200) + 'px)';",
+                end: "console.log('动画结束');",
+                loop: true,
+                direction: "alternate"
+            }
+            
+            // 虚对象测试
+            vir testObject = function
+            {
+                name: "TestObject",
+                value: 42,
+                method: "function() { return this.value * 2; }"
+            }
+            
+            // 路由测试
+            router
+            {
+                url: "/",
+                page: "<h1>首页</h1><p>欢迎来到首页</p>",
+                root: "/",
+                mode: "hash"
+            }
+            
+            // 局部脚本测试
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('CHTL JS 测试页面加载完成');
+                
+                // 测试增强选择器
+                if (selectorDemo) {
+                    selectorDemo.style.border = '2px solid blue';
+                }
+                
+                if (selectorDemoP) {
+                    selectorDemoP.style.color = 'green';
+                }
+                
+                // 测试虚对象
+                const virtualBtn = document.getElementById('virtual-btn');
+                if (virtualBtn) {
+                    virtualBtn.addEventListener('click', function() {
+                        console.log('虚对象测试:', testObject.getMeta());
+                        console.log('虚对象函数元信息:', testObject.getFunctionMeta());
+                    });
+                }
+                
+                // 测试动画
+                const animateBtn = document.getElementById('animate-btn');
+                if (animateBtn) {
+                    animateBtn.addEventListener('click', function() {
+                        // 触发动画
+                        console.log('开始动画');
+                    });
+                }
+            });
+        }
+    }
+}

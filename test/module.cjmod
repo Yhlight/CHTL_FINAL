@@ -1,0 +1,87 @@
+// CJMOD 模块测试文件
+
+[Info]
+{
+    name: "TestCJMODModule";
+    version: "1.0.0";
+    description: "A test CJMOD module for CHTL JS";
+    author: "CHTL Team";
+    license: "MIT";
+    dependencies: ["BaseCJMODModule"];
+}
+
+// CJMOD 源文件内容
+// 文件加载器
+fileloader
+{
+    load: "utils.js";
+}
+
+// 增强选择器
+const mainContent = {{.main-content}};
+const buttons = {{.btn}};
+
+// 事件监听器
+listen
+{
+    click: "console.log('Button clicked!');",
+    mouseenter: "this.style.backgroundColor = '#0056b3';",
+    mouseleave: "this.style.backgroundColor = '#007bff';"
+}
+
+// 事件委托
+delegate
+{
+    target: ".btn",
+    click: "console.log('Delegated click event:', event.target);"
+}
+
+// 动画
+animate
+{
+    target: ".btn",
+    duration: 1000,
+    easing: "ease-in-out",
+    begin: "console.log('Animation started');",
+    when: "this.style.transform = 'scale(' + (1 + progress * 0.1) + ')';",
+    end: "console.log('Animation ended');"
+}
+
+// 虚对象
+vir TestObject = function
+{
+    name: "TestObject",
+    value: 42,
+    method: "function() { return this.value * 2; }"
+}
+
+// 路由
+router
+{
+    url: "/",
+    page: "<h1>Home Page</h1><p>Welcome to the home page</p>",
+    root: "/",
+    mode: "hash"
+}
+
+// 局部脚本
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('CJMOD module loaded');
+    
+    // 测试增强选择器
+    if (mainContent) {
+        mainContent.style.border = '2px solid blue';
+    }
+    
+    // 测试虚对象
+    console.log('Virtual object meta:', TestObject.getMeta());
+    console.log('Virtual object function meta:', TestObject.getFunctionMeta());
+    
+    // 测试动画
+    const animateBtn = document.querySelector('.animate-btn');
+    if (animateBtn) {
+        animateBtn.addEventListener('click', function() {
+            console.log('Starting animation');
+        });
+    }
+});
