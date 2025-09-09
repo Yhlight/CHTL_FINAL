@@ -1,136 +1,158 @@
 #pragma once
-
 #include <string>
 #include <vector>
+#include <map>
 #include <memory>
+#include <functional>
+#include <CHTL/CHTLLexer/Token.hpp>
+#include <CHTL/CHTLLexer/Lexer.hpp>
 
 namespace CHTL {
 
-/**
- * @brief 代码类型枚举
- */
-enum class CodeType {
-    CHTL,       // CHTL 代码
-    CHTL_JS,    // CHTL JS 代码
-    CSS,        // CSS 代码
-    JAVASCRIPT  // JavaScript 代码
-};
-
-/**
- * @brief 代码块信息
- */
-struct CodeBlock {
-    CodeType type;
-    std::string content;
-    size_t startLine;
-    size_t startColumn;
-    size_t endLine;
-    size_t endColumn;
-    std::string language;
-    
-    CodeBlock() : type(CodeType::CHTL), startLine(0), startColumn(0), endLine(0), endColumn(0) {}
-};
-
-/**
- * @brief 统一扫描器
- * 
- * 根据 CHTL.md 文档实现
- * 支持 CHTL、CHTL JS、CSS、JS 代码的智能分离
- */
 class UnifiedScanner {
 public:
+    // 占位符类型
+    enum class PlaceholderType {
+        CHTL,           // CHTL代码占位符
+        HTML,           // HTML代码占位符
+        CSS,            // CSS代码占位符
+        JAVASCRIPT,     // JavaScript代码占位符
+        CJJS,           // CHTL JS代码占位符
+        CUSTOM          // 自定义类型占位符
+    };
+    
+    // 占位符信息
+    struct PlaceholderInfo {
+        std::string name;           // 占位符名称
+        PlaceholderType type;       // 占位符类型
+        std::string content;        // 占位符内容
+        size_t startPos;           // 开始位置
+        size_t endPos;             // 结束位置
+        std::map<std::string, std::string> attributes; // 占位符属性
+    };
+    
+    // 代码块信息
+    struct CodeBlock {
+        std::string content;        // 代码内容
+        PlaceholderType type;       // 代码类型
+        size_t startPos;           // 开始位置
+        size_t endPos;             // 结束位置
+        std::vector<PlaceholderInfo> placeholders; // 包含的占位符
+    };
+    
+    // 扫描结果
+    struct ScanResult {
+        std::vector<CodeBlock> codeBlocks;      // 代码块列表
+        std::vector<PlaceholderInfo> placeholders; // 占位符列表
+        std::map<std::string, std::string> metadata; // 元数据
+        bool success;                           // 扫描是否成功
+        std::string errorMessage;              // 错误信息
+    };
+    
+    // 构造函数
     UnifiedScanner();
-    ~UnifiedScanner() = default;
+    explicit UnifiedScanner(const std::string& input);
     
-    // 扫描和分离代码
-    std::vector<CodeBlock> scan(const std::string& content);
-    std::vector<CodeBlock> scanFromFile(const std::string& filePath);
+    // 设置输入
+    void setInput(const std::string& input);
     
-    // 代码类型检测
-    CodeType detectCodeType(const std::string& content) const;
-    CodeType detectCodeTypeByExtension(const std::string& filePath) const;
-    CodeType detectCodeTypeByContent(const std::string& content) const;
+    // 扫描方法
+    ScanResult scan();
+    ScanResult scanWithPlaceholders();
+    ScanResult scanWithCodeSeparation();
     
-    // 代码块提取
-    std::vector<CodeBlock> extractCHTLBlocks(const std::string& content) const;
-    std::vector<CodeBlock> extractCHTLJSBlocks(const std::string& content) const;
-    std::vector<CodeBlock> extractCSSBlocks(const std::string& content) const;
-    std::vector<CodeBlock> extractJavaScriptBlocks(const std::string& content) const;
+    // 占位符处理
+    void registerPlaceholder(const std::string& name, PlaceholderType type, 
+                           const std::string& content);
+    void unregisterPlaceholder(const std::string& name);
+    std::vector<PlaceholderInfo> findPlaceholders(const std::string& content) const;
+    std::string replacePlaceholders(const std::string& content) const;
     
-    // 代码块验证
-    bool validateCodeBlock(const CodeBlock& block) const;
-    bool validateCHTLBlock(const CodeBlock& block) const;
-    bool validateCHTLJSBlock(const CodeBlock& block) const;
-    bool validateCSSBlock(const CodeBlock& block) const;
-    bool validateJavaScriptBlock(const CodeBlock& block) const;
+    // 代码分离
+    std::vector<CodeBlock> separateCodeBlocks(const std::string& content) const;
+    std::string mergeCodeBlocks(const std::vector<CodeBlock>& blocks) const;
     
-    // 代码块转换
-    std::string convertToCHTL(const CodeBlock& block) const;
-    std::string convertToCHTLJS(const CodeBlock& block) const;
-    std::string convertToCSS(const CodeBlock& block) const;
-    std::string convertToJavaScript(const CodeBlock& block) const;
+    // 智能分析
+    PlaceholderType detectCodeType(const std::string& content) const;
+    std::vector<std::string> extractKeywords(const std::string& content) const;
+    std::map<std::string, std::string> extractMetadata(const std::string& content) const;
     
-    // 代码块合并
-    std::string mergeBlocks(const std::vector<CodeBlock>& blocks, CodeType targetType) const;
-    std::string mergeToCHTL(const std::vector<CodeBlock>& blocks) const;
-    std::string mergeToCHTLJS(const std::vector<CodeBlock>& blocks) const;
-    std::string mergeToCSS(const std::vector<CodeBlock>& blocks) const;
-    std::string mergeToJavaScript(const std::vector<CodeBlock>& blocks) const;
+    // 验证和错误处理
+    bool validatePlaceholders(const std::vector<PlaceholderInfo>& placeholders) const;
+    std::vector<std::string> getValidationErrors() const;
     
-    // 代码块过滤
-    std::vector<CodeBlock> filterByType(const std::vector<CodeBlock>& blocks, CodeType type) const;
-    std::vector<CodeBlock> filterByLanguage(const std::vector<CodeBlock>& blocks, const std::string& language) const;
+    // 配置选项
+    void setPlaceholderPrefix(const std::string& prefix) { placeholderPrefix_ = prefix; }
+    void setPlaceholderSuffix(const std::string& suffix) { placeholderSuffix_ = suffix; }
+    void setEnableSmartDetection(bool enable) { enableSmartDetection_ = enable; }
+    void setEnableCodeSeparation(bool enable) { enableCodeSeparation_ = enable; }
+    void setEnablePlaceholderReplacement(bool enable) { enablePlaceholderReplacement_ = enable; }
     
-    // 代码块统计
-    size_t countBlocks(const std::vector<CodeBlock>& blocks, CodeType type) const;
-    size_t countLines(const std::vector<CodeBlock>& blocks, CodeType type) const;
-    size_t countCharacters(const std::vector<CodeBlock>& blocks, CodeType type) const;
+    // 获取配置
+    std::string getPlaceholderPrefix() const { return placeholderPrefix_; }
+    std::string getPlaceholderSuffix() const { return placeholderSuffix_; }
+    bool isSmartDetectionEnabled() const { return enableSmartDetection_; }
+    bool isCodeSeparationEnabled() const { return enableCodeSeparation_; }
+    bool isPlaceholderReplacementEnabled() const { return enablePlaceholderReplacement_; }
     
-    // 代码块格式化
-    std::string formatCodeBlock(const CodeBlock& block) const;
-    std::string formatBlocks(const std::vector<CodeBlock>& blocks) const;
+    // 统计信息
+    size_t getPlaceholderCount() const { return placeholders_.size(); }
+    size_t getCodeBlockCount() const { return codeBlocks_.size(); }
+    std::map<PlaceholderType, size_t> getPlaceholderTypeCounts() const;
+    std::map<PlaceholderType, size_t> getCodeBlockTypeCounts() const;
+    
+    // 清理
+    void clear();
+    void reset();
     
 private:
+    std::string input_;                    // 输入内容
+    std::map<std::string, PlaceholderInfo> placeholders_; // 占位符映射
+    std::vector<CodeBlock> codeBlocks_;    // 代码块列表
+    std::vector<std::string> validationErrors_; // 验证错误
+    
+    // 配置选项
+    std::string placeholderPrefix_;        // 占位符前缀
+    std::string placeholderSuffix_;        // 占位符后缀
+    bool enableSmartDetection_;           // 启用智能检测
+    bool enableCodeSeparation_;           // 启用代码分离
+    bool enablePlaceholderReplacement_;   // 启用占位符替换
+    
     // 内部方法
-    bool isCHTLKeyword(const std::string& word) const;
-    bool isCHTLJSKeyword(const std::string& word) const;
-    bool isCSSKeyword(const std::string& word) const;
-    bool isJavaScriptKeyword(const std::string& word) const;
+    void initializeDefaults();
+    void parsePlaceholders(const std::string& content);
+    void parseCodeBlocks(const std::string& content);
+    PlaceholderType detectTypeFromContent(const std::string& content) const;
+    PlaceholderType detectTypeFromKeywords(const std::vector<std::string>& keywords) const;
+    std::vector<std::string> tokenizeContent(const std::string& content) const;
+    bool isValidPlaceholderName(const std::string& name) const;
+    bool isValidPlaceholderType(PlaceholderType type) const;
+    std::string formatPlaceholder(const PlaceholderInfo& placeholder) const;
+    std::string formatCodeBlock(const CodeBlock& block) const;
     
-    bool isCHTLComment(const std::string& line) const;
-    bool isCHTLJSComment(const std::string& line) const;
-    bool isCSSComment(const std::string& line) const;
-    bool isJavaScriptComment(const std::string& line) const;
+    // 错误处理
+    void addValidationError(const std::string& error);
+    void clearValidationErrors();
     
-    bool isCHTLBlockStart(const std::string& line) const;
-    bool isCHTLJSBlockStart(const std::string& line) const;
-    bool isCSSBlockStart(const std::string& line) const;
-    bool isJavaScriptBlockStart(const std::string& line) const;
+    // 辅助方法
+    std::string trim(const std::string& str) const;
+    std::vector<std::string> split(const std::string& str, char delimiter) const;
+    bool startsWith(const std::string& str, const std::string& prefix) const;
+    bool endsWith(const std::string& str, const std::string& suffix) const;
+    std::string toLowerCase(const std::string& str) const;
+    std::string toUpperCase(const std::string& str) const;
     
-    bool isCHTLBlockEnd(const std::string& line) const;
-    bool isCHTLJSBlockEnd(const std::string& line) const;
-    bool isCSSBlockEnd(const std::string& line) const;
-    bool isJavaScriptBlockEnd(const std::string& line) const;
+    // 正则表达式辅助
+    std::vector<std::string> extractMatches(const std::string& content, 
+                                          const std::string& pattern) const;
+    bool matchesPattern(const std::string& content, 
+                       const std::string& pattern) const;
     
-    std::string extractLanguageFromBlock(const std::string& content) const;
-    std::string normalizeCodeBlock(const CodeBlock& block) const;
-    
-    // 关键词列表
-    std::vector<std::string> chtlKeywords_;
-    std::vector<std::string> chtljsKeywords_;
-    std::vector<std::string> cssKeywords_;
-    std::vector<std::string> javascriptKeywords_;
-    
-    // 块开始/结束标记
-    std::vector<std::string> chtlBlockStarters_;
-    std::vector<std::string> chtljsBlockStarters_;
-    std::vector<std::string> cssBlockStarters_;
-    std::vector<std::string> javascriptBlockStarters_;
-    
-    std::vector<std::string> chtlBlockEnders_;
-    std::vector<std::string> chtljsBlockEnders_;
-    std::vector<std::string> cssBlockEnders_;
-    std::vector<std::string> javascriptBlockEnders_;
+    // 位置计算
+    size_t calculateLineNumber(const std::string& content, size_t position) const;
+    size_t calculateColumnNumber(const std::string& content, size_t position) const;
+    std::pair<size_t, size_t> calculatePosition(const std::string& content, 
+                                               size_t position) const;
 };
 
 } // namespace CHTL

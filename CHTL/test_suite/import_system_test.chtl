@@ -1,0 +1,135 @@
+// 导入系统测试文件
+
+// 导入HTML文件
+[Import] @Html from "./components/header.html" as HeaderComponent
+
+// 导入CSS文件
+[Import] @Style from "./styles/main.css" as MainStyles
+
+// 导入JavaScript文件
+[Import] @JavaScript from "./scripts/app.js" as AppScripts
+
+// 导入CHTL JS文件
+[Import] @JavaScript from "./scripts/components.cjjs" as ComponentScripts
+
+// 导入CHTL文件
+[Import] @Chtl from "./templates/layout.chtl" as LayoutTemplate
+
+// 导入CMOD模块
+[Import] @Chtl from "chtl::chtholly" as ChthollyTheme
+
+// 导入CJMOD模块
+[Import] @Chtl from "chtl::utils" as UtilsModule
+
+// 通配符导入
+[Import] @Style from "./styles/*.css" as AllStyles
+
+// 通配符导入CHTL文件
+[Import] @Chtl from "./components/*.chtl" as AllComponents
+
+// 使用导入的内容
+body
+{
+    // 使用导入的HTML组件
+    @Html HeaderComponent;
+    
+    // 使用导入的CSS样式
+    @Style MainStyles;
+    
+    // 使用导入的JavaScript脚本
+    @JavaScript AppScripts;
+    
+    // 使用导入的CHTL JS脚本
+    @JavaScript ComponentScripts;
+    
+    // 使用导入的CHTL模板
+    @Chtl LayoutTemplate;
+    
+    // 使用导入的主题
+    @Chtl ChthollyTheme;
+    
+    // 使用导入的工具模块
+    @Chtl UtilsModule;
+    
+    // 使用通配符导入的样式
+    @Style AllStyles;
+    
+    // 使用通配符导入的组件
+    @Chtl AllComponents;
+    
+    // 直接导入HTML
+    [Import] @Html from "./content/home.html" as HomeContent;
+    @Html HomeContent;
+    
+    // 直接导入CSS
+    [Import] @Style from "./themes/dark.css" as DarkTheme;
+    @Style DarkTheme;
+    
+    // 直接导入JavaScript
+    [Import] @JavaScript from "./utils/helpers.js" as HelperUtils;
+    @JavaScript HelperUtils;
+    
+    // 嵌套导入测试
+    div
+    {
+        class: "content";
+        
+        // 在嵌套元素中使用导入
+        [Import] @Html from "./sections/about.html" as AboutSection;
+        @Html AboutSection;
+        
+        [Import] @Style from "./sections/about.css" as AboutStyles;
+        @Style AboutStyles;
+        
+        [Import] @JavaScript from "./sections/about.js" as AboutScripts;
+        @JavaScript AboutScripts;
+    }
+    
+    // 条件导入测试
+    section
+    {
+        class: "features";
+        
+        // 根据条件导入不同的样式
+        [Import] @Style from "./features/desktop.css" as DesktopStyles;
+        [Import] @Style from "./features/mobile.css" as MobileStyles;
+        
+        @Style DesktopStyles;
+        @Style MobileStyles;
+        
+        // 根据条件导入不同的脚本
+        [Import] @JavaScript from "./features/desktop.js" as DesktopScripts;
+        [Import] @JavaScript from "./features/mobile.js" as MobileScripts;
+        
+        @JavaScript DesktopScripts;
+        @JavaScript MobileScripts;
+    }
+    
+    // 模块导入测试
+    footer
+    {
+        class: "footer";
+        
+        // 导入模块化的组件
+        [Import] @Chtl from "chtl::footer" as FooterModule;
+        @Chtl FooterModule;
+        
+        // 导入模块化的样式
+        [Import] @Style from "chtl::footer" as FooterStyles;
+        @Style FooterStyles;
+        
+        // 导入模块化的脚本
+        [Import] @JavaScript from "chtl::footer" as FooterScripts;
+        @JavaScript FooterScripts;
+    }
+}
+
+// 全局导入测试
+[Import] @Html from "./global/analytics.html" as GlobalAnalytics
+[Import] @Style from "./global/reset.css" as GlobalReset
+[Import] @JavaScript from "./global/analytics.js" as GlobalAnalyticsScript
+
+// 使用全局导入
+@Html GlobalAnalytics;
+@Style GlobalReset;
+@JavaScript GlobalAnalyticsScript;

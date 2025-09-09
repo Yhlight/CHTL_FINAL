@@ -12,6 +12,10 @@ add_subdirectory(CHTLJS)
 add_subdirectory(CHTLTemplate)
 add_subdirectory(CHTLCustom)
 add_subdirectory(CHTLOrigin)
+add_subdirectory(CHTLImport)
+add_subdirectory(CHTLNamespace)
+add_subdirectory(CHTLConstraint)
+add_subdirectory(CHTLConfig)
 add_subdirectory(CHTLGenerator)
 add_subdirectory(CHTLModule)
 add_subdirectory(CHTLScanner)
@@ -27,6 +31,10 @@ target_link_libraries(CHTLCore PUBLIC
     CHTLTemplate
     CHTLCustom
     CHTLOrigin
+    CHTLImport
+    CHTLNamespace
+    CHTLConstraint
+    CHTLConfig
     CHTLGenerator
     CHTLModule
     CHTLScanner

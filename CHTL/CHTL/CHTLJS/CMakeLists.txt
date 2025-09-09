@@ -1,6 +1,7 @@
 # CHTL JS 核心库
 add_library(CHTLJSCore STATIC
     CHTLJSCore.cpp
+    CHTLJSCompiler.cpp
 )
 
 # 添加子目录

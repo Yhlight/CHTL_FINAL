@@ -111,6 +111,24 @@ run_test "custom_system" "custom_system_test.chtl" ""
 echo "Starting origin embedding tests..."
 run_test "origin_embedding" "origin_embedding_test.chtl" ""
 
+echo "Starting import system tests..."
+run_test "import_system" "import_system_test.chtl" ""
+
+echo "Starting namespace system tests..."
+run_test "namespace_system" "namespace_system_test.chtl" ""
+
+echo "Starting constraint system tests..."
+run_test "constraint_system" "constraint_system_test.chtl" ""
+
+echo "Starting configuration system tests..."
+run_test "configuration_system" "configuration_system_test.chtl" ""
+
+echo "Starting CHTL JS tests..."
+run_test "chtl_js" "chtl_js_test.chtl" ""
+
+echo "Starting module system tests..."
+run_test "module_system" "module_system_test.chtl" ""
+
 # Test default structure output
 echo -e "\n${YELLOW}Running default structure test: spa_page_default_struct${NC}"
 echo "Input file: spa_page.chtl"

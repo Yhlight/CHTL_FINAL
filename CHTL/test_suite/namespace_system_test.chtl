@@ -1,0 +1,406 @@
+// 命名空间系统测试文件
+
+// 全局命名空间
+[Namespace] global
+{
+    // 全局样式组
+    [Template] @Style GlobalStyles
+    {
+        .container
+        {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .text-center
+        {
+            text-align: center;
+        }
+        
+        .text-left
+        {
+            text-align: left;
+        }
+        
+        .text-right
+        {
+            text-align: right;
+        }
+    }
+    
+    // 全局变量组
+    [Template] @Var GlobalVariables
+    {
+        primary-color: "rgb(255, 192, 203)";
+        secondary-color: "rgb(145, 155, 200)";
+        text-color: "black";
+        background-color: "white";
+        font-family: "Arial, sans-serif";
+        font-size: "16px";
+    }
+}
+
+// 主题命名空间
+[Namespace] theme
+{
+    // 主题样式组
+    [Template] @Style ThemeStyles
+    {
+        .header
+        {
+            background-color: GlobalVariables(primary-color);
+            color: GlobalVariables(text-color);
+            padding: 1rem 2rem;
+        }
+        
+        .footer
+        {
+            background-color: GlobalVariables(secondary-color);
+            color: GlobalVariables(text-color);
+            padding: 1rem 2rem;
+        }
+        
+        .button
+        {
+            background-color: GlobalVariables(primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .button:hover
+        {
+            background-color: GlobalVariables(secondary-color);
+        }
+    }
+    
+    // 主题变量组
+    [Template] @Var ThemeVariables
+    {
+        header-height: "80px";
+        footer-height: "60px";
+        button-padding: "0.5rem 1rem";
+        border-radius: "4px";
+    }
+}
+
+// 组件命名空间
+[Namespace] components
+{
+    // 导航组件
+    [Template] @Element Navigation
+    {
+        nav
+        {
+            class: "navigation";
+            style
+            {
+                .navigation
+                {
+                    background-color: theme::ThemeVariables(header-height);
+                    padding: 1rem 0;
+                }
+                
+                .navigation ul
+                {
+                    list-style: none;
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    gap: 2rem;
+                }
+                
+                .navigation li
+                {
+                    margin: 0;
+                }
+                
+                .navigation a
+                {
+                    color: GlobalVariables(text-color);
+                    text-decoration: none;
+                    padding: 0.5rem 1rem;
+                    border-radius: theme::ThemeVariables(border-radius);
+                    transition: background-color 0.3s;
+                }
+                
+                .navigation a:hover
+                {
+                    background-color: GlobalVariables(secondary-color);
+                }
+            }
+        }
+    }
+    
+    // 卡片组件
+    [Template] @Element Card
+    {
+        div
+        {
+            class: "card";
+            style
+            {
+                .card
+                {
+                    background-color: white;
+                    border: 1px solid #ddd;
+                    border-radius: theme::ThemeVariables(border-radius);
+                    padding: 1.5rem;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    margin-bottom: 1rem;
+                }
+                
+                .card-header
+                {
+                    font-size: 1.25rem;
+                    font-weight: bold;
+                    margin-bottom: 1rem;
+                    color: GlobalVariables(text-color);
+                }
+                
+                .card-body
+                {
+                    color: #666;
+                    line-height: 1.6;
+                }
+                
+                .card-footer
+                {
+                    margin-top: 1rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid #eee;
+                }
+            }
+        }
+    }
+}
+
+// 页面命名空间
+[Namespace] pages
+{
+    // 首页
+    [Template] @Element HomePage
+    {
+        div
+        {
+            class: "home-page";
+            style
+            {
+                .home-page
+                {
+                    min-height: 100vh;
+                    background-color: GlobalVariables(background-color);
+                }
+                
+                .hero-section
+                {
+                    background-color: theme::ThemeVariables(primary-color);
+                    color: white;
+                    padding: 4rem 2rem;
+                    text-align: center;
+                }
+                
+                .hero-section h1
+                {
+                    font-size: 3rem;
+                    margin-bottom: 1rem;
+                }
+                
+                .hero-section p
+                {
+                    font-size: 1.25rem;
+                    margin-bottom: 2rem;
+                }
+                
+                .content-section
+                {
+                    padding: 4rem 2rem;
+                }
+            }
+        }
+    }
+    
+    // 关于页面
+    [Template] @Element AboutPage
+    {
+        div
+        {
+            class: "about-page";
+            style
+            {
+                .about-page
+                {
+                    min-height: 100vh;
+                    background-color: GlobalVariables(background-color);
+                }
+                
+                .about-header
+                {
+                    background-color: theme::ThemeVariables(secondary-color);
+                    color: white;
+                    padding: 2rem;
+                    text-align: center;
+                }
+                
+                .about-content
+                {
+                    padding: 2rem;
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+            }
+        }
+    }
+}
+
+// 嵌套命名空间测试
+[Namespace] theme::dark
+{
+    // 深色主题变量
+    [Template] @Var DarkThemeVariables
+    {
+        primary-color: "rgb(100, 100, 100)";
+        secondary-color: "rgb(50, 50, 50)";
+        text-color: "white";
+        background-color: "rgb(30, 30, 30)";
+    }
+    
+    // 深色主题样式
+    [Template] @Style DarkThemeStyles
+    {
+        .dark-theme
+        {
+            background-color: DarkThemeVariables(background-color);
+            color: DarkThemeVariables(text-color);
+        }
+        
+        .dark-theme .card
+        {
+            background-color: DarkThemeVariables(secondary-color);
+            border-color: #555;
+        }
+        
+        .dark-theme .button
+        {
+            background-color: DarkThemeVariables(primary-color);
+        }
+    }
+}
+
+// 模块命名空间测试
+[Namespace] modules::ui
+{
+    // UI模块样式
+    [Template] @Style UIModuleStyles
+    {
+        .ui-button
+        {
+            background-color: GlobalVariables(primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .ui-button:hover
+        {
+            background-color: GlobalVariables(secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .ui-input
+        {
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            width: 100%;
+            transition: border-color 0.3s ease;
+        }
+        
+        .ui-input:focus
+        {
+            outline: none;
+            border-color: GlobalVariables(primary-color);
+        }
+    }
+}
+
+// 使用命名空间中的定义
+body
+{
+    // 使用全局样式
+    @Style GlobalStyles;
+    
+    // 使用主题样式
+    @Style theme::ThemeStyles;
+    
+    // 使用组件
+    @Element components::Navigation;
+    @Element components::Card;
+    
+    // 使用页面
+    @Element pages::HomePage;
+    
+    // 使用嵌套命名空间
+    @Style theme::dark::DarkThemeStyles;
+    
+    // 使用模块命名空间
+    @Style modules::ui::UIModuleStyles;
+    
+    // 命名空间冲突测试
+    div
+    {
+        class: "conflict-test";
+        
+        // 这里应该能够正确解析命名空间
+        style
+        {
+            .conflict-test
+            {
+                background-color: GlobalVariables(primary-color);
+                color: theme::ThemeVariables(text-color);
+                padding: components::Card(card-padding);
+            }
+        }
+    }
+}
+
+// 命名空间合并测试
+[Namespace] merged
+{
+    // 合并全局和主题命名空间
+    @Style GlobalStyles;
+    @Style theme::ThemeStyles;
+    
+    // 合并组件命名空间
+    @Element components::Navigation;
+    @Element components::Card;
+    
+    // 自定义合并后的样式
+    [Template] @Style MergedStyles
+    {
+        .merged-container
+        {
+            background-color: GlobalVariables(background-color);
+            color: GlobalVariables(text-color);
+            font-family: GlobalVariables(font-family);
+            font-size: GlobalVariables(font-size);
+        }
+        
+        .merged-button
+        {
+            background-color: theme::ThemeVariables(primary-color);
+            color: white;
+            padding: theme::ThemeVariables(button-padding);
+            border-radius: theme::ThemeVariables(border-radius);
+        }
+    }
+}

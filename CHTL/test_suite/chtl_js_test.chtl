@@ -1,0 +1,512 @@
+// CHTL JS扩展语法测试文件
+
+// 文件载入器测试
+fileloader
+{
+    load: ./components/header.cjjs;
+    load: ./components/footer.cjjs;
+    load: ./utils/helpers.cjjs;
+    load: ./styles/main.css;
+    load: ./scripts/app.js;
+}
+
+// 局部脚本测试
+div
+{
+    id: main-content;
+    class: container;
+    
+    style
+    {
+        .container
+        {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header
+        {
+            background-color: #333;
+            color: white;
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .content
+        {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .button
+        {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .button:hover
+        {
+            background-color: #0056b3;
+        }
+    }
+    
+    script
+    {
+        // 增强选择器测试
+        {{main-content}}->addEventListener('load', function() {
+            console.log('Main content loaded');
+        });
+        
+        {{.container}}->style.backgroundColor = '#ffffff';
+        
+        {{#main-content}}->classList.add('loaded');
+        
+        // 事件监听器测试
+        {{.button}}->listen
+        {
+            click: function(event) {
+                console.log('Button clicked:', event.target);
+                {{.content}}->style.backgroundColor = '#f0f0f0';
+            };
+            
+            mouseenter: function(event) {
+                event.target.style.transform = 'scale(1.05)';
+            };
+            
+            mouseleave: function(event) {
+                event.target.style.transform = 'scale(1)';
+            };
+        };
+        
+        // 事件委托测试
+        {{.container}}->delegate
+        {
+            target: {{.button}};
+            click: function(event) {
+                console.log('Delegated button click:', event.target);
+            };
+        };
+        
+        // 动画测试
+        const fadeIn = animate
+        {
+            target: {{.content}};
+            duration: 1000;
+            easing: ease-in-out;
+            
+            begin:
+            {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            
+            when:
+            [
+                {
+                    at: 0.5;
+                    opacity: 0.5;
+                    transform: translateY(10px);
+                }
+            ]
+            
+            end:
+            {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            
+            callback: function() {
+                console.log('Animation completed');
+            };
+        };
+        
+        // 虚对象测试
+        vir ButtonManager = listen
+        {
+            click: function(event) {
+                console.log('Button clicked via vir');
+            };
+            
+            hover: function(event) {
+                event.target.style.backgroundColor = '#28a745';
+            };
+        };
+        
+        // 使用虚对象
+        {{.button}}->click();
+        {{.button}}->hover();
+        
+        // 工具函数测试
+        util
+        {
+            formatDate: function(date) {
+                return date.toLocaleDateString();
+            };
+            
+            formatTime: function(date) {
+                return date.toLocaleTimeString();
+            };
+            
+            debounce: function(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = function() {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            };
+        };
+        
+        // 使用工具函数
+        const formattedDate = util.formatDate(new Date());
+        console.log('Formatted date:', formattedDate);
+        
+        const debouncedClick = util.debounce(function() {
+            console.log('Debounced click');
+        }, 300);
+        
+        {{.button}}->addEventListener('click', debouncedClick);
+    }
+}
+
+// 全局脚本测试
+script
+{
+    // 全局文件载入器
+    fileloader
+    {
+        load: ./global/analytics.js;
+        load: ./global/tracking.js;
+    }
+    
+    // 全局增强选择器
+    {{body}}->style.margin = '0';
+    {{body}}->style.padding = '0';
+    {{body}}->style.fontFamily = 'Arial, sans-serif';
+    
+    // 全局事件监听器
+    {{window}}->listen
+    {
+        load: function() {
+            console.log('Window loaded');
+        };
+        
+        resize: function() {
+            console.log('Window resized');
+        };
+        
+        scroll: function() {
+            console.log('Window scrolled');
+        };
+    };
+    
+    // 全局动画
+    const pageLoadAnimation = animate
+    {
+        target: {{body}};
+        duration: 500;
+        easing: ease-out;
+        
+        begin:
+        {
+            opacity: 0;
+        }
+        
+        end:
+        {
+            opacity: 1;
+        }
+    };
+    
+    // 全局路由
+    router
+    {
+        mode: history;
+        root: {{#main-content}};
+        
+        routes:
+        [
+            {
+                url: '/';
+                page: {{.home-page}};
+            };
+            {
+                url: '/about';
+                page: {{.about-page}};
+            };
+            {
+                url: '/contact';
+                page: {{.contact-page}};
+            };
+        ];
+    };
+    
+    // 全局虚对象
+    vir GlobalManager = listen
+    {
+        init: function() {
+            console.log('Global manager initialized');
+        };
+        
+        destroy: function() {
+            console.log('Global manager destroyed');
+        };
+        
+        update: function(data) {
+            console.log('Global manager updated:', data);
+        };
+    };
+    
+    // 使用全局虚对象
+    GlobalManager->init();
+    
+    // 全局工具函数
+    util
+    {
+        log: function(message) {
+            console.log('[CHTL]', message);
+        };
+        
+        error: function(message) {
+            console.error('[CHTL Error]', message);
+        };
+        
+        warn: function(message) {
+            console.warn('[CHTL Warning]', message);
+        };
+        
+        info: function(message) {
+            console.info('[CHTL Info]', message);
+        };
+    };
+    
+    // 使用全局工具函数
+    util.log('CHTL JS initialized');
+    util.info('All systems ready');
+}
+
+// 复杂CHTL JS测试
+section
+{
+    class: advanced-features;
+    
+    style
+    {
+        .advanced-features
+        {
+            padding: 2rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+        
+        .feature-grid
+        {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .feature-card
+        {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover
+        {
+            transform: translateY(-2px);
+        }
+    }
+    
+    script
+    {
+        // 复杂增强选择器测试
+        {{.feature-grid}}->style.display = 'grid';
+        {{.feature-grid}}->style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
+        {{.feature-grid}}->style.gap = '1rem';
+        
+        // 复杂事件监听器测试
+        {{.feature-card}}->listen
+        {
+            click: function(event) {
+                console.log('Feature card clicked:', event.target);
+                event.target.style.backgroundColor = '#e9ecef';
+            };
+            
+            mouseenter: function(event) {
+                event.target.style.transform = 'translateY(-2px)';
+                event.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+            };
+            
+            mouseleave: function(event) {
+                event.target.style.transform = 'translateY(0)';
+                event.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+            };
+        };
+        
+        // 复杂事件委托测试
+        {{.advanced-features}}->delegate
+        {
+            target: [{{.feature-card}}, {{.button}}];
+            click: function(event) {
+                console.log('Delegated click on:', event.target.className);
+            };
+        };
+        
+        // 复杂动画测试
+        const cardAnimation = animate
+        {
+            target: {{.feature-card}};
+            duration: 800;
+            easing: ease-in-out;
+            
+            begin:
+            {
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+            
+            when:
+            [
+                {
+                    at: 0.3;
+                    opacity: 0.7;
+                    transform: translateY(15px) scale(0.95);
+                };
+                {
+                    at: 0.7;
+                    opacity: 0.9;
+                    transform: translateY(5px) scale(0.98);
+                };
+            ]
+            
+            end:
+            {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            
+            loop: 1;
+            direction: normal;
+            delay: 100;
+            
+            callback: function() {
+                console.log('Card animation completed');
+            };
+        };
+        
+        // 复杂虚对象测试
+        vir FeatureManager = listen
+        {
+            init: function() {
+                console.log('Feature manager initialized');
+                this.loadFeatures();
+            };
+            
+            loadFeatures: function() {
+                console.log('Loading features...');
+                // 模拟加载功能
+                setTimeout(() => {
+                    console.log('Features loaded');
+                }, 1000);
+            };
+            
+            updateFeature: function(featureId, data) {
+                console.log('Updating feature:', featureId, data);
+            };
+            
+            removeFeature: function(featureId) {
+                console.log('Removing feature:', featureId);
+            };
+        };
+        
+        // 使用复杂虚对象
+        const featureManager = FeatureManager->init();
+        featureManager->updateFeature('card-1', { active: true });
+        featureManager->removeFeature('card-2');
+        
+        // 复杂工具函数测试
+        util
+        {
+            throttle: function(func, limit) {
+                let inThrottle;
+                return function() {
+                    const args = arguments;
+                    const context = this;
+                    if (!inThrottle) {
+                        func.apply(context, args);
+                        inThrottle = true;
+                        setTimeout(() => inThrottle = false, limit);
+                    }
+                };
+            };
+            
+            deepClone: function(obj) {
+                if (obj === null || typeof obj !== 'object') return obj;
+                if (obj instanceof Date) return new Date(obj.getTime());
+                if (obj instanceof Array) return obj.map(item => util.deepClone(item));
+                if (typeof obj === 'object') {
+                    const clonedObj = {};
+                    for (const key in obj) {
+                        if (obj.hasOwnProperty(key)) {
+                            clonedObj[key] = util.deepClone(obj[key]);
+                        }
+                    }
+                    return clonedObj;
+                }
+            };
+            
+            merge: function(target, ...sources) {
+                if (!sources.length) return target;
+                const source = sources.shift();
+                if (util.isObject(target) && util.isObject(source)) {
+                    for (const key in source) {
+                        if (util.isObject(source[key])) {
+                            if (!target[key]) Object.assign(target, { [key]: {} });
+                            util.merge(target[key], source[key]);
+                        } else {
+                            Object.assign(target, { [key]: source[key] });
+                        }
+                    }
+                }
+                return util.merge(target, ...sources);
+            };
+            
+            isObject: function(item) {
+                return item && typeof item === 'object' && !Array.isArray(item);
+            };
+        };
+        
+        // 使用复杂工具函数
+        const throttledScroll = util.throttle(function() {
+            console.log('Throttled scroll event');
+        }, 100);
+        
+        {{window}}->addEventListener('scroll', throttledScroll);
+        
+        const originalData = { name: 'CHTL', version: '1.0.0', features: ['js', 'css', 'html'] };
+        const clonedData = util.deepClone(originalData);
+        console.log('Cloned data:', clonedData);
+        
+        const mergedData = util.merge({}, originalData, { author: 'CHTL Team' });
+        console.log('Merged data:', mergedData);
+    }
+}
