@@ -92,7 +92,11 @@ void Evaluator::visit(const VariableExpr& expr) {
                     // Found the property, now evaluate its value expression.
                     // IMPORTANT: We use a new, empty local context for this evaluation
                     // to prevent infinite recursion if properties reference each other.
-                    m_lastValue = evaluateSubExpr(prop->getValue());
+                    if (!prop->getValues().empty()) {
+                         m_lastValue = evaluateSubExpr(prop->getValues()[0].get());
+                    } else {
+                        m_lastValue = {ChtlValue::Type::Null};
+                    }
                     return;
                 }
             }
@@ -167,7 +171,11 @@ void Evaluator::visit(const TernaryExpr& expr) {
     if (isTruthy(condition)) {
         m_lastValue = evaluateSubExpr(expr.getThenBranch());
     } else {
-        m_lastValue = evaluateSubExpr(expr.getElseBranch());
+        if (expr.getElseBranch()) {
+            m_lastValue = evaluateSubExpr(expr.getElseBranch());
+        } else {
+            m_lastValue = {ChtlValue::Type::Null}; // No else branch, result is null
+        }
     }
 }
 

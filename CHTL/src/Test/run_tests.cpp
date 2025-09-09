@@ -137,6 +137,28 @@ void test_ampersand_expansion_prefers_class() {
     run_test("Phase 7.B: Ampersand Expansion Prefers Class", src, expected);
 }
 
+void test_chained_conditional() {
+    std::string src = "div{ style{ width: 100px; color: width > 200px ? 'blue', width > 50px ? 'green'; } }";
+    run_test("Phase 8.A: Chained Conditional", src, "<div style=\"color: green;width: 100px;\"></div>");
+}
+
+void test_optional_else_true() {
+    std::string src = "div{ style{ width: 100px; color: width > 50px ? 'green'; } }";
+    run_test("Phase 8.B: Optional Else (True)", src, "<div style=\"color: green;width: 100px;\"></div>");
+}
+
+void test_optional_else_false() {
+    std::string src = "div{ style{ width: 100px; color: width > 200px ? 'green'; } }";
+    run_test("Phase 8.B: Optional Else (False)", src, "<div style=\"width: 100px;\"></div>");
+}
+
+void test_logical_operators() {
+    std::string src_and_true = "div{ style{ width:100px; height:50px; color: width > 50px && height < 100px ? 'green' : 'red'; } }";
+    run_test("Phase 8.C: Logical AND (True)", src_and_true, "<div style=\"color: green;height: 50px;width: 100px;\"></div>");
+    std::string src_or_true = "div{ style{ width:100px; height:50px; color: width > 200px || height < 100px ? 'green' : 'red'; } }";
+    run_test("Phase 8.C: Logical OR (True)", src_or_true, "<div style=\"color: green;height: 50px;width: 100px;\"></div>");
+}
+
 
 int main() {
     std::cout << "--- Running CHTL Full Test Suite ---" << std::endl;
@@ -167,6 +189,10 @@ int main() {
     test_auto_generation_does_not_overwrite();
     test_auto_generation_first_wins();
     test_ampersand_expansion_prefers_class();
+    test_chained_conditional();
+    test_optional_else_true();
+    test_optional_else_false();
+    test_logical_operators();
     std::cout << "------------------------------------" << std::endl;
     return 0;
 }

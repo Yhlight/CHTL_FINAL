@@ -15,7 +15,8 @@ public:
     }
 
     std::unique_ptr<Expr> clone() const override {
-        return std::make_unique<TernaryExpr>(m_condition->clone(), m_thenBranch->clone(), m_elseBranch->clone());
+        auto elseClone = m_elseBranch ? m_elseBranch->clone() : nullptr;
+        return std::make_unique<TernaryExpr>(m_condition->clone(), m_thenBranch->clone(), std::move(elseClone));
     }
 
     const Expr* getCondition() const { return m_condition.get(); }

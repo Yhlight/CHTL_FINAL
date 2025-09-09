@@ -197,9 +197,32 @@ void Generator::generateElement(const ElementNode* element) {
             return this->findNodeBySelector(this->m_root_node, selector);
         };
 
-        for(const auto& pair : final_properties) { if(isLiteral(pair.second->getValue())) { Evaluator eval; eval_context[pair.first] = eval.evaluate(pair.second->getValue(), *m_context, eval_context, resolver); } }
+        // Pre-pass for literals to populate the context, enabling properties to reference each other.
+        for (const auto& pair : final_properties) {
+            if (!pair.second->getValues().empty()) {
+                const auto& first_expr = pair.second->getValues()[0];
+                if (dynamic_cast<const LiteralExpr*>(first_expr.get())) {
+                    Evaluator eval;
+                    eval_context[pair.first] = eval.evaluate(first_expr.get(), *m_context, eval_context, resolver);
+                }
+            }
+        }
+
         std::string inline_style;
-        for(const auto& pair : final_properties) { Evaluator eval; ChtlValue value = eval.evaluate(pair.second->getValue(), *m_context, eval_context, resolver); inline_style += pair.first + ": " + value.toString() + ";"; }
+        for (const auto& pair : final_properties) {
+            Evaluator eval;
+            // A property can have multiple chained expressions.
+            for (const auto& expr : pair.second->getValues()) {
+                ChtlValue value = eval.evaluate(expr.get(), *m_context, eval_context, resolver);
+                // Use the first expression that doesn't evaluate to null.
+                if (value.type != ChtlValue::Type::Null) {
+                    inline_style += pair.first + ": " + value.toString() + ";";
+                    // Add the computed value to the context for subsequent properties to reference.
+                    eval_context[pair.first] = value;
+                    break; // Move to the next property
+                }
+            }
+        }
         if (!inline_style.empty()) attributes["style"] = inline_style;
 
         // --- New logic for auto-generation ---
@@ -234,7 +257,13 @@ void Generator::generateElement(const ElementNode* element) {
                     selector_text.replace(amp_pos, 1, base_selector);
                 }
                 m_global_css += selector_text + " { ";
-                for (const auto& prop : selectorNode->getProperties()) { Evaluator eval; ChtlValue value = eval.evaluate(prop->getValue(), *m_context, eval_context, resolver); m_global_css += prop->getKey() + ": " + value.toString() + "; "; }
+                for (const auto& prop : selectorNode->getProperties()) {
+                    if (!prop->getValues().empty()) {
+                        Evaluator eval;
+                        ChtlValue value = eval.evaluate(prop->getValues()[0].get(), *m_context, eval_context, resolver);
+                        m_global_css += prop->getKey() + ": " + value.toString() + "; ";
+                    }
+                }
                 m_global_css += "}\n";
             }
         }

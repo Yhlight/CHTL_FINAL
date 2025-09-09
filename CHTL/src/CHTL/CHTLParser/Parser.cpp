@@ -465,9 +465,14 @@ void Parser::parseAttributes(ElementNode* element) {
 std::unique_ptr<BaseNode> Parser::parseStyleProperty() {
     std::string key = parseIdentifierSequence();
     consume(TokenType::Colon, "Expected ':' after style property name.");
-    auto value = parseExpression();
+
+    std::vector<std::unique_ptr<Expr>> values;
+    do {
+        values.push_back(parseExpression());
+    } while (match({TokenType::Comma}));
+
     consume(TokenType::Semicolon, "Expected ';' after style property value.");
-    return std::make_unique<StylePropertyNode>(key, std::move(value));
+    return std::make_unique<StylePropertyNode>(key, std::move(values));
 }
 
 std::unique_ptr<BaseNode> Parser::parseStyleSelector() {
@@ -485,7 +490,18 @@ std::unique_ptr<BaseNode> Parser::parseStyleSelector() {
 }
 
 std::unique_ptr<Expr> Parser::parseExpression() { return parseTernary(); }
-std::unique_ptr<Expr> Parser::parseTernary() { auto expr = parseLogicalOr(); if (match({TokenType::QuestionMark})) { auto thenBranch = parseTernary(); consume(TokenType::Colon, "Expected ':' in ternary expression."); auto elseBranch = parseTernary(); expr = std::make_unique<TernaryExpr>(std::move(expr), std::move(thenBranch), std::move(elseBranch)); } return expr; }
+std::unique_ptr<Expr> Parser::parseTernary() {
+    auto expr = parseLogicalOr();
+    if (match({TokenType::QuestionMark})) {
+        auto thenBranch = parseTernary();
+        std::unique_ptr<Expr> elseBranch = nullptr;
+        if (match({TokenType::Colon})) {
+            elseBranch = parseTernary();
+        }
+        expr = std::make_unique<TernaryExpr>(std::move(expr), std::move(thenBranch), std::move(elseBranch));
+    }
+    return expr;
+}
 std::unique_ptr<Expr> Parser::parseLogicalOr() { auto expr = parseLogicalAnd(); while (match({TokenType::LogicalOr})) { Token op = m_tokens[m_current - 1]; auto right = parseLogicalAnd(); expr = std::make_unique<BinaryExpr>(std::move(expr), op, std::move(right)); } return expr; }
 std::unique_ptr<Expr> Parser::parseLogicalAnd() { auto expr = parseComparison(); while (match({TokenType::LogicalAnd})) { Token op = m_tokens[m_current - 1]; auto right = parseComparison(); expr = std::make_unique<BinaryExpr>(std::move(expr), op, std::move(right)); } return expr; }
 std::unique_ptr<Expr> Parser::parseComparison() { auto expr = parsePrimary(); while (match({TokenType::GreaterThan, TokenType::LessThan})) { Token op = m_tokens[m_current - 1]; auto right = parsePrimary(); expr = std::make_unique<BinaryExpr>(std::move(expr), op, std::move(right)); } return expr; }
