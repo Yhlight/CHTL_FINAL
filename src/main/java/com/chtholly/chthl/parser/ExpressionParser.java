@@ -6,10 +6,6 @@ import com.chtholly.chthl.lexer.TokenType;
 
 import java.util.List;
 
-/**
- * Parses a list of tokens into an Expression AST.
- * Handles operator precedence for binary operations.
- */
 public class ExpressionParser {
 
     private static class ParseError extends RuntimeException {
@@ -29,14 +25,64 @@ public class ExpressionParser {
         try {
             return expression();
         } catch (ParseError error) {
-            // In a real compiler, we might have better error recovery.
             System.err.println(error.getMessage());
             return null;
         }
     }
 
     private Expression expression() {
-        return term();
+        return conditional();
+    }
+
+    private Expression conditional() {
+        Expression expr = logic_or();
+        if (match(TokenType.QUESTION)) {
+            Expression thenBranch = expression();
+            consume(TokenType.COLON, "Expect ':' after then branch.");
+            Expression elseBranch = conditional(); // Ternary is right-associative
+            expr = new ConditionalExpr(expr, thenBranch, elseBranch);
+        }
+        return expr;
+    }
+
+    private Expression logic_or() {
+        Expression expr = logic_and();
+        while (match(TokenType.PIPE_PIPE)) {
+            Token operator = previous();
+            Expression right = logic_and();
+            expr = new BinaryExpr(expr, operator, right);
+        }
+        return expr;
+    }
+
+    private Expression logic_and() {
+        Expression expr = equality();
+        while (match(TokenType.AMPERSAND_AMPERSAND)) {
+            Token operator = previous();
+            Expression right = equality();
+            expr = new BinaryExpr(expr, operator, right);
+        }
+        return expr;
+    }
+
+    private Expression equality() {
+        Expression expr = comparison();
+        while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
+            Token operator = previous();
+            Expression right = comparison();
+            expr = new BinaryExpr(expr, operator, right);
+        }
+        return expr;
+    }
+
+    private Expression comparison() {
+        Expression expr = term();
+        while (match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)) {
+            Token operator = previous();
+            Expression right = term();
+            expr = new BinaryExpr(expr, operator, right);
+        }
+        return expr;
     }
 
     private Expression term() {
@@ -50,25 +96,40 @@ public class ExpressionParser {
     }
 
     private Expression factor() {
-        Expression expr = primary();
+        Expression expr = call(); // Unary would go here
         while (match(TokenType.SLASH, TokenType.STAR)) {
             Token operator = previous();
-            Expression right = primary();
+            Expression right = call();
             expr = new BinaryExpr(expr, operator, right);
         }
         return expr;
     }
 
-    private Expression primary() {
-        if (match(TokenType.IDENTIFIER)) {
-            // Both variables (`width`) and literals with units (`100px`) are tokenized as IDENTIFIER.
-            // We treat them all as VariableExpr at the parsing stage.
-            // The evaluator will be responsible for interpreting their semantic meaning.
-            return new VariableExpr(previous());
+    private Expression call() {
+        Expression expr = primary();
+        while (match(TokenType.DOT)) {
+            Token property = consume(TokenType.IDENTIFIER, "Expect property name after '.'.");
+            expr = new ReferenceExpr(expr, property);
         }
+        return expr;
+    }
 
+    private Expression primary() {
         if (match(TokenType.STRING)) {
             return new LiteralExpr(previous().getLiteral());
+        }
+
+        // For selectors like .box or #main
+        if (match(TokenType.DOT, TokenType.HASH)) {
+            Token prefix = previous();
+            Token name = consume(TokenType.IDENTIFIER, "Expect name after '.' or '#'.");
+            // We create a single token to represent the selector, then a VariableExpr
+            Token selectorToken = new Token(TokenType.IDENTIFIER, prefix.getLexeme() + name.getLexeme(), null, prefix.getLine());
+            return new VariableExpr(selectorToken);
+        }
+
+        if (match(TokenType.IDENTIFIER)) {
+            return new VariableExpr(previous());
         }
 
         if (match(TokenType.LEFT_PAREN)) {
@@ -101,13 +162,11 @@ public class ExpressionParser {
     }
 
     private boolean isAtEnd() {
-        // This parser works on a sub-list of tokens, so the end is the list size.
         return current >= tokens.size();
     }
 
     private Token peek() {
         if (isAtEnd()) {
-            // Return the last token to avoid IndexOutOfBounds, its type won't match anything.
             return tokens.get(tokens.size() - 1);
         }
         return tokens.get(current);

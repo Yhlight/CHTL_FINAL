@@ -39,8 +39,60 @@ class CompilerEndToEndTest {
                               "<h1>Welcome!</h1><p>This is a paragraph.</p>" +
                               "<br></div></body></html>";
 
-        CHTLGenerator generator = new CHTLGenerator();
-        CompilationResult result = generator.generate(new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse());
+        List<Node> ast = new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse();
+        CHTLGenerator generator = new CHTLGenerator(ast);
+        CompilationResult result = generator.generate();
+
+        assertEquals(expectedHtml, result.getHtml());
+        assertTrue(result.getCss().isEmpty());
+    }
+
+    @Test
+    void testConditionalExpressionEvaluation() {
+        String chtlSource = """
+        div {
+            id: box;
+            style {
+                width: 100px;
+                background-color: width > 50px ? 'green' : 'red';
+            }
+        }
+        """;
+
+        // The evaluator should see that 100px > 50px is true and choose 'green'.
+        String expectedHtml = "<div id=\"box\" style=\"width:100px;background-color:green;\"></div>";
+
+        List<Node> ast = new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse();
+        CHTLGenerator generator = new CHTLGenerator(ast);
+        CompilationResult result = generator.generate();
+
+        assertEquals(expectedHtml, result.getHtml());
+        assertTrue(result.getCss().isEmpty());
+    }
+
+    @Test
+    void testPropertyReferenceEvaluation() {
+        String chtlSource = """
+        div {
+            id: box1;
+            style {
+                width: 100px;
+            }
+        }
+        div {
+            id: box2;
+            style {
+                width: #box1.width + 50px;
+            }
+        }
+        """;
+
+        String expectedHtml = "<div id=\"box1\" style=\"width:100px;\"></div>" +
+                              "<div id=\"box2\" style=\"width:150px;\"></div>";
+
+        List<Node> ast = new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse();
+        CHTLGenerator generator = new CHTLGenerator(ast);
+        CompilationResult result = generator.generate();
 
         assertEquals(expectedHtml, result.getHtml());
         assertTrue(result.getCss().isEmpty());
@@ -65,8 +117,9 @@ class CompilerEndToEndTest {
         String expectedHtml = "<div class=\"box\" id=\"main\" style=\"color:red;\"><h1>Styled</h1></div>";
         String expectedCss = ".box {\n    font-weight: 700;\n}\n";
 
-        CHTLGenerator generator = new CHTLGenerator();
-        CompilationResult result = generator.generate(new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse());
+        List<Node> ast = new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse();
+        CHTLGenerator generator = new CHTLGenerator(ast);
+        CompilationResult result = generator.generate();
 
         assertEquals(expectedHtml, result.getHtml());
         assertEquals(expectedCss.trim(), result.getCss().trim());
@@ -94,8 +147,9 @@ class CompilerEndToEndTest {
         // The & should be resolved to .box
         String expectedCss = ".box {\n    color: blue;\n}\n.box:hover {\n    color: red;\n}\n";
 
-        CHTLGenerator generator = new CHTLGenerator();
-        CompilationResult result = generator.generate(new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse());
+        List<Node> ast = new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse();
+        CHTLGenerator generator = new CHTLGenerator(ast);
+        CompilationResult result = generator.generate();
 
         assertEquals(expectedHtml, result.getHtml());
         assertEquals(expectedCss.trim(), result.getCss().trim());
@@ -114,8 +168,9 @@ class CompilerEndToEndTest {
         // The evaluator should now correctly compute the result.
         String expectedHtml = "<div style=\"width:150px;\"></div>";
 
-        CHTLGenerator generator = new CHTLGenerator();
-        CompilationResult result = generator.generate(new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse());
+        List<Node> ast = new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse();
+        CHTLGenerator generator = new CHTLGenerator(ast);
+        CompilationResult result = generator.generate();
 
         assertEquals(expectedHtml, result.getHtml());
         assertTrue(result.getCss().isEmpty());

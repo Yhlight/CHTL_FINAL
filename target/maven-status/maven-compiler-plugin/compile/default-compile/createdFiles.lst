@@ -1,3 +1,4 @@
+com/chtholly/chthl/ast/expr/ReferenceExpr.class
 com/chtholly/chthl/evaluator/ExpressionEvaluator$1.class
 com/chtholly/chthl/lexer/Token.class
 com/chtholly/chthl/evaluator/UnitValue.class
@@ -16,6 +17,7 @@ com/chtholly/chthl/ast/expr/Expression.class
 com/chtholly/chthl/parser/CHTLParser$ParseError.class
 com/chtholly/chthl/parser/ExpressionParser.class
 com/chtholly/chthl/generator/CHTLGenerator.class
+com/chtholly/chthl/ast/expr/ConditionalExpr.class
 com/chtholly/chthl/lexer/CHTLLexer.class
 com/chtholly/chthl/ast/expr/BinaryExpr.class
 com/chtholly/chthl/parser/ExpressionParser$ParseError.class

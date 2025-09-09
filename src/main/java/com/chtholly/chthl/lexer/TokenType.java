@@ -7,10 +7,14 @@ public enum TokenType {
     LEFT_BRACKET, RIGHT_BRACKET,
     COLON, SEMICOLON, EQUAL,
     DOT, COMMA, PLUS, MINUS, STAR, SLASH, PERCENT,
-    HASH, AMPERSAND,
+    HASH, AMPERSAND, BANG, PIPE, QUESTION,
 
     // Two-character tokens
     STAR_STAR, // for power operator
+    BANG_EQUAL, EQUAL_EQUAL,
+    GREATER, GREATER_EQUAL,
+    LESS, LESS_EQUAL,
+    AMPERSAND_AMPERSAND, PIPE_PIPE,
     SLASH_SLASH, // for single line comment
     SLASH_STAR, // for multi-line comment start
     STAR_SLASH, // for multi-line comment end

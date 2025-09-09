@@ -4,10 +4,13 @@ import com.chtholly.chthl.ast.ElementNode;
 import com.chtholly.chthl.ast.Node;
 import com.chtholly.chthl.ast.SelectorBlockNode;
 import com.chtholly.chthl.ast.StyleBlockNode;
+import com.chtholly.chthl.ast.StylePropertyNode;
 import com.chtholly.chthl.ast.TextNode;
+import com.chtholly.chthl.ast.expr.ReferenceExpr;
 import com.chtholly.chthl.ast.expr.VariableExpr;
 import com.chtholly.chthl.lexer.CHTLLexer;
 import com.chtholly.chthl.lexer.Token;
+import com.chtholly.chthl.lexer.TokenType;
 import com.chtholly.chthl.parser.CHTLParser;
 import org.junit.jupiter.api.Test;
 
@@ -170,5 +173,27 @@ class CHTLParserTest {
         assertEquals("background-color", selectorNode.properties.get(0).key);
         assertTrue(selectorNode.properties.get(0).value instanceof VariableExpr);
         assertEquals("black", ((VariableExpr) selectorNode.properties.get(0).value).name.getLexeme());
+    }
+
+    @Test
+    void testReferenceExpressionParsing() {
+        String input = "div { style { width: .box.width; } }";
+        List<Token> tokens = new CHTLLexer(input).scanTokens();
+        CHTLParser parser = new CHTLParser(tokens);
+        List<Node> ast = parser.parse();
+
+        ElementNode div = (ElementNode) ast.get(0);
+        StyleBlockNode styleNode = (StyleBlockNode) div.children.get(0);
+        StylePropertyNode propNode = styleNode.directProperties.get(0);
+
+        assertEquals("width", propNode.key);
+        assertTrue(propNode.value instanceof ReferenceExpr);
+
+        ReferenceExpr refExpr = (ReferenceExpr) propNode.value;
+        assertEquals("width", refExpr.property.getLexeme());
+
+        assertTrue(refExpr.object instanceof VariableExpr);
+        VariableExpr selectorExpr = (VariableExpr) refExpr.object;
+        assertEquals(".box", selectorExpr.name.getLexeme());
     }
 }
