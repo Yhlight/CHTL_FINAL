@@ -1,0 +1,647 @@
+// 完整功能测试
+// 测试 CHTL.md 中所有功能的综合使用
+
+// 全局配置
+[Configuration] {
+    use html5;
+    
+    [Name] {
+        template: "Template";
+        custom: "Custom";
+        origin: "Origin";
+        import: "Import";
+        configuration: "Configuration";
+        namespace: "Namespace";
+        constraint: "Constraint";
+    }
+}
+
+// 全局命名空间
+[Namespace] "Global" {
+    [Constraint] {
+        html: "div, span, p, h1, h2, h3, h4, h5, h6, a, img, button, input, form, table, ul, ol, li, nav, header, main, footer, section, article, aside";
+        [Custom]: "Button, Card, Modal, Header, Footer, Navigation, Content";
+        [Template] @Var: "Theme, Colors, Layout, Typography";
+    }
+}
+
+// 全局主题
+[Template] VarGroup {
+    name: "GlobalTheme";
+    
+    variables {
+        --primary-color: "#007bff";
+        --secondary-color: "#6c757d";
+        --success-color: "#28a745";
+        --danger-color: "#dc3545";
+        --warning-color: "#ffc107";
+        --info-color: "#17a2b8";
+        --light-color: "#f8f9fa";
+        --dark-color: "#343a40";
+        --white: "#ffffff";
+        --black: "#000000";
+        --font-family: "Arial, sans-serif";
+        --font-size: "16px";
+        --line-height: "1.6";
+        --border-radius: "5px";
+        --box-shadow: "0 2px 4px rgba(0,0,0,0.1)";
+        --transition: "all 0.3s ease";
+    }
+}
+
+// 基础样式组模板
+[Template] StyleGroup {
+    name: "BaseButtonStyle";
+    
+    style {
+        background: "var(--primary-color)";
+        color: "var(--white)";
+        border: "none";
+        padding: "12px 24px";
+        border-radius: "var(--border-radius)";
+        cursor: "pointer";
+        font-family: "var(--font-family)";
+        font-size: "var(--font-size)";
+        transition: "var(--transition)";
+        box-shadow: "var(--box-shadow)";
+        
+        &:hover {
+            background: "var(--primary-hover)";
+            transform: "translateY(-2px)";
+            box-shadow: "0 4px 8px rgba(0,0,0,0.2)";
+        }
+        
+        &:active {
+            transform: "translateY(0)";
+            box-shadow: "var(--box-shadow)";
+        }
+    }
+}
+
+// 卡片样式组模板
+[Template] StyleGroup {
+    name: "BaseCardStyle";
+    
+    style {
+        background: "var(--white)";
+        border: "1px solid var(--light-color)";
+        border-radius: "var(--border-radius)";
+        padding: "20px";
+        margin: "10px";
+        box-shadow: "var(--box-shadow)";
+        transition: "var(--transition)";
+        
+        &:hover {
+            transform: "translateY(-4px)";
+            box-shadow: "0 8px 16px rgba(0,0,0,0.15)";
+        }
+    }
+}
+
+// 按钮元素模板
+[Template] Element {
+    name: "Button";
+    inherit: "BaseButtonStyle";
+    
+    content {
+        button {
+            class: "btn";
+            text: "Button";
+        }
+    }
+}
+
+// 卡片元素模板
+[Template] Element {
+    name: "Card";
+    inherit: "BaseCardStyle";
+    
+    content {
+        div {
+            class: "card";
+            
+            h3 {
+                text: "Card Title";
+                margin: "0 0 15px 0";
+                color: "var(--dark-color)";
+            }
+            
+            p {
+                text: "Card content goes here";
+                color: "var(--dark-color)";
+                line-height: "var(--line-height)";
+            }
+        }
+    }
+}
+
+// 自定义按钮样式
+[Custom] StyleGroup {
+    name: "DangerButtonStyle";
+    inherit: "BaseButtonStyle";
+    
+    style {
+        background: "var(--danger-color)";
+        
+        &:hover {
+            background: "var(--danger-hover)";
+        }
+    }
+}
+
+// 自定义按钮元素
+[Custom] Element {
+    name: "DangerButton";
+    inherit: "Button";
+    
+    content {
+        button {
+            class: "btn danger-btn";
+            text: "Danger Button";
+        }
+    }
+}
+
+// 自定义卡片样式
+[Custom] StyleGroup {
+    name: "SuccessCardStyle";
+    inherit: "BaseCardStyle";
+    
+    style {
+        border-left: "4px solid var(--success-color)";
+        background: "var(--success-bg)";
+    }
+}
+
+// 自定义卡片元素
+[Custom] Element {
+    name: "SuccessCard";
+    inherit: "Card";
+    
+    content {
+        div {
+            class: "card success-card";
+            
+            h3 {
+                text: "Success Card";
+                color: "var(--success-color)";
+            }
+            
+            p {
+                text: "This is a success card with custom styling.";
+            }
+        }
+    }
+}
+
+// 自定义主题
+[Custom] VarGroup {
+    name: "CustomTheme";
+    inherit: "GlobalTheme";
+    
+    variables {
+        --primary-hover: "#0056b3";
+        --danger-hover: "#c82333";
+        --success-bg: "#d4edda";
+        --success-hover: "#1e7e34";
+    }
+}
+
+// 原始嵌入内容
+[Origin] @Html {
+    <div class="feature-demo">
+        <h2>CHTL Complete Features Demo</h2>
+        <p>This demonstrates all CHTL features working together.</p>
+        <div class="feature-grid">
+            <div class="feature-item">
+                <h3>Template System</h3>
+                <p>Reusable style groups, elements, and variable groups</p>
+            </div>
+            <div class="feature-item">
+                <h3>Custom System</h3>
+                <p>Specialized components with inheritance</p>
+            </div>
+            <div class="feature-item">
+                <h3>Origin Embedding</h3>
+                <p>Raw HTML, CSS, and JavaScript integration</p>
+            </div>
+        </div>
+    </div>
+}
+
+[Origin] @Style {
+    .feature-demo {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin: 20px 0;
+        text-align: center;
+    }
+    
+    .feature-demo h2 {
+        font-size: 28px;
+        margin-bottom: 15px;
+    }
+    
+    .feature-demo p {
+        font-size: 18px;
+        margin-bottom: 30px;
+        opacity: 0.9;
+    }
+    
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+    }
+    
+    .feature-item {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 8px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .feature-item h3 {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+    
+    .feature-item p {
+        font-size: 14px;
+        margin: 0;
+        opacity: 0.8;
+    }
+}
+
+[Origin] @JavaScript {
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('CHTL Complete Features Demo loaded');
+        
+        // 动态添加交互效果
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 200);
+            });
+        });
+        
+        // 按钮点击效果
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 100);
+            });
+        });
+    });
+}
+
+// 主应用
+div {
+    class: "complete-app";
+    
+    // 导航栏
+    nav {
+        class: "navbar";
+        
+        div {
+            class: "nav-brand";
+            text: "CHTL Complete Demo";
+        }
+        
+        ul {
+            class: "nav-menu";
+            
+            li {
+                class: "nav-item";
+                a {
+                    href: "#features";
+                    class: "nav-link";
+                    text: "Features";
+                }
+            }
+            
+            li {
+                class: "nav-item";
+                a {
+                    href: "#components";
+                    class: "nav-link";
+                    text: "Components";
+                }
+            }
+            
+            li {
+                class: "nav-item";
+                a {
+                    href: "#about";
+                    class: "nav-link";
+                    text: "About";
+                }
+            }
+        }
+    }
+    
+    // 主要内容
+    main {
+        class: "main-content";
+        
+        // 特性展示
+        section {
+            class: "features-section";
+            id: "features";
+            
+            h1 {
+                text: "CHTL Complete Features";
+            }
+            
+            p {
+                text: "This page demonstrates all CHTL features working together in harmony.";
+            }
+            
+            // 使用模板元素
+            Button;
+            DangerButton;
+            Button;
+            
+            // 使用卡片元素
+            Card;
+            SuccessCard;
+            Card;
+        }
+        
+        // 组件展示
+        section {
+            class: "components-section";
+            id: "components";
+            
+            h2 {
+                text: "Component Showcase";
+            }
+            
+            div {
+                class: "component-grid";
+                
+                div {
+                    class: "component-item";
+                    
+                    h3 {
+                        text: "Buttons";
+                    }
+                    
+                    div {
+                        class: "button-group";
+                        
+                        Button;
+                        DangerButton;
+                        Button;
+                    }
+                }
+                
+                div {
+                    class: "component-item";
+                    
+                    h3 {
+                        text: "Cards";
+                    }
+                    
+                    div {
+                        class: "card-group";
+                        
+                        Card;
+                        SuccessCard;
+                    }
+                }
+            }
+        }
+        
+        // 关于部分
+        section {
+            class: "about-section";
+            id: "about";
+            
+            h2 {
+                text: "About CHTL";
+            }
+            
+            p {
+                text: "CHTL is a powerful C++ based hypertext language that provides a clean, efficient way to write HTML content with advanced features like templates, custom components, and module systems.";
+            }
+            
+            ul {
+                class: "feature-list";
+                
+                li {
+                    text: "Template System - Reusable components with inheritance";
+                }
+                
+                li {
+                    text: "Custom System - Specialized components with overrides";
+                }
+                
+                li {
+                    text: "Origin Embedding - Raw HTML, CSS, and JavaScript support";
+                }
+                
+                li {
+                    text: "Import System - Modular file organization";
+                }
+                
+                li {
+                    text: "Constraint System - Type safety and validation";
+                }
+                
+                li {
+                    text: "Configuration System - Customizable keywords and behavior";
+                }
+                
+                li {
+                    text: "Namespace System - Organized code structure";
+                }
+                
+                li {
+                    text: "CHTL JS Extensions - Enhanced JavaScript features";
+                }
+                
+                li {
+                    text: "Module System - CMOD and CJMOD support";
+                }
+            }
+        }
+    }
+    
+    // 页脚
+    footer {
+        class: "footer";
+        
+        div {
+            class: "footer-content";
+            
+            p {
+                text: "© 2024 CHTL Complete Demo. Built with CHTL.";
+            }
+            
+            div {
+                class: "footer-links";
+                
+                a {
+                    href: "#";
+                    class: "footer-link";
+                    text: "Documentation";
+                }
+                
+                a {
+                    href: "#";
+                    class: "footer-link";
+                    text: "GitHub";
+                }
+                
+                a {
+                    href: "#";
+                    class: "footer-link";
+                    text: "Support";
+                }
+            }
+        }
+    }
+    
+    // 应用样式
+    style {
+        .complete-app {
+            font-family: var(--font-family);
+            line-height: var(--line-height);
+            color: var(--dark-color);
+            background: var(--light-color);
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background: var(--white);
+            padding: 1rem 2rem;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 2rem;
+        }
+        
+        .nav-link {
+            text-decoration: none;
+            color: var(--dark-color);
+            transition: var(--transition);
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+        
+        .main-content {
+            padding: 2rem;
+        }
+        
+        .features-section, .components-section, .about-section {
+            margin-bottom: 3rem;
+        }
+        
+        .features-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .features-section p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--secondary-color);
+        }
+        
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .component-item {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .component-item h3 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .button-group, .card-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--light-color);
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .footer {
+            background: var(--dark-color);
+            color: var(--white);
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .footer-link {
+            color: var(--white);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .footer-link:hover {
+            color: var(--primary-color);
+        }
+    }
+}

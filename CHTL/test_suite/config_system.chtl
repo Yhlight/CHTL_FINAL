@@ -1,0 +1,228 @@
+// 配置组系统测试
+// 测试自定义关键字名称和模块配置
+
+[Configuration] {
+    // 使用 HTML5 模块
+    use html5;
+    
+    // 自定义关键字名称
+    [Name] {
+        template: "Template";
+        custom: "Custom";
+        origin: "Origin";
+        import: "Import";
+        configuration: "Configuration";
+        namespace: "Namespace";
+        constraint: "Constraint";
+    }
+    
+    // 自定义样式关键字
+    [Name] {
+        style: "Style";
+        script: "Script";
+        variables: "Variables";
+        content: "Content";
+    }
+}
+
+// 使用自定义关键字的模板
+[Template] StyleGroup {
+    name: "CustomButtonStyle";
+    
+    [Style] {
+        background: "var(--primary-color)";
+        color: "white";
+        padding: "10px 20px";
+        border: "none";
+        border-radius: "5px";
+        cursor: "pointer";
+        transition: "all 0.3s ease";
+        
+        &:hover {
+            background: "var(--primary-hover)";
+            transform: "translateY(-2px)";
+        }
+    }
+}
+
+[Template] Element {
+    name: "CustomButton";
+    inherit: "CustomButtonStyle";
+    
+    [Content] {
+        button {
+            class: "btn custom-btn";
+            text: "Custom Button";
+        }
+    }
+}
+
+[Template] VarGroup {
+    name: "CustomTheme";
+    
+    [Variables] {
+        --primary-color: "#007bff";
+        --primary-hover: "#0056b3";
+        --secondary-color: "#6c757d";
+        --success-color: "#28a745";
+        --danger-color: "#dc3545";
+        --warning-color: "#ffc107";
+        --info-color: "#17a2b8";
+    }
+}
+
+// 使用自定义关键字的自定义系统
+[Custom] StyleGroup {
+    name: "DangerButtonStyle";
+    inherit: "CustomButtonStyle";
+    
+    [Style] {
+        background: "var(--danger-color)";
+        
+        &:hover {
+            background: "var(--danger-hover)";
+        }
+    }
+}
+
+[Custom] Element {
+    name: "DangerButton";
+    inherit: "CustomButton";
+    
+    [Content] {
+        button {
+            class: "btn danger-btn";
+            text: "Danger Button";
+        }
+    }
+}
+
+[Custom] VarGroup {
+    name: "DangerTheme";
+    inherit: "CustomTheme";
+    
+    [Variables] {
+        --danger-hover: "#c82333";
+        --primary-color: "var(--danger-color)";
+        --primary-hover: "var(--danger-hover)";
+    }
+}
+
+// 使用自定义关键字的原始嵌入
+[Origin] @Html {
+    <div class="config-demo">
+        <h2>Configuration System Demo</h2>
+        <p>This demonstrates the configuration system with custom keywords.</p>
+    </div>
+}
+
+[Origin] @Style {
+    .config-demo {
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        margin: 20px 0;
+    }
+    
+    .config-demo h2 {
+        margin-bottom: 15px;
+        font-size: 24px;
+    }
+    
+    .config-demo p {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+}
+
+[Origin] @JavaScript {
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Configuration system demo loaded');
+        
+        // 使用配置的变量
+        const primaryColor = getComputedStyle(document.documentElement)
+            .getPropertyValue('--primary-color');
+        console.log('Primary color:', primaryColor);
+    });
+}
+
+// 使用自定义关键字的导入
+[Import] "components/header.chtl" as Header;
+[Import] "styles/theme.css" as ThemeStyles;
+
+// 使用自定义关键字的约束
+[Namespace] "ConfigApp" {
+    [Constraint] {
+        html: "div, span, p, h1, h2, h3, h4, h5, h6, button, input, form";
+        [Custom]: "CustomButton, DangerButton";
+        [Template] @Var: "CustomTheme, DangerTheme";
+    }
+}
+
+// 应用配置的应用
+div {
+    class: "config-app";
+    
+    // 使用自定义元素
+    CustomButton;
+    DangerButton;
+    CustomButton;
+    
+    // 使用原始嵌入的内容
+    [Origin] @Html {
+        <div class="button-group">
+            <button class="btn btn-primary">Primary</button>
+            <button class="btn btn-secondary">Secondary</button>
+            <button class="btn btn-success">Success</button>
+            <button class="btn btn-danger">Danger</button>
+        </div>
+    }
+    
+    // 使用自定义关键字的样式
+    [Style] {
+        .config-app {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    }
+}

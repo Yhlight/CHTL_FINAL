@@ -1,0 +1,281 @@
+// 命名空间系统测试
+// 测试命名空间定义和模块化组织
+
+// 全局命名空间
+[Namespace] "Global" {
+    // 全局约束
+    [Constraint] {
+        html: "div, span, p, h1, h2, h3, h4, h5, h6, a, img, button, input, form, table, ul, ol, li";
+        [Custom]: "Button, Card, Modal, Header, Footer";
+        [Template] @Var: "Theme, Colors, Layout";
+    }
+    
+    // 全局变量组
+    [Template] VarGroup {
+        name: "GlobalTheme";
+        
+        variables {
+            --primary-color: "#007bff";
+            --secondary-color: "#6c757d";
+            --success-color: "#28a745";
+            --danger-color: "#dc3545";
+            --warning-color: "#ffc107";
+            --info-color: "#17a2b8";
+            --light-color: "#f8f9fa";
+            --dark-color: "#343a40";
+            --font-family: "Arial, sans-serif";
+            --border-radius: "5px";
+            --box-shadow: "0 2px 4px rgba(0,0,0,0.1)";
+        }
+    }
+}
+
+// 应用命名空间
+[Namespace] "App" {
+    // 应用级约束
+    [Constraint] {
+        html: "div, span, p, h1, h2, h3, button, input, form";
+        [Custom]: "AppButton, AppCard, AppHeader, AppFooter";
+        [Template] @Var: "AppTheme, AppColors";
+    }
+    
+    // 应用主题
+    [Template] VarGroup {
+        name: "AppTheme";
+        inherit: "GlobalTheme";
+        
+        variables {
+            --app-bg: "#ffffff";
+            --app-text: "#333333";
+            --app-border: "#e9ecef";
+            --app-shadow: "0 4px 6px rgba(0,0,0,0.1)";
+            --app-padding: "20px";
+            --app-margin: "10px";
+        }
+    }
+    
+    // 应用样式组
+    [Template] StyleGroup {
+        name: "AppButtonStyle";
+        
+        style {
+            background: "var(--primary-color)";
+            color: "white";
+            border: "none";
+            padding: "12px 24px";
+            border-radius: "var(--border-radius)";
+            cursor: "pointer";
+            font-family: "var(--font-family)";
+            font-size: "16px";
+            transition: "all 0.3s ease";
+            box-shadow: "var(--box-shadow)";
+            
+            &:hover {
+                background: "var(--primary-hover)";
+                transform: "translateY(-2px)";
+                box-shadow: "0 4px 8px rgba(0,0,0,0.2)";
+            }
+            
+            &:active {
+                transform: "translateY(0)";
+                box-shadow: "0 2px 4px rgba(0,0,0,0.1)";
+            }
+        }
+    }
+    
+    // 应用元素
+    [Template] Element {
+        name: "AppButton";
+        inherit: "AppButtonStyle";
+        
+        content {
+            button {
+                class: "app-btn";
+                text: "App Button";
+            }
+        }
+    }
+    
+    // 应用卡片样式
+    [Template] StyleGroup {
+        name: "AppCardStyle";
+        
+        style {
+            background: "var(--app-bg)";
+            border: "1px solid var(--app-border)";
+            border-radius: "var(--border-radius)";
+            padding: "var(--app-padding)";
+            margin: "var(--app-margin)";
+            box-shadow: "var(--app-shadow)";
+            transition: "all 0.3s ease";
+            
+            &:hover {
+                transform: "translateY(-4px)";
+                box-shadow: "0 8px 16px rgba(0,0,0,0.15)";
+            }
+        }
+    }
+    
+    // 应用卡片元素
+    [Template] Element {
+        name: "AppCard";
+        inherit: "AppCardStyle";
+        
+        content {
+            div {
+                class: "app-card";
+                
+                h3 {
+                    text: "Card Title";
+                    margin: "0 0 15px 0";
+                    color: "var(--app-text)";
+                }
+                
+                p {
+                    text: "Card content goes here";
+                    color: "var(--app-text)";
+                    line-height: "1.6";
+                }
+            }
+        }
+    }
+}
+
+// 组件命名空间
+[Namespace] "Components" {
+    // 组件级约束
+    [Constraint] {
+        html: "div, span, p, h1, h2, h3, button, input";
+        [Custom]: "ComponentButton, ComponentCard";
+        [Template] @Var: "ComponentTheme";
+    }
+    
+    // 组件主题
+    [Template] VarGroup {
+        name: "ComponentTheme";
+        inherit: "AppTheme";
+        
+        variables {
+            --component-bg: "var(--light-color)";
+            --component-text: "var(--dark-color)";
+            --component-border: "var(--app-border)";
+            --component-padding: "15px";
+            --component-margin: "5px";
+        }
+    }
+    
+    // 组件按钮样式
+    [Template] StyleGroup {
+        name: "ComponentButtonStyle";
+        inherit: "AppButtonStyle";
+        
+        style {
+            background: "var(--secondary-color)";
+            padding: "8px 16px";
+            font-size: "14px";
+            
+            &:hover {
+                background: "var(--secondary-hover)";
+            }
+        }
+    }
+    
+    // 组件按钮元素
+    [Template] Element {
+        name: "ComponentButton";
+        inherit: "ComponentButtonStyle";
+        
+        content {
+            button {
+                class: "component-btn";
+                text: "Component Button";
+            }
+        }
+    }
+}
+
+// 使用命名空间的应用
+div {
+    class: "namespace-app";
+    
+    // 使用应用级元素
+    AppButton;
+    AppCard;
+    AppButton;
+    
+    // 使用组件级元素
+    ComponentButton;
+    ComponentButton;
+    
+    // 混合使用
+    div {
+        class: "mixed-content";
+        
+        h2 {
+            text: "Namespace System Demo";
+        }
+        
+        p {
+            text: "This demonstrates the namespace system with different levels of organization.";
+        }
+        
+        // 使用原始嵌入展示命名空间效果
+        [Origin] @Html {
+            <div class="namespace-demo">
+                <h3>Namespace Hierarchy</h3>
+                <ul>
+                    <li>Global - Global constraints and themes</li>
+                    <li>App - Application-level components</li>
+                    <li>Components - Reusable component library</li>
+                </ul>
+            </div>
+        }
+        
+        [Origin] @Style {
+            .namespace-demo {
+                background: var(--component-bg);
+                padding: var(--component-padding);
+                margin: var(--component-margin);
+                border: 1px solid var(--component-border);
+                border-radius: var(--border-radius);
+            }
+            
+            .namespace-demo h3 {
+                color: var(--component-text);
+                margin-bottom: 10px;
+            }
+            
+            .namespace-demo ul {
+                list-style: none;
+                padding: 0;
+            }
+            
+            .namespace-demo li {
+                padding: 5px 0;
+                border-bottom: 1px solid var(--component-border);
+            }
+            
+            .namespace-demo li:last-child {
+                border-bottom: none;
+            }
+        }
+    }
+    
+    // 应用样式
+    style {
+        .namespace-app {
+            padding: 20px;
+            font-family: var(--font-family);
+            background: var(--app-bg);
+            color: var(--app-text);
+        }
+        
+        .mixed-content {
+            margin: 20px 0;
+            padding: 20px;
+            background: var(--light-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+    }
+}
