@@ -1,0 +1,16 @@
+div
+{
+    h1
+    {
+        text
+        {
+            Welcome to CHTL
+        }
+        
+        style
+        {
+            color: #333;
+            font-size: 2em;
+        }
+    }
+}

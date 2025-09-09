@@ -1,0 +1,25 @@
+use html5;
+
+div
+{
+    class: test-box;
+    id: main-box;
+    
+    text
+    {
+        CHTL JS 语法测试
+    }
+    
+    script
+    {
+        // 测试 {{选择器}} 语法
+        {{.test-box}}->addEventListener('click', function() {
+            console.log('Box clicked!');
+        });
+        
+        {{#main-box}}->style->backgroundColor = 'red';
+        
+        // 测试 -> 操作符
+        {{.test-box}}->textContent = 'Updated by CHTL JS';
+    }
+}

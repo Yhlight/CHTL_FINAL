@@ -1,0 +1,12 @@
+use html5;
+
+div
+{
+    id: main;
+    class: container;
+    
+    text
+    {
+        Hello, CHTL World!
+    }
+}
