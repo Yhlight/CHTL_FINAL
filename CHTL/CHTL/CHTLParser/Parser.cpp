@@ -366,6 +366,11 @@ std::shared_ptr<BaseNode> Parser::parseImport() {
         return nullptr;
     }
     
+    // 检查是否有 from 关键字
+    if (current_.getType() == TokenType::FROM) {
+        current_ = lexer_.nextToken();
+    }
+    
     // 获取导入路径
     std::string importPath;
     if (current_.getType() == TokenType::STRING_LITERAL) {
@@ -618,27 +623,102 @@ std::string Parser::parseTemplateType() {
             current_ = lexer_.nextToken();
             return type;
         }
+    } else if (current_.getType() == TokenType::TEMPLATE_STYLE) {
+        current_ = lexer_.nextToken();
+        return "@Style";
+    } else if (current_.getType() == TokenType::TEMPLATE_ELEMENT) {
+        current_ = lexer_.nextToken();
+        return "@Element";
+    } else if (current_.getType() == TokenType::TEMPLATE_VAR) {
+        current_ = lexer_.nextToken();
+        return "@Var";
     }
     return "";
 }
 
 std::string Parser::parseCustomType() {
-    return parseTemplateType();
+    if (current_.getType() == TokenType::AT) {
+        current_ = lexer_.nextToken();
+        if (current_.getType() == TokenType::IDENTIFIER) {
+            std::string type = "@" + current_.getValue();
+            current_ = lexer_.nextToken();
+            return type;
+        }
+    } else if (current_.getType() == TokenType::TEMPLATE_STYLE) {
+        current_ = lexer_.nextToken();
+        return "@Style";
+    } else if (current_.getType() == TokenType::TEMPLATE_ELEMENT) {
+        current_ = lexer_.nextToken();
+        return "@Element";
+    } else if (current_.getType() == TokenType::TEMPLATE_VAR) {
+        current_ = lexer_.nextToken();
+        return "@Var";
+    }
+    return "";
 }
 
 std::string Parser::parseOriginType() {
-    return parseTemplateType();
+    if (current_.getType() == TokenType::AT) {
+        current_ = lexer_.nextToken();
+        if (current_.getType() == TokenType::IDENTIFIER) {
+            std::string type = "@" + current_.getValue();
+            current_ = lexer_.nextToken();
+            return type;
+        }
+    } else if (current_.getType() == TokenType::TEMPLATE_STYLE) {
+        current_ = lexer_.nextToken();
+        return "@Style";
+    } else if (current_.getType() == TokenType::ORIGIN_HTML) {
+        current_ = lexer_.nextToken();
+        return "@Html";
+    } else if (current_.getType() == TokenType::ORIGIN_JAVASCRIPT) {
+        current_ = lexer_.nextToken();
+        return "@JavaScript";
+    }
+    return "";
 }
 
 std::string Parser::parseImportType() {
-    return parseTemplateType();
+    if (current_.getType() == TokenType::AT) {
+        current_ = lexer_.nextToken();
+        if (current_.getType() == TokenType::IDENTIFIER) {
+            std::string type = "@" + current_.getValue();
+            current_ = lexer_.nextToken();
+            return type;
+        }
+    } else if (current_.getType() == TokenType::ORIGIN_HTML) {
+        current_ = lexer_.nextToken();
+        return "@Html";
+    } else if (current_.getType() == TokenType::ORIGIN_STYLE) {
+        current_ = lexer_.nextToken();
+        return "@Style";
+    } else if (current_.getType() == TokenType::ORIGIN_JAVASCRIPT) {
+        current_ = lexer_.nextToken();
+        return "@JavaScript";
+    } else if (current_.getType() == TokenType::ORIGIN_CHTL) {
+        current_ = lexer_.nextToken();
+        return "@Chtl";
+    } else if (current_.getType() == TokenType::ORIGIN_CJMOD) {
+        current_ = lexer_.nextToken();
+        return "@CJmod";
+    }
+    return "";
 }
 
 std::string Parser::parseConfigType() {
-    return parseTemplateType();
+    if (current_.getType() == TokenType::AT) {
+        current_ = lexer_.nextToken();
+        if (current_.getType() == TokenType::IDENTIFIER) {
+            std::string type = "@" + current_.getValue();
+            current_ = lexer_.nextToken();
+            return type;
+        }
+    }
+    return "";
 }
 
 std::string Parser::parseNamespaceType() {
+    // 命名空间不需要类型，直接返回空字符串
     return "";
 }
 

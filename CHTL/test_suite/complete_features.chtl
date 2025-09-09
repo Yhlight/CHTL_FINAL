@@ -26,32 +26,27 @@
 }
 
 // 全局主题
-[Template] VarGroup {
-    name: "GlobalTheme";
-    
-    variables {
-        --primary-color: "#007bff";
-        --secondary-color: "#6c757d";
-        --success-color: "#28a745";
-        --danger-color: "#dc3545";
-        --warning-color: "#ffc107";
-        --info-color: "#17a2b8";
-        --light-color: "#f8f9fa";
-        --dark-color: "#343a40";
-        --white: "#ffffff";
-        --black: "#000000";
-        --font-family: "Arial, sans-serif";
-        --font-size: "16px";
-        --line-height: "1.6";
-        --border-radius: "5px";
-        --box-shadow: "0 2px 4px rgba(0,0,0,0.1)";
-        --transition: "all 0.3s ease";
-    }
+[Template] @Var GlobalTheme {
+    primaryColor: "#007bff";
+    secondaryColor: "#6c757d";
+    successColor: "#28a745";
+    dangerColor: "#dc3545";
+    warningColor: "#ffc107";
+    infoColor: "#17a2b8";
+    lightColor: "#f8f9fa";
+    darkColor: "#343a40";
+    white: "#ffffff";
+    black: "#000000";
+    fontFamily: "Arial, sans-serif";
+    fontSize: "16px";
+    lineHeight: "1.6";
+    borderRadius: "5px";
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)";
+    transition: "all 0.3s ease";
 }
 
 // 基础样式组模板
-[Template] StyleGroup {
-    name: "BaseButtonStyle";
+[Template] @Style BaseButtonStyle {
     
     style {
         background: "var(--primary-color)";
@@ -79,8 +74,7 @@
 }
 
 // 卡片样式组模板
-[Template] StyleGroup {
-    name: "BaseCardStyle";
+[Template] @Style BaseCardStyle {
     
     style {
         background: "var(--white)";
@@ -99,7 +93,7 @@
 }
 
 // 按钮元素模板
-[Template] Element {
+[Template] @Element
     name: "Button";
     inherit: "BaseButtonStyle";
     
@@ -112,7 +106,7 @@
 }
 
 // 卡片元素模板
-[Template] Element {
+[Template] @Element
     name: "Card";
     inherit: "BaseCardStyle";
     
@@ -136,7 +130,7 @@
 }
 
 // 自定义按钮样式
-[Custom] StyleGroup {
+[Custom] @Style
     name: "DangerButtonStyle";
     inherit: "BaseButtonStyle";
     
@@ -150,7 +144,7 @@
 }
 
 // 自定义按钮元素
-[Custom] Element {
+[Custom] @Element
     name: "DangerButton";
     inherit: "Button";
     
@@ -163,7 +157,7 @@
 }
 
 // 自定义卡片样式
-[Custom] StyleGroup {
+[Custom] @Style
     name: "SuccessCardStyle";
     inherit: "BaseCardStyle";
     
@@ -174,7 +168,7 @@
 }
 
 // 自定义卡片元素
-[Custom] Element {
+[Custom] @Element
     name: "SuccessCard";
     inherit: "Card";
     
@@ -195,7 +189,7 @@
 }
 
 // 自定义主题
-[Custom] VarGroup {
+[Custom] @Var
     name: "CustomTheme";
     inherit: "GlobalTheme";
     

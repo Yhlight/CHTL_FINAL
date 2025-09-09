@@ -2,36 +2,28 @@
 // 测试精确约束、类型约束和全局约束
 
 // 命名空间定义
-[Namespace] "App" {
+[Namespace] App {
     // 精确约束 - 限制可用的 HTML 元素
-    except {
-        html: "div, span, p, h1, h2, h3, h4, h5, h6";
-        form: "input, button, select, textarea";
-        list: "ul, ol, li";
-        table: "table, thead, tbody, tr, th, td";
-    }
+    except div, span, p, h1, h2, h3, h4, h5, h6;
+    except input, button, select, textarea;
+    except ul, ol, li;
+    except table, thead, tbody, tr, th, td;
     
     // 类型约束 - 限制可用的类型
-    except {
-        @Html: "div, span, p";
-        [Custom]: "Button, Card, Modal";
-        [Template] @Var: "Theme, Colors, Sizes";
-    }
+    except @Html;
+    except [Custom] Button, Card, Modal;
+    except [Template] @Var Theme, Colors, Sizes;
 }
 
 // 全局约束
-[Namespace] "Global" {
+[Namespace] Global {
     // 全局元素约束
-    except {
-        html: "div, span, p, h1, h2, h3, h4, h5, h6, a, img, button, input, form, table, ul, ol, li";
-    }
+    except div, span, p, h1, h2, h3, h4, h5, h6, a, img, button, input, form, table, ul, ol, li;
     
     // 全局类型约束
-    except {
-        @Html: "div, span, p, h1, h2, h3, h4, h5, h6";
-        [Custom]: "Button, Card, Modal, Header, Footer";
-        [Template] @Var: "Theme, Colors, Sizes, Layout";
-    }
+    except @Html;
+    except [Custom] Button, Card, Modal, Header, Footer;
+    except [Template] @Var Theme, Colors, Sizes, Layout;
 }
 
 // 使用约束的元素

@@ -1,82 +1,79 @@
 // 配置组系统测试
 // 测试自定义关键字名称和模块配置
 
+use html5;
+
 [Configuration] {
-    // 使用 HTML5 模块
-    use html5;
-    
     // 自定义关键字名称
     [Name] {
-        template: "Template";
-        custom: "Custom";
-        origin: "Origin";
-        import: "Import";
-        configuration: "Configuration";
-        namespace: "Namespace";
-        constraint: "Constraint";
-    }
-    
-    // 自定义样式关键字
-    [Name] {
-        style: "Style";
-        script: "Script";
-        variables: "Variables";
-        content: "Content";
-    }
-}
-
-// 使用自定义关键字的模板
-[Template] StyleGroup {
-    name: "CustomButtonStyle";
-    
-    [Style] {
-        background: "var(--primary-color)";
-        color: "white";
-        padding: "10px 20px";
-        border: "none";
-        border-radius: "5px";
-        cursor: "pointer";
-        transition: "all 0.3s ease";
-        
-        &:hover {
-            background: "var(--primary-hover)";
-            transform: "translateY(-2px)";
-        }
+        CUSTOM_STYLE: "@Style";
+        CUSTOM_ELEMENT: "@Element";
+        CUSTOM_VAR: "@Var";
+        TEMPLATE_STYLE: "@Style";
+        TEMPLATE_ELEMENT: "@Element";
+        TEMPLATE_VAR: "@Var";
+        ORIGIN_HTML: "@Html";
+        ORIGIN_STYLE: "@Style";
+        ORIGIN_JAVASCRIPT: "@JavaScript";
+        IMPORT_HTML: "@Html";
+        IMPORT_STYLE: "@Style";
+        IMPORT_JAVASCRIPT: "@JavaScript";
+        IMPORT_CHTL: "@Chtl";
+        KEYWORD_INHERIT: "inherit";
+        KEYWORD_DELETE: "delete";
+        KEYWORD_INSERT: "insert";
+        KEYWORD_FROM: "from";
+        KEYWORD_AS: "as";
+        KEYWORD_EXCEPT: "except";
+        KEYWORD_USE: "use";
+        KEYWORD_HTML5: "html5";
+        KEYWORD_TEXT: "text";
+        KEYWORD_STYLE: "style";
+        KEYWORD_SCRIPT: "script";
+        KEYWORD_CUSTOM: "[Custom]";
+        KEYWORD_TEMPLATE: "[Template]";
+        KEYWORD_ORIGIN: "[Origin]";
+        KEYWORD_IMPORT: "[Import]";
+        KEYWORD_NAMESPACE: "[Namespace]";
     }
 }
 
-[Template] Element {
-    name: "CustomButton";
-    inherit: "CustomButtonStyle";
+// 使用标准语法的模板
+[Template] @Style CustomButtonStyle {
+    background: "var(--primary-color)";
+    color: "white";
+    padding: "10px 20px";
+    border: "none";
+    border-radius: "5px";
+    cursor: "pointer";
+    transition: "all 0.3s ease";
     
-    [Content] {
-        button {
-            class: "btn custom-btn";
-            text: "Custom Button";
-        }
+    &:hover {
+        background: "var(--primary-hover)";
+        transform: "translateY(-2px)";
     }
 }
 
-[Template] VarGroup {
-    name: "CustomTheme";
-    
-    [Variables] {
-        --primary-color: "#007bff";
-        --primary-hover: "#0056b3";
-        --secondary-color: "#6c757d";
-        --success-color: "#28a745";
-        --danger-color: "#dc3545";
-        --warning-color: "#ffc107";
-        --info-color: "#17a2b8";
+[Template] @Element CustomButton {
+    button {
+        class: "btn custom-btn";
+        text: "Custom Button";
     }
 }
 
-// 使用自定义关键字的自定义系统
-[Custom] StyleGroup {
-    name: "DangerButtonStyle";
-    inherit: "CustomButtonStyle";
-    
-    [Style] {
+[Template] @Var CustomTheme {
+    primaryColor: "#007bff";
+    primaryHover: "#0056b3";
+    secondaryColor: "#6c757d";
+    successColor: "#28a745";
+    dangerColor: "#dc3545";
+    warningColor: "#ffc107";
+    infoColor: "#17a2b8";
+}
+
+// 使用标准语法的自定义系统
+[Custom] @Style DangerButtonStyle {
+    @Style CustomButtonStyle {
         background: "var(--danger-color)";
         
         &:hover {
@@ -85,27 +82,17 @@
     }
 }
 
-[Custom] Element {
-    name: "DangerButton";
-    inherit: "CustomButton";
-    
-    [Content] {
-        button {
-            class: "btn danger-btn";
-            text: "Danger Button";
-        }
+[Custom] @Element DangerButton {
+    button {
+        class: "btn danger-btn";
+        text: "Danger Button";
     }
 }
 
-[Custom] VarGroup {
-    name: "DangerTheme";
-    inherit: "CustomTheme";
-    
-    [Variables] {
-        --danger-hover: "#c82333";
-        --primary-color: "var(--danger-color)";
-        --primary-hover: "var(--danger-hover)";
-    }
+[Custom] @Var DangerTheme {
+    dangerHover: "#c82333";
+    primaryColor: "var(--danger-color)";
+    primaryHover: "var(--danger-hover)";
 }
 
 // 使用自定义关键字的原始嵌入
@@ -147,17 +134,15 @@
     });
 }
 
-// 使用自定义关键字的导入
-[Import] "components/header.chtl" as Header;
-[Import] "styles/theme.css" as ThemeStyles;
+// 使用标准语法的导入
+[Import] @Chtl from "components/header.chtl" as Header;
+[Import] @Style from "styles/theme.css" as ThemeStyles;
 
-// 使用自定义关键字的约束
-[Namespace] "ConfigApp" {
-    [Constraint] {
-        html: "div, span, p, h1, h2, h3, h4, h5, h6, button, input, form";
-        [Custom]: "CustomButton, DangerButton";
-        [Template] @Var: "CustomTheme, DangerTheme";
-    }
+// 使用标准语法的约束
+[Namespace] ConfigApp {
+    except div, span, p, h1, h2, h3, h4, h5, h6, button, input, form;
+    except [Custom] CustomButton, DangerButton;
+    except [Template] @Var CustomTheme, DangerTheme;
 }
 
 // 应用配置的应用
@@ -165,9 +150,9 @@ div {
     class: "config-app";
     
     // 使用自定义元素
-    CustomButton;
-    DangerButton;
-    CustomButton;
+    @Element CustomButton;
+    @Element DangerButton;
+    @Element CustomButton;
     
     // 使用原始嵌入的内容
     [Origin] @Html {
@@ -179,8 +164,8 @@ div {
         </div>
     }
     
-    // 使用自定义关键字的样式
-    [Style] {
+    // 使用标准语法的样式
+    style {
         .config-app {
             padding: 20px;
             font-family: Arial, sans-serif;

@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/workspace/CHTL -I/workspace/CHTL/CHTL/CHTLGenerator -I/workspace/CHTL/CHTL/CHTLNode -I/workspace/CHTL/CHTL/CHTLManage
 
-CXX_FLAGS =  -Wall -Wextra -Wpedantic -g -std=gnu++17
+CXX_FLAGS =  -Wall -Wextra -Wpedantic -std=gnu++17
 

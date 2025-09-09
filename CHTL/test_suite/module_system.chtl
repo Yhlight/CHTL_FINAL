@@ -7,7 +7,7 @@
     version: "1.0.0";
     
     // 模块内容
-    [Template] StyleGroup {
+    [Template] @Style
         name: "ButtonStyle";
         
         style {
@@ -30,26 +30,17 @@
         }
     }
     
-    [Template] Element {
-        name: "Button";
-        inherit: "ButtonStyle";
-        
-        content {
-            button {
-                class: "btn";
-                text: "Button";
-            }
+    [Template] @Element Button {
+        button {
+            class: "btn";
+            text: "Button";
         }
     }
     
-    [Template] VarGroup {
-        name: "ButtonTheme";
-        
-        variables {
-            --btn-bg: "#007bff";
-            --btn-text: "white";
-            --btn-hover: "#0056b3";
-        }
+    [Template] @Var ButtonTheme {
+        btnBg: "#007bff";
+        btnText: "white";
+        btnHover: "#0056b3";
     }
 }
 
@@ -171,8 +162,8 @@ div {
 }
 
 // 模块导入测试
-[Import] "modules/ButtonModule.chtl" as ButtonModule;
-[Import] "modules/AnimationModule.chtl" as AnimationModule;
+[Import] @Chtl from "modules/ButtonModule.chtl" as ButtonModule;
+[Import] @Chtl from "modules/AnimationModule.chtl" as AnimationModule;
 
 // 使用导入的模块
 div {

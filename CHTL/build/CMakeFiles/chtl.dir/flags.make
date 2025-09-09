@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/workspace/CHTL -I/workspace/CHTL/CHTL/CHTLLexer -I/workspace/CHTL/CHTL/CHTLNode -I/workspace/CHTL/CHTL/CHTLParser -I/workspace/CHTL/CHTL/CHTLManage -I/workspace/CHTL/CHTL/CHTLJS/CHTLJSLexer -I/workspace/CHTL/CHTL/CHTLJS/CHTLJSNode -I/workspace/CHTL/CHTL/CHTLJS/CHTLJSParser -I/workspace/CHTL/CHTL/CHTLGenerator -I/workspace/CHTL/CHTL/CHTLModule -I/workspace/CHTL/CHTL/CHTLScanner -I/workspace/CHTL/CHTL/CHTLCompiler
 
-CXX_FLAGS =  -Wall -Wextra -Wpedantic -g -std=gnu++17
+CXX_FLAGS =  -Wall -Wextra -Wpedantic -std=gnu++17
 

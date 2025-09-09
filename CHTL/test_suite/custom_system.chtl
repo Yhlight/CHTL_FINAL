@@ -1,94 +1,71 @@
 // 自定义系统测试
 // 测试自定义样式组、元素、变量组的特例化操作
 
-[Template] StyleGroup {
-    name: "BaseCard";
-    
-    style {
-        background: "white";
-        border: "1px solid #ddd";
-        border-radius: "8px";
-        padding: "20px";
-        box-shadow: "0 2px 4px rgba(0,0,0,0.1)";
-        margin: "10px";
-    }
+[Template] @Style BaseCard {
+    background: "white";
+    border: "1px solid #ddd";
+    border-radius: "8px";
+    padding: "20px";
+    box-shadow: "0 2px 4px rgba(0,0,0,0.1)";
+    margin: "10px";
 }
 
-[Template] Element {
-    name: "Card";
-    inherit: "BaseCard";
-    
-    content {
-        div {
-            class: "card";
-            
-            h3 {
-                text: "Card Title";
-            }
-            
-            p {
-                text: "Card content goes here";
-            }
+[Template] @Element Card {
+    div {
+        class: "card";
+        
+        h3 {
+            text: "Card Title";
+        }
+        
+        p {
+            text: "Card content goes here";
         }
     }
 }
 
-[Template] VarGroup {
-    name: "CardTheme";
-    
-    variables {
-        --card-bg: "white";
-        --card-border: "#ddd";
-        --card-shadow: "0 2px 4px rgba(0,0,0,0.1)";
-    }
+[Template] @Var CardTheme {
+    cardBg: "white";
+    cardBorder: "#ddd";
+    cardShadow: "0 2px 4px rgba(0,0,0,0.1)";
 }
 
 // 自定义样式组 - 删除操作
-[Custom] StyleGroup {
-    name: "DarkCard";
-    inherit: "BaseCard";
-    
-    style {
+[Custom] @Style DarkCard {
+    @Style BaseCard {
         background: "var(--dark-bg)";
         color: "var(--dark-text)";
         border-color: "var(--dark-border)";
         
-        delete {
-            box-shadow: "0 2px 4px rgba(0,0,0,0.1)";
-        }
+        delete box-shadow;
     }
 }
 
 // 自定义元素 - 插入操作
-[Custom] Element {
-    name: "EnhancedCard";
-    inherit: "Card";
-    
-    content {
-        div {
-            class: "card enhanced";
-            
-            h3 {
-                text: "Enhanced Card Title";
-            }
-            
-            p {
-                text: "Enhanced card content";
-            }
-            
-            insert {
-                div {
-                    class: "card-actions";
-                    
-                    button {
-                        class: "btn-primary";
-                        text: "Action 1";
-                    }
-                    
-                    button {
-                        class: "btn-secondary";
-                        text: "Action 2";
-                    }
+[Custom] @Element EnhancedCard {
+    div {
+        class: "card enhanced";
+        
+        h3 {
+            text: "Enhanced Card Title";
+        }
+        
+        p {
+            text: "Enhanced card content";
+        }
+        
+        insert after div {
+            div {
+                class: "card-actions";
+                
+                button {
+                    class: "btn-primary";
+                    text: "Action 1";
+                }
+                
+                button {
+                    class: "btn-secondary";
+                    text: "Action 2";
                 }
             }
         }
@@ -96,25 +73,20 @@
 }
 
 // 自定义变量组 - 变量覆盖
-[Custom] VarGroup {
-    name: "DarkTheme";
-    inherit: "CardTheme";
-    
-    variables {
-        --dark-bg: "#2d3748";
-        --dark-text: "#e2e8f0";
-        --dark-border: "#4a5568";
-        --card-bg: "var(--dark-bg)";
-        --card-border: "var(--dark-border)";
-        --card-shadow: "0 2px 4px rgba(0,0,0,0.3)";
-    }
+[Custom] @Var DarkTheme {
+    darkBg: "#2d3748";
+    darkText: "#e2e8f0";
+    darkBorder: "#4a5568";
+    cardBg: "var(--dark-bg)";
+    cardBorder: "var(--dark-border)";
+    cardShadow: "0 2px 4px rgba(0,0,0,0.3)";
 }
 
 // 使用自定义元素
 div {
     class: "card-container";
     
-    Card;
-    EnhancedCard;
-    Card;
+    @Element Card;
+    @Element EnhancedCard;
+    @Element Card;
 }

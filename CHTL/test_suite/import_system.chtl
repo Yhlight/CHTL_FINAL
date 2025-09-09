@@ -2,20 +2,20 @@
 // 测试 CHTL、HTML、CSS、JS 文件的导入和命名空间管理
 
 // 导入 CHTL 文件
-[Import] "components/header.chtl" as Header;
-[Import] "components/footer.chtl" as Footer;
-[Import] "components/card.chtl" as Card;
+[Import] @Chtl from "components/header.chtl" as Header;
+[Import] @Chtl from "components/footer.chtl" as Footer;
+[Import] @Chtl from "components/card.chtl" as Card;
 
 // 导入 HTML 文件
-[Import] "templates/layout.html" as Layout;
+[Import] @Html from "templates/layout.html" as Layout;
 
 // 导入 CSS 文件
-[Import] "styles/main.css" as MainStyles;
-[Import] "styles/components.css" as ComponentStyles;
+[Import] @Style from "styles/main.css" as MainStyles;
+[Import] @Style from "styles/components.css" as ComponentStyles;
 
 // 导入 JavaScript 文件
-[Import] "scripts/app.js" as AppScript;
-[Import] "scripts/utils.js" as Utils;
+[Import] @JavaScript from "scripts/app.js" as AppScript;
+[Import] @JavaScript from "scripts/utils.js" as Utils;
 
 // 使用导入的组件
 div {
