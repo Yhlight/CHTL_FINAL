@@ -208,6 +208,8 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o: \
   /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/sstream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/istream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ios \

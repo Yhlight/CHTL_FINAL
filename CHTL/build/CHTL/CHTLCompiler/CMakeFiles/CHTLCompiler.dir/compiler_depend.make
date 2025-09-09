@@ -181,7 +181,9 @@ CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/CSSCompiler.cpp.o: /workspace/CHTL
   /usr/include/c++/14/bits/stl_iterator_base_types.h \
   /usr/include/c++/14/bits/stl_map.h \
   /usr/include/c++/14/bits/stl_multimap.h \
+  /usr/include/c++/14/bits/stl_multiset.h \
   /usr/include/c++/14/bits/stl_pair.h \
+  /usr/include/c++/14/bits/stl_set.h \
   /usr/include/c++/14/bits/stl_stack.h \
   /usr/include/c++/14/bits/stl_tempbuf.h \
   /usr/include/c++/14/bits/stl_tree.h \
@@ -232,6 +234,7 @@ CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/CSSCompiler.cpp.o: /workspace/CHTL
   /usr/include/c++/14/pstl/glue_algorithm_defs.h \
   /usr/include/c++/14/pstl/pstl_config.h \
   /usr/include/c++/14/regex \
+  /usr/include/c++/14/set \
   /usr/include/c++/14/sstream \
   /usr/include/c++/14/stack \
   /usr/include/c++/14/stdexcept \
@@ -685,7 +688,9 @@ CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/JSCompiler.cpp.o: /workspace/CHTL/
   /usr/include/c++/14/bits/stl_iterator_base_types.h \
   /usr/include/c++/14/bits/stl_map.h \
   /usr/include/c++/14/bits/stl_multimap.h \
+  /usr/include/c++/14/bits/stl_multiset.h \
   /usr/include/c++/14/bits/stl_pair.h \
+  /usr/include/c++/14/bits/stl_set.h \
   /usr/include/c++/14/bits/stl_stack.h \
   /usr/include/c++/14/bits/stl_tempbuf.h \
   /usr/include/c++/14/bits/stl_tree.h \
@@ -740,6 +745,7 @@ CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/JSCompiler.cpp.o: /workspace/CHTL/
   /usr/include/c++/14/pstl/glue_algorithm_defs.h \
   /usr/include/c++/14/pstl/pstl_config.h \
   /usr/include/c++/14/regex \
+  /usr/include/c++/14/set \
   /usr/include/c++/14/sstream \
   /usr/include/c++/14/stack \
   /usr/include/c++/14/stdexcept \
@@ -825,6 +831,12 @@ CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/JSCompiler.cpp.o: /workspace/CHTL/
 
 /usr/lib/llvm-20/lib/clang/20/include/__stddef_max_align_t.h:
 
+/usr/lib/llvm-20/lib/clang/20/include/__stddef_header_macro.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/__stdarg___gnuc_va_list.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/time_members.h:
+
 /usr/include/c++/14/bits/char_traits.h:
 
 /usr/include/x86_64-linux-gnu/asm/posix_types.h:
@@ -840,8 +852,6 @@ CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/JSCompiler.cpp.o: /workspace/CHTL/
 /usr/include/x86_64-linux-gnu/bits/types/error_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/timesize.h:
-
-/usr/include/c++/14/bits/functexcept.h:
 
 /usr/include/pthread.h:
 
@@ -932,6 +942,10 @@ CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/JSCompiler.cpp.o: /workspace/CHTL/
 /usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
 
 /usr/include/c++/14/bits/allocated_ptr.h:
+
+/usr/include/c++/14/bits/functexcept.h:
+
+/usr/include/c++/14/set:
 
 /usr/include/c++/14/stack:
 
@@ -1153,6 +1167,8 @@ CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/JSCompiler.cpp.o: /workspace/CHTL/
 
 /usr/include/x86_64-linux-gnu/bits/byteswap.h:
 
+/usr/include/c++/14/bits/stl_multiset.h:
+
 /usr/include/x86_64-linux-gnu/c++/14/bits/os_defines.h:
 
 /usr/include/x86_64-linux-gnu/bits/long-double.h:
@@ -1228,6 +1244,8 @@ CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/JSCompiler.cpp.o: /workspace/CHTL/
 /usr/include/c++/14/iosfwd:
 
 /usr/include/c++/14/bits/regex_scanner.tcc:
+
+/usr/include/c++/14/bits/stl_set.h:
 
 /usr/include/c++/14/bits/sstream.tcc:
 
@@ -1358,9 +1376,3 @@ CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/JSCompiler.cpp.o: /workspace/CHTL/
 /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
 
 /usr/include/x86_64-linux-gnu/c++/14/bits/gthr.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/time_members.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stdarg___gnuc_va_list.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stddef_header_macro.h:

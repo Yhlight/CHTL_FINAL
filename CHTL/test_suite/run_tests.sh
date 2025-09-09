@@ -1,119 +1,123 @@
 #!/bin/bash
+# CHTL Test Suite Runner (Linux Version)
+# Tests all CHTL syntax features and functionality
 
-# CHTL 测试套件运行脚本
-# 测试所有 CHTL 语法特性和功能
+echo "=== CHTL Test Suite ==="
+echo "Starting all tests..."
 
-echo "=== CHTL 测试套件 ==="
-echo "开始运行所有测试..."
-
-# 设置颜色
+# Set colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# 测试计数器
+# Test counters
 TOTAL_TESTS=0
 PASSED_TESTS=0
 FAILED_TESTS=0
 
-# 测试函数
+# Test function
 run_test() {
     local test_name="$1"
     local input_file="$2"
     local expected_output="$3"
     
-    echo -e "\n${YELLOW}运行测试: $test_name${NC}"
-    echo "输入文件: $input_file"
+    echo -e "\n${YELLOW}Running test: $test_name${NC}"
+    echo "Input file: $input_file"
     
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
     
-    # 运行 CHTL 编译器
+    # Run CHTL compiler
     if ../build/bin/chtl "$input_file" > "output_${test_name}.html" 2>&1; then
-        echo -e "${GREEN}✓ 编译成功${NC}"
+        echo -e "${GREEN}✓ Compilation successful${NC}"
         PASSED_TESTS=$((PASSED_TESTS + 1))
         
-        # 显示输出内容
-        echo "输出内容:"
+        # Show output content
+        echo "Output content:"
         cat "output_${test_name}.html"
         echo ""
     else
-        echo -e "${RED}✗ 编译失败${NC}"
+        echo -e "${RED}✗ Compilation failed${NC}"
         FAILED_TESTS=$((FAILED_TESTS + 1))
         
-        # 显示错误信息
-        echo "错误信息:"
+        # Show error information
+        echo "Error information:"
         cat "output_${test_name}.html"
         echo ""
     fi
 }
 
-# 运行所有测试
-echo "开始运行基础语法测试..."
+# Run all tests
+echo "Starting basic syntax tests..."
 run_test "basic_syntax" "basic_syntax.chtl" ""
 
-echo "开始运行模板系统测试..."
+echo "Starting template system tests..."
 run_test "template_system" "template_system.chtl" ""
 
-echo "开始运行自定义系统测试..."
+echo "Starting custom system tests..."
 run_test "custom_system" "custom_system.chtl" ""
 
-echo "开始运行原始嵌入系统测试..."
+echo "Starting origin embedding tests..."
 run_test "origin_embedding" "origin_embedding.chtl" ""
 
-echo "开始运行导入系统测试..."
+echo "Starting import system tests..."
 run_test "import_system" "import_system.chtl" ""
 
-echo "开始运行约束系统测试..."
+echo "Starting constraint system tests..."
 run_test "constraint_system" "constraint_system.chtl" ""
 
-echo "开始运行 CHTL JS 扩展语法测试..."
+echo "Starting configuration system tests..."
+run_test "config_system" "config_system.chtl" ""
+
+echo "Starting namespace system tests..."
+run_test "namespace_system" "namespace_system.chtl" ""
+
+echo "Starting CHTL JS extended syntax tests..."
 run_test "chtl_js_extended" "chtl_js_extended.chtl" ""
 
-echo "开始运行模块系统测试..."
+echo "Starting module system tests..."
 run_test "module_system" "module_system.chtl" ""
 
-echo "开始运行 SPA 页面测试..."
+echo "Starting SPA page tests..."
 run_test "spa_page" "spa_page.chtl" ""
 
-# 测试默认结构输出
-echo "开始运行默认结构输出测试..."
-run_test "spa_page_default_struct" "spa_page.chtl" ""
+echo "Starting complete features tests..."
+run_test "complete_features" "complete_features.chtl" ""
 
-# 运行默认结构测试
-echo -e "\n${YELLOW}运行默认结构测试: spa_page_default_struct${NC}"
-echo "输入文件: spa_page.chtl"
+# Test default structure output
+echo -e "\n${YELLOW}Running default structure test: spa_page_default_struct${NC}"
+echo "Input file: spa_page.chtl"
 
 TOTAL_TESTS=$((TOTAL_TESTS + 1))
 
 if ../build/bin/chtl --default-struct "spa_page.chtl" > "output_spa_page_default_struct.html" 2>&1; then
-    echo -e "${GREEN}✓ 默认结构编译成功${NC}"
+    echo -e "${GREEN}✓ Default structure compilation successful${NC}"
     PASSED_TESTS=$((PASSED_TESTS + 1))
     
-    # 显示输出内容
-    echo "输出内容:"
+    # Show output content
+    echo "Output content:"
     cat "output_spa_page_default_struct.html"
     echo ""
 else
-    echo -e "${RED}✗ 默认结构编译失败${NC}"
+    echo -e "${RED}✗ Default structure compilation failed${NC}"
     FAILED_TESTS=$((FAILED_TESTS + 1))
     
-    # 显示错误信息
-    echo "错误信息:"
+    # Show error information
+    echo "Error information:"
     cat "output_spa_page_default_struct.html"
     echo ""
 fi
 
-# 显示测试结果
-echo -e "\n=== 测试结果 ==="
-echo "总测试数: $TOTAL_TESTS"
-echo -e "通过: ${GREEN}$PASSED_TESTS${NC}"
-echo -e "失败: ${RED}$FAILED_TESTS${NC}"
+# Show test results
+echo -e "\n=== Test Results ==="
+echo "Total tests: $TOTAL_TESTS"
+echo -e "Passed: ${GREEN}$PASSED_TESTS${NC}"
+echo -e "Failed: ${RED}$FAILED_TESTS${NC}"
 
 if [ $FAILED_TESTS -eq 0 ]; then
-    echo -e "\n${GREEN}🎉 所有测试通过！${NC}"
+    echo -e "\n${GREEN}🎉 All tests passed!${NC}"
     exit 0
 else
-    echo -e "\n${RED}❌ 有 $FAILED_TESTS 个测试失败${NC}"
+    echo -e "\n${RED}❌ $FAILED_TESTS tests failed${NC}"
     exit 1
 fi

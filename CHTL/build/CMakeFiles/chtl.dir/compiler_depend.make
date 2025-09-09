@@ -295,6 +295,7 @@ bin/chtl: /lib/x86_64-linux-gnu/Scrt1.o \
   /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so \
   /usr/lib/x86_64-linux-gnu/libc_nonshared.a \
   CMakeFiles/chtl.dir/src/main.cpp.o \
+  lib/libCHTLCompiler.a \
   lib/libCHTLCore.a \
   lib/libCHTLGenerator.a \
   lib/libCHTLJSCore.a \
@@ -320,6 +321,8 @@ lib/libCHTLJSParser.a:
 lib/libCHTLJSNode.a:
 
 lib/libCHTLGenerator.a:
+
+lib/libCHTLCompiler.a:
 
 CMakeFiles/chtl.dir/src/main.cpp.o:
 

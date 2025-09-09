@@ -265,8 +265,20 @@ bool ModuleManager::parseModuleAST(const std::string& name, const std::string& c
             std::istringstream stream(content);
             CHTLJSLexer jsLexer(stream);
             CHTLJSParser jsParser(stream);
-            // 注意：这里需要适配 CHTLJSParser 的接口
-            // moduleInfo->ast = jsParser.parse();
+            
+            // 解析 CHTL JS 内容
+            try {
+                auto jsAST = jsParser.parse();
+                if (jsAST) {
+                    // CHTL JS AST 需要特殊处理，暂时跳过
+                    // moduleInfo->ast = jsAST; // 类型不匹配，需要适配器
+                } else {
+                    return false;
+                }
+            } catch (const std::exception& e) {
+                // CHTL JS 解析失败
+                return false;
+            }
         }
         
         return true;

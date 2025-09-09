@@ -995,6 +995,8 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o: /workspace/CHTL/C
   /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp \
   /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/ElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp \
@@ -1495,7 +1497,9 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.o: /workspace/CHTL/CHT
   /usr/lib/llvm-20/lib/clang/20/include/stdint.h \
   /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp \
   /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp
@@ -1750,6 +1754,8 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.o: /workspace/CHTL/CHTL/
   /usr/lib/llvm-20/lib/clang/20/include/stdint.h \
   /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp \
   /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp \
@@ -3246,6 +3252,9 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.o: /workspace/CHTL
   /usr/lib/llvm-20/lib/clang/20/include/stdint.h \
   /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp \
   /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/ElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp \
@@ -3746,6 +3755,9 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.o: /workspace/CHTL/C
   /usr/lib/llvm-20/lib/clang/20/include/stdint.h \
   /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp \
   /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp
@@ -4000,6 +4012,9 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.o: /workspace/CHTL/CHT
   /usr/lib/llvm-20/lib/clang/20/include/stdint.h \
   /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp \
   /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp
@@ -4272,11 +4287,7 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TextNode.cpp.o: /workspace/CHTL/CHTL/CHTLN
 
 /workspace/CHTL/CHTL/CHTLNode/ImportNode.hpp:
 
-/workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp:
-
 /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.cpp:
-
-/workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp:
 
 /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.cpp:
 
@@ -4287,6 +4298,10 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TextNode.cpp.o: /workspace/CHTL/CHTL/CHTLN
 /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp:
 
 /workspace/CHTL/CHTL/CHTLNode/ElementNode.hpp:
+
+/workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp:
+
+/workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp:
 
 /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp:
 

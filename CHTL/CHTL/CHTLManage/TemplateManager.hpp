@@ -3,6 +3,9 @@
 #include <CHTL/CHTLNode/TemplateStyleNode.hpp>
 #include <CHTL/CHTLNode/TemplateElementNode.hpp>
 #include <CHTL/CHTLNode/TemplateVarNode.hpp>
+#include <CHTL/CHTLNode/CustomStyleNode.hpp>
+#include <CHTL/CHTLNode/CustomElementNode.hpp>
+#include <CHTL/CHTLNode/CustomVarNode.hpp>
 #include <string>
 #include <map>
 #include <memory>
@@ -62,6 +65,21 @@ public:
     size_t getElementTemplateCount() const { return elementTemplates_.size(); }
     size_t getVarTemplateCount() const { return varTemplates_.size(); }
     
+    // 通用模板注册方法
+    void registerTemplate(const std::string& name, std::shared_ptr<TemplateStyleNode> template_node);
+    void registerTemplate(const std::string& name, std::shared_ptr<TemplateElementNode> template_node);
+    void registerTemplate(const std::string& name, std::shared_ptr<TemplateVarNode> template_node);
+    
+    // 自定义模板注册方法
+    void registerCustom(const std::string& name, std::shared_ptr<CustomStyleNode> custom_node);
+    void registerCustom(const std::string& name, std::shared_ptr<CustomElementNode> custom_node);
+    void registerCustom(const std::string& name, std::shared_ptr<CustomVarNode> custom_node);
+    
+    // 自定义模板获取方法
+    std::shared_ptr<CustomStyleNode> getCustomStyle(const std::string& name) const;
+    std::shared_ptr<CustomElementNode> getCustomElement(const std::string& name) const;
+    std::shared_ptr<CustomVarNode> getCustomVar(const std::string& name) const;
+    
 private:
     TemplateManager() = default;
     ~TemplateManager() = default;
@@ -74,6 +92,11 @@ private:
     
     // 变量组模板存储
     std::map<std::string, std::shared_ptr<TemplateVarNode>> varTemplates_;
+    
+    // 自定义模板存储
+    std::map<std::string, std::shared_ptr<CustomStyleNode>> customStyles_;
+    std::map<std::string, std::shared_ptr<CustomElementNode>> customElements_;
+    std::map<std::string, std::shared_ptr<CustomVarNode>> customVars_;
     
     // 解析样式组模板继承
     void resolveStyleTemplateInheritance(const std::string& templateName);

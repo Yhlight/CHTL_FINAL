@@ -230,21 +230,45 @@ std::string CodeGenerator::generateStyleCSS(std::shared_ptr<BaseNode> node) {
 std::string CodeGenerator::generateTemplateCode(std::shared_ptr<BaseNode> node) {
     // 模板节点需要根据类型生成相应的代码
     if (auto templateStyleNode = std::dynamic_pointer_cast<TemplateStyleNode>(node)) {
+        // 合并继承的属性
+        templateStyleNode->mergeInheritedProperties();
+        
         // 生成样式模板的 CSS 代码
         std::string css = templateStyleNode->toCSS();
         if (!css.empty()) {
-            generatedCSS_[templateStyleNode->getTemplateName()] = css;
+            std::string templateName = templateStyleNode->getTemplateName();
+            generatedCSS_[templateName] = css;
+            
+            // 注册到模板管理器
+            templateManager_.registerTemplate(templateName, templateStyleNode);
         }
         return "";
     } else if (auto templateElementNode = std::dynamic_pointer_cast<TemplateElementNode>(node)) {
+        // 合并继承的内容
+        templateElementNode->mergeInheritedContent();
+        
         // 生成元素模板的 HTML 代码
-        return templateElementNode->toHTML();
+        std::string html = templateElementNode->toHTML();
+        std::string templateName = templateElementNode->getTemplateName();
+        
+        // 注册到模板管理器
+        templateManager_.registerTemplate(templateName, templateElementNode);
+        
+        return html;
     } else if (auto templateVarNode = std::dynamic_pointer_cast<TemplateVarNode>(node)) {
+        // 合并继承的变量
+        templateVarNode->mergeInheritedVariables();
+        
         // 变量模板不直接生成 HTML，但需要注册变量
+        std::string templateName = templateVarNode->getTemplateName();
         for (const auto& [name, value] : templateVarNode->getVariables()) {
             // 注册变量到全局变量表
-            globalVariables_[templateVarNode->getTemplateName() + "." + name] = value;
+            globalVariables_[templateName + "." + name] = value;
         }
+        
+        // 注册到模板管理器
+        templateManager_.registerTemplate(templateName, templateVarNode);
+        
         return "";
     }
     
@@ -260,7 +284,11 @@ std::string CodeGenerator::generateCustomCode(std::shared_ptr<BaseNode> node) {
         // 生成自定义样式组的 CSS 代码
         std::string css = customStyleNode->toCSS();
         if (!css.empty()) {
-            generatedCSS_[customStyleNode->getCustomName()] = css;
+            std::string customName = customStyleNode->getCustomName();
+            generatedCSS_[customName] = css;
+            
+            // 注册到模板管理器
+            templateManager_.registerCustom(customName, customStyleNode);
         }
         return "";
     } else if (auto customElementNode = std::dynamic_pointer_cast<CustomElementNode>(node)) {
@@ -268,15 +296,25 @@ std::string CodeGenerator::generateCustomCode(std::shared_ptr<BaseNode> node) {
         customElementNode->applySpecialization();
         
         // 生成自定义元素组的 HTML 代码
-        return customElementNode->toHTML();
+        std::string html = customElementNode->toHTML();
+        std::string customName = customElementNode->getCustomName();
+        
+        // 注册到模板管理器
+        templateManager_.registerCustom(customName, customElementNode);
+        
+        return html;
     } else if (auto customVarNode = std::dynamic_pointer_cast<CustomVarNode>(node)) {
         // 应用特例化操作
         customVarNode->applySpecialization();
         
         // 注册特例化变量到全局变量表
+        std::string customName = customVarNode->getCustomName();
         for (const auto& [name, value] : customVarNode->getSpecializedVariables()) {
-            globalVariables_[customVarNode->getCustomName() + "." + name] = value;
+            globalVariables_[customName + "." + name] = value;
         }
+        
+        // 注册到模板管理器
+        templateManager_.registerCustom(customName, customVarNode);
         return "";
     }
     
@@ -332,8 +370,20 @@ std::string CodeGenerator::generateImportCode(std::shared_ptr<BaseNode> node) {
             auto importedAST = parser.parse();
             
             if (!parser.hasError() && importedAST) {
-                // 生成导入的 CHTL 内容
-                return generateElementHTML(importedAST);
+                // 递归生成导入文件的代码
+                std::string importedHTML = generateHTML(importedAST);
+                std::string importedCSS = generateCSS(importedAST);
+                std::string importedJS = generateJavaScript(importedAST);
+                
+                // 将导入的内容添加到相应的输出中
+                if (!importedCSS.empty()) {
+                    generatedCSS_[importName] = importedCSS;
+                }
+                if (!importedJS.empty()) {
+                    generatedJS_[importName] = importedJS;
+                }
+                
+                return importedHTML;
             }
         }
     } else if (importType == "@Html") {
@@ -410,20 +460,24 @@ std::string CodeGenerator::generateNamespaceCode(std::shared_ptr<BaseNode> node)
     
     // 处理命名空间中的约束
     auto constraints = namespaceNode->getConstraints();
+    std::string namespaceName = namespaceNode->getNamespaceName();
+    
     for (const auto& constraint : constraints) {
         if (constraint->getType() == ConstraintNode::ConstraintType::PRECISE) {
             // 处理精确约束
             auto elementNames = constraint->getElementNames();
             for (const auto& elementName : elementNames) {
                 // 在命名空间中限制特定元素的使用
-                namespaceConstraints_[namespaceNode->getNamespaceName()].push_back(elementName);
+                namespaceConstraints_[namespaceName].push_back(elementName);
+                constrainedElements_.insert(elementName);
             }
         } else if (constraint->getType() == ConstraintNode::ConstraintType::TYPE) {
             // 处理类型约束
             auto typeConstraints = constraint->getTypeConstraints();
             for (const auto& typeConstraint : typeConstraints) {
                 // 在命名空间中限制特定类型的使用
-                namespaceTypeConstraints_[namespaceNode->getNamespaceName()].push_back(typeConstraint);
+                namespaceTypeConstraints_[namespaceName].push_back(typeConstraint);
+                constrainedTypes_.insert(typeConstraint);
             }
         }
     }
@@ -564,7 +618,9 @@ std::string CodeGenerator::generateCSSProperties(const std::map<std::string, std
     std::ostringstream css;
     
     for (const auto& [property, value] : properties) {
-        css << property << ": " << value << "; ";
+        // 解析变量引用
+        std::string resolvedValue = resolveVariableReference(value);
+        css << property << ": " << resolvedValue << "; ";
     }
     
     std::string result = css.str();
@@ -578,16 +634,16 @@ std::string CodeGenerator::generateCSSProperties(const std::map<std::string, std
 std::string CodeGenerator::formatOutput(const std::string& html, const std::string& css, const std::string& js) {
     std::ostringstream output;
     
-    output << "=== 生成的 HTML ===\n";
+    output << "=== Generated HTML ===\n";
     output << html << "\n\n";
     
     if (!css.empty()) {
-        output << "=== 生成的 CSS ===\n";
+        output << "=== Generated CSS ===\n";
         output << css << "\n\n";
     }
     
     if (!js.empty()) {
-        output << "=== 生成的 JavaScript ===\n";
+        output << "=== Generated JavaScript ===\n";
         output << js << "\n\n";
     }
     

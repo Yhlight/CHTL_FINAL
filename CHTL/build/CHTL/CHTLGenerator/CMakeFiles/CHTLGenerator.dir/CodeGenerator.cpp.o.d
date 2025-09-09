@@ -207,15 +207,15 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: \
   /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/set \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_set.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_multiset.h \
   /workspace/CHTL/CHTL/CHTLNode/ElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TextNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/StyleNode.hpp \
-  /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp \
-  /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp \
-  /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/OriginNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/ImportNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/ConfigNode.hpp \

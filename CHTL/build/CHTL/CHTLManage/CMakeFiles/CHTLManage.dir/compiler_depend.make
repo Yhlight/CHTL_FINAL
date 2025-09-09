@@ -226,12 +226,21 @@ CHTL/CHTLManage/CMakeFiles/CHTLManage.dir/TemplateManager.cpp.o: /workspace/CHTL
   /usr/lib/llvm-20/lib/clang/20/include/stdint.h \
   /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp \
   /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp
 
 
 /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp:
+
+/workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp:
+
+/workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp:
+
+/workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp:
 
 /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp:
 

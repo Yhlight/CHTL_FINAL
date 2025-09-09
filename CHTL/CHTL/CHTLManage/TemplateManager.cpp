@@ -177,4 +177,46 @@ void TemplateManager::resolveVarTemplateInheritance(const std::string& templateN
     }
 }
 
+// 通用模板注册方法实现
+void TemplateManager::registerTemplate(const std::string& name, std::shared_ptr<TemplateStyleNode> template_node) {
+    styleTemplates_[name] = template_node;
+}
+
+void TemplateManager::registerTemplate(const std::string& name, std::shared_ptr<TemplateElementNode> template_node) {
+    elementTemplates_[name] = template_node;
+}
+
+void TemplateManager::registerTemplate(const std::string& name, std::shared_ptr<TemplateVarNode> template_node) {
+    varTemplates_[name] = template_node;
+}
+
+// 自定义模板注册方法实现
+void TemplateManager::registerCustom(const std::string& name, std::shared_ptr<CustomStyleNode> custom_node) {
+    customStyles_[name] = custom_node;
+}
+
+void TemplateManager::registerCustom(const std::string& name, std::shared_ptr<CustomElementNode> custom_node) {
+    customElements_[name] = custom_node;
+}
+
+void TemplateManager::registerCustom(const std::string& name, std::shared_ptr<CustomVarNode> custom_node) {
+    customVars_[name] = custom_node;
+}
+
+// 自定义模板获取方法实现
+std::shared_ptr<CustomStyleNode> TemplateManager::getCustomStyle(const std::string& name) const {
+    auto it = customStyles_.find(name);
+    return (it != customStyles_.end()) ? it->second : nullptr;
+}
+
+std::shared_ptr<CustomElementNode> TemplateManager::getCustomElement(const std::string& name) const {
+    auto it = customElements_.find(name);
+    return (it != customElements_.end()) ? it->second : nullptr;
+}
+
+std::shared_ptr<CustomVarNode> TemplateManager::getCustomVar(const std::string& name) const {
+    auto it = customVars_.find(name);
+    return (it != customVars_.end()) ? it->second : nullptr;
+}
+
 } // namespace CHTL

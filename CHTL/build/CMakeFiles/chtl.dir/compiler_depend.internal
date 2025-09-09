@@ -297,6 +297,7 @@ bin/chtl
  /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so
  /usr/lib/x86_64-linux-gnu/libc_nonshared.a
  /workspace/CHTL/build/CMakeFiles/chtl.dir/src/main.cpp.o
+ /workspace/CHTL/build/lib/libCHTLCompiler.a
  /workspace/CHTL/build/lib/libCHTLCore.a
  /workspace/CHTL/build/lib/libCHTLGenerator.a
  /workspace/CHTL/build/lib/libCHTLJSCore.a
