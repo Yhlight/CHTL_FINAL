@@ -201,18 +201,36 @@ void Generator::generateElement(const ElementNode* element) {
         std::string inline_style;
         for(const auto& pair : final_properties) { Evaluator eval; ChtlValue value = eval.evaluate(pair.second->getValue(), *m_context, eval_context, resolver); inline_style += pair.first + ": " + value.toString() + ";"; }
         if (!inline_style.empty()) attributes["style"] = inline_style;
+
+        // --- New logic for auto-generation ---
+        bool auto_class_added = attributes.count("class") > 0;
+        bool auto_id_added = attributes.count("id") > 0;
+
         for (const auto& styleChild : element->getStyleBlock()->getChildren()) {
             if (styleChild->getType() == NodeType::StyleSelector) {
                 const auto* selectorNode = static_cast<const StyleSelectorNode*>(styleChild.get());
                 std::string selector_text = selectorNode->getSelector();
-                if (selector_text[0] == '.') attributes["class"] += (attributes["class"].empty() ? "" : " ") + selector_text.substr(1);
-                else if (selector_text[0] == '#') attributes["id"] = selector_text.substr(1);
+
+                // Auto-add class/id if not present
+                if (selector_text[0] == '.' && !auto_class_added) {
+                    attributes["class"] = selector_text.substr(1);
+                    auto_class_added = true;
+                } else if (selector_text[0] == '#' && !auto_id_added) {
+                    attributes["id"] = selector_text.substr(1);
+                    auto_id_added = true;
+                }
+
                 size_t amp_pos = selector_text.find('&');
                 if (amp_pos != std::string::npos) {
                     std::string base_selector;
-                    if (attributes.count("id") > 0 && !attributes.at("id").empty()) base_selector = "#" + attributes.at("id");
-                    else if (attributes.count("class") > 0 && !attributes.at("class").empty()) base_selector = "." + attributes.at("class").substr(0, attributes.at("class").find(' '));
-                    else base_selector = element->getTagName();
+                    // Spec priority: class > id > tag name
+                    if (attributes.count("class") > 0 && !attributes.at("class").empty()) {
+                        base_selector = "." + attributes.at("class").substr(0, attributes.at("class").find(' '));
+                    } else if (attributes.count("id") > 0 && !attributes.at("id").empty()) {
+                        base_selector = "#" + attributes.at("id");
+                    } else {
+                        base_selector = element->getTagName();
+                    }
                     selector_text.replace(amp_pos, 1, base_selector);
                 }
                 m_global_css += selector_text + " { ";

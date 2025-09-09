@@ -111,6 +111,32 @@ void test_comments() {
     run_test("Phase 6: Generator Comment", "div{ -- this becomes an html comment }", "<div><!-- this becomes an html comment --></div>");
 }
 
+void test_auto_class_generation() {
+    std::string expected = "<head><style>.box { color: red; }\n</style></head><div class=\"box\"></div>";
+    run_test("Phase 7.A: Auto Class Generation", "div{ style{ .box{ color: red; } } }", expected);
+}
+
+void test_auto_id_generation() {
+    std::string expected = "<head><style>#main { color: red; }\n</style></head><div id=\"main\"></div>";
+    run_test("Phase 7.A: Auto ID Generation", "div{ style{ #main{ color: red; } } }", expected);
+}
+
+void test_auto_generation_does_not_overwrite() {
+    std::string expected = "<head><style>.box { color: red; }\n</style></head><div class=\"existing\"></div>";
+    run_test("Phase 7.A: Auto Generation Does Not Overwrite", "div{ class: existing; style{ .box{ color: red; } } }", expected);
+}
+
+void test_auto_generation_first_wins() {
+    std::string expected = "<head><style>.box { color: red; }\n.other { color: blue; }\n</style></head><div class=\"box\"></div>";
+    run_test("Phase 7.A: Auto Generation First Wins", "div{ style{ .box{ color: red; } .other{ color: blue; } } }", expected);
+}
+
+void test_ampersand_expansion_prefers_class() {
+    std::string src = "div{ class: box; id: main; style{ &:hover{ color: red; } } }";
+    std::string expected = "<head><style>.box:hover { color: red; }\n</style></head><div class=\"box\" id=\"main\"></div>";
+    run_test("Phase 7.B: Ampersand Expansion Prefers Class", src, expected);
+}
+
 
 int main() {
     std::cout << "--- Running CHTL Full Test Suite ---" << std::endl;
@@ -136,6 +162,11 @@ int main() {
     test_origin_blocks();
     test_advanced_conditionals();
     test_comments();
+    test_auto_class_generation();
+    test_auto_id_generation();
+    test_auto_generation_does_not_overwrite();
+    test_auto_generation_first_wins();
+    test_ampersand_expansion_prefers_class();
     std::cout << "------------------------------------" << std::endl;
     return 0;
 }
