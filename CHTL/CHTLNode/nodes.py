@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List, Union, Any, Optional
+from enum import Enum, auto
 # Import Token for type hinting in expression nodes
 from CHTL.CHTLLexer.lexer import Token
 
@@ -8,7 +9,7 @@ class BaseNode:
     """Base class for all AST nodes."""
     pass
 
-# --- Expression Nodes ---
+# --- Expression and Selector Nodes ---
 
 @dataclass
 class ExpressionNode(BaseNode):
@@ -26,7 +27,7 @@ class LiteralNode(ExpressionNode):
 class PropertyReferenceNode(ExpressionNode):
     """Represents a reference to another property (e.g., .box.width)."""
     property_name: str
-    selector: Optional[str] = None
+    selector: 'SelectorNode' # Changed to SelectorNode
     lineno: int = 0
     parent: Optional['BaseNode'] = field(default=None, repr=False)
 
@@ -56,6 +57,22 @@ class ConditionalExpressionNode(ExpressionNode):
     false_expr: Optional[ExpressionNode] = None
     lineno: int = 0
     parent: Optional['BaseNode'] = field(default=None, repr=False)
+
+class SelectorType(Enum):
+    TAG = auto()
+    CLASS = auto()
+    ID = auto()
+
+@dataclass
+class SelectorPartNode(BaseNode):
+    type: SelectorType
+    value: str
+    index: Optional[int] = None
+
+@dataclass
+class SelectorNode(BaseNode):
+    parts: List[SelectorPartNode] = field(default_factory=list)
+
 
 # --- Core CHTL Nodes ---
 

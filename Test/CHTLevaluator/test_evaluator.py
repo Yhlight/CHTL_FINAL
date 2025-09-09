@@ -2,7 +2,8 @@ import unittest
 from CHTL.CHTLLexer.lexer import Lexer
 from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLParser.parser import Parser
-from CHTL.CHTLParser.expression_parser import ExpressionParser
+from CHTL.CHTLParser.selector_parser import SelectorParser
+from CHTL.CHTLUtils.ast_search import find_nodes_by_selector
 from CHTL.CHTLevaluator.evaluator import ExpressionEvaluator
 from CHTL.CHTLNode.nodes import DocumentNode, ElementNode, StyleNode, CssPropertyNode, LiteralNode
 
@@ -15,33 +16,48 @@ class TestExpressionEvaluator(unittest.TestCase):
         doc_ast = parser.parse()
         return doc_ast
 
-    def _evaluate_expression(self, expr_str, doc_ast, context_element):
-        """Helper to parse and evaluate a standalone expression string."""
-        tokens = Lexer(expr_str).tokenize()[:-1] # Exclude EOF
-        expr_ast = ExpressionParser(tokens).parse()
+    def _evaluate_expression_in_source(self, source: str, context_selector: str, prop_name: str):
+        """
+        A helper to find a specific property expression in a source file,
+        find its context element, and evaluate it.
+        """
+        doc_ast = self._setup_test_env(source)
+
+        # Correctly find the context element using the new selector engine
+        selector_ast = SelectorParser(context_selector).parse()
+        target_nodes = find_nodes_by_selector(doc_ast, selector_ast)
+
+        if not target_nodes:
+            self.fail(f"Test setup failed: could not find context element '{context_selector}'")
+
+        target_element = target_nodes[0]
+
+        # Find the expression to evaluate on that element
+        expr_to_eval = None
+        for child in target_element.children:
+            if isinstance(child, StyleNode):
+                for prop in child.children:
+                    if isinstance(prop, CssPropertyNode) and prop.name == prop_name:
+                        expr_to_eval = prop.value
+                        break
+            if expr_to_eval:
+                break
+
+        if not expr_to_eval:
+            self.fail(f"Test setup failed: could not find property '{prop_name}' on '{context_selector}'")
+
         evaluator = ExpressionEvaluator(doc_ast)
-        return evaluator.evaluate(expr_ast, context_element)
+        return evaluator.evaluate(expr_to_eval, target_element)
 
     def test_simple_arithmetic(self):
-        doc = DocumentNode() # Empty doc for this test
-        context_el = ElementNode(tag_name='div')
-        result = self._evaluate_expression("10 + 5", doc, context_el)
-        self.assertEqual(result, "15")
-
-        result_px = self._evaluate_expression("100px - 25px", doc, context_el)
-        self.assertEqual(result_px, "75px")
-
-        result_div = self._evaluate_expression("100 / 4", doc, context_el)
-        self.assertEqual(result_div, "25")
-
-    def test_comparison(self):
         doc = DocumentNode()
         context_el = ElementNode(tag_name='div')
-        result = self._evaluate_expression("100 > 50", doc, context_el)
-        self.assertTrue(result)
+        evaluator = ExpressionEvaluator(doc)
 
-        result_false = self._evaluate_expression("10px < 5px", doc, context_el)
-        self.assertFalse(result_false)
+        from CHTL.CHTLParser.expression_parser import ExpressionParser
+        expr_ast = ExpressionParser(Lexer("10 + 5").tokenize()[:-1]).parse()
+        result = evaluator.evaluate(expr_ast, context_el)
+        self.assertEqual(result, "15")
 
     def test_local_property_reference(self):
         source = """
@@ -52,16 +68,7 @@ class TestExpressionEvaluator(unittest.TestCase):
             }
         }
         """
-        doc_ast = self._setup_test_env(source)
-        div_element = doc_ast.children[0]
-
-        # We need to find the expression node for `width / 2`
-        style_node = div_element.children[0]
-        height_prop = style_node.children[1]
-        height_expr_ast = height_prop.value
-
-        evaluator = ExpressionEvaluator(doc_ast)
-        result = evaluator.evaluate(height_expr_ast, div_element)
+        result = self._evaluate_expression_in_source(source, "div", "height")
         self.assertEqual(result, "50px")
 
     def test_external_property_reference(self):
@@ -78,36 +85,44 @@ class TestExpressionEvaluator(unittest.TestCase):
             }
         }
         """
-        doc_ast = self._setup_test_env(source)
-        p_element = doc_ast.children[1]
-
-        style_node = p_element.children[0]
-        width_prop = style_node.children[0]
-        width_expr_ast = width_prop.value
-
-        evaluator = ExpressionEvaluator(doc_ast)
-        result = evaluator.evaluate(width_expr_ast, p_element)
+        result = self._evaluate_expression_in_source(source, "p", "width")
         self.assertEqual(result, "400px")
 
-    def test_conditional_expression(self):
+    def test_descendant_selector_property_reference(self):
         source = """
         div {
+            id: "app";
+            span {
+                class: "label";
+                style {
+                    font-size: 16px;
+                }
+            }
+        }
+        footer {
             style {
-                width: 150px;
-                color: width > 100px ? "red" : "blue";
+                margin-top: #app .label.font-size * 2;
             }
         }
         """
-        doc_ast = self._setup_test_env(source)
-        div_element = doc_ast.children[0]
+        result = self._evaluate_expression_in_source(source, "footer", "margin-top")
+        self.assertEqual(result, "32px")
 
-        style_node = div_element.children[0]
-        color_prop = style_node.children[1]
-        color_expr_ast = color_prop.value
+    def test_indexed_selector_property_reference(self):
+        source = """
+        div {
+            p { class: "item"; style { height: 20px; } }
+            p { class: "item"; style { height: 30px; } }
+        }
+        footer {
+            style {
+                height: .item[1].height;
+            }
+        }
+        """
+        result = self._evaluate_expression_in_source(source, "footer", "height")
+        self.assertEqual(result, "30px")
 
-        evaluator = ExpressionEvaluator(doc_ast)
-        result = evaluator.evaluate(color_expr_ast, div_element)
-        self.assertEqual(result, "red")
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,7 +1,10 @@
 import unittest
 from CHTL.CHTLLexer.lexer import Lexer
 from CHTL.CHTLParser.expression_parser import ExpressionParser
-from CHTL.CHTLNode.nodes import BinaryOpNode, LiteralNode, PropertyReferenceNode, ConditionalExpressionNode, LogicalOpNode
+from CHTL.CHTLNode.nodes import (
+    BinaryOpNode, LiteralNode, PropertyReferenceNode, ConditionalExpressionNode,
+    LogicalOpNode, SelectorNode, SelectorType
+)
 
 class TestExpressionParser(unittest.TestCase):
 
@@ -60,8 +63,12 @@ class TestExpressionParser(unittest.TestCase):
     def test_property_reference(self):
         ast = self._parse_expr(".box.width")
         self.assertIsInstance(ast, PropertyReferenceNode)
-        self.assertEqual(ast.selector, ".box")
         self.assertEqual(ast.property_name, "width")
+        # Check the parsed selector node
+        self.assertIsInstance(ast.selector, SelectorNode)
+        self.assertEqual(len(ast.selector.parts), 1)
+        self.assertEqual(ast.selector.parts[0].type, SelectorType.CLASS)
+        self.assertEqual(ast.selector.parts[0].value, "box")
 
     def test_local_property_reference(self):
         ast = self._parse_expr("width")
