@@ -428,6 +428,7 @@ void CliApplication::initialize() {
     m_parser->addOption("-v", "--version", "Show version information", CliArgType::BOOLEAN);
     m_parser->addOption("-o", "--output", "Output file or directory", CliArgType::FILE);
     m_parser->addOption("-w", "--watch", "Watch for file changes", CliArgType::BOOLEAN);
+    m_parser->addOption("", "--default-struct", "Generate HTML with default structure", CliArgType::BOOLEAN);
 }
 
 void CliApplication::run(int argc, char* argv[]) {
@@ -527,6 +528,13 @@ void CliApplication::cmdCompile(const std::vector<std::string>& args) {
     if (args.empty()) {
         std::cerr << "Usage: chtl compile <input> [output]" << std::endl;
         return;
+    }
+    
+    // 检查是否启用默认结构
+    if (m_parser->hasOption("--default-struct")) {
+        m_context->setConfiguration("default-struct", "true");
+    } else {
+        m_context->setConfiguration("default-struct", "false");
     }
     
     std::string input = args[0];

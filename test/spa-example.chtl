@@ -1,0 +1,203 @@
+// SPA 页面示例 - 不包含默认 HTML 结构
+// 这个文件演示了 CHTL 编译器如何生成纯净的内容，适合 SPA 应用
+
+div
+{
+    id: "app";
+    class: "spa-container";
+    
+    style
+    {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    header
+    {
+        class: "app-header";
+        
+        style
+        {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1
+        {
+            style
+            {
+                color: white;
+                margin: 0;
+                font-size: 2rem;
+                font-weight: 300;
+            }
+            text { "SPA Application" }
+        }
+    }
+    
+    main
+    {
+        class: "app-main";
+        
+        style
+        {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        div
+        {
+            class: "content-card";
+            
+            style
+            {
+                background: rgba(255, 255, 255, 0.9);
+                border-radius: 12px;
+                padding: 2rem;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                backdrop-filter: blur(10px);
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            
+            h2
+            {
+                style
+                {
+                    color: #333;
+                    margin-bottom: 1rem;
+                    font-size: 1.5rem;
+                }
+                text { "Welcome to CHTL SPA" }
+            }
+            
+            p
+            {
+                style
+                {
+                    color: #666;
+                    line-height: 1.6;
+                    margin-bottom: 1.5rem;
+                }
+                text
+                {
+                    "This is a Single Page Application built with CHTL. Notice how this content is generated without the default HTML structure, making it perfect for SPA frameworks like React, Vue, or Angular."
+                }
+            }
+            
+            div
+            {
+                class: "button-group";
+                
+                style
+                {
+                    display: flex;
+                    gap: 1rem;
+                    flex-wrap: wrap;
+                }
+                
+                button
+                {
+                    class: "btn btn-primary";
+                    
+                    style
+                    {
+                        background: linear-gradient(45deg, #667eea, #764ba2);
+                        color: white;
+                        border: none;
+                        padding: 0.75rem 1.5rem;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 1rem;
+                        transition: transform 0.2s ease;
+                    }
+                    
+                    text { "Get Started" }
+                }
+                
+                button
+                {
+                    class: "btn btn-secondary";
+                    
+                    style
+                    {
+                        background: transparent;
+                        color: #667eea;
+                        border: 2px solid #667eea;
+                        padding: 0.75rem 1.5rem;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 1rem;
+                        transition: all 0.2s ease;
+                    }
+                    
+                    text { "Learn More" }
+                }
+            }
+        }
+    }
+    
+    footer
+    {
+        class: "app-footer";
+        
+        style
+        {
+            background: rgba(0, 0, 0, 0.1);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        text { "© 2024 CHTL SPA Example. Built with CHTL." }
+    }
+}
+
+script
+{
+    // SPA 相关的 JavaScript 代码
+    console.log('SPA Application loaded');
+    
+    // 模拟路由功能
+    const app = document.getElementById('app');
+    
+    // 按钮事件处理
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            const text = this.textContent;
+            console.log(`Button clicked: ${text}`);
+            
+            // 模拟页面切换
+            if (text === 'Get Started') {
+                showPage('getting-started');
+            } else if (text === 'Learn More') {
+                showPage('learn-more');
+            }
+        });
+    });
+    
+    function showPage(pageName) {
+        console.log(`Navigating to: ${pageName}`);
+        // 这里可以实现实际的页面切换逻辑
+        // 在真实的 SPA 框架中，这会被框架的路由系统处理
+    }
+    
+    // 模拟组件生命周期
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('SPA Application initialized');
+        initializeApp();
+    });
+    
+    function initializeApp() {
+        // 初始化应用
+        console.log('App initialization complete');
+    }
+}

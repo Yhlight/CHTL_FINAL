@@ -505,7 +505,32 @@ CHTLGenerator::GeneratedCode CHTLGenerator::generate(std::shared_ptr<BaseNode> r
 }
 
 std::string CHTLGenerator::generateHTML(std::shared_ptr<BaseNode> root) {
-    return m_htmlGenerator->generate(root);
+    // 检查是否启用默认结构
+    bool useDefaultStruct = m_context->getConfiguration("default-struct") == "true";
+    
+    if (useDefaultStruct) {
+        // 生成带有默认结构的 HTML
+        std::stringstream html;
+        html << "<!DOCTYPE html>\n";
+        html << "<html>\n";
+        html << "<head>\n";
+        html << "  <meta charset=\"UTF-8\">\n";
+        html << "  <title>CHTL Generated Page</title>\n";
+        html << "</head>\n";
+        html << "<body>\n";
+        
+        // 生成内容
+        std::string content = m_htmlGenerator->generate(root);
+        html << content;
+        
+        html << "</body>\n";
+        html << "</html>\n";
+        
+        return html.str();
+    } else {
+        // 默认行为：只生成纯净的内容，不包含默认结构
+        return m_htmlGenerator->generate(root);
+    }
 }
 
 std::string CHTLGenerator::generateCSS(std::shared_ptr<BaseNode> root) {

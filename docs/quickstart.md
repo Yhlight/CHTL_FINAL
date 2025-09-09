@@ -112,12 +112,20 @@ html
 ### 3. 编译 CHTL 文件
 
 ```bash
+# 默认编译（生成纯净内容，适合 SPA）
 chtl compile index.chtl -o index.html
+
+# 生成带有默认 HTML 结构的完整页面
+chtl compile index.chtl -o index.html --default-struct
 ```
 
 ### 4. 查看结果
 
 在浏览器中打开 `index.html` 文件，您将看到一个美观的网页。
+
+**重要说明**：CHTL 编译器默认生成纯净的内容，不包含默认的 HTML 结构（如 `<!DOCTYPE html>`、`<html>`、`<head>`、`<body>` 等）。这种设计特别适合 SPA（单页应用）开发，因为 SPA 框架通常不需要这些默认结构。
+
+如果您需要生成完整的 HTML 页面，请使用 `--default-struct` 选项。
 
 ## CHTL 基础语法
 
@@ -546,6 +554,36 @@ chtl compile input.chtl -c config.json -o output.html
 # 生成源映射
 chtl compile input.chtl -s -o output.html
 ```
+
+## SPA 开发支持
+
+CHTL 特别适合 SPA（单页应用）开发，因为：
+
+### 纯净内容生成
+- **默认行为**：CHTL 编译器默认生成纯净的内容，不包含默认的 HTML 结构
+- **SPA 友好**：生成的内容可以直接集成到 React、Vue、Angular 等 SPA 框架中
+- **灵活输出**：支持生成 HTML 片段、CSS 样式和 JavaScript 代码
+
+### 示例对比
+
+**SPA 模式（默认）**：
+```bash
+chtl compile spa-example.chtl -o spa-content.html
+```
+生成纯净的内容，适合 SPA 框架使用。
+
+**传统网页模式**：
+```bash
+chtl compile traditional-page.chtl -o traditional-page.html --default-struct
+```
+生成完整的 HTML 页面，包含 DOCTYPE、html、head、body 等结构。
+
+### SPA 开发最佳实践
+
+1. **使用纯净模式**：默认不添加 HTML 结构，让 SPA 框架处理
+2. **模块化设计**：将页面拆分为多个 CHTL 文件，便于管理
+3. **组件化开发**：使用模板和自定义系统创建可复用的组件
+4. **样式隔离**：使用局部样式块避免样式冲突
 
 ## 下一步
 
