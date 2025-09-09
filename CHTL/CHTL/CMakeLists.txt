@@ -33,8 +33,6 @@ add_library(CHTLCore STATIC
     CHTLNode/ElementNode.cpp
     CHTLNode/TextNode.h
     CHTLNode/TextNode.cpp
-    CHTLNode/CommentNode.h
-    CHTLNode/CommentNode.cpp
     CHTLNode/TemplateNode.h
     CHTLNode/TemplateNode.cpp
     CHTLNode/CustomNode.h
@@ -43,16 +41,6 @@ add_library(CHTLCore STATIC
     CHTLNode/StyleNode.cpp
     CHTLNode/ScriptNode.h
     CHTLNode/ScriptNode.cpp
-    CHTLNode/OriginNode.h
-    CHTLNode/OriginNode.cpp
-    CHTLNode/ImportNode.h
-    CHTLNode/ImportNode.cpp
-    CHTLNode/ConfigNode.h
-    CHTLNode/ConfigNode.cpp
-    CHTLNode/NamespaceNode.h
-    CHTLNode/NamespaceNode.cpp
-    CHTLNode/OperatorNode.h
-    CHTLNode/OperatorNode.cpp
     
     # Parser
     CHTLParser/CHTLParser.h

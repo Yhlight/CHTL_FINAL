@@ -27,13 +27,23 @@ const std::map<std::string, TokenType> KEYWORDS = {
     {"from", TokenType::FROM},
     {"as", TokenType::AS},
     
+    // CHTL JS关键字
+    {"fileloader", TokenType::FILELOADER},
+    {"listen", TokenType::LISTEN},
+    {"delegate", TokenType::DELEGATE},
+    {"animate", TokenType::ANIMATE},
+    {"vir", TokenType::VIR},
+    {"router", TokenType::ROUTER},
+    {"util", TokenType::UTIL},
+    {"iNeverAway", TokenType::INEVERAWAY},
+    
     // 位置关键字
-    {"after", TokenType::IDENTIFIER},
-    {"before", TokenType::IDENTIFIER},
-    {"replace", TokenType::IDENTIFIER},
-    {"at", TokenType::IDENTIFIER},
-    {"top", TokenType::IDENTIFIER},
-    {"bottom", TokenType::IDENTIFIER}
+    {"after", TokenType::AFTER},
+    {"before", TokenType::BEFORE},
+    {"replace", TokenType::REPLACE},
+    {"at", TokenType::AT},
+    {"top", TokenType::AT_TOP},
+    {"bottom", TokenType::AT_BOTTOM}
 };
 
 const std::map<std::string, TokenType> OPERATORS = {
@@ -52,7 +62,8 @@ const std::map<std::string, TokenType> OPERATORS = {
     {"==", TokenType::EQUAL_EQUAL},
     {"!=", TokenType::NOT_EQUAL},
     {"?", TokenType::QUESTION},
-    {"=", TokenType::EQUAL}
+    {"=", TokenType::EQUAL},
+    {"->", TokenType::ARROW}
 };
 
 const std::map<std::string, TokenType> DELIMITERS = {
@@ -179,6 +190,7 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::STRING: return "STRING";
         case TokenType::NUMBER: return "NUMBER";
         case TokenType::COMMENT: return "COMMENT";
+        case TokenType::GENERATOR_COMMENT: return "GENERATOR_COMMENT";
         case TokenType::LEFT_BRACE: return "LEFT_BRACE";
         case TokenType::RIGHT_BRACE: return "RIGHT_BRACE";
         case TokenType::LEFT_BRACKET: return "LEFT_BRACKET";
@@ -213,6 +225,7 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::PIPE: return "PIPE";
         case TokenType::TILDE: return "TILDE";
         case TokenType::CARET: return "CARET";
+        case TokenType::ARROW: return "ARROW";
         case TokenType::TEMPLATE: return "TEMPLATE";
         case TokenType::CUSTOM: return "CUSTOM";
         case TokenType::ORIGIN: return "ORIGIN";
@@ -231,6 +244,19 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::INHERIT: return "INHERIT";
         case TokenType::FROM: return "FROM";
         case TokenType::AS: return "AS";
+        case TokenType::FILELOADER: return "FILELOADER";
+        case TokenType::LISTEN: return "LISTEN";
+        case TokenType::DELEGATE: return "DELEGATE";
+        case TokenType::ANIMATE: return "ANIMATE";
+        case TokenType::VIR: return "VIR";
+        case TokenType::ROUTER: return "ROUTER";
+        case TokenType::UTIL: return "UTIL";
+        case TokenType::INEVERAWAY: return "INEVERAWAY";
+        case TokenType::AFTER: return "AFTER";
+        case TokenType::BEFORE: return "BEFORE";
+        case TokenType::REPLACE: return "REPLACE";
+        case TokenType::AT_TOP: return "AT_TOP";
+        case TokenType::AT_BOTTOM: return "AT_BOTTOM";
         case TokenType::NEWLINE: return "NEWLINE";
         case TokenType::WHITESPACE: return "WHITESPACE";
         case TokenType::EOF_TOKEN: return "EOF_TOKEN";

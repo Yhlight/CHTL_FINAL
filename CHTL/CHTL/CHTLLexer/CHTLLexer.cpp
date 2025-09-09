@@ -204,7 +204,7 @@ Token CHTLLexer::scanComment() {
             advance();
         }
         
-        return Token(TokenType::COMMENT, value, startLine, startColumn, start);
+        return Token(TokenType::GENERATOR_COMMENT, value, startLine, startColumn, start);
     }
     
     return Token(TokenType::ERROR, "", startLine, startColumn, start);
@@ -228,6 +228,15 @@ Token CHTLLexer::scanOperator() {
         if (OPERATORS.find(twoChar) != OPERATORS.end()) {
             advance();
             value = twoChar;
+        }
+    }
+    
+    // 检查三字符运算符（如 ->）
+    if (position < source.length() && value == "-") {
+        char second = currentChar();
+        if (second == '>') {
+            advance();
+            value = "->";
         }
     }
     
@@ -329,7 +338,10 @@ TokenStream CHTLLexer::tokenize() {
         }
         
         if (isCommentStart() || isMultiLineCommentStart() || isGeneratorComment()) {
-            tokens.push_back(scanComment());
+            Token commentToken = scanComment();
+            if (commentToken.type != TokenType::ERROR) {
+                tokens.push_back(commentToken);
+            }
             continue;
         }
         

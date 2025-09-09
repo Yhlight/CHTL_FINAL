@@ -12,6 +12,7 @@ enum class TokenType {
     STRING,         // 字符串
     NUMBER,         // 数字
     COMMENT,        // 注释
+    GENERATOR_COMMENT, // 生成器注释 --
     
     // 分隔符
     LEFT_BRACE,     // {
@@ -52,6 +53,7 @@ enum class TokenType {
     PIPE,           // |
     TILDE,          // ~
     CARET,          // ^
+    ARROW,          // ->
     
     // 关键字
     TEMPLATE,       // [Template]
@@ -74,6 +76,23 @@ enum class TokenType {
     INHERIT,        // inherit
     FROM,           // from
     AS,             // as
+    
+    // CHTL JS关键字
+    FILELOADER,     // fileloader
+    LISTEN,         // listen
+    DELEGATE,       // delegate
+    ANIMATE,        // animate
+    VIR,            // vir
+    ROUTER,         // router
+    UTIL,           // util
+    INEVERAWAY,     // iNeverAway
+    
+    // 位置关键字
+    AFTER,          // after
+    BEFORE,         // before
+    REPLACE,        // replace
+    AT_TOP,         // at top
+    AT_BOTTOM,      // at bottom
     
     // 位置标记
     NEWLINE,        // 换行

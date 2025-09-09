@@ -30,7 +30,25 @@ add_subdirectory(Test)
 add_executable(chtl main.cpp)
 target_link_libraries(chtl 
     CHTLCore
-    CHTLJSCore
+    Scanner
+    CodeMerger
+    CompilerDispatcher
+    Util
+)
+
+# 测试可执行文件
+add_executable(test_basic Test/TestBasic.cpp)
+target_link_libraries(test_basic 
+    CHTLCore
+    Scanner
+    CodeMerger
+    CompilerDispatcher
+    Util
+)
+
+add_executable(test_complete Test/TestComplete.cpp)
+target_link_libraries(test_complete 
+    CHTLCore
     Scanner
     CodeMerger
     CompilerDispatcher
