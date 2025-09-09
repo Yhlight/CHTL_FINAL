@@ -11,6 +11,7 @@ enum class TokenType {
     IDENTIFIER,     // 标识符
     STRING,         // 字符串
     NUMBER,         // 数字
+    UNQUOTED_LITERAL, // 无修饰字面量
     COMMENT,        // 注释
     GENERATOR_COMMENT, // 生成器注释 --
     

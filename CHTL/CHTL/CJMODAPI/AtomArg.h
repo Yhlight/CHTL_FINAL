@@ -9,14 +9,19 @@ namespace CHTL {
 
 // 原子参数类型
 enum class AtomType {
-    Placeholder,    // 占位符
+    Placeholder,    // 占位符 $
+    OptionalPlaceholder,  // 可选占位符 $?
+    RequiredPlaceholder,  // 必须占位符 $!
+    UnorderedPlaceholder, // 无序占位符 $_
+    CombinedPlaceholder,  // 组合占位符 $!_, $?_, etc.
     Variable,       // 变量
     Constant,       // 常量
     Expression,     // 表达式
     Function,       // 函数调用
     Property,       // 属性访问
     Index,          // 索引访问
-    Literal         // 字面量
+    Literal,        // 字面量
+    Variadic        // 不定参数 ...
 };
 
 // 原子参数类
@@ -32,9 +37,29 @@ public:
     void setAtomType(AtomType type) { atomType = type; }
     
     // 占位符管理
-    bool isPlaceholder() const { return atomType == AtomType::Placeholder; }
+    bool isPlaceholder() const { 
+        return atomType == AtomType::Placeholder || 
+               atomType == AtomType::OptionalPlaceholder ||
+               atomType == AtomType::RequiredPlaceholder ||
+               atomType == AtomType::UnorderedPlaceholder ||
+               atomType == AtomType::CombinedPlaceholder;
+    }
+    
+    bool isOptionalPlaceholder() const { return atomType == AtomType::OptionalPlaceholder; }
+    bool isRequiredPlaceholder() const { return atomType == AtomType::RequiredPlaceholder; }
+    bool isUnorderedPlaceholder() const { return atomType == AtomType::UnorderedPlaceholder; }
+    bool isCombinedPlaceholder() const { return atomType == AtomType::CombinedPlaceholder; }
+    bool isVariadic() const { return atomType == AtomType::Variadic; }
+    
     void setPlaceholder(const std::string& placeholder);
+    void setOptionalPlaceholder(const std::string& placeholder);
+    void setRequiredPlaceholder(const std::string& placeholder);
+    void setUnorderedPlaceholder(const std::string& placeholder);
+    void setCombinedPlaceholder(const std::string& placeholder, const std::string& modifiers);
+    void setVariadic();
+    
     std::string getPlaceholder() const;
+    std::string getPlaceholderModifiers() const;
     
     // 变量管理
     bool isVariable() const { return atomType == AtomType::Variable; }

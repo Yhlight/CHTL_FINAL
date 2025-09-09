@@ -86,6 +86,28 @@ bool CHTLLexer::isMultiLineCommentEnd() const {
     return currentChar() == '*' && peekChar() == '/';
 }
 
+bool CHTLLexer::isInUnquotedLiteralContext() const {
+    // 检查是否在属性值、CSS属性值、或CHTL JS函数参数等上下文中
+    // 这里简化实现，实际需要更复杂的上下文分析
+    
+    // 向前查找最近的上下文标记
+    size_t pos = position;
+    while (pos > 0) {
+        pos--;
+        char c = source[pos];
+        
+        if (c == ':' || c == '=') {
+            // 在属性赋值上下文中
+            return true;
+        } else if (c == '{' || c == '}' || c == ';' || c == '\n') {
+            // 遇到块边界或语句结束
+            break;
+        }
+    }
+    
+    return false;
+}
+
 bool CHTLLexer::isGeneratorComment() const {
     return currentChar() == '-' && peekChar() == '-';
 }
@@ -155,6 +177,28 @@ Token CHTLLexer::scanNumber() {
     
     std::string value = source.substr(start, position - start);
     return Token(TokenType::NUMBER, value, startLine, startColumn, start);
+}
+
+Token CHTLLexer::scanUnquotedLiteral() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    // 无修饰字面量：以字母开头，包含字母、数字、连字符、下划线
+    while (position < source.length() && 
+           (isAlphaNumeric(currentChar()) || currentChar() == '-' || currentChar() == '_')) {
+        advance();
+    }
+    
+    std::string value = source.substr(start, position - start);
+    
+    // 检查是否为关键字
+    TokenType keywordType = identifyKeyword(value);
+    if (keywordType != TokenType::IDENTIFIER) {
+        return Token(keywordType, value, startLine, startColumn, start);
+    }
+    
+    return Token(TokenType::UNQUOTED_LITERAL, value, startLine, startColumn, start);
 }
 
 Token CHTLLexer::scanComment() {
@@ -346,7 +390,12 @@ TokenStream CHTLLexer::tokenize() {
         }
         
         if (isAlpha(c)) {
-            tokens.push_back(scanIdentifier());
+            // 检查是否为无修饰字面量（在特定上下文中）
+            if (isInUnquotedLiteralContext()) {
+                tokens.push_back(scanUnquotedLiteral());
+            } else {
+                tokens.push_back(scanIdentifier());
+            }
             continue;
         }
         

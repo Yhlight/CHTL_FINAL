@@ -31,6 +31,7 @@ private:
     Token scanIdentifier();
     Token scanString();
     Token scanNumber();
+    Token scanUnquotedLiteral();
     Token scanComment();
     Token scanOperator();
     Token scanDelimiter();
@@ -46,6 +47,7 @@ private:
     bool isCommentStart() const;
     bool isMultiLineCommentStart() const;
     bool isMultiLineCommentEnd() const;
+    bool isInUnquotedLiteralContext() const;
     
     // 关键字和运算符识别
     TokenType identifyKeyword(const std::string& value) const;
