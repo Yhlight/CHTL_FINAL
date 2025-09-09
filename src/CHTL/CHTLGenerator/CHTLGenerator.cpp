@@ -2,6 +2,7 @@
 #include "CHTLNode/ElementNode.h"
 #include "CHTLNode/TextNode.h"
 #include "CHTLNode/CommentNode.h"
+#include "CHTLNode/OriginNode.h"
 
 std::string CHTLGenerator::generate(BaseNode& root) {
     root.accept(*this);
@@ -15,6 +16,14 @@ void CHTLGenerator::doIndent() {
 }
 
 void CHTLGenerator::visit(ElementNode& node) {
+    // Special handling for the dummy root node created by the parser
+    if (node.getTagName() == "root") {
+        for (const auto& child : node.getChildren()) {
+            child->accept(*this);
+        }
+        return;
+    }
+
     doIndent();
     output += "<" + node.getTagName();
 
@@ -23,8 +32,6 @@ void CHTLGenerator::visit(ElementNode& node) {
     }
 
     if (node.getChildren().empty()) {
-        // Handle self-closing tags later if needed. For now, all tags have a closing tag.
-        // A simple list of self-closing tags could be checked here.
         output += "></" + node.getTagName() + ">\n";
         return;
     }
@@ -49,4 +56,14 @@ void CHTLGenerator::visit(TextNode& node) {
 void CHTLGenerator::visit(CommentNode& node) {
     doIndent();
     output += "<!-- " + node.getText() + " -->\n";
+}
+
+void CHTLGenerator::visit(OriginNode& node) {
+    // As per spec, origin blocks are output directly without processing.
+    // We might add indentation based on the generator's state, but for now, raw is raw.
+    output += node.getContent();
+    // Add a newline for cleaner separation in the output, if the content doesn't have one.
+    if (!output.empty() && output.back() != '\n') {
+        output += '\n';
+    }
 }

@@ -21,9 +21,8 @@ enum class TokenType {
     RightParen,         // )
     LeftBracket,        // [
     RightBracket,       // ]
-    Colon,              // :
+    Colon,              // : or =
     Semicolon,          // ;
-    Equals,             // =
     At,                 // @
     Hash,               // #
     Dot,                // .
@@ -35,6 +34,7 @@ enum class TokenType {
     // Keywords
     Text,               // text
     Style,              // style
+    TemplateKeyword,    // [Template]
 };
 
 struct Token {
@@ -42,6 +42,7 @@ struct Token {
     std::string lexeme;
     int line;
     int column;
+    size_t offset; // The starting offset in the source string
 
     // For debugging
     std::string toString() const;

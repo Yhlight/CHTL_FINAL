@@ -130,6 +130,30 @@ CHTL/fast:
 	cd /app/build/build/build && $(MAKE) $(MAKESILENT) -f src/CHTL/CMakeFiles/CHTL.dir/build.make src/CHTL/CMakeFiles/CHTL.dir/build
 .PHONY : CHTL/fast
 
+CHTLContext/CHTLContext.o: CHTLContext/CHTLContext.cpp.o
+.PHONY : CHTLContext/CHTLContext.o
+
+# target to build an object file
+CHTLContext/CHTLContext.cpp.o:
+	cd /app/build/build/build && $(MAKE) $(MAKESILENT) -f src/CHTL/CMakeFiles/CHTL.dir/build.make src/CHTL/CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.o
+.PHONY : CHTLContext/CHTLContext.cpp.o
+
+CHTLContext/CHTLContext.i: CHTLContext/CHTLContext.cpp.i
+.PHONY : CHTLContext/CHTLContext.i
+
+# target to preprocess a source file
+CHTLContext/CHTLContext.cpp.i:
+	cd /app/build/build/build && $(MAKE) $(MAKESILENT) -f src/CHTL/CMakeFiles/CHTL.dir/build.make src/CHTL/CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.i
+.PHONY : CHTLContext/CHTLContext.cpp.i
+
+CHTLContext/CHTLContext.s: CHTLContext/CHTLContext.cpp.s
+.PHONY : CHTLContext/CHTLContext.s
+
+# target to generate assembly for a file
+CHTLContext/CHTLContext.cpp.s:
+	cd /app/build/build/build && $(MAKE) $(MAKESILENT) -f src/CHTL/CMakeFiles/CHTL.dir/build.make src/CHTL/CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.s
+.PHONY : CHTLContext/CHTLContext.cpp.s
+
 CHTLDebug/ASTPrinter.o: CHTLDebug/ASTPrinter.cpp.o
 .PHONY : CHTLDebug/ASTPrinter.o
 
@@ -274,6 +298,30 @@ CHTLNode/ElementNode.cpp.s:
 	cd /app/build/build/build && $(MAKE) $(MAKESILENT) -f src/CHTL/CMakeFiles/CHTL.dir/build.make src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/ElementNode.cpp.s
 .PHONY : CHTLNode/ElementNode.cpp.s
 
+CHTLNode/OriginNode.o: CHTLNode/OriginNode.cpp.o
+.PHONY : CHTLNode/OriginNode.o
+
+# target to build an object file
+CHTLNode/OriginNode.cpp.o:
+	cd /app/build/build/build && $(MAKE) $(MAKESILENT) -f src/CHTL/CMakeFiles/CHTL.dir/build.make src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.o
+.PHONY : CHTLNode/OriginNode.cpp.o
+
+CHTLNode/OriginNode.i: CHTLNode/OriginNode.cpp.i
+.PHONY : CHTLNode/OriginNode.i
+
+# target to preprocess a source file
+CHTLNode/OriginNode.cpp.i:
+	cd /app/build/build/build && $(MAKE) $(MAKESILENT) -f src/CHTL/CMakeFiles/CHTL.dir/build.make src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.i
+.PHONY : CHTLNode/OriginNode.cpp.i
+
+CHTLNode/OriginNode.s: CHTLNode/OriginNode.cpp.s
+.PHONY : CHTLNode/OriginNode.s
+
+# target to generate assembly for a file
+CHTLNode/OriginNode.cpp.s:
+	cd /app/build/build/build && $(MAKE) $(MAKESILENT) -f src/CHTL/CMakeFiles/CHTL.dir/build.make src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.s
+.PHONY : CHTLNode/OriginNode.cpp.s
+
 CHTLNode/TextNode.o: CHTLNode/TextNode.cpp.o
 .PHONY : CHTLNode/TextNode.o
 
@@ -331,6 +379,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... CHTL"
+	@echo "... CHTLContext/CHTLContext.o"
+	@echo "... CHTLContext/CHTLContext.i"
+	@echo "... CHTLContext/CHTLContext.s"
 	@echo "... CHTLDebug/ASTPrinter.o"
 	@echo "... CHTLDebug/ASTPrinter.i"
 	@echo "... CHTLDebug/ASTPrinter.s"
@@ -349,6 +400,9 @@ help:
 	@echo "... CHTLNode/ElementNode.o"
 	@echo "... CHTLNode/ElementNode.i"
 	@echo "... CHTLNode/ElementNode.s"
+	@echo "... CHTLNode/OriginNode.o"
+	@echo "... CHTLNode/OriginNode.i"
+	@echo "... CHTLNode/OriginNode.s"
 	@echo "... CHTLNode/TextNode.o"
 	@echo "... CHTLNode/TextNode.i"
 	@echo "... CHTLNode/TextNode.s"

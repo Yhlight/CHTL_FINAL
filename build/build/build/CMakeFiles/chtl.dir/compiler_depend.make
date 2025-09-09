@@ -8,9 +8,11 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
   /app/src/CHTL/CHTLNode/Attribute.h \
   /app/src/CHTL/CHTLNode/BaseNode.h \
   /app/src/CHTL/CHTLNode/ElementNode.h \
+  /app/src/CHTL/CHTLNode/OriginNode.h \
   /app/src/CHTL/CHTLNode/TextNode.h \
   /app/src/CHTL/CHTLNode/Visitor.h \
   /app/src/CHTL/CHTLParser/CHTLParser.h \
+  /app/src/Util/FileSystem/FileSystem.h \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
   /usr/include/asm-generic/errno.h \
@@ -263,8 +265,6 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/clockid_t.h:
-
 /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h:
@@ -329,9 +329,7 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
 
 /usr/include/linux/errno.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
-
-/usr/include/c++/13/bits/refwrap.h:
+/usr/include/features.h:
 
 /usr/include/c++/13/debug/debug.h:
 
@@ -361,11 +359,9 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
 
 /usr/include/asm-generic/errno-base.h:
 
-/usr/include/c++/13/bits/nested_exception.h:
+/usr/include/features-time64.h:
 
-/usr/include/c++/13/bits/istream.tcc:
-
-/usr/include/c++/13/bits/exception_ptr.h:
+/usr/include/c++/13/string_view:
 
 /usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
 
@@ -385,11 +381,23 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
 
 /usr/include/c++/13/bits/move.h:
 
+/usr/include/x86_64-linux-gnu/bits/types/clockid_t.h:
+
+/app/src/CHTL/CHTLNode/OriginNode.h:
+
 /usr/include/x86_64-linux-gnu/bits/types.h:
 
 /usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
 
 /usr/include/c++/13/bits/cpp_type_traits.h:
+
+/usr/include/alloca.h:
+
+/usr/include/c++/13/bits/nested_exception.h:
+
+/usr/include/c++/13/bits/istream.tcc:
+
+/usr/include/c++/13/bits/exception_ptr.h:
 
 /usr/include/c++/13/cwctype:
 
@@ -398,8 +406,6 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
 /usr/include/c++/13/iosfwd:
 
 /usr/include/c++/13/cwchar:
-
-/usr/include/alloca.h:
 
 /app/src/CHTL/CHTLNode/BaseNode.h:
 
@@ -433,22 +439,6 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
 
 /usr/include/c++/13/bits/shared_ptr_base.h:
 
-/usr/include/c++/13/bits/cxxabi_forced.h:
-
-/usr/include/c++/13/bits/ostream.tcc:
-
-/app/src/CHTL/CHTLNode/TextNode.h:
-
-/usr/include/c++/13/backward/auto_ptr.h:
-
-/app/src/CHTL/CHTLParser/CHTLParser.h:
-
-/usr/include/c++/13/ios:
-
-/usr/include/c++/13/bits/concept_check.h:
-
-/usr/include/c++/13/bits/alloc_traits.h:
-
 /usr/include/c++/13/bits/locale_facets.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
@@ -459,13 +449,23 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
 
 /app/src/CHTL/CHTLLexer/CHTLLexer.h:
 
-/usr/include/c++/13/bits/locale_facets.tcc:
+/usr/include/c++/13/bits/cxxabi_forced.h:
 
-/usr/include/c++/13/bits/requires_hosted.h:
+/usr/include/c++/13/bits/ostream.tcc:
 
-/usr/include/c++/13/bits/string_view.tcc:
+/app/src/CHTL/CHTLNode/TextNode.h:
 
-/usr/include/features.h:
+/app/src/Util/FileSystem/FileSystem.h:
+
+/usr/include/c++/13/backward/auto_ptr.h:
+
+/app/src/CHTL/CHTLParser/CHTLParser.h:
+
+/usr/include/c++/13/ios:
+
+/usr/include/c++/13/bits/concept_check.h:
+
+/usr/include/c++/13/bits/alloc_traits.h:
 
 /usr/include/c++/13/backward/binders.h:
 
@@ -480,6 +480,16 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
 /usr/include/x86_64-linux-gnu/bits/endianness.h:
 
 /usr/include/c++/13/bits/basic_string.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
+
+/usr/include/c++/13/bits/refwrap.h:
+
+/usr/include/c++/13/bits/locale_facets.tcc:
+
+/usr/include/c++/13/bits/requires_hosted.h:
+
+/usr/include/c++/13/bits/string_view.tcc:
 
 /usr/include/x86_64-linux-gnu/bits/struct_mutex.h:
 
@@ -551,9 +561,9 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/long-double.h:
 
-/usr/include/c++/13/bits/new_allocator.h:
-
 /usr/include/c++/13/bits/atomic_base.h:
+
+/usr/include/c++/13/bits/new_allocator.h:
 
 /usr/include/c++/13/bits/uses_allocator_args.h:
 
@@ -595,9 +605,9 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
 
 /usr/include/c++/13/tuple:
 
-/usr/include/c++/13/bits/functional_hash.h:
-
 /app/src/CHTL/CHTLNode/Attribute.h:
+
+/usr/include/c++/13/bits/functional_hash.h:
 
 /usr/include/errno.h:
 
@@ -624,10 +634,6 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
 /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
 
 /usr/include/c++/13/pstl/glue_memory_defs.h:
-
-/usr/include/c++/13/string_view:
-
-/usr/include/features-time64.h:
 
 /usr/include/c++/13/ext/alloc_traits.h:
 

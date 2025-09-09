@@ -1,11 +1,23 @@
+[Template] @Style DefaultText
+{
+    font-size: 16px;
+    color: black;
+}
+
 html {
     head {
         title { "My Website" }
     }
     body {
         div {
-            id: my_div;
+            id = my_div;
             class: "container";
+
+            style {
+                @Style DefaultText;
+                background-color: red;
+            }
+
             text {
                 Hello World
             }

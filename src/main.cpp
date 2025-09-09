@@ -1,6 +1,8 @@
 #include <iostream>
+#include <memory>
 #include "Util/FileSystem/FileSystem.h"
 #include "CHTLLexer/CHTLLexer.h"
+#include "CHTLContext/CHTLContext.h"
 #include "CHTLParser/CHTLParser.h"
 #include "CHTLGenerator/CHTLGenerator.h"
 
@@ -26,16 +28,18 @@ int main(int argc, char* argv[]) {
         std::vector<Token> tokens = lexer.tokenize();
 
         // 2. Parse
-        CHTLParser parser(tokens);
-        std::unique_ptr<ElementNode> ast = parser.parse();
+        CHTLContext context;
+        CHTLParser parser(tokens, source, &context);
+        parser.parse(); // This populates the context and the parser's internal root node
 
         // 3. Generate HTML
-        if (ast) {
+        ElementNode* astRoot = parser.getRootNode();
+        if (astRoot) {
             CHTLGenerator generator;
-            std::string html = generator.generate(*ast);
+            std::string html = generator.generate(*astRoot);
             std::cout << html;
         } else {
-            std::cout << "Failed to parse the source." << std::endl;
+            std::cout << "Failed to parse the source: No root element found." << std::endl;
         }
 
     } catch (const std::runtime_error& e) {

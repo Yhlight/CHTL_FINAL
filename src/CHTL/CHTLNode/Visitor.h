@@ -5,6 +5,7 @@
 class ElementNode;
 class TextNode;
 class CommentNode;
+class OriginNode;
 
 class Visitor {
 public:
@@ -12,6 +13,7 @@ public:
     virtual void visit(ElementNode& node) = 0;
     virtual void visit(TextNode& node) = 0;
     virtual void visit(CommentNode& node) = 0;
+    virtual void visit(OriginNode& node) = 0;
 };
 
 #endif // VISITOR_H

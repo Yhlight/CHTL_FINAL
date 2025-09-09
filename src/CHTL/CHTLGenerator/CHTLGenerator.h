@@ -12,6 +12,7 @@ public:
     void visit(ElementNode& node) override;
     void visit(TextNode& node) override;
     void visit(CommentNode& node) override;
+    void visit(OriginNode& node) override;
 
 private:
     std::string output;

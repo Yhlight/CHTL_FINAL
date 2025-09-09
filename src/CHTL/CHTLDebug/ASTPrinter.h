@@ -2,7 +2,7 @@
 #define AST_PRINTER_H
 
 #include "CHTLNode/Visitor.h"
-#include "CHTLNode/BaseNode.h" // Include BaseNode definition
+#include "CHTLNode/BaseNode.h"
 #include <string>
 
 class ASTPrinter : public Visitor {
@@ -11,6 +11,7 @@ public:
     void visit(ElementNode& node) override;
     void visit(TextNode& node) override;
     void visit(CommentNode& node) override;
+    void visit(OriginNode& node) override;
 
 private:
     std::string result;

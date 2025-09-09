@@ -148,15 +148,9 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
  /usr/include/c++/13/bits/locale_facets.tcc \
  /usr/include/c++/13/bits/basic_ios.tcc \
  /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
- /usr/include/c++/13/bits/istream.tcc \
- /app/src/Util/FileSystem/FileSystem.h /usr/include/c++/13/vector \
+ /usr/include/c++/13/bits/istream.tcc /usr/include/c++/13/memory \
+ /usr/include/c++/13/bits/stl_tempbuf.h \
  /usr/include/c++/13/bits/stl_uninitialized.h \
- /usr/include/c++/13/bits/stl_vector.h \
- /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc /app/src/CHTL/CHTLLexer/CHTLLexer.h \
- /app/src/CHTL/CHTLLexer/Token.h /app/src/CHTL/CHTLParser/CHTLParser.h \
- /app/src/CHTL/CHTLLexer/Token.h /app/src/CHTL/CHTLNode/BaseNode.h \
- /usr/include/c++/13/memory /usr/include/c++/13/bits/stl_tempbuf.h \
  /usr/include/c++/13/bits/stl_raw_storage_iter.h \
  /usr/include/c++/13/bits/align.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
@@ -174,7 +168,19 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h \
- /app/src/CHTL/CHTLNode/ElementNode.h /app/src/CHTL/CHTLNode/BaseNode.h \
- /app/src/CHTL/CHTLNode/Attribute.h /app/src/CHTL/CHTLNode/TextNode.h \
+ /app/src/Util/FileSystem/FileSystem.h /usr/include/c++/13/vector \
+ /usr/include/c++/13/bits/stl_vector.h \
+ /usr/include/c++/13/bits/stl_bvector.h \
+ /usr/include/c++/13/bits/vector.tcc /app/src/CHTL/CHTLLexer/CHTLLexer.h \
+ /app/src/CHTL/CHTLLexer/Token.h /app/src/CHTL/CHTLContext/CHTLContext.h \
+ /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \
+ /usr/include/c++/13/bits/node_handle.h \
+ /usr/include/c++/13/bits/stl_map.h \
+ /usr/include/c++/13/bits/stl_multimap.h \
+ /usr/include/c++/13/bits/erase_if.h \
+ /app/src/CHTL/CHTLParser/CHTLParser.h /app/src/CHTL/CHTLLexer/Token.h \
+ /app/src/CHTL/CHTLNode/BaseNode.h /app/src/CHTL/CHTLNode/ElementNode.h \
+ /app/src/CHTL/CHTLNode/BaseNode.h /app/src/CHTL/CHTLNode/Attribute.h \
+ /app/src/CHTL/CHTLNode/TextNode.h /app/src/CHTL/CHTLNode/OriginNode.h \
  /app/src/CHTL/CHTLGenerator/CHTLGenerator.h \
  /app/src/CHTL/CHTLNode/Visitor.h

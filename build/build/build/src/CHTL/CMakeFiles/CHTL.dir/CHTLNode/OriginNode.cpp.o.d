@@ -1,7 +1,6 @@
-src/CHTL/CMakeFiles/CHTL.dir/CHTLGenerator/CHTLGenerator.cpp.o: \
- /app/src/CHTL/CHTLGenerator/CHTLGenerator.cpp /usr/include/stdc-predef.h \
- /app/src/CHTL/CHTLGenerator/CHTLGenerator.h \
- /app/src/CHTL/CHTLNode/Visitor.h /app/src/CHTL/CHTLNode/BaseNode.h \
+src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.o: \
+ /app/src/CHTL/CHTLNode/OriginNode.cpp /usr/include/stdc-predef.h \
+ /app/src/CHTL/CHTLNode/OriginNode.h /app/src/CHTL/CHTLNode/BaseNode.h \
  /usr/include/c++/13/memory /usr/include/c++/13/bits/memoryfwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -155,6 +154,4 @@ src/CHTL/CMakeFiles/CHTL.dir/CHTLGenerator/CHTLGenerator.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
  /usr/include/c++/13/bits/charconv.h \
  /usr/include/c++/13/bits/basic_string.tcc \
- /app/src/CHTL/CHTLNode/ElementNode.h /app/src/CHTL/CHTLNode/BaseNode.h \
- /app/src/CHTL/CHTLNode/Attribute.h /app/src/CHTL/CHTLNode/TextNode.h \
- /app/src/CHTL/CHTLNode/CommentNode.h /app/src/CHTL/CHTLNode/OriginNode.h
+ /app/src/CHTL/CHTLNode/Visitor.h

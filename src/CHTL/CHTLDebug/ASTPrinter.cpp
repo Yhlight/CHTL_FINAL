@@ -2,6 +2,7 @@
 #include "CHTLNode/ElementNode.h"
 #include "CHTLNode/TextNode.h"
 #include "CHTLNode/CommentNode.h"
+#include "CHTLNode/OriginNode.h"
 
 std::string ASTPrinter::print(BaseNode& node) {
     node.accept(*this);
@@ -38,4 +39,9 @@ void ASTPrinter::visit(TextNode& node) {
 void ASTPrinter::visit(CommentNode& node) {
     indent();
     result += "Comment(\"" + node.getText() + "\")\n";
+}
+
+void ASTPrinter::visit(OriginNode& node) {
+    indent();
+    result += "Origin(Type: " + node.getType() + ", Content: \"" + node.getContent() + "\")\n";
 }

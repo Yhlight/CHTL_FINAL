@@ -139,10 +139,24 @@ src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/CommentNode.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTL.dir/CHTLNode/CommentNode.cpp.s"
 	cd /app/build/build/build/src/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTL/CHTLNode/CommentNode.cpp -o CMakeFiles/CHTL.dir/CHTLNode/CommentNode.cpp.s
 
+src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.o: src/CHTL/CMakeFiles/CHTL.dir/flags.make
+src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.o: /app/src/CHTL/CHTLNode/OriginNode.cpp
+src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.o: src/CHTL/CMakeFiles/CHTL.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/build/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.o"
+	cd /app/build/build/build/src/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.o -MF CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.o.d -o CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.o -c /app/src/CHTL/CHTLNode/OriginNode.cpp
+
+src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.i"
+	cd /app/build/build/build/src/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/src/CHTL/CHTLNode/OriginNode.cpp > CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.i
+
+src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.s"
+	cd /app/build/build/build/src/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTL/CHTLNode/OriginNode.cpp -o CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.s
+
 src/CHTL/CMakeFiles/CHTL.dir/CHTLParser/CHTLParser.cpp.o: src/CHTL/CMakeFiles/CHTL.dir/flags.make
 src/CHTL/CMakeFiles/CHTL.dir/CHTLParser/CHTLParser.cpp.o: /app/src/CHTL/CHTLParser/CHTLParser.cpp
 src/CHTL/CMakeFiles/CHTL.dir/CHTLParser/CHTLParser.cpp.o: src/CHTL/CMakeFiles/CHTL.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/build/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object src/CHTL/CMakeFiles/CHTL.dir/CHTLParser/CHTLParser.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/build/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object src/CHTL/CMakeFiles/CHTL.dir/CHTLParser/CHTLParser.cpp.o"
 	cd /app/build/build/build/src/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CHTL/CMakeFiles/CHTL.dir/CHTLParser/CHTLParser.cpp.o -MF CMakeFiles/CHTL.dir/CHTLParser/CHTLParser.cpp.o.d -o CMakeFiles/CHTL.dir/CHTLParser/CHTLParser.cpp.o -c /app/src/CHTL/CHTLParser/CHTLParser.cpp
 
 src/CHTL/CMakeFiles/CHTL.dir/CHTLParser/CHTLParser.cpp.i: cmake_force
@@ -153,10 +167,24 @@ src/CHTL/CMakeFiles/CHTL.dir/CHTLParser/CHTLParser.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTL.dir/CHTLParser/CHTLParser.cpp.s"
 	cd /app/build/build/build/src/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTL/CHTLParser/CHTLParser.cpp -o CMakeFiles/CHTL.dir/CHTLParser/CHTLParser.cpp.s
 
+src/CHTL/CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.o: src/CHTL/CMakeFiles/CHTL.dir/flags.make
+src/CHTL/CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.o: /app/src/CHTL/CHTLContext/CHTLContext.cpp
+src/CHTL/CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.o: src/CHTL/CMakeFiles/CHTL.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/build/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object src/CHTL/CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.o"
+	cd /app/build/build/build/src/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CHTL/CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.o -MF CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.o.d -o CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.o -c /app/src/CHTL/CHTLContext/CHTLContext.cpp
+
+src/CHTL/CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.i"
+	cd /app/build/build/build/src/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/src/CHTL/CHTLContext/CHTLContext.cpp > CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.i
+
+src/CHTL/CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.s"
+	cd /app/build/build/build/src/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTL/CHTLContext/CHTLContext.cpp -o CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.s
+
 src/CHTL/CMakeFiles/CHTL.dir/CHTLDebug/ASTPrinter.cpp.o: src/CHTL/CMakeFiles/CHTL.dir/flags.make
 src/CHTL/CMakeFiles/CHTL.dir/CHTLDebug/ASTPrinter.cpp.o: /app/src/CHTL/CHTLDebug/ASTPrinter.cpp
 src/CHTL/CMakeFiles/CHTL.dir/CHTLDebug/ASTPrinter.cpp.o: src/CHTL/CMakeFiles/CHTL.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/build/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object src/CHTL/CMakeFiles/CHTL.dir/CHTLDebug/ASTPrinter.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/build/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object src/CHTL/CMakeFiles/CHTL.dir/CHTLDebug/ASTPrinter.cpp.o"
 	cd /app/build/build/build/src/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CHTL/CMakeFiles/CHTL.dir/CHTLDebug/ASTPrinter.cpp.o -MF CMakeFiles/CHTL.dir/CHTLDebug/ASTPrinter.cpp.o.d -o CMakeFiles/CHTL.dir/CHTLDebug/ASTPrinter.cpp.o -c /app/src/CHTL/CHTLDebug/ASTPrinter.cpp
 
 src/CHTL/CMakeFiles/CHTL.dir/CHTLDebug/ASTPrinter.cpp.i: cmake_force
@@ -170,7 +198,7 @@ src/CHTL/CMakeFiles/CHTL.dir/CHTLDebug/ASTPrinter.cpp.s: cmake_force
 src/CHTL/CMakeFiles/CHTL.dir/CHTLGenerator/CHTLGenerator.cpp.o: src/CHTL/CMakeFiles/CHTL.dir/flags.make
 src/CHTL/CMakeFiles/CHTL.dir/CHTLGenerator/CHTLGenerator.cpp.o: /app/src/CHTL/CHTLGenerator/CHTLGenerator.cpp
 src/CHTL/CMakeFiles/CHTL.dir/CHTLGenerator/CHTLGenerator.cpp.o: src/CHTL/CMakeFiles/CHTL.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/build/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object src/CHTL/CMakeFiles/CHTL.dir/CHTLGenerator/CHTLGenerator.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/build/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object src/CHTL/CMakeFiles/CHTL.dir/CHTLGenerator/CHTLGenerator.cpp.o"
 	cd /app/build/build/build/src/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CHTL/CMakeFiles/CHTL.dir/CHTLGenerator/CHTLGenerator.cpp.o -MF CMakeFiles/CHTL.dir/CHTLGenerator/CHTLGenerator.cpp.o.d -o CMakeFiles/CHTL.dir/CHTLGenerator/CHTLGenerator.cpp.o -c /app/src/CHTL/CHTLGenerator/CHTLGenerator.cpp
 
 src/CHTL/CMakeFiles/CHTL.dir/CHTLGenerator/CHTLGenerator.cpp.i: cmake_force
@@ -188,7 +216,9 @@ CHTL_OBJECTS = \
 "CMakeFiles/CHTL.dir/CHTLNode/ElementNode.cpp.o" \
 "CMakeFiles/CHTL.dir/CHTLNode/TextNode.cpp.o" \
 "CMakeFiles/CHTL.dir/CHTLNode/CommentNode.cpp.o" \
+"CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.o" \
 "CMakeFiles/CHTL.dir/CHTLParser/CHTLParser.cpp.o" \
+"CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.o" \
 "CMakeFiles/CHTL.dir/CHTLDebug/ASTPrinter.cpp.o" \
 "CMakeFiles/CHTL.dir/CHTLGenerator/CHTLGenerator.cpp.o"
 
@@ -200,12 +230,14 @@ src/CHTL/libCHTL.a: src/CHTL/CMakeFiles/CHTL.dir/CHTLLexer/Token.cpp.o
 src/CHTL/libCHTL.a: src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/ElementNode.cpp.o
 src/CHTL/libCHTL.a: src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/TextNode.cpp.o
 src/CHTL/libCHTL.a: src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/CommentNode.cpp.o
+src/CHTL/libCHTL.a: src/CHTL/CMakeFiles/CHTL.dir/CHTLNode/OriginNode.cpp.o
 src/CHTL/libCHTL.a: src/CHTL/CMakeFiles/CHTL.dir/CHTLParser/CHTLParser.cpp.o
+src/CHTL/libCHTL.a: src/CHTL/CMakeFiles/CHTL.dir/CHTLContext/CHTLContext.cpp.o
 src/CHTL/libCHTL.a: src/CHTL/CMakeFiles/CHTL.dir/CHTLDebug/ASTPrinter.cpp.o
 src/CHTL/libCHTL.a: src/CHTL/CMakeFiles/CHTL.dir/CHTLGenerator/CHTLGenerator.cpp.o
 src/CHTL/libCHTL.a: src/CHTL/CMakeFiles/CHTL.dir/build.make
 src/CHTL/libCHTL.a: src/CHTL/CMakeFiles/CHTL.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/build/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX static library libCHTL.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/build/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX static library libCHTL.a"
 	cd /app/build/build/build/src/CHTL && $(CMAKE_COMMAND) -P CMakeFiles/CHTL.dir/cmake_clean_target.cmake
 	cd /app/build/build/build/src/CHTL && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/CHTL.dir/link.txt --verbose=$(VERBOSE)
 

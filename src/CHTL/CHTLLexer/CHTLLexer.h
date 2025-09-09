@@ -21,12 +21,12 @@ private:
     bool isAtEnd();
     void skipWhitespaceAndComments();
 
-    Token makeToken(TokenType type, const std::string& lexeme);
-    Token makeToken(TokenType type);
+    Token makeToken(TokenType type, const std::string& lexeme, size_t startOffset);
+    Token makeToken(TokenType type, size_t startOffset);
     Token errorToken(const std::string& message);
-    Token identifier();
-    Token unquotedLiteral();
-    Token stringLiteral();
+    Token identifier(size_t startOffset);
+    Token unquotedLiteral(size_t startOffset);
+    Token stringLiteral(size_t startOffset);
 
     TokenType identifierType(const std::string& identifier);
 };

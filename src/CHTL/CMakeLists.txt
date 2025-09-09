@@ -4,7 +4,9 @@ add_library(CHTL STATIC
     CHTLNode/ElementNode.cpp
     CHTLNode/TextNode.cpp
     CHTLNode/CommentNode.cpp
+    CHTLNode/OriginNode.cpp
     CHTLParser/CHTLParser.cpp
+    CHTLContext/CHTLContext.cpp
     CHTLDebug/ASTPrinter.cpp
     CHTLGenerator/CHTLGenerator.cpp
 )
