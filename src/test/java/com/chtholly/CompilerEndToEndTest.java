@@ -100,4 +100,24 @@ class CompilerEndToEndTest {
         assertEquals(expectedHtml, result.getHtml());
         assertEquals(expectedCss.trim(), result.getCss().trim());
     }
+
+    @Test
+    void testStyleWithBinaryExpression() {
+        String chtlSource = """
+        div {
+            style {
+                width: 100px + 50px;
+            }
+        }
+        """;
+
+        // The evaluator should now correctly compute the result.
+        String expectedHtml = "<div style=\"width:150px;\"></div>";
+
+        CHTLGenerator generator = new CHTLGenerator();
+        CompilationResult result = generator.generate(new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse());
+
+        assertEquals(expectedHtml, result.getHtml());
+        assertTrue(result.getCss().isEmpty());
+    }
 }

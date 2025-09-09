@@ -1,14 +1,16 @@
 package com.chtholly.chthl.ast;
 
+import com.chtholly.chthl.ast.expr.Expression;
+
 /**
  * Represents a single key-value style property within a style block or selector block.
  * e.g., <code>color: red;</code>
  */
 public class StylePropertyNode implements Node {
     public final String key;
-    public final String value; // For now, the value is a simple string. This will be expanded later.
+    public final Expression value;
 
-    public StylePropertyNode(String key, String value) {
+    public StylePropertyNode(String key, Expression value) {
         this.key = key;
         this.value = value;
     }

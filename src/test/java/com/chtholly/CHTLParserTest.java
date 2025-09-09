@@ -5,6 +5,7 @@ import com.chtholly.chthl.ast.Node;
 import com.chtholly.chthl.ast.SelectorBlockNode;
 import com.chtholly.chthl.ast.StyleBlockNode;
 import com.chtholly.chthl.ast.TextNode;
+import com.chtholly.chthl.ast.expr.VariableExpr;
 import com.chtholly.chthl.lexer.CHTLLexer;
 import com.chtholly.chthl.lexer.Token;
 import com.chtholly.chthl.parser.CHTLParser;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CHTLParserTest {
 
+    // ... existing tests for simple elements, text, attributes ...
     @Test
     void testSimpleElementParsing() {
         String input = "html { body {} }";
@@ -116,10 +118,16 @@ class CHTLParserTest {
 
         StyleBlockNode styleNode = (StyleBlockNode) child;
         assertEquals(2, styleNode.directProperties.size());
+
+        // Test first property
         assertEquals("color", styleNode.directProperties.get(0).key);
-        assertEquals("red", styleNode.directProperties.get(0).value);
+        assertTrue(styleNode.directProperties.get(0).value instanceof VariableExpr);
+        assertEquals("red", ((VariableExpr) styleNode.directProperties.get(0).value).name.getLexeme());
+
+        // Test second property
         assertEquals("font-size", styleNode.directProperties.get(1).key);
-        assertEquals("16px", styleNode.directProperties.get(1).value);
+        assertTrue(styleNode.directProperties.get(1).value instanceof VariableExpr);
+        assertEquals("16px", ((VariableExpr) styleNode.directProperties.get(1).value).name.getLexeme());
     }
 
     @Test
@@ -147,9 +155,12 @@ class CHTLParserTest {
         // Check direct properties
         assertEquals(2, styleNode.directProperties.size());
         assertEquals("color", styleNode.directProperties.get(0).key);
-        assertEquals("white", styleNode.directProperties.get(0).value);
+        assertTrue(styleNode.directProperties.get(0).value instanceof VariableExpr);
+        assertEquals("white", ((VariableExpr) styleNode.directProperties.get(0).value).name.getLexeme());
+
         assertEquals("font-size", styleNode.directProperties.get(1).key);
-        assertEquals("16px", styleNode.directProperties.get(1).value);
+        assertTrue(styleNode.directProperties.get(1).value instanceof VariableExpr);
+        assertEquals("16px", ((VariableExpr) styleNode.directProperties.get(1).value).name.getLexeme());
 
         // Check selector blocks
         assertEquals(1, styleNode.selectorBlocks.size());
@@ -157,6 +168,7 @@ class CHTLParserTest {
         assertEquals(".box", selectorNode.selector);
         assertEquals(1, selectorNode.properties.size());
         assertEquals("background-color", selectorNode.properties.get(0).key);
-        assertEquals("black", selectorNode.properties.get(0).value);
+        assertTrue(selectorNode.properties.get(0).value instanceof VariableExpr);
+        assertEquals("black", ((VariableExpr) selectorNode.properties.get(0).value).name.getLexeme());
     }
 }

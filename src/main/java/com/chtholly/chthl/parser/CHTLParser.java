@@ -1,6 +1,7 @@
 package com.chtholly.chthl.parser;
 
 import com.chtholly.chthl.ast.*;
+import com.chtholly.chthl.ast.expr.Expression;
 import com.chtholly.chthl.lexer.Token;
 import com.chtholly.chthl.lexer.TokenType;
 
@@ -124,20 +125,21 @@ public class CHTLParser {
         Token name = consume(TokenType.IDENTIFIER, "Expect style property name.");
         consume(TokenType.COLON, "Expect ':' after style property name.");
 
-        StringBuilder valueBuilder = new StringBuilder();
+        List<Token> valueTokens = new ArrayList<>();
         while (!check(TokenType.SEMICOLON) && !isAtEnd()) {
-            if (valueBuilder.length() > 0) {
-                valueBuilder.append(" ");
-            }
-            valueBuilder.append(advance().getLexeme());
+            valueTokens.add(advance());
         }
 
-        if (valueBuilder.length() == 0) {
+        if (valueTokens.isEmpty()) {
             throw new ParseError(peek(), "Style property value cannot be empty.");
         }
 
         consume(TokenType.SEMICOLON, "Expect ';' after style property value.");
-        return new StylePropertyNode(name.getLexeme(), valueBuilder.toString().trim());
+
+        ExpressionParser expressionParser = new ExpressionParser(valueTokens);
+        Expression valueExpression = expressionParser.parse();
+
+        return new StylePropertyNode(name.getLexeme(), valueExpression);
     }
 
     private SelectorBlockNode parseSelectorBlock() {

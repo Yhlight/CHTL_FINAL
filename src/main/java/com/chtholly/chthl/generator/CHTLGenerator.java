@@ -1,6 +1,7 @@
 package com.chtholly.chthl.generator;
 
 import com.chtholly.chthl.ast.*;
+import com.chtholly.chthl.evaluator.ExpressionEvaluator;
 
 import java.util.List;
 import java.util.Map;
@@ -66,9 +67,12 @@ public class CHTLGenerator implements Visitor<String> {
         for (Node child : node.children) {
             if (child instanceof StyleBlockNode) {
                 StyleBlockNode styleNode = (StyleBlockNode) child;
+                // Use the ExpressionEvaluator for direct properties
+                ExpressionEvaluator evaluator = new ExpressionEvaluator(node);
                 for (StylePropertyNode property : styleNode.directProperties) {
+                    String value = evaluator.evaluate(property.value);
                     styleAttrBuilder.append(property.key).append(":")
-                                  .append(property.value).append(";");
+                                  .append(value).append(";");
                 }
 
                 for (SelectorBlockNode selectorBlock : styleNode.selectorBlocks) {
@@ -91,7 +95,6 @@ public class CHTLGenerator implements Visitor<String> {
 
         builder.append("<").append(node.tagName);
 
-        // Use TreeMap to sort attributes for consistent output, making tests reliable.
         Map<String, String> sortedAttributes = new TreeMap<>(node.attributes);
         for (Map.Entry<String, String> attribute : sortedAttributes.entrySet()) {
             builder.append(" ")
@@ -146,11 +149,14 @@ public class CHTLGenerator implements Visitor<String> {
         String resolvedSelector = resolveSelector(node.selector, this.currentElement);
 
         globalCssBuilder.append(resolvedSelector).append(" {\n");
+        // Use the ExpressionEvaluator for properties within selector blocks
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(this.currentElement);
         for (StylePropertyNode property : node.properties) {
+            String value = evaluator.evaluate(property.value);
             globalCssBuilder.append("    ")
                           .append(property.key)
                           .append(": ")
-                          .append(property.value)
+                          .append(value)
                           .append(";\n");
         }
         globalCssBuilder.append("}\n");
