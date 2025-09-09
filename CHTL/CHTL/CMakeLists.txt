@@ -12,6 +12,7 @@ add_subdirectory(CHTLJS)
 add_subdirectory(CHTLGenerator)
 add_subdirectory(CHTLModule)
 add_subdirectory(CHTLScanner)
+add_subdirectory(CHTLCompiler)
 
 # 链接依赖
 target_link_libraries(CHTLCore PUBLIC
@@ -23,6 +24,7 @@ target_link_libraries(CHTLCore PUBLIC
     CHTLGenerator
     CHTLModule
     CHTLScanner
+    CHTLCompiler
 )
 
 # 设置编译选项

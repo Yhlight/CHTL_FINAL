@@ -15,6 +15,7 @@ bin/chtl: \
   lib/libCHTLJSNode.a \
   lib/libCHTLJSLexer.a \
   lib/libCHTLScanner.a \
+  lib/libCHTLCompiler.a \
   /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so \
   /lib/x86_64-linux-gnu/libm.so \
   /lib/x86_64-linux-gnu/libm.so \
@@ -74,6 +75,8 @@ lib/libCHTLJSNode.a:
 lib/libCHTLJSLexer.a:
 
 lib/libCHTLScanner.a:
+
+lib/libCHTLCompiler.a:
 
 /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so:
 

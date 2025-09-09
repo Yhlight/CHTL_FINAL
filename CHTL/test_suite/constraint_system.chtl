@@ -1,0 +1,138 @@
+// 约束系统测试
+// 测试精确约束、类型约束和全局约束
+
+// 命名空间定义
+[Namespace] "App" {
+    // 精确约束 - 限制可用的 HTML 元素
+    except {
+        html: "div, span, p, h1, h2, h3, h4, h5, h6";
+        form: "input, button, select, textarea";
+        list: "ul, ol, li";
+        table: "table, thead, tbody, tr, th, td";
+    }
+    
+    // 类型约束 - 限制可用的类型
+    except {
+        @Html: "div, span, p";
+        [Custom]: "Button, Card, Modal";
+        [Template] @Var: "Theme, Colors, Sizes";
+    }
+}
+
+// 全局约束
+[Namespace] "Global" {
+    // 全局元素约束
+    except {
+        html: "div, span, p, h1, h2, h3, h4, h5, h6, a, img, button, input, form, table, ul, ol, li";
+    }
+    
+    // 全局类型约束
+    except {
+        @Html: "div, span, p, h1, h2, h3, h4, h5, h6";
+        [Custom]: "Button, Card, Modal, Header, Footer";
+        [Template] @Var: "Theme, Colors, Sizes, Layout";
+    }
+}
+
+// 使用约束的元素
+div {
+    class: "constrained-app";
+    
+    // 这些元素应该被约束系统允许
+    header {
+        class: "app-header";
+        
+        h1 {
+            text: "Constrained App";
+        }
+        
+        nav {
+            class: "main-nav";
+            
+            ul {
+                class: "nav-list";
+                
+                li {
+                    class: "nav-item";
+                    
+                    a {
+                        href: "#home";
+                        text: "Home";
+                    }
+                }
+                
+                li {
+                    class: "nav-item";
+                    
+                    a {
+                        href: "#about";
+                        text: "About";
+                    }
+                }
+            }
+        }
+    }
+    
+    main {
+        class: "app-main";
+        
+        section {
+            class: "content-section";
+            
+            h2 {
+                text: "Content Section";
+            }
+            
+            p {
+                text: "This content should be constrained by the namespace rules.";
+            }
+            
+            // 使用约束的表格
+            table {
+                class: "data-table";
+                
+                thead {
+                    tr {
+                        th {
+                            text: "Name";
+                        }
+                        
+                        th {
+                            text: "Value";
+                        }
+                    }
+                }
+                
+                tbody {
+                    tr {
+                        td {
+                            text: "Item 1";
+                        }
+                        
+                        td {
+                            text: "100";
+                        }
+                    }
+                    
+                    tr {
+                        td {
+                            text: "Item 2";
+                        }
+                        
+                        td {
+                            text: "200";
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    footer {
+        class: "app-footer";
+        
+        p {
+            text: "© 2024 Constrained App";
+        }
+    }
+}

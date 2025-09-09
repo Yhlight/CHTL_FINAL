@@ -1,0 +1,44 @@
+// 基础语法测试
+// 测试注释、文本节点、元素节点等基础功能
+
+div {
+    class: "container";
+    id: "main";
+    
+    // 单行注释测试
+    header {
+        class: "header";
+        text: "Welcome to CHTL";
+    }
+    
+    /* 多行注释测试
+       这是多行注释的内容
+    */
+    main {
+        class: "content";
+        
+        h1 {
+            text: "Hello World";
+        }
+        
+        p {
+            text: "This is a paragraph with some text content.";
+        }
+        
+        // 测试自闭合标签
+        br;
+        
+        // 测试属性
+        img {
+            src: "image.jpg";
+            alt: "Test Image";
+            width: "300";
+            height: "200";
+        }
+    }
+    
+    footer {
+        class: "footer";
+        text: "© 2024 CHTL Test";
+    }
+}

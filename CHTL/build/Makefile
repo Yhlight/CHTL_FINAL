@@ -330,6 +330,19 @@ CHTLScanner/fast:
 	$(MAKE) $(MAKESILENT) -f CHTL/CHTLScanner/CMakeFiles/CHTLScanner.dir/build.make CHTL/CHTLScanner/CMakeFiles/CHTLScanner.dir/build
 .PHONY : CHTLScanner/fast
 
+#=============================================================================
+# Target rules for targets named CHTLCompiler
+
+# Build rule for target.
+CHTLCompiler: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTLCompiler
+.PHONY : CHTLCompiler
+
+# fast build rule for target.
+CHTLCompiler/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/build
+.PHONY : CHTLCompiler/fast
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -366,6 +379,7 @@ help:
 	@echo "... install/strip"
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
+	@echo "... CHTLCompiler"
 	@echo "... CHTLCore"
 	@echo "... CHTLGenerator"
 	@echo "... CHTLJSCore"

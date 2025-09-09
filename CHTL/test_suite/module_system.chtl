@@ -1,0 +1,193 @@
+// 模块系统测试
+// 测试 CMOD 和 CJMOD 模块的创建、导入和管理
+
+// 创建 CMOD 模块
+[Module] CMOD {
+    name: "ButtonModule";
+    version: "1.0.0";
+    
+    // 模块内容
+    [Template] StyleGroup {
+        name: "ButtonStyle";
+        
+        style {
+            background: "var(--btn-bg, #007bff)";
+            color: "var(--btn-text, white)";
+            border: "none";
+            padding: "10px 20px";
+            border-radius: "5px";
+            cursor: "pointer";
+            transition: "all 0.3s ease";
+            
+            &:hover {
+                background: "var(--btn-hover, #0056b3)";
+                transform: "translateY(-2px)";
+            }
+            
+            &:active {
+                transform: "translateY(0)";
+            }
+        }
+    }
+    
+    [Template] Element {
+        name: "Button";
+        inherit: "ButtonStyle";
+        
+        content {
+            button {
+                class: "btn";
+                text: "Button";
+            }
+        }
+    }
+    
+    [Template] VarGroup {
+        name: "ButtonTheme";
+        
+        variables {
+            --btn-bg: "#007bff";
+            --btn-text: "white";
+            --btn-hover: "#0056b3";
+        }
+    }
+}
+
+// 创建 CJMOD 模块
+[Module] CJMOD {
+    name: "AnimationModule";
+    version: "1.0.0";
+    
+    // 模块内容
+    script {
+        // 动画函数
+        function animateElement(element, properties, duration) {
+            return new Promise((resolve) => {
+                element.style.transition = `all ${duration}ms ease`;
+                
+                Object.keys(properties).forEach(key => {
+                    element.style[key] = properties[key];
+                });
+                
+                setTimeout(resolve, duration);
+            });
+        }
+        
+        // 淡入效果
+        function fadeIn(element, duration = 300) {
+            element.style.opacity = '0';
+            element.style.display = 'block';
+            
+            return animateElement(element, { opacity: '1' }, duration);
+        }
+        
+        // 淡出效果
+        function fadeOut(element, duration = 300) {
+            return animateElement(element, { opacity: '0' }, duration).then(() => {
+                element.style.display = 'none';
+            });
+        }
+        
+        // 滑动效果
+        function slideDown(element, duration = 300) {
+            element.style.height = '0';
+            element.style.overflow = 'hidden';
+            element.style.display = 'block';
+            
+            const targetHeight = element.scrollHeight;
+            return animateElement(element, { height: `${targetHeight}px` }, duration);
+        }
+        
+        // 滑动效果
+        function slideUp(element, duration = 300) {
+            return animateElement(element, { height: '0' }, duration).then(() => {
+                element.style.display = 'none';
+            });
+        }
+        
+        // 导出函数
+        window.AnimationModule = {
+            animateElement,
+            fadeIn,
+            fadeOut,
+            slideDown,
+            slideUp
+        };
+    }
+}
+
+// 使用模块
+div {
+    class: "module-test-app";
+    
+    // 使用 CMOD 模块
+    ButtonModule.Button;
+    
+    // 使用 CJMOD 模块
+    [Origin] @JavaScript {
+        // 使用动画模块
+        document.addEventListener('DOMContentLoaded', function() {
+            const button = document.querySelector('.btn');
+            const content = document.querySelector('.content');
+            
+            if (button && content) {
+                button.addEventListener('click', function() {
+                    if (content.style.display === 'none') {
+                        AnimationModule.slideDown(content);
+                    } else {
+                        AnimationModule.slideUp(content);
+                    }
+                });
+            }
+        });
+    }
+    
+    div {
+        class: "content";
+        style: "display: none;";
+        
+        h2 {
+            text: "Module System Test";
+        }
+        
+        p {
+            text: "This content is controlled by the AnimationModule.";
+        }
+        
+        ul {
+            li {
+                text: "CMOD modules provide reusable CHTL components";
+            }
+            
+            li {
+                text: "CJMOD modules provide reusable JavaScript functionality";
+            }
+            
+            li {
+                text: "Modules can be imported and used across projects";
+            }
+        }
+    }
+}
+
+// 模块导入测试
+[Import] "modules/ButtonModule.chtl" as ButtonModule;
+[Import] "modules/AnimationModule.chtl" as AnimationModule;
+
+// 使用导入的模块
+div {
+    class: "imported-modules";
+    
+    h3 {
+        text: "Imported Modules";
+    }
+    
+    p {
+        text: "These modules are imported from external files.";
+    }
+    
+    // 使用导入的按钮模块
+    ButtonModule.Button;
+    ButtonModule.Button;
+    ButtonModule.Button;
+}
