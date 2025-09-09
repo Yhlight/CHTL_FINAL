@@ -1,0 +1,358 @@
+// CHTL Lexer Test File
+// This file tests all CHTL syntax elements for lexer validation
+
+// Single line comment
+/*
+Multi-line comment
+with multiple lines
+*/
+-- Generator comment
+
+// Text nodes
+text
+{
+    "This is a text node"
+}
+
+text: "This is also a text node";
+
+// Literals
+text
+{
+    This is a literal text without quotes
+}
+
+// Elements with attributes
+div
+{
+    id: "main-container";
+    class: "container";
+    data-value: "test";
+    
+    text
+    {
+        Hello World
+    }
+}
+
+// Local style blocks
+div
+{
+    style
+    {
+        .box
+        {
+            width: 100px;
+            height: 200px;
+            background-color: red;
+        }
+        
+        &:hover
+        {
+            background-color: blue;
+        }
+        
+        width: 100px;
+        height: 100px;
+        background-color: width > 50px ? "red" : "blue";
+    }
+}
+
+// Script blocks
+div
+{
+    script
+    {
+        console.log("Hello from CHTL JS");
+        
+        {{box}}->addEventListener('click', () => {
+            console.log('Box clicked!');
+        });
+    }
+}
+
+// Templates
+[Template] @Style PrimaryButton
+{
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+[Template] @Element Card
+{
+    div
+    {
+        class: "card";
+        style
+        {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px;
+        }
+        
+        h3 { "Card Title" }
+        p { "Card content" }
+    }
+}
+
+[Template] @Var ThemeColors
+{
+    primary: "#007bff";
+    secondary: "#6c757d";
+    success: "#28a745";
+    danger: "#dc3545";
+}
+
+// Custom definitions
+[Custom] @Style ButtonVariant
+{
+    background-color,
+    color,
+    border-color;
+}
+
+[Custom] @Element CustomCard
+{
+    div { }
+    header { }
+    content { }
+    footer { }
+}
+
+// Origin embeds
+[Origin] @Html
+{
+    <div class="raw-html">
+        <h2>Raw HTML Content</h2>
+        <p>This is raw HTML that will be embedded directly.</p>
+    </div>
+}
+
+[Origin] @Style
+{
+    .raw-html {
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        padding: 20px;
+        border-radius: 10px;
+        color: white;
+    }
+}
+
+[Origin] @JavaScript
+{
+    console.log("Raw JavaScript code");
+    
+    function initializeRawJS() {
+        console.log("Raw JavaScript initialized!");
+    }
+}
+
+// Imports
+[Import] "external-styles.css" as externalStyles;
+[Import] "external-script.js" as externalScript;
+[Import] "components.chtl"::ButtonComponent;
+[Import] "utils.chtl"::* as utils;
+
+// Constraints
+[Constraints] except @Element script
+{
+    // No script elements allowed
+}
+
+[Constraints] except @Style .dangerous-style type: "class"
+{
+    // No dangerous styles allowed
+}
+
+// Configuration
+[Configuration] ProductionConfig
+{
+    DEBUG_MODE: false;
+    INDEX_INITIAL_COUNT: 1000;
+    DISABLE_NAME_GROUP: true;
+    
+    [Name]
+    {
+        element: "el";
+        attribute: "attr";
+        text: "txt";
+        style: "sty";
+        script: "scr";
+    }
+    
+    [OriginType]
+    {
+        @Vue: "vue-component";
+        @React: "react-component";
+        @Angular: "angular-component";
+    }
+}
+
+// Namespace
+[Namespace] UIComponents
+{
+    [Import] "ui-button.chtl"::Button;
+    [Import] "ui-card.chtl"::Card;
+    [Import] "ui-modal.chtl"::Modal;
+}
+
+// CHTL JS features
+script
+{
+    // File loader
+    fileloader
+    {
+        load: "./module.cjjs",
+        load: "./module2.cjjs",
+        load: "./module3.js"
+    }
+    
+    // Enhanced selectors
+    {{box}}->textContent();
+    {{.box}}->addEventListener('click', () => {});
+    {{#box}}->style.display = 'none';
+    {{button}}->forEach(btn => btn.click());
+    {{button[0]}}->focus();
+    
+    // Enhanced listeners
+    {{box}}->listen
+    {
+        click: () => {
+            console.log("Box clicked!");
+        },
+        mouseenter: () => {
+            console.log("Mouse entered box");
+        }
+    }
+    
+    // Event delegation
+    {{document}}->delegate
+    {
+        target: {{.dynamic-button}},
+        click: (event) => {
+            console.log("Dynamic button clicked:", event.target);
+        }
+    }
+    
+    // Animations
+    const anim = animate
+    {
+        target: {{box}},
+        duration: 1000,
+        easing: ease-in-out,
+        begin: {
+            opacity: 0,
+            transform: "translateY(20px)"
+        },
+        when: [
+            {
+                at: 0.5,
+                opacity: 0.5,
+                transform: "translateY(10px)"
+            }
+        ],
+        end: {
+            opacity: 1,
+            transform: "translateY(0)"
+        },
+        loop: 1,
+        direction: normal,
+        delay: 100,
+        callback: () => {
+            console.log("Animation completed!");
+        }
+    };
+    
+    // Virtual objects
+    vir myObject = listen
+    {
+        click: () => {
+            console.log("Virtual object clicked!");
+        },
+        data: {
+            name: "MyObject",
+            version: "1.0.0"
+        }
+    };
+    
+    myObject->click();
+    console.log(myObject->data.name);
+    
+    // Router
+    router
+    {
+        url: "/home",
+        page: {{#home-page}},
+        root: {{#app}},
+        mode: "history"
+    }
+    
+    router
+    {
+        page: {"/about", {{#about-page}}},
+        page: {"/contact", {{#contact-page}}}
+    }
+}
+
+// Use configuration
+use ProductionConfig;
+
+// Main HTML structure
+html
+{
+    head
+    {
+        title { "CHTL Lexer Test" }
+        meta
+        {
+            charset: "UTF-8";
+        }
+        meta
+        {
+            name: "viewport";
+            content: "width=device-width, initial-scale=1.0";
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            id: "app";
+            class: "main-app";
+            
+            style
+            {
+                .main-app
+                {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 20px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    min-height: 100vh;
+                }
+            }
+            
+            h1 { "CHTL Lexer Test Page" }
+            
+            p { "This page tests all CHTL syntax elements for lexer validation." }
+            
+            // Use templates
+            @Element Card;
+            
+            div
+            {
+                style
+                {
+                    @Style PrimaryButton;
+                }
+                text { "Primary Button" }
+            }
+        }
+    }
+}

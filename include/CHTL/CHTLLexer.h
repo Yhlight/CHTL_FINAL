@@ -4,20 +4,22 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_map>
+#include <regex>
 
 namespace CHTL {
 
 /**
- * @brief Token 类型枚举
+ * @brief Token type enumeration
  */
 enum class TokenType {
-    // 基础类型
-    IDENTIFIER,     // 标识符
-    STRING,         // 字符串
-    NUMBER,         // 数字
-    LITERAL,        // 无修饰字面量
+    // Basic types
+    IDENTIFIER,     // identifier
+    STRING,         // string literal
+    NUMBER,         // number literal
+    LITERAL,        // unquoted literal
     
-    // 符号
+    // Symbols
     LEFT_BRACE,     // {
     RIGHT_BRACE,    // }
     LEFT_BRACKET,   // [
@@ -35,14 +37,27 @@ enum class TokenType {
     QUESTION,       // ?
     EXCLAMATION,    // !
     UNDERSCORE,     // _
+    ARROW,          // ->
+    PIPE,           // |
+    TILDE,          // ~
+    CARET,          // ^
+    DOLLAR,         // $
+    PERCENT,        // %
+    PLUS,           // +
+    MINUS,          // -
+    ASTERISK,       // *
+    SLASH,          // /
+    BACKSLASH,      // \
+    LESS_THAN,      // <
+    GREATER_THAN,   // >
     
-    // 注释
-    COMMENT,        // 通用注释
+    // Comments
+    COMMENT,        // general comment
     LINE_COMMENT,   // //
     BLOCK_COMMENT,  // /* */
     GENERATOR_COMMENT, // --
     
-    // 关键字
+    // Keywords
     TEXT,           // text
     STYLE,          // style
     SCRIPT,         // script
@@ -50,94 +65,192 @@ enum class TokenType {
     CUSTOM,         // [Custom]
     ORIGIN,         // [Origin]
     IMPORT,         // [Import]
-    NAMESPACE,      // [Namespace]
+    CONSTRAINTS,    // [Constraints]
     CONFIGURATION,  // [Configuration]
-    INFO,           // [Info]
-    EXPORT,         // [Export]
-    EXCEPT,         // except
+    NAMESPACE,      // [Namespace]
+    USE,            // use
     INHERIT,        // inherit
     DELETE,         // delete
     INSERT,         // insert
-    USE,            // use
-    FROM,           // from
-    AS,             // as
     AFTER,          // after
     BEFORE,         // before
     REPLACE,        // replace
     AT_TOP,         // at top
     AT_BOTTOM,      // at bottom
+    FROM,           // from
+    AS,             // as
+    EXCEPT,         // except
+    HTML5,          // html5
     
-    // 特殊
-    EOF_TOKEN,      // 文件结束
-    UNKNOWN         // 未知
+    // CHTL JS keywords
+    FILELOADER,     // fileloader
+    LISTEN,         // listen
+    DELEGATE,       // delegate
+    ANIMATE,        // animate
+    VIR,            // vir
+    ROUTER,         // router
+    
+    // Operators
+    AND,            // &&
+    OR,             // ||
+    NOT,            // !
+    EQUALS,         // ==
+    NOT_EQUALS,     // !=
+    LESS_EQUAL,     // <=
+    GREATER_EQUAL,  // >=
+    PLUS_EQUAL,     // +=
+    MINUS_EQUAL,    // -=
+    MULTIPLY_EQUAL, // *=
+    DIVIDE_EQUAL,   // /=
+    MODULO_EQUAL,   // %=
+    
+    // Special tokens
+    NEWLINE,        // \n
+    WHITESPACE,     // whitespace
+    EOF_TOKEN,      // end of file
+    UNKNOWN         // unknown token
 };
 
 /**
- * @brief Token 结构体
+ * @brief Token structure
  */
 struct Token {
     TokenType type;
     std::string value;
-    int line;
-    int column;
+    size_t line;
+    size_t column;
+    size_t position;
     
-    Token(TokenType t = TokenType::UNKNOWN, const std::string& v = "", int l = 0, int c = 0)
-        : type(t), value(v), line(l), column(c) {}
+    Token(TokenType t = TokenType::UNKNOWN, const std::string& v = "", 
+          size_t l = 0, size_t c = 0, size_t p = 0)
+        : type(t), value(v), line(l), column(c), position(p) {}
+    
+    bool operator==(const Token& other) const {
+        return type == other.type && value == other.value;
+    }
+    
+    bool operator!=(const Token& other) const {
+        return !(*this == other);
+    }
 };
 
 /**
- * @brief CHTL 词法分析器
+ * @brief CHTL Lexer class
  * 
- * 负责将 CHTL 源代码转换为 Token 序列
+ * Responsible for tokenizing CHTL source code into a sequence of tokens
  */
 class CHTLLexer {
 public:
     explicit CHTLLexer(std::shared_ptr<CHTLContext> context);
     ~CHTLLexer() = default;
-
-    // 词法分析
-    std::vector<Token> tokenize(const std::string& source);
     
-    // 重置状态
+    // Main lexing functions
+    std::vector<Token> tokenize(const std::string& source);
+    Token getNextToken();
+    bool hasMoreTokens() const;
+    
+    // State management
     void reset();
-
+    void setSource(const std::string& source);
+    
+    // Error handling
+    std::vector<std::string> getErrors() const;
+    bool hasErrors() const;
+    void clearErrors();
+    
+    // Utility functions
+    static std::string tokenTypeToString(TokenType type);
+    static bool isKeyword(const std::string& word);
+    static TokenType getKeywordType(const std::string& word);
+    static bool isOperator(const std::string& word);
+    static TokenType getOperatorType(const std::string& word);
+    static bool isSymbol(const std::string& word);
+    static TokenType getSymbolType(const std::string& word);
+    
 private:
     std::shared_ptr<CHTLContext> m_context;
     std::string m_source;
     size_t m_position;
-    int m_line;
-    int m_column;
+    size_t m_line;
+    size_t m_column;
+    std::vector<std::string> m_errors;
     
-    // 辅助方法
-    char current() const;
-    char peek(size_t offset = 1) const;
-    void advance(size_t count = 1);
-    bool isAtEnd() const;
+    // Tokenization helpers
+    void skipWhitespace();
+    void skipLineComment();
+    void skipBlockComment();
+    void skipGeneratorComment();
     
-    // Token 识别
-    Token scanToken();
+    Token scanLineComment();
+    Token scanBlockComment();
+    Token scanGeneratorComment();
     Token scanIdentifier();
     Token scanString();
     Token scanNumber();
     Token scanLiteral();
-    Token scanComment();
-    Token scanLineComment();
-    Token scanBlockComment();
-    Token scanGeneratorComment();
+    Token scanOperator();
+    Token scanSymbol();
     
-    // 字符分类
+    // Character utilities
+    char current() const;
+    char peek(size_t offset = 1) const;
+    void advance(size_t count = 1);
+    bool isAtEnd() const;
     bool isAlpha(char c) const;
     bool isDigit(char c) const;
     bool isAlphaNumeric(char c) const;
     bool isWhitespace(char c) const;
+    bool isNewline(char c) const;
     
-    // 关键字识别
-    TokenType getKeywordType(const std::string& identifier) const;
-    bool isKeyword(const std::string& identifier) const;
+    // Error reporting
+    void addError(const std::string& message);
+    void addError(const std::string& message, size_t line, size_t column);
     
-    // 跳过空白字符
-    void skipWhitespace();
-    void skipNewline();
+    // Keyword and operator maps
+    static const std::unordered_map<std::string, TokenType> s_keywords;
+    static const std::unordered_map<std::string, TokenType> s_operators;
+    static const std::unordered_map<std::string, TokenType> s_symbols;
+    
+    // Regex patterns
+    static const std::regex s_identifierPattern;
+    static const std::regex s_stringPattern;
+    static const std::regex s_numberPattern;
+    static const std::regex s_literalPattern;
+};
+
+/**
+ * @brief Token stream iterator
+ */
+class TokenStream {
+public:
+    explicit TokenStream(const std::vector<Token>& tokens);
+    ~TokenStream() = default;
+    
+    // Iterator functions
+    const Token& current() const;
+    const Token& peek(size_t offset = 1) const;
+    const Token& advance();
+    bool hasMore() const;
+    bool isAtEnd() const;
+    
+    // Position management
+    size_t position() const;
+    void setPosition(size_t pos);
+    void reset();
+    
+    // Lookahead functions
+    bool check(TokenType type) const;
+    bool check(const std::vector<TokenType>& types) const;
+    bool match(TokenType type);
+    bool match(const std::vector<TokenType>& types);
+    
+    // Error handling
+    const Token& consume(TokenType type, const std::string& message);
+    void synchronize();
+    
+private:
+    const std::vector<Token>& m_tokens;
+    size_t m_position;
 };
 
 } // namespace CHTL
