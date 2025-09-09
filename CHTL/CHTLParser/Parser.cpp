@@ -80,136 +80,6 @@ std::unique_ptr<BaseNode> Parser::declaration() {
     return nullptr;
 }
 
-
-// =================================================================
-// Expression Parsing
-// =================================================================
-
-std::unique_ptr<ExpressionNode> Parser::parseExpression() {
-    return parseTernary();
-}
-
-std::unique_ptr<ExpressionNode> Parser::parseTernary() {
-    auto expr = parseLogicalOr();
-
-    if (match(TokenType::QUESTION)) {
-        auto trueExpr = parseTernary();
-        consume(TokenType::COLON, "Expect ':' after true expression in ternary operator.");
-        auto falseExpr = parseTernary();
-        return std::make_unique<TernaryOpNode>(std::move(expr), std::move(trueExpr), std::move(falseExpr));
-    }
-
-    return expr;
-}
-
-std::unique_ptr<ExpressionNode> Parser::parseLogicalOr() {
-    auto expr = parseLogicalAnd();
-    while (match(TokenType::OR_OR)) {
-        Token op = previousToken;
-        auto right = parseLogicalAnd();
-        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
-    }
-    return expr;
-}
-
-std::unique_ptr<ExpressionNode> Parser::parseLogicalAnd() {
-    auto expr = parseEquality();
-    while (match(TokenType::AND_AND)) {
-        Token op = previousToken;
-        auto right = parseEquality();
-        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
-    }
-    return expr;
-}
-
-std::unique_ptr<ExpressionNode> Parser::parseEquality() {
-    auto expr = parseComparison();
-    while (match(TokenType::EQUAL_EQUAL) || match(TokenType::NOT_EQUAL)) {
-        Token op = previousToken;
-        auto right = parseComparison();
-        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
-    }
-    return expr;
-}
-
-std::unique_ptr<ExpressionNode> Parser::parseComparison() {
-    auto expr = parseTerm();
-    while (match(TokenType::GREATER) || match(TokenType::GREATER_EQUAL) || match(TokenType::LESS) || match(TokenType::LESS_EQUAL)) {
-        Token op = previousToken;
-        auto right = parseTerm();
-        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
-    }
-    return expr;
-}
-
-std::unique_ptr<ExpressionNode> Parser::parseTerm() {
-    auto expr = parseFactor();
-    while (match(TokenType::PLUS) || match(TokenType::MINUS)) {
-        Token op = previousToken;
-        auto right = parseFactor();
-        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
-    }
-    return expr;
-}
-
-std::unique_ptr<ExpressionNode> Parser::parseFactor() {
-    auto expr = parsePrimary();
-    while (match(TokenType::STAR) || match(TokenType::SLASH)) {
-        Token op = previousToken;
-        auto right = parsePrimary();
-        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
-    }
-    return expr;
-}
-
-std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
-    if (match(TokenType::STRING) || match(TokenType::NUMBER)) {
-        return std::make_unique<LiteralNode>(previousToken);
-    }
-
-    if (match(TokenType::IDENTIFIER)) {
-        if (check(TokenType::LEFT_PAREN)) {
-            std::string templateName = previousToken.lexeme;
-            advance();
-            std::string varName = currentToken.lexeme;
-            consume(TokenType::IDENTIFIER, "Expect variable name inside parentheses.");
-            if (match(TokenType::EQUAL)) {
-                auto newValue = parseExpression();
-                consume(TokenType::RIGHT_PAREN, "Expect ')' after specialized value.");
-                return newValue;
-            } else {
-                consume(TokenType::RIGHT_PAREN, "Expect ')' after variable name.");
-                if (varTemplates.count(templateName) && varTemplates[templateName]->variables.count(varName)) {
-                    Token valueToken = {TokenType::STRING, varTemplates[templateName]->variables[varName], currentToken.line, currentToken.column, currentToken.position};
-                    return std::make_unique<LiteralNode>(valueToken);
-                }
-                std::cerr << "Parse Error: Variable " << templateName << "(" << varName << ") not found." << std::endl;
-                return nullptr;
-            }
-        }
-        return std::make_unique<PropertyAccessNode>(previousToken);
-    }
-
-    if (match(TokenType::DOT)) {
-        std::string selector = "." + currentToken.lexeme;
-        advance();
-        consume(TokenType::DOT, "Expect '.' between selector and property.");
-        selector += "." + currentToken.lexeme;
-        advance();
-        return std::make_unique<PropertyAccessNode>(Token{TokenType::IDENTIFIER, selector, previousToken.line, previousToken.column, previousToken.position});
-    }
-
-    if (match(TokenType::LEFT_PAREN)) {
-        auto expr = parseExpression();
-        consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
-        return expr;
-    }
-
-    auto literal = std::make_unique<LiteralNode>(currentToken);
-    advance();
-    return literal;
-}
-
 std::unique_ptr<BaseNode> Parser::originDeclaration() {
     consume(TokenType::KEYWORD_ORIGIN, "Expect '[Origin]' keyword.");
     consume(TokenType::AT, "Expect '@' before origin type.");
@@ -853,4 +723,127 @@ std::unique_ptr<BaseNode> Parser::customDeclaration() {
         std::cerr << "Parse Error: Expected 'Element' or 'Style' after '[Custom] @' at line " << currentToken.line << std::endl;
     }
     return nullptr;
+}
+
+// =================================================================
+// Expression Parsing
+// =================================================================
+
+std::unique_ptr<ExpressionNode> Parser::parseExpression() {
+    return parseTernary();
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseTernary() {
+    auto expr = parseLogicalOr();
+    if (match(TokenType::QUESTION)) {
+        auto trueExpr = parseTernary();
+        consume(TokenType::COLON, "Expect ':' after true expression in ternary operator.");
+        auto falseExpr = parseTernary();
+        return std::make_unique<TernaryOpNode>(std::move(expr), std::move(trueExpr), std::move(falseExpr));
+    }
+    return expr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseLogicalOr() {
+    auto expr = parseLogicalAnd();
+    while (match(TokenType::OR_OR)) {
+        Token op = previousToken;
+        auto right = parseLogicalAnd();
+        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseLogicalAnd() {
+    auto expr = parseEquality();
+    while (match(TokenType::AND_AND)) {
+        Token op = previousToken;
+        auto right = parseEquality();
+        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseEquality() {
+    auto expr = parseComparison();
+    while (match(TokenType::EQUAL_EQUAL) || match(TokenType::NOT_EQUAL)) {
+        Token op = previousToken;
+        auto right = parseComparison();
+        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseComparison() {
+    auto expr = parseTerm();
+    while (match(TokenType::GREATER) || match(TokenType::GREATER_EQUAL) || match(TokenType::LESS) || match(TokenType::LESS_EQUAL)) {
+        Token op = previousToken;
+        auto right = parseTerm();
+        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseTerm() {
+    auto expr = parseFactor();
+    while (match(TokenType::PLUS) || match(TokenType::MINUS)) {
+        Token op = previousToken;
+        auto right = parseFactor();
+        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseFactor() {
+    auto expr = parsePrimary();
+    while (match(TokenType::STAR) || match(TokenType::SLASH)) {
+        Token op = previousToken;
+        auto right = parsePrimary();
+        expr = std::make_unique<BinaryOpNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
+    if (match(TokenType::STRING) || match(TokenType::NUMBER)) {
+        return std::make_unique<LiteralNode>(previousToken);
+    }
+    if (match(TokenType::IDENTIFIER)) {
+        if (check(TokenType::LEFT_PAREN)) {
+            std::string templateName = previousToken.lexeme;
+            advance();
+            std::string varName = currentToken.lexeme;
+            consume(TokenType::IDENTIFIER, "Expect variable name inside parentheses.");
+            if (match(TokenType::EQUAL)) {
+                auto newValue = parseExpression();
+                consume(TokenType::RIGHT_PAREN, "Expect ')' after specialized value.");
+                return newValue;
+            } else {
+                consume(TokenType::RIGHT_PAREN, "Expect ')' after variable name.");
+                if (varTemplates.count(templateName) && varTemplates[templateName]->variables.count(varName)) {
+                    Token valueToken = {TokenType::STRING, varTemplates[templateName]->variables[varName], currentToken.line, currentToken.column, currentToken.position};
+                    return std::make_unique<LiteralNode>(valueToken);
+                }
+                std::cerr << "Parse Error: Variable " << templateName << "(" << varName << ") not found." << std::endl;
+                return nullptr;
+            }
+        }
+        return std::make_unique<PropertyAccessNode>(previousToken);
+    }
+    if (match(TokenType::DOT)) {
+        std::string selector = "." + currentToken.lexeme;
+        advance();
+        consume(TokenType::DOT, "Expect '.' between selector and property.");
+        selector += "." + currentToken.lexeme;
+        advance();
+        return std::make_unique<PropertyAccessNode>(Token{TokenType::IDENTIFIER, selector, previousToken.line, previousToken.column, previousToken.position});
+    }
+    if (match(TokenType::LEFT_PAREN)) {
+        auto expr = parseExpression();
+        consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
+        return expr;
+    }
+    auto literal = std::make_unique<LiteralNode>(currentToken);
+    advance();
+    return literal;
 }
