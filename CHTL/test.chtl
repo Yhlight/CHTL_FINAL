@@ -1,0 +1,38 @@
+// 这是一个测试文件
+div
+{
+    class: welcome;
+    id: box;
+    
+    text
+    {
+        "Hello World"
+    }
+    
+    style
+    {
+        width: 100px;
+        height: 200px;
+        background-color: red;
+    }
+}
+
+// 测试模板
+[Template] @Style DefaultText
+{
+    color: black;
+    line-height: 1.6;
+}
+
+// 测试自定义
+[Custom] @Element Box
+{
+    div
+    {
+        style
+        {
+            width: 200px;
+            height: 200px;
+        }
+    }
+}
