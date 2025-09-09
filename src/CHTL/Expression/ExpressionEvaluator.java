@@ -25,19 +25,18 @@ public class ExpressionEvaluator {
     }
 
     private ExpressionNode evaluateFunctionCall(FunctionCallNode node, EvaluationContext context) {
-        // This is a major simplification based on the new spec.
-        // It assumes function calls are for variable lookups, e.g., ThemeColor(tableColor)
-        String varTemplateName = node.getFunctionName();
+        String templateName = node.getFunctionName();
         if (node.getArguments().size() != 1 || !(node.getArguments().get(0) instanceof ReferenceNode)) {
             throw new RuntimeException("Invalid variable usage syntax. Expect 'TemplateName(variableName)'.");
         }
-
         String varName = ((ReferenceNode) node.getArguments().get(0)).getProperty();
 
-        // A DefinitionManager needs to be available in the context
-        // This is a temporary placeholder for getting the value.
-        // String value = definitionManager.getVariableValue(varTemplateName, varName);
-        String value = "/* " + varTemplateName + "(" + varName + ") */"; // Placeholder
+        DefinitionManager defManager = context.definitionManager();
+        if (defManager == null) throw new RuntimeException("DefinitionManager not available.");
+
+        // TODO: The namespace should be resolved more intelligently.
+        String value = defManager.getVariableValue("default", templateName, varName)
+            .orElseThrow(() -> new RuntimeException("Variable '" + varName + "' not found in template '" + templateName + "'."));
 
         return new LiteralNode(value);
     }
@@ -131,36 +130,66 @@ public class ExpressionEvaluator {
         throw new RuntimeException("Unsupported operand types for binary operation.");
     }
 
+    private enum UnitCategory { LENGTH, TIME, ANGLE, PERCENTAGE, UNKNOWN }
+
+    private UnitCategory getUnitCategory(String unit) {
+        if (unit == null) return UnitCategory.UNKNOWN;
+        return switch (unit.toLowerCase()) {
+            case "px", "em", "rem", "vw", "vh", "cm", "mm", "in", "pt", "pc" -> UnitCategory.LENGTH;
+            case "s", "ms" -> UnitCategory.TIME;
+            case "deg", "grad", "rad", "turn" -> UnitCategory.ANGLE;
+            case "%" -> UnitCategory.PERCENTAGE;
+            default -> UnitCategory.UNKNOWN;
+        };
+    }
+
     private ExpressionNode evaluateUnitOperation(ExpressionNode left, ExpressionNode right, String op) {
         double lVal, rVal;
-        String unit = null;
+        String lUnit = null, rUnit = null;
 
-        if (left instanceof UnitNode) {
-            lVal = ((UnitNode) left).getValue();
-            unit = ((UnitNode) left).getUnit();
-        } else if (left instanceof LiteralNode && ((LiteralNode) left).getValue() instanceof Number) {
-            lVal = ((Number) ((LiteralNode) left).getValue()).doubleValue();
+        if (left instanceof UnitNode un) {
+            lVal = un.getValue();
+            lUnit = un.getUnit();
+        } else if (left instanceof LiteralNode ln && ln.getValue() instanceof Number) {
+            lVal = ((Number) ln.getValue()).doubleValue();
         } else {
             throw new RuntimeException("Invalid left operand for unit operation.");
         }
 
-        if (right instanceof UnitNode) {
-            rVal = ((UnitNode) right).getValue();
-            if (unit != null && !unit.equals(((UnitNode) right).getUnit())) throw new RuntimeException("Unit mismatch.");
-            if (unit == null) unit = ((UnitNode) right).getUnit();
-        } else if (right instanceof LiteralNode && ((LiteralNode) right).getValue() instanceof Number) {
-            rVal = ((Number) ((LiteralNode) right).getValue()).doubleValue();
+        if (right instanceof UnitNode un) {
+            rVal = un.getValue();
+            rUnit = un.getUnit();
+        } else if (right instanceof LiteralNode ln && ln.getValue() instanceof Number) {
+            rVal = ((Number) ln.getValue()).doubleValue();
         } else {
             throw new RuntimeException("Invalid right operand for unit operation.");
         }
 
+        UnitCategory lCat = getUnitCategory(lUnit);
+        UnitCategory rCat = getUnitCategory(rUnit);
+
+        if (lUnit != null && rUnit != null && lCat != rCat) {
+            throw new RuntimeException("Incompatible units for operation: " + lUnit + " and " + rUnit);
+        }
+
+        String resultUnit = lUnit != null ? lUnit : rUnit;
+        if (resultUnit == null) { // Two literals were operated on
+            // This path shouldn't be taken if called correctly, but as a fallback:
+            double result = 0;
+            switch(op) {
+                case "+": result = lVal + rVal; break;
+                // ... handle other ops for literals
+            }
+            return new LiteralNode(result);
+        }
+
         switch (op) {
-            case "+": return new UnitNode(lVal + rVal, unit);
-            case "-": return new UnitNode(lVal - rVal, unit);
-            case "*": return new UnitNode(lVal * rVal, unit);
-            case "/": return new UnitNode(lVal / rVal, unit);
-            case "%": return new UnitNode(lVal % rVal, unit);
-            case "**": return new UnitNode(Math.pow(lVal, rVal), unit);
+            case "+": return new UnitNode(lVal + rVal, resultUnit);
+            case "-": return new UnitNode(lVal - rVal, resultUnit);
+            case "*": return new UnitNode(lVal * rVal, resultUnit);
+            case "/": return new UnitNode(lVal / rVal, resultUnit);
+            case "%": return new UnitNode(lVal % rVal, resultUnit);
+            case "**": return new UnitNode(Math.pow(lVal, rVal), resultUnit);
             case ">": return new LiteralNode(lVal > rVal);
             case ">=": return new LiteralNode(lVal >= rVal);
             case "<": return new LiteralNode(lVal < rVal);

@@ -32,4 +32,18 @@ public class DefinitionManager {
         // Fallback to default namespace
         return Optional.ofNullable(definitions.getOrDefault(DEFAULT_NAMESPACE, new HashMap<>()).get(key));
     }
+
+    public Optional<String> getVariableValue(String namespace, String templateName, String varName) {
+        Optional<BaseNode> templateNodeOpt = get(namespace, VarTemplateNode.class, templateName);
+        if (templateNodeOpt.isEmpty()) {
+            templateNodeOpt = get(namespace, CustomVarNode.class, templateName);
+        }
+
+        if (templateNodeOpt.isPresent() && templateNodeOpt.get() instanceof VarTemplateNode) {
+            VarTemplateNode varTemplate = (VarTemplateNode) templateNodeOpt.get();
+            return Optional.ofNullable(varTemplate.getVariables().get(varName));
+        }
+
+        return Optional.empty();
+    }
 }

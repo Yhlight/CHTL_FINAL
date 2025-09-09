@@ -39,8 +39,40 @@ public class CHTLParser {
         switch (type.type()) {
             case TEMPLATE: return templateDefinition(false);
             case CUSTOM: return templateDefinition(true);
+            case IMPORT: return parseImportStatement();
+            case NAMESPACE: return parseNamespaceStatement();
             default: throw new RuntimeException("Unexpected token in bracket declaration: " + type.value());
         }
+    }
+
+    private ImportNode parseImportStatement() {
+        // This is a placeholder for the very complex import logic in the spec.
+        consume(TokenType.AT, "Expect '@'.");
+        consume(TokenType.IDENTIFIER, "Expect import type.");
+        consume(TokenType.FROM, "Expect 'from'.");
+        String path = consume(TokenType.STRING, "Expect path.").value();
+        if (match(TokenType.AS)) {
+            consume(TokenType.IDENTIFIER, "Expect alias.");
+        }
+        consume(TokenType.SEMICOLON, "Expect ';'.");
+        return new ImportNode(path);
+    }
+
+    private NamespaceNode parseNamespaceStatement() {
+        Token name = consume(TokenType.IDENTIFIER, "Expect namespace name.");
+        NamespaceNode node = new NamespaceNode(name.value());
+        this.currentNamespace = name.value(); // Set current namespace
+
+        if (match(TokenType.LBRACE)) {
+            while(!check(TokenType.RBRACE)) {
+                node.addChild(declaration());
+            }
+            consume(TokenType.RBRACE, "Expect '}'.");
+        }
+        // After the block, revert to the default namespace.
+        // A stack-based approach would be needed for true nesting.
+        this.currentNamespace = DefinitionManager.DEFAULT_NAMESPACE;
+        return node;
     }
 
     private BaseNode templateDefinition(boolean isCustom) {

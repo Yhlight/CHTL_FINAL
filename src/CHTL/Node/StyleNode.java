@@ -11,14 +11,25 @@ public class StyleNode implements BaseNode {
 
     public StyleNode() {
         this.properties = new HashMap<>();
+        this.usages = new ArrayList<>();
     }
 
     public void addProperty(String key, String value) {
         this.properties.put(key, value);
     }
 
+    private final List<StyleTemplateUsageNode> usages;
+
     public Map<String, String> getProperties() {
         return properties;
+    }
+
+    public List<StyleTemplateUsageNode> getUsages() {
+        return usages;
+    }
+
+    public void addUsage(StyleTemplateUsageNode usage) {
+        this.usages.add(usage);
     }
 
     @Override
@@ -26,6 +37,9 @@ public class StyleNode implements BaseNode {
         StyleNode cloned = new StyleNode();
         for (Map.Entry<String, String> entry : this.properties.entrySet()) {
             cloned.addProperty(entry.getKey(), entry.getValue());
+        }
+        for (StyleTemplateUsageNode usage : this.usages) {
+            cloned.addUsage((StyleTemplateUsageNode) usage.clone());
         }
         return cloned;
     }

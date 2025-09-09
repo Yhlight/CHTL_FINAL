@@ -28,11 +28,9 @@ public class CHTLJSParser {
             consume(TokenType.ARROW, "Expect '->'.");
             Token keyword = consume(TokenType.IDENTIFIER, "Expect keyword.");
             if (keyword.value().equals("listen")) return parseListenBlock(selector);
-            if (keyword.value().equals("delegate")) return parseDelegateBlock(selector);
         } else if (check(TokenType.IDENTIFIER)) {
             Token keyword = advance();
             if (keyword.value().equals("animate")) return parseAnimateBlock();
-            if (keyword.value().equals("router")) return parseRouterBlock();
         }
         throw new RuntimeException("Unexpected token in CHTL JS: " + peek().value());
     }
@@ -44,14 +42,31 @@ public class CHTLJSParser {
         return selector;
     }
 
+    private String parseValue() {
+        // This is still simplified. A real implementation would return an object
+        // representing the value (e.g., a list for arrays, a map for objects).
+        // For now, we consume tokens until a comma or closing brace.
+        StringBuilder builder = new StringBuilder();
+        int braceDepth = 0;
+        while (!isAtEnd()) {
+            if (braceDepth == 0 && (check(TokenType.COMMA) || check(TokenType.RBRACE))) {
+                break;
+            }
+            if (check(TokenType.LBRACE)) braceDepth++;
+            if (check(TokenType.RBRACE)) braceDepth--;
+            builder.append(peek().value()).append(" ");
+            advance();
+        }
+        return builder.toString().trim();
+    }
+
     private Map<String, String> parseKeyValueBlock() {
         Map<String, String> map = new HashMap<>();
         consume(TokenType.LBRACE, "Expect '{'.");
         while (!check(TokenType.RBRACE)) {
             Token key = consume(TokenType.IDENTIFIER, "Expect property key.");
             consume(TokenType.COLON, "Expect ':'.");
-            String value = consumeUntil(TokenType.COMMA, TokenType.RBRACE);
-            map.put(key.value(), value);
+            map.put(key.value(), parseValue());
             if (check(TokenType.COMMA)) advance();
         }
         consume(TokenType.RBRACE, "Expect '}'.");
@@ -65,13 +80,6 @@ public class CHTLJSParser {
         return node;
     }
 
-    private DelegateNode parseDelegateBlock(String selector) {
-        DelegateNode node = new DelegateNode(selector);
-        Map<String, String> events = parseKeyValueBlock();
-        events.forEach(node::addDelegatedEvent);
-        return node;
-    }
-
     private AnimateNode parseAnimateBlock() {
         AnimateNode node = new AnimateNode();
         Map<String, String> properties = parseKeyValueBlock();
@@ -79,37 +87,13 @@ public class CHTLJSParser {
         return node;
     }
 
-    private RouterNode parseRouterBlock() {
-        RouterNode node = new RouterNode();
-        Map<String, String> routes = parseKeyValueBlock();
-        routes.forEach(node::addRoute);
-        return node;
-    }
-
-    private String consumeUntil(TokenType... terminators) {
-        StringBuilder builder = new StringBuilder();
-        int braceDepth = 0;
-        while (!isAtEnd()) {
-            if (braceDepth == 0) {
-                for (TokenType terminator : terminators) {
-                    if (check(terminator)) return builder.toString().trim();
-                }
-            }
-            if (check(TokenType.LBRACE)) braceDepth++;
-            if (check(TokenType.RBRACE)) braceDepth--;
-            builder.append(peek().value()).append(" ");
-            advance();
-        }
-        return builder.toString().trim();
-    }
-
+    // Utility methods
     private Token peek() { return tokens.get(current); }
-    private Token previous() { return tokens.get(current - 1); }
     private boolean isAtEnd() { return peek().type() == TokenType.EOF; }
+    private void advance() { if (!isAtEnd()) current++; }
     private boolean check(TokenType type) { if (isAtEnd()) return false; return peek().type() == type; }
-    private Token advance() { if (!isAtEnd()) current++; return previous(); }
     private Token consume(TokenType type, String message) {
-        if (check(type)) return advance();
+        if (check(type)) { Token t = peek(); advance(); return t; }
         throw new RuntimeException(message + " Got " + peek().type() + " instead.");
     }
 }

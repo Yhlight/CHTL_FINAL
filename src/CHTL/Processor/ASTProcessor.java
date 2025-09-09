@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class ASTProcessor {
 
@@ -20,13 +23,9 @@ public class ASTProcessor {
     }
 
     public List<BaseNode> process() {
-        // 1. Expand all element templates recursively.
-        expandTemplates(ast);
-
-        // 2. Evaluate all style expressions.
+        expandTemplates(this.ast);
         evaluateAllStyles();
-
-        return ast;
+        return this.ast;
     }
 
     private void expandTemplates(List<BaseNode> nodes) {
@@ -34,19 +33,13 @@ public class ASTProcessor {
         boolean changed = false;
         for(BaseNode node : nodes) {
             if (node instanceof ElementTemplateUsageNode usage) {
-                // Get the template definition
                 ElementTemplateNode template = (ElementTemplateNode) definitionManager.get(usage.getNamespace(), ElementTemplateNode.class, usage.getTemplateName())
                     .orElseThrow(() -> new RuntimeException("Template not found: " + usage.getTemplateName()));
-
-                // Clone the children from the template
                 List<BaseNode> clonedChildren = new ArrayList<>();
                 for (BaseNode child : template.getChildren()) {
-                    clonedChildren.add(cloneNode(child)); // Deep clone
+                    clonedChildren.add(child.clone());
                 }
-
-                // Apply specializations
                 applySpecializations(clonedChildren, usage.getSpecializationInstructions());
-
                 newNodes.addAll(clonedChildren);
                 changed = true;
             } else {
@@ -59,7 +52,6 @@ public class ASTProcessor {
         if (changed) {
             nodes.clear();
             nodes.addAll(newNodes);
-            // Repeat until no more templates are expanded
             expandTemplates(nodes);
         }
     }
@@ -67,45 +59,34 @@ public class ASTProcessor {
     private void applySpecializations(List<BaseNode> targetNodes, List<BaseNode> instructions) {
         for (BaseNode inst : instructions) {
             if (inst instanceof InsertInstructionNode ins) {
-                List<ElementNode> targets = findInContext(new ArrayList<>(targetNodes), ins.getSelector());
+                List<ElementNode> targets = find(new ArrayList<>(targetNodes), ins.getSelector());
                 if(targets.isEmpty()) continue;
-                ElementNode target = targets.get(0); // Simplified: assumes first match
+                ElementNode target = targets.get(0);
                 int index = targetNodes.indexOf(target);
                 if (index != -1) {
-                    switch(ins.getMode()) {
+                    switch (ins.getMode()) {
                         case BEFORE: targetNodes.addAll(index, ins.getNodesToInsert()); break;
                         case AFTER: targetNodes.addAll(index + 1, ins.getNodesToInsert()); break;
-                        case REPLACE:
-                            targetNodes.remove(index);
-                            targetNodes.addAll(index, ins.getNodesToInsert());
-                            break;
+                        case REPLACE: targetNodes.remove(index); targetNodes.addAll(index, ins.getNodesToInsert()); break;
+                        case AT_TOP: targetNodes.addAll(0, ins.getNodesToInsert()); break;
+                        case AT_BOTTOM: targetNodes.addAll(ins.getNodesToInsert()); break;
                     }
                 }
             } else if (inst instanceof DeleteInstructionNode del) {
-                targetNodes.removeIf(n -> {
-                    if (n instanceof ElementNode el) {
-                        // This is a simplified match, a full selector engine would be needed here
-                        return el.getTagName().equals(del.getSelector());
-                    }
-                    return false;
-                });
+                List<ElementNode> targets = find(new ArrayList<>(targetNodes), del.getSelector());
+                targetNodes.removeAll(targets);
             } else if (inst instanceof AddStyleInstructionNode styleInst) {
-                List<ElementNode> targets = findInContext(new ArrayList<>(targetNodes), styleInst.getSelector());
+                List<ElementNode> targets = find(new ArrayList<>(targetNodes), styleInst.getSelector());
                 for (ElementNode target : targets) {
-                    // Find an existing style node or create a new one
-                    StyleNode styleNodeToUpdate = null;
-                    for(BaseNode child : target.getChildren()) {
-                        if (child instanceof StyleNode) {
-                            styleNodeToUpdate = (StyleNode) child;
-                            break;
-                        }
-                    }
-                    if (styleNodeToUpdate == null) {
-                        styleNodeToUpdate = new StyleNode();
-                        target.addChild(styleNodeToUpdate);
-                    }
-                    // Add properties from the instruction's style node
+                    StyleNode styleNodeToUpdate = target.getChildren().stream()
+                        .filter(StyleNode.class::isInstance).map(StyleNode.class::cast).findFirst()
+                        .orElseGet(() -> {
+                            StyleNode newNode = new StyleNode();
+                            target.addChild(newNode);
+                            return newNode;
+                        });
                     styleInst.getStyleNode().getProperties().forEach(styleNodeToUpdate::addProperty);
+                    styleInst.getStyleNode().getUsages().forEach(styleNodeToUpdate::addUsage);
                 }
             }
         }
@@ -114,11 +95,7 @@ public class ASTProcessor {
     private void evaluateAllStyles() {
         Map<StyleProperty, String> propertyValues = new HashMap<>();
         Map<StyleProperty, ExpressionNode> propertyExpressions = new HashMap<>();
-
-        // 1. Discover all properties
         discoverProperties(ast, null, propertyValues);
-
-        // 2. Build dependency graph
         DependencyGraph<StyleProperty> graph = new DependencyGraph<>();
         for (Map.Entry<StyleProperty, String> entry : propertyValues.entrySet()) {
             StyleProperty currentProp = entry.getKey();
@@ -126,53 +103,41 @@ public class ASTProcessor {
             ExpressionNode expression = new ExpressionParser(new ExpressionLexer(entry.getValue()).tokenize()).parse();
             propertyExpressions.put(currentProp, expression);
             for (ReferenceNode ref : findReferences(expression)) {
-                // Simplified findElement
-                ElementNode referencedElement = findElement(ref.getSelector());
-                if (referencedElement != null) {
-                    graph.addEdge(new StyleProperty(referencedElement, ref.getProperty()), currentProp);
+                List<ElementNode> referencedElements = find(this.ast, ref.getSelector());
+                if (!referencedElements.isEmpty()) {
+                    graph.addEdge(new StyleProperty(referencedElements.get(0), ref.getProperty()), currentProp);
                 }
             }
         }
-
-        // 3. Evaluate in order
         List<StyleProperty> order = graph.topologicalSort();
         ExpressionEvaluator evaluator = new ExpressionEvaluator();
         Map<ElementNode, Map<String, String>> elementComputedStyles = new HashMap<>();
-
         for (StyleProperty prop : order) {
             ExpressionNode expression = propertyExpressions.get(prop);
             if (expression == null) continue;
-
             Map<String, String> computedForThisElement = elementComputedStyles.computeIfAbsent(prop.parent(), k -> new HashMap<>());
-            EvaluationContext context = new EvaluationContext(prop.parent(), this.ast, computedForThisElement);
+            EvaluationContext context = new EvaluationContext(prop.parent(), this.ast, computedForThisElement, this.definitionManager);
             ExpressionNode result = evaluator.evaluate(expression, context);
-            String finalValue = result.toString(); // Simplified
-
-            // Update the actual AST node
-            prop.parent().getChildren().stream()
-                .filter(n -> n instanceof StyleNode)
-                .map(n -> (StyleNode)n)
-                .findFirst()
-                .ifPresent(s -> s.getProperties().put(prop.propertyName(), finalValue));
-
-            // Store the computed value for self-referencing
+            String finalValue = "eval_error";
+            if (result instanceof UnitNode un) finalValue = un.getValue() + un.getUnit();
+            else if (result instanceof LiteralNode ln) finalValue = ln.getValue().toString();
+            if (prop.parent() != null) {
+                prop.parent().getChildren().stream()
+                    .filter(n -> n instanceof StyleNode).map(n -> (StyleNode)n).findFirst()
+                    .ifPresent(s -> s.getProperties().put(prop.propertyName(), finalValue));
+            }
             computedForThisElement.put(prop.propertyName(), finalValue);
         }
     }
 
-    // Simplified helper methods from before
     private void discoverProperties(List<BaseNode> nodes, ElementNode parent, Map<StyleProperty, String> map) {
         for (BaseNode node : nodes) {
             if (node instanceof ElementNode element) {
-                // Discover properties in local style blocks
                 element.getChildren().stream()
-                    .filter(n -> n instanceof StyleNode)
-                    .flatMap(n -> ((StyleNode)n).getProperties().entrySet().stream())
+                    .filter(StyleNode.class::isInstance).flatMap(n -> ((StyleNode)n).getProperties().entrySet().stream())
                     .forEach(entry -> map.put(new StyleProperty(element, entry.getKey()), entry.getValue()));
-                // Recurse into children
                 discoverProperties(element.getChildren(), element, map);
             } else if (node instanceof StyleNode styleNode && parent == null) {
-                // Discover properties in global style blocks
                 styleNode.getProperties().entrySet().stream()
                     .forEach(entry -> map.put(new StyleProperty(null, entry.getKey()), entry.getValue()));
             }
@@ -181,59 +146,73 @@ public class ASTProcessor {
 
     private List<ReferenceNode> findReferences(ExpressionNode node) {
         List<ReferenceNode> refs = new ArrayList<>();
-        if (node instanceof ReferenceNode ref) {
-            refs.add(ref);
-        } else if (node instanceof BinaryOpNode bn) {
+        if (node instanceof ReferenceNode ref) refs.add(ref);
+        else if (node instanceof BinaryOpNode bn) {
             refs.addAll(findReferences(bn.getLeft()));
             refs.addAll(findReferences(bn.getRight()));
         } else if (node instanceof TernaryNode tn) {
             refs.addAll(findReferences(tn.getCondition()));
             refs.addAll(findReferences(tn.getTrueExpression()));
-            if (tn.getFalseExpression() != null) {
-                refs.addAll(findReferences(tn.getFalseExpression()));
-            }
+            if (tn.getFalseExpression() != null) refs.addAll(findReferences(tn.getFalseExpression()));
         }
         return refs;
     }
 
-    private ElementNode findElement(String selector) {
-        if (selector != null && selector.startsWith("#")) {
-            return findElementById(this.ast, selector.substring(1));
+    public List<ElementNode> find(List<BaseNode> searchContext, String selector) {
+        String[] parts = selector.trim().split("\\s+");
+        List<ElementNode> currentMatches = findElements(searchContext, parts[0]);
+        for (int i = 1; i < parts.length; i++) {
+            List<ElementNode> childrenContext = new ArrayList<>();
+            for(ElementNode parent : currentMatches) {
+                childrenContext.addAll(parent.getChildren());
+            }
+            currentMatches = findElements(childrenContext, parts[i]);
         }
-        return null;
+        return currentMatches;
     }
 
-    private List<ElementNode> findInContext(List<BaseNode> nodes, String part) {
-        List<ElementNode> results = new ArrayList<>();
-        // This is a simplified implementation that only handles tag names.
-        for (BaseNode node : nodes) {
-            if (node instanceof ElementNode element) {
-                if (element.getTagName().equals(part)) {
-                    results.add(element);
+    private List<ElementNode> findElements(List<BaseNode> nodes, String selectorPart) {
+        List<ElementNode> found = new ArrayList<>();
+        Pattern indexed = Pattern.compile("(\\w+)\\[(\\d+)\\]");
+        Matcher m = indexed.matcher(selectorPart);
+
+        if (m.matches()) {
+            String tagName = m.group(1);
+            int index = Integer.parseInt(m.group(2));
+            int count = 0;
+            for (BaseNode node : nodes) {
+                if (node instanceof ElementNode element && element.getTagName().equals(tagName)) {
+                    if (count == index) {
+                        found.add(element);
+                        return found;
+                    }
+                    count++;
                 }
-                // Recurse
-                results.addAll(findInContext(element.getChildren(), part));
+            }
+        } else {
+            for (BaseNode node : nodes) {
+                if (node instanceof ElementNode element) {
+                    if (matches(element, selectorPart)) {
+                        found.add(element);
+                    }
+                    found.addAll(findElements(element.getChildren(), selectorPart));
+                }
             }
         }
-        return results;
+        return found;
     }
 
-    private ElementNode findElementById(List<BaseNode> nodes, String id) {
-         for (BaseNode node : nodes) {
-            if (node instanceof ElementNode element) {
-                Object elementId = element.getAttributes().get("id");
-                if (elementId instanceof String && elementId.equals(id)) {
-                    return element;
-                }
-                ElementNode foundInChildren = findElementById(element.getChildren(), id);
-                if (foundInChildren != null) return foundInChildren;
-            }
+    private boolean matches(ElementNode element, String selectorPart) {
+        if (selectorPart.startsWith(".")) {
+            String className = selectorPart.substring(1);
+            Object classAttr = element.getAttributes().get("class");
+            return classAttr instanceof String && List.of(((String) classAttr).split("\\s+")).contains(className);
+        } else if (selectorPart.startsWith("#")) {
+            String id = selectorPart.substring(1);
+            Object idAttr = element.getAttributes().get("id");
+            return idAttr instanceof String && idAttr.equals(id);
+        } else {
+            return element.getTagName().equals(selectorPart);
         }
-        return null;
-    }
-
-    private BaseNode cloneNode(BaseNode node) {
-        if (node == null) return null;
-        return node.clone();
     }
 }
