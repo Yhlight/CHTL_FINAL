@@ -175,7 +175,18 @@ class TemplateDefinitionNode(BaseNode):
 
 CustomDefinitionNode = TemplateDefinitionNode
 
-DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode, CustomDefinitionNode, StyleNode]
+@dataclass
+class ImportNode(BaseNode):
+    """Represents an [Import] statement."""
+    import_type: str  # e.g., 'Chtl', 'Style', 'JavaScript'
+    construct_type: Optional[str] = None # e.g., 'Element', 'Style' for precise imports
+    path: str = ""
+    alias: Optional[str] = None
+    imported_item: Optional[str] = None
+    lineno: int = 0
+    parent: Optional['BaseNode'] = field(default=None, repr=False)
+
+DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode, CustomDefinitionNode, StyleNode, ImportNode]
 
 @dataclass
 class DocumentNode(BaseNode):

@@ -1,0 +1,17 @@
+[Info]
+{
+    name = "Chtholly";
+    version = "1.0.0";
+    description = "Chtholly theme module - The happiest girl in the world";
+    author = "CHTL Team";
+    license = "MIT";
+    dependencies = "";
+    category = "theme";
+    minCHTLVersion = "1.0.0";
+    maxCHTLVersion = "2.0.0";
+}
+
+[Export]
+{
+
+}

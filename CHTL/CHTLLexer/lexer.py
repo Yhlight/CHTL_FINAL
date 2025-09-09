@@ -2,20 +2,72 @@ from enum import Enum, auto
 from dataclasses import dataclass
 
 class TokenType(Enum):
-    LBRACE, RBRACE, LPAREN, RPAREN, LBRACK, RBRACK = auto(), auto(), auto(), auto(), auto(), auto()
-    COLON, SEMICOLON, EQUALS, COMMA, DOT, AT = auto(), auto(), auto(), auto(), auto(), auto()
-    QUESTION, SLASH, GT, LT = auto(), auto(), auto(), auto()
+    # Single-character tokens
+    LBRACE = auto()
+    RBRACE = auto()
+    LPAREN = auto()
+    RPAREN = auto()
+    LBRACK = auto()
+    RBRACK = auto()
+    COLON = auto()
+    SEMICOLON = auto()
+    EQUALS = auto()
+    COMMA = auto()
+    DOT = auto()
+    AT_SYMBOL = auto()
+    QUESTION = auto()
+    SLASH = auto()
+    GT = auto()
+    LT = auto()
 
     # Operators
-    PLUS, MINUS, STAR, PERCENT, POWER = auto(), auto(), auto(), auto(), auto()
-    AMPERSAND, AND, OR = auto(), auto(), auto()
-    EQ_EQ, NOT_EQ, GTE, LTE = auto(), auto(), auto(), auto()
+    PLUS = auto()
+    MINUS = auto()
+    STAR = auto()
+    PERCENT = auto()
+    POWER = auto()
+    AMPERSAND = auto()
+    AND = auto()
+    OR = auto()
+    EQ_EQ = auto()
+    NOT_EQ = auto()
+    GTE = auto()
+    LTE = auto()
 
     # Literals
-    IDENTIFIER, STRING, UNQUOTED_LITERAL = auto(), auto(), auto()
+    IDENTIFIER = auto()
+    STRING = auto()
+    UNQUOTED_LITERAL = auto()
+
+    # Keywords
+    CUSTOM = auto()
+    TEMPLATE = auto()
+    ORIGIN = auto()
+    IMPORT = auto()
+    NAMESPACE = auto()
+    CONFIGURATION = auto()
+    STYLE = auto()
+    TEXT = auto()
+    SCRIPT = auto()
+    FROM = auto()
+    AS = auto()
+    USE = auto()
+    EXCEPT = auto()
+    HTML5 = auto()
+    INHERIT = auto()
+    DELETE = auto()
+    INSERT = auto()
+    AFTER = auto()
+    BEFORE = auto()
+    REPLACE = auto()
+    AT_KEYWORD = auto()
+    TOP = auto()
+    BOTTOM = auto()
 
     # Other
-    COMMENT, EOF, UNKNOWN = auto(), auto(), auto()
+    COMMENT = auto()
+    EOF = auto()
+    UNKNOWN = auto()
 
 @dataclass
 class Token:
@@ -24,6 +76,32 @@ class Token:
     lineno: int
     col: int
 
+KEYWORDS = {
+    "Custom": TokenType.CUSTOM,
+    "Template": TokenType.TEMPLATE,
+    "Origin": TokenType.ORIGIN,
+    "Import": TokenType.IMPORT,
+    "Namespace": TokenType.NAMESPACE,
+    "Configuration": TokenType.CONFIGURATION,
+    "style": TokenType.STYLE,
+    "text": TokenType.TEXT,
+    "script": TokenType.SCRIPT,
+    "from": TokenType.FROM,
+    "as": TokenType.AS,
+    "use": TokenType.USE,
+    "except": TokenType.EXCEPT,
+    "html5": TokenType.HTML5,
+    "inherit": TokenType.INHERIT,
+    "delete": TokenType.DELETE,
+    "insert": TokenType.INSERT,
+    "after": TokenType.AFTER,
+    "before": TokenType.BEFORE,
+    "replace": TokenType.REPLACE,
+    "at": TokenType.AT_KEYWORD,
+    "top": TokenType.TOP,
+    "bottom": TokenType.BOTTOM,
+}
+
 class Lexer:
     def __init__(self, source_code: str):
         self.source_code = source_code
@@ -31,11 +109,12 @@ class Lexer:
         self.lineno = 1
         self.line_start = 0
         self.tokens: list[Token] = []
+        self.keywords = KEYWORDS
         self.simple_tokens = {
             '{': TokenType.LBRACE, '}': TokenType.RBRACE, '(': TokenType.LPAREN,
             ')': TokenType.RPAREN, '[': TokenType.LBRACK, ']': TokenType.RBRACK,
             ':': TokenType.COLON, ';': TokenType.SEMICOLON, ',': TokenType.COMMA,
-            '.': TokenType.DOT, '@': TokenType.AT, '?': TokenType.QUESTION,
+            '.': TokenType.DOT, '@': TokenType.AT_SYMBOL, '?': TokenType.QUESTION,
             '+': TokenType.PLUS, '%': TokenType.PERCENT,
         }
 
@@ -135,7 +214,8 @@ class Lexer:
                 break
             self.advance()
         value = self.source_code[start_pos:self.pos]
-        self.add_token(TokenType.IDENTIFIER, value)
+        token_type = self.keywords.get(value, TokenType.IDENTIFIER)
+        self.add_token(token_type, value)
 
     def consume_unquoted_literal(self):
         start_pos = self.pos

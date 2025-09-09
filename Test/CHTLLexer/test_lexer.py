@@ -85,5 +85,33 @@ class TestLexer(unittest.TestCase):
         token_types = [t.type for t in tokens]
         self.assertEqual(token_types, expected_types)
 
+    def test_keywords(self):
+        source = "style text script from as use except html5 inherit delete insert after before replace at top bottom"
+        lexer = Lexer(source)
+        tokens = lexer.tokenize()
+        expected_types = [
+            TokenType.STYLE, TokenType.TEXT, TokenType.SCRIPT,
+            TokenType.FROM, TokenType.AS, TokenType.USE, TokenType.EXCEPT,
+            TokenType.HTML5, TokenType.INHERIT, TokenType.DELETE,
+            TokenType.INSERT, TokenType.AFTER, TokenType.BEFORE,
+            TokenType.REPLACE, TokenType.AT_KEYWORD, TokenType.TOP,
+            TokenType.BOTTOM, TokenType.EOF
+        ]
+        token_types = [t.type for t in tokens]
+        self.assertEqual(token_types, expected_types)
+
+    def test_bracketed_keywords(self):
+        source = "[Template] [Custom]"
+        lexer = Lexer(source)
+        tokens = lexer.tokenize()
+        expected_types = [
+            TokenType.LBRACK, TokenType.TEMPLATE, TokenType.RBRACK,
+            TokenType.LBRACK, TokenType.CUSTOM, TokenType.RBRACK,
+            TokenType.EOF,
+        ]
+        token_types = [t.type for t in tokens]
+        self.assertEqual(token_types, expected_types)
+
+
 if __name__ == '__main__':
     unittest.main()

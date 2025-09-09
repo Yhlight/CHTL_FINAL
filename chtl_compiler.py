@@ -1,26 +1,19 @@
 import argparse
 import sys
-from CHTL.CHTLLexer.lexer import Lexer
-from CHTL.CHTLParser.parser import Parser
-from CHTL.CHTLTransformer.transformer import ASTTransformer
-from CHTL.CHTLGenerator.generator import HTMLGenerator
-from CHTL.CHTLContext.context import CompilationContext
+from Scanner.CHTLUnifiedScanner import CHTLUnifiedScanner
+from CompilerDispatcher.dispatcher import CompilerDispatcher
 
-def compile_chtl(source_code: str, use_default_structure: bool = False) -> str:
-    """
-    Runs the full CHTL compilation pipeline.
-    """
-    context = CompilationContext()
-    lexer = Lexer(source_code)
-    tokens = lexer.tokenize()
-    parser = Parser(tokens, context)
-    ast = parser.parse()
-    transformer = ASTTransformer(ast, context)
-    transformed_ast = transformer.transform()
-    generator = HTMLGenerator(transformed_ast)
-    html_output = generator.generate(use_default_structure=use_default_structure)
 
-    return html_output
+def compile_chtl(source_code: str, use_default_structure: bool = True) -> str:
+    """
+    Runs the full CHTL compilation pipeline using the scanner and dispatcher.
+    """
+    scanner = CHTLUnifiedScanner(source_code)
+    fragments = scanner.scan()
+    dispatcher = CompilerDispatcher(fragments)
+    dispatcher.dispatch()
+    final_html = dispatcher.merge_outputs(use_default_structure=use_default_structure)
+    return final_html
 
 def main():
     """
@@ -39,9 +32,9 @@ def main():
         help="The path to the output .html file.\nIf not provided, the output will be printed to the console."
     )
     parser.add_argument(
-        "--default-struct",
+        "--no-struct",
         action="store_true",
-        help="Generate a full HTML document structure (<html>, <head>, <body>)."
+        help="Generate only the HTML fragment, not a full document structure."
     )
 
     args = parser.parse_args()
@@ -50,7 +43,7 @@ def main():
         with open(args.input_file, 'r', encoding='utf-8') as f:
             source_code = f.read()
 
-        html_output = compile_chtl(source_code, use_default_structure=args.default_struct)
+        html_output = compile_chtl(source_code, use_default_structure=not args.no_struct)
 
         if args.output:
             with open(args.output, 'w', encoding='utf-8') as f:

@@ -123,6 +123,67 @@ class TestExpressionEvaluator(unittest.TestCase):
         result = self._evaluate_expression_in_source(source, "footer", "height")
         self.assertEqual(result, "30px")
 
+    def test_simple_conditional_expression_true(self):
+        source = """
+        div {
+            style {
+                width: 100px;
+                color: width > 50px ? "red" : "blue";
+            }
+        }
+        """
+        result = self._evaluate_expression_in_source(source, "div", "color")
+        self.assertEqual(result, 'red')
+
+    def test_simple_conditional_expression_false(self):
+        source = """
+        div {
+            style {
+                width: 20px;
+                color: width > 50px ? "red" : "blue";
+            }
+        }
+        """
+        result = self._evaluate_expression_in_source(source, "div", "color")
+        self.assertEqual(result, 'blue')
+
+    def test_logical_and_expression(self):
+        source = """
+        div {
+            style {
+                width: 60px;
+                height: 90px;
+                color: width > 50px && height < 100px ? "green" : "yellow";
+            }
+        }
+        """
+        result = self._evaluate_expression_in_source(source, "div", "color")
+        self.assertEqual(result, 'green')
+
+    def test_logical_or_expression(self):
+        source = """
+        div {
+            style {
+                width: 40px;
+                height: 120px;
+                color: width > 50px || height > 100px ? "purple" : "pink";
+            }
+        }
+        """
+        result = self._evaluate_expression_in_source(source, "div", "color")
+        self.assertEqual(result, 'purple')
+
+    def test_optional_else_conditional(self):
+        source = """
+        div {
+            style {
+                width: 75px;
+                color: width > 50px ? "orange";
+            }
+        }
+        """
+        result = self._evaluate_expression_in_source(source, "div", "color")
+        self.assertEqual(result, 'orange')
 
 if __name__ == '__main__':
     unittest.main()

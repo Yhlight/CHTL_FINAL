@@ -2,7 +2,8 @@ from CHTL.CHTLLexer.lexer import Token, TokenType
 from CHTL.CHTLNode.nodes import (
     BaseNode, DocumentNode, ElementNode, AttributeNode, TextNode, CommentNode, Node,
     StyleNode, CssRuleNode, CssPropertyNode, TemplateDefinitionNode, TemplateUsageNode,
-    CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode, LiteralNode
+    CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode, LiteralNode,
+    ImportNode
 )
 from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLParser.expression_parser import ExpressionParser
@@ -42,41 +43,89 @@ class Parser:
             token = self.current_token()
             if token.type == TokenType.LBRACK:
                 self.consume(TokenType.LBRACK)
-                keyword = self.consume(TokenType.IDENTIFIER)
-                if keyword.value == "Template":
-                    doc.add_child(self.parse_template_definition(keyword))
-                elif keyword.value == "Custom":
-                    doc.add_child(self.parse_template_definition(keyword, is_custom=True))
+                keyword_token = self.current_token()
+                if not keyword_token: raise RuntimeError("Unexpected EOF after '['")
+
+                if keyword_token.type == TokenType.TEMPLATE:
+                    self.consume()
+                    doc.add_child(self.parse_template_definition(keyword_token))
+                elif keyword_token.type == TokenType.CUSTOM:
+                    self.consume()
+                    doc.add_child(self.parse_template_definition(keyword_token, is_custom=True))
+                elif keyword_token.type == TokenType.IMPORT:
+                    self.consume()
+                    doc.add_child(self.parse_import_statement(keyword_token))
                 else:
-                    raise RuntimeError(f"Unknown definition type: {keyword.value}")
+                    raise RuntimeError(f"Unknown definition type: {keyword_token.value}")
             elif token.type == TokenType.COMMENT:
                 doc.add_child(self.parse_comment())
             elif token.type == TokenType.IDENTIFIER:
                 if token.value == 'title' and self.peek(1) and self.peek(1).type == TokenType.COLON:
                     doc.add_child(self.parse_title_shorthand())
-                elif token.value == 'style' and self.peek(1) and self.peek(1).type == TokenType.LBRACE:
-                    doc.add_child(self.parse_style_block(parent_element=None))
                 else:
                     doc.add_child(self.parse_element())
+            elif token.type == TokenType.STYLE:
+                 doc.add_child(self.parse_style_block(parent_element=None))
             else:
                 raise RuntimeError(f"Line {token.lineno}: Unexpected token {token.type} ('{token.value}') at top level.")
         return doc
+
+    def parse_import_statement(self, start_token: Token) -> ImportNode:
+        self.consume(TokenType.RBRACK)
+        is_construct_import = self.current_token().type == TokenType.LBRACK
+        construct_type = None
+        if is_construct_import:
+            self.consume(TokenType.LBRACK)
+            construct_type = self.consume().value
+            self.consume(TokenType.RBRACK)
+        self.consume(TokenType.AT_SYMBOL)
+        import_type = self.consume().value
+        imported_item = None
+        if self.current_token().type != TokenType.FROM:
+            imported_item = self.consume().value
+        self.consume(TokenType.FROM)
+        path_token = self.current_token()
+        if path_token.type not in (TokenType.STRING, TokenType.UNQUOTED_LITERAL):
+             raise RuntimeError(f"Line {path_token.lineno}: Expected a path string or literal for import.")
+        self.consume()
+        path = path_token.value
+        if path_token.type == TokenType.STRING:
+            path = path[1:-1]
+        alias = None
+        if self.current_token() and self.current_token().type == TokenType.AS:
+            self.consume(TokenType.AS)
+            alias_token = self.consume(TokenType.IDENTIFIER)
+            alias = alias_token.value
+        if self.current_token() and self.current_token().type == TokenType.SEMICOLON:
+            self.consume(TokenType.SEMICOLON)
+        return ImportNode(
+            lineno=start_token.lineno, import_type=import_type,
+            construct_type=construct_type, path=path, alias=alias,
+            imported_item=imported_item
+        )
 
     def parse_title_shorthand(self) -> ElementNode:
         title_token = self.consume(TokenType.IDENTIFIER, 'title')
         self.consume(TokenType.COLON)
         value_token = self.consume(TokenType.STRING)
         value = value_token.value[1:-1]
-
         title_element = ElementNode(tag_name='title', lineno=title_token.lineno)
         title_element.add_child(TextNode(value=value, lineno=value_token.lineno))
-
         if self.current_token() and self.current_token().type == TokenType.SEMICOLON:
             self.consume(TokenType.SEMICOLON)
-
         return title_element
 
-    def parse_definition_content(self, template_type):
+    def parse_definition_content(self, template_type: str):
+        if template_type == 'Element':
+            return self.parse_element_template_content()
+        elif template_type == 'Style':
+            return self.parse_style_template_content()
+        elif template_type == 'Var':
+            return self.parse_var_template_content()
+        else:
+            raise RuntimeError(f"Unknown template type for definition: {template_type}")
+
+    def parse_element_template_content(self) -> List[ElementNode]:
         content = []
         self.consume(TokenType.LBRACE)
         while self.current_token().type != TokenType.RBRACE:
@@ -84,9 +133,30 @@ class Parser:
         self.consume(TokenType.RBRACE)
         return content
 
+    def parse_style_template_content(self) -> List[CssPropertyNode]:
+        content = []
+        self.consume(TokenType.LBRACE)
+        while self.current_token().type != TokenType.RBRACE:
+            content.append(self.parse_css_property())
+        self.consume(TokenType.RBRACE)
+        return content
+
+    def parse_var_template_content(self) -> List[AttributeNode]:
+        content = []
+        self.consume(TokenType.LBRACE)
+        while self.current_token().type != TokenType.RBRACE:
+            attr_name_token = self.consume(TokenType.IDENTIFIER)
+            self.consume()
+            value = self.parse_value_tokens([TokenType.SEMICOLON, TokenType.RBRACE])
+            content.append(AttributeNode(name=attr_name_token.value, value=value, lineno=attr_name_token.lineno))
+            if self.current_token().type == TokenType.SEMICOLON:
+                self.consume(TokenType.SEMICOLON)
+        self.consume(TokenType.RBRACE)
+        return content
+
     def parse_template_definition(self, start_token, is_custom=False) -> Union[TemplateDefinitionNode, CustomDefinitionNode]:
         self.consume(TokenType.RBRACK)
-        self.consume(TokenType.AT)
+        self.consume(TokenType.AT_SYMBOL)
         template_type_token = self.consume(TokenType.IDENTIFIER)
         template_name_token = self.consume(TokenType.IDENTIFIER)
         template_type = template_type_token.value
@@ -98,7 +168,7 @@ class Parser:
         return node_class(template_type=template_type, name=template_name, content=content, lineno=start_token.lineno)
 
     def parse_at_usage(self):
-        start_token = self.consume(TokenType.AT)
+        start_token = self.consume(TokenType.AT_SYMBOL)
         template_type_token = self.consume(TokenType.IDENTIFIER)
         template_name_token = self.consume(TokenType.IDENTIFIER)
         if self.current_token().type == TokenType.SEMICOLON:
@@ -113,9 +183,9 @@ class Parser:
         self.consume(TokenType.LBRACE)
         while self.current_token() and self.current_token().type != TokenType.RBRACE:
             token = self.current_token()
-            if token.type == TokenType.IDENTIFIER and token.value == 'delete':
+            if token.type == TokenType.DELETE:
                 body.append(self.parse_delete_rule())
-            elif token.type == TokenType.IDENTIFIER and token.value == 'insert':
+            elif token.type == TokenType.INSERT:
                 body.append(self.parse_insert_rule())
             else:
                 body.append(self.parse_element())
@@ -123,7 +193,7 @@ class Parser:
         return body
 
     def parse_delete_rule(self) -> DeleteNode:
-        start_token = self.consume(TokenType.IDENTIFIER, 'delete')
+        start_token = self.consume(TokenType.DELETE)
         targets = []
         while self.current_token().type != TokenType.SEMICOLON:
             if self.current_token().type == TokenType.COMMA: self.consume()
@@ -132,12 +202,14 @@ class Parser:
         return DeleteNode(targets=targets, lineno=start_token.lineno)
 
     def parse_insert_rule(self) -> InsertNode:
-        start_token = self.consume(TokenType.IDENTIFIER, 'insert')
-        position_parts = [self.consume(TokenType.IDENTIFIER).value]
-        if position_parts[0] == 'at': position_parts.append(self.consume(TokenType.IDENTIFIER).value)
+        start_token = self.consume(TokenType.INSERT)
+        position_token = self.consume()
+        position_parts = [position_token.value]
+        if position_token.type == TokenType.AT_KEYWORD:
+            position_parts.append(self.consume().value)
         position = " ".join(position_parts)
         target_selector = self.consume(TokenType.IDENTIFIER).value
-        content = self.parse_definition_content('Element')
+        content = self.parse_element_template_content()
         return InsertNode(position=position, target_selector=target_selector, content=content, lineno=start_token.lineno)
 
     def parse_comment(self) -> CommentNode:
@@ -164,13 +236,13 @@ class Parser:
         self.consume(TokenType.LBRACE)
         while self.current_token() and self.current_token().type not in (TokenType.RBRACE, TokenType.EOF):
             token = self.current_token()
-            if token.type == TokenType.AT:
+            if token.type == TokenType.AT_SYMBOL:
                 element.add_child(self.parse_at_usage())
             elif token.type == TokenType.COMMENT:
                 element.add_child(self.parse_comment())
-            elif token.type == TokenType.IDENTIFIER and token.value == 'style':
+            elif token.type == TokenType.STYLE:
                 element.add_child(self.parse_style_block(element))
-            elif token.type == TokenType.IDENTIFIER:
+            elif token.type == TokenType.IDENTIFIER or token.type == TokenType.TEXT:
                 next_token = self.peek(1)
                 if next_token and next_token.type == TokenType.LBRACE:
                     element.add_child(self.parse_element())
@@ -184,9 +256,9 @@ class Parser:
         return element
 
     def parse_attribute(self, element: ElementNode):
-        attr_name_token = self.consume(TokenType.IDENTIFIER)
+        attr_name_token = self.consume()
         self.consume() # colon or equals
-        if attr_name_token.value == 'text':
+        if attr_name_token.type == TokenType.TEXT:
              value = self.parse_value_tokens([TokenType.SEMICOLON, TokenType.RBRACE])
              element.add_child(TextNode(value=value, lineno=attr_name_token.lineno))
         else:
@@ -196,11 +268,11 @@ class Parser:
             self.consume(TokenType.SEMICOLON)
 
     def parse_style_block(self, parent_element: Optional[ElementNode]) -> StyleNode:
-        style_token = self.consume(TokenType.IDENTIFIER)
+        style_token = self.consume(TokenType.STYLE)
         self.consume(TokenType.LBRACE)
         style_node = StyleNode(lineno=style_token.lineno)
         while self.current_token() and self.current_token().type != TokenType.RBRACE:
-            if self.current_token().type == TokenType.AT:
+            if self.current_token().type == TokenType.AT_SYMBOL:
                 style_node.add_child(self.parse_at_usage())
             else:
                 is_rule = False

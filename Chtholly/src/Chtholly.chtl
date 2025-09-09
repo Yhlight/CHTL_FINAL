@@ -1,0 +1,27 @@
+// Chtholly Module - Main Source File
+
+[Custom] @Element ProgressBar
+{
+    div {
+        class: "progress-bar-container";
+        style {
+            width: 100%;
+            background-color: #eee;
+            border-radius: 4px;
+        }
+
+        div {
+            class: "progress-bar-fill";
+            style {
+                width: 50%;
+                height: 20px;
+                background-color: #4CAF50;
+                border-radius: 4px;
+                text-align: center;
+                line-height: 20px;
+                color: white;
+            }
+            text: "50%";
+        }
+    }
+}

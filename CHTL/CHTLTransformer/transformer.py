@@ -1,10 +1,14 @@
 import copy
 from typing import List, Union, Any
 from CHTL.CHTLContext.context import CompilationContext
+from CHTL.CHTLParser.parser import Parser
+from CHTL.CHTLLexer.lexer import Lexer
+from CHTL.CHTLParser.parser import Parser
+from CHTL.CHTLLexer.lexer import Lexer
 from CHTL.CHTLNode.nodes import (
     BaseNode, DocumentNode, ElementNode, TextNode, CommentNode, StyleNode, Node,
-    TemplateDefinitionNode, TemplateUsageNode, CssRuleNode, CssPropertyNode,
-    CustomUsageNode, DeleteNode, InsertNode
+    TemplateDefinitionNode, CustomDefinitionNode, TemplateUsageNode, CssRuleNode, CssPropertyNode,
+    CustomUsageNode, DeleteNode, InsertNode, ImportNode
 )
 
 class ASTTransformer:
@@ -39,7 +43,36 @@ class ASTTransformer:
         return node
 
     def visit_TemplateDefinitionNode(self, node: TemplateDefinitionNode) -> None:
+        # These are handled at the context level, so we remove them from the tree
         return None
+
+    def visit_CustomDefinitionNode(self, node: CustomDefinitionNode) -> None:
+        # These are handled at the context level, so we remove them from the tree
+        return None
+
+    def visit_ImportNode(self, node: ImportNode) -> None:
+        try:
+            with open(node.path, 'r', encoding='utf-8') as f:
+                source_code = f.read()
+        except FileNotFoundError:
+            raise RuntimeError(f"Imported file not found: {node.path}")
+
+        # Create a new context for the imported file to avoid pollution
+        import_context = CompilationContext()
+        lexer = Lexer(source_code)
+        tokens = lexer.tokenize()
+        parser = Parser(tokens, import_context)
+        import_ast = parser.parse()
+
+        # Now, we need to extract the definitions from the imported AST
+        # and add them to our main context.
+        for def_node in import_ast.children:
+            if isinstance(def_node, TemplateDefinitionNode):
+                # For now, we'll just handle element templates
+                if def_node.template_type == 'Element':
+                    # TODO: Handle namespaces from import aliases/file names
+                    self.context.add_element_template(def_node.name, def_node.content)
+        return None # Import nodes are processed and removed from the final AST
 
     def visit_TemplateUsageNode(self, node: TemplateUsageNode) -> List[BaseNode]:
         if node.template_type == 'Element':

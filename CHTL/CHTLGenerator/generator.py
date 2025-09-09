@@ -111,6 +111,20 @@ class HTMLGenerator:
         result += f"</{node.tag_name}>"
         return result
 
+    def generate_parts(self) -> (str, str):
+        self.global_styles = []
+        self.find_and_process_styles(self.ast, None, base_indent=1)
+
+        body_content_parts = []
+        for node in self.ast.children:
+            if isinstance(node, ElementNode):
+                 body_content_parts.append(self.visit(node, None, 1))
+
+        body_content = "\n".join(filter(None, body_content_parts))
+        style_tag_content = "\n".join(self.global_styles)
+
+        return (body_content, style_tag_content)
+
     def visit_AttributeNode(self, node: AttributeNode, context: Optional[ElementNode], indent_level: int = 0) -> str:
         return f'{node.name}="{html.escape(node.value)}"'
 

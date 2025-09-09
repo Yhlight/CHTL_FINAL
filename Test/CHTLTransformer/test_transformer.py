@@ -1,12 +1,16 @@
 import unittest
 import copy
+from CHTL.CHTLLexer.lexer import Lexer
+from CHTL.CHTLParser.parser import Parser
 from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLNode.nodes import (
     DocumentNode, ElementNode, TextNode, TemplateUsageNode,
     TemplateDefinitionNode, CustomUsageNode, DeleteNode, AttributeNode,
-    InsertNode, StyleNode, CssPropertyNode
+    InsertNode, StyleNode, CssPropertyNode, ImportNode
 )
 from CHTL.CHTLTransformer.transformer import ASTTransformer
+
+import os
 
 class TestASTTransformer(unittest.TestCase):
 
@@ -21,6 +25,30 @@ class TestASTTransformer(unittest.TestCase):
             ])
         ]
         self.context.add_element_template("MyBox", box_template_content)
+
+        # Create files needed for import test
+        with open("imported_component.chtl", "w") as f:
+            f.write("""
+            [Template] @Element MyImportedButton {
+                button {
+                    class: "imported-btn";
+                    text: "I was imported!";
+                }
+            }
+            """)
+        with open("imports.chtl", "w") as f:
+            f.write("""
+            [Import] @Chtl from "imported_component.chtl";
+            body {
+                @Element MyImportedButton;
+            }
+            """)
+
+    def tearDown(self):
+        if os.path.exists("imported_component.chtl"):
+            os.remove("imported_component.chtl")
+        if os.path.exists("imports.chtl"):
+            os.remove("imports.chtl")
 
     def test_custom_delete_attribute(self):
         ast = DocumentNode(children=[
@@ -72,6 +100,36 @@ class TestASTTransformer(unittest.TestCase):
         transformer = ASTTransformer(ast, self.context)
         with self.assertRaisesRegex(RuntimeError, "Template 'MissingBox' of type 'Element' not found"):
             transformer.transform()
+
+    def test_import_transformation(self):
+        with open('imports.chtl', 'r') as f:
+            source = f.read()
+
+        context = CompilationContext()
+        lexer = Lexer(source)
+        tokens = lexer.tokenize()
+        parser = Parser(tokens, context)
+        ast = parser.parse()
+
+        # Before transformation, the AST should have 2 children: ImportNode and ElementNode
+        self.assertEqual(len(ast.children), 2)
+        self.assertIsInstance(ast.children[0], ImportNode)
+        self.assertIsInstance(ast.children[1], ElementNode)
+
+        transformer = ASTTransformer(ast, context)
+        transformed_ast = transformer.transform()
+
+        # After transformation, the import node should be gone, and the template should be expanded
+        self.assertEqual(len(transformed_ast.children), 1)
+        body_node = transformed_ast.children[0]
+        self.assertEqual(body_node.tag_name, 'body')
+        self.assertEqual(len(body_node.children), 1)
+
+        button_node = body_node.children[0]
+        self.assertIsInstance(button_node, ElementNode)
+        self.assertEqual(button_node.tag_name, 'button')
+        self.assertEqual(button_node.attributes[0].value, 'imported-btn')
+
 
 if __name__ == '__main__':
     unittest.main()
