@@ -239,6 +239,58 @@ CHTLManage/fast:
 	$(MAKE) $(MAKESILENT) -f CHTL/CHTLManage/CMakeFiles/CHTLManage.dir/build.make CHTL/CHTLManage/CMakeFiles/CHTLManage.dir/build
 .PHONY : CHTLManage/fast
 
+#=============================================================================
+# Target rules for targets named CHTLJSCore
+
+# Build rule for target.
+CHTLJSCore: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTLJSCore
+.PHONY : CHTLJSCore
+
+# fast build rule for target.
+CHTLJSCore/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL/CHTLJS/CMakeFiles/CHTLJSCore.dir/build.make CHTL/CHTLJS/CMakeFiles/CHTLJSCore.dir/build
+.PHONY : CHTLJSCore/fast
+
+#=============================================================================
+# Target rules for targets named CHTLJSLexer
+
+# Build rule for target.
+CHTLJSLexer: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTLJSLexer
+.PHONY : CHTLJSLexer
+
+# fast build rule for target.
+CHTLJSLexer/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL/CHTLJS/CHTLJSLexer/CMakeFiles/CHTLJSLexer.dir/build.make CHTL/CHTLJS/CHTLJSLexer/CMakeFiles/CHTLJSLexer.dir/build
+.PHONY : CHTLJSLexer/fast
+
+#=============================================================================
+# Target rules for targets named CHTLJSNode
+
+# Build rule for target.
+CHTLJSNode: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTLJSNode
+.PHONY : CHTLJSNode
+
+# fast build rule for target.
+CHTLJSNode/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL/CHTLJS/CHTLJSNode/CMakeFiles/CHTLJSNode.dir/build.make CHTL/CHTLJS/CHTLJSNode/CMakeFiles/CHTLJSNode.dir/build
+.PHONY : CHTLJSNode/fast
+
+#=============================================================================
+# Target rules for targets named CHTLJSParser
+
+# Build rule for target.
+CHTLJSParser: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTLJSParser
+.PHONY : CHTLJSParser
+
+# fast build rule for target.
+CHTLJSParser/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL/CHTLJS/CHTLJSParser/CMakeFiles/CHTLJSParser.dir/build.make CHTL/CHTLJS/CHTLJSParser/CMakeFiles/CHTLJSParser.dir/build
+.PHONY : CHTLJSParser/fast
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -276,6 +328,10 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... CHTLCore"
+	@echo "... CHTLJSCore"
+	@echo "... CHTLJSLexer"
+	@echo "... CHTLJSNode"
+	@echo "... CHTLJSParser"
 	@echo "... CHTLLexer"
 	@echo "... CHTLManage"
 	@echo "... CHTLNode"

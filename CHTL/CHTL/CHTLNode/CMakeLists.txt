@@ -16,6 +16,7 @@ add_library(CHTLNode STATIC
     ImportNode.cpp
     ConfigNode.cpp
     NamespaceNode.cpp
+    ConstraintNode.cpp
 )
 
 target_include_directories(CHTLNode PUBLIC

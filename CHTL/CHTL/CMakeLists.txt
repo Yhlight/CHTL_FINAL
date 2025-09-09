@@ -8,6 +8,7 @@ add_subdirectory(CHTLLexer)
 add_subdirectory(CHTLNode)
 add_subdirectory(CHTLParser)
 add_subdirectory(CHTLManage)
+add_subdirectory(CHTLJS)
 
 # 链接依赖
 target_link_libraries(CHTLCore PUBLIC
@@ -15,6 +16,7 @@ target_link_libraries(CHTLCore PUBLIC
     CHTLNode
     CHTLParser
     CHTLManage
+    CHTLJSCore
 )
 
 # 设置编译选项

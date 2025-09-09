@@ -31,6 +31,10 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/share/cmake-3.31/Modules/Platform/Linux-Initialize.cmake"
   "/usr/share/cmake-3.31/Modules/Platform/Linux.cmake"
   "/usr/share/cmake-3.31/Modules/Platform/UnixPaths.cmake"
+  "/workspace/CHTL/CHTL/CHTLJS/CHTLJSLexer/CMakeLists.txt"
+  "/workspace/CHTL/CHTL/CHTLJS/CHTLJSNode/CMakeLists.txt"
+  "/workspace/CHTL/CHTL/CHTLJS/CHTLJSParser/CMakeLists.txt"
+  "/workspace/CHTL/CHTL/CHTLJS/CMakeLists.txt"
   "/workspace/CHTL/CHTL/CHTLLexer/CMakeLists.txt"
   "/workspace/CHTL/CHTL/CHTLManage/CMakeLists.txt"
   "/workspace/CHTL/CHTL/CHTLNode/CMakeLists.txt"
@@ -55,6 +59,10 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "CHTL/CHTLNode/CMakeFiles/CMakeDirectoryInformation.cmake"
   "CHTL/CHTLParser/CMakeFiles/CMakeDirectoryInformation.cmake"
   "CHTL/CHTLManage/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "CHTL/CHTLJS/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "CHTL/CHTLJS/CHTLJSLexer/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "CHTL/CHTLJS/CHTLJSNode/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "CHTL/CHTLJS/CHTLJSParser/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
@@ -65,4 +73,8 @@ set(CMAKE_DEPEND_INFO_FILES
   "CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/DependInfo.cmake"
   "CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/DependInfo.cmake"
   "CHTL/CHTLManage/CMakeFiles/CHTLManage.dir/DependInfo.cmake"
+  "CHTL/CHTLJS/CMakeFiles/CHTLJSCore.dir/DependInfo.cmake"
+  "CHTL/CHTLJS/CHTLJSLexer/CMakeFiles/CHTLJSLexer.dir/DependInfo.cmake"
+  "CHTL/CHTLJS/CHTLJSNode/CMakeFiles/CHTLJSNode.dir/DependInfo.cmake"
+  "CHTL/CHTLJS/CHTLJSParser/CMakeFiles/CHTLJSParser.dir/DependInfo.cmake"
   )

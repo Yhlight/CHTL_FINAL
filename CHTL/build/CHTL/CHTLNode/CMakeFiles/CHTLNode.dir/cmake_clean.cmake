@@ -5,6 +5,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/CHTLNode.dir/BaseNode.cpp.o.d"
   "CMakeFiles/CHTLNode.dir/ConfigNode.cpp.o"
   "CMakeFiles/CHTLNode.dir/ConfigNode.cpp.o.d"
+  "CMakeFiles/CHTLNode.dir/ConstraintNode.cpp.o"
+  "CMakeFiles/CHTLNode.dir/ConstraintNode.cpp.o.d"
   "CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o"
   "CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o.d"
   "CMakeFiles/CHTLNode.dir/CustomNode.cpp.o"

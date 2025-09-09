@@ -1,0 +1,38 @@
+// 测试精确约束
+div
+{
+    except span, [Custom] @Element Box;
+    
+    text
+    {
+        "Testing Precise Constraints"
+    }
+}
+
+// 测试类型约束
+div
+{
+    except @Html;
+    except [Template] @Var;
+    except [Custom];
+    
+    text
+    {
+        "Testing Type Constraints"
+    }
+}
+
+// 测试全局约束
+[Namespace] TestSpace
+{
+    except [Template];
+    except [Custom];
+    
+    div
+    {
+        text
+        {
+            "Testing Global Constraints"
+        }
+    }
+}

@@ -18,6 +18,7 @@
 #include <CHTL/CHTLNode/ImportNode.hpp>
 #include <CHTL/CHTLNode/ConfigNode.hpp>
 #include <CHTL/CHTLNode/NamespaceNode.hpp>
+#include <CHTL/CHTLNode/ConstraintNode.hpp>
 #include <CHTL/CHTLManage/TemplateManager.hpp>
 #include <memory>
 #include <vector>
@@ -158,6 +159,12 @@ private:
     
     // 解析 Use 语句
     std::shared_ptr<BaseNode> parseUse();
+    
+    // 解析约束
+    std::shared_ptr<BaseNode> parseConstraint();
+    
+    // 解析 except 约束
+    void parseExceptConstraint(ConstraintNode* constraint);
     
     // 报告错误
     void reportError(const std::string& message);

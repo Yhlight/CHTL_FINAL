@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libCHTLJSCore.a CMakeFiles/CHTLJSCore.dir/CHTLJSCore.cpp.o
+/usr/bin/ranlib ../../lib/libCHTLJSCore.a

@@ -78,6 +78,14 @@ std::shared_ptr<ElementNode> Parser::parseElement() {
     // 解析属性
     parseAttributes(element.get());
     
+    // 解析约束（except 语句）
+    if (current_.getType() == TokenType::EXCEPT) {
+        auto constraint = parseConstraint();
+        if (constraint) {
+            element->addChild(constraint);
+        }
+    }
+    
     // 解析内容
     if (consume(TokenType::LEFT_BRACE)) {
         while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
@@ -460,6 +468,29 @@ std::shared_ptr<BaseNode> Parser::parseNamespace() {
     
     auto namespace_node = std::make_shared<NamespaceNode>(namespaceName,
                                                         current_.getLine(), current_.getColumn());
+    
+    if (consume(TokenType::LEFT_BRACE)) {
+        while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+            if (isElementStart(current_.getType())) {
+                auto element = parseElement();
+                if (element) {
+                    namespace_node->addChild(element);
+                }
+            } else if (current_.getType() == TokenType::EXCEPT) {
+                // 处理全局约束
+                auto constraint = parseConstraint();
+                if (constraint) {
+                    namespace_node->addChild(constraint);
+                }
+            } else {
+                current_ = lexer_.nextToken();
+            }
+        }
+        
+        if (!consume(TokenType::RIGHT_BRACE)) {
+            reportError("Expected '}'");
+        }
+    }
     
     return namespace_node;
 }
@@ -890,9 +921,9 @@ std::shared_ptr<BaseNode> Parser::parseUse() {
         return nullptr;
     }
     
-    // 创建 Use 节点
-    auto use = std::make_shared<BaseNode>(BaseNode::NodeType::OPERATOR,
-                                         current_.getLine(), current_.getColumn());
+    // 创建 Use 节点（使用 ConstraintNode 作为基类）
+    auto use = std::make_shared<ConstraintNode>(ConstraintNode::ConstraintType::PRECISE,
+                                               current_.getLine(), current_.getColumn());
     
     if (current_.getType() == TokenType::IDENTIFIER) {
         std::string useTarget = current_.getValue();
@@ -919,6 +950,84 @@ std::shared_ptr<BaseNode> Parser::parseUse() {
     }
     
     return use;
+}
+
+std::shared_ptr<BaseNode> Parser::parseConstraint() {
+    if (!consume(TokenType::EXCEPT)) {
+        reportError("Expected except");
+        return nullptr;
+    }
+    
+    // 创建约束节点
+    auto constraint = std::make_shared<ConstraintNode>(ConstraintNode::ConstraintType::PRECISE,
+                                                      current_.getLine(), current_.getColumn());
+    
+    parseExceptConstraint(constraint.get());
+    
+    return constraint;
+}
+
+void Parser::parseExceptConstraint(ConstraintNode* constraint) {
+    while (current_.getType() != TokenType::SEMICOLON && 
+           current_.getType() != TokenType::RIGHT_BRACE && 
+           !hasError_) {
+        
+        if (current_.getType() == TokenType::IDENTIFIER) {
+            std::string element = current_.getValue();
+            current_ = lexer_.nextToken();
+            
+            // 检查是否为类型约束
+            if (element == "@Html") {
+                constraint->addTypeConstraint("@Html");
+            } else if (element == "[Custom]") {
+                constraint->addTypeConstraint("[Custom]");
+            } else if (element == "[Template]") {
+                constraint->addTypeConstraint("[Template]");
+                // 检查是否有具体的模板类型
+                if (current_.getType() == TokenType::AT) {
+                    current_ = lexer_.nextToken();
+                    if (current_.getType() == TokenType::IDENTIFIER) {
+                        std::string templateType = "@" + current_.getValue();
+                        constraint->addTypeConstraint("[Template] " + templateType);
+                        current_ = lexer_.nextToken();
+                    }
+                }
+            } else {
+                // 精确约束
+                constraint->addPreciseConstraint(element);
+            }
+        } else if (current_.getType() == TokenType::LEFT_BRACKET) {
+            // 处理 [Custom] 或 [Template] 约束
+            current_ = lexer_.nextToken();
+            if (current_.getType() == TokenType::IDENTIFIER) {
+                std::string type = "[" + current_.getValue() + "]";
+                current_ = lexer_.nextToken();
+                
+                if (consume(TokenType::RIGHT_BRACKET)) {
+                    if (type == "[Custom]") {
+                        constraint->addTypeConstraint("[Custom]");
+                    } else if (type == "[Template]") {
+                        constraint->addTypeConstraint("[Template]");
+                        // 检查是否有具体的模板类型
+                        if (current_.getType() == TokenType::AT) {
+                            current_ = lexer_.nextToken();
+                            if (current_.getType() == TokenType::IDENTIFIER) {
+                                std::string templateType = "@" + current_.getValue();
+                                constraint->addTypeConstraint("[Template] " + templateType);
+                                current_ = lexer_.nextToken();
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            current_ = lexer_.nextToken();
+        }
+        
+        if (current_.getType() == TokenType::COMMA) {
+            current_ = lexer_.nextToken();
+        }
+    }
 }
 
 void Parser::reportError(const std::string& message) {

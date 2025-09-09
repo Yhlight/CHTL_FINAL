@@ -1,0 +1,82 @@
+// 测试文件加载器
+fileloader
+{
+    load: ./module.cjjs
+    load: ./module2.cjjs
+    load: ./module3.cjjs
+}
+
+// 测试局部脚本
+div
+{
+    class: test-box;
+    
+    style
+    {
+        .box
+        {
+            width: 100px;
+            height: 100px;
+            background-color: red;
+        }
+    }
+    
+    script
+    {
+        {{box}}.addEventListener('click', () => {
+            console.log('Box clicked!');
+        });
+        
+        {{&}}->addEventListener('click', () => {
+            console.log('Box clicked!');
+        });
+    }
+}
+
+// 测试增强选择器
+script
+{
+    {{box}}.textContent()
+    {{.box}}
+    {{#box}}
+    {{button}}
+    {{.box button}}
+    {{button[0]}}
+}
+
+// 测试动画
+const anim = animate
+{
+    target: {{选择器}} || [{{选择器1}}, {{选择器2}}] || DOM对象
+    duration: 100
+    easing: ease-in-out
+    
+    begin:
+    {
+        opacity: 0
+    }
+    
+    when:
+    [
+        {
+            at: 0.5
+            opacity: 0.5
+        }
+    ]
+    
+    end:
+    {
+        opacity: 1
+    }
+}
+
+// 测试监听器
+listen
+{
+    click: {
+        console.log('Clicked!');
+    }
+}
+
+// 测试工具表达式
+util a > b -> change print("发生变化") -> then print("a > b");

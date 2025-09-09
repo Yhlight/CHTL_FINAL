@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../../lib/libCHTLJSNode.a CMakeFiles/CHTLJSNode.dir/CHTLJSBaseNode.cpp.o CMakeFiles/CHTLJSNode.dir/FileLoaderNode.cpp.o CMakeFiles/CHTLJSNode.dir/EnhancedSelectorNode.cpp.o CMakeFiles/CHTLJSNode.dir/StatementNode.cpp.o
+/usr/bin/ranlib ../../../lib/libCHTLJSNode.a

@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/workspace/CHTL -I/workspace/CHTL/CHTL/CHTLLexer -I/workspace/CHTL/CHTL/CHTLNode -I/workspace/CHTL/CHTL/CHTLParser -I/workspace/CHTL/CHTL/CHTLManage
+CXX_INCLUDES = -I/workspace/CHTL -I/workspace/CHTL/CHTL/CHTLLexer -I/workspace/CHTL/CHTL/CHTLNode -I/workspace/CHTL/CHTL/CHTLParser -I/workspace/CHTL/CHTL/CHTLManage -I/workspace/CHTL/CHTL/CHTLJS/CHTLJSLexer -I/workspace/CHTL/CHTL/CHTLJS/CHTLJSNode -I/workspace/CHTL/CHTL/CHTLJS/CHTLJSParser
 
 CXX_FLAGS =  -Wall -Wextra -Wpedantic -g -std=gnu++17
 
