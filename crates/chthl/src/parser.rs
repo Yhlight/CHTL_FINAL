@@ -2,7 +2,7 @@
 //! to build an Abstract Syntax Tree (AST).
 
 use crate::ast::{
-    AttributeNode, CssRuleNode, ElementNode, Expression, InfixExpression, Node,
+    AttributeNode, CommentNode, CssRuleNode, ElementNode, Expression, InfixExpression, Node,
     Program, StyleNode, StyleProperty, TextNode, PrefixExpression, TernaryExpression
 };
 use crate::lexer::Lexer;
@@ -74,6 +74,9 @@ impl<'a> Parser<'a> {
             Token::Ident(tag) if tag == "text" => self.parse_text_node().map(Node::Text),
             Token::Ident(tag) if tag == "style" => self.parse_style_node().map(Node::Style),
             Token::Ident(_) => self.parse_element_node().map(Node::Element),
+            Token::GeneratorComment(value) => Ok(Node::Comment(CommentNode {
+                value: value.clone(),
+            })),
             _ => Err(format!("Cannot parse node from token {:?}", self.cur_token)),
         }
     }
@@ -221,10 +224,10 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_ternary_expression(&mut self, condition: Expression) -> Result<Expression, String> {
-        self.next_token(); // consume '?'
+        self.next_token();
         let consequence = self.parse_expression(Precedence::LOWEST)?;
         self.expect_peek(&Token::Colon)?;
-        self.next_token(); // consume ':'
+        self.next_token();
         let alternative = self.parse_expression(Precedence::LOWEST)?;
         Ok(Expression::Ternary(TernaryExpression {
             condition: Box::new(condition),
@@ -338,7 +341,7 @@ mod tests {
             Expression::Ternary(ternary) => {
                 format!("({} ? {} : {})", expression_to_string(*ternary.condition), expression_to_string(*ternary.consequence), expression_to_string(*ternary.alternative))
             }
-            _ => "unimplemented".to_string()
+            Expression::Boolean(_) => "boolean".to_string(),
         }
     }
 }

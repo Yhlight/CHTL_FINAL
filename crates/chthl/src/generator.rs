@@ -1,13 +1,12 @@
 //! This module defines the HTML Generator, which walks the AST produced by the
 //! parser and generates an HTML string.
 
-use crate::ast::{CommentNode, ElementNode, Node, Program};
+use crate::ast::{ElementNode, Node, Program};
 use crate::evaluator::{self, Environment, Object};
 use std::collections::HashSet;
 
 pub struct Generator {
     global_css: String,
-    // We could add an error list here later
 }
 
 impl Generator {
@@ -85,13 +84,11 @@ impl Generator {
         }
 
         for sn in &style_nodes {
-            // Evaluate inline properties in order, updating the environment
             for prop in &sn.inline_properties {
                 let value_obj = evaluator::eval(&prop.value, &env).unwrap_or(Object::Null);
                 env.insert(prop.name.clone(), value_obj.clone());
                 inline_styles.push(format!("{}: {};", prop.name, value_obj.to_string()));
             }
-            // Evaluate rules using the final environment
             for rule in &sn.rules {
                 let mut selector = rule.selector.trim().to_string();
                 if let Some(class_name) = selector.strip_prefix('.') { classes.insert(class_name.to_string()); }
@@ -137,8 +134,7 @@ impl Generator {
     fn generate_text_node(&self, text: &crate::ast::TextNode, indent: usize) -> String {
         format!("{}{}", " ".repeat(indent), text.value)
     }
-
-    fn generate_comment_node(&self, comment: &CommentNode, indent: usize) -> String {
+    fn generate_comment_node(&self, comment: &crate::ast::CommentNode, indent: usize) -> String {
         format!("{}<!-- {} -->", " ".repeat(indent), comment.value)
     }
 }
@@ -160,17 +156,13 @@ mod tests {
                 }
             }
         "#;
-
         let lexer = Lexer::new(input);
         let mut parser = Parser::new(lexer);
         let program = parser.parse_program();
         assert!(parser.errors.is_empty(), "{:?}", parser.errors);
-
         let mut generator = Generator::new();
         let html = generator.generate_program(&program);
-
         let expected_html = r#"<div style="width: 100; height: 50;"></div>"#;
-
         let normalize = |s: &str| s.replace(['\n', ' '], "");
         assert_eq!(normalize(&html), normalize(expected_html));
     }

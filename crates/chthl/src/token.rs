@@ -3,13 +3,13 @@
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
     // Special tokens
-    Illegal(String), // Represents a token that is not valid
-    Eof,             // End of file
+    Illegal(String),
+    Eof,
 
     // Identifiers and literals
-    Ident(String),  // e.g., div, color, 100px, 50. Also used for unquoted literals.
-    String(String), // "a string" or 'a string'
-    Number(String), // e.g., 50, 1.5
+    Ident(String),
+    String(String),
+    Number(String),
 
     // Delimiters
     LBrace,     // {
@@ -31,7 +31,7 @@ pub enum Token {
     Question,   // ?
     Arrow,      // ->
 
-    // Operators for conditional expressions (to be expanded)
+    // Operators
     Gt,             // >
     Lt,             // <
     LogicalAnd,     // &&
@@ -43,5 +43,5 @@ pub enum Token {
     Slash,          // /
 
     // Comments
-    GeneratorComment(String), // -- a comment
+    GeneratorComment(String),
 }

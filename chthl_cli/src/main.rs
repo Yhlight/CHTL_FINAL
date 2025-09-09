@@ -2,7 +2,7 @@ use std::env;
 use std::fs;
 use std::process;
 
-use chthl::generator::generate_program;
+use chthl::generator::Generator;
 use chthl::lexer::Lexer;
 use chthl::parser::Parser;
 
@@ -26,14 +26,15 @@ fn main() {
     let mut parser = Parser::new(lexer);
     let program = parser.parse_program();
 
-    if !parser.errors().is_empty() {
-        eprintln!("Found {} parsing errors:", parser.errors().len());
-        for error in parser.errors() {
+    if !parser.errors.is_empty() {
+        eprintln!("Found {} parsing errors:", parser.errors.len());
+        for error in &parser.errors {
             eprintln!("\t{}", error);
         }
         process::exit(1);
     }
 
-    let html = generate_program(&program);
+    let mut generator = Generator::new();
+    let html = generator.generate_program(&program);
     println!("{}", html);
 }

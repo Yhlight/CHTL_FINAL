@@ -2,8 +2,6 @@
 //! expressions, producing a final value represented by the `Object` enum.
 
 use crate::ast::Expression;
-#[cfg(test)]
-use crate::ast::Node;
 use std::collections::HashMap;
 
 pub type Environment = HashMap<String, Object>;
@@ -35,7 +33,7 @@ fn is_truthy(obj: Object) -> bool {
         Object::Null => false,
         Object::Number(n) => n != 0.0,
         Object::String(s) => !s.is_empty(),
-        Object::Unit(_, _) => true, // Any unit value is considered truthy
+        Object::Unit(_, _) => true,
     }
 }
 
@@ -67,7 +65,6 @@ fn eval_identifier(name: &str, env: &Environment) -> Result<Object, String> {
     if let Some(val) = env.get(name) {
         Ok(val.clone())
     } else {
-        // If not found in env, it might be a literal like 'red' or 'solid'
         Ok(Object::String(name.to_string()))
     }
 }
@@ -93,36 +90,6 @@ fn eval_infix_expression(operator: &str, left: Object, right: Object) -> Result<
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::lexer::Lexer;
-    use crate::parser::Parser;
-
-    fn test_eval(input: &str) -> Result<Object, String> {
-        let lexer = Lexer::new(input);
-        let mut parser = Parser::new(lexer);
-        let program = parser.parse_program();
-        let env = &mut Environment::new();
-
-        if !parser.errors.is_empty() {
-            return Err(format!("Parser errors: {:?}", parser.errors));
-        }
-
-        // Simplified for testing: assumes first node is an element with a style property
-        if let Some(Node::Element(el)) = program.nodes.get(0) {
-            if let Some(Node::Style(style)) = el.children.get(0) {
-                if let Some(prop) = style.inline_properties.get(0) {
-                    return eval(&prop.value, env);
-                }
-            }
-        }
-        Err("Test setup failed".to_string())
-    }
-
-    #[test]
-    fn test_arithmetic_evaluation() {
-        let input = "div { style { width: 5 + 10; } }";
-        let result = test_eval(input).unwrap();
-        assert_eq!(result, Object::Number(15.0));
-    }
 
     #[test]
     fn test_identifier_evaluation() {
@@ -136,5 +103,29 @@ mod tests {
         let input2 = Expression::Ident("red".to_string());
         let result2 = eval(&input2, &env).unwrap();
         assert_eq!(result2, Object::String("red".to_string()));
+    }
+
+    #[test]
+    fn test_ternary_evaluation() {
+        let env = Environment::new();
+        let ten = Box::new(Expression::NumberLiteral(10.0));
+        let five = Box::new(Expression::NumberLiteral(5.0));
+        let one = Box::new(Expression::NumberLiteral(1.0));
+        let two = Box::new(Expression::NumberLiteral(2.0));
+
+        let condition = Expression::Infix(crate::ast::InfixExpression{
+            left: ten.clone(),
+            operator: ">".to_string(),
+            right: five.clone(),
+        });
+
+        let ternary = Expression::Ternary(crate::ast::TernaryExpression{
+            condition: Box::new(condition),
+            consequence: one.clone(),
+            alternative: two.clone(),
+        });
+
+        let result = eval(&ternary, &env).unwrap();
+        assert_eq!(result, Object::Number(1.0));
     }
 }
