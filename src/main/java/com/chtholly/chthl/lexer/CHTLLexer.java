@@ -74,7 +74,6 @@ public class CHTLLexer {
                 break;
             case '-':
                 if (match('-')) {
-                    // For now, just a token. Parser will give it meaning.
                     addToken(TokenType.MINUS_MINUS);
                 } else {
                     addToken(TokenType.MINUS);
@@ -82,26 +81,21 @@ public class CHTLLexer {
                 break;
             case '/':
                 if (match('/')) {
-                    // A comment goes until the end of the line.
                     while (peek() != '\n' && !isAtEnd()) advance();
                 } else if (match('*')) {
-                    // Multi-line comment.
                     while (!(peek() == '*' && peekNext() == '/') && !isAtEnd()) {
                         if (peek() == '\n') line++;
                         advance();
                     }
-                    if (isAtEnd()) {
-                        // Handle unterminated comment error if necessary
-                    } else {
-                        advance(); // consume *
-                        advance(); // consume /
+                    if (!isAtEnd()) {
+                        advance();
+                        advance();
                     }
                 } else {
                     addToken(TokenType.SLASH);
                 }
                 break;
 
-            // Ignore whitespace.
             case ' ':
             case '\r':
             case '\t':
@@ -117,11 +111,9 @@ public class CHTLLexer {
                 break;
 
             default:
-                if (isAlpha(c)) {
+                if (isAlpha(c) || isDigit(c)) {
                     identifier();
                 } else {
-                    // For now, we'll log an error for unexpected characters.
-                    // This can be improved later.
                     System.err.println("Line " + line + ": Unexpected character '" + c + "'.");
                 }
                 break;
@@ -129,15 +121,9 @@ public class CHTLLexer {
     }
 
     private void identifier() {
-        while (isAlphaNumeric(peek())) advance();
+        while (isAlphaNumeric(peek()) || peek() == '-') advance();
 
         String text = source.substring(start, current);
-        // Check for special bracketed keywords like [Template]
-        if (text.equals("Template") && peek() == ']' && tokens.get(tokens.size()-1).getType() == TokenType.LEFT_BRACKET) {
-            // This is a very basic check and might need to be more robust.
-            // For now, we assume [Template] is a single unit.
-            // The parser will handle the composition.
-        }
 
         TokenType type = keywords.get(text);
         if (type == null) type = TokenType.IDENTIFIER;
@@ -155,10 +141,8 @@ public class CHTLLexer {
             return;
         }
 
-        // Consume the closing quote.
         advance();
 
-        // Get the string value without the quotes.
         String value = source.substring(start + 1, current - 1);
         addToken(TokenType.STRING, value);
     }

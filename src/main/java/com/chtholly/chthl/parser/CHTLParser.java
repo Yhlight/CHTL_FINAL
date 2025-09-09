@@ -17,7 +17,6 @@ public class CHTLParser {
 
     private static class ParseError extends RuntimeException {
         ParseError(Token token, String message) {
-            // In a real compiler, you'd have more sophisticated error reporting.
             super("[line " + token.getLine() + "] Error at '" + token.getLexeme() + "': " + message);
         }
     }
@@ -66,6 +65,8 @@ public class CHTLParser {
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
             if (check(TokenType.IDENTIFIER) && peekNext().getType() == TokenType.COLON) {
                 attribute(attributes);
+            } else if (check(TokenType.STYLE)) {
+                children.add(styleBlock());
             } else {
                 Node child = declaration();
                 if (child != null) {
@@ -98,6 +99,39 @@ public class CHTLParser {
         attributes.put(name.getLexeme(), value);
 
         consume(TokenType.SEMICOLON, "Expect ';' after attribute value.");
+    }
+
+    private Node styleBlock() {
+        consume(TokenType.STYLE, "Expect 'style' keyword.");
+        consume(TokenType.LEFT_BRACE, "Expect '{' after 'style'.");
+
+        Map<String, String> properties = new HashMap<>();
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            parseStyleProperty(properties);
+        }
+
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after style block.");
+        return new StyleBlockNode(properties);
+    }
+
+    private void parseStyleProperty(Map<String, String> properties) {
+        Token name = consume(TokenType.IDENTIFIER, "Expect style property name.");
+        consume(TokenType.COLON, "Expect ':' after style property name.");
+
+        StringBuilder valueBuilder = new StringBuilder();
+        while (!check(TokenType.SEMICOLON) && !isAtEnd()) {
+            if (valueBuilder.length() > 0) {
+                valueBuilder.append(" ");
+            }
+            valueBuilder.append(advance().getLexeme());
+        }
+
+        if (valueBuilder.length() == 0) {
+            throw new ParseError(peek(), "Style property value cannot be empty.");
+        }
+
+        consume(TokenType.SEMICOLON, "Expect ';' after style property value.");
+        properties.put(name.getLexeme(), valueBuilder.toString().trim());
     }
 
     private Node textDeclaration() {
@@ -159,6 +193,7 @@ public class CHTLParser {
             switch (peek().getType()) {
                 case IDENTIFIER:
                 case TEXT:
+                case STYLE:
                     return;
             }
             advance();

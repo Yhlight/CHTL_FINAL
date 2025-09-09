@@ -1,12 +1,13 @@
 com/chtholly/chthl/parser/CHTLParser$ParseError.class
 com/chtholly/chthl/lexer/Token.class
-com/chtholly/chthl/lexer/TokenType.class
 com/chtholly/chthl/generator/CHTLGenerator.class
 com/chtholly/chthl/lexer/CHTLLexer.class
 com/chtholly/chthl/parser/CHTLParser$1.class
+com/chtholly/chthl/ast/StyleBlockNode.class
+com/chtholly/chthl/parser/CHTLParser.class
+com/chtholly/chthl/ast/TextNode.class
+com/chtholly/chthl/lexer/TokenType.class
 com/chtholly/chthl/ast/CommentNode.class
 com/chtholly/chthl/ast/Node.class
 com/chtholly/chthl/ast/Visitor.class
-com/chtholly/chthl/parser/CHTLParser.class
 com/chtholly/chthl/ast/ElementNode.class
-com/chtholly/chthl/ast/TextNode.class

@@ -2,6 +2,7 @@ package com.chtholly;
 
 import com.chtholly.chthl.ast.ElementNode;
 import com.chtholly.chthl.ast.Node;
+import com.chtholly.chthl.ast.StyleBlockNode;
 import com.chtholly.chthl.ast.TextNode;
 import com.chtholly.chthl.lexer.CHTLLexer;
 import com.chtholly.chthl.lexer.Token;
@@ -93,5 +94,28 @@ class CHTLParserTest {
         assertEquals("box", node.attributes.get("id"));
         assertEquals("container", node.attributes.get("class"));
         assertTrue(node.children.isEmpty());
+    }
+
+    @Test
+    void testStyleBlockParsing() {
+        String input = "div { style { color: red; font-size: 16px; } }";
+        List<Token> tokens = new CHTLLexer(input).scanTokens();
+        CHTLParser parser = new CHTLParser(tokens);
+        List<Node> ast = parser.parse();
+
+        assertEquals(1, ast.size());
+        assertTrue(ast.get(0) instanceof ElementNode);
+
+        ElementNode node = (ElementNode) ast.get(0);
+        assertEquals("div", node.tagName);
+        assertEquals(1, node.children.size());
+
+        Node child = node.children.get(0);
+        assertTrue(child instanceof StyleBlockNode);
+
+        StyleBlockNode styleNode = (StyleBlockNode) child;
+        assertEquals(2, styleNode.properties.size());
+        assertEquals("red", styleNode.properties.get("color"));
+        assertEquals("16px", styleNode.properties.get("font-size"));
     }
 }

@@ -8,3 +8,4 @@
 /app/src/main/java/com/chtholly/chthl/ast/CommentNode.java
 /app/src/main/java/com/chtholly/chthl/ast/Node.java
 /app/src/main/java/com/chtholly/chthl/lexer/CHTLLexer.java
+/app/src/main/java/com/chtholly/chthl/ast/StyleBlockNode.java

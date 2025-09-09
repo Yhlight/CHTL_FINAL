@@ -54,4 +54,36 @@ class CompilerEndToEndTest {
         // 4. Assert
         assertEquals(expectedHtml, actualHtml);
     }
+
+    @Test
+    void testFullCompilationWithStyles() {
+        String chtlSource = """
+        div {
+            id: main;
+            style {
+                color: red;
+                font-weight: 700;
+            }
+            h1 { text { "Styled" } }
+        }
+        """;
+
+        String expectedHtml = "<div id=\"main\" style=\"color:red;font-weight:700;\">" +
+                              "<h1>Styled</h1></div>";
+
+        // 1. Lexer
+        CHTLLexer lexer = new CHTLLexer(chtlSource);
+        List<Token> tokens = lexer.scanTokens();
+
+        // 2. Parser
+        CHTLParser parser = new CHTLParser(tokens);
+        List<Node> ast = parser.parse();
+
+        // 3. Generator
+        CHTLGenerator generator = new CHTLGenerator();
+        String actualHtml = generator.generate(ast);
+
+        // 4. Assert
+        assertEquals(expectedHtml, actualHtml);
+    }
 }
