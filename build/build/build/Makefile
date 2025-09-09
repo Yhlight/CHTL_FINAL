@@ -155,6 +155,19 @@ CHTL/fast:
 	$(MAKE) $(MAKESILENT) -f src/CHTL/CMakeFiles/CHTL.dir/build.make src/CHTL/CMakeFiles/CHTL.dir/build
 .PHONY : CHTL/fast
 
+#=============================================================================
+# Target rules for targets named CHTLLoader
+
+# Build rule for target.
+CHTLLoader: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTLLoader
+.PHONY : CHTLLoader
+
+# fast build rule for target.
+CHTLLoader/fast:
+	$(MAKE) $(MAKESILENT) -f src/CHTLLoader/CMakeFiles/CHTLLoader.dir/build.make src/CHTLLoader/CMakeFiles/CHTLLoader.dir/build
+.PHONY : CHTLLoader/fast
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -188,6 +201,7 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... CHTL"
+	@echo "... CHTLLoader"
 	@echo "... Util"
 	@echo "... chtl"
 	@echo "... src/main.o"

@@ -12,6 +12,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/3.28.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.28.3/CMakeSystem.cmake"
   "/app/src/CHTL/CMakeLists.txt"
+  "/app/src/CHTLLoader/CMakeLists.txt"
   "/app/src/Util/CMakeLists.txt"
   "/usr/share/cmake-3.28/Modules/CMakeCInformation.cmake"
   "/usr/share/cmake-3.28/Modules/CMakeCXXInformation.cmake"
@@ -44,6 +45,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/CMakeDirectoryInformation.cmake"
   "src/Util/CMakeFiles/CMakeDirectoryInformation.cmake"
   "src/CHTL/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "src/CHTLLoader/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
@@ -51,4 +53,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/chtl.dir/DependInfo.cmake"
   "src/Util/CMakeFiles/Util.dir/DependInfo.cmake"
   "src/CHTL/CMakeFiles/CHTL.dir/DependInfo.cmake"
+  "src/CHTLLoader/CMakeFiles/CHTLLoader.dir/DependInfo.cmake"
   )

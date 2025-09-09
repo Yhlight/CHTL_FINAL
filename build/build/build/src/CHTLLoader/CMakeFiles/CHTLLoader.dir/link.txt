@@ -1,0 +1,2 @@
+/usr/bin/ar qc libCHTLLoader.a CMakeFiles/CHTLLoader.dir/CHTLLoader.cpp.o
+/usr/bin/ranlib libCHTLLoader.a

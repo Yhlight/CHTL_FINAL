@@ -46,6 +46,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/app/build/build/build/src/Util/cmake_install.cmake")
   include("/app/build/build/build/src/CHTL/cmake_install.cmake")
+  include("/app/build/build/build/src/CHTLLoader/cmake_install.cmake")
 
 endif()
 

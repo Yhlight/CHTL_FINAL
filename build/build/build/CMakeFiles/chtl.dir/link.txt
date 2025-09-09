@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/chtl.dir/src/main.cpp.o -o chtl  src/Util/libUtil.a src/CHTL/libCHTL.a
+/usr/bin/c++  -std=c++17 CMakeFiles/chtl.dir/src/main.cpp.o -o chtl  src/Util/libUtil.a src/CHTL/libCHTL.a src/CHTLLoader/libCHTLLoader.a src/Util/libUtil.a

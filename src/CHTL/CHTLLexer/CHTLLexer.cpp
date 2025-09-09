@@ -30,19 +30,16 @@ void CHTLLexer::skipWhitespaceAndComments() {
     while (true) {
         char c = peek();
         switch (c) {
-            case ' ':
-            case '\r':
-            case '\t':
-            case '\n':
+            case ' ': case '\r': case '\t': case '\n':
                 advance();
                 break;
             case '/':
                 if (source.size() > current + 1 && source[current + 1] == '/') {
                     while (peek() != '\n' && !isAtEnd()) advance();
                 } else if (source.size() > current + 1 && source[current + 1] == '*') {
-                    advance(); advance(); // Consume /*
+                    advance(); advance();
                     while (!isAtEnd() && !(peek() == '*' && source[current + 1] == '/')) advance();
-                    if (!isAtEnd()) { advance(); advance(); } // Consume */
+                    if (!isAtEnd()) { advance(); advance(); }
                 } else {
                     return;
                 }
@@ -69,8 +66,7 @@ TokenType CHTLLexer::identifierType(const std::string& identifier) {
     static const std::unordered_map<std::string, TokenType> keywords = {
         {"text", TokenType::Text},
         {"style", TokenType::Style},
-        {"Template", TokenType::Identifier}, // Treat "Template" as a regular identifier for the parser
-        {"Origin", TokenType::Identifier},   // Treat "Origin" as a regular identifier for the parser
+        {"from", TokenType::FromKeyword},
     };
     auto it = keywords.find(identifier);
     return it != keywords.end() ? it->second : TokenType::Identifier;
@@ -83,7 +79,6 @@ Token CHTLLexer::identifier(size_t startOffset) {
 }
 
 Token CHTLLexer::unquotedLiteral(size_t startOffset) {
-    // Stop at any whitespace or symbol that could delimit a value.
     while (!isspace(peek()) && peek() != ';' && peek() != '{' && peek() != '}' &&
            peek() != '(' && peek() != ')' && !isAtEnd()) {
         advance();
@@ -110,6 +105,24 @@ std::vector<Token> CHTLLexer::tokenize() {
 
         size_t startOffset = current;
         char c = peek();
+
+        if (c == '[') {
+            if (source.substr(current, 10) == "[Template]") {
+                current += 10;
+                tokens.push_back(makeToken(TokenType::TemplateKeyword, "[Template]", startOffset));
+                continue;
+            }
+            if (source.substr(current, 11) == "[Namespace]") {
+                current += 11;
+                tokens.push_back(makeToken(TokenType::NamespaceKeyword, "[Namespace]", startOffset));
+                continue;
+            }
+            if (source.substr(current, 8) == "[Import]") {
+                current += 8;
+                tokens.push_back(makeToken(TokenType::ImportKeyword, "[Import]", startOffset));
+                continue;
+            }
+        }
 
         if (isalpha(c) || c == '_') {
             tokens.push_back(identifier(startOffset));
@@ -144,8 +157,6 @@ std::vector<Token> CHTLLexer::tokenize() {
             case '>': tokens.push_back(makeToken(TokenType::GreaterThan, startOffset)); break;
             case '<': tokens.push_back(makeToken(TokenType::LessThan, startOffset)); break;
             default:
-                // If we are here, it's an unhandled character.
-                // For now, assume it might be part of an unquoted literal if it's not whitespace.
                 if (!isspace(c)) {
                     current = startOffset;
                     tokens.push_back(unquotedLiteral(startOffset));

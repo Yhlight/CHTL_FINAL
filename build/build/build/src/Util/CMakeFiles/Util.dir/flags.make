@@ -4,6 +4,6 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES =
 
-CXX_INCLUDES = -I/app/src/Util
+CXX_INCLUDES = -I/app/src -I/app/src/Util
 
-CXX_FLAGS = -std=gnu++17
+CXX_FLAGS =  -std=c++17 -std=gnu++17

@@ -7,3 +7,6 @@
 /app/build/build/build/src/CHTL/CMakeFiles/CHTL.dir
 /app/build/build/build/src/CHTL/CMakeFiles/edit_cache.dir
 /app/build/build/build/src/CHTL/CMakeFiles/rebuild_cache.dir
+/app/build/build/build/src/CHTLLoader/CMakeFiles/CHTLLoader.dir
+/app/build/build/build/src/CHTLLoader/CMakeFiles/edit_cache.dir
+/app/build/build/build/src/CHTLLoader/CMakeFiles/rebuild_cache.dir

@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <stack>
 #include "CHTLNode/BaseNode.h"
 
 class CHTLContext {
@@ -13,29 +14,33 @@ public:
     using ElementTemplate = std::vector<std::unique_ptr<BaseNode>>;
     using VarGroup = std::map<std::string, std::string>;
 
-    // Style Templates
+    CHTLContext();
+
+    // Namespace Management
+    void pushNamespace(const std::string& name);
+    void popNamespace();
+    std::string getCurrentNamespace() const;
+
+    // Template Management (now namespace-aware)
     void addStyleTemplate(const std::string& name, const StyleProperties& properties);
-    const StyleProperties& getStyleTemplate(const std::string& name) const;
-    bool hasStyleTemplate(const std::string& name) const;
+    const StyleProperties& getStyleTemplate(const std::string& name, const std::string& ns = "") const;
 
-    // Element Templates
     void addElementTemplate(const std::string& name, ElementTemplate elementTemplate);
-    const ElementTemplate& getElementTemplate(const std::string& name) const;
-    bool hasElementTemplate(const std::string& name) const;
+    const ElementTemplate& getElementTemplate(const std::string& name, const std::string& ns = "") const;
 
-    // Variable Templates
     void addVarTemplate(const std::string& groupName, const VarGroup& vars);
-    const std::string& getVarTemplateValue(const std::string& groupName, const std::string& varName) const;
-    bool hasVarTemplate(const std::string& groupName) const;
+    const std::string& getVarTemplateValue(const std::string& groupName, const std::string& varName, const std::string& ns = "") const;
 
     // Global CSS
     void addGlobalCSS(const std::string& rule);
     const std::string& getGlobalCSS() const;
 
 private:
-    std::map<std::string, StyleProperties> styleTemplates;
-    std::map<std::string, ElementTemplate> elementTemplates;
-    std::map<std::string, VarGroup> varTemplates;
+    std::map<std::string, std::map<std::string, StyleProperties>> namespacedStyleTemplates;
+    std::map<std::string, std::map<std::string, ElementTemplate>> namespacedElementTemplates;
+    std::map<std::string, std::map<std::string, VarGroup>> namespacedVarTemplates;
+
+    std::stack<std::string> namespaceStack;
     std::string globalCSS;
 };
 

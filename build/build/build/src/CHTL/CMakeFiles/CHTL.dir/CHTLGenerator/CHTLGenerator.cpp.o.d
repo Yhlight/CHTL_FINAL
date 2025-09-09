@@ -160,12 +160,14 @@ src/CHTL/CMakeFiles/CHTL.dir/CHTLGenerator/CHTLGenerator.cpp.o: \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h /app/src/CHTL/CHTLNode/ElementNode.h \
- /app/src/CHTL/CHTLNode/BaseNode.h /app/src/CHTL/CHTLNode/Attribute.h \
- /app/src/CHTL/CHTLNode/TextNode.h /app/src/CHTL/CHTLNode/CommentNode.h \
- /app/src/CHTL/CHTLNode/OriginNode.h /usr/include/c++/13/iostream \
- /usr/include/c++/13/ostream /usr/include/c++/13/ios \
- /usr/include/c++/13/bits/ios_base.h \
+ /usr/include/c++/13/bits/erase_if.h /usr/include/c++/13/stack \
+ /usr/include/c++/13/deque /usr/include/c++/13/bits/stl_deque.h \
+ /usr/include/c++/13/bits/deque.tcc /usr/include/c++/13/bits/stl_stack.h \
+ /app/src/CHTL/CHTLNode/ElementNode.h /app/src/CHTL/CHTLNode/BaseNode.h \
+ /app/src/CHTL/CHTLNode/Attribute.h /app/src/CHTL/CHTLNode/TextNode.h \
+ /app/src/CHTL/CHTLNode/CommentNode.h /app/src/CHTL/CHTLNode/OriginNode.h \
+ /usr/include/c++/13/iostream /usr/include/c++/13/ostream \
+ /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \
  /usr/include/c++/13/bits/locale_classes.tcc \
  /usr/include/c++/13/system_error \

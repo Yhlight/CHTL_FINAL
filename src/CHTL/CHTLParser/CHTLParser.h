@@ -41,12 +41,14 @@ private:
     std::unique_ptr<TextNode> parseText();
     std::unique_ptr<OriginNode> parseOrigin();
     void parseTemplateDefinition();
+    void parseNamespace();
+    void parseImport(); // New method
     void parseBlock(ElementNode* element);
     void parseAttribute(ElementNode* element);
     void parseStyleBlock(ElementNode* element);
     void parseElementTemplateUsage(ElementNode* parent);
     std::string parseValue();
-    void parseCSSRule(ElementNode* parent); // New method
+    void parseCSSRule(ElementNode* parent);
 };
 
 #endif // CHTL_PARSER_H

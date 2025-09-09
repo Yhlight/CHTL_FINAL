@@ -1,0 +1,8 @@
+[Namespace] MyStuff {
+    [Template] @Element MyBox {
+        div {
+            class: "my-box";
+            text { "This is an imported and namespaced box." }
+        }
+    }
+}

@@ -1,21 +1,24 @@
+// Import a file that has its own namespace
+[Import] @Chtl from "../../../templates.chtl";
+
+// Import a file that does NOT have its own namespace
+[Import] @Chtl from "../../../vars.chtl";
+
 html {
     head {
-        title { "My Website" }
+        title { "Import & Namespace Test" }
     }
     body {
-        div {
-            // This style block will auto-add class="box" to the div
-            // and elevate the rule to a global <style> tag.
-            style {
-                .box {
-                    border: 1px solid black;
-                    padding: 10px;
-                }
-            }
+        h1 { "Using an imported template" }
+        @Element MyBox from MyStuff;
 
-            text {
-                "This div should have a border."
+        div {
+            style {
+                // Use the variable from the 'vars.chtl' file,
+                // which should be in the 'vars' namespace automatically.
+                background-color: Colors(highlight) from vars;
             }
+            text { "This div should have a yellow background." }
         }
     }
 }

@@ -25,6 +25,10 @@ std::string Token::toString() const {
         case TokenType::LessThan: typeStr = "LessThan"; break;
         case TokenType::Text: typeStr = "Text"; break;
         case TokenType::Style: typeStr = "Style"; break;
+        case TokenType::TemplateKeyword: typeStr = "TemplateKeyword"; break;
+        case TokenType::NamespaceKeyword: typeStr = "NamespaceKeyword"; break;
+        case TokenType::ImportKeyword: typeStr = "ImportKeyword"; break;
+        case TokenType::FromKeyword: typeStr = "FromKeyword"; break;
         default: typeStr = "Unknown"; break;
     }
     return "Token(" + typeStr + ", '" + lexeme + "', " + std::to_string(line) + ":" + std::to_string(column) + " @ " + std::to_string(offset) + ")";
