@@ -1,0 +1,394 @@
+// 约束系统测试文件
+
+// 精确约束测试
+[Constraint] precise
+{
+    // 元素ID约束
+    element_id: "box" = "box";
+    
+    // 样式属性约束
+    style_property: "color" = "red";
+    
+    // 脚本变量约束
+    script_variable: "count" = "0";
+}
+
+// 类型约束测试
+[Constraint] type
+{
+    // 颜色类型约束
+    color_type: "background-color" = color;
+    
+    // 长度类型约束
+    length_type: "width" = length;
+    
+    // 数字类型约束
+    number_type: "z-index" = number;
+    
+    // 字符串类型约束
+    string_type: "content" = string;
+    
+    // 布尔类型约束
+    boolean_type: "enabled" = boolean;
+    
+    // URL类型约束
+    url_type: "background-image" = url;
+}
+
+// 全局约束测试
+[Constraint] global
+{
+    // 全局样式约束
+    global_style: "body" = {
+        margin: 0;
+        padding: 0;
+        font-family: "Arial, sans-serif";
+    };
+    
+    // 全局脚本约束
+    global_script: "window" = {
+        addEventListener: function;
+        removeEventListener: function;
+    };
+    
+    // 全局模板约束
+    global_template: "layout" = {
+        header: element;
+        main: element;
+        footer: element;
+    };
+}
+
+// 元素约束测试
+[Constraint] element
+{
+    // 必需属性约束
+    required_attributes: "img" = {
+        src: required;
+        alt: required;
+    };
+    
+    // 可选属性约束
+    optional_attributes: "div" = {
+        class: optional;
+        id: optional;
+        style: optional;
+    };
+    
+    // 属性值约束
+    attribute_values: "input" = {
+        type: ["text", "password", "email", "number", "tel", "url"];
+        required: [true, false];
+    };
+}
+
+// 样式约束测试
+[Constraint] style
+{
+    // CSS属性约束
+    css_properties: "color" = {
+        value: color;
+        required: true;
+    };
+    
+    // CSS选择器约束
+    css_selectors: ".class" = {
+        pattern: "\\.[a-zA-Z][a-zA-Z0-9_-]*";
+        required: true;
+    };
+    
+    // CSS值约束
+    css_values: "width" = {
+        type: length;
+        min: "0px";
+        max: "100vw";
+    };
+}
+
+// 脚本约束测试
+[Constraint] script
+{
+    // 变量约束
+    variables: "count" = {
+        type: number;
+        min: 0;
+        max: 100;
+    };
+    
+    // 函数约束
+    functions: "init" = {
+        parameters: ["element", "options"];
+        return: boolean;
+    };
+    
+    // 事件约束
+    events: "click" = {
+        target: element;
+        handler: function;
+    };
+}
+
+// 模板约束测试
+[Constraint] template
+{
+    // 模板结构约束
+    template_structure: "layout" = {
+        header: required;
+        main: required;
+        footer: optional;
+    };
+    
+    // 模板参数约束
+    template_parameters: "button" = {
+        text: string;
+        type: ["primary", "secondary", "danger"];
+        size: ["small", "medium", "large"];
+    };
+}
+
+// 自定义约束测试
+[Constraint] custom
+{
+    // 自定义验证约束
+    custom_validation: "email" = {
+        pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+        message: "Invalid email format";
+    };
+    
+    // 自定义范围约束
+    custom_range: "age" = {
+        min: 0;
+        max: 120;
+        message: "Age must be between 0 and 120";
+    };
+    
+    // 自定义格式约束
+    custom_format: "phone" = {
+        pattern: "^\\+?[1-9]\\d{1,14}$";
+        message: "Invalid phone number format";
+    };
+}
+
+// 命名空间约束测试
+[Constraint] namespace
+{
+    // 命名空间符号约束
+    namespace_symbols: "global" = {
+        symbols: ["primary-color", "secondary-color", "text-color"];
+        types: [color, color, color];
+    };
+    
+    // 命名空间定义约束
+    namespace_definitions: "components" = {
+        definitions: ["Button", "Card", "Modal"];
+        types: [element, element, element];
+    };
+}
+
+// 约束组测试
+[Constraint] group
+{
+    // 表单约束组
+    form_constraints: ["required", "type", "format"] = {
+        name: string;
+        email: email;
+        age: number;
+        phone: phone;
+    };
+    
+    // 样式约束组
+    style_constraints: ["color", "length", "format"] = {
+        background-color: color;
+        width: length;
+        font-family: string;
+    };
+    
+    // 脚本约束组
+    script_constraints: ["variable", "function", "event"] = {
+        count: number;
+        init: function;
+        click: event;
+    };
+}
+
+// 使用约束的CHTL代码
+body
+{
+    // 精确约束测试
+    div
+    {
+        id: box; // 应该通过精确约束验证
+        style
+        {
+            .container
+            {
+                color: red; // 应该通过精确约束验证
+                background-color: rgb(255, 192, 203); // 应该通过类型约束验证
+                width: 100px; // 应该通过类型约束验证
+                height: 200px; // 应该通过类型约束验证
+            }
+        }
+    }
+    
+    // 元素约束测试
+    img
+    {
+        src: "image.jpg"; // 应该通过必需属性约束验证
+        alt: "Test image"; // 应该通过必需属性约束验证
+        class: "responsive"; // 应该通过可选属性约束验证
+    }
+    
+    // 样式约束测试
+    section
+    {
+        style
+        {
+            .section
+            {
+                background-color: #f0f0f0; // 应该通过颜色类型约束验证
+                width: 100%; // 应该通过长度类型约束验证
+                height: 50vh; // 应该通过长度类型约束验证
+                z-index: 1; // 应该通过数字类型约束验证
+                font-family: "Arial, sans-serif"; // 应该通过字符串类型约束验证
+            }
+        }
+    }
+    
+    // 脚本约束测试
+    script
+    {
+        let count = 0; // 应该通过变量约束验证
+        
+        function init(element, options) { // 应该通过函数约束验证
+            return true;
+        }
+        
+        document.addEventListener('click', function(event) { // 应该通过事件约束验证
+            count++;
+        });
+    }
+    
+    // 模板约束测试
+    @Element layout
+    {
+        header
+        {
+            style
+            {
+                .header
+                {
+                    background-color: primary-color;
+                    color: text-color;
+                    padding: 1rem 2rem;
+                }
+            }
+        }
+        
+        main
+        {
+            style
+            {
+                .main
+                {
+                    padding: 2rem;
+                    min-height: 50vh;
+                }
+            }
+        }
+        
+        footer
+        {
+            style
+            {
+                .footer
+                {
+                    background-color: secondary-color;
+                    color: text-color;
+                    padding: 1rem 2rem;
+                    text-align: center;
+                }
+            }
+        }
+    }
+    
+    // 自定义约束测试
+    form
+    {
+        input
+        {
+            type: email;
+            name: email;
+            placeholder: "Enter your email"; // 应该通过自定义验证约束验证
+        }
+        
+        input
+        {
+            type: number;
+            name: age;
+            placeholder: "Enter your age"; // 应该通过自定义范围约束验证
+        }
+        
+        input
+        {
+            type: tel;
+            name: phone;
+            placeholder: "Enter your phone number"; // 应该通过自定义格式约束验证
+        }
+    }
+}
+
+// 约束冲突测试
+div
+{
+    class: "conflict-test";
+    
+    // 这些应该触发约束冲突
+    style
+    {
+        .conflict-test
+        {
+            color: invalid-color; // 应该触发颜色类型约束错误
+            width: invalid-length; // 应该触发长度类型约束错误
+            z-index: invalid-number; // 应该触发数字类型约束错误
+        }
+    }
+}
+
+// 约束组验证测试
+section
+{
+    class: "form-section";
+    
+    // 这些应该通过约束组验证
+    form
+    {
+        input
+        {
+            type: text;
+            name: name;
+            required: true; // 应该通过表单约束组验证
+        }
+        
+        input
+        {
+            type: email;
+            name: email;
+            required: true; // 应该通过表单约束组验证
+        }
+        
+        input
+        {
+            type: number;
+            name: age;
+            min: 0;
+            max: 120; // 应该通过表单约束组验证
+        }
+        
+        input
+        {
+            type: tel;
+            name: phone;
+            pattern: "^\\+?[1-9]\\d{1,14}$"; // 应该通过表单约束组验证
+        }
+    }
+}

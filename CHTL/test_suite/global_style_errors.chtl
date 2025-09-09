@@ -1,0 +1,24 @@
+// 测试全局样式中不支持的语法（这些应该导致编译错误）
+
+div {
+    id: box;
+    style {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+// 这些全局样式应该导致编译错误
+Style {
+    .invalid-reference {
+        width: box.width;  // 错误：全局样式不支持引用属性
+    }
+    
+    .invalid-conditional-reference {
+        background-color: .box.width > 50px ? "red" : "blue"; // 错误：全局样式不支持引用属性条件表达式
+    }
+    
+    .invalid-dynamic {
+        transform: {{box}}->width > 100 ? "scale(1.1)" : "scale(1)"; // 错误：全局样式不支持动态表达式
+    }
+}

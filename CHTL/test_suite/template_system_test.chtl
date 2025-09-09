@@ -1,0 +1,121 @@
+// 模板系统测试文件
+
+// 样式组模板定义
+[Template] @Style TextSet
+{
+    color: black;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+// 样式组模板特例化
+[Custom] @Style WhiteText
+{
+    @Style TextSet
+    {
+        color: white;
+        font-size: 18px;
+    }
+}
+
+// 元素模板定义
+[Template] @Element Box
+{
+    div
+    {
+        style
+        {
+            .container
+            {
+                width: 100px;
+                height: 100px;
+                border: 1px solid black;
+            }
+        }
+    }
+    
+    div
+    {
+        style
+        {
+            .content
+            {
+                padding: 10px;
+                background-color: #f0f0f0;
+            }
+        }
+    }
+}
+
+// 变量组模板定义
+[Template] @Var ThemeColors
+{
+    primary: "rgb(255, 192, 203)";
+    secondary: "rgb(145, 155, 200)";
+    text: "black";
+    background: "white";
+}
+
+// 模板实例化测试
+body
+{
+    // 使用样式组模板
+    @Style TextSet
+    {
+        color: red;
+        font-size: 20px;
+    }
+    
+    // 使用元素模板
+    @Element Box
+    {
+        div[0]
+        {
+            style
+            {
+                .container
+                {
+                    background-color: ThemeColors(primary);
+                }
+            }
+        }
+    }
+    
+    // 使用变量组模板
+    @Var ThemeColors
+    {
+        primary: "rgb(255, 0, 0)";
+        text: "white";
+    }
+}
+
+// 模板特例化测试
+div
+{
+    style
+    {
+        @Style WhiteText
+        {
+            delete color;
+            background-color: ThemeColors(primary);
+        }
+    }
+}
+
+// 模板继承测试
+[Custom] @Element ColoredBox
+{
+    @Element Box
+    {
+        div[0]
+        {
+            style
+            {
+                .container
+                {
+                    background-color: ThemeColors(secondary);
+                }
+            }
+        }
+    }
+}

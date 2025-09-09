@@ -1,0 +1,52 @@
+// 测试自定义样式组
+[Custom] @Style MyCustomStyle
+{
+    color: blue;
+    font-size: 16px;
+    delete property1, property2;
+    @Style DefaultText;
+}
+
+// 测试自定义元素
+[Custom] @Element MyCustomElement
+{
+    div
+    {
+        class: custom-box;
+        text: "Custom Element";
+    }
+    
+    delete element1, element2;
+    insert after selector1
+    {
+        span
+        {
+            text: "Inserted Element";
+        }
+    }
+}
+
+// 测试自定义变量组
+[Custom] @Var MyCustomVar
+{
+    customColor: "rgb(255, 0, 0)";
+    customSize: "20px";
+    @Var ThemeColor;
+}
+
+// 测试使用自定义
+div
+{
+    class: test-container;
+    
+    text
+    {
+        "Testing Custom System"
+    }
+    
+    style
+    {
+        @Style MyCustomStyle;
+        background-color: MyCustomVar(customColor);
+    }
+}

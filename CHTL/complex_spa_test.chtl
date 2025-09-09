@@ -1,0 +1,72 @@
+// 复杂的 SPA 页面测试
+div {
+    class: "app";
+    id: "root";
+    
+    // 导航栏
+    nav {
+        class: "navbar";
+        
+        div {
+            class: "nav-brand";
+            text: "My App";
+        }
+        
+        ul {
+            class: "nav-menu";
+            
+            li {
+                class: "nav-item";
+                a {
+                    href: "#home";
+                    text: "Home";
+                }
+            }
+            
+            li {
+                class: "nav-item";
+                a {
+                    href: "#about";
+                    text: "About";
+                }
+            }
+        }
+    }
+    
+    // 主要内容区域
+    main {
+        class: "main-content";
+        
+        section {
+            class: "hero";
+            id: "home";
+            
+            h1 {
+                text: "Welcome to My SPA";
+            }
+            
+            p {
+                text: "This is a clean, structure-free output perfect for SPA frameworks.";
+            }
+        }
+        
+        section {
+            class: "content";
+            id: "about";
+            
+            h2 {
+                text: "About Us";
+            }
+            
+            p {
+                text: "We build amazing single-page applications with CHTL.";
+            }
+        }
+    }
+    
+    // 页脚
+    footer {
+        class: "footer";
+        text: "© 2024 My SPA Company";
+    }
+}

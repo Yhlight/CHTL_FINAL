@@ -1,0 +1,59 @@
+// 模板系统测试
+// 测试样式组模板、元素模板、变量组模板
+
+[Template] @Style ButtonStyle {
+    background-color: "var(--primary-color)";
+    color: "white";
+    padding: "10px 20px";
+    border: "none";
+    border-radius: "5px";
+    cursor: "pointer";
+    
+    &:hover {
+        background-color: "var(--primary-hover)";
+    }
+}
+
+[Template] @Element Button {
+    button {
+        class: "btn";
+        text: "Click Me";
+    }
+}
+
+[Template] @Var Theme {
+    primaryColor: "#007bff";
+    primaryHover: "#0056b3";
+    secondaryColor: "#6c757d";
+    textColor: "#333";
+}
+
+// 使用模板
+[Custom] @Style CustomButton {
+    @Style ButtonStyle {
+        background-color: "var(--secondary-color)";
+        border-radius: "10px";
+    }
+}
+
+[Custom] @Element CustomButton {
+    button {
+        class: "btn custom-btn";
+        text: "Custom Button";
+    }
+}
+
+// 应用主题
+[Custom] @Var CustomTheme {
+    primaryColor: "#28a745";
+    primaryHover: "#1e7e34";
+}
+
+// 使用自定义元素
+div {
+    class: "app";
+    
+    @Element CustomButton;
+    @Element CustomButton;
+    @Element CustomButton;
+}

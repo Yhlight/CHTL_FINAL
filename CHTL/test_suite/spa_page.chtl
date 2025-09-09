@@ -1,0 +1,293 @@
+// SPA 页面测试
+// 测试纯净输出模式，适合单页应用
+
+// 应用根组件
+div {
+    class: "spa-app";
+    id: "app";
+    
+    // 导航栏
+    nav {
+        class: "navbar";
+        
+        div {
+            class: "nav-brand";
+            text: "My SPA App";
+        }
+        
+        ul {
+            class: "nav-menu";
+            
+            li {
+                class: "nav-item";
+                
+                a {
+                    href: "#home";
+                    class: "nav-link active";
+                    text: "Home";
+                }
+            }
+            
+            li {
+                class: "nav-item";
+                
+                a {
+                    href: "#about";
+                    class: "nav-link";
+                    text: "About";
+                }
+            }
+            
+            li {
+                class: "nav-item";
+                
+                a {
+                    href: "#contact";
+                    class: "nav-link";
+                    text: "Contact";
+                }
+            }
+        }
+    }
+    
+    // 主要内容区域
+    main {
+        class: "main-content";
+        
+        // 首页内容
+        section {
+            class: "page active";
+            id: "home";
+            
+            div {
+                class: "hero";
+                
+                h1 {
+                    text: "Welcome to My SPA";
+                }
+                
+                p {
+                    text: "This is a single-page application built with CHTL.";
+                }
+                
+                button {
+                    class: "cta-button";
+                    text: "Get Started";
+                }
+            }
+            
+            div {
+                class: "features";
+                
+                h2 {
+                    text: "Features";
+                }
+                
+                div {
+                    class: "feature-grid";
+                    
+                    div {
+                        class: "feature-card";
+                        
+                        h3 {
+                            text: "Fast";
+                        }
+                        
+                        p {
+                            text: "Lightning fast performance with optimized output.";
+                        }
+                    }
+                    
+                    div {
+                        class: "feature-card";
+                        
+                        h3 {
+                            text: "Modern";
+                        }
+                        
+                        p {
+                            text: "Built with modern web technologies and best practices.";
+                        }
+                    }
+                    
+                    div {
+                        class: "feature-card";
+                        
+                        h3 {
+                            text: "Flexible";
+                        }
+                        
+                        p {
+                            text: "Highly customizable and extensible architecture.";
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 关于页面内容
+        section {
+            class: "page";
+            id: "about";
+            
+            h1 {
+                text: "About Us";
+            }
+            
+            p {
+                text: "We are a team of developers passionate about creating amazing web experiences.";
+            }
+            
+            div {
+                class: "team";
+                
+                h2 {
+                    text: "Our Team";
+                }
+                
+                div {
+                    class: "team-grid";
+                    
+                    div {
+                        class: "team-member";
+                        
+                        img {
+                            src: "https://via.placeholder.com/150";
+                            alt: "Team Member 1";
+                        }
+                        
+                        h3 {
+                            text: "John Doe";
+                        }
+                        
+                        p {
+                            text: "Lead Developer";
+                        }
+                    }
+                    
+                    div {
+                        class: "team-member";
+                        
+                        img {
+                            src: "https://via.placeholder.com/150";
+                            alt: "Team Member 2";
+                        }
+                        
+                        h3 {
+                            text: "Jane Smith";
+                        }
+                        
+                        p {
+                            text: "UI/UX Designer";
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 联系页面内容
+        section {
+            class: "page";
+            id: "contact";
+            
+            h1 {
+                text: "Contact Us";
+            }
+            
+            div {
+                class: "contact-form";
+                
+                form {
+                    div {
+                        class: "form-group";
+                        
+                        label {
+                            for: "name";
+                            text: "Name";
+                        }
+                        
+                        input {
+                            type: "text";
+                            id: "name";
+                            name: "name";
+                            required: "true";
+                        }
+                    }
+                    
+                    div {
+                        class: "form-group";
+                        
+                        label {
+                            for: "email";
+                            text: "Email";
+                        }
+                        
+                        input {
+                            type: "email";
+                            id: "email";
+                            name: "email";
+                            required: "true";
+                        }
+                    }
+                    
+                    div {
+                        class: "form-group";
+                        
+                        label {
+                            for: "message";
+                            text: "Message";
+                        }
+                        
+                        textarea {
+                            id: "message";
+                            name: "message";
+                            rows: "5";
+                            required: "true";
+                        }
+                    }
+                    
+                    button {
+                        type: "submit";
+                        class: "submit-button";
+                        text: "Send Message";
+                    }
+                }
+            }
+        }
+    }
+    
+    // 页脚
+    footer {
+        class: "footer";
+        
+        div {
+            class: "footer-content";
+            
+            p {
+                text: "© 2024 My SPA App. All rights reserved.";
+            }
+            
+            div {
+                class: "social-links";
+                
+                a {
+                    href: "#";
+                    class: "social-link";
+                    text: "Twitter";
+                }
+                
+                a {
+                    href: "#";
+                    class: "social-link";
+                    text: "GitHub";
+                }
+                
+                a {
+                    href: "#";
+                    class: "social-link";
+                    text: "LinkedIn";
+                }
+            }
+        }
+    }
+}

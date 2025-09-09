@@ -1,0 +1,54 @@
+// 测试引用属性语法
+div {
+    id: container;
+    class: main-box;
+    style {
+        width: 300px;
+        height: 200px;
+        background-color: #f0f0f0;
+    }
+}
+
+div {
+    class: sidebar;
+    style {
+        // 引用ID选择器的属性
+        width: container.width / 3;
+        height: container.height;
+        
+        // 引用类选择器的属性
+        margin: main-box.width * 0.1;
+        padding: main-box.height * 0.05;
+    }
+}
+
+div {
+    class: content;
+    style {
+        // 引用其他元素的属性进行计算
+        width: container.width - sidebar.width - 20px;
+        height: container.height - 40px;
+        
+        // 使用属性引用进行定位
+        left: sidebar.width + 10px;
+        top: 20px;
+    }
+}
+
+// 测试精确访问
+div {
+    class: item;
+    style {
+        width: 100px;
+        height: 50px;
+    }
+}
+
+div {
+    class: item;
+    style {
+        // 引用第一个item的宽度
+        width: item[0].width * 1.5;
+        height: item[0].height * 2;
+    }
+}

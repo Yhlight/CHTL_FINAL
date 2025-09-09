@@ -1,0 +1,233 @@
+// 命名空间系统测试
+// 测试命名空间定义和模块化组织
+
+// 全局命名空间
+[Namespace] Global {
+    // 全局约束
+    except div, span, p, h1, h2, h3, h4, h5, h6, a, img, button, input, form, table, ul, ol, li;
+    except [Custom] Button, Card, Modal, Header, Footer;
+    except [Template] @Var Theme, Colors, Layout;
+    
+    // 全局变量组
+    [Template] @Var GlobalTheme {
+        primaryColor: "#007bff";
+        secondaryColor: "#6c757d";
+        successColor: "#28a745";
+        dangerColor: "#dc3545";
+        warningColor: "#ffc107";
+        infoColor: "#17a2b8";
+        lightColor: "#f8f9fa";
+        darkColor: "#343a40";
+        fontFamily: "Arial, sans-serif";
+        borderRadius: "5px";
+        boxShadow: "0 2px 4px rgba(0,0,0,0.1)";
+    }
+}
+
+// 应用命名空间
+[Namespace] App {
+    // 应用级约束
+    except div, span, p, h1, h2, h3, button, input, form;
+    except [Custom] AppButton, AppCard, AppHeader, AppFooter;
+    except [Template] @Var AppTheme, AppColors;
+    
+    // 应用主题
+    [Template] @Var AppTheme {
+        appBg: "#ffffff";
+        appText: "#333333";
+        appBorder: "#e9ecef";
+        appShadow: "0 4px 6px rgba(0,0,0,0.1)";
+        appPadding: "20px";
+        appMargin: "10px";
+    }
+    
+    // 应用样式组
+    [Template] @Style AppButtonStyle {
+        background: "var(--primary-color)";
+        color: "white";
+        border: "none";
+        padding: "12px 24px";
+        border-radius: "var(--border-radius)";
+        cursor: "pointer";
+        font-family: "var(--font-family)";
+        font-size: "16px";
+        transition: "all 0.3s ease";
+        box-shadow: "var(--box-shadow)";
+        
+        &:hover {
+            background: "var(--primary-hover)";
+            transform: "translateY(-2px)";
+            box-shadow: "0 4px 8px rgba(0,0,0,0.2)";
+        }
+        
+        &:active {
+            transform: "translateY(0)";
+            box-shadow: "0 2px 4px rgba(0,0,0,0.1)";
+        }
+    }
+    
+    // 应用元素
+    [Template] @Element AppButton {
+        button {
+            class: "app-btn";
+            text: "App Button";
+        }
+    }
+    
+    // 应用卡片样式
+    [Template] @Style AppCardStyle {
+        background: "var(--app-bg)";
+        border: "1px solid var(--app-border)";
+        border-radius: "var(--border-radius)";
+        padding: "var(--app-padding)";
+        margin: "var(--app-margin)";
+        box-shadow: "var(--app-shadow)";
+        transition: "all 0.3s ease";
+        
+        &:hover {
+            transform: "translateY(-4px)";
+            box-shadow: "0 8px 16px rgba(0,0,0,0.15)";
+        }
+    }
+    
+    // 应用卡片元素
+    [Template] @Element AppCard {
+        div {
+            class: "app-card";
+            
+            h3 {
+                text: "Card Title";
+                margin: "0 0 15px 0";
+                color: "var(--app-text)";
+            }
+            
+            p {
+                text: "Card content goes here";
+                color: "var(--app-text)";
+                line-height: "1.6";
+            }
+        }
+    }
+}
+
+// 组件命名空间
+[Namespace] Components {
+    // 组件级约束
+    except div, span, p, h1, h2, h3, button, input;
+    except [Custom] ComponentButton, ComponentCard;
+    except [Template] @Var ComponentTheme;
+    
+    // 组件主题
+    [Template] @Var ComponentTheme {
+        componentBg: "var(--light-color)";
+        componentText: "var(--dark-color)";
+        componentBorder: "var(--app-border)";
+        componentPadding: "15px";
+        componentMargin: "5px";
+    }
+    
+    // 组件按钮样式
+    [Template] @Style ComponentButtonStyle {
+        background: "var(--secondary-color)";
+        padding: "8px 16px";
+        font-size: "14px";
+        
+        &:hover {
+            background: "var(--secondary-hover)";
+        }
+    }
+    
+    // 组件按钮元素
+    [Template] @Element ComponentButton {
+        button {
+            class: "component-btn";
+            text: "Component Button";
+        }
+    }
+}
+
+// 使用命名空间的应用
+div {
+    class: "namespace-app";
+    
+    // 使用应用级元素
+    AppButton;
+    AppCard;
+    AppButton;
+    
+    // 使用组件级元素
+    ComponentButton;
+    ComponentButton;
+    
+    // 混合使用
+    div {
+        class: "mixed-content";
+        
+        h2 {
+            text: "Namespace System Demo";
+        }
+        
+        p {
+            text: "This demonstrates the namespace system with different levels of organization.";
+        }
+        
+        // 使用原始嵌入展示命名空间效果
+        [Origin] @Html {
+            <div class="namespace-demo">
+                <h3>Namespace Hierarchy</h3>
+                <ul>
+                    <li>Global - Global constraints and themes</li>
+                    <li>App - Application-level components</li>
+                    <li>Components - Reusable component library</li>
+                </ul>
+            </div>
+        }
+        
+        [Origin] @Style {
+            .namespace-demo {
+                background: var(--component-bg);
+                padding: var(--component-padding);
+                margin: var(--component-margin);
+                border: 1px solid var(--component-border);
+                border-radius: var(--border-radius);
+            }
+            
+            .namespace-demo h3 {
+                color: var(--component-text);
+                margin-bottom: 10px;
+            }
+            
+            .namespace-demo ul {
+                list-style: none;
+                padding: 0;
+            }
+            
+            .namespace-demo li {
+                padding: 5px 0;
+                border-bottom: 1px solid var(--component-border);
+            }
+            
+            .namespace-demo li:last-child {
+                border-bottom: none;
+            }
+        }
+    }
+    
+    // 应用样式
+    style {
+        .namespace-app {
+            padding: 20px;
+            font-family: var(--font-family);
+            background: var(--app-bg);
+            color: var(--app-text);
+        }
+        
+        .mixed-content {
+            margin: 20px 0;
+            padding: 20px;
+            background: var(--light-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+    }
+}

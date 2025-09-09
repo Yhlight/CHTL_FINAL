@@ -1,0 +1,1 @@
+Style { .test { width: box.width; } }

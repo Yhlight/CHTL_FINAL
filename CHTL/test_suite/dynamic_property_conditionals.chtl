@@ -1,0 +1,44 @@
+// 测试动态属性条件表达式语法
+div {
+    id: dynamic-box;
+    style {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+div {
+    style {
+        // 动态属性条件表达式
+        background-color: {{dynamic-box}}->width > 50 ? "red" : "blue";
+        color: {{dynamic-box}}->height < 100 ? "white" : "black";
+        
+        // 动态链式条件表达式
+        background-color: 
+            {{dynamic-box}}->width > 100 ? "green",
+            {{dynamic-box}}->width > 50 ? "yellow", 
+            {{dynamic-box}}->height < 50 ? "purple" : "pink";
+            
+        // 动态逻辑运算符
+        background-color: 
+            {{dynamic-box}}->width > 50 && {{dynamic-box}}->width < 150 ? "orange",
+            {{dynamic-box}}->width > 150 || {{dynamic-box}}->height < 50 ? "cyan",
+            {{dynamic-box}}->height < 100 ? "magenta" : "lime";
+            
+        // 动态算术运算
+        width: {{dynamic-box}}->width * 2;
+        height: {{dynamic-box}}->height + 50;
+        margin: {{dynamic-box}}->width / 4;
+        padding: {{dynamic-box}}->height / 8;
+        
+        // 复杂动态表达式
+        transform: 
+            {{dynamic-box}}->width > 100 && {{dynamic-box}}->height > 100 ? "scale(1.2)",
+            {{dynamic-box}}->width < 50 || {{dynamic-box}}->height < 50 ? "scale(0.8)" : "scale(1.0)";
+            
+        // 动态字体大小
+        font-size: 
+            {{dynamic-box}}->width > 100 ? {{dynamic-box}}->width / 10 + "px",
+            {{dynamic-box}}->height > 50 ? {{dynamic-box}}->height / 5 + "px" : "12px";
+    }
+}

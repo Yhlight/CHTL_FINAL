@@ -1,0 +1,114 @@
+// Test CMOD module structure
+[Module] @CMOD MyCMODModule {
+    name = "MyCMODModule";
+    version = "1.0.0";
+    description = "A test CMOD module";
+    author = "CHTL Team";
+    license = "MIT";
+    category = "test";
+    minCHTLVersion = "1.0.0";
+    maxCHTLVersion = "2.0.0";
+    
+    // Module dependencies
+    dependencies = ["BaseModule", "UtilityModule"];
+    
+    // Module exports
+    exports = {
+        "Button": "chtl::components::Button",
+        "Card": "chtl::components::Card",
+        "Utils": "chtl::utils::Helper"
+    };
+    
+    // Module imports
+    imports = {
+        "Base": "chtl::base::Core",
+        "Utils": "chtl::utils::Common"
+    };
+}
+
+// Test CJMOD module structure
+[Module] @CJMOD MyCJMODModule {
+    name = "MyCJMODModule";
+    version = "1.0.0";
+    description = "A test CJMOD module";
+    author = "CHTL Team";
+    license = "MIT";
+    category = "javascript";
+    
+    // Module dependencies
+    dependencies = ["BaseModule"];
+    
+    // Module exports
+    exports = {
+        "Animator": "chtl::js::Animator",
+        "Router": "chtl::js::Router",
+        "Utils": "chtl::js::Utils"
+    };
+}
+
+// Test Mixed module structure
+[Module] @Mixed MyMixedModule {
+    name = "MyMixedModule";
+    version = "1.0.0";
+    description = "A test mixed module";
+    author = "CHTL Team";
+    license = "MIT";
+    category = "mixed";
+    
+    // Module dependencies
+    dependencies = ["BaseModule", "JSModule"];
+    
+    // Module exports
+    exports = {
+        "Component": "chtl::mixed::Component",
+        "Script": "chtl::mixed::Script",
+        "Style": "chtl::mixed::Style"
+    };
+}
+
+// Test Custom module structure
+[Module] @Custom MyCustomModule {
+    name = "MyCustomModule";
+    version = "1.0.0";
+    description = "A test custom module";
+    author = "CHTL Team";
+    license = "MIT";
+    category = "custom";
+    
+    // Module dependencies
+    dependencies = [];
+    
+    // Module exports
+    exports = {
+        "CustomElement": "chtl::custom::Element",
+        "CustomStyle": "chtl::custom::Style"
+    };
+}
+
+// Test module usage
+div {
+    class: "app-container";
+    
+    // Use CMOD module
+    @Module MyCMODModule;
+    
+    // Use CJMOD module
+    script {
+        @Module MyCJMODModule;
+        // Use exported functions
+        // Animator.fadeIn({{#myElement}});
+        // Router.navigate("/home");
+    }
+    
+    // Use Mixed module
+    @Module MyMixedModule;
+    
+    // Use Custom module
+    @Module MyCustomModule;
+    
+    // Test module-specific elements
+    div {
+        class: "module-test";
+        text: "Testing module system integration";
+    }
+}

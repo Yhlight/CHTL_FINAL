@@ -1,0 +1,45 @@
+# CHTL 核心库
+add_library(CHTLCore STATIC
+    CHTLCore.cpp
+)
+
+# 添加子目录
+add_subdirectory(CHTLLexer)
+add_subdirectory(CHTLNode)
+add_subdirectory(CHTLParser)
+add_subdirectory(CHTLManage)
+add_subdirectory(CHTLJS)
+add_subdirectory(CHTLTemplate)
+add_subdirectory(CHTLCustom)
+add_subdirectory(CHTLOrigin)
+add_subdirectory(CHTLImport)
+add_subdirectory(CHTLNamespace)
+add_subdirectory(CHTLConstraint)
+add_subdirectory(CHTLConfig)
+add_subdirectory(CHTLGenerator)
+add_subdirectory(CHTLModule)
+add_subdirectory(CHTLScanner)
+add_subdirectory(CHTLCompiler)
+
+# 链接依赖
+target_link_libraries(CHTLCore PUBLIC
+    CHTLLexer
+    CHTLNode
+    CHTLParser
+    CHTLManage
+    CHTLJSCore
+    CHTLTemplate
+    CHTLCustom
+    CHTLOrigin
+    CHTLImport
+    CHTLNamespace
+    CHTLConstraint
+    CHTLConfig
+    CHTLGenerator
+    CHTLModule
+    CHTLScanner
+    CHTLCompiler
+)
+
+# 设置编译选项
+target_compile_features(CHTLCore PUBLIC cxx_std_17)

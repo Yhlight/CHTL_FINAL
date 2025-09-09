@@ -1,0 +1,181 @@
+// CHTL JS 扩展语法测试
+// 测试文件载入、局部脚本、增强选择器等
+
+div {
+    class: "chtl-js-app";
+    
+    // 文件载入测试
+    [Origin] @JavaScript {
+        // 使用 fileloader 语法
+        fileloader {
+            "jquery": "https://code.jquery.com/jquery-3.6.0.min.js";
+            "bootstrap": "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js";
+            "chartjs": "https://cdn.jsdelivr.net/npm/chart.js";
+        }
+        
+        // 使用 script 语法
+        script {
+            // 增强选择器测试
+            const elements = {{.chtl-js-app .content}};
+            const buttons = {{.btn}};
+            const inputs = {{input[type="text"]}};
+            
+            // 动画测试
+            animate {
+                target: {{.animated-element}};
+                duration: 1000;
+                properties: {
+                    opacity: "0 to 1";
+                    transform: "translateY(20px) to translateY(0)";
+                };
+                easing: "ease-out";
+            }
+            
+            // 事件监听测试
+            listen {
+                event: "click";
+                target: {{.btn}};
+                handler: function(event) {
+                    console.log('Button clicked:', event.target);
+                    
+                    // 使用 util 表达式
+                    util {
+                        target: {{.btn}};
+                        change: {
+                            class: "btn-clicked";
+                            text: "Clicked!";
+                        };
+                        then: {
+                            setTimeout(() => {
+                                util {
+                                    target: {{.btn}};
+                                    change: {
+                                        class: "btn";
+                                        text: "Click Me";
+                                    };
+                                };
+                            }, 2000);
+                        };
+                    }
+                };
+            }
+            
+            // 复杂的事件处理
+            listen {
+                event: "input";
+                target: {{input[type="text"]}};
+                handler: function(event) {
+                    const value = event.target.value;
+                    
+                    util {
+                        target: {{.output}};
+                        change: {
+                            text: "You typed: " + value;
+                        };
+                    }
+                };
+            }
+        }
+    }
+    
+    // 样式块中的脚本
+    style {
+        .chtl-js-app {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .content {
+            margin: 20px 0;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn-clicked {
+            background: #28a745;
+            transform: scale(1.05);
+        }
+        
+        .animated-element {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .output {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        // 脚本中的样式
+        script {
+            // 动态样式应用
+            util {
+                target: {{.dynamic-element}};
+                change: {
+                    style: {
+                        background: "linear-gradient(45deg, #ff6b6b, #4ecdc4)";
+                        color: "white";
+                        padding: "20px";
+                        border-radius: "10px";
+                    };
+                };
+            }
+        }
+    }
+    
+    // 主要内容
+    main {
+        class: "content";
+        
+        h1 {
+            text: "CHTL JS Extended Syntax Test";
+        }
+        
+        p {
+            text: "This page demonstrates the CHTL JS extended syntax features.";
+        }
+        
+        div {
+            class: "controls";
+            
+            button {
+                class: "btn";
+                text: "Click Me";
+            }
+            
+            input {
+                type: "text";
+                placeholder: "Type something...";
+            }
+        }
+        
+        div {
+            class: "output";
+            text: "Output will appear here...";
+        }
+        
+        div {
+            class: "animated-element";
+            text: "This element will be animated";
+        }
+        
+        div {
+            class: "dynamic-element";
+            text: "This element has dynamic styles";
+        }
+    }
+}

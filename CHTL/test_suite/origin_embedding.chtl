@@ -1,0 +1,87 @@
+// 原始嵌入系统测试
+// 测试 HTML、CSS、JavaScript 代码的原始嵌入
+
+div {
+    class: "app";
+    
+    // 原始 HTML 嵌入
+    [Origin] @Html {
+        <div class="raw-html">
+            <h2>Raw HTML Content</h2>
+            <p>This is raw HTML content embedded in CHTL.</p>
+            <ul>
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+            </ul>
+        </div>
+    }
+    
+    // 原始 CSS 嵌入
+    [Origin] @Style {
+        .raw-html {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            margin: 20px 0;
+        }
+        
+        .raw-html h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .raw-html ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .raw-html li {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .raw-html li:last-child {
+            border-bottom: none;
+        }
+    }
+    
+    // 原始 JavaScript 嵌入
+    [Origin] @JavaScript {
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Raw JavaScript executed!');
+            
+            const rawHtml = document.querySelector('.raw-html');
+            if (rawHtml) {
+                rawHtml.addEventListener('click', function() {
+                    this.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 200);
+                });
+            }
+        });
+    }
+    
+    // 混合内容
+    section {
+        class: "mixed-content";
+        
+        h3 {
+            text: "Mixed Content Section";
+        }
+        
+        p {
+            text: "This section contains both CHTL and raw HTML content.";
+        }
+        
+        [Origin] @Html {
+            <div class="interactive-element">
+                <button onclick="alert('Raw HTML button clicked!')">
+                    Click Me (Raw HTML)
+                </button>
+            </div>
+        }
+    }
+}

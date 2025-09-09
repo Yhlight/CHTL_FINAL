@@ -1,0 +1,247 @@
+// 原始嵌入系统测试文件
+
+// 嵌入HTML代码
+[Origin] @Html
+{
+    <div class="header">
+        <h1>Welcome to CHTL</h1>
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </div>
+}
+
+// 嵌入CSS代码
+[Origin] @Style
+{
+    .header {
+        background-color: #333;
+        color: white;
+        padding: 1rem;
+    }
+    
+    .header h1 {
+        margin: 0;
+        font-size: 2rem;
+    }
+    
+    .header nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .header nav a {
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+    }
+    
+    .header nav a:hover {
+        background-color: #555;
+    }
+}
+
+// 嵌入JavaScript代码
+[Origin] @JavaScript
+{
+    function initNavigation() {
+        const navLinks = document.querySelectorAll('.header nav a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    }
+    
+    document.addEventListener('DOMContentLoaded', initNavigation);
+}
+
+// 带名的原始嵌入
+[Origin] @Html header
+{
+    <header class="main-header">
+        <div class="logo">
+            <img src="logo.png" alt="Logo">
+        </div>
+        <div class="search-box">
+            <input type="text" placeholder="Search...">
+            <button type="submit">Search</button>
+        </div>
+    </header>
+}
+
+[Origin] @Style header-styles
+{
+    .main-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .logo img {
+        height: 40px;
+        width: auto;
+    }
+    
+    .search-box {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .search-box input {
+        padding: 0.5rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        width: 200px;
+    }
+    
+    .search-box button {
+        padding: 0.5rem 1rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .search-box button:hover {
+        background-color: #0056b3;
+    }
+}
+
+[Origin] @JavaScript header-scripts
+{
+    function initHeader() {
+        const searchBox = document.querySelector('.search-box');
+        const searchInput = searchBox.querySelector('input');
+        const searchButton = searchBox.querySelector('button');
+        
+        searchButton.addEventListener('click', function() {
+            const query = searchInput.value.trim();
+            if (query) {
+                performSearch(query);
+            }
+        });
+        
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value.trim();
+                if (query) {
+                    performSearch(query);
+                }
+            }
+        });
+    }
+    
+    function performSearch(query) {
+        console.log('Searching for:', query);
+        // 实现搜索逻辑
+    }
+    
+    document.addEventListener('DOMContentLoaded', initHeader);
+}
+
+// 在元素中使用原始嵌入
+body
+{
+    // 使用带名的HTML嵌入
+    @Html header;
+    
+    // 使用带名的CSS嵌入
+    @Style header-styles;
+    
+    // 使用带名的JavaScript嵌入
+    @JavaScript header-scripts;
+    
+    // 直接嵌入HTML
+    [Origin] @Html
+    {
+        <main class="content">
+            <section id="home">
+                <h2>Home Section</h2>
+                <p>This is the home section content.</p>
+            </section>
+            
+            <section id="about">
+                <h2>About Section</h2>
+                <p>This is the about section content.</p>
+            </section>
+            
+            <section id="contact">
+                <h2>Contact Section</h2>
+                <p>This is the contact section content.</p>
+            </section>
+        </main>
+    }
+    
+    // 直接嵌入CSS
+    [Origin] @Style
+    {
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .content section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .content h2 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .content p {
+            color: #666;
+            line-height: 1.6;
+        }
+    }
+    
+    // 直接嵌入JavaScript
+    [Origin] @JavaScript
+    {
+        function initContent() {
+            // 添加滚动效果
+            const sections = document.querySelectorAll('.content section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+            
+            sections.forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+                section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(section);
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', initContent);
+    }
+}

@@ -1,0 +1,427 @@
+// 配置系统测试文件
+
+// Name块配置测试
+[Name] MyProject
+{
+    // 项目基本信息
+    name: "MyProject";
+    version: "1.0.0";
+    description: "A CHTL project for testing configuration system";
+    author: "CHTL Team";
+    license: "MIT";
+    
+    // 项目设置
+    INDEX_INITIAL_COUNT: 0;
+    DEBUG_MODE: false;
+    DISABLE_NAME_GROUP: false;
+    OPTION_COUNT: 10;
+    
+    // 样式设置
+    DISABLE_STYLE_AUTO_ADD_CLASS: false;
+    DISABLE_STYLE_AUTO_ADD_ID: false;
+    DISABLE_DEFAULT_NAMESPACE: false;
+    
+    // 自定义关键字
+    keywords: {
+        primary: "primary-color";
+        secondary: "secondary-color";
+        accent: "accent-color";
+        text: "text-color";
+        background: "background-color";
+    };
+}
+
+// OriginType配置测试
+[OriginType] CustomHtml
+{
+    type: "html";
+    extension: ".chtml";
+    mimeType: "text/html";
+    description: "Custom HTML origin type";
+    
+    // 自定义设置
+    settings: {
+        autoIndent: true;
+        validateTags: true;
+        minifyOutput: false;
+        preserveComments: true;
+    };
+}
+
+[OriginType] CustomCss
+{
+    type: "css";
+    extension: ".cstyle";
+    mimeType: "text/css";
+    description: "Custom CSS origin type";
+    
+    // 自定义设置
+    settings: {
+        autoPrefix: true;
+        minifyOutput: true;
+        sourceMap: true;
+        validateProperties: true;
+    };
+}
+
+[OriginType] CustomJs
+{
+    type: "javascript";
+    extension: ".cscript";
+    mimeType: "application/javascript";
+    description: "Custom JavaScript origin type";
+    
+    // 自定义设置
+    settings: {
+        minifyOutput: true;
+        sourceMap: true;
+        validateSyntax: true;
+        transpileES6: true;
+    };
+}
+
+// 配置组测试
+[Config] Development
+{
+    // 开发环境配置
+    environment: "development";
+    debug: true;
+    verbose: true;
+    hotReload: true;
+    
+    // 编译设置
+    compileSettings: {
+        optimize: false;
+        minify: false;
+        sourceMap: true;
+        watchMode: true;
+    };
+    
+    // 模块设置
+    moduleSettings: {
+        autoImport: true;
+        treeShaking: false;
+        codeSplitting: false;
+    };
+}
+
+[Config] Production
+{
+    // 生产环境配置
+    environment: "production";
+    debug: false;
+    verbose: false;
+    hotReload: false;
+    
+    // 编译设置
+    compileSettings: {
+        optimize: true;
+        minify: true;
+        sourceMap: false;
+        watchMode: false;
+    };
+    
+    // 模块设置
+    moduleSettings: {
+        autoImport: false;
+        treeShaking: true;
+        codeSplitting: true;
+    };
+}
+
+[Config] Testing
+{
+    // 测试环境配置
+    environment: "testing";
+    debug: true;
+    verbose: true;
+    hotReload: false;
+    
+    // 编译设置
+    compileSettings: {
+        optimize: false;
+        minify: false;
+        sourceMap: true;
+        watchMode: false;
+    };
+    
+    // 测试设置
+    testSettings: {
+        coverage: true;
+        parallel: true;
+        timeout: 5000;
+        retries: 3;
+    };
+}
+
+// 模块配置测试
+[Config] ModuleConfig
+{
+    // 模块列表
+    modules: [
+        "chtl::chtholly",
+        "chtl::utils",
+        "chtl::components",
+        "chtl::themes"
+    ];
+    
+    // 模块设置
+    moduleSettings: {
+        autoLoad: true;
+        lazyLoad: false;
+        cacheModules: true;
+        validateDependencies: true;
+    };
+    
+    // 依赖管理
+    dependencies: {
+        "chtl::chtholly": "1.0.0";
+        "chtl::utils": "1.0.0";
+        "chtl::components": "1.0.0";
+        "chtl::themes": "1.0.0";
+    };
+}
+
+// 自定义配置测试
+[Config] CustomConfig
+{
+    // 自定义设置
+    customSettings: {
+        theme: "dark";
+        language: "en";
+        timezone: "UTC";
+        currency: "USD";
+        dateFormat: "YYYY-MM-DD";
+        timeFormat: "HH:mm:ss";
+    };
+    
+    // 用户偏好
+    userPreferences: {
+        fontSize: "16px";
+        fontFamily: "Arial, sans-serif";
+        colorScheme: "dark";
+        animations: true;
+        sounds: false;
+    };
+    
+    // 功能开关
+    featureFlags: {
+        newUI: true;
+        betaFeatures: false;
+        experimental: false;
+        analytics: true;
+    };
+}
+
+// 配置继承测试
+[Config] ExtendedConfig
+{
+    // 继承基础配置
+    extends: "Development";
+    
+    // 覆盖设置
+    debug: false;
+    verbose: false;
+    
+    // 添加新设置
+    customSettings: {
+        apiEndpoint: "https://api.example.com";
+        apiKey: "your-api-key-here";
+        rateLimit: 1000;
+    };
+    
+    // 添加新模块
+    modules: [
+        "chtl::api",
+        "chtl::auth",
+        "chtl::storage"
+    ];
+}
+
+// 配置合并测试
+[Config] MergedConfig
+{
+    // 合并多个配置
+    merge: ["Development", "ModuleConfig", "CustomConfig"];
+    
+    // 覆盖合并的设置
+    debug: true;
+    environment: "merged";
+    
+    // 添加合并后的设置
+    mergedSettings: {
+        source: "multiple";
+        priority: "high";
+        conflicts: "resolved";
+    };
+}
+
+// 使用配置的CHTL代码
+body
+{
+    // 使用Name块配置
+    @Name MyProject;
+    
+    // 使用OriginType配置
+    [Origin] @CustomHtml
+    {
+        <div class="custom-html">
+            <h1>Custom HTML Content</h1>
+            <p>This is rendered using CustomHtml origin type.</p>
+        </div>
+    }
+    
+    [Origin] @CustomCss
+    {
+        .custom-html {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        
+        .custom-html h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .custom-html p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+    }
+    
+    [Origin] @CustomJs
+    {
+        function initCustomHtml() {
+            const customHtml = document.querySelector('.custom-html');
+            if (customHtml) {
+                customHtml.addEventListener('click', function() {
+                    console.log('Custom HTML clicked!');
+                });
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', initCustomHtml);
+    }
+    
+    // 使用配置组
+    @Config Development;
+    
+    // 条件配置使用
+    div
+    {
+        class: "config-test";
+        
+        // 根据配置环境显示不同内容
+        style
+        {
+            .config-test
+            {
+                background-color: var(--background-color);
+                color: var(--text-color);
+                padding: 1rem;
+                border: 1px solid var(--primary-color);
+            }
+            
+            .config-test.development
+            {
+                border-color: #00ff00;
+            }
+            
+            .config-test.production
+            {
+                border-color: #ff0000;
+            }
+            
+            .config-test.testing
+            {
+                border-color: #ffff00;
+            }
+        }
+    }
+    
+    // 使用模块配置
+    @Config ModuleConfig;
+    
+    // 使用自定义配置
+    @Config CustomConfig;
+    
+    // 配置变量使用
+    div
+    {
+        class: "config-variables";
+        
+        style
+        {
+            .config-variables
+            {
+                font-size: var(--fontSize);
+                font-family: var(--fontFamily);
+                color: var(--colorScheme);
+            }
+        }
+    }
+    
+    // 功能开关使用
+    div
+    {
+        class: "feature-flags";
+        
+        // 根据功能开关显示内容
+        style
+        {
+            .feature-flags
+            {
+                display: var(--newUI) ? block : none;
+            }
+            
+            .feature-flags.beta
+            {
+                display: var(--betaFeatures) ? block : none;
+            }
+            
+            .feature-flags.experimental
+            {
+                display: var(--experimental) ? block : none;
+            }
+        }
+    }
+}
+
+// 配置验证测试
+div
+{
+    class: "config-validation";
+    
+    // 这些应该通过配置验证
+    style
+    {
+        .config-validation
+        {
+            // 使用有效的配置值
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            font-size: 16px;
+            padding: 1rem;
+        }
+    }
+}
+
+// 配置错误测试
+div
+{
+    class: "config-errors";
+    
+    // 这些应该触发配置验证错误
+    style
+    {
+        .config-errors
+        {
+            // 使用无效的配置值
+            background-color: invalid-color; // 应该触发配置验证错误
+            font-size: invalid-size; // 应该触发配置验证错误
+            padding: invalid-padding; // 应该触发配置验证错误
+        }
+    }
+}

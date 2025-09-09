@@ -1,0 +1,51 @@
+// 测试属性条件表达式语法
+div {
+    id: responsive-box;
+    style {
+        width: 100px;
+        height: 100px;
+        min-width: 50px;
+        max-width: 200px;
+    }
+}
+
+div {
+    style {
+        // 基本条件表达式
+        background-color: width > 50px ? "red" : "blue";
+        color: height < 100px ? "white" : "black";
+        
+        // 链式条件表达式
+        background-color: 
+            width > 100px ? "green",
+            width > 50px ? "yellow", 
+            height < 50px ? "purple" : "pink";
+            
+        // 可选选项（没有默认值）
+        border-style: 
+            width > 150px ? "solid",
+            width > 100px ? "dashed",
+            height < 50px ? "dotted";
+            
+        // 使用逻辑运算符
+        background-color: 
+            width > 50px && width < 150px ? "orange",
+            width > 150px || height < 50px ? "cyan",
+            height < 100px ? "magenta" : "lime";
+            
+        // 引用属性条件表达式
+        background-color: 
+            responsive-box.width > 50px ? "navy",
+            responsive-box.height < 100px ? "olive" : "teal";
+            
+        // 复杂条件表达式
+        transform: 
+            width > 100px && height > 100px ? "scale(1.1)",
+            width < 50px || height < 50px ? "scale(0.9)" : "scale(1.0)";
+            
+        // 使用算术运算符的条件表达式
+        font-size: 
+            width > 100px ? width / 10 + "px",
+            height > 50px ? height / 5 + "px" : "12px";
+    }
+}

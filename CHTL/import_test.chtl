@@ -1,0 +1,27 @@
+// 测试导入 HTML 文件
+[Import] @Html "header.html" as Header
+
+// 测试导入 CSS 文件
+[Import] @Style "styles.css" as MainStyles
+
+// 测试导入 JavaScript 文件
+[Import] @JavaScript "script.js" as MainScript
+
+// 测试导入 CHTL 文件
+[Import] @Chtl "templates.chtl" as Templates
+
+// 测试使用导入的内容
+div
+{
+    class: main-container;
+    
+    text
+    {
+        "Testing Import System"
+    }
+    
+    style
+    {
+        @Style MainStyles;
+    }
+}
