@@ -186,27 +186,36 @@ impl ChtlParser {
         while !self.is_at_end() {
             let token = self.peek()?;
             match &token.token_type {
-                TokenType::Semicolon | TokenType::RightBrace => break,
+                TokenType::Semicolon | TokenType::RightBrace | TokenType::Newline => break,
                 TokenType::String(s) => {
                     value.push_str(s);
-                    self.advance();
+                    self.advance()?;
                 }
                 TokenType::Identifier(s) => {
+                    if !value.is_empty() && !value.ends_with(' ') {
+                        value.push(' ');
+                    }
                     value.push_str(s);
-                    self.advance();
+                    self.advance()?;
                 }
                 TokenType::Number(n) => {
+                    if !value.is_empty() && !value.ends_with(' ') {
+                        value.push(' ');
+                    }
                     value.push_str(n);
-                    self.advance();
+                    self.advance()?;
                 }
                 _ => {
+                    if !value.is_empty() && !value.ends_with(' ') && !token.value.starts_with(' ') {
+                        value.push(' ');
+                    }
                     value.push_str(&token.value);
-                    self.advance();
+                    self.advance()?;
                 }
             }
         }
         
-        Ok(value)
+        Ok(value.trim().to_string())
     }
     
     fn parse_script_node(&mut self) -> Result<Option<AstNode>> {
@@ -244,14 +253,48 @@ impl ChtlParser {
             _ => return Err(anyhow::anyhow!("Expected element name")),
         };
         
-        // Skip newlines before expecting LeftBrace
-        while !self.is_at_end() && self.peek()?.token_type == TokenType::Newline {
-            self.advance()?;
+        let mut attributes = Vec::new();
+        
+        // Parse attributes before the opening brace
+        while !self.is_at_end() {
+            let token = self.peek()?.clone();
+            match &token.token_type {
+                TokenType::LeftBrace => break,
+                TokenType::Newline => {
+                    // Skip newlines
+                    self.advance()?;
+                }
+                TokenType::LineComment | TokenType::BlockComment | TokenType::GeneratorComment => {
+                    // Skip comments
+                    self.advance()?;
+                }
+                TokenType::Identifier(name) => {
+                    // This is an attribute
+                    self.advance();
+                    
+                    // Check if there's an equals sign
+                    if self.peek()?.token_type == TokenType::Equals {
+                        self.advance()?; // consume the equals sign
+                    }
+                    
+                    let value = self.parse_attribute_value()?;
+                    attributes.push(Attribute {
+                        name: name.clone(),
+                        value,
+                    });
+                    
+                    if self.peek()?.token_type == TokenType::Semicolon {
+                        self.advance()?;
+                    }
+                }
+                _ => {
+                    return Err(anyhow::anyhow!("Expected LeftBrace or attribute, got {:?}", token.token_type));
+                }
+            }
         }
         
         self.consume(TokenType::LeftBrace)?;
         
-        let mut attributes = Vec::new();
         let mut children = Vec::new();
         
         while !self.is_at_end() {
@@ -266,30 +309,8 @@ impl ChtlParser {
                     // Skip comments within element body
                     self.advance()?;
                 }
-                TokenType::Identifier(name) => {
-                    // Check if this is an attribute or child element
-                    if self.peek_next()?.token_type == TokenType::Colon {
-                        // This is an attribute
-                        self.advance();
-                        self.consume(TokenType::Colon)?;
-                        
-                        let value = self.parse_attribute_value()?;
-                        attributes.push(Attribute {
-                            name: name.clone(),
-                            value,
-                        });
-                        
-                        if self.peek()?.token_type == TokenType::Semicolon {
-                            self.advance();
-                        }
-                    } else {
-                        // This is a child element
-                        if let Some(child) = self.parse_node()? {
-                            children.push(child);
-                        }
-                    }
-                }
                 _ => {
+                    // This is a child element
                     if let Some(child) = self.parse_node()? {
                         children.push(child);
                     }
@@ -557,28 +578,157 @@ impl ChtlParser {
     }
     
     fn parse_import_declaration(&mut self) -> Result<Option<AstNode>> {
-        // Placeholder for Import declarations
+        // Skip newlines after [Import]
+        while !self.is_at_end() && self.peek()?.token_type == TokenType::Newline {
+            self.advance()?;
+        }
+        
+        // Parse import type (@Module, @Style, @Script, etc.)
+        self.consume(TokenType::At)?;
+        
+        let type_token = self.advance()?;
+        let import_type = match &type_token.token_type {
+            TokenType::Identifier(name) if name == "Module" => ImportType::Module,
+            TokenType::Identifier(name) if name == "Style" => ImportType::Style,
+            TokenType::Identifier(name) if name == "Script" => ImportType::Script,
+            TokenType::Identifier(name) if name == "Config" => ImportType::Config,
+            _ => return Err(anyhow::anyhow!("Expected @Module, @Style, @Script, or @Config after [Import], got {:?}", type_token.token_type)),
+        };
+        
+        // Parse module path
+        let path_token = self.advance()?;
+        let path = match &path_token.token_type {
+            TokenType::String(s) => s.clone(),
+            TokenType::Identifier(s) => s.clone(),
+            _ => return Err(anyhow::anyhow!("Expected module path after import type, got {:?}", path_token.token_type)),
+        };
+        
+        // Parse optional alias
+        let mut alias = None;
+        if !self.is_at_end() && self.peek()?.token_type == TokenType::As {
+            self.advance()?; // consume 'as'
+            let alias_token = self.advance()?;
+            alias = match &alias_token.token_type {
+                TokenType::Identifier(s) => Some(s.clone()),
+                _ => return Err(anyhow::anyhow!("Expected alias identifier after 'as', got {:?}", alias_token.token_type)),
+            };
+        }
+        
         Ok(Some(AstNode::Import(ImportNode {
-            import_type: ImportType::Chtl,
+            import_type,
             name: None,
-            path: "import_path".to_string(),
-            alias: None,
+            path,
+            alias,
         })))
     }
     
     fn parse_namespace_declaration(&mut self) -> Result<Option<AstNode>> {
-        // Placeholder for Namespace declarations
+        // Skip newlines after [Namespace]
+        while !self.is_at_end() && self.peek()?.token_type == TokenType::Newline {
+            self.advance()?;
+        }
+        
+        // Parse namespace name
+        let name_token = self.advance()?;
+        let name = match &name_token.token_type {
+            TokenType::Identifier(s) => s.clone(),
+            _ => return Err(anyhow::anyhow!("Expected namespace name after [Namespace], got {:?}", name_token.token_type)),
+        };
+        
+        // Parse namespace content (elements, styles, etc.)
+        let mut content = Vec::new();
+        
+        // Skip newlines before content
+        while !self.is_at_end() && self.peek()?.token_type == TokenType::Newline {
+            self.advance()?;
+        }
+        
+        // Parse content until end of namespace
+        while !self.is_at_end() {
+            if let Some(node) = self.parse_node()? {
+                content.push(node);
+            } else {
+                break;
+            }
+        }
+        
         Ok(Some(AstNode::Namespace(NamespaceNode {
-            name: "namespace".to_string(),
-            content: Vec::new(),
+            name,
+            content,
         })))
     }
     
     fn parse_configuration_declaration(&mut self) -> Result<Option<AstNode>> {
-        // Placeholder for Configuration declarations
+        // Skip newlines after [Configuration]
+        while !self.is_at_end() && self.peek()?.token_type == TokenType::Newline {
+            self.advance()?;
+        }
+        
+        // Parse optional configuration name
+        let mut name = None;
+        if !self.is_at_end() && matches!(self.peek()?.token_type, TokenType::Identifier(_)) {
+            let name_token = self.advance()?;
+            name = match &name_token.token_type {
+                TokenType::Identifier(s) => Some(s.clone()),
+                _ => None,
+            };
+        }
+        
+        // Parse configuration settings
+        let mut settings = Vec::new();
+        
+        // Skip newlines before settings
+        while !self.is_at_end() && self.peek()?.token_type == TokenType::Newline {
+            self.advance()?;
+        }
+        
+        // Parse settings until end of configuration
+        while !self.is_at_end() {
+            if self.peek()?.token_type == TokenType::LeftBracket {
+                // Check if this is the end of configuration
+                let bracket_token = self.advance()?;
+                if let Ok(next_token) = self.peek() {
+                    if matches!(&next_token.token_type, TokenType::Identifier(s) if s == "Configuration" || s == "End") {
+                        self.advance()?; // consume the identifier
+                        if self.peek()?.token_type == TokenType::RightBracket {
+                            self.advance()?; // consume the closing bracket
+                            break;
+                        }
+                    }
+                }
+                // If not end of configuration, continue parsing
+            }
+            
+            // Parse setting key-value pairs
+            if let Ok(key_token) = self.advance() {
+                if let TokenType::Identifier(key) = &key_token.token_type {
+                    // Skip newlines and colons
+                    while !self.is_at_end() && matches!(self.peek()?.token_type, TokenType::Newline | TokenType::Colon) {
+                        self.advance()?;
+                    }
+                    
+                    // Parse value
+                    let value_token = self.advance()?;
+                    let value = match &value_token.token_type {
+                        TokenType::String(s) => ConfigValue::String(s.clone()),
+                        TokenType::Identifier(s) => ConfigValue::String(s.clone()),
+                        TokenType::Number(s) => ConfigValue::String(s.clone()),
+                        _ => return Err(anyhow::anyhow!("Expected configuration value, got {:?}", value_token.token_type)),
+                    };
+                    
+                    settings.push(ConfigSetting {
+                        key: key.clone(),
+                        value,
+                    });
+                }
+            } else {
+                break;
+            }
+        }
+        
         Ok(Some(AstNode::Configuration(ConfigurationNode {
-            name: Some("config".to_string()),
-            settings: vec![],
+            name,
+            settings,
         })))
     }
     

@@ -118,6 +118,9 @@ pub enum ImportType {
     JavaScript,
     Chtl,
     Cjmod,
+    Module,
+    Script,
+    Config,
 }
 
 /// Namespace node

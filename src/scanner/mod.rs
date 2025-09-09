@@ -1,12 +1,11 @@
-//! CHTL Unified Scanner
+//! Unified Scanner for CHTL
 //! 
-//! This module provides the unified scanner that separates CHTL, CHTL JS, CSS, and JS code.
+//! This module provides precise code cutting for CHTL, CHTL JS, CSS, and JS.
 
 use anyhow::Result;
-use std::collections::VecDeque;
 
-/// Code fragment types
-#[derive(Debug, Clone, PartialEq)]
+/// Fragment types
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum FragmentType {
     Chtl,
     ChtlJS,
@@ -19,9 +18,10 @@ pub enum FragmentType {
 pub struct CodeFragment {
     pub fragment_type: FragmentType,
     pub content: String,
-    pub position: usize,
-    pub line: usize,
-    pub column: usize,
+    pub start_pos: usize,
+    pub end_pos: usize,
+    pub start_line: usize,
+    pub end_line: usize,
 }
 
 /// Unified scanner for CHTL
@@ -69,6 +69,122 @@ impl UnifiedScanner {
         Ok(fragments)
     }
     
+    /// Get the next code fragment
+    fn next_fragment(&mut self) -> Result<Option<CodeFragment>> {
+        let start_pos = self.position;
+        let start_line = self.line;
+        
+        // Determine fragment type based on content
+        let fragment_type = if self.is_chtl_js_start() {
+            FragmentType::ChtlJS
+        } else if self.is_css_start() {
+            FragmentType::CSS
+        } else if self.is_js_start() {
+            FragmentType::JS
+        } else {
+            FragmentType::Chtl
+        };
+        
+        // Scan until end of fragment
+        while !self.is_at_end() {
+            if self.is_fragment_end(fragment_type) {
+                break;
+            }
+            self.advance();
+        }
+        
+        let end_pos = self.position;
+        let end_line = self.line;
+        
+        if start_pos == end_pos {
+            return Ok(None);
+        }
+        
+        Ok(Some(CodeFragment {
+            fragment_type,
+            content: self.source[start_pos..end_pos].to_string(),
+            start_pos,
+            end_pos,
+            start_line,
+            end_line,
+        }))
+    }
+    
+    /// Check if this is the start of CHTL JS code
+    fn is_chtl_js_start(&self) -> bool {
+        let remaining = &self.source[self.position..];
+        remaining.starts_with("fileloader") ||
+        remaining.starts_with("script") ||
+        remaining.starts_with("listen") ||
+        remaining.starts_with("delegate") ||
+        remaining.starts_with("animate") ||
+        remaining.starts_with("router") ||
+        remaining.starts_with("vir")
+    }
+    
+    /// Check if this is the start of CSS code
+    fn is_css_start(&self) -> bool {
+        let remaining = &self.source[self.position..];
+        remaining.starts_with("style") ||
+        remaining.starts_with("@") ||
+        remaining.starts_with(".") ||
+        remaining.starts_with("#")
+    }
+    
+    /// Check if this is the start of JS code
+    fn is_js_start(&self) -> bool {
+        let remaining = &self.source[self.position..];
+        remaining.starts_with("function") ||
+        remaining.starts_with("var ") ||
+        remaining.starts_with("let ") ||
+        remaining.starts_with("const ") ||
+        remaining.starts_with("if ") ||
+        remaining.starts_with("for ") ||
+        remaining.starts_with("while ")
+    }
+    
+    /// Check if this is the end of a fragment
+    fn is_fragment_end(&self, fragment_type: FragmentType) -> bool {
+        match fragment_type {
+            FragmentType::ChtlJS => self.is_chtl_js_end(),
+            FragmentType::CSS => self.is_css_end(),
+            FragmentType::JS => self.is_js_end(),
+            FragmentType::Chtl => self.is_chtl_end(),
+        }
+    }
+    
+    /// Check if this is the end of a CHTL JS fragment
+    fn is_chtl_js_end(&self) -> bool {
+        let remaining = &self.source[self.position..];
+        remaining.starts_with("}") ||
+        remaining.starts_with(";") ||
+        remaining.starts_with("\n")
+    }
+    
+    /// Check if this is the end of a CSS fragment
+    fn is_css_end(&self) -> bool {
+        let remaining = &self.source[self.position..];
+        remaining.starts_with("}") ||
+        remaining.starts_with(";") ||
+        remaining.starts_with("\n")
+    }
+    
+    /// Check if this is the end of a JS fragment
+    fn is_js_end(&self) -> bool {
+        let remaining = &self.source[self.position..];
+        remaining.starts_with("}") ||
+        remaining.starts_with(";") ||
+        remaining.starts_with("\n")
+    }
+    
+    /// Check if this is the end of a CHTL fragment
+    fn is_chtl_end(&self) -> bool {
+        let remaining = &self.source[self.position..];
+        remaining.starts_with("}") ||
+        remaining.starts_with(";") ||
+        remaining.starts_with("\n")
+    }
+    
     fn is_at_end(&self) -> bool {
         self.position >= self.source.len()
     }
@@ -82,206 +198,24 @@ impl UnifiedScanner {
     }
     
     fn advance(&mut self) -> Option<char> {
-        let ch = self.peek()?;
-        self.position += 1;
-        if ch == '\n' {
-            self.line += 1;
-            self.column = 1;
+        if self.position < self.source.len() {
+            let ch = self.source.chars().nth(self.position);
+            self.position += 1;
+            if ch == Some('\n') {
+                self.line += 1;
+                self.column = 1;
+            } else {
+                self.column += 1;
+            }
+            ch
         } else {
-            self.column += 1;
+            None
         }
-        Some(ch)
     }
     
     fn skip_whitespace(&mut self) {
-        while let Some(ch) = self.peek() {
-            if ch.is_whitespace() && ch != '\n' {
-                self.advance();
-            } else {
-                break;
-            }
-        }
-    }
-    
-    fn next_fragment(&mut self) -> Result<Option<CodeFragment>> {
-        let start_pos = self.position;
-        let start_line = self.line;
-        let start_column = self.column;
-        
-        let ch = match self.peek() {
-            Some(c) => c,
-            None => return Ok(None),
-        };
-        
-        // Check for CHTL JS syntax
-        if self.is_chtl_js_start() {
-            return self.scan_chtl_js_fragment(start_pos, start_line, start_column);
-        }
-        
-        // Check for CSS syntax
-        if self.is_css_start() {
-            return self.scan_css_fragment(start_pos, start_line, start_column);
-        }
-        
-        // Check for JS syntax
-        if self.is_js_start() {
-            return self.scan_js_fragment(start_pos, start_line, start_column);
-        }
-        
-        // Default to CHTL
-        self.scan_chtl_fragment(start_pos, start_line, start_column)
-    }
-    
-    fn is_chtl_js_start(&self) -> bool {
-        // Check for CHTL JS specific syntax like {{ }} or vir, listen, etc.
-        let remaining = &self.source[self.position..];
-        remaining.starts_with("{{") || 
-        remaining.starts_with("vir ") ||
-        remaining.starts_with("listen ") ||
-        remaining.starts_with("animate ") ||
-        remaining.starts_with("router ")
-    }
-    
-    fn is_css_start(&self) -> bool {
-        // Check for CSS syntax
-        let remaining = &self.source[self.position..];
-        remaining.starts_with("style") ||
-        remaining.starts_with("@media") ||
-        remaining.starts_with("@keyframes") ||
-        remaining.starts_with("@import")
-    }
-    
-    fn is_js_start(&self) -> bool {
-        // Check for JavaScript syntax
-        let remaining = &self.source[self.position..];
-        remaining.starts_with("function ") ||
-        remaining.starts_with("const ") ||
-        remaining.starts_with("let ") ||
-        remaining.starts_with("var ") ||
-        remaining.starts_with("class ") ||
-        remaining.starts_with("if ") ||
-        remaining.starts_with("for ") ||
-        remaining.starts_with("while ")
-    }
-    
-    fn scan_chtl_js_fragment(&mut self, start_pos: usize, start_line: usize, start_column: usize) -> Result<Option<CodeFragment>> {
-        let mut content = String::new();
-        
-        // Scan until we find the end of CHTL JS fragment
-        while !self.is_at_end() {
-            let ch = self.peek().unwrap();
-            
-            if ch == '}' && self.peek_next() == Some('}') {
-                // End of CHTL JS fragment
-                content.push(ch);
-                self.advance();
-                content.push(self.advance().unwrap());
-                break;
-            }
-            
-            content.push(ch);
+        while !self.is_at_end() && self.peek().map_or(false, |c| c.is_whitespace()) {
             self.advance();
         }
-        
-        Ok(Some(CodeFragment {
-            fragment_type: FragmentType::ChtlJS,
-            content,
-            position: start_pos,
-            line: start_line,
-            column: start_column,
-        }))
-    }
-    
-    fn scan_css_fragment(&mut self, start_pos: usize, start_line: usize, start_column: usize) -> Result<Option<CodeFragment>> {
-        let mut content = String::new();
-        
-        // Scan CSS content
-        while !self.is_at_end() {
-            let ch = self.peek().unwrap();
-            
-            if ch == '}' && self.is_css_end() {
-                content.push(ch);
-                self.advance();
-                break;
-            }
-            
-            content.push(ch);
-            self.advance();
-        }
-        
-        Ok(Some(CodeFragment {
-            fragment_type: FragmentType::CSS,
-            content,
-            position: start_pos,
-            line: start_line,
-            column: start_column,
-        }))
-    }
-    
-    fn scan_js_fragment(&mut self, start_pos: usize, start_line: usize, start_column: usize) -> Result<Option<CodeFragment>> {
-        let mut content = String::new();
-        
-        // Scan JavaScript content
-        while !self.is_at_end() {
-            let ch = self.peek().unwrap();
-            
-            if ch == '}' && self.is_js_end() {
-                content.push(ch);
-                self.advance();
-                break;
-            }
-            
-            content.push(ch);
-            self.advance();
-        }
-        
-        Ok(Some(CodeFragment {
-            fragment_type: FragmentType::JS,
-            content,
-            position: start_pos,
-            line: start_line,
-            column: start_column,
-        }))
-    }
-    
-    fn scan_chtl_fragment(&mut self, start_pos: usize, start_line: usize, start_column: usize) -> Result<Option<CodeFragment>> {
-        let mut content = String::new();
-        
-        // Scan CHTL content
-        while !self.is_at_end() {
-            let ch = self.peek().unwrap();
-            
-            if ch == '}' && self.is_chtl_end() {
-                content.push(ch);
-                self.advance();
-                break;
-            }
-            
-            content.push(ch);
-            self.advance();
-        }
-        
-        Ok(Some(CodeFragment {
-            fragment_type: FragmentType::Chtl,
-            content,
-            position: start_pos,
-            line: start_line,
-            column: start_column,
-        }))
-    }
-    
-    fn is_css_end(&self) -> bool {
-        // Check if we're at the end of a CSS block
-        true // Simplified
-    }
-    
-    fn is_js_end(&self) -> bool {
-        // Check if we're at the end of a JS block
-        true // Simplified
-    }
-    
-    fn is_chtl_end(&self) -> bool {
-        // Check if we're at the end of a CHTL block
-        true // Simplified
     }
 }

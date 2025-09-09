@@ -24,7 +24,7 @@ impl ChtlGenerator {
     }
     
     /// Generate HTML from AST
-    pub fn generate(&self, ast: DocumentNode) -> Result<String> {
+    pub fn generate(&self, ast: Vec<AstNode>) -> Result<String> {
         let mut generator = Self::new();
         generator.generate_document(ast)?;
         
@@ -42,8 +42,8 @@ impl ChtlGenerator {
         Ok(result)
     }
     
-    fn generate_document(&mut self, document: DocumentNode) -> Result<()> {
-        for node in document.nodes {
+    fn generate_document(&mut self, nodes: Vec<AstNode>) -> Result<()> {
+        for node in nodes {
             self.generate_node(node)?;
         }
         Ok(())
@@ -168,20 +168,61 @@ impl ChtlGenerator {
     }
     
     fn generate_import(&mut self, import: ImportNode) -> Result<()> {
-        // TODO: Implement import generation
-        // Imports are resolved during compilation
+        match import.import_type {
+            ImportType::Module => {
+                // Generate module import
+                if let Some(alias) = &import.alias {
+                    self.html_output.push_str(&format!("<!-- Import module: {} as {} -->\n", import.path, alias));
+                } else {
+                    self.html_output.push_str(&format!("<!-- Import module: {} -->\n", import.path));
+                }
+            }
+            ImportType::Style => {
+                // Generate style import
+                self.css_output.push_str(&format!("/* Import style: {} */\n", import.path));
+            }
+            ImportType::Script => {
+                // Generate script import
+                self.js_output.push_str(&format!("/* Import script: {} */\n", import.path));
+            }
+            ImportType::Config => {
+                // Generate config import
+                self.html_output.push_str(&format!("<!-- Import config: {} -->\n", import.path));
+            }
+            _ => {
+                // Default import handling
+                self.html_output.push_str(&format!("<!-- Import: {} -->\n", import.path));
+            }
+        }
         Ok(())
     }
     
     fn generate_namespace(&mut self, namespace: NamespaceNode) -> Result<()> {
-        // TODO: Implement namespace generation
-        // Namespaces are used for organization, not direct output
+        // Generate namespace comment
+        self.html_output.push_str(&format!("<!-- Namespace: {} -->\n", namespace.name));
+        
+        // Generate namespace content
+        for node in namespace.content {
+            self.generate_node(node)?;
+        }
+        
+        self.html_output.push_str(&format!("<!-- End namespace: {} -->\n", namespace.name));
         Ok(())
     }
     
     fn generate_configuration(&mut self, config: ConfigurationNode) -> Result<()> {
-        // TODO: Implement configuration generation
-        // Configuration affects compilation behavior, not output
+        // Generate configuration comment
+        if let Some(name) = &config.name {
+            self.html_output.push_str(&format!("<!-- Configuration: {} -->\n", name));
+        } else {
+            self.html_output.push_str("<!-- Configuration -->\n");
+        }
+        
+        // Generate configuration settings as comments
+        for setting in &config.settings {
+            self.html_output.push_str(&format!("<!-- {}: {:?} -->\n", setting.key, setting.value));
+        }
+        
         Ok(())
     }
     
@@ -193,6 +234,7 @@ impl ChtlGenerator {
             }
             UseType::Config => {
                 // TODO: Apply configuration
+                println!("Using config");
             }
         }
         Ok(())

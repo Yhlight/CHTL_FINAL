@@ -23,7 +23,7 @@ impl CompilerDispatcher {
     }
     
     /// Dispatch fragments to appropriate compilers
-    pub fn dispatch(&self, fragments: Vec<CodeFragment>) -> Result<CompilationResult> {
+    pub fn dispatch(&mut self, fragments: Vec<CodeFragment>) -> Result<CompilationResult> {
         let mut html_output = String::new();
         let mut css_output = String::new();
         let mut js_output = String::new();

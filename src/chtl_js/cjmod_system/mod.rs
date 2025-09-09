@@ -26,4 +26,30 @@ impl CjmodSystem {
             modules: HashMap::new(),
         }
     }
+    
+    /// Load a CJMOD module
+    pub fn load_module(&mut self, name: String, content: String) -> Result<()> {
+        let module = CjmodModule {
+            name: name.clone(),
+            content,
+        };
+        
+        self.modules.insert(name, module);
+        Ok(())
+    }
+    
+    /// Get a loaded module
+    pub fn get_module(&self, name: &str) -> Option<&CjmodModule> {
+        self.modules.get(name)
+    }
+    
+    /// List all loaded modules
+    pub fn list_modules(&self) -> Vec<&CjmodModule> {
+        self.modules.values().collect()
+    }
+    
+    /// Get module content
+    pub fn get_module_content(&self, name: &str) -> Option<&String> {
+        self.modules.get(name).map(|m| &m.content)
+    }
 }

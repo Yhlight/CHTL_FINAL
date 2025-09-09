@@ -12,6 +12,7 @@ pub mod parser;
 pub mod state;
 pub mod io_stream;
 pub mod cjmod_system;
+pub mod cjmod_api;
 
 use anyhow::Result;
 use std::path::Path;
@@ -36,7 +37,7 @@ impl ChtlJSCompiler {
     }
     
     /// Compile CHTL JS source code to JavaScript
-    pub fn compile_source(&self, source: &str) -> Result<String> {
+    pub fn compile_source(&mut self, source: &str) -> Result<String> {
         // Tokenize the input
         let tokens = self.lexer.tokenize(source)?;
         

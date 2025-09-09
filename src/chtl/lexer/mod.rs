@@ -25,6 +25,7 @@ pub enum TokenType {
     Namespace,
     Configuration,
     Use,
+    As,
     
     // Operators and punctuation
     LeftBrace,      // {

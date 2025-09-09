@@ -4,6 +4,7 @@
 
 use anyhow::Result;
 use std::collections::VecDeque;
+use crate::chtl_js::lexer::ChtlJSToken;
 
 /// CHTL JS Parser
 pub struct ChtlJSParser;
@@ -15,9 +16,9 @@ impl ChtlJSParser {
     }
     
     /// Parse CHTL JS tokens into AST
-    pub fn parse(&self, tokens: VecDeque<String>) -> Result<String> {
+    pub fn parse(&self, tokens: VecDeque<ChtlJSToken>) -> Result<String> {
         // TODO: Implement CHTL JS parsing
-        // For now, just return the first token as the result
-        Ok(tokens.into_iter().next().unwrap_or_default())
+        // For now, just return a placeholder
+        Ok("// CHTL JS parsed".to_string())
     }
 }

@@ -12,6 +12,8 @@ pub mod parser;
 pub mod state;
 pub mod io_stream;
 pub mod cmod_system;
+pub mod module_parser;
+pub mod module_manager;
 
 use anyhow::Result;
 use std::path::Path;
@@ -47,7 +49,7 @@ impl ChtlCompiler {
         let ast = self.parser.parse(tokens)?;
         
         // Generate HTML output
-        let html = self.generator.generate(ast)?;
+        let html = self.generator.generate(ast.nodes)?;
         
         // Write output if specified
         if let Some(output_path) = output {
@@ -66,7 +68,7 @@ impl ChtlCompiler {
         let ast = self.parser.parse(tokens)?;
         
         // Generate HTML output
-        let html = self.generator.generate(ast)?;
+        let html = self.generator.generate(ast.nodes)?;
         
         Ok(html)
     }
