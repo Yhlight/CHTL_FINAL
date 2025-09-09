@@ -397,8 +397,14 @@ void Lexer::ungetChar() {
         current_--;
         if (source_[current_] == '\n') {
             line_--;
-            // 需要重新计算列号，这里简化处理
+            // 精确计算列号：从当前位置向前查找直到遇到换行符
             column_ = 1;
+            for (int i = current_ - 1; i >= 0; i--) {
+                if (source_[i] == '\n') {
+                    column_ = current_ - i;
+                    break;
+                }
+            }
         } else {
             column_--;
         }

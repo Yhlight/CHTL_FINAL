@@ -12,6 +12,10 @@
 #include <vector>
 #include <map>
 
+#ifdef HAVE_LIBCSS
+#include <libcss/libcss.h>
+#endif
+
 namespace CHTL {
 
 /**
@@ -51,6 +55,15 @@ private:
     std::map<std::string, std::string> variables_;
     bool minify_;
     bool optimize_;
+    
+    // libcss 相关
+#ifdef HAVE_LIBCSS
+    css_allocator_func alloc_;
+    css_reallocator_func realloc_;
+    css_deallocator_func free_;
+    void* user_;
+    css_select_ctx* select_ctx_;
+#endif
     
     // 处理 CSS 变量替换
     std::string processVariables(const std::string& input);

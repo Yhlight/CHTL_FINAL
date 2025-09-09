@@ -63,6 +63,24 @@ private:
     // 解析语句
     std::shared_ptr<CHTLJSBaseNode> parseStatement();
     
+    // 表达式解析方法
+    std::shared_ptr<CHTLJSBaseNode> parseLogicalOrExpression();
+    std::shared_ptr<CHTLJSBaseNode> parseLogicalAndExpression();
+    std::shared_ptr<CHTLJSBaseNode> parseEqualityExpression();
+    std::shared_ptr<CHTLJSBaseNode> parseRelationalExpression();
+    std::shared_ptr<CHTLJSBaseNode> parseAdditiveExpression();
+    std::shared_ptr<CHTLJSBaseNode> parseMultiplicativeExpression();
+    std::shared_ptr<CHTLJSBaseNode> parseUnaryExpression();
+    std::shared_ptr<CHTLJSBaseNode> parsePrimaryExpression();
+    
+    // 语句解析方法
+    std::shared_ptr<CHTLJSBaseNode> parseVariableDeclaration();
+    std::shared_ptr<CHTLJSBaseNode> parseFunctionDeclaration();
+    std::shared_ptr<CHTLJSBaseNode> parseIfStatement();
+    std::shared_ptr<CHTLJSBaseNode> parseWhileStatement();
+    std::shared_ptr<CHTLJSBaseNode> parseForStatement();
+    std::shared_ptr<CHTLJSBaseNode> parseReturnStatement();
+    
     // 报告错误
     void reportError(const std::string& message);
     

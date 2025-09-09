@@ -13,11 +13,32 @@ target_include_directories(CHTLCompiler PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+# 查找可选的库
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+    pkg_check_modules(LIBCSS QUIET libcss)
+endif()
+
+find_package(v8 QUIET)
+
 # 链接必要的库
 target_link_libraries(CHTLCompiler PUBLIC
-    # 这里可以链接外部 CSS/JS 编译器库
-    # 例如：libcss, v8, quickjs 等
+    # 正则表达式库
+    Threads::Threads
+    regex
 )
+
+# 链接可选的库
+if(TARGET v8::v8)
+    target_link_libraries(CHTLCompiler PUBLIC v8::v8 v8::v8_libplatform)
+    target_compile_definitions(CHTLCompiler PUBLIC HAVE_V8)
+endif()
+
+if(LIBCSS_FOUND)
+    target_link_libraries(CHTLCompiler PUBLIC ${LIBCSS_LIBRARIES})
+    target_include_directories(CHTLCompiler PUBLIC ${LIBCSS_INCLUDE_DIRS})
+    target_compile_definitions(CHTLCompiler PUBLIC HAVE_LIBCSS)
+endif()
 
 # 设置 C++ 标准
 target_compile_features(CHTLCompiler PUBLIC cxx_std_17)

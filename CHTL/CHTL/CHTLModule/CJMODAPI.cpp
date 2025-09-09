@@ -1,6 +1,7 @@
 #include "CJMODAPI.hpp"
 #include <CHTL/CHTLJS/CHTLJSLexer/CHTLJSLexer.hpp>
 #include <CHTL/CHTLJS/CHTLJSParser/CHTLJSParser.hpp>
+#include <CHTL/CHTLCompiler/JSCompiler.hpp>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -347,18 +348,31 @@ std::string CJMODAPI::runFunction(const std::string& functionName, const std::ma
     functionCall << "}\n";
     
     // 执行函数
-    // 在实际实现中，这里应该使用 JavaScript 引擎（如 V8 或 QuickJS）
-    // 来执行生成的 JavaScript 代码
+    // 使用真正的 JavaScript 引擎执行
     try {
-        // 模拟 JavaScript 执行环境
-        std::ostringstream result;
-        result << "// Executing function: " << functionName << "\n";
-        result << "// Parameters: " << parameters.size() << " bound\n";
-        result << "// Generated JavaScript code:\n";
-        result << functionCall.str();
-        result << "\n// Function execution completed\n";
+        // 创建 JavaScript 编译器实例
+        JSCompiler jsCompiler;
         
-        return result.str();
+        // 添加全局变量和函数
+        for (const auto& [name, value] : globalVariables_) {
+            jsCompiler.addGlobalVariable(name, value);
+        }
+        
+        for (const auto& [name, code] : globalFunctions_) {
+            jsCompiler.addGlobalFunction(name, code);
+        }
+        
+        // 执行生成的 JavaScript 代码
+        std::string result;
+        if (jsCompiler.execute(functionCall.str(), result)) {
+            return result;
+        } else {
+            // 如果执行失败，返回错误信息
+            std::ostringstream error;
+            error << "// Error executing function " << functionName << ": " << result << "\n";
+            error << functionCall.str();
+            return error.str();
+        }
     } catch (const std::exception& e) {
         // 如果 JavaScript 执行失败，返回错误信息
         std::ostringstream error;

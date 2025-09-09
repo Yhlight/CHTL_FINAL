@@ -11,15 +11,91 @@
 #include <regex>
 #include <sstream>
 #include <set>
+#ifdef HAVE_LIBCSS
+#include <libcss/libcss.h>
+#include <libcss/select.h>
+#include <libcss/parse.h>
+#endif
 
 namespace CHTL {
 
-CSSCompiler::CSSCompiler() : minify_(false), optimize_(false) {}
+CSSCompiler::CSSCompiler() : minify_(false), optimize_(false) {
+#ifdef HAVE_LIBCSS
+    // 初始化 libcss
+    css_error error = css_initialise("", 0, &alloc_, &realloc_, &free_, &user_);
+    if (error != CSS_OK) {
+        // 如果初始化失败，使用默认的分配器
+        alloc_ = malloc;
+        realloc_ = realloc;
+        free_ = free;
+        user_ = nullptr;
+    }
+    
+    // 创建 CSS 上下文
+    error = css_select_ctx_create(&select_ctx_);
+    if (error != CSS_OK) {
+        select_ctx_ = nullptr;
+    }
+#else
+    // 如果没有 libcss，使用默认的分配器
+    alloc_ = malloc;
+    realloc_ = realloc;
+    free_ = free;
+    user_ = nullptr;
+    select_ctx_ = nullptr;
+#endif
+}
 
-CSSCompiler::~CSSCompiler() = default;
+CSSCompiler::~CSSCompiler() {
+#ifdef HAVE_LIBCSS
+    if (select_ctx_) {
+        css_select_ctx_destroy(select_ctx_);
+    }
+    if (alloc_ != malloc) {
+        css_finalise(alloc_, realloc_, free_, user_);
+    }
+#endif
+}
 
 bool CSSCompiler::compile(const std::string& input, std::string& output) {
     try {
+#ifdef HAVE_LIBCSS
+        if (!select_ctx_) {
+            // 如果 libcss 不可用，使用基本处理
+            output = processVariables(input);
+            if (optimize_) {
+                output = optimizeCSS(output);
+            }
+            if (minify_) {
+                output = minifyCSS(output);
+            }
+            return true;
+        }
+        
+        // 使用 libcss 解析 CSS
+        css_stylesheet* stylesheet = nullptr;
+        css_error error = css_stylesheet_create(CSS_LEVEL_3, &stylesheet);
+        if (error != CSS_OK) {
+            return false;
+        }
+        
+        // 解析 CSS 内容
+        size_t input_len = input.length();
+        error = css_stylesheet_append_data(stylesheet, 
+                                         reinterpret_cast<const uint8_t*>(input.c_str()), 
+                                         input_len);
+        if (error != CSS_OK && error != CSS_NEEDDATA) {
+            css_stylesheet_destroy(stylesheet);
+            return false;
+        }
+        
+        // 完成解析
+        error = css_stylesheet_data_done(stylesheet);
+        if (error != CSS_OK) {
+            css_stylesheet_destroy(stylesheet);
+            return false;
+        }
+        
         // 处理 CSS 变量
         std::string processed = processVariables(input);
         
@@ -34,7 +110,21 @@ bool CSSCompiler::compile(const std::string& input, std::string& output) {
         }
         
         output = processed;
+        
+        // 清理
+        css_stylesheet_destroy(stylesheet);
         return true;
+#else
+        // 如果没有 libcss，使用基本处理
+        output = processVariables(input);
+        if (optimize_) {
+            output = optimizeCSS(output);
+        }
+        if (minify_) {
+            output = minifyCSS(output);
+        }
+        return true;
+#endif
     } catch (const std::exception& e) {
         return false;
     }

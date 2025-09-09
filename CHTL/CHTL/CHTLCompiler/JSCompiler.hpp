@@ -12,6 +12,12 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <memory>
+
+#ifdef HAVE_V8
+#include <v8.h>
+#include <libplatform/libplatform.h>
+#endif
 
 namespace CHTL {
 
@@ -60,6 +66,12 @@ private:
     std::string lastResult_;
     bool minify_;
     bool optimize_;
+    
+    // V8 引擎相关
+#ifdef HAVE_V8
+    std::unique_ptr<v8::Platform> platform_;
+    v8::Isolate* isolate_;
+#endif
     
     // 处理全局变量和函数注入
     std::string injectGlobals(const std::string& code);
