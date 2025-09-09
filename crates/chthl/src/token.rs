@@ -7,7 +7,7 @@ pub enum Token {
     Eof,             // End of file
 
     // Identifiers and literals
-    Ident(String),  // e.g., div, color, my_variable. Also used for unquoted literals.
+    Ident(String),  // e.g., div, color, 100px, 50. Also used for unquoted literals.
     String(String), // "a string" or 'a string'
 
     // Delimiters
@@ -30,7 +30,7 @@ pub enum Token {
     Question,   // ?
     Arrow,      // ->
 
-    // Operators for conditional expressions
+    // Operators for conditional expressions (to be expanded)
     Gt,             // >
     Lt,             // <
     LogicalAnd,     // &&
