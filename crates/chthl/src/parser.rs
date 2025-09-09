@@ -64,9 +64,7 @@ impl<'a> Parser<'a> {
                 Ok(node) => program.nodes.push(node),
                 Err(e) => self.errors.push(e),
             }
-            if self.cur_token_is(&Token::Semicolon) {
-                self.next_token();
-            }
+            self.next_token();
         }
         program
     }
@@ -119,6 +117,7 @@ impl<'a> Parser<'a> {
                 }
                 _ => return Err(format!("Unexpected token in style block: {:?}", self.cur_token)),
             }
+            self.next_token();
         }
         self.expect_cur(&Token::RBrace)?;
         Ok(StyleNode { inline_properties, rules })
@@ -136,6 +135,7 @@ impl<'a> Parser<'a> {
         let mut properties = vec![];
         while !self.cur_token_is(&Token::RBrace) && !self.cur_token_is(&Token::Eof) {
             properties.push(self.parse_style_property()?);
+            self.next_token();
         }
         self.expect_cur(&Token::RBrace)?;
         Ok(CssRuleNode { selector, properties })
