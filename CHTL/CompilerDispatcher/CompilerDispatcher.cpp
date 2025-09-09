@@ -3,6 +3,7 @@
 #include "CodeMerger/CodeMerger.h"
 #include "CHTL/CHTLLexer/CHTLLexer.h"
 #include "CHTL/CHTLParser/CHTLParser.h"
+#include "CHTL/CHTLGenerator/CHTLGenerator.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -19,6 +20,7 @@ CompilerDispatcher::~CompilerDispatcher() = default;
 void CompilerDispatcher::initializeCompilers() {
     chtlLexer = std::make_unique<CHTLLexer>();
     chtlParser = std::make_unique<CHTLParser>();
+    chtlGenerator = std::make_unique<CHTLGenerator>();
     scanner = std::make_unique<CHTLUnifiedScanner>();
     codeMerger = std::make_unique<CodeMerger>();
     
@@ -26,6 +28,13 @@ void CompilerDispatcher::initializeCompilers() {
     if (chtlParser) {
         chtlParser->setDebugMode(debugMode);
         chtlParser->setStrictMode(strictMode);
+    }
+    
+    if (chtlGenerator) {
+        chtlGenerator->setDebugMode(debugMode);
+        chtlGenerator->setStrictMode(strictMode);
+        chtlGenerator->setGenerateDefaultStructure(generateDefaultStructure);
+        chtlGenerator->setOutputFormat(outputFormat);
     }
 }
 
@@ -221,9 +230,9 @@ std::string CompilerDispatcher::compileCHTLFragment(const CodeFragment& fragment
         chtlParser->setTokens(tokens);
         auto ast = chtlParser->parse();
         
-        // 生成HTML代码
-        if (ast) {
-            return ast->toHTML();
+        // 使用CHTL代码生成器
+        if (ast && chtlGenerator) {
+            return chtlGenerator->generate(ast);
         }
         
         return "";

@@ -22,6 +22,10 @@ set(CHTL_SOURCES
     CHTL/CHTLContext/CHTLContext.h
     CHTL/CHTLGenerator/CHTLGenerator.cpp
     CHTL/CHTLGenerator/CHTLGenerator.h
+    CHTL/CHTLStyle/CHTLStyleProcessor.cpp
+    CHTL/CHTLStyle/CHTLStyleProcessor.h
+    CHTL/CHTLProperty/CHTLPropertyReference.cpp
+    CHTL/CHTLProperty/CHTLPropertyReference.h
     CHTL/CHTLLexer/CHTLLexer.cpp
     CHTL/CHTLLexer/CHTLLexer.h
     CHTL/CHTLLexer/Lexer.cpp
@@ -42,24 +46,20 @@ set(CHTL_SOURCES
     CHTL/CHTLNode/TextNode.h
     CHTL/CHTLNode/CommentNode.cpp
     CHTL/CHTLNode/CommentNode.h
-    CHTL/CHTLNode/TemplateNode.cpp
-    CHTL/CHTLNode/TemplateNode.h
-    CHTL/CHTLNode/CustomNode.cpp
-    CHTL/CHTLNode/CustomNode.h
     CHTL/CHTLNode/StyleNode.cpp
     CHTL/CHTLNode/StyleNode.h
     CHTL/CHTLNode/ScriptNode.cpp
     CHTL/CHTLNode/ScriptNode.h
+    CHTL/CHTLNode/TemplateNode.cpp
+    CHTL/CHTLNode/TemplateNode.h
+    CHTL/CHTLNode/CustomNode.cpp
+    CHTL/CHTLNode/CustomNode.h
     CHTL/CHTLNode/OriginNode.cpp
     CHTL/CHTLNode/OriginNode.h
     CHTL/CHTLNode/ImportNode.cpp
     CHTL/CHTLNode/ImportNode.h
-    CHTL/CHTLNode/ConfigNode.cpp
-    CHTL/CHTLNode/ConfigNode.h
     CHTL/CHTLNode/NamespaceNode.cpp
     CHTL/CHTLNode/NamespaceNode.h
-    CHTL/CHTLNode/OperatorNode.cpp
-    CHTL/CHTLNode/OperatorNode.h
     CHTL/CHTLParser/CHTLParser.cpp
     CHTL/CHTLParser/CHTLParser.h
     CHTL/CHTLState/CHTLState.cpp

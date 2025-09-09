@@ -56,6 +56,7 @@ private:
     // 编译器实例
     std::unique_ptr<class CHTLLexer> chtlLexer;
     std::unique_ptr<class CHTLParser> chtlParser;
+    std::unique_ptr<class CHTLGenerator> chtlGenerator;
     // std::unique_ptr<class CHTLJSCompiler> chtlJSCompiler;
     // std::unique_ptr<class CSSCompiler> cssCompiler;
     // std::unique_ptr<class JSCompiler> jsCompiler;

@@ -23,7 +23,7 @@ enum class NodeType {
     OPERATOR        // 操作符节点
 };
 
-class BaseNode {
+class BaseNode : public std::enable_shared_from_this<BaseNode> {
 protected:
     NodeType nodeType;
     std::string name;

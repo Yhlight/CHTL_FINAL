@@ -2,7 +2,10 @@
 #include <fstream>
 #include "CHTL/CHTLLexer/CHTLLexer.h"
 #include "CHTL/CHTLLexer/Token.h"
+#include "CHTL/CHTLParser/CHTLParser.h"
+#include "CHTL/CHTLGenerator/CHTLGenerator.h"
 #include "Scanner/CHTLUnifiedScanner.h"
+#include "CompilerDispatcher/CompilerDispatcher.h"
 
 int main() {
     std::cout << "CHTL基础功能测试" << std::endl;
@@ -38,28 +41,67 @@ int main() {
         }
         std::cout << std::endl;
         
-        // 测试统一扫描器
-        std::cout << "统一扫描结果:" << std::endl;
-        CHTL::CHTLUnifiedScanner scanner(source);
-        auto scanResult = scanner.scan();
+        // 测试语法分析器
+        std::cout << "语法分析结果:" << std::endl;
+        CHTL::CHTLParser parser(tokens);
+        auto ast = parser.parse();
         
-        std::cout << "扫描到 " << scanResult.fragments.size() << " 个代码片段:" << std::endl;
-        for (const auto& fragment : scanResult.fragments) {
-            std::cout << "类型: " << fragment.type 
-                      << ", 行: " << fragment.startLine << "-" << fragment.endLine
-                      << ", 长度: " << fragment.content.length() << std::endl;
+        if (ast) {
+            std::cout << "AST创建成功，节点数: " << ast->getChildCount() << std::endl;
+            
+            // 显示解析错误
+            auto errors = parser.getErrors();
+            if (!errors.empty()) {
+                std::cout << "解析错误:" << std::endl;
+                for (const auto& error : errors) {
+                    std::cout << "  " << error << std::endl;
+                }
+            }
+        } else {
+            std::cout << "AST创建失败" << std::endl;
         }
         
-        if (!scanResult.errors.empty()) {
-            std::cout << "错误:" << std::endl;
-            for (const auto& error : scanResult.errors) {
+        // 测试代码生成器
+        if (ast) {
+            std::cout << "代码生成结果:" << std::endl;
+            CHTL::CHTLGenerator generator;
+            generator.setDebugMode(true);
+            std::string html = generator.generate(ast);
+            
+            std::cout << "生成的HTML长度: " << html.length() << std::endl;
+            std::cout << "HTML内容:" << std::endl;
+            std::cout << html << std::endl;
+            
+            // 显示生成器错误
+            auto errors = generator.getErrors();
+            if (!errors.empty()) {
+                std::cout << "生成错误:" << std::endl;
+                for (const auto& error : errors) {
+                    std::cout << "  " << error << std::endl;
+                }
+            }
+        }
+        
+        // 测试完整编译流程
+        std::cout << "完整编译流程测试:" << std::endl;
+        CHTL::CompilerDispatcher dispatcher;
+        dispatcher.setDebugMode(true);
+        auto result = dispatcher.compileFile("test.chtl");
+        
+        std::cout << "编译结果HTML长度: " << result.html.length() << std::endl;
+        std::cout << "编译结果CSS长度: " << result.css.length() << std::endl;
+        std::cout << "编译结果JavaScript长度: " << result.javascript.length() << std::endl;
+        
+        if (!result.errors.empty()) {
+            std::cout << "编译错误:" << std::endl;
+            for (const auto& error : result.errors) {
                 std::cout << "  " << error << std::endl;
             }
         }
         
-        if (!scanResult.warnings.empty()) {
-            std::cout << "警告:" << std::endl;
-            for (const auto& warning : scanResult.warnings) {
+        if (!result.warnings.empty()) {
+            std::cout << "编译警告:" << std::endl;
+            for (const auto& warning : result.warnings) {
                 std::cout << "  " << warning << std::endl;
             }
         }
