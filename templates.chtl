@@ -1,0 +1,4 @@
+[Template] @Style ImportedTheme {
+    font-family: "Arial", sans-serif;
+    color: navy;
+}

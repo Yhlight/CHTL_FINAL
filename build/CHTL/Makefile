@@ -130,6 +130,30 @@ CHTL_LIB/fast:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTL_LIB.dir/build.make CHTL/CMakeFiles/CHTL_LIB.dir/build
 .PHONY : CHTL_LIB/fast
 
+CHTLContext/Context.o: CHTLContext/Context.cpp.o
+.PHONY : CHTLContext/Context.o
+
+# target to build an object file
+CHTLContext/Context.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTL_LIB.dir/build.make CHTL/CMakeFiles/CHTL_LIB.dir/CHTLContext/Context.cpp.o
+.PHONY : CHTLContext/Context.cpp.o
+
+CHTLContext/Context.i: CHTLContext/Context.cpp.i
+.PHONY : CHTLContext/Context.i
+
+# target to preprocess a source file
+CHTLContext/Context.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTL_LIB.dir/build.make CHTL/CMakeFiles/CHTL_LIB.dir/CHTLContext/Context.cpp.i
+.PHONY : CHTLContext/Context.cpp.i
+
+CHTLContext/Context.s: CHTLContext/Context.cpp.s
+.PHONY : CHTLContext/Context.s
+
+# target to generate assembly for a file
+CHTLContext/Context.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTL_LIB.dir/build.make CHTL/CMakeFiles/CHTL_LIB.dir/CHTLContext/Context.cpp.s
+.PHONY : CHTLContext/Context.cpp.s
+
 CHTLGenerator/Generator.o: CHTLGenerator/Generator.cpp.o
 .PHONY : CHTLGenerator/Generator.o
 
@@ -211,6 +235,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... CHTL_LIB"
+	@echo "... CHTLContext/Context.o"
+	@echo "... CHTLContext/Context.i"
+	@echo "... CHTLContext/Context.s"
 	@echo "... CHTLGenerator/Generator.o"
 	@echo "... CHTLGenerator/Generator.i"
 	@echo "... CHTLGenerator/Generator.s"

@@ -1,25 +1,32 @@
 #include "../../CHTL/CHTLLexer/Lexer.h"
 #include "../../CHTL/CHTLParser/Parser.h"
 #include "../../CHTL/CHTLGenerator/Generator.h"
+#include "../../CHTL/CHTLContext/Context.h"
+#include "../../CHTL/CHTLLoader/Loader.h"
 #include <iostream>
 #include <vector>
 
-void runPipelineTest(const std::string& source) {
-    std::cout << "--- CHTL Source ---" << std::endl;
-    std::cout << source << std::endl;
-    std::cout << "--------------------" << std::endl;
+void runPipelineTest(const std::string& entry_file_path) {
+    std::cout << "--- CHTL Entry File: " << entry_file_path << " ---" << std::endl;
 
     try {
+        std::string source = CHTL::Loader::loadFile(entry_file_path);
+        std::cout << source << std::endl;
+        std::cout << "--------------------" << std::endl;
+
+        CHTL::CHTLContext context;
+        context.addImportedPath(entry_file_path); // Add the entry file to prevent self-import loops
+
         // 1. Lexer
         CHTL::Lexer lexer(source);
         auto tokens = lexer.tokenize();
 
         // 2. Parser
-        CHTL::Parser parser(tokens);
+        CHTL::Parser parser(tokens, context);
         CHTL::DocumentNode ast = parser.parse();
 
         // 3. Generator
-        CHTL::Generator generator;
+        CHTL::Generator generator(context);
         std::string html_output = generator.generate(ast);
 
         std::cout << "--- Generated HTML ---" << std::endl;
@@ -33,26 +40,6 @@ void runPipelineTest(const std::string& source) {
 }
 
 int main() {
-    std::string sample = R"(
-        div {
-            id: "main";
-            class = container;
-
-            h1 {
-                text { "Welcome to CHTL" }
-            }
-
-            p {
-                style {
-                    color: red;
-                    font-size: 16px;
-                }
-                text { "This text should be red." }
-            }
-        }
-    )";
-
-    runPipelineTest(sample);
-
+    runPipelineTest("main.chtl");
     return 0;
 }

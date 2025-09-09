@@ -1,0 +1,10 @@
+[Import] @Chtl from "templates.chtl";
+
+div {
+    style {
+        @Style ImportedTheme;
+        border: 1px solid black;
+    }
+
+    text { "This text uses an imported template." }
+}

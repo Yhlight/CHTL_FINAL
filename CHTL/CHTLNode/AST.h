@@ -12,6 +12,9 @@ struct ElementNode;
 struct TextNode;
 struct StyleBlockNode;
 struct CssPropertyNode;
+struct StyleTemplateDefinitionNode;
+struct StyleTemplateUsageNode;
+struct ImportNode;
 struct AttributeNode;
 
 // Base class for all AST nodes
@@ -21,22 +24,35 @@ struct BaseNode {
 };
 
 // Represents an attribute (e.g., id: "box").
-// Not directly visited in the main tree traversal, but can be part of a visit.
 struct AttributeNode {
     std::string key;
     std::string value;
 };
 
 // Represents a single CSS property (e.g., color: red;)
-struct CssPropertyNode {
+struct CssPropertyNode : public BaseNode {
     std::string key;
     std::string value;
+    void accept(Visitor& visitor) override;
+};
+
+// Represents a [Template] @Style ... {} definition
+struct StyleTemplateDefinitionNode : public BaseNode {
+    std::string name;
+    std::vector<CssPropertyNode> properties;
+    void accept(Visitor& visitor) override;
+};
+
+// Represents a @Style ...; usage
+struct StyleTemplateUsageNode : public BaseNode {
+    std::string name;
+    void accept(Visitor& visitor) override;
 };
 
 // Represents a style { ... } block
 struct StyleBlockNode : public BaseNode {
-    std::vector<CssPropertyNode> properties;
-    void accept(Visitor& visitor) override; // Implementation will need to be in a cpp file or defined here
+    std::vector<std::unique_ptr<BaseNode>> items; // Can contain CssPropertyNode or StyleTemplateUsageNode
+    void accept(Visitor& visitor) override;
 };
 
 // Visitor base class
@@ -46,9 +62,34 @@ public:
     virtual void visit(ElementNode& node) = 0;
     virtual void visit(TextNode& node) = 0;
     virtual void visit(StyleBlockNode& node) = 0;
+    virtual void visit(CssPropertyNode& node) = 0;
+    virtual void visit(StyleTemplateDefinitionNode& node) = 0;
+    virtual void visit(StyleTemplateUsageNode& node) = 0;
+    virtual void visit(ImportNode& node) = 0;
 };
 
-// We must define the accept method for StyleBlockNode now that Visitor is fully defined.
+// Represents an [Import] ... from "..." statement
+struct ImportNode : public BaseNode {
+    std::string path;
+    void accept(Visitor& visitor) override {
+        visitor.visit(*this);
+    }
+};
+
+// --- Inline implementations of accept methods ---
+
+inline void CssPropertyNode::accept(Visitor& visitor) {
+    visitor.visit(*this);
+}
+
+inline void StyleTemplateDefinitionNode::accept(Visitor& visitor) {
+    visitor.visit(*this);
+}
+
+inline void StyleTemplateUsageNode::accept(Visitor& visitor) {
+    visitor.visit(*this);
+}
+
 inline void StyleBlockNode::accept(Visitor& visitor) {
     visitor.visit(*this);
 }

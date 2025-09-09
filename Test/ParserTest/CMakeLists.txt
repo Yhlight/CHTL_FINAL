@@ -10,3 +10,10 @@ target_link_libraries(ParserTest PRIVATE CHTL_LIB)
 target_include_directories(ParserTest PRIVATE
     ${CMAKE_SOURCE_DIR}/CHTL
 )
+
+# Copy data files needed for the test to the build directory
+file(COPY
+    ${CMAKE_SOURCE_DIR}/main.chtl
+    ${CMAKE_SOURCE_DIR}/templates.chtl
+    DESTINATION ${CMAKE_BINARY_DIR}
+)
