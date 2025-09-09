@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <set>
 
 namespace CHTL {
 
@@ -34,6 +35,12 @@ private:
     TemplateManager& templateManager_;
     std::map<std::string, std::string> generatedCSS_;
     std::map<std::string, std::string> generatedJS_;
+    std::map<std::string, std::string> globalVariables_;
+    std::map<std::string, std::string> keywordMappings_;
+    std::map<std::string, std::vector<std::string>> namespaceConstraints_;
+    std::map<std::string, std::vector<std::string>> namespaceTypeConstraints_;
+    std::set<std::string> constrainedElements_;
+    std::set<std::string> constrainedTypes_;
     
     // 生成元素节点的 HTML
     std::string generateElementHTML(std::shared_ptr<BaseNode> node);

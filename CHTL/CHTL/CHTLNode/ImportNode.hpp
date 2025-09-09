@@ -20,6 +20,18 @@ public:
     // 设置导入类型
     void setImportType(const std::string& type) { importType_ = type; }
     
+    // 获取导入路径
+    const std::string& getImportPath() const { return importPath_; }
+    
+    // 设置导入路径
+    void setImportPath(const std::string& path) { importPath_ = path; }
+    
+    // 获取导入名称
+    const std::string& getImportName() const { return importName_; }
+    
+    // 设置导入名称
+    void setImportName(const std::string& name) { importName_ = name; }
+    
     // 转换为 HTML
     std::string toHTML() const override;
     
@@ -28,6 +40,8 @@ public:
     
 private:
     std::string importType_;
+    std::string importPath_;
+    std::string importName_;
 };
 
 } // namespace CHTL

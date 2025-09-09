@@ -38,11 +38,17 @@ public:
     // 检查是否被精确约束
     bool isPreciseConstrained(const std::string& element) const;
     
-    // 添加类型约束（@Html, [Custom], [Template]）
-    void addTypeConstraint(const std::string& constraint);
+    // 获取约束类型（兼容性方法）
+    ConstraintType getType() const { return constraintType_; }
+    
+    // 获取元素名称列表
+    const std::vector<std::string>& getElementNames() const { return preciseConstraints_; }
     
     // 获取类型约束列表
     const std::vector<std::string>& getTypeConstraints() const { return typeConstraints_; }
+    
+    // 添加类型约束（@Html, [Custom], [Template]）
+    void addTypeConstraint(const std::string& constraint);
     
     // 检查是否被类型约束
     bool isTypeConstrained(const std::string& type) const;

@@ -207,6 +207,9 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: \
   /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/set \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_set.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_multiset.h \
   /workspace/CHTL/CHTL/CHTLNode/ElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TextNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/StyleNode.hpp \
@@ -218,9 +221,16 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: \
   /workspace/CHTL/CHTL/CHTLNode/ConfigNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/NamespaceNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/ConstraintNode.hpp \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/set \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_set.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_multiset.h \
+  /workspace/CHTL/CHTL/CHTLLexer/Lexer.hpp \
+  /workspace/CHTL/CHTL/CHTLLexer/Token.hpp \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/unordered_map \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/unordered_map.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/hashtable.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/hashtable_policy.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/enable_special_members.h \
+  /workspace/CHTL/CHTL/CHTLParser/Parser.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/TemplateNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomNode.hpp \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/sstream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/istream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ios \
@@ -251,4 +261,9 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/algorithmfwd.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_heap.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/uniform_int_dist.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/pstl/glue_algorithm_defs.h
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/pstl/glue_algorithm_defs.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/fstream \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/codecvt.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/basic_file.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++io.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fstream.tcc

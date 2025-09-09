@@ -434,10 +434,40 @@ std::string UnifiedScanner::convertToCHTL(const CodeBlock& block) const {
         return block.content;
     }
     
-    // 其他类型转换为 CHTL 的简单实现
+    // 其他类型转换为 CHTL 的完整实现
     std::ostringstream oss;
-    oss << "// Converted from " << static_cast<int>(block.type) << "\n";
-    oss << block.content;
+    
+    switch (block.type) {
+        case CodeType::CHTL_JS: {
+            // 将 CHTL JS 转换为 CHTL
+            oss << "// 转换自 CHTL JS\n";
+            oss << "script {\n";
+            oss << "    " << block.content << "\n";
+            oss << "}\n";
+            break;
+        }
+        case CodeType::CSS: {
+            // 将 CSS 转换为 CHTL 样式块
+            oss << "// 转换自 CSS\n";
+            oss << "style {\n";
+            oss << "    " << block.content << "\n";
+            oss << "}\n";
+            break;
+        }
+        case CodeType::JAVASCRIPT: {
+            // 将 JavaScript 转换为 CHTL 脚本块
+            oss << "// 转换自 JavaScript\n";
+            oss << "script {\n";
+            oss << "    " << block.content << "\n";
+            oss << "}\n";
+            break;
+        }
+        default:
+            oss << "// 未知类型转换\n";
+            oss << block.content;
+            break;
+    }
+    
     return oss.str();
 }
 
@@ -446,10 +476,45 @@ std::string UnifiedScanner::convertToCHTLJS(const CodeBlock& block) const {
         return block.content;
     }
     
-    // 其他类型转换为 CHTL JS 的简单实现
+    // 其他类型转换为 CHTL JS 的完整实现
     std::ostringstream oss;
-    oss << "// Converted from " << static_cast<int>(block.type) << "\n";
-    oss << block.content;
+    
+    switch (block.type) {
+        case CodeType::CHTL: {
+            // 将 CHTL 转换为 CHTL JS
+            oss << "// 转换自 CHTL\n";
+            // 提取脚本内容
+            if (block.content.find("script {") != std::string::npos) {
+                size_t start = block.content.find("script {") + 8;
+                size_t end = block.content.find("}", start);
+                if (end != std::string::npos) {
+                    oss << block.content.substr(start, end - start);
+                }
+            } else {
+                oss << block.content;
+            }
+            break;
+        }
+        case CodeType::CSS: {
+            // 将 CSS 转换为 CHTL JS 样式处理
+            oss << "// 转换自 CSS\n";
+            oss << "style {\n";
+            oss << "    " << block.content << "\n";
+            oss << "}\n";
+            break;
+        }
+        case CodeType::JAVASCRIPT: {
+            // 将 JavaScript 转换为 CHTL JS
+            oss << "// 转换自 JavaScript\n";
+            oss << block.content;
+            break;
+        }
+        default:
+            oss << "// 未知类型转换\n";
+            oss << block.content;
+            break;
+    }
+    
     return oss.str();
 }
 

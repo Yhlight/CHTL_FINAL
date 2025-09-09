@@ -303,11 +303,17 @@ bin/chtl: /lib/x86_64-linux-gnu/Scrt1.o \
   lib/libCHTLJSParser.a \
   lib/libCHTLLexer.a \
   lib/libCHTLManage.a \
+  lib/libCHTLModule.a \
   lib/libCHTLNode.a \
-  lib/libCHTLParser.a
+  lib/libCHTLParser.a \
+  lib/libCHTLScanner.a
 
+
+lib/libCHTLScanner.a:
 
 lib/libCHTLParser.a:
+
+lib/libCHTLModule.a:
 
 lib/libCHTLJSParser.a:
 

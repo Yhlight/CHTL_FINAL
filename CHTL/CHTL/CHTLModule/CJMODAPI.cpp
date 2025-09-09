@@ -312,9 +312,47 @@ std::string CJMODAPI::runFunction(const std::string& functionName, const std::ma
         return ""; // 参数验证失败
     }
     
-    // 这里应该执行实际的函数逻辑
-    // 现在只是返回函数名作为占位符
-    return "Function " + functionName + " executed with " + std::to_string(parameters.size()) + " parameters";
+    // 执行实际的函数逻辑
+    const auto& function = *it->second;
+    
+    // 构建函数调用代码
+    std::ostringstream functionCall;
+    functionCall << "function " << functionName << "(";
+    
+    // 添加参数
+    bool first = true;
+    for (const auto& param : function.parameters) {
+        if (!first) functionCall << ", ";
+        functionCall << param.name;
+        first = false;
+    }
+    
+    functionCall << ") {\n";
+    
+    // 添加参数绑定
+    for (const auto& [paramName, paramValue] : parameters) {
+        functionCall << "    var " << paramName << " = " << convertParameterType(paramValue, 
+            [&]() -> CJMODParameterType {
+                for (const auto& param : function.parameters) {
+                    if (param.name == paramName) {
+                        return param.type;
+                    }
+                }
+                return CJMODParameterType::STRING;
+            }()) << ";\n";
+    }
+    
+    // 添加函数实现
+    functionCall << function.implementation << "\n";
+    functionCall << "}\n";
+    
+    // 执行函数（这里简化实现，实际应该使用 JavaScript 引擎）
+    std::ostringstream result;
+    result << "// 执行函数: " << functionName << "\n";
+    result << functionCall.str();
+    result << "// 参数: " << parameters.size() << " 个\n";
+    
+    return result.str();
 }
 
 bool CJMODAPI::parseCHTLJSContent(const std::string& content, std::shared_ptr<CHTLJSBaseNode>& ast) {

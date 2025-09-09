@@ -305,6 +305,8 @@ bin/chtl
  /workspace/CHTL/build/lib/libCHTLJSParser.a
  /workspace/CHTL/build/lib/libCHTLLexer.a
  /workspace/CHTL/build/lib/libCHTLManage.a
+ /workspace/CHTL/build/lib/libCHTLModule.a
  /workspace/CHTL/build/lib/libCHTLNode.a
  /workspace/CHTL/build/lib/libCHTLParser.a
+ /workspace/CHTL/build/lib/libCHTLScanner.a
 

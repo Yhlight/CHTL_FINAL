@@ -13,8 +13,11 @@
 #include <CHTL/CHTLNode/ConfigNode.hpp>
 #include <CHTL/CHTLNode/NamespaceNode.hpp>
 #include <CHTL/CHTLNode/ConstraintNode.hpp>
+#include <CHTL/CHTLLexer/Lexer.hpp>
+#include <CHTL/CHTLParser/Parser.hpp>
 #include <sstream>
 #include <algorithm>
+#include <fstream>
 
 namespace CHTL {
 
@@ -210,12 +213,58 @@ std::string CodeGenerator::generateStyleCSS(std::shared_ptr<BaseNode> node) {
 }
 
 std::string CodeGenerator::generateTemplateCode(std::shared_ptr<BaseNode> node) {
-    // 模板节点不直接生成 HTML，而是被其他节点引用
+    // 模板节点需要根据类型生成相应的代码
+    if (auto templateStyleNode = std::dynamic_pointer_cast<TemplateStyleNode>(node)) {
+        // 生成样式模板的 CSS 代码
+        std::string css = templateStyleNode->toCSS();
+        if (!css.empty()) {
+            generatedCSS_[templateStyleNode->getTemplateName()] = css;
+        }
+        return "";
+    } else if (auto templateElementNode = std::dynamic_pointer_cast<TemplateElementNode>(node)) {
+        // 生成元素模板的 HTML 代码
+        return templateElementNode->toHTML();
+    } else if (auto templateVarNode = std::dynamic_pointer_cast<TemplateVarNode>(node)) {
+        // 变量模板不直接生成 HTML，但需要注册变量
+        for (const auto& [name, value] : templateVarNode->getVariables()) {
+            // 注册变量到全局变量表
+            globalVariables_[templateVarNode->getTemplateName() + "." + name] = value;
+        }
+        return "";
+    }
+    
     return "";
 }
 
 std::string CodeGenerator::generateCustomCode(std::shared_ptr<BaseNode> node) {
-    // 自定义节点不直接生成 HTML，而是被其他节点引用
+    // 自定义节点需要根据类型生成相应的代码
+    if (auto customStyleNode = std::dynamic_pointer_cast<CustomStyleNode>(node)) {
+        // 应用特例化操作
+        customStyleNode->applySpecialization();
+        
+        // 生成自定义样式组的 CSS 代码
+        std::string css = customStyleNode->toCSS();
+        if (!css.empty()) {
+            generatedCSS_[customStyleNode->getCustomName()] = css;
+        }
+        return "";
+    } else if (auto customElementNode = std::dynamic_pointer_cast<CustomElementNode>(node)) {
+        // 应用特例化操作
+        customElementNode->applySpecialization();
+        
+        // 生成自定义元素组的 HTML 代码
+        return customElementNode->toHTML();
+    } else if (auto customVarNode = std::dynamic_pointer_cast<CustomVarNode>(node)) {
+        // 应用特例化操作
+        customVarNode->applySpecialization();
+        
+        // 注册特例化变量到全局变量表
+        for (const auto& [name, value] : customVarNode->getSpecializedVariables()) {
+            globalVariables_[customVarNode->getCustomName() + "." + name] = value;
+        }
+        return "";
+    }
+    
     return "";
 }
 
@@ -249,7 +298,68 @@ std::string CodeGenerator::generateImportCode(std::shared_ptr<BaseNode> node) {
     auto importNode = std::dynamic_pointer_cast<ImportNode>(node);
     if (!importNode) return "";
     
-    // 导入节点不直接生成 HTML，而是被其他节点引用
+    // 根据导入类型处理不同的文件
+    std::string importType = importNode->getImportType();
+    std::string importPath = importNode->getImportPath();
+    std::string importName = importNode->getImportName();
+    
+    if (importType == "@Chtl") {
+        // 导入 CHTL 文件
+        std::ifstream file(importPath);
+        if (file.is_open()) {
+            std::string content((std::istreambuf_iterator<char>(file)),
+                               std::istreambuf_iterator<char>());
+            file.close();
+            
+            // 解析导入的 CHTL 文件
+            Lexer lexer(content);
+            Parser parser(lexer);
+            auto importedAST = parser.parse();
+            
+            if (!parser.hasError() && importedAST) {
+                // 生成导入的 CHTL 内容
+                return generateElementHTML(importedAST);
+            }
+        }
+    } else if (importType == "@Html") {
+        // 导入 HTML 文件
+        std::ifstream file(importPath);
+        if (file.is_open()) {
+            std::string content((std::istreambuf_iterator<char>(file)),
+                               std::istreambuf_iterator<char>());
+            file.close();
+            return content;
+        }
+    } else if (importType == "@Style") {
+        // 导入 CSS 文件
+        std::ifstream file(importPath);
+        if (file.is_open()) {
+            std::string content((std::istreambuf_iterator<char>(file)),
+                               std::istreambuf_iterator<char>());
+            file.close();
+            
+            if (!importName.empty()) {
+                generatedCSS_[importName] = content;
+            } else {
+                generatedCSS_[importPath] = content;
+            }
+        }
+    } else if (importType == "@JavaScript") {
+        // 导入 JavaScript 文件
+        std::ifstream file(importPath);
+        if (file.is_open()) {
+            std::string content((std::istreambuf_iterator<char>(file)),
+                               std::istreambuf_iterator<char>());
+            file.close();
+            
+            if (!importName.empty()) {
+                generatedJS_[importName] = content;
+            } else {
+                generatedJS_[importPath] = content;
+            }
+        }
+    }
+    
     return "";
 }
 
@@ -257,7 +367,25 @@ std::string CodeGenerator::generateConfigCode(std::shared_ptr<BaseNode> node) {
     auto configNode = std::dynamic_pointer_cast<ConfigNode>(node);
     if (!configNode) return "";
     
-    // 配置节点不直接生成 HTML，而是被其他节点引用
+    // 处理配置节点的配置项
+    auto configs = configNode->getConfigurations();
+    for (const auto& [key, value] : configs) {
+        if (key == "use" && value == "html5") {
+            // 应用 HTML5 配置
+            // 这里可以设置 HTML5 相关的默认配置
+        } else if (key == "template" || key == "custom") {
+            // 处理关键字重定义
+            // 这里可以更新词法分析器的关键字表
+        }
+    }
+    
+    // 处理 [Name] 块中的关键字重定义
+    auto nameBlocks = configNode->getNameBlocks();
+    for (const auto& [oldName, newName] : nameBlocks) {
+        // 更新关键字映射
+        keywordMappings_[oldName] = newName;
+    }
+    
     return "";
 }
 
@@ -265,15 +393,60 @@ std::string CodeGenerator::generateNamespaceCode(std::shared_ptr<BaseNode> node)
     auto namespaceNode = std::dynamic_pointer_cast<NamespaceNode>(node);
     if (!namespaceNode) return "";
     
-    // 命名空间节点不直接生成 HTML，而是被其他节点引用
-    return "";
+    // 处理命名空间中的约束
+    auto constraints = namespaceNode->getConstraints();
+    for (const auto& constraint : constraints) {
+        if (constraint->getType() == ConstraintNode::ConstraintType::PRECISE) {
+            // 处理精确约束
+            auto elementNames = constraint->getElementNames();
+            for (const auto& elementName : elementNames) {
+                // 在命名空间中限制特定元素的使用
+                namespaceConstraints_[namespaceNode->getNamespaceName()].push_back(elementName);
+            }
+        } else if (constraint->getType() == ConstraintNode::ConstraintType::TYPE) {
+            // 处理类型约束
+            auto typeConstraints = constraint->getTypeConstraints();
+            for (const auto& typeConstraint : typeConstraints) {
+                // 在命名空间中限制特定类型的使用
+                namespaceTypeConstraints_[namespaceNode->getNamespaceName()].push_back(typeConstraint);
+            }
+        }
+    }
+    
+    // 生成命名空间中的子节点
+    std::ostringstream oss;
+    for (const auto& child : namespaceNode->getChildren()) {
+        if (child) {
+            oss << generateElementHTML(child);
+        }
+    }
+    
+    return oss.str();
 }
 
 std::string CodeGenerator::generateConstraintCode(std::shared_ptr<BaseNode> node) {
     auto constraintNode = std::dynamic_pointer_cast<ConstraintNode>(node);
     if (!constraintNode) return "";
     
-    // 约束节点不直接生成 HTML，而是被其他节点引用
+    // 约束节点用于验证和限制，不直接生成 HTML
+    // 但需要记录约束信息用于验证
+    
+    if (constraintNode->getType() == ConstraintNode::ConstraintType::PRECISE) {
+        // 精确约束：限制特定元素的使用
+        auto elementNames = constraintNode->getElementNames();
+        for (const auto& elementName : elementNames) {
+            // 记录被约束的元素
+            constrainedElements_.insert(elementName);
+        }
+    } else if (constraintNode->getType() == ConstraintNode::ConstraintType::TYPE) {
+        // 类型约束：限制特定类型的使用
+        auto typeConstraints = constraintNode->getTypeConstraints();
+        for (const auto& typeConstraint : typeConstraints) {
+            // 记录被约束的类型
+            constrainedTypes_.insert(typeConstraint);
+        }
+    }
+    
     return "";
 }
 
@@ -298,20 +471,56 @@ std::string CodeGenerator::resolveTemplateReference(const std::string& reference
 }
 
 std::string CodeGenerator::resolveVariableReference(const std::string& reference) {
-    // 解析变量引用
+    // 首先检查全局变量表
+    auto it = globalVariables_.find(reference);
+    if (it != globalVariables_.end()) {
+        return it->second;
+    }
+    
+    // 解析模板变量引用
     auto varTemplate = templateManager_.getVarTemplate(reference);
     if (varTemplate) {
         return varTemplate->getVariable(reference);
+    }
+    
+    // 解析带模板前缀的变量引用 (格式: TemplateName.VariableName)
+    size_t dotPos = reference.find('.');
+    if (dotPos != std::string::npos) {
+        std::string templateName = reference.substr(0, dotPos);
+        std::string variableName = reference.substr(dotPos + 1);
+        
+        auto templateVar = templateManager_.getVarTemplate(templateName);
+        if (templateVar) {
+            return templateVar->getVariable(variableName);
+        }
     }
     
     return reference;
 }
 
 std::string CodeGenerator::resolveStyleReference(const std::string& reference) {
-    // 解析样式引用
+    // 首先检查生成的 CSS 表
+    auto it = generatedCSS_.find(reference);
+    if (it != generatedCSS_.end()) {
+        return it->second;
+    }
+    
+    // 解析模板样式引用
     auto styleTemplate = templateManager_.getStyleTemplate(reference);
     if (styleTemplate) {
         return styleTemplate->toCSS();
+    }
+    
+    // 解析带模板前缀的样式引用 (格式: TemplateName.StyleName)
+    size_t dotPos = reference.find('.');
+    if (dotPos != std::string::npos) {
+        std::string templateName = reference.substr(0, dotPos);
+        std::string styleName = reference.substr(dotPos + 1);
+        
+        auto templateStyle = templateManager_.getStyleTemplate(templateName);
+        if (templateStyle) {
+            return templateStyle->toCSS();
+        }
     }
     
     return reference;

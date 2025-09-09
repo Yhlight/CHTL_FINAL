@@ -118,17 +118,22 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
   /usr/include/c++/14/bits/basic_string.tcc \
   /usr/include/c++/14/bits/char_traits.h \
   /usr/include/c++/14/bits/charconv.h \
+  /usr/include/c++/14/bits/codecvt.h \
   /usr/include/c++/14/bits/concept_check.h \
   /usr/include/c++/14/bits/cpp_type_traits.h \
   /usr/include/c++/14/bits/cxxabi_forced.h \
   /usr/include/c++/14/bits/cxxabi_init_exception.h \
+  /usr/include/c++/14/bits/enable_special_members.h \
   /usr/include/c++/14/bits/erase_if.h \
   /usr/include/c++/14/bits/exception.h \
   /usr/include/c++/14/bits/exception_defines.h \
   /usr/include/c++/14/bits/exception_ptr.h \
+  /usr/include/c++/14/bits/fstream.tcc \
   /usr/include/c++/14/bits/functexcept.h \
   /usr/include/c++/14/bits/functional_hash.h \
   /usr/include/c++/14/bits/hash_bytes.h \
+  /usr/include/c++/14/bits/hashtable.h \
+  /usr/include/c++/14/bits/hashtable_policy.h \
   /usr/include/c++/14/bits/invoke.h \
   /usr/include/c++/14/bits/ios_base.h \
   /usr/include/c++/14/bits/istream.tcc \
@@ -181,6 +186,7 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
   /usr/include/c++/14/bits/stringfwd.h \
   /usr/include/c++/14/bits/uniform_int_dist.h \
   /usr/include/c++/14/bits/unique_ptr.h \
+  /usr/include/c++/14/bits/unordered_map.h \
   /usr/include/c++/14/bits/uses_allocator.h \
   /usr/include/c++/14/bits/uses_allocator_args.h \
   /usr/include/c++/14/bits/utility.h \
@@ -205,6 +211,7 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
   /usr/include/c++/14/ext/numeric_traits.h \
   /usr/include/c++/14/ext/string_conversions.h \
   /usr/include/c++/14/ext/type_traits.h \
+  /usr/include/c++/14/fstream \
   /usr/include/c++/14/initializer_list \
   /usr/include/c++/14/ios \
   /usr/include/c++/14/iosfwd \
@@ -227,10 +234,13 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
   /usr/include/c++/14/tuple \
   /usr/include/c++/14/type_traits \
   /usr/include/c++/14/typeinfo \
+  /usr/include/c++/14/unordered_map \
   /usr/include/c++/14/vector \
   /usr/include/x86_64-linux-gnu/c++/14/bits/atomic_word.h \
+  /usr/include/x86_64-linux-gnu/c++/14/bits/basic_file.h \
   /usr/include/x86_64-linux-gnu/c++/14/bits/c++allocator.h \
   /usr/include/x86_64-linux-gnu/c++/14/bits/c++config.h \
+  /usr/include/x86_64-linux-gnu/c++/14/bits/c++io.h \
   /usr/include/x86_64-linux-gnu/c++/14/bits/c++locale.h \
   /usr/include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h \
   /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h \
@@ -253,11 +263,14 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
   /usr/lib/llvm-20/lib/clang/20/include/stddef.h \
   /usr/lib/llvm-20/lib/clang/20/include/stdint.h \
   /workspace/CHTL/CHTL/CHTLGenerator/CodeGenerator.hpp \
+  /workspace/CHTL/CHTL/CHTLLexer/Lexer.hpp \
+  /workspace/CHTL/CHTL/CHTLLexer/Token.hpp \
   /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp \
   /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/ConfigNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/ConstraintNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/ElementNode.hpp \
@@ -266,10 +279,14 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
   /workspace/CHTL/CHTL/CHTLNode/OriginNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/StyleNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/TemplateNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp \
-  /workspace/CHTL/CHTL/CHTLNode/TextNode.hpp
+  /workspace/CHTL/CHTL/CHTLNode/TextNode.hpp \
+  /workspace/CHTL/CHTL/CHTLParser/Parser.hpp
 
+
+/workspace/CHTL/CHTL/CHTLParser/Parser.hpp:
 
 /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp:
 
@@ -285,6 +302,20 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 
 /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp:
 
+/workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp:
+
+/workspace/CHTL/CHTL/CHTLNode/ConstraintNode.hpp:
+
+/workspace/CHTL/CHTL/CHTLNode/ConfigNode.hpp:
+
+/workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp:
+
+/workspace/CHTL/CHTL/CHTLGenerator/CodeGenerator.hpp:
+
+/usr/lib/llvm-20/lib/clang/20/include/stdint.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/stdarg.h:
+
 /usr/include/x86_64-linux-gnu/bits/locale.h:
 
 /usr/include/c++/14/bits/exception.h:
@@ -299,7 +330,9 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 
 /usr/include/x86_64-linux-gnu/bits/timesize.h:
 
-/usr/include/pthread.h:
+/usr/lib/llvm-20/lib/clang/20/include/stddef.h:
+
+/usr/include/c++/14/cwchar:
 
 /usr/include/c++/14/stdexcept:
 
@@ -403,13 +436,11 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 
 /usr/include/c++/14/bits/allocated_ptr.h:
 
-/usr/include/c++/14/bits/functexcept.h:
-
-/usr/include/c++/14/set:
-
 /usr/include/x86_64-linux-gnu/asm/errno.h:
 
 /usr/include/c++/14/bits/cxxabi_forced.h:
+
+/usr/include/c++/14/bits/enable_special_members.h:
 
 /usr/include/x86_64-linux-gnu/bits/time64.h:
 
@@ -505,11 +536,15 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 
 /usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
 
+/usr/include/c++/14/bits/codecvt.h:
+
 /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
 
 /usr/include/c++/14/bits/stl_iterator_base_funcs.h:
 
 /usr/include/c++/14/ext/numeric_traits.h:
+
+/workspace/CHTL/CHTL/CHTLLexer/Lexer.hpp:
 
 /usr/include/wchar.h:
 
@@ -523,13 +558,23 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 
 /usr/include/sched.h:
 
+/usr/include/pthread.h:
+
+/usr/include/c++/14/set:
+
+/usr/include/c++/14/bits/functexcept.h:
+
 /usr/include/x86_64-linux-gnu/asm/types.h:
+
+/workspace/CHTL/CHTL/CHTLNode/TemplateNode.hpp:
 
 /usr/include/asm-generic/errno.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
+
+/usr/include/c++/14/bits/hashtable_policy.h:
 
 /usr/include/stdint.h:
 
@@ -553,8 +598,6 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 
 /usr/include/c++/14/new:
 
-/workspace/CHTL/CHTL/CHTLGenerator/CodeGenerator.hpp:
-
 /usr/include/x86_64-linux-gnu/bits/endian.h:
 
 /usr/include/c++/14/ostream:
@@ -576,8 +619,6 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 /usr/include/c++/14/bits/uniform_int_dist.h:
 
 /usr/include/c++/14/vector:
-
-/usr/include/c++/14/bits/functional_hash.h:
 
 /usr/include/x86_64-linux-gnu/bits/libc-header-start.h:
 
@@ -617,9 +658,21 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 
 /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
 
+/usr/include/c++/14/bits/fstream.tcc:
+
+/usr/include/c++/14/bits/stl_map.h:
+
+/usr/include/c++/14/bits/functional_hash.h:
+
+/workspace/CHTL/CHTL/CHTLLexer/Token.hpp:
+
+/usr/include/c++/14/bits/hashtable.h:
+
 /usr/include/c++/14/bits/invoke.h:
 
 /usr/include/c++/14/bits/ios_base.h:
+
+/workspace/CHTL/CHTL/CHTLNode/CustomNode.hpp:
 
 /usr/include/c++/14/bits/algorithmfwd.h:
 
@@ -669,8 +722,6 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 
 /usr/include/c++/14/bits/stl_construct.h:
 
-/usr/include/c++/14/bits/stl_map.h:
-
 /usr/lib/llvm-20/lib/clang/20/include/sanitizer/tsan_interface.h:
 
 /usr/include/c++/14/bits/stl_multimap.h:
@@ -684,6 +735,10 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 /usr/include/c++/14/bits/stringfwd.h:
 
 /usr/include/c++/14/bits/unique_ptr.h:
+
+/workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp:
+
+/usr/include/c++/14/bits/unordered_map.h:
 
 /usr/include/c++/14/bits/uses_allocator.h:
 
@@ -705,8 +760,6 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 
 /usr/include/c++/14/cwctype:
 
-/workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp:
-
 /usr/include/c++/14/debug/assertions.h:
 
 /usr/include/x86_64-linux-gnu/bits/wordsize.h:
@@ -714,8 +767,6 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 /usr/include/c++/14/exception:
 
 /usr/include/c++/14/ext/alloc_traits.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/stdint.h:
 
 /usr/include/c++/14/ext/atomicity.h:
 
@@ -726,6 +777,8 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 /usr/include/c++/14/ext/string_conversions.h:
 
 /usr/include/c++/14/ext/type_traits.h:
+
+/usr/include/c++/14/fstream:
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
 
@@ -761,7 +814,13 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 
 /usr/include/c++/14/typeinfo:
 
+/usr/include/c++/14/unordered_map:
+
 /usr/include/x86_64-linux-gnu/c++/14/bits/atomic_word.h:
+
+/usr/include/x86_64-linux-gnu/bits/struct_mutex.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h:
 
 /usr/include/x86_64-linux-gnu/c++/14/bits/c++allocator.h:
 
@@ -769,11 +828,9 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 
 /usr/include/x86_64-linux-gnu/c++/14/bits/c++config.h:
 
+/usr/include/x86_64-linux-gnu/c++/14/bits/c++io.h:
+
 /usr/include/x86_64-linux-gnu/c++/14/bits/c++locale.h:
-
-/usr/include/x86_64-linux-gnu/bits/struct_mutex.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h:
 
 /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h:
 
@@ -783,26 +840,14 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: /workspace/
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
 
+/usr/include/x86_64-linux-gnu/c++/14/bits/basic_file.h:
+
 /usr/include/x86_64-linux-gnu/c++/14/bits/gthr.h:
 
 /usr/lib/llvm-20/lib/clang/20/include/__stdarg___gnuc_va_list.h:
 
 /usr/lib/llvm-20/lib/clang/20/include/__stddef_header_macro.h:
 
-/usr/lib/llvm-20/lib/clang/20/include/stdarg.h:
-
 /usr/lib/llvm-20/lib/clang/20/include/__stddef_null.h:
 
 /usr/lib/llvm-20/lib/clang/20/include/__stddef_size_t.h:
-
-/usr/include/c++/14/cwchar:
-
-/usr/lib/llvm-20/lib/clang/20/include/stddef.h:
-
-/workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp:
-
-/workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp:
-
-/workspace/CHTL/CHTL/CHTLNode/ConfigNode.hpp:
-
-/workspace/CHTL/CHTL/CHTLNode/ConstraintNode.hpp:
