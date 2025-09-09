@@ -26,7 +26,7 @@ func NewDispatcher(ctx *context.Context) *Dispatcher {
 	return &Dispatcher{
 		ctx:           ctx,
 		scanner:       Scanner.NewUnifiedScanner(ctx),
-		htmlGenerator: generator.NewHTMLGenerator(),
+		htmlGenerator: nil, // 将在编译时创建
 		cssGenerator:  generator.NewCSSGenerator(),
 	}
 }
@@ -69,7 +69,8 @@ func (d *Dispatcher) Compile(inputFile, outputFile string) error {
 	}
 
 	// 生成 HTML
-	htmlContent := d.htmlGenerator.Generate(program)
+	htmlGenerator := generator.NewHTMLGenerator(program)
+	htmlContent := htmlGenerator.Generate(program)
 
 	// 生成 CSS
 	cssContent := d.cssGenerator.Generate(program)

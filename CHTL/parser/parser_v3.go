@@ -46,6 +46,12 @@ func (p *ParserV3) ParseProgram() *node.ProgramNode {
 		case lexer.KEYWORD_EXCEPT:
 			except := p.parseExcept()
 			program.AddExcept(except)
+		case lexer.KEYWORD_TEMPLATE:
+			template := p.parseTemplate()
+			program.AddTemplate(template)
+		case lexer.KEYWORD_CUSTOM:
+			custom := p.parseCustom()
+			program.AddCustom(custom)
 		case lexer.IDENTIFIER:
 			element := p.parseElement()
 			program.AddElement(element)
@@ -99,18 +105,18 @@ func (p *ParserV3) parseImport() *node.ImportNode {
 	var path, alias, target, namespace string
 
 	// 解析导入类型
-	switch p.CurrentToken.Type {
-	case lexer.KEYWORD_HTML:
+	switch p.CurrentToken.Literal {
+	case "html", "Html":
 		importType = node.IMPORT_TYPE_HTML
-	case lexer.KEYWORD_STYLE:
+	case "style", "css", "Style":
 		importType = node.IMPORT_TYPE_CSS
-	case lexer.KEYWORD_JAVASCRIPT:
+	case "javascript", "js", "JavaScript":
 		importType = node.IMPORT_TYPE_JS
-	case lexer.KEYWORD_CHTL:
+	case "chtl", "Chtl":
 		importType = node.IMPORT_TYPE_CHTL
-	case lexer.KEYWORD_CJMOD:
+	case "cjmod", "Cjmod":
 		importType = node.IMPORT_TYPE_CJMOD
-	case lexer.KEYWORD_CONFIG:
+	case "config", "Config":
 		importType = node.IMPORT_TYPE_CONFIG
 	default:
 		p.addError(fmt.Sprintf("意外的导入类型: %s", p.CurrentToken.Literal))
@@ -135,6 +141,11 @@ func (p *ParserV3) parseImport() *node.ImportNode {
 	if p.CurrentToken.Type == lexer.KEYWORD_AS {
 		p.NextToken()
 		alias = p.CurrentToken.Literal
+		p.NextToken()
+	}
+
+	// 跳过分号
+	if p.CurrentToken.Type == lexer.SEMICOLON {
 		p.NextToken()
 	}
 
@@ -507,9 +518,49 @@ func (p *ParserV3) parseTemplate() *node.TemplateNode {
 	if p.CurrentToken.Type == lexer.LEFT_BRACE {
 		p.NextToken()
 		for p.CurrentToken.Type != lexer.RIGHT_BRACE && p.CurrentToken.Type != lexer.EOF {
-			// 解析模板内容
-			content := p.parseElement()
-			template.AddContent(content)
+			switch templateType {
+			case node.TEMPLATE_TYPE_STYLE:
+				// 样式模板直接解析样式属性
+				if p.CurrentToken.Type == lexer.IDENTIFIER {
+					prop := p.parseStyleProperty()
+					template.AddContent(prop)
+				} else {
+					p.addError(fmt.Sprintf("样式模板内意外的词法单元: %s", p.CurrentToken.Literal))
+					p.NextToken()
+				}
+			case node.TEMPLATE_TYPE_ELEMENT:
+				// 元素模板解析元素
+				if p.CurrentToken.Type == lexer.IDENTIFIER {
+					content := p.parseElement()
+					template.AddContent(content)
+				} else if p.CurrentToken.Type == lexer.KEYWORD_STYLE {
+					style := p.parseStyle()
+					template.AddContent(style)
+				} else {
+					p.addError(fmt.Sprintf("元素模板内意外的词法单元: %s", p.CurrentToken.Literal))
+					p.NextToken()
+				}
+			case node.TEMPLATE_TYPE_VAR:
+				// 变量模板解析变量
+				if p.CurrentToken.Type == lexer.IDENTIFIER {
+					// 解析变量定义
+					_ = p.CurrentToken.Literal
+					p.NextToken()
+					if p.CurrentToken.Type == lexer.COLON {
+						p.NextToken()
+						_ = p.CurrentToken.Literal
+						p.NextToken()
+						// 创建变量节点（简化实现）
+						// template.AddContent(NewVarNode(varName, varValue, p.CurrentToken.Position))
+					}
+				} else {
+					p.addError(fmt.Sprintf("变量模板内意外的词法单元: %s", p.CurrentToken.Literal))
+					p.NextToken()
+				}
+			default:
+				p.addError(fmt.Sprintf("未知的模板类型: %d", templateType))
+				p.NextToken()
+			}
 		}
 		if p.CurrentToken.Type == lexer.RIGHT_BRACE {
 			p.NextToken()
@@ -546,9 +597,19 @@ func (p *ParserV3) parseCustom() *node.CustomNode {
 	if p.CurrentToken.Type == lexer.LEFT_BRACE {
 		p.NextToken()
 		for p.CurrentToken.Type != lexer.RIGHT_BRACE && p.CurrentToken.Type != lexer.EOF {
-			// 解析自定义内容
-			content := p.parseElement()
-			custom.AddContent(content)
+			switch p.CurrentToken.Type {
+			case lexer.IDENTIFIER:
+				// 解析元素
+				content := p.parseElement()
+				custom.AddContent(content)
+			case lexer.KEYWORD_STYLE:
+				// 解析样式
+				style := p.parseStyle()
+				custom.AddContent(style)
+			default:
+				p.addError(fmt.Sprintf("自定义内意外的词法单元: %s", p.CurrentToken.Literal))
+				p.NextToken()
+			}
 		}
 		if p.CurrentToken.Type == lexer.RIGHT_BRACE {
 			p.NextToken()

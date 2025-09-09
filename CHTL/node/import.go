@@ -67,6 +67,8 @@ type NamespaceNode struct {
 	Children  []*NamespaceNode
 	Exports   []string
 	Imports   []*ImportNode
+	Templates []*TemplateNode
+	Customs   []*CustomNode
 }
 
 // GetChildren 返回子节点
@@ -88,12 +90,14 @@ func (n *NamespaceNode) Accept(visitor Visitor) interface{} {
 // NewNamespaceNode 创建命名空间节点
 func NewNamespaceNode(name string, pos lexer.Position) *NamespaceNode {
 	return &NamespaceNode{
-		BaseNode: NewBaseNode(NAMESPACE, pos),
-		Name:     name,
-		Content:  make([]Node, 0),
-		Children: make([]*NamespaceNode, 0),
-		Exports:  make([]string, 0),
-		Imports:  make([]*ImportNode, 0),
+		BaseNode:  NewBaseNode(NAMESPACE, pos),
+		Name:      name,
+		Content:   make([]Node, 0),
+		Children:  make([]*NamespaceNode, 0),
+		Exports:   make([]string, 0),
+		Imports:   make([]*ImportNode, 0),
+		Templates: make([]*TemplateNode, 0),
+		Customs:   make([]*CustomNode, 0),
 	}
 }
 
@@ -116,6 +120,22 @@ func (n *NamespaceNode) AddImport(imp *ImportNode) {
 	if imp != nil {
 		n.Imports = append(n.Imports, imp)
 		// imp.SetParent(n)  // 暂时注释掉
+	}
+}
+
+// AddTemplate 添加模板
+func (n *NamespaceNode) AddTemplate(template *TemplateNode) {
+	if template != nil {
+		n.Templates = append(n.Templates, template)
+		// template.SetParent(n)  // 暂时注释掉
+	}
+}
+
+// AddCustom 添加自定义
+func (n *NamespaceNode) AddCustom(custom *CustomNode) {
+	if custom != nil {
+		n.Customs = append(n.Customs, custom)
+		// custom.SetParent(n)  // 暂时注释掉
 	}
 }
 
@@ -224,6 +244,8 @@ type ProgramNode struct {
 	Configs    []*ConfigurationNode
 	Elements   []*ElementNode
 	Excepts    []*ExceptNode
+	Templates  []*TemplateNode
+	Customs    []*CustomNode
 }
 
 // NewProgramNode 创建程序节点
@@ -235,6 +257,8 @@ func NewProgramNode(pos lexer.Position) *ProgramNode {
 		Configs:    make([]*ConfigurationNode, 0),
 		Elements:   make([]*ElementNode, 0),
 		Excepts:    make([]*ExceptNode, 0),
+		Templates:  make([]*TemplateNode, 0),
+		Customs:    make([]*CustomNode, 0),
 	}
 }
 
@@ -288,5 +312,21 @@ func (n *ProgramNode) AddExcept(except *ExceptNode) {
 	if except != nil {
 		n.Excepts = append(n.Excepts, except)
 		except.SetParent(n)
+	}
+}
+
+// AddTemplate 添加模板
+func (n *ProgramNode) AddTemplate(template *TemplateNode) {
+	if template != nil {
+		n.Templates = append(n.Templates, template)
+		template.SetParent(n)
+	}
+}
+
+// AddCustom 添加自定义
+func (n *ProgramNode) AddCustom(custom *CustomNode) {
+	if custom != nil {
+		n.Customs = append(n.Customs, custom)
+		custom.SetParent(n)
 	}
 }

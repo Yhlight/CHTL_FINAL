@@ -1,0 +1,38 @@
+use html5;
+
+import html from "header.html";
+import style from "styles.css";
+import javascript from "script.js";
+
+namespace components
+{
+    import element from "button.chtl";
+    
+    template style primary-button
+    {
+        background-color: #007bff;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+}
+
+div
+{
+    class: main-container;
+    
+    text
+    {
+        Welcome to CHTL with Imports!
+    }
+    
+    components.primary-button
+    {
+        text
+        {
+            Click Me
+        }
+    }
+}

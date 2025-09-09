@@ -1,0 +1,75 @@
+use html5;
+
+div
+{
+    class: interactive-container;
+    
+    text
+    {
+        CHTL JS Test
+    }
+    
+    script
+    {
+        // CHTL JS 代码
+        function init() {
+            console.log("CHTL JS 初始化");
+            
+            // 文件加载
+            loadFile("data.json", function(data) {
+                console.log("数据加载完成:", data);
+            });
+            
+            // 本地脚本
+            local script {
+                const button = document.querySelector('.btn');
+                button.addEventListener('click', function() {
+                    alert('按钮被点击了!');
+                });
+            }
+            
+            // 增强选择器
+            const elements = select('.interactive-container > *');
+            elements.forEach(el => {
+                el.style.opacity = '0.8';
+            });
+            
+            // 事件委托
+            delegate('click', '.btn', function(event) {
+                console.log('按钮点击事件:', event.target);
+            });
+            
+            // 动画
+            animate('.interactive-container', {
+                duration: 1000,
+                properties: {
+                    opacity: 1,
+                    transform: 'translateY(0)'
+                }
+            });
+        }
+        
+        // 虚拟对象
+        const virtualObj = virtual {
+            name: "CHTL JS",
+            version: "1.0.0",
+            features: ["文件加载", "事件委托", "动画"]
+        };
+        
+        // 路由
+        route('/home', function() {
+            console.log('首页路由');
+        });
+        
+        route('/about', function() {
+            console.log('关于页面路由');
+        });
+        
+        // 动态属性条件表达式
+        const isVisible = true;
+        const element = createElement('div', {
+            class: 'dynamic-element',
+            style: isVisible ? 'display: block' : 'display: none'
+        });
+    }
+}

@@ -1,0 +1,14 @@
+use html5;
+
+import html from "header.html";
+import style from "styles.css";
+
+div
+{
+    class: main-container;
+    
+    text
+    {
+        Welcome to CHTL with Imports!
+    }
+}

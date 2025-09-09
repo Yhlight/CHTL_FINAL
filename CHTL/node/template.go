@@ -18,7 +18,7 @@ type TemplateNode struct {
 // NewTemplateNode 创建模板节点
 func NewTemplateNode(templateType TemplateType, name string, pos lexer.Position) *TemplateNode {
 	return &TemplateNode{
-		BaseNode:     NewBaseNode(TEMPLATE_STYLE, pos),
+		BaseNode:     NewBaseNode(TEMPLATE, pos),
 		TemplateType: templateType,
 		Name:         name,
 		Content:      make([]Node, 0),
@@ -65,7 +65,7 @@ type CustomNode struct {
 // NewCustomNode 创建自定义节点
 func NewCustomNode(customType CustomType, name string, pos lexer.Position) *CustomNode {
 	return &CustomNode{
-		BaseNode:        NewBaseNode(CUSTOM_STYLE, pos),
+		BaseNode:        NewBaseNode(CUSTOM, pos),
 		CustomType:      customType,
 		Name:            name,
 		Content:         make([]Node, 0),

@@ -1,0 +1,24 @@
+use html5;
+
+div
+{
+    class: test-container;
+    
+    text
+    {
+        CHTL JS Test
+    }
+    
+    script
+    {
+        function init() {
+            console.log("CHTL JS 初始化");
+        }
+        
+        const message = "Hello CHTL JS";
+        
+        load("data.json", function(data) {
+            console.log("数据加载完成:", data);
+        });
+    }
+}
