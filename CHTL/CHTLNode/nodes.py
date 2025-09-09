@@ -1,10 +1,63 @@
 from dataclasses import dataclass, field
 from typing import List, Union, Any, Optional
+# Import Token for type hinting in expression nodes
+from CHTL.CHTLLexer.lexer import Token
 
 @dataclass
 class BaseNode:
     """Base class for all AST nodes."""
     pass
+
+# --- Expression Nodes ---
+
+@dataclass
+class ExpressionNode(BaseNode):
+    """Base class for all nodes that can appear in a style expression."""
+    pass
+
+@dataclass
+class LiteralNode(ExpressionNode):
+    """Represents a literal value (e.g., '100px', 'red', 50)."""
+    value: Any
+    lineno: int = 0
+    parent: Optional['BaseNode'] = field(default=None, repr=False)
+
+@dataclass
+class PropertyReferenceNode(ExpressionNode):
+    """Represents a reference to another property (e.g., .box.width)."""
+    property_name: str
+    selector: Optional[str] = None
+    lineno: int = 0
+    parent: Optional['BaseNode'] = field(default=None, repr=False)
+
+@dataclass
+class BinaryOpNode(ExpressionNode):
+    """Represents a binary operation (e.g., a + b, a > b)."""
+    left: ExpressionNode
+    op: Token
+    right: ExpressionNode
+    lineno: int = 0
+    parent: Optional['BaseNode'] = field(default=None, repr=False)
+
+@dataclass
+class LogicalOpNode(ExpressionNode):
+    """Represents a logical operation (e.g., a && b)."""
+    left: ExpressionNode
+    op: Token
+    right: ExpressionNode
+    lineno: int = 0
+    parent: Optional['BaseNode'] = field(default=None, repr=False)
+
+@dataclass
+class ConditionalExpressionNode(ExpressionNode):
+    """Represents a conditional (ternary) expression."""
+    condition: ExpressionNode
+    true_expr: ExpressionNode
+    false_expr: Optional[ExpressionNode] = None
+    lineno: int = 0
+    parent: Optional['BaseNode'] = field(default=None, repr=False)
+
+# --- Core CHTL Nodes ---
 
 @dataclass
 class AttributeNode(BaseNode):
@@ -27,9 +80,9 @@ class CommentNode(BaseNode):
 
 @dataclass
 class CssPropertyNode(BaseNode):
-    """Value is a simple string for now. Will be an expression tree later."""
+    """A CSS property. Its value can be a simple string or a complex expression tree."""
     name: str
-    value: str
+    value: Union[str, ExpressionNode]
     lineno: int = 0
     parent: Optional['BaseNode'] = field(default=None, repr=False)
 
@@ -105,7 +158,7 @@ class TemplateDefinitionNode(BaseNode):
 
 CustomDefinitionNode = TemplateDefinitionNode
 
-DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode, CustomDefinitionNode]
+DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode, CustomDefinitionNode, StyleNode]
 
 @dataclass
 class DocumentNode(BaseNode):

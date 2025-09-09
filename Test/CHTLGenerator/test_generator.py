@@ -168,5 +168,37 @@ class TestGenerator(unittest.TestCase):
         actual = self._compile_source(source, use_default_structure=True)
         self._assert_html_equal(actual, expected)
 
+    # --- Tests for Expression Evaluation in Generator ---
+
+    def test_generator_with_arithmetic_expression(self):
+        source = """
+        div {
+            style {
+                width: 100px + 50px;
+            }
+        }
+        """
+        expected = """
+        <div style="width: 150px;"></div>
+        """
+        actual = self._compile_source(source)
+        self._assert_html_equal(actual, expected)
+
+    def test_generator_with_conditional_expression(self):
+        source = """
+        div {
+            style {
+                width: 200px;
+                background-color: width > 150px ? "green" : "red";
+            }
+        }
+        """
+        expected = """
+        <div style="width: 200px; background-color: green;"></div>
+        """
+        actual = self._compile_source(source)
+        self._assert_html_equal(actual, expected)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -9,6 +9,7 @@ class TokenType(Enum):
     # Operators
     PLUS, MINUS, STAR, PERCENT, POWER = auto(), auto(), auto(), auto(), auto()
     AMPERSAND, AND, OR = auto(), auto(), auto()
+    EQ_EQ, NOT_EQ, GTE, LTE = auto(), auto(), auto(), auto()
 
     # Literals
     IDENTIFIER, STRING, UNQUOTED_LITERAL = auto(), auto(), auto()
@@ -33,10 +34,9 @@ class Lexer:
         self.simple_tokens = {
             '{': TokenType.LBRACE, '}': TokenType.RBRACE, '(': TokenType.LPAREN,
             ')': TokenType.RPAREN, '[': TokenType.LBRACK, ']': TokenType.RBRACK,
-            ':': TokenType.COLON, ';': TokenType.SEMICOLON, '=': TokenType.EQUALS,
-            ',': TokenType.COMMA, '.': TokenType.DOT, '@': TokenType.AT,
-            '?': TokenType.QUESTION, '+': TokenType.PLUS, '%': TokenType.PERCENT,
-            '>': TokenType.GT, '<': TokenType.LT
+            ':': TokenType.COLON, ';': TokenType.SEMICOLON, ',': TokenType.COMMA,
+            '.': TokenType.DOT, '@': TokenType.AT, '?': TokenType.QUESTION,
+            '+': TokenType.PLUS, '%': TokenType.PERCENT,
         }
 
     def tokenize(self) -> list[Token]:
@@ -46,6 +46,7 @@ class Lexer:
 
             if char.isspace(): self.advance(); continue
 
+            # Multi-character operators first
             if char == '&':
                 if self.peek() == '&': self.add_token(TokenType.AND, '&&'); self.advance(2); continue
                 else: self.add_token(TokenType.AMPERSAND, '&'); self.advance(); continue
@@ -54,6 +55,19 @@ class Lexer:
             if char == '*':
                 if self.peek() == '*': self.add_token(TokenType.POWER, '**'); self.advance(2); continue
                 else: self.add_token(TokenType.STAR, '*'); self.advance(); continue
+            if char == '!':
+                if self.peek() == '=': self.add_token(TokenType.NOT_EQ, '!='); self.advance(2); continue
+            if char == '=':
+                if self.peek() == '=': self.add_token(TokenType.EQ_EQ, '=='); self.advance(2); continue
+                else: self.add_token(TokenType.EQUALS, '='); self.advance(); continue
+            if char == '>':
+                if self.peek() == '=': self.add_token(TokenType.GTE, '>='); self.advance(2); continue
+                else: self.add_token(TokenType.GT, '>'); self.advance(); continue
+            if char == '<':
+                if self.peek() == '=': self.add_token(TokenType.LTE, '<='); self.advance(2); continue
+                else: self.add_token(TokenType.LT, '<'); self.advance(); continue
+
+            # Comments and division
             if char == '/':
                 if self.peek() == '/': self.consume_line_comment('//'); continue
                 elif self.peek() == '*': self.consume_multi_line_comment(); continue
@@ -68,7 +82,9 @@ class Lexer:
                 continue
 
             if char == '"' or char == "'": self.consume_string(char); continue
-            if char.isalpha() or char in '_#': self.consume_identifier(); continue
+            if char.isalpha() or char == '_': self.consume_identifier(); continue
+            if char.isdigit(): self.consume_unquoted_literal(); continue # For things like 100px
+            if char == '#': self.consume_identifier(); continue # For #id selectors
 
             self.consume_unquoted_literal()
 
@@ -97,7 +113,6 @@ class Lexer:
                 self.add_token(TokenType.COMMENT, value)
                 return
             self.advance()
-        # Unterminated comment
         self.add_token(TokenType.UNKNOWN, self.source_code[start_pos:])
         self.pos = len(self.source_code)
 
@@ -115,20 +130,25 @@ class Lexer:
         start_pos = self.pos
         while self.pos < len(self.source_code):
             char = self.current_char()
-            if char.isspace() or not (char.isalnum() or char in '_-.' or char == '#'): break
+            # Dots are not part of identifiers, they are separate tokens.
+            if not (char.isalnum() or char in '_-#'):
+                break
             self.advance()
         value = self.source_code[start_pos:self.pos]
         self.add_token(TokenType.IDENTIFIER, value)
 
     def consume_unquoted_literal(self):
         start_pos = self.pos
-        terminators = list(self.simple_tokens.keys()) + ['/', '"', "'", '|', '&', '*', '-']
+        # Define terminators for unquoted literals
+        terminators = list(self.simple_tokens.keys()) + ['/', '"', "'", '|', '&', '*', '-', '=', '>', '<', '!', '(', ')']
         while self.pos < len(self.source_code):
             char = self.current_char()
-            if char.isspace() or char in terminators: break
+            if char.isspace() or char in terminators:
+                break
             self.advance()
         value = self.source_code[start_pos:self.pos]
-        if value: self.add_token(TokenType.UNQUOTED_LITERAL, value)
+        if value:
+            self.add_token(TokenType.UNQUOTED_LITERAL, value)
 
     def add_token(self, type, value):
         col = self.pos - self.line_start + 1

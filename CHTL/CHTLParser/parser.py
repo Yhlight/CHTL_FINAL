@@ -2,9 +2,10 @@ from CHTL.CHTLLexer.lexer import Token, TokenType
 from CHTL.CHTLNode.nodes import (
     BaseNode, DocumentNode, ElementNode, AttributeNode, TextNode, CommentNode, Node,
     StyleNode, CssRuleNode, CssPropertyNode, TemplateDefinitionNode, TemplateUsageNode,
-    CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode
+    CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode, LiteralNode
 )
 from CHTL.CHTLContext.context import CompilationContext
+from CHTL.CHTLParser.expression_parser import ExpressionParser
 from typing import List, Optional, Union
 
 class Parser:
@@ -176,8 +177,6 @@ class Parser:
                 elif next_token and next_token.type in (TokenType.COLON, TokenType.EQUALS):
                      self.parse_attribute(element)
                 else:
-                    # This case handles single-word text content like `p { "hello" }` if we want
-                    # For now, assume it's an element without braces
                     element.add_child(self.parse_element())
             else:
                  raise RuntimeError(f"Line {token.lineno}: Unexpected token {token.type} ('{token.value}') inside element '{element.tag_name}'")
@@ -223,9 +222,28 @@ class Parser:
     def parse_css_property(self) -> CssPropertyNode:
         name_token = self.consume(TokenType.IDENTIFIER)
         self.consume(TokenType.COLON)
-        value = self.parse_value_tokens([TokenType.SEMICOLON])
-        self.consume(TokenType.SEMICOLON)
-        return CssPropertyNode(name=name_token.value, value=value, lineno=name_token.lineno)
+
+        expression_tokens = []
+        while self.current_token() and self.current_token().type not in (TokenType.SEMICOLON, TokenType.RBRACE):
+            expression_tokens.append(self.consume())
+
+        if not expression_tokens:
+            raise RuntimeError(f"Line {name_token.lineno}: Missing value for CSS property '{name_token.value}'")
+
+        # If it's a simple, single value, store as a literal string for efficiency.
+        # Otherwise, parse the full expression.
+        if len(expression_tokens) == 1 and expression_tokens[0].type in (TokenType.IDENTIFIER, TokenType.UNQUOTED_LITERAL, TokenType.STRING):
+            token = expression_tokens[0]
+            value = token.value[1:-1] if token.type == TokenType.STRING else token.value
+            value_node = LiteralNode(value=value, lineno=token.lineno)
+        else:
+            expr_parser = ExpressionParser(expression_tokens)
+            value_node = expr_parser.parse()
+
+        if self.current_token() and self.current_token().type == TokenType.SEMICOLON:
+            self.consume(TokenType.SEMICOLON)
+
+        return CssPropertyNode(name=name_token.value, value=value_node, lineno=name_token.lineno)
 
     def parse_css_rule(self, parent_element: Optional[ElementNode]) -> CssRuleNode:
         selector_parts = []
@@ -234,7 +252,7 @@ class Parser:
             selector_parts.append(self.consume().value)
         selector = "".join(selector_parts).strip()
 
-        if parent_element: # Only apply auto-class/id if there is a parent element
+        if parent_element:
             if selector.startswith('.'):
                 class_name = selector.split(':')[0].split(' ')[0][1:]
                 found = False
