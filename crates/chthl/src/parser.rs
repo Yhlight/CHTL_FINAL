@@ -3,7 +3,7 @@
 
 use crate::ast::{
     AttributeNode, CssRuleNode, ElementNode, Expression, InfixExpression, Node,
-    Program, StyleNode, StyleProperty, TextNode, PrefixExpression
+    Program, StyleNode, StyleProperty, TextNode, PrefixExpression, TernaryExpression
 };
 use crate::lexer::Lexer;
 use crate::token::Token;
@@ -202,6 +202,7 @@ impl<'a> Parser<'a> {
     fn parse_infix(&mut self, left: Expression) -> Result<Expression, String> {
         match self.cur_token {
             Token::Ident(_) => self.parse_unit_literal(left),
+            Token::Question => self.parse_ternary_expression(left),
             _ => self.parse_infix_expression(left),
         }
     }
@@ -217,6 +218,19 @@ impl<'a> Parser<'a> {
         } else {
             Err("Expected unit identifier after number".to_string())
         }
+    }
+
+    fn parse_ternary_expression(&mut self, condition: Expression) -> Result<Expression, String> {
+        self.next_token(); // consume '?'
+        let consequence = self.parse_expression(Precedence::LOWEST)?;
+        self.expect_peek(&Token::Colon)?;
+        self.next_token(); // consume ':'
+        let alternative = self.parse_expression(Precedence::LOWEST)?;
+        Ok(Expression::Ternary(TernaryExpression {
+            condition: Box::new(condition),
+            consequence: Box::new(consequence),
+            alternative: Box::new(alternative),
+        }))
     }
 
     fn parse_infix_expression(&mut self, left: Expression) -> Result<Expression, String> {
@@ -296,6 +310,7 @@ mod tests {
             ("10 * 2 + 5", "((10 * 2) + 5)"),
             ("5 + 10 * 2", "(5 + (10 * 2))"),
             ("100px", "100px"),
+            ("10 > 5 ? 1 : 2", "((10 > 5) ? 1 : 2)"),
         ];
 
         for (input, expected) in tests {
@@ -320,6 +335,9 @@ mod tests {
             Expression::Prefix(prefix) => {
                 format!("({}{})", prefix.operator, expression_to_string(*prefix.right))
             },
+            Expression::Ternary(ternary) => {
+                format!("({} ? {} : {})", expression_to_string(*ternary.condition), expression_to_string(*ternary.consequence), expression_to_string(*ternary.alternative))
+            }
             _ => "unimplemented".to_string()
         }
     }

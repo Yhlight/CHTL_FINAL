@@ -26,6 +26,16 @@ impl std::fmt::Display for Object {
     }
 }
 
+fn is_truthy(obj: Object) -> bool {
+    match obj {
+        Object::Boolean(b) => b,
+        Object::Null => false,
+        Object::Number(n) => n != 0.0,
+        Object::String(s) => !s.is_empty(),
+        Object::Unit(_, _) => true, // Any unit value is considered truthy
+    }
+}
+
 pub fn eval(node: &Expression) -> Result<Object, String> {
     match node {
         Expression::NumberLiteral(n) => Ok(Object::Number(*n)),
@@ -36,6 +46,14 @@ pub fn eval(node: &Expression) -> Result<Object, String> {
             let left = eval(&infix_expr.left)?;
             let right = eval(&infix_expr.right)?;
             eval_infix_expression(&infix_expr.operator, left, right)
+        },
+        Expression::Ternary(ternary_expr) => {
+            let condition = eval(&ternary_expr.condition)?;
+            if is_truthy(condition) {
+                eval(&ternary_expr.consequence)
+            } else {
+                eval(&ternary_expr.alternative)
+            }
         }
         _ => Err("Evaluation for this expression type is not yet implemented".to_string()),
     }
@@ -110,6 +128,22 @@ mod tests {
             ("width: 10 > 5;", Object::Boolean(true)),
             ("width: 5 < 10;", Object::Boolean(true)),
             ("width: 10 > 10;", Object::Boolean(false)),
+         ];
+
+        for (input, expected) in tests {
+            let full_input = format!("div {{ style {{ {} }} }}", input);
+            match eval_input(&full_input) {
+                Ok(obj) => assert_eq!(obj, expected, "Failed on input: {}", input),
+                Err(e) => panic!("Evaluation failed for '{}': {}", input, e),
+            }
+        }
+    }
+
+    #[test]
+    fn test_ternary_evaluation() {
+         let tests = vec![
+            ("width: 10 > 5 ? 1 : 2;", Object::Number(1.0)),
+            ("width: 5 > 10 ? 1 : 2;", Object::Number(2.0)),
          ];
 
         for (input, expected) in tests {
