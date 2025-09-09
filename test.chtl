@@ -1,0 +1,37 @@
+[Import] @Chtl from "imported_styles.chtl";
+
+style {
+    /* This is a global style block */
+    body {
+        font-family: sans-serif;
+    }
+}
+
+[Template] @Style BaseText {
+    color: #333;
+}
+
+div {
+    id: "main-container";
+
+    style {
+        @Style ImportedStyles;
+        background-color: #f0f0f0;
+
+        .header {
+            font-size: 24px;
+        }
+    }
+
+    h1 {
+        class: "header";
+        style {
+            @Style BaseText;
+        }
+        text { "Hello, CHTL!" }
+    }
+
+    p {
+        text { "This is a test of the CHTL compiler." }
+    }
+}
