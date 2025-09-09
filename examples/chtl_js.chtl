@@ -1,0 +1,255 @@
+// CHTL JS 示例
+use html5;
+
+html
+{
+    head
+    {
+        title
+        {
+            text: "CHTL JS Demo";
+        }
+        
+        style
+        {
+            .container
+            {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+                font-family: Arial, sans-serif;
+            }
+            
+            .demo-section
+            {
+                margin: 20px 0;
+                padding: 20px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+            }
+            
+            .button
+            {
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                margin: 5px;
+            }
+            
+            .button:hover
+            {
+                background-color: #0056b3;
+            }
+            
+            .box
+            {
+                width: 100px;
+                height: 100px;
+                background-color: #ff6b6b;
+                margin: 10px;
+                transition: all 0.3s ease;
+            }
+            
+            .counter
+            {
+                font-size: 24px;
+                font-weight: bold;
+                color: #333;
+                margin: 10px 0;
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: container;
+            
+            h1
+            {
+                text: "CHTL JS Features Demo";
+                style
+                {
+                    text-align: center;
+                    color: #333;
+                }
+            }
+            
+            // 事件监听器示例
+            div
+            {
+                class: demo-section;
+                
+                h2
+                {
+                    text: "Event Listeners";
+                }
+                
+                button
+                {
+                    class: button;
+                    text: "Click Me";
+                    
+                    script
+                    {
+                        {{&}}->listen
+                        {
+                            click: function() {
+                                alert('Button clicked!');
+                            }
+                        };
+                    }
+                }
+            }
+            
+            // 动画示例
+            div
+            {
+                class: demo-section;
+                
+                h2
+                {
+                    text: "Animations";
+                }
+                
+                div
+                {
+                    class: box;
+                    id: animated-box;
+                }
+                
+                button
+                {
+                    class: button;
+                    text: "Animate Box";
+                    
+                    script
+                    {
+                        {{&}}->addEventListener('click', function() {
+                            const anim = animate
+                            {
+                                target: {{#animated-box}},
+                                duration: 1000,
+                                easing: ease-in-out,
+                                
+                                begin:
+                                {
+                                    transform: scale(1);
+                                    opacity: 1;
+                                }
+                                
+                                when:
+                                [
+                                    {
+                                        at: 0.5,
+                                        transform: scale(1.2),
+                                        opacity: 0.8
+                                    }
+                                ]
+                                
+                                end:
+                                {
+                                    transform: scale(1);
+                                    opacity: 1;
+                                }
+                                
+                                loop: 1
+                            };
+                        });
+                    }
+                }
+            }
+            
+            // 计数器示例
+            div
+            {
+                class: demo-section;
+                
+                h2
+                {
+                    text: "Counter";
+                }
+                
+                div
+                {
+                    class: counter;
+                    id: counter-display;
+                    text: "0";
+                }
+                
+                button
+                {
+                    class: button;
+                    text: "Increment";
+                    
+                    script
+                    {
+                        let count = 0;
+                        
+                        {{&}}->addEventListener('click', function() {
+                            count++;
+                            {{#counter-display}}->textContent = count.toString();
+                        });
+                    }
+                }
+                
+                button
+                {
+                    class: button;
+                    text: "Reset";
+                    
+                    script
+                    {
+                        {{&}}->addEventListener('click', function() {
+                            count = 0;
+                            {{#counter-display}}->textContent = "0";
+                        });
+                    }
+                }
+            }
+            
+            // 虚对象示例
+            div
+            {
+                class: demo-section;
+                
+                h2
+                {
+                    text: "Virtual Objects";
+                }
+                
+                button
+                {
+                    class: button;
+                    text: "Test Virtual Object";
+                    
+                    script
+                    {
+                        vir TestObject = listen
+                        {
+                            click: function() {
+                                console.log('Virtual object method called');
+                            },
+                            
+                            hover: function() {
+                                console.log('Hover event');
+                            }
+                        };
+                        
+                        {{&}}->addEventListener('click', function() {
+                            TestObject->click();
+                        });
+                        
+                        {{&}}->addEventListener('mouseenter', function() {
+                            TestObject->hover();
+                        });
+                    }
+                }
+            }
+        }
+    }
+}

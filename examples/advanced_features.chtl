@@ -1,0 +1,525 @@
+// CHTL 高级特性示例
+use html5;
+
+// 配置组示例
+[Configuration]
+{
+    INDEX_INITIAL_COUNT = 0;
+    DEBUG_MODE = false;
+    DISABLE_STYLE_AUTO_ADD_CLASS = false;
+    DISABLE_STYLE_AUTO_ADD_ID = false;
+    DISABLE_DEFAULT_NAMESPACE = false;
+    
+    [Name]
+    {
+        CUSTOM_STYLE = [@Style, @style, @CSS, @Css, @css];
+        CUSTOM_ELEMENT = @Element;
+        CUSTOM_VAR = @Var;
+        TEMPLATE_STYLE = @Style;
+        TEMPLATE_ELEMENT = @Element;
+        TEMPLATE_VAR = @Var;
+        ORIGIN_HTML = @Html;
+        ORIGIN_STYLE = @Style;
+        ORIGIN_JAVASCRIPT = @JavaScript;
+        IMPORT_HTML = @Html;
+        IMPORT_STYLE = @Style;
+        IMPORT_JAVASCRIPT = @JavaScript;
+        IMPORT_CHTL = @Chtl;
+        KEYWORD_INHERIT = inherit;
+        KEYWORD_DELETE = delete;
+        KEYWORD_INSERT = insert;
+        KEYWORD_FROM = from;
+        KEYWORD_AS = as;
+        KEYWORD_EXCEPT = except;
+        KEYWORD_USE = use;
+        KEYWORD_HTML5 = html5;
+        KEYWORD_TEXT = text;
+        KEYWORD_STYLE = style;
+        KEYWORD_SCRIPT = script;
+        KEYWORD_CUSTOM = [Custom];
+        KEYWORD_TEMPLATE = [Template];
+        KEYWORD_ORIGIN = [Origin];
+        KEYWORD_IMPORT = [Import];
+        KEYWORD_NAMESPACE = [Namespace];
+        OPTION_COUNT = 3;
+    }
+}
+
+// 命名空间示例
+[Namespace] AdvancedFeatures
+{
+    // 样式组模板
+    [Template] @Style ButtonBase
+    {
+        display: inline-block;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+    
+    [Template] @Style PrimaryButton
+    {
+        @Style ButtonBase;
+        background-color: #007bff;
+        color: white;
+    }
+    
+    [Template] @Style SecondaryButton
+    {
+        @Style ButtonBase;
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    // 变量组模板
+    [Template] @Var Theme
+    {
+        primaryColor: "#007bff";
+        secondaryColor: "#6c757d";
+        successColor: "#28a745";
+        dangerColor: "#dc3545";
+        warningColor: "#ffc107";
+        infoColor: "#17a2b8";
+        lightColor: "#f8f9fa";
+        darkColor: "#343a40";
+    }
+    
+    // 元素模板
+    [Template] @Element Card
+    {
+        div
+        {
+            class: card;
+            style
+            {
+                .card
+                {
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    padding: 20px;
+                    margin: 10px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    background-color: white;
+                }
+            }
+            
+            h3
+            {
+                class: card-title;
+                text: "Card Title";
+                style
+                {
+                    .card-title
+                    {
+                        margin: 0 0 10px 0;
+                        color: Theme(primaryColor);
+                    }
+                }
+            }
+            
+            p
+            {
+                class: card-content;
+                text: "This is a card content.";
+                style
+                {
+                    .card-content
+                    {
+                        margin: 0;
+                        color: #666;
+                        line-height: 1.6;
+                    }
+                }
+            }
+        }
+    }
+    
+    // 自定义样式组
+    [Custom] @Style ResponsiveText
+    {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #333;
+    }
+    
+    [Custom] @Style ResponsiveText
+    {
+        @Style ResponsiveText
+        {
+            delete font-size;
+        }
+        font-size: 14px;
+    }
+    
+    // 自定义元素
+    [Custom] @Element Modal
+    {
+        div
+        {
+            class: modal-overlay;
+            style
+            {
+                .modal-overlay
+                {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0,0,0,0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 1000;
+                }
+            }
+            
+            div
+            {
+                class: modal-content;
+                style
+                {
+                    .modal-content
+                    {
+                        background-color: white;
+                        border-radius: 8px;
+                        padding: 20px;
+                        max-width: 500px;
+                        width: 90%;
+                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    }
+                }
+                
+                h2
+                {
+                    text: "Modal Title";
+                    style
+                    {
+                        margin: 0 0 15px 0;
+                        color: Theme(primaryColor);
+                    }
+                }
+                
+                p
+                {
+                    text: "Modal content goes here.";
+                    style
+                    {
+                        margin: 0 0 20px 0;
+                        color: #666;
+                    }
+                }
+                
+                button
+                {
+                    class: modal-close;
+                    text: "Close";
+                    style
+                    {
+                        @Style PrimaryButton;
+                    }
+                }
+            }
+        }
+    }
+}
+
+html
+{
+    head
+    {
+        title
+        {
+            text: "CHTL Advanced Features Demo";
+        }
+        
+        style
+        {
+            .container
+            {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+                font-family: Arial, sans-serif;
+            }
+            
+            .section
+            {
+                margin: 30px 0;
+                padding: 20px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                background-color: #f9f9f9;
+            }
+            
+            .section h2
+            {
+                margin: 0 0 15px 0;
+                color: #333;
+                border-bottom: 2px solid #007bff;
+                padding-bottom: 5px;
+            }
+            
+            .demo-grid
+            {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+                margin: 20px 0;
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: container;
+            
+            h1
+            {
+                text: "CHTL Advanced Features Demo";
+                style
+                {
+                    text-align: center;
+                    color: Theme(primaryColor);
+                    margin-bottom: 30px;
+                }
+            }
+            
+            // 属性条件表达式示例
+            div
+            {
+                class: section;
+                
+                h2
+                {
+                    text: "属性条件表达式";
+                }
+                
+                div
+                {
+                    class: demo-grid;
+                    
+                    div
+                    {
+                        style
+                        {
+                            width: 100px;
+                            height: 100px;
+                            background-color: width > 50px ? "red" : "blue";
+                            margin: 10px;
+                            display: inline-block;
+                        }
+                    }
+                    
+                    div
+                    {
+                        style
+                        {
+                            width: 150px;
+                            height: 80px;
+                            background-color: 
+                                width > 100px ? "green" : "yellow",
+                                height > 50px ? "purple" : "pink";
+                            margin: 10px;
+                            display: inline-block;
+                        }
+                    }
+                    
+                    div
+                    {
+                        style
+                        {
+                            width: 200px;
+                            height: 120px;
+                            background-color: 
+                                width > 100px && height > 100px ? "orange" : "cyan",
+                                width > 150px || height > 100px ? "magenta" : "lime";
+                            margin: 10px;
+                            display: inline-block;
+                        }
+                    }
+                }
+            }
+            
+            // 模板系统示例
+            div
+            {
+                class: section;
+                
+                h2
+                {
+                    text: "模板系统";
+                }
+                
+                div
+                {
+                    class: demo-grid;
+                    
+                    button
+                    {
+                        text: "Primary Button";
+                        style
+                        {
+                            @Style PrimaryButton;
+                        }
+                    }
+                    
+                    button
+                    {
+                        text: "Secondary Button";
+                        style
+                        {
+                            @Style SecondaryButton;
+                        }
+                    }
+                    
+                    @Element Card;
+                    @Element Card;
+                    @Element Card;
+                }
+            }
+            
+            // 自定义系统示例
+            div
+            {
+                class: section;
+                
+                h2
+                {
+                    text: "自定义系统";
+                }
+                
+                div
+                {
+                    class: demo-grid;
+                    
+                    p
+                    {
+                        text: "Responsive Text with Custom Style";
+                        style
+                        {
+                            @Style ResponsiveText;
+                        }
+                    }
+                    
+                    @Element Modal;
+                }
+            }
+            
+            // 约束系统示例
+            div
+            {
+                class: section;
+                except: span, [Custom] @Element Modal;
+                
+                h2
+                {
+                    text: "约束系统";
+                }
+                
+                p
+                {
+                    text: "这个div禁止使用span元素和Modal自定义元素";
+                }
+                
+                div
+                {
+                    text: "允许的div元素";
+                }
+            }
+            
+            // 原始嵌入示例
+            div
+            {
+                class: section;
+                
+                h2
+                {
+                    text: "原始嵌入";
+                }
+                
+                [Origin] @Html
+                {
+                    <div style="background-color: #f0f0f0; padding: 10px; border-radius: 4px;">
+                        <p>这是原始HTML代码，不会被CHTL处理</p>
+                    </div>
+                }
+            }
+            
+            // CHTL JS示例
+            div
+            {
+                class: section;
+                
+                h2
+                {
+                    text: "CHTL JS";
+                }
+                
+                button
+                {
+                    class: js-demo-button;
+                    text: "Click Me";
+                    style
+                    {
+                        .js-demo-button
+                        {
+                            @Style PrimaryButton;
+                        }
+                    }
+                    
+                    script
+                    {
+                        {{&}}->listen
+                        {
+                            click: function() {
+                                alert('Hello from CHTL JS!');
+                            }
+                        };
+                    }
+                }
+                
+                div
+                {
+                    class: counter-display;
+                    text: "0";
+                    style
+                    {
+                        .counter-display
+                        {
+                            font-size: 24px;
+                            font-weight: bold;
+                            color: Theme(primaryColor);
+                            margin: 10px 0;
+                        }
+                    }
+                }
+                
+                button
+                {
+                    class: counter-button;
+                    text: "Increment";
+                    style
+                    {
+                        @Style SecondaryButton;
+                    }
+                    
+                    script
+                    {
+                        let count = 0;
+                        
+                        {{&}}->addEventListener('click', function() {
+                            count++;
+                            {{.counter-display}}->textContent = count.toString();
+                        });
+                    }
+                }
+            }
+        }
+    }
+}
