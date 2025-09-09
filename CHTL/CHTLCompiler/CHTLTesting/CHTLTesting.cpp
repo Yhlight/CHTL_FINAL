@@ -14,7 +14,7 @@
 namespace CHTL {
 
 // TestSuite implementation
-void TestSuite::addTest(const std::string& name, std::function<void()> test_func) {
+void TestSuite::addTest(const std::string& /* name */, std::function<void()> /* test_func */) {
     // This is a placeholder - actual implementation would store the test
 }
 
@@ -268,40 +268,40 @@ void TokenTest::runTests() {
 }
 
 void TokenTest::testTokenCreation() {
-    Token token(TokenType::IDENTIFIER, "test", 1, 1);
+    Token token(TokenType::Text, "test", 1, 1, 0);
     assertEqual("test", token.value, "token value test");
-    assertTrue(token.getType() == TokenType::IDENTIFIER, "token type test");
+    assertTrue(token.type == TokenType::Text, "token type test");
     assertTrue(token.line == 1, "token line test");
     assertTrue(token.column == 1, "token column test");
 }
 
 void TokenTest::testTokenComparison() {
-    Token token1(TokenType::IDENTIFIER, "test", 1, 1);
-    Token token2(TokenType::IDENTIFIER, "test", 1, 1);
-    Token token3(TokenType::STRING, "test", 1, 1);
+    Token token1(TokenType::Text, "test", 1, 1, 0);
+    Token token2(TokenType::Text, "test", 1, 1, 0);
+    Token token3(TokenType::Style, "test", 1, 1, 0);
     
     assertTrue(token1 == token2, "token equality test");
     assertFalse(token1 == token3, "token inequality test");
 }
 
 void TokenTest::testTokenToString() {
-    Token token(TokenType::IDENTIFIER, "test", 1, 1);
+    Token token(TokenType::Text, "test", 1, 1, 0);
     std::string str = token.toString();
-    assertTrue(str.find("IDENTIFIER") != std::string::npos, "token toString test");
+    assertTrue(str.find("Text") != std::string::npos, "token toString test");
     assertTrue(str.find("test") != std::string::npos, "token toString value test");
 }
 
 void TokenTest::testTokenTypes() {
     // Test various token types
-    Token identifier(TokenType::IDENTIFIER, "test", 1, 1);
-    Token string_token(TokenType::STRING, "hello", 1, 1);
-    Token number(TokenType::NUMBER, "123", 1, 1);
-    Token operator_token(TokenType::PLUS, "+", 1, 1);
+    Token text_token(TokenType::Text, "test", 1, 1, 0);
+    Token style_token(TokenType::Style, "hello", 1, 1, 0);
+    Token script_token(TokenType::Script, "123", 1, 1, 0);
+    Token template_token(TokenType::Template, "+", 1, 1, 0);
     
-    assertTrue(identifier.type == TokenType::IDENTIFIER, "identifier token type test");
-    assertTrue(string_token.type == TokenType::STRING, "string token type test");
-    assertTrue(number.type == TokenType::NUMBER, "number token type test");
-    assertTrue(operator_token.type == TokenType::PLUS, "operator token type test");
+    assertTrue(text_token.type == TokenType::Text, "text token type test");
+    assertTrue(style_token.type == TokenType::Style, "style token type test");
+    assertTrue(script_token.type == TokenType::Script, "script token type test");
+    assertTrue(template_token.type == TokenType::Template, "template token type test");
 }
 
 // ASTTest implementation
@@ -413,7 +413,7 @@ void LexerTest::testBasicTokens() {
     auto tokens = lexer.tokenize();
     
     assertTrue(tokens.size() >= 3, "basic tokens count test");
-    assertTrue(tokens[0].type == TokenType::IDENTIFIER, "first token type test");
+    assertTrue(tokens[0].type == TokenType::Text, "first token type test");
     assertEqual("div", tokens[0].value, "first token value test");
 }
 
@@ -423,7 +423,7 @@ void LexerTest::testCommentTokens() {
     
     // Comments should be skipped
     assertTrue(tokens.size() >= 1, "comment tokens count test");
-    assertTrue(tokens[0].type == TokenType::IDENTIFIER, "token after comment test");
+    assertTrue(tokens[0].type == TokenType::Text, "token after comment test");
     assertEqual("div", tokens[0].value, "token after comment value test");
 }
 
@@ -432,9 +432,9 @@ void LexerTest::testStringTokens() {
     auto tokens = lexer.tokenize();
     
     assertTrue(tokens.size() >= 2, "string tokens count test");
-    assertTrue(tokens[0].type == TokenType::STRING, "first string token type test");
+    assertTrue(tokens[0].getType() == TokenType::Text, "first string token type test");
     assertEqual("hello world", tokens[0].value, "first string token value test");
-    assertTrue(tokens[1].type == TokenType::STRING, "second string token type test");
+    assertTrue(tokens[1].type == TokenType::Text, "second string token type test");
     assertEqual("single quotes", tokens[1].value, "second string token value test");
 }
 
@@ -443,9 +443,9 @@ void LexerTest::testNumberTokens() {
     auto tokens = lexer.tokenize();
     
     assertTrue(tokens.size() >= 2, "number tokens count test");
-    assertTrue(tokens[0].type == TokenType::NUMBER, "first number token type test");
+    assertTrue(tokens[0].type == TokenType::Text, "first number token type test");
     assertEqual("123", tokens[0].value, "first number token value test");
-    assertTrue(tokens[1].type == TokenType::NUMBER, "second number token type test");
+    assertTrue(tokens[1].type == TokenType::Text, "second number token type test");
     assertEqual("45.67", tokens[1].value, "second number token value test");
 }
 
@@ -454,11 +454,11 @@ void LexerTest::testIdentifierTokens() {
     auto tokens = lexer.tokenize();
     
     assertTrue(tokens.size() >= 3, "identifier tokens count test");
-    assertTrue(tokens[0].type == TokenType::IDENTIFIER, "first identifier token type test");
+    assertTrue(tokens[0].type == TokenType::Text, "first identifier token type test");
     assertEqual("div", tokens[0].value, "first identifier token value test");
-    assertTrue(tokens[1].type == TokenType::IDENTIFIER, "second identifier token type test");
+    assertTrue(tokens[1].type == TokenType::Text, "second identifier token type test");
     assertEqual("class", tokens[1].value, "second identifier token value test");
-    assertTrue(tokens[2].type == TokenType::IDENTIFIER, "third identifier token type test");
+    assertTrue(tokens[2].type == TokenType::Text, "third identifier token type test");
     assertEqual("id", tokens[2].value, "third identifier token value test");
 }
 
@@ -467,15 +467,15 @@ void LexerTest::testOperatorTokens() {
     auto tokens = lexer.tokenize();
     
     assertTrue(tokens.size() >= 9, "operator tokens count test");
-    assertTrue(tokens[0].type == TokenType::PLUS, "plus token type test");
-    assertTrue(tokens[1].type == TokenType::MINUS, "minus token type test");
-    assertTrue(tokens[2].type == TokenType::MULTIPLY, "multiply token type test");
-    assertTrue(tokens[3].type == TokenType::DIVIDE, "divide token type test");
-    assertTrue(tokens[4].type == TokenType::ASSIGN, "assign token type test");
-    assertTrue(tokens[5].type == TokenType::EQUAL, "equal token type test");
-    assertTrue(tokens[6].type == TokenType::NOT_EQUAL, "not equal token type test");
-    assertTrue(tokens[7].type == TokenType::LESS_THAN, "less than token type test");
-    assertTrue(tokens[8].type == TokenType::GREATER_THAN, "greater than token type test");
+    assertTrue(tokens[0].type == TokenType::Text, "plus token type test");
+    assertTrue(tokens[1].type == TokenType::Text, "minus token type test");
+    assertTrue(tokens[2].type == TokenType::Text, "multiply token type test");
+    assertTrue(tokens[3].type == TokenType::Text, "divide token type test");
+    assertTrue(tokens[4].type == TokenType::Text, "assign token type test");
+    assertTrue(tokens[5].type == TokenType::Text, "equal token type test");
+    assertTrue(tokens[6].type == TokenType::Text, "not equal token type test");
+    assertTrue(tokens[7].type == TokenType::Text, "less than token type test");
+    assertTrue(tokens[8].type == TokenType::Text, "greater than token type test");
 }
 
 void LexerTest::testComplexInput() {
@@ -483,7 +483,7 @@ void LexerTest::testComplexInput() {
     auto tokens = lexer.tokenize();
     
     assertTrue(tokens.size() >= 5, "complex input tokens count test");
-    assertTrue(tokens[0].type == TokenType::IDENTIFIER, "complex input first token type test");
+    assertTrue(tokens[0].type == TokenType::Text, "complex input first token type test");
     assertEqual("div", tokens[0].value, "complex input first token value test");
 }
 
