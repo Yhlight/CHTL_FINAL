@@ -35,9 +35,26 @@ std::shared_ptr<ASTNode> CHTLParser::parseRoot() {
 std::shared_ptr<ASTNode> CHTLParser::parseElement() {
     Token token = current();
     
+    // 处理注释
+    if (token.isComment()) {
+        advance();
+        return nullptr;
+    }
+    
+    // 处理空白字符
+    if (token.isWhitespace()) {
+        advance();
+        return nullptr;
+    }
+    
     // 处理特殊语法结构
     if (token.isType(TokenType::LBRACKET)) {
         return parseSpecialStructure();
+    }
+    
+    // 处理use语句
+    if (token.isType(TokenType::USE)) {
+        return parseUse();
     }
     
     // 处理文本节点
@@ -56,25 +73,45 @@ std::shared_ptr<ASTNode> CHTLParser::parseElement() {
 }
 
 std::shared_ptr<ASTNode> CHTLParser::parseSpecialStructure() {
-    Token token = current();
+    if (!check(TokenType::LBRACKET)) {
+        return nullptr;
+    }
     
-    if (token.isType(TokenType::LBRACKET)) {
-        advance(); // 跳过 [
-        
-        token = current();
-        if (token.isType(TokenType::TEMPLATE)) {
-            return parseTemplate();
-        } else if (token.isType(TokenType::CUSTOM)) {
-            return parseCustom();
-        } else if (token.isType(TokenType::ORIGIN)) {
-            return parseOrigin();
-        } else if (token.isType(TokenType::IMPORT)) {
-            return parseImport();
-        } else if (token.isType(TokenType::NAMESPACE)) {
-            return parseNamespace();
-        } else if (token.isType(TokenType::CONFIGURATION)) {
-            return parseConfiguration();
-        }
+    advance(); // 跳过 [
+    
+    Token token = current();
+    if (token.isType(TokenType::TEMPLATE)) {
+        advance(); // 跳过 TEMPLATE
+        return parseTemplate();
+    } else if (token.isType(TokenType::CUSTOM)) {
+        advance(); // 跳过 CUSTOM
+        return parseCustom();
+    } else if (token.isType(TokenType::ORIGIN)) {
+        advance(); // 跳过 ORIGIN
+        return parseOrigin();
+    } else if (token.isType(TokenType::IMPORT)) {
+        advance(); // 跳过 IMPORT
+        return parseImport();
+    } else if (token.isType(TokenType::NAMESPACE)) {
+        advance(); // 跳过 NAMESPACE
+        return parseNamespace();
+    } else if (token.isType(TokenType::CONFIGURATION)) {
+        advance(); // 跳过 CONFIGURATION
+        return parseConfiguration();
+    } else if (token.isType(TokenType::NAME)) {
+        advance(); // 跳过 NAME
+        return parseConfiguration();
+    } else if (token.isType(TokenType::ORIGIN_TYPE)) {
+        advance(); // 跳过 ORIGIN_TYPE
+        return parseConfiguration();
+    }
+    
+    // 如果遇到未知的方括号结构，跳过整个结构
+    while (!isAtEnd() && !check(TokenType::RBRACKET)) {
+        advance();
+    }
+    if (check(TokenType::RBRACKET)) {
+        advance(); // 跳过 ]
     }
     
     return nullptr;
@@ -97,8 +134,34 @@ std::shared_ptr<ASTNode> CHTLParser::parseHTMLElement() {
             
             // 如果是属性（key: value格式）
             if (nextToken.isType(TokenType::IDENTIFIER) && 
-                peek().isType(TokenType::COLON)) {
+                (peek().isType(TokenType::COLON) || peek().isType(TokenType::EQUALS))) {
                 parseAttributes(element);
+            } else if (nextToken.isType(TokenType::TEXT)) {
+                // 处理text节点
+                auto child = parseText();
+                if (child) {
+                    element->addChild(child);
+                }
+            } else if (nextToken.isType(TokenType::STYLE)) {
+                // 处理style节点
+                auto child = parseStyle();
+                if (child) {
+                    element->addChild(child);
+                }
+            } else if (nextToken.isType(TokenType::AT)) {
+                // 处理@Style, @Element等引用
+                auto child = parseTemplateReference();
+                if (child) {
+                    element->addChild(child);
+                }
+            } else if (nextToken.isType(TokenType::STRING) || 
+                       nextToken.isType(TokenType::LITERAL) ||
+                       nextToken.isType(TokenType::IDENTIFIER)) {
+                // 处理直接文本内容
+                auto textNode = std::make_shared<TextNode>(nextToken.getValue());
+                textNode->setPosition(nextToken.getLine(), nextToken.getColumn());
+                element->addChild(textNode);
+                advance();
             } else {
                 // 否则是子元素
                 auto child = parseElement();
@@ -160,7 +223,7 @@ std::shared_ptr<ASTNode> CHTLParser::parseStyle() {
     if (check(TokenType::LBRACE)) {
         advance(); // 跳过 {
         
-        parseStyleProperties(styleNode);
+        parseStyleRules(styleNode);
         
         if (check(TokenType::RBRACE)) {
             advance(); // 跳过 }
@@ -198,23 +261,33 @@ std::shared_ptr<ASTNode> CHTLParser::parseScript() {
 }
 
 std::shared_ptr<ASTNode> CHTLParser::parseTemplate() {
-    Token token = current();
-    advance(); // 跳过 Template
+    // 已经跳过了 [Template]，现在需要处理 @Style/@Element/@Var
     
-    if (!check(TokenType::RBRACKET)) {
-        reportError("期望 ]");
+    // 解析@符号
+    if (!check(TokenType::AT)) {
+        reportError("期望 @ 符号");
         return nullptr;
     }
-    advance(); // 跳过 ]
+    advance(); // 跳过 @
     
-    // 解析模板类型和名称
+    // 解析模板类型
     Token typeToken = current();
-    if (!typeToken.isType(TokenType::IDENTIFIER)) {
-        reportError("期望模板类型");
+    std::string templateType;
+    if (typeToken.isType(TokenType::TEMPLATE_STYLE)) {
+        templateType = "Style";
+        advance();
+    } else if (typeToken.isType(TokenType::TEMPLATE_ELEMENT)) {
+        templateType = "Element";
+        advance();
+    } else if (typeToken.isType(TokenType::TEMPLATE_VAR)) {
+        templateType = "Var";
+        advance();
+    } else {
+        reportError("期望 @Style, @Element 或 @Var");
         return nullptr;
     }
-    advance();
     
+    // 解析模板名称
     Token nameToken = current();
     if (!nameToken.isType(TokenType::IDENTIFIER)) {
         reportError("期望模板名称");
@@ -222,10 +295,17 @@ std::shared_ptr<ASTNode> CHTLParser::parseTemplate() {
     }
     advance();
     
+    // 跳过 ]
+    if (!check(TokenType::RBRACKET)) {
+        reportError("期望 ]");
+        return nullptr;
+    }
+    advance();
+    
     auto templateNode = std::make_shared<TemplateNode>(
-        typeToken.getValue(), nameToken.getValue()
+        templateType, nameToken.getValue()
     );
-    templateNode->setPosition(token.getLine(), token.getColumn());
+    templateNode->setPosition(typeToken.getLine(), typeToken.getColumn());
     
     // 解析模板内容
     if (check(TokenType::LBRACE)) {
@@ -247,23 +327,33 @@ std::shared_ptr<ASTNode> CHTLParser::parseTemplate() {
 }
 
 std::shared_ptr<ASTNode> CHTLParser::parseCustom() {
-    Token token = current();
-    advance(); // 跳过 Custom
+    // 已经跳过了 [Custom]，现在需要处理 @Style/@Element/@Var
     
-    if (!check(TokenType::RBRACKET)) {
-        reportError("期望 ]");
+    // 解析@符号
+    if (!check(TokenType::AT)) {
+        reportError("期望 @ 符号");
         return nullptr;
     }
-    advance(); // 跳过 ]
+    advance(); // 跳过 @
     
-    // 解析自定义类型和名称
+    // 解析自定义类型
     Token typeToken = current();
-    if (!typeToken.isType(TokenType::IDENTIFIER)) {
-        reportError("期望自定义类型");
+    std::string customType;
+    if (typeToken.isType(TokenType::CUSTOM_STYLE)) {
+        customType = "Style";
+        advance();
+    } else if (typeToken.isType(TokenType::CUSTOM_ELEMENT)) {
+        customType = "Element";
+        advance();
+    } else if (typeToken.isType(TokenType::CUSTOM_VAR)) {
+        customType = "Var";
+        advance();
+    } else {
+        reportError("期望 @Style, @Element 或 @Var");
         return nullptr;
     }
-    advance();
     
+    // 解析自定义名称
     Token nameToken = current();
     if (!nameToken.isType(TokenType::IDENTIFIER)) {
         reportError("期望自定义名称");
@@ -271,10 +361,17 @@ std::shared_ptr<ASTNode> CHTLParser::parseCustom() {
     }
     advance();
     
+    // 跳过 ]
+    if (!check(TokenType::RBRACKET)) {
+        reportError("期望 ]");
+        return nullptr;
+    }
+    advance();
+    
     auto customNode = std::make_shared<CustomNode>(
-        typeToken.getValue(), nameToken.getValue()
+        customType, nameToken.getValue()
     );
-    customNode->setPosition(token.getLine(), token.getColumn());
+    customNode->setPosition(typeToken.getLine(), typeToken.getColumn());
     
     // 解析自定义内容
     if (check(TokenType::LBRACE)) {
@@ -436,24 +533,17 @@ std::shared_ptr<ASTNode> CHTLParser::parseNamespace() {
 }
 
 std::shared_ptr<ASTNode> CHTLParser::parseConfiguration() {
-    Token token = current();
-    advance(); // 跳过 Configuration
+    // 已经跳过了 [Configuration]，现在需要处理配置内容
     
+    // 跳过 ]
     if (!check(TokenType::RBRACKET)) {
         reportError("期望 ]");
         return nullptr;
     }
-    advance(); // 跳过 ]
+    advance();
     
-    std::string configName;
-    if (check(TokenType::IDENTIFIER)) {
-        Token nameToken = current();
-        configName = nameToken.getValue();
-        advance();
-    }
-    
-    auto configNode = std::make_shared<ConfigurationNode>(configName);
-    configNode->setPosition(token.getLine(), token.getColumn());
+    auto configNode = std::make_shared<ConfigurationNode>();
+    configNode->setPosition(current().getLine(), current().getColumn());
     
     // 解析配置内容
     if (check(TokenType::LBRACE)) {
@@ -464,13 +554,15 @@ std::shared_ptr<ASTNode> CHTLParser::parseConfiguration() {
             if (keyToken.isType(TokenType::IDENTIFIER)) {
                 advance();
                 
-                if (check(TokenType::EQUALS)) {
-                    advance(); // 跳过 =
+                // 支持 : 和 = 等价
+                if (check(TokenType::EQUALS) || check(TokenType::COLON)) {
+                    advance(); // 跳过 = 或 :
                     
                     Token valueToken = current();
                     if (valueToken.isType(TokenType::STRING) || 
                         valueToken.isType(TokenType::LITERAL) ||
-                        valueToken.isType(TokenType::NUMBER)) {
+                        valueToken.isType(TokenType::NUMBER) ||
+                        valueToken.isType(TokenType::IDENTIFIER)) {
                         configNode->addConfigItem(keyToken.getValue(), valueToken.getValue());
                         advance();
                     }
@@ -511,6 +603,43 @@ std::shared_ptr<ASTNode> CHTLParser::parseUse() {
     return useNode;
 }
 
+std::shared_ptr<ASTNode> CHTLParser::parseTemplateReference() {
+    Token token = current();
+    if (!token.isType(TokenType::AT)) {
+        return nullptr;
+    }
+    advance(); // 跳过 @
+    
+    Token typeToken = current();
+    std::string referenceType;
+    if (typeToken.isType(TokenType::TEMPLATE_STYLE)) {
+        referenceType = "Style";
+        advance();
+    } else if (typeToken.isType(TokenType::TEMPLATE_ELEMENT)) {
+        referenceType = "Element";
+        advance();
+    } else if (typeToken.isType(TokenType::TEMPLATE_VAR)) {
+        referenceType = "Var";
+        advance();
+    } else {
+        reportError("期望 @Style, @Element 或 @Var");
+        return nullptr;
+    }
+    
+    Token nameToken = current();
+    if (!nameToken.isType(TokenType::IDENTIFIER)) {
+        reportError("期望模板名称");
+        return nullptr;
+    }
+    advance();
+    
+    // 创建一个特殊的引用节点
+    auto refNode = std::make_shared<ElementNode>("@" + referenceType + " " + nameToken.getValue());
+    refNode->setPosition(token.getLine(), token.getColumn());
+    
+    return refNode;
+}
+
 void CHTLParser::parseAttributes(std::shared_ptr<ASTNode> node) {
     Token keyToken = current();
     if (!keyToken.isType(TokenType::IDENTIFIER)) {
@@ -532,6 +661,44 @@ void CHTLParser::parseAttributes(std::shared_ptr<ASTNode> node) {
     }
 }
 
+void CHTLParser::parseStyleRules(std::shared_ptr<StyleNode> styleNode) {
+    while (!check(TokenType::RBRACE) && !isAtEnd()) {
+        Token currentToken = current();
+        
+        // 跳过空白字符和换行符
+        if (currentToken.isType(TokenType::WHITESPACE) || currentToken.isType(TokenType::NEWLINE)) {
+            advance();
+            continue;
+        }
+        
+        // 解析选择器
+        std::string selector = parseSelector();
+        if (selector.empty()) {
+            advance();
+            continue;
+        }
+        
+        // 解析属性块
+        if (check(TokenType::LBRACE)) {
+            advance(); // 跳过 {
+            
+            // 创建样式规则节点
+            auto ruleNode = std::make_shared<StyleRuleNode>();
+            ruleNode->addSelector(selector);
+            
+            // 解析属性
+            parseStyleRuleProperties(ruleNode);
+            
+            // 添加到样式节点
+            styleNode->addChild(ruleNode);
+            
+            if (check(TokenType::RBRACE)) {
+                advance(); // 跳过 }
+            }
+        }
+    }
+}
+
 void CHTLParser::parseStyleProperties(std::shared_ptr<StyleNode> styleNode) {
     while (!check(TokenType::RBRACE) && !isAtEnd()) {
         Token keyToken = current();
@@ -544,15 +711,108 @@ void CHTLParser::parseStyleProperties(std::shared_ptr<StyleNode> styleNode) {
                 Token valueToken = current();
                 if (valueToken.isType(TokenType::STRING) || 
                     valueToken.isType(TokenType::LITERAL) ||
-                    valueToken.isType(TokenType::NUMBER)) {
+                    valueToken.isType(TokenType::NUMBER) ||
+                    valueToken.isType(TokenType::IDENTIFIER)) {
                     styleNode->addProperty(keyToken.getValue(), valueToken.getValue());
                     advance();
+                    
+                    // 跳过分号
+                    if (check(TokenType::SEMICOLON)) {
+                        advance();
+                    }
                 }
+            } else {
+                // 可能是无修饰字面量
+                styleNode->addProperty(keyToken.getValue(), keyToken.getValue());
+            }
+        } else if (keyToken.isType(TokenType::AT)) {
+            // 处理@Style引用
+            auto refNode = parseTemplateReference();
+            if (refNode) {
+                // 将引用添加到样式中
+                styleNode->addChild(refNode);
             }
         } else {
+            // 跳过其他token（如{等）
             advance();
         }
     }
+}
+
+void CHTLParser::parseStyleRuleProperties(std::shared_ptr<StyleRuleNode> ruleNode) {
+    while (!check(TokenType::RBRACE) && !isAtEnd()) {
+        Token keyToken = current();
+        if (keyToken.isType(TokenType::IDENTIFIER) || keyToken.isKeyword()) {
+            advance();
+            
+            if (check(TokenType::COLON) || check(TokenType::EQUALS)) {
+                advance(); // 跳过 : 或 =
+                
+                // 解析属性值（可能包含多个token）
+                std::string value;
+                while (!check(TokenType::SEMICOLON) && !check(TokenType::RBRACE) && !isAtEnd()) {
+                    Token valueToken = current();
+                    if (valueToken.isType(TokenType::STRING) || 
+                        valueToken.isType(TokenType::LITERAL) ||
+                        valueToken.isType(TokenType::NUMBER) ||
+                        valueToken.isType(TokenType::IDENTIFIER) ||
+                        valueToken.isKeyword()) {
+                        if (!value.empty()) {
+                            value += " ";
+                        }
+                        value += valueToken.getValue();
+                        advance();
+                    } else {
+                        break;
+                    }
+                }
+                
+                if (!value.empty()) {
+                    ruleNode->addDeclaration(keyToken.getValue(), value);
+                }
+                
+                // 跳过分号
+                if (check(TokenType::SEMICOLON)) {
+                    advance();
+                }
+            } else {
+                // 可能是无修饰字面量
+                ruleNode->addDeclaration(keyToken.getValue(), keyToken.getValue());
+            }
+        } else if (keyToken.isType(TokenType::AT)) {
+            // 处理@Style引用
+            auto refNode = parseTemplateReference();
+            if (refNode) {
+                // 将引用添加到样式中
+                ruleNode->addChild(refNode);
+            }
+        } else {
+            // 跳过其他token（如空白字符等）
+            advance();
+        }
+    }
+}
+
+std::string CHTLParser::parseSelector() {
+    std::string selector;
+    
+    // 解析选择器，直到遇到 {
+    while (!check(TokenType::LBRACE) && !check(TokenType::RBRACE) && !isAtEnd()) {
+        Token token = current();
+        if (token.isType(TokenType::DOT) || 
+            token.isType(TokenType::IDENTIFIER) ||
+            token.isType(TokenType::HASH)) {
+            selector += token.getValue();
+            advance();
+        } else if (token.isType(TokenType::WHITESPACE) || token.isType(TokenType::NEWLINE)) {
+            // 跳过空白字符和换行符
+            advance();
+        } else {
+            break;
+        }
+    }
+    
+    return selector;
 }
 
 Token& CHTLParser::current() {
@@ -638,21 +898,35 @@ void CHTLParser::synchronize() {
 }
 
 bool CHTLParser::isElementToken(const Token& token) {
-    return token.isType(TokenType::HTML) || token.isType(TokenType::HEAD) ||
-           token.isType(TokenType::BODY) || token.isType(TokenType::DIV) ||
-           token.isType(TokenType::SPAN) || token.isType(TokenType::P) ||
-           token.isType(TokenType::A) || token.isType(TokenType::IMG) ||
-           token.isType(TokenType::BR) || token.isType(TokenType::HR) ||
-           token.isType(TokenType::H1) || token.isType(TokenType::H2) ||
-           token.isType(TokenType::H3) || token.isType(TokenType::H4) ||
-           token.isType(TokenType::H5) || token.isType(TokenType::H6) ||
-           token.isType(TokenType::UL) || token.isType(TokenType::OL) ||
-           token.isType(TokenType::LI) || token.isType(TokenType::TABLE) ||
-           token.isType(TokenType::TR) || token.isType(TokenType::TD) ||
-           token.isType(TokenType::TH) || token.isType(TokenType::FORM) ||
-           token.isType(TokenType::INPUT) || token.isType(TokenType::BUTTON) ||
-           token.isType(TokenType::TEXT) || token.isType(TokenType::STYLE) ||
-           token.isType(TokenType::SCRIPT) || token.isType(TokenType::IDENTIFIER);
+    // 检查是否是HTML元素关键字
+    if (token.isType(TokenType::HTML) || token.isType(TokenType::HEAD) ||
+        token.isType(TokenType::TITLE) || token.isType(TokenType::BODY) || token.isType(TokenType::DIV) ||
+        token.isType(TokenType::SPAN) || token.isType(TokenType::P) ||
+        token.isType(TokenType::A) || token.isType(TokenType::IMG) ||
+        token.isType(TokenType::BR) || token.isType(TokenType::HR) ||
+        token.isType(TokenType::H1) || token.isType(TokenType::H2) ||
+        token.isType(TokenType::H3) || token.isType(TokenType::H4) ||
+        token.isType(TokenType::H5) || token.isType(TokenType::H6) ||
+        token.isType(TokenType::UL) || token.isType(TokenType::OL) ||
+        token.isType(TokenType::LI) || token.isType(TokenType::TABLE) ||
+        token.isType(TokenType::TR) || token.isType(TokenType::TD) ||
+        token.isType(TokenType::TH) || token.isType(TokenType::FORM) ||
+        token.isType(TokenType::INPUT) || token.isType(TokenType::BUTTON) ||
+        token.isType(TokenType::TEXT) || token.isType(TokenType::STYLE) ||
+        token.isType(TokenType::SCRIPT)) {
+        return true;
+    }
+    
+    // 检查是否是标识符且后面跟着大括号（表示元素）
+    if (token.isType(TokenType::IDENTIFIER)) {
+        // 检查下一个token是否是大括号
+        if (currentToken_ + 1 < tokens_.size()) {
+            Token nextToken = tokens_[currentToken_ + 1];
+            return nextToken.isType(TokenType::LBRACE);
+        }
+    }
+    
+    return false;
 }
 
 bool CHTLParser::isStylePropertyToken(const Token& token) {

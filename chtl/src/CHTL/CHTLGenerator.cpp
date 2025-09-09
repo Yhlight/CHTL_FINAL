@@ -1,4 +1,5 @@
 #include "CHTL/CHTLGenerator.h"
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -100,6 +101,33 @@ void CHTLGenerator::generateNode(std::shared_ptr<ASTNode> node) {
 
 void CHTLGenerator::generateElement(std::shared_ptr<ElementNode> element) {
     std::string tagName = element->getTagName();
+    
+    // 处理特殊元素
+    if (tagName == "root") {
+        // 根节点，只处理子节点
+        for (auto& child : element->getChildren()) {
+            generateNode(child);
+        }
+        return;
+    }
+    
+    // 处理配置元素（这些不应该生成HTML）
+    if (tagName == "DEBUG_MODE" || tagName == "INDEX_INITIAL_COUNT" || 
+        tagName == "DefaultText" || tagName == "Box" || tagName == "false") {
+        // 这些是配置或模板，不应该生成HTML
+        return;
+    }
+    
+    // 处理@Element引用
+    if (tagName.find("@Element") != std::string::npos) {
+        std::string refName = tagName.substr(9); // 跳过 "@Element "
+        std::string customContent = context_.getCustom(refName, "Element");
+        if (!customContent.empty()) {
+            htmlCode_ += customContent + "\n";
+        }
+        return;
+    }
+    
     std::string attributes = generateAttributes(element->getAttributes());
     
     // 开始标签
@@ -131,24 +159,38 @@ void CHTLGenerator::generateText(std::shared_ptr<TextNode> text) {
 }
 
 void CHTLGenerator::generateStyle(std::shared_ptr<StyleNode> style) {
-    if (inStyleBlock_) {
-        // 局部样式块
-        std::string properties = generateStyleProperties(style->getProperties());
-        if (!properties.empty()) {
-            cssCode_ += getIndent() + properties + "\n";
+    // 处理子节点（样式规则）
+    for (auto& child : style->getChildren()) {
+        if (child->getType() == ASTNodeType::STYLE_RULE) {
+            auto rule = std::static_pointer_cast<StyleRuleNode>(child);
+            auto selectors = rule->getSelectors();
+            auto declarations = rule->getDeclarations();
+            
+            if (!selectors.empty() && !declarations.empty()) {
+                for (const auto& selector : selectors) {
+                    cssCode_ += getIndent() + selector + " {\n";
+                    addIndent();
+                    
+                    for (const auto& decl : declarations) {
+                        cssCode_ += getIndent() + decl.first + ": " + decl.second + ";\n";
+                    }
+                    
+                    removeIndent();
+                    cssCode_ += getIndent() + "}\n";
+                }
+            }
+        } else if (child->getType() == ASTNodeType::ELEMENT) {
+            auto element = std::static_pointer_cast<ElementNode>(child);
+            std::string tagName = element->getTagName();
+            if (tagName.find("@Style") != std::string::npos) {
+                // 处理@Style引用
+                std::string refName = tagName.substr(7); // 跳过 "@Style "
+                std::string templateContent = context_.getTemplate(refName, "Style");
+                if (!templateContent.empty()) {
+                    cssCode_ += templateContent;
+                }
+            }
         }
-    } else {
-        // 全局样式块
-        cssCode_ += getIndent() + "<style>\n";
-        addIndent();
-        
-        std::string properties = generateStyleProperties(style->getProperties());
-        if (!properties.empty()) {
-            cssCode_ += getIndent() + properties + "\n";
-        }
-        
-        removeIndent();
-        cssCode_ += getIndent() + "</style>\n";
     }
 }
 
@@ -179,13 +221,23 @@ void CHTLGenerator::generateTemplate(std::shared_ptr<TemplateNode> template_) {
     std::string templateType = template_->getTemplateType();
     std::string templateName = template_->getTemplateName();
     
-    // 将模板存储到上下文中
-    context_.addTemplate(templateName, templateType, template_->toString());
-    
     // 生成模板内容
+    std::string templateContent;
     for (auto& child : template_->getChildren()) {
-        generateNode(child);
+        if (child->getType() == ASTNodeType::STYLE_BLOCK) {
+            // 样式模板
+            auto style = std::static_pointer_cast<StyleNode>(child);
+            templateContent = generateStyleProperties(style->getProperties());
+        } else {
+            // 其他模板内容
+            templateContent += child->toString();
+        }
     }
+    
+    // 将模板存储到上下文中
+    context_.addTemplate(templateName, templateType, templateContent);
+    
+    // 模板本身不生成HTML，只存储到上下文中
 }
 
 void CHTLGenerator::generateCustom(std::shared_ptr<CustomNode> custom) {
@@ -193,13 +245,36 @@ void CHTLGenerator::generateCustom(std::shared_ptr<CustomNode> custom) {
     std::string customType = custom->getCustomType();
     std::string customName = custom->getCustomName();
     
-    // 将自定义存储到上下文中
-    context_.addCustom(customName, customType, custom->toString());
-    
     // 生成自定义内容
+    std::string customContent;
     for (auto& child : custom->getChildren()) {
-        generateNode(child);
+        if (child->getType() == ASTNodeType::ELEMENT) {
+            // 元素自定义
+            auto element = std::static_pointer_cast<ElementNode>(child);
+            customContent += "<" + element->getTagName();
+            
+            // 添加属性
+            std::string attributes = generateAttributes(element->getAttributes());
+            if (!attributes.empty()) {
+                customContent += " " + attributes;
+            }
+            customContent += ">";
+            
+            // 添加子元素
+            for (auto& grandChild : element->getChildren()) {
+                customContent += grandChild->toString();
+            }
+            
+            customContent += "</" + element->getTagName() + ">";
+        } else {
+            customContent += child->toString();
+        }
     }
+    
+    // 将自定义存储到上下文中
+    context_.addCustom(customName, customType, customContent);
+    
+    // 自定义本身不生成HTML，只存储到上下文中
 }
 
 void CHTLGenerator::generateOrigin(std::shared_ptr<OriginNode> origin) {

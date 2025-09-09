@@ -47,6 +47,10 @@ private:
     std::shared_ptr<ASTNode> parseConfiguration();
     std::shared_ptr<ASTNode> parseConstraint();
     std::shared_ptr<ASTNode> parseUse();
+    std::shared_ptr<ASTNode> parseTemplateReference();
+    void parseStyleRules(std::shared_ptr<StyleNode> styleNode);
+    void parseStyleRuleProperties(std::shared_ptr<StyleRuleNode> ruleNode);
+    std::string parseSelector();
     
     // 辅助方法
     Token& current();

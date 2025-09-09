@@ -27,6 +27,7 @@ enum class TokenType {
     EQUALS,         // =
     COMMA,          // ,
     DOT,            // .
+    HASH,           // #
     SLASH,          // /
     BACKSLASH,      // backslash
     ASTERISK,       // *
@@ -104,12 +105,14 @@ enum class TokenType {
     // 特殊类型
     COMMENT,        // 注释
     WHITESPACE,     // 空白字符
+    SPACE,          // 空格
     NEWLINE,        // 换行符
     EOF_TOKEN,      // 文件结束
     
     // HTML元素
     HTML,           // html
     HEAD,           // head
+    TITLE,          // title
     BODY,           // body
     DIV,            // div
     SPAN,           // span

@@ -333,6 +333,7 @@ Token CHTLLexer::parseSymbol() {
             case '=': type = TokenType::EQUALS; break;
             case ',': type = TokenType::COMMA; break;
             case '.': type = TokenType::DOT; break;
+            case '#': type = TokenType::HASH; break;
             case '/': type = TokenType::SLASH; break;
             case '\\': type = TokenType::BACKSLASH; break;
             case '*': type = TokenType::ASTERISK; break;
@@ -531,6 +532,7 @@ TokenType CHTLLexer::getKeywordType(const std::string& keyword) const {
         // HTML元素
         {"html", TokenType::HTML},
         {"head", TokenType::HEAD},
+        {"title", TokenType::TITLE},
         {"body", TokenType::BODY},
         {"div", TokenType::DIV},
         {"span", TokenType::SPAN},

@@ -960,6 +960,7 @@ CMakeFiles/chtl.dir/src/CHTL/CHTLGenerator.cpp.o: /workspace/chtl/src/CHTL/CHTLG
   /usr/include/c++/14/initializer_list \
   /usr/include/c++/14/ios \
   /usr/include/c++/14/iosfwd \
+  /usr/include/c++/14/iostream \
   /usr/include/c++/14/istream \
   /usr/include/c++/14/locale \
   /usr/include/c++/14/memory \
@@ -2072,8 +2073,6 @@ CMakeFiles/chtl.dir/src/CHTL/CHTLContext.cpp.o:
 
 /workspace/chtl/include/CHTL/CHTLLexer.h:
 
-/usr/include/c++/14/iostream:
-
 /usr/include/c++/14/functional:
 
 /usr/include/c++/14/array:
@@ -2087,6 +2086,8 @@ CMakeFiles/chtl.dir/src/CHTL/CHTLContext.cpp.o:
 /usr/include/c++/14/stack:
 
 /usr/include/c++/14/regex:
+
+/usr/include/c++/14/iostream:
 
 /usr/include/c++/14/fstream:
 
