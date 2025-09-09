@@ -2,8 +2,8 @@
 //! to build an Abstract Syntax Tree (AST).
 
 use crate::ast::{
-    AttributeNode, CommentNode, ElementNode, Expression, Node, Program, StyleNode, StyleProperty,
-    TextNode,
+    AttributeNode, CommentNode, CssRuleNode, ElementNode, Expression, Node, Program, StyleNode,
+    StyleProperty, TextNode,
 };
 use crate::lexer::Lexer;
 use crate::token::Token;
@@ -111,20 +111,72 @@ impl<'a> Parser<'a> {
 
     fn parse_style_node(&mut self) -> Result<StyleNode, String> {
         self.expect_peek(Token::LBrace)?;
-        self.next_token();
+        self.next_token(); // consume LBrace
 
-        let mut properties = Vec::new();
+        let mut inline_properties = Vec::new();
+        let mut rules = Vec::new();
 
-        while self.cur_token != Token::RBrace && self.cur_token != Token::Eof {
-            properties.push(self.parse_style_property()?);
+        while !self.cur_token_is(&Token::RBrace) && !self.cur_token_is(&Token::Eof) {
+            match self.cur_token {
+                Token::Dot | Token::Hash => {
+                    rules.push(self.parse_css_rule()?);
+                }
+                Token::Ident(_) => {
+                    // Lookahead to see if it's an inline property or a tag selector for a rule
+                    if self.peek_token_is(&Token::Colon) {
+                        inline_properties.push(self.parse_style_property()?);
+                    } else if self.peek_token_is(&Token::LBrace) {
+                        rules.push(self.parse_css_rule()?);
+                    } else {
+                        // It's part of a selector
+                        rules.push(self.parse_css_rule()?);
+                    }
+                }
+                _ => {
+                    return Err(format!(
+                        "Unexpected token in style block: {:?}",
+                        self.cur_token
+                    ))
+                }
+            }
             self.next_token();
         }
 
-        if self.cur_token != Token::RBrace {
+        if !self.cur_token_is(&Token::RBrace) {
             return Err("Expected '}' to close style block".to_string());
         }
 
-        Ok(StyleNode { properties })
+        Ok(StyleNode {
+            inline_properties,
+            rules,
+        })
+    }
+
+    fn parse_css_rule(&mut self) -> Result<CssRuleNode, String> {
+        let mut selector_parts = Vec::new();
+        // A simple selector parser: read tokens until we hit a brace.
+        while !self.cur_token_is(&Token::LBrace) && !self.cur_token_is(&Token::Eof) {
+            selector_parts.push(token_to_string(&self.cur_token));
+            self.next_token();
+        }
+        let selector = selector_parts.join("").trim().to_string();
+
+        if !self.cur_token_is(&Token::LBrace) {
+            return Err("Expected '{' to start css rule block".to_string());
+        }
+        self.next_token(); // consume LBrace
+
+        let mut properties = Vec::new();
+        while !self.cur_token_is(&Token::RBrace) && !self.cur_token_is(&Token::Eof) {
+            properties.push(self.parse_style_property()?);
+            self.next_token(); // consume semicolon
+        }
+
+        if !self.cur_token_is(&Token::RBrace) {
+            return Err("Expected '}' to close css rule block".to_string());
+        }
+
+        Ok(CssRuleNode { selector, properties })
     }
 
     fn parse_style_property(&mut self) -> Result<StyleProperty, String> {
@@ -220,6 +272,7 @@ fn token_to_string(token: &Token) -> String {
         Token::Ident(s) => s.clone(),
         Token::String(s) => s.clone(),
         Token::Dot => ".".to_string(),
+        Token::Hash => "#".to_string(),
         _ => "".to_string(),
     }
 }
@@ -230,59 +283,49 @@ mod tests {
     use crate::lexer::Lexer;
 
     #[test]
-    fn test_element_with_styles_parsing() {
+    fn test_style_block_parsing() {
         let input = r#"
-            div {
-                id: "main";
-                -- a generator comment
-                style {
+            style {
+                color: white;
+                .box {
                     width: 100px;
-                    height: 200px;
                 }
-                span {
-                    text { "Hello World" }
+                #main {
+                    height: 200px;
                 }
             }
         "#;
 
         let lexer = Lexer::new(input);
         let mut parser = Parser::new(lexer);
-        let program = parser.parse_program();
+        let node = parser.parse_node().unwrap();
 
         assert!(
             parser.errors.is_empty(),
             "Parser has errors: {:?}",
             parser.errors
         );
-        assert_eq!(program.nodes.len(), 1);
 
-        let node = program.nodes.get(0).unwrap();
-        if let Node::Element(el) = node {
-            assert_eq!(el.tag_name, "div");
-            assert_eq!(el.attributes.len(), 1);
-            assert_eq!(el.children.len(), 3);
+        if let Node::Style(style_node) = node {
+            assert_eq!(style_node.inline_properties.len(), 1);
+            assert_eq!(style_node.rules.len(), 2);
 
-            let attr1 = &el.attributes[0];
-            assert_eq!(attr1.name, "id");
-            assert_eq!(attr1.value, Expression::StringLiteral("main".to_string()));
+            let inline_prop = &style_node.inline_properties[0];
+            assert_eq!(inline_prop.name, "color");
+            assert_eq!(inline_prop.value, "white");
 
-            let child1 = &el.children[0];
-            assert!(matches!(child1, Node::Comment(_)));
+            let rule1 = &style_node.rules[0];
+            assert_eq!(rule1.selector, ".box");
+            assert_eq!(rule1.properties.len(), 1);
+            let rule1_prop = &rule1.properties[0];
+            assert_eq!(rule1_prop.name, "width");
+            assert_eq!(rule1_prop.value, "100px");
 
-            let child2 = &el.children[1];
-            if let Node::Style(style_node) = child2 {
-                assert_eq!(style_node.properties.len(), 2);
-                let prop1 = &style_node.properties[0];
-                assert_eq!(prop1.name, "width");
-                assert_eq!(prop1.value, "100px");
-            } else {
-                panic!("Expected style node");
-            }
-
-            let child3 = &el.children[2];
-            assert!(matches!(child3, Node::Element(_)));
+            let rule2 = &style_node.rules[1];
+            assert_eq!(rule2.selector, "#main");
+            assert_eq!(rule2.properties.len(), 1);
         } else {
-            panic!("Expected top-level node to be an element");
+            panic!("Expected a StyleNode, got {:?}", node);
         }
     }
 }

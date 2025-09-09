@@ -21,6 +21,14 @@ pub enum Node {
 /// Represents a local style block, e.g., `style { ... }`.
 #[derive(Debug, PartialEq, Clone)]
 pub struct StyleNode {
+    pub inline_properties: Vec<StyleProperty>,
+    pub rules: Vec<CssRuleNode>,
+}
+
+/// Represents a CSS rule block, e.g., `.class { ... }`.
+#[derive(Debug, PartialEq, Clone)]
+pub struct CssRuleNode {
+    pub selector: String,
     pub properties: Vec<StyleProperty>,
 }
 
