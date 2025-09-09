@@ -1,0 +1,70 @@
+// 样式组模板示例
+[Template] @Style DefaultText
+{
+    color: "black";
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+// 元素模板示例
+[Template] @Element Box
+{
+    div
+    {
+        class: "box-container";
+        
+        style
+        {
+            width: 200px;
+            height: 200px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        
+        text
+        {
+            "This is a box element"
+        }
+    }
+}
+
+// 变量组模板示例
+[Template] @Var ThemeColor
+{
+    primary: "rgb(255, 192, 203)";
+    secondary: "rgb(253, 144, 162)";
+    text: "black";
+}
+
+// 使用模板
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                "CHTL Template Test"
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            style
+            {
+                @Style DefaultText;
+            }
+            
+            text
+            {
+                "Hello, CHTL Templates!"
+            }
+        }
+        
+        @Element Box;
+    }
+}

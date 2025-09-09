@@ -1,0 +1,37 @@
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                "CHTL Test Page"
+            }
+        }
+    }
+
+    body
+    {
+        div
+        {
+            id: "container";
+            class: "main-content";
+            
+            text
+            {
+                "Hello, CHTL World!"
+            }
+        }
+        
+        div
+        {
+            style
+            {
+                width: 100px;
+                height: 100px;
+                background-color: red;
+            }
+        }
+    }
+}

@@ -1,0 +1,106 @@
+// 自定义样式组示例
+[Custom] @Style TextSet
+{
+    color,
+    font-size;
+}
+
+[Custom] @Style WhiteText
+{
+    @Style TextSet
+    {
+        color: white;
+        font-size: 16px;
+    }
+}
+
+// 自定义元素示例
+[Custom] @Element Box
+{
+    div
+    {
+        class: "box-container";
+        
+        style
+        {
+            width: 200px;
+            height: 200px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        
+        text
+        {
+            "This is a custom box element"
+        }
+    }
+    
+    span
+    {
+        class: "box-label";
+        
+        text
+        {
+            "Box Label"
+        }
+    }
+}
+
+// 自定义变量组示例
+[Custom] @Var ThemeColor
+{
+    primary: "rgb(255, 192, 203)";
+    secondary: "rgb(253, 144, 162)";
+    text: "black";
+}
+
+// 使用自定义
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                "CHTL Custom Test"
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            style
+            {
+                @Style TextSet
+                {
+                    color: red;
+                    font-size: 18px;
+                }
+            }
+            
+            text
+            {
+                "Hello, CHTL Custom System!"
+            }
+        }
+        
+        @Element Box;
+        
+        div
+        {
+            style
+            {
+                color: ThemeColor(primary);
+                background-color: ThemeColor(secondary);
+            }
+            
+            text
+            {
+                "Themed content"
+            }
+        }
+    }
+}

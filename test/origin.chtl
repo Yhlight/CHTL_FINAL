@@ -1,0 +1,76 @@
+// 原始嵌入示例
+
+// 嵌入 HTML 代码
+[Origin] @Html
+{
+    <div class="custom-html">
+        <h1>Custom HTML Content</h1>
+        <p>This is raw HTML content embedded in CHTL.</p>
+    </div>
+}
+
+// 嵌入 CSS 代码
+[Origin] @Style
+{
+    .custom-html {
+        background-color: #f0f0f0;
+        padding: 20px;
+        border-radius: 5px;
+    }
+    
+    .custom-html h1 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+}
+
+// 嵌入 JavaScript 代码
+[Origin] @JavaScript
+{
+    function showAlert() {
+        alert('Hello from embedded JavaScript!');
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Embedded JavaScript loaded');
+    });
+}
+
+// 带名称的原始嵌入
+[Origin] @Html customBox
+{
+    <div class="custom-box">
+        <span>Named HTML content</span>
+    </div>
+}
+
+// 使用原始嵌入
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                "CHTL Origin Test"
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: "main-content";
+            
+            text
+            {
+                "CHTL with embedded content"
+            }
+        }
+        
+        // 使用带名称的原始嵌入
+        [Origin] @Html customBox;
+    }
+}
