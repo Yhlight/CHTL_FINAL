@@ -1,0 +1,74 @@
+# CHTL Core Module
+add_library(CHTLCore STATIC
+    # Context
+    CHTLContext/CHTLContext.h
+    CHTLContext/CHTLContext.cpp
+    
+    # Generator
+    CHTLGenerator/CHTLGenerator.h
+    CHTLGenerator/CHTLGenerator.cpp
+    
+    # Lexer
+    CHTLLexer/CHTLLexer.h
+    CHTLLexer/CHTLLexer.cpp
+    CHTLLexer/Lexer.h
+    CHTLLexer/Lexer.cpp
+    CHTLLexer/GlobalMap.h
+    CHTLLexer/GlobalMap.cpp
+    CHTLLexer/Token.h
+    CHTLLexer/Token.cpp
+    
+    # Loader
+    CHTLLoader/CHTLLoader.h
+    CHTLLoader/CHTLLoader.cpp
+    
+    # Manager
+    CHTLManage/CHTLManage.h
+    CHTLManage/CHTLManage.cpp
+    
+    # Nodes
+    CHTLNode/BaseNode.h
+    CHTLNode/BaseNode.cpp
+    CHTLNode/ElementNode.h
+    CHTLNode/ElementNode.cpp
+    CHTLNode/TextNode.h
+    CHTLNode/TextNode.cpp
+    CHTLNode/CommentNode.h
+    CHTLNode/CommentNode.cpp
+    CHTLNode/TemplateNode.h
+    CHTLNode/TemplateNode.cpp
+    CHTLNode/CustomNode.h
+    CHTLNode/CustomNode.cpp
+    CHTLNode/StyleNode.h
+    CHTLNode/StyleNode.cpp
+    CHTLNode/ScriptNode.h
+    CHTLNode/ScriptNode.cpp
+    CHTLNode/OriginNode.h
+    CHTLNode/OriginNode.cpp
+    CHTLNode/ImportNode.h
+    CHTLNode/ImportNode.cpp
+    CHTLNode/ConfigNode.h
+    CHTLNode/ConfigNode.cpp
+    CHTLNode/NamespaceNode.h
+    CHTLNode/NamespaceNode.cpp
+    CHTLNode/OperatorNode.h
+    CHTLNode/OperatorNode.cpp
+    
+    # Parser
+    CHTLParser/CHTLParser.h
+    CHTLParser/CHTLParser.cpp
+    
+    # State
+    CHTLState/CHTLState.h
+    CHTLState/CHTLState.cpp
+    
+    # IO Stream
+    CHTLIOStream/CHTLIOStream.h
+    CHTLIOStream/CHTLIOStream.cpp
+    
+    # CMOD System
+    CMODSystem/CMODSystem.h
+    CMODSystem/CMODSystem.cpp
+)
+
+target_include_directories(CHTLCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
