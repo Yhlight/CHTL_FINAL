@@ -2,20 +2,18 @@ package CHTL.Lexer;
 
 public enum TokenType {
     // Literals
-    IDENTIFIER,
-    STRING,
-    NUMBER,
+    IDENTIFIER, STRING, NUMBER,
 
     // Symbols
-    LBRACE, RBRACE,
-    COLON,
-    EQUALS,
-    SEMICOLON,
+    LBRACE, RBRACE, LBRACKET, RBRACKET,
+    COLON, EQUALS, SEMICOLON, COMMA,
+    AT, DOT,
 
-    // Keywords from the spec
-    TEXT,
-    STYLE,
-    SCRIPT,
+    // Keywords
+    TEXT, STYLE, SCRIPT,
+    TEMPLATE, CUSTOM, IMPORT, NAMESPACE, EXCEPT,
+    FROM, AS, WITH, INHERIT, DELETE, INSERT,
+    AFTER, BEFORE, REPLACE,
 
     EOF
 }

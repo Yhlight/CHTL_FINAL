@@ -11,4 +11,9 @@ public class TextNode implements BaseNode {
     public String getText() {
         return text;
     }
+
+    @Override
+    public BaseNode clone() {
+        return new TextNode(this.text);
+    }
 }

@@ -43,7 +43,7 @@ public class ExpressionLexer {
                 advance();
                 continue;
             }
-            if (current == '#' || current == '.' || (Character.isLetter(current) && lookahead(5).matches("^[a-zA-Z0-9]+\\[\\d+\\].*"))) {
+            if (current == '#' || current == '.') {
                  tokens.add(selector());
             } else if (Character.isDigit(current)) {
                 tokens.add(number());
@@ -79,10 +79,27 @@ public class ExpressionLexer {
 
     private Token selector() {
         int start = position;
-        while (position < input.length() && !Character.isWhitespace(peek()) && !OPERATORS.containsKey(String.valueOf(peek()))) {
+        while (position < input.length()) {
+            char c = peek();
+            if (OPERATORS.containsKey(String.valueOf(c)) && c != '.') {
+                break; // Stop at an operator (but allow . for class selectors)
+            }
+
             advance();
+
+            // If we hit whitespace, peek ahead. If the next thing is an operator, stop.
+            // This allows for descendant selectors like `.class div`
+            if (Character.isWhitespace(c)) {
+                int tempPos = position;
+                while(tempPos < input.length() && Character.isWhitespace(input.charAt(tempPos))) {
+                    tempPos++;
+                }
+                if (tempPos < input.length() && OPERATORS.containsKey(String.valueOf(input.charAt(tempPos)))) {
+                    break;
+                }
+            }
         }
-        return new Token(ExpressionTokenType.SELECTOR, input.substring(start, position), start);
+        return new Token(ExpressionTokenType.SELECTOR, input.substring(start, position).trim(), start);
     }
 
     private Token number() {

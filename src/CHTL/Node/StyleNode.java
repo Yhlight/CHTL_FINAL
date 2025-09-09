@@ -20,4 +20,13 @@ public class StyleNode implements BaseNode {
     public Map<String, String> getProperties() {
         return properties;
     }
+
+    @Override
+    public BaseNode clone() {
+        StyleNode cloned = new StyleNode();
+        for (Map.Entry<String, String> entry : this.properties.entrySet()) {
+            cloned.addProperty(entry.getKey(), entry.getValue());
+        }
+        return cloned;
+    }
 }

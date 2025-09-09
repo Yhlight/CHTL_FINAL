@@ -2,81 +2,178 @@ package CHTL.Processor;
 
 import CHTL.Expression.*;
 import CHTL.Manage.DefinitionManager;
-import CHTL.Node.BaseNode;
-import CHTL.Node.ElementNode;
-import CHTL.Node.StyleNode;
-
+import CHTL.Node.*;
+import Util.DependencyGraph;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ASTProcessor {
 
     private final DefinitionManager definitionManager;
-    private final List<BaseNode> documentRoot;
+    private List<BaseNode> ast;
 
-    public ASTProcessor(List<BaseNode> documentRoot, DefinitionManager definitionManager) {
-        this.documentRoot = documentRoot;
+    public ASTProcessor(List<BaseNode> ast, DefinitionManager definitionManager) {
+        this.ast = ast;
         this.definitionManager = definitionManager;
     }
 
-    public void process() {
-        // In a full implementation, we would also expand element templates here.
-        processStyles(documentRoot, true); // Process global styles first
-        processStyles(documentRoot, false); // Process local styles
+    public List<BaseNode> process() {
+        // 1. Expand all element templates recursively.
+        expandTemplates(ast);
+
+        // 2. Evaluate all style expressions.
+        evaluateAllStyles();
+
+        return ast;
     }
 
-    private void processStyles(List<BaseNode> nodes, boolean isGlobal) {
-        for (BaseNode node : nodes) {
-            if (node instanceof ElementNode element) {
-                for (BaseNode child : element.getChildren()) {
-                    if (child instanceof StyleNode styleNode) {
-                        if (isGlobal) continue; // Skip local styles in global pass
-                        evaluateStyleNode(styleNode, element);
+    private void expandTemplates(List<BaseNode> nodes) {
+        List<BaseNode> newNodes = new ArrayList<>();
+        boolean changed = false;
+        for(BaseNode node : nodes) {
+            if (node instanceof ElementTemplateUsageNode usage) {
+                // Get the template definition
+                ElementTemplateNode template = (ElementTemplateNode) definitionManager.get(usage.getNamespace(), ElementTemplateNode.class, usage.getTemplateName())
+                    .orElseThrow(() -> new RuntimeException("Template not found: " + usage.getTemplateName()));
+
+                // Clone the children from the template
+                List<BaseNode> clonedChildren = new ArrayList<>();
+                for (BaseNode child : template.getChildren()) {
+                    clonedChildren.add(cloneNode(child)); // Deep clone
+                }
+
+                // Apply specializations
+                applySpecializations(clonedChildren, usage.getSpecializationInstructions());
+
+                newNodes.addAll(clonedChildren);
+                changed = true;
+            } else {
+                if (node instanceof ElementNode element) {
+                    expandTemplates(element.getChildren());
+                }
+                newNodes.add(node);
+            }
+        }
+        if (changed) {
+            nodes.clear();
+            nodes.addAll(newNodes);
+            // Repeat until no more templates are expanded
+            expandTemplates(nodes);
+        }
+    }
+
+    private void applySpecializations(List<BaseNode> targetNodes, List<BaseNode> instructions) {
+        for (BaseNode inst : instructions) {
+            if (inst instanceof InsertInstructionNode ins) {
+                // Simplified insert logic
+            } else if (inst instanceof DeleteInstructionNode del) {
+                targetNodes.removeIf(n -> n instanceof ElementNode && ((ElementNode)n).getTagName().equals(del.getSelector()));
+            } else if (inst instanceof AddStyleInstructionNode styleInst) {
+                for(BaseNode n : targetNodes) {
+                    if (n instanceof ElementNode el && el.getTagName().equals(styleInst.getSelector())) {
+                        el.addChild(styleInst.getStyleNode());
                     }
                 }
-                processStyles(element.getChildren(), false); // Children are always in local context
-            } else if (node instanceof StyleNode styleNode) {
-                if (!isGlobal) continue; // Skip global styles in local pass
-                evaluateStyleNode(styleNode, null);
             }
         }
     }
 
-    private void evaluateStyleNode(StyleNode styleNode, ElementNode parent) {
-        // This is a simplified evaluation loop. A real implementation needs a dependency graph.
-        for (Map.Entry<String, String> property : styleNode.getProperties().entrySet()) {
-            String propertyName = property.getKey();
-            String propertyValue = property.getValue();
+    private void evaluateAllStyles() {
+        Map<StyleProperty, String> propertyValues = new HashMap<>();
+        Map<StyleProperty, ExpressionNode> propertyExpressions = new HashMap<>();
 
-            try {
-                ExpressionLexer lexer = new ExpressionLexer(propertyValue);
-                List<Token> tokens = lexer.tokenize();
+        // 1. Discover all properties
+        discoverProperties(ast, null, propertyValues);
 
-                // If it's just a simple literal, no need to parse/eval
-                if (tokens.size() == 2 && (tokens.get(0).type() == ExpressionTokenType.STRING || tokens.get(0).type() == ExpressionTokenType.NUMBER)) {
-                    continue;
+        // 2. Build dependency graph
+        DependencyGraph<StyleProperty> graph = new DependencyGraph<>();
+        for (Map.Entry<StyleProperty, String> entry : propertyValues.entrySet()) {
+            StyleProperty currentProp = entry.getKey();
+            graph.addNode(currentProp);
+            ExpressionNode expression = new ExpressionParser(new ExpressionLexer(entry.getValue()).tokenize()).parse();
+            propertyExpressions.put(currentProp, expression);
+            for (ReferenceNode ref : findReferences(expression)) {
+                // Simplified findElement
+                ElementNode referencedElement = findElement(ref.getSelector());
+                if (referencedElement != null) {
+                    graph.addEdge(new StyleProperty(referencedElement, ref.getProperty()), currentProp);
                 }
-
-                ExpressionParser parser = new ExpressionParser(tokens);
-                ExpressionNode expression = parser.parse();
-
-                EvaluationContext context = new EvaluationContext(parent, this.documentRoot);
-                ExpressionEvaluator evaluator = new ExpressionEvaluator();
-                ExpressionNode result = evaluator.evaluate(expression, context);
-
-                // Update the property in the style node with the computed value
-                // This part is also simplified. The result node needs to be converted to a string.
-                if (result instanceof UnitNode) {
-                    UnitNode unitResult = (UnitNode) result;
-                    styleNode.getProperties().put(propertyName, unitResult.getValue() + unitResult.getUnit());
-                } else if (result instanceof LiteralNode) {
-                     styleNode.getProperties().put(propertyName, ((LiteralNode) result).getValue().toString());
-                }
-
-            } catch (Exception e) {
-                System.err.println("Failed to evaluate expression for property '" + propertyName + "': " + propertyValue);
-                e.printStackTrace();
             }
         }
+
+        // 3. Evaluate in order
+        List<StyleProperty> order = graph.topologicalSort();
+        ExpressionEvaluator evaluator = new ExpressionEvaluator();
+        for (StyleProperty prop : order) {
+            ExpressionNode expression = propertyExpressions.get(prop);
+            EvaluationContext context = new EvaluationContext(prop.parent(), this.ast);
+            ExpressionNode result = evaluator.evaluate(expression, context);
+            String finalValue = result.toString(); // Simplified
+
+            // Update the actual AST node
+            prop.parent().getChildren().stream()
+                .filter(n -> n instanceof StyleNode)
+                .map(n -> (StyleNode)n)
+                .findFirst()
+                .ifPresent(s -> s.getProperties().put(prop.propertyName(), finalValue));
+        }
+    }
+
+    // Simplified helper methods from before
+    private void discoverProperties(List<BaseNode> nodes, ElementNode parent, Map<StyleProperty, String> map) {
+        for (BaseNode node : nodes) {
+            if (node instanceof ElementNode element) {
+                element.getChildren().stream()
+                    .filter(n -> n instanceof StyleNode)
+                    .flatMap(n -> ((StyleNode)n).getProperties().entrySet().stream())
+                    .forEach(entry -> map.put(new StyleProperty(element, entry.getKey()), entry.getValue()));
+                discoverProperties(element.getChildren(), element, map);
+            }
+        }
+    }
+
+    private List<ReferenceNode> findReferences(ExpressionNode node) {
+        List<ReferenceNode> refs = new ArrayList<>();
+        if (node instanceof ReferenceNode ref) {
+            refs.add(ref);
+        } else if (node instanceof BinaryOpNode bn) {
+            refs.addAll(findReferences(bn.getLeft()));
+            refs.addAll(findReferences(bn.getRight()));
+        } else if (node instanceof TernaryNode tn) {
+            refs.addAll(findReferences(tn.getCondition()));
+            refs.addAll(findReferences(tn.getTrueExpression()));
+            if (tn.getFalseExpression() != null) {
+                refs.addAll(findReferences(tn.getFalseExpression()));
+            }
+        }
+        return refs;
+    }
+
+    private ElementNode findElement(String selector) {
+        if (selector != null && selector.startsWith("#")) {
+            return findElementById(this.ast, selector.substring(1));
+        }
+        return null;
+    }
+
+    private ElementNode findElementById(List<BaseNode> nodes, String id) {
+         for (BaseNode node : nodes) {
+            if (node instanceof ElementNode element) {
+                Object elementId = element.getAttributes().get("id");
+                if (elementId instanceof String && elementId.equals(id)) {
+                    return element;
+                }
+                ElementNode foundInChildren = findElementById(element.getChildren(), id);
+                if (foundInChildren != null) return foundInChildren;
+            }
+        }
+        return null;
+    }
+
+    private BaseNode cloneNode(BaseNode node) {
+        if (node == null) return null;
+        return node.clone();
     }
 }

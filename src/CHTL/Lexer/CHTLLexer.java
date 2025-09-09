@@ -14,6 +14,20 @@ public class CHTLLexer {
         KEYWORDS.put("text", TokenType.TEXT);
         KEYWORDS.put("style", TokenType.STYLE);
         KEYWORDS.put("script", TokenType.SCRIPT);
+        KEYWORDS.put("Template", TokenType.TEMPLATE);
+        KEYWORDS.put("Custom", TokenType.CUSTOM);
+        KEYWORDS.put("Import", TokenType.IMPORT);
+        KEYWORDS.put("Namespace", TokenType.NAMESPACE);
+        KEYWORDS.put("except", TokenType.EXCEPT);
+        KEYWORDS.put("from", TokenType.FROM);
+        KEYWORDS.put("as", TokenType.AS);
+        KEYWORDS.put("with", TokenType.WITH);
+        KEYWORDS.put("inherit", TokenType.INHERIT);
+        KEYWORDS.put("delete", TokenType.DELETE);
+        KEYWORDS.put("insert", TokenType.INSERT);
+        KEYWORDS.put("after", TokenType.AFTER);
+        KEYWORDS.put("before", TokenType.BEFORE);
+        KEYWORDS.put("replace", TokenType.REPLACE);
     }
 
     public CHTLLexer(String input) {
@@ -34,12 +48,22 @@ public class CHTLLexer {
                 tokens.add(new Token(TokenType.LBRACE, "{")); advance();
             } else if (current == '}') {
                 tokens.add(new Token(TokenType.RBRACE, "}")); advance();
+            } else if (current == '[') {
+                tokens.add(new Token(TokenType.LBRACKET, "[")); advance();
+            } else if (current == ']') {
+                tokens.add(new Token(TokenType.RBRACKET, "]")); advance();
             } else if (current == ':') {
                 tokens.add(new Token(TokenType.COLON, ":")); advance();
             } else if (current == '=') {
                 tokens.add(new Token(TokenType.EQUALS, "=")); advance();
             } else if (current == ';') {
                 tokens.add(new Token(TokenType.SEMICOLON, ";")); advance();
+            } else if (current == ',') {
+                tokens.add(new Token(TokenType.COMMA, ",")); advance();
+            } else if (current == '@') {
+                tokens.add(new Token(TokenType.AT, "@")); advance();
+            } else if (current == '.') {
+                tokens.add(new Token(TokenType.DOT, ".")); advance();
             } else if (current == '"' || current == '\'') {
                 tokens.add(string(current));
             } else {

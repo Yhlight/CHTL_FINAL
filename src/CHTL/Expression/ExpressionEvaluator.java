@@ -88,34 +88,49 @@ public class ExpressionEvaluator {
         ExpressionNode left = evaluate(node.getLeft(), context);
         ExpressionNode right = evaluate(node.getRight(), context);
 
-        if (left instanceof UnitNode && right instanceof UnitNode) {
-            UnitNode leftUnit = (UnitNode) left;
-            UnitNode rightUnit = (UnitNode) right;
-
-            if (!leftUnit.getUnit().equals(rightUnit.getUnit())) {
-                // Simplification: units must match for all ops.
-                throw new RuntimeException("Unit mismatch for operator " + node.getOperator());
-            }
-
-            double l = leftUnit.getValue();
-            double r = rightUnit.getValue();
-
-            switch (node.getOperator()) {
-                case "+": return new UnitNode(l + r, leftUnit.getUnit());
-                case "-": return new UnitNode(l - r, leftUnit.getUnit());
-                case "*": return new UnitNode(l * r, leftUnit.getUnit());
-                case "/": return new UnitNode(l / r, leftUnit.getUnit());
-                case "%": return new UnitNode(l % r, leftUnit.getUnit());
-                case "**": return new UnitNode(Math.pow(l, r), leftUnit.getUnit());
-                case ">": return new LiteralNode(l > r);
-                case ">=": return new LiteralNode(l >= r);
-                case "<": return new LiteralNode(l < r);
-                case "<=": return new LiteralNode(l <= r);
-                default: throw new RuntimeException("Unsupported operator for UnitNodes: " + node.getOperator());
-            }
+        if (left instanceof UnitNode || right instanceof UnitNode) {
+            return evaluateUnitOperation(left, right, node.getOperator());
         }
 
         // Add logic for other types (e.g., number, string, boolean) later
         throw new RuntimeException("Unsupported operand types for binary operation.");
+    }
+
+    private ExpressionNode evaluateUnitOperation(ExpressionNode left, ExpressionNode right, String op) {
+        double lVal, rVal;
+        String unit = null;
+
+        if (left instanceof UnitNode) {
+            lVal = ((UnitNode) left).getValue();
+            unit = ((UnitNode) left).getUnit();
+        } else if (left instanceof LiteralNode && ((LiteralNode) left).getValue() instanceof Number) {
+            lVal = ((Number) ((LiteralNode) left).getValue()).doubleValue();
+        } else {
+            throw new RuntimeException("Invalid left operand for unit operation.");
+        }
+
+        if (right instanceof UnitNode) {
+            rVal = ((UnitNode) right).getValue();
+            if (unit != null && !unit.equals(((UnitNode) right).getUnit())) throw new RuntimeException("Unit mismatch.");
+            if (unit == null) unit = ((UnitNode) right).getUnit();
+        } else if (right instanceof LiteralNode && ((LiteralNode) right).getValue() instanceof Number) {
+            rVal = ((Number) ((LiteralNode) right).getValue()).doubleValue();
+        } else {
+            throw new RuntimeException("Invalid right operand for unit operation.");
+        }
+
+        switch (op) {
+            case "+": return new UnitNode(lVal + rVal, unit);
+            case "-": return new UnitNode(lVal - rVal, unit);
+            case "*": return new UnitNode(lVal * rVal, unit);
+            case "/": return new UnitNode(lVal / rVal, unit);
+            case "%": return new UnitNode(lVal % rVal, unit);
+            case "**": return new UnitNode(Math.pow(lVal, rVal), unit);
+            case ">": return new LiteralNode(lVal > rVal);
+            case ">=": return new LiteralNode(lVal >= rVal);
+            case "<": return new LiteralNode(lVal < rVal);
+            case "<=": return new LiteralNode(lVal <= rVal);
+            default: throw new RuntimeException("Unsupported operator for unit operation: " + op);
+        }
     }
 }

@@ -16,15 +16,24 @@ import CodeMerger;
 
 public class CompilerDispatcher {
     public static void main(String[] args) {
-        String source = "style { body { background-color: #eee; } }\n" +
+        String source = "style { body { font-family: sans-serif; } }\n" +
+                        "\n" +
                         "div {\n" +
                         "    id: main-box;\n" +
-                        "    text: \"Click the button!\";\n" +
+                        "    style {\n" +
+                        "        width: 100px * 2;\n" +
+                        "        height: width;\n" +
+                        "        border: 1px solid black;\n" +
+                        "    }\n" +
+                        "    text: \"Hello, World!\";\n" +
                         "    script {\n" +
-                        "        {{#main-box}} -> listen { click: () => { alert('Hello from CHTL JS!'); } };\n" +
+                        "        {{#main-box}} -> listen { \n" +
+                        "             click: () => { this.style.backgroundColor = 'lightblue'; }\n" +
+                        "        };\n" +
                         "    }\n" +
                         "}\n" +
-                        "script { console.log('Global JS executed.'); }";
+                        "\n" +
+                        "script { console.log('Global script loaded.'); }";
 
         System.out.println("--- Source Code ---\n" + source + "\n");
 
@@ -38,7 +47,8 @@ public class CompilerDispatcher {
             List<String> cssOutputs = new ArrayList<>();
             List<String> jsOutputs = new ArrayList<>();
 
-            CHTLCompiler chtlCompiler = new CHTLCompiler();
+            DefinitionManager definitionManager = new DefinitionManager();
+            CHTLCompiler chtlCompiler = new CHTLCompiler(definitionManager);
             CHTLJSGenerator chtljsGenerator = new CHTLJSGenerator();
             CssCompiler cssCompiler = new CssCompiler();
             JsCompiler jsCompiler = new JsCompiler();
@@ -63,9 +73,15 @@ public class CompilerDispatcher {
                 }
             }
 
-            // 3. Merging
+            // 3. Post-Processing CHTL AST
+            // This is the critical step that was missing.
+            // It resolves templates and evaluates all style expressions.
+            CHTL.Processor.ASTProcessor processor = new CHTL.Processor.ASTProcessor(chtlAst, definitionManager);
+            List<BaseNode> processedAst = processor.process();
+
+            // 4. Merging
             CodeMerger merger = new CodeMerger();
-            String finalHtml = merger.merge(chtlAst, cssOutputs, jsOutputs);
+            String finalHtml = merger.merge(processedAst, cssOutputs, jsOutputs);
 
             System.out.println("--- Final HTML Output ---");
             System.out.println(finalHtml);

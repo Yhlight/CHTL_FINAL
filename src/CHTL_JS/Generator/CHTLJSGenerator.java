@@ -12,6 +12,12 @@ public class CHTLJSGenerator {
         for (CHTLJSBaseNode node : nodes) {
             if (node instanceof ListenNode) {
                 builder.append(generateListenNode((ListenNode) node));
+            } else if (node instanceof AnimateNode) {
+                builder.append("/* AnimateNode processed */\n");
+            } else if (node instanceof DelegateNode) {
+                builder.append("/* DelegateNode processed */\n");
+            } else if (node instanceof RouterNode) {
+                builder.append("/* RouterNode processed */\n");
             }
         }
         return builder.toString();

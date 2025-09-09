@@ -26,21 +26,38 @@ public class CHTLJSParser {
 
     private CHTLJSBaseNode statement() {
         if (check(TokenType.L_CURLY_BRACE)) {
-            return listenStatement();
+            // This is a statement starting with a selector, e.g., {{...}} -> listen
+            String selector = parseSelector();
+            consume(TokenType.ARROW, "Expect '->'.");
+            Token keyword = consume(TokenType.IDENTIFIER, "Expect keyword like 'listen' or 'delegate'.");
+            if (keyword.value().equals("listen")) {
+                return parseListenBlock(selector);
+            } else if (keyword.value().equals("delegate")) {
+                return parseDelegateBlock(selector);
+            }
+        } else if (check(TokenType.IDENTIFIER)) {
+            // This is a statement starting with a keyword, e.g., animate { ... }
+            Token keyword = advance();
+            if (keyword.value().equals("animate")) {
+                return parseAnimateBlock();
+            } else if (keyword.value().equals("router")) {
+                return parseRouterBlock();
+            }
         }
         throw new RuntimeException("Unexpected token in CHTL JS: " + peek().value());
     }
 
-    private ListenNode listenStatement() {
-        consume(TokenType.L_CURLY_BRACE, "Expect '{{' to start a selector.");
-        Token selector = consume(TokenType.SELECTOR, "Expect a selector inside braces.");
-        consume(TokenType.R_CURLY_BRACE, "Expect '}}' to close a selector.");
+    private String parseSelector() {
+        consume(TokenType.L_CURLY_BRACE, "Expect '{{'.");
+        String selector = consume(TokenType.SELECTOR, "Expect selector.").value();
+        consume(TokenType.R_CURLY_BRACE, "Expect '}}'.");
+        return selector;
+    }
 
-        consume(TokenType.ARROW, "Expect '->' after selector.");
-        consume(TokenType.LISTEN, "Expect 'listen' keyword.");
+    private ListenNode parseListenBlock(String selector) {
         consume(TokenType.LBRACE, "Expect '{' for listen block.");
 
-        ListenNode listenNode = new ListenNode(selector.value());
+        ListenNode listenNode = new ListenNode(selector);
 
         while (!check(TokenType.RBRACE)) {
             Token eventName = consume(TokenType.IDENTIFIER, "Expect event name (e.g., click).");
@@ -62,16 +79,46 @@ public class CHTLJSParser {
 
     private String consumeUntil(TokenType... terminators) {
         StringBuilder builder = new StringBuilder();
+        int braceDepth = 0;
         while (!isAtEnd()) {
-            for (TokenType terminator : terminators) {
-                if (check(terminator)) {
-                    return builder.toString().trim();
+            if (braceDepth == 0) {
+                for (TokenType terminator : terminators) {
+                    if (check(terminator)) {
+                        return builder.toString().trim();
+                    }
                 }
             }
+            if (check(TokenType.LBRACE)) braceDepth++;
+            if (check(TokenType.RBRACE)) braceDepth--;
+
             builder.append(peek().value()).append(" ");
             advance();
         }
         return builder.toString().trim();
+    }
+
+    private DelegateNode parseDelegateBlock(String selector) {
+        consume(TokenType.LBRACE, "Expect '{' for delegate block.");
+        DelegateNode node = new DelegateNode(selector);
+        // Simplified parsing
+        consume(TokenType.RBRACE, "Expect '}'.");
+        return node;
+    }
+
+    private AnimateNode parseAnimateBlock() {
+        consume(TokenType.LBRACE, "Expect '{' for animate block.");
+        AnimateNode node = new AnimateNode();
+        // Simplified parsing
+        consume(TokenType.RBRACE, "Expect '}'.");
+        return node;
+    }
+
+    private RouterNode parseRouterBlock() {
+        consume(TokenType.LBRACE, "Expect '{' for router block.");
+        RouterNode node = new RouterNode();
+        // Simplified parsing
+        consume(TokenType.RBRACE, "Expect '}'.");
+        return node;
     }
 
     // Utility methods
