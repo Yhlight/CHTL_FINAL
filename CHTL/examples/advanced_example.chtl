@@ -1,0 +1,341 @@
+// 高级CHTL示例 - 展示各种特性
+
+// 配置组
+[Configuration]
+{
+    DEBUG_MODE = false;
+    PRETTY_PRINT = true;
+}
+
+// 样式组模板
+[Template] @Style CardStyle
+{
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin: 10px;
+}
+
+[Template] @Style ButtonStyle
+{
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+[Template] @Style PrimaryButton
+{
+    @Style ButtonStyle;
+    background-color: #007bff;
+    color: white;
+    
+    &:hover
+    {
+        background-color: #0056b3;
+    }
+}
+
+[Template] @Style SecondaryButton
+{
+    @Style ButtonStyle;
+    background-color: #6c757d;
+    color: white;
+    
+    &:hover
+    {
+        background-color: #545b62;
+    }
+}
+
+// 变量组模板
+[Template] @Var Theme
+{
+    primaryColor: "#007bff";
+    secondaryColor: "#6c757d";
+    successColor: "#28a745";
+    dangerColor: "#dc3545";
+    warningColor: "#ffc107";
+    infoColor: "#17a2b8";
+    lightColor: "#f8f9fa";
+    darkColor: "#343a40";
+}
+
+// 元素模板
+[Template] @Element Card
+{
+    div
+    {
+        style
+        {
+            @Style CardStyle;
+        }
+        
+        h3
+        {
+            text
+            {
+                Card Title
+            }
+        }
+        
+        p
+        {
+            text
+            {
+                This is a card component created with CHTL templates.
+            }
+        }
+    }
+}
+
+[Template] @Element Button
+{
+    button
+    {
+        style
+        {
+            @Style PrimaryButton;
+        }
+        
+        text
+        {
+            Click Me
+        }
+    }
+}
+
+// 自定义样式组
+[Custom] @Style CustomCard
+{
+    @Style CardStyle;
+    border: 2px solid Theme(primaryColor);
+    
+    &:hover
+    {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+}
+
+// 自定义元素
+[Custom] @Element CustomButton
+{
+    button
+    {
+        style
+    {
+            @Style PrimaryButton;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        text
+        {
+            Custom Button
+        }
+    }
+}
+
+// 主HTML结构
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                CHTL Advanced Example
+            }
+        }
+        
+        meta
+        {
+            charset: "utf-8";
+        }
+        
+        meta
+        {
+            name: "viewport";
+            content: "width=device-width, initial-scale=1.0";
+        }
+    }
+    
+    body
+    {
+        style
+        {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: Theme(lightColor);
+        }
+        
+        div
+        {
+            class: "container";
+            
+            style
+            {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            
+            h1
+            {
+                text
+                {
+                    CHTL Advanced Example
+                }
+                
+                style
+                {
+                    color: Theme(darkColor);
+                    text-align: center;
+                    margin-bottom: 30px;
+                }
+            }
+            
+            div
+            {
+                class: "grid";
+                
+                style
+                {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 20px;
+                }
+                
+                // 使用元素模板
+                @Element Card;
+                
+                div
+                {
+                    style
+                    {
+                        @Style CustomCard;
+                    }
+                    
+                    h3
+                    {
+                        text
+                        {
+                            Custom Card
+                        }
+                    }
+                    
+                    p
+                    {
+                        text
+                        {
+                            This card uses a custom style with theme colors.
+                        }
+                    }
+                    
+                    div
+                    {
+                        style
+                        {
+                            margin-top: 15px;
+                        }
+                        
+                        @Element Button;
+                        
+                        button
+                        {
+                            style
+                            {
+                                @Style SecondaryButton;
+                                margin-left: 10px;
+                            }
+                            
+                            text
+                            {
+                                Secondary
+                            }
+                        }
+                    }
+                }
+                
+                div
+                {
+                    style
+                    {
+                        @Style CardStyle;
+                        background: linear-gradient(135deg, Theme(primaryColor), Theme(infoColor));
+                        color: white;
+                    }
+                    
+                    h3
+                    {
+                        text
+                        {
+                            Gradient Card
+                        }
+                    }
+                    
+                    p
+                    {
+                        text
+                        {
+                            This card uses a gradient background with theme colors.
+                        }
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "actions";
+                
+                style
+                {
+                    text-align: center;
+                    margin-top: 30px;
+                }
+                
+                @Element CustomButton;
+                
+                button
+                {
+                    style
+                    {
+                        @Style SecondaryButton;
+                        margin-left: 10px;
+                    }
+                    
+                    text
+                    {
+                        Reset
+                    }
+                }
+            }
+        }
+        
+        // 原始嵌入JavaScript
+        [Origin] @JavaScript
+        {
+            // 简单的交互功能
+            document.addEventListener('DOMContentLoaded', function() {
+                const buttons = document.querySelectorAll('button');
+                
+                buttons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        console.log('Button clicked:', this.textContent);
+                        
+                        // 添加点击效果
+                        this.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            this.style.transform = 'scale(1)';
+                        }, 150);
+                    });
+                });
+            });
+        }
+    }
+}

@@ -1,0 +1,261 @@
+{
+  "name": "chtl-language",
+  "displayName": "CHTL Language Support",
+  "description": "Language support for CHTL (C++ HyperText Language)",
+  "version": "1.0.0",
+  "publisher": "chtl-dev",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Linters",
+    "Formatters"
+  ],
+  "keywords": [
+    "chtl",
+    "html",
+    "css",
+    "javascript",
+    "template",
+    "compiler"
+  ],
+  "activationEvents": [
+    "onLanguage:chtl",
+    "onCommand:chtl.compile",
+    "onCommand:chtl.preview",
+    "onCommand:chtl.format"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "chtl",
+        "aliases": [
+          "CHTL",
+          "chtl"
+        ],
+        "extensions": [
+          ".chtl"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "chtl",
+        "scopeName": "source.chtl",
+        "path": "./syntaxes/chtl.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "chtl",
+        "path": "./snippets/chtl.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "chtl.compile",
+        "title": "Compile CHTL",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.preview",
+        "title": "Preview CHTL",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.format",
+        "title": "Format CHTL",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.watch",
+        "title": "Watch CHTL",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.build",
+        "title": "Build CHTL Project",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.clean",
+        "title": "Clean CHTL Project",
+        "category": "CHTL"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "chtl.compile",
+          "when": "resourceExtname == .chtl",
+          "group": "chtl"
+        },
+        {
+          "command": "chtl.preview",
+          "when": "resourceExtname == .chtl",
+          "group": "chtl"
+        },
+        {
+          "command": "chtl.format",
+          "when": "resourceExtname == .chtl",
+          "group": "chtl"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "chtl.compile",
+          "when": "resourceExtname == .chtl",
+          "group": "chtl"
+        },
+        {
+          "command": "chtl.preview",
+          "when": "resourceExtname == .chtl",
+          "group": "chtl"
+        },
+        {
+          "command": "chtl.format",
+          "when": "resourceExtname == .chtl",
+          "group": "chtl"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "chtl.compile",
+          "title": "CHTL: Compile"
+        },
+        {
+          "command": "chtl.preview",
+          "title": "CHTL: Preview"
+        },
+        {
+          "command": "chtl.format",
+          "title": "CHTL: Format"
+        },
+        {
+          "command": "chtl.watch",
+          "title": "CHTL: Watch"
+        },
+        {
+          "command": "chtl.build",
+          "title": "CHTL: Build Project"
+        },
+        {
+          "command": "chtl.clean",
+          "title": "CHTL: Clean Project"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "chtl.compile",
+        "key": "ctrl+shift+c",
+        "when": "editorTextFocus && resourceExtname == .chtl"
+      },
+      {
+        "command": "chtl.preview",
+        "key": "ctrl+shift+p",
+        "when": "editorTextFocus && resourceExtname == .chtl"
+      },
+      {
+        "command": "chtl.format",
+        "key": "ctrl+shift+f",
+        "when": "editorTextFocus && resourceExtname == .chtl"
+      }
+    ],
+    "configuration": {
+      "title": "CHTL",
+      "properties": {
+        "chtl.compiler.path": {
+          "type": "string",
+          "default": "chtl",
+          "description": "Path to the CHTL compiler executable"
+        },
+        "chtl.compiler.options": {
+          "type": "object",
+          "default": {
+            "minify": false,
+            "sourcemap": true,
+            "watch": false
+          },
+          "description": "Default compiler options"
+        },
+        "chtl.formatting.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable CHTL formatting"
+        },
+        "chtl.formatting.indentSize": {
+          "type": "number",
+          "default": 2,
+          "description": "Indentation size for formatting"
+        },
+        "chtl.formatting.useTabs": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use tabs for indentation"
+        },
+        "chtl.preview.autoOpen": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically open preview when compiling"
+        },
+        "chtl.preview.port": {
+          "type": "number",
+          "default": 8080,
+          "description": "Port for preview server"
+        },
+        "chtl.linting.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable CHTL linting"
+        },
+        "chtl.linting.strict": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable strict linting mode"
+        }
+      }
+    },
+    "views": {
+      "chtl": [
+        {
+          "id": "chtlExplorer",
+          "name": "CHTL Explorer",
+          "when": "workspaceHasChtlFiles"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "chtl",
+          "title": "CHTL",
+          "icon": "resources/chtl-icon.svg"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^8.1.0"
+  }
+}

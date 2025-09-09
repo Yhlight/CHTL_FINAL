@@ -1,0 +1,112 @@
+// 样式组模板
+[Template] @Style ButtonStyle
+{
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+[Template] @Style PrimaryButton
+{
+    @Style ButtonStyle;
+    background-color: #007bff;
+    color: white;
+}
+
+[Template] @Style SecondaryButton
+{
+    @Style ButtonStyle;
+    background-color: #6c757d;
+    color: white;
+}
+
+// 元素模板
+[Template] @Element Button
+{
+    button
+    {
+        style
+        {
+            @Style PrimaryButton;
+        }
+        
+        text
+        {
+            Click Me
+        }
+    }
+}
+
+// 变量组模板
+[Template] @Var Theme
+{
+    primaryColor: "#007bff";
+    secondaryColor: "#6c757d";
+    successColor: "#28a745";
+    dangerColor: "#dc3545";
+    warningColor: "#ffc107";
+    infoColor: "#17a2b8";
+}
+
+html
+{
+    body
+    {
+        div
+        {
+            class: "container";
+            
+            style
+            {
+                padding: 20px;
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            
+            h1
+            {
+                text
+                {
+                    CHTL Template Example
+                }
+            }
+            
+            // 使用元素模板
+            @Element Button;
+            
+            button
+            {
+                style
+                {
+                    @Style SecondaryButton;
+                    margin-left: 10px;
+                }
+                
+                text
+                {
+                    Secondary Button
+                }
+            }
+            
+            div
+            {
+                style
+                {
+                    margin-top: 20px;
+                    padding: 15px;
+                    background-color: Theme(primaryColor);
+                    color: white;
+                    border-radius: 5px;
+                }
+                
+                text
+                {
+                    This div uses theme colors from the variable group template.
+                }
+            }
+        }
+    }
+}
