@@ -114,12 +114,12 @@ Test/ParserTest/clean: Test/ParserTest/CMakeFiles/ParserTest.dir/clean
 CHTL/CMakeFiles/CHTL_LIB.dir/all:
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTL_LIB.dir/build.make CHTL/CMakeFiles/CHTL_LIB.dir/depend
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTL_LIB.dir/build.make CHTL/CMakeFiles/CHTL_LIB.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=1,2,3 "Built target CHTL_LIB"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=1,2,3,4 "Built target CHTL_LIB"
 .PHONY : CHTL/CMakeFiles/CHTL_LIB.dir/all
 
 # Build rule for subdir invocation for target.
 CHTL/CMakeFiles/CHTL_LIB.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL/CMakeFiles/CHTL_LIB.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : CHTL/CMakeFiles/CHTL_LIB.dir/rule
@@ -140,12 +140,12 @@ CHTL/CMakeFiles/CHTL_LIB.dir/clean:
 Test/ParserTest/CMakeFiles/ParserTest.dir/all: CHTL/CMakeFiles/CHTL_LIB.dir/all
 	$(MAKE) $(MAKESILENT) -f Test/ParserTest/CMakeFiles/ParserTest.dir/build.make Test/ParserTest/CMakeFiles/ParserTest.dir/depend
 	$(MAKE) $(MAKESILENT) -f Test/ParserTest/CMakeFiles/ParserTest.dir/build.make Test/ParserTest/CMakeFiles/ParserTest.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=4,5 "Built target ParserTest"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=5,6 "Built target ParserTest"
 .PHONY : Test/ParserTest/CMakeFiles/ParserTest.dir/all
 
 # Build rule for subdir invocation for target.
 Test/ParserTest/CMakeFiles/ParserTest.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Test/ParserTest/CMakeFiles/ParserTest.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : Test/ParserTest/CMakeFiles/ParserTest.dir/rule

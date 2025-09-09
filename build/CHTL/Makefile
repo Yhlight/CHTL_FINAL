@@ -130,6 +130,30 @@ CHTL_LIB/fast:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTL_LIB.dir/build.make CHTL/CMakeFiles/CHTL_LIB.dir/build
 .PHONY : CHTL_LIB/fast
 
+CHTLGenerator/Generator.o: CHTLGenerator/Generator.cpp.o
+.PHONY : CHTLGenerator/Generator.o
+
+# target to build an object file
+CHTLGenerator/Generator.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTL_LIB.dir/build.make CHTL/CMakeFiles/CHTL_LIB.dir/CHTLGenerator/Generator.cpp.o
+.PHONY : CHTLGenerator/Generator.cpp.o
+
+CHTLGenerator/Generator.i: CHTLGenerator/Generator.cpp.i
+.PHONY : CHTLGenerator/Generator.i
+
+# target to preprocess a source file
+CHTLGenerator/Generator.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTL_LIB.dir/build.make CHTL/CMakeFiles/CHTL_LIB.dir/CHTLGenerator/Generator.cpp.i
+.PHONY : CHTLGenerator/Generator.cpp.i
+
+CHTLGenerator/Generator.s: CHTLGenerator/Generator.cpp.s
+.PHONY : CHTLGenerator/Generator.s
+
+# target to generate assembly for a file
+CHTLGenerator/Generator.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTL_LIB.dir/build.make CHTL/CMakeFiles/CHTL_LIB.dir/CHTLGenerator/Generator.cpp.s
+.PHONY : CHTLGenerator/Generator.cpp.s
+
 CHTLLexer/Lexer.o: CHTLLexer/Lexer.cpp.o
 .PHONY : CHTLLexer/Lexer.o
 
@@ -187,6 +211,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... CHTL_LIB"
+	@echo "... CHTLGenerator/Generator.o"
+	@echo "... CHTLGenerator/Generator.i"
+	@echo "... CHTLGenerator/Generator.s"
 	@echo "... CHTLLexer/Lexer.o"
 	@echo "... CHTLLexer/Lexer.i"
 	@echo "... CHTLLexer/Lexer.s"

@@ -63,6 +63,9 @@ std::unique_ptr<BaseNode> Parser::parseStatement() {
     if (check(TokenType::KEYWORD_TEXT)) {
         return parseText();
     }
+    if (check(TokenType::KEYWORD_STYLE)) {
+        return parseStyleBlock();
+    }
     if (check(TokenType::IDENTIFIER)) {
         return parseElement();
     }
@@ -126,4 +129,33 @@ std::unique_ptr<ElementNode> Parser::parseElement() {
     return element;
 }
 
+std::unique_ptr<StyleBlockNode> Parser::parseStyleBlock() {
+    consume(TokenType::KEYWORD_STYLE, "Expect 'style' keyword.");
+    consume(TokenType::LBRACE, "Expect '{' after 'style'.");
+
+    auto styleNode = std::make_unique<StyleBlockNode>();
+
+    while (!check(TokenType::RBRACE) && !isAtEnd()) {
+        CssPropertyNode prop;
+        prop.key = consume(TokenType::IDENTIFIER, "Expect CSS property key.").lexeme;
+
+        consume(TokenType::COLON, "Expect ':' after CSS property key.");
+
+        if (check(TokenType::IDENTIFIER) || check(TokenType::STRING_LITERAL)) {
+            prop.value = advance().lexeme;
+        } else {
+            throw std::runtime_error("Parse Error: Expected CSS property value.");
+        }
+
+        styleNode->properties.push_back(prop);
+
+        if (!check(TokenType::RBRACE)) {
+            consume(TokenType::SEMICOLON, "Expect ';' after CSS property value.");
+        }
+    }
+
+    consume(TokenType::RBRACE, "Expect '}' after style block.");
+    return styleNode;
 }
+
+} // namespace CHTL

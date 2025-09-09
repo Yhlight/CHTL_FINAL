@@ -4,6 +4,7 @@
 add_library(CHTL_LIB STATIC
     CHTLLexer/Lexer.cpp
     CHTLParser/Parser.cpp
+    CHTLGenerator/Generator.cpp
 )
 
 # Publicly expose the include directories for the library

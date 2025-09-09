@@ -18,6 +18,7 @@ private:
     std::unique_ptr<BaseNode> parseStatement();
     std::unique_ptr<ElementNode> parseElement();
     std::unique_ptr<TextNode> parseText();
+    std::unique_ptr<StyleBlockNode> parseStyleBlock();
     AttributeNode parseAttribute();
 
     // Token management helpers
