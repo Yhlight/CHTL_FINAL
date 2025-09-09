@@ -27,6 +27,12 @@ set(SOURCES
     CHTL/CHTLNode/OriginNode.cpp
     CHTL/CHTLNode/ImportNode.cpp
     CHTL/CHTLNode/NamespaceNode.cpp
+    CHTL/CHTLNode/ConstraintNode.cpp
+    CHTL/CHTLNode/ConfigurationNode.cpp
+    CHTL/CHTLNode/UseNode.cpp
+    CHTL/CHTLConstraint/CHTLConstraintProcessor.cpp
+    CHTL/CHTLConfiguration/CHTLConfigurationProcessor.cpp
+    CHTL/CHTLUse/CHTLUseProcessor.cpp
     CHTL/CHTLParser/CHTLParser.cpp
     CHTL/CHTLGenerator/CHTLGenerator.cpp
     CHTL/CHTLStyle/CHTLStyleProcessor.cpp

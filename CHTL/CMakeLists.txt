@@ -60,6 +60,18 @@ set(CHTL_SOURCES
     CHTL/CHTLNode/ImportNode.h
     CHTL/CHTLNode/NamespaceNode.cpp
     CHTL/CHTLNode/NamespaceNode.h
+    CHTL/CHTLNode/ConstraintNode.cpp
+    CHTL/CHTLNode/ConstraintNode.h
+    CHTL/CHTLNode/ConfigurationNode.cpp
+    CHTL/CHTLNode/ConfigurationNode.h
+    CHTL/CHTLNode/UseNode.cpp
+    CHTL/CHTLNode/UseNode.h
+    CHTL/CHTLConstraint/CHTLConstraintProcessor.cpp
+    CHTL/CHTLConstraint/CHTLConstraintProcessor.h
+    CHTL/CHTLConfiguration/CHTLConfigurationProcessor.cpp
+    CHTL/CHTLConfiguration/CHTLConfigurationProcessor.h
+    CHTL/CHTLUse/CHTLUseProcessor.cpp
+    CHTL/CHTLUse/CHTLUseProcessor.h
     CHTL/CHTLParser/CHTLParser.cpp
     CHTL/CHTLParser/CHTLParser.h
     CHTL/CHTLState/CHTLState.cpp

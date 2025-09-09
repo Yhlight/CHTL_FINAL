@@ -4,6 +4,12 @@
 #include "CHTL/CHTLLexer/Token.h"
 #include "CHTL/CHTLParser/CHTLParser.h"
 #include "CHTL/CHTLGenerator/CHTLGenerator.h"
+#include "CHTL/CHTLNode/ConstraintNode.h"
+#include "CHTL/CHTLConstraint/CHTLConstraintProcessor.h"
+#include "CHTL/CHTLNode/ConfigurationNode.h"
+#include "CHTL/CHTLConfiguration/CHTLConfigurationProcessor.h"
+#include "CHTL/CHTLNode/UseNode.h"
+#include "CHTL/CHTLUse/CHTLUseProcessor.h"
 #include "Scanner/CHTLUnifiedScanner.h"
 #include "CompilerDispatcher/CompilerDispatcher.h"
 
@@ -105,6 +111,103 @@ int main() {
                 std::cout << "  " << warning << std::endl;
             }
         }
+        
+        // 测试约束系统
+        std::cout << "\n约束系统测试:" << std::endl;
+        CHTL::CHTLConstraintProcessor constraintProcessor;
+        constraintProcessor.setDebugMode(true);
+        
+        // 创建约束节点
+        auto constraint1 = std::make_shared<CHTL::ConstraintNode>("test_constraint", CHTL::ConstraintNode::ConstraintType::EXACT);
+        constraint1->setConstraintExpression("test_value");
+        constraint1->addTargetElement("div");
+        constraint1->addTargetProperty("class");
+        constraint1->setOperation(CHTL::ConstraintNode::ConstraintOperation::REQUIRE);
+        constraint1->setOperationMessage("测试约束消息");
+        
+        // 添加约束到处理器
+        constraintProcessor.addConstraint(constraint1);
+        
+        // 处理约束
+        bool constraintResult = constraintProcessor.processConstraints();
+        std::cout << "约束处理结果: " << (constraintResult ? "成功" : "失败") << std::endl;
+        
+        // 检查约束
+        bool checkResult = constraintProcessor.checkConstraints("test_value");
+        std::cout << "约束检查结果: " << (checkResult ? "通过" : "失败") << std::endl;
+        
+        // 输出约束调试信息
+        std::cout << "约束处理器调试信息:" << std::endl;
+        std::cout << constraintProcessor.getDebugInfo() << std::endl;
+        
+        // 测试配置系统
+        std::cout << "\n配置系统测试:" << std::endl;
+        CHTL::CHTLConfigurationProcessor configurationProcessor;
+        configurationProcessor.setDebugMode(true);
+        
+        // 创建配置节点
+        auto config1 = std::make_shared<CHTL::ConfigurationNode>("test_config", CHTL::ConfigurationNode::ConfigurationType::GLOBAL);
+        config1->setConfigurationGroup("test_group");
+        config1->setConfigurationParameter("debug", "true");
+        config1->setConfigurationParameter("strict", "false");
+        config1->addConfigurationRule("is_valid");
+        config1->setConfigurationOption("auto_generate", true);
+        config1->setConfigurationLimit("max_depth", 10);
+        config1->setConfigurationDefault("output_format", "html5");
+        
+        // 添加配置到处理器
+        configurationProcessor.addConfiguration(config1);
+        
+        // 处理配置
+        bool configResult = configurationProcessor.processConfigurations();
+        std::cout << "配置处理结果: " << (configResult ? "成功" : "失败") << std::endl;
+        
+        // 验证配置
+        bool validateResult = configurationProcessor.validateConfigurations();
+        std::cout << "配置验证结果: " << (validateResult ? "通过" : "失败") << std::endl;
+        
+        // 应用配置
+        bool applyResult = configurationProcessor.applyConfigurations();
+        std::cout << "配置应用结果: " << (applyResult ? "成功" : "失败") << std::endl;
+        
+        // 输出配置调试信息
+        std::cout << "配置处理器调试信息:" << std::endl;
+        std::cout << configurationProcessor.getDebugInfo() << std::endl;
+        
+        // 测试use语法系统
+        std::cout << "\nuse语法系统测试:" << std::endl;
+        CHTL::CHTLUseProcessor useProcessor;
+        useProcessor.setDebugMode(true);
+        
+        // 创建use节点
+        auto use1 = std::make_shared<CHTL::UseNode>("test_use", CHTL::UseNode::UseType::HTML5);
+        use1->setUseGroup("test_group");
+        use1->setUseVersion("1.0.0");
+        use1->setUseParameter("doctype", "html5");
+        use1->setUseParameter("charset", "utf-8");
+        use1->addUseRule("is_valid");
+        use1->setUseOption("auto_generate", true);
+        use1->setUseLimit("max_depth", 10);
+        use1->setUseDefault("output_format", "html5");
+        
+        // 添加use到处理器
+        useProcessor.addUse(use1);
+        
+        // 处理use
+        bool useResult = useProcessor.processUses();
+        std::cout << "use处理结果: " << (useResult ? "成功" : "失败") << std::endl;
+        
+        // 验证use
+        bool useValidateResult = useProcessor.validateUses();
+        std::cout << "use验证结果: " << (useValidateResult ? "通过" : "失败") << std::endl;
+        
+        // 应用use
+        bool useApplyResult = useProcessor.applyUses();
+        std::cout << "use应用结果: " << (useApplyResult ? "成功" : "失败") << std::endl;
+        
+        // 输出use调试信息
+        std::cout << "use处理器调试信息:" << std::endl;
+        std::cout << useProcessor.getDebugInfo() << std::endl;
         
     } catch (const std::exception& e) {
         std::cerr << "测试过程中发生错误: " << e.what() << std::endl;
