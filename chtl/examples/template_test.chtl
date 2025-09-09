@@ -1,0 +1,47 @@
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                Template Test
+            }
+        }
+    }
+    body
+    {
+        div
+        {
+            class: "container";
+            
+            [Template] @Style
+            {
+                .container
+                {
+                    width: 100%;
+                    height: 100vh;
+                    background-color: #f0f0f0;
+                }
+            }
+            
+            [Custom] @Element
+            {
+                div
+                {
+                    class: "custom-element";
+                    text
+                    {
+                        This is a custom element
+                    }
+                }
+            }
+            
+            [Origin] @Html
+            {
+                <p>This is raw HTML content</p>
+            }
+        }
+    }
+}

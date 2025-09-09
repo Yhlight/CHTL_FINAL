@@ -22,7 +22,9 @@ set(SOURCES
     src/main.cpp
     src/lexer/lexer.cpp
     src/lexer/token.cpp
+    src/lexer/chtl_lexer.cpp
     src/parser/parser.cpp
+    src/parser/chtl_parser.cpp
     src/ast/ast_node.cpp
 )
 
@@ -30,7 +32,9 @@ set(SOURCES
 set(HEADERS
     include/lexer/lexer.h
     include/lexer/token.h
+    include/lexer/chtl_lexer.h
     include/parser/parser.h
+    include/parser/chtl_parser.h
     include/ast/ast_node.h
 )
 

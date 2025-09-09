@@ -65,6 +65,8 @@ void Lexer::initialize_keywords() {
         {"true", TokenType::BOOLEAN_LITERAL},
         {"false", TokenType::BOOLEAN_LITERAL}
     };
+    
+    initialize_chtl_keywords();
 }
 
 void Lexer::initialize_operators() {
@@ -98,6 +100,62 @@ void Lexer::initialize_operators() {
         {"{", TokenType::LEFT_BRACE},
         {"}", TokenType::RIGHT_BRACE}
     };
+}
+
+void Lexer::initialize_chtl_keywords() {
+    // CHTL特有的关键字和语法
+    keywords_["html5"] = TokenType::IDENTIFIER; // HTML5类型
+    keywords_["html"] = TokenType::IDENTIFIER;
+    keywords_["head"] = TokenType::IDENTIFIER;
+    keywords_["body"] = TokenType::IDENTIFIER;
+    keywords_["div"] = TokenType::IDENTIFIER;
+    keywords_["span"] = TokenType::IDENTIFIER;
+    keywords_["p"] = TokenType::IDENTIFIER;
+    keywords_["a"] = TokenType::IDENTIFIER;
+    keywords_["img"] = TokenType::IDENTIFIER;
+    keywords_["ul"] = TokenType::IDENTIFIER;
+    keywords_["ol"] = TokenType::IDENTIFIER;
+    keywords_["li"] = TokenType::IDENTIFIER;
+    keywords_["table"] = TokenType::IDENTIFIER;
+    keywords_["tr"] = TokenType::IDENTIFIER;
+    keywords_["td"] = TokenType::IDENTIFIER;
+    keywords_["th"] = TokenType::IDENTIFIER;
+    keywords_["form"] = TokenType::IDENTIFIER;
+    keywords_["input"] = TokenType::IDENTIFIER;
+    keywords_["button"] = TokenType::IDENTIFIER;
+    keywords_["title"] = TokenType::IDENTIFIER;
+    keywords_["meta"] = TokenType::IDENTIFIER;
+    keywords_["link"] = TokenType::IDENTIFIER;
+    keywords_["script"] = TokenType::SCRIPT;
+    keywords_["style"] = TokenType::STYLE;
+    
+    // CHTL JS关键字
+    keywords_["fileloader"] = TokenType::IDENTIFIER;
+    keywords_["listen"] = TokenType::IDENTIFIER;
+    keywords_["delegate"] = TokenType::IDENTIFIER;
+    keywords_["animate"] = TokenType::IDENTIFIER;
+    keywords_["vir"] = TokenType::IDENTIFIER;
+    keywords_["router"] = TokenType::IDENTIFIER;
+    keywords_["iNeverAway"] = TokenType::IDENTIFIER;
+    keywords_["util"] = TokenType::IDENTIFIER;
+    keywords_["printMylove"] = TokenType::IDENTIFIER;
+    
+    // 配置关键字
+    keywords_["INDEX_INITIAL_COUNT"] = TokenType::IDENTIFIER;
+    keywords_["DEBUG_MODE"] = TokenType::IDENTIFIER;
+    keywords_["DISABLE_NAME_GROUP"] = TokenType::IDENTIFIER;
+    keywords_["DISABLE_STYLE_AUTO_ADD_CLASS"] = TokenType::IDENTIFIER;
+    keywords_["DISABLE_STYLE_AUTO_ADD_ID"] = TokenType::IDENTIFIER;
+    keywords_["DISABLE_DEFAULT_NAMESPACE"] = TokenType::IDENTIFIER;
+    keywords_["DISABLE_CUSTOM_ORIGIN_TYPE"] = TokenType::IDENTIFIER;
+    keywords_["DISABLE_SCRIPT_AUTO_ADD_CLASS"] = TokenType::IDENTIFIER;
+    keywords_["DISABLE_SCRIPT_AUTO_ADD_ID"] = TokenType::IDENTIFIER;
+    
+    // 模块关键字
+    keywords_["Info"] = TokenType::IDENTIFIER;
+    keywords_["Export"] = TokenType::IDENTIFIER;
+    keywords_["Name"] = TokenType::IDENTIFIER;
+    keywords_["OriginType"] = TokenType::IDENTIFIER;
 }
 
 char Lexer::current_char() const {

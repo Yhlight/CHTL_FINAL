@@ -23,6 +23,7 @@ private:
     
     void initialize_keywords();
     void initialize_operators();
+    void initialize_chtl_keywords();
     
     char current_char() const;
     char peek_char(size_t offset = 1) const;

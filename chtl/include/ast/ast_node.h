@@ -139,6 +139,7 @@ public:
     StyleNode(const std::string& value = "")
         : ASTNode(NodeType::STYLE, "style", value) {}
     
+    std::string to_html() const override;
     std::string to_css() const override;
     NodePtr clone() const override;
     void accept(class ASTVisitor& visitor) override;

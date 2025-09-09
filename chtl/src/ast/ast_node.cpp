@@ -107,6 +107,33 @@ std::string ASTNode::to_string() const {
 }
 
 std::string ASTNode::to_html() const {
+    if (type == NodeType::ROOT) {
+        std::ostringstream oss;
+        for (const auto& child : children) {
+            oss << child->to_html();
+        }
+        return oss.str();
+    } else if (type == NodeType::TEMPLATE_STYLE || 
+               type == NodeType::TEMPLATE_ELEMENT || 
+               type == NodeType::TEMPLATE_VAR ||
+               type == NodeType::CUSTOM_STYLE || 
+               type == NodeType::CUSTOM_ELEMENT || 
+               type == NodeType::CUSTOM_VAR ||
+               type == NodeType::ORIGIN_HTML || 
+               type == NodeType::ORIGIN_STYLE || 
+               type == NodeType::ORIGIN_JAVASCRIPT ||
+               type == NodeType::IMPORT_HTML || 
+               type == NodeType::IMPORT_STYLE || 
+               type == NodeType::IMPORT_JAVASCRIPT ||
+               type == NodeType::IMPORT_CHTL || 
+               type == NodeType::IMPORT_CJMOD) {
+        // For now, just return the content attribute
+        auto it = attributes.find("content");
+        if (it != attributes.end()) {
+            return it->second;
+        }
+        return "";
+    }
     return "";
 }
 
@@ -210,6 +237,10 @@ void TextNode::accept(ASTVisitor& visitor) {
 }
 
 // StyleNode implementation
+std::string StyleNode::to_html() const {
+    return "<style>" + value + "</style>";
+}
+
 std::string StyleNode::to_css() const {
     return value;
 }

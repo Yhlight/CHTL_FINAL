@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "lexer/lexer.h"
-#include "parser/parser.h"
+#include "lexer/chtl_lexer.h"
+#include "parser/chtl_parser.h"
 #include "ast/ast_node.h"
 
 using namespace chtl;
@@ -28,16 +28,19 @@ int main(int argc, char* argv[]) {
     
     try {
         // Lexical analysis
-        lexer::Lexer lexer(content);
+        lexer::CHTLLexer lexer(content);
         auto tokens = lexer.tokenize();
         
         std::cout << "Tokens:" << std::endl;
         for (const auto& token : tokens.get_tokens()) {
-            std::cout << token.to_string() << std::endl;
+            if (token.type != lexer::TokenType::WHITESPACE && 
+                token.type != lexer::TokenType::NEWLINE) {
+                std::cout << token.to_string() << std::endl;
+            }
         }
         
         // Syntax analysis
-        parser::Parser parser(tokens);
+        parser::CHTLParser parser(tokens);
         auto ast = parser.parse();
         
         std::cout << "\nAST:" << std::endl;

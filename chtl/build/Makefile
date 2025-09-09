@@ -250,6 +250,33 @@ src/ast/ast_node.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/ast/ast_node.cpp.s
 .PHONY : src/ast/ast_node.cpp.s
 
+src/lexer/chtl_lexer.o: src/lexer/chtl_lexer.cpp.o
+.PHONY : src/lexer/chtl_lexer.o
+
+# target to build an object file
+src/lexer/chtl_lexer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/lexer/chtl_lexer.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/lexer/chtl_lexer.cpp.o
+.PHONY : src/lexer/chtl_lexer.cpp.o
+
+src/lexer/chtl_lexer.i: src/lexer/chtl_lexer.cpp.i
+.PHONY : src/lexer/chtl_lexer.i
+
+# target to preprocess a source file
+src/lexer/chtl_lexer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/lexer/chtl_lexer.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/lexer/chtl_lexer.cpp.i
+.PHONY : src/lexer/chtl_lexer.cpp.i
+
+src/lexer/chtl_lexer.s: src/lexer/chtl_lexer.cpp.s
+.PHONY : src/lexer/chtl_lexer.s
+
+# target to generate assembly for a file
+src/lexer/chtl_lexer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/lexer/chtl_lexer.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/lexer/chtl_lexer.cpp.s
+.PHONY : src/lexer/chtl_lexer.cpp.s
+
 src/lexer/lexer.o: src/lexer/lexer.cpp.o
 .PHONY : src/lexer/lexer.o
 
@@ -331,6 +358,33 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/parser/chtl_parser.o: src/parser/chtl_parser.cpp.o
+.PHONY : src/parser/chtl_parser.o
+
+# target to build an object file
+src/parser/chtl_parser.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/parser/chtl_parser.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/parser/chtl_parser.cpp.o
+.PHONY : src/parser/chtl_parser.cpp.o
+
+src/parser/chtl_parser.i: src/parser/chtl_parser.cpp.i
+.PHONY : src/parser/chtl_parser.i
+
+# target to preprocess a source file
+src/parser/chtl_parser.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/parser/chtl_parser.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/parser/chtl_parser.cpp.i
+.PHONY : src/parser/chtl_parser.cpp.i
+
+src/parser/chtl_parser.s: src/parser/chtl_parser.cpp.s
+.PHONY : src/parser/chtl_parser.s
+
+# target to generate assembly for a file
+src/parser/chtl_parser.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/parser/chtl_parser.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/parser/chtl_parser.cpp.s
+.PHONY : src/parser/chtl_parser.cpp.s
+
 src/parser/parser.o: src/parser/parser.cpp.o
 .PHONY : src/parser/parser.o
 
@@ -378,6 +432,9 @@ help:
 	@echo "... src/ast/ast_node.o"
 	@echo "... src/ast/ast_node.i"
 	@echo "... src/ast/ast_node.s"
+	@echo "... src/lexer/chtl_lexer.o"
+	@echo "... src/lexer/chtl_lexer.i"
+	@echo "... src/lexer/chtl_lexer.s"
 	@echo "... src/lexer/lexer.o"
 	@echo "... src/lexer/lexer.i"
 	@echo "... src/lexer/lexer.s"
@@ -387,6 +444,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/parser/chtl_parser.o"
+	@echo "... src/parser/chtl_parser.i"
+	@echo "... src/parser/chtl_parser.s"
 	@echo "... src/parser/parser.o"
 	@echo "... src/parser/parser.i"
 	@echo "... src/parser/parser.s"

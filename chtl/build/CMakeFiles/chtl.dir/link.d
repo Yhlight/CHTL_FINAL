@@ -5,7 +5,9 @@ chtl: \
   CMakeFiles/chtl.dir/src/main.cpp.o \
   CMakeFiles/chtl.dir/src/lexer/lexer.cpp.o \
   CMakeFiles/chtl.dir/src/lexer/token.cpp.o \
+  CMakeFiles/chtl.dir/src/lexer/chtl_lexer.cpp.o \
   CMakeFiles/chtl.dir/src/parser/parser.cpp.o \
+  CMakeFiles/chtl.dir/src/parser/chtl_parser.cpp.o \
   CMakeFiles/chtl.dir/src/ast/ast_node.cpp.o \
   /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so \
   /lib/x86_64-linux-gnu/libm.so \
@@ -47,7 +49,11 @@ CMakeFiles/chtl.dir/src/lexer/lexer.cpp.o:
 
 CMakeFiles/chtl.dir/src/lexer/token.cpp.o:
 
+CMakeFiles/chtl.dir/src/lexer/chtl_lexer.cpp.o:
+
 CMakeFiles/chtl.dir/src/parser/parser.cpp.o:
+
+CMakeFiles/chtl.dir/src/parser/chtl_parser.cpp.o:
 
 CMakeFiles/chtl.dir/src/ast/ast_node.cpp.o:
 
