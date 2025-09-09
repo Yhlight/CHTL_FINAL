@@ -1,7 +1,12 @@
 #include "Parser.h"
 #include <stdexcept>
+#include <iostream> // For debugging
 
 namespace CHTL {
+
+void print_debug_token(const std::string& func, const Token& token) {
+    // std::cout << "[DEBUG] " << func << " | Token: " << TokenTypeToString(token.type) << " ('" << token.value << "')" << std::endl;
+}
 
 Parser::Parser(std::vector<Token> tokens)
     : m_tokens(std::move(tokens)), m_position(0) {}
@@ -17,6 +22,7 @@ Token Parser::consume() {
     if (m_position >= m_tokens.size()) {
         return m_tokens.back();
     }
+    // print_debug_token("CONSUME", m_tokens[m_position]);
     return m_tokens[m_position++];
 }
 
@@ -30,6 +36,7 @@ bool Parser::match(TokenType type) {
 }
 
 Token Parser::expect(TokenType type) {
+    // print_debug_token("EXPECT " + TokenTypeToString(type), peek());
     skipComments();
     if (peek().type == type) {
         return consume();
@@ -47,6 +54,7 @@ void Parser::skipComments() {
 }
 
 std::vector<std::unique_ptr<Node>> Parser::parse() {
+    // print_debug_token("parse", peek());
     std::vector<std::unique_ptr<Node>> roots;
     while (peek().type != TokenType::EndOfFile) {
         roots.push_back(parseStatement());
@@ -56,6 +64,7 @@ std::vector<std::unique_ptr<Node>> Parser::parse() {
 }
 
 std::unique_ptr<Node> Parser::parseStatement() {
+    // print_debug_token("parseStatement", peek());
     skipComments();
     const auto& token = peek();
     if (token.type == TokenType::Identifier) {
@@ -65,6 +74,7 @@ std::unique_ptr<Node> Parser::parseStatement() {
 }
 
 std::unique_ptr<ElementNode> Parser::parseElement(Token identifier) {
+    // print_debug_token("parseElement", identifier);
     auto element = std::make_unique<ElementNode>(identifier.value);
 
     skipComments();
@@ -78,6 +88,7 @@ std::unique_ptr<ElementNode> Parser::parseElement(Token identifier) {
 }
 
 void Parser::parseElementBody(ElementNode* element) {
+    // print_debug_token("parseElementBody", peek());
     while (peek().type != TokenType::CloseBrace && peek().type != TokenType::EndOfFile) {
         skipComments();
 
@@ -133,6 +144,7 @@ void Parser::parseElementBody(ElementNode* element) {
 }
 
 std::unique_ptr<CssPropertyNode> Parser::parseCssProperty() {
+    // print_debug_token("parseCssProperty", peek());
     Token key = expect(TokenType::Identifier);
     expect(TokenType::Colon);
     auto value = parseExpression();
@@ -141,6 +153,7 @@ std::unique_ptr<CssPropertyNode> Parser::parseCssProperty() {
 }
 
 std::unique_ptr<StyleBlockNode> Parser::parseStyleBlock() {
+    // print_debug_token("parseStyleBlock", peek());
     auto styleNode = std::make_unique<StyleBlockNode>();
     while (peek().type != TokenType::CloseBrace && peek().type != TokenType::EndOfFile) {
         skipComments();
@@ -158,6 +171,7 @@ std::unique_ptr<StyleBlockNode> Parser::parseStyleBlock() {
 }
 
 std::unique_ptr<CssRuleNode> Parser::parseCssRule() {
+    // print_debug_token("parseCssRule", peek());
     skipComments();
     std::string selector_str;
 
@@ -198,6 +212,18 @@ int Parser::getOperatorPrecedence(TokenType type) {
 }
 
 std::unique_ptr<ExpressionNode> Parser::parsePrimaryExpression() {
+    // print_debug_token("parsePrimaryExpression", peek());
+    // Property access starts with '.' or '#'.
+    if (peek().type == TokenType::Dot || peek().type == TokenType::Hash) {
+        std::string selector;
+        selector += consume().value; // consume . or #
+        selector += expect(TokenType::Identifier).value; // consume selector name
+
+        expect(TokenType::Dot);
+        std::string prop_name = expect(TokenType::Identifier).value;
+        return std::make_unique<PropertyAccessNode>(selector, prop_name);
+    }
+
     if (peek().type == TokenType::Identifier || peek().type == TokenType::StringLiteral) {
         return std::make_unique<LiteralNode>(consume().value);
     }
@@ -212,6 +238,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimaryExpression() {
 }
 
 std::unique_ptr<ExpressionNode> Parser::parseExpression(int precedence) {
+    // print_debug_token("parseExpression", peek());
     auto left = parsePrimaryExpression();
 
     while (precedence < getOperatorPrecedence(peek().type)) {

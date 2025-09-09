@@ -92,6 +92,11 @@ void printAst(const CHTL::Node* node, int indent = 0) {
         default:
             std::cout << indentation << "Unknown Node Type" << std::endl;
             break;
+        case CHTL::NodeType::PropertyAccess: {
+            auto propAccess = static_cast<const CHTL::PropertyAccessNode*>(node);
+            std::cout << indentation << "PropertyAccess: " << propAccess->getSelector() << "." << propAccess->getPropertyName() << std::endl;
+            break;
+        }
     }
 }
 

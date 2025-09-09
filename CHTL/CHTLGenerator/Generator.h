@@ -20,6 +20,7 @@ private:
     std::stringstream m_output;
     std::stringstream m_global_css;
     int m_indent_level;
+    const std::vector<std::unique_ptr<Node>>* m_roots;
 
     // Main recursive visitor function.
     void visit(const Node* node);
@@ -30,6 +31,10 @@ private:
     // Specific visitor functions for each node type.
     void visitElement(const ElementNode* node);
     void visitText(const TextNode* node);
+
+    // Selector engine
+    const ElementNode* findNode(const std::string& selector) const;
+    const ElementNode* findNodeRecursive(const std::string& selector, const Node* current_node) const;
 
     // Helper for indentation.
     std::string getIndentation() const;

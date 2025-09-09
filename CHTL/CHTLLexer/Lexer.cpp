@@ -83,8 +83,8 @@ Token Lexer::lexComment() {
 Token Lexer::lexIdentifierOrUnquotedLiteral() {
     std::string value;
     // CHTL literals can contain almost anything until a delimiter is hit.
-    // Delimiters are whitespace, ;, {, }, :, =, (, )
-    while (peek() != '\0' && !std::isspace(peek()) && peek() != ';' && peek() != '{' && peek() != '}' && peek() != ':' && peek() != '=' && peek() != '(' && peek() != ')') {
+    // Delimiters are whitespace, ;, {, }, :, =, (, ), .
+    while (peek() != '\0' && !std::isspace(peek()) && peek() != ';' && peek() != '{' && peek() != '}' && peek() != ':' && peek() != '=' && peek() != '(' && peek() != ')' && peek() != '.') {
         value += consume();
     }
     return makeToken(TokenType::Identifier, value);

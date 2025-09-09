@@ -105,6 +105,19 @@ private:
 // Base class for all expression-related nodes
 class ExpressionNode : public Node {};
 
+class PropertyAccessNode : public ExpressionNode {
+public:
+    PropertyAccessNode(const std::string& selector, const std::string& prop_name)
+        : m_selector(selector), m_property_name(prop_name) {}
+
+    NodeType getType() const override { return NodeType::PropertyAccess; }
+    const std::string& getSelector() const { return m_selector; }
+    const std::string& getPropertyName() const { return m_property_name; }
+private:
+    std::string m_selector;
+    std::string m_property_name;
+};
+
 class LiteralNode : public ExpressionNode {
 public:
     LiteralNode(const std::string& value) : m_value(value) {}

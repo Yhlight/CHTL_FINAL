@@ -68,7 +68,7 @@ include CMakeFiles/run_tests.dir/progress.make
 
 CMakeFiles/run_tests: ch-test
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Running all .chtl tests from Test/ directory"
-	/app/build/ch-test /app/Test/basic_elements.chtl /app/Test/example.chtl /app/Test/expressions.chtl /app/Test/style_blocks.chtl
+	/app/build/ch-test /app/Test/basic_elements.chtl /app/Test/example.chtl /app/Test/expressions.chtl /app/Test/property_access.chtl /app/Test/style_blocks.chtl
 
 run_tests: CMakeFiles/run_tests
 run_tests: CMakeFiles/run_tests.dir/build.make

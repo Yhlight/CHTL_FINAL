@@ -21,9 +21,10 @@ std::string Generator::getIndentation() const {
 }
 
 std::string Generator::generate(const std::vector<std::unique_ptr<Node>>& roots) {
-    // Clear previous outputs
+    // Clear previous outputs and store AST roots
     m_output.str("");
     m_global_css.str("");
+    m_roots = &roots;
 
     // First pass: generate the main HTML body and collect global CSS rules
     for (const auto& root : roots) {
@@ -104,6 +105,24 @@ std::string Generator::evaluateExpression(const ExpressionNode* expr, const std:
             } else {
                 return evaluateExpression(ternOp->getFalseValue(), context);
             }
+        }
+        case NodeType::PropertyAccess: {
+            const auto* prop_access = static_cast<const PropertyAccessNode*>(expr);
+            const ElementNode* target_node = findNode(prop_access->getSelector());
+            if (target_node && target_node->getStyleBlock()) {
+                // Find the property in the target's style block
+                for (const auto& prop : target_node->getStyleBlock()->getInlineProperties()) {
+                    if (prop->getKey() == prop_access->getPropertyName()) {
+                        // Return the evaluated value of that property.
+                        // NOTE: This is a simplified implementation that avoids recursive evaluation cycles.
+                        // It assumes the target property is a literal.
+                        if (prop->getValue()->getType() == NodeType::Literal) {
+                             return static_cast<const LiteralNode*>(prop->getValue())->getValue();
+                        }
+                    }
+                }
+            }
+            return "0"; // Default value if not found
         }
         default:
             return "[unsupported expression]";
@@ -213,5 +232,62 @@ void Generator::visitText(const TextNode* node) {
     // Basic HTML escaping could be added here if needed.
     m_output << getIndentation() << node->getText() << "\n";
 }
+
+const ElementNode* Generator::findNodeRecursive(const std::string& selector, const Node* current_node) const {
+    if (!current_node || current_node->getType() != NodeType::Element) {
+        return nullptr;
+    }
+
+    const auto* element = static_cast<const ElementNode*>(current_node);
+    bool match = false;
+
+    // Simplified selector matching for .class, #id
+    if (selector.rfind(".", 0) == 0) {
+        std::string selector_class = selector.substr(1);
+        for (const auto& attr : element->getAttributes()) {
+            if (attr->getKey() == "class" && attr->getValue() == selector_class) {
+                match = true;
+                break;
+            }
+        }
+    } else if (selector.rfind("#", 0) == 0) {
+        std::string selector_id = selector.substr(1);
+         for (const auto& attr : element->getAttributes()) {
+            if (attr->getKey() == "id" && attr->getValue() == selector_id) {
+                match = true;
+                break;
+            }
+        }
+    } else {
+        if (element->getTagName() == selector) {
+            match = true;
+        }
+    }
+
+    if (match) {
+        return element;
+    }
+
+    // Recurse into children
+    for (const auto& child : element->getChildren()) {
+        const ElementNode* found = findNodeRecursive(selector, child.get());
+        if (found) {
+            return found;
+        }
+    }
+
+    return nullptr;
+}
+
+
+const ElementNode* Generator::findNode(const std::string& selector) const {
+    if (!m_roots) return nullptr;
+    for (const auto& root : *m_roots) {
+        const ElementNode* found = findNodeRecursive(selector, root.get());
+        if (found) return found;
+    }
+    return nullptr;
+}
+
 
 } // namespace CHTL

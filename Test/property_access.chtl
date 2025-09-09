@@ -1,0 +1,15 @@
+// Box with a defined width
+div {
+    class: box;
+    style {
+        width: 150px;
+    }
+}
+
+// Another element that references the box's width
+span {
+    style {
+        // This should parse as a property access
+        width: .box.width;
+    }
+}
