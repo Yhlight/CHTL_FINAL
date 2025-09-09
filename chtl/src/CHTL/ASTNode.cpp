@@ -188,4 +188,116 @@ void UseNode::accept(ASTVisitor& visitor) {
     visitor.visitUse(*this);
 }
 
+// StyleRuleNode实现
+StyleRuleNode::StyleRuleNode()
+    : ASTNode(ASTNodeType::STYLE_RULE, "style_rule") {
+}
+
+void StyleRuleNode::accept(ASTVisitor& visitor) {
+    visitor.visitStyleRule(*this);
+}
+
+void StyleRuleNode::addSelector(const std::string& selector) {
+    selectors_.push_back(selector);
+}
+
+void StyleRuleNode::addDeclaration(const std::string& property, const std::string& value) {
+    declarations_[property] = value;
+}
+
+// ExpressionNode实现
+ExpressionNode::ExpressionNode(const std::string& expression)
+    : ASTNode(ASTNodeType::EXPRESSION, "expression"), expressionType_(ExpressionType::LITERAL) {
+    setText(expression);
+}
+
+void ExpressionNode::accept(ASTVisitor& visitor) {
+    visitor.visitExpression(*this);
+}
+
+// BinaryOpNode实现
+BinaryOpNode::BinaryOpNode(const std::string& operator_, std::shared_ptr<ASTNode> left, std::shared_ptr<ASTNode> right)
+    : ASTNode(ASTNodeType::BINARY_OP, "binary_op"), operator_(TokenType::PLUS) {
+    setText(operator_);
+    addChild(left);
+    addChild(right);
+}
+
+void BinaryOpNode::accept(ASTVisitor& visitor) {
+    visitor.visitBinaryOp(*this);
+}
+
+std::shared_ptr<ASTNode> BinaryOpNode::getLeft() const {
+    return children_.empty() ? nullptr : children_[0];
+}
+
+std::shared_ptr<ASTNode> BinaryOpNode::getRight() const {
+    return children_.size() < 2 ? nullptr : children_[1];
+}
+
+// ConditionalNode实现
+ConditionalNode::ConditionalNode(std::shared_ptr<ASTNode> condition, std::shared_ptr<ASTNode> trueExpr, std::shared_ptr<ASTNode> falseExpr)
+    : ASTNode(ASTNodeType::CONDITIONAL, "conditional") {
+    addChild(condition);
+    addChild(trueExpr);
+    addChild(falseExpr);
+}
+
+void ConditionalNode::accept(ASTVisitor& visitor) {
+    visitor.visitConditional(*this);
+}
+
+std::shared_ptr<ASTNode> ConditionalNode::getCondition() const {
+    return children_.empty() ? nullptr : children_[0];
+}
+
+std::shared_ptr<ASTNode> ConditionalNode::getTrueExpression() const {
+    return children_.size() < 2 ? nullptr : children_[1];
+}
+
+std::shared_ptr<ASTNode> ConditionalNode::getFalseExpression() const {
+    return children_.size() < 3 ? nullptr : children_[2];
+}
+
+// ReferenceNode实现
+ReferenceNode::ReferenceNode(const std::string& selector, const std::string& property)
+    : ASTNode(ASTNodeType::REFERENCE, "reference"), selector_(selector), property_(property) {
+}
+
+void ReferenceNode::accept(ASTVisitor& visitor) {
+    visitor.visitReference(*this);
+}
+
+// SelectorNode实现
+SelectorNode::SelectorNode(const std::string& selector)
+    : ASTNode(ASTNodeType::SELECTOR, "selector"), selectorType_(SelectorType::TAG) {
+    setText(selector);
+}
+
+void SelectorNode::accept(ASTVisitor& visitor) {
+    visitor.visitSelector(*this);
+}
+
+// CHTLJSFunctionNode实现
+CHTLJSFunctionNode::CHTLJSFunctionNode(const std::string& functionName)
+    : ASTNode(ASTNodeType::CHTLJS_FUNCTION, functionName) {
+}
+
+void CHTLJSFunctionNode::accept(ASTVisitor& visitor) {
+    visitor.visitCHTLJSFunction(*this);
+}
+
+void CHTLJSFunctionNode::addParameter(const std::string& param) {
+    parameters_.push_back(param);
+}
+
+// CHTLJSVirNode实现
+CHTLJSVirNode::CHTLJSVirNode(const std::string& virName)
+    : ASTNode(ASTNodeType::CHTLJS_VIR, virName) {
+}
+
+void CHTLJSVirNode::accept(ASTVisitor& visitor) {
+    visitor.visitCHTLJSVir(*this);
+}
+
 } // namespace CHTL

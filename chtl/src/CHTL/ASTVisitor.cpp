@@ -40,6 +40,30 @@ void ASTVisitor::visitNode(ASTNode& node) {
         case ASTNodeType::USE:
             visitUse(static_cast<UseNode&>(node));
             break;
+        case ASTNodeType::STYLE_RULE:
+            visitStyleRule(static_cast<StyleRuleNode&>(node));
+            break;
+        case ASTNodeType::EXPRESSION:
+            visitExpression(static_cast<ExpressionNode&>(node));
+            break;
+        case ASTNodeType::BINARY_OP:
+            visitBinaryOp(static_cast<BinaryOpNode&>(node));
+            break;
+        case ASTNodeType::CONDITIONAL:
+            visitConditional(static_cast<ConditionalNode&>(node));
+            break;
+        case ASTNodeType::REFERENCE:
+            visitReference(static_cast<ReferenceNode&>(node));
+            break;
+        case ASTNodeType::SELECTOR:
+            visitSelector(static_cast<SelectorNode&>(node));
+            break;
+        case ASTNodeType::CHTLJS_FUNCTION:
+            visitCHTLJSFunction(static_cast<CHTLJSFunctionNode&>(node));
+            break;
+        case ASTNodeType::CHTLJS_VIR:
+            visitCHTLJSVir(static_cast<CHTLJSVirNode&>(node));
+            break;
         default:
             // 对于其他类型的节点，遍历子节点
             for (auto& child : node.getChildren()) {

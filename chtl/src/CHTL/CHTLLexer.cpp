@@ -79,6 +79,11 @@ Token CHTLLexer::nextToken() {
         }
     }
     
+    // 处理生成器注释 --
+    if (current == '-' && currentPos_ + 1 < source_.length() && source_[currentPos_ + 1] == '-') {
+        return parseGeneratorComment();
+    }
+    
     // 处理字符串
     if (current == '"' || current == '\'') {
         return parseString();
@@ -92,6 +97,16 @@ Token CHTLLexer::nextToken() {
     // 处理标识符和关键字
     if (isAlpha(current) || current == '_') {
         return parseIdentifier();
+    }
+    
+    // 处理方括号结构 [Template], [Custom], [Origin], [Import], [Namespace], [Configuration]
+    if (current == '[') {
+        return parseBracketStructure();
+    }
+    
+    // 处理@符号结构 @Style, @Element, @Var, @Html, @JavaScript, @Chtl, @CJmod, @Config
+    if (current == '@') {
+        return parseAtStructure();
     }
     
     // 处理符号
@@ -165,7 +180,25 @@ Token CHTLLexer::parseMultiLineComment() {
         currentPos_++;
     }
     
-    return Token(TokenType::COMMENT, value, startLine, startColumn);
+    return Token(TokenType::MULTI_COMMENT, value, startLine, startColumn);
+}
+
+Token CHTLLexer::parseGeneratorComment() {
+    size_t startLine = currentLine_;
+    size_t startColumn = currentColumn_;
+    std::string value;
+    
+    // 跳过 --
+    currentPos_ += 2;
+    currentColumn_ += 2;
+    
+    while (currentPos_ < source_.length() && source_[currentPos_] != '\n') {
+        value += source_[currentPos_];
+        currentPos_++;
+        currentColumn_++;
+    }
+    
+    return Token(TokenType::GENERATOR_COMMENT, value, startLine, startColumn);
 }
 
 Token CHTLLexer::parseString() {
@@ -274,30 +307,45 @@ Token CHTLLexer::parseSymbol() {
     
     // 映射到TokenType
     TokenType type = TokenType::IDENTIFIER; // 默认
-    switch (current) {
-        case '{': type = TokenType::LBRACE; break;
-        case '}': type = TokenType::RBRACE; break;
-        case '(': type = TokenType::LPAREN; break;
-        case ')': type = TokenType::RPAREN; break;
-        case '[': type = TokenType::LBRACKET; break;
-        case ']': type = TokenType::RBRACKET; break;
-        case ';': type = TokenType::SEMICOLON; break;
-        case ':': type = TokenType::COLON; break;
-        case '=': type = TokenType::EQUALS; break;
-        case ',': type = TokenType::COMMA; break;
-        case '.': type = TokenType::DOT; break;
-        case '/': type = TokenType::SLASH; break;
-        case '\\': type = TokenType::BACKSLASH; break;
-        case '*': type = TokenType::ASTERISK; break;
-        case '+': type = TokenType::PLUS; break;
-        case '-': type = TokenType::MINUS; break;
-        case '%': type = TokenType::PERCENT_UNIT; break;
-        case '!': type = TokenType::EXCLAMATION; break;
-        case '?': type = TokenType::QUESTION; break;
-        case '&': type = TokenType::AMPERSAND; break;
-        case '|': type = TokenType::PIPE; break;
-        case '<': type = TokenType::LESS; break;
-        case '>': type = TokenType::GREATER; break;
+    
+    // 处理双字符运算符
+    if (value.length() == 2) {
+        if (value == "==") type = TokenType::DOUBLE_EQUALS;
+        else if (value == "!=") type = TokenType::NOT_EQUALS;
+        else if (value == "<=") type = TokenType::LESS_EQUALS;
+        else if (value == ">=") type = TokenType::GREATER_EQUALS;
+        else if (value == "&&") type = TokenType::AND;
+        else if (value == "||") type = TokenType::OR;
+        else if (value == "**") type = TokenType::POWER;
+        else if (value == "++") type = TokenType::PLUS; // 简化处理
+        else if (value == "--") type = TokenType::MINUS; // 简化处理
+    } else {
+        // 单字符运算符
+        switch (current) {
+            case '{': type = TokenType::LBRACE; break;
+            case '}': type = TokenType::RBRACE; break;
+            case '(': type = TokenType::LPAREN; break;
+            case ')': type = TokenType::RPAREN; break;
+            case '[': type = TokenType::LBRACKET; break;
+            case ']': type = TokenType::RBRACKET; break;
+            case ';': type = TokenType::SEMICOLON; break;
+            case ':': type = TokenType::COLON; break;
+            case '=': type = TokenType::EQUALS; break;
+            case ',': type = TokenType::COMMA; break;
+            case '.': type = TokenType::DOT; break;
+            case '/': type = TokenType::SLASH; break;
+            case '\\': type = TokenType::BACKSLASH; break;
+            case '*': type = TokenType::ASTERISK; break;
+            case '+': type = TokenType::PLUS; break;
+            case '-': type = TokenType::MINUS; break;
+            case '%': type = TokenType::PERCENT; break;
+            case '!': type = TokenType::EXCLAMATION; break;
+            case '?': type = TokenType::QUESTION; break;
+            case '&': type = TokenType::AMPERSAND; break;
+            case '|': type = TokenType::PIPE; break;
+            case '<': type = TokenType::LESS; break;
+            case '>': type = TokenType::GREATER; break;
+        }
     }
     
     return Token(type, value, startLine, startColumn);
@@ -317,6 +365,92 @@ Token CHTLLexer::parseLiteral() {
     }
     
     return Token(TokenType::LITERAL, value, startLine, startColumn);
+}
+
+Token CHTLLexer::parseBracketStructure() {
+    size_t startLine = currentLine_;
+    size_t startColumn = currentColumn_;
+    std::string value;
+    
+    // 跳过 [
+    currentPos_++;
+    currentColumn_++;
+    
+    // 读取标识符
+    while (currentPos_ < source_.length() && 
+           (isAlphaNumeric(source_[currentPos_]) || source_[currentPos_] == '_')) {
+        value += source_[currentPos_];
+        currentPos_++;
+        currentColumn_++;
+    }
+    
+    // 跳过 ]
+    if (currentPos_ < source_.length() && source_[currentPos_] == ']') {
+        currentPos_++;
+        currentColumn_++;
+    }
+    
+    // 映射到对应的TokenType
+    TokenType type = TokenType::IDENTIFIER;
+    if (value == "Template") {
+        type = TokenType::TEMPLATE;
+    } else if (value == "Custom") {
+        type = TokenType::CUSTOM;
+    } else if (value == "Origin") {
+        type = TokenType::ORIGIN;
+    } else if (value == "Import") {
+        type = TokenType::IMPORT;
+    } else if (value == "Namespace") {
+        type = TokenType::NAMESPACE;
+    } else if (value == "Configuration") {
+        type = TokenType::CONFIGURATION;
+    } else if (value == "Name") {
+        type = TokenType::NAME;
+    } else if (value == "OriginType") {
+        type = TokenType::ORIGIN_TYPE;
+    }
+    
+    return Token(type, value, startLine, startColumn);
+}
+
+Token CHTLLexer::parseAtStructure() {
+    size_t startLine = currentLine_;
+    size_t startColumn = currentColumn_;
+    std::string value;
+    
+    // 跳过 @
+    currentPos_++;
+    currentColumn_++;
+    
+    // 读取标识符
+    while (currentPos_ < source_.length() && 
+           (isAlphaNumeric(source_[currentPos_]) || source_[currentPos_] == '_')) {
+        value += source_[currentPos_];
+        currentPos_++;
+        currentColumn_++;
+    }
+    
+    // 映射到对应的TokenType
+    TokenType type = TokenType::IDENTIFIER;
+    if (value == "Style") {
+        type = TokenType::TEMPLATE_STYLE; // 默认作为模板样式
+    } else if (value == "Element") {
+        type = TokenType::TEMPLATE_ELEMENT; // 默认作为模板元素
+    } else if (value == "Var") {
+        type = TokenType::TEMPLATE_VAR; // 默认作为模板变量
+    } else if (value == "Html") {
+        type = TokenType::ORIGIN_HTML;
+    } else if (value == "JavaScript") {
+        type = TokenType::ORIGIN_JAVASCRIPT;
+    } else if (value == "Chtl") {
+        type = TokenType::IMPORT_CHTL;
+    } else if (value == "CJmod") {
+        type = TokenType::IMPORT_CJMOD;
+    } else if (value == "Config") {
+        type = TokenType::CONFIG;
+    }
+    
+    return Token(type, value, startLine, startColumn);
 }
 
 char CHTLLexer::peek() const {
@@ -487,6 +621,18 @@ TokenType CHTLLexer::getKeywordType(const std::string& keyword) const {
         {"initial", TokenType::INITIAL},
         {"unset", TokenType::UNSET},
         {"important", TokenType::IMPORTANT},
+        
+        // CHTL JS相关
+        {"vir", TokenType::VIR},
+        {"listen", TokenType::LISTEN},
+        {"delegate", TokenType::DELEGATE},
+        {"animate", TokenType::ANIMATE},
+        {"router", TokenType::ROUTER},
+        {"fileloader", TokenType::FILELOADER},
+        {"iNeverAway", TokenType::INEVERAWAY},
+        {"util", TokenType::UTIL},
+        {"change", TokenType::CHANGE},
+        {"then", TokenType::THEN},
     };
     
     auto it = keywords.find(keyword);

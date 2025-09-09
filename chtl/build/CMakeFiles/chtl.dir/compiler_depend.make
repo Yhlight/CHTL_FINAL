@@ -1219,6 +1219,7 @@ CMakeFiles/chtl.dir/src/CHTL/CHTLLexer.cpp.o: /workspace/chtl/src/CHTL/CHTLLexer
   /usr/include/c++/14/initializer_list \
   /usr/include/c++/14/ios \
   /usr/include/c++/14/iosfwd \
+  /usr/include/c++/14/iostream \
   /usr/include/c++/14/istream \
   /usr/include/c++/14/new \
   /usr/include/c++/14/ostream \
@@ -1477,6 +1478,7 @@ CMakeFiles/chtl.dir/src/CHTL/CHTLParser.cpp.o: /workspace/chtl/src/CHTL/CHTLPars
   /usr/include/c++/14/initializer_list \
   /usr/include/c++/14/ios \
   /usr/include/c++/14/iosfwd \
+  /usr/include/c++/14/iostream \
   /usr/include/c++/14/istream \
   /usr/include/c++/14/memory \
   /usr/include/c++/14/new \
@@ -2060,8 +2062,6 @@ CMakeFiles/chtl.dir/src/CHTL/CHTLContext.cpp.o:
 
 /lib/x86_64-linux-gnu/crti.o:
 
-/usr/include/c++/14/iostream:
-
 /lib64/ld-linux-x86-64.so.2:
 
 /workspace/chtl/src/main.cpp:
@@ -2071,6 +2071,8 @@ CMakeFiles/chtl.dir/src/CHTL/CHTLContext.cpp.o:
 /workspace/chtl/src/CHTL/CHTLParser.cpp:
 
 /workspace/chtl/include/CHTL/CHTLLexer.h:
+
+/usr/include/c++/14/iostream:
 
 /usr/include/c++/14/functional:
 

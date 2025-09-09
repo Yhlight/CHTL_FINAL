@@ -1,0 +1,62 @@
+// 这是单行注释
+/* 这是多行注释
+   支持多行内容 */
+
+-- 这是生成器注释，会被保留
+
+use html5;
+
+[Configuration]
+{
+    DEBUG_MODE = false;
+    INDEX_INITIAL_COUNT = 0;
+}
+
+[Template] @Style DefaultText
+{
+    color: black;
+    line-height: 1.6;
+}
+
+[Custom] @Element Box
+{
+    div
+    {
+        class: container;
+        style
+        {
+            width: 100px;
+            height: 200px;
+            background-color: red;
+        }
+    }
+}
+
+html
+{
+    head
+    {
+        title
+        {
+            "CHTL 高级测试页面"
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            style
+            {
+                @Style DefaultText;
+            }
+            
+            text
+            {
+                欢迎使用CHTL高级功能
+            }
+            
+            @Element Box;
+        }
+    }
+}

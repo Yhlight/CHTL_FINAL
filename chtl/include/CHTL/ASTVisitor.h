@@ -40,6 +40,22 @@ public:
     // 使用节点访问
     virtual void visitUse(UseNode& node) = 0;
     
+    // 样式规则节点访问
+    virtual void visitStyleRule(StyleRuleNode& node) = 0;
+    
+    // 表达式节点访问
+    virtual void visitExpression(ExpressionNode& node) = 0;
+    virtual void visitBinaryOp(BinaryOpNode& node) = 0;
+    virtual void visitConditional(ConditionalNode& node) = 0;
+    virtual void visitReference(ReferenceNode& node) = 0;
+    
+    // 选择器节点访问
+    virtual void visitSelector(SelectorNode& node) = 0;
+    
+    // CHTL JS节点访问
+    virtual void visitCHTLJSFunction(CHTLJSFunctionNode& node) = 0;
+    virtual void visitCHTLJSVir(CHTLJSVirNode& node) = 0;
+    
     // 通用访问方法
     virtual void visitNode(ASTNode& node);
 };

@@ -457,4 +457,169 @@ void CHTLGenerator::reportError(const std::string& message) {
     throw std::runtime_error("代码生成错误: " + message);
 }
 
+// 新增的访问者方法实现
+void CHTLGenerator::visitStyleRule(StyleRuleNode& node) {
+    // 样式规则处理
+    std::string selector = node.getSelectors().empty() ? "" : node.getSelectors()[0];
+    std::string properties = generateStyleProperties(node.getProperties());
+    
+    if (!selector.empty() && !properties.empty()) {
+        cssCode_ += getIndent() + selector + " {\n";
+        addIndent();
+        cssCode_ += properties;
+        removeIndent();
+        cssCode_ += getIndent() + "}\n";
+    }
+}
+
+void CHTLGenerator::visitExpression(ExpressionNode& node) {
+    // 表达式处理
+    std::string expression = node.getExpression();
+    if (!expression.empty()) {
+        htmlCode_ += getIndent() + expression + "\n";
+    }
+}
+
+void CHTLGenerator::visitBinaryOp(BinaryOpNode& node) {
+    // 二元运算处理
+    std::string left = node.getLeft() ? node.getLeft()->getText() : "";
+    std::string right = node.getRight() ? node.getRight()->getText() : "";
+    std::string op = getOperatorString(node.getOperator());
+    
+    std::string result = left + " " + op + " " + right;
+    htmlCode_ += getIndent() + result + "\n";
+}
+
+void CHTLGenerator::visitConditional(ConditionalNode& node) {
+    // 条件表达式处理
+    std::string condition = node.getCondition() ? node.getCondition()->getText() : "";
+    std::string trueExpr = node.getTrueExpr() ? node.getTrueExpr()->getText() : "";
+    std::string falseExpr = node.getFalseExpr() ? node.getFalseExpr()->getText() : "";
+    
+    std::string result = condition + " ? " + trueExpr + " : " + falseExpr;
+    htmlCode_ += getIndent() + result + "\n";
+}
+
+void CHTLGenerator::visitReference(ReferenceNode& node) {
+    // 引用处理
+    std::string reference = node.getReference();
+    std::string value = context_.getReference(reference);
+    
+    if (!value.empty()) {
+        htmlCode_ += getIndent() + value + "\n";
+    }
+}
+
+void CHTLGenerator::visitSelector(SelectorNode& node) {
+    // 选择器处理
+    std::string selector = node.getSelector();
+    if (!selector.empty()) {
+        cssCode_ += getIndent() + selector + "\n";
+    }
+}
+
+void CHTLGenerator::visitCHTLJSFunction(CHTLJSFunctionNode& node) {
+    // CHTL JS函数处理
+    std::string functionName = node.getFunctionName();
+    std::string functionBody = node.getFunctionBody();
+    
+    jsCode_ += getIndent() + "function " + functionName + "() {\n";
+    addIndent();
+    jsCode_ += getIndent() + functionBody + "\n";
+    removeIndent();
+    jsCode_ += getIndent() + "}\n";
+}
+
+void CHTLGenerator::visitCHTLJSVir(CHTLJSVirNode& node) {
+    // CHTL JS虚对象处理
+    std::string virName = node.getVirName();
+    std::string virBody = node.getVirBody();
+    
+    jsCode_ += getIndent() + "var " + virName + " = {\n";
+    addIndent();
+    jsCode_ += getIndent() + virBody + "\n";
+    removeIndent();
+    jsCode_ += getIndent() + "};\n";
+}
+
+// 辅助方法
+std::string CHTLGenerator::generateSelector(std::shared_ptr<ASTNode> selector) {
+    if (!selector) return "";
+    
+    if (auto selectorNode = std::dynamic_pointer_cast<SelectorNode>(selector)) {
+        switch (selectorNode->getSelectorType()) {
+            case SelectorType::TAG:
+                return selectorNode->getTagName();
+            case SelectorType::CLASS:
+                return "." + selectorNode->getClassName();
+            case SelectorType::ID:
+                return "#" + selectorNode->getIdName();
+            case SelectorType::PSEUDO:
+                return ":" + selectorNode->getPseudoName();
+            default:
+                return selectorNode->getSelectorValue();
+        }
+    }
+    
+    return selector->getText();
+}
+
+std::string CHTLGenerator::generateExpression(std::shared_ptr<ASTNode> expr) {
+    if (!expr) return "";
+    
+    std::string result;
+    
+    if (auto expressionNode = std::dynamic_pointer_cast<ExpressionNode>(expr)) {
+        switch (expressionNode->getExpressionType()) {
+            case ExpressionType::LITERAL:
+                result = expressionNode->getLiteralValue();
+                break;
+            case ExpressionType::IDENTIFIER:
+                result = expressionNode->getIdentifierName();
+                break;
+            default:
+                result = expressionNode->getExpression();
+                break;
+        }
+    } else if (auto binaryOp = std::dynamic_pointer_cast<BinaryOpNode>(expr)) {
+        std::string left = generateExpression(binaryOp->getLeft());
+        std::string right = generateExpression(binaryOp->getRight());
+        std::string op = getOperatorString(binaryOp->getOperator());
+        result = left + " " + op + " " + right;
+    } else if (auto conditional = std::dynamic_pointer_cast<ConditionalNode>(expr)) {
+        std::string condition = generateExpression(conditional->getCondition());
+        std::string trueExpr = generateExpression(conditional->getTrueExpr());
+        std::string falseExpr = generateExpression(conditional->getFalseExpr());
+        result = condition + " ? " + trueExpr + " : " + falseExpr;
+    } else if (auto reference = std::dynamic_pointer_cast<ReferenceNode>(expr)) {
+        result = context_.getReference(reference->getReference());
+    } else {
+        result = expr->getText();
+    }
+    
+    return result;
+}
+
+std::string CHTLGenerator::getOperatorString(TokenType op) {
+    switch (op) {
+        case TokenType::PLUS: return "+";
+        case TokenType::MINUS: return "-";
+        case TokenType::ASTERISK: return "*";
+        case TokenType::SLASH: return "/";
+        case TokenType::PERCENT: return "%";
+        case TokenType::POWER: return "**";
+        case TokenType::EQUALS: return "=";
+        case TokenType::DOUBLE_EQUALS: return "==";
+        case TokenType::NOT_EQUALS: return "!=";
+        case TokenType::LESS: return "<";
+        case TokenType::GREATER: return ">";
+        case TokenType::LESS_EQUALS: return "<=";
+        case TokenType::GREATER_EQUALS: return ">=";
+        case TokenType::AND: return "&&";
+        case TokenType::OR: return "||";
+        case TokenType::EXCLAMATION: return "!";
+        default: return "";
+    }
+}
+
 } // namespace CHTL

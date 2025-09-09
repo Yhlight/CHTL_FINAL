@@ -42,6 +42,14 @@ public:
     void visitConfiguration(ConfigurationNode& node) override;
     void visitConstraint(ConstraintNode& node) override;
     void visitUse(UseNode& node) override;
+    void visitStyleRule(StyleRuleNode& node) override;
+    void visitExpression(ExpressionNode& node) override;
+    void visitBinaryOp(BinaryOpNode& node) override;
+    void visitConditional(ConditionalNode& node) override;
+    void visitReference(ReferenceNode& node) override;
+    void visitSelector(SelectorNode& node) override;
+    void visitCHTLJSFunction(CHTLJSFunctionNode& node) override;
+    void visitCHTLJSVir(CHTLJSVirNode& node) override;
     
 private:
     // 输入
@@ -85,6 +93,11 @@ private:
     std::string processTemplate(const std::string& template_, const std::string& name, const std::string& type);
     std::string processCustom(const std::string& custom, const std::string& name, const std::string& type);
     std::string processExpression(const std::string& expression);
+    
+    // 新增的辅助方法
+    std::string generateSelector(std::shared_ptr<ASTNode> selector);
+    std::string generateExpression(std::shared_ptr<ASTNode> expr);
+    std::string getOperatorString(TokenType op);
     
     // 文件操作
     void writeToFile(const std::string& filename, const std::string& content);

@@ -53,11 +53,14 @@ private:
     void skipWhitespace();
     Token parseComment();
     Token parseMultiLineComment();
+    Token parseGeneratorComment();
     Token parseString();
     Token parseNumber();
     Token parseIdentifier();
     Token parseSymbol();
     Token parseLiteral();
+    Token parseBracketStructure();
+    Token parseAtStructure();
     
     // 辅助方法
     char peek() const;

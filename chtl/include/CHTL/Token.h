@@ -39,6 +39,18 @@ enum class TokenType {
     PIPE,           // |
     LESS,           // <
     GREATER,        // >
+    DOUBLE_EQUALS,  // ==
+    NOT_EQUALS,     // !=
+    LESS_EQUALS,    // <=
+    GREATER_EQUALS, // >=
+    AND,            // &&
+    OR,             // ||
+    POWER,          // **
+    
+    // 注释类型
+    SINGLE_COMMENT, // //
+    MULTI_COMMENT,  // /**/
+    GENERATOR_COMMENT, // --
     
     // 关键字
     TEXT,           // text
@@ -63,6 +75,31 @@ enum class TokenType {
     AFTER,          // after
     BEFORE,         // before
     REPLACE,        // replace
+    
+    // 模板和自定义类型
+    TEMPLATE_STYLE, // @Style
+    TEMPLATE_ELEMENT, // @Element
+    TEMPLATE_VAR,   // @Var
+    CUSTOM_STYLE,   // @Style (自定义)
+    CUSTOM_ELEMENT, // @Element (自定义)
+    CUSTOM_VAR,     // @Var (自定义)
+    
+    // 原始嵌入类型
+    ORIGIN_HTML,    // @Html
+    ORIGIN_STYLE,   // @Style (原始嵌入)
+    ORIGIN_JAVASCRIPT, // @JavaScript
+    
+    // 导入类型
+    IMPORT_HTML,    // @Html (导入)
+    IMPORT_STYLE,   // @Style (导入)
+    IMPORT_JAVASCRIPT, // @JavaScript (导入)
+    IMPORT_CHTL,    // @Chtl
+    IMPORT_CJMOD,   // @CJmod
+    
+    // 配置类型
+    CONFIG,         // @Config
+    NAME,           // [Name]
+    ORIGIN_TYPE,    // [OriginType]
     
     // 特殊类型
     COMMENT,        // 注释
@@ -154,6 +191,18 @@ enum class TokenType {
     INITIAL,        // initial
     UNSET,          // unset
     IMPORTANT,      // !important
+    
+    // CHTL JS相关
+    VIR,            // vir
+    LISTEN,         // listen
+    DELEGATE,       // delegate
+    ANIMATE,        // animate
+    ROUTER,         // router
+    FILELOADER,     // fileloader
+    INEVERAWAY,     // iNeverAway
+    UTIL,           // util
+    CHANGE,         // change
+    THEN,           // then
 };
 
 /**
@@ -173,6 +222,8 @@ public:
     bool isKeyword() const;
     bool isOperator() const;
     bool isLiteral() const;
+    bool isComment() const;
+    bool isWhitespace() const;
     
     std::string toString() const;
     

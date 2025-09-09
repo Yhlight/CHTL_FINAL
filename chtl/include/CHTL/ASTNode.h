@@ -25,6 +25,8 @@ enum class ASTNodeType {
     STYLE_PROPERTY, // 样式属性
     STYLE_SELECTOR, // 样式选择器
     STYLE_VALUE,    // 样式值
+    STYLE_RULE,     // 样式规则
+    STYLE_DECLARATION, // 样式声明
     
     // 脚本相关
     SCRIPT_BLOCK,   // 脚本块
@@ -55,6 +57,8 @@ enum class ASTNodeType {
     // 配置
     CONFIGURATION,  // 配置
     CONFIG_ITEM,    // 配置项
+    CONFIG_NAME,    // Name配置块
+    CONFIG_ORIGIN_TYPE, // OriginType配置块
     
     // 约束
     CONSTRAINT,     // 约束
@@ -62,6 +66,36 @@ enum class ASTNodeType {
     
     // 使用
     USE,            // use语句
+    
+    // 特例化操作
+    DELETE,         // delete操作
+    INSERT,         // insert操作
+    INHERIT,        // inherit操作
+    
+    // 表达式
+    EXPRESSION,     // 表达式
+    BINARY_OP,      // 二元操作
+    UNARY_OP,       // 一元操作
+    CONDITIONAL,    // 条件表达式
+    REFERENCE,      // 引用表达式
+    
+    // 选择器
+    SELECTOR,       // 选择器
+    CLASS_SELECTOR, // 类选择器
+    ID_SELECTOR,    // ID选择器
+    TAG_SELECTOR,   // 标签选择器
+    PSEUDO_SELECTOR, // 伪选择器
+    
+    // CHTL JS相关
+    CHTLJS_FUNCTION, // CHTL JS函数
+    CHTLJS_OBJECT,   // CHTL JS对象
+    CHTLJS_ARRAY,    // CHTL JS数组
+    CHTLJS_VIR,      // 虚对象
+    CHTLJS_LISTEN,   // 监听器
+    CHTLJS_DELEGATE, // 事件委托
+    CHTLJS_ANIMATE,  // 动画
+    CHTLJS_ROUTER,   // 路由
+    CHTLJS_FILELOADER, // 文件加载器
 };
 
 /**
@@ -294,6 +328,184 @@ public:
     void accept(ASTVisitor& visitor) override;
     
     const std::string& getUseTarget() const { return getText(); }
+};
+
+/**
+ * 样式规则节点
+ */
+class StyleRuleNode : public ASTNode {
+public:
+    StyleRuleNode();
+    void accept(ASTVisitor& visitor) override;
+    
+    void addSelector(const std::string& selector);
+    void addDeclaration(const std::string& property, const std::string& value);
+    
+    const std::vector<std::string>& getSelectors() const { return selectors_; }
+    const std::unordered_map<std::string, std::string>& getDeclarations() const { return declarations_; }
+    
+    // 兼容性方法
+    const std::unordered_map<std::string, std::string>& getProperties() const { return declarations_; }
+    
+private:
+    std::vector<std::string> selectors_;
+    std::unordered_map<std::string, std::string> declarations_;
+};
+
+/**
+ * 表达式类型枚举
+ */
+enum class ExpressionType {
+    LITERAL,
+    IDENTIFIER,
+    BINARY_OP,
+    CONDITIONAL,
+    REFERENCE
+};
+
+/**
+ * 表达式节点
+ */
+class ExpressionNode : public ASTNode {
+public:
+    ExpressionNode(const std::string& expression);
+    void accept(ASTVisitor& visitor) override;
+    
+    const std::string& getExpression() const { return getText(); }
+    void setExpression(const std::string& expression) { setText(expression); }
+    
+    // 新增方法
+    ExpressionType getExpressionType() const { return expressionType_; }
+    void setExpressionType(ExpressionType type) { expressionType_ = type; }
+    const std::string& getLiteralValue() const { return getText(); }
+    const std::string& getIdentifierName() const { return getText(); }
+    
+private:
+    ExpressionType expressionType_;
+};
+
+/**
+ * 二元操作节点
+ */
+class BinaryOpNode : public ASTNode {
+public:
+    BinaryOpNode(const std::string& operator_, std::shared_ptr<ASTNode> left, std::shared_ptr<ASTNode> right);
+    void accept(ASTVisitor& visitor) override;
+    
+    const std::string& getOperatorString() const { return getText(); }
+    std::shared_ptr<ASTNode> getLeft() const;
+    std::shared_ptr<ASTNode> getRight() const;
+    
+    // 新增方法
+    TokenType getOperator() const { return operator_; }
+    
+private:
+    TokenType operator_;
+};
+
+/**
+ * 条件表达式节点
+ */
+class ConditionalNode : public ASTNode {
+public:
+    ConditionalNode(std::shared_ptr<ASTNode> condition, std::shared_ptr<ASTNode> trueExpr, std::shared_ptr<ASTNode> falseExpr);
+    void accept(ASTVisitor& visitor) override;
+    
+    std::shared_ptr<ASTNode> getCondition() const;
+    std::shared_ptr<ASTNode> getTrueExpression() const;
+    std::shared_ptr<ASTNode> getFalseExpression() const;
+    
+    // 兼容性方法
+    std::shared_ptr<ASTNode> getTrueExpr() const { return getTrueExpression(); }
+    std::shared_ptr<ASTNode> getFalseExpr() const { return getFalseExpression(); }
+};
+
+/**
+ * 引用表达式节点
+ */
+class ReferenceNode : public ASTNode {
+public:
+    ReferenceNode(const std::string& selector, const std::string& property);
+    void accept(ASTVisitor& visitor) override;
+    
+    const std::string& getSelector() const { return selector_; }
+    const std::string& getProperty() const { return property_; }
+    
+    // 兼容性方法
+    const std::string& getReference() const { return getText(); }
+    
+private:
+    std::string selector_;
+    std::string property_;
+};
+
+/**
+ * 选择器类型枚举
+ */
+enum class SelectorType {
+    TAG,
+    CLASS,
+    ID,
+    PSEUDO
+};
+
+/**
+ * 选择器节点
+ */
+class SelectorNode : public ASTNode {
+public:
+    SelectorNode(const std::string& selector);
+    void accept(ASTVisitor& visitor) override;
+    
+    const std::string& getSelector() const { return getText(); }
+    void setSelector(const std::string& selector) { setText(selector); }
+    
+    // 新增方法
+    SelectorType getSelectorType() const { return selectorType_; }
+    void setSelectorType(SelectorType type) { selectorType_ = type; }
+    const std::string& getTagName() const { return getText(); }
+    const std::string& getClassName() const { return getText(); }
+    const std::string& getIdName() const { return getText(); }
+    const std::string& getPseudoName() const { return getText(); }
+    const std::string& getSelectorValue() const { return getText(); }
+    
+private:
+    SelectorType selectorType_;
+};
+
+/**
+ * CHTL JS函数节点
+ */
+class CHTLJSFunctionNode : public ASTNode {
+public:
+    CHTLJSFunctionNode(const std::string& functionName);
+    void accept(ASTVisitor& visitor) override;
+    
+    const std::string& getFunctionName() const { return getName(); }
+    void addParameter(const std::string& param);
+    const std::vector<std::string>& getParameters() const { return parameters_; }
+    
+    // 兼容性方法
+    const std::string& getFunctionBody() const { return getText(); }
+    void setFunctionBody(const std::string& body) { setText(body); }
+    
+private:
+    std::vector<std::string> parameters_;
+};
+
+/**
+ * 虚对象节点
+ */
+class CHTLJSVirNode : public ASTNode {
+public:
+    CHTLJSVirNode(const std::string& virName);
+    void accept(ASTVisitor& visitor) override;
+    
+    const std::string& getVirName() const { return getName(); }
+    
+    // 兼容性方法
+    const std::string& getVirBody() const { return getText(); }
+    void setVirBody(const std::string& body) { setText(body); }
 };
 
 } // namespace CHTL

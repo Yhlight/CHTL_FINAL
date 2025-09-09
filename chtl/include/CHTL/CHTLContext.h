@@ -36,6 +36,10 @@ public:
     void setVariable(const std::string& name, const std::string& value);
     std::string getVariable(const std::string& name) const;
     
+    // 引用管理
+    void setReference(const std::string& name, const std::string& value);
+    std::string getReference(const std::string& name) const;
+    
     // 模块管理
     void addModule(const std::string& name, const std::string& path);
     std::string getModule(const std::string& name) const;

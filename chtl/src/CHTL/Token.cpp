@@ -31,6 +31,33 @@ bool Token::isKeyword() const {
         case TokenType::AFTER:
         case TokenType::BEFORE:
         case TokenType::REPLACE:
+        case TokenType::TEMPLATE_STYLE:
+        case TokenType::TEMPLATE_ELEMENT:
+        case TokenType::TEMPLATE_VAR:
+        case TokenType::CUSTOM_STYLE:
+        case TokenType::CUSTOM_ELEMENT:
+        case TokenType::CUSTOM_VAR:
+        case TokenType::ORIGIN_HTML:
+        case TokenType::ORIGIN_STYLE:
+        case TokenType::ORIGIN_JAVASCRIPT:
+        case TokenType::IMPORT_HTML:
+        case TokenType::IMPORT_STYLE:
+        case TokenType::IMPORT_JAVASCRIPT:
+        case TokenType::IMPORT_CHTL:
+        case TokenType::IMPORT_CJMOD:
+        case TokenType::CONFIG:
+        case TokenType::NAME:
+        case TokenType::ORIGIN_TYPE:
+        case TokenType::VIR:
+        case TokenType::LISTEN:
+        case TokenType::DELEGATE:
+        case TokenType::ANIMATE:
+        case TokenType::ROUTER:
+        case TokenType::FILELOADER:
+        case TokenType::INEVERAWAY:
+        case TokenType::UTIL:
+        case TokenType::CHANGE:
+        case TokenType::THEN:
         case TokenType::HTML:
         case TokenType::HEAD:
         case TokenType::BODY:
@@ -128,6 +155,13 @@ bool Token::isOperator() const {
         case TokenType::PIPE:
         case TokenType::EXCLAMATION:
         case TokenType::QUESTION:
+        case TokenType::DOUBLE_EQUALS:
+        case TokenType::NOT_EQUALS:
+        case TokenType::LESS_EQUALS:
+        case TokenType::GREATER_EQUALS:
+        case TokenType::AND:
+        case TokenType::OR:
+        case TokenType::POWER:
             return true;
         default:
             return false;
@@ -136,6 +170,22 @@ bool Token::isOperator() const {
 
 bool Token::isLiteral() const {
     return type_ == TokenType::LITERAL || type_ == TokenType::STRING || type_ == TokenType::NUMBER;
+}
+
+bool Token::isComment() const {
+    switch (type_) {
+        case TokenType::SINGLE_COMMENT:
+        case TokenType::MULTI_COMMENT:
+        case TokenType::GENERATOR_COMMENT:
+        case TokenType::COMMENT:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool Token::isWhitespace() const {
+    return type_ == TokenType::WHITESPACE || type_ == TokenType::NEWLINE;
 }
 
 std::string Token::toString() const {

@@ -75,6 +75,15 @@ std::string CHTLContext::getVariable(const std::string& name) const {
     return (it != variables_.end()) ? it->second : "";
 }
 
+void CHTLContext::setReference(const std::string& name, const std::string& value) {
+    variables_[name] = value; // 引用和变量使用同一个存储
+}
+
+std::string CHTLContext::getReference(const std::string& name) const {
+    auto it = variables_.find(name);
+    return (it != variables_.end()) ? it->second : "";
+}
+
 void CHTLContext::addModule(const std::string& name, const std::string& path) {
     modules_[name] = path;
 }
