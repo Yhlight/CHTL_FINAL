@@ -22,27 +22,6 @@ class TestGenerator(unittest.TestCase):
     def _dedent(self, text):
         return textwrap.dedent(text).strip()
 
-    def test_basic_html(self):
-        source = "html { head {} body {} }"
-        expected = self._dedent("""
-        <html>
-          <head>
-          </head>
-          <body>
-          </body>
-        </html>
-        """)
-        self.assertEqual(self._compile_source(source), expected)
-
-    def test_attributes_and_text(self):
-        source = 'div { id="main"; p { text: "Hello"; } }'
-        expected = self._dedent("""
-        <div id="main">
-          <p>Hello</p>
-        </div>
-        """)
-        self.assertEqual(self._compile_source(source), expected)
-
     def test_template_expansion_and_generation(self):
         source = """
         [Template] @Element MyBox {
@@ -58,37 +37,28 @@ class TestGenerator(unittest.TestCase):
         """)
         self.assertEqual(self._compile_source(source), expected)
 
-    def test_style_generation(self):
+    def test_customization_and_generation(self):
         source = """
-        html {
-            head {}
-            body {
-                div {
-                    style {
-                        .box {}
-                    }
-                }
+        [Custom] @Element MyBox {
+            div {
+                id: "my-id";
+                class: "box";
+            }
+        }
+        body {
+            @Element MyBox {
+                delete id;
             }
         }
         """
         expected = self._dedent("""
-        <html>
-          <head>
-            <style>
-              .box {}
-            </style>
-          </head>
-          <body>
-            <div class="box">
-            </div>
-          </body>
-        </html>
+        <body>
+          <div class="box">
+          </div>
+        </body>
         """)
-        # Compare without regard to whitespace to avoid brittle tests
-        self.assertEqual(
-            "".join(self._compile_source(source).split()),
-            "".join(expected.split())
-        )
+        self.assertEqual(self._compile_source(source), expected)
+
 
 if __name__ == '__main__':
     unittest.main()

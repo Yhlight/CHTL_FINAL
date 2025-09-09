@@ -1,14 +1,13 @@
-[Template] @Element MyBox {
+[Custom] @Element MyCustomBox {
     div {
         class: "box";
-        text: "I am a template!";
+        id: "my-id";
+        text: "Hello";
     }
 }
 
-html {
-    body {
-        h1 { text: "Testing Templates"; }
-        @Element MyBox;
-        @Element MyBox;
+body {
+    @Element MyCustomBox {
+        delete id;
     }
 }
