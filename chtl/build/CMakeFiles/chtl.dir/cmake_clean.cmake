@@ -1,0 +1,26 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/chtl.dir/link.d"
+  "CMakeFiles/chtl.dir/src/CHTL/ASTNode.cpp.o"
+  "CMakeFiles/chtl.dir/src/CHTL/ASTNode.cpp.o.d"
+  "CMakeFiles/chtl.dir/src/CHTL/ASTVisitor.cpp.o"
+  "CMakeFiles/chtl.dir/src/CHTL/ASTVisitor.cpp.o.d"
+  "CMakeFiles/chtl.dir/src/CHTL/CHTLContext.cpp.o"
+  "CMakeFiles/chtl.dir/src/CHTL/CHTLContext.cpp.o.d"
+  "CMakeFiles/chtl.dir/src/CHTL/CHTLGenerator.cpp.o"
+  "CMakeFiles/chtl.dir/src/CHTL/CHTLGenerator.cpp.o.d"
+  "CMakeFiles/chtl.dir/src/CHTL/CHTLLexer.cpp.o"
+  "CMakeFiles/chtl.dir/src/CHTL/CHTLLexer.cpp.o.d"
+  "CMakeFiles/chtl.dir/src/CHTL/CHTLParser.cpp.o"
+  "CMakeFiles/chtl.dir/src/CHTL/CHTLParser.cpp.o.d"
+  "CMakeFiles/chtl.dir/src/CHTL/Token.cpp.o"
+  "CMakeFiles/chtl.dir/src/CHTL/Token.cpp.o.d"
+  "CMakeFiles/chtl.dir/src/main.cpp.o"
+  "CMakeFiles/chtl.dir/src/main.cpp.o.d"
+  "chtl"
+  "chtl.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/chtl.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()
