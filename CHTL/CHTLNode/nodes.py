@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Union
+from typing import List, Union, Any
 
 @dataclass
 class BaseNode:
@@ -39,8 +39,14 @@ class CssRuleNode(BaseNode):
     properties: List[CssPropertyNode] = field(default_factory=list)
     lineno: int = 0
 
-# StyleNode can contain either direct properties or full rules.
-StyleContent = Union[CssPropertyNode, CssRuleNode]
+@dataclass
+class TemplateUsageNode(BaseNode):
+    """Represents the usage of a template (e.g., @Element Box;)."""
+    template_type: str
+    name: str
+    lineno: int = 0
+
+StyleContent = Union[CssPropertyNode, CssRuleNode, TemplateUsageNode]
 
 @dataclass
 class StyleNode(BaseNode):
@@ -48,9 +54,7 @@ class StyleNode(BaseNode):
     children: List[StyleContent] = field(default_factory=list)
     lineno: int = 0
 
-# Update the general Node type alias to include StyleNode.
-# An ElementNode can now have a StyleNode as a child.
-Node = Union['ElementNode', TextNode, CommentNode, StyleNode]
+Node = Union['ElementNode', TextNode, CommentNode, StyleNode, TemplateUsageNode]
 
 @dataclass
 class ElementNode(BaseNode):
@@ -61,36 +65,17 @@ class ElementNode(BaseNode):
     lineno: int = 0
 
 @dataclass
-class DocumentNode(BaseNode):
-    """Represents the root of the document, containing a list of top-level nodes."""
-    children: List[Node] = field(default_factory=list)
+class TemplateDefinitionNode(BaseNode):
+    """Represents a [Template] @Type Name { ... } block."""
+    template_type: str
+    name: str
+    content: List[Any] = field(default_factory=list)
     lineno: int = 0
 
-if __name__ == '__main__':
-    # Example of how to build a simple AST manually with style nodes
+DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode]
 
-    doc = DocumentNode(children=[
-        ElementNode(
-            lineno=1,
-            tag_name='div',
-            children=[
-                StyleNode(lineno=2, children=[
-                    # Inline style property
-                    CssPropertyNode(name='color', value='red', lineno=3),
-                    # Hoisted CSS rule
-                    CssRuleNode(selector='.box', lineno=4, properties=[
-                        CssPropertyNode(name='font-size', value='16px', lineno=5)
-                    ])
-                ])
-            ]
-        )
-    ])
-
-    import json
-    class AstEncoder(json.JSONEncoder):
-        def default(self, o):
-            if isinstance(o, (BaseNode, DocumentNode, ElementNode, TextNode, AttributeNode, CommentNode, StyleNode, CssRuleNode, CssPropertyNode)):
-                return vars(o)
-            return super().default(o)
-
-    print(json.dumps(doc, cls=AstEncoder, indent=2))
+@dataclass
+class DocumentNode(BaseNode):
+    """Represents the root of the document, containing a list of top-level nodes."""
+    children: List[DocumentContent] = field(default_factory=list)
+    lineno: int = 0

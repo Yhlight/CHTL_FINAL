@@ -2,22 +2,30 @@ import argparse
 import sys
 from CHTL.CHTLLexer.lexer import Lexer
 from CHTL.CHTLParser.parser import Parser
+from CHTL.CHTLTransformer.transformer import ASTTransformer
 from CHTL.CHTLGenerator.generator import HTMLGenerator
+from CHTL.CHTLContext.context import CompilationContext
 
 def compile_chtl(source_code: str) -> str:
     """
     Runs the full CHTL compilation pipeline.
     """
+    context = CompilationContext()
+
     # 1. Lexing
     lexer = Lexer(source_code)
     tokens = lexer.tokenize()
 
     # 2. Parsing
-    parser = Parser(tokens)
+    parser = Parser(tokens, context)
     ast = parser.parse()
 
-    # 3. Generation
-    generator = HTMLGenerator(ast)
+    # 3. Transformation (New Step)
+    transformer = ASTTransformer(ast, context)
+    transformed_ast = transformer.transform()
+
+    # 4. Generation
+    generator = HTMLGenerator(transformed_ast)
     html_output = generator.generate()
 
     return html_output

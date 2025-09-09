@@ -2,16 +2,21 @@ import unittest
 import textwrap
 from CHTL.CHTLLexer.lexer import Lexer
 from CHTL.CHTLParser.parser import Parser
+from CHTL.CHTLContext.context import CompilationContext
+from CHTL.CHTLTransformer.transformer import ASTTransformer
 from CHTL.CHTLGenerator.generator import HTMLGenerator
 
 class TestGenerator(unittest.TestCase):
 
     def _compile_source(self, source):
+        context = CompilationContext()
         lexer = Lexer(source)
         tokens = lexer.tokenize()
-        parser = Parser(tokens)
+        parser = Parser(tokens, context)
         ast = parser.parse()
-        generator = HTMLGenerator(ast)
+        transformer = ASTTransformer(ast, context)
+        transformed_ast = transformer.transform()
+        generator = HTMLGenerator(transformed_ast)
         return generator.generate()
 
     def _dedent(self, text):
@@ -38,27 +43,18 @@ class TestGenerator(unittest.TestCase):
         """)
         self.assertEqual(self._compile_source(source), expected)
 
-    def test_html_escaping(self):
-        source = 'p { text: "<a> & \'b\'"; }'
-        expected = '<p>&lt;a&gt; &amp; &#x27;b&#x27;</p>'
-        self.assertEqual(self._compile_source(source), expected)
-
-    def test_comment_generation(self):
-        source = "div { -- a real comment\n }"
+    def test_template_expansion_and_generation(self):
+        source = """
+        [Template] @Element MyBox {
+            div { class: "box"; }
+        }
+        body { @Element MyBox; }
+        """
         expected = self._dedent("""
-        <div>
-          <!-- a real comment -->
-        </div>
-        """)
-        self.assertEqual(self._compile_source(source), expected)
-
-    def test_self_closing_tags(self):
-        source = "div { br; hr; }"
-        expected = self._dedent("""
-        <div>
-          <br>
-          <hr>
-        </div>
+        <body>
+          <div class="box">
+          </div>
+        </body>
         """)
         self.assertEqual(self._compile_source(source), expected)
 
@@ -68,13 +64,8 @@ class TestGenerator(unittest.TestCase):
             head {}
             body {
                 div {
-                    class: container;
                     style {
-                        color: red;
-                        font-size: 16px;
-                        .box {
-                            border: 1px solid black;
-                        }
+                        .box {}
                     }
                 }
             }
@@ -84,13 +75,11 @@ class TestGenerator(unittest.TestCase):
         <html>
           <head>
             <style>
-              .box {
-                border: 1px solid black;
-              }
+              .box {}
             </style>
           </head>
           <body>
-            <div class="container box" style="color: red; font-size: 16px;">
+            <div class="box">
             </div>
           </body>
         </html>

@@ -48,7 +48,7 @@ class Lexer:
             ':': TokenType.COLON, ';': TokenType.SEMICOLON, '=': TokenType.EQUALS,
             ',': TokenType.COMMA, '.': TokenType.DOT, '@': TokenType.AT,
             '&': TokenType.AMPERSAND, '?': TokenType.QUESTION, '*': TokenType.STAR,
-            '>': TokenType.GT, '<': TokenType.LT
+            '>': TokenType.GT, '<': TokenType.LT, '/': TokenType.SLASH
         }
 
     def tokenize(self) -> list[Token]:
@@ -136,12 +136,14 @@ class Lexer:
 
     def consume_unquoted_literal(self):
         start_pos = self.pos
-        terminators = list(self.simple_tokens.keys()) + ['/', '"', "'"]
+        terminators = list(self.simple_tokens.keys()) + ['"', "'"]
         while self.pos < len(self.source_code):
             char = self.current_char()
             if char.isspace() or char in terminators:
                 break
             if char == '-' and self.peek() == '-':
+                break
+            if char == '/' and self.peek() in ('/', '*'):
                 break
             self.advance()
         value = self.source_code[start_pos:self.pos]

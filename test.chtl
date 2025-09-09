@@ -1,17 +1,14 @@
-// A test CHTL file for the CLI
-html {
-    head {
-        title: CHTL Test Page;
+[Template] @Element MyBox {
+    div {
+        class: "box";
+        text: "I am a template!";
     }
+}
+
+html {
     body {
-        h1 {
-            text: Welcome to CHTL!;
-        }
-        p {
-            text {
-                This is a paragraph compiled by the CHTL compiler.
-            }
-        }
-        -- A comment for the final HTML
+        h1 { text: "Testing Templates"; }
+        @Element MyBox;
+        @Element MyBox;
     }
 }

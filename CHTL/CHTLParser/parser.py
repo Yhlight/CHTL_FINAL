@@ -1,14 +1,17 @@
 from CHTL.CHTLLexer.lexer import Token, TokenType
 from CHTL.CHTLNode.nodes import (
     BaseNode, DocumentNode, ElementNode, AttributeNode, TextNode, CommentNode, Node,
-    StyleNode, CssRuleNode, CssPropertyNode
+    StyleNode, CssRuleNode, CssPropertyNode, TemplateDefinitionNode, TemplateUsageNode,
+    DocumentContent, StyleContent
 )
+from CHTL.CHTLContext.context import CompilationContext
 from typing import List, Optional
 
 class Parser:
-    def __init__(self, tokens: List[Token]):
+    def __init__(self, tokens: List[Token], context: CompilationContext):
         self.tokens = tokens
         self.pos = 0
+        self.context = context
 
     def peek(self, offset: int = 0) -> Optional[Token]:
         if self.pos + offset < len(self.tokens):
@@ -32,7 +35,9 @@ class Parser:
     def parse(self) -> DocumentNode:
         doc = DocumentNode(lineno=1)
         while self.current_token() and self.current_token().type != TokenType.EOF:
-            if self.current_token().type == TokenType.COMMENT:
+            if self.current_token().type == TokenType.LBRACK:
+                doc.children.append(self.parse_template_definition())
+            elif self.current_token().type == TokenType.COMMENT:
                 doc.children.append(self.parse_comment())
             elif self.current_token().type == TokenType.IDENTIFIER:
                 doc.children.append(self.parse_element())
@@ -40,6 +45,61 @@ class Parser:
                 token = self.current_token()
                 raise RuntimeError(f"Line {token.lineno}: Unexpected token {token.type} at top level.")
         return doc
+
+    def parse_template_definition(self) -> TemplateDefinitionNode:
+        start_token = self.consume(TokenType.LBRACK)
+        # Assuming the identifier is 'Template' as per spec
+        self.consume(TokenType.IDENTIFIER)
+        self.consume(TokenType.RBRACK)
+        self.consume(TokenType.AT)
+        template_type_token = self.consume(TokenType.IDENTIFIER)
+        template_name_token = self.consume(TokenType.IDENTIFIER)
+
+        template_type = template_type_token.value
+        template_name = template_name_token.value
+
+        content = []
+        self.consume(TokenType.LBRACE)
+        if template_type == 'Style':
+            while self.current_token().type != TokenType.RBRACE:
+                content.append(self.parse_css_property())
+        elif template_type == 'Element':
+            while self.current_token().type != TokenType.RBRACE:
+                content.append(self.parse_element())
+        elif template_type == 'Var':
+             while self.current_token().type != TokenType.RBRACE:
+                name_token = self.consume(TokenType.IDENTIFIER)
+                self.consume(TokenType.COLON)
+                value = self.parse_value_tokens([TokenType.SEMICOLON])
+                self.consume(TokenType.SEMICOLON)
+                content.append(AttributeNode(name=name_token.value, value=value, lineno=name_token.lineno))
+        self.consume(TokenType.RBRACE)
+
+        if template_type == 'Style':
+            self.context.add_style_template(template_name, content)
+        elif template_type == 'Element':
+            self.context.add_element_template(template_name, content)
+        elif template_type == 'Var':
+            self.context.add_var_template(template_name, content)
+
+        return TemplateDefinitionNode(
+            template_type=template_type,
+            name=template_name,
+            content=content,
+            lineno=start_token.lineno
+        )
+
+    def parse_template_usage(self) -> TemplateUsageNode:
+        start_token = self.consume(TokenType.AT)
+        template_type_token = self.consume(TokenType.IDENTIFIER)
+        template_name_token = self.consume(TokenType.IDENTIFIER)
+        self.consume(TokenType.SEMICOLON)
+
+        return TemplateUsageNode(
+            template_type=template_type_token.value,
+            name=template_name_token.value,
+            lineno=start_token.lineno
+        )
 
     def parse_comment(self) -> CommentNode:
         token = self.consume(TokenType.COMMENT)
@@ -69,16 +129,20 @@ class Parser:
 
         while self.current_token() and self.current_token().type not in (TokenType.RBRACE, TokenType.EOF):
             token = self.current_token()
-            next_token = self.peek(1)
 
+            if token.type == TokenType.AT:
+                element.children.append(self.parse_template_usage())
+                continue
+
+            next_token = self.peek(1)
             if token.type == TokenType.COMMENT:
                 element.children.append(self.parse_comment())
             elif token.type == TokenType.IDENTIFIER and token.value == 'style':
                 element.children.append(self.parse_style_block(element))
             elif token.type == TokenType.IDENTIFIER and next_token and next_token.type == TokenType.LBRACE:
                 if token.value == 'text':
-                    self.consume() # consume 'text'
-                    self.consume() # consume '{'
+                    self.consume()
+                    self.consume()
                     value = self.parse_value_tokens([TokenType.RBRACE])
                     self.consume(TokenType.RBRACE)
                     element.children.append(TextNode(value=value, lineno=token.lineno))
@@ -96,7 +160,7 @@ class Parser:
 
     def parse_attribute(self, element: ElementNode):
         attr_name_token = self.consume(TokenType.IDENTIFIER)
-        self.consume() # Consume ':' or '='
+        self.consume()
         value = self.parse_value_tokens([TokenType.SEMICOLON])
         self.consume(TokenType.SEMICOLON)
 
@@ -115,6 +179,10 @@ class Parser:
         style_node = StyleNode(lineno=style_token.lineno)
 
         while self.current_token() and self.current_token().type != TokenType.RBRACE:
+            if self.current_token().type == TokenType.AT:
+                style_node.children.append(self.parse_template_usage())
+                continue
+
             is_rule = False
             i = 0
             while True:
@@ -186,29 +254,29 @@ if __name__ == '__main__':
     import json
 
     source = """
-    div {
-        class: "old-class";
-        style {
-            width: 100px;
-            .box {
-                color: blue;
-            }
-            #my-id {
-                font-weight: bold;
-            }
+    [Template] @Element MyBox {
+        div {
+            text: "I am in a box.";
         }
+    }
+
+    body {
+        @Element MyBox;
     }
     """
 
     lexer = Lexer(source)
-    tokens = lexer.tokenize()
-    parser = Parser(tokens)
+    context = CompilationContext()
+    parser = Parser(lexer.tokenize(), context)
     ast = parser.parse()
 
     class AstEncoder(json.JSONEncoder):
         def default(self, o):
-            if isinstance(o, (BaseNode, DocumentNode, ElementNode, TextNode, AttributeNode, CommentNode, StyleNode, CssRuleNode, CssPropertyNode)):
+            if isinstance(o, (BaseNode, DocumentNode, ElementNode, TextNode, AttributeNode, CommentNode, StyleNode, CssRuleNode, CssPropertyNode, TemplateDefinitionNode, TemplateUsageNode)):
                 return vars(o)
             return super().default(o)
 
+    print("--- AST ---")
     print(json.dumps(ast, cls=AstEncoder, indent=2))
+    print("\n--- Context ---")
+    print(f"Element Templates: {list(context.element_templates.keys())}")
