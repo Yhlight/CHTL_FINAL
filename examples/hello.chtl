@@ -1,0 +1,121 @@
+html
+{
+    head
+    {
+        title
+        {
+            "Hello CHTL World"
+        }
+        
+        meta
+        {
+            charset: utf-8;
+        }
+        
+        meta
+        {
+            name: viewport;
+            content: width=device-width, initial-scale=1.0;
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: container;
+            id: main-content;
+            
+            text
+            {
+                Welcome to CHTL!
+            }
+        }
+        
+        div
+        {
+            class: info;
+            
+            style
+            {
+                .info
+                {
+                    margin: 20px 0;
+                    padding: 15px;
+                    background-color: #e8f4f8;
+                    border-left: 4px solid #2196F3;
+                }
+                
+                &:hover
+                {
+                    background-color: #d1ecf1;
+                }
+            }
+            
+            text
+            {
+                CHTL is a hypertext language that provides a better way to write HTML.
+            }
+        }
+        
+        // This is a line comment - won't appear in output
+        /* This is a block comment - won't appear in output */
+        -- This is a generator comment - will appear as HTML comment
+        
+        div
+        {
+            class: features;
+            
+            h2
+            {
+                text
+                {
+                    Features
+                }
+            }
+            
+            ul
+            {
+                li
+                {
+                    text
+                    {
+                        Comments: // /* */ --
+                    }
+                }
+                
+                li
+                {
+                    text
+                    {
+                        Text nodes: text { } and text: attribute
+                    }
+                }
+                
+                li
+                {
+                    text
+                    {
+                        Literals: unquoted, single-quoted, double-quoted strings
+                    }
+                }
+                
+                li
+                {
+                    text
+                    {
+                        CE equivalence: : and = are equivalent
+                    }
+                }
+                
+                li
+                {
+                    text
+                    {
+                        Local style blocks with auto class/id addition
+                    }
+                }
+            }
+        }
+    }
+}
