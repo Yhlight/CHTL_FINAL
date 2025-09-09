@@ -1,0 +1,195 @@
+[Configuration]
+{
+    HTML5_DOCTYPE = true;
+    DEBUG_MODE = false;
+    INDEX_INITIAL_COUNT = 0;
+}
+
+[Template] @Style ButtonStyle
+{
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+[Template] @Element Button
+{
+    button
+    {
+        style
+        {
+            @Style ButtonStyle;
+        }
+        
+        text
+        {
+            Click me
+        }
+    }
+}
+
+[Custom] @Element Card
+{
+    div
+    {
+        class: "card";
+        style
+        {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: white;
+        }
+    }
+}
+
+html
+{
+    head
+    {
+        title
+        {
+            text: "Advanced CHTL Example";
+        }
+        
+        meta
+        {
+            charset: "utf-8";
+        }
+        
+        meta
+        {
+            name: "viewport";
+            content: "width=device-width, initial-scale=1.0";
+        }
+    }
+    
+    body
+    {
+        style
+        {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        div
+        {
+            class: "container";
+            style
+            {
+                max-width: 800px;
+                margin: 0 auto;
+                background-color: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+            
+            h1
+            {
+                text: "Welcome to CHTL!";
+                style
+                {
+                    color: #333;
+                    text-align: center;
+                    margin-bottom: 30px;
+                }
+            }
+            
+            p
+            {
+                text: "This is an advanced example showcasing CHTL features including templates, custom elements, and local styling.";
+                style
+                {
+                    line-height: 1.6;
+                    color: #666;
+                    margin-bottom: 20px;
+                }
+            }
+            
+            @Element Card
+            {
+                div
+                {
+                    style
+                    {
+                        background-color: #f9f9f9;
+                        margin-bottom: 15px;
+                    }
+                    
+                    h3
+                    {
+                        text: "Template System";
+                        style
+                        {
+                            color: #007bff;
+                            margin-top: 0;
+                        }
+                    }
+                    
+                    p
+                    {
+                        text: "CHTL supports reusable templates for styles and elements.";
+                        style
+                        {
+                            margin-bottom: 15px;
+                        }
+                    }
+                    
+                    @Element Button;
+                }
+            }
+            
+            @Element Card
+            {
+                div
+                {
+                    style
+                    {
+                        background-color: #e8f5e8;
+                    }
+                    
+                    h3
+                    {
+                        text: "Local Styling";
+                        style
+                        {
+                            color: #28a745;
+                            margin-top: 0;
+                        }
+                    }
+                    
+                    p
+                    {
+                        text: "You can define styles directly within elements using the style block.";
+                        style
+                        {
+                            margin-bottom: 15px;
+                        }
+                    }
+                    
+                    button
+                    {
+                        style
+                        {
+                            @Style ButtonStyle;
+                            background-color: #28a745;
+                        }
+                        
+                        text
+                        {
+                            Green Button
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

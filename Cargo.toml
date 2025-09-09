@@ -1,0 +1,59 @@
+[package]
+name = "chtl"
+version = "0.1.0"
+edition = "2021"
+authors = ["CHTL Team"]
+description = "CHTL - A hypertext language based on Rust"
+license = "MIT"
+
+[dependencies]
+# 核心依赖
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+regex = "1.10"
+thiserror = "1.0"
+anyhow = "1.0"
+clap = { version = "4.0", features = ["derive"] }
+walkdir = "2.0"
+zip = { version = "0.6", default-features = false, features = ["deflate"] }
+
+# 文件系统
+tokio = { version = "1.0", features = ["full"] }
+tokio-util = "0.7"
+
+# 字符串处理
+unicode-segmentation = "1.10"
+unicode-normalization = "0.1"
+
+# 时间处理
+chrono = { version = "0.4", features = ["serde"] }
+
+# 日志
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# 测试
+criterion = "0.5"
+
+[dev-dependencies]
+tempfile = "3.0"
+
+[[bin]]
+name = "test_compiler"
+path = "test_compiler.rs"
+
+[[bin]]
+name = "run_feature_tests"
+path = "run_feature_tests.rs"
+
+[[bin]]
+name = "simple_test"
+path = "simple_test.rs"
+
+[[test]]
+name = "integration_tests"
+path = "tests/integration_tests.rs"
+
+[[test]]
+name = "unit_tests"
+path = "tests/unit_tests.rs"
