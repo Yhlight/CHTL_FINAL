@@ -17,4 +17,14 @@ public class CustomStyleNode extends StyleTemplateNode {
     public void addConstrainedProperty(String name) { this.constrainedProperties.add(name); }
     public Set<String> getValuelessProperties() { return valuelessProperties; }
     public Set<String> getConstrainedProperties() { return constrainedProperties; }
+
+    @Override
+    public BaseNode clone() {
+        CustomStyleNode cloned = new CustomStyleNode(getName());
+        getProperties().forEach(cloned::addProperty);
+        getParentTemplates().forEach(cloned::addParentTemplate);
+        this.valuelessProperties.forEach(cloned::addValuelessProperty);
+        this.constrainedProperties.forEach(cloned::addConstrainedProperty);
+        return cloned;
+    }
 }

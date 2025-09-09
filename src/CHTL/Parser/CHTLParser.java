@@ -28,7 +28,7 @@ public class CHTLParser {
 
     private BaseNode declaration() {
         if (check(TokenType.LBRACKET)) return bracketedDeclaration();
-        if (check(TokenType.AT)) return templateUsage();
+        if (check(TokenType.AT)) return elementTemplateUsage();
         return element();
     }
 
@@ -36,12 +36,9 @@ public class CHTLParser {
         consume(TokenType.LBRACKET, "Expect '['.");
         Token type = advance();
         consume(TokenType.RBRACKET, "Expect ']'.");
-
         switch (type.type()) {
             case TEMPLATE: return templateDefinition(false);
             case CUSTOM: return templateDefinition(true);
-            // case IMPORT: return importStatement();
-            // case NAMESPACE: return namespaceStatement();
             default: throw new RuntimeException("Unexpected token in bracket declaration: " + type.value());
         }
     }
@@ -61,23 +58,24 @@ public class CHTLParser {
     private StyleTemplateNode parseStyleTemplate(String name) {
         StyleTemplateNode node = new StyleTemplateNode(name);
         consume(TokenType.LBRACE, "Expect '{'.");
-        while (!check(TokenType.RBRACE)) {
-            if (check(TokenType.AT) || check(TokenType.INHERIT)) {
-                if(match(TokenType.INHERIT)){}
-                consume(TokenType.AT, "Expect '@'.");
-                consume(TokenType.IDENTIFIER, "Expect 'Style'.");
-                node.addParentTemplate(consume(TokenType.IDENTIFIER, "Expect parent name.").value());
-                consume(TokenType.SEMICOLON, "Expect ';'.");
-            } else {
-                Token key = consume(TokenType.IDENTIFIER, "Expect property name.");
-                match(TokenType.COLON, TokenType.EQUALS);
-                node.addProperty(key.value(), consume(TokenType.STRING, "Expect property value.").value());
-                consume(TokenType.SEMICOLON, "Expect ';'.");
-            }
-        }
+        while (!check(TokenType.RBRACE)) parseStylePropertyOrInheritance(node);
         consume(TokenType.RBRACE, "Expect '}'.");
         definitionManager.register(currentNamespace, name, node);
         return node;
+    }
+
+    private void parseStylePropertyOrInheritance(StyleTemplateNode node) {
+        if (match(TokenType.AT) || match(TokenType.INHERIT)) {
+            consume(TokenType.AT, "Expect '@'.");
+            consume(TokenType.IDENTIFIER, "Expect 'Style'.");
+            node.addParentTemplate(consume(TokenType.IDENTIFIER, "Expect parent name.").value());
+            consume(TokenType.SEMICOLON, "Expect ';'.");
+        } else {
+            Token key = consume(TokenType.IDENTIFIER, "Expect property name.");
+            match(TokenType.COLON, TokenType.EQUALS);
+            node.addProperty(key.value(), consume(TokenType.STRING, "Expect property value.").value());
+            consume(TokenType.SEMICOLON, "Expect ';'.");
+        }
     }
 
     private CustomStyleNode parseCustomStyle(String name) {
@@ -85,16 +83,15 @@ public class CHTLParser {
         consume(TokenType.LBRACE, "Expect '{'.");
         while (!check(TokenType.RBRACE)) {
             if (check(TokenType.EXCEPT)) {
-                // Parse except block
                 advance();
                 consume(TokenType.LBRACE, "Expect '{'.");
-                do {
-                    node.addConstrainedProperty(consume(TokenType.IDENTIFIER, "Expect property name.").value());
-                } while (match(TokenType.COMMA));
+                do { node.addConstrainedProperty(consume(TokenType.IDENTIFIER, "Expect property name.").value()); } while (match(TokenType.COMMA));
                 consume(TokenType.SEMICOLON, "Expect ';'.");
                 consume(TokenType.RBRACE, "Expect '}'.");
-            } else {
-                // Simplified property parsing
+            } else if (check(TokenType.AT) || check(TokenType.INHERIT)){
+                parseStylePropertyOrInheritance(node);
+            }
+            else {
                 Token key = consume(TokenType.IDENTIFIER, "Expect property name.");
                 if (match(TokenType.COLON, TokenType.EQUALS)) {
                     node.addProperty(key.value(), consume(TokenType.STRING, "Expect value.").value());
@@ -144,16 +141,21 @@ public class CHTLParser {
 
     private CustomVarNode parseCustomVar(String name) {
         CustomVarNode node = new CustomVarNode(name);
-        // Simplified
         consume(TokenType.LBRACE, "Expect '{'.");
+        while(!check(TokenType.RBRACE)) {
+            Token key = consume(TokenType.IDENTIFIER, "Expect var name.");
+            match(TokenType.COLON, TokenType.EQUALS);
+            node.addVariable(key.value(), consume(TokenType.STRING, "Expect var value.").value());
+            consume(TokenType.SEMICOLON, "Expect ';'.");
+        }
         consume(TokenType.RBRACE, "Expect '}'.");
         definitionManager.register(currentNamespace, name, node);
         return node;
     }
 
-    private BaseNode templateUsage() {
+    private ElementTemplateUsageNode elementTemplateUsage() {
         consume(TokenType.AT, "Expect '@'.");
-        Token templateType = consume(TokenType.IDENTIFIER, "Expect template type.");
+        consume(TokenType.IDENTIFIER, "Expect 'Element'.");
         Token templateName = consume(TokenType.IDENTIFIER, "Expect template name.");
         String namespace = currentNamespace;
         if (match(TokenType.FROM)) namespace = consume(TokenType.IDENTIFIER, "Expect namespace.").value();
@@ -184,7 +186,7 @@ public class CHTLParser {
 
     private InsertInstructionNode parseInsertInstruction() {
         consume(TokenType.INSERT, "Expect 'insert'.");
-        Token modeToken = advance(); // after, before, etc.
+        Token modeToken = advance();
         InsertInstructionNode.Mode mode = InsertInstructionNode.Mode.valueOf(modeToken.value().toUpperCase());
         String selector = consume(TokenType.IDENTIFIER, "Expect selector.").value();
         List<BaseNode> nodesToInsert = new ArrayList<>();
@@ -229,10 +231,7 @@ public class CHTLParser {
         StyleNode styleNode = new StyleNode();
         while(!check(TokenType.RBRACE)) {
             if (check(TokenType.AT)) {
-                // Parse style template usage
-                advance();
-                consume(TokenType.IDENTIFIER, "Expect 'Style'.");
-                // Simplified: doesn't create usage node, just merges for now
+                styleNode.addUsage(parseStyleTemplateUsage());
             } else {
                 Token property = consume(TokenType.IDENTIFIER, "Expect property name.");
                 match(TokenType.COLON, TokenType.EQUALS);
@@ -242,6 +241,34 @@ public class CHTLParser {
         }
         consume(TokenType.RBRACE, "Expect '}' to close style block.");
         return styleNode;
+    }
+
+    private StyleTemplateUsageNode parseStyleTemplateUsage() {
+        consume(TokenType.AT, "Expect '@'.");
+        consume(TokenType.IDENTIFIER, "Expect 'Style'.");
+        Token templateName = consume(TokenType.IDENTIFIER, "Expect template name.");
+        String namespace = currentNamespace;
+        if(match(TokenType.FROM)) namespace = consume(TokenType.IDENTIFIER, "Expect namespace.").value();
+        StyleTemplateUsageNode usage = new StyleTemplateUsageNode(templateName.value(), namespace);
+        if(match(TokenType.LBRACE)) {
+            while(!check(TokenType.RBRACE)) {
+                if(match(TokenType.DELETE)) {
+                    do {
+                        usage.addDeletion(consume(TokenType.IDENTIFIER, "Expect property to delete.").value());
+                    } while(match(TokenType.COMMA));
+                    consume(TokenType.SEMICOLON, "Expect ';'.");
+                } else {
+                    Token key = consume(TokenType.IDENTIFIER, "Expect property name.");
+                    match(TokenType.COLON, TokenType.EQUALS);
+                    usage.addSpecialization(key.value(), consume(TokenType.STRING, "Expect value.").value());
+                    consume(TokenType.SEMICOLON, "Expect ';'.");
+                }
+            }
+            consume(TokenType.RBRACE, "Expect '}'.");
+        } else {
+            consume(TokenType.SEMICOLON, "Expect ';'.");
+        }
+        return usage;
     }
 
     // Utility methods

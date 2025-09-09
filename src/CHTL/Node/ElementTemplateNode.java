@@ -13,4 +13,13 @@ public class ElementTemplateNode extends TemplateNode {
 
     public void addChild(BaseNode child) { this.children.add(child); }
     public List<BaseNode> getChildren() { return children; }
+
+    @Override
+    public BaseNode clone() {
+        ElementTemplateNode cloned = new ElementTemplateNode(getName());
+        for (BaseNode child : this.children) {
+            cloned.addChild(child.clone());
+        }
+        return cloned;
+    }
 }

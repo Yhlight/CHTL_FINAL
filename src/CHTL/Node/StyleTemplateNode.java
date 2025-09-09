@@ -19,4 +19,12 @@ public class StyleTemplateNode extends TemplateNode {
     public void addParentTemplate(String parent) { this.parentTemplates.add(parent); }
     public Map<String, String> getProperties() { return properties; }
     public List<String> getParentTemplates() { return parentTemplates; }
+
+    @Override
+    public BaseNode clone() {
+        StyleTemplateNode cloned = new StyleTemplateNode(getName());
+        this.properties.forEach(cloned::addProperty);
+        this.parentTemplates.forEach(cloned::addParentTemplate);
+        return cloned;
+    }
 }

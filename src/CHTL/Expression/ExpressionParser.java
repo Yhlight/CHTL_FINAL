@@ -120,10 +120,23 @@ public class ExpressionParser {
         }
 
         if (match(ExpressionTokenType.IDENTIFIER)) {
-             // Could be a reference to own property e.g. `width`
-             // This requires context the parser doesn't have. The evaluator will handle it.
-             // For now, treat it as a reference with no selector.
-             return new ReferenceNode(null, previous().value());
+            Token identifier = previous();
+            if (match(ExpressionTokenType.LPAREN)) {
+                // It's a function call
+                FunctionCallNode node = new FunctionCallNode(identifier.value());
+                if (!check(ExpressionTokenType.RPAREN)) {
+                    do {
+                        node.addArgument(expression());
+                    } while (match(ExpressionTokenType.COMMA));
+                }
+                if(!match(ExpressionTokenType.RPAREN)) {
+                    throw new RuntimeException("Expect ')' after arguments.");
+                }
+                return node;
+            } else {
+                // It's a reference to a property on the same element
+                return new ReferenceNode(null, identifier.value());
+            }
         }
 
         if (match(ExpressionTokenType.LPAREN)) {

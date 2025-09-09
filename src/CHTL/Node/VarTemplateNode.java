@@ -13,4 +13,11 @@ public class VarTemplateNode extends TemplateNode {
 
     public void addVariable(String key, String value) { this.variables.put(key, value); }
     public Map<String, String> getVariables() { return variables; }
+
+    @Override
+    public BaseNode clone() {
+        VarTemplateNode cloned = new VarTemplateNode(getName());
+        this.variables.forEach(cloned::addVariable);
+        return cloned;
+    }
 }

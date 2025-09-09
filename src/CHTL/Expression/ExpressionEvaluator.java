@@ -18,21 +18,34 @@ public class ExpressionEvaluator {
         if (node instanceof ReferenceNode) {
             return evaluateReference((ReferenceNode) node, context);
         }
+        if (node instanceof FunctionCallNode) {
+            return evaluateFunctionCall((FunctionCallNode) node, context);
+        }
         throw new RuntimeException("Unsupported expression node type: " + node.getClass().getSimpleName());
+    }
+
+    private ExpressionNode evaluateFunctionCall(FunctionCallNode node, EvaluationContext context) {
+        // This is a major simplification based on the new spec.
+        // It assumes function calls are for variable lookups, e.g., ThemeColor(tableColor)
+        String varTemplateName = node.getFunctionName();
+        if (node.getArguments().size() != 1 || !(node.getArguments().get(0) instanceof ReferenceNode)) {
+            throw new RuntimeException("Invalid variable usage syntax. Expect 'TemplateName(variableName)'.");
+        }
+
+        String varName = ((ReferenceNode) node.getArguments().get(0)).getProperty();
+
+        // A DefinitionManager needs to be available in the context
+        // This is a temporary placeholder for getting the value.
+        // String value = definitionManager.getVariableValue(varTemplateName, varName);
+        String value = "/* " + varTemplateName + "(" + varName + ") */"; // Placeholder
+
+        return new LiteralNode(value);
     }
 
     private ExpressionNode evaluateTernary(TernaryNode node, EvaluationContext context) {
         ExpressionNode conditionResult = evaluate(node.getCondition(), context);
-        // This is a simplification. A real implementation would have a proper truthiness check.
-        boolean isTrue = false;
-        if (conditionResult instanceof LiteralNode) {
-             Object val = ((LiteralNode) conditionResult).getValue();
-             if (val instanceof Boolean && (Boolean) val) {
-                 isTrue = true;
-             }
-        }
 
-        if (isTrue) {
+        if (isTruthy(conditionResult)) {
             return evaluate(node.getTrueExpression(), context);
         } else {
             if (node.getFalseExpression() != null) {
@@ -44,12 +57,34 @@ public class ExpressionEvaluator {
         }
     }
 
+    private boolean isTruthy(ExpressionNode node) {
+        if (node instanceof LiteralNode ln) {
+            Object val = ln.getValue();
+            if (val instanceof Boolean) return (Boolean) val;
+            if (val instanceof Number) return ((Number) val).doubleValue() != 0;
+            if (val instanceof String) return !((String) val).isEmpty();
+            return val != null;
+        }
+        // UnitNodes are considered truthy if not zero
+        if (node instanceof UnitNode un) {
+            return un.getValue() != 0;
+        }
+        return false; // References, etc., are not truthy by themselves
+    }
+
     private ExpressionNode evaluateReference(ReferenceNode node, EvaluationContext context) {
         if (node.getSelector() == null) {
-            // It's a reference to a property on the same element, e.g. `width`.
-            // The ASTProcessor will need to handle this by looking up the property on the `self` element.
-            // This creates a dependency graph problem. For now, we'll return the node itself.
-            return node;
+            // It's a reference to a property on the same element, e.g. `height: width;`
+            String propName = node.getProperty();
+            if (context.computedValues().containsKey(propName)) {
+                String rawValue = context.computedValues().get(propName);
+                ExpressionLexer lexer = new ExpressionLexer(rawValue);
+                ExpressionParser parser = new ExpressionParser(lexer.tokenize());
+                // Evaluate this sub-expression in the same context
+                return evaluate(parser.parse(), context);
+            } else {
+                throw new RuntimeException("Unresolved self-reference to property '" + propName + "'. Check for dependency cycle.");
+            }
         }
         // This is a highly simplified reference search. It only looks for IDs.
         ElementNode target = findElementById(context.documentRoot(), node.getSelector().substring(1));

@@ -10,16 +10,44 @@ public class CHTLJSGenerator {
     public String generate(List<CHTLJSBaseNode> nodes) {
         StringBuilder builder = new StringBuilder();
         for (CHTLJSBaseNode node : nodes) {
-            if (node instanceof ListenNode) {
-                builder.append(generateListenNode((ListenNode) node));
-            } else if (node instanceof AnimateNode) {
-                builder.append("/* AnimateNode processed */\n");
-            } else if (node instanceof DelegateNode) {
-                builder.append("/* DelegateNode processed */\n");
-            } else if (node instanceof RouterNode) {
-                builder.append("/* RouterNode processed */\n");
+            if (node instanceof ListenNode listenNode) {
+                builder.append(generateListenNode(listenNode));
+            } else if (node instanceof AnimateNode animateNode) {
+                builder.append(generateAnimateNode(animateNode));
+            } else if (node instanceof DelegateNode delegateNode) {
+                builder.append(generateDelegateNode(delegateNode));
+            } else if (node instanceof RouterNode routerNode) {
+                builder.append(generateRouterNode(routerNode));
             }
         }
+        return builder.toString();
+    }
+
+    private String generateAnimateNode(AnimateNode node) {
+        StringBuilder builder = new StringBuilder("animate({\n");
+        for(Map.Entry<String, String> entry : node.getProperties().entrySet()) {
+            builder.append("  ").append(entry.getKey()).append(": ").append(entry.getValue()).append(",\n");
+        }
+        builder.append("});\n");
+        return builder.toString();
+    }
+
+    private String generateDelegateNode(DelegateNode node) {
+         StringBuilder builder = new StringBuilder();
+         builder.append("document.querySelector('").append(node.getParentSelector()).append("').delegate({\n");
+         for(Map.Entry<String, String> entry : node.getDelegatedEvents().entrySet()) {
+            builder.append("  ").append(entry.getKey()).append(": ").append(entry.getValue()).append(",\n");
+        }
+        builder.append("});\n");
+        return builder.toString();
+    }
+
+    private String generateRouterNode(RouterNode node) {
+        StringBuilder builder = new StringBuilder("router({\n");
+        for(Map.Entry<String, String> entry : node.getRoutes().entrySet()) {
+            builder.append("  '").append(entry.getKey()).append("': ").append(entry.getValue()).append(",\n");
+        }
+        builder.append("});\n");
         return builder.toString();
     }
 
