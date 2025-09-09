@@ -507,6 +507,7 @@ CMakeFiles/chtl.dir/src/generator/code_generator.cpp.o: /workspace/chtl/src/gene
   /usr/include/c++/14/iomanip \
   /usr/include/c++/14/ios \
   /usr/include/c++/14/iosfwd \
+  /usr/include/c++/14/iostream \
   /usr/include/c++/14/istream \
   /usr/include/c++/14/limits \
   /usr/include/c++/14/locale \
@@ -2246,6 +2247,7 @@ CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.o: /workspace/chtl/src/scann
   /usr/include/errno.h \
   /usr/include/features-time64.h \
   /usr/include/features.h \
+  /usr/include/libintl.h \
   /usr/include/linux/errno.h \
   /usr/include/linux/posix_types.h \
   /usr/include/linux/sched/types.h \
@@ -2352,10 +2354,12 @@ CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.o: /workspace/chtl/src/scann
   /usr/include/c++/14/bits/basic_string.tcc \
   /usr/include/c++/14/bits/char_traits.h \
   /usr/include/c++/14/bits/charconv.h \
+  /usr/include/c++/14/bits/codecvt.h \
   /usr/include/c++/14/bits/concept_check.h \
   /usr/include/c++/14/bits/cpp_type_traits.h \
   /usr/include/c++/14/bits/cxxabi_forced.h \
   /usr/include/c++/14/bits/cxxabi_init_exception.h \
+  /usr/include/c++/14/bits/deque.tcc \
   /usr/include/c++/14/bits/enable_special_members.h \
   /usr/include/c++/14/bits/erase_if.h \
   /usr/include/c++/14/bits/exception.h \
@@ -2371,8 +2375,11 @@ CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.o: /workspace/chtl/src/scann
   /usr/include/c++/14/bits/istream.tcc \
   /usr/include/c++/14/bits/locale_classes.h \
   /usr/include/c++/14/bits/locale_classes.tcc \
+  /usr/include/c++/14/bits/locale_conv.h \
   /usr/include/c++/14/bits/locale_facets.h \
   /usr/include/c++/14/bits/locale_facets.tcc \
+  /usr/include/c++/14/bits/locale_facets_nonio.h \
+  /usr/include/c++/14/bits/locale_facets_nonio.tcc \
   /usr/include/c++/14/bits/localefwd.h \
   /usr/include/c++/14/bits/memory_resource.h \
   /usr/include/c++/14/bits/memoryfwd.h \
@@ -2387,24 +2394,42 @@ CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.o: /workspace/chtl/src/scann
   /usr/include/c++/14/bits/ptr_traits.h \
   /usr/include/c++/14/bits/range_access.h \
   /usr/include/c++/14/bits/refwrap.h \
+  /usr/include/c++/14/bits/regex.h \
+  /usr/include/c++/14/bits/regex.tcc \
+  /usr/include/c++/14/bits/regex_automaton.h \
+  /usr/include/c++/14/bits/regex_automaton.tcc \
+  /usr/include/c++/14/bits/regex_compiler.h \
+  /usr/include/c++/14/bits/regex_compiler.tcc \
+  /usr/include/c++/14/bits/regex_constants.h \
+  /usr/include/c++/14/bits/regex_error.h \
+  /usr/include/c++/14/bits/regex_executor.h \
+  /usr/include/c++/14/bits/regex_executor.tcc \
+  /usr/include/c++/14/bits/regex_scanner.h \
+  /usr/include/c++/14/bits/regex_scanner.tcc \
   /usr/include/c++/14/bits/requires_hosted.h \
   /usr/include/c++/14/bits/shared_ptr.h \
   /usr/include/c++/14/bits/shared_ptr_atomic.h \
   /usr/include/c++/14/bits/shared_ptr_base.h \
   /usr/include/c++/14/bits/sstream.tcc \
   /usr/include/c++/14/bits/std_abs.h \
+  /usr/include/c++/14/bits/std_function.h \
   /usr/include/c++/14/bits/stl_algo.h \
   /usr/include/c++/14/bits/stl_algobase.h \
   /usr/include/c++/14/bits/stl_bvector.h \
   /usr/include/c++/14/bits/stl_construct.h \
+  /usr/include/c++/14/bits/stl_deque.h \
   /usr/include/c++/14/bits/stl_function.h \
   /usr/include/c++/14/bits/stl_heap.h \
   /usr/include/c++/14/bits/stl_iterator.h \
   /usr/include/c++/14/bits/stl_iterator_base_funcs.h \
   /usr/include/c++/14/bits/stl_iterator_base_types.h \
+  /usr/include/c++/14/bits/stl_map.h \
   /usr/include/c++/14/bits/stl_pair.h \
+  /usr/include/c++/14/bits/stl_queue.h \
   /usr/include/c++/14/bits/stl_raw_storage_iter.h \
+  /usr/include/c++/14/bits/stl_stack.h \
   /usr/include/c++/14/bits/stl_tempbuf.h \
+  /usr/include/c++/14/bits/stl_tree.h \
   /usr/include/c++/14/bits/stl_uninitialized.h \
   /usr/include/c++/14/bits/stl_vector.h \
   /usr/include/c++/14/bits/streambuf.tcc \
@@ -2420,6 +2445,7 @@ CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.o: /workspace/chtl/src/scann
   /usr/include/c++/14/bits/utility.h \
   /usr/include/c++/14/bits/vector.tcc \
   /usr/include/c++/14/bits/version.h \
+  /usr/include/c++/14/bitset \
   /usr/include/c++/14/cctype \
   /usr/include/c++/14/cerrno \
   /usr/include/c++/14/clocale \
@@ -2427,10 +2453,12 @@ CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.o: /workspace/chtl/src/scann
   /usr/include/c++/14/cstddef \
   /usr/include/c++/14/cstdio \
   /usr/include/c++/14/cstdlib \
+  /usr/include/c++/14/ctime \
   /usr/include/c++/14/cwchar \
   /usr/include/c++/14/cwctype \
   /usr/include/c++/14/debug/assertions.h \
   /usr/include/c++/14/debug/debug.h \
+  /usr/include/c++/14/deque \
   /usr/include/c++/14/exception \
   /usr/include/c++/14/ext/aligned_buffer.h \
   /usr/include/c++/14/ext/alloc_traits.h \
@@ -2444,6 +2472,7 @@ CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.o: /workspace/chtl/src/scann
   /usr/include/c++/14/iosfwd \
   /usr/include/c++/14/iostream \
   /usr/include/c++/14/istream \
+  /usr/include/c++/14/locale \
   /usr/include/c++/14/memory \
   /usr/include/c++/14/new \
   /usr/include/c++/14/ostream \
@@ -2451,7 +2480,10 @@ CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.o: /workspace/chtl/src/scann
   /usr/include/c++/14/pstl/glue_algorithm_defs.h \
   /usr/include/c++/14/pstl/glue_memory_defs.h \
   /usr/include/c++/14/pstl/pstl_config.h \
+  /usr/include/c++/14/queue \
+  /usr/include/c++/14/regex \
   /usr/include/c++/14/sstream \
+  /usr/include/c++/14/stack \
   /usr/include/c++/14/stdexcept \
   /usr/include/c++/14/streambuf \
   /usr/include/c++/14/string \
@@ -2473,7 +2505,9 @@ CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.o: /workspace/chtl/src/scann
   /usr/include/x86_64-linux-gnu/c++/14/bits/error_constants.h \
   /usr/include/x86_64-linux-gnu/c++/14/bits/gthr-default.h \
   /usr/include/x86_64-linux-gnu/c++/14/bits/gthr.h \
+  /usr/include/x86_64-linux-gnu/c++/14/bits/messages_members.h \
   /usr/include/x86_64-linux-gnu/c++/14/bits/os_defines.h \
+  /usr/include/x86_64-linux-gnu/c++/14/bits/time_members.h \
   /usr/lib/llvm-20/lib/clang/20/include/__stdarg___gnuc_va_list.h \
   /usr/lib/llvm-20/lib/clang/20/include/__stddef_header_macro.h \
   /usr/lib/llvm-20/lib/clang/20/include/__stddef_max_align_t.h \
@@ -2794,6 +2828,7 @@ chtl: /lib/x86_64-linux-gnu/Scrt1.o \
   /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so \
   /usr/lib/x86_64-linux-gnu/libc_nonshared.a \
   CMakeFiles/chtl.dir/src/ast/ast_node.cpp.o \
+  CMakeFiles/chtl.dir/src/generator/code_generator.cpp.o \
   CMakeFiles/chtl.dir/src/import/import_manager.cpp.o \
   CMakeFiles/chtl.dir/src/lexer/chtl_lexer.cpp.o \
   CMakeFiles/chtl.dir/src/lexer/lexer.cpp.o \
@@ -2837,6 +2872,10 @@ CMakeFiles/chtl.dir/src/ast/ast_node.cpp.o:
 
 /workspace/chtl/include/scanner/unified_scanner.h:
 
+/usr/include/c++/14/queue:
+
+/usr/include/c++/14/bits/stl_queue.h:
+
 /workspace/chtl/include/parser/parser.h:
 
 /workspace/chtl/src/parser/parser.cpp:
@@ -2857,8 +2896,6 @@ CMakeFiles/chtl.dir/src/style/style_processor.cpp.o:
 
 /usr/include/x86_64-linux-gnu/c++/14/bits/c++io.h:
 
-/usr/include/c++/14/iostream:
-
 /usr/include/c++/14/fstream:
 
 /usr/include/c++/14/bits/fstream.tcc:
@@ -2872,6 +2909,8 @@ CMakeFiles/chtl.dir/src/style/style_processor.cpp.o:
 /usr/include/c++/14/stack:
 
 /usr/include/c++/14/regex:
+
+/usr/include/c++/14/iostream:
 
 /usr/include/c++/14/functional:
 
@@ -3288,6 +3327,8 @@ CMakeFiles/chtl.dir/src/import/import_manager.cpp.o:
 /usr/include/features-time64.h:
 
 /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
+
+CMakeFiles/chtl.dir/src/generator/code_generator.cpp.o:
 
 /usr/include/c++/14/bits/requires_hosted.h:
 
