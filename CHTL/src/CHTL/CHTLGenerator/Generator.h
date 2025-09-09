@@ -5,6 +5,7 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
+#include "../CHTLNode/ScriptNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
 #include "../CHTLNode/CustomUsageNode.h"
 #include "../CHTLNode/OriginNode.h"
@@ -44,10 +45,12 @@ private:
 
     // Helper for advanced conditional expressions
     const ElementNode* findNodeBySelector(const BaseNode* searchRoot, const std::string& selector) const;
+    void generateScript(const ScriptNode* node);
 
 
     std::string m_output;
     std::string m_global_css;
+    std::string m_global_js;
     const CHTLContext* m_context = nullptr;
     const DocumentNode* m_root_node = nullptr;
 };

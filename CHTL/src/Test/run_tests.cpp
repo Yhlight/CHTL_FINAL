@@ -159,6 +159,12 @@ void test_logical_operators() {
     run_test("Phase 8.C: Logical OR (True)", src_or_true, "<div style=\"color: green;height: 50px;width: 100px;\"></div>");
 }
 
+void test_local_script_block() {
+    std::string src = "body { div{ script { const a = 1; } } p { script { const b = 2; } } }";
+    std::string expected = "<body><div></div><p></p><script> const a = 1;  const b = 2; </script></body>";
+    run_test("Phase 9.A: Local Script Block", src, expected);
+}
+
 
 int main() {
     std::cout << "--- Running CHTL Full Test Suite ---" << std::endl;
@@ -193,6 +199,7 @@ int main() {
     test_optional_else_true();
     test_optional_else_false();
     test_logical_operators();
+    test_local_script_block();
     std::cout << "------------------------------------" << std::endl;
     return 0;
 }

@@ -12,6 +12,7 @@ enum class NodeType {
     Attribute,
 
     StyleBlock,
+    Script,
     StyleProperty,
     StyleSelector,
 

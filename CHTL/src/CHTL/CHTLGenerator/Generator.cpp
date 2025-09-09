@@ -8,6 +8,7 @@
 #include "CHTL/CHTLNode/OriginNode.h"
 #include "CHTL/CHTLNode/OriginUsageNode.h"
 #include "CHTL/CHTLNode/CommentNode.h"
+#include "CHTL/CHTLNode/ScriptNode.h"
 #include "CHTL/ExpressionNode/LiteralExpr.h"
 #include "CHTL/Evaluator/Evaluator.h"
 #include <stdexcept>
@@ -26,11 +27,20 @@ std::string Generator::generate(const DocumentNode* document, const CHTLContext&
     m_root_node = document;
     m_output.clear();
     m_global_css.clear();
+    m_global_js.clear();
     if (document) { for (const auto& child : document->getChildren()) { generateNode(child.get()); } }
     if (!m_global_css.empty()) {
         size_t head_pos = m_output.find("</head>");
         if (head_pos != std::string::npos) { m_output.insert(head_pos, "<style>" + m_global_css + "</style>"); }
         else { m_output = "<head><style>" + m_global_css + "</style></head>" + m_output; }
+    }
+    if (!m_global_js.empty()) {
+        size_t body_end_pos = m_output.rfind("</body>");
+        if (body_end_pos != std::string::npos) {
+            m_output.insert(body_end_pos, "<script>" + m_global_js + "</script>");
+        } else {
+            m_output += "<script>" + m_global_js + "</script>";
+        }
     }
     return m_output;
 }
@@ -45,8 +55,13 @@ void Generator::generateNode(const BaseNode* node) {
         case NodeType::Origin: generateOrigin(static_cast<const OriginNode*>(node)); break;
         case NodeType::OriginUsage: generateOriginUsage(static_cast<const OriginUsageNode*>(node)); break;
         case NodeType::Comment: generateComment(static_cast<const CommentNode*>(node)); break;
+        case NodeType::Script: generateScript(static_cast<const ScriptNode*>(node)); break;
         default: break;
     }
+}
+
+void Generator::generateScript(const ScriptNode* node) {
+    m_global_js += node->getContent();
 }
 
 void Generator::generateComment(const CommentNode* comment) {

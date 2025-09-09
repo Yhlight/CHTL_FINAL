@@ -5,6 +5,7 @@
 #include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/AttributeNode.h"
 #include "../CHTLNode/StyleBlockNode.h"
+#include "../CHTLNode/ScriptNode.h"
 #include "../CHTLNode/StylePropertyNode.h"
 #include "../CHTLNode/StyleSelectorNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
@@ -331,7 +332,10 @@ std::unique_ptr<ElementNode> Parser::parseElement() {
         }
         else if (check(TokenType::Identifier) && peek().value == "style") {
             element->setStyleBlock(std::unique_ptr<StyleBlockNode>(static_cast<StyleBlockNode*>(parseStyleBlock().release())));
-        } else if (check(TokenType::At) || (check(TokenType::LeftBracket) && m_tokens[m_current + 1].value == "Origin")) {
+        } else if (check(TokenType::Identifier) && peek().value == "script") {
+            element->addChild(parseScriptBlock());
+        }
+        else if (check(TokenType::At) || (check(TokenType::LeftBracket) && m_tokens[m_current + 1].value == "Origin")) {
              element->addChild(parseNode());
         } else if (check(TokenType::Identifier)) {
              // It could be an attribute or a child element. We need to lookahead.
@@ -370,6 +374,38 @@ std::unique_ptr<BaseNode> Parser::parseStyleBlock() {
     }
     consume(TokenType::CloseBrace, "Expected '}' to close style block.");
     return styleBlock;
+}
+
+std::unique_ptr<BaseNode> Parser::parseScriptBlock() {
+    consume(TokenType::Identifier, "Expected 'script' keyword.");
+    consume(TokenType::OpenBrace, "Expected '{' for script body.");
+
+    size_t content_start_pos = m_tokens[m_current - 1].end;
+    int brace_level = 1;
+    size_t search_start_idx = m_current;
+
+    while (m_current < m_tokens.size()) {
+        if (m_tokens[m_current].type == TokenType::OpenBrace) {
+            brace_level++;
+        } else if (m_tokens[m_current].type == TokenType::CloseBrace) {
+            brace_level--;
+            if (brace_level == 0) break;
+        }
+        m_current++;
+    }
+
+    if (brace_level > 0) {
+        throw std::runtime_error("Unmatched braces in script block.");
+    }
+
+    size_t content_end_pos = m_tokens[m_current].start;
+    std::string content;
+    if (content_end_pos > content_start_pos) {
+        content = m_source.substr(content_start_pos, content_end_pos - content_start_pos);
+    }
+
+    consume(TokenType::CloseBrace, "Expected '}' to close script block.");
+    return std::make_unique<ScriptNode>(content);
 }
 
 std::unique_ptr<BaseNode> Parser::parseStyleContent() {

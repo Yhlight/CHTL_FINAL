@@ -54,6 +54,7 @@ private:
 
     // Style-parsing functions
     std::unique_ptr<BaseNode> parseStyleBlock();
+    std::unique_ptr<BaseNode> parseScriptBlock();
     std::unique_ptr<BaseNode> parseStyleContent();
     std::unique_ptr<BaseNode> parseStyleProperty();
     std::unique_ptr<BaseNode> parseStyleSelector();
