@@ -7,20 +7,19 @@
 namespace CHTL {
 
 /**
- * @brief 文件加载器节点
+ * @brief 文件载入节点
  * 
- * 根据 CHTL.md 文档第 1210-1231 行实现
- * 支持 AMD 风格 JavaScript 文件加载器
+ * 表示 fileloader {} 语法
  */
 class FileLoaderNode : public CHTLJSBaseNode {
 public:
     FileLoaderNode(size_t line = 0, size_t column = 0);
     
-    // 添加要加载的文件
-    void addLoadFile(const std::string& filePath);
+    // 添加要载入的文件
+    void addFile(const std::string& filePath);
     
-    // 获取要加载的文件列表
-    const std::vector<std::string>& getLoadFiles() const { return loadFiles_; }
+    // 获取所有要载入的文件
+    const std::vector<std::string>& getFiles() const { return files_; }
     
     // 转换为 JavaScript 代码
     std::string toJavaScript() const override;
@@ -29,10 +28,7 @@ public:
     std::string toString() const override;
     
 private:
-    std::vector<std::string> loadFiles_;
-    
-    // 生成 AMD 加载器代码
-    std::string generateAMDLoader() const;
+    std::vector<std::string> files_;
 };
 
 } // namespace CHTL

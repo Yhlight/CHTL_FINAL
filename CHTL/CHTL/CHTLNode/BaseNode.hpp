@@ -26,6 +26,7 @@ public:
         IMPORT,         // 导入节点
         CONFIG,         // 配置节点
         NAMESPACE,      // 命名空间节点
+        CONSTRAINT,     // 约束节点
         OPERATOR        // 操作符节点
     };
     

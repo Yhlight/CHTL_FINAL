@@ -102,6 +102,15 @@ run_test "comprehensive_property_expressions" "comprehensive_property_expression
 echo "Starting global style restrictions tests..."
 run_test "global_style_restrictions" "global_style_restrictions.chtl" ""
 
+echo "Starting template system tests..."
+run_test "template_system" "template_system_test.chtl" ""
+
+echo "Starting custom system tests..."
+run_test "custom_system" "custom_system_test.chtl" ""
+
+echo "Starting origin embedding tests..."
+run_test "origin_embedding" "origin_embedding_test.chtl" ""
+
 # Test default structure output
 echo -e "\n${YELLOW}Running default structure test: spa_page_default_struct${NC}"
 echo "Input file: spa_page.chtl"

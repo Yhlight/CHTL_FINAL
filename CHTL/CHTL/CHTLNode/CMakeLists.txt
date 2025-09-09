@@ -3,7 +3,10 @@ add_library(CHTLNode STATIC
     BaseNode.cpp
     ElementNode.cpp
     TextNode.cpp
+    CommentNode.cpp
+    OperatorNode.cpp
     StyleNode.cpp
+    ScriptNode.cpp
     TemplateNode.cpp
     TemplateStyleNode.cpp
     TemplateElementNode.cpp

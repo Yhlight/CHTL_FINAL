@@ -9,6 +9,9 @@ add_subdirectory(CHTLNode)
 add_subdirectory(CHTLParser)
 add_subdirectory(CHTLManage)
 add_subdirectory(CHTLJS)
+add_subdirectory(CHTLTemplate)
+add_subdirectory(CHTLCustom)
+add_subdirectory(CHTLOrigin)
 add_subdirectory(CHTLGenerator)
 add_subdirectory(CHTLModule)
 add_subdirectory(CHTLScanner)
@@ -21,6 +24,9 @@ target_link_libraries(CHTLCore PUBLIC
     CHTLParser
     CHTLManage
     CHTLJSCore
+    CHTLTemplate
+    CHTLCustom
+    CHTLOrigin
     CHTLGenerator
     CHTLModule
     CHTLScanner

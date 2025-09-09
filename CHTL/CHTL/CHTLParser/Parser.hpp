@@ -6,6 +6,7 @@
 #include <CHTL/CHTLNode/ElementNode.hpp>
 #include <CHTL/CHTLNode/TextNode.hpp>
 #include <CHTL/CHTLNode/StyleNode.hpp>
+#include <CHTL/CHTLNode/ScriptNode.hpp>
 #include <CHTL/CHTLNode/TemplateNode.hpp>
 #include <CHTL/CHTLNode/TemplateStyleNode.hpp>
 #include <CHTL/CHTLNode/TemplateElementNode.hpp>
@@ -53,6 +54,9 @@ public:
     
     // 解析样式块
     std::shared_ptr<StyleNode> parseStyle();
+    
+    // 解析脚本块
+    std::shared_ptr<BaseNode> parseScript();
     
     // 解析模板
     std::shared_ptr<BaseNode> parseTemplate();
@@ -168,6 +172,17 @@ private:
     
     // 解析 except 约束
     void parseExceptConstraint(ConstraintNode* constraint);
+    
+    // CHTL JS 解析方法
+    void parseFileLoader(ScriptNode* script);
+    void parseListen(ScriptNode* script);
+    void parseDelegate(ScriptNode* script);
+    void parseAnimate(ScriptNode* script);
+    void parseVir(ScriptNode* script);
+    void parseRouter(ScriptNode* script);
+    void parseUtil(ScriptNode* script);
+    void parseINeverAway(ScriptNode* script);
+    void parsePrintMylove(ScriptNode* script);
     
     // 报告错误
     void reportError(const std::string& message);

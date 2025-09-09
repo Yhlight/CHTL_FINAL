@@ -1,0 +1,190 @@
+// 自定义系统测试文件
+
+// 自定义样式组定义
+[Custom] @Style TextSet
+{
+    color: black;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+// 自定义样式组特例化
+[Custom] @Style WhiteText
+{
+    @Style TextSet
+    {
+        delete color;
+        color: white;
+        font-size: 18px;
+    }
+}
+
+// 自定义元素定义
+[Custom] @Element Box
+{
+    div
+    {
+        style
+        {
+            .container
+            {
+                width: 100px;
+                height: 100px;
+                border: 1px solid black;
+            }
+        }
+    }
+    
+    div
+    {
+        style
+        {
+            .content
+            {
+                padding: 10px;
+                background-color: #f0f0f0;
+            }
+        }
+    }
+}
+
+// 自定义元素特例化
+[Custom] @Element ColoredBox
+{
+    @Element Box
+    {
+        div[0]
+        {
+            style
+            {
+                .container
+                {
+                    background-color: red;
+                }
+            }
+        }
+        
+        // 插入新元素
+        insert after div[0]
+        {
+            span
+            {
+                style
+                {
+                    .label
+                    {
+                        color: white;
+                        font-weight: bold;
+                    }
+                }
+            }
+        }
+        
+        // 删除元素
+        delete div[1];
+    }
+}
+
+// 自定义变量组定义
+[Custom] @Var ThemeColors
+{
+    primary: "rgb(255, 192, 203)";
+    secondary: "rgb(145, 155, 200)";
+    text: "black";
+    background: "white";
+}
+
+// 自定义变量组特例化
+[Custom] @Var DarkTheme
+{
+    @Var ThemeColors
+    {
+        primary: "rgb(255, 0, 0)";
+        text: "white";
+        background: "black";
+    }
+}
+
+// 自定义系统实例化测试
+body
+{
+    // 使用自定义样式组
+    @Style WhiteText
+    {
+        delete font-size;
+        font-size: 20px;
+        background-color: ThemeColors(primary);
+    }
+    
+    // 使用自定义元素
+    @Element ColoredBox
+    {
+        div[0]
+        {
+            style
+            {
+                .container
+                {
+                    background-color: DarkTheme(primary);
+                }
+            }
+        }
+    }
+    
+    // 使用自定义变量组
+    @Var DarkTheme
+    {
+        primary: "rgb(0, 255, 0)";
+        text: "yellow";
+    }
+}
+
+// 复杂特例化测试
+div
+{
+    style
+    {
+        @Style WhiteText
+        {
+            delete color, font-size;
+            color: DarkTheme(text);
+            font-size: 24px;
+            background-color: DarkTheme(background);
+        }
+    }
+}
+
+// 元素特例化测试
+section
+{
+    @Element ColoredBox
+    {
+        div[0]
+        {
+            style
+            {
+                .container
+                {
+                    width: 200px;
+                    height: 200px;
+                }
+            }
+        }
+        
+        // 替换元素
+        replace div[1]
+        {
+            p
+            {
+                style
+                {
+                    .description
+                    {
+                        color: DarkTheme(text);
+                        font-size: 14px;
+                    }
+                }
+            }
+        }
+    }
+}

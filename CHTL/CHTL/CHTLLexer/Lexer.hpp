@@ -84,6 +84,9 @@ private:
     // 读取方括号关键字
     Token readBracketKeyword();
     
+    // 读取增强选择器
+    Token readEnhancedSelector();
+    
     // 检查是否为字母
     bool isAlpha(char c) const;
     

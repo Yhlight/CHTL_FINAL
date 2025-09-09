@@ -3,6 +3,11 @@ add_library(CHTLJSNode STATIC
     CHTLJSBaseNode.cpp
     FileLoaderNode.cpp
     EnhancedSelectorNode.cpp
+    ListenNode.cpp
+    DelegateNode.cpp
+    AnimateNode.cpp
+    VirNode.cpp
+    RouterNode.cpp
     StatementNode.cpp
 )
 

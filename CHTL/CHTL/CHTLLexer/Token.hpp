@@ -104,6 +104,36 @@ enum class TokenType {
     ORIGIN_CHTL,    // @Chtl
     ORIGIN_CJMOD,   // @CJmod
     
+    // CHTL JS 关键字
+    FILELOADER,     // fileloader
+    LISTEN,         // listen
+    DELEGATE,       // delegate
+    ANIMATE,        // animate
+    VIR,            // vir
+    ROUTER,         // router
+    UTIL,           // util
+    THEN,           // then
+    CHANGE,         // change
+    INEVERAWAY,     // iNeverAway
+    PRINTMYLOVE,    // printMylove
+    
+    // 增强选择器
+    ENHANCED_SELECTOR, // {{selector}}
+    
+    // 属性条件表达式
+    PROPERTY_CONDITIONAL, // 属性条件表达式
+    PROPERTY_REFERENCE,   // 属性引用
+    DYNAMIC_REFERENCE,    // 动态引用 {{var}}->property
+    
+    // 配置关键字
+    CONFIG,         // @Config
+    NAME,           // [Name]
+    ORIGIN_TYPE,    // [OriginType]
+    
+    // 模块关键字
+    CMOD,           // CMOD
+    CJMOD,          // CJMOD
+    
     // 标识符
     IDENTIFIER,     // 标识符
     NUMBER,         // 数字
@@ -112,6 +142,8 @@ enum class TokenType {
     ARROW,          // ->
     DOUBLE_COLON,   // ::
     TRIPLE_DOT,     // ...
+    DOUBLE_BRACE_LEFT,  // {{
+    DOUBLE_BRACE_RIGHT, // }}
     
     // 文件结束
     END_OF_FILE,    // EOF

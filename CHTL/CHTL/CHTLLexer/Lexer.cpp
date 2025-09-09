@@ -59,6 +59,11 @@ Token Lexer::nextToken() {
         return readBracketKeyword();
     }
     
+    // 处理双大括号增强选择器
+    if (c == '{' && current_ + 1 < source_.length() && source_[current_ + 1] == '{') {
+        return readEnhancedSelector();
+    }
+    
     // 处理操作符
     return readOperator();
 }
@@ -212,35 +217,81 @@ Token Lexer::readStringLiteral() {
 Token Lexer::readUnquotedLiteral() {
     std::string value;
     
-    while (current_ < source_.length() && 
-           !isWhitespace(currentChar()) && 
-           currentChar() != ';' && 
-           currentChar() != ':' && 
-           currentChar() != '=' &&
-           currentChar() != '{' &&
-           currentChar() != '}' &&
-           currentChar() != '[' &&
-           currentChar() != ']' &&
-           currentChar() != '(' &&
-           currentChar() != ')' &&
-           currentChar() != ',' &&
-           currentChar() != '.' &&
-           currentChar() != '#' &&
-           currentChar() != '@' &&
-           currentChar() != '&' &&
-           currentChar() != '?' &&
-           currentChar() != '!' &&
-           currentChar() != '_' &&
-           currentChar() != '/' &&
-           currentChar() != '\\' &&
-           currentChar() != '|' &&
-           currentChar() != '~' &&
-           currentChar() != '^' &&
-           currentChar() != '$' &&
-           currentChar() != '%') {
-        value += currentChar();
+    // 检查是否为属性条件表达式
+    bool isPropertyExpression = false;
+    bool hasArithmetic = false;
+    bool hasConditional = false;
+    bool hasPropertyReference = false;
+    
+    while (current_ < source_.length()) {
+        char c = currentChar();
+        
+        // 检查算术运算符
+        if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%') {
+            hasArithmetic = true;
+            isPropertyExpression = true;
+        }
+        
+        // 检查条件运算符
+        if (c == '?' || c == ':') {
+            hasConditional = true;
+            isPropertyExpression = true;
+        }
+        
+        // 检查逻辑运算符
+        if (c == '&' && current_ + 1 < source_.length() && source_[current_ + 1] == '&') {
+            hasConditional = true;
+            isPropertyExpression = true;
+        }
+        if (c == '|' && current_ + 1 < source_.length() && source_[current_ + 1] == '|') {
+            hasConditional = true;
+            isPropertyExpression = true;
+        }
+        
+        // 检查比较运算符
+        if (c == '<' || c == '>' || c == '=' || c == '!') {
+            hasConditional = true;
+            isPropertyExpression = true;
+        }
+        
+        // 检查属性引用（选择器.属性）
+        if (c == '.' && !value.empty() && 
+            (isAlpha(value.back()) || isDigit(value.back()) || value.back() == '_')) {
+            hasPropertyReference = true;
+            isPropertyExpression = true;
+        }
+        
+        // 检查动态引用（{{var}}->property）
+        if (c == '-' && current_ + 1 < source_.length() && source_[current_ + 1] == '>') {
+            isPropertyExpression = true;
+        }
+        
+        // 如果遇到结束符号且不是属性表达式，则停止
+        if (!isPropertyExpression && 
+            (isWhitespace(c) || c == ';' || c == ':' || c == '=' ||
+             c == '{' || c == '}' || c == '[' || c == ']' ||
+             c == '(' || c == ')' || c == ',' || c == '#' ||
+             c == '@' || c == '&' || c == '!' || c == '_' ||
+             c == '/' || c == '\\' || c == '|' || c == '~' ||
+             c == '^' || c == '$' || c == '%')) {
+            break;
+        }
+        
+        // 如果是属性表达式，继续读取直到遇到分号或右大括号
+        if (isPropertyExpression && (c == ';' || c == '}')) {
+            break;
+        }
+        
+        value += c;
         current_++;
         column_++;
+    }
+    
+    // 根据内容确定Token类型
+    if (isPropertyExpression) {
+        if (hasPropertyReference || hasArithmetic || hasConditional) {
+            return createToken(TokenType::PROPERTY_CONDITIONAL, value);
+        }
     }
     
     return createToken(TokenType::UNQUOTED_LITERAL, value);
@@ -280,6 +331,19 @@ Token Lexer::readIdentifier() {
 
 Token Lexer::readOperator() {
     char c = currentChar();
+    
+    // 处理双大括号 {{ }}
+    if (c == '{' && current_ + 1 < source_.length() && source_[current_ + 1] == '{') {
+        current_ += 2;
+        column_ += 2;
+        return createToken(TokenType::DOUBLE_BRACE_LEFT, "{{");
+    }
+    
+    if (c == '}' && current_ + 1 < source_.length() && source_[current_ + 1] == '}') {
+        current_ += 2;
+        column_ += 2;
+        return createToken(TokenType::DOUBLE_BRACE_RIGHT, "}}");
+    }
     
     // 处理多字符操作符
     if (current_ + 1 < source_.length()) {
@@ -352,6 +416,39 @@ Token Lexer::readBracketKeyword() {
     }
     
     return createToken(KeywordMap::getKeywordType(value), value);
+}
+
+Token Lexer::readEnhancedSelector() {
+    std::string value;
+    
+    // 添加 {{
+    value += currentChar();
+    current_++;
+    column_++;
+    value += currentChar();
+    current_++;
+    column_++;
+    
+    // 读取选择器内容
+    while (current_ < source_.length()) {
+        char c = currentChar();
+        if (c == '}' && current_ + 1 < source_.length() && source_[current_ + 1] == '}') {
+            // 找到结束标记 }}
+            value += c;
+            current_++;
+            column_++;
+            value += currentChar();
+            current_++;
+            column_++;
+            break;
+        } else {
+            value += c;
+            current_++;
+            column_++;
+        }
+    }
+    
+    return createToken(TokenType::ENHANCED_SELECTOR, value);
 }
 
 bool Lexer::isAlpha(char c) const {

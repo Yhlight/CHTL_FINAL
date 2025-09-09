@@ -106,6 +106,11 @@ std::shared_ptr<ElementNode> Parser::parseElement() {
                 if (style) {
                     element->addChild(style);
                 }
+            } else if (current_.getType() == TokenType::SCRIPT) {
+                auto script = parseScript();
+                if (script) {
+                    element->addChild(script);
+                }
             } else if (current_.getType() == TokenType::IDENTIFIER) {
                 auto childElement = parseElement();
                 if (childElement) {
@@ -173,6 +178,79 @@ std::shared_ptr<StyleNode> Parser::parseStyle() {
     }
     
     return style;
+}
+
+std::shared_ptr<BaseNode> Parser::parseScript() {
+    if (current_.getType() != TokenType::SCRIPT) {
+        reportError("Expected script");
+        return nullptr;
+    }
+    
+    // 判断是否是全局脚本（根级别的script标签）
+    ScriptNode::ScriptType scriptType = ScriptNode::ScriptType::LOCAL;
+    
+    // 检查下一个token是否是{
+    Token nextToken = lexer_.peekToken();
+    if (nextToken.getType() == TokenType::LEFT_BRACE) {
+        scriptType = ScriptNode::ScriptType::GLOBAL;
+    }
+    
+    auto script = std::make_shared<ScriptNode>(scriptType, 
+                                              current_.getLine(), current_.getColumn());
+    
+    current_ = lexer_.nextToken();
+    
+    if (consume(TokenType::LEFT_BRACE)) {
+        while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+            if (current_.getType() == TokenType::ENHANCED_SELECTOR) {
+                // 处理增强选择器 {{selector}}
+                std::string selector = current_.getValue();
+                script->addEnhancedSelector(selector);
+                current_ = lexer_.nextToken();
+            } else if (current_.getType() == TokenType::FILELOADER) {
+                // 处理fileloader
+                parseFileLoader(script.get());
+            } else if (current_.getType() == TokenType::LISTEN) {
+                // 处理listen
+                parseListen(script.get());
+            } else if (current_.getType() == TokenType::DELEGATE) {
+                // 处理delegate
+                parseDelegate(script.get());
+            } else if (current_.getType() == TokenType::ANIMATE) {
+                // 处理animate
+                parseAnimate(script.get());
+            } else if (current_.getType() == TokenType::VIR) {
+                // 处理vir
+                parseVir(script.get());
+            } else if (current_.getType() == TokenType::ROUTER) {
+                // 处理router
+                parseRouter(script.get());
+            } else if (current_.getType() == TokenType::UTIL) {
+                // 处理util
+                parseUtil(script.get());
+            } else if (current_.getType() == TokenType::INEVERAWAY) {
+                // 处理iNeverAway
+                parseINeverAway(script.get());
+            } else if (current_.getType() == TokenType::PRINTMYLOVE) {
+                // 处理printMylove
+                parsePrintMylove(script.get());
+            } else if (current_.getType() == TokenType::UNQUOTED_LITERAL ||
+                       current_.getType() == TokenType::STRING_LITERAL) {
+                // 处理普通JavaScript代码
+                std::string code = current_.getValue();
+                script->addJavaScriptCode(code);
+                current_ = lexer_.nextToken();
+            } else {
+                current_ = lexer_.nextToken();
+            }
+        }
+        
+        if (!consume(TokenType::RIGHT_BRACE)) {
+            reportError("Expected '}'");
+        }
+    }
+    
+    return script;
 }
 
 std::shared_ptr<BaseNode> Parser::parseTemplate() {
@@ -1279,6 +1357,232 @@ bool Parser::isConfigStart(TokenType type) {
 
 bool Parser::isNamespaceStart(TokenType type) {
     return type == TokenType::NAMESPACE;
+}
+
+// CHTL JS 解析方法实现
+void Parser::parseFileLoader(ScriptNode* script) {
+    if (!consume(TokenType::FILELOADER)) {
+        return;
+    }
+    
+    if (consume(TokenType::LEFT_BRACE)) {
+        while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+            if (current_.getType() == TokenType::IDENTIFIER && current_.getValue() == "load") {
+                current_ = lexer_.nextToken();
+                if (consume(TokenType::COLON)) {
+                    std::string filePath = parseAttributeValue();
+                    script->addCHTLJSCode("fileloader.load(\"" + filePath + "\");");
+                }
+            } else {
+                current_ = lexer_.nextToken();
+            }
+        }
+        consume(TokenType::RIGHT_BRACE);
+    }
+}
+
+void Parser::parseListen(ScriptNode* script) {
+    if (!consume(TokenType::LISTEN)) {
+        return;
+    }
+    
+    if (consume(TokenType::LEFT_BRACE)) {
+        std::string listenCode = "listen {\n";
+        while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+            if (current_.getType() == TokenType::IDENTIFIER) {
+                std::string event = current_.getValue();
+                current_ = lexer_.nextToken();
+                if (consume(TokenType::COLON)) {
+                    std::string handler = parseAttributeValue();
+                    listenCode += "    " + event + ": " + handler + ",\n";
+                }
+            } else {
+                current_ = lexer_.nextToken();
+            }
+        }
+        listenCode += "}";
+        script->addCHTLJSCode(listenCode);
+        consume(TokenType::RIGHT_BRACE);
+    }
+}
+
+void Parser::parseDelegate(ScriptNode* script) {
+    if (!consume(TokenType::DELEGATE)) {
+        return;
+    }
+    
+    if (consume(TokenType::LEFT_BRACE)) {
+        std::string delegateCode = "delegate {\n";
+        while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+            if (current_.getType() == TokenType::IDENTIFIER) {
+                std::string key = current_.getValue();
+                current_ = lexer_.nextToken();
+                if (consume(TokenType::COLON)) {
+                    std::string value = parseAttributeValue();
+                    delegateCode += "    " + key + ": " + value + ",\n";
+                }
+            } else {
+                current_ = lexer_.nextToken();
+            }
+        }
+        delegateCode += "}";
+        script->addCHTLJSCode(delegateCode);
+        consume(TokenType::RIGHT_BRACE);
+    }
+}
+
+void Parser::parseAnimate(ScriptNode* script) {
+    if (!consume(TokenType::ANIMATE)) {
+        return;
+    }
+    
+    if (consume(TokenType::LEFT_BRACE)) {
+        std::string animateCode = "animate {\n";
+        while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+            if (current_.getType() == TokenType::IDENTIFIER) {
+                std::string key = current_.getValue();
+                current_ = lexer_.nextToken();
+                if (consume(TokenType::COLON)) {
+                    std::string value = parseAttributeValue();
+                    animateCode += "    " + key + ": " + value + ",\n";
+                }
+            } else {
+                current_ = lexer_.nextToken();
+            }
+        }
+        animateCode += "}";
+        script->addCHTLJSCode(animateCode);
+        consume(TokenType::RIGHT_BRACE);
+    }
+}
+
+void Parser::parseVir(ScriptNode* script) {
+    if (!consume(TokenType::VIR)) {
+        return;
+    }
+    
+    std::string varName;
+    if (current_.getType() == TokenType::IDENTIFIER) {
+        varName = current_.getValue();
+        current_ = lexer_.nextToken();
+    }
+    
+    if (consume(TokenType::EQUAL)) {
+        std::string virCode = "var " + varName + " = ";
+        if (current_.getType() == TokenType::LISTEN) {
+            parseListen(script);
+            virCode += "listen {...}";
+        } else if (current_.getType() == TokenType::INEVERAWAY) {
+            parseINeverAway(script);
+            virCode += "iNeverAway {...}";
+        } else {
+            virCode += parseAttributeValue();
+        }
+        script->addCHTLJSCode(virCode);
+    }
+}
+
+void Parser::parseRouter(ScriptNode* script) {
+    if (!consume(TokenType::ROUTER)) {
+        return;
+    }
+    
+    if (consume(TokenType::LEFT_BRACE)) {
+        std::string routerCode = "router {\n";
+        while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+            if (current_.getType() == TokenType::IDENTIFIER) {
+                std::string key = current_.getValue();
+                current_ = lexer_.nextToken();
+                if (consume(TokenType::COLON)) {
+                    std::string value = parseAttributeValue();
+                    routerCode += "    " + key + ": " + value + ",\n";
+                }
+            } else {
+                current_ = lexer_.nextToken();
+            }
+        }
+        routerCode += "}";
+        script->addCHTLJSCode(routerCode);
+        consume(TokenType::RIGHT_BRACE);
+    }
+}
+
+void Parser::parseUtil(ScriptNode* script) {
+    if (!consume(TokenType::UTIL)) {
+        return;
+    }
+    
+    std::string utilCode = "util ";
+    utilCode += parseAttributeValue();
+    
+    if (current_.getType() == TokenType::ARROW) {
+        current_ = lexer_.nextToken();
+        if (current_.getType() == TokenType::CHANGE) {
+            current_ = lexer_.nextToken();
+            utilCode += " -> change ";
+            utilCode += parseAttributeValue();
+        }
+        if (current_.getType() == TokenType::ARROW) {
+            current_ = lexer_.nextToken();
+            if (current_.getType() == TokenType::THEN) {
+                current_ = lexer_.nextToken();
+                utilCode += " -> then ";
+                utilCode += parseAttributeValue();
+            }
+        }
+    }
+    
+    script->addCHTLJSCode(utilCode);
+}
+
+void Parser::parseINeverAway(ScriptNode* script) {
+    if (!consume(TokenType::INEVERAWAY)) {
+        return;
+    }
+    
+    if (consume(TokenType::LEFT_BRACE)) {
+        std::string ineverawayCode = "iNeverAway {\n";
+        while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+            if (current_.getType() == TokenType::IDENTIFIER) {
+                std::string key = current_.getValue();
+                current_ = lexer_.nextToken();
+                if (consume(TokenType::COLON)) {
+                    std::string value = parseAttributeValue();
+                    ineverawayCode += "    " + key + ": " + value + ",\n";
+                }
+            } else {
+                current_ = lexer_.nextToken();
+            }
+        }
+        ineverawayCode += "}";
+        script->addCHTLJSCode(ineverawayCode);
+        consume(TokenType::RIGHT_BRACE);
+    }
+}
+
+void Parser::parsePrintMylove(ScriptNode* script) {
+    if (!consume(TokenType::PRINTMYLOVE)) {
+        return;
+    }
+    
+    if (consume(TokenType::LEFT_BRACE)) {
+        std::string printmyloveCode = "printMylove {\n";
+        while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+            if (current_.getType() == TokenType::IDENTIFIER) {
+                std::string key = current_.getValue();
+                current_ = lexer_.nextToken();
+                if (consume(TokenType::COLON)) {
+                    std::string value = parseAttributeValue();
+                    printmyloveCode += "    " + key + ": " + value + ",\n";
+                }
+            } else {
+                current_ = lexer_.nextToken();
+            }
+        }
+        printmyloveCode += "}";
+        script->addCHTLJSCode(printmyloveCode);
+        consume(TokenType::RIGHT_BRACE);
+    }
 }
 
 } // namespace CHTL

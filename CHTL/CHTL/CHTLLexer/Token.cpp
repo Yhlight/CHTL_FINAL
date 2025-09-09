@@ -34,9 +34,13 @@ std::string Token::toString() const {
 // 关键字映射表实现
 const std::unordered_map<std::string, TokenType>& KeywordMap::getKeywords() {
     static const std::unordered_map<std::string, TokenType> keywords = {
+        // 基础关键字
         {"text", TokenType::TEXT},
         {"style", TokenType::STYLE},
         {"script", TokenType::SCRIPT},
+        {"Style", TokenType::STYLE},
+        
+        // 块关键字
         {"[Template]", TokenType::TEMPLATE},
         {"[Custom]", TokenType::CUSTOM},
         {"[Origin]", TokenType::ORIGIN},
@@ -45,6 +49,10 @@ const std::unordered_map<std::string, TokenType>& KeywordMap::getKeywords() {
         {"[Configuration]", TokenType::CONFIGURATION},
         {"[Info]", TokenType::INFO},
         {"[Export]", TokenType::EXPORT},
+        {"[Name]", TokenType::NAME},
+        {"[OriginType]", TokenType::ORIGIN_TYPE},
+        
+        // 操作关键字
         {"use", TokenType::USE},
         {"except", TokenType::EXCEPT},
         {"delete", TokenType::DELETE},
@@ -59,14 +67,33 @@ const std::unordered_map<std::string, TokenType>& KeywordMap::getKeywords() {
         {"top", TokenType::AT_TOP},
         {"bottom", TokenType::AT_BOTTOM},
         {"html5", TokenType::HTML5},
+        
+        // 模板类型
         {"@Style", TokenType::TEMPLATE_STYLE},
-        {"Style", TokenType::STYLE},
         {"@Element", TokenType::TEMPLATE_ELEMENT},
         {"@Var", TokenType::TEMPLATE_VAR},
         {"@Html", TokenType::ORIGIN_HTML},
         {"@JavaScript", TokenType::ORIGIN_JAVASCRIPT},
         {"@Chtl", TokenType::ORIGIN_CHTL},
-        {"@CJmod", TokenType::ORIGIN_CJMOD}
+        {"@CJmod", TokenType::ORIGIN_CJMOD},
+        {"@Config", TokenType::CONFIG},
+        
+        // CHTL JS 关键字
+        {"fileloader", TokenType::FILELOADER},
+        {"listen", TokenType::LISTEN},
+        {"delegate", TokenType::DELEGATE},
+        {"animate", TokenType::ANIMATE},
+        {"vir", TokenType::VIR},
+        {"router", TokenType::ROUTER},
+        {"util", TokenType::UTIL},
+        {"then", TokenType::THEN},
+        {"change", TokenType::CHANGE},
+        {"iNeverAway", TokenType::INEVERAWAY},
+        {"printMylove", TokenType::PRINTMYLOVE},
+        
+        // 模块关键字
+        {"CMOD", TokenType::CMOD},
+        {"CJMOD", TokenType::CJMOD}
     };
     return keywords;
 }
@@ -112,6 +139,8 @@ const std::unordered_map<std::string, TokenType>& OperatorMap::getOperators() {
         {"->", TokenType::ARROW},
         {"::", TokenType::DOUBLE_COLON},
         {"...", TokenType::TRIPLE_DOT},
+        {"{{", TokenType::DOUBLE_BRACE_LEFT},
+        {"}}", TokenType::DOUBLE_BRACE_RIGHT},
         
         // 算术运算符
         {"+", TokenType::PLUS},
