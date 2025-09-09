@@ -68,6 +68,36 @@ class TestLexer(unittest.TestCase):
         self.assertEqual(tokens[1].value, "font-weight")
         self.assertEqual(tokens[2].type, TokenType.EOF)
 
+    def test_origin_block_tokenization(self):
+        source = """
+        [Origin] @Html {
+            <div class="raw">
+                <p>Content with { nested braces }</p>
+            </div>
+        }
+        """
+        lexer = Lexer(source)
+        tokens = lexer.tokenize()
+
+        expected_types = [
+            TokenType.LBRACK, TokenType.IDENTIFIER, TokenType.RBRACK,
+            TokenType.IDENTIFIER, TokenType.LBRACE,
+            TokenType.RAW_CONTENT,
+            TokenType.RBRACE, TokenType.EOF
+        ]
+
+        token_types = [t.type for t in tokens]
+        self.assertEqual(token_types, expected_types)
+
+        raw_content_token = tokens[5]
+        self.assertEqual(raw_content_token.type, TokenType.RAW_CONTENT)
+        expected_content = """
+            <div class="raw">
+                <p>Content with { nested braces }</p>
+            </div>
+        """
+        # Compare whitespace-normalized content
+        self.assertEqual(" ".join(raw_content_token.value.split()), " ".join(expected_content.split()))
 
     def test_full_snippet(self):
         source = """

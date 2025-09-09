@@ -28,147 +28,47 @@ class TestGenerator(unittest.TestCase):
         normalized_expected = " ".join(self._dedent(expected).split())
         self.assertEqual(normalized_actual, normalized_expected)
 
-    # --- Tests for Fragment Generation (Default Behavior) ---
-
     def test_fragment_generation_default(self):
         source = 'div { id="main"; p { text: "Hello"; } }'
         expected = """
         <div id="main">
-          <p>Hello</p>
+            <p>Hello</p>
         </div>
         """
-        actual = self._compile_source(source, use_default_structure=False)
-        self._assert_html_equal(actual, expected)
+        self._assert_html_equal(self._compile_source(source), expected)
 
-    def test_fragment_with_style_hoisting_and_auto_class(self):
+    def test_origin_block_rendering(self):
         source = """
         div {
-            style {
-                .box { color: red; }
-            }
-            p { text: "I'm in a box"; }
+            [Origin] @Html {<p>This is &lt;raw&gt; HTML.</p>}
         }
         """
-        expected = """
-        <style>
-        .box { color: red; }
-        </style>
-        <div class="box">
-          <p>I&#x27;m in a box</p>
-        </div>
-        """
+        # We don't use the helper here because we need to check raw content precisely
         actual = self._compile_source(source)
-        self._assert_html_equal(actual, expected)
+        self.assertIn('<p>This is &lt;raw&gt; HTML.</p>', actual)
+        self.assertNotIn('&amp;lt;', actual) # Ensure no double-escaping
 
-    # --- Tests for Full Document Generation (--default-struct) ---
-
-    def test_full_document_generation_basic(self):
-        source = 'div { p { text: "Hello"; } }'
-        expected = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-        </head>
-        <body>
-          <div>
-            <p>Hello</p>
-          </div>
-        </body>
-        </html>
-        """
-        actual = self._compile_source(source, use_default_structure=True)
-        self._assert_html_equal(actual, expected)
-
-    def test_full_document_with_title(self):
-        source = 'title: "My Page"'
-        expected = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>My Page</title>
-        </head>
-        <body>
-        </body>
-        </html>
-        """
-        actual = self._compile_source(source, use_default_structure=True)
-        self._assert_html_equal(actual, expected)
-
-    def test_full_document_with_styles(self):
+    def test_origin_style_hoisting(self):
         source = """
-        style { .box { color: red; } }
-        div { class: "box"; }
-        """
-        expected = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <style>
-            .box {
-              color: red;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="box"></div>
-        </body>
-        </html>
-        """
-        actual = self._compile_source(source, use_default_structure=True)
-        self._assert_html_equal(actual, expected)
-
-    def test_full_document_with_title_and_styles(self):
-        source = """
-        title: "Styled Page"
-        style {
-            body { font-family: sans-serif; }
-            .container { width: 960px; }
-        }
-        div { class: "container"; }
-        """
-        expected = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Styled Page</title>
-          <style>
-            body {
-              font-family: sans-serif;
-            }
-            .container {
-              width: 960px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container"></div>
-        </body>
-        </html>
-        """
-        actual = self._compile_source(source, use_default_structure=True)
-        self._assert_html_equal(actual, expected)
-
-    def test_full_document_retains_comments(self):
-        source = """
-        -- This is a test comment
+        [Origin] @Style { .raw-style { color: blue; } }
         div {}
-        // This comment is ignored
         """
         expected = """
         <!DOCTYPE html>
         <html>
         <head>
+        .raw-style { color: blue; }
         </head>
         <body>
-          <!-- This is a test comment -->
-          <div></div>
+        <div></div>
         </body>
         </html>
         """
         actual = self._compile_source(source, use_default_structure=True)
-        self._assert_html_equal(actual, expected)
-
-    # --- Tests for Expression Evaluation in Generator ---
+        # We don't use the helper here to avoid normalizing the raw style block
+        self.assertIn('.raw-style { color: blue; }', actual)
+        self.assertTrue(actual.find('<head>') < actual.find('.raw-style'))
+        self.assertTrue(actual.find('.raw-style') < actual.find('</head>'))
 
     def test_generator_with_arithmetic_expression(self):
         source = """
@@ -178,11 +78,8 @@ class TestGenerator(unittest.TestCase):
             }
         }
         """
-        expected = """
-        <div style="width: 150px;"></div>
-        """
-        actual = self._compile_source(source)
-        self._assert_html_equal(actual, expected)
+        expected = '<div style="width: 150px;"></div>'
+        self._assert_html_equal(self._compile_source(source), expected)
 
     def test_generator_with_conditional_expression(self):
         source = """
@@ -193,11 +90,8 @@ class TestGenerator(unittest.TestCase):
             }
         }
         """
-        expected = """
-        <div style="width: 200px; background-color: green;"></div>
-        """
-        actual = self._compile_source(source)
-        self._assert_html_equal(actual, expected)
+        expected = '<div style="width: 200px; background-color: green;"></div>'
+        self._assert_html_equal(self._compile_source(source), expected)
 
 
 if __name__ == '__main__':

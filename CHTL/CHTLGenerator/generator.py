@@ -1,6 +1,6 @@
 from CHTL.CHTLNode.nodes import (
     DocumentNode, ElementNode, AttributeNode, TextNode, CommentNode, Node,
-    StyleNode, CssRuleNode, CssPropertyNode, ExpressionNode, LiteralNode
+    StyleNode, CssRuleNode, CssPropertyNode, ExpressionNode, LiteralNode, OriginNode
 )
 from CHTL.CHTLevaluator.evaluator import ExpressionEvaluator
 import html
@@ -19,7 +19,7 @@ class HTMLGenerator:
     def generate(self, use_default_structure: bool = False) -> str:
         self.global_styles = []
 
-        self.find_and_process_styles(self.ast, None, base_indent=1 if use_default_structure else 0)
+        self.find_and_process_styles(self.ast, None)
 
         if not use_default_structure:
             html_output = self.visit(self.ast, None, -1)
@@ -29,13 +29,15 @@ class HTMLGenerator:
                 html_output = style_tag + "\n" + html_output
             return html_output.strip()
         else:
-            head_content_parts, body_content_parts = [], []
+            head_content_parts, body_nodes = [], []
             head_indent = "  " * 1
-            title_node, body_nodes = None, []
+            title_node = None
 
             for node in self.ast.children:
                 if isinstance(node, ElementNode) and node.tag_name == 'title' and not title_node:
                     title_node = node
+                elif isinstance(node, OriginNode) and node.origin_type == '@Style':
+                    head_content_parts.append(node.content)
                 elif not isinstance(node, StyleNode):
                     body_nodes.append(node)
 
@@ -48,9 +50,7 @@ class HTMLGenerator:
 
             head_content = "\n".join(head_content_parts)
 
-            for node in body_nodes:
-                body_content_parts.append(self.visit(node, None, 1))
-            body_content = "\n".join(filter(None, body_content_parts))
+            body_content = "\n".join(filter(None, [self.visit(node, None, 1) for node in body_nodes]))
 
             return f"<!DOCTYPE html>\n<html>\n<head>\n{head_content}\n</head>\n<body>\n{body_content}\n</body>\n</html>"
 
@@ -60,18 +60,18 @@ class HTMLGenerator:
         return visitor(node, context, indent_level)
 
     def generic_visit(self, node: Node, context: Optional[ElementNode], indent_level: int):
-        raise Exception(f'No visit_{type(node).__name__} method')
+        raise Exception(f'No visit_{type(node).__name__} method for {type(node)}')
 
-    def find_and_process_styles(self, node: Node, context: Optional[ElementNode], base_indent: int = 0):
+    def find_and_process_styles(self, node: Node, context: Optional[ElementNode]):
         if isinstance(node, StyleNode):
             for style_child in node.children:
                 if isinstance(style_child, CssRuleNode):
-                    self.global_styles.append(self.visit(style_child, context, base_indent + 1))
+                    self.global_styles.append(self.visit(style_child, context, 2))
         elif hasattr(node, 'children'):
             if isinstance(node, ElementNode):
                 context = node
             for child in node.children:
-                self.find_and_process_styles(child, context, base_indent)
+                self.find_and_process_styles(child, context)
 
     def visit_DocumentNode(self, node: DocumentNode, context: Optional[ElementNode], indent_level: int) -> str:
         html_parts = [self.visit(child, None, indent_level + 1) for child in node.children]
@@ -79,9 +79,7 @@ class HTMLGenerator:
 
     def visit_ElementNode(self, node: ElementNode, context: Optional[ElementNode], indent_level: int) -> str:
         indent = "  " * indent_level if indent_level >= 0 else ""
-
-        inline_styles = []
-        children_nodes = []
+        inline_styles, children_nodes = [], []
         for child in node.children:
             if isinstance(child, StyleNode):
                 for style_child in child.children:
@@ -92,20 +90,16 @@ class HTMLGenerator:
 
         attrs = " ".join([self.visit(attr, node, 0) for attr in node.attributes])
         if inline_styles:
-            style_attr = f'style="{" ".join(inline_styles)}"'
-            attrs = f"{attrs} {style_attr}".strip()
-
+            attrs = f'{attrs} style="{" ".join(inline_styles)}"'.strip()
         if attrs: attrs = " " + attrs
+
         result = f"{indent}<{node.tag_name}{attrs}>"
         if node.tag_name in self.self_closing_tags: return result
 
-        # Restore optimization for elements with only a single text node child
         if len(children_nodes) == 1 and isinstance(children_nodes[0], TextNode):
-            result += self.visit(children_nodes[0], node, 0) # No indent for single text
+            result += self.visit(children_nodes[0], node, 0)
         elif children_nodes:
-            result += "\n"
-            children_html = [self.visit(child, node, indent_level + 1) for child in children_nodes]
-            result += "\n".join(filter(None, children_html))
+            result += "\n" + "\n".join(filter(None, [self.visit(child, node, indent_level + 1) for child in children_nodes]))
             result += f"\n{indent}"
 
         result += f"</{node.tag_name}>"
@@ -124,6 +118,10 @@ class HTMLGenerator:
             return f"{indent}<!-- {node.value[2:].strip()} -->"
         return ""
 
+    def visit_OriginNode(self, node: OriginNode, context: Optional[ElementNode], indent_level: int) -> str:
+        indent = "  " * indent_level if indent_level > 0 else ""
+        return indent + node.content
+
     def visit_StyleNode(self, node: StyleNode, context: Optional[ElementNode], indent_level: int = 0):
         pass
 
@@ -138,10 +136,5 @@ class HTMLGenerator:
             if context is None and not isinstance(value, LiteralNode):
                  raise ValueError("Cannot evaluate complex expressions in a global scope.")
             value = self.evaluator.evaluate(value, context)
-
         prop_str = f"{node.name}: {value};"
-        if indent_level == 0:
-            return prop_str
-
-        indent = "  " * indent_level
-        return f"{indent}{prop_str}"
+        return f"{'  ' * indent_level}{prop_str}" if indent_level > 0 else prop_str

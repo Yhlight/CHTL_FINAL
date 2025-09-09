@@ -27,7 +27,7 @@ class LiteralNode(ExpressionNode):
 class PropertyReferenceNode(ExpressionNode):
     """Represents a reference to another property (e.g., .box.width)."""
     property_name: str
-    selector: 'SelectorNode' # Changed to SelectorNode
+    selector: 'SelectorNode'
     lineno: int = 0
     parent: Optional['BaseNode'] = field(default=None, repr=False)
 
@@ -96,6 +96,15 @@ class CommentNode(BaseNode):
     parent: Optional['BaseNode'] = field(default=None, repr=False)
 
 @dataclass
+class OriginNode(BaseNode):
+    """Represents a block of raw, unprocessed code."""
+    origin_type: str  # e.g., '@Html', '@Style'
+    name: Optional[str] = None
+    content: str = ""
+    lineno: int = 0
+    parent: Optional['BaseNode'] = field(default=None, repr=False)
+
+@dataclass
 class CssPropertyNode(BaseNode):
     """A CSS property. Its value can be a simple string or a complex expression tree."""
     name: str
@@ -152,7 +161,7 @@ class StyleNode(BaseNode):
         child.parent = self
         self.children.append(child)
 
-Node = Union['ElementNode', TextNode, CommentNode, StyleNode, TemplateUsageNode, CustomUsageNode]
+Node = Union['ElementNode', TextNode, CommentNode, StyleNode, TemplateUsageNode, CustomUsageNode, OriginNode]
 
 @dataclass
 class ElementNode(BaseNode):
@@ -175,7 +184,7 @@ class TemplateDefinitionNode(BaseNode):
 
 CustomDefinitionNode = TemplateDefinitionNode
 
-DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode, CustomDefinitionNode, StyleNode]
+DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode, CustomDefinitionNode, StyleNode, OriginNode]
 
 @dataclass
 class DocumentNode(BaseNode):

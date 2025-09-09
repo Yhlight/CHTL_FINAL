@@ -5,7 +5,7 @@ from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLNode.nodes import (
     ElementNode, TextNode, AttributeNode, CommentNode, StyleNode,
     CssRuleNode, CssPropertyNode, TemplateDefinitionNode, TemplateUsageNode,
-    CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode
+    CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode, OriginNode
 )
 
 class TestParser(unittest.TestCase):
@@ -59,6 +59,32 @@ class TestParser(unittest.TestCase):
         style_node = override_div.children[0]
         self.assertIsInstance(style_node, StyleNode)
         self.assertEqual(style_node.children[0].name, "color")
+
+    def test_origin_block_parsing(self):
+        source = """
+        [Origin] @Html myRawBlock { <script>alert("toplevel");</script> }
+
+        div {
+            [Origin] @JavaScript { console.log("nested"); }
+        }
+        """
+        ast, context = self._parse_source(source)
+
+        # Test top-level origin block
+        top_level_origin = ast.children[0]
+        self.assertIsInstance(top_level_origin, OriginNode)
+        self.assertEqual(top_level_origin.origin_type, "@Html")
+        self.assertEqual(top_level_origin.name, "myRawBlock")
+        self.assertIn('<script>alert("toplevel");</script>', top_level_origin.content)
+
+        # Test nested origin block
+        div_node = ast.children[1]
+        nested_origin = div_node.children[0]
+        self.assertIsInstance(nested_origin, OriginNode)
+        self.assertEqual(nested_origin.origin_type, "@JavaScript")
+        self.assertIsNone(nested_origin.name)
+        self.assertIn('console.log("nested");', nested_origin.content)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -2,7 +2,7 @@ from CHTL.CHTLLexer.lexer import Token, TokenType
 from CHTL.CHTLNode.nodes import (
     BaseNode, DocumentNode, ElementNode, AttributeNode, TextNode, CommentNode, Node,
     StyleNode, CssRuleNode, CssPropertyNode, TemplateDefinitionNode, TemplateUsageNode,
-    CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode, LiteralNode
+    CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode, LiteralNode, OriginNode
 )
 from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLParser.expression_parser import ExpressionParser
@@ -41,14 +41,15 @@ class Parser:
         while self.current_token() and self.current_token().type != TokenType.EOF:
             token = self.current_token()
             if token.type == TokenType.LBRACK:
-                self.consume(TokenType.LBRACK)
-                keyword = self.consume(TokenType.IDENTIFIER)
-                if keyword.value == "Template":
-                    doc.add_child(self.parse_template_definition(keyword))
-                elif keyword.value == "Custom":
-                    doc.add_child(self.parse_template_definition(keyword, is_custom=True))
+                if self.peek(1) and self.peek(1).value == "Origin":
+                    doc.add_child(self.parse_origin_block())
+                elif self.peek(1) and self.peek(1).value in ("Template", "Custom"):
+                    self.consume(TokenType.LBRACK)
+                    keyword = self.consume(TokenType.IDENTIFIER)
+                    is_custom = keyword.value == "Custom"
+                    doc.add_child(self.parse_template_definition(keyword, is_custom=is_custom))
                 else:
-                    raise RuntimeError(f"Unknown definition type: {keyword.value}")
+                    raise RuntimeError(f"Unknown definition type: {self.peek(1).value if self.peek(1) else 'None'}")
             elif token.type == TokenType.COMMENT:
                 doc.add_child(self.parse_comment())
             elif token.type == TokenType.IDENTIFIER:
@@ -62,18 +63,36 @@ class Parser:
                 raise RuntimeError(f"Line {token.lineno}: Unexpected token {token.type} ('{token.value}') at top level.")
         return doc
 
+    def parse_origin_block(self) -> OriginNode:
+        start_token = self.consume(TokenType.LBRACK)
+        self.consume(TokenType.IDENTIFIER, "Origin")
+        self.consume(TokenType.RBRACK)
+
+        origin_type = self.consume(TokenType.IDENTIFIER).value
+        name = None
+        if self.current_token().type == TokenType.IDENTIFIER:
+            name = self.consume(TokenType.IDENTIFIER).value
+
+        self.consume(TokenType.LBRACE)
+        content_token = self.consume(TokenType.RAW_CONTENT)
+        self.consume(TokenType.RBRACE)
+
+        return OriginNode(
+            origin_type=origin_type,
+            name=name,
+            content=content_token.value,
+            lineno=start_token.lineno
+        )
+
     def parse_title_shorthand(self) -> ElementNode:
         title_token = self.consume(TokenType.IDENTIFIER, 'title')
         self.consume(TokenType.COLON)
         value_token = self.consume(TokenType.STRING)
         value = value_token.value[1:-1]
-
         title_element = ElementNode(tag_name='title', lineno=title_token.lineno)
         title_element.add_child(TextNode(value=value, lineno=value_token.lineno))
-
         if self.current_token() and self.current_token().type == TokenType.SEMICOLON:
             self.consume(TokenType.SEMICOLON)
-
         return title_element
 
     def parse_definition_content(self, template_type):
@@ -142,18 +161,7 @@ class Parser:
 
     def parse_comment(self) -> CommentNode:
         token = self.consume(TokenType.COMMENT)
-        cleaned_value = token.value.strip()
-        return CommentNode(value=cleaned_value, lineno=token.lineno)
-
-    def parse_value_tokens(self, terminators: List[TokenType]) -> str:
-        if self.current_token().type == TokenType.STRING:
-            token = self.consume(TokenType.STRING)
-            return token.value[1:-1]
-        value_parts = []
-        while self.current_token() and self.current_token().type not in terminators:
-            token = self.consume()
-            value_parts.append(token.value)
-        return " ".join(value_parts).strip()
+        return CommentNode(value=token.value.strip(), lineno=token.lineno)
 
     def parse_element(self) -> ElementNode:
         tag_token = self.consume(TokenType.IDENTIFIER)
@@ -168,6 +176,8 @@ class Parser:
                 element.add_child(self.parse_at_usage())
             elif token.type == TokenType.COMMENT:
                 element.add_child(self.parse_comment())
+            elif token.type == TokenType.LBRACK and self.peek(1) and self.peek(1).value == "Origin":
+                 element.add_child(self.parse_origin_block())
             elif token.type == TokenType.IDENTIFIER and token.value == 'style':
                 element.add_child(self.parse_style_block(element))
             elif token.type == TokenType.IDENTIFIER:
@@ -186,11 +196,11 @@ class Parser:
     def parse_attribute(self, element: ElementNode):
         attr_name_token = self.consume(TokenType.IDENTIFIER)
         self.consume() # colon or equals
+        # This needs to be updated to use the expression parser if we want attributes to support expressions
+        value = self.parse_value_tokens([TokenType.SEMICOLON, TokenType.RBRACE])
         if attr_name_token.value == 'text':
-             value = self.parse_value_tokens([TokenType.SEMICOLON, TokenType.RBRACE])
              element.add_child(TextNode(value=value, lineno=attr_name_token.lineno))
         else:
-             value = self.parse_value_tokens([TokenType.SEMICOLON, TokenType.RBRACE])
              element.attributes.append(AttributeNode(name=attr_name_token.value, value=value, lineno=attr_name_token.lineno))
         if self.current_token().type == TokenType.SEMICOLON:
             self.consume(TokenType.SEMICOLON)
@@ -203,35 +213,25 @@ class Parser:
             if self.current_token().type == TokenType.AT:
                 style_node.add_child(self.parse_at_usage())
             else:
-                is_rule = False
-                i = 0
+                is_rule = False; i = 0
                 while True:
                     peek_token = self.peek(i)
-                    if not peek_token or peek_token.type in (TokenType.SEMICOLON, TokenType.RBRACE):
-                        is_rule = False; break
-                    if peek_token.type == TokenType.LBRACE:
-                        is_rule = True; break
+                    if not peek_token or peek_token.type in (TokenType.SEMICOLON, TokenType.RBRACE): is_rule = False; break
+                    if peek_token.type == TokenType.LBRACE: is_rule = True; break
                     i += 1
-                if is_rule:
-                    style_node.children.append(self.parse_css_rule(parent_element))
-                else:
-                    style_node.children.append(self.parse_css_property())
+                if is_rule: style_node.children.append(self.parse_css_rule(parent_element))
+                else: style_node.children.append(self.parse_css_property())
         self.consume(TokenType.RBRACE)
         return style_node
 
     def parse_css_property(self) -> CssPropertyNode:
         name_token = self.consume(TokenType.IDENTIFIER)
         self.consume(TokenType.COLON)
-
         expression_tokens = []
         while self.current_token() and self.current_token().type not in (TokenType.SEMICOLON, TokenType.RBRACE):
             expression_tokens.append(self.consume())
-
         if not expression_tokens:
             raise RuntimeError(f"Line {name_token.lineno}: Missing value for CSS property '{name_token.value}'")
-
-        # If it's a simple, single value, store as a literal string for efficiency.
-        # Otherwise, parse the full expression.
         if len(expression_tokens) == 1 and expression_tokens[0].type in (TokenType.IDENTIFIER, TokenType.UNQUOTED_LITERAL, TokenType.STRING):
             token = expression_tokens[0]
             value = token.value[1:-1] if token.type == TokenType.STRING else token.value
@@ -239,10 +239,8 @@ class Parser:
         else:
             expr_parser = ExpressionParser(expression_tokens)
             value_node = expr_parser.parse()
-
         if self.current_token() and self.current_token().type == TokenType.SEMICOLON:
             self.consume(TokenType.SEMICOLON)
-
         return CssPropertyNode(name=name_token.value, value=value_node, lineno=name_token.lineno)
 
     def parse_css_rule(self, parent_element: Optional[ElementNode]) -> CssRuleNode:
@@ -251,27 +249,31 @@ class Parser:
         while self.current_token() and self.current_token().type != TokenType.LBRACE:
             selector_parts.append(self.consume().value)
         selector = "".join(selector_parts).strip()
-
         if parent_element:
             if selector.startswith('.'):
                 class_name = selector.split(':')[0].split(' ')[0][1:]
                 found = False
                 for attr in parent_element.attributes:
                     if attr.name == 'class':
-                        if class_name not in attr.value.split(): attr.value += f" {class_name}"
-                        found = True; break
+                        if class_name not in attr.value.split(): attr.value += f" {class_name}"; found = True; break
                 if not found: parent_element.attributes.append(AttributeNode(name='class', value=class_name))
             elif selector.startswith('#'):
                 id_name = selector.split(':')[0].split(' ')[0][1:]
                 found = False
                 for attr in parent_element.attributes:
-                    if attr.name == 'id':
-                        attr.value = id_name; found = True; break
+                    if attr.name == 'id': attr.value = id_name; found = True; break
                 if not found: parent_element.attributes.append(AttributeNode(name='id', value=id_name))
-
         rule_node = CssRuleNode(selector=selector, lineno=rule_lineno)
         self.consume(TokenType.LBRACE)
         while self.current_token() and self.current_token().type != TokenType.RBRACE:
             rule_node.properties.append(self.parse_css_property())
         self.consume(TokenType.RBRACE)
         return rule_node
+
+    def parse_value_tokens(self, terminators: List[TokenType]) -> str:
+        if self.current_token().type == TokenType.STRING:
+            return self.consume(TokenType.STRING).value[1:-1]
+        value_parts = []
+        while self.current_token() and self.current_token().type not in terminators:
+            value_parts.append(self.consume().value)
+        return " ".join(value_parts).strip()
