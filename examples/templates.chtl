@@ -1,0 +1,167 @@
+// CHTL 模板系统示例
+use html5;
+
+// 样式组模板
+[Template] @Style ButtonStyle
+{
+    display: inline-block;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+[Template] @Style PrimaryButton
+{
+    @Style ButtonStyle;
+    background-color: #007bff;
+    color: white;
+}
+
+[Template] @Style SecondaryButton
+{
+    @Style ButtonStyle;
+    background-color: #6c757d;
+    color: white;
+}
+
+// 元素模板
+[Template] @Element Card
+{
+    div
+    {
+        class: card;
+        style
+        {
+            .card
+            {
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 10px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+        }
+        
+        h3
+        {
+            class: card-title;
+            text: "Card Title";
+        }
+        
+        p
+        {
+            class: card-content;
+            text: "This is a card content.";
+        }
+        
+        button
+        {
+            class: card-button;
+            text: "Action";
+        }
+    }
+}
+
+// 变量组模板
+[Template] @Var Theme
+{
+    primaryColor: "#007bff";
+    secondaryColor: "#6c757d";
+    successColor: "#28a745";
+    dangerColor: "#dc3545";
+    warningColor: "#ffc107";
+    infoColor: "#17a2b8";
+    lightColor: "#f8f9fa";
+    darkColor: "#343a40";
+}
+
+html
+{
+    head
+    {
+        title
+        {
+            text: "CHTL Templates Example";
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: container;
+            style
+            {
+                .container
+                {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+            }
+            
+            h1
+            {
+                text: "CHTL Templates Demo";
+                style
+                {
+                    text-align: center;
+                    color: Theme(primaryColor);
+                    margin-bottom: 30px;
+                }
+            }
+            
+            div
+            {
+                class: button-group;
+                style
+                {
+                    .button-group
+                    {
+                        text-align: center;
+                        margin: 20px 0;
+                    }
+                }
+                
+                button
+                {
+                    text: "Primary Button";
+                    style
+                    {
+                        @Style PrimaryButton;
+                    }
+                }
+                
+                button
+                {
+                    text: "Secondary Button";
+                    style
+                    {
+                        @Style SecondaryButton;
+                    }
+                }
+            }
+            
+            div
+            {
+                class: cards-container;
+                style
+                {
+                    .cards-container
+                    {
+                        display: flex;
+                        flex-wrap: wrap;
+                        justify-content: center;
+                    }
+                }
+                
+                @Element Card;
+                @Element Card;
+                @Element Card;
+            }
+        }
+    }
+}

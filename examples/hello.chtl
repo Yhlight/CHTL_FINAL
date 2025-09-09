@@ -1,0 +1,126 @@
+// CHTL Hello World 示例
+use html5;
+
+html
+{
+    head
+    {
+        title
+        {
+            text: "Hello CHTL World";
+        }
+        
+        style
+        {
+            .container
+            {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+                font-family: Arial, sans-serif;
+            }
+            
+            .header
+            {
+                text-align: center;
+                color: #333;
+                margin-bottom: 30px;
+            }
+            
+            .content
+            {
+                background-color: #f5f5f5;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .button
+            {
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 16px;
+                margin: 10px;
+            }
+            
+            .button:hover
+            {
+                background-color: #0056b3;
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: container;
+            
+            h1
+            {
+                class: header;
+                text: "Welcome to CHTL!";
+            }
+            
+            div
+            {
+                class: content;
+                
+                p
+                {
+                    text: "CHTL is a powerful hypertext language that provides a more developer-friendly way to write HTML code.";
+                }
+                
+                p
+                {
+                    text: "Key features include:";
+                }
+                
+                ul
+                {
+                    li
+                    {
+                        text: "Clean, C++-like syntax";
+                    }
+                    
+                    li
+                    {
+                        text: "Local style blocks with CSS-like syntax";
+                    }
+                    
+                    li
+                    {
+                        text: "Template and custom systems";
+                    }
+                    
+                    li
+                    {
+                        text: "Module support with CMOD and CJMOD";
+                    }
+                    
+                    li
+                    {
+                        text: "CHTL JS extensions for dynamic content";
+                    }
+                }
+                
+                button
+                {
+                    class: button;
+                    text: "Click me!";
+                    
+                    script
+                    {
+                        {{&}}->addEventListener('click', function() {
+                            alert('Hello from CHTL JS!');
+                        });
+                    }
+                }
+            }
+        }
+    }
+}
