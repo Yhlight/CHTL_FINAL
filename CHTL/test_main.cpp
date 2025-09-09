@@ -10,6 +10,12 @@
 #include "CHTL/CHTLConfiguration/CHTLConfigurationProcessor.h"
 #include "CHTL/CHTLNode/UseNode.h"
 #include "CHTL/CHTLUse/CHTLUseProcessor.h"
+#include "CHTL_JS/CHTLJSLexer/CHTLJSLexer.h"
+#include "CHTL_JS/CHTLJSLexer/CHTLJSToken.h"
+#include "CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.h"
+#include "CHTL_JS/CHTLJSParser/CHTLJSParser.h"
+#include "CHTL_JS/CHTLJSNode/CHTLJSBaseNode.h"
+#include "CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.h"
 #include "Scanner/CHTLUnifiedScanner.h"
 #include "CompilerDispatcher/CompilerDispatcher.h"
 
@@ -208,6 +214,304 @@ int main() {
         // 输出use调试信息
         std::cout << "use处理器调试信息:" << std::endl;
         std::cout << useProcessor.getDebugInfo() << std::endl;
+        
+        // 测试CHTL JS词法分析器
+        std::cout << "\nCHTL JS词法分析器测试:" << std::endl;
+        CHTL_JS::CHTLJSLexer jsLexer;
+        jsLexer.setDebugMode(true);
+        jsLexer.setStrictMode(true);
+        
+        // 测试CHTL JS代码
+        std::string chtljsCode = R"(
+            vir test = listen {
+                click: () => {
+                    console.log('Button clicked!');
+                },
+                mouseenter: () => {
+                    console.log('Mouse entered!');
+                }
+            };
+            
+            {{button}}->addEventListener('click', () => {
+                console.log('Enhanced selector clicked!');
+            });
+            
+            const anim = animate {
+                target: {{box}},
+                duration: 1000,
+                easing: ease-in-out,
+                begin: {
+                    opacity: 0,
+                    transform: 'scale(0.5)'
+                },
+                end: {
+                    opacity: 1,
+                    transform: 'scale(1.0)'
+                }
+            };
+            
+            router {
+                url: "/home",
+                page: {{homePage}}
+            };
+        )";
+        
+        jsLexer.setSource(chtljsCode);
+        auto jsTokens = jsLexer.tokenize();
+        
+        std::cout << "CHTL JS词法分析结果:" << std::endl;
+        for (size_t i = 0; i < jsTokens.size() && i < 30; ++i) {
+            const auto& token = jsTokens[i];
+            if (token.getType() != CHTL_JS::CHTLJSTokenType::END_OF_FILE) {
+                std::cout << "[" << i << "] " << token.toDebugString() << std::endl;
+            }
+        }
+        
+        // 测试统一扫描器功能
+        std::cout << "\n统一扫描器测试:" << std::endl;
+        jsLexer.setUnifiedMode(true);
+        auto fragments = jsLexer.separateCodeFragments(chtljsCode);
+        std::cout << "分离的代码片段数量: " << fragments.size() << std::endl;
+        
+        for (size_t i = 0; i < fragments.size(); ++i) {
+            std::cout << "片段 " << i << ": " << fragments[i].substr(0, 50) << "..." << std::endl;
+        }
+        
+        // 测试语法边界识别
+        std::cout << "\n语法边界识别测试:" << std::endl;
+        auto boundaries = jsLexer.detectBoundaries(chtljsCode);
+        std::cout << "检测到的语法边界数量: " << boundaries.size() << std::endl;
+        
+        // 测试占位符机制
+        std::cout << "\n占位符机制测试:" << std::endl;
+        std::string placeholder = jsLexer.createPlaceholder("function test() {}", "function");
+        std::cout << "创建的占位符: " << placeholder << std::endl;
+        
+        std::string restored = jsLexer.restoreFromPlaceholder(placeholder);
+        std::cout << "恢复的内容: " << restored << std::endl;
+        
+        // 输出CHTL JS词法分析器调试信息
+        std::cout << "\nCHTL JS词法分析器调试信息:" << std::endl;
+        std::cout << jsLexer.getDebugInfo() << std::endl;
+        
+        // 测试CHTL JS全局映射
+        std::cout << "\nCHTL JS全局映射测试:" << std::endl;
+        CHTL_JS::CHTLJSGlobalMap globalMap;
+        globalMap.setDebugMode(true);
+        
+        // 测试关键字查找
+        auto keywordType = globalMap.findTokenType("vir");
+        std::cout << "关键字 'vir' 的类型: " << static_cast<int>(keywordType) << std::endl;
+        
+        // 测试运算符查找
+        auto operatorType = globalMap.findTokenType("->");
+        std::cout << "运算符 '->' 的类型: " << static_cast<int>(operatorType) << std::endl;
+        
+        // 测试CHTL JS函数
+        bool hasFunction = globalMap.hasCHTLJSFunction("printMylove");
+        std::cout << "是否有printMylove函数: " << (hasFunction ? "是" : "否") << std::endl;
+        
+        if (hasFunction) {
+            std::string signature = globalMap.getCHTLJSFunctionSignature("printMylove");
+            std::cout << "printMylove函数签名: " << signature << std::endl;
+        }
+        
+        // 输出全局映射调试信息
+        std::cout << "\nCHTL JS全局映射调试信息:" << std::endl;
+        std::cout << globalMap.getDebugInfo() << std::endl;
+        
+        // 测试CHTL JS语法分析器
+        std::cout << "\nCHTL JS语法分析器测试:" << std::endl;
+        CHTL_JS::CHTLJSParser jsParser;
+        jsParser.setDebugMode(true);
+        jsParser.setStrictMode(true);
+        jsParser.setAllowUnquotedLiterals(true);
+        jsParser.setAllowUnorderedKeyValuePairs(true);
+        jsParser.setAllowOptionalKeyValuePairs(true);
+        jsParser.setAllowChainSyntax(true);
+        jsParser.setAllowDeclarationSyntax(true);
+        
+        // 设置词法分析结果
+        jsParser.setTokens(jsTokens);
+        
+        // 解析AST
+        auto ast = jsParser.parse();
+        if (ast) {
+            std::cout << "AST解析成功!" << std::endl;
+            std::cout << "AST类型: " << ast->getNodeTypeName() << std::endl;
+            std::cout << "子节点数量: " << ast->getChildCount() << std::endl;
+            
+            // 遍历AST
+            std::cout << "\nAST遍历结果:" << std::endl;
+            ast->traverse([](std::shared_ptr<CHTL_JS::CHTLJSBaseNode> node) {
+                std::cout << "  " << node->toDebugString() << std::endl;
+            });
+            
+            // 查找特定类型的节点
+            auto enhancedSelectors = ast->findNodes(CHTL_JS::CHTLJSNodeType::ENHANCED_SELECTOR);
+            std::cout << "\n找到的增强选择器数量: " << enhancedSelectors.size() << std::endl;
+            
+            auto virtualObjects = ast->findNodes(CHTL_JS::CHTLJSNodeType::VIRTUAL_OBJECT);
+            std::cout << "找到的虚对象数量: " << virtualObjects.size() << std::endl;
+            
+            auto listenExpressions = ast->findNodes(CHTL_JS::CHTLJSNodeType::LISTEN_EXPRESSION);
+            std::cout << "找到的监听表达式数量: " << listenExpressions.size() << std::endl;
+            
+            // 验证AST
+            bool isValid = jsParser.validateAST(ast);
+            std::cout << "AST验证结果: " << (isValid ? "通过" : "失败") << std::endl;
+            
+            if (!isValid) {
+                auto validationErrors = jsParser.validateNode(ast);
+                std::cout << "验证错误:" << std::endl;
+                for (const auto& error : validationErrors) {
+                    std::cout << "  " << error << std::endl;
+                }
+            }
+            
+            // 转换为JavaScript
+            std::cout << "\n转换为JavaScript:" << std::endl;
+            std::string javascript = ast->toJavaScript();
+            std::cout << javascript << std::endl;
+            
+            // 转换为CHTL JS
+            std::cout << "\n转换为CHTL JS:" << std::endl;
+            std::string chtljs = ast->toCHTLJS();
+            std::cout << chtljs << std::endl;
+            
+            // 转换为JSON
+            std::cout << "\n转换为JSON:" << std::endl;
+            std::string json = ast->toJSON();
+            std::cout << json << std::endl;
+            
+        } else {
+            std::cout << "AST解析失败!" << std::endl;
+        }
+        
+        // 输出语法分析器调试信息
+        std::cout << "\nCHTL JS语法分析器调试信息:" << std::endl;
+        std::cout << jsParser.getDebugInfo() << std::endl;
+        
+        // 测试错误处理
+        std::cout << "\n错误处理测试:" << std::endl;
+        if (jsParser.hasErrors()) {
+            std::cout << "错误数量: " << jsParser.getErrors().size() << std::endl;
+            for (const auto& error : jsParser.getErrors()) {
+                std::cout << "  错误: " << error << std::endl;
+            }
+        }
+        
+        if (jsParser.hasWarnings()) {
+            std::cout << "警告数量: " << jsParser.getWarnings().size() << std::endl;
+            for (const auto& warning : jsParser.getWarnings()) {
+                std::cout << "  警告: " << warning << std::endl;
+            }
+        }
+        
+        // 测试CHTL JS代码生成器
+        std::cout << "\nCHTL JS代码生成器测试:" << std::endl;
+        CHTL_JS::CHTLJSGenerator jsGenerator;
+        jsGenerator.setDebugMode(true);
+        jsGenerator.setStrictMode(true);
+        jsGenerator.setMinifyOutput(false);
+        jsGenerator.setBeautifyOutput(true);
+        jsGenerator.setIncludeComments(true);
+        jsGenerator.setIncludeSourceMaps(false);
+        jsGenerator.setOutputFormat("javascript");
+        jsGenerator.setLanguageVersion("1.0.0");
+        
+        // 生成JavaScript代码
+        if (ast) {
+            std::string generatedCode = jsGenerator.generate(ast);
+            std::cout << "生成的JavaScript代码:" << std::endl;
+            std::cout << generatedCode << std::endl;
+            
+            // 验证生成的代码
+            bool isValid = jsGenerator.validateOutput(generatedCode);
+            std::cout << "\n代码验证结果: " << (isValid ? "通过" : "失败") << std::endl;
+            
+            if (!isValid) {
+                auto validationErrors = jsGenerator.validateGeneratedCode(generatedCode);
+                std::cout << "验证错误:" << std::endl;
+                for (const auto& error : validationErrors) {
+                    std::cout << "  " << error << std::endl;
+                }
+            }
+            
+            // 测试不同的输出格式
+            std::cout << "\n测试不同输出格式:" << std::endl;
+            
+            // JavaScript格式
+            jsGenerator.setOutputFormat("javascript");
+            std::string jsCode = jsGenerator.generate(ast);
+            std::cout << "JavaScript格式: " << jsCode.substr(0, 100) << "..." << std::endl;
+            
+            // CHTL JS格式
+            jsGenerator.setOutputFormat("chtljs");
+            std::string chtljsCode = jsGenerator.generate(ast);
+            std::cout << "CHTL JS格式: " << chtljsCode.substr(0, 100) << "..." << std::endl;
+            
+            // HTML格式
+            jsGenerator.setOutputFormat("html");
+            std::string htmlCode = jsGenerator.generate(ast);
+            std::cout << "HTML格式: " << htmlCode.substr(0, 100) << "..." << std::endl;
+            
+            // CSS格式
+            jsGenerator.setOutputFormat("css");
+            std::string cssCode = jsGenerator.generate(ast);
+            std::cout << "CSS格式: " << cssCode.substr(0, 100) << "..." << std::endl;
+            
+            // 测试压缩和美化
+            std::cout << "\n测试代码压缩和美化:" << std::endl;
+            
+            // 压缩模式
+            jsGenerator.setMinifyOutput(true);
+            jsGenerator.setBeautifyOutput(false);
+            std::string minifiedCode = jsGenerator.generate(ast);
+            std::cout << "压缩后代码长度: " << minifiedCode.length() << " 字符" << std::endl;
+            
+            // 美化模式
+            jsGenerator.setMinifyOutput(false);
+            jsGenerator.setBeautifyOutput(true);
+            std::string beautifiedCode = jsGenerator.generate(ast);
+            std::cout << "美化后代码长度: " << beautifiedCode.length() << " 字符" << std::endl;
+            
+            // 测试统计信息
+            std::cout << "\n代码生成统计信息:" << std::endl;
+            std::cout << "生成行数: " << jsGenerator.getGeneratedLines() << std::endl;
+            std::cout << "生成字符数: " << jsGenerator.getGeneratedCharacters() << std::endl;
+            
+            auto featureUsage = jsGenerator.getFeatureUsage();
+            if (!featureUsage.empty()) {
+                std::cout << "功能使用统计:" << std::endl;
+                for (const auto& pair : featureUsage) {
+                    std::cout << "  " << pair.first << ": " << pair.second << " 次" << std::endl;
+                }
+            }
+            
+        } else {
+            std::cout << "无法生成代码，AST为空!" << std::endl;
+        }
+        
+        // 输出代码生成器调试信息
+        std::cout << "\nCHTL JS代码生成器调试信息:" << std::endl;
+        std::cout << jsGenerator.getDebugInfo() << std::endl;
+        
+        // 测试代码生成器错误处理
+        std::cout << "\n代码生成器错误处理测试:" << std::endl;
+        if (jsGenerator.hasErrors()) {
+            std::cout << "错误数量: " << jsGenerator.getErrors().size() << std::endl;
+            for (const auto& error : jsGenerator.getErrors()) {
+                std::cout << "  错误: " << error << std::endl;
+            }
+        }
+        
+        if (jsGenerator.hasWarnings()) {
+            std::cout << "警告数量: " << jsGenerator.getWarnings().size() << std::endl;
+            for (const auto& warning : jsGenerator.getWarnings()) {
+                std::cout << "  警告: " << warning << std::endl;
+            }
+        }
         
     } catch (const std::exception& e) {
         std::cerr << "测试过程中发生错误: " << e.what() << std::endl;

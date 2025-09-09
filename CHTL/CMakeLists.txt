@@ -89,6 +89,10 @@ set(CHTL_JS_SOURCES
     CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.h
     CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp
     CHTL_JS/CHTLJSLexer/CHTLJSLexer.h
+    CHTL_JS/CHTLJSLexer/CHTLJSToken.cpp
+    CHTL_JS/CHTLJSLexer/CHTLJSToken.h
+    CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.cpp
+    CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.h
     CHTL_JS/CHTLJSLexer/Lexer.cpp
     CHTL_JS/CHTLJSLexer/Lexer.h
     CHTL_JS/CHTLJSLexer/GlobalMap.cpp
@@ -103,6 +107,8 @@ set(CHTL_JS_SOURCES
     CHTL_JS/CHTLJSNode/CHTLJSBaseNode.h
     CHTL_JS/CHTLJSParser/CHTLJSParser.cpp
     CHTL_JS/CHTLJSParser/CHTLJSParser.h
+    CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp
+    CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.h
     CHTL_JS/CHTLJSState/CHTLJSState.cpp
     CHTL_JS/CHTLJSState/CHTLJSState.h
     CHTL_JS/CHTLJSIOStream/CHTLJSIOStream.cpp

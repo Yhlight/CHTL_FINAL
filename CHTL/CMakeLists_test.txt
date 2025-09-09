@@ -37,6 +37,12 @@ set(SOURCES
     CHTL/CHTLGenerator/CHTLGenerator.cpp
     CHTL/CHTLStyle/CHTLStyleProcessor.cpp
     CHTL/CHTLProperty/CHTLPropertyReference.cpp
+    CHTL_JS/CHTLJSLexer/CHTLJSToken.cpp
+    CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp
+    CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.cpp
+    CHTL_JS/CHTLJSNode/CHTLJSBaseNode.cpp
+    CHTL_JS/CHTLJSParser/CHTLJSParser.cpp
+    CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp
     Scanner/CHTLUnifiedScanner.cpp
     CodeMerger/CodeMerger.cpp
     CompilerDispatcher/CompilerDispatcher.cpp
