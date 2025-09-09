@@ -3,6 +3,7 @@
 #include <string>
 #include "CHTLCompiler/CHTLLexer/CHTLLexer.h"
 #include "CHTLCompiler/CHTLParser/CHTLParser.h"
+#include "CHTLCompiler/CHTLGenerator/CHTLGenerator.h"
 #include "CHTLCompiler/CHTLContext/CHTLContext.h"
 
 using namespace CHTL;
@@ -74,8 +75,9 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         
-        // Generate HTML from AST
-        std::string html = ast->toHTML();
+        // Create generator and generate HTML
+        CHTLGenerator generator;
+        std::string html = generator.generateHTML(ast);
         
         // Write output file
         std::ofstream outfile(output_file);

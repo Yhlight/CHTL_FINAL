@@ -22,6 +22,16 @@ set(CHTL_SOURCES
     CHTLCompiler/CHTLLexer/CHTLLexer.cpp
     CHTLCompiler/CHTLNode/CHTLNode.cpp
     CHTLCompiler/CHTLParser/CHTLParser.cpp
+    CHTLCompiler/CHTLGenerator/CHTLGenerator.cpp
+    CHTLCompiler/CHTLStyle/CHTLStyle.cpp
+    CHTLCompiler/CHTLTemplate/CHTLTemplate.cpp
+    CHTLCompiler/CHTLCustom/CHTLCustom.cpp
+    CHTLCompiler/CHTLOrigin/CHTLOrigin.cpp
+    CHTLCompiler/CHTLImport/CHTLImport.cpp
+    CHTLCompiler/CHTLNamespace/CHTLNamespace.cpp
+    CHTLCompiler/CHTLConstraint/CHTLConstraint.cpp
+    CHTLCompiler/CHTLConfiguration/CHTLConfiguration.cpp
+    CHTLCompiler/CHTLJSLexer/CHTLJSLexer.cpp
     # Add other source files as they are created
 )
 
@@ -31,6 +41,16 @@ set(CHTL_HEADERS
     CHTLCompiler/CHTLLexer/CHTLLexer.h
     CHTLCompiler/CHTLNode/CHTLNode.h
     CHTLCompiler/CHTLParser/CHTLParser.h
+    CHTLCompiler/CHTLGenerator/CHTLGenerator.h
+    CHTLCompiler/CHTLStyle/CHTLStyle.h
+    CHTLCompiler/CHTLTemplate/CHTLTemplate.h
+    CHTLCompiler/CHTLCustom/CHTLCustom.h
+    CHTLCompiler/CHTLOrigin/CHTLOrigin.h
+    CHTLCompiler/CHTLImport/CHTLImport.h
+    CHTLCompiler/CHTLNamespace/CHTLNamespace.h
+    CHTLCompiler/CHTLConstraint/CHTLConstraint.h
+    CHTLCompiler/CHTLConfiguration/CHTLConfiguration.h
+    CHTLCompiler/CHTLJSLexer/CHTLJSLexer.h
     # Add other header files as they are created
 )
 

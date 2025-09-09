@@ -237,4 +237,5 @@ CMakeFiles/chtl.dir/main.cpp.o: /workspace/CHTL/main.cpp \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/variant \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/enable_special_members.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/parse_numbers.h \
+  /workspace/CHTL/CHTLCompiler/CHTLGenerator/CHTLGenerator.h \
   /workspace/CHTL/CHTLCompiler/CHTLContext/CHTLContext.h

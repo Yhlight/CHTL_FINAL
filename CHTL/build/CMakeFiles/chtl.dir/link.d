@@ -7,6 +7,16 @@ chtl: \
   CMakeFiles/chtl.dir/CHTLCompiler/CHTLLexer/CHTLLexer.cpp.o \
   CMakeFiles/chtl.dir/CHTLCompiler/CHTLNode/CHTLNode.cpp.o \
   CMakeFiles/chtl.dir/CHTLCompiler/CHTLParser/CHTLParser.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLGenerator/CHTLGenerator.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLStyle/CHTLStyle.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLTemplate/CHTLTemplate.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLCustom/CHTLCustom.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLOrigin/CHTLOrigin.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLImport/CHTLImport.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLNamespace/CHTLNamespace.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLConstraint/CHTLConstraint.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLConfiguration/CHTLConfiguration.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSLexer/CHTLJSLexer.cpp.o \
   /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so \
   /lib/x86_64-linux-gnu/libm.so \
   /lib/x86_64-linux-gnu/libm.so \
@@ -50,6 +60,26 @@ CMakeFiles/chtl.dir/CHTLCompiler/CHTLLexer/CHTLLexer.cpp.o:
 CMakeFiles/chtl.dir/CHTLCompiler/CHTLNode/CHTLNode.cpp.o:
 
 CMakeFiles/chtl.dir/CHTLCompiler/CHTLParser/CHTLParser.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLGenerator/CHTLGenerator.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLStyle/CHTLStyle.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLTemplate/CHTLTemplate.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLCustom/CHTLCustom.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLOrigin/CHTLOrigin.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLImport/CHTLImport.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLNamespace/CHTLNamespace.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLConstraint/CHTLConstraint.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLConfiguration/CHTLConfiguration.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSLexer/CHTLJSLexer.cpp.o:
 
 /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so:
 
