@@ -80,6 +80,10 @@ set(CHTL_SOURCES
     CHTL/CHTLIOStream/CHTLIOStream.h
     CHTL/CMODSystem/CMODSystem.cpp
     CHTL/CMODSystem/CMODSystem.h
+    CHTL/CMODSystem/CMODModule.cpp
+    CHTL/CMODSystem/CMODModule.h
+    CHTL/CMODSystem/CMODLoader.cpp
+    CHTL/CMODSystem/CMODLoader.h
 )
 
 set(CHTL_JS_SOURCES
@@ -115,6 +119,18 @@ set(CHTL_JS_SOURCES
     CHTL_JS/CHTLJSIOStream/CHTLJSIOStream.h
     CHTL_JS/CJMODSystem/CJMODSystem.cpp
     CHTL_JS/CJMODSystem/CJMODSystem.h
+    CHTL_JS/CJMODSystem/CJMODModule.cpp
+    CHTL_JS/CJMODSystem/CJMODModule.h
+    CHTL_JS/CJMODSystem/CJMODSyntax.cpp
+    CHTL_JS/CJMODSystem/CJMODSyntax.h
+    CHTL_JS/CJMODSystem/CJMODArg.cpp
+    CHTL_JS/CJMODSystem/CJMODArg.h
+    CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedSelector.cpp
+    CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedSelector.h
+    CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedListener.cpp
+    CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedListener.h
+    CHTL_JS/CHTLJSEnhanced/CHTLJSEventDelegation.cpp
+    CHTL_JS/CHTLJSEnhanced/CHTLJSEventDelegation.h
 )
 
 set(UTIL_SOURCES

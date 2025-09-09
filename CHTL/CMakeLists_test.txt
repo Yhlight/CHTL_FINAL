@@ -37,12 +37,20 @@ set(SOURCES
     CHTL/CHTLGenerator/CHTLGenerator.cpp
     CHTL/CHTLStyle/CHTLStyleProcessor.cpp
     CHTL/CHTLProperty/CHTLPropertyReference.cpp
+    CHTL/CMODSystem/CMODModule.cpp
+    CHTL/CMODSystem/CMODLoader.cpp
     CHTL_JS/CHTLJSLexer/CHTLJSToken.cpp
     CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp
     CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.cpp
     CHTL_JS/CHTLJSNode/CHTLJSBaseNode.cpp
     CHTL_JS/CHTLJSParser/CHTLJSParser.cpp
     CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp
+    CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedSelector.cpp
+    CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedListener.cpp
+    CHTL_JS/CHTLJSEnhanced/CHTLJSEventDelegation.cpp
+    CHTL_JS/CJMODSystem/CJMODModule.cpp
+    CHTL_JS/CJMODSystem/CJMODSyntax.cpp
+    CHTL_JS/CJMODSystem/CJMODArg.cpp
     Scanner/CHTLUnifiedScanner.cpp
     CodeMerger/CodeMerger.cpp
     CompilerDispatcher/CompilerDispatcher.cpp
