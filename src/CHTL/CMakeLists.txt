@@ -24,6 +24,10 @@ add_library(CHTLCore STATIC
     CHTLCJMODAPIGenerator.cpp
     CHTLCJMODAPIManager.cpp
     CHTLTesting.cpp
+    CHTLVSCodeExtension.cpp
+    CHTLVSCodeExtensionPreviewer.cpp
+    CHTLVSCodeExtensionModules.cpp
+    CHTLVSCodeExtensionManager.cpp
 )
 
 target_include_directories(CHTLCore PUBLIC
