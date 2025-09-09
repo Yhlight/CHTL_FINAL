@@ -5,10 +5,11 @@ import com.chtholly.chthl.ast.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
- * Generates the final HTML string from an Abstract Syntax Tree (AST).
+ * Generates the final HTML and CSS from an Abstract Syntax Tree (AST).
  * Implements the Visitor pattern to traverse the AST.
  */
 public class CHTLGenerator implements Visitor<String> {
@@ -18,35 +19,81 @@ public class CHTLGenerator implements Visitor<String> {
         "link", "meta", "param", "source", "track", "wbr"
     );
 
-    public String generate(List<Node> nodes) {
-        StringBuilder builder = new StringBuilder();
+    private final StringBuilder globalCssBuilder;
+    private ElementNode currentElement = null;
+
+    public CHTLGenerator() {
+        this.globalCssBuilder = new StringBuilder();
+    }
+
+    public CompilationResult generate(List<Node> nodes) {
+        StringBuilder htmlBuilder = new StringBuilder();
         for (Node node : nodes) {
-            builder.append(node.accept(this));
+            htmlBuilder.append(node.accept(this));
         }
-        return builder.toString();
+        return new CompilationResult(htmlBuilder.toString(), globalCssBuilder.toString());
+    }
+
+    private String resolveSelector(String selector, ElementNode parent) {
+        if (!selector.contains("&")) {
+            return selector;
+        }
+        if (parent == null) {
+            return selector;
+        }
+
+        String parentSelector = "";
+        if (parent.attributes.containsKey("class")) {
+            String firstClass = parent.attributes.get("class").split("\\s+")[0];
+            parentSelector = "." + firstClass;
+        } else if (parent.attributes.containsKey("id")) {
+            parentSelector = "#" + parent.attributes.get("id");
+        } else {
+            return selector;
+        }
+
+        return selector.replace("&", parentSelector);
     }
 
     @Override
     public String visitElementNode(ElementNode node) {
+        ElementNode previousElement = this.currentElement;
+        this.currentElement = node;
+
         StringBuilder builder = new StringBuilder();
 
-        // --- Style block processing ---
         StringBuilder styleAttrBuilder = new StringBuilder();
         for (Node child : node.children) {
             if (child instanceof StyleBlockNode) {
                 StyleBlockNode styleNode = (StyleBlockNode) child;
-                for (Map.Entry<String, String> property : styleNode.properties.entrySet()) {
-                    styleAttrBuilder.append(property.getKey()).append(":")
-                                  .append(property.getValue()).append(";");
+                for (StylePropertyNode property : styleNode.directProperties) {
+                    styleAttrBuilder.append(property.key).append(":")
+                                  .append(property.value).append(";");
                 }
+
+                for (SelectorBlockNode selectorBlock : styleNode.selectorBlocks) {
+                    String selector = selectorBlock.selector.trim();
+                    if (selector.startsWith(".")) {
+                        if (!node.attributes.containsKey("class")) {
+                            String className = selector.substring(1).split("[\\s:]")[0];
+                            node.attributes.put("class", className);
+                        }
+                    } else if (selector.startsWith("#")) {
+                        if (!node.attributes.containsKey("id")) {
+                            String idName = selector.substring(1).split("[\\s:]")[0];
+                            node.attributes.put("id", idName);
+                        }
+                    }
+                }
+                child.accept(this);
             }
         }
 
-        // Opening tag
         builder.append("<").append(node.tagName);
 
-        // Attributes
-        for (Map.Entry<String, String> attribute : node.attributes.entrySet()) {
+        // Use TreeMap to sort attributes for consistent output, making tests reliable.
+        Map<String, String> sortedAttributes = new TreeMap<>(node.attributes);
+        for (Map.Entry<String, String> attribute : sortedAttributes.entrySet()) {
             builder.append(" ")
                    .append(attribute.getKey())
                    .append("=\"")
@@ -54,7 +101,6 @@ public class CHTLGenerator implements Visitor<String> {
                    .append("\"");
         }
 
-        // Append style attribute if styles were found
         if (styleAttrBuilder.length() > 0) {
             builder.append(" style=\"").append(styleAttrBuilder.toString()).append("\"");
         }
@@ -67,14 +113,13 @@ public class CHTLGenerator implements Visitor<String> {
             builder.append(">");
         } else {
             builder.append(">");
-            // Children
             for (Node child : contentChildren) {
                 builder.append(child.accept(this));
             }
-            // Closing tag
             builder.append("</").append(node.tagName).append(">");
         }
 
+        this.currentElement = previousElement;
         return builder.toString();
     }
 
@@ -90,7 +135,25 @@ public class CHTLGenerator implements Visitor<String> {
 
     @Override
     public String visitStyleBlockNode(StyleBlockNode node) {
-        // Handled by the parent ElementNode, so this produces no direct output.
+        for (SelectorBlockNode selectorBlock : node.selectorBlocks) {
+            selectorBlock.accept(this);
+        }
+        return "";
+    }
+
+    @Override
+    public String visitSelectorBlockNode(SelectorBlockNode node) {
+        String resolvedSelector = resolveSelector(node.selector, this.currentElement);
+
+        globalCssBuilder.append(resolvedSelector).append(" {\n");
+        for (StylePropertyNode property : node.properties) {
+            globalCssBuilder.append("    ")
+                          .append(property.key)
+                          .append(": ")
+                          .append(property.value)
+                          .append(";\n");
+        }
+        globalCssBuilder.append("}\n");
         return "";
     }
 }

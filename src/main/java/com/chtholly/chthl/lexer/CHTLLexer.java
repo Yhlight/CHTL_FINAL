@@ -69,6 +69,8 @@ public class CHTLLexer {
             case ',': addToken(TokenType.COMMA); break;
             case '+': addToken(TokenType.PLUS); break;
             case '%': addToken(TokenType.PERCENT); break;
+            case '#': addToken(TokenType.HASH); break;
+            case '&': addToken(TokenType.AMPERSAND); break;
             case '*':
                 addToken(match('*') ? TokenType.STAR_STAR : TokenType.STAR);
                 break;

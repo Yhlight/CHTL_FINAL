@@ -2,6 +2,7 @@ package com.chtholly;
 
 import com.chtholly.chthl.ast.Node;
 import com.chtholly.chthl.generator.CHTLGenerator;
+import com.chtholly.chthl.generator.CompilationResult;
 import com.chtholly.chthl.lexer.CHTLLexer;
 import com.chtholly.chthl.lexer.Token;
 import com.chtholly.chthl.parser.CHTLParser;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CompilerEndToEndTest {
 
@@ -32,27 +34,16 @@ class CompilerEndToEndTest {
         }
         """;
 
-        // Note: A real HTML generator would add newlines and indentation for readability.
-        // For testing, a compact string is easier to assert against.
         String expectedHtml = "<html><head><title>My CHTL Page</title></head>" +
-                              "<body><div id=\"main\" class=\"container\">" +
+                              "<body><div class=\"container\" id=\"main\">" +
                               "<h1>Welcome!</h1><p>This is a paragraph.</p>" +
                               "<br></div></body></html>";
 
-        // 1. Lexer
-        CHTLLexer lexer = new CHTLLexer(chtlSource);
-        List<Token> tokens = lexer.scanTokens();
-
-        // 2. Parser
-        CHTLParser parser = new CHTLParser(tokens);
-        List<Node> ast = parser.parse();
-
-        // 3. Generator
         CHTLGenerator generator = new CHTLGenerator();
-        String actualHtml = generator.generate(ast);
+        CompilationResult result = generator.generate(new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse());
 
-        // 4. Assert
-        assertEquals(expectedHtml, actualHtml);
+        assertEquals(expectedHtml, result.getHtml());
+        assertTrue(result.getCss().isEmpty());
     }
 
     @Test
@@ -62,28 +53,51 @@ class CompilerEndToEndTest {
             id: main;
             style {
                 color: red;
-                font-weight: 700;
+                .box {
+                    font-weight: 700;
+                }
             }
             h1 { text { "Styled" } }
         }
         """;
 
-        String expectedHtml = "<div id=\"main\" style=\"color:red;font-weight:700;\">" +
-                              "<h1>Styled</h1></div>";
+        // Attributes are sorted: class, then id, then style
+        String expectedHtml = "<div class=\"box\" id=\"main\" style=\"color:red;\"><h1>Styled</h1></div>";
+        String expectedCss = ".box {\n    font-weight: 700;\n}\n";
 
-        // 1. Lexer
-        CHTLLexer lexer = new CHTLLexer(chtlSource);
-        List<Token> tokens = lexer.scanTokens();
-
-        // 2. Parser
-        CHTLParser parser = new CHTLParser(tokens);
-        List<Node> ast = parser.parse();
-
-        // 3. Generator
         CHTLGenerator generator = new CHTLGenerator();
-        String actualHtml = generator.generate(ast);
+        CompilationResult result = generator.generate(new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse());
 
-        // 4. Assert
-        assertEquals(expectedHtml, actualHtml);
+        assertEquals(expectedHtml, result.getHtml());
+        assertEquals(expectedCss.trim(), result.getCss().trim());
+    }
+
+    @Test
+    void testAutoAttributeAndAmpersandResolution() {
+        String chtlSource = """
+        div {
+            // This div has no class attribute initially.
+            // The .box selector should add it automatically.
+            style {
+                .box {
+                    color: blue;
+                }
+                &:hover {
+                    color: red;
+                }
+            }
+        }
+        """;
+
+        // The class="box" should be added automatically.
+        String expectedHtml = "<div class=\"box\"></div>";
+        // The & should be resolved to .box
+        String expectedCss = ".box {\n    color: blue;\n}\n.box:hover {\n    color: red;\n}\n";
+
+        CHTLGenerator generator = new CHTLGenerator();
+        CompilationResult result = generator.generate(new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse());
+
+        assertEquals(expectedHtml, result.getHtml());
+        assertEquals(expectedCss.trim(), result.getCss().trim());
     }
 }

@@ -17,7 +17,24 @@ public interface Visitor<R> {
      */
     default R visitStyleBlockNode(StyleBlockNode node) {
         // Default implementation to avoid breaking existing visitors.
-        // Can be overridden by visitors that need to handle style blocks.
+        return null;
+    }
+
+    /**
+     * Visits a StylePropertyNode.
+     * @param node The StylePropertyNode to visit.
+     * @return The result of the visit.
+     */
+    default R visitStylePropertyNode(StylePropertyNode node) {
+        return null;
+    }
+
+    /**
+     * Visits a SelectorBlockNode.
+     * @param node The SelectorBlockNode to visit.
+     * @return The result of the visit.
+     */
+    default R visitSelectorBlockNode(SelectorBlockNode node) {
         return null;
     }
 }

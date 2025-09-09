@@ -2,6 +2,7 @@ package com.chtholly;
 
 import com.chtholly.chthl.ast.ElementNode;
 import com.chtholly.chthl.ast.Node;
+import com.chtholly.chthl.ast.SelectorBlockNode;
 import com.chtholly.chthl.ast.StyleBlockNode;
 import com.chtholly.chthl.ast.TextNode;
 import com.chtholly.chthl.lexer.CHTLLexer;
@@ -114,8 +115,48 @@ class CHTLParserTest {
         assertTrue(child instanceof StyleBlockNode);
 
         StyleBlockNode styleNode = (StyleBlockNode) child;
-        assertEquals(2, styleNode.properties.size());
-        assertEquals("red", styleNode.properties.get("color"));
-        assertEquals("16px", styleNode.properties.get("font-size"));
+        assertEquals(2, styleNode.directProperties.size());
+        assertEquals("color", styleNode.directProperties.get(0).key);
+        assertEquals("red", styleNode.directProperties.get(0).value);
+        assertEquals("font-size", styleNode.directProperties.get(1).key);
+        assertEquals("16px", styleNode.directProperties.get(1).value);
+    }
+
+    @Test
+    void testSelectorBlockParsing() {
+        String input = """
+        div {
+            style {
+                color: white;
+                .box {
+                    background-color: black;
+                }
+                font-size: 16px;
+            }
+        }
+        """;
+        List<Token> tokens = new CHTLLexer(input).scanTokens();
+        CHTLParser parser = new CHTLParser(tokens);
+        List<Node> ast = parser.parse();
+
+        assertEquals(1, ast.size());
+        ElementNode div = (ElementNode) ast.get(0);
+        assertEquals(1, div.children.size());
+        StyleBlockNode styleNode = (StyleBlockNode) div.children.get(0);
+
+        // Check direct properties
+        assertEquals(2, styleNode.directProperties.size());
+        assertEquals("color", styleNode.directProperties.get(0).key);
+        assertEquals("white", styleNode.directProperties.get(0).value);
+        assertEquals("font-size", styleNode.directProperties.get(1).key);
+        assertEquals("16px", styleNode.directProperties.get(1).value);
+
+        // Check selector blocks
+        assertEquals(1, styleNode.selectorBlocks.size());
+        SelectorBlockNode selectorNode = styleNode.selectorBlocks.get(0);
+        assertEquals(".box", selectorNode.selector);
+        assertEquals(1, selectorNode.properties.size());
+        assertEquals("background-color", selectorNode.properties.get(0).key);
+        assertEquals("black", selectorNode.properties.get(0).value);
     }
 }

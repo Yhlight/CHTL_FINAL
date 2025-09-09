@@ -7,6 +7,7 @@ public enum TokenType {
     LEFT_BRACKET, RIGHT_BRACKET,
     COLON, SEMICOLON, EQUAL,
     DOT, COMMA, PLUS, MINUS, STAR, SLASH, PERCENT,
+    HASH, AMPERSAND,
 
     // Two-character tokens
     STAR_STAR, // for power operator

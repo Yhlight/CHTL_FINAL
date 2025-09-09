@@ -105,16 +105,22 @@ public class CHTLParser {
         consume(TokenType.STYLE, "Expect 'style' keyword.");
         consume(TokenType.LEFT_BRACE, "Expect '{' after 'style'.");
 
-        Map<String, String> properties = new HashMap<>();
+        List<StylePropertyNode> directProperties = new ArrayList<>();
+        List<SelectorBlockNode> selectorBlocks = new ArrayList<>();
+
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            parseStyleProperty(properties);
+            if (check(TokenType.IDENTIFIER) && peekNext().getType() == TokenType.COLON) {
+                directProperties.add(parseStyleProperty());
+            } else {
+                selectorBlocks.add(parseSelectorBlock());
+            }
         }
 
         consume(TokenType.RIGHT_BRACE, "Expect '}' after style block.");
-        return new StyleBlockNode(properties);
+        return new StyleBlockNode(directProperties, selectorBlocks);
     }
 
-    private void parseStyleProperty(Map<String, String> properties) {
+    private StylePropertyNode parseStyleProperty() {
         Token name = consume(TokenType.IDENTIFIER, "Expect style property name.");
         consume(TokenType.COLON, "Expect ':' after style property name.");
 
@@ -131,7 +137,29 @@ public class CHTLParser {
         }
 
         consume(TokenType.SEMICOLON, "Expect ';' after style property value.");
-        properties.put(name.getLexeme(), valueBuilder.toString().trim());
+        return new StylePropertyNode(name.getLexeme(), valueBuilder.toString().trim());
+    }
+
+    private SelectorBlockNode parseSelectorBlock() {
+        StringBuilder selectorBuilder = new StringBuilder();
+        while (!check(TokenType.LEFT_BRACE) && !isAtEnd()) {
+            selectorBuilder.append(advance().getLexeme());
+        }
+
+        String selector = selectorBuilder.toString().trim();
+        if (selector.isEmpty()) {
+            throw new ParseError(peek(), "Selector cannot be empty.");
+        }
+
+        consume(TokenType.LEFT_BRACE, "Expect '{' after selector.");
+
+        List<StylePropertyNode> properties = new ArrayList<>();
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            properties.add(parseStyleProperty());
+        }
+
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after selector block.");
+        return new SelectorBlockNode(selector, properties);
     }
 
     private Node textDeclaration() {
