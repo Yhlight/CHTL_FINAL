@@ -77,6 +77,10 @@ path = "src/bin/chtl_cli.rs"
 name = "test_lexer"
 path = "src/bin/test_lexer.rs"
 
+[[bin]]
+name = "test_parser"
+path = "src/bin/test_parser.rs"
+
 [lib]
 name = "chtl"
 path = "src/lib.rs"

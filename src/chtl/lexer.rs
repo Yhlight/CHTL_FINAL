@@ -64,6 +64,15 @@ pub enum TokenType {
     Configuration,
     Origin,
     
+    // Type keywords
+    Style,
+    Element,
+    Variable,
+    CHTL,
+    HTML,
+    CSS,
+    JavaScript,
+    
     // Special tokens
     Whitespace,
     Newline,
@@ -79,12 +88,23 @@ pub struct Token {
 }
 
 /// Source location information
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SourceLocation {
     pub file: String,
     pub line: usize,
     pub column: usize,
     pub position: usize,
+}
+
+impl Default for SourceLocation {
+    fn default() -> Self {
+        Self {
+            file: String::new(),
+            line: 0,
+            column: 0,
+            position: 0,
+        }
+    }
 }
 
 /// Lexer error
@@ -114,6 +134,13 @@ impl CHTLLexer {
         keywords.insert("Namespace".to_string(), TokenType::Namespace);
         keywords.insert("Configuration".to_string(), TokenType::Configuration);
         keywords.insert("Origin".to_string(), TokenType::Origin);
+        keywords.insert("Style".to_string(), TokenType::Style);
+        keywords.insert("Element".to_string(), TokenType::Element);
+        keywords.insert("Variable".to_string(), TokenType::Variable);
+        keywords.insert("CHTL".to_string(), TokenType::CHTL);
+        keywords.insert("HTML".to_string(), TokenType::HTML);
+        keywords.insert("CSS".to_string(), TokenType::CSS);
+        keywords.insert("JavaScript".to_string(), TokenType::JavaScript);
         
         Self {
             source,
@@ -142,7 +169,7 @@ impl CHTLLexer {
         self.skip_whitespace();
         
         if self.position >= self.source.len() {
-            return Ok(Some(self.create_token(TokenType::EOF, "", self.position, self.line, self.column)));
+            return Ok(None);
         }
         
         let start_pos = self.position;
@@ -226,6 +253,15 @@ impl CHTLLexer {
                 self.advance();
                 Ok(Some(self.create_token(TokenType::Colon, ":", start_pos, start_line, start_column)))
             }
+            '=' if self.peek_char() == Some('=') => {
+                self.advance();
+                self.advance();
+                Ok(Some(self.create_token(TokenType::Equal, "==", start_pos, start_line, start_column)))
+            }
+            '=' => {
+                self.advance();
+                Ok(Some(self.create_token(TokenType::Equal, "=", start_pos, start_line, start_column)))
+            }
             ';' => {
                 self.advance();
                 Ok(Some(self.create_token(TokenType::Semicolon, ";", start_pos, start_line, start_column)))
@@ -259,11 +295,6 @@ impl CHTLLexer {
             '|' => {
                 self.advance();
                 Ok(Some(self.create_token(TokenType::Pipe, "|", start_pos, start_line, start_column)))
-            }
-            '=' if self.peek_char() == Some('=') => {
-                self.advance();
-                self.advance();
-                Ok(Some(self.create_token(TokenType::Equal, "==", start_pos, start_line, start_column)))
             }
             '!' if self.peek_char() == Some('=') => {
                 self.advance();
@@ -331,6 +362,7 @@ impl CHTLLexer {
             content.push(ch);
             self.advance();
         }
+        // Don't advance past the newline, let skip_whitespace handle it
         content
     }
     
@@ -397,7 +429,7 @@ impl CHTLLexer {
     fn read_identifier(&mut self) -> String {
         let mut identifier = String::new();
         while let Some(ch) = self.current_char() {
-            if ch.is_alphanumeric() || ch == '_' {
+            if ch.is_alphanumeric() || ch == '_' || ch == '-' {
                 identifier.push(ch);
                 self.advance();
             } else {

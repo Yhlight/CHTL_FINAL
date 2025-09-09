@@ -13,6 +13,9 @@ pub mod chtl;
 // pub mod util;
 // pub mod test;
 
+// Re-export main components
+pub use chtl::*;
+
 /// Main CHTL compiler entry point
 pub struct CHTLCompiler {
     // TODO: Add compiler state and configuration
@@ -25,8 +28,16 @@ impl CHTLCompiler {
     }
     
     /// Compile CHTL source code to HTML, CSS, and JavaScript
-    pub fn compile(&self, _source: &str) -> Result<CompilationResult, CompilationError> {
-        // TODO: Implement compilation pipeline
+    pub fn compile(&self, source: &str) -> Result<CompilationResult, CompilationError> {
+        // Parse the source code
+        let mut parser = CHTLParser::new(source.to_string())
+            .map_err(|e| CompilationError::Parse(e.to_string()))?;
+        
+        let ast = parser.parse()
+            .map_err(|e| CompilationError::Parse(e.to_string()))?;
+        
+        // TODO: Generate HTML, CSS, and JavaScript from AST
+        // For now, return empty results
         Ok(CompilationResult {
             html: String::new(),
             css: String::new(),

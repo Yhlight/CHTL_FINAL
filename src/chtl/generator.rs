@@ -1,471 +1,548 @@
 //! CHTL code generator
 //! 
-//! This module provides the code generation functionality for CHTL,
-//! including HTML, CSS, and JavaScript generation.
+//! This module provides code generation for CHTL,
+//! converting AST nodes into HTML, CSS, and JavaScript code.
 
 use std::collections::HashMap;
-use crate::chtl::context::*;
 use crate::chtl::node::*;
+use crate::chtl::style::{StyleBlock, CSSValue};
+use crate::chtl::template::TemplateSystem;
 
-/// CHTL code generator
-#[derive(Debug, Clone)]
-pub struct CHTLGenerator {
-    /// Generation context
-    context: CHTLContext,
-    /// Generated HTML
-    html: String,
-    /// Generated CSS
-    css: String,
-    /// Generated JavaScript
-    javascript: String,
-    /// CSS class counter
-    class_counter: usize,
-    /// ID counter
-    id_counter: usize,
-    /// Global styles
-    global_styles: Vec<GlobalStyle>,
-    /// Global scripts
-    global_scripts: Vec<GlobalScript>,
+/// Code generation result
+#[derive(Debug, Clone, PartialEq)]
+pub struct GeneratedCode {
+    /// Generated HTML code
+    pub html: String,
+    /// Generated CSS code
+    pub css: String,
+    /// Generated JavaScript code
+    pub javascript: String,
+    /// Generated source map (optional)
+    pub source_map: Option<String>,
 }
 
-/// Global style definition
+/// Code generator for CHTL
 #[derive(Debug, Clone)]
-pub struct GlobalStyle {
-    pub selector: String,
-    pub properties: Vec<StyleProperty>,
-    pub media_queries: Vec<MediaQuery>,
-    pub pseudo_classes: Vec<PseudoClass>,
-    pub pseudo_elements: Vec<PseudoElement>,
+pub struct CodeGenerator {
+    /// Template system for resolving templates
+    template_system: TemplateSystem,
+    /// Style system for managing styles
+    style_system: crate::chtl::style::StyleSystem,
+    /// Generation options
+    options: GenerationOptions,
+    /// Generated CSS class counter
+    css_class_counter: u32,
+    /// Generated ID counter
+    css_id_counter: u32,
 }
 
-/// Media query
-#[derive(Debug, Clone)]
-pub struct MediaQuery {
-    pub condition: String,
-    pub styles: Vec<GlobalStyle>,
+/// Code generation options
+#[derive(Debug, Clone, PartialEq)]
+pub struct GenerationOptions {
+    /// Whether to minify output
+    pub minify: bool,
+    /// Whether to include source maps
+    pub include_source_maps: bool,
+    /// Whether to include comments
+    pub include_comments: bool,
+    /// CSS output format
+    pub css_format: CSSFormat,
+    /// HTML output format
+    pub html_format: HTMLFormat,
 }
 
-/// Pseudo class
-#[derive(Debug, Clone)]
-pub struct PseudoClass {
-    pub name: String,
-    pub styles: Vec<GlobalStyle>,
+/// CSS output format
+#[derive(Debug, Clone, PartialEq)]
+pub enum CSSFormat {
+    /// Standard CSS
+    Standard,
+    /// SCSS/Sass
+    SCSS,
+    /// Less
+    Less,
 }
 
-/// Pseudo element
-#[derive(Debug, Clone)]
-pub struct PseudoElement {
-    pub name: String,
-    pub styles: Vec<GlobalStyle>,
+/// HTML output format
+#[derive(Debug, Clone, PartialEq)]
+pub enum HTMLFormat {
+    /// Standard HTML
+    Standard,
+    /// XHTML
+    XHTML,
+    /// HTML5
+    HTML5,
 }
 
-/// Global script definition
-#[derive(Debug, Clone)]
-pub struct GlobalScript {
-    pub content: String,
-    pub script_type: ScriptType,
-    pub priority: usize,
-}
-
-/// Generation error
-#[derive(Debug, Clone)]
-pub struct GenerationError {
-    pub message: String,
-    pub location: SourceLocation,
-    pub suggestion: Option<String>,
-}
-
-impl CHTLGenerator {
-    /// Create a new CHTL generator
-    pub fn new(context: CHTLContext) -> Self {
+impl CodeGenerator {
+    /// Create a new code generator
+    pub fn new() -> Self {
         Self {
-            context,
-            html: String::new(),
-            css: String::new(),
-            javascript: String::new(),
-            class_counter: 0,
-            id_counter: 0,
-            global_styles: Vec::new(),
-            global_scripts: Vec::new(),
+            template_system: TemplateSystem::new(),
+            style_system: crate::chtl::style::StyleSystem::new(),
+            options: GenerationOptions::default(),
+            css_class_counter: 0,
+            css_id_counter: 0,
         }
     }
     
-    /// Generate code from AST
-    pub fn generate(&mut self, ast: &Node) -> Result<CompilationResult, GenerationError> {
-        self.html.clear();
-        self.css.clear();
-        self.javascript.clear();
-        self.global_styles.clear();
-        self.global_scripts.clear();
-        
-        // Generate HTML5 doctype if configured
-        if self.context.config.debug_mode {
-            self.html.push_str("<!DOCTYPE html>\n");
+    /// Create a new code generator with options
+    pub fn with_options(options: GenerationOptions) -> Self {
+        Self {
+            template_system: TemplateSystem::new(),
+            style_system: crate::chtl::style::StyleSystem::new(),
+            options,
+            css_class_counter: 0,
+            css_id_counter: 0,
         }
+    }
+    
+    /// Generate code from a document AST
+    pub fn generate(&mut self, document: &Document) -> Result<GeneratedCode, GenerationError> {
+        let mut html = String::new();
+        let mut css = String::new();
+        let mut javascript = String::new();
         
-        // Generate code from AST
-        self.generate_node(ast)?;
+        // Generate HTML
+        html = self.generate_html(document)?;
         
-        // Generate global styles
-        self.generate_global_styles()?;
+        // Generate CSS
+        css = self.generate_css(document)?;
         
-        // Generate global scripts
-        self.generate_global_scripts()?;
+        // Generate JavaScript
+        javascript = self.generate_javascript(document)?;
         
-        Ok(CompilationResult {
-            html: self.html.clone(),
-            css: self.css.clone(),
-            javascript: self.javascript.clone(),
+        Ok(GeneratedCode {
+            html,
+            css,
+            javascript,
+            source_map: None, // TODO: Implement source map generation
         })
     }
     
-    /// Generate code from a node
-    fn generate_node(&mut self, node: &Node) -> Result<(), GenerationError> {
+    /// Generate HTML from document
+    fn generate_html(&mut self, document: &Document) -> Result<String, GenerationError> {
+        let mut html = String::new();
+        
+        // Add DOCTYPE if HTML5 format
+        if self.options.html_format == HTMLFormat::HTML5 {
+            html.push_str("<!DOCTYPE html>\n");
+        }
+        
+        // Generate HTML for each child node
+        for child in &document.children {
+            html.push_str(&self.generate_node_html(child)?);
+            html.push('\n');
+        }
+        
+        Ok(html)
+    }
+    
+    /// Generate CSS from document
+    fn generate_css(&mut self, document: &Document) -> Result<String, GenerationError> {
+        let mut css = String::new();
+        
+        // Generate CSS for each child node
+        for child in &document.children {
+            css.push_str(&self.generate_node_css(child)?);
+        }
+        
+        // Add global styles from style system
+        css.push_str(&self.style_system.to_css());
+        
+        Ok(css)
+    }
+    
+    /// Generate JavaScript from document
+    fn generate_javascript(&mut self, document: &Document) -> Result<String, GenerationError> {
+        let mut javascript = String::new();
+        
+        // Generate JavaScript for each child node
+        for child in &document.children {
+            javascript.push_str(&self.generate_node_javascript(child)?);
+        }
+        
+        Ok(javascript)
+    }
+    
+    /// Generate HTML for a single node
+    fn generate_node_html(&mut self, node: &Node) -> Result<String, GenerationError> {
         match node {
-            Node::Element(element) => self.generate_element(element)?,
-            Node::Text(text) => self.generate_text(text)?,
-            Node::Comment(comment) => self.generate_comment(comment)?,
-            Node::Style(style) => self.generate_style(style)?,
-            Node::Script(script) => self.generate_script(script)?,
-            Node::Template(template) => self.generate_template(template)?,
-            Node::Custom(custom) => self.generate_custom(custom)?,
-            Node::Origin(origin) => self.generate_origin(origin)?,
-            Node::Import(import) => self.generate_import(import)?,
-            Node::Config(config) => self.generate_config(config)?,
-            Node::Namespace(namespace) => self.generate_namespace(namespace)?,
+            Node::Element(element) => self.generate_element_html(element),
+            Node::Text(text) => self.generate_text_html(text),
+            Node::Style(style) => self.generate_style_html(style),
+            Node::Template(template) => self.generate_template_html(template),
+            Node::Custom(custom) => self.generate_custom_html(custom),
+            Node::Import(import) => self.generate_import_html(import),
+            Node::Namespace(namespace) => self.generate_namespace_html(namespace),
+            Node::Configuration(config) => self.generate_configuration_html(config),
+            Node::Origin(origin) => self.generate_origin_html(origin),
+            Node::Comment(comment) => self.generate_comment_html(comment),
+            Node::Script(script) => self.generate_script_html(script),
         }
-        Ok(())
     }
     
-    /// Generate HTML element
-    fn generate_element(&mut self, element: &ElementNode) -> Result<(), GenerationError> {
-        // Handle special elements
-        match element.tag_name.as_str() {
-            "html" => {
-                self.html.push_str("<html");
-                self.generate_attributes(&element.attributes)?;
-                self.html.push_str(">\n");
-                
-                // Generate children
-                for child in &element.children {
-                    self.generate_node(child)?;
-                }
-                
-                self.html.push_str("</html>\n");
+    /// Generate CSS for a single node
+    fn generate_node_css(&mut self, node: &Node) -> Result<String, GenerationError> {
+        match node {
+            Node::Element(element) => self.generate_element_css(element),
+            Node::Style(style) => self.generate_style_css(style),
+            Node::Template(template) => self.generate_template_css(template),
+            Node::Custom(custom) => self.generate_custom_css(custom),
+            _ => Ok(String::new()),
+        }
+    }
+    
+    /// Generate JavaScript for a single node
+    fn generate_node_javascript(&mut self, node: &Node) -> Result<String, GenerationError> {
+        match node {
+            Node::Element(element) => self.generate_element_javascript(element),
+            Node::Script(script) => self.generate_script_javascript(script),
+            Node::Template(template) => self.generate_template_javascript(template),
+            Node::Custom(custom) => self.generate_custom_javascript(custom),
+            _ => Ok(String::new()),
+        }
+    }
+    
+    /// Generate HTML for an element node
+    fn generate_element_html(&mut self, element: &ElementNode) -> Result<String, GenerationError> {
+        let mut html = String::new();
+        
+        // Generate opening tag
+        html.push('<');
+        html.push_str(&element.tag);
+        
+        // Generate attributes
+        for (name, value) in &element.attributes {
+            html.push(' ');
+            html.push_str(name);
+            html.push('=');
+            html.push('"');
+            html.push_str(&value.to_string());
+            html.push('"');
+        }
+        
+        // Handle self-closing tags
+        if element.self_closing {
+            if self.options.html_format == HTMLFormat::XHTML {
+                html.push_str(" />");
+            } else {
+                html.push_str(">");
             }
-            "head" => {
-                self.html.push_str("<head");
-                self.generate_attributes(&element.attributes)?;
-                self.html.push_str(">\n");
-                
-                // Generate children
-                for child in &element.children {
-                    self.generate_node(child)?;
+            return Ok(html);
+        }
+        
+        html.push('>');
+        
+        // Generate children
+        for child in &element.children {
+            html.push_str(&self.generate_node_html(child)?);
+        }
+        
+        // Generate closing tag
+        html.push_str("</");
+        html.push_str(&element.tag);
+        html.push('>');
+        
+        Ok(html)
+    }
+    
+    /// Generate HTML for a text node
+    fn generate_text_html(&self, text: &TextNode) -> Result<String, GenerationError> {
+        Ok(self.escape_html(&text.content))
+    }
+    
+    /// Generate HTML for a style node
+    fn generate_style_html(&self, _style: &StyleNode) -> Result<String, GenerationError> {
+        // Style nodes don't generate HTML directly
+        Ok(String::new())
+    }
+    
+    /// Generate HTML for a template node
+    fn generate_template_html(&mut self, template: &TemplateNode) -> Result<String, GenerationError> {
+        let mut html = String::new();
+        
+        // Generate HTML for template content
+        for child in &template.content {
+            html.push_str(&self.generate_node_html(child)?);
+        }
+        
+        Ok(html)
+    }
+    
+    /// Generate HTML for a custom node
+    fn generate_custom_html(&mut self, custom: &CustomNode) -> Result<String, GenerationError> {
+        let mut html = String::new();
+        
+        // Generate HTML for custom modifications
+        for modification in &custom.modifications {
+            match modification {
+                CustomModification::AddElement(element) => {
+                    html.push_str(&self.generate_element_html(element)?);
                 }
-                
-                self.html.push_str("</head>\n");
-            }
-            "body" => {
-                self.html.push_str("<body");
-                self.generate_attributes(&element.attributes)?;
-                self.html.push_str(">\n");
-                
-                // Generate children
-                for child in &element.children {
-                    self.generate_node(child)?;
+                CustomModification::AddStyle(_style) => {
+                    // Styles don't generate HTML directly
                 }
-                
-                self.html.push_str("</body>\n");
-            }
-            _ => {
-                // Check if it's a self-closing tag
-                let self_closing_tags = ["img", "br", "hr", "input", "meta", "link", "area", "base", "col", "embed", "source", "track", "wbr"];
-                
-                if self_closing_tags.contains(&element.tag_name.as_str()) {
-                    self.html.push_str(&format!("<{}", element.tag_name));
-                    self.generate_attributes(&element.attributes)?;
-                    self.html.push_str(" />\n");
-                } else {
-                    self.html.push_str(&format!("<{}", element.tag_name));
-                    self.generate_attributes(&element.attributes)?;
-                    self.html.push_str(">");
-                    
-                    // Generate children
-                    for child in &element.children {
-                        self.generate_node(child)?;
-                    }
-                    
-                    self.html.push_str(&format!("</{}>\n", element.tag_name));
+                CustomModification::AddScript(script) => {
+                    html.push_str(&self.generate_script_html(script)?);
                 }
             }
         }
         
-        // Generate local style if present
-        if let Some(style) = &element.style {
-            self.generate_local_style(element, style)?;
-        }
+        Ok(html)
+    }
+    
+    /// Generate HTML for an import node
+    fn generate_import_html(&self, _import: &ImportNode) -> Result<String, GenerationError> {
+        // Import nodes don't generate HTML directly
+        Ok(String::new())
+    }
+    
+    /// Generate HTML for a namespace node
+    fn generate_namespace_html(&mut self, namespace: &NamespaceNode) -> Result<String, GenerationError> {
+        let mut html = String::new();
         
-        // Generate local script if present
-        if let Some(script) = &element.script {
-            self.generate_local_script(element, script)?;
-        }
-        
-        Ok(())
-    }
-    
-    /// Generate text content
-    fn generate_text(&mut self, text: &TextNode) -> Result<(), GenerationError> {
-        // Escape HTML special characters
-        let escaped = self.escape_html(&text.content);
-        self.html.push_str(&escaped);
-        Ok(())
-    }
-    
-    /// Generate comment
-    fn generate_comment(&mut self, comment: &CommentNode) -> Result<(), GenerationError> {
-        match comment.comment_type {
-            CommentType::SingleLine => {
-                // Single line comments are not generated to HTML
-            }
-            CommentType::MultiLine => {
-                // Multi line comments are not generated to HTML
-            }
-            CommentType::Generator => {
-                // Generator comments are generated to HTML
-                self.html.push_str(&format!("<!-- {} -->\n", comment.content));
-            }
-        }
-        Ok(())
-    }
-    
-    /// Generate style block
-    fn generate_style(&mut self, style: &StyleNode) -> Result<(), GenerationError> {
-        // Add to global styles
-        for property in &style.content.properties {
-            // TODO: Handle style selectors and conditions
-            self.global_styles.push(GlobalStyle {
-                selector: "global".to_string(),
-                properties: vec![property.clone()],
-                media_queries: Vec::new(),
-                pseudo_classes: Vec::new(),
-                pseudo_elements: Vec::new(),
-            });
-        }
-        Ok(())
-    }
-    
-    /// Generate script block
-    fn generate_script(&mut self, script: &ScriptNode) -> Result<(), GenerationError> {
-        // Add to global scripts
-        self.global_scripts.push(GlobalScript {
-            content: script.content.content.clone(),
-            script_type: script.content.script_type.clone(),
-            priority: 0,
-        });
-        Ok(())
-    }
-    
-    /// Generate template
-    fn generate_template(&mut self, template: &TemplateNode) -> Result<(), GenerationError> {
-        // Templates are not directly generated, they are used by other elements
-        // Store template in context for later use
-        self.context.templates.insert(template.name.clone(), TemplateDefinition {
-            name: template.name.clone(),
-            template_type: template.template_type.clone(),
-            content: template.content.clone(),
-            parameters: Vec::new(),
-        });
-        Ok(())
-    }
-    
-    /// Generate custom definition
-    fn generate_custom(&mut self, custom: &CustomNode) -> Result<(), GenerationError> {
-        // Custom definitions are not directly generated, they are used by other elements
-        // Store custom in context for later use
-        self.context.customs.insert(custom.name.clone(), CustomDefinition {
-            name: custom.name.clone(),
-            custom_type: custom.custom_type.clone(),
-            content: custom.content.clone(),
-            specializations: Vec::new(),
-        });
-        Ok(())
-    }
-    
-    /// Generate origin content
-    fn generate_origin(&mut self, origin: &OriginNode) -> Result<(), GenerationError> {
-        match origin.origin_type {
-            OriginType::HTML => {
-                self.html.push_str(&origin.content);
-            }
-            OriginType::CSS => {
-                self.css.push_str(&origin.content);
-            }
-            OriginType::JavaScript => {
-                self.javascript.push_str(&origin.content);
-            }
-            OriginType::Custom(_) => {
-                // Custom origin types are handled based on configuration
-                self.html.push_str(&origin.content);
-            }
-        }
-        Ok(())
-    }
-    
-    /// Generate import statement
-    fn generate_import(&mut self, import: &ImportNode) -> Result<(), GenerationError> {
-        // Imports are handled during compilation, not generation
-        // This is a placeholder for future implementation
-        Ok(())
-    }
-    
-    /// Generate configuration
-    fn generate_config(&mut self, config: &ConfigNode) -> Result<(), GenerationError> {
-        // Configuration is handled during compilation, not generation
-        // This is a placeholder for future implementation
-        Ok(())
-    }
-    
-    /// Generate namespace
-    fn generate_namespace(&mut self, namespace: &NamespaceNode) -> Result<(), GenerationError> {
-        // Generate namespace content
+        // Generate HTML for namespace content
         for child in &namespace.content {
-            self.generate_node(child)?;
-        }
-        Ok(())
-    }
-    
-    /// Generate local style for an element
-    fn generate_local_style(&mut self, element: &ElementNode, style: &StyleBlock) -> Result<(), GenerationError> {
-        // Generate CSS class or ID if needed
-        let selector = self.generate_selector(element, style)?;
-        
-        // Add to global styles
-        self.global_styles.push(GlobalStyle {
-            selector,
-            properties: style.properties.clone(),
-            media_queries: Vec::new(),
-            pseudo_classes: Vec::new(),
-            pseudo_elements: Vec::new(),
-        });
-        
-        Ok(())
-    }
-    
-    /// Generate local script for an element
-    fn generate_local_script(&mut self, element: &ElementNode, script: &ScriptBlock) -> Result<(), GenerationError> {
-        // Add to global scripts with element context
-        self.global_scripts.push(GlobalScript {
-            content: script.content.clone(),
-            script_type: script.script_type.clone(),
-            priority: 1, // Local scripts have higher priority
-        });
-        Ok(())
-    }
-    
-    /// Generate CSS selector for an element
-    fn generate_selector(&mut self, element: &ElementNode, style: &StyleBlock) -> Result<String, GenerationError> {
-        // Check if element has class or ID
-        if let Some(class) = element.get_attribute("class") {
-            return Ok(format!(".{}", class));
+            html.push_str(&self.generate_node_html(child)?);
         }
         
-        if let Some(id) = element.get_attribute("id") {
-            return Ok(format!("#{}", id));
+        Ok(html)
+    }
+    
+    /// Generate HTML for a configuration node
+    fn generate_configuration_html(&self, _config: &ConfigurationNode) -> Result<String, GenerationError> {
+        // Configuration nodes don't generate HTML directly
+        Ok(String::new())
+    }
+    
+    /// Generate HTML for an origin node
+    fn generate_origin_html(&self, origin: &OriginNode) -> Result<String, GenerationError> {
+        match origin.origin_type {
+            OriginType::HTML => Ok(origin.content.clone()),
+            _ => Ok(String::new()),
+        }
+    }
+    
+    /// Generate HTML for a comment node
+    fn generate_comment_html(&self, comment: &CommentNode) -> Result<String, GenerationError> {
+        if self.options.include_comments {
+            Ok(format!("<!-- {} -->", comment.content))
+        } else {
+            Ok(String::new())
+        }
+    }
+    
+    /// Generate HTML for a script node
+    fn generate_script_html(&self, script: &ScriptNode) -> Result<String, GenerationError> {
+        let mut html = String::new();
+        
+        html.push_str("<script");
+        
+        // Add script attributes
+        for (name, value) in &script.attributes {
+            html.push(' ');
+            html.push_str(name);
+            html.push('=');
+            html.push('"');
+            html.push_str(&value.to_string());
+            html.push('"');
         }
         
-        // Generate automatic class or ID based on style selectors
-        for selector in &style.selectors {
-            match selector.selector_type {
-                SelectorType::Class => {
-                    // Add class to element
-                    element.set_attribute("class".to_string(), selector.value.clone());
-                    return Ok(format!(".{}", selector.value));
-                }
-                SelectorType::Id => {
-                    // Add ID to element
-                    element.set_attribute("id".to_string(), selector.value.clone());
-                    return Ok(format!("#{}", selector.value));
+        html.push_str(">");
+        html.push_str(&script.content);
+        html.push_str("</script>");
+        
+        Ok(html)
+    }
+    
+    /// Generate CSS for an element node
+    fn generate_element_css(&mut self, element: &ElementNode) -> Result<String, GenerationError> {
+        let mut css = String::new();
+        
+        // Generate CSS for element children
+        for child in &element.children {
+            css.push_str(&self.generate_node_css(child)?);
+        }
+        
+        Ok(css)
+    }
+    
+    /// Generate CSS for a style node
+    fn generate_style_css(&self, style: &StyleNode) -> Result<String, GenerationError> {
+        let mut css = String::new();
+        
+        // Generate selector
+        css.push_str(&self.generate_selector(&style.selector)?);
+        css.push_str(" {\n");
+        
+        // Generate properties
+        for property in &style.properties {
+            css.push_str("  ");
+            css.push_str(&property.name);
+            css.push_str(": ");
+            css.push_str(&property.value.to_string());
+            css.push_str(";\n");
+        }
+        
+        css.push_str("}\n");
+        
+        // Generate nested styles
+        for nested in &style.nested {
+            css.push_str(&self.generate_style_css(nested)?);
+        }
+        
+        Ok(css)
+    }
+    
+    /// Generate CSS for a template node
+    fn generate_template_css(&mut self, template: &TemplateNode) -> Result<String, GenerationError> {
+        let mut css = String::new();
+        
+        // Generate CSS for template content
+        for child in &template.content {
+            css.push_str(&self.generate_node_css(child)?);
+        }
+        
+        Ok(css)
+    }
+    
+    /// Generate CSS for a custom node
+    fn generate_custom_css(&mut self, custom: &CustomNode) -> Result<String, GenerationError> {
+        let mut css = String::new();
+        
+        // Generate CSS for custom modifications
+        for modification in &custom.modifications {
+            match modification {
+                CustomModification::AddStyle(style) => {
+                    css.push_str(&self.generate_style_css(style)?);
                 }
                 _ => {}
             }
         }
         
-        // Generate automatic class
-        let class_name = format!("chtl-class-{}", self.class_counter);
-        self.class_counter += 1;
-        element.set_attribute("class".to_string(), class_name.clone());
-        Ok(format!(".{}", class_name))
+        Ok(css)
     }
     
-    /// Generate attributes
-    fn generate_attributes(&mut self, attributes: &HashMap<String, String>) -> Result<(), GenerationError> {
-        for (key, value) in attributes {
-            self.html.push_str(&format!(" {}=\"{}\"", key, self.escape_html(value)));
+    /// Generate JavaScript for an element node
+    fn generate_element_javascript(&mut self, element: &ElementNode) -> Result<String, GenerationError> {
+        let mut javascript = String::new();
+        
+        // Generate JavaScript for element children
+        for child in &element.children {
+            javascript.push_str(&self.generate_node_javascript(child)?);
         }
-        Ok(())
+        
+        Ok(javascript)
     }
     
-    /// Generate global styles
-    fn generate_global_styles(&mut self) -> Result<(), GenerationError> {
-        if !self.global_styles.is_empty() {
-            self.css.push_str("<style>\n");
-            
-            for style in &self.global_styles {
-                self.css.push_str(&format!("{} {{\n", style.selector));
-                
-                for property in &style.properties {
-                    self.css.push_str(&format!("    {}: {};\n", property.name, property.value));
+    /// Generate JavaScript for a script node
+    fn generate_script_javascript(&self, script: &ScriptNode) -> Result<String, GenerationError> {
+        Ok(script.content.clone())
+    }
+    
+    /// Generate JavaScript for a template node
+    fn generate_template_javascript(&mut self, template: &TemplateNode) -> Result<String, GenerationError> {
+        let mut javascript = String::new();
+        
+        // Generate JavaScript for template content
+        for child in &template.content {
+            javascript.push_str(&self.generate_node_javascript(child)?);
+        }
+        
+        Ok(javascript)
+    }
+    
+    /// Generate JavaScript for a custom node
+    fn generate_custom_javascript(&mut self, custom: &CustomNode) -> Result<String, GenerationError> {
+        let mut javascript = String::new();
+        
+        // Generate JavaScript for custom modifications
+        for modification in &custom.modifications {
+            match modification {
+                CustomModification::AddScript(script) => {
+                    javascript.push_str(&self.generate_script_javascript(script)?);
                 }
-                
-                self.css.push_str("}\n\n");
+                _ => {}
             }
-            
-            self.css.push_str("</style>\n");
         }
-        Ok(())
+        
+        Ok(javascript)
     }
     
-    /// Generate global scripts
-    fn generate_global_scripts(&mut self) -> Result<(), GenerationError> {
-        if !self.global_scripts.is_empty() {
-            self.javascript.push_str("<script>\n");
-            
-            // Sort scripts by priority
-            let mut sorted_scripts = self.global_scripts.clone();
-            sorted_scripts.sort_by_key(|s| s.priority);
-            
-            for script in sorted_scripts {
-                self.javascript.push_str(&script.content);
-                self.javascript.push_str("\n");
-            }
-            
-            self.javascript.push_str("</script>\n");
+    /// Generate CSS selector
+    fn generate_selector(&self, selector: &StyleSelector) -> Result<String, GenerationError> {
+        match selector {
+            StyleSelector::Class(name) => Ok(format!(".{}", name)),
+            StyleSelector::Id(name) => Ok(format!("#{}", name)),
+            StyleSelector::Element(name) => Ok(name.clone()),
+            StyleSelector::Attribute(attr) => Ok(format!("[{}]", attr)),
+            StyleSelector::PseudoClass(name) => Ok(format!(":{}", name)),
+            StyleSelector::PseudoElement(name) => Ok(format!("::{}", name)),
+            StyleSelector::Universal => Ok("*".to_string()),
         }
-        Ok(())
     }
     
     /// Escape HTML special characters
     fn escape_html(&self, text: &str) -> String {
-        text.replace('&', "&amp;")
-            .replace('<', "&lt;")
-            .replace('>', "&gt;")
-            .replace('"', "&quot;")
-            .replace('\'', "&#x27;")
+        text.chars()
+            .map(|c| match c {
+                '<' => "&lt;",
+                '>' => "&gt;",
+                '&' => "&amp;",
+                '"' => "&quot;",
+                '\'' => "&#39;",
+                _ => &c.to_string(),
+            })
+            .collect::<Vec<&str>>()
+            .join("")
     }
     
-    /// Get the context
-    pub fn get_context(&self) -> &CHTLContext {
-        &self.context
+    /// Generate a unique CSS class name
+    fn generate_css_class(&mut self) -> String {
+        self.css_class_counter += 1;
+        format!("chtl-class-{}", self.css_class_counter)
     }
     
-    /// Get mutable context
-    pub fn get_context_mut(&mut self) -> &mut CHTLContext {
-        &mut self.context
+    /// Generate a unique CSS ID
+    fn generate_css_id(&mut self) -> String {
+        self.css_id_counter += 1;
+        format!("chtl-id-{}", self.css_id_counter)
     }
 }
 
-impl Default for CHTLGenerator {
+/// Code generation error
+#[derive(Debug, thiserror::Error)]
+pub enum GenerationError {
+    #[error("Template resolution error: {0}")]
+    TemplateResolution(String),
+    
+    #[error("Style generation error: {0}")]
+    StyleGeneration(String),
+    
+    #[error("JavaScript generation error: {0}")]
+    JavaScriptGeneration(String),
+    
+    #[error("HTML generation error: {0}")]
+    HTMLGeneration(String),
+    
+    #[error("Invalid node type: {0}")]
+    InvalidNodeType(String),
+}
+
+impl Default for CodeGenerator {
     fn default() -> Self {
-        Self::new(CHTLContext::new())
+        Self::new()
+    }
+}
+
+impl Default for GenerationOptions {
+    fn default() -> Self {
+        Self {
+            minify: false,
+            include_source_maps: false,
+            include_comments: true,
+            css_format: CSSFormat::Standard,
+            html_format: HTMLFormat::HTML5,
+        }
     }
 }
