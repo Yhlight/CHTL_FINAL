@@ -2,23 +2,32 @@ package CompilerDispatcher;
 
 import CHTL.CHTLLexer.CHTLLexer;
 import CHTL.CHTLLexer.Token;
+import CHTL.CHTLLexer.TokenType;
 import CHTL.CHTLLoader.CHTLLoader;
+import CHTL.CHTLManage.ConfigurationManager;
 import CHTL.CHTLManage.DefinitionManager;
 import CHTL.CHTLParser.CHTLParser;
 import CHTL.CHTLNode.BaseNode;
+import CHTL.CHTLNode.ConfigurationNode;
 import CHTL.CHTLProcessor.ProcessedAST;
 import CHTL.CHTLProcessor.ASTProcessor;
 import CHTL.CHTLGenerator.CHTLGenerator;
 
 import java.util.List;
+import java.util.Map;
 
 public class CompilerDispatcher {
     public static void main(String[] args) {
-        // A CHTL source code example for testing the import system.
-        String source = "[Import] @Chtl from \"other.chtl\"\n" +
-                "\n" +
-                "body {\n" +
-                "    @Element ImportedBox from other;\n" +
+        // Final test case for dynamic keywords.
+        String source = "[Configuration] {\n" +
+                "    [Name] {\n" +
+                "        KEYWORD_STYLE = css;\n" +
+                "    }\n" +
+                "}\n" +
+                "div {\n" +
+                "    css { \n" +
+                "        color: green;\n" +
+                "    }\n" +
                 "}";
 
         System.out.println("--- CHTL Source ---");
@@ -27,27 +36,34 @@ public class CompilerDispatcher {
         try {
             // 0. Setup
             DefinitionManager definitionManager = new DefinitionManager();
+            ConfigurationManager configManager = new ConfigurationManager();
             CHTLLoader loader = new CHTLLoader();
 
-            // 1. Lexer
-            CHTLLexer lexer = new CHTLLexer(source);
+            // Pass 1
+            CHTLLexer preLexer = new CHTLLexer(source);
+            List<Token> preTokens = preLexer.tokenize();
+            CHTLParser preParser = new CHTLParser(source, preTokens, definitionManager, DefinitionManager.DEFAULT_NAMESPACE, loader);
+            List<ConfigurationNode> configNodes = preParser.preScanForConfiguration();
+
+            for (ConfigurationNode configNode : configNodes) {
+                configManager.processConfigNode(configNode);
+            }
+
+            // Pass 2
+            Map<String, TokenType> activeKeywords = configManager.getActiveKeywords(CHTLLexer.getDefaultKeywords());
+            CHTLLexer lexer = new CHTLLexer(source, activeKeywords);
             List<Token> tokens = lexer.tokenize();
 
-            // 2. Parser
-            // The initial parser is for the main file, in the default namespace.
-            CHTLParser parser = new CHTLParser(tokens, definitionManager, DefinitionManager.DEFAULT_NAMESPACE, loader);
+            CHTLParser parser = new CHTLParser(source, tokens, definitionManager, DefinitionManager.DEFAULT_NAMESPACE, loader);
             List<BaseNode> ast = parser.parse();
 
-            // 3. AST Processor
             ASTProcessor astProcessor = new ASTProcessor(definitionManager);
             ProcessedAST processedAST = astProcessor.process(ast);
 
-            // 4. Generator
             CHTLGenerator generator = new CHTLGenerator();
             String bodyContent = generator.generate(processedAST.ast());
             String styleBlock = generator.generateStyleBlock(processedAST.globalStyles());
 
-            // 5. Final Assembly
             String finalHtml;
             if (!styleBlock.isEmpty() && bodyContent.contains("</head>")) {
                 finalHtml = bodyContent.replace("</head>", styleBlock + "</head>");

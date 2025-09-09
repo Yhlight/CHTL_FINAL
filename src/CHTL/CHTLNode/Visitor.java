@@ -23,4 +23,7 @@ public interface Visitor<R> {
     R visitDeleteInstructionNode(DeleteInstructionNode node);
     R visitInsertInstructionNode(InsertInstructionNode node);
     R visitImportNode(ImportNode node);
+    R visitConfigurationNode(ConfigurationNode node);
+    R visitUseNode(UseNode node);
+    R visitOriginNode(OriginNode node);
 }

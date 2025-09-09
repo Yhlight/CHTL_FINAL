@@ -4,6 +4,8 @@
 /app/src/CHTL/CHTLLoader/CHTLLoader.java
 /app/src/CHTL/CHTLNode/StyleTemplateNode.java
 /app/src/CHTL/CHTLParser/CHTLParser.java
+/app/src/CHTL/CHTLNode/UseNode.java
+/app/src/CHTL/CHTLManage/ConfigurationManager.java
 /app/src/CHTL/CHTLNode/CommentNode.java
 /app/src/CHTL/CHTLNode/Visitor.java
 /app/src/CHTL/CHTLGenerator/CHTLGenerator.java
@@ -16,9 +18,11 @@
 /app/src/CHTL/CHTLNode/ElementNode.java
 /app/src/CompilerDispatcher/CompilerDispatcher.java
 /app/src/CHTL/CHTLNode/TemplateNode.java
+/app/src/CHTL/CHTLNode/OriginNode.java
 /app/src/CHTL/CHTLNode/DeleteInstructionNode.java
 /app/src/CHTL/CHTLManage/DefinitionManager.java
 /app/src/CHTL/CHTLLexer/Token.java
+/app/src/CHTL/CHTLNode/ConfigurationNode.java
 /app/src/CHTL/CHTLNode/BaseNode.java
 /app/src/CHTL/CHTLNode/CustomElementNode.java
 /app/src/CHTL/CHTLNode/StyleNode.java

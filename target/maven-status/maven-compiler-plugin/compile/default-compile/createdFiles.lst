@@ -1,15 +1,18 @@
 CHTL/CHTLLoader/CHTLLoader.class
 CHTL/CHTLProcessor/ASTProcessor.class
 CHTL/CHTLProcessor/ProcessedAST.class
+CHTL/CHTLNode/ConfigurationNode.class
 CHTL/CHTLParser/CHTLParser$1.class
 CHTL/CHTLNode/TemplateNode.class
 CHTL/CHTLNode/ElementTemplateNode.class
 CHTL/CHTLNode/StyleRule.class
 CHTL/CHTLNode/BaseNode.class
+CHTL/CHTLNode/OriginNode.class
 CHTL/CHTLParser/CHTLParser.class
 CHTL/CHTLNode/CustomVarNode.class
 CHTL/CHTLNode/ElementTemplateUsageNode.class
 CHTL/CHTLGenerator/CHTLGenerator.class
+CHTL/CHTLManage/ConfigurationManager.class
 CHTL/CHTLProcessor/ASTProcessor$1.class
 CHTL/CHTLNode/StyleNode.class
 CHTL/CHTLNode/Visitor.class
@@ -20,6 +23,7 @@ CHTL/CHTLNode/CommentNode.class
 CHTL/CHTLNode/ImportNode.class
 CHTL/CHTLLexer/Token.class
 CHTL/CHTLNode/InsertInstructionNode.class
+CHTL/CHTLNode/UseNode.class
 CHTL/CHTLNode/TextNode.class
 CHTL/CHTLNode/StyleTemplateNode.class
 CHTL/CHTLNode/CustomNode.class

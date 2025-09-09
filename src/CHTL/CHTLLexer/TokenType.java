@@ -31,6 +31,10 @@ public enum TokenType {
     TEMPLATE,           // Template
     CUSTOM,             // Custom
     IMPORT,             // Import
+    ORIGIN,             // Origin
+    CONFIGURATION,      // Configuration
+    NAME,               // Name
+    USE,                // use
     INHERIT,            // inherit
     DELETE,             // delete
     INSERT,             // insert

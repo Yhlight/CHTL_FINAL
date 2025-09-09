@@ -148,4 +148,25 @@ public class CHTLGenerator implements Visitor<String> {
         // Import nodes are handled by the parser and do not produce output.
         return "";
     }
+
+    @Override
+    public String visitConfigurationNode(ConfigurationNode node) {
+        // Configuration nodes do not produce output.
+        return "";
+    }
+
+    @Override
+    public String visitUseNode(UseNode node) {
+        // Use nodes are handled by the pre-scanner and do not produce output.
+        if (node.getTarget().equalsIgnoreCase("html5")) {
+            return "<!DOCTYPE html>";
+        }
+        return "";
+    }
+
+    @Override
+    public String visitOriginNode(OriginNode node) {
+        // Origin nodes contain raw content to be passed through.
+        return node.getContent();
+    }
 }

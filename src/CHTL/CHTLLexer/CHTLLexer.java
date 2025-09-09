@@ -8,32 +8,56 @@ import java.util.Map;
 public class CHTLLexer {
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
+    private final Map<String, TokenType> keywords;
+
     private int start = 0;
     private int current = 0;
     private int line = 1;
     private int lineStart = 0;
 
-    private static final Map<String, TokenType> keywords;
+    private static final Map<String, TokenType> DEFAULT_KEYWORDS;
 
     static {
-        keywords = new HashMap<>();
-        keywords.put("text", TokenType.TEXT);
-        keywords.put("style", TokenType.STYLE);
-        keywords.put("Template", TokenType.TEMPLATE);
-        keywords.put("Custom", TokenType.CUSTOM);
-        keywords.put("inherit", TokenType.INHERIT);
-        keywords.put("delete", TokenType.DELETE);
-        keywords.put("insert", TokenType.INSERT);
-        keywords.put("after", TokenType.AFTER);
-        keywords.put("before", TokenType.BEFORE);
-        keywords.put("replace", TokenType.REPLACE);
-        keywords.put("Import", TokenType.IMPORT);
-        keywords.put("from", TokenType.FROM);
-        keywords.put("as", TokenType.AS);
+        DEFAULT_KEYWORDS = new HashMap<>();
+        DEFAULT_KEYWORDS.put("text", TokenType.TEXT);
+        DEFAULT_KEYWORDS.put("style", TokenType.STYLE);
+        DEFAULT_KEYWORDS.put("Template", TokenType.TEMPLATE);
+        DEFAULT_KEYWORDS.put("Custom", TokenType.CUSTOM);
+        DEFAULT_KEYWORDS.put("Import", TokenType.IMPORT);
+        DEFAULT_KEYWORDS.put("Origin", TokenType.ORIGIN);
+        DEFAULT_KEYWORDS.put("Configuration", TokenType.CONFIGURATION);
+        DEFAULT_KEYWORDS.put("use", TokenType.USE);
+        DEFAULT_KEYWORDS.put("inherit", TokenType.INHERIT);
+        DEFAULT_KEYWORDS.put("delete", TokenType.DELETE);
+        DEFAULT_KEYWORDS.put("insert", TokenType.INSERT);
+        DEFAULT_KEYWORDS.put("after", TokenType.AFTER);
+        DEFAULT_KEYWORDS.put("before", TokenType.BEFORE);
+        DEFAULT_KEYWORDS.put("replace", TokenType.REPLACE);
+        DEFAULT_KEYWORDS.put("from", TokenType.FROM);
+        DEFAULT_KEYWORDS.put("as", TokenType.AS);
+        DEFAULT_KEYWORDS.put("Name", TokenType.NAME);
     }
 
-    public CHTLLexer(String source) {
+    /**
+     * Constructor for using a dynamic set of keywords.
+     * @param source The source code to tokenize.
+     * @param keywords The map of keyword strings to token types.
+     */
+    public CHTLLexer(String source, Map<String, TokenType> keywords) {
         this.source = source;
+        this.keywords = keywords;
+    }
+
+    /**
+     * Constructor for using the default set of keywords.
+     * @param source The source code to tokenize.
+     */
+    public CHTLLexer(String source) {
+        this(source, DEFAULT_KEYWORDS);
+    }
+
+    public static Map<String, TokenType> getDefaultKeywords() {
+        return new HashMap<>(DEFAULT_KEYWORDS);
     }
 
     public List<Token> tokenize() {
@@ -41,8 +65,7 @@ public class CHTLLexer {
             start = current;
             scanToken();
         }
-
-        tokens.add(new Token(TokenType.EOF, "", line, current - lineStart + 1));
+        tokens.add(new Token(TokenType.EOF, "", line, current - lineStart + 1, current, current));
         return tokens;
     }
 
@@ -63,7 +86,6 @@ public class CHTLLexer {
             case '&': addToken(TokenType.AMPERSAND); break;
             case '/':
                 if (match('/')) {
-                    // A single-line comment goes until the end of the line.
                     while (peek() != '\n' && !isAtEnd()) advance();
                 } else if (match('*')) {
                     multilineComment();
@@ -74,29 +96,18 @@ public class CHTLLexer {
             case '-':
                 if (match('-')) {
                     while (peek() != '\n' && !isAtEnd()) advance();
-                    String value = source.substring(start + 2, current).trim();
-                    addToken(TokenType.GENERATOR_COMMENT, value);
+                    addToken(TokenType.GENERATOR_COMMENT);
                 } else {
-                    // It could be part of an identifier or a negative number.
-                    // Let's treat it as part of an identifier for now.
                     identifier();
                 }
                 break;
-
-            // Ignore whitespace
-            case ' ':
-            case '\r':
-            case '\t':
-                break;
-
+            case ' ': case '\r': case '\t': break;
             case '\n':
                 line++;
                 lineStart = current;
                 break;
-
             case '"': string('"'); break;
             case '\'': string('\''); break;
-
             default:
                 if (isDigit(c)) {
                     number();
@@ -115,36 +126,25 @@ public class CHTLLexer {
             }
             advance();
         }
-
-        if (isAtEnd()) {
-            // Unterminated comment error. For now, we just stop.
-            return;
-        }
-
-        // Consume the "*/"
+        if (isAtEnd()) return;
         advance();
         advance();
     }
 
     private void identifier() {
         while (isAlphaNumeric(peek())) advance();
-
         String text = source.substring(start, current);
-        TokenType type = keywords.getOrDefault(text, TokenType.IDENTIFIER);
+        TokenType type = this.keywords.getOrDefault(text, TokenType.IDENTIFIER);
         addToken(type);
     }
 
     private void number() {
         while (isDigit(peek())) advance();
-
         if (peek() == '.' && isDigit(peekNext())) {
             advance();
             while (isDigit(peek())) advance();
         }
-
-        // For values like '100px' or '100%', we consume the alphabetic part or '%'.
         while(isAlpha(peek()) || peek() == '%') advance();
-
         addToken(TokenType.NUMBER);
     }
 
@@ -156,13 +156,8 @@ public class CHTLLexer {
             }
             advance();
         }
-
-        if (isAtEnd()) {
-            // Unterminated string error.
-            return;
-        }
-
-        advance(); // The closing quote.
+        if (isAtEnd()) return;
+        advance();
         String value = source.substring(start + 1, current - 1);
         addToken(TokenType.STRING, value);
     }
@@ -205,11 +200,10 @@ public class CHTLLexer {
     }
 
     private void addToken(TokenType type) {
-        String text = source.substring(start, current);
-        tokens.add(new Token(type, text, line, start - lineStart + 1));
+        addToken(type, source.substring(start, current));
     }
 
-    private void addToken(TokenType type, String literal) {
-        tokens.add(new Token(type, literal, line, start - lineStart + 1));
+    private void addToken(TokenType type, String value) {
+        tokens.add(new Token(type, value, line, start - lineStart + 1, start, current));
     }
 }

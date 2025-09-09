@@ -8,12 +8,12 @@ import CHTL.CHTLManage.DefinitionManager;
 import CHTL.CHTLNode.*;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CHTLParser {
+    private final String source;
     private final List<Token> tokens;
     private final DefinitionManager definitionManager;
     private final String namespace;
@@ -26,7 +26,8 @@ public class CHTLParser {
         }
     }
 
-    public CHTLParser(List<Token> tokens, DefinitionManager definitionManager, String namespace, CHTLLoader loader) {
+    public CHTLParser(String source, List<Token> tokens, DefinitionManager definitionManager, String namespace, CHTLLoader loader) {
+        this.source = source;
         this.tokens = tokens;
         this.definitionManager = definitionManager;
         this.namespace = namespace;
@@ -35,126 +36,190 @@ public class CHTLParser {
 
     public List<BaseNode> parse() {
         List<BaseNode> nodes = new ArrayList<>();
+        if (check(TokenType.USE)) {
+            nodes.add(parseUseStatement());
+        }
         while (!isAtEnd()) {
             nodes.add(declaration());
         }
         return nodes;
     }
 
+    public List<ConfigurationNode> preScanForConfiguration() {
+        List<ConfigurationNode> configs = new ArrayList<>();
+        while (!isAtEnd()) {
+            if (check(TokenType.LBRACKET) && tokenAt(current + 1) != null && tokenAt(current + 1).getType() == TokenType.CONFIGURATION) {
+                configs.add(parseConfigurationBlock());
+            } else {
+                if (check(TokenType.LBRACE)) {
+                    skipBlock();
+                } else {
+                    advance();
+                }
+            }
+        }
+        return configs;
+    }
+
+    private void skipBlock() {
+        consume(TokenType.LBRACE, "Expect '{'.");
+        int braceDepth = 1;
+        while(braceDepth > 0 && !isAtEnd()) {
+            if (check(TokenType.LBRACE)) {
+                braceDepth++;
+                advance();
+            } else if (check(TokenType.RBRACE)) {
+                braceDepth--;
+                advance();
+            } else {
+                advance();
+            }
+        }
+    }
+
+    private String sourceText(int startOffset, int endOffset) {
+        if (startOffset < 0 || endOffset > source.length() || startOffset > endOffset) return "";
+        return source.substring(startOffset, endOffset);
+    }
+
     private BaseNode declaration() {
         if (check(TokenType.LBRACKET)) {
-            if (tokenAt(current + 1).getType() == TokenType.IMPORT) {
-                return parseImportDeclaration();
+            Token next = tokenAt(current + 1);
+            if (next == null) throw new ParseError(peek(), "Unexpected end of file after '['.");
+            switch(next.getType()) {
+                case IMPORT: return parseImportDeclaration();
+                case TEMPLATE: case CUSTOM: return parseBracketedDefinition();
+                case ORIGIN: return parseOriginBlock();
+                case CONFIGURATION: return parseConfigurationBlock();
+                default: break;
             }
-            return parseBracketedDeclaration();
         }
-        if (check(TokenType.AT)) {
-            return parseTemplateUsage();
-        }
-        if (check(TokenType.IDENTIFIER)) {
-            return element(advance().getValue());
-        }
-        // ... (rest of the method is the same)
-        if (check(TokenType.TEXT)) {
-            advance();
-            return textBlock();
-        }
-        if (check(TokenType.STYLE)) {
-            return parseStyleBlock();
-        }
-        if (match(TokenType.GENERATOR_COMMENT)) {
-            return new CommentNode(previous().getValue());
-        }
+        if (check(TokenType.AT)) return parseTemplateUsage();
+        if (check(TokenType.IDENTIFIER)) return element(advance().getValue());
+        if (check(TokenType.TEXT)) { advance(); return textBlock(); }
+        if (check(TokenType.STYLE)) return parseStyleBlock();
+        if (match(TokenType.GENERATOR_COMMENT)) return new CommentNode(previous().getValue());
         throw new ParseError(peek(), "Expect a declaration.");
     }
 
-    private BaseNode parseImportDeclaration() {
-        consume(TokenType.LBRACKET, "Expect '[' to start import declaration.");
-        consume(TokenType.IMPORT, "Expect 'Import' keyword.");
-        consume(TokenType.RBRACKET, "Expect ']' to end import keyword.");
+    private UseNode parseUseStatement() {
+        consume(TokenType.USE, "Expect 'use' keyword.");
+        Token target = consume(TokenType.IDENTIFIER, "Expect target after 'use'.");
+        consume(TokenType.SEMICOLON, "Expect ';' after use statement.");
+        return new UseNode(target.getValue());
+    }
 
+    private OriginNode parseOriginBlock() {
+        consume(TokenType.LBRACKET, "Expect '['."); consume(TokenType.ORIGIN, "Expect 'Origin' keyword."); consume(TokenType.RBRACKET, "Expect ']'.");
+        consume(TokenType.AT, "Expect '@' before origin type.");
+        String type = consume(TokenType.IDENTIFIER, "Expect origin type.").getValue();
+        consume(TokenType.LBRACE, "Expect '{' to start origin block.");
+        Token startBrace = previous();
+        int contentStartIndex = startBrace.getEndOffset();
+        int braceDepth = 1;
+        while (braceDepth > 0 && !isAtEnd()) {
+            if (check(TokenType.LBRACE)) braceDepth++;
+            else if (check(TokenType.RBRACE)) braceDepth--;
+            if (braceDepth > 0) advance();
+        }
+        Token endBrace = peek();
+        int contentEndIndex = endBrace.getStartOffset();
+        String content = sourceText(contentStartIndex, contentEndIndex);
+        consume(TokenType.RBRACE, "Expect '}' to end origin block.");
+        return new OriginNode(type, content);
+    }
+
+    private ConfigurationNode parseConfigurationBlock() {
+        consume(TokenType.LBRACKET, "Expect '['."); consume(TokenType.CONFIGURATION, "Expect 'Configuration' keyword."); consume(TokenType.RBRACKET, "Expect ']'.");
+        ConfigurationNode node = new ConfigurationNode(null);
+        consume(TokenType.LBRACE, "Expect '{' to start configuration block.");
+        while(!check(TokenType.RBRACE) && !isAtEnd()) {
+            if(match(TokenType.LBRACKET)) {
+                if (match(TokenType.NAME)) {
+                    consume(TokenType.RBRACKET, "Expect ']' to end name keyword.");
+                    parseNameBlock(node);
+                } else {
+                    throw new ParseError(previous(), "Unsupported block in [Configuration].");
+                }
+            } else {
+                Token key = consume(TokenType.IDENTIFIER, "Expect setting key.");
+                consume(TokenType.EQUALS, "Expect '=' after setting key.");
+                Token value = advance();
+                consume(TokenType.SEMICOLON, "Expect ';' after setting value.");
+                node.addSetting(key.getValue(), value.getValue());
+            }
+        }
+        consume(TokenType.RBRACE, "Expect '}' to end configuration block.");
+        return node;
+    }
+
+    private void parseNameBlock(ConfigurationNode configNode) {
+        consume(TokenType.LBRACE, "Expect '{' to start name block.");
+        while(!check(TokenType.RBRACE) && !isAtEnd()) {
+            Token key = consume(TokenType.IDENTIFIER, "Expect keyword variable name.");
+            consume(TokenType.EQUALS, "Expect '='.");
+
+            // The value can be complex. For now, just grab the next token's value.
+            Token value = advance();
+
+            consume(TokenType.SEMICOLON, "Expect ';'.");
+            configNode.addSetting(key.getValue(), value.getValue());
+        }
+        consume(TokenType.RBRACE, "Expect '}' to end name block.");
+    }
+
+    private BaseNode parseImportDeclaration() {
+        consume(TokenType.LBRACKET, "Expect '['."); consume(TokenType.IMPORT, "Expect 'Import' keyword."); consume(TokenType.RBRACKET, "Expect ']'.");
         consume(TokenType.AT, "Expect '@' before import type.");
         Token type = consume(TokenType.IDENTIFIER, "Expect import type (e.g., Chtl).");
-
         consume(TokenType.FROM, "Expect 'from' keyword.");
         Token pathToken = consume(TokenType.STRING, "Expect a string literal for the path.");
         String path = pathToken.getValue();
-
-        // For now, we only handle @Chtl imports
-        if (!type.getValue().equals("Chtl")) {
-            throw new ParseError(type, "Only '@Chtl' imports are currently supported.");
-        }
-
+        if (!type.getValue().equals("Chtl")) throw new ParseError(type, "Only '@Chtl' imports are currently supported.");
         try {
             String content = loader.loadFile(path);
             String newNamespace = Paths.get(path).getFileName().toString().replace(".chtl", "");
-
             CHTLLexer importedLexer = new CHTLLexer(content);
             List<Token> importedTokens = importedLexer.tokenize();
-
-            CHTLParser importedParser = new CHTLParser(importedTokens, this.definitionManager, newNamespace, this.loader);
-            importedParser.parse(); // This will parse and register definitions into the manager
-
+            CHTLParser importedParser = new CHTLParser(content, importedTokens, this.definitionManager, newNamespace, this.loader);
+            importedParser.parse();
         } catch (IOException e) {
             throw new ParseError(pathToken, "Could not load file: " + path);
         }
-
         return new ImportNode(path);
     }
 
-
-    // ... (All other parsing methods remain the same)
-    private BaseNode parseBracketedDeclaration() {
-        consume(TokenType.LBRACKET, "Expect '[' to start declaration.");
-        Token declarationType = advance();
-        consume(TokenType.RBRACKET, "Expect ']' to end keyword.");
+    private BaseNode parseBracketedDefinition() {
+        consume(TokenType.LBRACKET, "Expect '['."); Token declarationType = advance(); consume(TokenType.RBRACKET, "Expect ']'.");
         consume(TokenType.AT, "Expect '@' before type.");
         Token type = consume(TokenType.IDENTIFIER, "Expect type (Style, Element, Var).");
-
         boolean isCustom = declarationType.getType() == TokenType.CUSTOM;
-
         switch (type.getValue()) {
-            case "Style":
-                return isCustom ? parseCustomStyle() : parseStyleTemplate();
-            case "Element":
-                return isCustom ? parseCustomElement() : parseElementTemplate();
-            case "Var":
-                 return isCustom ? parseCustomVar() : parseVarTemplate();
-            default:
-                throw new ParseError(type, "Unknown definition type: " + type.getValue());
+            case "Style": return isCustom ? parseCustomStyle() : parseStyleTemplate();
+            case "Element": return isCustom ? parseCustomElement() : parseElementTemplate();
+            case "Var": return isCustom ? parseCustomVar() : parseVarTemplate();
+            default: throw new ParseError(type, "Unknown definition type: " + type.getValue());
         }
     }
 
     private BaseNode parseTemplateUsage() {
         consume(TokenType.AT, "Expect '@' to start template usage.");
         Token type = consume(TokenType.IDENTIFIER, "Expect template type (Element).");
-        if (!type.getValue().equals("Element")) {
-            throw new ParseError(type, "Only @Element is allowed at this level.");
-        }
+        if (!type.getValue().equals("Element")) throw new ParseError(type, "Only @Element is allowed at this level.");
         Token name = consume(TokenType.IDENTIFIER, "Expect template name.");
-
         String fromNamespace = this.namespace;
-        if (match(TokenType.FROM)) {
-            fromNamespace = consume(TokenType.IDENTIFIER, "Expect namespace name after 'from'.").getValue();
-        }
-
+        if (match(TokenType.FROM)) fromNamespace = consume(TokenType.IDENTIFIER, "Expect namespace name after 'from'.").getValue();
         ElementTemplateUsageNode usageNode = new ElementTemplateUsageNode(name.getValue(), fromNamespace);
-
         if (match(TokenType.LBRACE)) {
             while (!check(TokenType.RBRACE) && !isAtEnd()) {
-                if (check(TokenType.DELETE)) {
-                    usageNode.addInstruction(parseDeleteInstruction());
-                } else if (check(TokenType.INSERT)) {
-                    usageNode.addInstruction(parseInsertInstruction());
-                } else {
-                    throw new ParseError(peek(), "Unsupported instruction in element specialization block.");
-                }
+                if (check(TokenType.DELETE)) usageNode.addInstruction(parseDeleteInstruction());
+                else if (check(TokenType.INSERT)) usageNode.addInstruction(parseInsertInstruction());
+                else throw new ParseError(peek(), "Unsupported instruction in element specialization block.");
             }
             consume(TokenType.RBRACE, "Expect '}' to end element specialization block.");
         } else {
             consume(TokenType.SEMICOLON, "Expect ';' after element template usage.");
         }
-
         return usageNode;
     }
 
@@ -186,12 +251,9 @@ public class CHTLParser {
                     if (next.getValue().equals("top")) mode = InsertInstructionNode.Mode.AT_TOP;
                     else if (next.getValue().equals("bottom")) mode = InsertInstructionNode.Mode.AT_BOTTOM;
                     else throw new ParseError(next, "Invalid insert position.");
-                } else {
-                    throw new ParseError(modeToken, "Invalid insert position keyword.");
-                }
+                } else throw new ParseError(modeToken, "Invalid insert position keyword.");
                 break;
         }
-
         String selector = null;
         if (mode == InsertInstructionNode.Mode.AFTER || mode == InsertInstructionNode.Mode.BEFORE || mode == InsertInstructionNode.Mode.REPLACE) {
             StringBuilder selectorBuilder = new StringBuilder();
@@ -204,14 +266,10 @@ public class CHTLParser {
             }
             selector = selectorBuilder.toString();
         }
-
         List<BaseNode> nodesToInsert = new ArrayList<>();
         consume(TokenType.LBRACE, "Expect '{' to start insert block.");
-        while(!check(TokenType.RBRACE) && !isAtEnd()) {
-            nodesToInsert.add(declaration());
-        }
+        while(!check(TokenType.RBRACE) && !isAtEnd()) nodesToInsert.add(declaration());
         consume(TokenType.RBRACE, "Expect '}' to end insert block.");
-
         return new InsertInstructionNode(mode, selector, nodesToInsert);
     }
 
@@ -248,9 +306,7 @@ public class CHTLParser {
         Token name = consume(TokenType.IDENTIFIER, "Expect template name.");
         ElementTemplateNode template = new ElementTemplateNode(name.getValue());
         consume(TokenType.LBRACE, "Expect '{' to start element template block.");
-        while (!check(TokenType.RBRACE) && !isAtEnd()) {
-            template.addChild(declaration());
-        }
+        while (!check(TokenType.RBRACE) && !isAtEnd()) template.addChild(declaration());
         consume(TokenType.RBRACE, "Expect '}' to end element template block.");
         definitionManager.registerElementTemplate(this.namespace, template);
         return template;
@@ -288,11 +344,8 @@ public class CHTLParser {
                 custom.addProperty(key.getValue(), valueBuilder.toString().trim());
             } else {
                 custom.addValuelessProperty(key.getValue());
-                if (check(TokenType.COMMA)) {
-                    advance();
-                } else {
-                    consume(TokenType.SEMICOLON, "Expect ';' or ',' after valueless property.");
-                }
+                if (check(TokenType.COMMA)) advance();
+                else consume(TokenType.SEMICOLON, "Expect ';' or ',' after valueless property.");
             }
         }
         consume(TokenType.RBRACE, "Expect '}' to end custom style block.");
@@ -304,9 +357,7 @@ public class CHTLParser {
         Token name = consume(TokenType.IDENTIFIER, "Expect custom element name.");
         CustomElementNode custom = new CustomElementNode(name.getValue());
         consume(TokenType.LBRACE, "Expect '{' to start custom element block.");
-        while (!check(TokenType.RBRACE) && !isAtEnd()) {
-            custom.addChild(declaration());
-        }
+        while (!check(TokenType.RBRACE) && !isAtEnd()) custom.addChild(declaration());
         consume(TokenType.RBRACE, "Expect '}' to end custom element block.");
         definitionManager.registerCustomElement(this.namespace, custom);
         return custom;
@@ -353,17 +404,11 @@ public class CHTLParser {
         Token key = advance();
         match(TokenType.COLON, TokenType.EQUALS);
         Token value;
-        if (match(TokenType.STRING, TokenType.IDENTIFIER, TokenType.NUMBER)) {
-            value = previous();
-        } else {
-            throw new ParseError(peek(), "Expect attribute value.");
-        }
+        if (match(TokenType.STRING, TokenType.IDENTIFIER, TokenType.NUMBER)) value = previous();
+        else throw new ParseError(peek(), "Expect attribute value.");
         consume(TokenType.SEMICOLON, "Expect ';' after attribute value.");
-        if (key.getType() == TokenType.TEXT) {
-            node.addChild(new TextNode(value.getValue()));
-        } else {
-            node.addAttribute(key.getValue(), value.getValue());
-        }
+        if (key.getType() == TokenType.TEXT) node.addChild(new TextNode(value.getValue()));
+        else node.addAttribute(key.getValue(), value.getValue());
     }
 
     private StyleNode parseStyleBlock() {
@@ -371,15 +416,10 @@ public class CHTLParser {
         consume(TokenType.LBRACE, "Expect '{' after 'style'.");
         StyleNode styleNode = new StyleNode();
         while (!check(TokenType.RBRACE) && !isAtEnd()) {
-            if (check(TokenType.HASH) || check(TokenType.DOT) || check(TokenType.AMPERSAND)) {
-                styleNode.addRule(parseStyleRule());
-            } else if (check(TokenType.AT)) {
-                parseStyleTemplateUsage(styleNode);
-            } else if (check(TokenType.IDENTIFIER)) {
-                parseInlineStyleProperty(styleNode);
-            } else {
-                throw new ParseError(peek(), "Expect a style property, rule, or template usage.");
-            }
+            if (check(TokenType.HASH) || check(TokenType.DOT) || check(TokenType.AMPERSAND)) styleNode.addRule(parseStyleRule());
+            else if (check(TokenType.AT)) parseStyleTemplateUsage(styleNode);
+            else if (check(TokenType.IDENTIFIER)) parseInlineStyleProperty(styleNode);
+            else throw new ParseError(peek(), "Expect a style property, rule, or template usage.");
         }
         consume(TokenType.RBRACE, "Expect '}' after style block.");
         return styleNode;
@@ -389,14 +429,9 @@ public class CHTLParser {
         consume(TokenType.AT, "Expect '@' to start template usage.");
         consume(TokenType.IDENTIFIER, "Expect 'Style' keyword for style template usage.");
         Token templateName = consume(TokenType.IDENTIFIER, "Expect template name.");
-
         String fromNamespace = this.namespace;
-        if (match(TokenType.FROM)) {
-            fromNamespace = consume(TokenType.IDENTIFIER, "Expect namespace name after 'from'.").getValue();
-        }
-
+        if (match(TokenType.FROM)) fromNamespace = consume(TokenType.IDENTIFIER, "Expect namespace name after 'from'.").getValue();
         StyleTemplateUsageNode usageNode = new StyleTemplateUsageNode(templateName.getValue(), fromNamespace);
-
         if (match(TokenType.LBRACE)) {
             while (!check(TokenType.RBRACE) && !isAtEnd()) {
                 if (match(TokenType.DELETE)) {
@@ -421,7 +456,6 @@ public class CHTLParser {
         } else {
             consume(TokenType.SEMICOLON, "Expect ';' after template usage.");
         }
-
         styleNode.addTemplateUsage(usageNode);
     }
 
@@ -439,13 +473,9 @@ public class CHTLParser {
 
     private StyleRule parseStyleRule() {
         StringBuilder selectorBuilder = new StringBuilder();
-        while (!check(TokenType.LBRACE) && !isAtEnd()) {
-            selectorBuilder.append(advance().getValue());
-        }
+        while (!check(TokenType.LBRACE) && !isAtEnd()) selectorBuilder.append(advance().getValue());
         String selector = selectorBuilder.toString().trim();
-        if (selector.isEmpty()) {
-            throw new ParseError(peek(), "Expect a selector before '{'.");
-        }
+        if (selector.isEmpty()) throw new ParseError(peek(), "Expect a selector before '{'.");
         StyleRule rule = new StyleRule(selector);
         consume(TokenType.LBRACE, "Expect '{' after selector.");
         while (!check(TokenType.RBRACE) && !isAtEnd()) {
