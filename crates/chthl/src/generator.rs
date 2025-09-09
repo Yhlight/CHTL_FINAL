@@ -1,32 +1,13 @@
 //! This module defines the HTML Generator, which walks the AST produced by the
 //! parser and generates an HTML string.
 
-use crate::ast::{CommentNode, ElementNode, Expression, Node, Program};
+use crate::ast::{CommentNode, ElementNode, Node, Program};
+use crate::evaluator::{self, Object};
 use std::collections::HashSet;
 
 pub struct Generator {
     global_css: String,
-}
-
-// This is a temporary stringifier for expressions. A real evaluator will be needed later.
-fn expression_to_string(exp: &Expression) -> String {
-    match exp {
-        Expression::Ident(s) => s.clone(),
-        Expression::StringLiteral(s) => s.clone(),
-        Expression::NumberLiteral(n) => n.to_string(),
-        Expression::Infix(infix) => {
-            format!("{} {} {}",
-                expression_to_string(&infix.left),
-                infix.operator,
-                expression_to_string(&infix.right)
-            )
-        }
-        Expression::Prefix(prefix) => {
-            format!("{}{}", prefix.operator, expression_to_string(&prefix.right))
-        }
-        // Placeholder for more complex expressions
-        _ => "[complex expression]".to_string(),
-    }
+    // We could add an error list here later
 }
 
 impl Generator {
@@ -69,7 +50,8 @@ impl Generator {
         let mut inline_styles = Vec::new();
 
         for attr in &element.attributes {
-            let value_str = expression_to_string(&attr.value);
+            let value_obj = evaluator::eval(&attr.value).unwrap_or(Object::Null);
+            let value_str = value_obj.to_string();
             match attr.name.as_str() {
                 "class" => classes.extend(value_str.split_whitespace().map(String::from)),
                 "id" => id = Some(value_str.clone()),
@@ -103,7 +85,8 @@ impl Generator {
 
         for sn in &style_nodes {
             for prop in &sn.inline_properties {
-                inline_styles.push(format!("{}: {};", prop.name, expression_to_string(&prop.value)));
+                let value_obj = evaluator::eval(&prop.value).unwrap_or(Object::Null);
+                inline_styles.push(format!("{}: {};", prop.name, value_obj.to_string()));
             }
             for rule in &sn.rules {
                 let mut selector = rule.selector.trim().to_string();
@@ -115,7 +98,10 @@ impl Generator {
                     }
                 }
                 let properties_str = rule.properties.iter()
-                    .map(|p| format!("  {}: {};\n", p.name, expression_to_string(&p.value)))
+                    .map(|p| {
+                        let value_obj = evaluator::eval(&p.value).unwrap_or(Object::Null);
+                        format!("  {}: {};\n", p.name, value_obj.to_string())
+                    })
                     .collect::<String>();
                 self.global_css.push_str(&format!("{} {{\n{}}}\n", selector, properties_str));
             }
@@ -161,8 +147,7 @@ mod tests {
     use crate::parser::Parser;
 
     #[test]
-    #[ignore] // Ignoring because parsing multiple properties with mixed expression/literal values is not yet supported
-    fn test_generator_with_simple_expressions() {
+    fn test_generator_with_evaluated_expressions() {
         let input = r#"
             div {
                 style {
@@ -180,8 +165,8 @@ mod tests {
         let mut generator = Generator::new();
         let html = generator.generate_program(&program);
 
-        // The generator currently just stringifies, it doesn't evaluate.
-        let expected_html = r#"<div style="width: 5 + 10; height: 100px;"></div>"#;
+        // The generator should now evaluate the expressions.
+        let expected_html = r#"<div style="width: 15; height: 100px;"></div>"#;
 
         let normalize = |s: &str| s.replace(['\n', ' '], "");
         assert_eq!(normalize(&html), normalize(expected_html));
