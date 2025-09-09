@@ -1,22 +1,10 @@
-html {
-    head {
-        title { text { "CHTL Test" } }
+div {
+    // Use the text attribute instead of the text block
+    h1 {
+        text: "Hello from attribute!";
     }
-    body {
-        // This div already has a class and an id.
-        // The style block should add a new class and overwrite the id.
-        div {
-            id: old-id;
-            class: existing-class;
 
-            style {
-                #new-id { font-size: 16px; }
-                .new-class { font-weight: bold; }
-            }
-
-            h1 {
-                text { "Test" }
-            }
-        }
+    p {
+        text: UnquotedText;
     }
 }

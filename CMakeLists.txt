@@ -25,3 +25,15 @@ add_executable(ch-test Test/main.cpp)
 
 # Link the test executable against our library
 target_link_libraries(ch-test PRIVATE chtl_lib)
+
+# --- Custom Test Runner ---
+# Find all the .chtl test files in the Test directory
+file(GLOB CHTL_TEST_FILES "Test/*.chtl")
+
+# Create a custom target to run the tests
+add_custom_target(run_tests
+    COMMAND ch-test ${CHTL_TEST_FILES}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DEPENDS ch-test
+    COMMENT "Running all .chtl tests from Test/ directory"
+)

@@ -30,8 +30,17 @@ private:
     std::unique_ptr<Node> parseStatement();
     std::unique_ptr<ElementNode> parseElement(Token identifier);
     void parseElementBody(ElementNode* element);
+
+    // Style and CSS parsing methods
     std::unique_ptr<StyleBlockNode> parseStyleBlock();
     std::unique_ptr<CssRuleNode> parseCssRule();
+    std::unique_ptr<CssPropertyNode> parseCssProperty();
+
+    // Expression parsing methods
+    int getOperatorPrecedence(TokenType type);
+    std::unique_ptr<ExpressionNode> parseExpression(int precedence = 0);
+    std::unique_ptr<ExpressionNode> parsePrimaryExpression();
+    std::unique_ptr<ExpressionNode> parseTernaryExpression(std::unique_ptr<ExpressionNode> condition);
 };
 
 } // namespace CHTL

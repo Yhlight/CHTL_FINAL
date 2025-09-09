@@ -1,0 +1,26 @@
+html {
+    head {
+        title { text { "Style Block Test" } }
+    }
+    body {
+        div {
+            id: old-id;
+            class: existing-class;
+
+            style {
+                // This ID should overwrite the one above
+                #new-id { font-size: 16px; }
+
+                // This class should be appended to the existing one
+                .new-class { font-weight: bold; }
+
+                // This should become an inline style
+                background-color: lightblue;
+            }
+
+            h1 {
+                text { "Styled Component" }
+            }
+        }
+    }
+}

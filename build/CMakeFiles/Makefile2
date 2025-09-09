@@ -74,6 +74,7 @@ preinstall:
 # The main recursive "clean" target.
 clean: CMakeFiles/chtl_lib.dir/clean
 clean: CMakeFiles/ch-test.dir/clean
+clean: CMakeFiles/run_tests.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -127,6 +128,32 @@ ch-test: CMakeFiles/ch-test.dir/rule
 CMakeFiles/ch-test.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ch-test.dir/build.make CMakeFiles/ch-test.dir/clean
 .PHONY : CMakeFiles/ch-test.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/run_tests.dir
+
+# All Build rule for target.
+CMakeFiles/run_tests.dir/all: CMakeFiles/ch-test.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_tests.dir/build.make CMakeFiles/run_tests.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_tests.dir/build.make CMakeFiles/run_tests.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=7 "Built target run_tests"
+.PHONY : CMakeFiles/run_tests.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/run_tests.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 7
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/run_tests.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
+.PHONY : CMakeFiles/run_tests.dir/rule
+
+# Convenience name for target.
+run_tests: CMakeFiles/run_tests.dir/rule
+.PHONY : run_tests
+
+# clean rule for target.
+CMakeFiles/run_tests.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_tests.dir/build.make CMakeFiles/run_tests.dir/clean
+.PHONY : CMakeFiles/run_tests.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

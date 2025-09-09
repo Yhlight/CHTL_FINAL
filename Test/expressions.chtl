@@ -1,0 +1,10 @@
+div {
+    style {
+        width: 100px;
+        height: 200px;
+
+        // This expression tests operator precedence and parentheses.
+        // The parentheses should force '&&' to be evaluated before '>'.
+        color: width > (50 && 100) ? "blue" : "red";
+    }
+}

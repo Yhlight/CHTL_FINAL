@@ -1,0 +1,23 @@
+// This file tests basic CHTL syntax.
+html {
+    head {
+        title { text { "Basic Test" } }
+    }
+    body {
+        id: main-body;
+        class: container;
+
+        h1 {
+            text: "Welcome to CHTL!";
+        }
+
+        p {
+            text {
+                This is a paragraph with some text.
+            }
+        }
+
+        // Test a void element
+        br;
+    }
+}

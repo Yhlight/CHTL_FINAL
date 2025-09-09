@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <sstream>
+#include <map>
 
 namespace CHTL {
 
@@ -22,6 +23,9 @@ private:
 
     // Main recursive visitor function.
     void visit(const Node* node);
+
+    // Expression evaluator
+    std::string evaluateExpression(const ExpressionNode* expr, const std::map<std::string, std::string>& context);
 
     // Specific visitor functions for each node type.
     void visitElement(const ElementNode* node);

@@ -142,6 +142,19 @@ ch-test/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ch-test.dir/build.make CMakeFiles/ch-test.dir/build
 .PHONY : ch-test/fast
 
+#=============================================================================
+# Target rules for targets named run_tests
+
+# Build rule for target.
+run_tests: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 run_tests
+.PHONY : run_tests
+
+# fast build rule for target.
+run_tests/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_tests.dir/build.make CMakeFiles/run_tests.dir/build
+.PHONY : run_tests/fast
+
 CHTL/CHTLGenerator/Generator.o: CHTL/CHTLGenerator/Generator.cpp.o
 .PHONY : CHTL/CHTLGenerator/Generator.o
 
@@ -246,6 +259,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... run_tests"
 	@echo "... ch-test"
 	@echo "... chtl_lib"
 	@echo "... CHTL/CHTLGenerator/Generator.o"

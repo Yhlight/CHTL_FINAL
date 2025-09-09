@@ -18,6 +18,8 @@ enum class TokenType {
     // Punctuation
     OpenBrace,       // {
     CloseBrace,      // }
+    OpenParen,       // (
+    CloseParen,      // )
     Colon,           // :
     Semicolon,       // ;
     Equals,          // = (CE equality)
@@ -30,7 +32,14 @@ enum class TokenType {
     // CSS-specific
     Dot,             // .
     Hash,            // #
-    Ampersand        // &
+    Ampersand,       // &
+
+    // Expression-specific
+    GreaterThan,     // >
+    LessThan,        // <
+    QuestionMark,    // ?
+    LogicalAnd,      // &&
+    LogicalOr        // ||
 };
 
 // Represents a single token extracted from the source code.
@@ -50,6 +59,8 @@ inline std::string TokenTypeToString(TokenType type) {
         case TokenType::StringLiteral: return "StringLiteral";
         case TokenType::OpenBrace: return "OpenBrace";
         case TokenType::CloseBrace: return "CloseBrace";
+        case TokenType::OpenParen: return "OpenParen";
+        case TokenType::CloseParen: return "CloseParen";
         case TokenType::Colon: return "Colon";
         case TokenType::Semicolon: return "Semicolon";
         case TokenType::Equals: return "Equals";
@@ -59,6 +70,11 @@ inline std::string TokenTypeToString(TokenType type) {
         case TokenType::Dot: return "Dot";
         case TokenType::Hash: return "Hash";
         case TokenType::Ampersand: return "Ampersand";
+        case TokenType::GreaterThan: return "GreaterThan";
+        case TokenType::LessThan: return "LessThan";
+        case TokenType::QuestionMark: return "QuestionMark";
+        case TokenType::LogicalAnd: return "LogicalAnd";
+        case TokenType::LogicalOr: return "LogicalOr";
         default: return "Unknown";
     }
 }

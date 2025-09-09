@@ -8,7 +8,6 @@ Parser::Parser(std::vector<Token> tokens)
 
 const Token& Parser::peek(size_t offset) const {
     if (m_position + offset >= m_tokens.size()) {
-        // Return EOF token
         return m_tokens.back();
     }
     return m_tokens[m_position + offset];
@@ -16,7 +15,7 @@ const Token& Parser::peek(size_t offset) const {
 
 Token Parser::consume() {
     if (m_position >= m_tokens.size()) {
-        return m_tokens.back(); // EOF
+        return m_tokens.back();
     }
     return m_tokens[m_position++];
 }
@@ -68,7 +67,6 @@ std::unique_ptr<Node> Parser::parseStatement() {
 std::unique_ptr<ElementNode> Parser::parseElement(Token identifier) {
     auto element = std::make_unique<ElementNode>(identifier.value);
 
-    // Check for element body
     skipComments();
     if (peek().type == TokenType::OpenBrace) {
         expect(TokenType::OpenBrace);
@@ -90,36 +88,41 @@ void Parser::parseElementBody(ElementNode* element) {
 
         const auto& next_token = peek(1);
 
-        if (next_token.type == TokenType::Colon || next_token.type == TokenType::Equals) {
-            // It's an attribute
-            Token key = consume(); // Identifier
+        if (current_token.value == "text" && next_token.type == TokenType::Colon) {
+            consume(); // text
+            consume(); // :
+            const auto& value_token = consume();
+            if (value_token.type != TokenType::Identifier && value_token.type != TokenType::StringLiteral) {
+                throw std::runtime_error("Expected a string or literal for text attribute at line " + std::to_string(value_token.line));
+            }
+            element->addChild(std::make_unique<TextNode>(value_token.value));
+            expect(TokenType::Semicolon);
+        } else if (next_token.type == TokenType::Colon || next_token.type == TokenType::Equals) {
+            Token key = consume();
             consume(); // : or =
-            Token value = expect(TokenType::Identifier); // CHTL allows unquoted literals
+            Token value = expect(TokenType::Identifier);
             element->addAttribute(std::make_unique<AttributeNode>(key.value, value.value));
             expect(TokenType::Semicolon);
-} else if (current_token.value == "style" && next_token.type == TokenType::OpenBrace) {
+        } else if (current_token.value == "style" && next_token.type == TokenType::OpenBrace) {
             consume(); // 'style'
             expect(TokenType::OpenBrace);
             element->setStyleBlock(parseStyleBlock());
             expect(TokenType::CloseBrace);
         } else if (current_token.value == "text" && next_token.type == TokenType::OpenBrace) {
-            // It's a text node `text { ... }`
             consume(); // text identifier
             expect(TokenType::OpenBrace);
-            // The spec allows for unquoted, single quoted, or double quoted strings.
             skipComments();
-            Token text_content = peek();
-            if (text_content.type == TokenType::Identifier || text_content.type == TokenType::StringLiteral) {
-                consume(); // consume the content token
-                element->addChild(std::make_unique<TextNode>(text_content.value));
-            } else {
-                 throw std::runtime_error("Expected a string or unquoted literal inside text block at line " + std::to_string(text_content.line));
+            std::string text_value;
+            while(peek().type != TokenType::CloseBrace && peek().type != TokenType::EndOfFile) {
+                if (!text_value.empty()) {
+                    text_value += " ";
+                }
+                text_value += consume().value;
             }
+            element->addChild(std::make_unique<TextNode>(text_value));
             expect(TokenType::CloseBrace);
-        } else if (next_token.type == TokenType::OpenBrace || next_token.type == TokenType::Semicolon || peek().type == TokenType::Semicolon || next_token.type == TokenType::EndOfFile) {
-            // It's a child element
+        } else if (next_token.type == TokenType::OpenBrace || next_token.type == TokenType::Semicolon) {
              element->addChild(parseElement(consume()));
-             // Optional semicolon for single-tag elements, e.g. `br;`
              if (peek().type == TokenType::Semicolon) {
                  consume();
              }
@@ -129,6 +132,14 @@ void Parser::parseElementBody(ElementNode* element) {
     }
 }
 
+std::unique_ptr<CssPropertyNode> Parser::parseCssProperty() {
+    Token key = expect(TokenType::Identifier);
+    expect(TokenType::Colon);
+    auto value = parseExpression();
+    expect(TokenType::Semicolon);
+    return std::make_unique<CssPropertyNode>(key.value, std::move(value));
+}
+
 std::unique_ptr<StyleBlockNode> Parser::parseStyleBlock() {
     auto styleNode = std::make_unique<StyleBlockNode>();
     while (peek().type != TokenType::CloseBrace && peek().type != TokenType::EndOfFile) {
@@ -136,19 +147,9 @@ std::unique_ptr<StyleBlockNode> Parser::parseStyleBlock() {
         const auto& current = peek();
         const auto& next = peek(1);
 
-        // If next token is a colon, it's an inline property like `width: 100px;`
         if (current.type == TokenType::Identifier && next.type == TokenType::Colon) {
-            Token key = consume();
-            consume(); // ':'
-            std::string value_str;
-            while(peek().type != TokenType::Semicolon && peek().type != TokenType::EndOfFile) {
-                if (!value_str.empty()) value_str += " ";
-                value_str += consume().value;
-            }
-            expect(TokenType::Semicolon);
-            styleNode->addInlineProperty(std::make_unique<CssPropertyNode>(key.value, value_str));
+            styleNode->addInlineProperty(parseCssProperty());
         }
-        // Otherwise, assume it's a selector rule, e.g., `.box { ... }`
         else {
             styleNode->addCssRule(parseCssRule());
         }
@@ -160,39 +161,74 @@ std::unique_ptr<CssRuleNode> Parser::parseCssRule() {
     skipComments();
     std::string selector_str;
 
-    // A selector can be simple (.box) or complex (&:hover).
-    // For now, let's handle simple selectors: .box, #id, &
-    const auto& first_token = peek();
-    if (first_token.type == TokenType::Dot || first_token.type == TokenType::Hash || first_token.type == TokenType::Ampersand) {
+    while (peek().type != TokenType::OpenBrace && peek().type != TokenType::EndOfFile) {
         selector_str += consume().value;
     }
 
-    // The selector name itself
-    Token selector_name = expect(TokenType::Identifier);
-    selector_str += selector_name.value;
-
-    // A more complex selector parser would go here to handle pseudo-classes etc.
-    // For now, we assume simple selectors.
+    if (selector_str.empty()) {
+        throw std::runtime_error("Found CSS rule with empty selector at line " + std::to_string(peek().line));
+    }
 
     auto ruleNode = std::make_unique<CssRuleNode>(selector_str);
 
     expect(TokenType::OpenBrace);
     while (peek().type != TokenType::CloseBrace && peek().type != TokenType::EndOfFile) {
         skipComments();
-        Token key = expect(TokenType::Identifier);
-        expect(TokenType::Colon);
-        std::string value_str;
-        while(peek().type != TokenType::Semicolon && peek().type != TokenType::EndOfFile) {
-            if (!value_str.empty()) value_str += " ";
-            value_str += consume().value;
-        }
-        expect(TokenType::Semicolon);
-        ruleNode->addProperty(std::make_unique<CssPropertyNode>(key.value, value_str));
+        ruleNode->addProperty(parseCssProperty());
     }
     expect(TokenType::CloseBrace);
 
     return ruleNode;
 }
 
+int Parser::getOperatorPrecedence(TokenType type) {
+    switch (type) {
+        case TokenType::QuestionMark:
+            return 1;
+        case TokenType::LogicalOr:
+            return 2;
+        case TokenType::LogicalAnd:
+            return 3;
+        case TokenType::GreaterThan:
+        case TokenType::LessThan:
+            return 4;
+        default:
+            return 0;
+    }
+}
+
+std::unique_ptr<ExpressionNode> Parser::parsePrimaryExpression() {
+    if (peek().type == TokenType::Identifier || peek().type == TokenType::StringLiteral) {
+        return std::make_unique<LiteralNode>(consume().value);
+    }
+
+    if (match(TokenType::OpenParen)) {
+        auto expr = parseExpression();
+        expect(TokenType::CloseParen);
+        return expr;
+    }
+
+    throw std::runtime_error("Unexpected token in expression: " + peek().value);
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseExpression(int precedence) {
+    auto left = parsePrimaryExpression();
+
+    while (precedence < getOperatorPrecedence(peek().type)) {
+        Token op = consume();
+
+        if (op.type == TokenType::QuestionMark) {
+            auto true_expr = parseExpression();
+            expect(TokenType::Colon);
+            auto false_expr = parseExpression(getOperatorPrecedence(op.type) - 1);
+            left = std::make_unique<TernaryOperationNode>(std::move(left), std::move(true_expr), std::move(false_expr));
+        } else {
+            auto right = parseExpression(getOperatorPrecedence(op.type));
+            left = std::make_unique<BinaryOperationNode>(std::move(left), op, std::move(right));
+        }
+    }
+
+    return left;
+}
 
 } // namespace CHTL

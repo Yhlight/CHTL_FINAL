@@ -83,8 +83,8 @@ Token Lexer::lexComment() {
 Token Lexer::lexIdentifierOrUnquotedLiteral() {
     std::string value;
     // CHTL literals can contain almost anything until a delimiter is hit.
-    // Delimiters are whitespace, ;, {, }, :, =
-    while (peek() != '\0' && !std::isspace(peek()) && peek() != ';' && peek() != '{' && peek() != '}' && peek() != ':' && peek() != '=') {
+    // Delimiters are whitespace, ;, {, }, :, =, (, )
+    while (peek() != '\0' && !std::isspace(peek()) && peek() != ';' && peek() != '{' && peek() != '}' && peek() != ':' && peek() != '=' && peek() != '(' && peek() != ')') {
         value += consume();
     }
     return makeToken(TokenType::Identifier, value);
@@ -121,16 +121,32 @@ Token Lexer::getNextToken() {
         return lexComment();
     }
 
+    if (current == '&' && peek(1) == '&') {
+        consume();
+        consume();
+        return makeToken(TokenType::LogicalAnd, "&&");
+    }
+    if (current == '|' && peek(1) == '|') {
+        consume();
+        consume();
+        return makeToken(TokenType::LogicalOr, "||");
+    }
+
     // Punctuation
     switch (current) {
         case '{': return makeToken(TokenType::OpenBrace, consume());
         case '}': return makeToken(TokenType::CloseBrace, consume());
+        case '(': return makeToken(TokenType::OpenParen, consume());
+        case ')': return makeToken(TokenType::CloseParen, consume());
         case ':': return makeToken(TokenType::Colon, consume());
         case ';': return makeToken(TokenType::Semicolon, consume());
         case '=': return makeToken(TokenType::Equals, consume());
         case '.': return makeToken(TokenType::Dot, consume());
         case '#': return makeToken(TokenType::Hash, consume());
         case '&': return makeToken(TokenType::Ampersand, consume());
+        case '>': return makeToken(TokenType::GreaterThan, consume());
+        case '<': return makeToken(TokenType::LessThan, consume());
+        case '?': return makeToken(TokenType::QuestionMark, consume());
     }
 
     // String Literals

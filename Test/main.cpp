@@ -62,70 +62,97 @@ void printAst(const CHTL::Node* node, int indent = 0) {
         }
         case CHTL::NodeType::CssProperty: {
             auto prop = static_cast<const CHTL::CssPropertyNode*>(node);
-            std::cout << indentation << "CssProperty: " << prop->getKey() << ": " << prop->getValue() << std::endl;
+            std::cout << indentation << "CssProperty: " << prop->getKey() << ":" << std::endl;
+            printAst(prop->getValue(), indent + 1);
+            break;
+        }
+        case CHTL::NodeType::Literal: {
+            auto literal = static_cast<const CHTL::LiteralNode*>(node);
+            std::cout << indentation << "Literal: " << literal->getValue() << std::endl;
+            break;
+        }
+        case CHTL::NodeType::BinaryOperation: {
+            auto binOp = static_cast<const CHTL::BinaryOperationNode*>(node);
+            std::cout << indentation << "BinaryOp: " << binOp->getOperator().value << std::endl;
+            printAst(binOp->getLeft(), indent + 1);
+            printAst(binOp->getRight(), indent + 1);
+            break;
+        }
+        case CHTL::NodeType::TernaryOperation: {
+            auto ternOp = static_cast<const CHTL::TernaryOperationNode*>(node);
+            std::cout << indentation << "TernaryOp:" << std::endl;
+            std::cout << indentation << "  Condition:" << std::endl;
+            printAst(ternOp->getCondition(), indent + 2);
+            std::cout << indentation << "  True:" << std::endl;
+            printAst(ternOp->getTrueValue(), indent + 2);
+            std::cout << indentation << "  False:" << std::endl;
+            printAst(ternOp->getFalseValue(), indent + 2);
             break;
         }
         default:
-            std::cout << indentation << "Unknown Node" << std::endl;
+            std::cout << indentation << "Unknown Node Type" << std::endl;
             break;
     }
 }
 
-int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <input_file.chtl>" << std::endl;
-        return 1;
-    }
+bool runTest(const char* filename) {
+    std::cout << "====================================================\n";
+    std::cout << "--- Running Test: " << filename << " ---\n";
+    std::cout << "====================================================\n";
 
-    std::ifstream infile(argv[1]);
+    std::ifstream infile(filename);
     if (!infile) {
-        std::cerr << "Error: Could not open file " << argv[1] << std::endl;
-        return 1;
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        return false;
     }
 
     std::stringstream buffer;
     buffer << infile.rdbuf();
     std::string source = buffer.str();
 
-    std::cout << "--- Compiling: " << argv[1] << " ---\n" << source << "\n\n";
-
     try {
-        // 1. Lexing
         CHTL::Lexer lexer(source);
         std::vector<CHTL::Token> tokens = lexer.getAllTokens();
-
-        std::cout << "--- Tokens ---" << std::endl;
-        for (const auto& token : tokens) {
-            if (token.type == CHTL::TokenType::EndOfFile) break;
-            std::cout << "  Type: " << CHTL::TokenTypeToString(token.type)
-                      << ",\tValue: '" << token.value << "'" << std::endl;
-        }
-
-        // 2. Parsing
         CHTL::Parser parser(std::move(tokens));
         std::vector<std::unique_ptr<CHTL::Node>> ast = parser.parse();
 
-        std::cout << "\n--- Abstract Syntax Tree ---" << std::endl;
-        if (!ast.empty()) {
-            std::cout << "Parsing successful. AST has " << ast.size() << " root node(s)." << std::endl;
-            for (const auto& node : ast) {
-                printAst(node.get());
-            }
+        // For now, a successful test is one that parses without throwing an exception.
+        // The generator is still incomplete for expressions.
+        std::cout << "Parsing successful for " << filename << std::endl;
 
-            std::cout << "\n--- Generated HTML ---" << std::endl;
-            CHTL::Generator generator;
-            std::string html = generator.generate(ast);
-            std::cout << html << std::endl;
+        // We can still try to generate to see what happens
+        CHTL::Generator generator;
+        std::string html = generator.generate(ast);
+        std::cout << "\n--- Generated HTML for " << filename << " ---\n";
+        std::cout << html << std::endl;
 
-        } else {
-            std::cout << "Parsing produced an empty AST." << std::endl;
-        }
 
     } catch (const std::exception& e) {
-        std::cerr << "\n--- ERROR ---" << std::endl;
+        std::cerr << "\n--- ERROR in " << filename << " ---" << std::endl;
         std::cerr << "An error occurred: " << e.what() << std::endl;
+        return false;
+    }
+    return true;
+}
+
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <test_file1.chtl> <test_file2.chtl> ..." << std::endl;
         return 1;
     }
 
+    int failed_tests = 0;
+    for (int i = 1; i < argc; ++i) {
+        if (!runTest(argv[i])) {
+            failed_tests++;
+        }
+    }
+
+    if (failed_tests > 0) {
+        std::cerr << "\n" << failed_tests << " test(s) failed." << std::endl;
+        return 1;
+    }
+
+    std::cout << "\nAll tests passed successfully!" << std::endl;
     return 0;
 }

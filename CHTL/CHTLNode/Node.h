@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include "../CHTLLexer/Token.h"
 
 namespace CHTL {
 
@@ -13,7 +14,13 @@ enum class NodeType {
     Attribute,
     StyleBlock,
     CssRule,
-    CssProperty
+    CssProperty,
+
+    // Expression Nodes
+    Literal,
+    PropertyAccess,
+    BinaryOperation,
+    TernaryOperation
 };
 
 // Forward declarations for node classes.
@@ -23,6 +30,11 @@ class AttributeNode;
 class StyleBlockNode;
 class CssRuleNode;
 class CssPropertyNode;
+class ExpressionNode;
+class LiteralNode;
+class PropertyAccessNode;
+class BinaryOperationNode;
+class TernaryOperationNode;
 
 // Base class for all AST nodes.
 class Node {
@@ -90,17 +102,58 @@ private:
 };
 
 // Represents a CSS property, e.g., `width: 100px`.
+// Base class for all expression-related nodes
+class ExpressionNode : public Node {};
+
+class LiteralNode : public ExpressionNode {
+public:
+    LiteralNode(const std::string& value) : m_value(value) {}
+    NodeType getType() const override { return NodeType::Literal; }
+    const std::string& getValue() const { return m_value; }
+private:
+    std::string m_value;
+};
+
+class BinaryOperationNode : public ExpressionNode {
+public:
+    BinaryOperationNode(std::unique_ptr<ExpressionNode> left, Token op, std::unique_ptr<ExpressionNode> right)
+        : m_left(std::move(left)), m_operator(op), m_right(std::move(right)) {}
+    NodeType getType() const override { return NodeType::BinaryOperation; }
+    const ExpressionNode* getLeft() const { return m_left.get(); }
+    const ExpressionNode* getRight() const { return m_right.get(); }
+    const Token& getOperator() const { return m_operator; }
+private:
+    std::unique_ptr<ExpressionNode> m_left;
+    Token m_operator;
+    std::unique_ptr<ExpressionNode> m_right;
+};
+
+class TernaryOperationNode : public ExpressionNode {
+public:
+    TernaryOperationNode(std::unique_ptr<ExpressionNode> cond, std::unique_ptr<ExpressionNode> true_val, std::unique_ptr<ExpressionNode> false_val)
+        : m_condition(std::move(cond)), m_true_value(std::move(true_val)), m_false_value(std::move(false_val)) {}
+    NodeType getType() const override { return NodeType::TernaryOperation; }
+    const ExpressionNode* getCondition() const { return m_condition.get(); }
+    const ExpressionNode* getTrueValue() const { return m_true_value.get(); }
+    const ExpressionNode* getFalseValue() const { return m_false_value.get(); }
+private:
+     std::unique_ptr<ExpressionNode> m_condition;
+     std::unique_ptr<ExpressionNode> m_true_value;
+     std::unique_ptr<ExpressionNode> m_false_value;
+};
+
+
 class CssPropertyNode : public Node {
 public:
-    CssPropertyNode(const std::string& key, const std::string& value)
-        : m_key(key), m_value(value) {}
+    CssPropertyNode(const std::string& key, std::unique_ptr<ExpressionNode> value)
+        : m_key(key), m_value(std::move(value)) {}
 
     NodeType getType() const override { return NodeType::CssProperty; }
     const std::string& getKey() const { return m_key; }
-    const std::string& getValue() const { return m_value; }
+    const ExpressionNode* getValue() const { return m_value.get(); }
 private:
     std::string m_key;
-    std::string m_value;
+    std::unique_ptr<ExpressionNode> m_value;
 };
 
 // Represents a CSS rule with a selector, e.g., `.box { ... }`.
