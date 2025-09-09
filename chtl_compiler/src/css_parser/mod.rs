@@ -55,7 +55,7 @@ fn build_css_property(pair: Pair<Rule>) -> CssProperty {
             CssValue::Variable(VarUsage { group_name, var_name })
         }
         Rule::literal_value => {
-            CssValue::Literal(value_content_pair.as_str().trim())
+            CssValue::Literal(value_content_pair.as_str().trim().trim_matches(|c| c == '"' || c == '\''))
         }
         _ => unreachable!("Unexpected css property value rule: {:?}", value_content_pair.as_rule()),
     };

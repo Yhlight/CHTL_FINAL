@@ -53,9 +53,7 @@ fn apply_specializations<'a>(children: &mut Vec<Node<'a>>, specializations: &[Sp
                             let should_modify =
                                 ms.selector.index.is_none() || ms.selector.index == Some(current_index);
                             if should_modify {
-                                // Replace the children of the matched element
                                 elem.children = ms.modifications.clone();
-                                // If we were targeting a specific index, we're done with this rule
                                 if ms.selector.index.is_some() {
                                     break;
                                 }
@@ -118,7 +116,7 @@ fn apply_specializations<'a>(children: &mut Vec<Node<'a>>, specializations: &[Sp
                                 i += 1;
                             }
                         }
-                        _ => {} // AtTop and AtBottom not handled for specific selectors yet
+                        _ => {}
                     }
                 } else if is.position == crate::ast::InsertPosition::AtTop {
                      let mut i = 0;
@@ -133,7 +131,6 @@ fn apply_specializations<'a>(children: &mut Vec<Node<'a>>, specializations: &[Sp
         }
     }
 
-    // Recurse into child elements
     for child in children.iter_mut() {
         if let Node::Element(elem) = child {
             apply_specializations(&mut elem.children, specializations);
@@ -174,7 +171,49 @@ fn generate_element(html: &mut String, element: &Element, context: &Context) {
     let mut keys_to_delete = HashSet::new();
     let mut auto_classes = HashSet::new();
     let mut auto_id = None;
+    let mut unique_class = None;
 
+    // First pass over style blocks to check for '&' rules and hoist all rulesets
+    for node in &element.children {
+        if let Node::StyleBlock(style_contents) = node {
+            for sc in style_contents {
+                if let StyleContent::Ruleset(ruleset) = sc {
+                    let selector = ruleset.selector.trim();
+                    // Hoist all rules, processing '&' if necessary
+                    if selector.contains('&') {
+                        if unique_class.is_none() {
+                            let mut counter = context.unique_class_counter.borrow_mut();
+                            *counter += 1;
+                            let new_class = format!("chtl-{}", *counter);
+                            unique_class = Some(new_class.clone());
+                            auto_classes.insert(new_class);
+                        }
+                        let new_selector = selector.replace('&', &format!(".{}", unique_class.as_ref().unwrap()));
+                        let mut rule_str = format!("{} {{ ", new_selector);
+                        for prop in &ruleset.properties {
+                             if let Some(value) = get_css_value(&prop.value, context) {
+                                rule_str.push_str(&format!("{}:{};", prop.key, value));
+                            }
+                        }
+                        rule_str.push_str(" }\n");
+                        context.hoisted_styles.borrow_mut().push_str(&rule_str);
+                    } else {
+                        // Regular rule hoisting
+                        let mut rule_str = format!("{} {{ ", selector);
+                        for prop in &ruleset.properties {
+                             if let Some(value) = get_css_value(&prop.value, context) {
+                                rule_str.push_str(&format!("{}:{};", prop.key, value));
+                            }
+                        }
+                        rule_str.push_str(" }\n");
+                        context.hoisted_styles.borrow_mut().push_str(&rule_str);
+                    }
+                }
+            }
+        }
+    }
+
+    // Second pass for inline styles and auto-class/id based on non-'&' rules
     for node in &element.children {
         if let Node::StyleBlock(style_contents) = node {
             for sc in style_contents {
@@ -193,18 +232,21 @@ fn generate_element(html: &mut String, element: &Element, context: &Context) {
                              }
                         }
                     }
-                    StyleContent::CustomStyleUsage { name: _, properties: _ } => {}
                     StyleContent::Delete(keys) => {
                         for key in keys {
                             keys_to_delete.insert(*key);
                         }
                     }
                     StyleContent::Ruleset(ruleset) => {
+                        // This logic is for auto-applying classes/ids from simple selectors
+                        // It should not run for '&' selectors.
                         let selector = ruleset.selector.trim();
-                        if let Some(class_name) = selector.strip_prefix('.') {
-                            auto_classes.insert(class_name.split_whitespace().next().unwrap_or("").to_string());
-                        } else if let Some(id_name) = selector.strip_prefix('#') {
-                            if auto_id.is_none() { auto_id = Some(id_name.split_whitespace().next().unwrap_or("").to_string()); }
+                        if !selector.contains('&') {
+                            if let Some(class_name) = selector.strip_prefix('.') {
+                                auto_classes.insert(class_name.split_whitespace().next().unwrap_or("").to_string());
+                            } else if let Some(id_name) = selector.strip_prefix('#') {
+                                if auto_id.is_none() { auto_id = Some(id_name.split_whitespace().next().unwrap_or("").to_string()); }
+                            }
                         }
                     }
                     _ => {}
@@ -244,7 +286,10 @@ fn generate_element(html: &mut String, element: &Element, context: &Context) {
 
     html.push_str(&format!("<{}{}>", element.tag_name, formatted_attrs));
     for child in &element.children {
-        generate_node(html, child, context);
+        // We only want to generate child nodes that are not StyleBlocks, as they have been processed
+        if !matches!(child, Node::StyleBlock(_)) {
+            generate_node(html, child, context);
+        }
     }
     html.push_str(&format!("</{}>\n", element.tag_name));
 }

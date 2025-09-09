@@ -48,44 +48,52 @@ fn process_file_and_imports<'a>(
     Ok(all_docs)
 }
 
-pub fn compile(source_path: &Path) -> Result<String, ChtlError> {
-    // Create the arena for this compilation
-    let arena = Bump::new();
+fn extract_script_blocks(nodes: &[ast::Node], script_content: &mut String) {
+    for node in nodes {
+        match node {
+            ast::Node::Element(element) => {
+                extract_script_blocks(&element.children, script_content);
+            }
+            ast::Node::ScriptBlock(content) => {
+                script_content.push_str(content.trim());
+                script_content.push('\n');
+            }
+            _ => {}
+        }
+    }
+}
 
-    // 1. Recursively parse the entire dependency tree.
+pub fn compile(source_path: &Path) -> Result<String, ChtlError> {
+    let arena = Bump::new();
     let mut processed_files = HashSet::new();
     let all_docs = process_file_and_imports(source_path, &arena, &mut processed_files)?;
 
-    // 2. Build the compilation context from all discovered definitions.
     let mut context = Context::new();
     for doc in &all_docs {
         for def in &doc.definitions {
             match def {
                 ast::TopLevelDefinition::Use(_) => {}
-                ast::TopLevelDefinition::Template(template_def) => {
-                    match template_def {
-                        ast::TemplateDefinition::Style(st) => { context.style_templates.insert(st.name, st); },
-                        ast::TemplateDefinition::Element(et) => { context.element_templates.insert(et.name, et); },
-                        ast::TemplateDefinition::Var(vt) => { context.var_templates.insert(vt.name, vt); },
-                    };
-                }
-                ast::TopLevelDefinition::Custom(custom_def) => {
-                     match custom_def {
-                        ast::CustomDefinition::Style(st) => { context.custom_style_templates.insert(st.name, st); },
-                        ast::CustomDefinition::Element(et) => { context.custom_element_templates.insert(et.name, et); },
-                        ast::CustomDefinition::Var(vt) => { context.custom_var_templates.insert(vt.name, vt); },
-                    };
-                }
+                ast::TopLevelDefinition::Template(template_def) => match template_def {
+                    ast::TemplateDefinition::Style(st) => { context.style_templates.insert(st.name, st); },
+                    ast::TemplateDefinition::Element(et) => { context.element_templates.insert(et.name, et); },
+                    ast::TemplateDefinition::Var(vt) => { context.var_templates.insert(vt.name, vt); },
+                },
+                ast::TopLevelDefinition::Custom(custom_def) => match custom_def {
+                    ast::CustomDefinition::Style(st) => { context.custom_style_templates.insert(st.name, st); },
+                    ast::CustomDefinition::Element(et) => { context.custom_element_templates.insert(et.name, et); },
+                    ast::CustomDefinition::Var(vt) => { context.custom_var_templates.insert(vt.name, vt); },
+                },
             }
         }
     }
 
     let main_ast = all_docs.get(0).ok_or_else(|| ChtlError::Generic("Failed to process the main source file.".to_string()))?;
 
+    // Extract script content
     let mut script_content = String::new();
-    let mut style_content = String::new();
-    extract_hoisted_blocks(&main_ast.children, &mut script_content, &mut style_content, &context);
+    extract_script_blocks(&main_ast.children, &mut script_content);
 
+    // Compile CHTL-JS
     let generated_js = if !script_content.is_empty() {
         let chtl_js_ast = chtl_js::parser::parse(&script_content).map_err(|e| ChtlError::ParseError {
             path: source_path.to_path_buf(),
@@ -96,13 +104,17 @@ pub fn compile(source_path: &Path) -> Result<String, ChtlError> {
         String::new()
     };
 
+    // Generate HTML and Hoisted Styles
     let mut generated_html = generator::generate(main_ast, &context);
+    let style_content = context.hoisted_styles.into_inner();
 
+    // Inject styles and scripts
     if !style_content.is_empty() {
         let style_tag = format!("<style>{}</style>", style_content);
         if let Some(pos) = generated_html.find("</head>") {
             generated_html.insert_str(pos, &style_tag);
         } else {
+            // A simple fallback if no <head> is present
             generated_html.insert_str(0, &style_tag);
         }
     }
@@ -116,50 +128,6 @@ pub fn compile(source_path: &Path) -> Result<String, ChtlError> {
     }
 
     Ok(generated_html)
-}
-
-fn get_css_value<'a>(value: &'a Option<ast::CssValue<'a>>, context: &Context<'a>) -> Option<String> {
-    match value {
-        Some(ast::CssValue::Literal(s)) => Some(s.to_string()),
-        Some(ast::CssValue::Variable(usage)) => {
-            if let Some(var_group) = context.var_templates.get(usage.group_name) {
-                if let Some(variable) = var_group.variables.iter().find(|v| v.key == usage.var_name) {
-                    return Some(variable.value.to_string());
-                }
-            }
-            None
-        }
-        None => None,
-    }
-}
-
-fn extract_hoisted_blocks(
-    nodes: &[ast::Node],
-    script_content: &mut String,
-    style_content: &mut String,
-    context: &Context,
-) {
-    for node in nodes {
-        if let ast::Node::Element(element) = node {
-            extract_hoisted_blocks(&element.children, script_content, style_content, context);
-        } else if let ast::Node::ScriptBlock(content) = node {
-            script_content.push_str(content.trim());
-            script_content.push('\n');
-        } else if let ast::Node::StyleBlock(contents) = node {
-            for sc in contents {
-                if let ast::StyleContent::Ruleset(ruleset) = sc {
-                    style_content.push_str(ruleset.selector.trim());
-                    style_content.push_str(" { ");
-                    for prop in &ruleset.properties {
-                        if let Some(value) = get_css_value(&prop.value, context) {
-                            style_content.push_str(&format!("{}:{};", prop.key, value));
-                        }
-                    }
-                    style_content.push_str(" }\n");
-                }
-            }
-        }
-    }
 }
 
 
@@ -272,7 +240,34 @@ mod tests {
         assert_eq!(result.trim(), expected_html.trim());
     }
 
-    // This test is commented out as it's for a feature not yet fully implemented.
-    // #[test]
-    // fn test_valueless_property_usage() { ... }
+    #[test]
+    fn test_contextual_selector() {
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("main.chtl");
+        let mut file = File::create(&file_path).unwrap();
+        let source = r##"
+            div {
+                style {
+                    & {
+                        border: "1px solid black";
+                    }
+                    &:hover {
+                        background-color: "#eee";
+                    }
+                }
+                p { text { "Hover me" } }
+            }
+        "##;
+        file.write_all(source.as_bytes()).unwrap();
+
+        let result = super::compile(&file_path).unwrap();
+
+        // Check for the unique class on the div
+        assert!(result.contains("<div class=\"chtl-1\">"));
+
+        // Check for the correctly compiled and hoisted CSS
+        // We check for substrings to be robust against minor whitespace changes.
+        assert!(result.contains(".chtl-1 { border:1px solid black; }"));
+        assert!(result.contains(".chtl-1:hover { background-color:#eee; }"));
+    }
 }
