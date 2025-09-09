@@ -291,6 +291,45 @@ CHTLJSParser/fast:
 	$(MAKE) $(MAKESILENT) -f CHTL/CHTLJS/CHTLJSParser/CMakeFiles/CHTLJSParser.dir/build.make CHTL/CHTLJS/CHTLJSParser/CMakeFiles/CHTLJSParser.dir/build
 .PHONY : CHTLJSParser/fast
 
+#=============================================================================
+# Target rules for targets named CHTLGenerator
+
+# Build rule for target.
+CHTLGenerator: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTLGenerator
+.PHONY : CHTLGenerator
+
+# fast build rule for target.
+CHTLGenerator/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/build.make CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/build
+.PHONY : CHTLGenerator/fast
+
+#=============================================================================
+# Target rules for targets named CHTLModule
+
+# Build rule for target.
+CHTLModule: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTLModule
+.PHONY : CHTLModule
+
+# fast build rule for target.
+CHTLModule/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL/CHTLModule/CMakeFiles/CHTLModule.dir/build.make CHTL/CHTLModule/CMakeFiles/CHTLModule.dir/build
+.PHONY : CHTLModule/fast
+
+#=============================================================================
+# Target rules for targets named CHTLScanner
+
+# Build rule for target.
+CHTLScanner: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTLScanner
+.PHONY : CHTLScanner
+
+# fast build rule for target.
+CHTLScanner/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL/CHTLScanner/CMakeFiles/CHTLScanner.dir/build.make CHTL/CHTLScanner/CMakeFiles/CHTLScanner.dir/build
+.PHONY : CHTLScanner/fast
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -328,14 +367,17 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... CHTLCore"
+	@echo "... CHTLGenerator"
 	@echo "... CHTLJSCore"
 	@echo "... CHTLJSLexer"
 	@echo "... CHTLJSNode"
 	@echo "... CHTLJSParser"
 	@echo "... CHTLLexer"
 	@echo "... CHTLManage"
+	@echo "... CHTLModule"
 	@echo "... CHTLNode"
 	@echo "... CHTLParser"
+	@echo "... CHTLScanner"
 	@echo "... chtl"
 	@echo "... src/main.o"
 	@echo "... src/main.i"

@@ -6,12 +6,15 @@ bin/chtl: \
   lib/libCHTLCore.a \
   lib/libCHTLParser.a \
   lib/libCHTLLexer.a \
+  lib/libCHTLGenerator.a \
+  lib/libCHTLModule.a \
   lib/libCHTLManage.a \
   lib/libCHTLNode.a \
   lib/libCHTLJSCore.a \
   lib/libCHTLJSParser.a \
   lib/libCHTLJSNode.a \
   lib/libCHTLJSLexer.a \
+  lib/libCHTLScanner.a \
   /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so \
   /lib/x86_64-linux-gnu/libm.so \
   /lib/x86_64-linux-gnu/libm.so \
@@ -54,6 +57,10 @@ lib/libCHTLParser.a:
 
 lib/libCHTLLexer.a:
 
+lib/libCHTLGenerator.a:
+
+lib/libCHTLModule.a:
+
 lib/libCHTLManage.a:
 
 lib/libCHTLNode.a:
@@ -65,6 +72,8 @@ lib/libCHTLJSParser.a:
 lib/libCHTLJSNode.a:
 
 lib/libCHTLJSLexer.a:
+
+lib/libCHTLScanner.a:
 
 /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so:
 

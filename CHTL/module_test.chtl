@@ -1,0 +1,56 @@
+// 测试模块系统的 CHTL 文件
+html {
+    head {
+        title { text: "CHTL 模块系统测试"; }
+    }
+    
+    body {
+        div {
+            class: "container";
+            text: "这是一个测试模块系统的 CHTL 文件";
+        }
+        
+        // 测试模板系统
+        [Template] @Style MyTemplate {
+            color: red;
+            font-size: 16px;
+        }
+        
+        // 测试自定义系统
+        [Custom] @Style MyCustom {
+            inherit: MyTemplate;
+            background-color: blue;
+        }
+        
+        // 测试原始嵌入
+        [Origin] @Html {
+            <div class="embedded">原始 HTML 内容</div>
+        }
+        
+        // 测试导入系统
+        [Import] @Chtl "template_test.chtl" as TemplateTest;
+        
+        // 测试配置组
+        [Configuration] MyConfig {
+            [Name] {
+                Template: "Template";
+                Custom: "Custom";
+            }
+            use html5;
+        }
+        
+        // 测试命名空间
+        [Namespace] TestNamespace {
+            div {
+                class: "namespace-test";
+                text: "命名空间测试";
+            }
+        }
+        
+        // 测试约束系统
+        div {
+            except span, [Custom] @Element Box;
+            text: "约束测试";
+        }
+    }
+}

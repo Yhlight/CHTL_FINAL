@@ -1,4 +1,5 @@
 #include "CustomStyleNode.hpp"
+#include <CHTL/CHTLManage/TemplateManager.hpp>
 #include <sstream>
 #include <algorithm>
 
@@ -72,9 +73,18 @@ void CustomStyleNode::applySpecialization() {
     }
     
     // 3. 合并继承的模板属性
-    for (const auto& inheritedTemplate : inheritedTemplates_) {
-        // 在实际实现中，这里会从模板管理器中获取属性并合并
-        // 现在只是占位符
+    for (const auto& inheritedTemplateName : inheritedTemplates_) {
+        auto& templateManager = TemplateManager::getInstance();
+        auto inheritedTemplate = templateManager.getStyleTemplate(inheritedTemplateName);
+        
+        if (inheritedTemplate) {
+            // 合并继承的 CSS 属性
+            for (const auto& prop : inheritedTemplate->getCSSProperties()) {
+                if (!hasCSSProperty(prop.first)) {
+                    addCSSProperty(prop.first, prop.second);
+                }
+            }
+        }
     }
 }
 

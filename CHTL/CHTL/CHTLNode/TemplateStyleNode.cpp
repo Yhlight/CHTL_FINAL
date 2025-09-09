@@ -1,4 +1,5 @@
 #include "TemplateStyleNode.hpp"
+#include <CHTL/CHTLManage/TemplateManager.hpp>
 #include <sstream>
 #include <algorithm>
 
@@ -30,11 +31,22 @@ bool TemplateStyleNode::inheritsFrom(const std::string& templateName) const {
 }
 
 void TemplateStyleNode::mergeInheritedProperties() {
-    // 这里需要从全局模板管理器中获取继承的模板属性
-    // 暂时简化实现
-    for (const auto& inheritedTemplate : inheritedTemplates_) {
-        // 在实际实现中，这里会从模板管理器中获取属性并合并
-        // 现在只是占位符
+    // 从全局模板管理器中获取继承的模板属性并合并
+    for (const auto& inheritedTemplateName : inheritedTemplates_) {
+        auto& templateManager = TemplateManager::getInstance();
+        auto inheritedTemplate = templateManager.getStyleTemplate(inheritedTemplateName);
+        
+        if (inheritedTemplate) {
+            // 合并继承的 CSS 属性
+            for (const auto& prop : inheritedTemplate->getCSSProperties()) {
+                if (!hasCSSProperty(prop.first)) {
+                    addCSSProperty(prop.first, prop.second);
+                }
+            }
+            
+            // 递归处理继承的模板
+            inheritedTemplate->mergeInheritedProperties();
+        }
     }
 }
 
@@ -53,6 +65,7 @@ std::string TemplateStyleNode::toCSS() const {
     
     return oss.str();
 }
+
 
 std::string TemplateStyleNode::toString() const {
     std::ostringstream oss;

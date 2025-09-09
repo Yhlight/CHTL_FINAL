@@ -1,4 +1,5 @@
 #include "CustomVarNode.hpp"
+#include <CHTL/CHTLManage/TemplateManager.hpp>
 #include <sstream>
 #include <algorithm>
 
@@ -45,9 +46,18 @@ bool CustomVarNode::inheritsFrom(const std::string& templateName) const {
 void CustomVarNode::applySpecialization() {
     // 应用特例化操作
     // 1. 合并继承的模板变量
-    for (const auto& inheritedTemplate : inheritedTemplates_) {
-        // 在实际实现中，这里会从模板管理器中获取变量并合并
-        // 现在只是占位符
+    for (const auto& inheritedTemplateName : inheritedTemplates_) {
+        auto& templateManager = TemplateManager::getInstance();
+        auto inheritedTemplate = templateManager.getVarTemplate(inheritedTemplateName);
+        
+        if (inheritedTemplate) {
+            // 合并继承的变量
+            for (const auto& var : inheritedTemplate->getVariables()) {
+                if (!hasVariable(var.first)) {
+                    addVariable(var.first, var.second);
+                }
+            }
+        }
     }
     
     // 2. 应用特例化变量覆盖
@@ -67,7 +77,13 @@ std::string CustomVarNode::resolveVariableReference(const std::string& reference
         return getVariable(variableName);
     }
     
-    // 在实际实现中，这里会查找其他模板的变量
+    // 查找其他模板的变量
+    auto& templateManager = TemplateManager::getInstance();
+    auto otherTemplate = templateManager.getVarTemplate(templateName);
+    if (otherTemplate) {
+        return otherTemplate->getVariable(variableName);
+    }
+    
     return reference; // 返回原始引用
 }
 

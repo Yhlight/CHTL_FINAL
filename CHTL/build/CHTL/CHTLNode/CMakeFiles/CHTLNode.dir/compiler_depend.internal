@@ -996,8 +996,13 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o
  /usr/lib/llvm-20/lib/clang/20/include/stdarg.h
  /usr/lib/llvm-20/lib/clang/20/include/stddef.h
  /usr/lib/llvm-20/lib/clang/20/include/stdint.h
+ /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp
  /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp
  /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/ElementNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp
 
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomNode.cpp.o
  /workspace/CHTL/CHTL/CHTLNode/CustomNode.cpp
@@ -1494,8 +1499,12 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.o
  /usr/lib/llvm-20/lib/clang/20/include/stdarg.h
  /usr/lib/llvm-20/lib/clang/20/include/stddef.h
  /usr/lib/llvm-20/lib/clang/20/include/stdint.h
+ /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp
  /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp
  /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp
 
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.o
  /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.cpp
@@ -1746,8 +1755,12 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.o
  /usr/lib/llvm-20/lib/clang/20/include/stdarg.h
  /usr/lib/llvm-20/lib/clang/20/include/stddef.h
  /usr/lib/llvm-20/lib/clang/20/include/stdint.h
+ /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp
  /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp
  /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp
 
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ElementNode.cpp.o
  /workspace/CHTL/CHTL/CHTLNode/ElementNode.cpp
@@ -3240,8 +3253,12 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.o
  /usr/lib/llvm-20/lib/clang/20/include/stdarg.h
  /usr/lib/llvm-20/lib/clang/20/include/stddef.h
  /usr/lib/llvm-20/lib/clang/20/include/stdint.h
+ /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp
  /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/ElementNode.hpp
  /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp
 
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateNode.cpp.o
  /workspace/CHTL/CHTL/CHTLNode/TemplateNode.cpp
@@ -3738,8 +3755,11 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.o
  /usr/lib/llvm-20/lib/clang/20/include/stdarg.h
  /usr/lib/llvm-20/lib/clang/20/include/stddef.h
  /usr/lib/llvm-20/lib/clang/20/include/stdint.h
+ /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp
  /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp
  /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp
 
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.o
  /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.cpp
@@ -3990,7 +4010,10 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.o
  /usr/lib/llvm-20/lib/clang/20/include/stdarg.h
  /usr/lib/llvm-20/lib/clang/20/include/stddef.h
  /usr/lib/llvm-20/lib/clang/20/include/stdint.h
+ /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp
  /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp
  /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp
 
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TextNode.cpp.o

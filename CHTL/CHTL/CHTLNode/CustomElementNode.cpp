@@ -1,4 +1,6 @@
 #include "CustomElementNode.hpp"
+#include <CHTL/CHTLNode/ElementNode.hpp>
+#include <CHTL/CHTLManage/TemplateManager.hpp>
 #include <sstream>
 #include <algorithm>
 
@@ -43,8 +45,19 @@ void CustomElementNode::applySpecialization() {
     // 应用特例化操作
     // 1. 删除指定的元素
     for (const auto& elementSelector : deletedElements_) {
-        // 在实际实现中，这里会删除匹配的元素
-        // 现在只是占位符
+        // 删除匹配的元素
+        auto it = children_.begin();
+        while (it != children_.end()) {
+            if (auto elementNode = std::dynamic_pointer_cast<ElementNode>(*it)) {
+                if (elementNode->getTagName() == elementSelector) {
+                    it = children_.erase(it);
+                } else {
+                    ++it;
+                }
+            } else {
+                ++it;
+            }
+        }
     }
     
     // 2. 删除指定的继承
@@ -72,9 +85,16 @@ void CustomElementNode::applySpecialization() {
     }
     
     // 4. 合并继承的模板内容
-    for (const auto& inheritedTemplate : inheritedTemplates_) {
-        // 在实际实现中，这里会从模板管理器中获取内容并合并
-        // 现在只是占位符
+    for (const auto& inheritedTemplateName : inheritedTemplates_) {
+        auto& templateManager = TemplateManager::getInstance();
+        auto inheritedTemplate = templateManager.getElementTemplate(inheritedTemplateName);
+        
+        if (inheritedTemplate) {
+            // 合并继承的子节点
+            for (const auto& child : inheritedTemplate->getChildren()) {
+                addChild(child);
+            }
+        }
     }
 }
 

@@ -1,4 +1,5 @@
 #include "TemplateVarNode.hpp"
+#include <CHTL/CHTLManage/TemplateManager.hpp>
 #include <sstream>
 #include <algorithm>
 
@@ -30,11 +31,22 @@ bool TemplateVarNode::inheritsFrom(const std::string& templateName) const {
 }
 
 void TemplateVarNode::mergeInheritedVariables() {
-    // 这里需要从全局模板管理器中获取继承的模板变量
-    // 暂时简化实现
-    for (const auto& inheritedTemplate : inheritedTemplates_) {
-        // 在实际实现中，这里会从模板管理器中获取变量并合并
-        // 现在只是占位符
+    // 从全局模板管理器中获取继承的模板变量并合并
+    for (const auto& inheritedTemplateName : inheritedTemplates_) {
+        auto& templateManager = TemplateManager::getInstance();
+        auto inheritedTemplate = templateManager.getVarTemplate(inheritedTemplateName);
+        
+        if (inheritedTemplate) {
+            // 合并继承的变量
+            for (const auto& var : inheritedTemplate->getVariables()) {
+                if (!hasVariable(var.first)) {
+                    addVariable(var.first, var.second);
+                }
+            }
+            
+            // 递归处理继承的模板
+            inheritedTemplate->mergeInheritedVariables();
+        }
     }
 }
 
@@ -45,7 +57,13 @@ std::string TemplateVarNode::resolveVariableReference(const std::string& referen
         return getVariable(variableName);
     }
     
-    // 在实际实现中，这里会查找其他模板的变量
+    // 查找其他模板的变量
+    auto& templateManager = TemplateManager::getInstance();
+    auto otherTemplate = templateManager.getVarTemplate(templateName);
+    if (otherTemplate) {
+        return otherTemplate->getVariable(variableName);
+    }
+    
     return reference; // 返回原始引用
 }
 
@@ -53,6 +71,7 @@ std::string TemplateVarNode::toHTML() const {
     // 变量组模板不直接生成 HTML，而是被其他节点引用
     return "";
 }
+
 
 std::string TemplateVarNode::toString() const {
     std::ostringstream oss;

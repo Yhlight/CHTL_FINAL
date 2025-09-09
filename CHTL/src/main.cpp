@@ -3,6 +3,7 @@
 #include <string>
 #include <CHTL/CHTLLexer/Lexer.hpp>
 #include <CHTL/CHTLParser/Parser.hpp>
+#include <CHTL/CHTLGenerator/CodeGenerator.hpp>
 
 using namespace CHTL;
 
@@ -47,9 +48,11 @@ int main(int argc, char* argv[]) {
     std::cout << "子节点数量: " << ast->getChildCount() << std::endl;
     std::cout << std::endl;
     
-    // 输出 HTML
-    std::cout << "=== 生成的 HTML ===" << std::endl;
-    std::cout << ast->toHTML() << std::endl;
+    // 创建代码生成器
+    CodeGenerator generator;
+    
+    // 生成完整输出
+    std::cout << generator.generateOutput(ast) << std::endl;
     
     return 0;
 }

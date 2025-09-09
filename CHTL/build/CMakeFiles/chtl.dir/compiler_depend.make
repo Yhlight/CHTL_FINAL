@@ -255,6 +255,7 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /workspace/CHTL/src/main.cpp \
   /usr/lib/llvm-20/lib/clang/20/include/stdarg.h \
   /usr/lib/llvm-20/lib/clang/20/include/stddef.h \
   /usr/lib/llvm-20/lib/clang/20/include/stdint.h \
+  /workspace/CHTL/CHTL/CHTLGenerator/CodeGenerator.hpp \
   /workspace/CHTL/CHTL/CHTLLexer/Lexer.hpp \
   /workspace/CHTL/CHTL/CHTLLexer/Token.hpp \
   /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp \
@@ -295,6 +296,11 @@ bin/chtl: /lib/x86_64-linux-gnu/Scrt1.o \
   /usr/lib/x86_64-linux-gnu/libc_nonshared.a \
   CMakeFiles/chtl.dir/src/main.cpp.o \
   lib/libCHTLCore.a \
+  lib/libCHTLGenerator.a \
+  lib/libCHTLJSCore.a \
+  lib/libCHTLJSLexer.a \
+  lib/libCHTLJSNode.a \
+  lib/libCHTLJSParser.a \
   lib/libCHTLLexer.a \
   lib/libCHTLManage.a \
   lib/libCHTLNode.a \
@@ -302,6 +308,12 @@ bin/chtl: /lib/x86_64-linux-gnu/Scrt1.o \
 
 
 lib/libCHTLParser.a:
+
+lib/libCHTLJSParser.a:
+
+lib/libCHTLJSNode.a:
+
+lib/libCHTLGenerator.a:
 
 CMakeFiles/chtl.dir/src/main.cpp.o:
 
@@ -346,6 +358,8 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 /workspace/CHTL/CHTL/CHTLNode/ConstraintNode.hpp:
 
 /workspace/CHTL/CHTL/CHTLNode/ConfigNode.hpp:
+
+lib/libCHTLJSCore.a:
 
 /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp:
 
@@ -639,6 +653,8 @@ lib/libCHTLCore.a:
 
 /usr/include/c++/14/new:
 
+/workspace/CHTL/CHTL/CHTLGenerator/CodeGenerator.hpp:
+
 /usr/include/x86_64-linux-gnu/bits/endian.h:
 
 /usr/include/c++/14/ostream:
@@ -773,6 +789,12 @@ lib/libCHTLCore.a:
 
 /usr/include/c++/14/bits/unique_ptr.h:
 
+lib/libCHTLJSLexer.a:
+
+/workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp:
+
+/usr/include/c++/14/bits/unordered_map.h:
+
 /usr/include/c++/14/bits/uses_allocator.h:
 
 /usr/include/c++/14/bits/uses_allocator_args.h:
@@ -890,7 +912,3 @@ lib/libCHTLNode.a:
 /usr/include/c++/14/bits/hashtable.h:
 
 /workspace/CHTL/CHTL/CHTLLexer/Token.hpp:
-
-/usr/include/c++/14/bits/unordered_map.h:
-
-/workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp:

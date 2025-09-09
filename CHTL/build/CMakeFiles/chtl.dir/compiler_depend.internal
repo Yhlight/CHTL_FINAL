@@ -256,6 +256,7 @@ CMakeFiles/chtl.dir/src/main.cpp.o
  /usr/lib/llvm-20/lib/clang/20/include/stdarg.h
  /usr/lib/llvm-20/lib/clang/20/include/stddef.h
  /usr/lib/llvm-20/lib/clang/20/include/stdint.h
+ /workspace/CHTL/CHTL/CHTLGenerator/CodeGenerator.hpp
  /workspace/CHTL/CHTL/CHTLLexer/Lexer.hpp
  /workspace/CHTL/CHTL/CHTLLexer/Token.hpp
  /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp
@@ -297,6 +298,11 @@ bin/chtl
  /usr/lib/x86_64-linux-gnu/libc_nonshared.a
  /workspace/CHTL/build/CMakeFiles/chtl.dir/src/main.cpp.o
  /workspace/CHTL/build/lib/libCHTLCore.a
+ /workspace/CHTL/build/lib/libCHTLGenerator.a
+ /workspace/CHTL/build/lib/libCHTLJSCore.a
+ /workspace/CHTL/build/lib/libCHTLJSLexer.a
+ /workspace/CHTL/build/lib/libCHTLJSNode.a
+ /workspace/CHTL/build/lib/libCHTLJSParser.a
  /workspace/CHTL/build/lib/libCHTLLexer.a
  /workspace/CHTL/build/lib/libCHTLManage.a
  /workspace/CHTL/build/lib/libCHTLNode.a

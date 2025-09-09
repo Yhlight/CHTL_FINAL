@@ -1,4 +1,6 @@
 #include "TemplateElementNode.hpp"
+#include <CHTL/CHTLNode/ElementNode.hpp>
+#include <CHTL/CHTLManage/TemplateManager.hpp>
 #include <sstream>
 #include <algorithm>
 
@@ -17,11 +19,20 @@ bool TemplateElementNode::inheritsFrom(const std::string& templateName) const {
 }
 
 void TemplateElementNode::mergeInheritedContent() {
-    // 这里需要从全局模板管理器中获取继承的模板内容
-    // 暂时简化实现
-    for (const auto& inheritedTemplate : inheritedTemplates_) {
-        // 在实际实现中，这里会从模板管理器中获取内容并合并
-        // 现在只是占位符
+    // 从全局模板管理器中获取继承的模板内容并合并
+    for (const auto& inheritedTemplateName : inheritedTemplates_) {
+        auto& templateManager = TemplateManager::getInstance();
+        auto inheritedTemplate = templateManager.getElementTemplate(inheritedTemplateName);
+        
+        if (inheritedTemplate) {
+            // 合并继承的子节点
+            for (const auto& child : inheritedTemplate->getChildren()) {
+                addChild(child);
+            }
+            
+            // 递归处理继承的模板
+            inheritedTemplate->mergeInheritedContent();
+        }
     }
 }
 
@@ -37,6 +48,7 @@ std::string TemplateElementNode::toHTML() const {
     
     return oss.str();
 }
+
 
 std::string TemplateElementNode::toString() const {
     std::ostringstream oss;
