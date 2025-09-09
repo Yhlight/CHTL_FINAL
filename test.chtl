@@ -1,0 +1,12 @@
+// A test CHTL file for the CLI
+document {
+    h1 {
+        text: Welcome to CHTL!;
+    }
+    p {
+        text {
+            This is a paragraph compiled by the CHTL compiler.
+        }
+    }
+    -- A comment for the final HTML
+}
