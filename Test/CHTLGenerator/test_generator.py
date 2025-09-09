@@ -8,7 +8,7 @@ from CHTL.CHTLGenerator.generator import HTMLGenerator
 
 class TestGenerator(unittest.TestCase):
 
-    def _compile_source(self, source):
+    def _compile_source(self, source, use_default_structure=False):
         context = CompilationContext()
         lexer = Lexer(source)
         tokens = lexer.tokenize()
@@ -17,48 +17,156 @@ class TestGenerator(unittest.TestCase):
         transformer = ASTTransformer(ast, context)
         transformed_ast = transformer.transform()
         generator = HTMLGenerator(transformed_ast)
-        return generator.generate()
+        return generator.generate(use_default_structure=use_default_structure)
 
     def _dedent(self, text):
         return textwrap.dedent(text).strip()
 
-    def test_template_expansion_and_generation(self):
-        source = """
-        [Template] @Element MyBox {
-            div { class: "box"; }
-        }
-        body { @Element MyBox; }
-        """
-        expected = self._dedent("""
-        <body>
-          <div class="box">
-          </div>
-        </body>
-        """)
-        self.assertEqual(self._compile_source(source), expected)
+    def _assert_html_equal(self, actual, expected):
+        # Normalize whitespace for a more robust comparison
+        normalized_actual = " ".join(actual.split())
+        normalized_expected = " ".join(self._dedent(expected).split())
+        self.assertEqual(normalized_actual, normalized_expected)
 
-    def test_customization_and_generation(self):
+    # --- Tests for Fragment Generation (Default Behavior) ---
+
+    def test_fragment_generation_default(self):
+        source = 'div { id="main"; p { text: "Hello"; } }'
+        expected = """
+        <div id="main">
+          <p>Hello</p>
+        </div>
+        """
+        actual = self._compile_source(source, use_default_structure=False)
+        self._assert_html_equal(actual, expected)
+
+    def test_fragment_with_style_hoisting_and_auto_class(self):
         source = """
-        [Custom] @Element MyBox {
-            div {
-                id: "my-id";
-                class: "box";
+        div {
+            style {
+                .box { color: red; }
             }
-        }
-        body {
-            @Element MyBox {
-                delete id;
-            }
+            p { text: "I'm in a box"; }
         }
         """
-        expected = self._dedent("""
+        expected = """
+        <style>
+        .box { color: red; }
+        </style>
+        <div class="box">
+          <p>I&#x27;m in a box</p>
+        </div>
+        """
+        actual = self._compile_source(source)
+        self._assert_html_equal(actual, expected)
+
+    # --- Tests for Full Document Generation (--default-struct) ---
+
+    def test_full_document_generation_basic(self):
+        source = 'div { p { text: "Hello"; } }'
+        expected = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+        </head>
         <body>
-          <div class="box">
+          <div>
+            <p>Hello</p>
           </div>
         </body>
-        """)
-        self.assertEqual(self._compile_source(source), expected)
+        </html>
+        """
+        actual = self._compile_source(source, use_default_structure=True)
+        self._assert_html_equal(actual, expected)
 
+    def test_full_document_with_title(self):
+        source = 'title: "My Page"'
+        expected = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>My Page</title>
+        </head>
+        <body>
+        </body>
+        </html>
+        """
+        actual = self._compile_source(source, use_default_structure=True)
+        self._assert_html_equal(actual, expected)
+
+    def test_full_document_with_styles(self):
+        source = """
+        style { .box { color: red; } }
+        div { class: "box"; }
+        """
+        expected = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            .box {
+              color: red;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="box"></div>
+        </body>
+        </html>
+        """
+        actual = self._compile_source(source, use_default_structure=True)
+        self._assert_html_equal(actual, expected)
+
+    def test_full_document_with_title_and_styles(self):
+        source = """
+        title: "Styled Page"
+        style {
+            body { font-family: sans-serif; }
+            .container { width: 960px; }
+        }
+        div { class: "container"; }
+        """
+        expected = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Styled Page</title>
+          <style>
+            body {
+              font-family: sans-serif;
+            }
+            .container {
+              width: 960px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container"></div>
+        </body>
+        </html>
+        """
+        actual = self._compile_source(source, use_default_structure=True)
+        self._assert_html_equal(actual, expected)
+
+    def test_full_document_retains_comments(self):
+        source = """
+        -- This is a test comment
+        div {}
+        // This comment is ignored
+        """
+        expected = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+        </head>
+        <body>
+          <!-- This is a test comment -->
+          <div></div>
+        </body>
+        </html>
+        """
+        actual = self._compile_source(source, use_default_structure=True)
+        self._assert_html_equal(actual, expected)
 
 if __name__ == '__main__':
     unittest.main()

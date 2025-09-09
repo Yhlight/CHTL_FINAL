@@ -6,27 +6,19 @@ from CHTL.CHTLTransformer.transformer import ASTTransformer
 from CHTL.CHTLGenerator.generator import HTMLGenerator
 from CHTL.CHTLContext.context import CompilationContext
 
-def compile_chtl(source_code: str) -> str:
+def compile_chtl(source_code: str, use_default_structure: bool = False) -> str:
     """
     Runs the full CHTL compilation pipeline.
     """
     context = CompilationContext()
-
-    # 1. Lexing
     lexer = Lexer(source_code)
     tokens = lexer.tokenize()
-
-    # 2. Parsing
     parser = Parser(tokens, context)
     ast = parser.parse()
-
-    # 3. Transformation (New Step)
     transformer = ASTTransformer(ast, context)
     transformed_ast = transformer.transform()
-
-    # 4. Generation
     generator = HTMLGenerator(transformed_ast)
-    html_output = generator.generate()
+    html_output = generator.generate(use_default_structure=use_default_structure)
 
     return html_output
 
@@ -46,6 +38,11 @@ def main():
         "-o", "--output",
         help="The path to the output .html file.\nIf not provided, the output will be printed to the console."
     )
+    parser.add_argument(
+        "--default-struct",
+        action="store_true",
+        help="Generate a full HTML document structure (<html>, <head>, <body>)."
+    )
 
     args = parser.parse_args()
 
@@ -53,7 +50,7 @@ def main():
         with open(args.input_file, 'r', encoding='utf-8') as f:
             source_code = f.read()
 
-        html_output = compile_chtl(source_code)
+        html_output = compile_chtl(source_code, use_default_structure=args.default_struct)
 
         if args.output:
             with open(args.output, 'w', encoding='utf-8') as f:

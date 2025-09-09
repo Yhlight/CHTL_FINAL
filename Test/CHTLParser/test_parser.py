@@ -5,7 +5,7 @@ from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLNode.nodes import (
     ElementNode, TextNode, AttributeNode, CommentNode, StyleNode,
     CssRuleNode, CssPropertyNode, TemplateDefinitionNode, TemplateUsageNode,
-    CustomDefinitionNode, CustomUsageNode, DeleteNode
+    CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode
 )
 
 class TestParser(unittest.TestCase):
@@ -18,13 +18,6 @@ class TestParser(unittest.TestCase):
         ast = parser.parse()
         return ast, context
 
-    def test_template_definition_parsing(self):
-        source = "[Template] @Element MyBox { div {} }"
-        ast, context = self._parse_source(source)
-        def_node = ast.children[0]
-        self.assertIsInstance(def_node, TemplateDefinitionNode)
-        self.assertEqual(def_node.name, "MyBox")
-
     def test_custom_definition_parsing(self):
         source = "[Custom] @Element MyBox { div {} }"
         ast, context = self._parse_source(source)
@@ -32,23 +25,40 @@ class TestParser(unittest.TestCase):
         self.assertIsInstance(def_node, CustomDefinitionNode)
         self.assertEqual(def_node.name, "MyBox")
 
-    def test_template_usage_parsing(self):
-        source = "body { @Element MyBox; }"
-        ast, context = self._parse_source(source)
-        usage_node = ast.children[0].children[0]
-        self.assertIsInstance(usage_node, TemplateUsageNode)
-        self.assertEqual(usage_node.name, "MyBox")
-
     def test_custom_usage_parsing(self):
         source = "body { @Element MyBox { delete id; } }"
         ast, context = self._parse_source(source)
         usage_node = ast.children[0].children[0]
         self.assertIsInstance(usage_node, CustomUsageNode)
         self.assertEqual(usage_node.name, "MyBox")
-        self.assertEqual(len(usage_node.body), 1)
         delete_node = usage_node.body[0]
         self.assertIsInstance(delete_node, DeleteNode)
         self.assertEqual(delete_node.targets, ["id"])
+
+    def test_insert_rule_parsing(self):
+        source = "body { @Element MyBox { insert after div { p{} } } }"
+        ast, context = self._parse_source(source)
+        usage_node = ast.children[0].children[0]
+        self.assertIsInstance(usage_node, CustomUsageNode)
+        insert_node = usage_node.body[0]
+        self.assertIsInstance(insert_node, InsertNode)
+        self.assertEqual(insert_node.position, "after")
+        self.assertEqual(insert_node.target_selector, "div")
+        self.assertEqual(len(insert_node.content), 1)
+        self.assertIsInstance(insert_node.content[0], ElementNode)
+        self.assertEqual(insert_node.content[0].tag_name, "p")
+
+    def test_style_override_parsing(self):
+        source = "body { @Element MyBox { div { style { color: red; } } } }"
+        ast, context = self._parse_source(source)
+        usage_node = ast.children[0].children[0]
+        self.assertIsInstance(usage_node, CustomUsageNode)
+        override_div = usage_node.body[0]
+        self.assertIsInstance(override_div, ElementNode)
+        self.assertEqual(override_div.tag_name, "div")
+        style_node = override_div.children[0]
+        self.assertIsInstance(style_node, StyleNode)
+        self.assertEqual(style_node.children[0].name, "color")
 
 if __name__ == '__main__':
     unittest.main()

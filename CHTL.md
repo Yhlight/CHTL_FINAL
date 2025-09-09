@@ -2003,8 +2003,8 @@ result.print();  // 输出-> ["3", "**", "4"]
 
 args.fillValue(result);
 std::cout << arg[0].value << std::endl;  // 输出-> 3
-std.cout << arg[1].value << std::endl;  // 输出-> **
-std.cout << arg[2].value << std::endl;  // 输出-> 4
+std::cout << arg[1].value << std::endl;  // 输出-> **
+std::cout << arg[2].value << std::endl;  // 输出-> 4
 
 args.transform("pow(" + args[0].value + args[2].value + ")");
 
@@ -2380,9 +2380,9 @@ VSCode IDE需要满足下述基本要求
 
 ### 自动模块解包和JSON查询表
 如果导入的是CMOD模块，则导出[Export]块的内容，并根据此优化性能，提供语法提示，并创建json表
-如果导入的是CJMOD模块，则根据scan，CHTLJSFunction，analyze这三个函数接收的代码片段，提供语法提示，并创建json表  System Timestamp: 2025-09-09 04:54:58.685419
+如果导入的是CJMOD模块，则根据scan，CHTLJSFunction，analyze这三个函数接收的代码片段，提供语法提示，并创建json表  System Timestamp: 2025-09-09 07:45:32.342300
 
 
 
 You **must** respond now, using the `message_user` tool.System Info: The following tool calls are still running:
-overwrite_file_with_block
+run_in_bash_session

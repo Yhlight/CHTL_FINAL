@@ -13,10 +13,61 @@ class HTMLGenerator:
             'link', 'meta', 'param', 'source', 'track', 'wbr'
         }
 
-    def generate(self) -> str:
-        self.global_styles = [] # Reset for multiple calls
-        self.find_and_process_styles(self.ast)
-        return self.visit(self.ast)
+    def generate(self, use_default_structure: bool = False) -> str:
+        self.global_styles = []
+
+        if not use_default_structure:
+            # Generate an HTML fragment
+            self.find_and_process_styles(self.ast, base_indent=0)
+            html_output = self.visit(self.ast, -1)
+            if self.global_styles:
+                style_block = "\n".join(self.global_styles)
+                style_tag = f"<style>\n{style_block}\n</style>"
+                html_output = style_tag + "\n" + html_output
+            return html_output.strip()
+        else:
+            # Generate a full HTML document
+            self.find_and_process_styles(self.ast, base_indent=1)
+
+            head_content_parts = []
+            body_content_parts = []
+            head_indent = "  " * 1
+
+            # Separate title and body nodes from the AST
+            title_node = None
+            body_nodes = []
+            for node in self.ast.children:
+                if isinstance(node, ElementNode) and node.tag_name == 'title' and not title_node:
+                    title_node = node
+                # StyleNodes are processed globally, so we don't render them in place
+                elif not isinstance(node, StyleNode):
+                    body_nodes.append(node)
+
+            # Prepare <head> content
+            if title_node:
+                head_content_parts.append(self.visit(title_node, 1))
+
+            if self.global_styles:
+                style_tag_content = "\n".join(self.global_styles)
+                head_content_parts.append(f"{head_indent}<style>\n{style_tag_content}\n{head_indent}</style>")
+
+            head_content = "\n".join(head_content_parts)
+
+            # Prepare <body> content
+            for node in body_nodes:
+                body_content_parts.append(self.visit(node, 1))
+            body_content = "\n".join(filter(None, body_content_parts))
+
+            # Assemble the final document
+            return f"""<!DOCTYPE html>
+<html>
+<head>
+{head_content}
+</head>
+<body>
+{body_content}
+</body>
+</html>"""
 
     def visit(self, node: Node, indent_level: int = 0) -> str:
         method_name = f'visit_{type(node).__name__}'
@@ -26,21 +77,22 @@ class HTMLGenerator:
     def generic_visit(self, node: Node, indent_level: int):
         raise Exception(f'No visit_{type(node).__name__} method')
 
-    def find_and_process_styles(self, node: Node):
+    def find_and_process_styles(self, node: Node, base_indent: int = 0):
         if isinstance(node, StyleNode):
             for style_child in node.children:
                 if isinstance(style_child, CssRuleNode):
-                    self.global_styles.append(self.visit(style_child, 2))
+                    # Render rule with indentation appropriate for its context (fragment vs. full doc)
+                    self.global_styles.append(self.visit(style_child, base_indent + 1))
         elif hasattr(node, 'children'):
             for child in node.children:
-                self.find_and_process_styles(child)
+                self.find_and_process_styles(child, base_indent)
 
     def visit_DocumentNode(self, node: DocumentNode, indent_level: int) -> str:
-        html_parts = [self.visit(child, indent_level) for child in node.children]
+        html_parts = [self.visit(child, indent_level + 1) for child in node.children]
         return "\n".join(filter(None, html_parts))
 
     def visit_ElementNode(self, node: ElementNode, indent_level: int) -> str:
-        indent = "  " * indent_level
+        indent = "  " * indent_level if indent_level >= 0 else ""
 
         inline_styles = []
         children_nodes = []
@@ -65,39 +117,37 @@ class HTMLGenerator:
         if node.tag_name in self.self_closing_tags:
             return result
 
-        content_html = ""
-        # Special handling for head to inject styles
-        if node.tag_name == 'head' and self.global_styles:
-            style_block = "\n".join(self.global_styles)
-            style_tag = f"    <style>\n{style_block}\n    </style>"
-            content_html += "\n" + style_tag
-
+        # Optimization for elements with only a single text node child
         if len(children_nodes) == 1 and isinstance(children_nodes[0], TextNode):
-            content_html += self.visit(children_nodes[0])
-            result += content_html + f"</{node.tag_name}>"
-            return result
+            result += self.visit(children_nodes[0])
         elif children_nodes:
-            children_html_parts = [self.visit(child, indent_level + 1) for child in children_nodes]
-            content_html += "\n" + "\n".join(filter(None, children_html_parts))
+            result += "\n"
+            children_html = [self.visit(child, indent_level + 1) for child in children_nodes]
+            result += "\n".join(filter(None, children_html))
+            result += f"\n{indent}"
 
-        result += content_html + "\n" + indent + f"</{node.tag_name}>"
+        result += f"</{node.tag_name}>"
         return result
 
     def visit_AttributeNode(self, node: AttributeNode, indent_level: int = 0) -> str:
         return f'{node.name}="{html.escape(node.value)}"'
 
     def visit_TextNode(self, node: TextNode, indent_level: int = 0) -> str:
+        # Indent text if it's on its own line
         indent = "  " * indent_level if indent_level > 0 else ""
-        return f"{indent}{html.escape(node.value)}"
+        return indent + html.escape(node.value)
 
     def visit_CommentNode(self, node: CommentNode, indent_level: int) -> str:
+        # CHTL -- comments are rendered as HTML comments
         if node.value.startswith('--'):
-            indent = "  " * indent_level
+            indent = "  " * indent_level if indent_level >= 0 else ""
             comment_content = node.value[2:].strip()
             return f"{indent}<!-- {comment_content} -->"
+        # CHTL // and /**/ comments are ignored in the output
         return ""
 
     def visit_StyleNode(self, node: StyleNode, indent_level: int = 0):
+        # StyleNodes are handled by find_and_process_styles, so this visit method does nothing.
         pass
 
     def visit_CssRuleNode(self, node: CssRuleNode, indent_level: int) -> str:
@@ -106,30 +156,9 @@ class HTMLGenerator:
         return f"{indent}{node.selector} {{\n{props}\n{indent}}}"
 
     def visit_CssPropertyNode(self, node: CssPropertyNode, indent_level: int = 0) -> str:
-        indent = "  " * indent_level
+        # For inline styles
         if indent_level == 0:
             return f"{node.name}: {node.value};"
+        # For global styles
+        indent = "  " * indent_level
         return f"{indent}{node.name}: {node.value};"
-
-if __name__ == '__main__':
-    from CHTL.CHTLLexer.lexer import Lexer
-    from CHTL.CHTLParser.parser import Parser
-
-    source = """
-    html {
-        head {}
-        body {
-            p { text: "hello"; }
-        }
-    }
-    """
-
-    lexer = Lexer(source)
-    tokens = lexer.tokenize()
-    parser = Parser(tokens)
-    ast = parser.parse()
-
-    generator = HTMLGenerator(ast)
-    generated_html = generator.generate()
-
-    print(generated_html)

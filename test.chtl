@@ -1,13 +1,17 @@
-[Custom] @Element MyCustomBox {
+[Custom] @Element MyBox {
     div {
-        class: "box";
-        id: "my-id";
-        text: "Hello";
+        class: "original-class";
+        p { text: "Hello"; }
     }
 }
 
 body {
-    @Element MyCustomBox {
-        delete id;
+    @Element MyBox {
+        div { // This div matches the div in the template
+            style { border: 1px solid red; }
+            p {   // This p matches the p inside the template's div
+                style { color: blue; }
+            }
+        }
     }
 }
