@@ -258,6 +258,7 @@ impl ChtlParser {
         // Parse attributes before the opening brace
         while !self.is_at_end() {
             let token = self.peek()?.clone();
+            println!("DEBUG: Parsing attribute, current token: {:?}", token.token_type);
             match &token.token_type {
                 TokenType::LeftBrace => break,
                 TokenType::Newline => {
@@ -270,14 +271,17 @@ impl ChtlParser {
                 }
                 TokenType::Identifier(name) => {
                     // This is an attribute
+                    println!("DEBUG: Found attribute name: {}", name);
                     self.advance();
                     
                     // Check if there's an equals sign
                     if self.peek()?.token_type == TokenType::Equals {
+                        println!("DEBUG: Found equals sign");
                         self.advance()?; // consume the equals sign
                     }
                     
                     let value = self.parse_attribute_value()?;
+                    println!("DEBUG: Parsed attribute value: {}", value);
                     attributes.push(Attribute {
                         name: name.clone(),
                         value,
@@ -293,7 +297,9 @@ impl ChtlParser {
             }
         }
         
+        println!("DEBUG: About to consume LeftBrace for element: {}", tag_name);
         self.consume(TokenType::LeftBrace)?;
+        println!("DEBUG: Successfully consumed LeftBrace for element: {}", tag_name);
         
         let mut children = Vec::new();
         
@@ -308,6 +314,12 @@ impl ChtlParser {
                 TokenType::LineComment | TokenType::BlockComment | TokenType::GeneratorComment => {
                     // Skip comments within element body
                     self.advance()?;
+                }
+                TokenType::Identifier(_) => {
+                    // This is a child element
+                    if let Some(child) = self.parse_node()? {
+                        children.push(child);
+                    }
                 }
                 _ => {
                     // This is a child element
@@ -333,22 +345,21 @@ impl ChtlParser {
         while !self.is_at_end() {
             let token = self.peek()?;
             match &token.token_type {
-                TokenType::Semicolon | TokenType::RightBrace => break,
+                // Stop if we see a semicolon, right brace, or another identifier (start of next attribute/element)
+                TokenType::Semicolon | TokenType::RightBrace | TokenType::Identifier(_) => break,
                 TokenType::String(s) => {
                     value.push_str(s);
-                    self.advance();
-                }
-                TokenType::Identifier(s) => {
-                    value.push_str(s);
-                    self.advance();
+                    self.advance()?;
+                    break; // String values are complete, stop parsing
                 }
                 TokenType::Number(n) => {
                     value.push_str(n);
-                    self.advance();
+                    self.advance()?;
+                    break; // Number values are complete, stop parsing
                 }
                 _ => {
                     value.push_str(&token.value);
-                    self.advance();
+                    self.advance()?;
                 }
             }
         }
