@@ -82,14 +82,12 @@ class Lexer:
                 self.consume_string(char)
                 continue
 
-            if char.isalpha() or char == '_':
+            if char.isalpha() or char in '_#':
                 self.consume_identifier()
                 continue
 
-            # If we get here, it's not a known token start. Try unquoted literal.
             self.consume_unquoted_literal()
 
-            # Failsafe to prevent infinite loops on unknown characters.
             if self.pos == start_pos:
                 self.add_token(TokenType.UNKNOWN, self.current_char())
                 self.advance()
@@ -100,7 +98,7 @@ class Lexer:
     def consume_line_comment(self, prefix):
         start_pos = self.pos
         self.advance(len(prefix))
-        while self.pos < len(self.source_code) and self.current_char() not in '\n\r}':
+        while self.pos < len(self.source_code) and self.current_char() not in '\n\r':
             self.advance()
         value = self.source_code[start_pos:self.pos]
         self.add_token(TokenType.COMMENT, value)
@@ -128,7 +126,10 @@ class Lexer:
 
     def consume_identifier(self):
         start_pos = self.pos
-        while self.pos < len(self.source_code) and (self.current_char().isalnum() or self.current_char() == '_'):
+        while self.pos < len(self.source_code):
+            char = self.current_char()
+            if char.isspace() or not (char.isalnum() or char in '_-.' or char == '#'):
+                break
             self.advance()
         value = self.source_code[start_pos:self.pos]
         self.add_token(TokenType.IDENTIFIER, value)

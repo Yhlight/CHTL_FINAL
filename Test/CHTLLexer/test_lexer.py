@@ -57,15 +57,15 @@ class TestLexer(unittest.TestCase):
         self.assertTrue('multi' in tokens[2].value)
         self.assertEqual(tokens[3].type, TokenType.EOF)
 
-    def test_unquoted_literals(self):
-        source = "some-value_123"
+    def test_hyphenated_identifiers(self):
+        source = "some-value_123 font-weight"
         lexer = Lexer(source)
         tokens = lexer.tokenize()
-        self.assertEqual(len(tokens), 3) # [some, -value_123, EOF]
+        self.assertEqual(len(tokens), 3)
         self.assertEqual(tokens[0].type, TokenType.IDENTIFIER)
-        self.assertEqual(tokens[0].value, "some")
-        self.assertEqual(tokens[1].type, TokenType.UNQUOTED_LITERAL)
-        self.assertEqual(tokens[1].value, "-value_123")
+        self.assertEqual(tokens[0].value, "some-value_123")
+        self.assertEqual(tokens[1].type, TokenType.IDENTIFIER)
+        self.assertEqual(tokens[1].value, "font-weight")
         self.assertEqual(tokens[2].type, TokenType.EOF)
 
 

@@ -1,6 +1,7 @@
 from CHTL.CHTLLexer.lexer import Token, TokenType
 from CHTL.CHTLNode.nodes import (
-    BaseNode, DocumentNode, ElementNode, AttributeNode, TextNode, CommentNode, Node
+    BaseNode, DocumentNode, ElementNode, AttributeNode, TextNode, CommentNode, Node,
+    StyleNode, CssRuleNode, CssPropertyNode
 )
 from typing import List, Optional
 
@@ -42,21 +43,18 @@ class Parser:
 
     def parse_comment(self) -> CommentNode:
         token = self.consume(TokenType.COMMENT)
-        # Strip whitespace from the raw comment token value for a clean AST node
         cleaned_value = token.value.strip()
         return CommentNode(value=cleaned_value, lineno=token.lineno)
 
     def parse_value_tokens(self, terminators: List[TokenType]) -> str:
-        """Parses a value which can be a single string or a series of unquoted literals."""
         if self.current_token().type == TokenType.STRING:
             token = self.consume(TokenType.STRING)
-            return token.value[1:-1]  # Remove quotes
+            return token.value[1:-1]
 
         value_parts = []
         while self.current_token() and self.current_token().type not in terminators:
             token = self.consume()
             value_parts.append(token.value)
-
         return " ".join(value_parts).strip()
 
     def parse_element(self) -> ElementNode:
@@ -65,75 +63,139 @@ class Parser:
 
         if self.current_token().type == TokenType.SEMICOLON:
             self.consume(TokenType.SEMICOLON)
-            return element # Self-closing tag like <br/>
+            return element
 
         self.consume(TokenType.LBRACE)
 
         while self.current_token() and self.current_token().type not in (TokenType.RBRACE, TokenType.EOF):
             token = self.current_token()
+            next_token = self.peek(1)
+
             if token.type == TokenType.COMMENT:
                 element.children.append(self.parse_comment())
-                continue
-
-            if token.type != TokenType.IDENTIFIER:
-                raise RuntimeError(f"Line {token.lineno}: Unexpected token {token.type} ('{token.value}') inside element '{element.tag_name}'")
-
-            # Lookahead to see if it's an attribute or a child element
-            next_token = self.peek(1)
-            if next_token and next_token.type in (TokenType.COLON, TokenType.EQUALS):
-                attr_name_token = self.consume(TokenType.IDENTIFIER)
-
-                # Special handling for 'title' and 'text' shorthands
-                if attr_name_token.value in ('title', 'text'):
-                    self.consume() # Consume ':' or '='
-                    value = self.parse_value_tokens([TokenType.SEMICOLON])
-                    self.consume(TokenType.SEMICOLON)
-
-                    if attr_name_token.value == 'title':
-                        title_element = ElementNode(tag_name='title', lineno=attr_name_token.lineno)
-                        title_element.children.append(TextNode(value=value, lineno=attr_name_token.lineno))
-                        element.children.append(title_element)
-                    else: # 'text'
-                        element.children.append(TextNode(value=value, lineno=attr_name_token.lineno))
-                else:
-                    # It's a regular attribute
-                    self.consume() # Consume ':' or '='
-                    value = self.parse_value_tokens([TokenType.SEMICOLON])
-                    self.consume(TokenType.SEMICOLON)
-                    element.attributes.append(AttributeNode(name=attr_name_token.value, value=value, lineno=attr_name_token.lineno))
-
-            elif next_token and next_token.type == TokenType.LBRACE:
+            elif token.type == TokenType.IDENTIFIER and token.value == 'style':
+                element.children.append(self.parse_style_block(element))
+            elif token.type == TokenType.IDENTIFIER and next_token and next_token.type == TokenType.LBRACE:
                 if token.value == 'text':
-                    self.consume(TokenType.IDENTIFIER) # consume 'text'
-                    self.consume(TokenType.LBRACE)
+                    self.consume() # consume 'text'
+                    self.consume() # consume '{'
                     value = self.parse_value_tokens([TokenType.RBRACE])
                     self.consume(TokenType.RBRACE)
                     element.children.append(TextNode(value=value, lineno=token.lineno))
                 else:
                     element.children.append(self.parse_element())
+            elif token.type == TokenType.IDENTIFIER and next_token and next_token.type in (TokenType.COLON, TokenType.EQUALS):
+                self.parse_attribute(element)
+            elif token.type == TokenType.IDENTIFIER:
+                element.children.append(self.parse_element())
             else:
-                 element.children.append(self.parse_element())
+                raise RuntimeError(f"Line {token.lineno}: Unexpected token {token.type} ('{token.value}') inside element '{element.tag_name}'")
 
         self.consume(TokenType.RBRACE)
         return element
+
+    def parse_attribute(self, element: ElementNode):
+        attr_name_token = self.consume(TokenType.IDENTIFIER)
+        self.consume() # Consume ':' or '='
+        value = self.parse_value_tokens([TokenType.SEMICOLON])
+        self.consume(TokenType.SEMICOLON)
+
+        if attr_name_token.value == 'text':
+            element.children.append(TextNode(value=value, lineno=attr_name_token.lineno))
+        elif attr_name_token.value == 'title':
+            title_element = ElementNode(tag_name='title', lineno=attr_name_token.lineno)
+            title_element.children.append(TextNode(value=value, lineno=attr_name_token.lineno))
+            element.children.append(title_element)
+        else:
+            element.attributes.append(AttributeNode(name=attr_name_token.value, value=value, lineno=attr_name_token.lineno))
+
+    def parse_style_block(self, parent_element: ElementNode) -> StyleNode:
+        style_token = self.consume(TokenType.IDENTIFIER)
+        self.consume(TokenType.LBRACE)
+        style_node = StyleNode(lineno=style_token.lineno)
+
+        while self.current_token() and self.current_token().type != TokenType.RBRACE:
+            is_rule = False
+            i = 0
+            while True:
+                peek_token = self.peek(i)
+                if not peek_token or peek_token.type in (TokenType.SEMICOLON, TokenType.RBRACE):
+                    is_rule = False
+                    break
+                if peek_token.type == TokenType.LBRACE:
+                    is_rule = True
+                    break
+                i += 1
+
+            if is_rule:
+                rule = self.parse_css_rule(parent_element)
+                style_node.children.append(rule)
+            else:
+                prop = self.parse_css_property()
+                style_node.children.append(prop)
+
+        self.consume(TokenType.RBRACE)
+        return style_node
+
+    def parse_css_property(self) -> CssPropertyNode:
+        name_token = self.consume(TokenType.IDENTIFIER)
+        self.consume(TokenType.COLON)
+        value = self.parse_value_tokens([TokenType.SEMICOLON])
+        self.consume(TokenType.SEMICOLON)
+        return CssPropertyNode(name=name_token.value, value=value, lineno=name_token.lineno)
+
+    def parse_css_rule(self, parent_element: ElementNode) -> CssRuleNode:
+        selector_parts = []
+        rule_lineno = self.current_token().lineno
+        while self.current_token() and self.current_token().type != TokenType.LBRACE:
+            selector_parts.append(self.consume().value)
+
+        selector = "".join(selector_parts).strip()
+
+        if selector.startswith('.'):
+            class_name = selector.split(':')[0].split(' ')[0][1:]
+            found = False
+            for attr in parent_element.attributes:
+                if attr.name == 'class':
+                    if class_name not in attr.value.split():
+                        attr.value += f" {class_name}"
+                    found = True
+                    break
+            if not found:
+                parent_element.attributes.append(AttributeNode(name='class', value=class_name))
+        elif selector.startswith('#'):
+            id_name = selector.split(':')[0].split(' ')[0][1:]
+            found = False
+            for attr in parent_element.attributes:
+                if attr.name == 'id':
+                    attr.value = id_name
+                    found = True
+                    break
+            if not found:
+                parent_element.attributes.append(AttributeNode(name='id', value=id_name))
+
+        rule_node = CssRuleNode(selector=selector, lineno=rule_lineno)
+        self.consume(TokenType.LBRACE)
+        while self.current_token() and self.current_token().type != TokenType.RBRACE:
+            rule_node.properties.append(self.parse_css_property())
+        self.consume(TokenType.RBRACE)
+        return rule_node
 
 if __name__ == '__main__':
     from CHTL.CHTLLexer.lexer import Lexer
     import json
 
     source = """
-    html {
-        head {
-            title: My CHTL Page;
-        }
-        body {
-            -- A generator comment
-            div {
-                id: main_content;
-                class = "container";
-                text { Hello World from CHTL! }
+    div {
+        class: "old-class";
+        style {
+            width: 100px;
+            .box {
+                color: blue;
             }
-            br;
+            #my-id {
+                font-weight: bold;
+            }
         }
     }
     """
@@ -145,7 +207,7 @@ if __name__ == '__main__':
 
     class AstEncoder(json.JSONEncoder):
         def default(self, o):
-            if isinstance(o, (BaseNode, DocumentNode, ElementNode, TextNode, AttributeNode, CommentNode)):
+            if isinstance(o, (BaseNode, DocumentNode, ElementNode, TextNode, AttributeNode, CommentNode, StyleNode, CssRuleNode, CssPropertyNode)):
                 return vars(o)
             return super().default(o)
 
