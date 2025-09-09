@@ -1,0 +1,86 @@
+[package]
+name = "chtl"
+version = "0.1.0"
+edition = "2021"
+authors = ["CHTL Team"]
+description = "CHTL - A hypertext language for more developer-friendly HTML coding"
+license = "MIT"
+repository = "https://github.com/chtl-team/chtl"
+keywords = ["html", "css", "javascript", "compiler", "template", "web"]
+categories = ["web-programming", "template-engine", "compilers"]
+
+[dependencies]
+# Core dependencies
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+anyhow = "1.0"
+regex = "1.10"
+lazy_static = "1.4"
+walkdir = "2.4"
+glob = "0.3"
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+# String and text processing
+unicode-normalization = "0.1"
+unicode-segmentation = "1.10"
+
+# File I/O and path handling
+pathdiff = "0.2"
+relative-path = "1.0"
+
+# Logging and debugging
+log = "0.4"
+env_logger = "0.10"
+colored = "2.1"
+
+# CLI and terminal
+clap = { version = "4.4", features = ["derive", "color", "suggestions"] }
+indicatif = "0.17"
+console = "0.15"
+
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+futures = "0.3"
+
+# HTTP client for module downloading
+reqwest = { version = "0.11", features = ["json", "stream"] }
+
+# CSS and HTML parsing
+select = "0.6"
+quick-xml = "0.31"
+cssparser = "0.33"
+
+# JavaScript parsing and processing (simplified for now)
+# swc_common = "0.29"
+# swc_ecma_ast = "0.75"
+# swc_ecma_parser = "0.75"
+# swc_ecma_codegen = "0.75"
+
+# Template engine
+handlebars = "4.4"
+
+# Testing
+proptest = "1.4"
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[dev-dependencies]
+tempfile = "3.8"
+assert_cmd = "2.0"
+predicates = "3.0"
+
+[[bin]]
+name = "chtl"
+path = "src/bin/chtl_cli.rs"
+
+[[bin]]
+name = "test_lexer"
+path = "src/bin/test_lexer.rs"
+
+[[bin]]
+name = "test_parser"
+path = "src/bin/test_parser.rs"
+
+[lib]
+name = "chtl"
+path = "src/lib.rs"

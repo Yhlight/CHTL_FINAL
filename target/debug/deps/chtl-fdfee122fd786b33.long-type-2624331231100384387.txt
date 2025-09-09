@@ -1,0 +1,1 @@
+fn(std::string::String) -> chtl::lexer::TokenType {chtl::lexer::TokenType::Identifier}
