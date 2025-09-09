@@ -118,17 +118,15 @@ impl<'a> Parser<'a> {
 
         while !self.cur_token_is(&Token::RBrace) && !self.cur_token_is(&Token::Eof) {
             match self.cur_token {
-                Token::Dot | Token::Hash => {
+                Token::Dot | Token::Hash | Token::Ampersand => {
                     rules.push(self.parse_css_rule()?);
                 }
                 Token::Ident(_) => {
                     // Lookahead to see if it's an inline property or a tag selector for a rule
                     if self.peek_token_is(&Token::Colon) {
                         inline_properties.push(self.parse_style_property()?);
-                    } else if self.peek_token_is(&Token::LBrace) {
-                        rules.push(self.parse_css_rule()?);
                     } else {
-                        // It's part of a selector
+                        // It's part of a selector for a rule
                         rules.push(self.parse_css_rule()?);
                     }
                 }
@@ -273,6 +271,8 @@ fn token_to_string(token: &Token) -> String {
         Token::String(s) => s.clone(),
         Token::Dot => ".".to_string(),
         Token::Hash => "#".to_string(),
+        Token::Ampersand => "&".to_string(),
+        Token::Colon => ":".to_string(), // Needed for pseudo-classes like :hover
         _ => "".to_string(),
     }
 }

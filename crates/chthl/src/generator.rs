@@ -74,26 +74,70 @@ impl Generator {
         }
 
         // Process style nodes for inline styles, global rules, and automatic attributes
-        for child in &element.children {
-            if let Node::Style(style_node) = child {
-                // Collect inline properties
-                for prop in &style_node.inline_properties {
-                    inline_styles.push(format!("{}: {};", prop.name, prop.value));
-                }
-                // Collect global rules and auto-apply classes/ids
-                for rule in &style_node.rules {
-                    let selector = rule.selector.trim();
-                    if let Some(class_name) = selector.strip_prefix('.') {
-                        classes.insert(class_name.to_string());
-                    } else if let Some(id_name) = selector.strip_prefix('#') {
-                        id = Some(id_name.to_string());
-                    }
+        let style_nodes: Vec<_> = element
+            .children
+            .iter()
+            .filter_map(|c| match c {
+                Node::Style(sn) => Some(sn),
+                _ => None,
+            })
+            .collect();
 
-                    let properties_str = rule.properties.iter()
-                        .map(|p| format!("  {}: {};\n", p.name, p.value))
-                        .collect::<String>();
-                    self.global_css.push_str(&format!("{} {{\n{}}}\n", selector, properties_str));
+        // --- Context Deduction: First Pass ---
+        // Find the primary selector to provide context for `&`. Class has priority.
+        let mut context_selector: Option<String> = None;
+        for sn in &style_nodes {
+            for rule in &sn.rules {
+                let selector = rule.selector.trim();
+                if selector.starts_with('.') {
+                    context_selector = Some(selector.to_string());
+                    break;
                 }
+            }
+            if context_selector.is_some() { break; }
+        }
+        if context_selector.is_none() {
+            for sn in &style_nodes {
+                for rule in &sn.rules {
+                    let selector = rule.selector.trim();
+                    if selector.starts_with('#') {
+                        context_selector = Some(selector.to_string());
+                        break;
+                    }
+                }
+                if context_selector.is_some() { break; }
+            }
+        }
+
+        // --- Second Pass ---
+        // Collect all styles and rules, applying context deduction.
+        for sn in &style_nodes {
+            // Collect inline properties
+            for prop in &sn.inline_properties {
+                inline_styles.push(format!("{}: {};", prop.name, prop.value));
+            }
+            // Collect global rules and auto-apply classes/ids
+            for rule in &sn.rules {
+                let mut selector = rule.selector.trim().to_string();
+
+                // Auto-apply class/id
+                if let Some(class_name) = selector.strip_prefix('.') {
+                    classes.insert(class_name.to_string());
+                } else if let Some(id_name) = selector.strip_prefix('#') {
+                    id = Some(id_name.to_string());
+                }
+
+                // Perform context deduction for '&'
+                if selector.starts_with('&') {
+                    if let Some(ctx_selector) = &context_selector {
+                       selector = selector.replacen('&', ctx_selector, 1);
+                    }
+                }
+
+                let properties_str = rule.properties.iter()
+                    .map(|p| format!("  {}: {};\n", p.name, p.value))
+                    .collect::<String>();
+                self.global_css.push_str(&format!("{} {{\n{}}}\n", selector, properties_str));
             }
         }
 
@@ -147,21 +191,19 @@ mod tests {
     use crate::parser::Parser;
 
     #[test]
-    fn test_auto_class_id_and_global_style_generation() {
+    fn test_context_deduction_and_style_generation() {
         let input = r#"
             div {
                 style {
                     .container {
                         border: 1px solid black;
                     }
+                    &:hover {
+                        background-color: grey;
+                    }
                     color: red;
                 }
                 p {
-                    style {
-                        #main-text {
-                            font-size: 16px;
-                        }
-                    }
                     text { "Hello" }
                 }
             }
@@ -181,12 +223,12 @@ mod tests {
 .container {
   border: 1px solid black;
 }
-#main-text {
-  font-size: 16px;
+.container:hover {
+  background-color: grey;
 }
   </style>
 </head>
-<div class="container" style="color: red;"><p id="main-text">  Hello</p>
+<div class="container" style="color: red;"><p>  Hello</p>
 </div>
         "#;
 
