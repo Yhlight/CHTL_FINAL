@@ -46,6 +46,10 @@ path = "test_compiler.rs"
 name = "run_feature_tests"
 path = "run_feature_tests.rs"
 
+[[bin]]
+name = "simple_test"
+path = "simple_test.rs"
+
 [[test]]
 name = "integration_tests"
 path = "tests/integration_tests.rs"

@@ -1,4 +1,4 @@
-//! CLI tools for CHTL compiler (Fixed version)
+//! CLI tools for CHTL compiler
 
 use crate::ChtlCompiler;
 use crate::error::{ChtlError, Result};
@@ -32,55 +32,55 @@ impl CliApp {
     pub fn run(&mut self, args: Vec<String>) -> Result<()> {
         let matches = self.parse_args(args)?;
         
-        if matches.get_flag("verbose") {
+        if matches.is_present("verbose") {
             self.verbose = true;
         }
         
-        if let Some(output) = matches.get_one::<String>("output") {
+        if let Some(output) = matches.value_of("output") {
             self.output_dir = Some(PathBuf::from(output));
         }
         
-        if matches.get_flag("watch") {
+        if matches.is_present("watch") {
             self.watch_mode = true;
         }
         
-        if matches.get_flag("minify") {
+        if matches.is_present("minify") {
             self.minify = true;
         }
         
-        if matches.get_flag("source-map") {
+        if matches.is_present("source-map") {
             self.source_map = true;
         }
         
         match matches.subcommand() {
-            Some(("compile", sub_matches)) => {
+            ("compile", Some(sub_matches)) => {
                 self.handle_compile_command(sub_matches)?;
             }
-            Some(("build", sub_matches)) => {
+            ("build", Some(sub_matches)) => {
                 self.handle_build_command(sub_matches)?;
             }
-            Some(("watch", sub_matches)) => {
+            ("watch", Some(sub_matches)) => {
                 self.handle_watch_command(sub_matches)?;
             }
-            Some(("init", sub_matches)) => {
+            ("init", Some(sub_matches)) => {
                 self.handle_init_command(sub_matches)?;
             }
-            Some(("serve", sub_matches)) => {
+            ("serve", Some(sub_matches)) => {
                 self.handle_serve_command(sub_matches)?;
             }
-            Some(("test", sub_matches)) => {
+            ("test", Some(sub_matches)) => {
                 self.handle_test_command(sub_matches)?;
             }
-            Some(("lint", sub_matches)) => {
+            ("lint", Some(sub_matches)) => {
                 self.handle_lint_command(sub_matches)?;
             }
-            Some(("format", sub_matches)) => {
+            ("format", Some(sub_matches)) => {
                 self.handle_format_command(sub_matches)?;
             }
-            Some(("bundle", sub_matches)) => {
+            ("bundle", Some(sub_matches)) => {
                 self.handle_bundle_command(sub_matches)?;
             }
-            Some(("module", sub_matches)) => {
+            ("module", Some(sub_matches)) => {
                 self.handle_module_command(sub_matches)?;
             }
             _ => {
@@ -128,101 +128,101 @@ impl CliApp {
                     .value_parser(["html", "css", "js", "all"])
                     .default_value("html")
                     .help("Output format")))
-            .subcommand(clap::Command::new("build")
+            .subcommand(clap::App::new("build")
                 .about("Build project")
-                .arg(clap::Arg::new("input")
+                .arg(clap::Arg::with_name("input")
                     .required(true)
                     .help("Input directory or file"))
-                .arg(clap::Arg::new("recursive")
-                    .short('r')
+                .arg(clap::Arg::with_name("recursive")
+                    .short("r")
                     .long("recursive")
                     .help("Process directories recursively")))
-            .subcommand(clap::Command::new("watch")
+            .subcommand(clap::App::new("watch")
                 .about("Watch for changes and recompile")
-                .arg(clap::Arg::new("input")
+                .arg(clap::Arg::with_name("input")
                     .required(true)
                     .help("Input directory or file")))
-            .subcommand(clap::Command::new("init")
+            .subcommand(clap::App::new("init")
                 .about("Initialize new CHTL project")
-                .arg(clap::Arg::new("name")
+                .arg(clap::Arg::with_name("name")
                     .required(true)
                     .help("Project name"))
-                .arg(clap::Arg::new("template")
-                    .short('t')
+                .arg(clap::Arg::with_name("template")
+                    .short("t")
                     .long("template")
                     .value_name("TEMPLATE")
                     .help("Project template")))
-            .subcommand(clap::Command::new("serve")
+            .subcommand(clap::App::new("serve")
                 .about("Start development server")
-                .arg(clap::Arg::new("port")
-                    .short('p')
+                .arg(clap::Arg::with_name("port")
+                    .short("p")
                     .long("port")
                     .value_name("PORT")
                     .default_value("3000")
                     .help("Port number"))
-                .arg(clap::Arg::new("host")
+                .arg(clap::Arg::with_name("host")
                     .long("host")
                     .value_name("HOST")
                     .default_value("localhost")
                     .help("Host address")))
-            .subcommand(clap::Command::new("test")
+            .subcommand(clap::App::new("test")
                 .about("Run tests")
-                .arg(clap::Arg::new("pattern")
+                .arg(clap::Arg::with_name("pattern")
                     .help("Test pattern"))
-                .arg(clap::Arg::new("verbose")
-                    .short('v')
+                .arg(clap::Arg::with_name("verbose")
+                    .short("v")
                     .long("verbose")
                     .help("Verbose output")))
-            .subcommand(clap::Command::new("lint")
+            .subcommand(clap::App::new("lint")
                 .about("Lint CHTL files")
-                .arg(clap::Arg::new("input")
+                .arg(clap::Arg::with_name("input")
                     .required(true)
                     .help("Input file or directory"))
-                .arg(clap::Arg::new("fix")
+                .arg(clap::Arg::with_name("fix")
                     .long("fix")
                     .help("Fix issues automatically")))
-            .subcommand(clap::Command::new("format")
+            .subcommand(clap::App::new("format")
                 .about("Format CHTL files")
-                .arg(clap::Arg::new("input")
+                .arg(clap::Arg::with_name("input")
                     .required(true)
                     .help("Input file or directory"))
-                .arg(clap::Arg::new("check")
+                .arg(clap::Arg::with_name("check")
                     .long("check")
                     .help("Check formatting without making changes")))
-            .subcommand(clap::Command::new("bundle")
+            .subcommand(clap::App::new("bundle")
                 .about("Bundle CHTL project")
-                .arg(clap::Arg::new("input")
+                .arg(clap::Arg::with_name("input")
                     .required(true)
                     .help("Input directory"))
-                .arg(clap::Arg::new("output")
-                    .short('o')
+                .arg(clap::Arg::with_name("output")
+                    .short("o")
                     .long("output")
                     .value_name("FILE")
                     .help("Output bundle file")))
-            .subcommand(clap::Command::new("module")
+            .subcommand(clap::App::new("module")
                 .about("Manage CHTL modules")
-                .subcommand(clap::Command::new("create")
+                .subcommand(clap::App::new("create")
                     .about("Create new module")
-                    .arg(clap::Arg::new("name")
+                    .arg(clap::Arg::with_name("name")
                         .required(true)
                         .help("Module name"))
-                    .arg(clap::Arg::new("type")
-                        .short('t')
+                    .arg(clap::Arg::with_name("type")
+                        .short("t")
                         .long("type")
                         .value_name("TYPE")
-                        .value_parser(["cmod", "cjmod"])
+                        .possible_values(&["cmod", "cjmod"])
                         .default_value("cmod")
                         .help("Module type")))
-                .subcommand(clap::Command::new("install")
+                .subcommand(clap::App::new("install")
                     .about("Install module")
-                    .arg(clap::Arg::new("name")
+                    .arg(clap::Arg::with_name("name")
                         .required(true)
                         .help("Module name")))
-                .subcommand(clap::Command::new("list")
+                .subcommand(clap::App::new("list")
                     .about("List installed modules"))
-                .subcommand(clap::Command::new("remove")
+                .subcommand(clap::App::new("remove")
                     .about("Remove module")
-                    .arg(clap::Arg::new("name")
+                    .arg(clap::Arg::with_name("name")
                         .required(true)
                         .help("Module name"))));
         
@@ -231,8 +231,8 @@ impl CliApp {
     
     /// Handle compile command
     fn handle_compile_command(&mut self, matches: &clap::ArgMatches) -> Result<()> {
-        let input_file = matches.get_one::<String>("input").unwrap();
-        let format = matches.get_one::<String>("format").unwrap();
+        let input_file = matches.value_of("input").unwrap();
+        let format = matches.value_of("format").unwrap();
         
         let input_path = Path::new(input_file);
         if !input_path.exists() {
@@ -241,7 +241,7 @@ impl CliApp {
         
         let source = fs::read_to_string(input_path)?;
         
-        match format.as_str() {
+        match format {
             "html" => {
                 let html = self.compiler.compile(&source)?;
                 self.output_html(&html, input_path)?;
@@ -272,8 +272,8 @@ impl CliApp {
     
     /// Handle build command
     fn handle_build_command(&mut self, matches: &clap::ArgMatches) -> Result<()> {
-        let input = matches.get_one::<String>("input").unwrap();
-        let recursive = matches.get_flag("recursive");
+        let input = matches.value_of("input").unwrap();
+        let recursive = matches.is_present("recursive");
         
         let input_path = Path::new(input);
         if input_path.is_file() {
@@ -289,7 +289,7 @@ impl CliApp {
     
     /// Handle watch command
     fn handle_watch_command(&mut self, matches: &clap::ArgMatches) -> Result<()> {
-        let input = matches.get_one::<String>("input").unwrap();
+        let input = matches.value_of("input").unwrap();
         let input_path = Path::new(input);
         
         if self.verbose {
@@ -314,8 +314,8 @@ impl CliApp {
     
     /// Handle init command
     fn handle_init_command(&mut self, matches: &clap::ArgMatches) -> Result<()> {
-        let name = matches.get_one::<String>("name").unwrap();
-        let template = matches.get_one::<String>("template");
+        let name = matches.value_of("name").unwrap();
+        let template = matches.value_of("template");
         
         self.create_project(name, template)?;
         
@@ -326,9 +326,9 @@ impl CliApp {
     
     /// Handle serve command
     fn handle_serve_command(&mut self, matches: &clap::ArgMatches) -> Result<()> {
-        let port = matches.get_one::<String>("port").unwrap().parse::<u16>()
+        let port = matches.value_of("port").unwrap().parse::<u16>()
             .map_err(|_| ChtlError::semantic("Invalid port number"))?;
-        let host = matches.get_one::<String>("host").unwrap();
+        let host = matches.value_of("host").unwrap();
         
         println!("Starting development server on {}:{}", host, port);
         
@@ -340,8 +340,8 @@ impl CliApp {
     
     /// Handle test command
     fn handle_test_command(&mut self, matches: &clap::ArgMatches) -> Result<()> {
-        let pattern = matches.get_one::<String>("pattern");
-        let verbose = matches.get_flag("verbose");
+        let pattern = matches.value_of("pattern");
+        let verbose = matches.is_present("verbose");
         
         println!("Running tests...");
         
@@ -353,8 +353,8 @@ impl CliApp {
     
     /// Handle lint command
     fn handle_lint_command(&mut self, matches: &clap::ArgMatches) -> Result<()> {
-        let input = matches.get_one::<String>("input").unwrap();
-        let fix = matches.get_flag("fix");
+        let input = matches.value_of("input").unwrap();
+        let fix = matches.is_present("fix");
         
         let input_path = Path::new(input);
         if input_path.is_file() {
@@ -370,8 +370,8 @@ impl CliApp {
     
     /// Handle format command
     fn handle_format_command(&mut self, matches: &clap::ArgMatches) -> Result<()> {
-        let input = matches.get_one::<String>("input").unwrap();
-        let check = matches.get_flag("check");
+        let input = matches.value_of("input").unwrap();
+        let check = matches.is_present("check");
         
         let input_path = Path::new(input);
         if input_path.is_file() {
@@ -387,8 +387,8 @@ impl CliApp {
     
     /// Handle bundle command
     fn handle_bundle_command(&mut self, matches: &clap::ArgMatches) -> Result<()> {
-        let input = matches.get_one::<String>("input").unwrap();
-        let output = matches.get_one::<String>("output");
+        let input = matches.value_of("input").unwrap();
+        let output = matches.value_of("output");
         
         let input_path = Path::new(input);
         let bundle = self.create_bundle(input_path)?;
@@ -406,20 +406,20 @@ impl CliApp {
     /// Handle module command
     fn handle_module_command(&mut self, matches: &clap::ArgMatches) -> Result<()> {
         match matches.subcommand() {
-            Some(("create", sub_matches)) => {
-                let name = sub_matches.get_one::<String>("name").unwrap();
-                let module_type = sub_matches.get_one::<String>("type").unwrap();
+            ("create", Some(sub_matches)) => {
+                let name = sub_matches.value_of("name").unwrap();
+                let module_type = sub_matches.value_of("type").unwrap();
                 self.create_module(name, module_type)?;
             }
-            Some(("install", sub_matches)) => {
-                let name = sub_matches.get_one::<String>("name").unwrap();
+            ("install", Some(sub_matches)) => {
+                let name = sub_matches.value_of("name").unwrap();
                 self.install_module(name)?;
             }
-            Some(("list", _)) => {
+            ("list", Some(_)) => {
                 self.list_modules()?;
             }
-            Some(("remove", sub_matches)) => {
-                let name = sub_matches.get_one::<String>("name").unwrap();
+            ("remove", Some(sub_matches)) => {
+                let name = sub_matches.value_of("name").unwrap();
                 self.remove_module(name)?;
             }
             _ => {
@@ -468,7 +468,7 @@ impl CliApp {
     }
     
     /// Create a new project
-    fn create_project(&mut self, name: &str, template: Option<&String>) -> Result<()> {
+    fn create_project(&mut self, name: &str, template: Option<&str>) -> Result<()> {
         let project_dir = Path::new(name);
         fs::create_dir_all(project_dir)?;
         
@@ -531,7 +531,7 @@ impl CliApp {
     }
     
     /// Run tests
-    fn run_tests(&mut self, pattern: Option<&String>, verbose: bool) -> Result<()> {
+    fn run_tests(&mut self, pattern: Option<&str>, verbose: bool) -> Result<()> {
         println!("Running tests...");
         
         // In a real implementation, this would run the test suite
