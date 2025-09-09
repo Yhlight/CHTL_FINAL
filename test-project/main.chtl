@@ -1,0 +1,18 @@
+html {
+  head {
+    title {
+      "CHTL Project"
+    }
+  }
+  body {
+    div {
+      class: "container";
+      h1 {
+        "Welcome to CHTL!"
+      }
+      p {
+        "This is a sample CHTL project."
+      }
+    }
+  }
+}
