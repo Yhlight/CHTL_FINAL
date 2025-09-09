@@ -1,0 +1,79 @@
+// 这是一个测试文件
+-- 这是生成器注释
+
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                "CHTL 测试页面"
+            }
+        }
+    }
+
+    body
+    {
+        div
+        {
+            id: main-container;
+            class: content;
+            
+            style
+            {
+                width: 100px;
+                height: 200px;
+                background-color: red;
+                
+                .box
+                {
+                    width: 300px;
+                }
+                
+                &:hover
+                {
+                    background-color: blue;
+                }
+            }
+            
+            text
+            {
+                "Hello, CHTL!"
+            }
+        }
+        
+        span
+        {
+            text: "这是一个内联文本";
+        }
+    }
+}
+
+[Template] @Style DefaultText
+{
+    color: "black";
+    line-height: 1.6;
+}
+
+[Custom] @Element Box
+{
+    div
+    {
+        style
+        {
+            width: 200px;
+            height: 200px;
+            background-color: red;
+        }
+    }
+}
+
+[Import] @Chtl from "module.chtl";
+
+[Configuration]
+{
+    DEBUG_MODE = false;
+    INDEX_INITIAL_COUNT = 0;
+}
