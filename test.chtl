@@ -1,25 +1,20 @@
-[Template] @Style DefaultText
-{
-    font-size: 16px;
-    color: black;
-}
-
 html {
     head {
         title { "My Website" }
     }
     body {
         div {
-            id = my_div;
-            class: "container";
-
+            // This style block will auto-add class="box" to the div
+            // and elevate the rule to a global <style> tag.
             style {
-                @Style DefaultText;
-                background-color: red;
+                .box {
+                    border: 1px solid black;
+                    padding: 10px;
+                }
             }
 
             text {
-                Hello World
+                "This div should have a border."
             }
         }
     }

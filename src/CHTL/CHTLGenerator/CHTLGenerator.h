@@ -3,10 +3,12 @@
 
 #include "CHTLNode/Visitor.h"
 #include "CHTLNode/BaseNode.h"
+#include "CHTLContext/CHTLContext.h"
 #include <string>
 
 class CHTLGenerator : public Visitor {
 public:
+    CHTLGenerator(CHTLContext* context);
     std::string generate(BaseNode& root);
 
     void visit(ElementNode& node) override;
@@ -15,6 +17,7 @@ public:
     void visit(OriginNode& node) override;
 
 private:
+    CHTLContext* context;
     std::string output;
     int indentLevel = 0;
     void doIndent();

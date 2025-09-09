@@ -7,6 +7,10 @@ void CommentNode::accept(Visitor& visitor) {
     visitor.visit(*this);
 }
 
+std::unique_ptr<BaseNode> CommentNode::clone() const {
+    return std::make_unique<CommentNode>(text);
+}
+
 const std::string& CommentNode::getText() const {
     return text;
 }

@@ -9,13 +9,17 @@
 
 class ElementNode : public BaseNode {
 public:
+    using ElementTemplate = std::vector<std::unique_ptr<BaseNode>>;
+
     ElementNode(const std::string& tagName);
 
     void accept(Visitor& visitor) override;
+    std::unique_ptr<BaseNode> clone() const override;
 
     const std::string& getTagName() const;
     const std::vector<Attribute>& getAttributes() const;
     const std::vector<std::unique_ptr<BaseNode>>& getChildren() const;
+    ElementTemplate releaseChildren();
 
     void addAttribute(const Attribute& attribute);
     void addChild(std::unique_ptr<BaseNode> child);

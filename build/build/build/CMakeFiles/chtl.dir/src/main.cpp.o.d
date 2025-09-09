@@ -177,10 +177,10 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /app/src/main.cpp \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h \
+ /usr/include/c++/13/bits/erase_if.h /app/src/CHTL/CHTLNode/BaseNode.h \
  /app/src/CHTL/CHTLParser/CHTLParser.h /app/src/CHTL/CHTLLexer/Token.h \
- /app/src/CHTL/CHTLNode/BaseNode.h /app/src/CHTL/CHTLNode/ElementNode.h \
- /app/src/CHTL/CHTLNode/BaseNode.h /app/src/CHTL/CHTLNode/Attribute.h \
- /app/src/CHTL/CHTLNode/TextNode.h /app/src/CHTL/CHTLNode/OriginNode.h \
+ /app/src/CHTL/CHTLNode/ElementNode.h /app/src/CHTL/CHTLNode/BaseNode.h \
+ /app/src/CHTL/CHTLNode/Attribute.h /app/src/CHTL/CHTLNode/TextNode.h \
+ /app/src/CHTL/CHTLNode/OriginNode.h \
  /app/src/CHTL/CHTLGenerator/CHTLGenerator.h \
  /app/src/CHTL/CHTLNode/Visitor.h

@@ -34,7 +34,6 @@ enum class TokenType {
     // Keywords
     Text,               // text
     Style,              // style
-    TemplateKeyword,    // [Template]
 };
 
 struct Token {

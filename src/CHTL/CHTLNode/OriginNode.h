@@ -9,6 +9,7 @@ public:
     OriginNode(const std::string& type, const std::string& content);
 
     void accept(Visitor& visitor) override;
+    std::unique_ptr<BaseNode> clone() const override;
 
     const std::string& getType() const;
     const std::string& getContent() const;

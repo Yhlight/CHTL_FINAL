@@ -9,6 +9,7 @@ public:
     TextNode(const std::string& text);
 
     void accept(Visitor& visitor) override;
+    std::unique_ptr<BaseNode> clone() const override;
 
     const std::string& getText() const;
 

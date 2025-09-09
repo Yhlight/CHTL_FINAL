@@ -3,6 +3,9 @@
 #include "CHTLNode/TextNode.h"
 #include "CHTLNode/CommentNode.h"
 #include "CHTLNode/OriginNode.h"
+#include <iostream>
+
+CHTLGenerator::CHTLGenerator(CHTLContext* context) : context(context) {}
 
 std::string CHTLGenerator::generate(BaseNode& root) {
     root.accept(*this);
@@ -16,7 +19,6 @@ void CHTLGenerator::doIndent() {
 }
 
 void CHTLGenerator::visit(ElementNode& node) {
-    // Special handling for the dummy root node created by the parser
     if (node.getTagName() == "root") {
         for (const auto& child : node.getChildren()) {
             child->accept(*this);
@@ -29,6 +31,27 @@ void CHTLGenerator::visit(ElementNode& node) {
 
     for (const auto& attr : node.getAttributes()) {
         output += " " + attr.key + "=\"" + attr.value + "\"";
+    }
+
+    if (node.getTagName() == "head") {
+        output += ">\n";
+        indentLevel++;
+        // Inject global CSS into head
+        const std::string& globalCSS = context->getGlobalCSS();
+        if (!globalCSS.empty()) {
+            doIndent();
+            output += "<style>\n";
+            output += globalCSS; // Assuming CSS is already formatted
+            doIndent();
+            output += "</style>\n";
+        }
+        for (const auto& child : node.getChildren()) {
+            child->accept(*this);
+        }
+        indentLevel--;
+        doIndent();
+        output += "</" + node.getTagName() + ">\n";
+        return;
     }
 
     if (node.getChildren().empty()) {
@@ -59,10 +82,7 @@ void CHTLGenerator::visit(CommentNode& node) {
 }
 
 void CHTLGenerator::visit(OriginNode& node) {
-    // As per spec, origin blocks are output directly without processing.
-    // We might add indentation based on the generator's state, but for now, raw is raw.
     output += node.getContent();
-    // Add a newline for cleaner separation in the output, if the content doesn't have one.
     if (!output.empty() && output.back() != '\n') {
         output += '\n';
     }

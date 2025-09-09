@@ -33,11 +33,9 @@ void CHTLLexer::skipWhitespaceAndComments() {
             case ' ':
             case '\r':
             case '\t':
-                advance();
-                break;
             case '\n':
                 advance();
-                break; // line/col are handled in advance()
+                break;
             case '/':
                 if (source.size() > current + 1 && source[current + 1] == '/') {
                     while (peek() != '\n' && !isAtEnd()) advance();
@@ -71,25 +69,27 @@ TokenType CHTLLexer::identifierType(const std::string& identifier) {
     static const std::unordered_map<std::string, TokenType> keywords = {
         {"text", TokenType::Text},
         {"style", TokenType::Style},
+        {"Template", TokenType::Identifier}, // Treat "Template" as a regular identifier for the parser
+        {"Origin", TokenType::Identifier},   // Treat "Origin" as a regular identifier for the parser
     };
     auto it = keywords.find(identifier);
     return it != keywords.end() ? it->second : TokenType::Identifier;
 }
 
 Token CHTLLexer::identifier(size_t startOffset) {
-    while (isalnum(peek()) || peek() == '_' || peek() == '-') advance(); // Allow hyphens
+    while (isalnum(peek()) || peek() == '_' || peek() == '-') advance();
     std::string lexeme = source.substr(startOffset, current - startOffset);
     return makeToken(identifierType(lexeme), lexeme, startOffset);
 }
 
 Token CHTLLexer::unquotedLiteral(size_t startOffset) {
-    while (peek() != ';' && peek() != '{' && peek() != '}' && peek() != '\n' && !isAtEnd()) advance();
+    // Stop at any whitespace or symbol that could delimit a value.
+    while (!isspace(peek()) && peek() != ';' && peek() != '{' && peek() != '}' &&
+           peek() != '(' && peek() != ')' && !isAtEnd()) {
+        advance();
+    }
     std::string lexeme = source.substr(startOffset, current - startOffset);
-    const std::string whitespace = " \t";
-    size_t first = lexeme.find_first_not_of(whitespace);
-    if (std::string::npos == first) return makeToken(TokenType::UnquotedLiteral, "", startOffset);
-    size_t last = lexeme.find_last_not_of(whitespace);
-    return makeToken(TokenType::UnquotedLiteral, lexeme.substr(first, (last - first + 1)), startOffset);
+    return makeToken(TokenType::UnquotedLiteral, lexeme, startOffset);
 }
 
 Token CHTLLexer::stringLiteral(size_t startOffset) {
@@ -111,14 +111,6 @@ std::vector<Token> CHTLLexer::tokenize() {
         size_t startOffset = current;
         char c = peek();
 
-        if (c == '[') {
-            if (source.substr(current, 10) == "[Template]") {
-                current += 10;
-                tokens.push_back(makeToken(TokenType::TemplateKeyword, "[Template]", startOffset));
-                continue;
-            }
-        }
-
         if (isalpha(c) || c == '_') {
             tokens.push_back(identifier(startOffset));
             continue;
@@ -129,7 +121,12 @@ std::vector<Token> CHTLLexer::tokenize() {
             continue;
         }
 
-        advance(); // Consume the character for the switch
+        if (isdigit(c) || (c == '.' && isdigit(source[current+1]))) {
+             tokens.push_back(unquotedLiteral(startOffset));
+             continue;
+        }
+
+        advance();
         switch (c) {
             case '{': tokens.push_back(makeToken(TokenType::LeftBrace, startOffset)); break;
             case '}': tokens.push_back(makeToken(TokenType::RightBrace, startOffset)); break;
@@ -147,7 +144,12 @@ std::vector<Token> CHTLLexer::tokenize() {
             case '>': tokens.push_back(makeToken(TokenType::GreaterThan, startOffset)); break;
             case '<': tokens.push_back(makeToken(TokenType::LessThan, startOffset)); break;
             default:
-                tokens.push_back(unquotedLiteral(startOffset));
+                // If we are here, it's an unhandled character.
+                // For now, assume it might be part of an unquoted literal if it's not whitespace.
+                if (!isspace(c)) {
+                    current = startOffset;
+                    tokens.push_back(unquotedLiteral(startOffset));
+                }
                 break;
         }
     }

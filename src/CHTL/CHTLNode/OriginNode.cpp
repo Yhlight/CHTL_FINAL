@@ -8,6 +8,10 @@ void OriginNode::accept(Visitor& visitor) {
     visitor.visit(*this);
 }
 
+std::unique_ptr<BaseNode> OriginNode::clone() const {
+    return std::make_unique<OriginNode>(type, content);
+}
+
 const std::string& OriginNode::getType() const {
     return type;
 }

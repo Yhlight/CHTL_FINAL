@@ -36,6 +36,7 @@ private:
 
     // Parsing rules
     void parseTopLevelStatement();
+    std::unique_ptr<BaseNode> parseStatement();
     std::unique_ptr<ElementNode> parseElement();
     std::unique_ptr<TextNode> parseText();
     std::unique_ptr<OriginNode> parseOrigin();
@@ -43,6 +44,9 @@ private:
     void parseBlock(ElementNode* element);
     void parseAttribute(ElementNode* element);
     void parseStyleBlock(ElementNode* element);
+    void parseElementTemplateUsage(ElementNode* parent);
+    std::string parseValue();
+    void parseCSSRule(ElementNode* parent); // New method
 };
 
 #endif // CHTL_PARSER_H

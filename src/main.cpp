@@ -30,12 +30,12 @@ int main(int argc, char* argv[]) {
         // 2. Parse
         CHTLContext context;
         CHTLParser parser(tokens, source, &context);
-        parser.parse(); // This populates the context and the parser's internal root node
+        parser.parse();
 
         // 3. Generate HTML
         ElementNode* astRoot = parser.getRootNode();
         if (astRoot) {
-            CHTLGenerator generator;
+            CHTLGenerator generator(&context); // Pass context to generator
             std::string html = generator.generate(*astRoot);
             std::cout << html;
         } else {
