@@ -1,5 +1,0 @@
-[Template] @Element MyComponent {
-    p {
-        text: "This component came from an imported file!";
-    }
-}
