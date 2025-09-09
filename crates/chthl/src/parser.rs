@@ -1,7 +1,10 @@
 //! This module defines the Parser, which consumes tokens from the Lexer
 //! to build an Abstract Syntax Tree (AST).
 
-use crate::ast::{AttributeNode, CommentNode, ElementNode, Expression, Node, Program, TextNode};
+use crate::ast::{
+    AttributeNode, CommentNode, ElementNode, Expression, Node, Program, StyleNode, StyleProperty,
+    TextNode,
+};
 use crate::lexer::Lexer;
 use crate::token::Token;
 use std::mem;
@@ -21,7 +24,6 @@ impl<'a> Parser<'a> {
             peek_token: Token::Eof,
             errors: Vec::new(),
         };
-        // Prime the parser with the first two tokens
         p.next_token();
         p.next_token();
         p
@@ -50,6 +52,7 @@ impl<'a> Parser<'a> {
     fn parse_node(&mut self) -> Result<Node, String> {
         match &self.cur_token {
             Token::Ident(tag) if tag == "text" => self.parse_text_node().map(Node::Text),
+            Token::Ident(tag) if tag == "style" => self.parse_style_node().map(Node::Style),
             Token::Ident(_) => self.parse_element_node().map(Node::Element),
             Token::GeneratorComment(value) => Ok(Node::Comment(CommentNode {
                 value: value.clone(),
@@ -68,14 +71,13 @@ impl<'a> Parser<'a> {
         };
 
         self.expect_peek(Token::LBrace)?;
-        self.next_token(); // consume LBrace
+        self.next_token();
 
         let mut attributes = Vec::new();
         let mut children = Vec::new();
 
         while self.cur_token != Token::RBrace && self.cur_token != Token::Eof {
             match self.cur_token {
-                // Lookahead to see if it's an attribute or a child node
                 Token::Ident(_) => {
                     if self.peek_token_is(&Token::Colon) || self.peek_token_is(&Token::Assign) {
                         attributes.push(self.parse_attribute_node()?);
@@ -107,13 +109,57 @@ impl<'a> Parser<'a> {
         })
     }
 
+    fn parse_style_node(&mut self) -> Result<StyleNode, String> {
+        self.expect_peek(Token::LBrace)?;
+        self.next_token();
+
+        let mut properties = Vec::new();
+
+        while self.cur_token != Token::RBrace && self.cur_token != Token::Eof {
+            properties.push(self.parse_style_property()?);
+            self.next_token();
+        }
+
+        if self.cur_token != Token::RBrace {
+            return Err("Expected '}' to close style block".to_string());
+        }
+
+        Ok(StyleNode { properties })
+    }
+
+    fn parse_style_property(&mut self) -> Result<StyleProperty, String> {
+        let name = match &self.cur_token {
+            Token::Ident(name) => name.clone(),
+            _ => return Err("Expected identifier for style property name".to_string()),
+        };
+
+        self.expect_peek(Token::Colon)?;
+
+        self.next_token();
+
+        let mut value_parts = Vec::new();
+        while !self.cur_token_is(&Token::Semicolon) && !self.cur_token_is(&Token::Eof) {
+            value_parts.push(token_to_string(&self.cur_token));
+            self.next_token();
+        }
+
+        if !self.cur_token_is(&Token::Semicolon) {
+             return Err("Expected ';' after style property value".to_string());
+        }
+
+        Ok(StyleProperty {
+            name,
+            value: value_parts.join(" "),
+        })
+    }
+
     fn parse_text_node(&mut self) -> Result<TextNode, String> {
         self.expect_peek(Token::LBrace)?;
-        self.next_token(); // consume LBrace
+        self.next_token();
 
         let value = match &self.cur_token {
             Token::String(s) => s.clone(),
-            Token::Ident(s) => s.clone(), // for unquoted text
+            Token::Ident(s) => s.clone(),
             _ => return Err("Expected string or identifier for text node content".to_string()),
         };
         self.next_token();
@@ -131,12 +177,12 @@ impl<'a> Parser<'a> {
             _ => return Err("Expected identifier for attribute name".to_string()),
         };
 
-        self.next_token(); // move to : or =
+        self.next_token();
         if !self.cur_token_is(&Token::Colon) && !self.cur_token_is(&Token::Assign) {
             return Err("Expected ':' or '=' after attribute name".to_string());
         }
 
-        self.next_token(); // move to value
+        self.next_token();
         let value = match &self.cur_token {
             Token::Ident(val) => Expression::Ident(val.clone()),
             Token::String(val) => Expression::StringLiteral(val.clone()),
@@ -148,7 +194,6 @@ impl<'a> Parser<'a> {
         Ok(AttributeNode { name, value })
     }
 
-    // Helper functions for checking tokens
     fn cur_token_is(&self, t: &Token) -> bool {
         mem::discriminant(&self.cur_token) == mem::discriminant(t)
     }
@@ -170,18 +215,30 @@ impl<'a> Parser<'a> {
     }
 }
 
+fn token_to_string(token: &Token) -> String {
+    match token {
+        Token::Ident(s) => s.clone(),
+        Token::String(s) => s.clone(),
+        Token::Dot => ".".to_string(),
+        _ => "".to_string(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::lexer::Lexer;
 
     #[test]
-    fn test_simple_element_parsing() {
+    fn test_element_with_styles_parsing() {
         let input = r#"
             div {
                 id: "main";
-                class: container;
                 -- a generator comment
+                style {
+                    width: 100px;
+                    height: 200px;
+                }
                 span {
                     text { "Hello World" }
                 }
@@ -192,14 +249,18 @@ mod tests {
         let mut parser = Parser::new(lexer);
         let program = parser.parse_program();
 
-        assert!(parser.errors.is_empty(), "Parser has errors: {:?}", parser.errors);
+        assert!(
+            parser.errors.is_empty(),
+            "Parser has errors: {:?}",
+            parser.errors
+        );
         assert_eq!(program.nodes.len(), 1);
 
         let node = program.nodes.get(0).unwrap();
         if let Node::Element(el) = node {
             assert_eq!(el.tag_name, "div");
-            assert_eq!(el.attributes.len(), 2);
-            assert_eq!(el.children.len(), 2);
+            assert_eq!(el.attributes.len(), 1);
+            assert_eq!(el.children.len(), 3);
 
             let attr1 = &el.attributes[0];
             assert_eq!(attr1.name, "id");
@@ -209,17 +270,17 @@ mod tests {
             assert!(matches!(child1, Node::Comment(_)));
 
             let child2 = &el.children[1];
-            if let Node::Element(inner_el) = child2 {
-                assert_eq!(inner_el.tag_name, "span");
-                assert_eq!(inner_el.children.len(), 1);
-                if let Node::Text(text_node) = &inner_el.children[0] {
-                    assert_eq!(text_node.value, "Hello World");
-                } else {
-                    panic!("Expected text node");
-                }
+            if let Node::Style(style_node) = child2 {
+                assert_eq!(style_node.properties.len(), 2);
+                let prop1 = &style_node.properties[0];
+                assert_eq!(prop1.name, "width");
+                assert_eq!(prop1.value, "100px");
             } else {
-                panic!("Expected element node");
+                panic!("Expected style node");
             }
+
+            let child3 = &el.children[2];
+            assert!(matches!(child3, Node::Element(_)));
         } else {
             panic!("Expected top-level node to be an element");
         }

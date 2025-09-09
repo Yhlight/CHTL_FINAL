@@ -14,7 +14,22 @@ pub enum Node {
     Element(ElementNode),
     Text(TextNode),
     Comment(CommentNode),
+    Style(StyleNode),
     // More node types will be added here in later phases, e.g., Template, Custom.
+}
+
+/// Represents a local style block, e.g., `style { ... }`.
+#[derive(Debug, PartialEq, Clone)]
+pub struct StyleNode {
+    pub properties: Vec<StyleProperty>,
+}
+
+/// Represents a style property, e.g., `width: 100px`.
+#[derive(Debug, PartialEq, Clone)]
+pub struct StyleProperty {
+    pub name: String,
+    // For now, the value is a single string. This will be expanded later for expressions.
+    pub value: String,
 }
 
 /// Represents an expression. For now, this is used for attribute values, which can

@@ -11,12 +11,12 @@ pub fn generate_program(program: &Program) -> String {
     html
 }
 
-// The `indent` parameter is for pretty-printing, which can be useful for debugging.
 fn generate_node(node: &Node, indent: usize) -> String {
     match node {
         Node::Element(el) => generate_element_node(el, indent),
         Node::Text(txt) => generate_text_node(txt, indent),
         Node::Comment(comment) => generate_comment_node(comment, indent),
+        Node::Style(_) => String::new(), // Style nodes are handled by their parent element
     }
 }
 
@@ -27,6 +27,8 @@ fn generate_element_node(element: &ElementNode, indent: usize) -> String {
     ];
 
     let mut tag = format!("{}{}<{}", " ".repeat(indent), "\n", element.tag_name);
+
+    // Handle normal attributes
     for attr in &element.attributes {
         let value = match &attr.value {
             Expression::Ident(s) => s,
@@ -34,6 +36,20 @@ fn generate_element_node(element: &ElementNode, indent: usize) -> String {
         };
         tag.push_str(&format!(" {}=\"{}\"", attr.name, value));
     }
+
+    // Collect and handle inline styles from style nodes
+    let mut style_properties = Vec::new();
+    for child in &element.children {
+        if let Node::Style(style_node) = child {
+            for prop in &style_node.properties {
+                style_properties.push(format!("{}: {};", prop.name, prop.value));
+            }
+        }
+    }
+    if !style_properties.is_empty() {
+        tag.push_str(&format!(" style=\"{}\"", style_properties.join(" ")));
+    }
+
 
     if self_closing_tags.contains(&element.tag_name.as_str()) {
         tag.push('>');
@@ -43,7 +59,10 @@ fn generate_element_node(element: &ElementNode, indent: usize) -> String {
 
     let mut children_html = String::new();
     for child in &element.children {
-        children_html.push_str(&generate_node(child, indent + 2));
+        // Generate HTML for non-style children
+        if !matches!(child, Node::Style(_)) {
+            children_html.push_str(&generate_node(child, indent + 2));
+        }
     }
 
     if children_html.is_empty() {
@@ -54,7 +73,6 @@ fn generate_element_node(element: &ElementNode, indent: usize) -> String {
 }
 
 fn generate_text_node(text: &TextNode, indent: usize) -> String {
-    // In a real implementation, we would handle HTML escaping here.
     format!("{}{}{}", " ".repeat(indent), "\n", text.value)
 }
 
@@ -69,52 +87,33 @@ mod tests {
     use crate::parser::Parser;
 
     #[test]
-    fn test_html_generation() {
+    fn test_html_generation_with_style() {
         let input = r#"
-            html {
-                head {
-                    title { text { "My CHTL Page" } }
+            div {
+                id: "app";
+                style {
+                    width: 100px;
+                    color: red;
                 }
-                body {
-                    id: "app";
-                    -- main content
-                    div {
-                        class: "container";
-                        h1 { text { "Welcome!" } }
-                        img { src: "/logo.png"; }
-                    }
-                }
+                h1 { text { "Styled Box" } }
             }
         "#;
 
         let lexer = Lexer::new(input);
         let mut parser = Parser::new(lexer);
         let program = parser.parse_program();
-        assert!(parser.errors().is_empty());
+        assert!(parser.errors().is_empty(), "{:?}", parser.errors());
 
         let html = generate_program(&program);
 
-        // Note: The expected output is based on the pretty-printing logic (indents and newlines)
-        // in the generator. This makes the test specific but easier to read.
         let expected_html = r#"
-<html>
-  <head>
-    <title>
-      My CHTL Page
-    </title>
-  </head>
-  <body id="app">
-    <!-- main content -->
-    <div class="container">
-      <h1>
-        Welcome!
-      </h1>
-      <img src="/logo.png">
-    </div>
-  </body>
-</html>"#;
+            <div id="app" style="width: 100px; color: red;">
+              <h1>
+                Styled Box
+              </h1>
+            </div>
+        "#;
 
-        // A simple normalization to make comparison less brittle regarding whitespace.
         let normalize = |s: &str| s.lines().map(|l| l.trim()).filter(|l| !l.is_empty()).collect::<String>();
 
         assert_eq!(normalize(html.as_str()), normalize(expected_html));

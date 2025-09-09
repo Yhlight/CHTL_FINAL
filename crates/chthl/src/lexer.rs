@@ -5,9 +5,9 @@ use crate::token::Token;
 
 pub struct Lexer<'a> {
     input: &'a [u8],
-    position: usize,      // current position in input (points to current char)
-    read_position: usize, // current reading position in input (after current char)
-    ch: u8,               // current char under examination
+    position: usize,
+    read_position: usize,
+    ch: u8,
 }
 
 impl<'a> Lexer<'a> {
@@ -24,7 +24,7 @@ impl<'a> Lexer<'a> {
 
     fn read_char(&mut self) {
         if self.read_position >= self.input.len() {
-            self.ch = 0; // ASCII NUL for EOF
+            self.ch = 0;
         } else {
             self.ch = self.input[self.read_position];
         }
@@ -50,37 +50,6 @@ impl<'a> Lexer<'a> {
         self.skip_whitespace();
 
         let tok = match self.ch {
-            // Multi-character tokens first
-            b'&' if self.peek_char() == b'&' => {
-                self.read_char(); // consume first '&'
-                self.read_char(); // consume second '&'
-                Token::LogicalAnd
-            }
-            b'|' if self.peek_char() == b'|' => {
-                self.read_char(); // consume first '|'
-                self.read_char(); // consume second '|'
-                Token::LogicalOr
-            }
-            b'-' if self.peek_char() == b'>' => {
-                self.read_char(); // consume '-'
-                self.read_char(); // consume '>'
-                Token::Arrow
-            }
-            b'-' if self.peek_char() == b'-' => {
-                self.read_char(); // consume first '-'
-                self.read_char(); // consume second '-'
-                Token::GeneratorComment(self.read_comment_line())
-            }
-            b'/' if self.peek_char() == b'/' => {
-                self.read_comment_line();
-                self.next_token() // Recurse
-            }
-            b'/' if self.peek_char() == b'*' => {
-                self.read_multiline_comment();
-                self.next_token() // Recurse
-            }
-
-            // Single-character tokens
             b'=' => { self.read_char(); Token::Assign }
             b';' => { self.read_char(); Token::Semicolon }
             b'(' => { self.read_char(); Token::LParen }
@@ -97,27 +66,26 @@ impl<'a> Lexer<'a> {
             b'?' => { self.read_char(); Token::Question }
             b'>' => { self.read_char(); Token::Gt }
             b'<' => { self.read_char(); Token::Lt }
+            b'&' if self.peek_char() == b'&' => { self.read_char(); self.read_char(); Token::LogicalAnd }
+            b'|' if self.peek_char() == b'|' => { self.read_char(); self.read_char(); Token::LogicalOr }
+            b'-' if self.peek_char() == b'>' => { self.read_char(); self.read_char(); Token::Arrow }
+            b'-' if self.peek_char() == b'-' => { self.read_char(); self.read_char(); Token::GeneratorComment(self.read_comment_line()) }
+            b'/' if self.peek_char() == b'/' => { self.read_comment_line(); self.next_token() }
+            b'/' if self.peek_char() == b'*' => { self.read_multiline_comment(); self.next_token() }
             b'&' => { self.read_char(); Token::Ampersand }
-
-            // Literals
             b'"' | b'\'' => {
                 let quote = self.ch;
                 let content = self.read_string(quote);
-                self.read_char(); // consume closing quote
+                self.read_char();
                 Token::String(content)
             }
-
-            // EOF
             0 => Token::Eof,
-
-            // Identifiers or illegal characters
             _ => {
-                if is_letter(self.ch) {
-                    // read_identifier handles its own character consumption
+                if is_identifier_char(self.ch) {
                     Token::Ident(self.read_identifier())
                 } else {
                     let ch = self.ch;
-                    self.read_char(); // consume the illegal char
+                    self.read_char();
                     Token::Illegal(String::from_utf8_lossy(&[ch]).to_string())
                 }
             }
@@ -128,7 +96,7 @@ impl<'a> Lexer<'a> {
 
     fn read_identifier(&mut self) -> String {
         let position = self.position;
-        while is_letter(self.ch) || self.ch.is_ascii_digit() {
+        while is_identifier_char(self.ch) {
             self.read_char();
         }
         String::from_utf8_lossy(&self.input[position..self.position]).to_string()
@@ -154,15 +122,15 @@ impl<'a> Lexer<'a> {
     }
 
     fn read_multiline_comment(&mut self) {
-        self.read_char(); // consume '*'
-        self.read_char(); // consume first char of comment
+        self.read_char();
+        self.read_char();
         loop {
             if self.ch == b'*' && self.peek_char() == b'/' {
-                self.read_char(); // consume '*'
-                self.read_char(); // consume '/'
+                self.read_char();
+                self.read_char();
                 break;
             }
-            if self.ch == 0 { // EOF
+            if self.ch == 0 {
                 break;
             }
             self.read_char();
@@ -170,8 +138,10 @@ impl<'a> Lexer<'a> {
     }
 }
 
-fn is_letter(ch: u8) -> bool {
-    ch.is_ascii_alphabetic() || ch == b'_'
+// An identifier in CHTL is very flexible, especially for unquoted values.
+// It's easier to define it by what it's *not*.
+fn is_identifier_char(ch: u8) -> bool {
+    !ch.is_ascii_whitespace() && !b"={}[];,:@#&|?<>\"'".contains(&ch) && ch != 0
 }
 
 #[cfg(test)]
@@ -194,10 +164,24 @@ mod tests {
         ];
 
         let mut l = Lexer::new(input);
-
         for expected_token in tests {
-            let tok = l.next_token();
-            assert_eq!(tok, expected_token);
+            assert_eq!(l.next_token(), expected_token);
+        }
+    }
+
+    #[test]
+    fn test_css_value_as_identifier() {
+        let input = "width: 100px;";
+        let tests = vec![
+            Token::Ident("width".to_string()),
+            Token::Colon,
+            Token::Ident("100px".to_string()),
+            Token::Semicolon,
+            Token::Eof,
+        ];
+        let mut l = Lexer::new(input);
+        for expected_token in tests {
+            assert_eq!(l.next_token(), expected_token);
         }
     }
 
@@ -212,7 +196,6 @@ mod tests {
                 color: red;
             }
         "#;
-
         let tests = vec![
             Token::Ident("div".to_string()),
             Token::LBrace,
@@ -224,12 +207,9 @@ mod tests {
             Token::RBrace,
             Token::Eof,
         ];
-
         let mut l = Lexer::new(input);
-
         for expected_token in tests {
-            let tok = l.next_token();
-            assert_eq!(tok, expected_token);
+            assert_eq!(l.next_token(), expected_token);
         }
     }
 
@@ -258,12 +238,9 @@ mod tests {
             Token::Question,
             Token::Eof,
         ];
-
         let mut l = Lexer::new(input);
-
         for expected_token in tests {
-            let tok = l.next_token();
-            assert_eq!(tok, expected_token, "Failed on input: {}", input);
+            assert_eq!(l.next_token(), expected_token, "Failed on input: {}", input);
         }
     }
 }
