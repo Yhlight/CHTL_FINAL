@@ -1,0 +1,56 @@
+// This is a CHTL test file
+text
+{
+    "Hello, CHTL World!"
+}
+
+div
+{
+    id: main;
+    class: container;
+    
+    text
+    {
+        "This is a div element"
+    }
+    
+    style
+    {
+        .container
+        {
+            width: 100px;
+            height: 200px;
+            background-color: red;
+        }
+        
+        &:hover
+        {
+            background-color: blue;
+        }
+    }
+}
+
+[Template] @Style DefaultText
+{
+    color: "black";
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+[Custom] @Element Box
+{
+    div
+    {
+        style
+        {
+            width: 200px;
+            height: 200px;
+            background-color: green;
+        }
+    }
+}
+
+body
+{
+    @Element Box;
+}
