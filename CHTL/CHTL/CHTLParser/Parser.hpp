@@ -7,11 +7,18 @@
 #include <CHTL/CHTLNode/TextNode.hpp>
 #include <CHTL/CHTLNode/StyleNode.hpp>
 #include <CHTL/CHTLNode/TemplateNode.hpp>
+#include <CHTL/CHTLNode/TemplateStyleNode.hpp>
+#include <CHTL/CHTLNode/TemplateElementNode.hpp>
+#include <CHTL/CHTLNode/TemplateVarNode.hpp>
 #include <CHTL/CHTLNode/CustomNode.hpp>
+#include <CHTL/CHTLNode/CustomStyleNode.hpp>
+#include <CHTL/CHTLNode/CustomElementNode.hpp>
+#include <CHTL/CHTLNode/CustomVarNode.hpp>
 #include <CHTL/CHTLNode/OriginNode.hpp>
 #include <CHTL/CHTLNode/ImportNode.hpp>
 #include <CHTL/CHTLNode/ConfigNode.hpp>
 #include <CHTL/CHTLNode/NamespaceNode.hpp>
+#include <CHTL/CHTLManage/TemplateManager.hpp>
 #include <memory>
 #include <vector>
 #include <string>
@@ -121,6 +128,36 @@ private:
     
     // 解析命名空间类型
     std::string parseNamespaceType();
+    
+    // 解析样式模板内容
+    void parseStyleTemplateContent(TemplateStyleNode* styleTemplate);
+    
+    // 解析变量模板内容
+    void parseVarTemplateContent(TemplateVarNode* varTemplate);
+    
+    // 解析模板继承
+    void parseTemplateInheritance(BaseNode* template_node);
+    
+    // 解析自定义样式组内容
+    void parseCustomStyleContent(CustomStyleNode* customStyle);
+    
+    // 解析自定义元素内容
+    void parseCustomElementContent(CustomElementNode* customElement);
+    
+    // 解析自定义变量组内容
+    void parseCustomVarContent(CustomVarNode* customVar);
+    
+    // 解析删除操作
+    void parseDeleteOperation(BaseNode* customNode);
+    
+    // 解析插入操作
+    void parseInsertOperation(CustomElementNode* customElement);
+    
+    // 解析 Name 块
+    void parseNameBlock(ConfigNode* config);
+    
+    // 解析 Use 语句
+    std::shared_ptr<BaseNode> parseUse();
     
     // 报告错误
     void reportError(const std::string& message);

@@ -1,0 +1,51 @@
+// 测试原始 HTML 嵌入
+[Origin] @Html
+{
+    <div class="raw-html">
+        <h1>Raw HTML Content</h1>
+        <p>This is raw HTML that will be directly embedded.</p>
+    </div>
+}
+
+// 测试原始 CSS 嵌入
+[Origin] @Style MyStyles
+{
+    .custom-class {
+        color: red;
+        font-size: 18px;
+    }
+    
+    #custom-id {
+        background-color: blue;
+        padding: 10px;
+    }
+}
+
+// 测试原始 JavaScript 嵌入
+[Origin] @JavaScript MyScript
+{
+    function myFunction() {
+        console.log("Raw JavaScript function");
+        document.getElementById("demo").innerHTML = "Hello World!";
+    }
+    
+    window.onload = function() {
+        myFunction();
+    };
+}
+
+// 测试使用原始嵌入
+div
+{
+    class: container;
+    
+    text
+    {
+        "Testing Origin Embedding System"
+    }
+    
+    style
+    {
+        @Style MyStyles;
+    }
+}

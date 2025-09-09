@@ -32,6 +32,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/share/cmake-3.31/Modules/Platform/Linux.cmake"
   "/usr/share/cmake-3.31/Modules/Platform/UnixPaths.cmake"
   "/workspace/CHTL/CHTL/CHTLLexer/CMakeLists.txt"
+  "/workspace/CHTL/CHTL/CHTLManage/CMakeLists.txt"
   "/workspace/CHTL/CHTL/CHTLNode/CMakeLists.txt"
   "/workspace/CHTL/CHTL/CHTLParser/CMakeLists.txt"
   "/workspace/CHTL/CHTL/CMakeLists.txt"
@@ -53,6 +54,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "CHTL/CHTLLexer/CMakeFiles/CMakeDirectoryInformation.cmake"
   "CHTL/CHTLNode/CMakeFiles/CMakeDirectoryInformation.cmake"
   "CHTL/CHTLParser/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "CHTL/CHTLManage/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
@@ -62,4 +64,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/DependInfo.cmake"
   "CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/DependInfo.cmake"
   "CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/DependInfo.cmake"
+  "CHTL/CHTLManage/CMakeFiles/CHTLManage.dir/DependInfo.cmake"
   )

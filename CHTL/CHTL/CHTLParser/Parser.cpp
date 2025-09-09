@@ -51,6 +51,11 @@ std::shared_ptr<BaseNode> Parser::parse() {
             if (namespace_node) {
                 root->addChild(namespace_node);
             }
+        } else if (current_.getType() == TokenType::USE) {
+            auto use = parseUse();
+            if (use) {
+                root->addChild(use);
+            }
         } else {
             // 跳过未知词法单元
             current_ = lexer_.nextToken();
@@ -150,25 +155,77 @@ std::shared_ptr<BaseNode> Parser::parseTemplate() {
         return nullptr;
     }
     
-    // 创建模板节点
-    auto template_node = std::make_shared<TemplateNode>(templateType,
-                                                       current_.getLine(), current_.getColumn());
+    // 获取模板名称
+    std::string templateName;
+    if (current_.getType() == TokenType::IDENTIFIER) {
+        templateName = current_.getValue();
+        current_ = lexer_.nextToken();
+    } else {
+        reportError("Expected template name");
+        return nullptr;
+    }
     
-    if (consume(TokenType::LEFT_BRACE)) {
-        while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
-            if (isElementStart(current_.getType())) {
-                auto element = parseElement();
-                if (element) {
-                    template_node->addChild(element);
-                }
-            } else {
-                current_ = lexer_.nextToken();
+    // 根据模板类型创建相应的模板节点
+    std::shared_ptr<BaseNode> template_node;
+    
+    if (templateType == "@Style") {
+        auto styleTemplate = std::make_shared<TemplateStyleNode>(templateName,
+                                                                current_.getLine(), current_.getColumn());
+        
+        if (consume(TokenType::LEFT_BRACE)) {
+            parseStyleTemplateContent(styleTemplate.get());
+            if (!consume(TokenType::RIGHT_BRACE)) {
+                reportError("Expected '}'");
             }
         }
         
-        if (!consume(TokenType::RIGHT_BRACE)) {
-            reportError("Expected '}'");
+        // 注册到模板管理器
+        TemplateManager::getInstance().addStyleTemplate(templateName, styleTemplate);
+        template_node = styleTemplate;
+        
+    } else if (templateType == "@Element") {
+        auto elementTemplate = std::make_shared<TemplateElementNode>(templateName,
+                                                                    current_.getLine(), current_.getColumn());
+        
+        if (consume(TokenType::LEFT_BRACE)) {
+            while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+                if (isElementStart(current_.getType())) {
+                    auto element = parseElement();
+                    if (element) {
+                        elementTemplate->addChild(element);
+                    }
+                } else {
+                    current_ = lexer_.nextToken();
+                }
+            }
+            
+            if (!consume(TokenType::RIGHT_BRACE)) {
+                reportError("Expected '}'");
+            }
         }
+        
+        // 注册到模板管理器
+        TemplateManager::getInstance().addElementTemplate(templateName, elementTemplate);
+        template_node = elementTemplate;
+        
+    } else if (templateType == "@Var") {
+        auto varTemplate = std::make_shared<TemplateVarNode>(templateName,
+                                                            current_.getLine(), current_.getColumn());
+        
+        if (consume(TokenType::LEFT_BRACE)) {
+            parseVarTemplateContent(varTemplate.get());
+            if (!consume(TokenType::RIGHT_BRACE)) {
+                reportError("Expected '}'");
+            }
+        }
+        
+        // 注册到模板管理器
+        TemplateManager::getInstance().addVarTemplate(templateName, varTemplate);
+        template_node = varTemplate;
+        
+    } else {
+        reportError("Unknown template type: " + templateType);
+        return nullptr;
     }
     
     return template_node;
@@ -186,25 +243,61 @@ std::shared_ptr<BaseNode> Parser::parseCustom() {
         return nullptr;
     }
     
-    // 创建自定义节点
-    auto custom = std::make_shared<CustomNode>(customType,
-                                              current_.getLine(), current_.getColumn());
+    // 获取自定义名称
+    std::string customName;
+    if (current_.getType() == TokenType::IDENTIFIER) {
+        customName = current_.getValue();
+        current_ = lexer_.nextToken();
+    } else {
+        reportError("Expected custom name");
+        return nullptr;
+    }
     
-    if (consume(TokenType::LEFT_BRACE)) {
-        while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
-            if (isElementStart(current_.getType())) {
-                auto element = parseElement();
-                if (element) {
-                    custom->addChild(element);
-                }
-            } else {
-                current_ = lexer_.nextToken();
+    // 根据自定义类型创建相应的自定义节点
+    std::shared_ptr<BaseNode> custom;
+    
+    if (customType == "@Style") {
+        auto customStyle = std::make_shared<CustomStyleNode>(customName,
+                                                            current_.getLine(), current_.getColumn());
+        
+        if (consume(TokenType::LEFT_BRACE)) {
+            parseCustomStyleContent(customStyle.get());
+            if (!consume(TokenType::RIGHT_BRACE)) {
+                reportError("Expected '}'");
             }
         }
         
-        if (!consume(TokenType::RIGHT_BRACE)) {
-            reportError("Expected '}'");
+        custom = customStyle;
+        
+    } else if (customType == "@Element") {
+        auto customElement = std::make_shared<CustomElementNode>(customName,
+                                                                current_.getLine(), current_.getColumn());
+        
+        if (consume(TokenType::LEFT_BRACE)) {
+            parseCustomElementContent(customElement.get());
+            if (!consume(TokenType::RIGHT_BRACE)) {
+                reportError("Expected '}'");
+            }
         }
+        
+        custom = customElement;
+        
+    } else if (customType == "@Var") {
+        auto customVar = std::make_shared<CustomVarNode>(customName,
+                                                        current_.getLine(), current_.getColumn());
+        
+        if (consume(TokenType::LEFT_BRACE)) {
+            parseCustomVarContent(customVar.get());
+            if (!consume(TokenType::RIGHT_BRACE)) {
+                reportError("Expected '}'");
+            }
+        }
+        
+        custom = customVar;
+        
+    } else {
+        reportError("Unknown custom type: " + customType);
+        return nullptr;
     }
     
     return custom;
@@ -222,9 +315,20 @@ std::shared_ptr<BaseNode> Parser::parseOrigin() {
         return nullptr;
     }
     
+    // 获取原始嵌入名称（可选）
+    std::string originName;
+    if (current_.getType() == TokenType::IDENTIFIER) {
+        originName = current_.getValue();
+        current_ = lexer_.nextToken();
+    }
+    
     // 创建原始嵌入节点
     auto origin = std::make_shared<OriginNode>(originType,
                                               current_.getLine(), current_.getColumn());
+    
+    if (!originName.empty()) {
+        origin->setAttribute("name", originName);
+    }
     
     if (consume(TokenType::LEFT_BRACE)) {
         std::string content;
@@ -254,9 +358,37 @@ std::shared_ptr<BaseNode> Parser::parseImport() {
         return nullptr;
     }
     
+    // 获取导入路径
+    std::string importPath;
+    if (current_.getType() == TokenType::STRING_LITERAL) {
+        importPath = current_.getValue();
+        current_ = lexer_.nextToken();
+    } else if (current_.getType() == TokenType::UNQUOTED_LITERAL) {
+        importPath = current_.getValue();
+        current_ = lexer_.nextToken();
+    } else {
+        reportError("Expected import path");
+        return nullptr;
+    }
+    
+    // 获取导入名称（可选）
+    std::string importName;
+    if (current_.getType() == TokenType::AS) {
+        current_ = lexer_.nextToken();
+        if (current_.getType() == TokenType::IDENTIFIER) {
+            importName = current_.getValue();
+            current_ = lexer_.nextToken();
+        }
+    }
+    
     // 创建导入节点
     auto import = std::make_shared<ImportNode>(importType,
                                              current_.getLine(), current_.getColumn());
+    
+    import->setAttribute("path", importPath);
+    if (!importName.empty()) {
+        import->setAttribute("name", importName);
+    }
     
     return import;
 }
@@ -267,8 +399,19 @@ std::shared_ptr<BaseNode> Parser::parseConfig() {
         return nullptr;
     }
     
+    // 获取配置组名称（可选）
+    std::string configName;
+    if (current_.getType() == TokenType::IDENTIFIER) {
+        configName = current_.getValue();
+        current_ = lexer_.nextToken();
+    }
+    
     // 创建配置节点
     auto config = std::make_shared<ConfigNode>(current_.getLine(), current_.getColumn());
+    
+    if (!configName.empty()) {
+        config->setAttribute("name", configName);
+    }
     
     if (consume(TokenType::LEFT_BRACE)) {
         while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
@@ -279,6 +422,15 @@ std::shared_ptr<BaseNode> Parser::parseConfig() {
                 if (consume(TokenType::EQUAL)) {
                     std::string value = parseAttributeValue();
                     config->setAttribute(key, value);
+                }
+            } else if (current_.getType() == TokenType::LEFT_BRACKET) {
+                // 处理 [Name] 块
+                current_ = lexer_.nextToken();
+                if (current_.getType() == TokenType::IDENTIFIER && current_.getValue() == "Name") {
+                    current_ = lexer_.nextToken();
+                    if (consume(TokenType::RIGHT_BRACKET)) {
+                        parseNameBlock(config.get());
+                    }
                 }
             } else {
                 current_ = lexer_.nextToken();
@@ -457,6 +609,316 @@ std::string Parser::parseConfigType() {
 
 std::string Parser::parseNamespaceType() {
     return "";
+}
+
+void Parser::parseStyleTemplateContent(TemplateStyleNode* styleTemplate) {
+    while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+        if (current_.getType() == TokenType::IDENTIFIER) {
+            std::string property = current_.getValue();
+            current_ = lexer_.nextToken();
+            
+            if (consume(TokenType::COLON)) {
+                std::string value = parseAttributeValue();
+                styleTemplate->addCSSProperty(property, value);
+            }
+            
+            if (consume(TokenType::SEMICOLON)) {
+                // 属性结束
+            }
+        } else if (current_.getType() == TokenType::TEMPLATE_STYLE) {
+            // 处理模板继承
+            current_ = lexer_.nextToken();
+            if (current_.getType() == TokenType::IDENTIFIER) {
+                std::string inheritedTemplate = current_.getValue();
+                styleTemplate->addInheritedTemplate(inheritedTemplate);
+                current_ = lexer_.nextToken();
+            }
+        } else {
+            current_ = lexer_.nextToken();
+        }
+    }
+}
+
+void Parser::parseVarTemplateContent(TemplateVarNode* varTemplate) {
+    while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+        if (current_.getType() == TokenType::IDENTIFIER) {
+            std::string varName = current_.getValue();
+            current_ = lexer_.nextToken();
+            
+            if (consume(TokenType::COLON)) {
+                std::string varValue = parseAttributeValue();
+                varTemplate->addVariable(varName, varValue);
+            }
+            
+            if (consume(TokenType::SEMICOLON)) {
+                // 变量结束
+            }
+        } else if (current_.getType() == TokenType::TEMPLATE_VAR) {
+            // 处理模板继承
+            current_ = lexer_.nextToken();
+            if (current_.getType() == TokenType::IDENTIFIER) {
+                std::string inheritedTemplate = current_.getValue();
+                varTemplate->addInheritedTemplate(inheritedTemplate);
+                current_ = lexer_.nextToken();
+            }
+        } else {
+            current_ = lexer_.nextToken();
+        }
+    }
+}
+
+void Parser::parseTemplateInheritance(BaseNode* template_node) {
+    // 检查是否有继承关键字
+    if (current_.getType() == TokenType::INHERIT) {
+        current_ = lexer_.nextToken();
+        
+        if (current_.getType() == TokenType::TEMPLATE_STYLE ||
+            current_.getType() == TokenType::TEMPLATE_ELEMENT ||
+            current_.getType() == TokenType::TEMPLATE_VAR) {
+            
+            current_ = lexer_.nextToken();
+            if (current_.getType() == TokenType::IDENTIFIER) {
+                std::string inheritedTemplate = current_.getValue();
+                
+                // 根据模板类型添加继承
+                if (auto styleTemplate = dynamic_cast<TemplateStyleNode*>(template_node)) {
+                    styleTemplate->addInheritedTemplate(inheritedTemplate);
+                } else if (auto elementTemplate = dynamic_cast<TemplateElementNode*>(template_node)) {
+                    elementTemplate->addInheritedTemplate(inheritedTemplate);
+                } else if (auto varTemplate = dynamic_cast<TemplateVarNode*>(template_node)) {
+                    varTemplate->addInheritedTemplate(inheritedTemplate);
+                }
+                
+                current_ = lexer_.nextToken();
+            }
+        }
+    }
+}
+
+void Parser::parseCustomStyleContent(CustomStyleNode* customStyle) {
+    while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+        if (current_.getType() == TokenType::IDENTIFIER) {
+            std::string property = current_.getValue();
+            current_ = lexer_.nextToken();
+            
+            if (consume(TokenType::COLON)) {
+                std::string value = parseAttributeValue();
+                customStyle->addCSSProperty(property, value);
+            } else if (consume(TokenType::COMMA)) {
+                // 无值属性
+                customStyle->addUnvaluedProperty(property);
+            }
+            
+            if (consume(TokenType::SEMICOLON)) {
+                // 属性结束
+            }
+        } else if (current_.getType() == TokenType::TEMPLATE_STYLE) {
+            // 处理模板继承
+            current_ = lexer_.nextToken();
+            if (current_.getType() == TokenType::IDENTIFIER) {
+                std::string inheritedTemplate = current_.getValue();
+                customStyle->addInheritedTemplate(inheritedTemplate);
+                current_ = lexer_.nextToken();
+            }
+        } else if (current_.getType() == TokenType::DELETE) {
+            // 处理删除操作
+            parseDeleteOperation(customStyle);
+        } else {
+            current_ = lexer_.nextToken();
+        }
+    }
+}
+
+void Parser::parseCustomElementContent(CustomElementNode* customElement) {
+    while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+        if (isElementStart(current_.getType())) {
+            auto element = parseElement();
+            if (element) {
+                customElement->addChild(element);
+            }
+        } else if (current_.getType() == TokenType::TEMPLATE_ELEMENT) {
+            // 处理模板继承
+            current_ = lexer_.nextToken();
+            if (current_.getType() == TokenType::IDENTIFIER) {
+                std::string inheritedTemplate = current_.getValue();
+                customElement->addInheritedTemplate(inheritedTemplate);
+                current_ = lexer_.nextToken();
+            }
+        } else if (current_.getType() == TokenType::DELETE) {
+            // 处理删除操作
+            parseDeleteOperation(customElement);
+        } else if (current_.getType() == TokenType::INSERT) {
+            // 处理插入操作
+            parseInsertOperation(customElement);
+        } else {
+            current_ = lexer_.nextToken();
+        }
+    }
+}
+
+void Parser::parseCustomVarContent(CustomVarNode* customVar) {
+    while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+        if (current_.getType() == TokenType::IDENTIFIER) {
+            std::string varName = current_.getValue();
+            current_ = lexer_.nextToken();
+            
+            if (consume(TokenType::COLON)) {
+                std::string varValue = parseAttributeValue();
+                customVar->addVariable(varName, varValue);
+            }
+            
+            if (consume(TokenType::SEMICOLON)) {
+                // 变量结束
+            }
+        } else if (current_.getType() == TokenType::TEMPLATE_VAR) {
+            // 处理模板继承
+            current_ = lexer_.nextToken();
+            if (current_.getType() == TokenType::IDENTIFIER) {
+                std::string inheritedTemplate = current_.getValue();
+                customVar->addInheritedTemplate(inheritedTemplate);
+                current_ = lexer_.nextToken();
+            }
+        } else {
+            current_ = lexer_.nextToken();
+        }
+    }
+}
+
+void Parser::parseDeleteOperation(BaseNode* customNode) {
+    if (!consume(TokenType::DELETE)) {
+        return;
+    }
+    
+    while (current_.getType() != TokenType::SEMICOLON && !hasError_) {
+        if (current_.getType() == TokenType::IDENTIFIER) {
+            std::string item = current_.getValue();
+            current_ = lexer_.nextToken();
+            
+            // 根据节点类型添加删除项
+            if (auto customStyle = dynamic_cast<CustomStyleNode*>(customNode)) {
+                customStyle->addDeletedProperty(item);
+            } else if (auto customElement = dynamic_cast<CustomElementNode*>(customNode)) {
+                customElement->addDeletedElement(item);
+            }
+            
+            if (current_.getType() == TokenType::COMMA) {
+                current_ = lexer_.nextToken();
+            }
+        } else {
+            current_ = lexer_.nextToken();
+        }
+    }
+    
+    if (consume(TokenType::SEMICOLON)) {
+        // 删除操作结束
+    }
+}
+
+void Parser::parseInsertOperation(CustomElementNode* customElement) {
+    if (!consume(TokenType::INSERT)) {
+        return;
+    }
+    
+    std::string position = "at bottom"; // 默认位置
+    
+    if (current_.getType() == TokenType::AFTER) {
+        position = "after";
+        current_ = lexer_.nextToken();
+    } else if (current_.getType() == TokenType::BEFORE) {
+        position = "before";
+        current_ = lexer_.nextToken();
+    } else if (current_.getType() == TokenType::REPLACE) {
+        position = "replace";
+        current_ = lexer_.nextToken();
+    } else if (current_.getType() == TokenType::AT_TOP) {
+        position = "at top";
+        current_ = lexer_.nextToken();
+    } else if (current_.getType() == TokenType::AT_BOTTOM) {
+        position = "at bottom";
+        current_ = lexer_.nextToken();
+    }
+    
+    std::string selector;
+    if (current_.getType() == TokenType::IDENTIFIER) {
+        selector = current_.getValue();
+        current_ = lexer_.nextToken();
+    }
+    
+    if (consume(TokenType::LEFT_BRACE)) {
+        while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+            if (isElementStart(current_.getType())) {
+                auto element = parseElement();
+                if (element) {
+                    customElement->addInsertedElement(position, selector, element);
+                }
+            } else {
+                current_ = lexer_.nextToken();
+            }
+        }
+        
+        if (!consume(TokenType::RIGHT_BRACE)) {
+            reportError("Expected '}'");
+        }
+    }
+}
+
+void Parser::parseNameBlock(ConfigNode* config) {
+    if (consume(TokenType::LEFT_BRACE)) {
+        while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+            if (current_.getType() == TokenType::IDENTIFIER) {
+                std::string keyword = current_.getValue();
+                current_ = lexer_.nextToken();
+                
+                if (consume(TokenType::EQUAL)) {
+                    std::string value = parseAttributeValue();
+                    config->setAttribute("name_" + keyword, value);
+                }
+            } else {
+                current_ = lexer_.nextToken();
+            }
+        }
+        
+        if (!consume(TokenType::RIGHT_BRACE)) {
+            reportError("Expected '}'");
+        }
+    }
+}
+
+std::shared_ptr<BaseNode> Parser::parseUse() {
+    if (!consume(TokenType::USE)) {
+        reportError("Expected use");
+        return nullptr;
+    }
+    
+    // 创建 Use 节点
+    auto use = std::make_shared<BaseNode>(BaseNode::NodeType::OPERATOR,
+                                         current_.getLine(), current_.getColumn());
+    
+    if (current_.getType() == TokenType::IDENTIFIER) {
+        std::string useTarget = current_.getValue();
+        current_ = lexer_.nextToken();
+        
+        if (useTarget == "html5") {
+            use->setAttribute("type", "html5");
+        } else {
+            use->setAttribute("type", "config");
+            use->setAttribute("target", useTarget);
+        }
+    } else if (current_.getType() == TokenType::AT) {
+        current_ = lexer_.nextToken();
+        if (current_.getType() == TokenType::IDENTIFIER) {
+            std::string configName = "@" + current_.getValue();
+            current_ = lexer_.nextToken();
+            use->setAttribute("type", "config");
+            use->setAttribute("target", configName);
+        }
+    }
+    
+    if (consume(TokenType::SEMICOLON)) {
+        // Use 语句结束
+    }
+    
+    return use;
 }
 
 void Parser::reportError(const std::string& message) {

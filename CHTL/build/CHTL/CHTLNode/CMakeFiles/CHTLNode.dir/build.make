@@ -142,10 +142,52 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateNode.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLNode.dir/TemplateNode.cpp.s"
 	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CHTL/CHTLNode/TemplateNode.cpp -o CMakeFiles/CHTLNode.dir/TemplateNode.cpp.s
 
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/flags.make
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.cpp
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.o"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.o -MF CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.o.d -o CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.cpp
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.i"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.cpp > CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.i
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.s"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.cpp -o CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.s
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/flags.make
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.cpp
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.o"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.o -MF CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.o.d -o CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.cpp
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.i"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.cpp > CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.i
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.s"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.cpp -o CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.s
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/flags.make
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.cpp
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.o"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.o -MF CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.o.d -o CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.cpp
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.i"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.cpp > CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.i
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.s"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.cpp -o CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.s
+
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/flags.make
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/CustomNode.cpp
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomNode.cpp.o"
 	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomNode.cpp.o -MF CMakeFiles/CHTLNode.dir/CustomNode.cpp.o.d -o CMakeFiles/CHTLNode.dir/CustomNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/CustomNode.cpp
 
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomNode.cpp.i: cmake_force
@@ -156,10 +198,52 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomNode.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLNode.dir/CustomNode.cpp.s"
 	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CHTL/CHTLNode/CustomNode.cpp -o CMakeFiles/CHTLNode.dir/CustomNode.cpp.s
 
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/flags.make
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.cpp
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.o"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.o -MF CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.o.d -o CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.cpp
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.i"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.cpp > CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.i
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.s"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.cpp -o CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.s
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/flags.make
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.cpp
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o -MF CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o.d -o CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.cpp
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.i"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.cpp > CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.i
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.s"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.cpp -o CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.s
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/flags.make
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.cpp
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.o"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.o -MF CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.o.d -o CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.cpp
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.i"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.cpp > CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.i
+
+CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.s"
+	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.cpp -o CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.s
+
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/OriginNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/flags.make
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/OriginNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/OriginNode.cpp
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/OriginNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/OriginNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/OriginNode.cpp.o"
 	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/OriginNode.cpp.o -MF CMakeFiles/CHTLNode.dir/OriginNode.cpp.o.d -o CMakeFiles/CHTLNode.dir/OriginNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/OriginNode.cpp
 
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/OriginNode.cpp.i: cmake_force
@@ -173,7 +257,7 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/OriginNode.cpp.s: cmake_force
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ImportNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/flags.make
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ImportNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/ImportNode.cpp
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ImportNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ImportNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ImportNode.cpp.o"
 	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ImportNode.cpp.o -MF CMakeFiles/CHTLNode.dir/ImportNode.cpp.o.d -o CMakeFiles/CHTLNode.dir/ImportNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/ImportNode.cpp
 
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ImportNode.cpp.i: cmake_force
@@ -187,7 +271,7 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ImportNode.cpp.s: cmake_force
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ConfigNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/flags.make
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ConfigNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/ConfigNode.cpp
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ConfigNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ConfigNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ConfigNode.cpp.o"
 	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ConfigNode.cpp.o -MF CMakeFiles/CHTLNode.dir/ConfigNode.cpp.o.d -o CMakeFiles/CHTLNode.dir/ConfigNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/ConfigNode.cpp
 
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ConfigNode.cpp.i: cmake_force
@@ -201,7 +285,7 @@ CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ConfigNode.cpp.s: cmake_force
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/NamespaceNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/flags.make
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/NamespaceNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/NamespaceNode.cpp
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/NamespaceNode.cpp.o: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/NamespaceNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/NamespaceNode.cpp.o"
 	cd /workspace/CHTL/build/CHTL/CHTLNode && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/NamespaceNode.cpp.o -MF CMakeFiles/CHTLNode.dir/NamespaceNode.cpp.o.d -o CMakeFiles/CHTLNode.dir/NamespaceNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/NamespaceNode.cpp
 
 CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/NamespaceNode.cpp.i: cmake_force
@@ -219,7 +303,13 @@ CHTLNode_OBJECTS = \
 "CMakeFiles/CHTLNode.dir/TextNode.cpp.o" \
 "CMakeFiles/CHTLNode.dir/StyleNode.cpp.o" \
 "CMakeFiles/CHTLNode.dir/TemplateNode.cpp.o" \
+"CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.o" \
+"CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.o" \
+"CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.o" \
 "CMakeFiles/CHTLNode.dir/CustomNode.cpp.o" \
+"CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.o" \
+"CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o" \
+"CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.o" \
 "CMakeFiles/CHTLNode.dir/OriginNode.cpp.o" \
 "CMakeFiles/CHTLNode.dir/ImportNode.cpp.o" \
 "CMakeFiles/CHTLNode.dir/ConfigNode.cpp.o" \
@@ -233,14 +323,20 @@ lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ElementNode.cpp.o
 lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TextNode.cpp.o
 lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/StyleNode.cpp.o
 lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateNode.cpp.o
+lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.o
+lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.o
+lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.o
 lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomNode.cpp.o
+lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.o
+lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o
+lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.o
 lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/OriginNode.cpp.o
 lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ImportNode.cpp.o
 lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ConfigNode.cpp.o
 lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/NamespaceNode.cpp.o
 lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make
 lib/libCHTLNode.a: CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX static library ../../lib/libCHTLNode.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Linking CXX static library ../../lib/libCHTLNode.a"
 	cd /workspace/CHTL/build/CHTL/CHTLNode && $(CMAKE_COMMAND) -P CMakeFiles/CHTLNode.dir/cmake_clean_target.cmake
 	cd /workspace/CHTL/build/CHTL/CHTLNode && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/CHTLNode.dir/link.txt --verbose=$(VERBOSE)
 

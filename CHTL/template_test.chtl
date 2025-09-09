@@ -1,0 +1,52 @@
+// 测试样式组模板
+[Template] @Style DefaultText
+{
+    color: black;
+    line-height: 1.6;
+}
+
+// 测试元素模板
+[Template] @Element Box
+{
+    div
+    {
+        style
+        {
+            width: 200px;
+            height: 200px;
+            background-color: red;
+        }
+    }
+}
+
+// 测试变量组模板
+[Template] @Var ThemeColor
+{
+    primaryColor: "rgb(255, 192, 203)";
+    secondaryColor: "rgb(145, 155, 200)";
+}
+
+// 测试模板继承
+[Template] @Style ExtendedText
+{
+    @Style DefaultText;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+// 测试使用模板
+div
+{
+    class: container;
+    
+    text
+    {
+        "Hello from CHTL Template System!"
+    }
+    
+    style
+    {
+        @Style DefaultText;
+        background-color: ThemeColor(primaryColor);
+    }
+}

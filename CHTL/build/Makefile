@@ -226,6 +226,19 @@ CHTLParser/fast:
 	$(MAKE) $(MAKESILENT) -f CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/build.make CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/build
 .PHONY : CHTLParser/fast
 
+#=============================================================================
+# Target rules for targets named CHTLManage
+
+# Build rule for target.
+CHTLManage: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTLManage
+.PHONY : CHTLManage
+
+# fast build rule for target.
+CHTLManage/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL/CHTLManage/CMakeFiles/CHTLManage.dir/build.make CHTL/CHTLManage/CMakeFiles/CHTLManage.dir/build
+.PHONY : CHTLManage/fast
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -264,6 +277,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... CHTLCore"
 	@echo "... CHTLLexer"
+	@echo "... CHTLManage"
 	@echo "... CHTLNode"
 	@echo "... CHTLParser"
 	@echo "... chtl"

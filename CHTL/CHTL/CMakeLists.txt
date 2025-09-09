@@ -7,12 +7,14 @@ add_library(CHTLCore STATIC
 add_subdirectory(CHTLLexer)
 add_subdirectory(CHTLNode)
 add_subdirectory(CHTLParser)
+add_subdirectory(CHTLManage)
 
 # 链接依赖
 target_link_libraries(CHTLCore PUBLIC
     CHTLLexer
     CHTLNode
     CHTLParser
+    CHTLManage
 )
 
 # 设置编译选项

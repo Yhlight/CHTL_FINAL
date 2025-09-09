@@ -165,9 +165,12 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /workspace/CHTL/src/main.cpp \
   /usr/include/c++/14/bits/stl_iterator.h \
   /usr/include/c++/14/bits/stl_iterator_base_funcs.h \
   /usr/include/c++/14/bits/stl_iterator_base_types.h \
+  /usr/include/c++/14/bits/stl_map.h \
+  /usr/include/c++/14/bits/stl_multimap.h \
   /usr/include/c++/14/bits/stl_pair.h \
   /usr/include/c++/14/bits/stl_raw_storage_iter.h \
   /usr/include/c++/14/bits/stl_tempbuf.h \
+  /usr/include/c++/14/bits/stl_tree.h \
   /usr/include/c++/14/bits/stl_uninitialized.h \
   /usr/include/c++/14/bits/stl_vector.h \
   /usr/include/c++/14/bits/streambuf.tcc \
@@ -206,6 +209,7 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /workspace/CHTL/src/main.cpp \
   /usr/include/c++/14/iosfwd \
   /usr/include/c++/14/iostream \
   /usr/include/c++/14/istream \
+  /usr/include/c++/14/map \
   /usr/include/c++/14/memory \
   /usr/include/c++/14/new \
   /usr/include/c++/14/ostream \
@@ -249,7 +253,22 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /workspace/CHTL/src/main.cpp \
   /usr/lib/llvm-20/lib/clang/20/include/stddef.h \
   /usr/lib/llvm-20/lib/clang/20/include/stdint.h \
   /workspace/CHTL/CHTL/CHTLLexer/Lexer.hpp \
-  /workspace/CHTL/CHTL/CHTLLexer/Token.hpp
+  /workspace/CHTL/CHTL/CHTLLexer/Token.hpp \
+  /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/ConfigNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/ElementNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/ImportNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/NamespaceNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/OriginNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/StyleNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/TemplateNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/TextNode.hpp \
+  /workspace/CHTL/CHTL/CHTLParser/Parser.hpp
 
 bin/chtl: /lib/x86_64-linux-gnu/Scrt1.o \
   /lib/x86_64-linux-gnu/crti.o \
@@ -269,8 +288,13 @@ bin/chtl: /lib/x86_64-linux-gnu/Scrt1.o \
   /usr/lib/x86_64-linux-gnu/libc_nonshared.a \
   CMakeFiles/chtl.dir/src/main.cpp.o \
   lib/libCHTLCore.a \
-  lib/libCHTLLexer.a
+  lib/libCHTLLexer.a \
+  lib/libCHTLManage.a \
+  lib/libCHTLNode.a \
+  lib/libCHTLParser.a
 
+
+lib/libCHTLParser.a:
 
 CMakeFiles/chtl.dir/src/main.cpp.o:
 
@@ -285,6 +309,26 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 /usr/lib/gcc/x86_64-linux-gnu/14/crtbeginS.o:
 
 /lib64/ld-linux-x86-64.so.2:
+
+/lib/x86_64-linux-gnu/libgcc_s.so.1:
+
+/lib/x86_64-linux-gnu/libc.so:
+
+/lib/x86_64-linux-gnu/crtn.o:
+
+/lib/x86_64-linux-gnu/crti.o:
+
+/workspace/CHTL/CHTL/CHTLParser/Parser.hpp:
+
+/workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp:
+
+/workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp:
+
+/workspace/CHTL/CHTL/CHTLNode/OriginNode.hpp:
+
+/workspace/CHTL/CHTL/CHTLNode/ImportNode.hpp:
+
+/workspace/CHTL/CHTL/CHTLNode/ElementNode.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/locale.h:
 
@@ -309,6 +353,10 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 /usr/include/c++/14/bits/charconv.h:
 
 /usr/include/c++/14/bits/basic_ios.tcc:
+
+/lib/x86_64-linux-gnu/libc.so.6:
+
+/usr/include/c++/14/pstl/glue_memory_defs.h:
 
 /usr/include/c++/14/bits/alloc_traits.h:
 
@@ -338,11 +386,11 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/c++/14/bits/stl_iterator_base_types.h:
 
+/workspace/CHTL/CHTL/CHTLNode/TextNode.hpp:
+
 /usr/include/x86_64-linux-gnu/bits/sched.h:
 
-/usr/include/c++/14/pstl/glue_memory_defs.h:
-
-/lib/x86_64-linux-gnu/libc.so.6:
+/workspace/CHTL/CHTL/CHTLNode/StyleNode.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/waitstatus.h:
 
@@ -412,6 +460,8 @@ lib/libCHTLLexer.a:
 
 /usr/include/c++/14/bits/cxxabi_forced.h:
 
+lib/libCHTLManage.a:
+
 /usr/include/c++/14/bits/enable_special_members.h:
 
 /usr/include/x86_64-linux-gnu/bits/time64.h:
@@ -444,8 +494,6 @@ lib/libCHTLLexer.a:
 
 /usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
 
-/lib/x86_64-linux-gnu/libc.so:
-
 /usr/include/ctype.h:
 
 /usr/include/c++/14/bits/cxxabi_init_exception.h:
@@ -461,8 +509,6 @@ lib/libCHTLLexer.a:
 /usr/include/stdlib.h:
 
 /usr/include/c++/14/istream:
-
-/usr/lib/llvm-20/lib/clang/20/include/sanitizer/tsan_interface.h:
 
 /usr/include/linux/errno.h:
 
@@ -481,6 +527,8 @@ lib/libCHTLCore.a:
 /usr/include/alloca.h:
 
 /usr/include/c++/14/bits/fstream.tcc:
+
+/usr/include/c++/14/bits/stl_map.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/FILE.h:
 
@@ -501,6 +549,8 @@ lib/libCHTLCore.a:
 /usr/include/asm-generic/errno-base.h:
 
 /usr/include/c++/14/bits/stl_algobase.h:
+
+/workspace/CHTL/CHTL/CHTLNode/NamespaceNode.hpp:
 
 /usr/include/c++/14/bits/stl_iterator.h:
 
@@ -532,11 +582,19 @@ lib/libCHTLCore.a:
 
 /usr/include/x86_64-linux-gnu/asm/types.h:
 
+/workspace/CHTL/CHTL/CHTLNode/TemplateNode.hpp:
+
 /usr/include/asm-generic/errno.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
 
 /usr/include/x86_64-linux-gnu/gnu/stubs.h:
+
+/lib/x86_64-linux-gnu/libm.so:
+
+/usr/include/linux/sched/types.h:
+
+/usr/include/c++/14/bits/std_abs.h:
 
 /usr/include/c++/14/pstl/pstl_config.h:
 
@@ -584,6 +642,10 @@ lib/libCHTLCore.a:
 
 /usr/include/x86_64-linux-gnu/bits/select.h:
 
+/lib/x86_64-linux-gnu/Scrt1.o:
+
+/usr/include/c++/14/bits/locale_classes.h:
+
 /usr/include/x86_64-linux-gnu/bits/types/time_t.h:
 
 /usr/include/c++/14/bits/basic_string.h:
@@ -619,8 +681,6 @@ lib/libCHTLCore.a:
 /usr/include/c++/14/bits/invoke.h:
 
 /usr/include/c++/14/bits/ios_base.h:
-
-/usr/include/c++/14/bits/istream.tcc:
 
 /usr/include/c++/14/bits/memory_resource.h:
 
@@ -670,15 +730,19 @@ lib/libCHTLCore.a:
 
 /usr/include/c++/14/bits/stl_construct.h:
 
+/usr/lib/llvm-20/lib/clang/20/include/sanitizer/tsan_interface.h:
+
+/usr/include/c++/14/bits/stl_multimap.h:
+
 /usr/include/c++/14/bits/stl_raw_storage_iter.h:
+
+/usr/include/c++/14/bits/stl_tree.h:
 
 /usr/include/c++/14/bits/streambuf_iterator.h:
 
 /usr/include/c++/14/bits/stringfwd.h:
 
 /usr/include/c++/14/bits/unique_ptr.h:
-
-/usr/include/c++/14/bits/unordered_map.h:
 
 /usr/include/c++/14/bits/uses_allocator.h:
 
@@ -687,6 +751,8 @@ lib/libCHTLCore.a:
 /usr/include/c++/14/bits/vector.tcc:
 
 /usr/include/c++/14/bits/version.h:
+
+/workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp:
 
 /usr/include/c++/14/concepts:
 
@@ -710,9 +776,13 @@ lib/libCHTLCore.a:
 
 /usr/include/c++/14/ext/atomicity.h:
 
+/usr/include/c++/14/map:
+
 /usr/include/c++/14/ext/concurrence.h:
 
 /usr/include/c++/14/ext/string_conversions.h:
+
+lib/libCHTLNode.a:
 
 /usr/include/c++/14/ext/type_traits.h:
 
@@ -723,6 +793,10 @@ lib/libCHTLCore.a:
 /usr/include/c++/14/bits/postypes.h:
 
 /usr/include/c++/14/initializer_list:
+
+/lib/x86_64-linux-gnu/libm.so.6:
+
+/usr/include/c++/14/iosfwd:
 
 /usr/include/c++/14/bits/stl_function.h:
 
@@ -745,6 +819,10 @@ lib/libCHTLCore.a:
 /usr/include/c++/14/unordered_map:
 
 /usr/include/x86_64-linux-gnu/c++/14/bits/atomic_word.h:
+
+/usr/include/c++/14/bits/istream.tcc:
+
+/workspace/CHTL/CHTL/CHTLNode/CustomNode.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/struct_mutex.h:
 
@@ -788,22 +866,10 @@ lib/libCHTLCore.a:
 
 /workspace/CHTL/CHTL/CHTLLexer/Token.hpp:
 
-/usr/include/c++/14/bits/locale_classes.h:
+/usr/include/c++/14/bits/unordered_map.h:
 
-/lib/x86_64-linux-gnu/Scrt1.o:
+/workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp:
 
-/lib/x86_64-linux-gnu/crti.o:
+/workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp:
 
-/lib/x86_64-linux-gnu/crtn.o:
-
-/lib/x86_64-linux-gnu/libgcc_s.so.1:
-
-/usr/include/linux/sched/types.h:
-
-/usr/include/c++/14/bits/std_abs.h:
-
-/lib/x86_64-linux-gnu/libm.so:
-
-/usr/include/c++/14/iosfwd:
-
-/lib/x86_64-linux-gnu/libm.so.6:
+/workspace/CHTL/CHTL/CHTLNode/ConfigNode.hpp:

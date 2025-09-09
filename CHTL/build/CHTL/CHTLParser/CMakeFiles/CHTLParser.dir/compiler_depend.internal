@@ -251,11 +251,19 @@ CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/Parser.cpp.o
  /usr/lib/llvm-20/lib/clang/20/include/stdint.h
  /workspace/CHTL/CHTL/CHTLLexer/Lexer.hpp
  /workspace/CHTL/CHTL/CHTLLexer/Token.hpp
+ /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp
  /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/ConfigNode.hpp
  /workspace/CHTL/CHTL/CHTLNode/CustomNode.hpp
  /workspace/CHTL/CHTL/CHTLNode/ElementNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/ImportNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/NamespaceNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/OriginNode.hpp
  /workspace/CHTL/CHTL/CHTLNode/StyleNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp
  /workspace/CHTL/CHTL/CHTLNode/TemplateNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp
+ /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp
  /workspace/CHTL/CHTL/CHTLNode/TextNode.hpp
  /workspace/CHTL/CHTL/CHTLParser/Parser.hpp
 

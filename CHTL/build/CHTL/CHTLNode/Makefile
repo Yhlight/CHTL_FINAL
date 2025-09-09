@@ -223,6 +223,30 @@ ConfigNode.cpp.s:
 	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/ConfigNode.cpp.s
 .PHONY : ConfigNode.cpp.s
 
+CustomElementNode.o: CustomElementNode.cpp.o
+.PHONY : CustomElementNode.o
+
+# target to build an object file
+CustomElementNode.cpp.o:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.o
+.PHONY : CustomElementNode.cpp.o
+
+CustomElementNode.i: CustomElementNode.cpp.i
+.PHONY : CustomElementNode.i
+
+# target to preprocess a source file
+CustomElementNode.cpp.i:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.i
+.PHONY : CustomElementNode.cpp.i
+
+CustomElementNode.s: CustomElementNode.cpp.s
+.PHONY : CustomElementNode.s
+
+# target to generate assembly for a file
+CustomElementNode.cpp.s:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomElementNode.cpp.s
+.PHONY : CustomElementNode.cpp.s
+
 CustomNode.o: CustomNode.cpp.o
 .PHONY : CustomNode.o
 
@@ -246,6 +270,54 @@ CustomNode.s: CustomNode.cpp.s
 CustomNode.cpp.s:
 	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomNode.cpp.s
 .PHONY : CustomNode.cpp.s
+
+CustomStyleNode.o: CustomStyleNode.cpp.o
+.PHONY : CustomStyleNode.o
+
+# target to build an object file
+CustomStyleNode.cpp.o:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.o
+.PHONY : CustomStyleNode.cpp.o
+
+CustomStyleNode.i: CustomStyleNode.cpp.i
+.PHONY : CustomStyleNode.i
+
+# target to preprocess a source file
+CustomStyleNode.cpp.i:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.i
+.PHONY : CustomStyleNode.cpp.i
+
+CustomStyleNode.s: CustomStyleNode.cpp.s
+.PHONY : CustomStyleNode.s
+
+# target to generate assembly for a file
+CustomStyleNode.cpp.s:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomStyleNode.cpp.s
+.PHONY : CustomStyleNode.cpp.s
+
+CustomVarNode.o: CustomVarNode.cpp.o
+.PHONY : CustomVarNode.o
+
+# target to build an object file
+CustomVarNode.cpp.o:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.o
+.PHONY : CustomVarNode.cpp.o
+
+CustomVarNode.i: CustomVarNode.cpp.i
+.PHONY : CustomVarNode.i
+
+# target to preprocess a source file
+CustomVarNode.cpp.i:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.i
+.PHONY : CustomVarNode.cpp.i
+
+CustomVarNode.s: CustomVarNode.cpp.s
+.PHONY : CustomVarNode.s
+
+# target to generate assembly for a file
+CustomVarNode.cpp.s:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/CustomVarNode.cpp.s
+.PHONY : CustomVarNode.cpp.s
 
 ElementNode.o: ElementNode.cpp.o
 .PHONY : ElementNode.o
@@ -367,6 +439,30 @@ StyleNode.cpp.s:
 	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/StyleNode.cpp.s
 .PHONY : StyleNode.cpp.s
 
+TemplateElementNode.o: TemplateElementNode.cpp.o
+.PHONY : TemplateElementNode.o
+
+# target to build an object file
+TemplateElementNode.cpp.o:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.o
+.PHONY : TemplateElementNode.cpp.o
+
+TemplateElementNode.i: TemplateElementNode.cpp.i
+.PHONY : TemplateElementNode.i
+
+# target to preprocess a source file
+TemplateElementNode.cpp.i:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.i
+.PHONY : TemplateElementNode.cpp.i
+
+TemplateElementNode.s: TemplateElementNode.cpp.s
+.PHONY : TemplateElementNode.s
+
+# target to generate assembly for a file
+TemplateElementNode.cpp.s:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateElementNode.cpp.s
+.PHONY : TemplateElementNode.cpp.s
+
 TemplateNode.o: TemplateNode.cpp.o
 .PHONY : TemplateNode.o
 
@@ -390,6 +486,54 @@ TemplateNode.s: TemplateNode.cpp.s
 TemplateNode.cpp.s:
 	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateNode.cpp.s
 .PHONY : TemplateNode.cpp.s
+
+TemplateStyleNode.o: TemplateStyleNode.cpp.o
+.PHONY : TemplateStyleNode.o
+
+# target to build an object file
+TemplateStyleNode.cpp.o:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.o
+.PHONY : TemplateStyleNode.cpp.o
+
+TemplateStyleNode.i: TemplateStyleNode.cpp.i
+.PHONY : TemplateStyleNode.i
+
+# target to preprocess a source file
+TemplateStyleNode.cpp.i:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.i
+.PHONY : TemplateStyleNode.cpp.i
+
+TemplateStyleNode.s: TemplateStyleNode.cpp.s
+.PHONY : TemplateStyleNode.s
+
+# target to generate assembly for a file
+TemplateStyleNode.cpp.s:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateStyleNode.cpp.s
+.PHONY : TemplateStyleNode.cpp.s
+
+TemplateVarNode.o: TemplateVarNode.cpp.o
+.PHONY : TemplateVarNode.o
+
+# target to build an object file
+TemplateVarNode.cpp.o:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.o
+.PHONY : TemplateVarNode.cpp.o
+
+TemplateVarNode.i: TemplateVarNode.cpp.i
+.PHONY : TemplateVarNode.i
+
+# target to preprocess a source file
+TemplateVarNode.cpp.i:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.i
+.PHONY : TemplateVarNode.cpp.i
+
+TemplateVarNode.s: TemplateVarNode.cpp.s
+.PHONY : TemplateVarNode.s
+
+# target to generate assembly for a file
+TemplateVarNode.cpp.s:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/build.make CHTL/CHTLNode/CMakeFiles/CHTLNode.dir/TemplateVarNode.cpp.s
+.PHONY : TemplateVarNode.cpp.s
 
 TextNode.o: TextNode.cpp.o
 .PHONY : TextNode.o
@@ -434,9 +578,18 @@ help:
 	@echo "... ConfigNode.o"
 	@echo "... ConfigNode.i"
 	@echo "... ConfigNode.s"
+	@echo "... CustomElementNode.o"
+	@echo "... CustomElementNode.i"
+	@echo "... CustomElementNode.s"
 	@echo "... CustomNode.o"
 	@echo "... CustomNode.i"
 	@echo "... CustomNode.s"
+	@echo "... CustomStyleNode.o"
+	@echo "... CustomStyleNode.i"
+	@echo "... CustomStyleNode.s"
+	@echo "... CustomVarNode.o"
+	@echo "... CustomVarNode.i"
+	@echo "... CustomVarNode.s"
 	@echo "... ElementNode.o"
 	@echo "... ElementNode.i"
 	@echo "... ElementNode.s"
@@ -452,9 +605,18 @@ help:
 	@echo "... StyleNode.o"
 	@echo "... StyleNode.i"
 	@echo "... StyleNode.s"
+	@echo "... TemplateElementNode.o"
+	@echo "... TemplateElementNode.i"
+	@echo "... TemplateElementNode.s"
 	@echo "... TemplateNode.o"
 	@echo "... TemplateNode.i"
 	@echo "... TemplateNode.s"
+	@echo "... TemplateStyleNode.o"
+	@echo "... TemplateStyleNode.i"
+	@echo "... TemplateStyleNode.s"
+	@echo "... TemplateVarNode.o"
+	@echo "... TemplateVarNode.i"
+	@echo "... TemplateVarNode.s"
 	@echo "... TextNode.o"
 	@echo "... TextNode.i"
 	@echo "... TextNode.s"

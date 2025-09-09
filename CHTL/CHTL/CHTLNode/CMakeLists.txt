@@ -5,7 +5,13 @@ add_library(CHTLNode STATIC
     TextNode.cpp
     StyleNode.cpp
     TemplateNode.cpp
+    TemplateStyleNode.cpp
+    TemplateElementNode.cpp
+    TemplateVarNode.cpp
     CustomNode.cpp
+    CustomStyleNode.cpp
+    CustomElementNode.cpp
+    CustomVarNode.cpp
     OriginNode.cpp
     ImportNode.cpp
     ConfigNode.cpp

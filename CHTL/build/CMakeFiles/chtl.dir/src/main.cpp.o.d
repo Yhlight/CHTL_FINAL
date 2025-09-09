@@ -242,8 +242,15 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /workspace/CHTL/src/main.cpp \
   /workspace/CHTL/CHTL/CHTLNode/TextNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/StyleNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/TemplateNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/TemplateStyleNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/TemplateElementNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/TemplateVarNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/CustomNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp \
+  /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/OriginNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/ImportNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/ConfigNode.hpp \
-  /workspace/CHTL/CHTL/CHTLNode/NamespaceNode.hpp
+  /workspace/CHTL/CHTL/CHTLNode/NamespaceNode.hpp \
+  /workspace/CHTL/CHTL/CHTLManage/TemplateManager.hpp

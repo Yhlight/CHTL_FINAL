@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libCHTLManage.a CMakeFiles/CHTLManage.dir/TemplateManager.cpp.o
+/usr/bin/ranlib ../../lib/libCHTLManage.a
