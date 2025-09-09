@@ -57,7 +57,7 @@ func (d *Dispatcher) Compile(inputFile, outputFile string) error {
 
 	// 解析 CHTL 代码
 	chtlLexer := lexer.NewLexer(segments.CHTL)
-	chtlParser := parser.NewParser(chtlLexer)
+	chtlParser := parser.NewParserV3(chtlLexer)
 	program := chtlParser.ParseProgram()
 
 	// 检查解析错误

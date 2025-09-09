@@ -12,6 +12,7 @@ type Lexer struct {
 	ch           byte
 	line         int
 	column       int
+	lineStart    int
 	keywords     map[string]TokenType
 }
 
@@ -136,6 +137,16 @@ func (l *Lexer) NextToken() Token {
 			tok = l.newToken(AMPERSAND, l.ch)
 		}
 	case '#':
+		// 检查是否为颜色值
+		if l.peekChar() != 0 && (isDigit(l.peekChar()) || isLetter(l.peekChar())) {
+			// 读取颜色值
+			position := l.position
+			l.readChar() // 读取 #
+			for isDigit(l.ch) || isLetter(l.ch) {
+				l.readChar()
+			}
+			return l.newToken(IDENTIFIER, l.input[position:l.position])
+		}
 		tok = l.newToken(HASH, l.ch)
 	case '@':
 		tok = l.newToken(AT, l.ch)
@@ -225,6 +236,7 @@ func (l *Lexer) readChar() {
 	if l.ch == '\n' {
 		l.line++
 		l.column = 1
+		l.lineStart = l.position
 	} else {
 		l.column++
 	}
@@ -253,7 +265,26 @@ func (l *Lexer) readNumber() Token {
 	for isDigit(l.ch) || l.ch == '.' {
 		l.readChar()
 	}
-	return l.newToken(NUMBER, l.input[position:l.position])
+	
+	// 检查单位
+	if l.ch == '%' {
+		l.readChar()
+	} else if l.ch == 'p' && l.peekChar() == 'x' {
+		l.readChar() // 读取 'p'
+		l.readChar() // 读取 'x'
+	} else if l.ch == 'e' && l.peekChar() == 'm' {
+		l.readChar() // 读取 'e'
+		l.readChar() // 读取 'm'
+	} else if l.ch == 'r' && l.peekChar() == 'e' && l.readPosition+1 < len(l.input) && l.input[l.readPosition+1] == 'm' {
+		l.readChar() // 读取 'r'
+		l.readChar() // 读取 'e'
+		l.readChar() // 读取 'm'
+	}
+	
+	// 创建token时使用原始位置
+	token := l.newToken(NUMBER, l.input[position:l.position])
+	token.Position = Position{Line: l.line, Column: position - l.lineStart + 1}
+	return token
 }
 
 // readString 读取字符串

@@ -7,19 +7,21 @@ import (
 // ElementNode 元素节点
 type ElementNode struct {
 	*BaseNode
-	TagName    string
-	Attributes map[string]*AttributeNode
-	Text       *TextNode
-	Style      *StyleNode
-	Script     *ScriptNode
+	TagName        string
+	Attributes     map[string]*AttributeNode
+	Text           *TextNode
+	Style          *StyleNode
+	Script         *ScriptNode
+	StyleSelectors []*StyleSelector
 }
 
 // NewElementNode 创建元素节点
 func NewElementNode(tagName string, pos lexer.Position) *ElementNode {
 	return &ElementNode{
-		BaseNode:   NewBaseNode(ELEMENT, pos),
-		TagName:    tagName,
-		Attributes: make(map[string]*AttributeNode),
+		BaseNode:       NewBaseNode(ELEMENT, pos),
+		TagName:        tagName,
+		Attributes:     make(map[string]*AttributeNode),
+		StyleSelectors: make([]*StyleSelector, 0),
 	}
 }
 
@@ -63,6 +65,14 @@ func (n *ElementNode) SetScript(script *ScriptNode) {
 	if script != nil {
 		n.Script = script
 		script.SetParent(n)
+	}
+}
+
+// AddStyleSelector 添加样式选择器
+func (n *ElementNode) AddStyleSelector(selector *StyleSelector) {
+	if selector != nil {
+		n.StyleSelectors = append(n.StyleSelectors, selector)
+		selector.SetParent(n)
 	}
 }
 

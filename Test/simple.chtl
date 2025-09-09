@@ -1,0 +1,10 @@
+div
+{
+    id: main;
+    class: container;
+    
+    text
+    {
+        Hello, CHTL World!
+    }
+}
