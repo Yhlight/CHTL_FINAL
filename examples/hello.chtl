@@ -1,0 +1,44 @@
+// Hello World example in CHTL
+use html5;
+
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                Hello CHTL
+            }
+        }
+    }
+
+    body
+    {
+        div
+        {
+            id: welcome;
+            class: container;
+
+            text
+            {
+                Welcome to CHTL!
+            }
+        }
+
+        div
+        {
+            style
+            {
+                color: blue;
+                font-size: 18px;
+            }
+
+            text
+            {
+                This is a styled text block.
+            }
+        }
+    }
+}

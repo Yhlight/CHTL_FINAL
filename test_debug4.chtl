@@ -1,0 +1,13 @@
+// Hello World example in CHTL
+use html5;
+
+html
+{
+    body
+    {
+        div
+        {
+            id: welcome;
+        }
+    }
+}

@@ -1,0 +1,38 @@
+// Template example in CHTL
+use html5;
+
+[Template] @Style ButtonStyle
+{
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+[Template] @Element Button
+{
+    button
+    {
+        style
+        {
+            @Style ButtonStyle;
+        }
+
+        text
+        {
+            Click me
+        }
+    }
+}
+
+html
+{
+    body
+    {
+        @Element Button;
+        
+        @Element Button;
+    }
+}
