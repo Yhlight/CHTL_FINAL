@@ -1,0 +1,39 @@
+// CHTL JS example
+use html5;
+
+html
+{
+    body
+    {
+        button
+        {
+            id: clickButton;
+            style
+            {
+                .button
+                {
+                    background-color: #28a745;
+                    color: white;
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+            }
+
+            script
+            {
+                {{clickButton}}->listen {
+                    click: () => {
+                        console.log("Button clicked!");
+                    }
+                };
+            }
+
+            text
+            {
+                Click me
+            }
+        }
+    }
+}

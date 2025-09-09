@@ -1,0 +1,64 @@
+[package]
+name = "chtl"
+version = "0.1.0"
+edition = "2021"
+authors = ["CHTL Team"]
+description = "CHTL - A C++-based hypertext language for more developer-friendly HTML coding"
+license = "MIT"
+
+[[bin]]
+name = "chtl"
+path = "src/main.rs"
+
+[dependencies]
+# 核心依赖
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+thiserror = "1.0"
+
+# 文件系统操作
+walkdir = "2.3"
+glob = "0.3"
+
+# 字符串处理
+regex = "1.10"
+unicode-normalization = "0.1"
+
+# 解析器相关
+nom = "7.1"
+pest = "2.7"
+pest_derive = "2.7"
+
+# 代码生成
+quote = "1.0"
+proc-macro2 = "1.0"
+
+# 命令行工具
+clap = { version = "4.4", features = ["derive"] }
+clap_complete = "4.4"
+
+# 日志
+log = "0.4"
+env_logger = "0.10"
+
+# 并发
+tokio = { version = "1.0", features = ["full"] }
+rayon = "1.8"
+
+# 其他工具
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.6", features = ["v4", "serde"] }
+indexmap = "2.0"
+
+[dev-dependencies]
+criterion = "0.5"
+tempfile = "3.8"
+
+# [[bench]]
+# name = "lexer_bench"
+# harness = false
+
+# [[bench]]
+# name = "parser_bench"
+# harness = false

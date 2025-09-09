@@ -1,0 +1,14 @@
+{
+    "name": "test-project",
+    "version": "1.0.0",
+    "description": "A CHTL project",
+    "main": "src/index.chtl",
+    "scripts": {
+        "build": "chtl build",
+        "serve": "chtl serve",
+        "dev": "chtl serve --watch"
+    },
+    "keywords": ["chtl", "html", "css", "javascript"],
+    "author": "",
+    "license": "MIT"
+}

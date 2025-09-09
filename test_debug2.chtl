@@ -1,0 +1,9 @@
+// Hello World example in CHTL
+use html5;
+
+html
+{
+    head
+    {
+    }
+}
