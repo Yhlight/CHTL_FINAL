@@ -12,6 +12,7 @@ use std::mem;
 #[derive(PartialEq, PartialOrd, Clone, Copy)]
 enum Precedence {
     LOWEST,
+    UNIT,       // 100px
     TERNARY,    // ? :
     LOGICAL,    // && ||
     LESSGREATER, // > or <
@@ -27,6 +28,7 @@ fn token_to_precedence(token: &Token) -> Precedence {
         Token::Plus | Token::Minus => Precedence::SUM,
         Token::Slash | Token::Asterisk => Precedence::PRODUCT,
         Token::Question => Precedence::TERNARY,
+        Token::Ident(_) => Precedence::UNIT,
         _ => Precedence::LOWEST,
     }
 }
@@ -62,7 +64,9 @@ impl<'a> Parser<'a> {
                 Ok(node) => program.nodes.push(node),
                 Err(e) => self.errors.push(e),
             }
-            self.next_token();
+            if self.cur_token_is(&Token::Semicolon) {
+                self.next_token();
+            }
         }
         program
     }
@@ -115,7 +119,6 @@ impl<'a> Parser<'a> {
                 }
                 _ => return Err(format!("Unexpected token in style block: {:?}", self.cur_token)),
             }
-            self.next_token();
         }
         self.expect_cur(&Token::RBrace)?;
         Ok(StyleNode { inline_properties, rules })
@@ -133,7 +136,6 @@ impl<'a> Parser<'a> {
         let mut properties = vec![];
         while !self.cur_token_is(&Token::RBrace) && !self.cur_token_is(&Token::Eof) {
             properties.push(self.parse_style_property()?);
-            self.next_token();
         }
         self.expect_cur(&Token::RBrace)?;
         Ok(CssRuleNode { selector, properties })
@@ -198,6 +200,26 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_infix(&mut self, left: Expression) -> Result<Expression, String> {
+        match self.cur_token {
+            Token::Ident(_) => self.parse_unit_literal(left),
+            _ => self.parse_infix_expression(left),
+        }
+    }
+
+    fn parse_unit_literal(&mut self, number: Expression) -> Result<Expression, String> {
+        let n = if let Expression::NumberLiteral(val) = number {
+            val
+        } else {
+            return Err("Expected number before unit".to_string());
+        };
+        if let Token::Ident(unit) = &self.cur_token {
+            Ok(Expression::UnitLiteral(n, unit.clone()))
+        } else {
+            Err("Expected unit identifier after number".to_string())
+        }
+    }
+
+    fn parse_infix_expression(&mut self, left: Expression) -> Result<Expression, String> {
         let operator = token_to_string(&self.cur_token);
         let precedence = self.cur_precedence();
         self.next_token();
@@ -268,11 +290,12 @@ mod tests {
     use crate::lexer::Lexer;
 
     #[test]
-    fn test_infix_expression_parsing() {
+    fn test_expression_parsing() {
         let tests = vec![
             ("5 + 10", "(5 + 10)"),
             ("10 * 2 + 5", "((10 * 2) + 5)"),
             ("5 + 10 * 2", "(5 + (10 * 2))"),
+            ("100px", "100px"),
         ];
 
         for (input, expected) in tests {
@@ -289,15 +312,15 @@ mod tests {
         match exp {
             Expression::Ident(s) => s,
             Expression::NumberLiteral(n) => n.to_string(),
+            Expression::UnitLiteral(n, u) => format!("{}{}", n, u),
             Expression::StringLiteral(s) => s,
-            Expression::Boolean(b) => b.to_string(),
             Expression::Infix(infix) => {
                 format!("({} {} {})", expression_to_string(*infix.left), infix.operator, expression_to_string(*infix.right))
             },
             Expression::Prefix(prefix) => {
                 format!("({}{})", prefix.operator, expression_to_string(*prefix.right))
             },
-            Expression::Ternary(_) => "ternary".to_string(),
+            _ => "unimplemented".to_string()
         }
     }
 }

@@ -42,6 +42,7 @@ pub struct StyleProperty {
 pub enum Expression {
     Ident(String),
     NumberLiteral(f64),
+    UnitLiteral(f64, String),
     StringLiteral(String),
     Boolean(bool),
     Prefix(PrefixExpression),
