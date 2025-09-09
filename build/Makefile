@@ -187,6 +187,19 @@ CHTLCore/fast:
 	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/build
 .PHONY : CHTLCore/fast
 
+#=============================================================================
+# Target rules for targets named chtl-test
+
+# Build rule for target.
+chtl-test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 chtl-test
+.PHONY : chtl-test
+
+# fast build rule for target.
+chtl-test/fast:
+	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/build
+.PHONY : chtl-test/fast
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -225,6 +238,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... CHTLCore"
 	@echo "... chtl"
+	@echo "... chtl-test"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

@@ -6,6 +6,7 @@
 /workspace/build/CMakeFiles/install/local.dir
 /workspace/build/CMakeFiles/install/strip.dir
 /workspace/build/src/CMakeFiles/CHTLCore.dir
+/workspace/build/src/CMakeFiles/chtl-test.dir
 /workspace/build/src/CMakeFiles/edit_cache.dir
 /workspace/build/src/CMakeFiles/rebuild_cache.dir
 /workspace/build/src/CMakeFiles/list_install_components.dir

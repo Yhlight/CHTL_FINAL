@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace CHTL {
 
@@ -19,6 +20,13 @@ public:
 
 private:
     std::string m_generatedModule;
+    std::string m_moduleName;
+    std::string m_moduleVersion;
+    std::string m_moduleDescription;
+    std::string m_moduleAuthor;
+    std::string m_moduleLicense;
+    std::string m_moduleContent;
+    std::vector<std::string> m_moduleExports;
 };
 
 } // namespace CHTL

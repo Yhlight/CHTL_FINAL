@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
 namespace CHTL {
 
@@ -18,6 +19,15 @@ public:
     std::string getModuleInfo(const std::string& modulePath);
 
 private:
+    struct CJMODInfo {
+        std::string name;
+        std::string version;
+        std::string description;
+        std::string content;
+        std::string cppAPI;
+    };
+    
+    std::unordered_map<std::string, CJMODInfo> m_loadedModules;
 };
 
 } // namespace CHTL

@@ -175,6 +175,20 @@ CHTLCore/fast:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/build
 .PHONY : CHTLCore/fast
 
+# Convenience name for target.
+src/CMakeFiles/chtl-test.dir/rule:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/CMakeFiles/chtl-test.dir/rule
+.PHONY : src/CMakeFiles/chtl-test.dir/rule
+
+# Convenience name for target.
+chtl-test: src/CMakeFiles/chtl-test.dir/rule
+.PHONY : chtl-test
+
+# fast build rule for target.
+chtl-test/fast:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/build
+.PHONY : chtl-test/fast
+
 CHTL/CHTLContext.o: CHTL/CHTLContext.cpp.o
 .PHONY : CHTL/CHTLContext.o
 
@@ -1111,6 +1125,30 @@ CJMODSystem/CJMODParser.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CJMODSystem/CJMODParser.cpp.s
 .PHONY : CJMODSystem/CJMODParser.cpp.s
 
+CLI/CHTLCli.o: CLI/CHTLCli.cpp.o
+.PHONY : CLI/CHTLCli.o
+
+# target to build an object file
+CLI/CHTLCli.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.o
+.PHONY : CLI/CHTLCli.cpp.o
+
+CLI/CHTLCli.i: CLI/CHTLCli.cpp.i
+.PHONY : CLI/CHTLCli.i
+
+# target to preprocess a source file
+CLI/CHTLCli.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.i
+.PHONY : CLI/CHTLCli.cpp.i
+
+CLI/CHTLCli.s: CLI/CHTLCli.cpp.s
+.PHONY : CLI/CHTLCli.s
+
+# target to generate assembly for a file
+CLI/CHTLCli.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.s
+.PHONY : CLI/CHTLCli.cpp.s
+
 CMODSystem/CMODGenerator.o: CMODSystem/CMODGenerator.cpp.o
 .PHONY : CMODSystem/CMODGenerator.o
 
@@ -1255,6 +1293,150 @@ Scanner/CompilerDispatcher.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/Scanner/CompilerDispatcher.cpp.s
 .PHONY : Scanner/CompilerDispatcher.cpp.s
 
+Test/CHTLCliTest.o: Test/CHTLCliTest.cpp.o
+.PHONY : Test/CHTLCliTest.o
+
+# target to build an object file
+Test/CHTLCliTest.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/CHTLCliTest.cpp.o
+.PHONY : Test/CHTLCliTest.cpp.o
+
+Test/CHTLCliTest.i: Test/CHTLCliTest.cpp.i
+.PHONY : Test/CHTLCliTest.i
+
+# target to preprocess a source file
+Test/CHTLCliTest.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/CHTLCliTest.cpp.i
+.PHONY : Test/CHTLCliTest.cpp.i
+
+Test/CHTLCliTest.s: Test/CHTLCliTest.cpp.s
+.PHONY : Test/CHTLCliTest.s
+
+# target to generate assembly for a file
+Test/CHTLCliTest.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/CHTLCliTest.cpp.s
+.PHONY : Test/CHTLCliTest.cpp.s
+
+Test/CHTLGeneratorTest.o: Test/CHTLGeneratorTest.cpp.o
+.PHONY : Test/CHTLGeneratorTest.o
+
+# target to build an object file
+Test/CHTLGeneratorTest.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/CHTLGeneratorTest.cpp.o
+.PHONY : Test/CHTLGeneratorTest.cpp.o
+
+Test/CHTLGeneratorTest.i: Test/CHTLGeneratorTest.cpp.i
+.PHONY : Test/CHTLGeneratorTest.i
+
+# target to preprocess a source file
+Test/CHTLGeneratorTest.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/CHTLGeneratorTest.cpp.i
+.PHONY : Test/CHTLGeneratorTest.cpp.i
+
+Test/CHTLGeneratorTest.s: Test/CHTLGeneratorTest.cpp.s
+.PHONY : Test/CHTLGeneratorTest.s
+
+# target to generate assembly for a file
+Test/CHTLGeneratorTest.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/CHTLGeneratorTest.cpp.s
+.PHONY : Test/CHTLGeneratorTest.cpp.s
+
+Test/CHTLLexerTest.o: Test/CHTLLexerTest.cpp.o
+.PHONY : Test/CHTLLexerTest.o
+
+# target to build an object file
+Test/CHTLLexerTest.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/CHTLLexerTest.cpp.o
+.PHONY : Test/CHTLLexerTest.cpp.o
+
+Test/CHTLLexerTest.i: Test/CHTLLexerTest.cpp.i
+.PHONY : Test/CHTLLexerTest.i
+
+# target to preprocess a source file
+Test/CHTLLexerTest.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/CHTLLexerTest.cpp.i
+.PHONY : Test/CHTLLexerTest.cpp.i
+
+Test/CHTLLexerTest.s: Test/CHTLLexerTest.cpp.s
+.PHONY : Test/CHTLLexerTest.s
+
+# target to generate assembly for a file
+Test/CHTLLexerTest.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/CHTLLexerTest.cpp.s
+.PHONY : Test/CHTLLexerTest.cpp.s
+
+Test/CHTLParserTest.o: Test/CHTLParserTest.cpp.o
+.PHONY : Test/CHTLParserTest.o
+
+# target to build an object file
+Test/CHTLParserTest.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/CHTLParserTest.cpp.o
+.PHONY : Test/CHTLParserTest.cpp.o
+
+Test/CHTLParserTest.i: Test/CHTLParserTest.cpp.i
+.PHONY : Test/CHTLParserTest.i
+
+# target to preprocess a source file
+Test/CHTLParserTest.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/CHTLParserTest.cpp.i
+.PHONY : Test/CHTLParserTest.cpp.i
+
+Test/CHTLParserTest.s: Test/CHTLParserTest.cpp.s
+.PHONY : Test/CHTLParserTest.s
+
+# target to generate assembly for a file
+Test/CHTLParserTest.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/CHTLParserTest.cpp.s
+.PHONY : Test/CHTLParserTest.cpp.s
+
+Test/CHTLTest.o: Test/CHTLTest.cpp.o
+.PHONY : Test/CHTLTest.o
+
+# target to build an object file
+Test/CHTLTest.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.o
+.PHONY : Test/CHTLTest.cpp.o
+
+Test/CHTLTest.i: Test/CHTLTest.cpp.i
+.PHONY : Test/CHTLTest.i
+
+# target to preprocess a source file
+Test/CHTLTest.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.i
+.PHONY : Test/CHTLTest.cpp.i
+
+Test/CHTLTest.s: Test/CHTLTest.cpp.s
+.PHONY : Test/CHTLTest.s
+
+# target to generate assembly for a file
+Test/CHTLTest.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.s
+.PHONY : Test/CHTLTest.cpp.s
+
+Test/TestRunner.o: Test/TestRunner.cpp.o
+.PHONY : Test/TestRunner.o
+
+# target to build an object file
+Test/TestRunner.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/TestRunner.cpp.o
+.PHONY : Test/TestRunner.cpp.o
+
+Test/TestRunner.i: Test/TestRunner.cpp.i
+.PHONY : Test/TestRunner.i
+
+# target to preprocess a source file
+Test/TestRunner.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/TestRunner.cpp.i
+.PHONY : Test/TestRunner.cpp.i
+
+Test/TestRunner.s: Test/TestRunner.cpp.s
+.PHONY : Test/TestRunner.s
+
+# target to generate assembly for a file
+Test/TestRunner.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/chtl-test.dir/build.make src/CMakeFiles/chtl-test.dir/Test/TestRunner.cpp.s
+.PHONY : Test/TestRunner.cpp.s
+
 Util/FileSystem/FileSystem.o: Util/FileSystem/FileSystem.cpp.o
 .PHONY : Util/FileSystem/FileSystem.o
 
@@ -1340,6 +1522,7 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... CHTLCore"
+	@echo "... chtl-test"
 	@echo "... CHTL/CHTLContext.o"
 	@echo "... CHTL/CHTLContext.i"
 	@echo "... CHTL/CHTLContext.s"
@@ -1457,6 +1640,9 @@ help:
 	@echo "... CJMODSystem/CJMODParser.o"
 	@echo "... CJMODSystem/CJMODParser.i"
 	@echo "... CJMODSystem/CJMODParser.s"
+	@echo "... CLI/CHTLCli.o"
+	@echo "... CLI/CHTLCli.i"
+	@echo "... CLI/CHTLCli.s"
 	@echo "... CMODSystem/CMODGenerator.o"
 	@echo "... CMODSystem/CMODGenerator.i"
 	@echo "... CMODSystem/CMODGenerator.s"
@@ -1475,6 +1661,24 @@ help:
 	@echo "... Scanner/CompilerDispatcher.o"
 	@echo "... Scanner/CompilerDispatcher.i"
 	@echo "... Scanner/CompilerDispatcher.s"
+	@echo "... Test/CHTLCliTest.o"
+	@echo "... Test/CHTLCliTest.i"
+	@echo "... Test/CHTLCliTest.s"
+	@echo "... Test/CHTLGeneratorTest.o"
+	@echo "... Test/CHTLGeneratorTest.i"
+	@echo "... Test/CHTLGeneratorTest.s"
+	@echo "... Test/CHTLLexerTest.o"
+	@echo "... Test/CHTLLexerTest.i"
+	@echo "... Test/CHTLLexerTest.s"
+	@echo "... Test/CHTLParserTest.o"
+	@echo "... Test/CHTLParserTest.i"
+	@echo "... Test/CHTLParserTest.s"
+	@echo "... Test/CHTLTest.o"
+	@echo "... Test/CHTLTest.i"
+	@echo "... Test/CHTLTest.s"
+	@echo "... Test/TestRunner.o"
+	@echo "... Test/TestRunner.i"
+	@echo "... Test/TestRunner.s"
 	@echo "... Util/FileSystem/FileSystem.o"
 	@echo "... Util/FileSystem/FileSystem.i"
 	@echo "... Util/FileSystem/FileSystem.s"

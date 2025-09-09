@@ -702,10 +702,38 @@ src/CMakeFiles/CHTLCore.dir/CJMODSystem/CJMODAPI.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLCore.dir/CJMODSystem/CJMODAPI.cpp.s"
 	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/CJMODSystem/CJMODAPI.cpp -o CMakeFiles/CHTLCore.dir/CJMODSystem/CJMODAPI.cpp.s
 
+src/CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.o: src/CMakeFiles/CHTLCore.dir/flags.make
+src/CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.o: /workspace/src/CLI/CHTLCli.cpp
+src/CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.o: src/CMakeFiles/CHTLCore.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_46) "Building CXX object src/CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.o"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.o -MF CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.o.d -o CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.o -c /workspace/src/CLI/CHTLCli.cpp
+
+src/CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.i"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/src/CLI/CHTLCli.cpp > CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.i
+
+src/CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.s"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/CLI/CHTLCli.cpp -o CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.s
+
+src/CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.o: src/CMakeFiles/CHTLCore.dir/flags.make
+src/CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.o: /workspace/src/Test/CHTLTest.cpp
+src/CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.o: src/CMakeFiles/CHTLCore.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_47) "Building CXX object src/CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.o"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.o -MF CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.o.d -o CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.o -c /workspace/src/Test/CHTLTest.cpp
+
+src/CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.i"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/src/Test/CHTLTest.cpp > CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.i
+
+src/CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.s"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/Test/CHTLTest.cpp -o CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.s
+
 src/CMakeFiles/CHTLCore.dir/Util/FileSystem/FileSystem.cpp.o: src/CMakeFiles/CHTLCore.dir/flags.make
 src/CMakeFiles/CHTLCore.dir/Util/FileSystem/FileSystem.cpp.o: /workspace/src/Util/FileSystem/FileSystem.cpp
 src/CMakeFiles/CHTLCore.dir/Util/FileSystem/FileSystem.cpp.o: src/CMakeFiles/CHTLCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_46) "Building CXX object src/CMakeFiles/CHTLCore.dir/Util/FileSystem/FileSystem.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_48) "Building CXX object src/CMakeFiles/CHTLCore.dir/Util/FileSystem/FileSystem.cpp.o"
 	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/CHTLCore.dir/Util/FileSystem/FileSystem.cpp.o -MF CMakeFiles/CHTLCore.dir/Util/FileSystem/FileSystem.cpp.o.d -o CMakeFiles/CHTLCore.dir/Util/FileSystem/FileSystem.cpp.o -c /workspace/src/Util/FileSystem/FileSystem.cpp
 
 src/CMakeFiles/CHTLCore.dir/Util/FileSystem/FileSystem.cpp.i: cmake_force
@@ -719,7 +747,7 @@ src/CMakeFiles/CHTLCore.dir/Util/FileSystem/FileSystem.cpp.s: cmake_force
 src/CMakeFiles/CHTLCore.dir/Util/ZipUtil/ZipUtil.cpp.o: src/CMakeFiles/CHTLCore.dir/flags.make
 src/CMakeFiles/CHTLCore.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/src/Util/ZipUtil/ZipUtil.cpp
 src/CMakeFiles/CHTLCore.dir/Util/ZipUtil/ZipUtil.cpp.o: src/CMakeFiles/CHTLCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_47) "Building CXX object src/CMakeFiles/CHTLCore.dir/Util/ZipUtil/ZipUtil.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_49) "Building CXX object src/CMakeFiles/CHTLCore.dir/Util/ZipUtil/ZipUtil.cpp.o"
 	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/CHTLCore.dir/Util/ZipUtil/ZipUtil.cpp.o -MF CMakeFiles/CHTLCore.dir/Util/ZipUtil/ZipUtil.cpp.o.d -o CMakeFiles/CHTLCore.dir/Util/ZipUtil/ZipUtil.cpp.o -c /workspace/src/Util/ZipUtil/ZipUtil.cpp
 
 src/CMakeFiles/CHTLCore.dir/Util/ZipUtil/ZipUtil.cpp.i: cmake_force
@@ -733,7 +761,7 @@ src/CMakeFiles/CHTLCore.dir/Util/ZipUtil/ZipUtil.cpp.s: cmake_force
 src/CMakeFiles/CHTLCore.dir/Util/StringUtil/StringUtil.cpp.o: src/CMakeFiles/CHTLCore.dir/flags.make
 src/CMakeFiles/CHTLCore.dir/Util/StringUtil/StringUtil.cpp.o: /workspace/src/Util/StringUtil/StringUtil.cpp
 src/CMakeFiles/CHTLCore.dir/Util/StringUtil/StringUtil.cpp.o: src/CMakeFiles/CHTLCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_48) "Building CXX object src/CMakeFiles/CHTLCore.dir/Util/StringUtil/StringUtil.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_50) "Building CXX object src/CMakeFiles/CHTLCore.dir/Util/StringUtil/StringUtil.cpp.o"
 	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/CHTLCore.dir/Util/StringUtil/StringUtil.cpp.o -MF CMakeFiles/CHTLCore.dir/Util/StringUtil/StringUtil.cpp.o.d -o CMakeFiles/CHTLCore.dir/Util/StringUtil/StringUtil.cpp.o -c /workspace/src/Util/StringUtil/StringUtil.cpp
 
 src/CMakeFiles/CHTLCore.dir/Util/StringUtil/StringUtil.cpp.i: cmake_force
@@ -791,6 +819,8 @@ CHTLCore_OBJECTS = \
 "CMakeFiles/CHTLCore.dir/CJMODSystem/CJMODParser.cpp.o" \
 "CMakeFiles/CHTLCore.dir/CJMODSystem/CJMODGenerator.cpp.o" \
 "CMakeFiles/CHTLCore.dir/CJMODSystem/CJMODAPI.cpp.o" \
+"CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.o" \
+"CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.o" \
 "CMakeFiles/CHTLCore.dir/Util/FileSystem/FileSystem.cpp.o" \
 "CMakeFiles/CHTLCore.dir/Util/ZipUtil/ZipUtil.cpp.o" \
 "CMakeFiles/CHTLCore.dir/Util/StringUtil/StringUtil.cpp.o"
@@ -843,12 +873,14 @@ lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/CJMODSystem/CJMODLoader.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/CJMODSystem/CJMODParser.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/CJMODSystem/CJMODGenerator.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/CJMODSystem/CJMODAPI.cpp.o
+lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/CLI/CHTLCli.cpp.o
+lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/Test/CHTLTest.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/Util/FileSystem/FileSystem.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/Util/ZipUtil/ZipUtil.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/Util/StringUtil/StringUtil.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/build.make
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_49) "Linking CXX static library ../lib/libCHTLCore.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_51) "Linking CXX static library ../lib/libCHTLCore.a"
 	cd /workspace/build/src && $(CMAKE_COMMAND) -P CMakeFiles/CHTLCore.dir/cmake_clean_target.cmake
 	cd /workspace/build/src && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/CHTLCore.dir/link.txt --verbose=$(VERBOSE)
 

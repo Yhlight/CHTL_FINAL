@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <memory>
 
 namespace CHTL {
 
@@ -18,6 +20,12 @@ public:
     std::string processCode(const std::string& code);
 
 private:
+    bool m_initialized;
+    std::vector<std::shared_ptr<class SyntaxExtension>> m_syntaxExtensions;
+    std::vector<std::shared_ptr<class VirtualObject>> m_virtualObjects;
+    
+    // 辅助方法
+    void registerDefaultExtensions();
 };
 
 } // namespace CHTL

@@ -57,6 +57,12 @@ add_library(CHTLCore STATIC
     CJMODSystem/CJMODGenerator.cpp
     CJMODSystem/CJMODAPI.cpp
     
+    # CLI
+    CLI/CHTLCli.cpp
+    
+    # Test Framework
+    Test/CHTLTest.cpp
+    
     # Utilities
     Util/FileSystem/FileSystem.cpp
     Util/ZipUtil/ZipUtil.cpp
@@ -83,3 +89,14 @@ target_compile_definitions(CHTLCore PRIVATE
     CHTL_VERSION_MINOR=0
     CHTL_VERSION_PATCH=0
 )
+
+# 测试可执行文件
+add_executable(chtl-test
+    Test/TestRunner.cpp
+    Test/CHTLLexerTest.cpp
+    Test/CHTLParserTest.cpp
+    Test/CHTLGeneratorTest.cpp
+    Test/CHTLCliTest.cpp
+)
+
+target_link_libraries(chtl-test CHTLCore)

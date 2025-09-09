@@ -27,6 +27,8 @@ struct CodeFragment {
     size_t startColumn;
     size_t endColumn;
     
+    CodeFragment() : type(CodeFragmentType::CHTL), content(""), startLine(0), endLine(0), startColumn(0), endColumn(0) {}
+    
     CodeFragment(CodeFragmentType t, const std::string& c, size_t sl = 0, size_t el = 0, size_t sc = 0, size_t ec = 0)
         : type(t), content(c), startLine(sl), endLine(el), startColumn(sc), endColumn(ec) {}
 };
@@ -54,6 +56,22 @@ public:
     size_t getCHTLJSFragmentCount() const;
     size_t getCSSFragmentCount() const;
     size_t getJavaScriptFragmentCount() const;
+    
+    // 错误和警告信息管理
+    void addError(const std::string& error);
+    void addWarning(const std::string& warning);
+    void addInfo(const std::string& info);
+    const std::vector<std::string>& getErrors() const;
+    const std::vector<std::string>& getWarnings() const;
+    const std::vector<std::string>& getInfo() const;
+    void clearErrors();
+    void clearWarnings();
+    void clearInfo();
+    void clearAll();
+    bool hasErrors() const;
+    bool hasWarnings() const;
+    bool hasInfo() const;
+    bool hasAny() const;
 
 private:
     bool m_debugMode;
@@ -65,6 +83,11 @@ private:
     size_t m_cssFragmentCount;
     size_t m_javascriptFragmentCount;
     
+    // 错误和警告信息
+    std::vector<std::string> m_errors;
+    std::vector<std::string> m_warnings;
+    std::vector<std::string> m_info;
+    
     // 扫描状态
     struct ScanState {
         size_t position;
@@ -72,6 +95,7 @@ private:
         size_t column;
         bool inString;
         bool inComment;
+        bool inBlockComment;
         bool inCHTLBlock;
         bool inCHTLJSBlock;
         bool inCSSBlock;
@@ -81,6 +105,7 @@ private:
         int parenLevel;
         std::string currentFragment;
         CodeFragmentType currentType;
+        char stringChar;
     };
     
     // 主要扫描方法
@@ -136,12 +161,6 @@ private:
     bool isAlphaNumeric(char c) const;
     bool isOperator(char c) const;
     
-    // 错误处理
-    void addError(const std::string& error);
-    const std::vector<std::string>& getErrors() const;
-    bool hasErrors() const;
-    
-    std::vector<std::string> m_errors;
 };
 
 } // namespace CHTL

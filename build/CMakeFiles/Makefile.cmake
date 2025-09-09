@@ -56,4 +56,5 @@ set(CMAKE_MAKEFILE_PRODUCTS
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/chtl.dir/DependInfo.cmake"
   "src/CMakeFiles/CHTLCore.dir/DependInfo.cmake"
+  "src/CMakeFiles/chtl-test.dir/DependInfo.cmake"
   )

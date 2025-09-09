@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace CHTL {
 
@@ -20,6 +21,14 @@ public:
     std::vector<std::string> getModuleExports(const std::string& modulePath);
 
 private:
+    struct ModuleInfo {
+        std::string name;
+        std::string version;
+        std::string description;
+        std::string content;
+    };
+    
+    std::unordered_map<std::string, ModuleInfo> m_loadedModules;
 };
 
 } // namespace CHTL

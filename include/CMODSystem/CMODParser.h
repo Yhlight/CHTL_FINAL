@@ -20,11 +20,17 @@ public:
     std::string getModuleName() const;
     std::string getModuleVersion() const;
     std::string getModuleDescription() const;
+    std::string getModuleContent() const;
 
 private:
     std::string m_moduleName;
     std::string m_moduleVersion;
     std::string m_moduleDescription;
+    std::string m_moduleContent;
+    
+    // 解析方法
+    bool parseModuleInfo(const std::string& content);
+    bool parseModuleContent(const std::string& content);
 };
 
 } // namespace CHTL

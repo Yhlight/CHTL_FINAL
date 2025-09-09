@@ -18,6 +18,8 @@ public:
     std::vector<std::string> tokenize(const std::string& code);
 
 private:
+    // 辅助方法
+    bool isSpecialCharacter(char c) const;
 };
 
 } // namespace CHTL
