@@ -12,6 +12,7 @@ static std::map<std::string, TokenType> keywords = {
     {"replace", TokenType::KeywordReplace},
     {"from", TokenType::KeywordFrom},
     {"as", TokenType::KeywordAs},
+    {"inherit", TokenType::KeywordInherit},
     // Note: "at", "top", "bottom" are handled by the parser as identifiers
 };
 

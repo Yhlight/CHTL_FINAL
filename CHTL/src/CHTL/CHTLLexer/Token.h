@@ -36,6 +36,7 @@ enum class TokenType {
     KeywordAtBottom,
     KeywordFrom,
     KeywordAs,
+    KeywordInherit,
     // Note: [Import] and [Namespace] are parsed as bracket + identifier
 
     // Style-specific tokens

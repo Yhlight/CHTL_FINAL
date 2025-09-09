@@ -51,6 +51,7 @@ private:
     std::unique_ptr<BaseNode> parseOrigin();
     std::unique_ptr<BaseNode> parseSpecializationRule();
     std::unique_ptr<BaseNode> parseInsertRule();
+    std::unique_ptr<BaseNode> parseInherit();
 
     // Style-parsing functions
     std::unique_ptr<BaseNode> parseStyleBlock();

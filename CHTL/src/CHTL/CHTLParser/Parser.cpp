@@ -14,6 +14,7 @@
 #include "../CHTLNode/CustomUsageNode.h"
 #include "../CHTLNode/DeleteRuleNode.h"
 #include "../CHTLNode/InsertRuleNode.h"
+#include "../CHTLNode/InheritNode.h"
 #include "../CHTLNode/VariableGroupDefinitionNode.h"
 #include "../CHTLNode/VariableDefinitionNode.h"
 #include "../CHTLNode/OriginNode.h"
@@ -139,7 +140,12 @@ void Parser::parseCustomDefinition() {
     auto def = std::make_unique<CustomDefinitionNode>(type.value, name.value);
     consume(TokenType::OpenBrace, "Expected '{' for custom body.");
     if (type.value == "Style") {
-        while (!check(TokenType::CloseBrace) && !isAtEnd()) { def->addChild(parseStyleContent()); }
+        while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+            def->addChild(parseStyleContent());
+             if (peek().type == TokenType::Comma) {
+                advance();
+            }
+        }
     } else {
         while (!check(TokenType::CloseBrace) && !isAtEnd()) { def->addChild(parseNode()); }
     }
@@ -199,7 +205,28 @@ std::unique_ptr<BaseNode> Parser::parseSpecializationRule() {
     if (match({TokenType::KeywordInsert})) {
         return parseInsertRule();
     }
+    // It could be a style property override.
+    if (peek().type == TokenType::Identifier) {
+        return parseStyleProperty();
+    }
     throw std::runtime_error("Unknown or unimplemented specialization rule.");
+}
+
+std::unique_ptr<BaseNode> Parser::parseInherit() {
+    consume(TokenType::KeywordInherit, "Expected 'inherit' keyword.");
+    consume(TokenType::At, "Expected '@' after 'inherit'.");
+    const Token& type = consume(TokenType::Identifier, "Expected template type (e.g., 'Style').");
+
+    std::string ns, name;
+    const Token& first_id = consume(TokenType::Identifier, "Expected namespace or template name.");
+    if (match({TokenType::ColonColon})) {
+        ns = first_id.value;
+        name = consume(TokenType::Identifier, "Expected template name after '::'.").value;
+    } else {
+        name = first_id.value;
+    }
+    consume(TokenType::Semicolon, "Expected ';' after inherit statement.");
+    return std::make_unique<InheritNode>(type.value, name, ns);
 }
 
 std::unique_ptr<BaseNode> Parser::parseInsertRule() {
@@ -233,22 +260,19 @@ std::unique_ptr<BaseNode> Parser::parseOrigin() {
     consume(TokenType::At, "Expected '@'.");
     std::string first_id = consume(TokenType::Identifier, "Expected origin type or name.").value;
 
-    // Check if it's a usage or a definition
-    if (match({TokenType::Semicolon})) { // Usage: [Origin] @Name;
+    if (match({TokenType::Semicolon})) {
         return std::make_unique<OriginUsageNode>(first_id);
     }
 
-    // It's a definition
-    std::string type = first_id; // Type is discarded, but we parse it for syntax correctness.
+    std::string type = first_id;
     std::string name;
-    if (peek().type == TokenType::Identifier) { // Named definition: [Origin] @Type Name { ... }
+    if (peek().type == TokenType::Identifier) {
         name = advance().value;
     }
 
     consume(TokenType::OpenBrace, "Expected '{' for origin body.");
-    size_t content_start_pos = m_tokens[m_current - 1].end; // Position AFTER the '{'
+    size_t content_start_pos = m_tokens[m_current - 1].end;
 
-    // Find the matching closing brace
     int brace_level = 1;
     size_t search_start_idx = m_current;
 
@@ -258,7 +282,7 @@ std::unique_ptr<BaseNode> Parser::parseOrigin() {
         } else if (m_tokens[m_current].type == TokenType::CloseBrace) {
             brace_level--;
             if (brace_level == 0) {
-                break; // Found our match
+                break;
             }
         }
         m_current++;
@@ -272,15 +296,14 @@ std::unique_ptr<BaseNode> Parser::parseOrigin() {
         throw std::runtime_error("Unexpected end of file in origin block.");
     }
 
-    // m_current now points at the final '}'
-    size_t content_end_pos = m_tokens[m_current].start; // Position BEFORE the '}'
+    size_t content_end_pos = m_tokens[m_current].start;
 
     std::string content;
     if (content_end_pos > content_start_pos) {
          content = m_source.substr(content_start_pos, content_end_pos - content_start_pos);
     }
 
-    consume(TokenType::CloseBrace, "Expected '}' to close origin block."); // Consume the '}'
+    consume(TokenType::CloseBrace, "Expected '}' to close origin block.");
 
     auto node = std::make_unique<OriginNode>(name, content);
 
@@ -300,7 +323,7 @@ std::unique_ptr<BaseNode> Parser::parseNode() {
             if (keyword.value == "Origin") return parseOrigin();
             if (keyword.value == "Template" || keyword.value == "Custom" || keyword.value == "Import" || keyword.value == "Namespace") {
                 parseTopLevelDefinition();
-                return nullptr; // Definitions are consumed, not returned as nodes in the main tree
+                return nullptr;
             }
         }
     }
@@ -338,13 +361,10 @@ std::unique_ptr<ElementNode> Parser::parseElement() {
         else if (check(TokenType::At) || (check(TokenType::LeftBracket) && m_tokens[m_current + 1].value == "Origin")) {
              element->addChild(parseNode());
         } else if (check(TokenType::Identifier)) {
-             // It could be an attribute or a child element. We need to lookahead.
             size_t lookahead_pos = m_current;
             std::string identifier = m_tokens[lookahead_pos].value;
-            // Scan for what looks like an identifier sequence
             while(lookahead_pos < m_tokens.size() && (m_tokens[lookahead_pos].type == TokenType::Identifier || m_tokens[lookahead_pos].type == TokenType::Minus)) { lookahead_pos++; }
 
-            // If it's followed by a ':' or '=', it's an attribute or special property.
             if (lookahead_pos < m_tokens.size() && (m_tokens[lookahead_pos].type == TokenType::Colon || m_tokens[lookahead_pos].type == TokenType::Equals)) {
                 if (identifier == "text") {
                     parseTextAttribute(element.get());
@@ -410,6 +430,7 @@ std::unique_ptr<BaseNode> Parser::parseScriptBlock() {
 
 std::unique_ptr<BaseNode> Parser::parseStyleContent() {
     if (peek().type == TokenType::At) return parseUsage();
+    if (peek().type == TokenType::KeywordInherit) return parseInherit();
     if (peek().type == TokenType::Dot || peek().type == TokenType::Hash || peek().type == TokenType::Ampersand) return parseStyleSelector();
     if (peek().type == TokenType::Identifier) {
         size_t lookahead_pos = m_current;
@@ -425,11 +446,9 @@ std::unique_ptr<BaseNode> Parser::parseTextElement() {
     consume(TokenType::OpenBrace, "Expected '{' after 'text' keyword.");
 
     std::string text_content;
-    // If the next token is a single string literal, just use its value.
     if (peek().type == TokenType::StringLiteral) {
         text_content = advance().value;
     } else {
-        // Otherwise, consume all tokens until the closing brace.
         size_t start_pos = peek().start;
         size_t end_pos = start_pos;
         while (!check(TokenType::CloseBrace) && !isAtEnd()) {
@@ -437,7 +456,6 @@ std::unique_ptr<BaseNode> Parser::parseTextElement() {
         }
         if (end_pos > start_pos) {
             text_content = m_source.substr(start_pos, end_pos - start_pos);
-            // Trim whitespace from the raw string content
             size_t first = text_content.find_first_not_of(" \t\n\r");
             if (std::string::npos == first) {
                 text_content = "";
@@ -454,7 +472,7 @@ std::unique_ptr<BaseNode> Parser::parseTextElement() {
 }
 
 void Parser::parseTextAttribute(ElementNode* element) {
-    consume(TokenType::Identifier, "Expected 'text' keyword."); // consume 'text'
+    consume(TokenType::Identifier, "Expected 'text' keyword.");
     if (!match({TokenType::Colon, TokenType::Equals})) {
         throw std::runtime_error("Expected ':' or '=' after 'text' attribute.");
     }
@@ -462,7 +480,6 @@ void Parser::parseTextAttribute(ElementNode* element) {
     if(peek().type == TokenType::StringLiteral) {
         value = advance().value;
     } else {
-        // Handle unquoted text for consistency
         size_t start_pos = peek().start;
         size_t end_pos = start_pos;
         while (!check(TokenType::Semicolon) && !isAtEnd()) {
@@ -500,7 +517,13 @@ void Parser::parseAttributes(ElementNode* element) {
 
 std::unique_ptr<BaseNode> Parser::parseStyleProperty() {
     std::string key = parseIdentifierSequence();
-    consume(TokenType::Colon, "Expected ':' after style property name.");
+
+    if (peek().type != TokenType::Colon) {
+        match({TokenType::Semicolon});
+        return std::make_unique<StylePropertyNode>(key, std::vector<std::unique_ptr<Expr>>{});
+    }
+
+    consume(TokenType::Colon, "This should not fail.");
 
     std::vector<std::unique_ptr<Expr>> values;
     do {
@@ -546,7 +569,6 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
         return std::make_unique<LiteralExpr>(advance());
     }
     if (peek().type == TokenType::Identifier || peek().type == TokenType::Dot || peek().type == TokenType::Hash) {
-        // Check for function call syntax: Identifier( ... )
         if (m_current + 1 < m_tokens.size() && m_tokens[m_current + 1].type == TokenType::OpenParen) {
             auto callee = std::make_unique<VariableExpr>(advance());
             consume(TokenType::OpenParen, "Expected '(' after function/variable group name.");
@@ -554,7 +576,7 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
             if (!check(TokenType::CloseParen)) {
                 do {
                     args.push_back(parseExpression());
-                } while (match({TokenType::Comma})); // Assuming comma-separated args, though spec only shows one.
+                } while (match({TokenType::Comma}));
             }
             consume(TokenType::CloseParen, "Expected ')' after arguments.");
             return std::make_unique<FunctionCallExpr>(std::move(callee), std::move(args));
@@ -565,7 +587,6 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
             return std::make_unique<LiteralExpr>(advance());
         }
 
-        // It's a variable, potentially with a path like .box.width
         std::string varPath;
         if(match({TokenType::Dot, TokenType::Hash})) {
             varPath += m_tokens[m_current-1].value;
@@ -575,7 +596,6 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
         while(match({TokenType::Dot})) {
             varPath += "." + consume(TokenType::Identifier, "Expected identifier after '.'").value;
         }
-        // Create a synthetic token to hold the full path.
         Token pathToken = {TokenType::Identifier, varPath, token.line, token.column, token.start, peek().start};
         return std::make_unique<VariableExpr>(pathToken);
     }
@@ -589,4 +609,4 @@ bool Parser::check(TokenType type) const { if (isAtEnd()) return false; return p
 bool Parser::match(std::initializer_list<TokenType> types) { for (TokenType type : types) { if (check(type)) { advance(); return true; } } return false; }
 const Token& Parser::consume(TokenType type, const std::string& message) { if (check(type)) return advance(); throw std::runtime_error(message + " Found token '" + peek().value + "' instead."); }
 
-} // namespace CHTL
+}

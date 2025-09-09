@@ -5,6 +5,7 @@
 #include "CHTL/CHTLNode/CustomUsageNode.h"
 #include "CHTL/CHTLNode/DeleteRuleNode.h"
 #include "CHTL/CHTLNode/InsertRuleNode.h"
+#include "CHTL/CHTLNode/InheritNode.h"
 #include "CHTL/CHTLNode/OriginNode.h"
 #include "CHTL/CHTLNode/OriginUsageNode.h"
 #include "CHTL/CHTLNode/CommentNode.h"
@@ -108,8 +109,20 @@ void Generator::expandStyleProperties(const BaseNode* container, std::map<std::s
                 for (const auto& rule : usageNode->getSpecializations()) {
                     if (rule->getType() == NodeType::DeleteRule) {
                         properties.erase(static_cast<const DeleteRuleNode*>(rule.get())->getTarget());
+                    } else if (rule->getType() == NodeType::StyleProperty) {
+                        const auto* propOverride = static_cast<const StylePropertyNode*>(rule.get());
+                        if (properties.count(propOverride->getKey()) && properties.at(propOverride->getKey())->getValues().empty()) {
+                            properties[propOverride->getKey()] = propOverride;
+                        }
                     }
                 }
+            }
+        } else if (child->getType() == NodeType::Inherit) {
+            const auto* inheritNode = static_cast<const InheritNode*>(child.get());
+            if (inheritNode->getTemplateType() == "Style") {
+                std::string ns = inheritNode->getNamespace().empty() ? CHTLContext::GLOBAL_NAMESPACE : inheritNode->getNamespace();
+                const TemplateDefinitionNode* baseTemplate = m_context->getTemplate(ns, inheritNode->getTemplateName());
+                expandStyleProperties(baseTemplate, properties);
             }
         }
     }
@@ -212,7 +225,6 @@ void Generator::generateElement(const ElementNode* element) {
             return this->findNodeBySelector(this->m_root_node, selector);
         };
 
-        // Pre-pass for literals to populate the context, enabling properties to reference each other.
         for (const auto& pair : final_properties) {
             if (!pair.second->getValues().empty()) {
                 const auto& first_expr = pair.second->getValues()[0];
@@ -226,21 +238,17 @@ void Generator::generateElement(const ElementNode* element) {
         std::string inline_style;
         for (const auto& pair : final_properties) {
             Evaluator eval;
-            // A property can have multiple chained expressions.
             for (const auto& expr : pair.second->getValues()) {
                 ChtlValue value = eval.evaluate(expr.get(), *m_context, eval_context, resolver);
-                // Use the first expression that doesn't evaluate to null.
                 if (value.type != ChtlValue::Type::Null) {
                     inline_style += pair.first + ": " + value.toString() + ";";
-                    // Add the computed value to the context for subsequent properties to reference.
                     eval_context[pair.first] = value;
-                    break; // Move to the next property
+                    break;
                 }
             }
         }
         if (!inline_style.empty()) attributes["style"] = inline_style;
 
-        // --- New logic for auto-generation ---
         bool auto_class_added = attributes.count("class") > 0;
         bool auto_id_added = attributes.count("id") > 0;
 
@@ -249,7 +257,6 @@ void Generator::generateElement(const ElementNode* element) {
                 const auto* selectorNode = static_cast<const StyleSelectorNode*>(styleChild.get());
                 std::string selector_text = selectorNode->getSelector();
 
-                // Auto-add class/id if not present
                 if (selector_text[0] == '.' && !auto_class_added) {
                     attributes["class"] = selector_text.substr(1);
                     auto_class_added = true;
@@ -261,7 +268,6 @@ void Generator::generateElement(const ElementNode* element) {
                 size_t amp_pos = selector_text.find('&');
                 if (amp_pos != std::string::npos) {
                     std::string base_selector;
-                    // Spec priority: class > id > tag name
                     if (attributes.count("class") > 0 && !attributes.at("class").empty()) {
                         base_selector = "." + attributes.at("class").substr(0, attributes.at("class").find(' '));
                     } else if (attributes.count("id") > 0 && !attributes.at("id").empty()) {
@@ -294,4 +300,4 @@ void Generator::generateElement(const ElementNode* element) {
 
 void Generator::generateText(const TextNode* text) { m_output += text->getText(); }
 
-} // namespace CHTL
+}

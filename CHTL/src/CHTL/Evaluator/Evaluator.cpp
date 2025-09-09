@@ -89,9 +89,6 @@ void Evaluator::visit(const VariableExpr& expr) {
             if (propBase->getType() == NodeType::StyleProperty) {
                 const auto* prop = static_cast<const StylePropertyNode*>(propBase.get());
                 if (prop->getKey() == attrName) {
-                    // Found the property, now evaluate its value expression.
-                    // IMPORTANT: We use a new, empty local context for this evaluation
-                    // to prevent infinite recursion if properties reference each other.
                     if (!prop->getValues().empty()) {
                          m_lastValue = evaluateSubExpr(prop->getValues()[0].get());
                     } else {
@@ -179,4 +176,4 @@ void Evaluator::visit(const TernaryExpr& expr) {
     }
 }
 
-} // namespace CHTL
+}

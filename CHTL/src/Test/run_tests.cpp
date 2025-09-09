@@ -165,6 +165,16 @@ void test_local_script_block() {
     run_test("Phase 9.A: Local Script Block", src, expected);
 }
 
+void test_valueless_custom_style() {
+    std::string src = "[Custom] @Style TextSet { color, font-size; } div{ style{ @Custom @Style TextSet { color: red; font-size: 16px; } } }";
+    run_test("Phase 10.A: Valueless Custom Style", src, "<div style=\"color: red;font-size: 16px;\"></div>");
+}
+
+void test_explicit_inheritance() {
+    std::string src = "[Template] @Style Base { color: red; } [Template] @Style Derived { inherit @Style Base; font-size: 16px; } div{ style{ @Style Derived; } }";
+    run_test("Phase 10.B: Explicit Inheritance", src, "<div style=\"color: red;font-size: 16px;\"></div>");
+}
+
 
 int main() {
     std::cout << "--- Running CHTL Full Test Suite ---" << std::endl;
@@ -200,6 +210,8 @@ int main() {
     test_optional_else_false();
     test_logical_operators();
     test_local_script_block();
+    test_valueless_custom_style();
+    test_explicit_inheritance();
     std::cout << "------------------------------------" << std::endl;
     return 0;
 }
