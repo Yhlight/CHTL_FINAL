@@ -1,3 +1,0 @@
-[Template] @Element ImportedBox {
-    p { text: "I was imported!"; }
-}

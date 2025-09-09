@@ -1,81 +1,77 @@
 package CompilerDispatcher;
 
-import CHTL.CHTLLexer.CHTLLexer;
-import CHTL.CHTLLexer.Token;
-import CHTL.CHTLLexer.TokenType;
-import CHTL.CHTLLoader.CHTLLoader;
-import CHTL.CHTLManage.ConfigurationManager;
-import CHTL.CHTLManage.DefinitionManager;
-import CHTL.CHTLParser.CHTLParser;
-import CHTL.CHTLNode.BaseNode;
-import CHTL.CHTLNode.ConfigurationNode;
-import CHTL.CHTLProcessor.ProcessedAST;
-import CHTL.CHTLProcessor.ASTProcessor;
-import CHTL.CHTLGenerator.CHTLGenerator;
-
+import CHTL.CHTLCompiler;
+import CHTL.Node.BaseNode;
+import CHTL_JS.Generator.CHTLJSGenerator;
+import CHTL_JS.Lexer.CHTLJSLexer;
+import CHTL_JS.Node.CHTLJSBaseNode;
+import CHTL_JS.Parser.CHTLJSParser;
+import CSS.CssCompiler;
+import JS.JsCompiler;
+import Scanner.CHTLUnifiedScanner;
+import Scanner.SourceFragment;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import CodeMerger;
 
 public class CompilerDispatcher {
     public static void main(String[] args) {
-        // Final test case for dynamic keywords.
-        String source = "[Configuration] {\n" +
-                "    [Name] {\n" +
-                "        KEYWORD_STYLE = css;\n" +
-                "    }\n" +
-                "}\n" +
-                "div {\n" +
-                "    css { \n" +
-                "        color: green;\n" +
-                "    }\n" +
-                "}";
+        String source = "style { body { background-color: #eee; } }\n" +
+                        "div {\n" +
+                        "    id: main-box;\n" +
+                        "    text: \"Click the button!\";\n" +
+                        "    script {\n" +
+                        "        {{#main-box}} -> listen { click: () => { alert('Hello from CHTL JS!'); } };\n" +
+                        "    }\n" +
+                        "}\n" +
+                        "script { console.log('Global JS executed.'); }";
 
-        System.out.println("--- CHTL Source ---");
-        System.out.println(source);
+        System.out.println("--- Source Code ---\n" + source + "\n");
 
         try {
-            // 0. Setup
-            DefinitionManager definitionManager = new DefinitionManager();
-            ConfigurationManager configManager = new ConfigurationManager();
-            CHTLLoader loader = new CHTLLoader();
+            // 1. Scanning
+            CHTLUnifiedScanner scanner = new CHTLUnifiedScanner(source);
+            List<SourceFragment> fragments = scanner.scan();
 
-            // Pass 1
-            CHTLLexer preLexer = new CHTLLexer(source);
-            List<Token> preTokens = preLexer.tokenize();
-            CHTLParser preParser = new CHTLParser(source, preTokens, definitionManager, DefinitionManager.DEFAULT_NAMESPACE, loader);
-            List<ConfigurationNode> configNodes = preParser.preScanForConfiguration();
+            // 2. Compilation
+            List<BaseNode> chtlAst = new ArrayList<>();
+            List<String> cssOutputs = new ArrayList<>();
+            List<String> jsOutputs = new ArrayList<>();
 
-            for (ConfigurationNode configNode : configNodes) {
-                configManager.processConfigNode(configNode);
+            CHTLCompiler chtlCompiler = new CHTLCompiler();
+            CHTLJSGenerator chtljsGenerator = new CHTLJSGenerator();
+            CssCompiler cssCompiler = new CssCompiler();
+            JsCompiler jsCompiler = new JsCompiler();
+
+            for (SourceFragment fragment : fragments) {
+                switch (fragment.type()) {
+                    case CHTL:
+                        chtlAst.addAll(chtlCompiler.compile(fragment));
+                        break;
+                    case GLOBAL_CSS:
+                        cssOutputs.add(cssCompiler.compile(fragment));
+                        break;
+                    case GLOBAL_JS:
+                        jsOutputs.add(jsCompiler.compile(fragment));
+                        break;
+                    case CHTL_JS:
+                        CHTLJSLexer chtljsLexer = new CHTLJSLexer(fragment.content());
+                        CHTLJSParser chtljsParser = new CHTLJSParser(chtljsLexer.tokenize());
+                        List<CHTLJSBaseNode> chtljsAst = chtljsParser.parse();
+                        jsOutputs.add(chtljsGenerator.generate(chtljsAst));
+                        break;
+                }
             }
 
-            // Pass 2
-            Map<String, TokenType> activeKeywords = configManager.getActiveKeywords(CHTLLexer.getDefaultKeywords());
-            CHTLLexer lexer = new CHTLLexer(source, activeKeywords);
-            List<Token> tokens = lexer.tokenize();
+            // 3. Merging
+            CodeMerger merger = new CodeMerger();
+            String finalHtml = merger.merge(chtlAst, cssOutputs, jsOutputs);
 
-            CHTLParser parser = new CHTLParser(source, tokens, definitionManager, DefinitionManager.DEFAULT_NAMESPACE, loader);
-            List<BaseNode> ast = parser.parse();
-
-            ASTProcessor astProcessor = new ASTProcessor(definitionManager);
-            ProcessedAST processedAST = astProcessor.process(ast);
-
-            CHTLGenerator generator = new CHTLGenerator();
-            String bodyContent = generator.generate(processedAST.ast());
-            String styleBlock = generator.generateStyleBlock(processedAST.globalStyles());
-
-            String finalHtml;
-            if (!styleBlock.isEmpty() && bodyContent.contains("</head>")) {
-                finalHtml = bodyContent.replace("</head>", styleBlock + "</head>");
-            } else {
-                finalHtml = bodyContent;
-            }
-
-            System.out.println("\n--- Generated HTML ---");
+            System.out.println("--- Final HTML Output ---");
             System.out.println(finalHtml);
 
         } catch (Exception e) {
-            System.err.println("\n--- Compilation Failed ---");
+            System.err.println("\n--- COMPILATION FAILED ---");
             e.printStackTrace();
         }
     }
