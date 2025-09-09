@@ -2,7 +2,7 @@
 //! parser and generates an HTML string.
 
 use crate::ast::{CommentNode, ElementNode, Node, Program};
-use crate::evaluator::{self, Object};
+use crate::evaluator::{self, Environment, Object};
 use std::collections::HashSet;
 
 pub struct Generator {
@@ -48,9 +48,10 @@ impl Generator {
         let mut classes = HashSet::new();
         let mut id = None;
         let mut inline_styles = Vec::new();
+        let mut env = Environment::new();
 
         for attr in &element.attributes {
-            let value_obj = evaluator::eval(&attr.value).unwrap_or(Object::Null);
+            let value_obj = evaluator::eval(&attr.value, &env).unwrap_or(Object::Null);
             let value_str = value_obj.to_string();
             match attr.name.as_str() {
                 "class" => classes.extend(value_str.split_whitespace().map(String::from)),
@@ -84,10 +85,13 @@ impl Generator {
         }
 
         for sn in &style_nodes {
+            // Evaluate inline properties in order, updating the environment
             for prop in &sn.inline_properties {
-                let value_obj = evaluator::eval(&prop.value).unwrap_or(Object::Null);
+                let value_obj = evaluator::eval(&prop.value, &env).unwrap_or(Object::Null);
+                env.insert(prop.name.clone(), value_obj.clone());
                 inline_styles.push(format!("{}: {};", prop.name, value_obj.to_string()));
             }
+            // Evaluate rules using the final environment
             for rule in &sn.rules {
                 let mut selector = rule.selector.trim().to_string();
                 if let Some(class_name) = selector.strip_prefix('.') { classes.insert(class_name.to_string()); }
@@ -99,7 +103,7 @@ impl Generator {
                 }
                 let properties_str = rule.properties.iter()
                     .map(|p| {
-                        let value_obj = evaluator::eval(&p.value).unwrap_or(Object::Null);
+                        let value_obj = evaluator::eval(&p.value, &env).unwrap_or(Object::Null);
                         format!("  {}: {};\n", p.name, value_obj.to_string())
                     })
                     .collect::<String>();
@@ -147,12 +151,12 @@ mod tests {
     use crate::parser::Parser;
 
     #[test]
-    fn test_generator_with_evaluated_expressions() {
+    fn test_generator_with_contextual_evaluation() {
         let input = r#"
             div {
                 style {
-                    width: 5 + 10;
-                    height: 100px;
+                    width: 100;
+                    height: width / 2;
                 }
             }
         "#;
@@ -165,8 +169,7 @@ mod tests {
         let mut generator = Generator::new();
         let html = generator.generate_program(&program);
 
-        // The generator should now evaluate the expressions.
-        let expected_html = r#"<div style="width: 15; height: 100px;"></div>"#;
+        let expected_html = r#"<div style="width: 100; height: 50;"></div>"#;
 
         let normalize = |s: &str| s.replace(['\n', ' '], "");
         assert_eq!(normalize(&html), normalize(expected_html));
