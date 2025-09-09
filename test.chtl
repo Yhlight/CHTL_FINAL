@@ -1,0 +1,14 @@
+html {
+    head {
+        title { "My Website" }
+    }
+    body {
+        div {
+            id: my_div;
+            class: "container";
+            text {
+                Hello World
+            }
+        }
+    }
+}
