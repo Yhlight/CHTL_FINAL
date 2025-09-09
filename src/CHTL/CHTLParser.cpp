@@ -1,5 +1,7 @@
 #include "CHTL/CHTLParser.h"
 #include <stdexcept>
+#include <algorithm>
+#include <iterator>
 
 namespace CHTL {
 
@@ -133,7 +135,7 @@ std::shared_ptr<BaseNode> CHTLParser::parseStatement() {
         return parseNamespace();
     } else if (check(TokenType::TEXT)) {
         return parseText();
-    } else if (check(TokenType::COMMENT)) {
+    } else if (check(TokenType::LINE_COMMENT) || check(TokenType::BLOCK_COMMENT) || check(TokenType::GENERATOR_COMMENT)) {
         return parseComment();
     } else if (check(TokenType::IDENTIFIER) || check(TokenType::LITERAL)) {
         return parseElement();

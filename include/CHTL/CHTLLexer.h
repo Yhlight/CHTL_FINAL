@@ -37,6 +37,7 @@ enum class TokenType {
     UNDERSCORE,     // _
     
     // 注释
+    COMMENT,        // 通用注释
     LINE_COMMENT,   // //
     BLOCK_COMMENT,  // /* */
     GENERATOR_COMMENT, // --

@@ -97,6 +97,10 @@ private:
     
     // 表达式解析
     std::string parseExpression();
+    
+    // 节点类型转换
+    NodeType getTemplateNodeType(const std::string& type) const;
+    NodeType getCustomNodeType(const std::string& type) const;
     std::string parseConditionalExpression();
     std::string parseLogicalExpression();
     std::string parseEqualityExpression();

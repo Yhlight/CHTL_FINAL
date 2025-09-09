@@ -28,6 +28,7 @@ add_library(CHTLCore STATIC
     CHTLVSCodeExtensionPreviewer.cpp
     CHTLVSCodeExtensionModules.cpp
     CHTLVSCodeExtensionManager.cpp
+    CHTLExternalCompiler.cpp
 )
 
 target_include_directories(CHTLCore PUBLIC

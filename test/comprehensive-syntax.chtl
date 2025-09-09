@@ -1,0 +1,643 @@
+// CHTL 综合语法测试文件
+// 这个文件涵盖了 CHTL 的所有语法特性
+
+// 1. 注释系统测试
+// 单行注释
+/*
+多行注释
+支持跨行
+*/
+-- 生成器识别的注释
+
+// 2. 模板系统测试
+[Template] @Style PrimaryButton
+{
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+[Template] @Style SecondaryButton
+{
+    inherit PrimaryButton;
+    background-color: #6c757d;
+    border: 2px solid #6c757d;
+}
+
+[Template] @Element Card
+{
+    div
+    {
+        class: "card";
+        style
+        {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: white;
+        }
+        
+        h3 { "Card Title" }
+        p { "Card content goes here." }
+    }
+}
+
+[Template] @Var ThemeColors
+{
+    primary: "#007bff";
+    secondary: "#6c757d";
+    success: "#28a745";
+    danger: "#dc3545";
+    warning: "#ffc107";
+    info: "#17a2b8";
+}
+
+// 3. 自定义系统测试
+[Custom] @Style ButtonVariant
+{
+    background-color,
+    color,
+    border-color;
+}
+
+[Custom] @Element CustomCard
+{
+    div { }
+    header { }
+    content { }
+    footer { }
+}
+
+[Custom] @Var CustomTheme
+{
+    primary,
+    secondary,
+    accent;
+}
+
+// 4. 原始嵌入测试
+[Origin] @Html
+{
+    <div class="raw-html">
+        <h2>Raw HTML Content</h2>
+        <p>This is raw HTML that will be embedded directly.</p>
+        <script>
+            console.log("Raw HTML script executed!");
+        </script>
+    </div>
+}
+
+[Origin] @Style
+{
+    .raw-html {
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        padding: 20px;
+        border-radius: 10px;
+        color: white;
+        text-align: center;
+    }
+    
+    .raw-html h2 {
+        margin: 0 0 10px 0;
+        font-size: 2em;
+    }
+    
+    .raw-html p {
+        margin: 0;
+        opacity: 0.9;
+    }
+}
+
+[Origin] @JavaScript
+{
+    // Raw JavaScript code
+    function initializeRawJS() {
+        console.log("Raw JavaScript initialized!");
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const rawElements = document.querySelectorAll('.raw-html');
+            rawElements.forEach(element => {
+                element.addEventListener('click', function() {
+                    this.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 200);
+                });
+            });
+        });
+    }
+    
+    initializeRawJS();
+}
+
+// 5. 导入系统测试
+[Import] "external-styles.css" as externalStyles;
+[Import] "external-script.js" as externalScript;
+[Import] "components.chtl"::ButtonComponent;
+[Import] "utils.chtl"::* as utils;
+
+// 6. 约束系统测试
+[Constraints] except @Element script
+{
+    // 不允许直接使用 script 元素
+}
+
+[Constraints] except @Style .dangerous-style type: "class"
+{
+    // 不允许使用危险样式类
+}
+
+[Constraints] except @Element div in header
+{
+    // 在 header 中不允许使用 div 元素
+}
+
+// 7. 配置组测试
+[Configuration] ProductionConfig
+{
+    DEBUG_MODE: false;
+    INDEX_INITIAL_COUNT: 1000;
+    DISABLE_NAME_GROUP: true;
+    
+    [Name]
+    {
+        element: "el";
+        attribute: "attr";
+        text: "txt";
+        style: "sty";
+        script: "scr";
+    }
+    
+    [OriginType]
+    {
+        @Vue: "vue-component";
+        @React: "react-component";
+        @Angular: "angular-component";
+    }
+}
+
+[Configuration] DevelopmentConfig
+{
+    DEBUG_MODE: true;
+    INDEX_INITIAL_COUNT: 100;
+    DISABLE_NAME_GROUP: false;
+}
+
+use ProductionConfig;
+
+// 8. 命名空间测试
+[Namespace] UIComponents
+{
+    [Import] "ui-button.chtl"::Button;
+    [Import] "ui-card.chtl"::Card;
+    [Import] "ui-modal.chtl"::Modal;
+}
+
+[Namespace] Utils
+{
+    [Import] "math-utils.chtl"::* as math;
+    [Import] "string-utils.chtl"::* as string;
+}
+
+// 9. 主页面结构
+html
+{
+    head
+    {
+        title { "CHTL 综合语法测试" }
+        meta
+        {
+            charset: "UTF-8";
+        }
+        meta
+        {
+            name: "viewport";
+            content: "width=device-width, initial-scale=1.0";
+        }
+        link
+        {
+            rel: "stylesheet";
+            href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css";
+        }
+        
+        style
+        {
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                padding: 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+            }
+            
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            
+            .header {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border-radius: 15px;
+                padding: 30px;
+                margin-bottom: 30px;
+                text-align: center;
+                color: white;
+            }
+            
+            .section {
+                background: rgba(255, 255, 255, 0.9);
+                border-radius: 15px;
+                padding: 30px;
+                margin-bottom: 20px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            }
+            
+            .button-group {
+                display: flex;
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin: 20px 0;
+            }
+            
+            .feature-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+                margin: 20px 0;
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: "container";
+            
+            // 页面头部
+            header
+            {
+                class: "header";
+                
+                h1
+                {
+                    style
+                    {
+                        font-size: 3rem;
+                        margin: 0 0 10px 0;
+                        font-weight: 300;
+                    }
+                    text { "CHTL 综合语法测试" }
+                }
+                
+                p
+                {
+                    style
+                    {
+                        font-size: 1.2rem;
+                        margin: 0;
+                        opacity: 0.9;
+                    }
+                    text { "展示 CHTL 语言的所有语法特性和功能" }
+                }
+            }
+            
+            // 按钮测试区域
+            section
+            {
+                class: "section";
+                
+                h2 { "按钮系统测试" }
+                
+                div
+                {
+                    class: "button-group";
+                    
+                    button
+                    {
+                        class: "btn-primary";
+                        style
+                        {
+                            @Style PrimaryButton;
+                        }
+                        text { "主要按钮" }
+                    }
+                    
+                    button
+                    {
+                        class: "btn-secondary";
+                        style
+                        {
+                            @Style SecondaryButton;
+                        }
+                        text { "次要按钮" }
+                    }
+                    
+                    button
+                    {
+                        class: "btn-custom";
+                        style
+                        {
+                            @Style ButtonVariant
+                            {
+                                background-color: #28a745;
+                                color: white;
+                                border-color: #28a745;
+                            }
+                        }
+                        text { "自定义按钮" }
+                    }
+                }
+            }
+            
+            // 卡片系统测试
+            section
+            {
+                class: "section";
+                
+                h2 { "卡片系统测试" }
+                
+                div
+                {
+                    class: "feature-grid";
+                    
+                    @Element Card;
+                    
+                    @Element CustomCard
+                    {
+                        header
+                        {
+                            h3 { "自定义卡片" }
+                        }
+                        content
+                        {
+                            p { "这是一个自定义卡片组件。" }
+                        }
+                        footer
+                        {
+                            button
+                            {
+                                style
+                                {
+                                    @Style PrimaryButton;
+                                }
+                                text { "了解更多" }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // CHTL JS 扩展语法测试
+            section
+            {
+                class: "section";
+                
+                h2 { "CHTL JS 扩展语法测试" }
+                
+                div
+                {
+                    id: "chtljs-demo";
+                    class: "demo-container";
+                    
+                    style
+                    {
+                        background: #f8f9fa;
+                        border: 2px dashed #dee2e6;
+                        border-radius: 8px;
+                        padding: 20px;
+                        text-align: center;
+                    }
+                    
+                    h3 { "CHTL JS 功能演示" }
+                    
+                    p { "点击下面的按钮测试 CHTL JS 功能" }
+                    
+                    button
+                    {
+                        id: "demo-button";
+                        class: "btn-demo";
+                        
+                        style
+                        {
+                            @Style PrimaryButton;
+                        }
+                        
+                        text { "测试 CHTL JS" }
+                    }
+                    
+                    script
+                    {
+                        // CHTL JS 扩展语法演示
+                        
+                        // 文件加载器
+                        fileloader
+                        {
+                            load: "https://cdnjs.cloudflare.com/ajax/libs/lodash/4.17.21/lodash.min.js";
+                        }
+                        
+                        // 增强选择器
+                        const demoButton = {{#demo-button}};
+                        const demoContainer = {{.demo-container}};
+                        
+                        // 事件监听器
+                        listen
+                        {
+                            click: "handleDemoClick()";
+                            mouseenter: "this.style.transform = 'scale(1.05)'";
+                            mouseleave: "this.style.transform = 'scale(1)'";
+                        }
+                        
+                        // 动画系统
+                        animate
+                        {
+                            target: "{{.demo-container}}";
+                            duration: 1000;
+                            easing: "ease-in-out";
+                            begin: "opacity: 0; transform: translateY(20px)";
+                            end: "opacity: 1; transform: translateY(0)";
+                        }
+                        
+                        // 虚对象
+                        vir demoObject = function
+                        {
+                            name: "CHTLJSDemo";
+                            version: "1.0.0";
+                            features: ["选择器", "事件", "动画", "虚对象"];
+                            log: "CHTL JS 虚对象已创建";
+                        };
+                        
+                        // 路由系统
+                        router
+                        {
+                            url: "/demo";
+                            page: "demo.chtl";
+                            root: "#chtljs-demo";
+                            mode: "history";
+                        }
+                        
+                        // 事件委托
+                        delegate
+                        {
+                            target: "{{.button-group}}";
+                            click: "handleButtonClick(event)";
+                        }
+                        
+                        // 函数定义
+                        function handleDemoClick() {
+                            console.log("CHTL JS 演示按钮被点击!");
+                            
+                            // 使用虚对象
+                            console.log(demoObject.log);
+                            
+                            // 显示动画
+                            demoContainer.style.animation = "pulse 0.5s ease-in-out";
+                            
+                            // 更新内容
+                            demoContainer.innerHTML = `
+                                <h3>CHTL JS 功能已激活!</h3>
+                                <p>虚对象: ${demoObject.name} v${demoObject.version}</p>
+                                <p>功能: ${demoObject.features.join(', ')}</p>
+                            `;
+                        }
+                        
+                        function handleButtonClick(event) {
+                            console.log("按钮组中的按钮被点击:", event.target.textContent);
+                        }
+                    }
+                }
+            }
+            
+            // 模块系统测试
+            section
+            {
+                class: "section";
+                
+                h2 { "模块系统测试" }
+                
+                div
+                {
+                    class: "module-demo";
+                    
+                    p { "这里演示模块系统的功能" }
+                    
+                    // 使用导入的组件
+                    @Element ButtonComponent;
+                    
+                    // 使用导入的工具
+                    script
+                    {
+                        // 使用导入的 JavaScript 工具
+                        console.log("使用导入的工具:", utils);
+                    }
+                }
+            }
+            
+            // 原始嵌入测试
+            section
+            {
+                class: "section";
+                
+                h2 { "原始嵌入测试" }
+                
+                [Origin] @Html;
+            }
+            
+            // 页脚
+            footer
+            {
+                class: "section";
+                
+                style
+                {
+                    text-align: center;
+                    color: #666;
+                    border-top: 1px solid #eee;
+                    padding-top: 20px;
+                }
+                
+                p { "© 2024 CHTL 综合语法测试 - 展示所有 CHTL 语言特性" }
+                
+                div
+                {
+                    class: "footer-links";
+                    
+                    style
+                    {
+                        margin-top: 15px;
+                    }
+                    
+                    a
+                    {
+                        href: "#";
+                        style
+                        {
+                            color: #007bff;
+                            text-decoration: none;
+                            margin: 0 10px;
+                        }
+                        text { "文档" }
+                    }
+                    
+                    a
+                    {
+                        href: "#";
+                        style
+                        {
+                            color: #007bff;
+                            text-decoration: none;
+                            margin: 0 10px;
+                        }
+                        text { "示例" }
+                    }
+                    
+                    a
+                    {
+                        href: "#";
+                        style
+                        {
+                            color: #007bff;
+                            text-decoration: none;
+                            margin: 0 10px;
+                        }
+                        text { "GitHub" }
+                    }
+                }
+            }
+        }
+        
+        // 全局脚本
+        script
+        {
+            // 全局初始化
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('CHTL 综合语法测试页面已加载');
+                
+                // 初始化所有功能
+                initializePage();
+            });
+            
+            function initializePage() {
+                console.log('页面初始化完成');
+                
+                // 添加页面加载动画
+                document.body.style.opacity = '0';
+                document.body.style.transition = 'opacity 0.5s ease-in-out';
+                
+                setTimeout(() => {
+                    document.body.style.opacity = '1';
+                }, 100);
+            }
+        }
+    }
+}
