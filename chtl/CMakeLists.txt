@@ -26,6 +26,10 @@ set(SOURCES
     src/parser/parser.cpp
     src/parser/chtl_parser.cpp
     src/ast/ast_node.cpp
+    src/scanner/unified_scanner.cpp
+    src/style/style_processor.cpp
+    src/import/import_manager.cpp
+    src/generator/code_generator.cpp
 )
 
 # Header files
@@ -36,6 +40,10 @@ set(HEADERS
     include/parser/parser.h
     include/parser/chtl_parser.h
     include/ast/ast_node.h
+    include/scanner/unified_scanner.h
+    include/style/style_processor.h
+    include/import/import_manager.h
+    include/generator/code_generator.h
 )
 
 # Create executable

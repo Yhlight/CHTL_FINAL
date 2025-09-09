@@ -250,6 +250,60 @@ src/ast/ast_node.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/ast/ast_node.cpp.s
 .PHONY : src/ast/ast_node.cpp.s
 
+src/generator/code_generator.o: src/generator/code_generator.cpp.o
+.PHONY : src/generator/code_generator.o
+
+# target to build an object file
+src/generator/code_generator.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/generator/code_generator.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.o
+.PHONY : src/generator/code_generator.cpp.o
+
+src/generator/code_generator.i: src/generator/code_generator.cpp.i
+.PHONY : src/generator/code_generator.i
+
+# target to preprocess a source file
+src/generator/code_generator.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/generator/code_generator.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.i
+.PHONY : src/generator/code_generator.cpp.i
+
+src/generator/code_generator.s: src/generator/code_generator.cpp.s
+.PHONY : src/generator/code_generator.s
+
+# target to generate assembly for a file
+src/generator/code_generator.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/generator/code_generator.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.s
+.PHONY : src/generator/code_generator.cpp.s
+
+src/import/import_manager.o: src/import/import_manager.cpp.o
+.PHONY : src/import/import_manager.o
+
+# target to build an object file
+src/import/import_manager.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/import/import_manager.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.o
+.PHONY : src/import/import_manager.cpp.o
+
+src/import/import_manager.i: src/import/import_manager.cpp.i
+.PHONY : src/import/import_manager.i
+
+# target to preprocess a source file
+src/import/import_manager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/import/import_manager.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.i
+.PHONY : src/import/import_manager.cpp.i
+
+src/import/import_manager.s: src/import/import_manager.cpp.s
+.PHONY : src/import/import_manager.s
+
+# target to generate assembly for a file
+src/import/import_manager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/import/import_manager.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.s
+.PHONY : src/import/import_manager.cpp.s
+
 src/lexer/chtl_lexer.o: src/lexer/chtl_lexer.cpp.o
 .PHONY : src/lexer/chtl_lexer.o
 
@@ -412,6 +466,60 @@ src/parser/parser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/parser/parser.cpp.s
 .PHONY : src/parser/parser.cpp.s
 
+src/scanner/unified_scanner.o: src/scanner/unified_scanner.cpp.o
+.PHONY : src/scanner/unified_scanner.o
+
+# target to build an object file
+src/scanner/unified_scanner.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.o
+.PHONY : src/scanner/unified_scanner.cpp.o
+
+src/scanner/unified_scanner.i: src/scanner/unified_scanner.cpp.i
+.PHONY : src/scanner/unified_scanner.i
+
+# target to preprocess a source file
+src/scanner/unified_scanner.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.i
+.PHONY : src/scanner/unified_scanner.cpp.i
+
+src/scanner/unified_scanner.s: src/scanner/unified_scanner.cpp.s
+.PHONY : src/scanner/unified_scanner.s
+
+# target to generate assembly for a file
+src/scanner/unified_scanner.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.s
+.PHONY : src/scanner/unified_scanner.cpp.s
+
+src/style/style_processor.o: src/style/style_processor.cpp.o
+.PHONY : src/style/style_processor.o
+
+# target to build an object file
+src/style/style_processor.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/style/style_processor.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.o
+.PHONY : src/style/style_processor.cpp.o
+
+src/style/style_processor.i: src/style/style_processor.cpp.i
+.PHONY : src/style/style_processor.i
+
+# target to preprocess a source file
+src/style/style_processor.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/style/style_processor.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.i
+.PHONY : src/style/style_processor.cpp.i
+
+src/style/style_processor.s: src/style/style_processor.cpp.s
+.PHONY : src/style/style_processor.s
+
+# target to generate assembly for a file
+src/style/style_processor.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/style/style_processor.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.s
+.PHONY : src/style/style_processor.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -432,6 +540,12 @@ help:
 	@echo "... src/ast/ast_node.o"
 	@echo "... src/ast/ast_node.i"
 	@echo "... src/ast/ast_node.s"
+	@echo "... src/generator/code_generator.o"
+	@echo "... src/generator/code_generator.i"
+	@echo "... src/generator/code_generator.s"
+	@echo "... src/import/import_manager.o"
+	@echo "... src/import/import_manager.i"
+	@echo "... src/import/import_manager.s"
 	@echo "... src/lexer/chtl_lexer.o"
 	@echo "... src/lexer/chtl_lexer.i"
 	@echo "... src/lexer/chtl_lexer.s"
@@ -450,6 +564,12 @@ help:
 	@echo "... src/parser/parser.o"
 	@echo "... src/parser/parser.i"
 	@echo "... src/parser/parser.s"
+	@echo "... src/scanner/unified_scanner.o"
+	@echo "... src/scanner/unified_scanner.i"
+	@echo "... src/scanner/unified_scanner.s"
+	@echo "... src/style/style_processor.o"
+	@echo "... src/style/style_processor.i"
+	@echo "... src/style/style_processor.s"
 .PHONY : help
 
 

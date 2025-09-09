@@ -9,6 +9,10 @@ chtl: \
   CMakeFiles/chtl.dir/src/parser/parser.cpp.o \
   CMakeFiles/chtl.dir/src/parser/chtl_parser.cpp.o \
   CMakeFiles/chtl.dir/src/ast/ast_node.cpp.o \
+  CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.o \
+  CMakeFiles/chtl.dir/src/style/style_processor.cpp.o \
+  CMakeFiles/chtl.dir/src/import/import_manager.cpp.o \
+  CMakeFiles/chtl.dir/src/generator/code_generator.cpp.o \
   /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so \
   /lib/x86_64-linux-gnu/libm.so \
   /lib/x86_64-linux-gnu/libm.so \
@@ -56,6 +60,14 @@ CMakeFiles/chtl.dir/src/parser/parser.cpp.o:
 CMakeFiles/chtl.dir/src/parser/chtl_parser.cpp.o:
 
 CMakeFiles/chtl.dir/src/ast/ast_node.cpp.o:
+
+CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.o:
+
+CMakeFiles/chtl.dir/src/style/style_processor.cpp.o:
+
+CMakeFiles/chtl.dir/src/import/import_manager.cpp.o:
+
+CMakeFiles/chtl.dir/src/generator/code_generator.cpp.o:
 
 /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so:
 

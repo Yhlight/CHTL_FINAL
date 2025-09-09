@@ -9,12 +9,16 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspace/chtl/src/ast/ast_node.cpp" "CMakeFiles/chtl.dir/src/ast/ast_node.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/ast/ast_node.cpp.o.d"
+  "/workspace/chtl/src/generator/code_generator.cpp" "CMakeFiles/chtl.dir/src/generator/code_generator.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/generator/code_generator.cpp.o.d"
+  "/workspace/chtl/src/import/import_manager.cpp" "CMakeFiles/chtl.dir/src/import/import_manager.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/import/import_manager.cpp.o.d"
   "/workspace/chtl/src/lexer/chtl_lexer.cpp" "CMakeFiles/chtl.dir/src/lexer/chtl_lexer.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/lexer/chtl_lexer.cpp.o.d"
   "/workspace/chtl/src/lexer/lexer.cpp" "CMakeFiles/chtl.dir/src/lexer/lexer.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/lexer/lexer.cpp.o.d"
   "/workspace/chtl/src/lexer/token.cpp" "CMakeFiles/chtl.dir/src/lexer/token.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/lexer/token.cpp.o.d"
   "/workspace/chtl/src/main.cpp" "CMakeFiles/chtl.dir/src/main.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/main.cpp.o.d"
   "/workspace/chtl/src/parser/chtl_parser.cpp" "CMakeFiles/chtl.dir/src/parser/chtl_parser.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/parser/chtl_parser.cpp.o.d"
   "/workspace/chtl/src/parser/parser.cpp" "CMakeFiles/chtl.dir/src/parser/parser.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/parser/parser.cpp.o.d"
+  "/workspace/chtl/src/scanner/unified_scanner.cpp" "CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/scanner/unified_scanner.cpp.o.d"
+  "/workspace/chtl/src/style/style_processor.cpp" "CMakeFiles/chtl.dir/src/style/style_processor.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/style/style_processor.cpp.o.d"
   "" "chtl" "gcc" "CMakeFiles/chtl.dir/link.d"
   )
 

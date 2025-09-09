@@ -170,6 +170,62 @@ CMakeFiles/chtl_lib.dir/src/ast/ast_node.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/ast/ast_node.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/chtl/src/ast/ast_node.cpp -o CMakeFiles/chtl_lib.dir/src/ast/ast_node.cpp.s
 
+CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
+CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.o: /workspace/chtl/src/scanner/unified_scanner.cpp
+CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/chtl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.o -MF CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.o -c /workspace/chtl/src/scanner/unified_scanner.cpp
+
+CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/chtl/src/scanner/unified_scanner.cpp > CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.i
+
+CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/chtl/src/scanner/unified_scanner.cpp -o CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.s
+
+CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
+CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.o: /workspace/chtl/src/style/style_processor.cpp
+CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/chtl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.o -MF CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.o -c /workspace/chtl/src/style/style_processor.cpp
+
+CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/chtl/src/style/style_processor.cpp > CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.i
+
+CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/chtl/src/style/style_processor.cpp -o CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.s
+
+CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
+CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.o: /workspace/chtl/src/import/import_manager.cpp
+CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/chtl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.o -MF CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.o -c /workspace/chtl/src/import/import_manager.cpp
+
+CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/chtl/src/import/import_manager.cpp > CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.i
+
+CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/chtl/src/import/import_manager.cpp -o CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.s
+
+CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
+CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.o: /workspace/chtl/src/generator/code_generator.cpp
+CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/chtl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.o -MF CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.o -c /workspace/chtl/src/generator/code_generator.cpp
+
+CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/chtl/src/generator/code_generator.cpp > CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.i
+
+CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/chtl/src/generator/code_generator.cpp -o CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.s
+
 # Object files for target chtl_lib
 chtl_lib_OBJECTS = \
 "CMakeFiles/chtl_lib.dir/src/main.cpp.o" \
@@ -178,7 +234,11 @@ chtl_lib_OBJECTS = \
 "CMakeFiles/chtl_lib.dir/src/lexer/chtl_lexer.cpp.o" \
 "CMakeFiles/chtl_lib.dir/src/parser/parser.cpp.o" \
 "CMakeFiles/chtl_lib.dir/src/parser/chtl_parser.cpp.o" \
-"CMakeFiles/chtl_lib.dir/src/ast/ast_node.cpp.o"
+"CMakeFiles/chtl_lib.dir/src/ast/ast_node.cpp.o" \
+"CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.o" \
+"CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.o" \
+"CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.o" \
+"CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.o"
 
 # External object files for target chtl_lib
 chtl_lib_EXTERNAL_OBJECTS =
@@ -190,9 +250,13 @@ libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/lexer/chtl_lexer.cpp.o
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/parser/parser.cpp.o
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/parser/chtl_parser.cpp.o
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/ast/ast_node.cpp.o
+libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.o
+libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.o
+libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.o
+libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.o
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/build.make
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/chtl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX static library libchtl_lib.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/chtl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX static library libchtl_lib.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/chtl_lib.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/chtl_lib.dir/link.txt --verbose=$(VERBOSE)
 

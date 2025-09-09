@@ -1,6 +1,10 @@
 file(REMOVE_RECURSE
   "CMakeFiles/chtl_lib.dir/src/ast/ast_node.cpp.o"
   "CMakeFiles/chtl_lib.dir/src/ast/ast_node.cpp.o.d"
+  "CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.o"
+  "CMakeFiles/chtl_lib.dir/src/generator/code_generator.cpp.o.d"
+  "CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.o"
+  "CMakeFiles/chtl_lib.dir/src/import/import_manager.cpp.o.d"
   "CMakeFiles/chtl_lib.dir/src/lexer/chtl_lexer.cpp.o"
   "CMakeFiles/chtl_lib.dir/src/lexer/chtl_lexer.cpp.o.d"
   "CMakeFiles/chtl_lib.dir/src/lexer/lexer.cpp.o"
@@ -13,6 +17,10 @@ file(REMOVE_RECURSE
   "CMakeFiles/chtl_lib.dir/src/parser/chtl_parser.cpp.o.d"
   "CMakeFiles/chtl_lib.dir/src/parser/parser.cpp.o"
   "CMakeFiles/chtl_lib.dir/src/parser/parser.cpp.o.d"
+  "CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.o"
+  "CMakeFiles/chtl_lib.dir/src/scanner/unified_scanner.cpp.o.d"
+  "CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.o"
+  "CMakeFiles/chtl_lib.dir/src/style/style_processor.cpp.o.d"
   "libchtl_lib.a"
   "libchtl_lib.pdb"
 )
