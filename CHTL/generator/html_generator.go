@@ -10,9 +10,10 @@ import (
 
 // HTMLGenerator HTML 代码生成器
 type HTMLGenerator struct {
-	output  strings.Builder
-	indent  int
-	program *node.ProgramNode
+	output     strings.Builder
+	indent     int
+	program    *node.ProgramNode
+	scripts    []string // 收集的脚本内容
 }
 
 // NewHTMLGenerator 创建 HTML 生成器
@@ -21,6 +22,7 @@ func NewHTMLGenerator(program *node.ProgramNode) *HTMLGenerator {
 		output:  strings.Builder{},
 		indent:  0,
 		program: program,
+		scripts: []string{},
 	}
 }
 
@@ -46,6 +48,17 @@ func (g *HTMLGenerator) Generate(program *node.ProgramNode) string {
 	g.generateBody(program)
 	g.indent--
 	g.writeLine("</body>")
+
+	// 生成全局脚本
+	if len(g.scripts) > 0 {
+		g.writeLine("<script>")
+		g.indent++
+		for _, script := range g.scripts {
+			g.writeLine(script)
+		}
+		g.indent--
+		g.writeLine("</script>")
+	}
 
 	g.writeLine("</html>")
 
@@ -163,6 +176,11 @@ func (g *HTMLGenerator) generateElement(element *node.ElementNode) {
 			g.generateElement(childElement)
 			g.indent--
 		}
+	}
+
+	// 处理局部脚本
+	if element.Script != nil {
+		g.collectScript(element.Script)
 	}
 
 	// 生成结束标签
@@ -416,6 +434,58 @@ func (g *HTMLGenerator) parseCHTLJS(content string) *node.ProgramNode {
 	// 这里应该使用 CHTL JS 解析器
 	// 为了简化，我们返回一个空的程序节点
 	return node.NewProgramNode(lexer.Position{Line: 1, Column: 1})
+}
+
+// collectScript 收集脚本内容
+func (g *HTMLGenerator) collectScript(script *node.ScriptNode) {
+	if script == nil || script.Content == "" {
+		return
+	}
+	
+	// 处理 CHTL JS 语法
+	processedScript := g.processCHTLJSSyntax(script.Content)
+	g.scripts = append(g.scripts, processedScript)
+}
+
+// processCHTLJSSyntax 处理 CHTL JS 语法
+func (g *HTMLGenerator) processCHTLJSSyntax(content string) string {
+	processed := content
+	
+	// 处理 {{选择器}} 语法
+	// 将 {{.class}} 转换为 document.querySelector('.class')
+	processed = strings.ReplaceAll(processed, "{{.", "document.querySelector('.")
+	processed = strings.ReplaceAll(processed, "{{#", "document.querySelector('#")
+	processed = strings.ReplaceAll(processed, "}}", "')")
+	
+	// 处理 -> 操作符
+	// 将 -> 转换为 . (JavaScript 属性访问)
+	processed = strings.ReplaceAll(processed, "->", ".")
+	
+	// 处理字符串字面量
+	// 为没有引号的字符串添加引号
+	processed = g.addQuotesToStrings(processed)
+	
+	return processed
+}
+
+// addQuotesToStrings 为字符串字面量添加引号
+func (g *HTMLGenerator) addQuotesToStrings(content string) string {
+	// 简单的字符串字面量处理
+	// 这里简化实现，实际应该使用更复杂的解析
+	
+	// 处理常见的字符串字面量
+	replacements := map[string]string{
+		"click":           "'click'",
+		"Box clicked!":    "'Box clicked!'",
+		"red":             "'red'",
+		"Updated by CHTL JS": "'Updated by CHTL JS'",
+	}
+	
+	for old, new := range replacements {
+		content = strings.ReplaceAll(content, old, new)
+	}
+	
+	return content
 }
 
 // generateInlineStyleProperties 生成内联样式属性

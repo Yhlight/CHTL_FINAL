@@ -103,9 +103,19 @@ func (l *Lexer) NextToken() Token {
 
 	switch l.ch {
 	case '{':
-		tok = l.newToken(LEFT_BRACE, l.ch)
+		if l.peekChar() == '{' {
+			l.readChar()
+			tok = l.newToken(DOUBLE_LEFT_BRACE, "{{")
+		} else {
+			tok = l.newToken(LEFT_BRACE, l.ch)
+		}
 	case '}':
-		tok = l.newToken(RIGHT_BRACE, l.ch)
+		if l.peekChar() == '}' {
+			l.readChar()
+			tok = l.newToken(DOUBLE_RIGHT_BRACE, "}}")
+		} else {
+			tok = l.newToken(RIGHT_BRACE, l.ch)
+		}
 	case '[':
 		tok = l.newToken(LEFT_BRACKET, l.ch)
 	case ']':
@@ -173,7 +183,7 @@ func (l *Lexer) NextToken() Token {
 	case '-':
 		if l.peekChar() == '>' {
 			l.readChar()
-			tok = l.newToken(ARROW, "->")
+			tok = l.newToken(CHTL_ARROW, "->")
 		} else {
 			tok = l.newToken(MINUS, l.ch)
 		}

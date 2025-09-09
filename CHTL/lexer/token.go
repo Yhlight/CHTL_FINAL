@@ -15,6 +15,8 @@ const (
 	// 分隔符
 	LEFT_BRACE    // {
 	RIGHT_BRACE   // }
+	DOUBLE_LEFT_BRACE  // {{
+	DOUBLE_RIGHT_BRACE // }}
 	LEFT_BRACKET  // [
 	RIGHT_BRACKET // ]
 	LEFT_PAREN    // (
@@ -109,6 +111,7 @@ const (
 	ARROW          // ->
 	DOUBLE_ARROW   // =>
 	TRIPLE_DOT     // ...
+	CHTL_ARROW     // -> (CHTL JS 操作符)
 	DOUBLE_COLON   // ::
 	DOUBLE_PIPE    // ||
 	DOUBLE_AND     // &&
@@ -147,6 +150,10 @@ func (t TokenType) String() string {
 		return "LEFT_BRACE"
 	case RIGHT_BRACE:
 		return "RIGHT_BRACE"
+	case DOUBLE_LEFT_BRACE:
+		return "DOUBLE_LEFT_BRACE"
+	case DOUBLE_RIGHT_BRACE:
+		return "DOUBLE_RIGHT_BRACE"
 	case LEFT_BRACKET:
 		return "LEFT_BRACKET"
 	case RIGHT_BRACKET:
@@ -319,6 +326,8 @@ func (t TokenType) String() string {
 		return "DOUBLE_ARROW"
 	case TRIPLE_DOT:
 		return "TRIPLE_DOT"
+	case CHTL_ARROW:
+		return "CHTL_ARROW"
 	case DOUBLE_COLON:
 		return "DOUBLE_COLON"
 	case DOUBLE_PIPE:

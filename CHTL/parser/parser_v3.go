@@ -477,13 +477,17 @@ func (p *ParserV3) parseScript() *node.ScriptNode {
 
 	if p.CurrentToken.Type == lexer.LEFT_BRACE {
 		p.NextToken()
-		for p.CurrentToken.Type != lexer.RIGHT_BRACE && p.CurrentToken.Type != lexer.EOF {
-			// 解析脚本内容
-			content := p.CurrentToken.Literal
-			script.Content += content
-			p.NextToken()
-		}
-		if p.CurrentToken.Type == lexer.RIGHT_BRACE {
+		braceCount := 1
+		for braceCount > 0 && p.CurrentToken.Type != lexer.EOF {
+			if p.CurrentToken.Type == lexer.LEFT_BRACE {
+				braceCount++
+			} else if p.CurrentToken.Type == lexer.RIGHT_BRACE {
+				braceCount--
+			}
+			if braceCount > 0 {
+				// 收集所有脚本内容，包括空格和特殊字符
+				script.Content += p.CurrentToken.Literal
+			}
 			p.NextToken()
 		}
 	}
