@@ -11,4 +11,5 @@ public interface Visitor<R> {
     R visitVariableExpr(VariableExpr expr);
     default R visitReferenceExpr(ReferenceExpr expr) { return null; }
     default R visitConditionalExpr(ConditionalExpr expr) { return null; }
+    default R visitCallExpr(CallExpr expr) { return null; }
 }

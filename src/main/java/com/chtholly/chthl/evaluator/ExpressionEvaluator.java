@@ -5,9 +5,12 @@ import com.chtholly.chthl.ast.Node;
 import com.chtholly.chthl.ast.StyleBlockNode;
 import com.chtholly.chthl.ast.StylePropertyNode;
 import com.chtholly.chthl.ast.expr.*;
+import com.chtholly.chthl.ast.template.TemplateNode;
+import com.chtholly.chthl.ast.template.VarTemplateNode;
 import com.chtholly.chthl.lexer.Token;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,15 +22,17 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
 
     private final ElementNode localContext;
     private final List<Node> documentContext;
+    private final Map<String, TemplateNode> templateTable;
     private final int evaluationDepth;
 
-    public ExpressionEvaluator(ElementNode localContext, List<Node> documentContext) {
-        this(localContext, documentContext, 0);
+    public ExpressionEvaluator(ElementNode localContext, List<Node> documentContext, Map<String, TemplateNode> templateTable) {
+        this(localContext, documentContext, templateTable, 0);
     }
 
-    private ExpressionEvaluator(ElementNode localContext, List<Node> documentContext, int depth) {
+    private ExpressionEvaluator(ElementNode localContext, List<Node> documentContext, Map<String, TemplateNode> templateTable, int depth) {
         this.localContext = localContext;
         this.documentContext = documentContext;
+        this.templateTable = templateTable;
         this.evaluationDepth = depth;
     }
 
@@ -73,24 +78,16 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
         Object rightVal = evaluate(expr.right);
 
         switch (expr.operator.getType()) {
-            case PIPE_PIPE:
-                return isTruthy(leftVal) || isTruthy(rightVal);
-            case AMPERSAND_AMPERSAND:
-                return isTruthy(leftVal) && isTruthy(rightVal);
-            case BANG_EQUAL:
-                return !isEqual(leftVal, rightVal);
-            case EQUAL_EQUAL:
-                return isEqual(leftVal, rightVal);
+            case PIPE_PIPE: return isTruthy(leftVal) || isTruthy(rightVal);
+            case AMPERSAND_AMPERSAND: return isTruthy(leftVal) && isTruthy(rightVal);
+            case BANG_EQUAL: return !isEqual(leftVal, rightVal);
+            case EQUAL_EQUAL: return isEqual(leftVal, rightVal);
         }
-
         UnitValue leftUnit = parseUnitValue(leftVal);
         UnitValue rightUnit = parseUnitValue(rightVal);
-
-        if (leftUnit == null || rightUnit == null) {
-            // Cannot perform arithmetic or comparison on non-numeric values
-            return false; // Or handle as an error
+        if (leftUnit == null || rightUnit == null || (!leftUnit.unit.equals(rightUnit.unit) && !leftUnit.unit.isEmpty() && !rightUnit.unit.isEmpty())) {
+            return false;
         }
-
         switch (expr.operator.getType()) {
             case GREATER: return leftUnit.value > rightUnit.value;
             case GREATER_EQUAL: return leftUnit.value >= rightUnit.value;
@@ -103,8 +100,7 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
                 if (rightUnit.value == 0) return new UnitValue(0, leftUnit.unit);
                 return new UnitValue(leftUnit.value / rightUnit.value, leftUnit.unit);
         }
-
-        return null; // Unreachable
+        return null;
     }
 
     @Override
@@ -130,12 +126,10 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
     @Override
     public Object visitVariableExpr(VariableExpr expr) {
         String varName = expr.name.getLexeme();
-        // Check for local context properties
         if (localContext != null) {
             Expression propertyExpr = findPropertyInNode(localContext, varName);
             if (propertyExpr != null) {
-                // Evaluate the found property in the same context, but deeper
-                ExpressionEvaluator newEvaluator = new ExpressionEvaluator(this.localContext, this.documentContext, this.evaluationDepth + 1);
+                ExpressionEvaluator newEvaluator = new ExpressionEvaluator(this.localContext, this.documentContext, this.templateTable, this.evaluationDepth + 1);
                 return newEvaluator.evaluate(propertyExpr);
             }
         }
@@ -144,26 +138,29 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
 
     @Override
     public Object visitReferenceExpr(ReferenceExpr expr) {
-        // Since the parser was refactored, the 'object' is now an expression.
-        // We evaluate it to get the selector string.
         String selectorStr = evaluate(expr.object).toString();
         ElementNode targetNode = findNode(selectorStr);
-
-        if (targetNode == null) {
-            System.err.println("Warning: Could not find element for selector '" + selectorStr + "'");
-            return "0";
-        }
-
+        if (targetNode == null) return "0";
         String propertyName = expr.property.getLexeme();
         Expression propertyExpr = findPropertyInNode(targetNode, propertyName);
-
-        if (propertyExpr == null) {
-            System.err.println("Warning: Could not find property '" + propertyName + "' on element '" + selectorStr + "'");
-            return "0";
-        }
-
-        ExpressionEvaluator newEvaluator = new ExpressionEvaluator(targetNode, this.documentContext, this.evaluationDepth + 1);
+        if (propertyExpr == null) return "0";
+        ExpressionEvaluator newEvaluator = new ExpressionEvaluator(targetNode, this.documentContext, this.templateTable, this.evaluationDepth + 1);
         return newEvaluator.evaluate(propertyExpr);
+    }
+
+    @Override
+    public Object visitCallExpr(CallExpr expr) {
+        if (!(expr.callee instanceof VariableExpr)) return "";
+        String templateName = ((VariableExpr) expr.callee).name.getLexeme();
+        Node template = this.templateTable.get(templateName);
+        if (!(template instanceof VarTemplateNode)) return "";
+        VarTemplateNode varTemplate = (VarTemplateNode) template;
+        if (expr.arguments.size() != 1 || !(expr.arguments.get(0) instanceof VariableExpr)) return "";
+        String varName = ((VariableExpr) expr.arguments.get(0)).name.getLexeme();
+        Expression valueExpr = varTemplate.variables.get(varName);
+        if (valueExpr == null) return "";
+        ExpressionEvaluator newEvaluator = new ExpressionEvaluator(null, this.documentContext, this.templateTable, this.evaluationDepth + 1);
+        return newEvaluator.evaluate(valueExpr);
     }
 
     private ElementNode findNode(String selector) {
@@ -205,9 +202,12 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
         for (Node child : node.children) {
             if (child instanceof StyleBlockNode) {
                 StyleBlockNode styleNode = (StyleBlockNode) child;
-                for (StylePropertyNode prop : styleNode.directProperties) {
-                    if (prop.key.equals(propertyName)) {
-                        return prop.value;
+                for (Node propNode : styleNode.directPropertiesAndUsages) {
+                    if (propNode instanceof StylePropertyNode) {
+                        StylePropertyNode prop = (StylePropertyNode) propNode;
+                        if (prop.key.equals(propertyName)) {
+                            return prop.value;
+                        }
                     }
                 }
             }

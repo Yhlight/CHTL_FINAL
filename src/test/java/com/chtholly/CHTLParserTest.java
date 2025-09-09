@@ -1,13 +1,12 @@
 package com.chtholly;
 
-import com.chtholly.chthl.ast.ElementNode;
-import com.chtholly.chthl.ast.Node;
-import com.chtholly.chthl.ast.SelectorBlockNode;
-import com.chtholly.chthl.ast.StyleBlockNode;
-import com.chtholly.chthl.ast.StylePropertyNode;
-import com.chtholly.chthl.ast.TextNode;
+import com.chtholly.chthl.ast.*;
+import com.chtholly.chthl.ast.expr.CallExpr;
 import com.chtholly.chthl.ast.expr.ReferenceExpr;
 import com.chtholly.chthl.ast.expr.VariableExpr;
+import com.chtholly.chthl.ast.template.StyleTemplateNode;
+import com.chtholly.chthl.ast.template.TemplateNode;
+import com.chtholly.chthl.ast.template.TemplateUsageNode;
 import com.chtholly.chthl.lexer.CHTLLexer;
 import com.chtholly.chthl.lexer.Token;
 import com.chtholly.chthl.lexer.TokenType;
@@ -15,6 +14,7 @@ import com.chtholly.chthl.parser.CHTLParser;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -22,23 +22,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CHTLParserTest {
 
-    // ... existing tests for simple elements, text, attributes ...
     @Test
     void testSimpleElementParsing() {
         String input = "html { body {} }";
-        List<Token> tokens = new CHTLLexer(input).scanTokens();
-        CHTLParser parser = new CHTLParser(tokens);
-        List<Node> ast = parser.parse().stream().filter(Objects::nonNull).collect(Collectors.toList());
-
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        List<Node> ast = parser.getAst().stream().filter(Objects::nonNull).collect(Collectors.toList());
         assertNotNull(ast);
         assertEquals(1, ast.size());
-
         Node root = ast.get(0);
         assertTrue(root instanceof ElementNode);
         ElementNode htmlNode = (ElementNode) root;
         assertEquals("html", htmlNode.tagName);
         assertEquals(1, htmlNode.children.stream().filter(Objects::nonNull).collect(Collectors.toList()).size());
-
         Node body = htmlNode.children.get(0);
         assertTrue(body instanceof ElementNode);
         ElementNode bodyNode = (ElementNode) body;
@@ -49,13 +44,10 @@ class CHTLParserTest {
     @Test
     void testTextNodeParsing() {
         String input = "text { \"hello world\" }";
-        List<Token> tokens = new CHTLLexer(input).scanTokens();
-        CHTLParser parser = new CHTLParser(tokens);
-        List<Node> ast = parser.parse().stream().filter(Objects::nonNull).collect(Collectors.toList());
-
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        List<Node> ast = parser.getAst().stream().filter(Objects::nonNull).collect(Collectors.toList());
         assertNotNull(ast);
         assertEquals(1, ast.size());
-
         Node root = ast.get(0);
         assertTrue(root instanceof TextNode);
         TextNode textNode = (TextNode) root;
@@ -65,19 +57,15 @@ class CHTLParserTest {
     @Test
     void testMixedContentParsing() {
         String input = "div { text { \"I am a div\" } }";
-        List<Token> tokens = new CHTLLexer(input).scanTokens();
-        CHTLParser parser = new CHTLParser(tokens);
-        List<Node> ast = parser.parse().stream().filter(Objects::nonNull).collect(Collectors.toList());
-
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        List<Node> ast = parser.getAst().stream().filter(Objects::nonNull).collect(Collectors.toList());
         assertNotNull(ast);
         assertEquals(1, ast.size());
-
         Node root = ast.get(0);
         assertTrue(root instanceof ElementNode);
         ElementNode divNode = (ElementNode) root;
         assertEquals("div", divNode.tagName);
         assertEquals(1, divNode.children.stream().filter(Objects::nonNull).collect(Collectors.toList()).size());
-
         Node text = divNode.children.get(0);
         assertTrue(text instanceof TextNode);
         TextNode textNode = (TextNode) text;
@@ -87,13 +75,10 @@ class CHTLParserTest {
     @Test
     void testElementWithAttributes() {
         String input = "div { id: box; class: 'container'; }";
-        List<Token> tokens = new CHTLLexer(input).scanTokens();
-        CHTLParser parser = new CHTLParser(tokens);
-        List<Node> ast = parser.parse();
-
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        List<Node> ast = parser.getAst();
         assertEquals(1, ast.size());
         assertTrue(ast.get(0) instanceof ElementNode);
-
         ElementNode node = (ElementNode) ast.get(0);
         assertEquals("div", node.tagName);
         assertEquals(2, node.attributes.size());
@@ -105,95 +90,126 @@ class CHTLParserTest {
     @Test
     void testStyleBlockParsing() {
         String input = "div { style { color: red; font-size: 16px; } }";
-        List<Token> tokens = new CHTLLexer(input).scanTokens();
-        CHTLParser parser = new CHTLParser(tokens);
-        List<Node> ast = parser.parse();
-
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        List<Node> ast = parser.getAst();
         assertEquals(1, ast.size());
         assertTrue(ast.get(0) instanceof ElementNode);
-
         ElementNode node = (ElementNode) ast.get(0);
         assertEquals("div", node.tagName);
         assertEquals(1, node.children.size());
-
         Node child = node.children.get(0);
         assertTrue(child instanceof StyleBlockNode);
-
         StyleBlockNode styleNode = (StyleBlockNode) child;
-        assertEquals(2, styleNode.directProperties.size());
-
-        // Test first property
-        assertEquals("color", styleNode.directProperties.get(0).key);
-        assertTrue(styleNode.directProperties.get(0).value instanceof VariableExpr);
-        assertEquals("red", ((VariableExpr) styleNode.directProperties.get(0).value).name.getLexeme());
-
-        // Test second property
-        assertEquals("font-size", styleNode.directProperties.get(1).key);
-        assertTrue(styleNode.directProperties.get(1).value instanceof VariableExpr);
-        assertEquals("16px", ((VariableExpr) styleNode.directProperties.get(1).value).name.getLexeme());
+        assertEquals(2, styleNode.directPropertiesAndUsages.size());
+        StylePropertyNode prop1 = (StylePropertyNode) styleNode.directPropertiesAndUsages.get(0);
+        assertEquals("color", prop1.key);
+        assertTrue(prop1.value instanceof VariableExpr);
+        assertEquals("red", ((VariableExpr) prop1.value).name.getLexeme());
+        StylePropertyNode prop2 = (StylePropertyNode) styleNode.directPropertiesAndUsages.get(1);
+        assertEquals("font-size", prop2.key);
+        assertTrue(prop2.value instanceof VariableExpr);
+        assertEquals("16px", ((VariableExpr) prop2.value).name.getLexeme());
     }
 
     @Test
     void testSelectorBlockParsing() {
-        String input = """
-        div {
-            style {
-                color: white;
-                .box {
-                    background-color: black;
-                }
-                font-size: 16px;
-            }
-        }
-        """;
-        List<Token> tokens = new CHTLLexer(input).scanTokens();
-        CHTLParser parser = new CHTLParser(tokens);
-        List<Node> ast = parser.parse();
-
+        String input = "div { style { color: white; .box { background-color: black; } font-size: 16px; } }";
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        List<Node> ast = parser.getAst();
         assertEquals(1, ast.size());
         ElementNode div = (ElementNode) ast.get(0);
         assertEquals(1, div.children.size());
         StyleBlockNode styleNode = (StyleBlockNode) div.children.get(0);
-
-        // Check direct properties
-        assertEquals(2, styleNode.directProperties.size());
-        assertEquals("color", styleNode.directProperties.get(0).key);
-        assertTrue(styleNode.directProperties.get(0).value instanceof VariableExpr);
-        assertEquals("white", ((VariableExpr) styleNode.directProperties.get(0).value).name.getLexeme());
-
-        assertEquals("font-size", styleNode.directProperties.get(1).key);
-        assertTrue(styleNode.directProperties.get(1).value instanceof VariableExpr);
-        assertEquals("16px", ((VariableExpr) styleNode.directProperties.get(1).value).name.getLexeme());
-
-        // Check selector blocks
+        assertEquals(2, styleNode.directPropertiesAndUsages.size());
+        StylePropertyNode prop1 = (StylePropertyNode) styleNode.directPropertiesAndUsages.get(0);
+        assertEquals("color", prop1.key);
+        assertTrue(prop1.value instanceof VariableExpr);
+        assertEquals("white", ((VariableExpr) prop1.value).name.getLexeme());
+        StylePropertyNode prop2 = (StylePropertyNode) styleNode.directPropertiesAndUsages.get(1);
+        assertEquals("font-size", prop2.key);
+        assertTrue(prop2.value instanceof VariableExpr);
+        assertEquals("16px", ((VariableExpr) prop2.value).name.getLexeme());
         assertEquals(1, styleNode.selectorBlocks.size());
         SelectorBlockNode selectorNode = styleNode.selectorBlocks.get(0);
         assertEquals(".box", selectorNode.selector);
-        assertEquals(1, selectorNode.properties.size());
-        assertEquals("background-color", selectorNode.properties.get(0).key);
-        assertTrue(selectorNode.properties.get(0).value instanceof VariableExpr);
-        assertEquals("black", ((VariableExpr) selectorNode.properties.get(0).value).name.getLexeme());
+        assertEquals(1, selectorNode.body.size());
+        assertTrue(selectorNode.body.get(0) instanceof StylePropertyNode);
+        StylePropertyNode prop = (StylePropertyNode) selectorNode.body.get(0);
+        assertEquals("background-color", prop.key);
+        assertTrue(prop.value instanceof VariableExpr);
+        assertEquals("black", ((VariableExpr) prop.value).name.getLexeme());
     }
 
     @Test
     void testReferenceExpressionParsing() {
         String input = "div { style { width: .box.width; } }";
-        List<Token> tokens = new CHTLLexer(input).scanTokens();
-        CHTLParser parser = new CHTLParser(tokens);
-        List<Node> ast = parser.parse();
-
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        List<Node> ast = parser.getAst();
         ElementNode div = (ElementNode) ast.get(0);
         StyleBlockNode styleNode = (StyleBlockNode) div.children.get(0);
-        StylePropertyNode propNode = styleNode.directProperties.get(0);
-
+        StylePropertyNode propNode = (StylePropertyNode) styleNode.directPropertiesAndUsages.get(0);
         assertEquals("width", propNode.key);
         assertTrue(propNode.value instanceof ReferenceExpr);
-
         ReferenceExpr refExpr = (ReferenceExpr) propNode.value;
         assertEquals("width", refExpr.property.getLexeme());
-
         assertTrue(refExpr.object instanceof VariableExpr);
         VariableExpr selectorExpr = (VariableExpr) refExpr.object;
         assertEquals(".box", selectorExpr.name.getLexeme());
+    }
+
+    @Test
+    void testTemplateDefinitionParsing() {
+        String input = "[Template] @Style DefaultText { color: black; line-height: 1.6; }";
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        parser.getAst(); // This runs the parsing
+        Map<String, TemplateNode> table = parser.getTemplateTable();
+        assertEquals(1, table.size());
+        assertTrue(table.containsKey("DefaultText"));
+        TemplateNode node = table.get("DefaultText");
+        assertTrue(node instanceof StyleTemplateNode);
+        StyleTemplateNode styleTemplate = (StyleTemplateNode) node;
+        assertEquals(2, styleTemplate.body.size());
+        assertTrue(styleTemplate.body.get(0) instanceof StylePropertyNode);
+        StylePropertyNode prop = (StylePropertyNode) styleTemplate.body.get(0);
+        assertEquals("color", prop.key);
+    }
+
+    @Test
+    void testTemplateUsageParsing() {
+        String input = """
+        body {
+            @Element Box;
+            style {
+                @Style DefaultText;
+                color: ThemeColor(primary);
+            }
+        }
+        """;
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        List<Node> ast = parser.getAst();
+
+        // Check @Element usage
+        ElementNode body = (ElementNode) ast.get(0);
+        assertTrue(body.children.get(0) instanceof TemplateUsageNode);
+        TemplateUsageNode elementUsage = (TemplateUsageNode) body.children.get(0);
+        assertEquals("@Element", elementUsage.type.getLexeme());
+        assertEquals("Box", elementUsage.name.getLexeme());
+
+        // Check @Style usage
+        StyleBlockNode styleNode = (StyleBlockNode) body.children.get(1);
+        assertTrue(styleNode.directPropertiesAndUsages.get(0) instanceof TemplateUsageNode);
+        TemplateUsageNode styleUsage = (TemplateUsageNode) styleNode.directPropertiesAndUsages.get(0);
+        assertEquals("@Style", styleUsage.type.getLexeme());
+        assertEquals("DefaultText", styleUsage.name.getLexeme());
+
+        // Check @Var usage (CallExpr)
+        StylePropertyNode propNode = (StylePropertyNode) styleNode.directPropertiesAndUsages.get(1);
+        assertTrue(propNode.value instanceof CallExpr);
+        CallExpr callExpr = (CallExpr) propNode.value;
+        assertTrue(callExpr.callee instanceof VariableExpr);
+        assertEquals("ThemeColor", ((VariableExpr) callExpr.callee).name.getLexeme());
+        assertEquals(1, callExpr.arguments.size());
+        assertTrue(callExpr.arguments.get(0) instanceof VariableExpr);
+        assertEquals("primary", ((VariableExpr) callExpr.arguments.get(0)).name.getLexeme());
     }
 }

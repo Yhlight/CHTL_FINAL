@@ -4,6 +4,7 @@ import com.chtholly.chthl.ast.expr.*;
 import com.chtholly.chthl.lexer.Token;
 import com.chtholly.chthl.lexer.TokenType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExpressionParser {
@@ -39,7 +40,7 @@ public class ExpressionParser {
         if (match(TokenType.QUESTION)) {
             Expression thenBranch = expression();
             consume(TokenType.COLON, "Expect ':' after then branch.");
-            Expression elseBranch = conditional(); // Ternary is right-associative
+            Expression elseBranch = conditional();
             expr = new ConditionalExpr(expr, thenBranch, elseBranch);
         }
         return expr;
@@ -96,7 +97,7 @@ public class ExpressionParser {
     }
 
     private Expression factor() {
-        Expression expr = call(); // Unary would go here
+        Expression expr = call();
         while (match(TokenType.SLASH, TokenType.STAR)) {
             Token operator = previous();
             Expression right = call();
@@ -107,37 +108,48 @@ public class ExpressionParser {
 
     private Expression call() {
         Expression expr = primary();
-        while (match(TokenType.DOT)) {
-            Token property = consume(TokenType.IDENTIFIER, "Expect property name after '.'.");
-            expr = new ReferenceExpr(expr, property);
+        while (true) {
+            if (match(TokenType.LEFT_PAREN)) {
+                expr = finishCall(expr);
+            } else if (match(TokenType.DOT)) {
+                Token name = consume(TokenType.IDENTIFIER, "Expect property name after '.'.");
+                expr = new ReferenceExpr(expr, name);
+            } else {
+                break;
+            }
         }
         return expr;
+    }
+
+    private Expression finishCall(Expression callee) {
+        List<Expression> arguments = new ArrayList<>();
+        if (!check(TokenType.RIGHT_PAREN)) {
+            do {
+                arguments.add(expression());
+            } while (match(TokenType.COMMA));
+        }
+        Token paren = consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.");
+        return new CallExpr(callee, paren, arguments);
     }
 
     private Expression primary() {
         if (match(TokenType.STRING)) {
             return new LiteralExpr(previous().getLiteral());
         }
-
-        // For selectors like .box or #main
         if (match(TokenType.DOT, TokenType.HASH)) {
             Token prefix = previous();
             Token name = consume(TokenType.IDENTIFIER, "Expect name after '.' or '#'.");
-            // We create a single token to represent the selector, then a VariableExpr
             Token selectorToken = new Token(TokenType.IDENTIFIER, prefix.getLexeme() + name.getLexeme(), null, prefix.getLine());
             return new VariableExpr(selectorToken);
         }
-
         if (match(TokenType.IDENTIFIER)) {
             return new VariableExpr(previous());
         }
-
         if (match(TokenType.LEFT_PAREN)) {
             Expression expr = expression();
             consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
             return new GroupingExpr(expr);
         }
-
         throw new ParseError(peek(), "Expect expression.");
     }
 

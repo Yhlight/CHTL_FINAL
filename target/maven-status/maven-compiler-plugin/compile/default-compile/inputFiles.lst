@@ -1,5 +1,8 @@
+/app/src/main/java/com/chtholly/chthl/ast/expr/CallExpr.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/LiteralExpr.java
+/app/src/main/java/com/chtholly/chthl/ast/template/VarTemplateNode.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/ConditionalExpr.java
+/app/src/main/java/com/chtholly/chthl/ast/template/ElementTemplateNode.java
 /app/src/main/java/com/chtholly/chthl/ast/SelectorBlockNode.java
 /app/src/main/java/com/chtholly/chthl/lexer/TokenType.java
 /app/src/main/java/com/chtholly/chthl/evaluator/UnitValue.java
@@ -8,12 +11,15 @@
 /app/src/main/java/com/chtholly/chthl/ast/expr/Visitor.java
 /app/src/main/java/com/chtholly/chthl/evaluator/ExpressionEvaluator.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/BinaryExpr.java
+/app/src/main/java/com/chtholly/chthl/ast/template/StyleTemplateNode.java
 /app/src/main/java/com/chtholly/chthl/parser/ExpressionParser.java
 /app/src/main/java/com/chtholly/chthl/ast/CommentNode.java
 /app/src/main/java/com/chtholly/chthl/lexer/CHTLLexer.java
 /app/src/main/java/com/chtholly/chthl/ast/StyleBlockNode.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/ReferenceExpr.java
 /app/src/main/java/com/chtholly/chthl/ast/StylePropertyNode.java
+/app/src/main/java/com/chtholly/chthl/ast/template/TemplateUsageNode.java
+/app/src/main/java/com/chtholly/chthl/ast/template/TemplateNode.java
 /app/src/main/java/com/chtholly/chthl/ast/Visitor.java
 /app/src/main/java/com/chtholly/chthl/generator/CompilationResult.java
 /app/src/main/java/com/chtholly/chthl/ast/ElementNode.java

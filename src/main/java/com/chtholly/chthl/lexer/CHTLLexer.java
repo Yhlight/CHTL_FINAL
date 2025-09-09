@@ -130,7 +130,7 @@ public class CHTLLexer {
                 break;
 
             default:
-                if (isAlpha(c) || isDigit(c)) {
+                if (isAlpha(c) || isDigit(c) || c == '@') {
                     identifier();
                 } else {
                     System.err.println("Line " + line + ": Unexpected character '" + c + "'.");
@@ -140,6 +140,10 @@ public class CHTLLexer {
     }
 
     private void identifier() {
+        // Allow '@' at the start of an identifier for template types like @Style
+        if (peek() == '@') {
+            advance();
+        }
         while (isAlphaNumeric(peek()) || peek() == '-') advance();
 
         String text = source.substring(start, current);

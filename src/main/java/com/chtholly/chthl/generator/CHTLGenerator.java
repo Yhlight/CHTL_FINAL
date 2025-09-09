@@ -1,8 +1,9 @@
 package com.chtholly.chthl.generator;
 
 import com.chtholly.chthl.ast.*;
-import com.chtholly.chthl.evaluator.ExpressionEvaluator;
 import com.chtholly.chthl.ast.expr.Expression;
+import com.chtholly.chthl.ast.template.*;
+import com.chtholly.chthl.evaluator.ExpressionEvaluator;
 
 import java.util.List;
 import java.util.Map;
@@ -19,11 +20,13 @@ public class CHTLGenerator implements Visitor<String> {
 
     private final StringBuilder globalCssBuilder;
     private final List<Node> rootNodes;
+    private final Map<String, TemplateNode> templateTable;
     private ElementNode currentElement = null;
 
-    public CHTLGenerator(List<Node> rootNodes) {
+    public CHTLGenerator(List<Node> rootNodes, Map<String, TemplateNode> templateTable) {
         this.globalCssBuilder = new StringBuilder();
         this.rootNodes = rootNodes;
+        this.templateTable = templateTable;
     }
 
     public CompilationResult generate() {
@@ -58,11 +61,15 @@ public class CHTLGenerator implements Visitor<String> {
         for (Node child : node.children) {
             if (child instanceof StyleBlockNode) {
                 StyleBlockNode styleNode = (StyleBlockNode) child;
-                ExpressionEvaluator evaluator = new ExpressionEvaluator(node, this.rootNodes);
-                for (StylePropertyNode property : styleNode.directProperties) {
-                    Object value = evaluator.evaluate(property.value);
-                    styleAttrBuilder.append(property.key).append(":")
-                                  .append(value.toString()).append(";");
+                ExpressionEvaluator evaluator = new ExpressionEvaluator(node, this.rootNodes, this.templateTable);
+                for (Node propOrUsage : styleNode.directPropertiesAndUsages) {
+                    if (propOrUsage instanceof StylePropertyNode) {
+                        StylePropertyNode property = (StylePropertyNode) propOrUsage;
+                        Object value = evaluator.evaluate(property.value);
+                        styleAttrBuilder.append(property.key).append(":").append(value.toString()).append(";");
+                    } else if (propOrUsage instanceof TemplateUsageNode) {
+                        styleAttrBuilder.append(propOrUsage.accept(this));
+                    }
                 }
                 for (SelectorBlockNode selectorBlock : styleNode.selectorBlocks) {
                     String selector = selectorBlock.selector.trim();
@@ -129,12 +136,55 @@ public class CHTLGenerator implements Visitor<String> {
     public String visitSelectorBlockNode(SelectorBlockNode node) {
         String resolvedSelector = resolveSelector(node.selector, this.currentElement);
         globalCssBuilder.append(resolvedSelector).append(" {\n");
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(this.currentElement, this.rootNodes);
-        for (StylePropertyNode property : node.properties) {
-            Object value = evaluator.evaluate(property.value);
-            globalCssBuilder.append("    ").append(property.key).append(": ").append(value.toString()).append(";\n");
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(this.currentElement, this.rootNodes, this.templateTable);
+        for (Node propOrUsage : node.body) {
+            if (propOrUsage instanceof StylePropertyNode) {
+                StylePropertyNode property = (StylePropertyNode) propOrUsage;
+                Object value = evaluator.evaluate(property.value);
+                globalCssBuilder.append("    ").append(property.key).append(": ").append(value.toString()).append(";\n");
+            } else if (propOrUsage instanceof TemplateUsageNode) {
+                String expanded = propOrUsage.accept(this);
+                String[] props = expanded.split(";");
+                for (String prop : props) {
+                    if (!prop.trim().isEmpty()) {
+                        globalCssBuilder.append("    ").append(prop.trim()).append(";\n");
+                    }
+                }
+            }
         }
         globalCssBuilder.append("}\n");
         return "";
+    }
+
+    @Override
+    public String visitTemplateUsageNode(TemplateUsageNode node) {
+        TemplateNode template = this.templateTable.get(node.name.getLexeme());
+        if (template == null) return "";
+        return template.accept(this);
+    }
+
+    @Override
+    public String visitElementTemplateNode(ElementTemplateNode node) {
+        StringBuilder builder = new StringBuilder();
+        for (Node bodyNode : node.body) {
+            builder.append(bodyNode.accept(this));
+        }
+        return builder.toString();
+    }
+
+    @Override
+    public String visitStyleTemplateNode(StyleTemplateNode node) {
+        StringBuilder builder = new StringBuilder();
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(this.currentElement, this.rootNodes, this.templateTable);
+        for (Node bodyNode : node.body) {
+            if (bodyNode instanceof StylePropertyNode) {
+                StylePropertyNode prop = (StylePropertyNode) bodyNode;
+                String value = evaluator.evaluate(prop.value).toString();
+                builder.append(prop.key).append(":").append(value).append(";");
+            } else if (bodyNode instanceof TemplateUsageNode) {
+                builder.append(bodyNode.accept(this));
+            }
+        }
+        return builder.toString();
     }
 }

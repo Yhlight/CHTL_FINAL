@@ -15,6 +15,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CompilerEndToEndTest {
 
+    private CompilationResult compile(String source) {
+        CHTLParser parser = new CHTLParser(new CHTLLexer(source).scanTokens());
+        List<Node> ast = parser.getAst();
+        CHTLGenerator generator = new CHTLGenerator(ast, parser.getTemplateTable());
+        return generator.generate();
+    }
+
     @Test
     void testFullCompilation() {
         String chtlSource = """
@@ -33,18 +40,33 @@ class CompilerEndToEndTest {
             }
         }
         """;
-
         String expectedHtml = "<html><head><title>My CHTL Page</title></head>" +
                               "<body><div class=\"container\" id=\"main\">" +
                               "<h1>Welcome!</h1><p>This is a paragraph.</p>" +
                               "<br></div></body></html>";
 
-        List<Node> ast = new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse();
-        CHTLGenerator generator = new CHTLGenerator(ast);
-        CompilationResult result = generator.generate();
-
+        CompilationResult result = compile(chtlSource);
         assertEquals(expectedHtml, result.getHtml());
         assertTrue(result.getCss().isEmpty());
+    }
+
+    @Test
+    void testVariableTemplateExpansion() {
+        String chtlSource = """
+        [Template] @Var Theme {
+            primaryColor: #007bff;
+            secondaryColor: #6c757d;
+        }
+        div {
+            style {
+                background-color: Theme(primaryColor);
+                color: Theme(secondaryColor);
+            }
+        }
+        """;
+        String expectedHtml = "<div style=\"background-color:#007bff;color:#6c757d;\"></div>";
+        CompilationResult result = compile(chtlSource);
+        assertEquals(expectedHtml, result.getHtml());
     }
 
     @Test
@@ -58,14 +80,9 @@ class CompilerEndToEndTest {
             }
         }
         """;
-
-        // The evaluator should see that 100px > 50px is true and choose 'green'.
         String expectedHtml = "<div id=\"box\" style=\"width:100px;background-color:green;\"></div>";
 
-        List<Node> ast = new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse();
-        CHTLGenerator generator = new CHTLGenerator(ast);
-        CompilationResult result = generator.generate();
-
+        CompilationResult result = compile(chtlSource);
         assertEquals(expectedHtml, result.getHtml());
         assertTrue(result.getCss().isEmpty());
     }
@@ -73,27 +90,13 @@ class CompilerEndToEndTest {
     @Test
     void testPropertyReferenceEvaluation() {
         String chtlSource = """
-        div {
-            id: box1;
-            style {
-                width: 100px;
-            }
-        }
-        div {
-            id: box2;
-            style {
-                width: #box1.width + 50px;
-            }
-        }
+        div { id: box1; style { width: 100px; } }
+        div { id: box2; style { width: #box1.width + 50px; } }
         """;
-
         String expectedHtml = "<div id=\"box1\" style=\"width:100px;\"></div>" +
                               "<div id=\"box2\" style=\"width:150px;\"></div>";
 
-        List<Node> ast = new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse();
-        CHTLGenerator generator = new CHTLGenerator(ast);
-        CompilationResult result = generator.generate();
-
+        CompilationResult result = compile(chtlSource);
         assertEquals(expectedHtml, result.getHtml());
         assertTrue(result.getCss().isEmpty());
     }
@@ -105,22 +108,15 @@ class CompilerEndToEndTest {
             id: main;
             style {
                 color: red;
-                .box {
-                    font-weight: 700;
-                }
+                .box { font-weight: 700; }
             }
             h1 { text { "Styled" } }
         }
         """;
-
-        // Attributes are sorted: class, then id, then style
         String expectedHtml = "<div class=\"box\" id=\"main\" style=\"color:red;\"><h1>Styled</h1></div>";
         String expectedCss = ".box {\n    font-weight: 700;\n}\n";
 
-        List<Node> ast = new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse();
-        CHTLGenerator generator = new CHTLGenerator(ast);
-        CompilationResult result = generator.generate();
-
+        CompilationResult result = compile(chtlSource);
         assertEquals(expectedHtml, result.getHtml());
         assertEquals(expectedCss.trim(), result.getCss().trim());
     }
@@ -129,50 +125,85 @@ class CompilerEndToEndTest {
     void testAutoAttributeAndAmpersandResolution() {
         String chtlSource = """
         div {
-            // This div has no class attribute initially.
-            // The .box selector should add it automatically.
             style {
-                .box {
-                    color: blue;
-                }
-                &:hover {
-                    color: red;
-                }
+                .box { color: blue; }
+                &:hover { color: red; }
             }
         }
         """;
-
-        // The class="box" should be added automatically.
         String expectedHtml = "<div class=\"box\"></div>";
-        // The & should be resolved to .box
         String expectedCss = ".box {\n    color: blue;\n}\n.box:hover {\n    color: red;\n}\n";
 
-        List<Node> ast = new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse();
-        CHTLGenerator generator = new CHTLGenerator(ast);
-        CompilationResult result = generator.generate();
-
+        CompilationResult result = compile(chtlSource);
         assertEquals(expectedHtml, result.getHtml());
         assertEquals(expectedCss.trim(), result.getCss().trim());
     }
 
     @Test
     void testStyleWithBinaryExpression() {
+        String chtlSource = "div { style { width: 100px + 50px; } }";
+        String expectedHtml = "<div style=\"width:150px;\"></div>";
+
+        CompilationResult result = compile(chtlSource);
+        assertEquals(expectedHtml, result.getHtml());
+        assertTrue(result.getCss().isEmpty());
+    }
+
+    @Test
+    void testElementTemplateExpansion() {
         String chtlSource = """
+        [Template] @Element Box {
+            h1 { text { "Title" } }
+            p { text { "Content" } }
+        }
+        body {
+            @Element Box;
+        }
+        """;
+        String expectedHtml = "<body><h1>Title</h1><p>Content</p></body>";
+        CompilationResult result = compile(chtlSource);
+        assertEquals(expectedHtml, result.getHtml());
+    }
+
+    @Test
+    void testStyleTemplateExpansion() {
+        String chtlSource = """
+        [Template] @Style DefaultText {
+            font-family: sans-serif;
+            font-size: 16px;
+        }
         div {
             style {
-                width: 100px + 50px;
+                @Style DefaultText;
+                color: blue;
             }
         }
         """;
-
-        // The evaluator should now correctly compute the result.
-        String expectedHtml = "<div style=\"width:150px;\"></div>";
-
-        List<Node> ast = new CHTLParser(new CHTLLexer(chtlSource).scanTokens()).parse();
-        CHTLGenerator generator = new CHTLGenerator(ast);
-        CompilationResult result = generator.generate();
-
+        String expectedHtml = "<div style=\"font-family:sans-serif;font-size:16px;color:blue;\"></div>";
+        CompilationResult result = compile(chtlSource);
         assertEquals(expectedHtml, result.getHtml());
-        assertTrue(result.getCss().isEmpty());
+    }
+
+    @Test
+    void testStyleTemplateInheritance() {
+        String chtlSource = """
+        [Template] @Style Base {
+            color: red;
+            font-size: 16px;
+        }
+        [Template] @Style Derived {
+            @Style Base;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        div {
+            style {
+                @Style Derived;
+            }
+        }
+        """;
+        String expectedHtml = "<div style=\"color:red;font-size:16px;font-size:20px;font-weight:700;\"></div>";
+        CompilationResult result = compile(chtlSource);
+        assertEquals(expectedHtml, result.getHtml());
     }
 }
