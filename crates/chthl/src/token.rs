@@ -9,6 +9,7 @@ pub enum Token {
     // Identifiers and literals
     Ident(String),  // e.g., div, color, 100px, 50. Also used for unquoted literals.
     String(String), // "a string" or 'a string'
+    Number(String), // e.g., 50, 1.5
 
     // Delimiters
     LBrace,     // {
@@ -35,6 +36,11 @@ pub enum Token {
     Lt,             // <
     LogicalAnd,     // &&
     LogicalOr,      // ||
+    Bang,           // !
+    Plus,           // +
+    Minus,          // -
+    Asterisk,       // *
+    Slash,          // /
 
     // Comments
     GeneratorComment(String), // -- a comment

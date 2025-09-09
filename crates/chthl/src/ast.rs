@@ -34,14 +34,39 @@ pub struct CssRuleNode {
 #[derive(Debug, PartialEq, Clone)]
 pub struct StyleProperty {
     pub name: String,
-    pub value: String, // Reverted to String for stability
+    pub value: Expression,
 }
 
-/// Represents an expression, used for attribute values.
+/// Represents an expression. This is a recursive enum that forms an expression tree.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
     Ident(String),
+    NumberLiteral(f64),
     StringLiteral(String),
+    Boolean(bool),
+    Prefix(PrefixExpression),
+    Infix(InfixExpression),
+    Ternary(TernaryExpression),
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct PrefixExpression {
+    pub operator: String,
+    pub right: Box<Expression>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct InfixExpression {
+    pub left: Box<Expression>,
+    pub operator: String,
+    pub right: Box<Expression>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct TernaryExpression {
+    pub condition: Box<Expression>,
+    pub consequence: Box<Expression>,
+    pub alternative: Box<Expression>,
 }
 
 /// Represents a key-value attribute on an element, e.g., `id: "main"`.

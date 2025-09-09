@@ -60,6 +60,9 @@ impl<'a> Lexer<'a> {
             b'[' => { self.read_char(); Token::LBracket }
             b']' => { self.read_char(); Token::RBracket }
             b':' => { self.read_char(); Token::Colon }
+            b'!' => { self.read_char(); Token::Bang }
+            b'+' => { self.read_char(); Token::Plus }
+            b'*' => { self.read_char(); Token::Asterisk }
             b'@' => { self.read_char(); Token::At }
             b'#' => { self.read_char(); Token::Hash }
             b'.' => { self.read_char(); Token::Dot }
@@ -70,10 +73,10 @@ impl<'a> Lexer<'a> {
             b'|' if self.peek_char() == b'|' => { self.read_char(); self.read_char(); Token::LogicalOr }
             b'-' if self.peek_char() == b'>' => { self.read_char(); self.read_char(); Token::Arrow }
             b'-' if self.peek_char() == b'-' => { self.read_char(); self.read_char(); Token::GeneratorComment(self.read_comment_line()) }
-            b'-' => { self.read_char(); Token::Illegal("-".to_string()) }
+            b'-' => { self.read_char(); Token::Minus }
             b'/' if self.peek_char() == b'/' => { self.read_comment_line(); self.next_token() }
             b'/' if self.peek_char() == b'*' => { self.read_multiline_comment(); self.next_token() }
-            b'/' => { self.read_char(); Token::Illegal("/".to_string()) }
+            b'/' => { self.read_char(); Token::Slash }
             b'&' => { self.read_char(); Token::Ampersand }
             b'"' | b'\'' => {
                 let quote = self.ch;
@@ -83,16 +86,17 @@ impl<'a> Lexer<'a> {
             }
             0 => Token::Eof,
             _ => {
-                if is_identifier_char(self.ch) {
-                    return Token::Ident(self.read_identifier());
-                } else {
-                    let ch = self.ch;
-                    self.read_char();
-                    Token::Illegal(String::from_utf8_lossy(&[ch]).to_string())
+                if self.ch.is_ascii_digit() {
+                    return Token::Number(self.read_number());
                 }
+                if is_identifier_start(self.ch) {
+                    return Token::Ident(self.read_identifier());
+                }
+                let ch = self.ch;
+                self.read_char();
+                Token::Illegal(String::from_utf8_lossy(&[ch]).to_string())
             }
         };
-
         tok
     }
 
@@ -100,6 +104,20 @@ impl<'a> Lexer<'a> {
         let position = self.position;
         while is_identifier_char(self.ch) {
             self.read_char();
+        }
+        String::from_utf8_lossy(&self.input[position..self.position]).to_string()
+    }
+
+    fn read_number(&mut self) -> String {
+        let position = self.position;
+        while self.ch.is_ascii_digit() {
+            self.read_char();
+        }
+        if self.ch == b'.' {
+            self.read_char();
+            while self.ch.is_ascii_digit() {
+                self.read_char();
+            }
         }
         String::from_utf8_lossy(&self.input[position..self.position]).to_string()
     }
@@ -140,8 +158,12 @@ impl<'a> Lexer<'a> {
     }
 }
 
+fn is_identifier_start(ch: u8) -> bool {
+    ch.is_ascii_alphabetic() || ch == b'_'
+}
+
 fn is_identifier_char(ch: u8) -> bool {
-    !ch.is_ascii_whitespace() && !b"={}[];,:@#&|?<>\"'".contains(&ch) && ch != 0
+    ch.is_ascii_alphanumeric() || ch == b'_' || ch == b'-'
 }
 
 #[cfg(test)]
@@ -174,7 +196,8 @@ mod tests {
         let tests = vec![
             Token::Ident("width".to_string()),
             Token::Colon,
-            Token::Ident("100px".to_string()),
+            Token::Number("100".to_string()),
+            Token::Ident("px".to_string()),
             Token::Semicolon,
             Token::Eof,
         ];
@@ -240,6 +263,28 @@ mod tests {
         let mut l = Lexer::new(input);
         for expected_token in tests {
             assert_eq!(l.next_token(), expected_token, "Failed on input: {}", input);
+        }
+    }
+
+    #[test]
+    fn test_numbers_and_operators() {
+        let input = "10 + 20.5 * 3 / 4 - 5 !";
+        let tests = vec![
+            Token::Number("10".to_string()),
+            Token::Plus,
+            Token::Number("20.5".to_string()),
+            Token::Asterisk,
+            Token::Number("3".to_string()),
+            Token::Slash,
+            Token::Number("4".to_string()),
+            Token::Minus,
+            Token::Number("5".to_string()),
+            Token::Bang,
+            Token::Eof,
+        ];
+        let mut l = Lexer::new(input);
+        for expected_token in tests {
+            assert_eq!(l.next_token(), expected_token);
         }
     }
 }

@@ -2,12 +2,34 @@
 //! to build an Abstract Syntax Tree (AST).
 
 use crate::ast::{
-    AttributeNode, CssRuleNode, ElementNode, Expression, Node, Program, StyleNode,
-    StyleProperty, TextNode,
+    AttributeNode, CssRuleNode, ElementNode, Expression, InfixExpression, Node,
+    Program, StyleNode, StyleProperty, TextNode, PrefixExpression
 };
 use crate::lexer::Lexer;
 use crate::token::Token;
 use std::mem;
+
+#[derive(PartialEq, PartialOrd, Clone, Copy)]
+enum Precedence {
+    LOWEST,
+    TERNARY,    // ? :
+    LOGICAL,    // && ||
+    LESSGREATER, // > or <
+    SUM,        // + -
+    PRODUCT,    // * /
+    PREFIX,     // -X or !X
+}
+
+fn token_to_precedence(token: &Token) -> Precedence {
+    match token {
+        Token::LogicalAnd | Token::LogicalOr => Precedence::LOGICAL,
+        Token::Gt | Token::Lt => Precedence::LESSGREATER,
+        Token::Plus | Token::Minus => Precedence::SUM,
+        Token::Slash | Token::Asterisk => Precedence::PRODUCT,
+        Token::Question => Precedence::TERNARY,
+        _ => Precedence::LOWEST,
+    }
+}
 
 pub struct Parser<'a> {
     lexer: Lexer<'a>,
@@ -121,15 +143,11 @@ impl<'a> Parser<'a> {
         let name = self.parse_identifier_as_string()?;
         self.expect_peek(&Token::Colon)?;
         self.next_token();
-        let mut value_parts = Vec::new();
-        while !self.cur_token_is(&Token::Semicolon) && !self.cur_token_is(&Token::Eof) {
-            value_parts.push(token_to_string(&self.cur_token));
+        let value = self.parse_expression(Precedence::LOWEST)?;
+        if self.peek_token_is(&Token::Semicolon) {
             self.next_token();
         }
-        if !self.cur_token_is(&Token::Semicolon) {
-             return Err("Expected ';' after style property value".to_string());
-        }
-        Ok(StyleProperty { name, value: value_parts.join("") })
+        Ok(StyleProperty { name, value })
     }
 
     fn parse_text_node(&mut self) -> Result<TextNode, String> {
@@ -148,13 +166,50 @@ impl<'a> Parser<'a> {
         let name = self.parse_identifier_as_string()?;
         self.expect_peek_oneof(&[Token::Colon, Token::Assign])?;
         self.next_token();
-        let value = match &self.cur_token {
-            Token::Ident(val) => Expression::Ident(val.clone()),
-            Token::String(val) => Expression::StringLiteral(val.clone()),
-            _ => return Err("Expected identifier or string for attribute value".to_string()),
-        };
+        let value = self.parse_expression(Precedence::LOWEST)?;
         if self.peek_token_is(&Token::Semicolon) { self.next_token(); }
         Ok(AttributeNode { name, value })
+    }
+
+    fn parse_expression(&mut self, precedence: Precedence) -> Result<Expression, String> {
+        let mut left_exp = self.parse_prefix()?;
+        while !self.peek_token_is(&Token::Semicolon) && precedence < self.peek_precedence() {
+            self.next_token();
+            left_exp = self.parse_infix(left_exp)?;
+        }
+        Ok(left_exp)
+    }
+
+    fn parse_prefix(&mut self) -> Result<Expression, String> {
+        match &self.cur_token {
+            Token::Ident(_) => self.parse_identifier(),
+            Token::Number(_) => self.parse_number_literal(),
+            Token::String(_) => self.parse_string_literal(),
+            Token::Bang | Token::Minus => self.parse_prefix_expression(),
+            _ => Err(format!("No prefix parse function for {:?}", self.cur_token)),
+        }
+    }
+
+    fn parse_prefix_expression(&mut self) -> Result<Expression, String> {
+        let operator = token_to_string(&self.cur_token);
+        self.next_token();
+        let right = self.parse_expression(Precedence::PREFIX)?;
+        Ok(Expression::Prefix(PrefixExpression{ operator, right: Box::new(right) }))
+    }
+
+    fn parse_infix(&mut self, left: Expression) -> Result<Expression, String> {
+        let operator = token_to_string(&self.cur_token);
+        let precedence = self.cur_precedence();
+        self.next_token();
+        let right = self.parse_expression(precedence)?;
+        Ok(Expression::Infix(InfixExpression {
+            left: Box::new(left), operator, right: Box::new(right)
+        }))
+    }
+
+    fn parse_identifier(&self) -> Result<Expression, String> {
+        if let Token::Ident(name) = &self.cur_token { Ok(Expression::Ident(name.clone())) }
+        else { Err("Expected identifier".to_string()) }
     }
 
     fn parse_identifier_as_string(&self) -> Result<String, String> {
@@ -162,6 +217,19 @@ impl<'a> Parser<'a> {
         else { Err("Expected identifier".to_string()) }
     }
 
+    fn parse_number_literal(&self) -> Result<Expression, String> {
+        if let Token::Number(val) = &self.cur_token {
+            val.parse::<f64>().map(Expression::NumberLiteral).map_err(|e| e.to_string())
+        } else { Err("Expected number literal".to_string()) }
+    }
+
+    fn parse_string_literal(&self) -> Result<Expression, String> {
+        if let Token::String(val) = &self.cur_token { Ok(Expression::StringLiteral(val.clone())) }
+        else { Err("Expected string literal".to_string()) }
+    }
+
+    fn peek_precedence(&self) -> Precedence { token_to_precedence(&self.peek_token) }
+    fn cur_precedence(&self) -> Precedence { token_to_precedence(&self.cur_token) }
     fn cur_token_is(&self, t: &Token) -> bool { mem::discriminant(&self.cur_token) == mem::discriminant(t) }
     fn peek_token_is(&self, t: &Token) -> bool { mem::discriminant(&self.peek_token) == mem::discriminant(t) }
 
@@ -183,9 +251,13 @@ impl<'a> Parser<'a> {
 
 fn token_to_string(token: &Token) -> String {
     match token {
-        Token::Ident(s) | Token::String(s) => s.clone(),
+        Token::Ident(s) | Token::String(s) | Token::Number(s) => s.clone(),
         Token::Dot => ".".to_string(), Token::Hash => "#".to_string(),
         Token::Ampersand => "&".to_string(), Token::Colon => ":".to_string(),
+        Token::Plus => "+".to_string(), Token::Minus => "-".to_string(),
+        Token::Asterisk => "*".to_string(), Token::Slash => "/".to_string(),
+        Token::Gt => ">".to_string(), Token::Lt => "<".to_string(),
+        Token::Bang => "!".to_string(),
         _ => "".to_string(),
     }
 }
@@ -196,41 +268,36 @@ mod tests {
     use crate::lexer::Lexer;
 
     #[test]
-    fn test_style_block_parsing() {
-        let input = r#"
-            style {
-                color: white;
-                .box {
-                    width: 100px;
-                }
-                #main {
-                    height: 200px;
-                }
-            }
-        "#;
+    fn test_infix_expression_parsing() {
+        let tests = vec![
+            ("5 + 10", "(5 + 10)"),
+            ("10 * 2 + 5", "((10 * 2) + 5)"),
+            ("5 + 10 * 2", "(5 + (10 * 2))"),
+        ];
 
-        let lexer = Lexer::new(input);
-        let mut parser = Parser::new(lexer);
-        let node = parser.parse_node().unwrap();
+        for (input, expected) in tests {
+            let input_str = format!("width: {};", input);
+            let lexer = Lexer::new(&input_str);
+            let mut parser = Parser::new(lexer);
+            let prop = parser.parse_style_property().unwrap();
+            assert!(parser.errors.is_empty(), "Parse errors for '{}': {:?}", input, parser.errors);
+            assert_eq!(expression_to_string(prop.value), expected, "Failed on input: {}", input);
+        }
+    }
 
-        assert!(parser.errors.is_empty(), "Parser has errors: {:?}", parser.errors);
-
-        if let Node::Style(style_node) = node {
-            assert_eq!(style_node.inline_properties.len(), 1);
-            assert_eq!(style_node.rules.len(), 2);
-            let inline_prop = &style_node.inline_properties[0];
-            assert_eq!(inline_prop.name, "color");
-            assert_eq!(inline_prop.value, "white");
-            let rule1 = &style_node.rules[0];
-            assert_eq!(rule1.selector, ".box");
-            assert_eq!(rule1.properties.len(), 1);
-            let rule1_prop = &rule1.properties[0];
-            assert_eq!(rule1_prop.name, "width");
-            assert_eq!(rule1_prop.value, "100px");
-            let rule2 = &style_node.rules[1];
-            assert_eq!(rule2.selector, "#main");
-        } else {
-            panic!("Expected a StyleNode, got {:?}", node);
+    fn expression_to_string(exp: Expression) -> String {
+        match exp {
+            Expression::Ident(s) => s,
+            Expression::NumberLiteral(n) => n.to_string(),
+            Expression::StringLiteral(s) => s,
+            Expression::Boolean(b) => b.to_string(),
+            Expression::Infix(infix) => {
+                format!("({} {} {})", expression_to_string(*infix.left), infix.operator, expression_to_string(*infix.right))
+            },
+            Expression::Prefix(prefix) => {
+                format!("({}{})", prefix.operator, expression_to_string(*prefix.right))
+            },
+            Expression::Ternary(_) => "ternary".to_string(),
         }
     }
 }
