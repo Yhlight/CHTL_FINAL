@@ -25,6 +25,9 @@ tokio-util = "0.7"
 unicode-segmentation = "1.10"
 unicode-normalization = "0.1"
 
+# 时间处理
+chrono = { version = "0.4", features = ["serde"] }
+
 # 日志
 tracing = "0.1"
 tracing-subscriber = "0.3"

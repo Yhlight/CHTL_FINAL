@@ -11,6 +11,12 @@ pub mod ast_enum;
 pub mod generator;
 pub mod error;
 pub mod utils;
+pub mod style_processor;
+pub mod template_processor;
+pub mod chtl_js_processor;
+pub mod module_processor;
+pub mod import_namespace_processor;
+pub mod cli;
 
 pub use ast_enum::*;
 
