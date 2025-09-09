@@ -21,6 +21,8 @@ class TemplateInstantiationNode : public Statement {
 public:
     Token token;
     Token name;
+    std::vector<std::unique_ptr<Statement>> body; // For specialization
+
     std::string tokenLiteral() const override { return token.literal; }
     std::string toString() const override;
 };

@@ -43,6 +43,84 @@ void Generator::visit(Node* node, std::stringstream& out) {
     else if (auto ti = dynamic_cast<TemplateInstantiationNode*>(node)) { visit(ti, out); }
     else if (auto rb = dynamic_cast<RawBlockNode*>(node)) { visit(rb, out); }
     else if (auto sp = dynamic_cast<StylePropertyNode*>(node)) { visit(sp, out); }
+    else if (auto ie = dynamic_cast<InfixExpression*>(node)) { visit(ie, out); }
+    else if (auto vs = dynamic_cast<VariableSubstitutionNode*>(node)) { visit(vs, out); }
+    // DeleteNode is not called from the main dispatcher, but from within TemplateInstantiation
+}
+
+void Generator::visit(DeleteNode* node, std::vector<std::string>& deleted_names) {
+    for (const auto& target : node->targets) {
+        deleted_names.push_back(target.literal);
+    }
+}
+
+void Generator::visit(TemplateInstantiationNode* node, std::stringstream& out) {
+    TemplateNode* template_def = m_context.getTemplate(node->name.literal);
+    if (!template_def) return;
+
+    // Step 1: Collect all properties from the base template into a mutable map
+    std::map<std::string, Statement*> properties;
+    for (const auto& stmt : template_def->body) {
+        if (auto prop = dynamic_cast<StylePropertyNode*>(stmt.get())) {
+            properties[prop->key.literal] = prop;
+        }
+    }
+
+    // Step 2: Process specialization body
+    std::vector<std::string> deleted_names;
+    std::vector<Statement*> overrides;
+    for (const auto& stmt : node->body) {
+        if (auto delete_node = dynamic_cast<DeleteNode*>(stmt.get())) {
+            visit(delete_node, deleted_names);
+        } else {
+            overrides.push_back(stmt.get());
+        }
+    }
+
+    // Step 3: Apply deletions
+    for (const auto& name : deleted_names) {
+        properties.erase(name);
+    }
+
+    // Step 4: Apply overrides
+    for (const auto& stmt : overrides) {
+        if (auto prop = dynamic_cast<StylePropertyNode*>(stmt)) {
+            properties[prop->key.literal] = prop;
+        }
+    }
+
+    // Step 5: Generate the final properties
+    for (const auto& pair : properties) {
+        visit(pair.second, out);
+    }
+}
+
+void Generator::visit(VariableSubstitutionNode* node, std::stringstream& out) {
+    // This assumes the var_group is a simple Identifier.
+    auto group_ident = dynamic_cast<Identifier*>(node->var_group.get());
+    if (!group_ident) return;
+
+    TemplateNode* var_group_template = m_context.getTemplate(group_ident->value);
+    if (!var_group_template || var_group_template->type.literal != "@Var") {
+        return;
+    }
+
+    for (const auto& stmt : var_group_template->body) {
+        if (auto prop = dynamic_cast<StylePropertyNode*>(stmt.get())) {
+            if (prop->key.literal == node->variable.value) {
+                visit(prop->value.get(), out);
+                return;
+            }
+        }
+    }
+}
+
+void Generator::visit(InfixExpression* node, std::stringstream& out) {
+    out << "calc(";
+    visit(node->left.get(), out);
+    out << " " << node->op << " ";
+    visit(node->right.get(), out);
+    out << ")";
 }
 
 void Generator::visit(Program* node, std::stringstream& out) {

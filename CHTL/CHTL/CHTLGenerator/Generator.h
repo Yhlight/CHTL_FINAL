@@ -36,6 +36,9 @@ private:
     void visit(StylePropertyNode* node, std::stringstream& out);
     void visit(TemplateInstantiationNode* node, std::stringstream& out);
     void visit(RawBlockNode* node, std::stringstream& out);
+    void visit(InfixExpression* node, std::stringstream& out);
+    void visit(VariableSubstitutionNode* node, std::stringstream& out);
+    void visit(DeleteNode* node, std::vector<std::string>& deleted_names);
 
 
     Context& m_context;

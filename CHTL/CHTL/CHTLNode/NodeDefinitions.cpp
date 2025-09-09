@@ -23,6 +23,21 @@ std::string AttributeNode::toString() const { return key.literal + "=" + value->
 std::string TextNode::toString() const { return value; }
 std::string CommentNode::toString() const { return value; }
 std::string ElementNode::toString() const { return token.literal; }
+std::string InfixExpression::toString() const {
+    return "(" + left->toString() + " " + op + " " + right->toString() + ")";
+}
+std::string ConditionalExpression::toString() const {
+    return "(" + condition->toString() + " ? " + consequence->toString() + " : " + alternative->toString() + ")";
+}
+std::string PropertyReferenceExpression::toString() const {
+    return "(" + target->toString() + "." + property.toString() + ")";
+}
+std::string VariableSubstitutionNode::toString() const {
+    return var_group->toString() + "(" + variable.toString() + ")";
+}
+std::string IndexedExpressionNode::toString() const {
+    return "(" + target->toString() + "[" + index->toString() + "])";
+}
 
 // StyleNode.h
 std::string StyleRuleNode::toString() const { return selector.literal + " { ... }"; }

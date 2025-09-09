@@ -9,6 +9,13 @@ style {
 
 [Template] @Style BaseText {
     color: #333;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+[Template] @Var Theme {
+    mainColor: #f0f0f0;
+    specialFont: "Courier New";
 }
 
 div {
@@ -16,9 +23,11 @@ div {
 
     style {
         @Style ImportedStyles;
-        background-color: #f0f0f0;
+        background-color: Theme(mainColor);
+        width: 100px + 50px;
 
         .header {
+            font-family: Theme(specialFont);
             font-size: 24px;
         }
     }
@@ -26,12 +35,23 @@ div {
     h1 {
         class: "header";
         style {
-            @Style BaseText;
+            @Style BaseText {
+                delete font-size;
+                color: darkblue;
+            }
         }
         text { "Hello, CHTL!" }
     }
 
     p {
         text { "This is a test of the CHTL compiler." }
+    }
+
+    script {
+        {{.header}}->listen {
+            click: () => {
+                console.log("Header clicked!");
+            }
+        }
     }
 }
