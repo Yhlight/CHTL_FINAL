@@ -2,6 +2,7 @@
 
 #include <CHTL/CHTLNode/BaseNode.hpp>
 #include <CHTL/CHTLManage/TemplateManager.hpp>
+#include <CHTL/CHTLCompiler/CSSCompiler.hpp>
 #include <string>
 #include <memory>
 #include <map>
@@ -48,6 +49,7 @@ private:
     std::set<std::string> constrainedElements_;
     std::set<std::string> constrainedTypes_;
     bool useDefaultStruct_;
+    CSSCompiler cssCompiler_;
     
     // 生成元素节点的 HTML
     std::string generateElementHTML(std::shared_ptr<BaseNode> node);
@@ -92,7 +94,7 @@ private:
     std::string generateAttributes(const std::map<std::string, std::string>& attributes);
     
     // 生成 CSS 属性
-    std::string generateCSSProperties(const std::map<std::string, std::string>& properties);
+    std::string generateCSSProperties(const std::map<std::string, std::string>& properties, bool isGlobalStyle = false);
     
     // 清理和格式化输出
     std::string formatOutput(const std::string& html, const std::string& css, const std::string& js);

@@ -7,6 +7,10 @@ file(REMOVE_RECURSE
   "CMakeFiles/CHTLCompiler.dir/CompilerManager.cpp.o.d"
   "CMakeFiles/CHTLCompiler.dir/JSCompiler.cpp.o"
   "CMakeFiles/CHTLCompiler.dir/JSCompiler.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/__/CHTLLexer/PropertyExpressionLexer.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/__/CHTLLexer/PropertyExpressionLexer.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/__/CHTLParser/PropertyExpressionParser.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/__/CHTLParser/PropertyExpressionParser.cpp.o.d"
 )
 
 # Per-language clean rules from dependency scanning.

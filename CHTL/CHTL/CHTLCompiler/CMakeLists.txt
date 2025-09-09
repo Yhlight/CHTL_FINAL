@@ -6,6 +6,8 @@ add_library(CHTLCompiler STATIC
     CSSCompiler.cpp
     JSCompiler.cpp
     CompilerManager.cpp
+    ../CHTLLexer/PropertyExpressionLexer.cpp
+    ../CHTLParser/PropertyExpressionParser.cpp
 )
 
 # 设置包含目录

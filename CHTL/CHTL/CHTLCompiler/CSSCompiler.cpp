@@ -8,6 +8,7 @@
 
 #include "CSSCompiler.hpp"
 #include <algorithm>
+#include <iostream>
 #include <regex>
 #include <sstream>
 #include <set>
@@ -59,7 +60,7 @@ bool CSSCompiler::compile(const std::string& input, std::string& output) {
 #ifdef HAVE_LIBCSS
         if (!select_ctx_) {
             // 如果 libcss 不可用，使用基本处理
-            output = processVariables(input);
+            output = processVariables(input, false); // 默认不是全局样式
             if (optimize_) {
                 output = optimizeCSS(output);
             }
@@ -94,7 +95,7 @@ bool CSSCompiler::compile(const std::string& input, std::string& output) {
         }
         
         // 处理 CSS 变量
-        std::string processed = processVariables(input);
+        std::string processed = processVariables(input, false); // 默认不是全局样式
         
         // 优化 CSS（如果启用）
         if (optimize_) {
@@ -113,7 +114,7 @@ bool CSSCompiler::compile(const std::string& input, std::string& output) {
         return true;
 #else
         // 如果没有 libcss，使用基本处理
-        output = processVariables(input);
+        output = processVariables(input, false); // 默认不是全局样式
         if (optimize_) {
             output = optimizeCSS(output);
         }
@@ -168,7 +169,7 @@ void CSSCompiler::clearVariables() {
     variables_.clear();
 }
 
-std::string CSSCompiler::processVariables(const std::string& input) {
+std::string CSSCompiler::processVariables(const std::string& input, bool isGlobalStyle) {
     std::string result = input;
     
     // 处理 CSS 变量替换
@@ -179,10 +180,10 @@ std::string CSSCompiler::processVariables(const std::string& input) {
     }
     
     // 处理属性表达式
-    result = processArithmeticExpression(result);
-    result = processPropertyReference(result);
-    result = processConditionalExpression(result);
-    result = processDynamicExpression(result);
+    result = processArithmeticExpression(result, isGlobalStyle);
+    result = processPropertyReference(result, isGlobalStyle);
+    result = processConditionalExpression(result, isGlobalStyle);
+    result = processDynamicExpression(result, isGlobalStyle);
     
     return result;
 }
@@ -247,7 +248,12 @@ std::string CSSCompiler::optimizeCSS(const std::string& input) {
     return optimized.empty() ? result : optimized;
 }
 
-std::string CSSCompiler::processPropertyExpression(const std::string& value) {
+std::string CSSCompiler::processPropertyExpression(const std::string& value, bool isGlobalStyle) {
+    // 检查全局样式支持
+    if (isGlobalStyle && !isGlobalStyleSupported(value)) {
+        throw std::runtime_error("Property expression not supported in global style: " + value);
+    }
+    
     try {
         PropertyExpressionParser parser(value);
         auto ast = parser.parse();
@@ -258,7 +264,7 @@ std::string CSSCompiler::processPropertyExpression(const std::string& value) {
     }
 }
 
-std::string CSSCompiler::processArithmeticExpression(const std::string& value) {
+std::string CSSCompiler::processArithmeticExpression(const std::string& value, bool isGlobalStyle) {
     // 检查是否包含算术运算符
     if (value.find('+') != std::string::npos || 
         value.find('-') != std::string::npos || 
@@ -266,17 +272,22 @@ std::string CSSCompiler::processArithmeticExpression(const std::string& value) {
         value.find('/') != std::string::npos || 
         value.find('%') != std::string::npos || 
         value.find("**") != std::string::npos) {
-        return processPropertyExpression(value);
+        return processPropertyExpression(value, isGlobalStyle);
     }
     return value;
 }
 
-std::string CSSCompiler::processPropertyReference(const std::string& value) {
+std::string CSSCompiler::processPropertyReference(const std::string& value, bool isGlobalStyle) {
     // 检查是否包含属性引用 (选择器.属性)
     std::regex refRegex(R"(([.#]?[\w-]+)\.([\w-]+))");
     std::smatch match;
     
     if (std::regex_search(value, match, refRegex)) {
+        // 全局样式不支持属性引用
+        if (isGlobalStyle) {
+            throw std::runtime_error("Property reference not supported in global style: " + value);
+        }
+        
         std::string selector = match[1].str();
         std::string property = match[2].str();
         
@@ -287,20 +298,49 @@ std::string CSSCompiler::processPropertyReference(const std::string& value) {
     return value;
 }
 
-std::string CSSCompiler::processConditionalExpression(const std::string& value) {
+std::string CSSCompiler::processConditionalExpression(const std::string& value, bool isGlobalStyle) {
     // 检查是否包含条件表达式 (条件 ? 选项 : 选项)
     if (value.find('?') != std::string::npos && value.find(':') != std::string::npos) {
-        return processPropertyExpression(value);
+        return processPropertyExpression(value, isGlobalStyle);
     }
     return value;
 }
 
-std::string CSSCompiler::processDynamicExpression(const std::string& value) {
+std::string CSSCompiler::processDynamicExpression(const std::string& value, bool isGlobalStyle) {
     // 检查是否包含动态引用 ({{变量}}->属性)
     if (value.find("{{") != std::string::npos && value.find("}}") != std::string::npos) {
-        return processPropertyExpression(value);
+        // 全局样式不支持动态表达式
+        if (isGlobalStyle) {
+            throw std::runtime_error("Dynamic expression not supported in global style: " + value);
+        }
+        return processPropertyExpression(value, isGlobalStyle);
     }
     return value;
+}
+
+bool CSSCompiler::isGlobalStyleSupported(const std::string& value) {
+    // 全局样式只支持属性运算，不支持引用属性和动态表达式
+    
+    // 检查是否包含属性引用 (选择器.属性)
+    std::regex refRegex(R"(([.#]?[\w-]+)\.([\w-]+))");
+    if (std::regex_search(value, refRegex)) {
+        return false; // 不支持属性引用
+    }
+    
+    // 检查是否包含动态表达式 ({{变量}}->属性)
+    if (value.find("{{") != std::string::npos && value.find("}}->") != std::string::npos) {
+        return false; // 不支持动态表达式
+    }
+    
+    // 检查是否包含引用属性的条件表达式
+    // 如果条件表达式中包含选择器.属性，则不支持
+    std::regex conditionalRefRegex(R"([\w\s]*([.#]?[\w-]+)\.([\w-]+)[\w\s]*\?[\w\s]*:[\w\s]*)");
+    if (std::regex_search(value, conditionalRefRegex)) {
+        return false; // 不支持引用属性的条件表达式
+    }
+    
+    // 其他情况都支持（包括纯算术运算和基本条件表达式）
+    return true;
 }
 
 } // namespace CHTL

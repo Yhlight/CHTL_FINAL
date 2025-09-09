@@ -1,5 +1,6 @@
 #include "Parser.hpp"
 #include <sstream>
+#include <iostream>
 
 namespace CHTL {
 
@@ -55,6 +56,12 @@ std::shared_ptr<BaseNode> Parser::parse() {
             auto use = parseUse();
             if (use) {
                 root->addChild(use);
+            }
+        } else if (current_.getType() == TokenType::STYLE) {
+            // 处理全局样式
+            auto style = parseStyle();
+            if (style) {
+                root->addChild(style);
             }
         } else {
             // 跳过未知词法单元
@@ -136,12 +143,29 @@ std::shared_ptr<StyleNode> Parser::parseStyle() {
         return nullptr;
     }
     
-    auto style = std::make_shared<StyleNode>(StyleNode::StyleType::LOCAL, 
+    // 判断是否是全局样式（根级别的Style标签）
+    // 简化处理：如果Style标签后面直接跟{，则认为是全局样式
+    StyleNode::StyleType styleType = StyleNode::StyleType::LOCAL;
+    
+    // 检查下一个token是否是{
+    Token nextToken = lexer_.peekToken();
+    if (nextToken.getType() == TokenType::LEFT_BRACE) {
+        styleType = StyleNode::StyleType::GLOBAL;
+    }
+    
+    auto style = std::make_shared<StyleNode>(styleType, 
                                             current_.getLine(), current_.getColumn());
+    
     current_ = lexer_.nextToken();
     
     if (consume(TokenType::LEFT_BRACE)) {
-        parseStyleProperties(style.get());
+        if (styleType == StyleNode::StyleType::GLOBAL) {
+            // 全局样式：解析CSS规则
+            parseGlobalStyleRules(style.get());
+        } else {
+            // 局部样式：解析CSS属性
+            parseStyleProperties(style.get());
+        }
         
         if (!consume(TokenType::RIGHT_BRACE)) {
             reportError("Expected '}'");
@@ -554,21 +578,84 @@ void Parser::parseAttributes(ElementNode* element) {
 }
 
 std::string Parser::parseAttributeValue() {
+    std::string value;
+    
+    // 处理字符串字面量
     if (current_.getType() == TokenType::STRING_LITERAL) {
-        std::string value = current_.getValue();
-        current_ = lexer_.nextToken();
-        return value;
-    } else if (current_.getType() == TokenType::UNQUOTED_LITERAL) {
-        std::string value = current_.getValue();
-        current_ = lexer_.nextToken();
-        return value;
-    } else if (current_.getType() == TokenType::NUMBER) {
-        std::string value = current_.getValue();
+        value = current_.getValue();
         current_ = lexer_.nextToken();
         return value;
     }
     
-    return "";
+    // 处理复杂的表达式（包括属性引用、条件表达式、动态表达式等）
+    while (current_.getType() != TokenType::SEMICOLON && 
+           current_.getType() != TokenType::RIGHT_BRACE && 
+           current_.getType() != TokenType::END_OF_FILE && 
+           !hasError_) {
+        
+        if (current_.getType() == TokenType::UNQUOTED_LITERAL) {
+            value += current_.getValue();
+        } else if (current_.getType() == TokenType::NUMBER) {
+            value += current_.getValue();
+        } else if (current_.getType() == TokenType::DOT) {
+            value += ".";
+        } else if (current_.getType() == TokenType::HASH) {
+            value += "#";
+        } else if (current_.getType() == TokenType::LEFT_BRACKET) {
+            value += "[";
+        } else if (current_.getType() == TokenType::RIGHT_BRACKET) {
+            value += "]";
+        } else if (current_.getType() == TokenType::QUESTION) {
+            value += "?";
+        } else if (current_.getType() == TokenType::COLON) {
+            value += ":";
+        } else if (current_.getType() == TokenType::PLUS) {
+            value += "+";
+        } else if (current_.getType() == TokenType::MINUS) {
+            value += "-";
+        } else if (current_.getType() == TokenType::MULTIPLY) {
+            value += "*";
+        } else if (current_.getType() == TokenType::DIVIDE) {
+            value += "/";
+        } else if (current_.getType() == TokenType::MODULO) {
+            value += "%";
+        } else if (current_.getType() == TokenType::POWER) {
+            value += "**";
+        } else if (current_.getType() == TokenType::LESS_THAN) {
+            value += "<";
+        } else if (current_.getType() == TokenType::GREATER_THAN) {
+            value += ">";
+        } else if (current_.getType() == TokenType::LESS_EQUAL) {
+            value += "<=";
+        } else if (current_.getType() == TokenType::GREATER_EQUAL) {
+            value += ">=";
+        } else if (current_.getType() == TokenType::EQUAL_EQUAL) {
+            value += "==";
+        } else if (current_.getType() == TokenType::NOT_EQUAL) {
+            value += "!=";
+        } else if (current_.getType() == TokenType::LOGICAL_AND) {
+            value += "&&";
+        } else if (current_.getType() == TokenType::LOGICAL_OR) {
+            value += "||";
+        } else if (current_.getType() == TokenType::LOGICAL_NOT) {
+            value += "!";
+        } else if (current_.getType() == TokenType::LEFT_PAREN) {
+            value += "(";
+        } else if (current_.getType() == TokenType::RIGHT_PAREN) {
+            value += ")";
+        } else if (current_.getType() == TokenType::ARROW) {
+            value += "->";
+        } else if (current_.getType() == TokenType::IDENTIFIER) {
+            value += current_.getValue();
+        } else {
+            // 遇到不认识的token，停止解析
+            break;
+        }
+        
+        current_ = lexer_.nextToken();
+    }
+    
+    return value;
 }
 
 void Parser::parseStyleProperties(StyleNode* style) {
@@ -720,6 +807,42 @@ std::string Parser::parseConfigType() {
 std::string Parser::parseNamespaceType() {
     // 命名空间不需要类型，直接返回空字符串
     return "";
+}
+
+void Parser::parseGlobalStyleRules(StyleNode* style) {
+    while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+        // 解析选择器
+        std::string selector = parseSelector();
+        if (selector.empty()) {
+            current_ = lexer_.nextToken();
+            continue;
+        }
+        
+        // 解析CSS属性
+        if (consume(TokenType::LEFT_BRACE)) {
+            while (current_.getType() != TokenType::RIGHT_BRACE && !hasError_) {
+                if (current_.getType() == TokenType::IDENTIFIER) {
+                    std::string property = current_.getValue();
+                    current_ = lexer_.nextToken();
+                    
+                    if (consume(TokenType::COLON)) {
+                        std::string value = parseAttributeValue();
+                        style->addCSSProperty(property, value);
+                    }
+                    
+                    if (consume(TokenType::SEMICOLON)) {
+                        // 属性结束
+                    }
+                } else {
+                    current_ = lexer_.nextToken();
+                }
+            }
+            
+            if (!consume(TokenType::RIGHT_BRACE)) {
+                reportError("Expected '}' after CSS rule");
+            }
+        }
+    }
 }
 
 void Parser::parseStyleTemplateContent(TemplateStyleNode* styleTemplate) {

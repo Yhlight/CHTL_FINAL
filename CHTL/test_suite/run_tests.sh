@@ -99,6 +99,9 @@ run_test "dynamic_property_conditionals" "dynamic_property_conditionals.chtl" ""
 echo "Starting comprehensive property expressions tests..."
 run_test "comprehensive_property_expressions" "comprehensive_property_expressions.chtl" ""
 
+echo "Starting global style restrictions tests..."
+run_test "global_style_restrictions" "global_style_restrictions.chtl" ""
+
 # Test default structure output
 echo -e "\n${YELLOW}Running default structure test: spa_page_default_struct${NC}"
 echo "Input file: spa_page.chtl"

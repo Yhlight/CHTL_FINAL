@@ -247,6 +247,54 @@ JSCompiler.cpp.s:
 	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/JSCompiler.cpp.s
 .PHONY : JSCompiler.cpp.s
 
+__/CHTLLexer/PropertyExpressionLexer.o: __/CHTLLexer/PropertyExpressionLexer.cpp.o
+.PHONY : __/CHTLLexer/PropertyExpressionLexer.o
+
+# target to build an object file
+__/CHTLLexer/PropertyExpressionLexer.cpp.o:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/__/CHTLLexer/PropertyExpressionLexer.cpp.o
+.PHONY : __/CHTLLexer/PropertyExpressionLexer.cpp.o
+
+__/CHTLLexer/PropertyExpressionLexer.i: __/CHTLLexer/PropertyExpressionLexer.cpp.i
+.PHONY : __/CHTLLexer/PropertyExpressionLexer.i
+
+# target to preprocess a source file
+__/CHTLLexer/PropertyExpressionLexer.cpp.i:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/__/CHTLLexer/PropertyExpressionLexer.cpp.i
+.PHONY : __/CHTLLexer/PropertyExpressionLexer.cpp.i
+
+__/CHTLLexer/PropertyExpressionLexer.s: __/CHTLLexer/PropertyExpressionLexer.cpp.s
+.PHONY : __/CHTLLexer/PropertyExpressionLexer.s
+
+# target to generate assembly for a file
+__/CHTLLexer/PropertyExpressionLexer.cpp.s:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/__/CHTLLexer/PropertyExpressionLexer.cpp.s
+.PHONY : __/CHTLLexer/PropertyExpressionLexer.cpp.s
+
+__/CHTLParser/PropertyExpressionParser.o: __/CHTLParser/PropertyExpressionParser.cpp.o
+.PHONY : __/CHTLParser/PropertyExpressionParser.o
+
+# target to build an object file
+__/CHTLParser/PropertyExpressionParser.cpp.o:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/__/CHTLParser/PropertyExpressionParser.cpp.o
+.PHONY : __/CHTLParser/PropertyExpressionParser.cpp.o
+
+__/CHTLParser/PropertyExpressionParser.i: __/CHTLParser/PropertyExpressionParser.cpp.i
+.PHONY : __/CHTLParser/PropertyExpressionParser.i
+
+# target to preprocess a source file
+__/CHTLParser/PropertyExpressionParser.cpp.i:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/__/CHTLParser/PropertyExpressionParser.cpp.i
+.PHONY : __/CHTLParser/PropertyExpressionParser.cpp.i
+
+__/CHTLParser/PropertyExpressionParser.s: __/CHTLParser/PropertyExpressionParser.cpp.s
+.PHONY : __/CHTLParser/PropertyExpressionParser.s
+
+# target to generate assembly for a file
+__/CHTLParser/PropertyExpressionParser.cpp.s:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CHTLCompiler/CMakeFiles/CHTLCompiler.dir/__/CHTLParser/PropertyExpressionParser.cpp.s
+.PHONY : __/CHTLParser/PropertyExpressionParser.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -269,6 +317,12 @@ help:
 	@echo "... JSCompiler.o"
 	@echo "... JSCompiler.i"
 	@echo "... JSCompiler.s"
+	@echo "... __/CHTLLexer/PropertyExpressionLexer.o"
+	@echo "... __/CHTLLexer/PropertyExpressionLexer.i"
+	@echo "... __/CHTLLexer/PropertyExpressionLexer.s"
+	@echo "... __/CHTLParser/PropertyExpressionParser.o"
+	@echo "... __/CHTLParser/PropertyExpressionParser.i"
+	@echo "... __/CHTLParser/PropertyExpressionParser.s"
 .PHONY : help
 
 

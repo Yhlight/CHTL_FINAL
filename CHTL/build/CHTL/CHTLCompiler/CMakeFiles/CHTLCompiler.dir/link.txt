@@ -1,2 +1,2 @@
-/usr/bin/ar qc ../../lib/libCHTLCompiler.a CMakeFiles/CHTLCompiler.dir/CSSCompiler.cpp.o CMakeFiles/CHTLCompiler.dir/JSCompiler.cpp.o CMakeFiles/CHTLCompiler.dir/CompilerManager.cpp.o
+/usr/bin/ar qc ../../lib/libCHTLCompiler.a CMakeFiles/CHTLCompiler.dir/CSSCompiler.cpp.o CMakeFiles/CHTLCompiler.dir/JSCompiler.cpp.o CMakeFiles/CHTLCompiler.dir/CompilerManager.cpp.o CMakeFiles/CHTLCompiler.dir/__/CHTLLexer/PropertyExpressionLexer.cpp.o CMakeFiles/CHTLCompiler.dir/__/CHTLParser/PropertyExpressionParser.cpp.o
 /usr/bin/ranlib ../../lib/libCHTLCompiler.a

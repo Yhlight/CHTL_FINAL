@@ -59,11 +59,14 @@ public:
     void setOptimize(bool optimize) { optimize_ = optimize; }
     
     // 处理属性表达式
-    std::string processPropertyExpression(const std::string& value);
-    std::string processArithmeticExpression(const std::string& value);
-    std::string processPropertyReference(const std::string& value);
-    std::string processConditionalExpression(const std::string& value);
-    std::string processDynamicExpression(const std::string& value);
+    std::string processPropertyExpression(const std::string& value, bool isGlobalStyle = false);
+    std::string processArithmeticExpression(const std::string& value, bool isGlobalStyle = false);
+    std::string processPropertyReference(const std::string& value, bool isGlobalStyle = false);
+    std::string processConditionalExpression(const std::string& value, bool isGlobalStyle = false);
+    std::string processDynamicExpression(const std::string& value, bool isGlobalStyle = false);
+    
+    // 验证全局样式支持
+    bool isGlobalStyleSupported(const std::string& value);
     
 private:
     std::map<std::string, std::string> variables_;
@@ -80,7 +83,7 @@ private:
 #endif
     
     // 处理 CSS 变量替换
-    std::string processVariables(const std::string& input);
+    std::string processVariables(const std::string& input, bool isGlobalStyle = false);
     
     // 压缩 CSS
     std::string minifyCSS(const std::string& input);

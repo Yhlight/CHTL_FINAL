@@ -210,6 +210,7 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: \
   /workspace/CHTL/CHTL/CHTLNode/CustomStyleNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/CustomElementNode.hpp \
   /workspace/CHTL/CHTL/CHTLNode/CustomVarNode.hpp \
+  /workspace/CHTL/CHTL/CHTLCompiler/CSSCompiler.hpp \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/set \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_set.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_multiset.h \
@@ -266,4 +267,5 @@ CHTL/CHTLGenerator/CMakeFiles/CHTLGenerator.dir/CodeGenerator.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/codecvt.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/basic_file.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++io.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fstream.tcc
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fstream.tcc \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iostream

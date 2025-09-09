@@ -1,0 +1,7 @@
+// 简单的全局样式测试
+
+Style {
+    .test {
+        width: box.width;  // 这应该被拒绝
+    }
+}

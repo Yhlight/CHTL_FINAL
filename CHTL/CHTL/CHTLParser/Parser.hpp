@@ -109,6 +109,9 @@ private:
     // 解析样式属性
     void parseStyleProperties(StyleNode* style);
     
+    // 解析全局样式规则
+    void parseGlobalStyleRules(StyleNode* style);
+    
     // 解析选择器
     std::string parseSelector();
     

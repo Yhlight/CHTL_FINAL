@@ -60,6 +60,7 @@ const std::unordered_map<std::string, TokenType>& KeywordMap::getKeywords() {
         {"bottom", TokenType::AT_BOTTOM},
         {"html5", TokenType::HTML5},
         {"@Style", TokenType::TEMPLATE_STYLE},
+        {"Style", TokenType::STYLE},
         {"@Element", TokenType::TEMPLATE_ELEMENT},
         {"@Var", TokenType::TEMPLATE_VAR},
         {"@Html", TokenType::ORIGIN_HTML},

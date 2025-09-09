@@ -1,0 +1,74 @@
+// 测试全局样式的限制
+// 全局样式只支持属性运算，不支持引用属性和动态表达式
+
+div {
+    id: box;
+    style {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+// 全局样式 - 应该支持属性运算
+Style {
+    .container {
+        width: 100px + 50px;  // 支持：纯算术运算
+        height: 200px - 50px; // 支持：纯算术运算
+        margin: 10px * 2;     // 支持：纯算术运算
+        padding: 20px / 2;    // 支持：纯算术运算
+        border-width: 15px % 4; // 支持：纯算术运算
+        font-size: 2px ** 3;  // 支持：纯算术运算
+    }
+    
+    .conditional {
+        width: 100px;
+        height: 100px;
+        background-color: width > 50px ? "red" : "blue"; // 支持：基本条件表达式
+    }
+    
+    .chained-conditional {
+        width: 100px;
+        height: 100px;
+        background-color: 
+            width > 50px ? "red",
+            width > 100px ? "green", 
+            height < 100px ? "purple" : "pink"; // 支持：链式条件表达式
+    }
+    
+    .logical-conditional {
+        width: 100px;
+        height: 100px;
+        background-color: 
+            width > 50px && width < 100px ? "red",
+            width > 100px || height < 50px ? "green", 
+            height < 100px ? "purple" : "pink"; // 支持：逻辑条件表达式
+    }
+}
+
+// 局部样式 - 应该支持所有语法
+div {
+    style {
+        width: 100px + box.width;  // 支持：引用属性
+        height: box.height * 2;    // 支持：引用属性
+        background-color: .box.width > 50px ? "red" : "blue"; // 支持：引用属性条件表达式
+        transform: {{box}}->width > 100 ? "scale(1.1)" : "scale(1)"; // 支持：动态表达式
+    }
+}
+
+// 测试全局样式中不支持的语法（这些应该被拒绝）
+// 注意：这些测试用例应该导致编译错误
+/*
+Style {
+    .invalid-reference {
+        width: box.width;  // 错误：全局样式不支持引用属性
+    }
+    
+    .invalid-conditional-reference {
+        background-color: .box.width > 50px ? "red" : "blue"; // 错误：全局样式不支持引用属性条件表达式
+    }
+    
+    .invalid-dynamic {
+        transform: {{box}}->width > 100 ? "scale(1.1)" : "scale(1)"; // 错误：全局样式不支持动态表达式
+    }
+}
+*/

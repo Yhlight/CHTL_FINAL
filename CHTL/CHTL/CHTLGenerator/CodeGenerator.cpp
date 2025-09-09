@@ -18,11 +18,12 @@
 #include <sstream>
 #include <algorithm>
 #include <fstream>
+#include <iostream>
 
 namespace CHTL {
 
 CodeGenerator::CodeGenerator(bool defaultStruct) 
-    : templateManager_(TemplateManager::getInstance()), useDefaultStruct_(defaultStruct) {}
+    : templateManager_(TemplateManager::getInstance()), useDefaultStruct_(defaultStruct), cssCompiler_() {}
 
 std::string CodeGenerator::generateHTML(std::shared_ptr<BaseNode> root) {
     if (!root) return "";
@@ -150,8 +151,8 @@ std::string CodeGenerator::generateElementHTML(std::shared_ptr<BaseNode> node) {
             auto styleNode = std::dynamic_pointer_cast<StyleNode>(node);
             if (!styleNode) return "";
             
-            // 生成内联样式
-            std::string style = generateCSSProperties(styleNode->getCSSProperties());
+            // 生成内联样式（内联样式不是全局样式）
+            std::string style = generateCSSProperties(styleNode->getCSSProperties(), false);
             if (!style.empty()) {
                 return " style=\"" + style + "\"";
             }
@@ -210,7 +211,11 @@ std::string CodeGenerator::generateStyleCSS(std::shared_ptr<BaseNode> node) {
             std::string selector = "." + styleNode->getAttribute("class");
             if (selector == ".") selector = "body";
             
-            std::string properties = generateCSSProperties(styleNode->getCSSProperties());
+            // 检查是否是全局样式
+            bool isGlobalStyle = (styleNode->getStyleType() == StyleNode::StyleType::GLOBAL);
+            
+            
+            std::string properties = generateCSSProperties(styleNode->getCSSProperties(), isGlobalStyle);
             if (!properties.empty()) {
                 generatedCSS_[selector] = properties;
             }
@@ -614,13 +619,21 @@ std::string CodeGenerator::generateAttributes(const std::map<std::string, std::s
     return result;
 }
 
-std::string CodeGenerator::generateCSSProperties(const std::map<std::string, std::string>& properties) {
+std::string CodeGenerator::generateCSSProperties(const std::map<std::string, std::string>& properties, bool isGlobalStyle) {
     std::ostringstream css;
     
     for (const auto& [property, value] : properties) {
         // 解析变量引用
         std::string resolvedValue = resolveVariableReference(value);
-        css << property << ": " << resolvedValue << "; ";
+        
+        // 使用CSSCompiler验证属性值
+        try {
+            std::string processedValue = cssCompiler_.processPropertyExpression(resolvedValue, isGlobalStyle);
+            css << property << ": " << processedValue << "; ";
+        } catch (const std::exception& e) {
+            // 如果验证失败，抛出错误
+            throw std::runtime_error("CSS validation error: " + std::string(e.what()));
+        }
     }
     
     std::string result = css.str();
