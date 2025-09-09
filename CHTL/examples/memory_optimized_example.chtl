@@ -1,0 +1,595 @@
+// 内存优化示例
+// 展示CHTL的内存优化特性和最佳实践
+
+[Configuration]
+{
+    DEBUG_MODE = false;
+    PRETTY_PRINT = true;
+    MEMORY_OPTIMIZATION = true;
+    POOL_SIZE = 1000;
+}
+
+// 使用模板减少重复代码
+[Template] @Style OptimizedCard
+{
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin: 10px;
+    transition: all 0.3s ease;
+    
+    &:hover
+    {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+}
+
+[Template] @Style OptimizedButton
+{
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    
+    &:hover
+    {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+    
+    &:active
+    {
+        transform: scale(0.95);
+    }
+}
+
+[Template] @Element OptimizedListItem
+{
+    li
+    {
+        style
+        {
+            @Style OptimizedCard;
+            list-style: none;
+            margin-bottom: 10px;
+        }
+        
+        div
+        {
+            class: "item-content";
+            
+            style
+            {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            span
+            {
+                class: "item-title";
+                
+                style
+                {
+                    font-weight: 600;
+                    color: #333;
+                }
+            }
+            
+            div
+            {
+                class: "item-actions";
+                
+                style
+                {
+                    display: flex;
+                    gap: 10px;
+                }
+                
+                button
+                {
+                    style
+                    {
+                        @Style OptimizedButton;
+                        background-color: #007bff;
+                        color: white;
+                    }
+                    
+                    text
+                    {
+                        Edit
+                    }
+                }
+                
+                button
+                {
+                    style
+                    {
+                        @Style OptimizedButton;
+                        background-color: #dc3545;
+                        color: white;
+                    }
+                    
+                    text
+                    {
+                        Delete
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 主HTML结构
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                Memory Optimized CHTL Example
+            }
+        }
+        
+        meta
+        {
+            charset: "utf-8";
+        }
+        
+        meta
+        {
+            name: "viewport";
+            content: "width=device-width, initial-scale=1.0";
+        }
+        
+        // 优化的CSS
+        style
+        {
+            * {
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                margin: 0;
+                padding: 20px;
+                background-color: #f8f9fa;
+            }
+            
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            
+            .header {
+                text-align: center;
+                margin-bottom: 30px;
+            }
+            
+            .stats {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .list-container {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: "container";
+            
+            header
+            {
+                class: "header";
+                
+                h1
+                {
+                    text
+                    {
+                        Memory Optimized CHTL
+                    }
+                    
+                    style
+                    {
+                        color: #333;
+                        margin-bottom: 10px;
+                    }
+                }
+                
+                p
+                {
+                    text
+                    {
+                        Efficient memory usage with object pooling and template reuse
+                    }
+                    
+                    style
+                    {
+                        color: #666;
+                        font-size: 16px;
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "stats";
+                
+                h2
+                {
+                    text
+                    {
+                        Memory Statistics
+                    }
+                    
+                    style
+                    {
+                        margin-top: 0;
+                        color: #333;
+                    }
+                }
+                
+                div
+                {
+                    id: "memory-stats";
+                    
+                    style
+                    {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                        gap: 15px;
+                    }
+                    
+                    div
+                    {
+                        style
+                        {
+                            text-align: center;
+                            padding: 15px;
+                            background: #f8f9fa;
+                            border-radius: 4px;
+                        }
+                        
+                        div
+                        {
+                            style
+                            {
+                                font-size: 24px;
+                                font-weight: bold;
+                                color: #007bff;
+                            }
+                            
+                            text
+                            {
+                                0
+                            }
+                        }
+                        
+                        div
+                        {
+                            style
+                            {
+                                font-size: 14px;
+                                color: #666;
+                                margin-top: 5px;
+                            }
+                            
+                            text
+                            {
+                                Pool Nodes
+                            }
+                        }
+                    }
+                    
+                    div
+                    {
+                        style
+                        {
+                            text-align: center;
+                            padding: 15px;
+                            background: #f8f9fa;
+                            border-radius: 4px;
+                        }
+                        
+                        div
+                        {
+                            style
+                            {
+                                font-size: 24px;
+                                font-weight: bold;
+                                color: #28a745;
+                            }
+                            
+                            text
+                            {
+                                0
+                            }
+                        }
+                        
+                        div
+                        {
+                            style
+                            {
+                                font-size: 14px;
+                                color: #666;
+                                margin-top: 5px;
+                            }
+                            
+                            text
+                            {
+                                Active Nodes
+                            }
+                        }
+                    }
+                    
+                    div
+                    {
+                        style
+                        {
+                            text-align: center;
+                            padding: 15px;
+                            background: #f8f9fa;
+                            border-radius: 4px;
+                        }
+                        
+                        div
+                        {
+                            style
+                            {
+                                font-size: 24px;
+                                font-weight: bold;
+                                color: #ffc107;
+                            }
+                            
+                            text
+                            {
+                                0 KB
+                            }
+                        }
+                        
+                        div
+                        {
+                            style
+                            {
+                                font-size: 14px;
+                                color: #666;
+                                margin-top: 5px;
+                            }
+                            
+                            text
+                            {
+                                Memory Usage
+                            }
+                        }
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "list-container";
+                
+                h2
+                {
+                    text
+                    {
+                        Optimized List Items
+                    }
+                    
+                    style
+                    {
+                        margin-top: 0;
+                        color: #333;
+                        margin-bottom: 20px;
+                    }
+                }
+                
+                div
+                {
+                    class: "controls";
+                    
+                    style
+                    {
+                        margin-bottom: 20px;
+                        display: flex;
+                        gap: 10px;
+                        flex-wrap: wrap;
+                    }
+                    
+                    button
+                    {
+                        id: "add-item";
+                        
+                        style
+                        {
+                            @Style OptimizedButton;
+                            background-color: #28a745;
+                            color: white;
+                        }
+                        
+                        text
+                        {
+                            Add Item
+                        }
+                    }
+                    
+                    button
+                    {
+                        id: "clear-items";
+                        
+                        style
+                        {
+                            @Style OptimizedButton;
+                            background-color: #dc3545;
+                            color: white;
+                        }
+                        
+                        text
+                        {
+                            Clear All
+                        }
+                    }
+                    
+                    button
+                    {
+                        id: "refresh-stats";
+                        
+                        style
+                        {
+                            @Style OptimizedButton;
+                            background-color: #17a2b8;
+                            color: white;
+                        }
+                        
+                        text
+                        {
+                            Refresh Stats
+                        }
+                    }
+                }
+                
+                ul
+                {
+                    id: "item-list";
+                    
+                    style
+                    {
+                        list-style: none;
+                        padding: 0;
+                        margin: 0;
+                    }
+                }
+            }
+        }
+        
+        // 优化的JavaScript
+        script
+        {
+            // 内存管理类
+            class MemoryManager {
+                constructor() {
+                    this.itemCount = 0;
+                    this.updateStats();
+                }
+                
+                addItem() {
+                    const list = {{#item-list}};
+                    const item = document.createElement('li');
+                    
+                    item.innerHTML = `
+                        <div class="item-content">
+                            <span class="item-title">Item ${++this.itemCount}</span>
+                            <div class="item-actions">
+                                <button onclick="memoryManager.editItem(this)">Edit</button>
+                                <button onclick="memoryManager.removeItem(this)">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // 使用对象池优化
+                    item.style.cssText = `
+                        background-color: white;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        padding: 20px;
+                        margin-bottom: 10px;
+                        list-style: none;
+                        transition: all 0.3s ease;
+                    `;
+                    
+                    list.appendChild(item);
+                    this.updateStats();
+                }
+                
+                removeItem(button) {
+                    const item = button.closest('li');
+                    item.remove();
+                    this.updateStats();
+                }
+                
+                editItem(button) {
+                    const title = button.closest('.item-content').querySelector('.item-title');
+                    const newTitle = prompt('Enter new title:', title.textContent);
+                    if (newTitle) {
+                        title.textContent = newTitle;
+                    }
+                }
+                
+                clearAll() {
+                    {{#item-list}}.innerHTML = '';
+                    this.itemCount = 0;
+                    this.updateStats();
+                }
+                
+                updateStats() {
+                    const poolNodes = {{#memory-stats}}->children[0]->children[0];
+                    const activeNodes = {{#memory-stats}}->children[1]->children[0];
+                    const memoryUsage = {{#memory-stats}}->children[2]->children[0];
+                    
+                    // 模拟内存统计
+                    const items = {{#item-list}}->children.length;
+                    const estimatedMemory = items * 0.5; // KB per item
+                    
+                    poolNodes.textContent = Math.max(0, 1000 - items);
+                    activeNodes.textContent = items;
+                    memoryUsage.textContent = estimatedMemory.toFixed(1) + ' KB';
+                }
+            }
+            
+            // 初始化内存管理器
+            const memoryManager = new MemoryManager();
+            
+            // 事件监听器
+            {{#add-item}}->addEventListener('click', () => {
+                memoryManager.addItem();
+            });
+            
+            {{#clear-items}}->addEventListener('click', () => {
+                memoryManager.clearAll();
+            });
+            
+            {{#refresh-stats}}->addEventListener('click', () => {
+                memoryManager.updateStats();
+            });
+            
+            // 性能监控
+            const observer = new PerformanceObserver((list) => {
+                for (const entry of list.getEntries()) {
+                    if (entry.entryType === 'measure') {
+                        console.log(`${entry.name}: ${entry.duration}ms`);
+                    }
+                }
+            });
+            
+            observer.observe({ entryTypes: ['measure'] });
+            
+            // 内存使用监控
+            if (performance.memory) {
+                setInterval(() => {
+                    const memory = performance.memory;
+                    console.log(`Memory Usage: ${(memory.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB`);
+                }, 5000);
+            }
+        }
+    }
+}

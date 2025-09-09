@@ -35,26 +35,78 @@ std::string CHTLGenerator::generate(std::shared_ptr<BaseNode> ast) {
         // 生成JS
         jsOutput = generateJS(ast);
         
+        // 应用格式化
+        if (prettyPrint) {
+            htmlOutput = formatHTML(htmlOutput);
+            cssOutput = formatCSS(cssOutput);
+            jsOutput = formatJS(jsOutput);
+        }
+        
+        // 应用压缩
+        if (minify) {
+            htmlOutput = minifyHTML(htmlOutput);
+            cssOutput = minifyCSS(cssOutput);
+            jsOutput = minifyJS(jsOutput);
+        }
+        
         // 合并输出
         std::ostringstream oss;
         oss << "<!DOCTYPE html>\n";
-        oss << "<html>\n";
-        oss << "<head>\n";
         
-        if (!cssOutput.empty()) {
-            oss << "<style>\n" << cssOutput << "\n</style>\n";
+        if (prettyPrint) {
+            oss << "<html>\n";
+            oss << "  <head>\n";
+            
+            if (!cssOutput.empty()) {
+                oss << "    <style>\n";
+                // 添加CSS缩进
+                std::istringstream cssStream(cssOutput);
+                std::string line;
+                while (std::getline(cssStream, line)) {
+                    oss << "      " << line << "\n";
+                }
+                oss << "    </style>\n";
+            }
+            
+            oss << "  </head>\n";
+            oss << "  <body>\n";
+            // 添加HTML缩进
+            std::istringstream htmlStream(htmlOutput);
+            while (std::getline(htmlStream, line)) {
+                oss << "    " << line << "\n";
+            }
+            oss << "  </body>\n";
+            
+            if (!jsOutput.empty()) {
+                oss << "  <script>\n";
+                // 添加JS缩进
+                std::istringstream jsStream(jsOutput);
+                while (std::getline(jsStream, line)) {
+                    oss << "    " << line << "\n";
+                }
+                oss << "  </script>\n";
+            }
+            
+            oss << "</html>\n";
+        } else {
+            oss << "<html>\n";
+            oss << "<head>\n";
+            
+            if (!cssOutput.empty()) {
+                oss << "<style>\n" << cssOutput << "\n</style>\n";
+            }
+            
+            oss << "</head>\n";
+            oss << "<body>\n";
+            oss << htmlOutput << "\n";
+            oss << "</body>\n";
+            
+            if (!jsOutput.empty()) {
+                oss << "<script>\n" << jsOutput << "\n</script>\n";
+            }
+            
+            oss << "</html>\n";
         }
-        
-        oss << "</head>\n";
-        oss << "<body>\n";
-        oss << htmlOutput << "\n";
-        oss << "</body>\n";
-        
-        if (!jsOutput.empty()) {
-            oss << "<script>\n" << jsOutput << "\n</script>\n";
-        }
-        
-        oss << "</html>\n";
         
         auto endTime = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
@@ -481,6 +533,250 @@ CHTLGenerator::GenerateStats CHTLGenerator::getStats() const {
 
 void CHTLGenerator::resetStats() {
     stats = {};
+}
+
+// 实现格式化方法
+std::string CHTLGenerator::formatHTML(const std::string& html) {
+    std::string result;
+    int indentLevel = 0;
+    bool inTag = false;
+    bool inString = false;
+    char stringDelimiter = '\0';
+    
+    for (size_t i = 0; i < html.length(); ++i) {
+        char c = html[i];
+        
+        if (inString) {
+            result += c;
+            if (c == stringDelimiter && html[i-1] != '\\') {
+                inString = false;
+                stringDelimiter = '\0';
+            }
+        } else {
+            if (c == '"' || c == '\'') {
+                inString = true;
+                stringDelimiter = c;
+                result += c;
+            } else if (c == '<') {
+                if (html[i+1] == '/') {
+                    // 结束标签
+                    indentLevel = std::max(0, indentLevel - 1);
+                    result += '\n' + indent(indentLevel) + c;
+                } else {
+                    // 开始标签
+                    result += '\n' + indent(indentLevel) + c;
+                    indentLevel++;
+                }
+                inTag = true;
+            } else if (c == '>') {
+                result += c;
+                inTag = false;
+            } else if (c == '\n') {
+                if (!inTag) {
+                    result += '\n' + indent(indentLevel);
+                } else {
+                    result += c;
+                }
+            } else {
+                result += c;
+            }
+        }
+    }
+    
+    return result;
+}
+
+std::string CHTLGenerator::formatCSS(const std::string& css) {
+    std::string result;
+    int indentLevel = 0;
+    bool inString = false;
+    char stringDelimiter = '\0';
+    
+    for (size_t i = 0; i < css.length(); ++i) {
+        char c = css[i];
+        
+        if (inString) {
+            result += c;
+            if (c == stringDelimiter && css[i-1] != '\\') {
+                inString = false;
+                stringDelimiter = '\0';
+            }
+        } else {
+            if (c == '"' || c == '\'') {
+                inString = true;
+                stringDelimiter = c;
+                result += c;
+            } else if (c == '{') {
+                result += " {\n" + indent(++indentLevel);
+            } else if (c == '}') {
+                indentLevel = std::max(0, indentLevel - 1);
+                result += "\n" + indent(indentLevel) + "}";
+            } else if (c == ';') {
+                result += ";\n" + indent(indentLevel);
+            } else if (c == ',') {
+                result += ",\n" + indent(indentLevel);
+            } else {
+                result += c;
+            }
+        }
+    }
+    
+    return result;
+}
+
+std::string CHTLGenerator::formatJS(const std::string& js) {
+    std::string result;
+    int indentLevel = 0;
+    bool inString = false;
+    bool inComment = false;
+    char stringDelimiter = '\0';
+    
+    for (size_t i = 0; i < js.length(); ++i) {
+        char c = js[i];
+        
+        if (inComment) {
+            result += c;
+            if (c == '\n') {
+                inComment = false;
+                result += indent(indentLevel);
+            }
+        } else if (inString) {
+            result += c;
+            if (c == stringDelimiter && js[i-1] != '\\') {
+                inString = false;
+                stringDelimiter = '\0';
+            }
+        } else {
+            if (c == '"' || c == '\'') {
+                inString = true;
+                stringDelimiter = c;
+                result += c;
+            } else if (c == '/' && i + 1 < js.length() && js[i+1] == '/') {
+                inComment = true;
+                result += c;
+            } else if (c == '{') {
+                result += " {\n" + indent(++indentLevel);
+            } else if (c == '}') {
+                indentLevel = std::max(0, indentLevel - 1);
+                result += "\n" + indent(indentLevel) + "}";
+            } else if (c == ';') {
+                result += ";\n" + indent(indentLevel);
+            } else if (c == ',') {
+                result += ",\n" + indent(indentLevel);
+            } else {
+                result += c;
+            }
+        }
+    }
+    
+    return result;
+}
+
+std::string CHTLGenerator::minifyHTML(const std::string& html) {
+    std::string result;
+    bool inString = false;
+    char stringDelimiter = '\0';
+    
+    for (size_t i = 0; i < html.length(); ++i) {
+        char c = html[i];
+        
+        if (inString) {
+            result += c;
+            if (c == stringDelimiter && html[i-1] != '\\') {
+                inString = false;
+                stringDelimiter = '\0';
+            }
+        } else {
+            if (c == '"' || c == '\'') {
+                inString = true;
+                stringDelimiter = c;
+                result += c;
+            } else if (std::isspace(c)) {
+                // 压缩空白字符
+                if (!result.empty() && !std::isspace(result.back())) {
+                    result += ' ';
+                }
+            } else {
+                result += c;
+            }
+        }
+    }
+    
+    return result;
+}
+
+std::string CHTLGenerator::minifyCSS(const std::string& css) {
+    std::string result;
+    bool inString = false;
+    char stringDelimiter = '\0';
+    
+    for (size_t i = 0; i < css.length(); ++i) {
+        char c = css[i];
+        
+        if (inString) {
+            result += c;
+            if (c == stringDelimiter && css[i-1] != '\\') {
+                inString = false;
+                stringDelimiter = '\0';
+            }
+        } else {
+            if (c == '"' || c == '\'') {
+                inString = true;
+                stringDelimiter = c;
+                result += c;
+            } else if (std::isspace(c)) {
+                // 压缩空白字符，但保留必要的空格
+                if (!result.empty() && !std::isspace(result.back()) && 
+                    (result.back() == ':' || result.back() == ';' || result.back() == ',')) {
+                    result += ' ';
+                }
+            } else {
+                result += c;
+            }
+        }
+    }
+    
+    return result;
+}
+
+std::string CHTLGenerator::minifyJS(const std::string& js) {
+    std::string result;
+    bool inString = false;
+    bool inComment = false;
+    char stringDelimiter = '\0';
+    
+    for (size_t i = 0; i < js.length(); ++i) {
+        char c = js[i];
+        
+        if (inComment) {
+            if (c == '\n') {
+                inComment = false;
+            }
+        } else if (inString) {
+            result += c;
+            if (c == stringDelimiter && js[i-1] != '\\') {
+                inString = false;
+                stringDelimiter = '\0';
+            }
+        } else {
+            if (c == '"' || c == '\'') {
+                inString = true;
+                stringDelimiter = c;
+                result += c;
+            } else if (c == '/' && i + 1 < js.length() && js[i+1] == '/') {
+                inComment = true;
+            } else if (std::isspace(c)) {
+                // 压缩空白字符
+                if (!result.empty() && !std::isspace(result.back())) {
+                    result += ' ';
+                }
+            } else {
+                result += c;
+            }
+        }
+    }
+    
+    return result;
 }
 
 } // namespace CHTL

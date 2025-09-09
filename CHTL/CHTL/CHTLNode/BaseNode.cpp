@@ -1,9 +1,12 @@
 #include "BaseNode.h"
-#include <algorithm>
 #include <sstream>
-#include <functional>
+#include <algorithm>
 
 namespace CHTL {
+
+// 静态成员定义
+std::vector<std::unique_ptr<BaseNode>> BaseNode::nodePool;
+size_t BaseNode::poolSize = 0;
 
 BaseNode::BaseNode(NodeType type, const std::string& name) 
     : nodeType(type), name(name), line(0), column(0), position(0) {
@@ -31,23 +34,22 @@ void BaseNode::removeAttribute(const std::string& key) {
 
 void BaseNode::addChild(std::shared_ptr<BaseNode> child) {
     if (child) {
-        child->setParent(shared_from_this());
         children.push_back(child);
+        child->setParent(shared_from_this());
     }
 }
 
 void BaseNode::removeChild(std::shared_ptr<BaseNode> child) {
     auto it = std::find(children.begin(), children.end(), child);
     if (it != children.end()) {
-        (*it)->setParent(nullptr);
         children.erase(it);
     }
 }
 
 void BaseNode::insertChild(size_t index, std::shared_ptr<BaseNode> child) {
     if (child && index <= children.size()) {
-        child->setParent(shared_from_this());
         children.insert(children.begin() + index, child);
+        child->setParent(shared_from_this());
     }
 }
 
@@ -103,24 +105,24 @@ std::vector<std::shared_ptr<BaseNode>> BaseNode::findChildrenByType(NodeType typ
 
 void BaseNode::traverse(std::function<void(std::shared_ptr<BaseNode>)> visitor) {
     visitor(shared_from_this());
-    for (auto& child : children) {
+    for (const auto& child : children) {
         child->traverse(visitor);
     }
 }
 
 void BaseNode::traverse(std::function<void(std::shared_ptr<BaseNode>)> visitor) const {
-    visitor(shared_from_this());
+    visitor(std::const_pointer_cast<BaseNode>(shared_from_this()));
     for (const auto& child : children) {
         child->traverse(visitor);
     }
 }
 
 std::shared_ptr<BaseNode> BaseNode::clone() const {
-    auto cloned = std::make_shared<BaseNode>(nodeType, name);
-    cloned->attributes = attributes;
+    auto cloned = createNode(nodeType, name);
     cloned->line = line;
     cloned->column = column;
     cloned->position = position;
+    cloned->attributes = attributes;
     
     for (const auto& child : children) {
         cloned->addChild(child->clone());
@@ -131,7 +133,7 @@ std::shared_ptr<BaseNode> BaseNode::clone() const {
 
 std::string BaseNode::toString() const {
     std::ostringstream oss;
-    oss << "BaseNode(" << static_cast<int>(nodeType) << ", \"" << name << "\")";
+    oss << "Node[" << static_cast<int>(nodeType) << "](" << name << ")";
     return oss.str();
 }
 
@@ -148,7 +150,7 @@ std::string BaseNode::toJS() const {
 }
 
 bool BaseNode::isValid() const {
-    return true;
+    return !name.empty();
 }
 
 void BaseNode::accept(NodeVisitor& visitor) {
@@ -156,14 +158,78 @@ void BaseNode::accept(NodeVisitor& visitor) {
 }
 
 void BaseNode::accept(const NodeVisitor& visitor) const {
-    visitor.visit(shared_from_this());
+    visitor.visit(std::const_pointer_cast<BaseNode>(shared_from_this()));
 }
 
 std::string BaseNode::debugString() const {
     std::ostringstream oss;
-    oss << "Node: " << name << " (Type: " << static_cast<int>(nodeType) 
-        << ", Line: " << line << ", Column: " << column << ")";
+    oss << "BaseNode {\n";
+    oss << "  type: " << static_cast<int>(nodeType) << "\n";
+    oss << "  name: " << name << "\n";
+    oss << "  line: " << line << ", column: " << column << "\n";
+    oss << "  attributes: " << attributes.size() << "\n";
+    oss << "  children: " << children.size() << "\n";
+    oss << "}";
     return oss.str();
+}
+
+// 内存管理实现
+std::shared_ptr<BaseNode> BaseNode::createNode(NodeType type, const std::string& name) {
+    // 尝试从对象池获取
+    if (!nodePool.empty()) {
+        auto node = std::move(nodePool.back());
+        nodePool.pop_back();
+        poolSize--;
+        
+        // 重置节点状态
+        node->nodeType = type;
+        node->name = name;
+        node->line = 0;
+        node->column = 0;
+        node->position = 0;
+        node->attributes.clear();
+        node->children.clear();
+        node->parent.reset();
+        
+        return std::shared_ptr<BaseNode>(node.release(), [](BaseNode* n) {
+            returnNode(std::shared_ptr<BaseNode>(n));
+        });
+    }
+    
+    // 创建新节点
+    return std::shared_ptr<BaseNode>(new BaseNode(type, name), [](BaseNode* n) {
+        returnNode(std::shared_ptr<BaseNode>(n));
+    });
+}
+
+void BaseNode::returnNode(std::shared_ptr<BaseNode> node) {
+    if (!node) return;
+    
+    // 清理节点状态
+    node->attributes.clear();
+    node->children.clear();
+    node->parent.reset();
+    
+    // 如果对象池未满，回收节点
+    if (poolSize < MAX_POOL_SIZE) {
+        nodePool.push_back(std::unique_ptr<BaseNode>(node.get()));
+        poolSize++;
+    }
+    // 否则让节点自然销毁
+}
+
+void BaseNode::clearPool() {
+    nodePool.clear();
+    poolSize = 0;
+}
+
+BaseNode::MemoryStats BaseNode::getMemoryStats() {
+    MemoryStats stats;
+    stats.poolNodes = poolSize;
+    stats.totalNodes = poolSize; // 简化实现
+    stats.activeNodes = stats.totalNodes - stats.poolNodes;
+    stats.memoryUsage = sizeof(BaseNode) * stats.totalNodes;
+    return stats;
 }
 
 } // namespace CHTL

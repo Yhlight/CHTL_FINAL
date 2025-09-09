@@ -50,6 +50,11 @@ protected:
     size_t column;
     size_t position;
     
+    // 内存优化：使用对象池
+    static std::vector<std::unique_ptr<BaseNode>> nodePool;
+    static size_t poolSize;
+    static const size_t MAX_POOL_SIZE = 1000;
+    
 public:
     BaseNode(NodeType type, const std::string& name = "");
     virtual ~BaseNode() = default;
@@ -112,6 +117,23 @@ public:
     
     // 调试方法
     virtual std::string debugString() const;
+    
+    // 内存管理
+    static std::shared_ptr<BaseNode> createNode(NodeType type, const std::string& name = "");
+    static void returnNode(std::shared_ptr<BaseNode> node);
+    static void clearPool();
+    static size_t getPoolSize() { return poolSize; }
+    static size_t getMaxPoolSize() { return MAX_POOL_SIZE; }
+    
+    // 内存统计
+    struct MemoryStats {
+        size_t totalNodes;
+        size_t poolNodes;
+        size_t activeNodes;
+        size_t memoryUsage;
+    };
+    
+    static MemoryStats getMemoryStats();
 };
 
 // 访问者模式基类

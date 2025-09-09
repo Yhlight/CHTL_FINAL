@@ -62,19 +62,64 @@ bool CHTLParser::check(const std::string& value) const {
 }
 
 void CHTLParser::throwError(const std::string& message) const {
-    tokens.throwError(message);
+    std::ostringstream oss;
+    oss << "Parse Error at line " << peek().line 
+        << ", column " << peek().column << ": " << message;
+    
+    // 添加上下文信息
+    if (!nodeStack.empty()) {
+        auto currentNode = nodeStack.back();
+        oss << " (in " << currentNode->getName() << " context)";
+    }
+    
+    // 添加建议
+    if (message.find("Expected") != std::string::npos) {
+        oss << "\nSuggestion: Check syntax and ensure proper nesting";
+    }
+    
+    throw std::runtime_error(oss.str());
 }
 
 void CHTLParser::synchronize() {
-    // 同步到下一个安全位置
+    // 改进的同步机制，提供更好的错误恢复
+    int braceLevel = 0;
+    int parenLevel = 0;
+    int bracketLevel = 0;
+    
     while (!isAtEnd()) {
-        if (peek().type == TokenType::SEMICOLON) {
-            consume();
-            break;
-        }
+        Token current = peek();
         
-        if (peek().type == TokenType::RIGHT_BRACE) {
-            break;
+        // 跟踪括号层级
+        switch (current.type) {
+            case TokenType::LEFT_BRACE:
+                braceLevel++;
+                break;
+            case TokenType::RIGHT_BRACE:
+                braceLevel--;
+                if (braceLevel <= 0) {
+                    return; // 找到匹配的右括号
+                }
+                break;
+            case TokenType::LEFT_PAREN:
+                parenLevel++;
+                break;
+            case TokenType::RIGHT_PAREN:
+                parenLevel--;
+                break;
+            case TokenType::LEFT_BRACKET:
+                bracketLevel++;
+                break;
+            case TokenType::RIGHT_BRACKET:
+                bracketLevel--;
+                break;
+            case TokenType::SEMICOLON:
+                if (braceLevel == 0 && parenLevel == 0 && bracketLevel == 0) {
+                    consume();
+                    return;
+                }
+                break;
+            default:
+                break;
         }
         
         consume();
@@ -117,6 +162,11 @@ std::shared_ptr<BaseNode> CHTLParser::parseHTMLElement() {
     Token elementToken = consume();
     std::string elementName = elementToken.value;
     
+    // 验证元素名
+    if (!isValidElementName(elementName)) {
+        throwError("Invalid element name: " + elementName);
+    }
+    
     auto element = std::make_shared<ElementNode>(elementName);
     element->setPosition(elementToken.line, elementToken.column, elementToken.position);
     
@@ -126,21 +176,27 @@ std::shared_ptr<BaseNode> CHTLParser::parseHTMLElement() {
     // 检查是否有子内容
     if (match(TokenType::LEFT_BRACE)) {
         consume(); // 跳过 {
+        pushNode(element); // 推入上下文栈
         
         // 解析子节点
         while (!isAtEnd() && !match(TokenType::RIGHT_BRACE)) {
             std::shared_ptr<BaseNode> child = parseElement();
             if (child) {
                 element->addChild(child);
+                child->setParent(element);
             } else {
+                // 尝试同步到下一个安全位置
+                synchronize();
                 break;
             }
         }
         
+        popNode(); // 弹出上下文栈
+        
         if (match(TokenType::RIGHT_BRACE)) {
             consume(); // 跳过 }
         } else {
-            throwError("Expected '}' to close element");
+            throwError("Expected '}' to close element '" + elementName + "'");
         }
     }
     
@@ -492,6 +548,178 @@ bool CHTLParser::isValidTemplateName(const std::string& name) const {
     }
     
     return true;
+}
+
+// 实现缺失的解析方法
+std::shared_ptr<BaseNode> CHTLParser::parseStyle() {
+    Token styleToken = consume();
+    
+    auto styleNode = std::make_shared<BaseNode>(NodeType::STYLE, "style");
+    styleNode->setPosition(styleToken.line, styleToken.column, styleToken.position);
+    
+    if (match(TokenType::LEFT_BRACE)) {
+        consume(); // 跳过 {
+        
+        std::string content;
+        int braceLevel = 1;
+        bool inString = false;
+        char stringDelimiter = '\0';
+        
+        while (!isAtEnd() && braceLevel > 0) {
+            Token token = consume();
+            
+            if (inString) {
+                if (token.type == TokenType::STRING && token.value[0] == stringDelimiter) {
+                    inString = false;
+                    stringDelimiter = '\0';
+                }
+            } else {
+                if (token.type == TokenType::STRING) {
+                    inString = true;
+                    stringDelimiter = token.value[0];
+                } else if (token.type == TokenType::LEFT_BRACE) {
+                    braceLevel++;
+                } else if (token.type == TokenType::RIGHT_BRACE) {
+                    braceLevel--;
+                }
+            }
+            
+            if (braceLevel > 0) {
+                content += token.value;
+            }
+        }
+        
+        styleNode->setAttribute("content", content);
+    }
+    
+    return styleNode;
+}
+
+std::shared_ptr<BaseNode> CHTLParser::parseScript() {
+    Token scriptToken = consume();
+    
+    auto scriptNode = std::make_shared<BaseNode>(NodeType::SCRIPT, "script");
+    scriptNode->setPosition(scriptToken.line, scriptToken.column, scriptToken.position);
+    
+    if (match(TokenType::LEFT_BRACE)) {
+        consume(); // 跳过 {
+        
+        std::string content;
+        int braceLevel = 1;
+        bool inString = false;
+        char stringDelimiter = '\0';
+        
+        while (!isAtEnd() && braceLevel > 0) {
+            Token token = consume();
+            
+            if (inString) {
+                if (token.type == TokenType::STRING && token.value[0] == stringDelimiter) {
+                    inString = false;
+                    stringDelimiter = '\0';
+                }
+            } else {
+                if (token.type == TokenType::STRING) {
+                    inString = true;
+                    stringDelimiter = token.value[0];
+                } else if (token.type == TokenType::LEFT_BRACE) {
+                    braceLevel++;
+                } else if (token.type == TokenType::RIGHT_BRACE) {
+                    braceLevel--;
+                }
+            }
+            
+            if (braceLevel > 0) {
+                content += token.value;
+            }
+        }
+        
+        scriptNode->setAttribute("content", content);
+    }
+    
+    return scriptNode;
+}
+
+std::shared_ptr<BaseNode> CHTLParser::parseOperator() {
+    Token opToken = peek();
+    
+    if (opToken.value == "delete") {
+        return parseDeleteOperator();
+    } else if (opToken.value == "insert") {
+        return parseInsertOperator();
+    } else if (opToken.value == "inherit") {
+        return parseInheritOperator();
+    }
+    
+    return nullptr;
+}
+
+std::shared_ptr<BaseNode> CHTLParser::parseDeleteOperator() {
+    Token deleteToken = consume();
+    
+    auto deleteNode = std::make_shared<BaseNode>(NodeType::OPERATOR, "delete");
+    deleteNode->setPosition(deleteToken.line, deleteToken.column, deleteToken.position);
+    
+    // 解析要删除的目标
+    while (!isAtEnd() && !match(TokenType::SEMICOLON) && !match(TokenType::RIGHT_BRACE)) {
+        if (match(TokenType::IDENTIFIER)) {
+            Token targetToken = consume();
+            deleteNode->setAttribute("target", targetToken.value);
+        } else if (match(TokenType::COMMA)) {
+            consume(); // 跳过逗号
+        } else {
+            break;
+        }
+    }
+    
+    return deleteNode;
+}
+
+std::shared_ptr<BaseNode> CHTLParser::parseInsertOperator() {
+    Token insertToken = consume();
+    
+    auto insertNode = std::make_shared<BaseNode>(NodeType::OPERATOR, "insert");
+    insertNode->setPosition(insertToken.line, insertToken.column, insertToken.position);
+    
+    // 解析插入位置
+    if (match(TokenType::IDENTIFIER)) {
+        Token positionToken = consume();
+        insertNode->setAttribute("position", positionToken.value);
+    }
+    
+    // 解析插入内容
+    if (match(TokenType::LEFT_BRACE)) {
+        consume(); // 跳过 {
+        
+        while (!isAtEnd() && !match(TokenType::RIGHT_BRACE)) {
+            std::shared_ptr<BaseNode> child = parseElement();
+            if (child) {
+                insertNode->addChild(child);
+            } else {
+                break;
+            }
+        }
+        
+        if (match(TokenType::RIGHT_BRACE)) {
+            consume(); // 跳过 }
+        }
+    }
+    
+    return insertNode;
+}
+
+std::shared_ptr<BaseNode> CHTLParser::parseInheritOperator() {
+    Token inheritToken = consume();
+    
+    auto inheritNode = std::make_shared<BaseNode>(NodeType::OPERATOR, "inherit");
+    inheritNode->setPosition(inheritToken.line, inheritToken.column, inheritToken.position);
+    
+    // 解析继承的目标
+    if (match(TokenType::IDENTIFIER)) {
+        Token targetToken = consume();
+        inheritNode->setAttribute("target", targetToken.value);
+    }
+    
+    return inheritNode;
 }
 
 } // namespace CHTL

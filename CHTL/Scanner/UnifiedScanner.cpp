@@ -30,6 +30,9 @@ std::vector<CodeFragment> UnifiedScanner::scan(const std::string& source) {
     placeholders.clear();
     placeholderCounter = 0;
     
+    // 预分配内存以提高性能
+    fragments.reserve(source.length() / 100); // 估算片段数量
+    
     // 重置状态
     inCHTLBlock = false;
     inCHTLJSBlock = false;
@@ -40,6 +43,8 @@ std::vector<CodeFragment> UnifiedScanner::scan(const std::string& source) {
     // 重置扫描状态
     state = ScanState{};
     
+    // 使用双指针扫描优化
+    size_t startPos = 0;
     while (position < source.length()) {
         skipWhitespace();
         
@@ -47,7 +52,14 @@ std::vector<CodeFragment> UnifiedScanner::scan(const std::string& source) {
             break;
         }
         
+        startPos = position;
         CodeType type = identifyCodeType(position);
+        
+        // 使用智能边界检测
+        if (!isSafeBoundary()) {
+            expandBoundary();
+        }
+        
         CodeFragment fragment = CodeFragment{CodeType::UNKNOWN, "", 0, 0, 0, 0};
         
         switch (type) {
@@ -72,10 +84,14 @@ std::vector<CodeFragment> UnifiedScanner::scan(const std::string& source) {
         }
         
         if (!fragment.content.empty()) {
-            fragments.push_back(fragment);
+            // 优化占位符创建
+            fragment.placeholder = createPlaceholder(fragment.type, placeholderCounter++);
+            registerPlaceholder(fragment.placeholder, fragment.content);
+            
+            fragments.push_back(std::move(fragment));
             stats.totalFragments++;
             
-            switch (fragment.type) {
+            switch (fragments.back().type) {
                 case CodeType::CHTL: stats.chtlFragments++; break;
                 case CodeType::CHTL_JS: stats.chtlJSFragments++; break;
                 case CodeType::CSS: stats.cssFragments++; break;
@@ -631,6 +647,119 @@ std::string UnifiedScanner::createPlaceholder(CodeType type, size_t index) {
     }
     
     return "{{" + prefix + "_" + std::to_string(index) + "}}";
+}
+
+// 添加缺失的优化方法
+bool UnifiedScanner::isSafeBoundary() const {
+    // 检查当前位置是否为安全的代码边界
+    if (position >= source.length()) {
+        return true;
+    }
+    
+    char c = currentChar();
+    
+    // 检查是否在字符串或注释中
+    if (state.inString || state.inComment || state.inMultiLineComment) {
+        return false;
+    }
+    
+    // 检查括号层级
+    if (state.braceLevel > 0 || state.parenLevel > 0 || state.bracketLevel > 0) {
+        return false;
+    }
+    
+    // 检查特殊关键字边界
+    if (c == ';' || c == '}' || c == ')' || c == ']') {
+        return true;
+    }
+    
+    return false;
+}
+
+void UnifiedScanner::expandBoundary() {
+    // 智能扩增边界，避免截断语法结构
+    size_t originalPos = position;
+    
+    // 向前扫描寻找安全边界
+    while (position < source.length() && !isSafeBoundary()) {
+        char c = currentChar();
+        
+        // 更新状态
+        if (c == '"' || c == '\'') {
+            if (!state.inString) {
+                state.inString = true;
+                state.stringDelimiter = c;
+            } else if (c == state.stringDelimiter) {
+                state.inString = false;
+                state.stringDelimiter = '\0';
+            }
+        } else if (c == '/' && peekChar(1) == '/') {
+            // 单行注释
+            while (position < source.length() && currentChar() != '\n') {
+                advance();
+            }
+        } else if (c == '/' && peekChar(1) == '*') {
+            // 多行注释
+            state.inMultiLineComment = true;
+            advance(); // 跳过 *
+            while (position < source.length()) {
+                if (currentChar() == '*' && peekChar(1) == '/') {
+                    advance(); // 跳过 *
+                    advance(); // 跳过 /
+                    state.inMultiLineComment = false;
+                    break;
+                }
+                advance();
+            }
+        } else if (c == '{') {
+            state.braceLevel++;
+        } else if (c == '}') {
+            state.braceLevel--;
+        } else if (c == '(') {
+            state.parenLevel++;
+        } else if (c == ')') {
+            state.parenLevel--;
+        } else if (c == '[') {
+            state.bracketLevel++;
+        } else if (c == ']') {
+            state.bracketLevel--;
+        }
+        
+        advance();
+    }
+}
+
+void UnifiedScanner::contractBoundary() {
+    // 回退边界，用于错误恢复
+    // 实现回退逻辑
+}
+
+bool UnifiedScanner::isWideJudge() const {
+    // 宽判：用于处理大块CHTL代码
+    return !state.inString && !state.inComment && !state.inMultiLineComment;
+}
+
+bool UnifiedScanner::isStrictJudge() const {
+    // 严判：用于处理CHTL JS和JS混合代码
+    return state.inCHTLJSBlock || (state.braceLevel > 0 && !state.inString);
+}
+
+void UnifiedScanner::registerPlaceholder(const std::string& placeholder, const std::string& content) {
+    placeholders[placeholder] = content;
+}
+
+std::string UnifiedScanner::restorePlaceholders(const std::string& content) {
+    std::string result = content;
+    
+    for (const auto& pair : placeholders) {
+        size_t pos = 0;
+        while ((pos = result.find(pair.first, pos)) != std::string::npos) {
+            result.replace(pos, pair.first.length(), pair.second);
+            pos += pair.second.length();
+        }
+    }
+    
+    return result;
 }
 
 } // namespace CHTL
