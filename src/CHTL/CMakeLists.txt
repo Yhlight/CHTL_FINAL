@@ -20,6 +20,10 @@ add_library(CHTLCore STATIC
     CHTLModule.cpp
     CHTLScanner.cpp
     CHTLCli.cpp
+    CHTLCJMODAPI.cpp
+    CHTLCJMODAPIGenerator.cpp
+    CHTLCJMODAPIManager.cpp
+    CHTLTesting.cpp
 )
 
 target_include_directories(CHTLCore PUBLIC
