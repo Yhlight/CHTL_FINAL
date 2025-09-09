@@ -1,0 +1,10 @@
+div {
+    id: app;
+    h1 {
+        class: title;
+        text { "CHTL Compiler Test" }
+    }
+    p {
+        text { "This file was compiled by the CHTL CLI." }
+    }
+}

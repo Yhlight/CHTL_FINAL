@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = [
+    "chthl_cli",
+    "crates/chthl",
+    "crates/chthl_js",
+    "crates/chthl_scanner",
+    "crates/chthl_dispatcher",
+    "crates/chthl_merger",
+    "crates/chthl_utils",
+    "crates/chthl_test"
+]
+
+[workspace.dependencies]
+# Common dependencies will be added here later.
