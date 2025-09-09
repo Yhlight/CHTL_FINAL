@@ -25,8 +25,6 @@ impl Generator {
             return body_html;
         }
 
-        // Simple and naive wrapping for now. A more robust solution would
-        // find/create the head tag.
         format!(
             "<head>\n  <style>\n{}\n  </style>\n</head>\n{}",
             self.global_css, body_html
@@ -43,56 +41,32 @@ impl Generator {
     }
 
     fn generate_element_node(&mut self, element: &ElementNode, indent: usize) -> String {
-        let self_closing_tags: &[&str] = &[
-            "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param",
-            "source", "track", "wbr",
-        ];
-
+        let self_closing_tags: &[&str] = &["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"];
         let mut attributes = Vec::new();
         let mut classes = HashSet::new();
         let mut id = None;
         let mut inline_styles = Vec::new();
 
-        // Process explicit attributes
         for attr in &element.attributes {
             let value_str = match &attr.value {
-                Expression::Ident(s) => s,
-                Expression::StringLiteral(s) => s,
+                Expression::Ident(s) | Expression::StringLiteral(s) => s,
             };
-
             match attr.name.as_str() {
-                "class" => {
-                    classes.extend(value_str.split_whitespace().map(String::from));
-                }
-                "id" => {
-                    id = Some(value_str.clone());
-                }
-                _ => {
-                    attributes.push(format!("{}=\"{}\"", attr.name, value_str));
-                }
+                "class" => { classes.extend(value_str.split_whitespace().map(String::from)); }
+                "id" => { id = Some(value_str.clone()); }
+                _ => { attributes.push(format!("{}=\"{}\"", attr.name, value_str)); }
             }
         }
 
-        // Process style nodes for inline styles, global rules, and automatic attributes
-        let style_nodes: Vec<_> = element
-            .children
-            .iter()
-            .filter_map(|c| match c {
-                Node::Style(sn) => Some(sn),
-                _ => None,
-            })
-            .collect();
+        let style_nodes: Vec<_> = element.children.iter().filter_map(|c| match c {
+            Node::Style(sn) => Some(sn), _ => None,
+        }).collect();
 
-        // --- Context Deduction: First Pass ---
-        // Find the primary selector to provide context for `&`. Class has priority.
         let mut context_selector: Option<String> = None;
         for sn in &style_nodes {
             for rule in &sn.rules {
                 let selector = rule.selector.trim();
-                if selector.starts_with('.') {
-                    context_selector = Some(selector.to_string());
-                    break;
-                }
+                if selector.starts_with('.') { context_selector = Some(selector.to_string()); break; }
             }
             if context_selector.is_some() { break; }
         }
@@ -100,40 +74,25 @@ impl Generator {
             for sn in &style_nodes {
                 for rule in &sn.rules {
                     let selector = rule.selector.trim();
-                    if selector.starts_with('#') {
-                        context_selector = Some(selector.to_string());
-                        break;
-                    }
+                    if selector.starts_with('#') { context_selector = Some(selector.to_string()); break; }
                 }
                 if context_selector.is_some() { break; }
             }
         }
 
-        // --- Second Pass ---
-        // Collect all styles and rules, applying context deduction.
         for sn in &style_nodes {
-            // Collect inline properties
             for prop in &sn.inline_properties {
                 inline_styles.push(format!("{}: {};", prop.name, prop.value));
             }
-            // Collect global rules and auto-apply classes/ids
             for rule in &sn.rules {
                 let mut selector = rule.selector.trim().to_string();
-
-                // Auto-apply class/id
-                if let Some(class_name) = selector.strip_prefix('.') {
-                    classes.insert(class_name.to_string());
-                } else if let Some(id_name) = selector.strip_prefix('#') {
-                    id = Some(id_name.to_string());
-                }
-
-                // Perform context deduction for '&'
+                if let Some(class_name) = selector.strip_prefix('.') { classes.insert(class_name.to_string()); }
+                else if let Some(id_name) = selector.strip_prefix('#') { id = Some(id_name.to_string()); }
                 if selector.starts_with('&') {
                     if let Some(ctx_selector) = &context_selector {
                        selector = selector.replacen('&', ctx_selector, 1);
                     }
                 }
-
                 let properties_str = rule.properties.iter()
                     .map(|p| format!("  {}: {};\n", p.name, p.value))
                     .collect::<String>();
@@ -143,25 +102,15 @@ impl Generator {
 
         let mut tag = format!("<{}", element.tag_name);
 
-        // Assemble final attributes
-        if let Some(id_val) = id {
-            tag.push_str(&format!(" id=\"{}\"", id_val));
-        }
+        if let Some(id_val) = id { tag.push_str(&format!(" id=\"{}\"", id_val)); }
         if !classes.is_empty() {
             let class_list = classes.into_iter().collect::<Vec<_>>().join(" ");
             tag.push_str(&format!(" class=\"{}\"", class_list));
         }
-        for attr in attributes {
-            tag.push_str(&format!(" {}", attr));
-        }
-        if !inline_styles.is_empty() {
-            tag.push_str(&format!(" style=\"{}\"", inline_styles.join(" ")));
-        }
+        for attr in attributes { tag.push_str(&format!(" {}", attr)); }
+        if !inline_styles.is_empty() { tag.push_str(&format!(" style=\"{}\"", inline_styles.join(" "))); }
 
-        if self_closing_tags.contains(&element.tag_name.as_str()) {
-            tag.push('>');
-            return tag;
-        }
+        if self_closing_tags.contains(&element.tag_name.as_str()) { tag.push('>'); return tag; }
         tag.push('>');
 
         let mut children_html = String::new();
@@ -212,7 +161,7 @@ mod tests {
         let lexer = Lexer::new(input);
         let mut parser = Parser::new(lexer);
         let program = parser.parse_program();
-        assert!(parser.errors().is_empty(), "{:?}", parser.errors());
+        assert!(parser.errors.is_empty(), "{:?}", parser.errors);
 
         let mut generator = Generator::new();
         let html = generator.generate_program(&program);

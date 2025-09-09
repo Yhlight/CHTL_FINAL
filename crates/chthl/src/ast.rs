@@ -8,14 +8,12 @@ pub struct Program {
 }
 
 /// A unifying enum to represent any kind of node in the AST.
-/// This allows for heterogeneous lists of children in elements.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Node {
     Element(ElementNode),
     Text(TextNode),
     Comment(CommentNode),
     Style(StyleNode),
-    // More node types will be added here in later phases, e.g., Template, Custom.
 }
 
 /// Represents a local style block, e.g., `style { ... }`.
@@ -36,12 +34,10 @@ pub struct CssRuleNode {
 #[derive(Debug, PartialEq, Clone)]
 pub struct StyleProperty {
     pub name: String,
-    // For now, the value is a single string. This will be expanded later for expressions.
-    pub value: String,
+    pub value: String, // Reverted to String for stability
 }
 
-/// Represents an expression. For now, this is used for attribute values, which can
-/// be identifiers (unquoted literals) or strings (quoted literals).
+/// Represents an expression, used for attribute values.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
     Ident(String),
@@ -70,7 +66,6 @@ pub struct TextNode {
 }
 
 /// Represents a generator-aware comment, e.g., `-- a comment`.
-/// Normal comments (`//`, `/* */`) are discarded by the lexer.
 #[derive(Debug, PartialEq, Clone)]
 pub struct CommentNode {
     pub value: String,

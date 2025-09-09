@@ -68,13 +68,12 @@ impl<'a> Lexer<'a> {
             b'<' => { self.read_char(); Token::Lt }
             b'&' if self.peek_char() == b'&' => { self.read_char(); self.read_char(); Token::LogicalAnd }
             b'|' if self.peek_char() == b'|' => { self.read_char(); self.read_char(); Token::LogicalOr }
-            // Multi-character tokens must be checked BEFORE single-character fallbacks
             b'-' if self.peek_char() == b'>' => { self.read_char(); self.read_char(); Token::Arrow }
             b'-' if self.peek_char() == b'-' => { self.read_char(); self.read_char(); Token::GeneratorComment(self.read_comment_line()) }
-            b'-' => { self.read_char(); Token::Illegal("-".to_string()) } // `-` by itself is not a valid operator yet
+            b'-' => { self.read_char(); Token::Illegal("-".to_string()) }
             b'/' if self.peek_char() == b'/' => { self.read_comment_line(); self.next_token() }
             b'/' if self.peek_char() == b'*' => { self.read_multiline_comment(); self.next_token() }
-            b'/' => { self.read_char(); Token::Illegal("/".to_string()) } // `/` by itself is not a valid operator yet
+            b'/' => { self.read_char(); Token::Illegal("/".to_string()) }
             b'&' => { self.read_char(); Token::Ampersand }
             b'"' | b'\'' => {
                 let quote = self.ch;
@@ -141,8 +140,6 @@ impl<'a> Lexer<'a> {
     }
 }
 
-// An identifier in CHTL is very flexible, especially for unquoted values.
-// It's easier to define it by what it's *not*.
 fn is_identifier_char(ch: u8) -> bool {
     !ch.is_ascii_whitespace() && !b"={}[];,:@#&|?<>\"'".contains(&ch) && ch != 0
 }
