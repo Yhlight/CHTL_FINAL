@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG -Xlinker --dependency-file=CMakeFiles/chtl_test.dir/link.d CMakeFiles/chtl_test.dir/test_main.cpp.o -o chtl_test  ../libchtl_lib.a
