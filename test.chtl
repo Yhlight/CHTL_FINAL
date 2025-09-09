@@ -1,0 +1,18 @@
+// CHTL test file
+[Template] @Style TestStyle {
+    color: red;
+    background: blue;
+}
+
+div {
+    @TestStyle
+    text: "Hello World";
+    
+    span {
+        text: 'Nested element';
+    }
+}
+
+[Custom] @Style CustomStyle : TestStyle {
+    font-size: 16px;
+}

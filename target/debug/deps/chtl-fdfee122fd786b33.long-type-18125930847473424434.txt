@@ -1,0 +1,1 @@
+HashMap<CodeType, Box<dyn for<'a, 'b> Fn(&'a str, &'b str) -> std::string::String>>
