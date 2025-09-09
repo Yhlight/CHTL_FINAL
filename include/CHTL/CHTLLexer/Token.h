@@ -112,6 +112,51 @@ enum class TokenType {
     CHANGE,             // change
     THEN,               // then
     PRINTMYLOVE,        // printMylove
+    
+    // 新增令牌类型
+    HTML5,              // html5
+    CONFIG,             // @Config
+    CMOD,               // @Cmod
+    CJMOD,              // @CJmod
+    CJJS,               // .cjjs
+    CJS,                // .cjs
+    CJJ,                // .cjj
+    CJJMOD,             // .cjjmod
+    CMOD_FILE,          // .cmod
+    
+    // 配置相关
+    DISABLE,            // disable
+    ENABLE,             // enable
+    NAME,               // name
+    OPTION,             // option
+    COUNT,              // count
+    GROUP,              // group
+    
+    // 约束相关
+    CONSTRAINT,         // constraint
+    RESTRICT,           // restrict
+    ALLOW,              // allow
+    DENY,               // deny
+    
+    // 原始嵌入类型
+    VUE,                // @Vue
+    MARKDOWN,           // @Markdown
+    TYPESCRIPT,         // @TypeScript
+    PYTHON,             // @Python
+    JAVA,               // @Java
+    CPP,                // @Cpp
+    RUST,               // @Rust
+    
+    // 特殊语法
+    DOUBLE_CURLY,       // {{
+    TRIPLE_DOT,         // ...
+    ARROW,              // ->
+    DOUBLE_COLON,       // ::
+    PIPE,               // |
+    TILDE,              // ~
+    CARET,              // ^
+    BACKTICK,           // `
+    UNDERSCORE,         // _
 };
 
 /**

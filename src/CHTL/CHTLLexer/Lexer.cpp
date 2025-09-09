@@ -17,7 +17,16 @@ void Lexer::initializeKeywords() {
         "namespace", "configuration", "info", "export", "delete", "insert",
         "inherit", "except", "use", "from", "as", "after", "before", "replace",
         "at", "top", "bottom", "vir", "listen", "animate", "router", "fileloader",
-        "delegate", "iNeverAway", "util", "change", "then", "printMylove"
+        "delegate", "iNeverAway", "util", "change", "then", "printMylove",
+        // 新增关键字
+        "html5", "config", "cmod", "cjmod", "chtl", "javascript", "html",
+        "element", "var", "css", "js", "cjs", "cjj", "cjjmod", "cmod",
+        // 配置相关
+        "disable", "enable", "name", "option", "count", "group",
+        // 约束相关
+        "constraint", "restrict", "allow", "deny",
+        // 原始嵌入类型
+        "vue", "markdown", "typescript", "python", "java", "cpp", "rust"
     };
     
     // 操作符
