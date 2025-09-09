@@ -4,13 +4,13 @@ from Scanner.CHTLUnifiedScanner import CHTLUnifiedScanner
 from CompilerDispatcher.dispatcher import CompilerDispatcher
 
 
-def compile_chtl(source_code: str, use_default_structure: bool = True) -> str:
+def compile_chtl(source_code: str, source_file_path: str, use_default_structure: bool = True) -> str:
     """
     Runs the full CHTL compilation pipeline using the scanner and dispatcher.
     """
     scanner = CHTLUnifiedScanner(source_code)
     fragments = scanner.scan()
-    dispatcher = CompilerDispatcher(fragments)
+    dispatcher = CompilerDispatcher(fragments, current_file_path=source_file_path)
     dispatcher.dispatch()
     final_html = dispatcher.merge_outputs(use_default_structure=use_default_structure)
     return final_html
@@ -43,7 +43,7 @@ def main():
         with open(args.input_file, 'r', encoding='utf-8') as f:
             source_code = f.read()
 
-        html_output = compile_chtl(source_code, use_default_structure=not args.no_struct)
+        html_output = compile_chtl(source_code, source_file_path=args.input_file, use_default_structure=not args.no_struct)
 
         if args.output:
             with open(args.output, 'w', encoding='utf-8') as f:

@@ -1,10 +1,10 @@
+import os
 import copy
 from typing import List, Union, Any
 from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLParser.parser import Parser
 from CHTL.CHTLLexer.lexer import Lexer
-from CHTL.CHTLParser.parser import Parser
-from CHTL.CHTLLexer.lexer import Lexer
+from CHTL.CHTLUtils.module_resolver import ModuleResolver
 from CHTL.CHTLNode.nodes import (
     BaseNode, DocumentNode, ElementNode, TextNode, CommentNode, StyleNode, Node,
     TemplateDefinitionNode, CustomDefinitionNode, TemplateUsageNode, CssRuleNode, CssPropertyNode,
@@ -12,9 +12,11 @@ from CHTL.CHTLNode.nodes import (
 )
 
 class ASTTransformer:
-    def __init__(self, ast: DocumentNode, context: CompilationContext):
+    def __init__(self, ast: DocumentNode, context: CompilationContext, current_file_path: str, official_module_dir: str = './modules'):
         self.ast = ast
         self.context = context
+        self.current_file_path = current_file_path
+        self.official_module_dir = official_module_dir
 
     def transform(self) -> DocumentNode:
         return self.visit(self.ast)
@@ -51,11 +53,27 @@ class ASTTransformer:
         return None
 
     def visit_ImportNode(self, node: ImportNode) -> None:
+        resolver = ModuleResolver(
+            official_module_dir=self.official_module_dir,
+            current_file_path=self.current_file_path
+        )
+        resolved_path = resolver.resolve(node.path)
+
+        if not resolved_path:
+            raise RuntimeError(f"Could not resolve import '{node.path}' from '{self.current_file_path}'")
+
+        # Determine the namespace for this import
+        if node.alias:
+            namespace = node.alias
+        else:
+            # Default namespace is the filename without extension
+            namespace = os.path.splitext(os.path.basename(resolved_path))[0]
+
         try:
-            with open(node.path, 'r', encoding='utf-8') as f:
+            with open(resolved_path, 'r', encoding='utf-8') as f:
                 source_code = f.read()
         except FileNotFoundError:
-            raise RuntimeError(f"Imported file not found: {node.path}")
+            raise RuntimeError(f"Imported file not found at resolved path: {resolved_path}")
 
         # Create a new context for the imported file to avoid pollution
         import_context = CompilationContext()
@@ -64,21 +82,22 @@ class ASTTransformer:
         parser = Parser(tokens, import_context)
         import_ast = parser.parse()
 
-        # Now, we need to extract the definitions from the imported AST
-        # and add them to our main context.
+        # Extract definitions and add them to the main context under the correct namespace
         for def_node in import_ast.children:
             if isinstance(def_node, TemplateDefinitionNode):
-                # For now, we'll just handle element templates
                 if def_node.template_type == 'Element':
-                    # TODO: Handle namespaces from import aliases/file names
-                    self.context.add_element_template(def_node.name, def_node.content)
-        return None # Import nodes are processed and removed from the final AST
+                    self.context.add_element_template(def_node.name, def_node.content, namespace=namespace)
+                elif def_node.template_type == 'Style':
+                    self.context.add_style_template(def_node.name, def_node.content, namespace=namespace)
+                elif def_node.template_type == 'Var':
+                    self.context.add_var_template(def_node.name, def_node.content, namespace=namespace)
+        return None
 
     def visit_TemplateUsageNode(self, node: TemplateUsageNode) -> List[BaseNode]:
         if node.template_type == 'Element':
-            template_content = self.context.get_element_template(node.name)
+            template_content = self.context.get_element_template(node.name, namespace=node.from_namespace)
         elif node.template_type == 'Style':
-            template_content = self.context.get_style_template(node.name)
+            template_content = self.context.get_style_template(node.name, namespace=node.from_namespace)
         else:
             return []
         if not template_content:
@@ -86,7 +105,15 @@ class ASTTransformer:
         return copy.deepcopy(template_content)
 
     def visit_CustomUsageNode(self, node: CustomUsageNode) -> List[BaseNode]:
-        expanded_nodes = self.visit_TemplateUsageNode(node)
+        # Create a temporary TemplateUsageNode to expand the base template.
+        # Custom usage does not support 'from', so namespace is always None here.
+        temp_usage_node = TemplateUsageNode(
+            template_type=node.template_type,
+            name=node.name,
+            from_namespace=None,
+            lineno=node.lineno
+        )
+        expanded_nodes = self.visit_TemplateUsageNode(temp_usage_node)
 
         for rule in node.body:
             if isinstance(rule, DeleteNode):

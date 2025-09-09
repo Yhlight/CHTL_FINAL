@@ -171,10 +171,29 @@ class Parser:
         start_token = self.consume(TokenType.AT_SYMBOL)
         template_type_token = self.consume(TokenType.IDENTIFIER)
         template_name_token = self.consume(TokenType.IDENTIFIER)
+
+        from_namespace = None
+        if self.current_token().type == TokenType.FROM:
+            self.consume(TokenType.FROM)
+            # Namespaces can be dotted, e.g., space.room
+            namespace_parts = [self.consume(TokenType.IDENTIFIER).value]
+            while self.current_token().type == TokenType.DOT:
+                self.consume(TokenType.DOT)
+                namespace_parts.append(self.consume(TokenType.IDENTIFIER).value)
+            from_namespace = ".".join(namespace_parts)
+
         if self.current_token().type == TokenType.SEMICOLON:
             self.consume(TokenType.SEMICOLON)
-            return TemplateUsageNode(template_type=template_type_token.value, name=template_name_token.value, lineno=start_token.lineno)
+            return TemplateUsageNode(
+                template_type=template_type_token.value,
+                name=template_name_token.value,
+                from_namespace=from_namespace,
+                lineno=start_token.lineno
+            )
         else:
+            # Custom usage with 'from' is not specified, but we should handle it gracefully
+            if from_namespace:
+                raise RuntimeError(f"Line {start_token.lineno}: Custom usage with 'from' is not supported.")
             body = self.parse_custom_usage_body()
             return CustomUsageNode(template_type=template_type_token.value, name=template_name_token.value, body=body, lineno=start_token.lineno)
 

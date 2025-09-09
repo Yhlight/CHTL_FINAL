@@ -14,7 +14,7 @@ class TestGenerator(unittest.TestCase):
         tokens = lexer.tokenize()
         parser = Parser(tokens, context)
         ast = parser.parse()
-        transformer = ASTTransformer(ast, context)
+        transformer = ASTTransformer(ast, context, "test.chtl")
         transformed_ast = transformer.transform()
         generator = HTMLGenerator(transformed_ast)
         return generator.generate(use_default_structure=use_default_structure)

@@ -114,6 +114,7 @@ class CssRuleNode(BaseNode):
 class TemplateUsageNode(BaseNode):
     template_type: str
     name: str
+    from_namespace: Optional[str] = None
     lineno: int = 0
     parent: Optional['BaseNode'] = field(default=None, repr=False)
 

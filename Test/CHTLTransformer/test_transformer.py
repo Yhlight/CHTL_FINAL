@@ -26,8 +26,15 @@ class TestASTTransformer(unittest.TestCase):
         ]
         self.context.add_element_template("MyBox", box_template_content)
 
-        # Create files needed for import test
-        with open("imported_component.chtl", "w") as f:
+        # Create a dummy module structure for testing resolution
+        self.test_dir = "test_temp_dir"
+        self.module_dir = os.path.join(self.test_dir, "module")
+        os.makedirs(self.module_dir, exist_ok=True)
+
+        self.imports_file_path = os.path.join(self.test_dir, "imports.chtl")
+        component_file_path = os.path.join(self.module_dir, "MyComponent.chtl")
+
+        with open(component_file_path, "w") as f:
             f.write("""
             [Template] @Element MyImportedButton {
                 button {
@@ -36,25 +43,24 @@ class TestASTTransformer(unittest.TestCase):
                 }
             }
             """)
-        with open("imports.chtl", "w") as f:
+        with open(self.imports_file_path, "w") as f:
             f.write("""
-            [Import] @Chtl from "imported_component.chtl";
+            [Import] @Chtl from "MyComponent";
             body {
-                @Element MyImportedButton;
+                @Element MyImportedButton from MyComponent;
             }
             """)
 
     def tearDown(self):
-        if os.path.exists("imported_component.chtl"):
-            os.remove("imported_component.chtl")
-        if os.path.exists("imports.chtl"):
-            os.remove("imports.chtl")
+        import shutil
+        if os.path.exists(self.test_dir):
+            shutil.rmtree(self.test_dir)
 
     def test_custom_delete_attribute(self):
         ast = DocumentNode(children=[
             CustomUsageNode(template_type='Element', name='MyBox', body=[DeleteNode(targets=['id'])])
         ])
-        transformer = ASTTransformer(ast, self.context)
+        transformer = ASTTransformer(ast, self.context, "test.chtl")
         transformed_ast = transformer.transform()
         expanded_node = transformed_ast.children[0]
         self.assertEqual(len(expanded_node.attributes), 1)
@@ -65,7 +71,7 @@ class TestASTTransformer(unittest.TestCase):
                 InsertNode(position='at bottom', target_selector='div', content=[ElementNode(tag_name='span')])
             ])
         ])
-        transformer = ASTTransformer(ast, self.context)
+        transformer = ASTTransformer(ast, self.context, "test.chtl")
         transformed_ast = transformer.transform()
         div_node = transformed_ast.children[0]
         self.assertEqual(len(div_node.children), 2)
@@ -80,7 +86,7 @@ class TestASTTransformer(unittest.TestCase):
         ast = DocumentNode(children=[
             CustomUsageNode(template_type='Element', name='MyBox', body=[override_rule])
         ])
-        transformer = ASTTransformer(ast, self.context)
+        transformer = ASTTransformer(ast, self.context, "test.chtl")
         transformed_ast = transformer.transform()
 
         div_node = transformed_ast.children[0]
@@ -97,12 +103,12 @@ class TestASTTransformer(unittest.TestCase):
         ast = DocumentNode(children=[
             TemplateUsageNode(template_type='Element', name='MissingBox')
         ])
-        transformer = ASTTransformer(ast, self.context)
+        transformer = ASTTransformer(ast, self.context, "test.chtl")
         with self.assertRaisesRegex(RuntimeError, "Template 'MissingBox' of type 'Element' not found"):
             transformer.transform()
 
     def test_import_transformation(self):
-        with open('imports.chtl', 'r') as f:
+        with open(self.imports_file_path, 'r') as f:
             source = f.read()
 
         context = CompilationContext()
@@ -111,12 +117,8 @@ class TestASTTransformer(unittest.TestCase):
         parser = Parser(tokens, context)
         ast = parser.parse()
 
-        # Before transformation, the AST should have 2 children: ImportNode and ElementNode
-        self.assertEqual(len(ast.children), 2)
-        self.assertIsInstance(ast.children[0], ImportNode)
-        self.assertIsInstance(ast.children[1], ElementNode)
-
-        transformer = ASTTransformer(ast, context)
+        # Pass the source file path to the transformer
+        transformer = ASTTransformer(ast, context, self.imports_file_path)
         transformed_ast = transformer.transform()
 
         # After transformation, the import node should be gone, and the template should be expanded

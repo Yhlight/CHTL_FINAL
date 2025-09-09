@@ -6,8 +6,9 @@ from CHTL.CHTLGenerator.generator import HTMLGenerator
 from CHTL.CHTLContext.context import CompilationContext
 
 class CompilerDispatcher:
-    def __init__(self, fragments: list[CodeFragment]):
+    def __init__(self, fragments: list[CodeFragment], current_file_path: str):
         self.fragments = fragments
+        self.current_file_path = current_file_path
         self.context = CompilationContext()
         self.html_output = ""
         self.css_output = ""
@@ -38,7 +39,7 @@ class CompilerDispatcher:
         tokens = lexer.tokenize()
         parser = Parser(tokens, self.context)
         ast = parser.parse()
-        transformer = ASTTransformer(ast, self.context)
+        transformer = ASTTransformer(ast, self.context, self.current_file_path)
         transformed_ast = transformer.transform()
         generator = HTMLGenerator(transformed_ast)
 
