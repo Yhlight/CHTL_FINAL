@@ -27,10 +27,15 @@ find_package(Boost REQUIRED COMPONENTS filesystem system)
 add_subdirectory(src/CHTL)
 add_subdirectory(src/CHTL_JS)
 add_subdirectory(src/Scanner)
+add_subdirectory(src/CJMOD)
 add_subdirectory(src/CodeMerger)
 add_subdirectory(src/CompilerDispatcher)
+add_subdirectory(src/CSS)
+add_subdirectory(src/JS)
+add_subdirectory(src/ThirdParty)
 add_subdirectory(src/Util)
 add_subdirectory(src/Test)
+add_subdirectory(src/Module)
 add_subdirectory(src/CLI)
 
 # 创建主可执行文件
@@ -39,9 +44,14 @@ target_link_libraries(chtl
     CHTLCore
     CHTLJSCore
     Scanner
+    CJMOD
     CodeMerger
     CompilerDispatcher
+    CSS
+    JS
+    ThirdParty
     Util
+    Module
     ${Boost_LIBRARIES}
 )
 

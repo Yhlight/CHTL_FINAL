@@ -6,6 +6,7 @@ add_library(CHTLJSCore STATIC
     CHTLJSGenerator.cpp
     CHTLJSContext.cpp
     CHTLJSVisitor.cpp
+    UtilThenExpression.cpp
 )
 
 target_include_directories(CHTLJSCore PUBLIC
