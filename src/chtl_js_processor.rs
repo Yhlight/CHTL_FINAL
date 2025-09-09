@@ -227,7 +227,7 @@ pub enum FileType {
 /// File loader options
 #[derive(Debug, Clone)]
 pub struct FileLoaderOptions {
-    pub async: bool,
+    pub r#async: bool,
     pub defer: bool,
     pub cache: bool,
     pub minify: bool,
@@ -794,7 +794,7 @@ impl ChtlJsProcessor {
         
         let mut files = Vec::new();
         let mut options = FileLoaderOptions {
-            async: true,
+            r#async: true,
             defer: false,
             cache: true,
             minify: false,
@@ -815,7 +815,7 @@ impl ChtlJsProcessor {
                 let file_entries = self.parse_load_entries(load_str)?;
                 files.extend(file_entries);
             } else if line.starts_with("async:") {
-                options.async = line.strip_prefix("async:").unwrap().trim() == "true";
+                options.r#async = line.strip_prefix("async:").unwrap().trim() == "true";
             } else if line.starts_with("defer:") {
                 options.defer = line.strip_prefix("defer:").unwrap().trim() == "true";
             } else if line.starts_with("cache:") {
@@ -1076,7 +1076,7 @@ impl ChtlJsProcessor {
         }
         
         js.push_str("], {\n");
-        js.push_str(&format!("    async: {},\n", file_loader.options.async));
+        js.push_str(&format!("    async: {},\n", file_loader.options.r#async));
         js.push_str(&format!("    defer: {},\n", file_loader.options.defer));
         js.push_str(&format!("    cache: {},\n", file_loader.options.cache));
         js.push_str(&format!("    minify: {},\n", file_loader.options.minify));

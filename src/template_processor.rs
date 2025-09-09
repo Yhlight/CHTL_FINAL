@@ -2,6 +2,7 @@
 
 use crate::ast_enum::*;
 use crate::error::{ChtlError, Result};
+use crate::style_processor::StyleExpression;
 use std::collections::HashMap;
 
 /// Template processor for handling complex template features

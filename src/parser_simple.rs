@@ -525,7 +525,7 @@ impl Parser {
         };
         
         let mut name = None;
-        if self.check(TokenType::Identifier(_)) {
+        if matches!(self.peek().token_type, TokenType::Identifier(_)) {
             let name_token = self.advance();
             name = match &name_token.token_type {
                 TokenType::Identifier(n) => Some(n.clone()),

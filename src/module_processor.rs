@@ -2,6 +2,7 @@
 
 use crate::ast_enum::*;
 use crate::error::{ChtlError, Result};
+use crate::chtl_js_processor::VirtualObject;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
@@ -710,10 +711,8 @@ impl ModuleProcessor {
         
         for node in ast {
             if let AstNode::Configuration(config) = node {
-                for config_node in &config.configurations {
-                    match config_node {
-                        ConfigurationNode::Name(name_config) => {
-                            match name_config.name.as_str() {
+                for name_config in config.name_config.iter() {
+                    match name_config.name.as_str() {
                                 "name" => info.name = name_config.value.clone(),
                                 "version" => info.version = name_config.value.clone(),
                                 "author" => info.author = Some(name_config.value.clone()),
@@ -723,8 +722,6 @@ impl ModuleProcessor {
                                 "repository" => info.repository = Some(name_config.value.clone()),
                                 _ => {}
                             }
-                        }
-                    }
                 }
             }
         }

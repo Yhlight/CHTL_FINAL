@@ -132,7 +132,7 @@ impl Parser {
         })))
     }
     
-    fn parse_text_node(&mut self) -> Result<Option<Box<dyn AstNode>>> {
+    fn parse_text_node(&mut self) -> Result<Option<AstNode>> {
         let text_token = self.advance();
         let content = match &text_token.token_type {
             TokenType::Text => "".to_string(),
@@ -167,12 +167,12 @@ impl Parser {
             }
             self.advance(); // consume }
             
-            Ok(Some(Box::new(TextNode {
+            Ok(Some(AstNode::Text(TextNode {
                 content: text_content,
                 is_literal,
             })))
         } else {
-            Ok(Some(Box::new(TextNode {
+            Ok(Some(AstNode::Text(TextNode {
                 content,
                 is_literal: matches!(text_token.token_type, TokenType::Identifier(_)),
             })))
@@ -338,7 +338,7 @@ impl Parser {
         })
     }
     
-    fn parse_template(&mut self) -> Result<Option<Box<dyn AstNode>>> {
+    fn parse_template(&mut self) -> Result<Option<AstNode>> {
         self.advance(); // consume [Template]
         
         let template_type = match self.peek().token_type {
@@ -380,7 +380,7 @@ impl Parser {
         }
         self.advance(); // consume }
         
-        Ok(Some(Box::new(TemplateNode {
+        Ok(Some(AstNode::Template(TemplateNode {
             template_type,
             name,
             content,
@@ -388,7 +388,7 @@ impl Parser {
         })))
     }
     
-    fn parse_custom(&mut self) -> Result<Option<Box<dyn AstNode>>> {
+    fn parse_custom(&mut self) -> Result<Option<AstNode>> {
         self.advance(); // consume [Custom]
         
         let custom_type = match self.peek().token_type {
@@ -432,7 +432,7 @@ impl Parser {
         }
         self.advance(); // consume }
         
-        Ok(Some(Box::new(CustomNode {
+        Ok(Some(AstNode::Custom(CustomNode {
             custom_type,
             name,
             content,
@@ -440,7 +440,7 @@ impl Parser {
         })))
     }
     
-    fn parse_import(&mut self) -> Result<Option<Box<dyn AstNode>>> {
+    fn parse_import(&mut self) -> Result<Option<AstNode>> {
         self.advance(); // consume [Import]
         
         let import_type = match self.peek().token_type {
@@ -493,7 +493,7 @@ impl Parser {
             };
         }
         
-        Ok(Some(Box::new(ImportNode {
+        Ok(Some(AstNode::Import(ImportNode {
             import_type,
             path,
             alias,
@@ -501,7 +501,7 @@ impl Parser {
         })))
     }
     
-    fn parse_origin(&mut self) -> Result<Option<Box<dyn AstNode>>> {
+    fn parse_origin(&mut self) -> Result<Option<AstNode>> {
         self.advance(); // consume [Origin]
         
         let origin_type = match self.peek().token_type {
@@ -525,7 +525,7 @@ impl Parser {
         };
         
         let mut name = None;
-        if self.check(TokenType::Identifier(_)) {
+        if matches!(self.peek().token_type, TokenType::Identifier(_)) {
             let name_token = self.advance();
             name = match &name_token.token_type {
                 TokenType::Identifier(n) => Some(n.clone()),
@@ -555,7 +555,7 @@ impl Parser {
         }
         self.advance(); // consume }
         
-        Ok(Some(Box::new(OriginNode {
+        Ok(Some(AstNode::Origin(OriginNode {
             origin_type,
             name,
             content,
