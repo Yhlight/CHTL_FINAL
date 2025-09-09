@@ -8,6 +8,9 @@ add_library(CHTLCore STATIC
     CHTLTemplate.cpp
     CHTLCustom.cpp
     CHTLOrigin.cpp
+    CHTLImport.cpp
+    CHTLConstraints.cpp
+    CHTLConfig.cpp
 )
 
 target_include_directories(CHTLCore PUBLIC

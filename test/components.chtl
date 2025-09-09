@@ -1,0 +1,70 @@
+// Components CHTL file for import testing
+
+[Template] @Style CardStyle
+{
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+[Template] @Element Card
+{
+    div
+    {
+        class: "card";
+        
+        style
+        {
+            @Style CardStyle;
+        }
+        
+        div
+        {
+            class: "card-header";
+            
+            text
+            {
+                "Card Title"
+            }
+        }
+        
+        div
+        {
+            class: "card-body";
+            
+            text
+            {
+                "Card content goes here"
+            }
+        }
+    }
+}
+
+[Custom] @Style AlertStyle
+{
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+[Custom] @Element Alert
+{
+    div
+    {
+        class: "alert";
+        
+        style
+        {
+            @Style AlertStyle;
+        }
+        
+        text
+        {
+            "Alert message"
+        }
+    }
+}
