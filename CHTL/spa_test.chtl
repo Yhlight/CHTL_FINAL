@@ -1,0 +1,23 @@
+// 测试 SPA 页面的纯净输出
+div {
+    class: "app-container";
+    
+    header {
+        class: "app-header";
+        text: "My SPA Application";
+    }
+    
+    main {
+        class: "app-main";
+        
+        div {
+            class: "content";
+            text: "This is clean content for SPA pages";
+        }
+    }
+    
+    footer {
+        class: "app-footer";
+        text: "© 2024 My SPA App";
+    }
+}

@@ -11,7 +11,7 @@
 
 namespace CHTL {
 
-CHTLCore::CHTLCore() {
+CHTLCore::CHTLCore(bool defaultStruct) : useDefaultStruct_(defaultStruct) {
     // 初始化核心组件
     moduleManager_ = &ModuleManager::getInstance();
     scanner_ = std::make_unique<UnifiedScanner>();
@@ -52,7 +52,7 @@ bool CHTLCore::compileFile(const std::string& inputPath, const std::string& outp
                     return false;
                 }
                 
-                CodeGenerator generator;
+                CodeGenerator generator(useDefaultStruct_);
                 htmlOutput << generator.generateHTML(ast);
                 cssOutput << generator.generateCSS(ast);
                 jsOutput << generator.generateJavaScript(ast);
@@ -120,7 +120,7 @@ bool CHTLCore::compileString(const std::string& input, std::string& output) {
                     return false;
                 }
                 
-                CodeGenerator generator;
+                CodeGenerator generator(useDefaultStruct_);
                 htmlOutput << generator.generateHTML(ast);
                 cssOutput << generator.generateCSS(ast);
                 jsOutput << generator.generateJavaScript(ast);

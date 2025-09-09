@@ -21,32 +21,42 @@
 
 namespace CHTL {
 
-CodeGenerator::CodeGenerator() : templateManager_(TemplateManager::getInstance()) {}
+CodeGenerator::CodeGenerator(bool defaultStruct) 
+    : templateManager_(TemplateManager::getInstance()), useDefaultStruct_(defaultStruct) {}
 
 std::string CodeGenerator::generateHTML(std::shared_ptr<BaseNode> root) {
     if (!root) return "";
     
     std::ostringstream html;
     
-    // 生成 HTML 文档结构
-    html << "<!DOCTYPE html>\n<html>\n<head>\n";
-    
-    // 生成 CSS
-    std::string css = generateCSS(root);
-    if (!css.empty()) {
-        html << "<style>\n" << css << "\n</style>\n";
-    }
-    
-    html << "</head>\n<body>\n";
-    
-    // 生成主体内容
-    for (const auto& child : root->getChildren()) {
-        if (child) {
-            html << generateElementHTML(child);
+    if (useDefaultStruct_) {
+        // 生成完整的 HTML 文档结构
+        html << "<!DOCTYPE html>\n<html>\n<head>\n";
+        
+        // 生成 CSS
+        std::string css = generateCSS(root);
+        if (!css.empty()) {
+            html << "<style>\n" << css << "\n</style>\n";
+        }
+        
+        html << "</head>\n<body>\n";
+        
+        // 生成主体内容
+        for (const auto& child : root->getChildren()) {
+            if (child) {
+                html << generateElementHTML(child);
+            }
+        }
+        
+        html << "</body>\n</html>\n";
+    } else {
+        // 生成纯净的内容，适合 SPA 页面
+        for (const auto& child : root->getChildren()) {
+            if (child) {
+                html << generateElementHTML(child);
+            }
         }
     }
-    
-    html << "</body>\n</html>\n";
     
     return html.str();
 }
@@ -92,7 +102,12 @@ std::string CodeGenerator::generateOutput(std::shared_ptr<BaseNode> root) {
     std::string css = generateCSS(root);
     std::string js = generateJavaScript(root);
     
-    return formatOutput(html, css, js);
+    if (useDefaultStruct_) {
+        return formatOutput(html, css, js);
+    } else {
+        // 纯净输出，只返回 HTML 内容
+        return html;
+    }
 }
 
 std::string CodeGenerator::generateElementHTML(std::shared_ptr<BaseNode> node) {

@@ -17,7 +17,7 @@ namespace CHTL {
  */
 class CodeGenerator {
 public:
-    CodeGenerator();
+    CodeGenerator(bool defaultStruct = false);
     
     // 生成 HTML 代码
     std::string generateHTML(std::shared_ptr<BaseNode> root);
@@ -31,6 +31,12 @@ public:
     // 生成完整的输出
     std::string generateOutput(std::shared_ptr<BaseNode> root);
     
+    // 设置是否使用默认结构
+    void setDefaultStruct(bool useDefaultStruct) { useDefaultStruct_ = useDefaultStruct; }
+    
+    // 获取是否使用默认结构
+    bool getDefaultStruct() const { return useDefaultStruct_; }
+    
 private:
     TemplateManager& templateManager_;
     std::map<std::string, std::string> generatedCSS_;
@@ -41,6 +47,7 @@ private:
     std::map<std::string, std::vector<std::string>> namespaceTypeConstraints_;
     std::set<std::string> constrainedElements_;
     std::set<std::string> constrainedTypes_;
+    bool useDefaultStruct_;
     
     // 生成元素节点的 HTML
     std::string generateElementHTML(std::shared_ptr<BaseNode> node);

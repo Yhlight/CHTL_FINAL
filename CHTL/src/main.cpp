@@ -9,15 +9,48 @@ using namespace CHTL;
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <input.chtl>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " [options] <input.chtl>" << std::endl;
+        std::cerr << "Options:" << std::endl;
+        std::cerr << "  --default-struct    Generate HTML with default structure (DOCTYPE, html, head, body)" << std::endl;
+        std::cerr << "  --help              Show this help message" << std::endl;
         return 1;
     }
     
-    std::string filename = argv[1];
-    std::ifstream file(filename);
+    bool useDefaultStruct = false;
+    std::string inputFile;
+    
+    // 解析命令行参数
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "--default-struct") {
+            useDefaultStruct = true;
+        } else if (arg == "--help") {
+            std::cerr << "CHTL Compiler v1.0.0" << std::endl;
+            std::cerr << "Usage: " << argv[0] << " [options] <input.chtl>" << std::endl;
+            std::cerr << "Options:" << std::endl;
+            std::cerr << "  --default-struct    Generate HTML with default structure (DOCTYPE, html, head, body)" << std::endl;
+            std::cerr << "  --help              Show this help message" << std::endl;
+            std::cerr << std::endl;
+            std::cerr << "By default, CHTL generates clean content suitable for SPA pages." << std::endl;
+            std::cerr << "Use --default-struct to generate complete HTML documents." << std::endl;
+            return 0;
+        } else if (arg[0] != '-') {
+            inputFile = arg;
+        } else {
+            std::cerr << "Unknown option: " << arg << std::endl;
+            return 1;
+        }
+    }
+    
+    if (inputFile.empty()) {
+        std::cerr << "Error: No input file specified" << std::endl;
+        return 1;
+    }
+    
+    std::ifstream file(inputFile);
     
     if (!file.is_open()) {
-        std::cerr << "Error: Cannot open file " << filename << std::endl;
+        std::cerr << "Error: Cannot open file " << inputFile << std::endl;
         return 1;
     }
     
@@ -37,7 +70,7 @@ int main(int argc, char* argv[]) {
     
     // 输出结果
     std::cout << "=== CHTL 语法分析结果 ===" << std::endl;
-    std::cout << "文件: " << filename << std::endl;
+    std::cout << "文件: " << inputFile << std::endl;
     
     if (parser.hasError()) {
         std::cout << "错误: " << parser.getError() << std::endl;
@@ -49,9 +82,9 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl;
     
     // 创建代码生成器
-    CodeGenerator generator;
+    CodeGenerator generator(useDefaultStruct);
     
-    // 生成完整输出
+    // 生成输出
     std::cout << generator.generateOutput(ast) << std::endl;
     
     return 0;

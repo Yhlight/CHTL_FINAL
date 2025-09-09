@@ -157,6 +157,7 @@ CHTL/CMakeFiles/CHTLCore.dir/CHTLCore.cpp.o: /workspace/CHTL/CHTL/CHTLCore.cpp \
   /usr/include/c++/14/bits/shared_ptr.h \
   /usr/include/c++/14/bits/shared_ptr_atomic.h \
   /usr/include/c++/14/bits/shared_ptr_base.h \
+  /usr/include/c++/14/bits/sstream.tcc \
   /usr/include/c++/14/bits/std_abs.h \
   /usr/include/c++/14/bits/stl_algobase.h \
   /usr/include/c++/14/bits/stl_bvector.h \
@@ -219,6 +220,7 @@ CHTL/CMakeFiles/CHTLCore.dir/CHTLCore.cpp.o: /workspace/CHTL/CHTL/CHTLCore.cpp \
   /usr/include/c++/14/pstl/glue_memory_defs.h \
   /usr/include/c++/14/pstl/pstl_config.h \
   /usr/include/c++/14/set \
+  /usr/include/c++/14/sstream \
   /usr/include/c++/14/stdexcept \
   /usr/include/c++/14/streambuf \
   /usr/include/c++/14/string \
@@ -309,6 +311,8 @@ CHTL/CMakeFiles/CHTLCore.dir/CHTLCore.cpp.o: /workspace/CHTL/CHTL/CHTLCore.cpp \
 /workspace/CHTL/CHTL/CHTLNode/BaseNode.hpp:
 
 /workspace/CHTL/CHTL/CHTLModule/ModuleManager.hpp:
+
+/workspace/CHTL/CHTL/CHTLGenerator/CodeGenerator.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/locale.h:
 
@@ -435,8 +439,6 @@ CHTL/CMakeFiles/CHTLCore.dir/CHTLCore.cpp.o: /workspace/CHTL/CHTL/CHTLCore.cpp \
 /usr/include/x86_64-linux-gnu/bits/time64.h:
 
 /usr/include/x86_64-linux-gnu/bits/errno.h:
-
-/usr/include/c++/14/bits/stl_set.h:
 
 /usr/include/x86_64-linux-gnu/bits/setjmp.h:
 
@@ -584,8 +586,6 @@ CHTL/CMakeFiles/CHTLCore.dir/CHTLCore.cpp.o: /workspace/CHTL/CHTL/CHTLCore.cpp \
 
 /usr/include/c++/14/new:
 
-/workspace/CHTL/CHTL/CHTLGenerator/CodeGenerator.hpp:
-
 /usr/include/x86_64-linux-gnu/bits/endian.h:
 
 /usr/include/c++/14/ostream:
@@ -698,6 +698,10 @@ CHTL/CMakeFiles/CHTLCore.dir/CHTLCore.cpp.o: /workspace/CHTL/CHTL/CHTLCore.cpp \
 
 /usr/include/c++/14/bits/refwrap.h:
 
+/usr/include/c++/14/bits/stl_set.h:
+
+/usr/include/c++/14/bits/sstream.tcc:
+
 /usr/include/c++/14/bits/new_allocator.h:
 
 /usr/include/c++/14/bits/stl_bvector.h:
@@ -789,6 +793,8 @@ CHTL/CMakeFiles/CHTLCore.dir/CHTLCore.cpp.o: /workspace/CHTL/CHTL/CHTLCore.cpp \
 /usr/include/asm-generic/bitsperlong.h:
 
 /usr/include/c++/14/pstl/execution_defs.h:
+
+/usr/include/c++/14/sstream:
 
 /usr/include/c++/14/string:
 

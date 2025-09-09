@@ -16,12 +16,18 @@ namespace CHTL {
  */
 class CHTLCore {
 public:
-    CHTLCore();
+    CHTLCore(bool defaultStruct = false);
     ~CHTLCore();
     
     // 编译功能
     bool compileFile(const std::string& inputPath, const std::string& outputPath);
     bool compileString(const std::string& input, std::string& output);
+    
+    // 设置是否使用默认结构
+    void setDefaultStruct(bool useDefaultStruct) { useDefaultStruct_ = useDefaultStruct; }
+    
+    // 获取是否使用默认结构
+    bool getDefaultStruct() const { return useDefaultStruct_; }
     
     // 模块管理
     bool registerModule(const std::string& name, ModuleType type, const std::string& path);
@@ -36,6 +42,7 @@ public:
 private:
     ModuleManager* moduleManager_;
     std::unique_ptr<UnifiedScanner> scanner_;
+    bool useDefaultStruct_;
 };
 
 } // namespace CHTL
