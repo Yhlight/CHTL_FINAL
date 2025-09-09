@@ -5,9 +5,9 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
+#include "../CHTLNode/ExpressionNode.h"
 #include <string>
 #include <sstream>
-#include "../CHTLNode/ExpressionNode.h"
 
 class Parser;
 
