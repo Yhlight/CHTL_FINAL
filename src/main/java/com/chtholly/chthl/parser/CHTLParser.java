@@ -7,6 +7,7 @@ import com.chtholly.chthl.lexer.TokenType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A recursive descent parser for the CHTL language.
@@ -31,46 +32,76 @@ public class CHTLParser {
     public List<Node> parse() {
         List<Node> nodes = new ArrayList<>();
         while (!isAtEnd()) {
-            nodes.add(declaration());
+            Node node = declaration();
+            if (node != null) {
+                nodes.add(node);
+            }
         }
         return nodes;
     }
 
     private Node declaration() {
         try {
-            if (match(TokenType.TEXT)) {
+            if (peek().getType() == TokenType.TEXT) {
                 return textDeclaration();
             }
-            if (match(TokenType.IDENTIFIER)) {
+            if (peek().getType() == TokenType.IDENTIFIER) {
                 return elementDeclaration();
             }
-            // If we're here, it's a token we don't recognize at the top level yet.
-            // We'll skip it to avoid getting stuck in a loop on errors.
-            throw new ParseError(peek(), "Expected an element or text declaration.");
+            throw new ParseError(peek(), "Expected a declaration.");
         } catch (ParseError error) {
-            // For now, print the error and synchronize to the next statement.
             System.err.println(error.getMessage());
             synchronize();
-            return null; // Return null for the node that failed to parse.
+            return null;
         }
     }
 
     private Node elementDeclaration() {
-        Token name = previous(); // The IDENTIFIER token
+        Token name = consume(TokenType.IDENTIFIER, "Expect element name.");
         consume(TokenType.LEFT_BRACE, "Expect '{' after element name.");
 
         List<Node> children = new ArrayList<>();
+        Map<String, String> attributes = new HashMap<>();
+
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            children.add(declaration());
+            if (check(TokenType.IDENTIFIER) && peekNext().getType() == TokenType.COLON) {
+                attribute(attributes);
+            } else {
+                Node child = declaration();
+                if (child != null) {
+                    children.add(child);
+                }
+            }
         }
 
         consume(TokenType.RIGHT_BRACE, "Expect '}' after element block.");
-        // For now, attributes are an empty map. We'll add attribute parsing later.
-        return new ElementNode(name.getLexeme(), new HashMap<>(), children);
+        return new ElementNode(name.getLexeme(), attributes, children);
+    }
+
+    private void attribute(Map<String, String> attributes) {
+        Token name = consume(TokenType.IDENTIFIER, "Expect attribute name.");
+        consume(TokenType.COLON, "Expect ':' after attribute name.");
+
+        Token valueToken;
+        if (match(TokenType.STRING)) {
+            valueToken = previous();
+        } else if (match(TokenType.IDENTIFIER)) {
+            valueToken = previous();
+        } else {
+            throw new ParseError(peek(), "Expect attribute value (string or identifier).");
+        }
+
+        String value = (valueToken.getLiteral() != null)
+                ? valueToken.getLiteral().toString()
+                : valueToken.getLexeme();
+
+        attributes.put(name.getLexeme(), value);
+
+        consume(TokenType.SEMICOLON, "Expect ';' after attribute value.");
     }
 
     private Node textDeclaration() {
-        // Assumes 'text' token was already consumed by match().
+        consume(TokenType.TEXT, "Expect 'text' keyword.");
         consume(TokenType.LEFT_BRACE, "Expect '{' after 'text' keyword.");
         Token content = consume(TokenType.STRING, "Expect a string literal inside a text block.");
         consume(TokenType.RIGHT_BRACE, "Expect '}' after text block.");
@@ -97,6 +128,13 @@ public class CHTLParser {
         return peek().getType() == type;
     }
 
+    private Token peekNext() {
+        if (current + 1 >= tokens.size()) {
+            return tokens.get(tokens.size() - 1);
+        }
+        return tokens.get(current + 1);
+    }
+
     private Token advance() {
         if (!isAtEnd()) current++;
         return previous();
@@ -118,7 +156,6 @@ public class CHTLParser {
         advance();
         while (!isAtEnd()) {
             if (previous().getType() == TokenType.RIGHT_BRACE) return;
-
             switch (peek().getType()) {
                 case IDENTIFIER:
                 case TEXT:

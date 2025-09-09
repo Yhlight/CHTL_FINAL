@@ -76,4 +76,22 @@ class CHTLParserTest {
         TextNode textNode = (TextNode) text;
         assertEquals("I am a div", textNode.text);
     }
+
+    @Test
+    void testElementWithAttributes() {
+        String input = "div { id: box; class: 'container'; }";
+        List<Token> tokens = new CHTLLexer(input).scanTokens();
+        CHTLParser parser = new CHTLParser(tokens);
+        List<Node> ast = parser.parse();
+
+        assertEquals(1, ast.size());
+        assertTrue(ast.get(0) instanceof ElementNode);
+
+        ElementNode node = (ElementNode) ast.get(0);
+        assertEquals("div", node.tagName);
+        assertEquals(2, node.attributes.size());
+        assertEquals("box", node.attributes.get("id"));
+        assertEquals("container", node.attributes.get("class"));
+        assertTrue(node.children.isEmpty());
+    }
 }

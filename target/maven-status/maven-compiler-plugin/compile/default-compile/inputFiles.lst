@@ -2,6 +2,7 @@
 /app/src/main/java/com/chtholly/chthl/parser/CHTLParser.java
 /app/src/main/java/com/chtholly/chthl/ast/Visitor.java
 /app/src/main/java/com/chtholly/chthl/lexer/Token.java
+/app/src/main/java/com/chtholly/chthl/generator/CHTLGenerator.java
 /app/src/main/java/com/chtholly/chthl/ast/ElementNode.java
 /app/src/main/java/com/chtholly/chthl/lexer/TokenType.java
 /app/src/main/java/com/chtholly/chthl/ast/CommentNode.java
