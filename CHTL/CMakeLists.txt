@@ -32,6 +32,17 @@ set(CHTL_SOURCES
     CHTLCompiler/CHTLConstraint/CHTLConstraint.cpp
     CHTLCompiler/CHTLConfiguration/CHTLConfiguration.cpp
     CHTLCompiler/CHTLJSLexer/CHTLJSLexer.cpp
+    CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp
+    CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp
+    CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp
+    CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp
+    CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp
+    CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp
+    CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp
+    CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp
+    CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp
+    CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp
+    CHTLCompiler/CHTLTesting/CHTLTesting.cpp
     # Add other source files as they are created
 )
 
@@ -51,6 +62,13 @@ set(CHTL_HEADERS
     CHTLCompiler/CHTLConstraint/CHTLConstraint.h
     CHTLCompiler/CHTLConfiguration/CHTLConfiguration.h
     CHTLCompiler/CHTLJSLexer/CHTLJSLexer.h
+    CHTLCompiler/CHTLJSParser/CHTLJSParser.h
+    CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.h
+    CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.h
+    CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.h
+    CHTLCompiler/CHTLIOStream/CHTLIOStream.h
+    CHTLCompiler/CHTLUtilities/CHTLUtilities.h
+    CHTLCompiler/CHTLTesting/CHTLTesting.h
     # Add other header files as they are created
 )
 

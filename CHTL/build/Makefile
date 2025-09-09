@@ -129,6 +129,78 @@ chtl/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/build
 .PHONY : chtl/fast
 
+CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.o: CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp.o
+.PHONY : CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.o
+
+# target to build an object file
+CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp.o
+.PHONY : CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp.o
+
+CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.i: CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp.i
+.PHONY : CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.i
+
+# target to preprocess a source file
+CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp.i
+.PHONY : CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp.i
+
+CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.s: CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp.s
+.PHONY : CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.s
+
+# target to generate assembly for a file
+CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp.s
+.PHONY : CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp.s
+
+CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.o: CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp.o
+.PHONY : CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.o
+
+# target to build an object file
+CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp.o
+.PHONY : CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp.o
+
+CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.i: CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp.i
+.PHONY : CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.i
+
+# target to preprocess a source file
+CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp.i
+.PHONY : CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp.i
+
+CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.s: CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp.s
+.PHONY : CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.s
+
+# target to generate assembly for a file
+CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp.s
+.PHONY : CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp.s
+
+CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.o: CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp.o
+.PHONY : CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.o
+
+# target to build an object file
+CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp.o
+.PHONY : CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp.o
+
+CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.i: CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp.i
+.PHONY : CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.i
+
+# target to preprocess a source file
+CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp.i
+.PHONY : CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp.i
+
+CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.s: CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp.s
+.PHONY : CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.s
+
+# target to generate assembly for a file
+CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp.s
+.PHONY : CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp.s
+
 CHTLCompiler/CHTLConfiguration/CHTLConfiguration.o: CHTLCompiler/CHTLConfiguration/CHTLConfiguration.cpp.o
 .PHONY : CHTLCompiler/CHTLConfiguration/CHTLConfiguration.o
 
@@ -249,6 +321,30 @@ CHTLCompiler/CHTLGenerator/CHTLGenerator.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLGenerator/CHTLGenerator.cpp.s
 .PHONY : CHTLCompiler/CHTLGenerator/CHTLGenerator.cpp.s
 
+CHTLCompiler/CHTLIOStream/CHTLIOStream.o: CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp.o
+.PHONY : CHTLCompiler/CHTLIOStream/CHTLIOStream.o
+
+# target to build an object file
+CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp.o
+.PHONY : CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp.o
+
+CHTLCompiler/CHTLIOStream/CHTLIOStream.i: CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp.i
+.PHONY : CHTLCompiler/CHTLIOStream/CHTLIOStream.i
+
+# target to preprocess a source file
+CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp.i
+.PHONY : CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp.i
+
+CHTLCompiler/CHTLIOStream/CHTLIOStream.s: CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp.s
+.PHONY : CHTLCompiler/CHTLIOStream/CHTLIOStream.s
+
+# target to generate assembly for a file
+CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp.s
+.PHONY : CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp.s
+
 CHTLCompiler/CHTLImport/CHTLImport.o: CHTLCompiler/CHTLImport/CHTLImport.cpp.o
 .PHONY : CHTLCompiler/CHTLImport/CHTLImport.o
 
@@ -272,6 +368,54 @@ CHTLCompiler/CHTLImport/CHTLImport.s: CHTLCompiler/CHTLImport/CHTLImport.cpp.s
 CHTLCompiler/CHTLImport/CHTLImport.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLImport/CHTLImport.cpp.s
 .PHONY : CHTLCompiler/CHTLImport/CHTLImport.cpp.s
+
+CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.o: CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp.o
+.PHONY : CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.o
+
+# target to build an object file
+CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp.o
+.PHONY : CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp.o
+
+CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.i: CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp.i
+.PHONY : CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.i
+
+# target to preprocess a source file
+CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp.i
+.PHONY : CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp.i
+
+CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.s: CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp.s
+.PHONY : CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.s
+
+# target to generate assembly for a file
+CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp.s
+.PHONY : CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp.s
+
+CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.o: CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp.o
+.PHONY : CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.o
+
+# target to build an object file
+CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp.o
+.PHONY : CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp.o
+
+CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.i: CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp.i
+.PHONY : CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.i
+
+# target to preprocess a source file
+CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp.i
+.PHONY : CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp.i
+
+CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.s: CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp.s
+.PHONY : CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.s
+
+# target to generate assembly for a file
+CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp.s
+.PHONY : CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp.s
 
 CHTLCompiler/CHTLJSLexer/CHTLJSLexer.o: CHTLCompiler/CHTLJSLexer/CHTLJSLexer.cpp.o
 .PHONY : CHTLCompiler/CHTLJSLexer/CHTLJSLexer.o
@@ -297,6 +441,30 @@ CHTLCompiler/CHTLJSLexer/CHTLJSLexer.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSLexer/CHTLJSLexer.cpp.s
 .PHONY : CHTLCompiler/CHTLJSLexer/CHTLJSLexer.cpp.s
 
+CHTLCompiler/CHTLJSParser/CHTLJSParser.o: CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp.o
+.PHONY : CHTLCompiler/CHTLJSParser/CHTLJSParser.o
+
+# target to build an object file
+CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp.o
+.PHONY : CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp.o
+
+CHTLCompiler/CHTLJSParser/CHTLJSParser.i: CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp.i
+.PHONY : CHTLCompiler/CHTLJSParser/CHTLJSParser.i
+
+# target to preprocess a source file
+CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp.i
+.PHONY : CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp.i
+
+CHTLCompiler/CHTLJSParser/CHTLJSParser.s: CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp.s
+.PHONY : CHTLCompiler/CHTLJSParser/CHTLJSParser.s
+
+# target to generate assembly for a file
+CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp.s
+.PHONY : CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp.s
+
 CHTLCompiler/CHTLLexer/CHTLLexer.o: CHTLCompiler/CHTLLexer/CHTLLexer.cpp.o
 .PHONY : CHTLCompiler/CHTLLexer/CHTLLexer.o
 
@@ -320,6 +488,30 @@ CHTLCompiler/CHTLLexer/CHTLLexer.s: CHTLCompiler/CHTLLexer/CHTLLexer.cpp.s
 CHTLCompiler/CHTLLexer/CHTLLexer.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLLexer/CHTLLexer.cpp.s
 .PHONY : CHTLCompiler/CHTLLexer/CHTLLexer.cpp.s
+
+CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.o: CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp.o
+.PHONY : CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.o
+
+# target to build an object file
+CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp.o
+.PHONY : CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp.o
+
+CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.i: CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp.i
+.PHONY : CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.i
+
+# target to preprocess a source file
+CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp.i
+.PHONY : CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp.i
+
+CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.s: CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp.s
+.PHONY : CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.s
+
+# target to generate assembly for a file
+CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp.s
+.PHONY : CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp.s
 
 CHTLCompiler/CHTLNamespace/CHTLNamespace.o: CHTLCompiler/CHTLNamespace/CHTLNamespace.cpp.o
 .PHONY : CHTLCompiler/CHTLNamespace/CHTLNamespace.o
@@ -465,6 +657,78 @@ CHTLCompiler/CHTLTemplate/CHTLTemplate.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLTemplate/CHTLTemplate.cpp.s
 .PHONY : CHTLCompiler/CHTLTemplate/CHTLTemplate.cpp.s
 
+CHTLCompiler/CHTLTesting/CHTLTesting.o: CHTLCompiler/CHTLTesting/CHTLTesting.cpp.o
+.PHONY : CHTLCompiler/CHTLTesting/CHTLTesting.o
+
+# target to build an object file
+CHTLCompiler/CHTLTesting/CHTLTesting.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLTesting/CHTLTesting.cpp.o
+.PHONY : CHTLCompiler/CHTLTesting/CHTLTesting.cpp.o
+
+CHTLCompiler/CHTLTesting/CHTLTesting.i: CHTLCompiler/CHTLTesting/CHTLTesting.cpp.i
+.PHONY : CHTLCompiler/CHTLTesting/CHTLTesting.i
+
+# target to preprocess a source file
+CHTLCompiler/CHTLTesting/CHTLTesting.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLTesting/CHTLTesting.cpp.i
+.PHONY : CHTLCompiler/CHTLTesting/CHTLTesting.cpp.i
+
+CHTLCompiler/CHTLTesting/CHTLTesting.s: CHTLCompiler/CHTLTesting/CHTLTesting.cpp.s
+.PHONY : CHTLCompiler/CHTLTesting/CHTLTesting.s
+
+# target to generate assembly for a file
+CHTLCompiler/CHTLTesting/CHTLTesting.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLTesting/CHTLTesting.cpp.s
+.PHONY : CHTLCompiler/CHTLTesting/CHTLTesting.cpp.s
+
+CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.o: CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp.o
+.PHONY : CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.o
+
+# target to build an object file
+CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp.o
+.PHONY : CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp.o
+
+CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.i: CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp.i
+.PHONY : CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.i
+
+# target to preprocess a source file
+CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp.i
+.PHONY : CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp.i
+
+CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.s: CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp.s
+.PHONY : CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.s
+
+# target to generate assembly for a file
+CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp.s
+.PHONY : CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp.s
+
+CHTLCompiler/CHTLUtilities/CHTLUtilities.o: CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp.o
+.PHONY : CHTLCompiler/CHTLUtilities/CHTLUtilities.o
+
+# target to build an object file
+CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp.o
+.PHONY : CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp.o
+
+CHTLCompiler/CHTLUtilities/CHTLUtilities.i: CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp.i
+.PHONY : CHTLCompiler/CHTLUtilities/CHTLUtilities.i
+
+# target to preprocess a source file
+CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp.i
+.PHONY : CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp.i
+
+CHTLCompiler/CHTLUtilities/CHTLUtilities.s: CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp.s
+.PHONY : CHTLCompiler/CHTLUtilities/CHTLUtilities.s
+
+# target to generate assembly for a file
+CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp.s
+.PHONY : CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -498,6 +762,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... chtl"
+	@echo "... CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.o"
+	@echo "... CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.i"
+	@echo "... CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.s"
+	@echo "... CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.o"
+	@echo "... CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.i"
+	@echo "... CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.s"
+	@echo "... CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.o"
+	@echo "... CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.i"
+	@echo "... CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.s"
 	@echo "... CHTLCompiler/CHTLConfiguration/CHTLConfiguration.o"
 	@echo "... CHTLCompiler/CHTLConfiguration/CHTLConfiguration.i"
 	@echo "... CHTLCompiler/CHTLConfiguration/CHTLConfiguration.s"
@@ -513,15 +786,30 @@ help:
 	@echo "... CHTLCompiler/CHTLGenerator/CHTLGenerator.o"
 	@echo "... CHTLCompiler/CHTLGenerator/CHTLGenerator.i"
 	@echo "... CHTLCompiler/CHTLGenerator/CHTLGenerator.s"
+	@echo "... CHTLCompiler/CHTLIOStream/CHTLIOStream.o"
+	@echo "... CHTLCompiler/CHTLIOStream/CHTLIOStream.i"
+	@echo "... CHTLCompiler/CHTLIOStream/CHTLIOStream.s"
 	@echo "... CHTLCompiler/CHTLImport/CHTLImport.o"
 	@echo "... CHTLCompiler/CHTLImport/CHTLImport.i"
 	@echo "... CHTLCompiler/CHTLImport/CHTLImport.s"
+	@echo "... CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.o"
+	@echo "... CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.i"
+	@echo "... CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.s"
+	@echo "... CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.o"
+	@echo "... CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.i"
+	@echo "... CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.s"
 	@echo "... CHTLCompiler/CHTLJSLexer/CHTLJSLexer.o"
 	@echo "... CHTLCompiler/CHTLJSLexer/CHTLJSLexer.i"
 	@echo "... CHTLCompiler/CHTLJSLexer/CHTLJSLexer.s"
+	@echo "... CHTLCompiler/CHTLJSParser/CHTLJSParser.o"
+	@echo "... CHTLCompiler/CHTLJSParser/CHTLJSParser.i"
+	@echo "... CHTLCompiler/CHTLJSParser/CHTLJSParser.s"
 	@echo "... CHTLCompiler/CHTLLexer/CHTLLexer.o"
 	@echo "... CHTLCompiler/CHTLLexer/CHTLLexer.i"
 	@echo "... CHTLCompiler/CHTLLexer/CHTLLexer.s"
+	@echo "... CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.o"
+	@echo "... CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.i"
+	@echo "... CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.s"
 	@echo "... CHTLCompiler/CHTLNamespace/CHTLNamespace.o"
 	@echo "... CHTLCompiler/CHTLNamespace/CHTLNamespace.i"
 	@echo "... CHTLCompiler/CHTLNamespace/CHTLNamespace.s"
@@ -540,6 +828,15 @@ help:
 	@echo "... CHTLCompiler/CHTLTemplate/CHTLTemplate.o"
 	@echo "... CHTLCompiler/CHTLTemplate/CHTLTemplate.i"
 	@echo "... CHTLCompiler/CHTLTemplate/CHTLTemplate.s"
+	@echo "... CHTLCompiler/CHTLTesting/CHTLTesting.o"
+	@echo "... CHTLCompiler/CHTLTesting/CHTLTesting.i"
+	@echo "... CHTLCompiler/CHTLTesting/CHTLTesting.s"
+	@echo "... CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.o"
+	@echo "... CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.i"
+	@echo "... CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.s"
+	@echo "... CHTLCompiler/CHTLUtilities/CHTLUtilities.o"
+	@echo "... CHTLCompiler/CHTLUtilities/CHTLUtilities.i"
+	@echo "... CHTLCompiler/CHTLUtilities/CHTLUtilities.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

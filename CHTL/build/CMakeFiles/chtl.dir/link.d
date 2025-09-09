@@ -17,6 +17,16 @@ chtl: \
   CMakeFiles/chtl.dir/CHTLCompiler/CHTLConstraint/CHTLConstraint.cpp.o \
   CMakeFiles/chtl.dir/CHTLCompiler/CHTLConfiguration/CHTLConfiguration.cpp.o \
   CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSLexer/CHTLJSLexer.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp.o \
+  CMakeFiles/chtl.dir/CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp.o \
   /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so \
   /lib/x86_64-linux-gnu/libm.so \
   /lib/x86_64-linux-gnu/libm.so \
@@ -80,6 +90,26 @@ CMakeFiles/chtl.dir/CHTLCompiler/CHTLConstraint/CHTLConstraint.cpp.o:
 CMakeFiles/chtl.dir/CHTLCompiler/CHTLConfiguration/CHTLConfiguration.cpp.o:
 
 CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSLexer/CHTLJSLexer.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSParser/CHTLJSParser.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSFeatures/CHTLJSFeatures.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLJSDynamicExpressions/CHTLJSDynamicExpressions.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLModuleSystem/CHTLModuleSystem.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLCJMODAPI/CHTLCJMODAPI.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLUnifiedScanner/CHTLUnifiedScanner.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLCompilerDispatcher/CHTLCompilerDispatcher.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLCodeMerger/CHTLCodeMerger.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLIOStream/CHTLIOStream.cpp.o:
+
+CMakeFiles/chtl.dir/CHTLCompiler/CHTLUtilities/CHTLUtilities.cpp.o:
 
 /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so:
 
