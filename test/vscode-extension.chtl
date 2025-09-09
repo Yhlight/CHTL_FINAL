@@ -1,0 +1,516 @@
+// VSCode 扩展功能测试文件
+
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                "VSCode Extension Test"
+            }
+        }
+        
+        meta
+        {
+            charset: "UTF-8";
+        }
+        
+        link
+        {
+            rel: "stylesheet";
+            href: "styles.css";
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: "main-container";
+            
+            h1
+            {
+                text
+                {
+                    "VSCode 扩展功能测试"
+                }
+            }
+            
+            div
+            {
+                class: "test-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "语法高亮测试"
+                    }
+                }
+                
+                div
+                {
+                    class: "code-example";
+                    
+                    pre
+                    {
+                        text
+                        {
+                            "// 这是注释\nhtml { head { title { \"Test\" } } }\n[Template] @Style TestStyle { color: red; }"
+                        }
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "test-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "代码格式化测试"
+                    }
+                }
+                
+                div
+                {
+                    class: "format-example";
+                    
+                    pre
+                    {
+                        text
+                        {
+                            "html{head{title{\"Test\"}}body{div{class:\"test\";text{\"Content\"}}}}"
+                        }
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "test-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "代码补全测试"
+                    }
+                }
+                
+                div
+                {
+                    class: "completion-example";
+                    
+                    p
+                    {
+                        text
+                        {
+                            "在编辑器中输入 'html' 应该显示补全提示"
+                        }
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "test-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "页面预览测试"
+                    }
+                }
+                
+                div
+                {
+                    class: "preview-example";
+                    
+                    p
+                    {
+                        text
+                        {
+                            "实时预览功能应该显示当前页面的渲染结果"
+                        }
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "test-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "导出功能测试"
+                    }
+                }
+                
+                div
+                {
+                    class: "export-example";
+                    
+                    p
+                    {
+                        text
+                        {
+                            "导出功能应该能够生成 HTML、CSS、JavaScript 文件"
+                        }
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "test-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "内置编译器测试"
+                    }
+                }
+                
+                div
+                {
+                    class: "compiler-example";
+                    
+                    p
+                    {
+                        text
+                        {
+                            "内置编译器应该能够编译 CHTL 代码"
+                        }
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "test-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "模块解包测试"
+                    }
+                }
+                
+                div
+                {
+                    class: "module-example";
+                    
+                    p
+                    {
+                        text
+                        {
+                            "模块解包功能应该能够解包 CMOD 和 CJMOD 模块"
+                        }
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "test-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "JSON 查询测试"
+                    }
+                }
+                
+                div
+                {
+                    class: "query-example";
+                    
+                    p
+                    {
+                        text
+                        {
+                            "JSON 查询功能应该能够查询模块信息"
+                        }
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "test-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "模块语法提示测试"
+                    }
+                }
+                
+                div
+                {
+                    class: "syntax-help-example";
+                    
+                    p
+                    {
+                        text
+                        {
+                            "模块语法提示应该提供智能提示和帮助"
+                        }
+                    }
+                }
+            }
+        }
+        
+        script
+        {
+            // VSCode 扩展测试代码
+            
+            console.log('VSCode 扩展功能测试开始');
+            
+            // 测试语法高亮
+            function testSyntaxHighlighting() {
+                console.log('=== 语法高亮测试 ===');
+                
+                const testCode = `
+                    // 这是注释
+                    html {
+                        head {
+                            title { "Test" }
+                        }
+                        body {
+                            div {
+                                class: "test";
+                                text { "Content" }
+                            }
+                        }
+                    }
+                    
+                    [Template] @Style TestStyle {
+                        color: red;
+                        font-size: 16px;
+                    }
+                    
+                    [Custom] @Element TestElement {
+                        div { }
+                        span { }
+                    }
+                    
+                    [Origin] @Html {
+                        <div>Raw HTML</div>
+                    }
+                    
+                    [Import] "test.chtl";
+                    
+                    [Constraints] except @Element div {
+                        // 约束定义
+                    }
+                    
+                    [Configuration] TestConfig {
+                        DEBUG_MODE: true;
+                        INDEX_INITIAL_COUNT: 100;
+                    }
+                `;
+                
+                console.log('测试代码:', testCode);
+                console.log('语法高亮功能应该为不同语法元素应用不同颜色');
+            }
+            
+            // 测试代码格式化
+            function testCodeFormatting() {
+                console.log('=== 代码格式化测试 ===');
+                
+                const unformattedCode = 'html{head{title{"Test"}}body{div{class:"test";text{"Content"}}}}';
+                console.log('未格式化代码:', unformattedCode);
+                
+                // 模拟格式化
+                const formattedCode = `
+                    html {
+                        head {
+                            title { "Test" }
+                        }
+                        body {
+                            div {
+                                class: "test";
+                                text { "Content" }
+                            }
+                        }
+                    }
+                `;
+                
+                console.log('格式化后代码:', formattedCode);
+            }
+            
+            // 测试代码补全
+            function testCodeCompletion() {
+                console.log('=== 代码补全测试 ===');
+                
+                const completions = {
+                    elements: ['html', 'head', 'body', 'div', 'span', 'p', 'h1', 'h2', 'h3'],
+                    attributes: ['class', 'id', 'style', 'src', 'href', 'alt', 'title'],
+                    templates: ['[Template] @Style', '[Template] @Element', '[Template] @Var'],
+                    customs: ['[Custom] @Style', '[Custom] @Element', '[Custom] @Var'],
+                    origins: ['[Origin] @Html', '[Origin] @Style', '[Origin] @JavaScript'],
+                    imports: ['[Import]', 'as', 'from'],
+                    constraints: ['[Constraints]', 'except'],
+                    configs: ['[Configuration]', '[Name]', '[OriginType]', 'use']
+                };
+                
+                console.log('可用的补全选项:', completions);
+            }
+            
+            // 测试页面预览
+            function testPagePreview() {
+                console.log('=== 页面预览测试 ===');
+                
+                const previewModes = ['html', 'css', 'javascript'];
+                console.log('支持的预览模式:', previewModes);
+                
+                // 模拟预览生成
+                const preview = generatePreview();
+                console.log('生成的预览:', preview);
+            }
+            
+            // 测试导出功能
+            function testExportFunction() {
+                console.log('=== 导出功能测试 ===');
+                
+                const exportFormats = ['html', 'css', 'javascript', 'all'];
+                console.log('支持的导出格式:', exportFormats);
+                
+                // 模拟导出
+                const exportData = {
+                    html: '<html><head><title>Test</title></head><body><div>Content</div></body></html>',
+                    css: 'body { font-family: Arial, sans-serif; }',
+                    javascript: 'console.log("Hello World");'
+                };
+                
+                console.log('导出数据:', exportData);
+            }
+            
+            // 测试内置编译器
+            function testBuiltinCompiler() {
+                console.log('=== 内置编译器测试 ===');
+                
+                const compilationModes = ['debug', 'release', 'optimized'];
+                console.log('支持的编译模式:', compilationModes);
+                
+                // 模拟编译
+                const sourceCode = 'html { head { title { "Test" } } }';
+                const compiledCode = compileCode(sourceCode);
+                console.log('源代码:', sourceCode);
+                console.log('编译后代码:', compiledCode);
+            }
+            
+            // 测试模块解包
+            function testModuleUnpacking() {
+                console.log('=== 模块解包测试 ===');
+                
+                const moduleTypes = ['cmod', 'cjmod', 'chtl'];
+                console.log('支持的模块类型:', moduleTypes);
+                
+                // 模拟模块解包
+                const moduleInfo = {
+                    name: 'TestModule',
+                    version: '1.0.0',
+                    dependencies: ['Module1', 'Module2'],
+                    exports: ['TestStyle', 'TestElement']
+                };
+                
+                console.log('模块信息:', moduleInfo);
+            }
+            
+            // 测试 JSON 查询
+            function testJSONQuery() {
+                console.log('=== JSON 查询测试 ===');
+                
+                const queryExamples = [
+                    'all',
+                    'find name "TestModule"',
+                    'find version "1.0.0"',
+                    'select name, version'
+                ];
+                
+                console.log('查询示例:', queryExamples);
+                
+                // 模拟查询
+                const queryResult = executeQuery('all');
+                console.log('查询结果:', queryResult);
+            }
+            
+            // 测试模块语法提示
+            function testModuleSyntaxHelp() {
+                console.log('=== 模块语法提示测试 ===');
+                
+                const syntaxHelp = {
+                    module: 'Module syntax: [Info] { name: "moduleName"; version: "1.0.0"; }',
+                    template: 'Template syntax: [Template] @Style TemplateName { /* styles */ }',
+                    custom: 'Custom syntax: [Custom] @Style CustomName { /* custom styles */ }',
+                    import: 'Import syntax: [Import] "file.chtl";'
+                };
+                
+                console.log('语法帮助:', syntaxHelp);
+            }
+            
+            // 辅助函数
+            function generatePreview() {
+                return `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>CHTL Preview</title>
+                    </head>
+                    <body>
+                        <h1>CHTL Preview</h1>
+                        <p>This is a preview of your CHTL code.</p>
+                    </body>
+                    </html>
+                `;
+            }
+            
+            function compileCode(source) {
+                // 模拟编译过程
+                return source.replace(/\s+/g, ' ').trim();
+            }
+            
+            function executeQuery(query) {
+                // 模拟查询执行
+                return { result: 'Query executed successfully', query: query };
+            }
+            
+            // 运行所有测试
+            function runAllTests() {
+                console.log('开始运行 VSCode 扩展功能测试...');
+                
+                testSyntaxHighlighting();
+                testCodeFormatting();
+                testCodeCompletion();
+                testPagePreview();
+                testExportFunction();
+                testBuiltinCompiler();
+                testModuleUnpacking();
+                testJSONQuery();
+                testModuleSyntaxHelp();
+                
+                console.log('VSCode 扩展功能测试完成');
+            }
+            
+            // 页面加载完成后运行测试
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('VSCode 扩展测试页面加载完成');
+                runAllTests();
+            });
+        }
+    }
+}

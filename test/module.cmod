@@ -1,0 +1,124 @@
+// CMOD 模块测试文件
+
+[Info]
+{
+    name: "TestModule";
+    version: "1.0.0";
+    description: "A test CMOD module for CHTL";
+    author: "CHTL Team";
+    license: "MIT";
+    dependencies: ["BaseModule", "UtilsModule"];
+}
+
+[Export]
+{
+    // 导出模板
+    [Template] @Style ButtonStyle
+    {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    [Template] @Element Button
+    {
+        button
+        {
+            class: "btn";
+            
+            style
+            {
+                @Style ButtonStyle;
+            }
+            
+            text
+            {
+                "Click me"
+            }
+        }
+    }
+    
+    // 导出自定义
+    [Custom] @Style AlertStyle
+    {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+    
+    [Custom] @Element Alert
+    {
+        div
+        {
+            class: "alert";
+            
+            style
+            {
+                @Style AlertStyle;
+            }
+            
+            text
+            {
+                "Alert message"
+            }
+        }
+    }
+    
+    // 导出原始嵌入
+    [Origin] @Html Header
+    {
+        <header class="site-header">
+            <nav class="navbar">
+                <div class="nav-brand">
+                    <h1>Site Title</h1>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
+    }
+}
+
+// 源文件内容
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                "CMOD Module Test"
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: "main-content";
+            
+            text
+            {
+                "This is a CMOD module test"
+            }
+            
+            // 使用导出的模板
+            @Element Button;
+            
+            // 使用导出的自定义
+            @Element Alert;
+            
+            // 使用导出的原始嵌入
+            [Origin] @Html Header;
+        }
+    }
+}

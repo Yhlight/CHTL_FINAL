@@ -1,0 +1,296 @@
+// 工具函数库 - 用于测试导入功能
+
+// 数学工具
+[Template] @Var MathUtils
+{
+    PI: "3.14159265359";
+    E: "2.71828182846";
+    GOLDEN_RATIO: "1.61803398875";
+}
+
+// 字符串工具
+[Template] @Var StringUtils
+{
+    EMPTY: "";
+    SPACE: " ";
+    NEWLINE: "\n";
+    TAB: "\t";
+}
+
+// 颜色工具
+[Template] @Var ColorUtils
+{
+    PRIMARY: "#007bff";
+    SECONDARY: "#6c757d";
+    SUCCESS: "#28a745";
+    DANGER: "#dc3545";
+    WARNING: "#ffc107";
+    INFO: "#17a2b8";
+    LIGHT: "#f8f9fa";
+    DARK: "#343a40";
+}
+
+// 尺寸工具
+[Template] @Var SizeUtils
+{
+    XS: "0.25rem";
+    SM: "0.5rem";
+    MD: "1rem";
+    LG: "1.5rem";
+    XL: "3rem";
+    XXL: "4.5rem";
+}
+
+// 断点工具
+[Template] @Var BreakpointUtils
+{
+    XS: "0px";
+    SM: "576px";
+    MD: "768px";
+    LG: "992px";
+    XL: "1200px";
+    XXL: "1400px";
+}
+
+// 动画工具
+[Template] @Var AnimationUtils
+{
+    FAST: "0.15s";
+    NORMAL: "0.3s";
+    SLOW: "0.5s";
+    EASE: "ease";
+    EASE_IN: "ease-in";
+    EASE_OUT: "ease-out";
+    EASE_IN_OUT: "ease-in-out";
+}
+
+// 阴影工具
+[Template] @Var ShadowUtils
+{
+    SMALL: "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)";
+    MEDIUM: "0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23)";
+    LARGE: "0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23)";
+    XLARGE: "0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22)";
+}
+
+// 边框工具
+[Template] @Var BorderUtils
+{
+    NONE: "none";
+    SOLID: "solid";
+    DASHED: "dashed";
+    DOTTED: "dotted";
+    DOUBLE: "double";
+    THIN: "1px";
+    MEDIUM: "2px";
+    THICK: "4px";
+}
+
+// 字体工具
+[Template] @Var FontUtils
+{
+    FAMILY_SANS: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+    FAMILY_SERIF: "'Times New Roman', Times, serif";
+    FAMILY_MONO: "'Courier New', Courier, monospace";
+    SIZE_XS: "0.75rem";
+    SIZE_SM: "0.875rem";
+    SIZE_MD: "1rem";
+    SIZE_LG: "1.125rem";
+    SIZE_XL: "1.25rem";
+    SIZE_XXL: "1.5rem";
+    WEIGHT_LIGHT: "300";
+    WEIGHT_NORMAL: "400";
+    WEIGHT_MEDIUM: "500";
+    WEIGHT_BOLD: "700";
+}
+
+// 间距工具
+[Template] @Var SpacingUtils
+{
+    MARGIN_AUTO: "auto";
+    PADDING_NONE: "0";
+    PADDING_SM: "0.25rem";
+    PADDING_MD: "0.5rem";
+    PADDING_LG: "1rem";
+    PADDING_XL: "1.5rem";
+    MARGIN_NONE: "0";
+    MARGIN_SM: "0.25rem";
+    MARGIN_MD: "0.5rem";
+    MARGIN_LG: "1rem";
+    MARGIN_XL: "1.5rem";
+}
+
+// 布局工具
+[Template] @Var LayoutUtils
+{
+    FLEX_CENTER: "flex";
+    FLEX_START: "flex-start";
+    FLEX_END: "flex-end";
+    FLEX_BETWEEN: "space-between";
+    FLEX_AROUND: "space-around";
+    FLEX_EVENLY: "space-evenly";
+    FLEX_COLUMN: "column";
+    FLEX_ROW: "row";
+    FLEX_WRAP: "wrap";
+    FLEX_NOWRAP: "nowrap";
+}
+
+// 定位工具
+[Template] @Var PositionUtils
+{
+    STATIC: "static";
+    RELATIVE: "relative";
+    ABSOLUTE: "absolute";
+    FIXED: "fixed";
+    STICKY: "sticky";
+    TOP_0: "0";
+    RIGHT_0: "0";
+    BOTTOM_0: "0";
+    LEFT_0: "0";
+    CENTER: "50%";
+}
+
+// 显示工具
+[Template] @Var DisplayUtils
+{
+    BLOCK: "block";
+    INLINE: "inline";
+    INLINE_BLOCK: "inline-block";
+    FLEX: "flex";
+    GRID: "grid";
+    NONE: "none";
+    HIDDEN: "hidden";
+    VISIBLE: "visible";
+}
+
+// 溢出工具
+[Template] @Var OverflowUtils
+{
+    VISIBLE: "visible";
+    HIDDEN: "hidden";
+    SCROLL: "scroll";
+    AUTO: "auto";
+    CLIP: "clip";
+}
+
+// 文本工具
+[Template] @Var TextUtils
+{
+    LEFT: "left";
+    CENTER: "center";
+    RIGHT: "right";
+    JUSTIFY: "justify";
+    UPPERCASE: "uppercase";
+    LOWERCASE: "lowercase";
+    CAPITALIZE: "capitalize";
+    NONE: "none";
+    UNDERLINE: "underline";
+    OVERLINE: "overline";
+    LINE_THROUGH: "line-through";
+}
+
+// 光标工具
+[Template] @Var CursorUtils
+{
+    AUTO: "auto";
+    DEFAULT: "default";
+    POINTER: "pointer";
+    WAIT: "wait";
+    TEXT: "text";
+    MOVE: "move";
+    NOT_ALLOWED: "not-allowed";
+    HELP: "help";
+    CROSSHAIR: "crosshair";
+    GRAB: "grab";
+    GRABBING: "grabbing";
+}
+
+// 用户选择工具
+[Template] @Var UserSelectUtils
+{
+    AUTO: "auto";
+    NONE: "none";
+    TEXT: "text";
+    ALL: "all";
+    CONTAIN: "contain";
+}
+
+// 指针事件工具
+[Template] @Var PointerEventsUtils
+{
+    AUTO: "auto";
+    NONE: "none";
+    VISIBLE_PAINTED: "visiblePainted";
+    VISIBLE_FILL: "visibleFill";
+    VISIBLE_STROKE: "visibleStroke";
+    VISIBLE: "visible";
+    PAINTED: "painted";
+    FILL: "fill";
+    STROKE: "stroke";
+    ALL: "all";
+}
+
+// 变换工具
+[Template] @Var TransformUtils
+{
+    NONE: "none";
+    ROTATE_90: "rotate(90deg)";
+    ROTATE_180: "rotate(180deg)";
+    ROTATE_270: "rotate(270deg)";
+    SCALE_UP: "scale(1.1)";
+    SCALE_DOWN: "scale(0.9)";
+    FLIP_H: "scaleX(-1)";
+    FLIP_V: "scaleY(-1)";
+}
+
+// 过渡工具
+[Template] @Var TransitionUtils
+{
+    NONE: "none";
+    ALL: "all";
+    OPACITY: "opacity";
+    TRANSFORM: "transform";
+    COLOR: "color";
+    BACKGROUND: "background";
+    BORDER: "border";
+    BOX_SHADOW: "box-shadow";
+}
+
+// 动画工具
+[Template] @Var AnimationUtils
+{
+    NONE: "none";
+    SPIN: "spin 1s linear infinite";
+    PULSE: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite";
+    BOUNCE: "bounce 1s infinite";
+    PING: "ping 1s cubic-bezier(0, 0, 0.2, 1) infinite";
+    FADE_IN: "fadeIn 0.5s ease-in-out";
+    FADE_OUT: "fadeOut 0.5s ease-in-out";
+    SLIDE_IN_UP: "slideInUp 0.5s ease-out";
+    SLIDE_IN_DOWN: "slideInDown 0.5s ease-out";
+    SLIDE_IN_LEFT: "slideInLeft 0.5s ease-out";
+    SLIDE_IN_RIGHT: "slideInRight 0.5s ease-out";
+}
+
+// 响应式工具
+[Template] @Var ResponsiveUtils
+{
+    MOBILE_FIRST: "min-width";
+    DESKTOP_FIRST: "max-width";
+    PRINT: "print";
+    SCREEN: "screen";
+    ALL: "all";
+    SPEECH: "speech";
+}
+
+// 媒体查询工具
+[Template] @Var MediaQueryUtils
+{
+    MOBILE: "@media (max-width: 767px)";
+    TABLET: "@media (min-width: 768px) and (max-width: 1023px)";
+    DESKTOP: "@media (min-width: 1024px)";
+    LARGE_DESKTOP: "@media (min-width: 1200px)";
+    RETINA: "@media (-webkit-min-device-pixel-ratio: 2)";
+    LANDSCAPE: "@media (orientation: landscape)";
+    PORTRAIT: "@media (orientation: portrait)";
+}

@@ -1,0 +1,145 @@
+// 配置系统测试文件
+
+// 基础配置组
+[Configuration]
+{
+    // 索引的起始计数
+    INDEX_INITIAL_COUNT = 0;
+    
+    // DEBUG模式
+    DEBUG_MODE = true;
+    
+    // 禁止局部样式块自动添加类选择器
+    DISABLE_STYLE_AUTO_ADD_CLASS = false;
+    
+    // 禁止局部样式块自动添加id选择器
+    DISABLE_STYLE_AUTO_ADD_ID = false;
+    
+    // 禁止局部脚本自动添加类选择器
+    DISABLE_SCRIPT_AUTO_ADD_CLASS = true;
+    
+    // 禁止局部脚本自动添加id选择器
+    DISABLE_SCRIPT_AUTO_ADD_ID = true;
+    
+    // 禁止默认命名空间功能
+    DISABLE_DEFAULT_NAMESPACE = false;
+    
+    // 禁止自定义原始嵌入类型
+    DISABLE_CUSTOM_ORIGIN_TYPE = false;
+    
+    // Name配置块，存放关键字名称用
+    [Name]
+    {
+        // 组选项，即CUSTOM_STYLE具有多个值
+        CUSTOM_STYLE = [@Style, @style, @CSS, @Css, @css];
+        CUSTOM_ELEMENT = @Element;
+        CUSTOM_VAR = @Var;
+        TEMPLATE_STYLE = @Style;
+        TEMPLATE_ELEMENT = @Element;
+        TEMPLATE_VAR = @Var;
+        ORIGIN_HTML = @Html;
+        ORIGIN_STYLE = @Style;
+        ORIGIN_JAVASCRIPT = @JavaScript;
+        IMPORT_HTML = @Html;
+        IMPORT_STYLE = @Style;
+        IMPORT_JAVASCRIPT = @JavaScript;
+        IMPORT_CHTL = @Chtl;
+        IMPORT_CRMOD = @CJmod;
+        KEYWORD_INHERIT = inherit;
+        KEYWORD_DELETE = delete;
+        KEYWORD_INSERT = insert;
+        KEYWORD_AFTER = after;
+        KEYWORD_BEFORE = before;
+        KEYWORD_REPLACE = replace;
+        KEYWORD_ATTOP = at top;
+        KEYWORD_ATBOTTOM = at bottom;
+        KEYWORD_FROM = from;
+        KEYWORD_AS = as;
+        KEYWORD_EXCEPT = except;
+        KEYWORD_USE = use;
+        KEYWORD_HTML5 = html5;
+        KEYWORD_TEXT = text;
+        KEYWORD_STYLE = style;
+        KEYWORD_SCRIPT = script;
+        KEYWORD_CUSTOM = [Custom];
+        KEYWORD_TEMPLATE = [Template];
+        KEYWORD_ORIGIN = [Origin];
+        KEYWORD_IMPORT = [Import];
+        KEYWORD_NAMESPACE = [Namespace];
+        
+        // 组选项的数量限制
+        OPTION_COUNT = 3;
+    }
+    
+    // 定义Origin具有什么自定义类型
+    [OriginType]
+    {
+        ORIGINTYPE_VUE = @Vue;
+        ORIGINTYPE_MARKDOWN = @Markdown;
+    }
+}
+
+// 命名配置组
+[Configuration] @Config Basic
+{
+    [Name]
+    {
+        CONFIGURATION_CONFIG = @Config;
+        IMPORT_CONFIG = @Config;
+    }
+}
+
+[Configuration] @Config Advanced
+{
+    DEBUG_MODE = true;
+    INDEX_INITIAL_COUNT = 1;
+    
+    [Name]
+    {
+        CUSTOM_STYLE = [@Style, @CSS];
+        CUSTOM_ELEMENT = @Element;
+    }
+}
+
+// 使用配置
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                "CHTL Config Test"
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: "main-content";
+            
+            text
+            {
+                "Testing configuration system"
+            }
+            
+            div
+            {
+                style
+                {
+                    width: 100px;
+                    height: 100px;
+                    background-color: red;
+                }
+                
+                text
+                {
+                    "Styled div with configuration"
+                }
+            }
+        }
+    }
+}

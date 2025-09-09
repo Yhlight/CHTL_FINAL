@@ -1,0 +1,125 @@
+// 传统网页示例 - 包含完整的 HTML 结构
+// 这个文件演示了使用 --default-struct 选项时生成的完整 HTML 页面
+
+html
+{
+    head
+    {
+        title { "Traditional Web Page" }
+        meta
+        {
+            charset: "UTF-8";
+        }
+        meta
+        {
+            name: "viewport";
+            content: "width=device-width, initial-scale=1.0";
+        }
+        style
+        {
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f5f5f5;
+            }
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            .header {
+                background: #333;
+                color: white;
+                padding: 1rem;
+                text-align: center;
+            }
+            .content {
+                background: white;
+                padding: 2rem;
+                margin: 20px 0;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+            .footer {
+                background: #333;
+                color: white;
+                text-align: center;
+                padding: 1rem;
+                margin-top: 20px;
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: "container";
+            
+            header
+            {
+                class: "header";
+                h1 { "Traditional Web Page" }
+                p { "This is a complete HTML page with head, body, and all standard structure." }
+            }
+            
+            main
+            {
+                class: "content";
+                
+                h2 { "Page Content" }
+                
+                p
+                {
+                    text
+                    {
+                        "This page demonstrates the traditional web page structure that includes the complete HTML document with DOCTYPE, html, head, and body tags. This is useful for standalone web pages that don't need to be integrated into SPA frameworks."
+                    }
+                }
+                
+                div
+                {
+                    class: "features";
+                    
+                    h3 { "Features" }
+                    
+                    ul
+                    {
+                        li { "Complete HTML structure" }
+                        li { "Meta tags for SEO" }
+                        li { "Responsive design" }
+                        li { "Traditional web page layout" }
+                    }
+                }
+            }
+            
+            footer
+            {
+                class: "footer";
+                text { "© 2024 Traditional Web Page. Built with CHTL." }
+            }
+        }
+    }
+}
+
+script
+{
+    // 传统网页的 JavaScript
+    console.log('Traditional web page loaded');
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page fully loaded');
+        
+        // 添加一些交互功能
+        const features = document.querySelectorAll('.features li');
+        features.forEach((feature, index) => {
+            feature.addEventListener('click', function() {
+                this.style.backgroundColor = '#e0e0e0';
+                setTimeout(() => {
+                    this.style.backgroundColor = '';
+                }, 200);
+            });
+        });
+    });
+}

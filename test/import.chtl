@@ -1,0 +1,113 @@
+// 导入系统测试文件
+
+// 导入 HTML 文件
+[Import] @Html from "header.html" as "Header";
+
+// 导入 CSS 文件
+[Import] @Style from "styles.css" as "MainStyles";
+
+// 导入 JavaScript 文件
+[Import] @JavaScript from "script.js" as "MainScript";
+
+// 导入 CHTL 文件
+[Import] @Chtl from "components.chtl";
+
+// 导入 CJMOD 文件
+[Import] @Cjmod from "extensions.cjmod";
+
+// 命名空间定义
+[Namespace] Components
+{
+    [Template] @Style ButtonStyle
+    {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    [Template] @Element Button
+    {
+        button
+        {
+            class: "btn";
+            
+            style
+            {
+                @Style ButtonStyle;
+            }
+            
+            text
+            {
+                "Click me"
+            }
+        }
+    }
+}
+
+[Namespace] Utils
+{
+    [Template] @Var Colors
+    {
+        primary: "#007bff";
+        secondary: "#6c757d";
+        success: "#28a745";
+        danger: "#dc3545";
+    }
+}
+
+// 使用导入的内容
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                "CHTL Import Test"
+            }
+        }
+        
+        // 使用导入的 CSS
+        [Import] @Style MainStyles;
+    }
+    
+    body
+    {
+        // 使用导入的 HTML
+        [Import] @Html Header;
+        
+        div
+        {
+            class: "main-content";
+            
+            text
+            {
+                "Main content with imported components"
+            }
+            
+            // 使用命名空间中的模板
+            @Element Button from Components;
+            
+            div
+            {
+                style
+                {
+                    color: Utils.Colors(primary);
+                    background-color: Utils.Colors(secondary);
+                }
+                
+                text
+                {
+                    "Themed content using imported variables"
+                }
+            }
+        }
+        
+        // 使用导入的 JavaScript
+        [Import] @JavaScript MainScript;
+    }
+}

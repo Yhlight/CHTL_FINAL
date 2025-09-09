@@ -1,0 +1,435 @@
+// CJMOD API 测试文件
+
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                "CJMOD API Test"
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: "main-content";
+            
+            h1
+            {
+                text
+                {
+                    "CJMOD API 功能测试"
+                }
+            }
+            
+            div
+            {
+                class: "test-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "语法分析测试"
+                    }
+                }
+                
+                button
+                {
+                    id: "syntax-test-btn";
+                    class: "btn";
+                    
+                    text
+                    {
+                        "测试语法分析"
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "test-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "参数绑定测试"
+                    }
+                }
+                
+                button
+                {
+                    id: "binding-test-btn";
+                    class: "btn";
+                    
+                    text
+                    {
+                        "测试参数绑定"
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "test-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "代码生成测试"
+                    }
+                }
+                
+                button
+                {
+                    id: "generation-test-btn";
+                    class: "btn";
+                    
+                    text
+                    {
+                        "测试代码生成"
+                    }
+                }
+            }
+            
+            div
+            {
+                class: "test-section";
+                
+                h2
+                {
+                    text
+                    {
+                        "扫描算法测试"
+                    }
+                }
+                
+                button
+                {
+                    id: "scan-test-btn";
+                    class: "btn";
+                    
+                    text
+                    {
+                        "测试扫描算法"
+                    }
+                }
+            }
+        }
+        
+        script
+        {
+            // CJMOD API 测试代码
+            
+            // 语法分析测试
+            function testSyntaxAnalysis() {
+                console.log("=== 语法分析测试 ===");
+                
+                // 测试对象语法
+                const objectCode = "{ name: 'test', value: 42 }";
+                console.log("对象语法:", objectCode);
+                
+                // 测试函数语法
+                const functionCode = "function test(a, b) { return a + b; }";
+                console.log("函数语法:", functionCode);
+                
+                // 测试数组语法
+                const arrayCode = "[1, 2, 3, 4, 5]";
+                console.log("数组语法:", arrayCode);
+                
+                // 测试 CHTL JS 函数语法
+                const chtljsCode = "vir testObject = function { name: 'test', value: 42 }";
+                console.log("CHTL JS 函数语法:", chtljsCode);
+            }
+            
+            // 参数绑定测试
+            function testParameterBinding() {
+                console.log("=== 参数绑定测试 ===");
+                
+                // 测试函数签名解析
+                const signature = "function test(a, b, c)";
+                console.log("函数签名:", signature);
+                
+                // 测试参数绑定
+                const arguments = ["arg1", "arg2", "arg3"];
+                console.log("参数列表:", arguments);
+                
+                // 测试占位符替换
+                const template_ = "Hello ${name}, your value is ${value}";
+                const placeholders = { name: "World", value: "42" };
+                console.log("模板:", template_);
+                console.log("占位符:", placeholders);
+            }
+            
+            // 代码生成测试
+            function testCodeGeneration() {
+                console.log("=== 代码生成测试 ===");
+                
+                // 测试模板处理
+                const template_ = "function ${name}(${params}) { ${body} }";
+                const parameters = {
+                    name: "testFunction",
+                    params: "a, b",
+                    body: "return a + b;"
+                };
+                console.log("模板:", template_);
+                console.log("参数:", parameters);
+                
+                // 测试条件处理
+                const conditionalTemplate = "{#if debug}console.log('Debug mode');{#endif}";
+                console.log("条件模板:", conditionalTemplate);
+                
+                // 测试循环处理
+                const loopTemplate = "{#for item in items}${item}{#endfor}";
+                console.log("循环模板:", loopTemplate);
+            }
+            
+            // 扫描算法测试
+            function testScanningAlgorithms() {
+                console.log("=== 扫描算法测试 ===");
+                
+                const testCode = "function test(a, b) { return a + b; }";
+                console.log("测试代码:", testCode);
+                
+                // 双指针扫描
+                console.log("双指针扫描结果:");
+                const doublePointerResults = performDoublePointerScan(testCode);
+                doublePointerResults.forEach((result, index) => {
+                    console.log(`  ${index}: "${result}"`);
+                });
+                
+                // 预截断扫描
+                console.log("预截断扫描结果:");
+                const preTruncationResults = performPreTruncationScan(testCode);
+                preTruncationResults.forEach((result, index) => {
+                    console.log(`  ${index}: "${result}"`);
+                });
+            }
+            
+            // 原子参数占位符测试
+            function testAtomArgs() {
+                console.log("=== 原子参数占位符测试 ===");
+                
+                const placeholders = ["$", "$?", "$!", "$_", "..."];
+                
+                placeholders.forEach(placeholder => {
+                    console.log(`占位符: ${placeholder}`);
+                    console.log(`  是否变量: ${isVariablePlaceholder(placeholder)}`);
+                    console.log(`  是否可选: ${isOptionalPlaceholder(placeholder)}`);
+                    console.log(`  是否必需: ${isRequiredPlaceholder(placeholder)}`);
+                    console.log(`  是否通配符: ${isWildcardPlaceholder(placeholder)}`);
+                    console.log(`  是否特殊: ${isSpecialPlaceholder(placeholder)}`);
+                });
+            }
+            
+            // CHTL JS 函数测试
+            function testCHTLJSFunctions() {
+                console.log("=== CHTL JS 函数测试 ===");
+                
+                // 创建测试函数
+                const testFunction = new CHTLJSFunction(
+                    "testFunction",
+                    "function(a, b)",
+                    "return a + b;"
+                );
+                
+                console.log("函数名称:", testFunction.getName());
+                console.log("函数签名:", testFunction.getSignature());
+                console.log("函数体:", testFunction.getBody());
+                console.log("参数列表:", testFunction.getParameters());
+                
+                // 测试函数调用
+                const callResult = testFunction.call(["1", "2"]);
+                console.log("函数调用:", callResult);
+                
+                // 测试参数绑定
+                const bindResult = testFunction.bind({ a: "x", b: "y" });
+                console.log("参数绑定:", bindResult);
+                
+                // 测试虚对象创建
+                const virtualObject = testFunction.createVirtualObject();
+                console.log("虚对象代码:", virtualObject);
+            }
+            
+            // 辅助函数
+            function isVariablePlaceholder(placeholder) {
+                return placeholder.startsWith("$") && !placeholder.startsWith("$?") && !placeholder.startsWith("$!");
+            }
+            
+            function isOptionalPlaceholder(placeholder) {
+                return placeholder.startsWith("$?");
+            }
+            
+            function isRequiredPlaceholder(placeholder) {
+                return placeholder.startsWith("$") && !placeholder.startsWith("$?");
+            }
+            
+            function isWildcardPlaceholder(placeholder) {
+                return placeholder === "...";
+            }
+            
+            function isSpecialPlaceholder(placeholder) {
+                return placeholder.startsWith("$_") || placeholder.startsWith("$!");
+            }
+            
+            // 模拟扫描算法
+            function performDoublePointerScan(code) {
+                const results = [];
+                let left = 0;
+                let right = code.length - 1;
+                
+                while (left < right) {
+                    while (left < right && /\s/.test(code[left])) {
+                        left++;
+                    }
+                    while (left < right && /\s/.test(code[right])) {
+                        right--;
+                    }
+                    
+                    if (left < right) {
+                        results.push(code.substring(left, right + 1));
+                        left++;
+                        right--;
+                    }
+                }
+                
+                return results;
+            }
+            
+            function performPreTruncationScan(code) {
+                const results = [];
+                let pos = 0;
+                
+                while (pos < code.length) {
+                    let nextPos = pos;
+                    while (nextPos < code.length && !/[\s,;{}]/.test(code[nextPos])) {
+                        nextPos++;
+                    }
+                    
+                    if (nextPos > pos) {
+                        results.push(code.substring(pos, nextPos));
+                    }
+                    
+                    while (nextPos < code.length && /[\s,;{}]/.test(code[nextPos])) {
+                        nextPos++;
+                    }
+                    
+                    pos = nextPos;
+                }
+                
+                return results;
+            }
+            
+            // CHTL JS 函数类
+            class CHTLJSFunction {
+                constructor(name, signature, body) {
+                    this.name = name;
+                    this.signature = signature;
+                    this.body = body;
+                    this.parameters = this.parseParameters(signature);
+                }
+                
+                getName() {
+                    return this.name;
+                }
+                
+                getSignature() {
+                    return this.signature;
+                }
+                
+                getBody() {
+                    return this.body;
+                }
+                
+                getParameters() {
+                    return this.parameters;
+                }
+                
+                call(arguments) {
+                    return `${this.name}(${arguments.join(', ')})`;
+                }
+                
+                bind(bindings) {
+                    let result = this.body;
+                    for (const [key, value] of Object.entries(bindings)) {
+                        const placeholder = `\${${key}}`;
+                        result = result.replace(new RegExp(placeholder, 'g'), value);
+                    }
+                    return result;
+                }
+                
+                createVirtualObject() {
+                    return `const ${this.name} = {
+  __meta: {
+    name: '${this.name}',
+    type: 'function',
+    signature: '${this.signature}',
+    created: new Date().toISOString()
+  },
+  function: ${this.body},
+  call: function(...args) {
+    return this.function.apply(this, args);
+  },
+  bind: function(bindings) {
+    return this.function.bind(bindings);
+  }
+};`;
+                }
+                
+                parseParameters(signature) {
+                    const start = signature.indexOf('(');
+                    if (start === -1) return [];
+                    
+                    const end = signature.indexOf(')', start);
+                    if (end === -1) return [];
+                    
+                    const paramsStr = signature.substring(start + 1, end);
+                    return paramsStr.split(',').map(p => p.trim()).filter(p => p);
+                }
+            }
+            
+            // 事件监听器
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('CJMOD API 测试页面加载完成');
+                
+                // 绑定测试按钮事件
+                const syntaxBtn = document.getElementById('syntax-test-btn');
+                if (syntaxBtn) {
+                    syntaxBtn.addEventListener('click', testSyntaxAnalysis);
+                }
+                
+                const bindingBtn = document.getElementById('binding-test-btn');
+                if (bindingBtn) {
+                    bindingBtn.addEventListener('click', testParameterBinding);
+                }
+                
+                const generationBtn = document.getElementById('generation-test-btn');
+                if (generationBtn) {
+                    generationBtn.addEventListener('click', testCodeGeneration);
+                }
+                
+                const scanBtn = document.getElementById('scan-test-btn');
+                if (scanBtn) {
+                    scanBtn.addEventListener('click', testScanningAlgorithms);
+                }
+                
+                // 运行所有测试
+                console.log('开始运行 CJMOD API 测试...');
+                testSyntaxAnalysis();
+                testParameterBinding();
+                testCodeGeneration();
+                testScanningAlgorithms();
+                testAtomArgs();
+                testCHTLJSFunctions();
+                console.log('CJMOD API 测试完成');
+            });
+        }
+    }
+}

@@ -1,0 +1,110 @@
+// 约束系统测试文件
+
+// 定义命名空间
+[Namespace] Restricted
+{
+    // 精确约束：禁止使用 span 和 [Custom] @Element Box
+    div
+    {
+        except span, [Custom] @Element Box;
+        
+        text
+        {
+            "This div cannot contain span elements or Box custom elements"
+        }
+    }
+}
+
+[Namespace] TypeRestricted
+{
+    // 类型约束：禁止使用 @Html 和 [Template] @Var
+    div
+    {
+        except @Html;
+        except [Template] @Var;
+        
+        text
+        {
+            "This div cannot contain HTML imports or variable templates"
+        }
+    }
+}
+
+[Namespace] GlobalRestricted
+{
+    // 全局约束：禁止使用模板
+    except [Template];
+    
+    // 这里尝试定义模板会报错
+    // [Template] @Style TestStyle
+    // {
+    //     color: red;
+    // }
+    
+    div
+    {
+        text
+        {
+            "This namespace cannot use templates"
+        }
+    }
+}
+
+// 使用约束
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                "CHTL Constraints Test"
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: "main-content";
+            
+            text
+            {
+                "Testing constraint system"
+            }
+            
+            // 这些元素应该被允许
+            div
+            {
+                text
+                {
+                    "This div is allowed"
+                }
+            }
+            
+            p
+            {
+                text
+                {
+                    "This paragraph is allowed"
+                }
+            }
+            
+            // 这些元素应该被约束系统阻止
+            // span
+            // {
+            //     text
+            //     {
+            //         "This span should be blocked by constraints"
+            //     }
+            // }
+        }
+        
+        // 使用命名空间
+        [Namespace] Restricted;
+        [Namespace] TypeRestricted;
+        [Namespace] GlobalRestricted;
+    }
+}
