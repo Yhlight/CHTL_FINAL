@@ -1,0 +1,63 @@
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                CHTL 示例页面
+            }
+        }
+    }
+
+    body
+    {
+        div
+        {
+            id: main-container;
+            class: container;
+
+            h1
+            {
+                text
+                {
+                    欢迎使用 CHTL
+                }
+            }
+
+            p
+            {
+                text
+                {
+                    这是一个使用 CHTL 语言编写的示例页面。
+                }
+            }
+
+            div
+            {
+                class: button-group;
+
+                button
+                {
+                    id: btn-primary;
+                    class: btn btn-primary;
+                    text
+                    {
+                        主要按钮
+                    }
+                }
+
+                button
+                {
+                    id: btn-secondary;
+                    class: btn btn-secondary;
+                    text
+                    {
+                        次要按钮
+                    }
+                }
+            }
+        }
+    }
+}
