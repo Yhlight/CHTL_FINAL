@@ -34,9 +34,7 @@ JSCompiler::JSCompiler() : minify_(false), optimize_(false) {
     create_params.array_buffer_allocator = v8::ArrayBuffer::Allocator::NewDefaultAllocator();
     isolate_ = v8::Isolate::New(create_params);
 #else
-    // 如果没有 V8，使用基本实现
-    platform_ = nullptr;
-    isolate_ = nullptr;
+    // 如果没有 V8，这些变量在头文件中没有定义，所以不需要初始化
 #endif
 }
 

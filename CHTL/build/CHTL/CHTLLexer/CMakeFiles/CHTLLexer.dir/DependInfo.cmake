@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspace/CHTL/CHTL/CHTLLexer/GlobalMap.cpp" "CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/GlobalMap.cpp.o" "gcc" "CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/GlobalMap.cpp.o.d"
   "/workspace/CHTL/CHTL/CHTLLexer/Lexer.cpp" "CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/Lexer.cpp.o" "gcc" "CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/Lexer.cpp.o.d"
+  "/workspace/CHTL/CHTL/CHTLLexer/PropertyExpressionLexer.cpp" "CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.o" "gcc" "CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.o.d"
   "/workspace/CHTL/CHTL/CHTLLexer/Token.cpp" "CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/Token.cpp.o" "gcc" "CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/Token.cpp.o.d"
   )
 

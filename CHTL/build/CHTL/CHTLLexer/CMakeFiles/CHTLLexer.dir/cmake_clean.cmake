@@ -5,6 +5,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/CHTLLexer.dir/GlobalMap.cpp.o.d"
   "CMakeFiles/CHTLLexer.dir/Lexer.cpp.o"
   "CMakeFiles/CHTLLexer.dir/Lexer.cpp.o.d"
+  "CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.o"
+  "CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.o.d"
   "CMakeFiles/CHTLLexer.dir/Token.cpp.o"
   "CMakeFiles/CHTLLexer.dir/Token.cpp.o.d"
 )

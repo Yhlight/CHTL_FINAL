@@ -1,2 +1,2 @@
-/usr/bin/ar qc ../../lib/libCHTLParser.a CMakeFiles/CHTLParser.dir/Parser.cpp.o
+/usr/bin/ar qc ../../lib/libCHTLParser.a CMakeFiles/CHTLParser.dir/Parser.cpp.o CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.o
 /usr/bin/ranlib ../../lib/libCHTLParser.a

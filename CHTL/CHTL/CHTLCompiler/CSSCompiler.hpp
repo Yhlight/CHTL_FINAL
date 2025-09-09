@@ -11,10 +11,17 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 
 #ifdef HAVE_LIBCSS
 #include <libcss/libcss.h>
 #endif
+
+// 前向声明
+namespace CHTL {
+    class PropertyExpressionParser;
+    class PropertyExpressionNode;
+}
 
 namespace CHTL {
 
@@ -50,6 +57,13 @@ public:
     // 设置编译选项
     void setMinify(bool minify) { minify_ = minify; }
     void setOptimize(bool optimize) { optimize_ = optimize; }
+    
+    // 处理属性表达式
+    std::string processPropertyExpression(const std::string& value);
+    std::string processArithmeticExpression(const std::string& value);
+    std::string processPropertyReference(const std::string& value);
+    std::string processConditionalExpression(const std::string& value);
+    std::string processDynamicExpression(const std::string& value);
     
 private:
     std::map<std::string, std::string> variables_;

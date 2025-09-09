@@ -223,6 +223,30 @@ Lexer.cpp.s:
 	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/build.make CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/Lexer.cpp.s
 .PHONY : Lexer.cpp.s
 
+PropertyExpressionLexer.o: PropertyExpressionLexer.cpp.o
+.PHONY : PropertyExpressionLexer.o
+
+# target to build an object file
+PropertyExpressionLexer.cpp.o:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/build.make CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.o
+.PHONY : PropertyExpressionLexer.cpp.o
+
+PropertyExpressionLexer.i: PropertyExpressionLexer.cpp.i
+.PHONY : PropertyExpressionLexer.i
+
+# target to preprocess a source file
+PropertyExpressionLexer.cpp.i:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/build.make CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.i
+.PHONY : PropertyExpressionLexer.cpp.i
+
+PropertyExpressionLexer.s: PropertyExpressionLexer.cpp.s
+.PHONY : PropertyExpressionLexer.s
+
+# target to generate assembly for a file
+PropertyExpressionLexer.cpp.s:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/build.make CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.s
+.PHONY : PropertyExpressionLexer.cpp.s
+
 Token.o: Token.cpp.o
 .PHONY : Token.o
 
@@ -266,6 +290,9 @@ help:
 	@echo "... Lexer.o"
 	@echo "... Lexer.i"
 	@echo "... Lexer.s"
+	@echo "... PropertyExpressionLexer.o"
+	@echo "... PropertyExpressionLexer.i"
+	@echo "... PropertyExpressionLexer.s"
 	@echo "... Token.o"
 	@echo "... Token.i"
 	@echo "... Token.s"

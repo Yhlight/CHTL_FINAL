@@ -84,6 +84,21 @@ run_test "spa_page" "spa_page.chtl" ""
 echo "Starting complete features tests..."
 run_test "complete_features" "complete_features.chtl" ""
 
+echo "Starting property arithmetic tests..."
+run_test "property_arithmetic" "property_arithmetic.chtl" ""
+
+echo "Starting property reference tests..."
+run_test "property_reference" "property_reference.chtl" ""
+
+echo "Starting property conditionals tests..."
+run_test "property_conditionals" "property_conditionals.chtl" ""
+
+echo "Starting dynamic property conditionals tests..."
+run_test "dynamic_property_conditionals" "dynamic_property_conditionals.chtl" ""
+
+echo "Starting comprehensive property expressions tests..."
+run_test "comprehensive_property_expressions" "comprehensive_property_expressions.chtl" ""
+
 # Test default structure output
 echo -e "\n${YELLOW}Running default structure test: spa_page_default_struct${NC}"
 echo "Input file: spa_page.chtl"

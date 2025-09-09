@@ -211,25 +211,76 @@ CHTLJSTokenType CHTLJSLexer::checkKeyword(const std::string& word) {
 
 CHTLJSTokenType CHTLJSLexer::checkOperator(char c) {
     switch (c) {
-        case '=': return CHTLJSTokenType::ASSIGN;
+        case '=': 
+            if (peekChar() == '=') {
+                readChar();
+                return CHTLJSTokenType::EQUAL_EQUAL;
+            }
+            return CHTLJSTokenType::ASSIGN;
         case ':': return CHTLJSTokenType::COLON;
         case ',': return CHTLJSTokenType::COMMA;
         case ';': return CHTLJSTokenType::SEMICOLON;
         case '.': return CHTLJSTokenType::DOT;
-        case '|': return CHTLJSTokenType::PIPE;
+        case '|': 
+            if (peekChar() == '|') {
+                readChar();
+                return CHTLJSTokenType::LOGICAL_OR;
+            }
+            return CHTLJSTokenType::PIPE;
         case '(': return CHTLJSTokenType::LEFT_PAREN;
         case ')': return CHTLJSTokenType::RIGHT_PAREN;
         case '{': return CHTLJSTokenType::LEFT_BRACE;
         case '}': return CHTLJSTokenType::RIGHT_BRACE;
         case '[': return CHTLJSTokenType::LEFT_BRACKET;
         case ']': return CHTLJSTokenType::RIGHT_BRACKET;
-        case '&': return CHTLJSTokenType::REFERENCE;
+        case '&': 
+            if (peekChar() == '&') {
+                readChar();
+                return CHTLJSTokenType::LOGICAL_AND;
+            }
+            return CHTLJSTokenType::REFERENCE;
+        case '+': 
+            if (peekChar() == '+') {
+                readChar();
+                return CHTLJSTokenType::PLUS_PLUS;
+            }
+            return CHTLJSTokenType::PLUS;
         case '-': 
             if (peekChar() == '>') {
                 readChar();
                 return CHTLJSTokenType::ARROW;
             }
-            break;
+            if (peekChar() == '-') {
+                readChar();
+                return CHTLJSTokenType::MINUS_MINUS;
+            }
+            return CHTLJSTokenType::MINUS;
+        case '*': 
+            if (peekChar() == '*') {
+                readChar();
+                return CHTLJSTokenType::POWER;
+            }
+            return CHTLJSTokenType::MULTIPLY;
+        case '/': return CHTLJSTokenType::DIVIDE;
+        case '%': return CHTLJSTokenType::MODULO;
+        case '<': 
+            if (peekChar() == '=') {
+                readChar();
+                return CHTLJSTokenType::LESS_EQUAL;
+            }
+            return CHTLJSTokenType::LESS_THAN;
+        case '>': 
+            if (peekChar() == '=') {
+                readChar();
+                return CHTLJSTokenType::GREATER_EQUAL;
+            }
+            return CHTLJSTokenType::GREATER_THAN;
+        case '!': 
+            if (peekChar() == '=') {
+                readChar();
+                return CHTLJSTokenType::NOT_EQUAL;
+            }
+            return CHTLJSTokenType::LOGICAL_NOT;
     }
     
     return CHTLJSTokenType::ERROR;

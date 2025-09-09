@@ -3,6 +3,7 @@ add_library(CHTLLexer STATIC
     Token.cpp
     Lexer.cpp
     GlobalMap.cpp
+    PropertyExpressionLexer.cpp
 )
 
 target_include_directories(CHTLLexer PUBLIC

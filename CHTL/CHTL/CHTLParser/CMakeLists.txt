@@ -1,6 +1,7 @@
 # CHTL 解析器库
 add_library(CHTLParser STATIC
     Parser.cpp
+    PropertyExpressionParser.cpp
 )
 
 target_include_directories(CHTLParser PUBLIC

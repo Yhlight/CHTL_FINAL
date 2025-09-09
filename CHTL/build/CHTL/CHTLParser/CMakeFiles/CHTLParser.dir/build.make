@@ -86,17 +86,33 @@ CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/Parser.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLParser.dir/Parser.cpp.s"
 	cd /workspace/CHTL/build/CHTL/CHTLParser && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CHTL/CHTLParser/Parser.cpp -o CMakeFiles/CHTLParser.dir/Parser.cpp.s
 
+CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.o: CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/flags.make
+CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.o: /workspace/CHTL/CHTL/CHTLParser/PropertyExpressionParser.cpp
+CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.o: CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.o"
+	cd /workspace/CHTL/build/CHTL/CHTLParser && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.o -MF CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.o.d -o CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.o -c /workspace/CHTL/CHTL/CHTLParser/PropertyExpressionParser.cpp
+
+CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.i"
+	cd /workspace/CHTL/build/CHTL/CHTLParser && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/CHTL/CHTL/CHTLParser/PropertyExpressionParser.cpp > CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.i
+
+CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.s"
+	cd /workspace/CHTL/build/CHTL/CHTLParser && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CHTL/CHTLParser/PropertyExpressionParser.cpp -o CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.s
+
 # Object files for target CHTLParser
 CHTLParser_OBJECTS = \
-"CMakeFiles/CHTLParser.dir/Parser.cpp.o"
+"CMakeFiles/CHTLParser.dir/Parser.cpp.o" \
+"CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.o"
 
 # External object files for target CHTLParser
 CHTLParser_EXTERNAL_OBJECTS =
 
 lib/libCHTLParser.a: CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/Parser.cpp.o
+lib/libCHTLParser.a: CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.o
 lib/libCHTLParser.a: CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/build.make
 lib/libCHTLParser.a: CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX static library ../../lib/libCHTLParser.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library ../../lib/libCHTLParser.a"
 	cd /workspace/CHTL/build/CHTL/CHTLParser && $(CMAKE_COMMAND) -P CMakeFiles/CHTLParser.dir/cmake_clean_target.cmake
 	cd /workspace/CHTL/build/CHTL/CHTLParser && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/CHTLParser.dir/link.txt --verbose=$(VERBOSE)
 

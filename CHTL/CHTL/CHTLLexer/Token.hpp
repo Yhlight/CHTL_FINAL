@@ -38,6 +38,27 @@ enum class TokenType {
     DOLLAR,         // $
     PERCENT,        // %
     
+    // 算术运算符
+    PLUS,           // +
+    MINUS,          // -
+    MULTIPLY,       // *
+    DIVIDE,         // /
+    MODULO,         // %
+    POWER,          // **
+    
+    // 比较运算符
+    LESS_THAN,      // <
+    GREATER_THAN,   // >
+    LESS_EQUAL,     // <=
+    GREATER_EQUAL,  // >=
+    EQUAL_EQUAL,    // ==
+    NOT_EQUAL,      // !=
+    
+    // 逻辑运算符
+    LOGICAL_AND,    // &&
+    LOGICAL_OR,     // ||
+    LOGICAL_NOT,    // !
+    
     // 注释
     SINGLE_COMMENT, // //
     MULTI_COMMENT,  // /* */

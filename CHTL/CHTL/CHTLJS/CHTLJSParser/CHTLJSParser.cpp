@@ -365,7 +365,7 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseMultiplicativeExpression() {
 
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseUnaryExpression() {
     if (current_.getType() == CHTLJSTokenType::MINUS ||
-        current_.getType() == CHTLJSTokenType::NOT ||
+        current_.getType() == CHTLJSTokenType::LOGICAL_NOT ||
         current_.getType() == CHTLJSTokenType::PLUS_PLUS ||
         current_.getType() == CHTLJSTokenType::MINUS_MINUS) {
         std::string op = current_.getValue();

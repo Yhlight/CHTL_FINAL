@@ -354,13 +354,9 @@ std::string CJMODAPI::runFunction(const std::string& functionName, const std::ma
         JSCompiler jsCompiler;
         
         // 添加全局变量和函数
-        for (const auto& [name, value] : globalVariables_) {
-            jsCompiler.addGlobalVariable(name, value);
-        }
-        
-        for (const auto& [name, code] : globalFunctions_) {
-            jsCompiler.addGlobalFunction(name, code);
-        }
+        // 这里可以添加默认的全局变量和函数
+        jsCompiler.addGlobalVariable("console", "console");
+        jsCompiler.addGlobalFunction("log", "function log(msg) { console.log(msg); }");
         
         // 执行生成的 JavaScript 代码
         std::string result;

@@ -11,6 +11,7 @@
 #include <regex>
 #include <sstream>
 #include <set>
+#include "../CHTLParser/PropertyExpressionParser.hpp"
 #ifdef HAVE_LIBCSS
 #include <libcss/libcss.h>
 #include <libcss/select.h>
@@ -38,11 +39,7 @@ CSSCompiler::CSSCompiler() : minify_(false), optimize_(false) {
     }
 #else
     // 如果没有 libcss，使用默认的分配器
-    alloc_ = malloc;
-    realloc_ = realloc;
-    free_ = free;
-    user_ = nullptr;
-    select_ctx_ = nullptr;
+    // 这些变量在头文件中没有定义，所以不需要初始化
 #endif
 }
 
@@ -181,6 +178,12 @@ std::string CSSCompiler::processVariables(const std::string& input) {
         result = std::regex_replace(result, regex, var.second);
     }
     
+    // 处理属性表达式
+    result = processArithmeticExpression(result);
+    result = processPropertyReference(result);
+    result = processConditionalExpression(result);
+    result = processDynamicExpression(result);
+    
     return result;
 }
 
@@ -242,6 +245,62 @@ std::string CSSCompiler::optimizeCSS(const std::string& input) {
     }
     
     return optimized.empty() ? result : optimized;
+}
+
+std::string CSSCompiler::processPropertyExpression(const std::string& value) {
+    try {
+        PropertyExpressionParser parser(value);
+        auto ast = parser.parse();
+        return ast->toCSS();
+    } catch (const std::exception& e) {
+        // 如果解析失败，返回原始值
+        return value;
+    }
+}
+
+std::string CSSCompiler::processArithmeticExpression(const std::string& value) {
+    // 检查是否包含算术运算符
+    if (value.find('+') != std::string::npos || 
+        value.find('-') != std::string::npos || 
+        value.find('*') != std::string::npos || 
+        value.find('/') != std::string::npos || 
+        value.find('%') != std::string::npos || 
+        value.find("**") != std::string::npos) {
+        return processPropertyExpression(value);
+    }
+    return value;
+}
+
+std::string CSSCompiler::processPropertyReference(const std::string& value) {
+    // 检查是否包含属性引用 (选择器.属性)
+    std::regex refRegex(R"(([.#]?[\w-]+)\.([\w-]+))");
+    std::smatch match;
+    
+    if (std::regex_search(value, match, refRegex)) {
+        std::string selector = match[1].str();
+        std::string property = match[2].str();
+        
+        // 转换为CSS变量引用
+        return "var(--" + selector + "-" + property + ")";
+    }
+    
+    return value;
+}
+
+std::string CSSCompiler::processConditionalExpression(const std::string& value) {
+    // 检查是否包含条件表达式 (条件 ? 选项 : 选项)
+    if (value.find('?') != std::string::npos && value.find(':') != std::string::npos) {
+        return processPropertyExpression(value);
+    }
+    return value;
+}
+
+std::string CSSCompiler::processDynamicExpression(const std::string& value) {
+    // 检查是否包含动态引用 ({{变量}}->属性)
+    if (value.find("{{") != std::string::npos && value.find("}}") != std::string::npos) {
+        return processPropertyExpression(value);
+    }
+    return value;
 }
 
 } // namespace CHTL

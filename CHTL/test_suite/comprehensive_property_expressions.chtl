@@ -1,0 +1,123 @@
+// 综合测试所有属性表达式语法
+div {
+    id: master-container;
+    class: layout;
+    style {
+        width: 800px;
+        height: 600px;
+        background-color: #ffffff;
+    }
+}
+
+div {
+    class: header;
+    style {
+        // 基本算术运算
+        width: master-container.width;
+        height: 80px;
+        
+        // 属性引用运算
+        padding: master-container.width * 0.05;
+        margin: master-container.height * 0.02;
+        
+        // 条件表达式
+        background-color: 
+            width > 600px ? "#2c3e50",
+            width > 400px ? "#34495e",
+            height < 60px ? "#e74c3c" : "#95a5a6";
+            
+        // 动态条件表达式
+        color: {{master-container}}->width > 700 ? "white" : "black";
+    }
+}
+
+div {
+    class: sidebar;
+    style {
+        // 复杂属性引用
+        width: master-container.width * 0.25;
+        height: master-container.height - header.height - footer.height;
+        
+        // 链式条件表达式
+        background-color: 
+            width > 200px ? "#ecf0f1",
+            width > 150px ? "#bdc3c7",
+            height < 300px ? "#e67e22" : "#f39c12";
+            
+        // 动态属性运算
+        padding: {{master-container}}->width * 0.02;
+        margin: {{master-container}}->height * 0.01;
+    }
+}
+
+div {
+    class: main-content;
+    style {
+        // 复杂计算
+        width: master-container.width - sidebar.width - 20px;
+        height: master-container.height - header.height - footer.height;
+        
+        // 属性引用条件表达式
+        background-color: 
+            master-container.width > 600px ? "#ffffff",
+            master-container.height > 400px ? "#f8f9fa" : "#e9ecef";
+            
+        // 动态链式条件表达式
+        border: 
+            {{master-container}}->width > 700 ? "2px solid #3498db",
+            {{master-container}}->width > 500 ? "1px solid #95a5a6",
+            {{master-container}}->height < 400 ? "1px dashed #e74c3c" : "none";
+            
+        // 复杂算术运算
+        padding: (master-container.width + master-container.height) / 20;
+        margin: master-container.width % 100 + "px";
+    }
+}
+
+div {
+    class: footer;
+    style {
+        // 基本属性
+        width: master-container.width;
+        height: 60px;
+        
+        // 条件表达式
+        background-color: 
+            width > 600px ? "#2c3e50",
+            width > 400px ? "#34495e" : "#7f8c8d";
+            
+        // 动态属性引用
+        color: {{master-container}}->width > 700 ? "white" : "lightgray";
+        
+        // 复杂表达式
+        padding: master-container.width / 40 + "px";
+        text-align: master-container.width > 600 ? "center" : "left";
+    }
+}
+
+// 测试精确访问
+div {
+    class: item;
+    style {
+        width: 100px;
+        height: 50px;
+        background-color: #3498db;
+    }
+}
+
+div {
+    class: item;
+    style {
+        // 引用第一个item的属性
+        width: item[0].width * 1.5;
+        height: item[0].height * 2;
+        
+        // 条件表达式
+        background-color: 
+            item[0].width > 80 ? "#e74c3c",
+            item[0].height > 40 ? "#f39c12" : "#2ecc71";
+            
+        // 动态引用
+        transform: {{item[0]}}->width > 90 ? "scale(1.1)" : "scale(1.0)";
+    }
+}

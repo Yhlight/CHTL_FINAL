@@ -110,7 +110,28 @@ const std::unordered_map<std::string, TokenType>& OperatorMap::getOperators() {
         {"%", TokenType::PERCENT},
         {"->", TokenType::ARROW},
         {"::", TokenType::DOUBLE_COLON},
-        {"...", TokenType::TRIPLE_DOT}
+        {"...", TokenType::TRIPLE_DOT},
+        
+        // 算术运算符
+        {"+", TokenType::PLUS},
+        {"-", TokenType::MINUS},
+        {"*", TokenType::MULTIPLY},
+        {"/", TokenType::DIVIDE},
+        {"%", TokenType::MODULO},
+        {"**", TokenType::POWER},
+        
+        // 比较运算符
+        {"<", TokenType::LESS_THAN},
+        {">", TokenType::GREATER_THAN},
+        {"<=", TokenType::LESS_EQUAL},
+        {">=", TokenType::GREATER_EQUAL},
+        {"==", TokenType::EQUAL_EQUAL},
+        {"!=", TokenType::NOT_EQUAL},
+        
+        // 逻辑运算符
+        {"&&", TokenType::LOGICAL_AND},
+        {"||", TokenType::LOGICAL_OR},
+        {"!", TokenType::LOGICAL_NOT}
     };
     return operators;
 }

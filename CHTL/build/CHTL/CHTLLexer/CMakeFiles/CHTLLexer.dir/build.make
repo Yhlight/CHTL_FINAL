@@ -114,11 +114,26 @@ CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/GlobalMap.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLLexer.dir/GlobalMap.cpp.s"
 	cd /workspace/CHTL/build/CHTL/CHTLLexer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CHTL/CHTLLexer/GlobalMap.cpp -o CMakeFiles/CHTLLexer.dir/GlobalMap.cpp.s
 
+CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.o: CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/flags.make
+CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.o: /workspace/CHTL/CHTL/CHTLLexer/PropertyExpressionLexer.cpp
+CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.o: CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.o"
+	cd /workspace/CHTL/build/CHTL/CHTLLexer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.o -MF CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.o.d -o CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.o -c /workspace/CHTL/CHTL/CHTLLexer/PropertyExpressionLexer.cpp
+
+CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.i"
+	cd /workspace/CHTL/build/CHTL/CHTLLexer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/CHTL/CHTL/CHTLLexer/PropertyExpressionLexer.cpp > CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.i
+
+CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.s"
+	cd /workspace/CHTL/build/CHTL/CHTLLexer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CHTL/CHTLLexer/PropertyExpressionLexer.cpp -o CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.s
+
 # Object files for target CHTLLexer
 CHTLLexer_OBJECTS = \
 "CMakeFiles/CHTLLexer.dir/Token.cpp.o" \
 "CMakeFiles/CHTLLexer.dir/Lexer.cpp.o" \
-"CMakeFiles/CHTLLexer.dir/GlobalMap.cpp.o"
+"CMakeFiles/CHTLLexer.dir/GlobalMap.cpp.o" \
+"CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.o"
 
 # External object files for target CHTLLexer
 CHTLLexer_EXTERNAL_OBJECTS =
@@ -126,9 +141,10 @@ CHTLLexer_EXTERNAL_OBJECTS =
 lib/libCHTLLexer.a: CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/Token.cpp.o
 lib/libCHTLLexer.a: CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/Lexer.cpp.o
 lib/libCHTLLexer.a: CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/GlobalMap.cpp.o
+lib/libCHTLLexer.a: CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/PropertyExpressionLexer.cpp.o
 lib/libCHTLLexer.a: CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/build.make
 lib/libCHTLLexer.a: CHTL/CHTLLexer/CMakeFiles/CHTLLexer.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX static library ../../lib/libCHTLLexer.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX static library ../../lib/libCHTLLexer.a"
 	cd /workspace/CHTL/build/CHTL/CHTLLexer && $(CMAKE_COMMAND) -P CMakeFiles/CHTLLexer.dir/cmake_clean_target.cmake
 	cd /workspace/CHTL/build/CHTL/CHTLLexer && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/CHTLLexer.dir/link.txt --verbose=$(VERBOSE)
 

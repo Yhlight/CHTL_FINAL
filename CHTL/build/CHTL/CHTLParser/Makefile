@@ -199,6 +199,30 @@ Parser.cpp.s:
 	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/build.make CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/Parser.cpp.s
 .PHONY : Parser.cpp.s
 
+PropertyExpressionParser.o: PropertyExpressionParser.cpp.o
+.PHONY : PropertyExpressionParser.o
+
+# target to build an object file
+PropertyExpressionParser.cpp.o:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/build.make CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.o
+.PHONY : PropertyExpressionParser.cpp.o
+
+PropertyExpressionParser.i: PropertyExpressionParser.cpp.i
+.PHONY : PropertyExpressionParser.i
+
+# target to preprocess a source file
+PropertyExpressionParser.cpp.i:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/build.make CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.i
+.PHONY : PropertyExpressionParser.cpp.i
+
+PropertyExpressionParser.s: PropertyExpressionParser.cpp.s
+.PHONY : PropertyExpressionParser.s
+
+# target to generate assembly for a file
+PropertyExpressionParser.cpp.s:
+	cd /workspace/CHTL/build && $(MAKE) $(MAKESILENT) -f CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/build.make CHTL/CHTLParser/CMakeFiles/CHTLParser.dir/PropertyExpressionParser.cpp.s
+.PHONY : PropertyExpressionParser.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -215,6 +239,9 @@ help:
 	@echo "... Parser.o"
 	@echo "... Parser.i"
 	@echo "... Parser.s"
+	@echo "... PropertyExpressionParser.o"
+	@echo "... PropertyExpressionParser.i"
+	@echo "... PropertyExpressionParser.s"
 .PHONY : help
 
 

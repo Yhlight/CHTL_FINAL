@@ -13,6 +13,9 @@ target_include_directories(CHTLCompiler PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+# 查找必要的库
+find_package(Threads REQUIRED)
+
 # 查找可选的库
 find_package(PkgConfig QUIET)
 if(PkgConfig_FOUND)
@@ -23,9 +26,7 @@ find_package(v8 QUIET)
 
 # 链接必要的库
 target_link_libraries(CHTLCompiler PUBLIC
-    # 正则表达式库
     Threads::Threads
-    regex
 )
 
 # 链接可选的库

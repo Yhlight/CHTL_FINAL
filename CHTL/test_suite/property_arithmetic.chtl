@@ -1,0 +1,30 @@
+// 测试属性运算语法
+div {
+    id: box;
+    style {
+        width: 100px;
+        height: 50px;
+    }
+}
+
+div {
+    style {
+        // 基本算术运算
+        width: 100px + 50px;
+        height: 200px - 50px;
+        margin: 10px * 2;
+        padding: 20px / 2;
+        border-width: 15px % 4;
+        font-size: 2px ** 3;
+        
+        // 属性引用运算
+        left: 100px + box.width;
+        top: 200px - box.height;
+        right: box.width * 2;
+        bottom: box.height / 2;
+        
+        // 复杂表达式
+        transform: translateX(box.width + 10px) translateY(box.height - 5px);
+        box-shadow: 0px 0px (box.width / 2) rgba(0, 0, 0, 0.5);
+    }
+}
