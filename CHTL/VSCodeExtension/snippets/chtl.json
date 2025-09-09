@@ -1,0 +1,245 @@
+{
+  "CHTL Basic Structure": {
+    "prefix": "chtl-basic",
+    "body": [
+      "html",
+      "{",
+      "    head",
+      "    {",
+      "        title: \"${1:Page Title}\";",
+      "        meta: \"charset=UTF-8\";",
+      "    }",
+      "    ",
+      "    body",
+      "    {",
+      "        ${2:// Content here}",
+      "    }",
+      "}"
+    ],
+    "description": "Basic CHTL HTML structure"
+  },
+  "CHTL Template": {
+    "prefix": "chtl-template",
+    "body": [
+      "[Template] @${1|Style,Element,Var|} ${2:TemplateName}",
+      "{",
+      "    ${3:// Template content}",
+      "}"
+    ],
+    "description": "CHTL template block"
+  },
+  "CHTL Custom": {
+    "prefix": "chtl-custom",
+    "body": [
+      "[Custom] @${1|Style,Element,Var|} ${2:CustomName}",
+      "{",
+      "    ${3:// Custom content}",
+      "}"
+    ],
+    "description": "CHTL custom block"
+  },
+  "CHTL Import": {
+    "prefix": "chtl-import",
+    "body": [
+      "[Import] \"${1:path/to/file.chtl}\";"
+    ],
+    "description": "CHTL import statement"
+  },
+  "CHTL Namespace": {
+    "prefix": "chtl-namespace",
+    "body": [
+      "[Namespace] ${1:NamespaceName}",
+      "{",
+      "    ${2:// Namespace content}",
+      "}"
+    ],
+    "description": "CHTL namespace block"
+  },
+  "CHTL Configuration": {
+    "prefix": "chtl-config",
+    "body": [
+      "[Configuration] ${1:ConfigName}",
+      "{",
+      "    ${2:// Configuration options}",
+      "}"
+    ],
+    "description": "CHTL configuration block"
+  },
+  "CHTL Style Block": {
+    "prefix": "chtl-style",
+    "body": [
+      "style",
+      "{",
+      "    ${1:// CSS styles}",
+      "}"
+    ],
+    "description": "CHTL style block"
+  },
+  "CHTL Script Block": {
+    "prefix": "chtl-script",
+    "body": [
+      "script",
+      "{",
+      "    ${1:// JavaScript code}",
+      "}"
+    ],
+    "description": "CHTL script block"
+  },
+  "CHTL Text Node": {
+    "prefix": "chtl-text",
+    "body": [
+      "text",
+      "{",
+      "    \"${1:Text content}\"",
+      "}"
+    ],
+    "description": "CHTL text node"
+  },
+  "CHTL Element with Attributes": {
+    "prefix": "chtl-element",
+    "body": [
+      "${1:div}",
+      "{",
+      "    ${2|id,class,style|}${3|:|=} \"${4:value}\";",
+      "    ${5:// Element content}",
+      "}"
+    ],
+    "description": "CHTL element with attributes"
+  },
+  "CHTL Fileloader": {
+    "prefix": "chtl-fileloader",
+    "body": [
+      "fileloader",
+      "{",
+      "    load: \"${1:path/to/file.js}\";",
+      "}"
+    ],
+    "description": "CHTL JS fileloader"
+  },
+  "CHTL Listen": {
+    "prefix": "chtl-listen",
+    "body": [
+      "listen",
+      "{",
+      "    ${1:event}: () => {",
+      "        ${2:// Event handler}",
+      "    };",
+      "}"
+    ],
+    "description": "CHTL JS listen block"
+  },
+  "CHTL Delegate": {
+    "prefix": "chtl-delegate",
+    "body": [
+      "delegate",
+      "{",
+      "    \"${1:selector}\": {",
+      "        ${2:event}: () => {",
+      "            ${3:// Event handler}",
+      "        };",
+      "    };",
+      "}"
+    ],
+    "description": "CHTL JS delegate block"
+  },
+  "CHTL Animate": {
+    "prefix": "chtl-animate",
+    "body": [
+      "animate",
+      "{",
+      "    target: \"${1:selector}\";",
+      "    duration: ${2:300};",
+      "    easing: \"${3:ease-in-out}\";",
+      "    begin: {",
+      "        ${4:// Begin styles}",
+      "    };",
+      "    end: {",
+      "        ${5:// End styles}",
+      "    };",
+      "}"
+    ],
+    "description": "CHTL JS animate block"
+  },
+  "CHTL Virtual Object": {
+    "prefix": "chtl-vir",
+    "body": [
+      "vir",
+      "{",
+      "    ${1:ObjectName}: {",
+      "        ${2:method}: () => {",
+      "            ${3:// Method implementation}",
+      "        };",
+      "    };",
+      "}"
+    ],
+    "description": "CHTL JS virtual object"
+  },
+  "CHTL Router": {
+    "prefix": "chtl-router",
+    "body": [
+      "router",
+      "{",
+      "    mode: \"${1|hash,history|}\";",
+      "    routes: {",
+      "        \"${2:/}\": \"${3:home}\";",
+      "        \"${4:/about}\": \"${5:about}\";",
+      "    };",
+      "    onRouteChange: (route) => {",
+      "        ${6:// Route change handler}",
+      "    };",
+      "}"
+    ],
+    "description": "CHTL JS router"
+  },
+  "CHTL Selector": {
+    "prefix": "chtl-selector",
+    "body": [
+      "{{${1:selector}}}"
+    ],
+    "description": "CHTL JS selector"
+  },
+  "CHTL Arrow Function": {
+    "prefix": "chtl-arrow",
+    "body": [
+      "{{${1:selector}}}->${2:method}(${3:args});"
+    ],
+    "description": "CHTL JS arrow function call"
+  },
+  "CHTL Conditional Style": {
+    "prefix": "chtl-conditional",
+    "body": [
+      "${1:property}: ${2:condition} ? \"${3:true-value}\" : \"${4:false-value}\";"
+    ],
+    "description": "CHTL conditional style"
+  },
+  "CHTL Context Selector": {
+    "prefix": "chtl-context",
+    "body": [
+      "&:${1|hover,focus,active,visited|}"
+    ],
+    "description": "CHTL context selector"
+  },
+  "CHTL Comment": {
+    "prefix": "chtl-comment",
+    "body": [
+      "// ${1:Comment}"
+    ],
+    "description": "CHTL single-line comment"
+  },
+  "CHTL Block Comment": {
+    "prefix": "chtl-block-comment",
+    "body": [
+      "/*",
+      " * ${1:Comment}",
+      " */"
+    ],
+    "description": "CHTL block comment"
+  },
+  "CHTL Generator Comment": {
+    "prefix": "chtl-gen-comment",
+    "body": [
+      "-- ${1:Generator comment}"
+    ],
+    "description": "CHTL generator comment"
+  }
+}

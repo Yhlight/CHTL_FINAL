@@ -25,11 +25,13 @@ add_subdirectory(CodeMerger)
 add_subdirectory(CompilerDispatcher)
 add_subdirectory(Util)
 add_subdirectory(Test)
+add_subdirectory(CLI)
 
 # 主可执行文件
 add_executable(chtl main.cpp)
 target_link_libraries(chtl 
     CHTLCore
+    CHTLJSCore
     Scanner
     CodeMerger
     CompilerDispatcher
@@ -40,6 +42,7 @@ target_link_libraries(chtl
 add_executable(test_basic Test/TestBasic.cpp)
 target_link_libraries(test_basic 
     CHTLCore
+    CHTLJSCore
     Scanner
     CodeMerger
     CompilerDispatcher
@@ -49,6 +52,47 @@ target_link_libraries(test_basic
 add_executable(test_complete Test/TestComplete.cpp)
 target_link_libraries(test_complete 
     CHTLCore
+    CHTLJSCore
+    Scanner
+    CodeMerger
+    CompilerDispatcher
+    Util
+)
+
+add_executable(test_chtljs Test/TestCHTLJS.cpp)
+target_link_libraries(test_chtljs 
+    CHTLCore
+    CHTLJSCore
+    Scanner
+    CodeMerger
+    CompilerDispatcher
+    Util
+)
+
+add_executable(test_configuration Test/TestConfiguration.cpp)
+target_link_libraries(test_configuration 
+    CHTLCore
+    CHTLJSCore
+    Scanner
+    CodeMerger
+    CompilerDispatcher
+    Util
+)
+
+add_executable(test_module_system Test/TestModuleSystem.cpp)
+target_link_libraries(test_module_system 
+    CHTLCore
+    CHTLJSCore
+    Scanner
+    CodeMerger
+    CompilerDispatcher
+    Util
+)
+
+add_executable(test_cli Test/TestCLI.cpp)
+target_link_libraries(test_cli 
+    CHTLCore
+    CHTLJSCore
     Scanner
     CodeMerger
     CompilerDispatcher

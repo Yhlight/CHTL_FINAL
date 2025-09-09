@@ -25,6 +25,14 @@ add_library(CHTLCore STATIC
     # Manager
     CHTLManage/CHTLManage.h
     CHTLManage/CHTLManage.cpp
+    CHTLManage/ImportManager.h
+    CHTLManage/ImportManager.cpp
+    CHTLManage/NamespaceManager.h
+    CHTLManage/NamespaceManager.cpp
+    CHTLManage/ConstraintManager.h
+    CHTLManage/ConstraintManager.cpp
+    CHTLManage/ConfigurationManager.h
+    CHTLManage/ConfigurationManager.cpp
     
     # Nodes
     CHTLNode/BaseNode.h
@@ -41,6 +49,14 @@ add_library(CHTLCore STATIC
     CHTLNode/StyleNode.cpp
     CHTLNode/ScriptNode.h
     CHTLNode/ScriptNode.cpp
+    CHTLNode/ImportNode.h
+    CHTLNode/ImportNode.cpp
+    CHTLNode/NamespaceNode.h
+    CHTLNode/NamespaceNode.cpp
+    CHTLNode/ConstraintNode.h
+    CHTLNode/ConstraintNode.cpp
+    CHTLNode/ConfigurationNode.h
+    CHTLNode/ConfigurationNode.cpp
     
     # Parser
     CHTLParser/CHTLParser.h
@@ -54,9 +70,21 @@ add_library(CHTLCore STATIC
     CHTLIOStream/CHTLIOStream.h
     CHTLIOStream/CHTLIOStream.cpp
     
-    # CMOD System
-    CMODSystem/CMODSystem.h
-    CMODSystem/CMODSystem.cpp
+    # Module System
+    ModuleSystem/CMODSystem.h
+    ModuleSystem/CMODSystem.cpp
+    ModuleSystem/CJMODSystem.h
+    ModuleSystem/CJMODSystem.cpp
+    ModuleSystem/HybridModuleSystem.h
+    ModuleSystem/HybridModuleSystem.cpp
+    
+    # CJMOD API
+    CJMODAPI/Syntax.h
+    CJMODAPI/Syntax.cpp
+    CJMODAPI/Arg.h
+    CJMODAPI/Arg.cpp
+    CJMODAPI/AtomArg.h
+    CJMODAPI/CHTLJSFunction.h
 )
 
 target_include_directories(CHTLCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

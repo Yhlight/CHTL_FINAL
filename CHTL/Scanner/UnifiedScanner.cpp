@@ -1,15 +1,22 @@
 #include "UnifiedScanner.h"
+#include <iostream>
+#include <chrono>
 #include <algorithm>
 #include <sstream>
-#include <chrono>
-#include <cctype>
 
 namespace CHTL {
 
+CodeFragment::CodeFragment(CodeType type, const std::string& content, 
+                          size_t startLine, size_t startColumn, 
+                          size_t endLine, size_t endColumn)
+    : type(type), content(content), startLine(startLine), startColumn(startColumn),
+      endLine(endLine), endColumn(endColumn) {
+    placeholder = createPlaceholder(type, 0);
+}
+
 UnifiedScanner::UnifiedScanner() 
     : position(0), line(1), column(1), placeholderCounter(0), debugMode(false) {
-    state = {};
-    stats = {};
+    resetStats();
 }
 
 std::vector<CodeFragment> UnifiedScanner::scan(const std::string& source) {
@@ -19,62 +26,74 @@ std::vector<CodeFragment> UnifiedScanner::scan(const std::string& source) {
     position = 0;
     line = 1;
     column = 1;
-    state = {};
-    clearPlaceholders();
+    fragments.clear();
+    placeholders.clear();
+    placeholderCounter = 0;
     
-    std::vector<CodeFragment> fragments;
+    // 重置状态
+    inCHTLBlock = false;
+    inCHTLJSBlock = false;
+    inCSSBlock = false;
+    inJSBlock = false;
+    inHTMLBlock = false;
     
-    try {
-        while (position < source.length()) {
-            skipWhitespace();
-            
-            if (position >= source.length()) {
-                break;
-            }
-            
-            CodeFragment fragment;
-            
-            if (isCHTLStart()) {
+    // 重置扫描状态
+    state = ScanState{};
+    
+    while (position < source.length()) {
+        skipWhitespace();
+        
+        if (position >= source.length()) {
+            break;
+        }
+        
+        CodeType type = identifyCodeType(position);
+        CodeFragment fragment = CodeFragment{CodeType::UNKNOWN, "", 0, 0, 0, 0};
+        
+        switch (type) {
+            case CodeType::CHTL:
                 fragment = scanCHTLBlock();
-            } else if (isCSSStart()) {
+                break;
+            case CodeType::CHTL_JS:
+                fragment = scanCHTLJSBlock();
+                break;
+            case CodeType::CSS:
                 fragment = scanCSSBlock();
-            } else if (isHTMLStart()) {
+                break;
+            case CodeType::JS:
+                fragment = scanJSBlock();
+                break;
+            case CodeType::HTML:
                 fragment = scanHTMLBlock();
-            } else {
+                break;
+            default:
                 fragment = scanUnknownBlock();
-            }
+                break;
+        }
+        
+        if (!fragment.content.empty()) {
+            fragments.push_back(fragment);
+            stats.totalFragments++;
             
-            if (!fragment.content.empty()) {
-                fragments.push_back(fragment);
-                
-                // 更新统计信息
-                stats.totalFragments++;
-                switch (fragment.type) {
-                    case CodeType::CHTL: stats.chtlFragments++; break;
-                    case CodeType::CHTL_JS: stats.chtlJSFragments++; break;
-                    case CodeType::CSS: stats.cssFragments++; break;
-                    case CodeType::JS: stats.jsFragments++; break;
-                    case CodeType::HTML: stats.htmlFragments++; break;
-                    case CodeType::UNKNOWN: stats.unknownFragments++; break;
-                }
+            switch (fragment.type) {
+                case CodeType::CHTL: stats.chtlFragments++; break;
+                case CodeType::CHTL_JS: stats.chtlJSFragments++; break;
+                case CodeType::CSS: stats.cssFragments++; break;
+                case CodeType::JS: stats.jsFragments++; break;
+                case CodeType::HTML: stats.htmlFragments++; break;
+                case CodeType::UNKNOWN: stats.unknownFragments++; break;
             }
         }
-    } catch (const std::exception& e) {
-        if (debugMode) {
-            std::cerr << "Scanner error: " << e.what() << std::endl;
-        }
-        throw;
     }
     
     auto endTime = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-    stats.scanTime = duration.count();
+    stats.scanTime = std::chrono::duration<double, std::milli>(endTime - startTime).count();
     
     return fragments;
 }
 
 std::vector<std::string> UnifiedScanner::scanAsStrings(const std::string& source) {
-    std::vector<CodeFragment> fragments = scan(source);
+    auto fragments = scan(source);
     std::vector<std::string> result;
     
     for (const auto& fragment : fragments) {
@@ -84,24 +103,432 @@ std::vector<std::string> UnifiedScanner::scanAsStrings(const std::string& source
     return result;
 }
 
-char UnifiedScanner::currentChar() const {
-    if (position >= source.length()) {
-        return '\0';
+CodeType UnifiedScanner::identifyCodeType(size_t startPos) const {
+    // 保存当前位置
+    size_t savedPos = position;
+    size_t savedLine = line;
+    size_t savedColumn = column;
+    
+    // 临时设置位置
+    position = startPos;
+    
+    CodeType type = CodeType::UNKNOWN;
+    
+    if (isCHTLStart()) {
+        type = CodeType::CHTL;
+    } else if (isCSSStart()) {
+        type = CodeType::CSS;
+    } else if (isHTMLStart()) {
+        type = CodeType::HTML;
+    } else {
+        // 检查是否为CHTL JS或普通JS
+        if (isCHTLJSBlockStart()) {
+            type = CodeType::CHTL_JS;
+        } else {
+            type = CodeType::JS;
+        }
     }
-    return source[position];
+    
+    // 恢复位置
+    position = savedPos;
+    line = savedLine;
+    column = savedColumn;
+    
+    return type;
+}
+
+bool UnifiedScanner::isCHTLStart() const {
+    // 检查CHTL语法开始标记
+    if (isTemplateBlock() || isCustomBlock() || isOriginBlock() || 
+        isImportBlock() || isNamespaceBlock() || isConfigurationBlock()) {
+        return true;
+    }
+    
+    // 检查HTML元素
+    if (isHTMLStart()) {
+        return true;
+    }
+    
+    return false;
+}
+
+bool UnifiedScanner::isCHTLJSBlockStart() const {
+    // 检查CHTL JS关键字
+    std::string keyword = "";
+    size_t pos = position;
+    
+    while (pos < source.length() && std::isalpha(source[pos])) {
+        keyword += source[pos];
+        pos++;
+    }
+    
+    return keyword == "fileloader" || keyword == "listen" || keyword == "delegate" ||
+           keyword == "animate" || keyword == "vir" || keyword == "router" || keyword == "util";
+}
+
+bool UnifiedScanner::isCSSStart() const {
+    // 检查CSS语法
+    if (position < source.length() && source[position] == '.') {
+        return true;
+    }
+    
+    if (position + 1 < source.length() && source[position] == '#' && source[position + 1] != '{') {
+        return true;
+    }
+    
+    // 检查CSS属性
+    std::string prop = "";
+    size_t pos = position;
+    while (pos < source.length() && (std::isalnum(source[pos]) || source[pos] == '-')) {
+        prop += source[pos];
+        pos++;
+    }
+    
+    if (pos < source.length() && source[pos] == ':') {
+        return true;
+    }
+    
+    return false;
+}
+
+bool UnifiedScanner::isHTMLStart() const {
+    // 检查HTML标签
+    if (position < source.length() && source[position] == '<') {
+        return true;
+    }
+    
+    // 检查CHTL HTML元素
+    std::string element = "";
+    size_t pos = position;
+    
+    while (pos < source.length() && std::isalpha(source[pos])) {
+        element += source[pos];
+        pos++;
+    }
+    
+    if (pos < source.length() && source[pos] == '{') {
+        return element == "html" || element == "head" || element == "body" ||
+               element == "div" || element == "span" || element == "p" ||
+               element == "h1" || element == "h2" || element == "h3" ||
+               element == "h4" || element == "h5" || element == "h6" ||
+               element == "a" || element == "img" || element == "button" ||
+               element == "input" || element == "form" || element == "table" ||
+               element == "ul" || element == "ol" || element == "li";
+    }
+    
+    return false;
+}
+
+bool UnifiedScanner::isTemplateBlock() const {
+    return source.substr(position, 10) == "[Template]";
+}
+
+bool UnifiedScanner::isCustomBlock() const {
+    return source.substr(position, 8) == "[Custom]";
+}
+
+bool UnifiedScanner::isOriginBlock() const {
+    return source.substr(position, 8) == "[Origin]";
+}
+
+bool UnifiedScanner::isImportBlock() const {
+    return source.substr(position, 8) == "[Import]";
+}
+
+bool UnifiedScanner::isNamespaceBlock() const {
+    return source.substr(position, 11) == "[Namespace]";
+}
+
+bool UnifiedScanner::isConfigurationBlock() const {
+    return source.substr(position, 14) == "[Configuration]";
+}
+
+bool UnifiedScanner::isStyleBlock() const {
+    std::string keyword = "";
+    size_t pos = position;
+    
+    while (pos < source.length() && std::isalpha(source[pos])) {
+        keyword += source[pos];
+        pos++;
+    }
+    
+    return keyword == "style";
+}
+
+bool UnifiedScanner::isScriptBlock() const {
+    std::string keyword = "";
+    size_t pos = position;
+    
+    while (pos < source.length() && std::isalpha(source[pos])) {
+        keyword += source[pos];
+        pos++;
+    }
+    
+    return keyword == "script";
+}
+
+CodeFragment UnifiedScanner::scanCHTLBlock() {
+    size_t startLine = line;
+    size_t startColumn = column;
+    size_t startPos = position;
+    
+    std::string content = "";
+    int braceLevel = 0;
+    bool inString = false;
+    char stringDelimiter = '\0';
+    
+    while (position < source.length()) {
+        char c = currentChar();
+        
+        if (inString) {
+            if (c == stringDelimiter) {
+                inString = false;
+                stringDelimiter = '\0';
+            }
+        } else {
+            if (c == '"' || c == '\'') {
+                inString = true;
+                stringDelimiter = c;
+            } else if (c == '{') {
+                braceLevel++;
+            } else if (c == '}') {
+                braceLevel--;
+                if (braceLevel == 0) {
+                    content += c;
+                    advance();
+                    break;
+                }
+            }
+        }
+        
+        content += c;
+        advance();
+    }
+    
+    size_t endLine = line;
+    size_t endColumn = column;
+    
+    return CodeFragment{CodeType::CHTL, content, startLine, startColumn, endLine, endColumn};
+}
+
+CodeFragment UnifiedScanner::scanCHTLJSBlock() {
+    size_t startLine = line;
+    size_t startColumn = column;
+    size_t startPos = position;
+    
+    std::string content = "";
+    int braceLevel = 0;
+    bool inString = false;
+    char stringDelimiter = '\0';
+    
+    while (position < source.length()) {
+        char c = currentChar();
+        
+        if (inString) {
+            if (c == stringDelimiter) {
+                inString = false;
+                stringDelimiter = '\0';
+            }
+        } else {
+            if (c == '"' || c == '\'') {
+                inString = true;
+                stringDelimiter = c;
+            } else if (c == '{') {
+                braceLevel++;
+            } else if (c == '}') {
+                braceLevel--;
+                if (braceLevel == 0) {
+                    content += c;
+                    advance();
+                    break;
+                }
+            }
+        }
+        
+        content += c;
+        advance();
+    }
+    
+    size_t endLine = line;
+    size_t endColumn = column;
+    
+    return CodeFragment{CodeType::CHTL_JS, content, startLine, startColumn, endLine, endColumn};
+}
+
+CodeFragment UnifiedScanner::scanCSSBlock() {
+    size_t startLine = line;
+    size_t startColumn = column;
+    size_t startPos = position;
+    
+    std::string content = "";
+    int braceLevel = 0;
+    bool inString = false;
+    char stringDelimiter = '\0';
+    
+    while (position < source.length()) {
+        char c = currentChar();
+        
+        if (inString) {
+            if (c == stringDelimiter) {
+                inString = false;
+                stringDelimiter = '\0';
+            }
+        } else {
+            if (c == '"' || c == '\'') {
+                inString = true;
+                stringDelimiter = c;
+            } else if (c == '{') {
+                braceLevel++;
+            } else if (c == '}') {
+                braceLevel--;
+                if (braceLevel == 0) {
+                    content += c;
+                    advance();
+                    break;
+                }
+            }
+        }
+        
+        content += c;
+        advance();
+    }
+    
+    size_t endLine = line;
+    size_t endColumn = column;
+    
+    return CodeFragment{CodeType::CSS, content, startLine, startColumn, endLine, endColumn};
+}
+
+CodeFragment UnifiedScanner::scanJSBlock() {
+    size_t startLine = line;
+    size_t startColumn = column;
+    size_t startPos = position;
+    
+    std::string content = "";
+    int braceLevel = 0;
+    bool inString = false;
+    char stringDelimiter = '\0';
+    
+    while (position < source.length()) {
+        char c = currentChar();
+        
+        if (inString) {
+            if (c == stringDelimiter) {
+                inString = false;
+                stringDelimiter = '\0';
+            }
+        } else {
+            if (c == '"' || c == '\'') {
+                inString = true;
+                stringDelimiter = c;
+            } else if (c == '{') {
+                braceLevel++;
+            } else if (c == '}') {
+                braceLevel--;
+                if (braceLevel == 0) {
+                    content += c;
+                    advance();
+                    break;
+                }
+            }
+        }
+        
+        content += c;
+        advance();
+    }
+    
+    size_t endLine = line;
+    size_t endColumn = column;
+    
+    return CodeFragment{CodeType::JS, content, startLine, startColumn, endLine, endColumn};
+}
+
+CodeFragment UnifiedScanner::scanHTMLBlock() {
+    size_t startLine = line;
+    size_t startColumn = column;
+    size_t startPos = position;
+    
+    std::string content = "";
+    int braceLevel = 0;
+    bool inString = false;
+    char stringDelimiter = '\0';
+    
+    while (position < source.length()) {
+        char c = currentChar();
+        
+        if (inString) {
+            if (c == stringDelimiter) {
+                inString = false;
+                stringDelimiter = '\0';
+            }
+        } else {
+            if (c == '"' || c == '\'') {
+                inString = true;
+                stringDelimiter = c;
+            } else if (c == '{') {
+                braceLevel++;
+            } else if (c == '}') {
+                braceLevel--;
+                if (braceLevel == 0) {
+                    content += c;
+                    advance();
+                    break;
+                }
+            }
+        }
+        
+        content += c;
+        advance();
+    }
+    
+    size_t endLine = line;
+    size_t endColumn = column;
+    
+    return CodeFragment{CodeType::HTML, content, startLine, startColumn, endLine, endColumn};
+}
+
+CodeFragment UnifiedScanner::scanUnknownBlock() {
+    size_t startLine = line;
+    size_t startColumn = column;
+    size_t startPos = position;
+    
+    std::string content = "";
+    
+    // 扫描到下一个已知块或文件结束
+    while (position < source.length()) {
+        char c = currentChar();
+        content += c;
+        advance();
+        
+        // 检查是否遇到已知块
+        if (isCHTLStart() || isCHTLJSBlockStart() || isCSSStart() || isHTMLStart()) {
+            break;
+        }
+    }
+    
+    size_t endLine = line;
+    size_t endColumn = column;
+    
+    return CodeFragment{CodeType::UNKNOWN, content, startLine, startColumn, endLine, endColumn};
+}
+
+char UnifiedScanner::currentChar() const {
+    if (position < source.length()) {
+        return source[position];
+    }
+    return '\0';
 }
 
 char UnifiedScanner::peekChar(size_t offset) const {
-    size_t pos = position + offset;
-    if (pos >= source.length()) {
-        return '\0';
+    if (position + offset < source.length()) {
+        return source[position + offset];
     }
-    return source[pos];
+    return '\0';
 }
 
 void UnifiedScanner::advance() {
     if (position < source.length()) {
-        if (currentChar() == '\n') {
+        if (source[position] == '\n') {
             line++;
             column = 1;
         } else {
@@ -112,337 +539,31 @@ void UnifiedScanner::advance() {
 }
 
 void UnifiedScanner::skipWhitespace() {
-    while (position < source.length() && std::isspace(currentChar()) && currentChar() != '\n') {
+    while (position < source.length() && std::isspace(currentChar())) {
         advance();
     }
 }
 
 void UnifiedScanner::skipNewline() {
-    while (position < source.length() && currentChar() == '\n') {
+    if (currentChar() == '\n') {
         advance();
     }
 }
 
-bool UnifiedScanner::isCHTLStart() const {
-    // 检查是否为CHTL语法开始
-    if (currentChar() == '[') {
-        // 检查是否为模板、自定义、原始嵌入等
-        std::string keyword = "";
-        size_t pos = position + 1;
-        while (pos < source.length() && std::isalpha(source[pos])) {
-            keyword += source[pos];
-            pos++;
-        }
-        
-        return keyword == "Template" || keyword == "Custom" || 
-               keyword == "Origin" || keyword == "Import" ||
-               keyword == "Namespace" || keyword == "Configuration" ||
-               keyword == "Info" || keyword == "Export";
-    }
-    
-    // 检查是否为HTML元素
-    if (std::isalpha(currentChar())) {
-        return true;
-    }
-    
-    // 检查是否为text块
-    if (position + 4 < source.length() && 
-        source.substr(position, 4) == "text") {
-        return true;
-    }
-    
-    return false;
+void UnifiedScanner::throwError(const std::string& message) const {
+    throw std::runtime_error("UnifiedScanner Error at Line " + std::to_string(line) + 
+                            ", Column " + std::to_string(column) + ": " + message);
 }
 
-bool UnifiedScanner::isCHTLJSEnd() const {
-    // CHTL JS块的结束条件
-    return currentChar() == '}' && state.braceLevel == 0;
-}
-
-bool UnifiedScanner::isCSSStart() const {
-    // CSS块开始检测
-    return currentChar() == '{' && state.braceLevel > 0;
-}
-
-bool UnifiedScanner::isJSEnd() const {
-    // JS块结束检测
-    return currentChar() == '}' && state.braceLevel == 0;
-}
-
-bool UnifiedScanner::isHTMLStart() const {
-    // HTML开始检测
-    return currentChar() == '<';
-}
-
-bool UnifiedScanner::isHTMLEnd() const {
-    // HTML结束检测
-    return currentChar() == '>';
-}
-
-CodeFragment UnifiedScanner::scanCHTLBlock() {
-    CodeFragment fragment;
-    fragment.type = CodeType::CHTL;
-    fragment.startLine = line;
-    fragment.startColumn = column;
-    
-    size_t startPos = position;
-    std::string content;
-    
+void UnifiedScanner::synchronize() {
+    // 同步到下一个安全点
     while (position < source.length()) {
-        char c = currentChar();
-        
-        if (c == '{') {
-            state.braceLevel++;
-            content += c;
+        if (currentChar() == ';' || currentChar() == '}') {
             advance();
-        } else if (c == '}') {
-            state.braceLevel--;
-            content += c;
-            advance();
-            
-            if (state.braceLevel == 0) {
-                break;
-            }
-        } else if (c == '[') {
-            state.bracketLevel++;
-            content += c;
-            advance();
-        } else if (c == ']') {
-            state.bracketLevel--;
-            content += c;
-            advance();
-        } else if (c == '(') {
-            state.parenLevel++;
-            content += c;
-            advance();
-        } else if (c == ')') {
-            state.parenLevel--;
-            content += c;
-            advance();
-        } else if (c == '"' || c == '\'') {
-            // 字符串处理
-            char delimiter = c;
-            content += c;
-            advance();
-            
-            while (position < source.length() && currentChar() != delimiter) {
-                if (currentChar() == '\\') {
-                    content += currentChar();
-                    advance();
-                    if (position < source.length()) {
-                        content += currentChar();
-                        advance();
-                    }
-                } else {
-                    content += currentChar();
-                    advance();
-                }
-            }
-            
-            if (position < source.length()) {
-                content += currentChar();
-                advance();
-            }
-        } else if (c == '/' && peekChar() == '/') {
-            // 单行注释
-            while (position < source.length() && currentChar() != '\n') {
-                content += currentChar();
-                advance();
-            }
-        } else if (c == '/' && peekChar() == '*') {
-            // 多行注释
-            content += c;
-            advance();
-            content += currentChar();
-            advance();
-            
-            while (position < source.length()) {
-                if (currentChar() == '*' && peekChar() == '/') {
-                    content += currentChar();
-                    advance();
-                    content += currentChar();
-                    advance();
-                    break;
-                }
-                content += currentChar();
-                advance();
-            }
-        } else {
-            content += c;
-            advance();
-        }
-    }
-    
-    fragment.content = content;
-    fragment.endLine = line;
-    fragment.endColumn = column;
-    fragment.originalContent = content;
-    
-    return fragment;
-}
-
-CodeFragment UnifiedScanner::scanCHTLJSBlock() {
-    CodeFragment fragment;
-    fragment.type = CodeType::CHTL_JS;
-    fragment.startLine = line;
-    fragment.startColumn = column;
-    
-    size_t startPos = position;
-    std::string content;
-    
-    while (position < source.length() && !isCHTLJSEnd()) {
-        char c = currentChar();
-        
-        if (c == '{') {
-            state.braceLevel++;
-        } else if (c == '}') {
-            state.braceLevel--;
-        }
-        
-        content += c;
-        advance();
-    }
-    
-    fragment.content = content;
-    fragment.endLine = line;
-    fragment.endColumn = column;
-    fragment.originalContent = content;
-    
-    return fragment;
-}
-
-CodeFragment UnifiedScanner::scanCSSBlock() {
-    CodeFragment fragment;
-    fragment.type = CodeType::CSS;
-    fragment.startLine = line;
-    fragment.startColumn = column;
-    
-    std::string content;
-    
-    while (position < source.length() && !isJSEnd()) {
-        char c = currentChar();
-        
-        if (c == '{') {
-            state.braceLevel++;
-        } else if (c == '}') {
-            state.braceLevel--;
-        }
-        
-        content += c;
-        advance();
-    }
-    
-    fragment.content = content;
-    fragment.endLine = line;
-    fragment.endColumn = column;
-    fragment.originalContent = content;
-    
-    return fragment;
-}
-
-CodeFragment UnifiedScanner::scanJSBlock() {
-    CodeFragment fragment;
-    fragment.type = CodeType::JS;
-    fragment.startLine = line;
-    fragment.startColumn = column;
-    
-    std::string content;
-    
-    while (position < source.length() && !isJSEnd()) {
-        char c = currentChar();
-        
-        if (c == '{') {
-            state.braceLevel++;
-        } else if (c == '}') {
-            state.braceLevel--;
-        }
-        
-        content += c;
-        advance();
-    }
-    
-    fragment.content = content;
-    fragment.endLine = line;
-    fragment.endColumn = column;
-    fragment.originalContent = content;
-    
-    return fragment;
-}
-
-CodeFragment UnifiedScanner::scanHTMLBlock() {
-    CodeFragment fragment;
-    fragment.type = CodeType::HTML;
-    fragment.startLine = line;
-    fragment.startColumn = column;
-    
-    std::string content;
-    
-    while (position < source.length() && !isHTMLEnd()) {
-        content += currentChar();
-        advance();
-    }
-    
-    if (position < source.length()) {
-        content += currentChar();
-        advance();
-    }
-    
-    fragment.content = content;
-    fragment.endLine = line;
-    fragment.endColumn = column;
-    fragment.originalContent = content;
-    
-    return fragment;
-}
-
-CodeFragment UnifiedScanner::scanUnknownBlock() {
-    CodeFragment fragment;
-    fragment.type = CodeType::UNKNOWN;
-    fragment.startLine = line;
-    fragment.startColumn = column;
-    
-    std::string content;
-    
-    // 扫描到下一个已知块或文件结束
-    while (position < source.length()) {
-        if (isCHTLStart() || isCSSStart() || isHTMLStart()) {
             break;
         }
-        
-        content += currentChar();
         advance();
     }
-    
-    fragment.content = content;
-    fragment.endLine = line;
-    fragment.endColumn = column;
-    fragment.originalContent = content;
-    
-    return fragment;
-}
-
-std::string UnifiedScanner::createPlaceholder(const std::string& content) {
-    std::string placeholder = "_JS_CODE_PLACEHOLDER_" + std::to_string(placeholderCounter++);
-    registerPlaceholder(placeholder, content);
-    return placeholder;
-}
-
-std::string UnifiedScanner::restorePlaceholders(const std::string& content) {
-    std::string result = content;
-    
-    for (const auto& pair : placeholders) {
-        size_t pos = 0;
-        while ((pos = result.find(pair.first, pos)) != std::string::npos) {
-            result.replace(pos, pair.first.length(), pair.second);
-            pos += pair.second.length();
-        }
-    }
-    
-    return result;
-}
-
-void UnifiedScanner::registerPlaceholder(const std::string& placeholder, const std::string& content) {
-    placeholders[placeholder] = content;
 }
 
 bool UnifiedScanner::isAtEnd() const {
@@ -477,11 +598,16 @@ void UnifiedScanner::enableDebugMode(bool enable) {
 std::string UnifiedScanner::getDebugInfo() const {
     std::ostringstream oss;
     oss << "UnifiedScanner Debug Info:\n";
-    oss << "Position: " << position << "\n";
-    oss << "Line: " << line << ", Column: " << column << "\n";
-    oss << "Brace Level: " << state.braceLevel << "\n";
-    oss << "Bracket Level: " << state.bracketLevel << "\n";
-    oss << "Paren Level: " << state.parenLevel << "\n";
+    oss << "  Position: " << position << "\n";
+    oss << "  Line: " << line << ", Column: " << column << "\n";
+    oss << "  Total Fragments: " << stats.totalFragments << "\n";
+    oss << "  CHTL Fragments: " << stats.chtlFragments << "\n";
+    oss << "  CHTL JS Fragments: " << stats.chtlJSFragments << "\n";
+    oss << "  CSS Fragments: " << stats.cssFragments << "\n";
+    oss << "  JS Fragments: " << stats.jsFragments << "\n";
+    oss << "  HTML Fragments: " << stats.htmlFragments << "\n";
+    oss << "  Unknown Fragments: " << stats.unknownFragments << "\n";
+    oss << "  Scan Time: " << stats.scanTime << "ms\n";
     return oss.str();
 }
 
@@ -490,24 +616,21 @@ UnifiedScanner::ScanStats UnifiedScanner::getStats() const {
 }
 
 void UnifiedScanner::resetStats() {
-    stats = {};
+    stats = ScanStats{};
 }
 
-void UnifiedScanner::throwError(const std::string& message) const {
-    std::ostringstream oss;
-    oss << "Scanner error at line " << line << ", column " << column << ": " << message;
-    throw std::runtime_error(oss.str());
-}
-
-void UnifiedScanner::synchronize() {
-    // 同步到下一个安全位置
-    while (position < source.length()) {
-        if (currentChar() == '\n') {
-            advance();
-            break;
-        }
-        advance();
+std::string UnifiedScanner::createPlaceholder(CodeType type, size_t index) {
+    std::string prefix;
+    switch (type) {
+        case CodeType::CHTL: prefix = "CHTL"; break;
+        case CodeType::CHTL_JS: prefix = "CHTLJS"; break;
+        case CodeType::CSS: prefix = "CSS"; break;
+        case CodeType::JS: prefix = "JS"; break;
+        case CodeType::HTML: prefix = "HTML"; break;
+        default: prefix = "UNKNOWN"; break;
     }
+    
+    return "{{" + prefix + "_" + std::to_string(index) + "}}";
 }
 
 } // namespace CHTL

@@ -1,0 +1,506 @@
+// CHTL模块系统演示
+// 展示CMOD、CJMOD和混合模块的使用
+
+-- 这是生成器注释，会被转换为HTML注释
+
+// CMOD部分 - CHTL模块
+[Info]
+{
+    name: "CHTLModuleDemo";
+    version: "1.0.0";
+    description: "CHTL模块系统演示";
+    author: "CHTL Developer";
+    license: "MIT";
+    dependencies: "chtl::core@1.0.0", "chtl::ui@2.1.0";
+}
+
+[Export]
+{
+    // 导出模板
+    @Style GlobalStyles;
+    @Element Button;
+    @Element Card;
+    
+    // 导出自定义
+    @Style CustomButton;
+    @Element Modal;
+    
+    // 导出变量组
+    @Var ThemeColors;
+    @Var Spacing;
+}
+
+// 样式组模板
+[Template] @Style GlobalStyles
+{
+    // 全局样式
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f4f4f4;
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+}
+
+// 元素模板
+[Template] @Element Button
+{
+    button
+    {
+        class: "btn";
+        style
+        {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+            
+            &:active {
+                transform: translateY(0);
+            }
+        }
+    }
+}
+
+[Template] @Element Card
+{
+    div
+    {
+        class: "card";
+        style
+        {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            
+            &:hover {
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            }
+        }
+    }
+}
+
+// 自定义样式组
+[Custom] @Style CustomButton
+{
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        
+        &:hover {
+            background-color: #0056b3;
+        }
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        
+        &:hover {
+            background-color: #545b62;
+        }
+    }
+    
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+        
+        &:hover {
+            background-color: #1e7e34;
+        }
+    }
+}
+
+// 自定义元素
+[Custom] @Element Modal
+{
+    div
+    {
+        class: "modal";
+        style
+        {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        div
+        {
+            class: "modal-content";
+            style
+            {
+                background: white;
+                padding: 30px;
+                border-radius: 8px;
+                max-width: 500px;
+                width: 90%;
+                position: relative;
+            }
+            
+            button
+            {
+                class: "modal-close";
+                style
+                {
+                    position: absolute;
+                    top: 10px;
+                    right: 15px;
+                    background: none;
+                    border: none;
+                    font-size: 24px;
+                    cursor: pointer;
+                    color: #999;
+                    
+                    &:hover {
+                        color: #333;
+                    }
+                }
+                text: "×";
+            }
+            
+            h2: "Modal Title";
+            p: "This is modal content.";
+        }
+    }
+}
+
+// 变量组
+[Template] @Var ThemeColors
+{
+    primary: "#007bff";
+    secondary: "#6c757d";
+    success: "#28a745";
+    danger: "#dc3545";
+    warning: "#ffc107";
+    info: "#17a2b8";
+    light: "#f8f9fa";
+    dark: "#343a40";
+}
+
+[Template] @Var Spacing
+{
+    xs: "4px";
+    sm: "8px";
+    md: "16px";
+    lg: "24px";
+    xl: "32px";
+    xxl: "48px";
+}
+
+// CJMOD部分 - CHTL JS模块
+fileloader
+{
+    load: "./utils/helpers.js", "./components/modal.js";
+}
+
+// 工具函数
+util
+{
+    logMessage: (message) => {
+        console.log(`[CHTL Module] ${message}`);
+    };
+    
+    formatDate: (date) => {
+        return new Date(date).toLocaleDateString();
+    };
+    
+    debounce: (func, wait) => {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    };
+}
+
+// 事件监听器
+listen
+{
+    // 全局点击事件
+    document: {
+        click: (event) => {
+            util->logMessage("Document clicked");
+        }
+    };
+    
+    // 按钮点击事件
+    ".btn": {
+        click: (event) => {
+            event.preventDefault();
+            util->logMessage("Button clicked: " + event.target.textContent);
+        }
+    };
+}
+
+// 事件委托
+delegate
+{
+    ".container": {
+        click: ".btn", (event) => {
+            util->logMessage("Delegated button click");
+        }
+    }
+}
+
+// 动画
+animate
+{
+    target: ".card";
+    duration: 300;
+    easing: "ease-in-out";
+    begin: {
+        opacity: 0;
+        transform: "translateY(20px)";
+    };
+    end: {
+        opacity: 1;
+        transform: "translateY(0)";
+    };
+}
+
+// 虚对象
+vir
+{
+    ModalManager: {
+        open: (id) => {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.style.display = "flex";
+                util->logMessage("Modal opened: " + id);
+            }
+        };
+        
+        close: (id) => {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.style.display = "none";
+                util->logMessage("Modal closed: " + id);
+            }
+        };
+        
+        toggle: (id) => {
+            const modal = document.getElementById(id);
+            if (modal) {
+                if (modal.style.display === "flex") {
+                    ModalManager->close(id);
+                } else {
+                    ModalManager->open(id);
+                }
+            }
+        };
+    }
+}
+
+// 路由
+router
+{
+    mode: "hash";
+    routes: {
+        "/": "home";
+        "/about": "about";
+        "/contact": "contact";
+    };
+    
+    onRouteChange: (route) => {
+        util->logMessage("Route changed to: " + route);
+    };
+}
+
+// 主页面结构
+html
+{
+    head
+    {
+        title: "CHTL Module System Demo";
+        meta: "charset=UTF-8";
+        meta: "name=viewport, content=width=device-width, initial-scale=1.0";
+        
+        style
+        {
+            @Style GlobalStyles;
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: "container";
+            
+            h1: "CHTL Module System Demo";
+            
+            p: "This demonstrates the CHTL module system with CMOD and CJMOD components.";
+            
+            // 使用模板
+            @Element Button;
+            @Element Card;
+            
+            // 使用自定义元素
+            @Element Modal;
+            
+            // 使用变量
+            div
+            {
+                class: "color-demo";
+                style
+                {
+                    background-color: ThemeColors.primary;
+                    color: white;
+                    padding: Spacing.md;
+                    border-radius: 4px;
+                    margin: Spacing.md 0;
+                }
+                text: "This uses theme colors and spacing variables";
+            }
+            
+            // 按钮组
+            div
+            {
+                class: "button-group";
+                style
+                {
+                    display: flex;
+                    gap: Spacing.sm;
+                    margin: Spacing.lg 0;
+                }
+                
+                button
+                {
+                    class: "btn btn-primary";
+                    text: "Primary Button";
+                }
+                
+                button
+                {
+                    class: "btn btn-secondary";
+                    text: "Secondary Button";
+                }
+                
+                button
+                {
+                    class: "btn btn-success";
+                    text: "Success Button";
+                }
+            }
+            
+            // 卡片组
+            div
+            {
+                class: "card-grid";
+                style
+                {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: Spacing.md;
+                }
+                
+                div
+                {
+                    class: "card";
+                    h3: "Card 1";
+                    p: "This is the first card using the Card template.";
+                }
+                
+                div
+                {
+                    class: "card";
+                    h3: "Card 2";
+                    p: "This is the second card with custom content.";
+                }
+                
+                div
+                {
+                    class: "card";
+                    h3: "Card 3";
+                    p: "This is the third card demonstrating the module system.";
+                }
+            }
+            
+            // 模态框
+            div
+            {
+                id: "demo-modal";
+                class: "modal";
+                style: "display: none;";
+                
+                div
+                {
+                    class: "modal-content";
+                    
+                    button
+                    {
+                        class: "modal-close";
+                        text: "×";
+                    }
+                    
+                    h2: "Demo Modal";
+                    p: "This modal is created using the Custom Modal element.";
+                    
+                    button
+                    {
+                        class: "btn btn-primary";
+                        text: "Close Modal";
+                        onclick: "ModalManager->close('demo-modal')";
+                    }
+                }
+            }
+            
+            // 打开模态框的按钮
+            button
+            {
+                class: "btn btn-info";
+                text: "Open Modal";
+                onclick: "ModalManager->open('demo-modal')";
+            }
+            
+            // 局部脚本
+            script
+            {
+                // 使用工具函数
+                util->logMessage("Page loaded successfully");
+                
+                // 使用虚对象
+                ModalManager->open("demo-modal");
+                
+                // 使用路由
+                router->navigate("/");
+                
+                // 使用动画
+                animate->start();
+            }
+        }
+    }
+}

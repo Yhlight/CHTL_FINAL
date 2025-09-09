@@ -1,0 +1,186 @@
+// CHTL配置系统演示
+// 展示各种配置组的使用方法
+
+-- 这是生成器注释，会被转换为HTML注释
+
+// 关键字自定义配置组
+[Configuration] MyKeywords
+{
+    // 自定义关键字列表
+    keywords: "myElement", "myStyle", "myScript";
+    
+    // 配置选项
+    enabled: true;
+    priority: "high";
+    scope: "global";
+}
+
+// 原始类型自定义配置组
+[Configuration] MyOriginTypes
+{
+    // 自定义原始类型
+    originTypes: "@MyCustomType", "@AnotherType", "@SpecialType";
+    
+    // 类型配置
+    validation: "strict";
+    autoImport: true;
+    namespace: "Custom";
+}
+
+// 命名配置组
+[Configuration] ProjectSettings
+{
+    // 项目基本设置
+    projectName: "CHTL Demo Project";
+    version: "1.0.0";
+    author: "CHTL Developer";
+    
+    // 代码风格设置
+    indentSize: 4;
+    useTabs: false;
+    lineEnding: "lf";
+    maxLineLength: 120;
+    
+    // 功能开关
+    enableTemplates: true;
+    enableCustoms: true;
+    enableImports: true;
+    enableNamespaces: true;
+    enableConstraints: true;
+    
+    // 编译器设置
+    optimizationLevel: "medium";
+    debugMode: true;
+    warningsAsErrors: false;
+    
+    // 输出设置
+    outputFormat: "html";
+    minifyOutput: false;
+    includeComments: true;
+}
+
+// 导入配置组
+[Configuration] ImportedConfig
+{
+    // 从外部文件导入配置
+    import: "./configs/external.chtl";
+    
+    // 覆盖某些设置
+    indentSize: 2;
+    useTabs: true;
+}
+
+// 使用配置组
+use ProjectSettings;
+
+// 演示配置组的使用
+html
+{
+    head
+    {
+        title: "Configuration Demo";
+        meta: "charset=UTF-8";
+        
+        // 使用配置中的设置
+        style
+        {
+            // 根据配置生成CSS
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                max-width: 1200px; // 使用maxLineLength配置
+                margin: 0 auto;
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: "container";
+            
+            h1: "CHTL Configuration System Demo";
+            
+            p: "This demonstrates various configuration groups:";
+            
+            ul
+            {
+                li: "Keyword customization";
+                li: "Origin type customization";
+                li: "Named configuration groups";
+                li: "Imported configuration groups";
+            }
+            
+            // 使用自定义关键字（如果配置允许）
+            myElement
+            {
+                text: "This is a custom element defined in configuration";
+                style
+                {
+                    color: "blue";
+                    font-weight: "bold";
+                }
+            }
+            
+            // 使用自定义原始类型
+            @MyCustomType
+            {
+                text: "This uses a custom origin type";
+                style
+                {
+                    background-color: "lightblue";
+                    padding: "10px";
+                    border-radius: "5px";
+                }
+            }
+            
+            // 局部样式块，使用配置中的缩进设置
+            style
+            {
+                .container {
+                    padding: 20px;
+                    background-color: #f5f5f5;
+                    border-radius: 8px;
+                }
+                
+                h1 {
+                    color: #333;
+                    text-align: center;
+                }
+                
+                ul {
+                    list-style-type: disc;
+                    margin-left: 20px;
+                }
+                
+                li {
+                    margin-bottom: 5px;
+                }
+            }
+        }
+    }
+}
+
+// 约束系统示例
+except @MyCustomType {
+    // 禁止在全局范围内使用自定义类型
+    // 只能在特定命名空间内使用
+}
+
+// 命名空间示例
+[Namespace] ConfigDemo
+{
+    // 在这个命名空间内可以使用自定义类型
+    @MyCustomType
+    {
+        text: "This custom type is allowed in this namespace";
+        style
+        {
+            color: "green";
+            border: "2px solid green";
+            padding: "15px";
+            margin: "10px 0";
+        }
+    }
+}
