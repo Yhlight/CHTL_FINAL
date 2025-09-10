@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_executable(chtl_compiler main.cpp)
 
 # Link libraries
-target_link_libraries(chtl_compiler PRIVATE chtl_lexer chtl_ast chtl_parser chtl_generator chtl_util)
+target_link_libraries(chtl_compiler PRIVATE chtl_lexer chtl_ast chtl_parser chtl_generator chtl_util chtl_js_lexer)
 
 # Add include directories
 target_include_directories(chtl_compiler PRIVATE Util)

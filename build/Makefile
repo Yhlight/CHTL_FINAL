@@ -181,6 +181,19 @@ chtl_generator/fast:
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_generator.dir/build.make CHTL/CMakeFiles/chtl_generator.dir/build
 .PHONY : chtl_generator/fast
 
+#=============================================================================
+# Target rules for targets named chtl_js_lexer
+
+# Build rule for target.
+chtl_js_lexer: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 chtl_js_lexer
+.PHONY : chtl_js_lexer
+
+# fast build rule for target.
+chtl_js_lexer/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build.make CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build
+.PHONY : chtl_js_lexer/fast
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -215,6 +228,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... chtl_compiler"
 	@echo "... chtl_generator"
+	@echo "... chtl_js_lexer"
 	@echo "... chtl_lexer"
 	@echo "... chtl_parser"
 	@echo "... chtl_util"

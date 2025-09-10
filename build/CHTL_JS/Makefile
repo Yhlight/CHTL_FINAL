@@ -87,14 +87,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /app/build && $(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles "/app/build/CHTL JS//CMakeFiles/progress.marks"
-	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 "CHTL JS/all"
+	cd /app/build && $(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles /app/build/CHTL_JS//CMakeFiles/progress.marks
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL_JS/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 "CHTL JS/clean"
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL_JS/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,18 +103,56 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 "CHTL JS/preinstall"
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL_JS/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 "CHTL JS/preinstall"
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL_JS/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
 	cd /app/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
+
+# Convenience name for target.
+CHTL_JS/CMakeFiles/chtl_js_lexer.dir/rule:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL_JS/CMakeFiles/chtl_js_lexer.dir/rule
+.PHONY : CHTL_JS/CMakeFiles/chtl_js_lexer.dir/rule
+
+# Convenience name for target.
+chtl_js_lexer: CHTL_JS/CMakeFiles/chtl_js_lexer.dir/rule
+.PHONY : chtl_js_lexer
+
+# fast build rule for target.
+chtl_js_lexer/fast:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build.make CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build
+.PHONY : chtl_js_lexer/fast
+
+CHTLJSLexer/Lexer.o: CHTLJSLexer/Lexer.cpp.o
+.PHONY : CHTLJSLexer/Lexer.o
+
+# target to build an object file
+CHTLJSLexer/Lexer.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build.make CHTL_JS/CMakeFiles/chtl_js_lexer.dir/CHTLJSLexer/Lexer.cpp.o
+.PHONY : CHTLJSLexer/Lexer.cpp.o
+
+CHTLJSLexer/Lexer.i: CHTLJSLexer/Lexer.cpp.i
+.PHONY : CHTLJSLexer/Lexer.i
+
+# target to preprocess a source file
+CHTLJSLexer/Lexer.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build.make CHTL_JS/CMakeFiles/chtl_js_lexer.dir/CHTLJSLexer/Lexer.cpp.i
+.PHONY : CHTLJSLexer/Lexer.cpp.i
+
+CHTLJSLexer/Lexer.s: CHTLJSLexer/Lexer.cpp.s
+.PHONY : CHTLJSLexer/Lexer.s
+
+# target to generate assembly for a file
+CHTLJSLexer/Lexer.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build.make CHTL_JS/CMakeFiles/chtl_js_lexer.dir/CHTLJSLexer/Lexer.cpp.s
+.PHONY : CHTLJSLexer/Lexer.cpp.s
 
 # Help Target
 help:
@@ -124,6 +162,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... chtl_js_lexer"
+	@echo "... CHTLJSLexer/Lexer.o"
+	@echo "... CHTLJSLexer/Lexer.i"
+	@echo "... CHTLJSLexer/Lexer.s"
 .PHONY : help
 
 

@@ -96,6 +96,7 @@ chtl_compiler: CHTL/libchtl_lexer.a
 chtl_compiler: CHTL/libchtl_parser.a
 chtl_compiler: CHTL/libchtl_generator.a
 chtl_compiler: Util/libchtl_util.a
+chtl_compiler: CHTL_JS/libchtl_js_lexer.a
 chtl_compiler: CHTL/libchtl_lexer.a
 chtl_compiler: CMakeFiles/chtl_compiler.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable chtl_compiler"

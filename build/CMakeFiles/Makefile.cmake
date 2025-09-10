@@ -7,8 +7,8 @@ set(CMAKE_DEPENDS_GENERATOR "Unix Makefiles")
 # The top level Makefile was generated from the following files:
 set(CMAKE_MAKEFILE_DEPENDS
   "CMakeCache.txt"
-  "/app/CHTL JS/CMakeLists.txt"
   "/app/CHTL/CMakeLists.txt"
+  "/app/CHTL_JS/CMakeLists.txt"
   "/app/CMakeLists.txt"
   "/app/CodeMerger/CMakeLists.txt"
   "/app/CompilerDispatcher/CMakeLists.txt"
@@ -107,7 +107,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/CMakeDirectoryInformation.cmake"
   "Util/CMakeFiles/CMakeDirectoryInformation.cmake"
   "CHTL/CMakeFiles/CMakeDirectoryInformation.cmake"
-  "CHTL JS/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "CHTL_JS/CMakeFiles/CMakeDirectoryInformation.cmake"
   "Scanner/CMakeFiles/CMakeDirectoryInformation.cmake"
   "CodeMerger/CMakeFiles/CMakeDirectoryInformation.cmake"
   "CompilerDispatcher/CMakeFiles/CMakeDirectoryInformation.cmake"
@@ -121,4 +121,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "CHTL/CMakeFiles/chtl_lexer.dir/DependInfo.cmake"
   "CHTL/CMakeFiles/chtl_parser.dir/DependInfo.cmake"
   "CHTL/CMakeFiles/chtl_generator.dir/DependInfo.cmake"
+  "CHTL_JS/CMakeFiles/chtl_js_lexer.dir/DependInfo.cmake"
   )

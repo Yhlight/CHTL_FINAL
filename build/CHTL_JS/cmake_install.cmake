@@ -1,4 +1,4 @@
-# Install script for directory: /app/CHTL JS
+# Install script for directory: /app/CHTL_JS
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

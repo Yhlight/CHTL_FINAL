@@ -28,6 +28,7 @@ enum class CHTLJSTokenType {
     DoubleCurlyOpen,    // {{
     DoubleCurlyClose,   // }}
     Equals,             // =
+    FatArrow,           // =>
 
     // Keywords
     FileLoader,         // fileloader

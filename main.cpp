@@ -5,7 +5,33 @@
 #include "CHTLLexer/Lexer.h"
 #include "CHTLParser/Parser.h"
 #include "CHTLGenerator/Generator.h"
-#include "CHTLParser/ASTPrinter.h"
+#include "CHTL_JS/CHTLJSLexer/Token.h"
+#include "CHTL_JS/CHTLJSLexer/Lexer.h"
+
+// Helper to print CHTL JS tokens
+void printCHTLJSTokens(const std::vector<CHTLJSToken>& tokens) {
+    for (const auto& token : tokens) {
+        std::cout << "Type: " << static_cast<int>(token.type)
+                  << ", Value: '" << token.value << "'" << std::endl;
+    }
+}
+
+void testCHTLJSLexer() {
+    std::cout << "\n--- Testing CHTL JS Lexer ---\n";
+    std::string source = R"~(
+        vir test = listen {
+            click: () => {
+                {{box}}->textContent = "Clicked!";
+            }
+        };
+    )~";
+
+    CHTLJSLexer lexer(source);
+    std::vector<CHTLJSToken> tokens = lexer.tokenize();
+    printCHTLJSTokens(tokens);
+    std::cout << "---------------------------\n";
+}
+
 
 std::string readFile(const std::string& path) {
     std::ifstream file(path);
@@ -21,6 +47,7 @@ std::string readFile(const std::string& path) {
 int main(int argc, char* argv[]) {
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " <file>" << std::endl;
+        testCHTLJSLexer(); // Run CHTL JS lexer test if no file is provided
         return 1;
     }
 
@@ -35,7 +62,6 @@ int main(int argc, char* argv[]) {
     try {
         Parser parser(tokens);
         ast = parser.parse();
-
     } catch (const Parser::ParseError& e) {
         std::cerr << e.what() << std::endl;
         return 1;

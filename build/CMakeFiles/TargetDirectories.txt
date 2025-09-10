@@ -9,8 +9,9 @@
 /app/build/CHTL/CMakeFiles/chtl_generator.dir
 /app/build/CHTL/CMakeFiles/edit_cache.dir
 /app/build/CHTL/CMakeFiles/rebuild_cache.dir
-/app/build/CHTL JS/CMakeFiles/edit_cache.dir
-/app/build/CHTL JS/CMakeFiles/rebuild_cache.dir
+/app/build/CHTL_JS/CMakeFiles/chtl_js_lexer.dir
+/app/build/CHTL_JS/CMakeFiles/edit_cache.dir
+/app/build/CHTL_JS/CMakeFiles/rebuild_cache.dir
 /app/build/Scanner/CMakeFiles/edit_cache.dir
 /app/build/Scanner/CMakeFiles/rebuild_cache.dir
 /app/build/CodeMerger/CMakeFiles/edit_cache.dir
