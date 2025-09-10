@@ -1,0 +1,21 @@
+html {
+    head {
+        title {
+            text: "My CHTL Page";
+        }
+    }
+    body {
+        -- a generator comment
+        div {
+            id: main_content;
+            class: container primary;
+
+            text {
+                Hello CHTL World!
+            }
+        }
+        span {
+            class = "secondary-text";
+        }
+    }
+}
