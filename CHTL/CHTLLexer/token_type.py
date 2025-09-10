@@ -7,11 +7,33 @@ class TokenType(Enum):
     COLON = auto()          # :
     EQUALS = auto()         # =
     SEMICOLON = auto()      # ;
+    DOT = auto()            # .
+    HASH = auto()           # #
+    AMPERSAND = auto()      # &
+    QUESTION = auto()       # ?
+
+    # Operators
+    PLUS = auto()           # +
+    MINUS = auto()          # -
+    STAR = auto()           # *
+    SLASH = auto()          # /
+    PERCENT = auto()        # %
+
+    # One or two character tokens
+    STAR_STAR = auto()      # **
+    GREATER = auto()        # >
+    LESS = auto()           # <
+    GREATER_EQUAL = auto()  # >=
+    LESS_EQUAL = auto()     # <=
+    EQUAL_EQUAL = auto()    # ==
+    BANG_EQUAL = auto()     # !=
+    AMPERSAND_AMPERSAND = auto() # &&
+    PIPE_PIPE = auto()      # ||
 
     # Literals
-    IDENTIFIER = auto()     # div, id, width, .box, &:hover
-    STRING = auto()         # "a string"
-    NUMBER = auto()         # 100, 0.8
+    IDENTIFIER = auto()
+    STRING = auto()
+    NUMBER = auto()
 
     # Keywords
     TEXT = auto()
