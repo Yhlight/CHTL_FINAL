@@ -1,0 +1,11 @@
+div {
+    id: "main-content";
+    class: "container";
+
+    h1 {
+        text { "CHTL Compiler Test" }
+    }
+    p {
+        text { "This file was compiled by the CHTL CLI." }
+    }
+}
