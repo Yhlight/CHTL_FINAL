@@ -37,6 +37,15 @@ private:
     Token scanOperator();
     Token scanSymbol();
     
+    // CHTL特有词法分析方法
+    Token scanElementName();
+    Token scanAttributeName();
+    Token scanAttributeValue();
+    Token scanTextContent();
+    Token scanUnquotedLiteral();
+    Token scanQuotedLiteral();
+    Token scanColonEqual();
+    
     // 检查是否为字母
     bool isAlpha(char c) const;
     
@@ -84,6 +93,16 @@ private:
     
     // 检查是否为HTML5关键字
     bool isHTML5Keyword(const std::string& str) const;
+    
+    // CHTL特有检查方法
+    bool isElementNameChar(char c) const;
+    bool isAttributeNameChar(char c) const;
+    bool isTextContentChar(char c) const;
+    bool isLiteralChar(char c) const;
+    bool isColonEqual() const;
+    bool isElementStart() const;
+    bool isAttributeStart() const;
+    bool isTextStart() const;
 
 public:
     CHTLLexer();

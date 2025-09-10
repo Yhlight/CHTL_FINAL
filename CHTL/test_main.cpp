@@ -1941,6 +1941,134 @@ int main() {
         std::vector<std::string> files = CHTL::FileProcessor::listFiles(".", ".chtl");
         std::cout << "找到的.chtl文件数量: " << files.size() << std::endl;
         
+        // 测试CHTL核心词法分析器
+        std::cout << "\n8. CHTL核心词法分析器测试:" << std::endl;
+        CHTL::CHTLLexer lexer;
+        
+        // 测试基本词法分析
+        std::string testCode = R"(
+// 这是单行注释
+/* 这是多行注释 */
+-- 这是生成器注释
+
+div: Hello World
+div.class: Text content
+div#id: Another text
+
+[Template] MyTemplate
+[Custom] MyCustom
+[Origin] @Html
+[Import] MyModule
+[Namespace] MyNamespace
+[Configuration] MyConfig
+
+use html5
+
+div {
+    class: "container"
+    id: "main"
+    style: "color: red"
+}
+
+div: Text with := colon equal
+        )";
+        
+        lexer.setSource(testCode);
+        auto tokens = lexer.tokenize();
+        
+        std::cout << "词法分析完成，Token数量: " << tokens.size() << std::endl;
+        
+        // 测试特定Token类型
+        int elementCount = 0;
+        int commentCount = 0;
+        int colonEqualCount = 0;
+        int templateCount = 0;
+        
+        for (size_t i = 0; i < tokens.size(); ++i) {
+            auto token = tokens.peek(i);
+            if (token.type == CHTL::TokenType::ELEMENT_NAME) {
+                elementCount++;
+            } else if (token.type == CHTL::TokenType::SINGLE_COMMENT || 
+                      token.type == CHTL::TokenType::MULTI_COMMENT || 
+                      token.type == CHTL::TokenType::GENERATOR_COMMENT) {
+                commentCount++;
+            } else if (token.type == CHTL::TokenType::COLON_EQUAL) {
+                colonEqualCount++;
+            } else if (token.type == CHTL::TokenType::TEMPLATE) {
+                templateCount++;
+            }
+        }
+        
+        std::cout << "元素名称Token数量: " << elementCount << std::endl;
+        std::cout << "注释Token数量: " << commentCount << std::endl;
+        std::cout << "CE对等式Token数量: " << colonEqualCount << std::endl;
+        std::cout << "模板Token数量: " << templateCount << std::endl;
+        
+        // 测试位置信息
+        if (tokens.size() > 0) {
+            auto firstToken = tokens.peek(0);
+            std::cout << "第一个Token位置: 行" << firstToken.line << ", 列" << firstToken.column << std::endl;
+        }
+        
+        // 测试Token流功能
+        tokens.reset();
+        std::cout << "Token流重置: 完成" << std::endl;
+        
+        int consumedCount = 0;
+        while (tokens.hasNext()) {
+            auto token = tokens.consume();
+            consumedCount++;
+            if (consumedCount > 10) break; // 限制输出
+        }
+        std::cout << "消费的Token数量: " << consumedCount << std::endl;
+        
+        // 测试测试系统
+        std::cout << "\n9. 测试系统测试:" << std::endl;
+        CHTL::Test::TestFramework testFramework;
+        
+        // 创建简单测试用例
+        auto testSuite = std::make_unique<CHTL::Test::TestSuite>("BasicTest");
+        
+        // 添加基本测试用例
+        testSuite->addTestCase(std::make_unique<CHTL::Test::TestCase>(
+            "testBasicAssertion", 
+            "测试基本断言功能", 
+            []() {
+                CHTL::Test::TestFramework::assertTrue(true, "基本断言测试");
+                CHTL::Test::TestFramework::assertFalse(false, "基本断言测试");
+                CHTL::Test::TestFramework::assertEqual("hello", "hello", "字符串相等测试");
+            }
+        ));
+        
+        testSuite->addTestCase(std::make_unique<CHTL::Test::TestCase>(
+            "testStringOperations", 
+            "测试字符串操作", 
+            []() {
+                std::string str = "Hello World";
+                CHTL::Test::TestFramework::assertTrue(str.length() > 0, "字符串长度测试");
+                CHTL::Test::TestFramework::assertEqual("Hello", str.substr(0, 5), "字符串截取测试");
+            }
+        ));
+        
+        testSuite->addTestCase(std::make_unique<CHTL::Test::TestCase>(
+            "testMathOperations", 
+            "测试数学运算", 
+            []() {
+                int a = 5;
+                int b = 3;
+                CHTL::Test::TestFramework::assertTrue(a + b == 8, "加法运算测试");
+                CHTL::Test::TestFramework::assertTrue(a * b == 15, "乘法运算测试");
+            }
+        ));
+        
+        testFramework.addTestSuite(std::move(testSuite));
+        
+        // 运行测试
+        std::cout << "运行基本测试套件..." << std::endl;
+        testFramework.runAllTests();
+        
+        std::cout << "测试系统验证: 完成" << std::endl;
+        
         // 清理测试文件
         std::remove("test.chtl");
         std::remove("test_output.html");

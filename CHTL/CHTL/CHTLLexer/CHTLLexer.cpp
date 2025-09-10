@@ -52,23 +52,52 @@ TokenStream CHTLLexer::tokenize() {
         
         char c = currentChar();
         
-        if (isAlpha(c) || c == '_') {
+        // 检查CE对等式 (:=)
+        if (isColonEqual()) {
+            stream.addToken(scanColonEqual());
+        }
+        // 检查元素名称
+        else if (isElementStart()) {
+            stream.addToken(scanElementName());
+        }
+        // 检查属性名称
+        else if (isAttributeStart()) {
+            stream.addToken(scanAttributeName());
+        }
+        // 检查文本内容
+        else if (isTextStart()) {
+            stream.addToken(scanTextContent());
+        }
+        // 检查标识符
+        else if (isAlpha(c) || c == '_') {
             stream.addToken(scanIdentifier());
-        } else if (isQuote(c)) {
-            stream.addToken(scanString());
-        } else if (isDigit(c)) {
+        }
+        // 检查字符串
+        else if (isQuote(c)) {
+            stream.addToken(scanQuotedLiteral());
+        }
+        // 检查数字
+        else if (isDigit(c)) {
             stream.addToken(scanNumber());
-        } else if (c == '/' && peekChar() == '/') {
+        }
+        // 检查注释
+        else if (c == '/' && peekChar() == '/') {
             stream.addToken(scanComment());
         } else if (c == '/' && peekChar() == '*') {
             stream.addToken(scanComment());
         } else if (c == '-' && peekChar() == '-') {
             stream.addToken(scanComment());
-        } else if (isOperatorChar(c)) {
+        }
+        // 检查运算符
+        else if (isOperatorChar(c)) {
             stream.addToken(scanOperator());
-        } else if (isSymbolChar(c)) {
+        }
+        // 检查符号
+        else if (isSymbolChar(c)) {
             stream.addToken(scanSymbol());
-        } else if (c == '[') {
+        }
+        // 检查模板关键字
+        else if (c == '[') {
             // 处理模板关键字
             size_t start = position;
             advance(); // 跳过 '['
@@ -104,7 +133,12 @@ TokenStream CHTLLexer::tokenize() {
                 // 错误：未找到匹配的 ']'
                 stream.addToken(Token(TokenType::UNKNOWN, "[" + keyword, line, column - keyword.length() - 1, start));
             }
-        } else {
+        }
+        // 检查字面量
+        else if (isLiteralChar(c)) {
+            stream.addToken(scanUnquotedLiteral());
+        }
+        else {
             // 未知字符
             stream.addToken(Token(TokenType::UNKNOWN, std::string(1, c), line, column, position));
             advance();
@@ -524,6 +558,176 @@ bool CHTLLexer::isUseKeyword(const std::string& str) const {
 
 bool CHTLLexer::isHTML5Keyword(const std::string& str) const {
     return str == "html5";
+}
+
+// CHTL特有词法分析方法实现
+Token CHTLLexer::scanElementName() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    std::string value;
+    
+    while (position < source.length() && isElementNameChar(currentChar())) {
+        value += currentChar();
+        advance();
+    }
+    
+    return Token(TokenType::ELEMENT_NAME, value, startLine, startColumn, start);
+}
+
+Token CHTLLexer::scanAttributeName() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    std::string value;
+    
+    while (position < source.length() && isAttributeNameChar(currentChar())) {
+        value += currentChar();
+        advance();
+    }
+    
+    return Token(TokenType::ATTRIBUTE_NAME, value, startLine, startColumn, start);
+}
+
+Token CHTLLexer::scanAttributeValue() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    std::string value;
+    
+    // 跳过等号
+    if (currentChar() == '=') {
+        advance();
+        skipWhitespace();
+    }
+    
+    // 检查是否有引号
+    if (isQuote(currentChar())) {
+        return scanQuotedLiteral();
+    } else {
+        // 无引号属性值
+        while (position < source.length() && 
+               !isWhitespace(currentChar()) && 
+               currentChar() != ';' && 
+               currentChar() != ':' &&
+               currentChar() != '=') {
+            value += currentChar();
+            advance();
+        }
+        
+        return Token(TokenType::ATTRIBUTE_VALUE, value, startLine, startColumn, start);
+    }
+}
+
+Token CHTLLexer::scanTextContent() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    std::string value;
+    
+    while (position < source.length() && isTextContentChar(currentChar())) {
+        value += currentChar();
+        advance();
+    }
+    
+    return Token(TokenType::TEXT_CONTENT, value, startLine, startColumn, start);
+}
+
+Token CHTLLexer::scanUnquotedLiteral() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    std::string value;
+    
+    while (position < source.length() && isLiteralChar(currentChar())) {
+        value += currentChar();
+        advance();
+    }
+    
+    return Token(TokenType::UNQUOTED_LITERAL, value, startLine, startColumn, start);
+}
+
+Token CHTLLexer::scanQuotedLiteral() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    char quote = currentChar();
+    advance(); // 跳过开始引号
+    
+    std::string value;
+    while (position < source.length() && currentChar() != quote) {
+        if (currentChar() == '\\' && peekChar() == quote) {
+            advance(); // 跳过反斜杠
+            value += currentChar();
+            advance();
+        } else {
+            value += currentChar();
+            advance();
+        }
+    }
+    
+    if (position < source.length()) {
+        advance(); // 跳过结束引号
+    }
+    
+    TokenType type = (quote == '\'') ? TokenType::SINGLE_QUOTED_LITERAL : TokenType::DOUBLE_QUOTED_LITERAL;
+    return Token(type, value, startLine, startColumn, start);
+}
+
+Token CHTLLexer::scanColonEqual() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    advance(); // 跳过 ':'
+    advance(); // 跳过 '='
+    
+    return Token(TokenType::COLON_EQUAL, ":=", startLine, startColumn, start);
+}
+
+// CHTL特有检查方法实现
+bool CHTLLexer::isElementNameChar(char c) const {
+    return isAlpha(c) || isDigit(c) || c == '-' || c == '_';
+}
+
+bool CHTLLexer::isAttributeNameChar(char c) const {
+    return isAlpha(c) || isDigit(c) || c == '-' || c == '_' || c == '.';
+}
+
+bool CHTLLexer::isTextContentChar(char c) const {
+    return !isWhitespace(c) && c != ';' && c != ':' && c != '=' && c != '{' && c != '}';
+}
+
+bool CHTLLexer::isLiteralChar(char c) const {
+    return !isWhitespace(c) && !isSymbolChar(c) && !isOperatorChar(c) && c != ';' && c != ':' && c != '=';
+}
+
+bool CHTLLexer::isColonEqual() const {
+    return currentChar() == ':' && peekChar() == '=';
+}
+
+bool CHTLLexer::isElementStart() const {
+    char c = currentChar();
+    return isAlpha(c) || c == '_';
+}
+
+bool CHTLLexer::isAttributeStart() const {
+    char c = currentChar();
+    return isAlpha(c) || c == '_' || c == '.';
+}
+
+bool CHTLLexer::isTextStart() const {
+    char c = currentChar();
+    // 文本内容不能以特殊字符开始，但可以是字母、数字、中文等
+    return !isWhitespace(c) && !isSymbolChar(c) && !isOperatorChar(c) && 
+           c != ';' && c != ':' && c != '=' && c != '[' && c != '/' && c != '-' &&
+           c != '\0' && c != '\n' && c != '\r' && c != '\t';
 }
 
 } // namespace CHTL

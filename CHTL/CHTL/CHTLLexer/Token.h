@@ -90,6 +90,16 @@ enum class TokenType {
     // HTML5
     HTML5,          // html5
     
+    // CHTL特有类型
+    COLON_EQUAL,    // := (CE对等式)
+    ELEMENT_NAME,   // 元素名称
+    ATTRIBUTE_NAME, // 属性名称
+    ATTRIBUTE_VALUE, // 属性值
+    TEXT_CONTENT,   // 文本内容
+    UNQUOTED_LITERAL, // 无引号字面量
+    SINGLE_QUOTED_LITERAL, // 单引号字面量
+    DOUBLE_QUOTED_LITERAL, // 双引号字面量
+    
     // 特殊
     END_OF_FILE,    // 文件结束
     NEWLINE,        // 换行

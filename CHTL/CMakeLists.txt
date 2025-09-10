@@ -196,4 +196,27 @@ target_link_libraries(chtl_cli)
 
 # 测试
 enable_testing()
+
+# 测试系统
+set(TEST_SOURCES
+    Test/TestFramework.cpp
+    Test/UtilTest.cpp
+    Test/TokenTest.cpp
+    Test/AstTest.cpp
+    Test/test_main.cpp
+)
+
+# 创建测试可执行文件
+add_executable(chtl_test_system
+    ${TEST_SOURCES}
+    ${CHTL_SOURCES}
+    ${CHTL_JS_SOURCES}
+    ${UTIL_SOURCES}
+    ${SCANNER_SOURCES}
+    ${COMPILER_SOURCES}
+)
+
+# 链接库
+target_link_libraries(chtl_test_system)
+
 add_subdirectory(Test)
