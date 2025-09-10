@@ -123,6 +123,7 @@ public:
 class ElementNode : public ASTNode {
 public:
     std::vector<std::string> constraints;
+    std::string from_namespace; // For handling `@Element MyComponent from MyNamespace`
 
     ElementNode(const std::string& name = "", const std::string& value = "")
         : ASTNode(NodeType::ELEMENT, name, value) {}
@@ -316,6 +317,9 @@ public:
     
     NamespaceNode(const std::string& name = "")
         : ASTNode(NodeType::NAMESPACE, name), namespace_name(name) {}
+
+    // Namespaces are a compile-time construct and don't render to HTML directly.
+    std::string to_html() const override { return ""; }
     
     NodePtr clone() const override;
     void accept(class ASTVisitor& visitor) override;

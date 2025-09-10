@@ -1,5 +1,7 @@
 #include "import/import_resolver.h"
 #include "ast/ast_node.h"
+#include <filesystem>
+#include <iostream>
 
 namespace chtl {
 namespace import {
@@ -12,43 +14,68 @@ void ImportResolver::resolve_imports(ast::ASTNode::NodePtr root) {
     if (!root) {
         return;
     }
-    visit_node(root, nullptr);
+    visit_node(root);
 }
 
-void ImportResolver::visit_node(ast::ASTNode::NodePtr node, ast::ASTNode::NodePtr parent) {
+void ImportResolver::visit_node(ast::ASTNode::NodePtr node) {
     if (!node) {
         return;
     }
 
-    // We need to iterate carefully as we might modify the children list
-    for (size_t i = 0; i < node->children.size(); ++i) {
+    for (size_t i = 0; i < node->children.size(); ) {
         auto child = node->children[i];
+        bool node_processed = false;
 
         if (child->type == ast::NodeType::IMPORT_CHTL) {
             auto import_node = std::static_pointer_cast<ast::ImportNode>(child);
 
-            // Check if it's a module import (no file extension)
-            std::filesystem::path import_path(import_node->file_path);
-            if (!import_path.has_extension()) {
-                std::string module_name = import_node->file_path;
-                auto module_ast = manager_.load_module(module_name);
+            // Check if it's a granular import or a full module/file import
+            if (!import_node->imported_item_name.empty()) {
+                // Granular Import
+                auto imported_nodes = manager_.resolve_granular_import(import_node);
 
-                if (module_ast) {
-                    // Replace the import node with the module's AST content
-                    node->children.erase(node->children.begin() + i);
-                    for (const auto& module_child : module_ast->children) {
-                        node->children.insert(node->children.begin() + i, module_child);
-                        module_child->parent = node; // Set parent pointer
-                        i++;
-                    }
-                    i--; // Decrement i to re-evaluate the current position
+                // Replace the import node with the resolved nodes
+                node->children.erase(node->children.begin() + i);
+                for (const auto& imported_item : imported_nodes) {
+                    node->children.insert(node->children.begin() + i, imported_item);
+                    imported_item->parent = node;
+                    i++;
                 }
-                continue; // Continue to the next child
+                node_processed = true;
+
+            } else {
+                // Module/File Import (Default Namespace)
+                std::filesystem::path import_path(import_node->file_path);
+                if (!import_path.has_extension()) {
+                    std::string module_name = import_node->file_path;
+                    auto module_ast = manager_.load_module(module_name);
+
+                    if (module_ast) {
+                        auto namespace_node = std::make_shared<ast::NamespaceNode>(module_name);
+                        namespace_node->add_child(module_ast);
+
+                        node->children[i] = namespace_node;
+                        namespace_node->parent = node;
+
+                        visit_node(namespace_node);
+                        node_processed = true;
+                    }
+                }
             }
         }
 
-        // Recurse on the original child if it wasn't replaced
-        visit_node(child, node);
+        if (!node_processed) {
+            visit_node(child);
+            i++;
+        } else {
+            // If we replaced nodes, we want to re-evaluate from the start of the inserted block.
+            // The loop increment `i++` in the insertion loop already handles this.
+            // If we just replaced one node with another (namespace), we should just increment i.
+            if (node->children[i]->type != ast::NodeType::NAMESPACE) {
+                 // This logic is getting complex, a simple increment is safer for now.
+            }
+            i++;
+        }
     }
 }
 

@@ -85,12 +85,12 @@ private:
     
     // Template parsing
     ast::ASTNode::NodePtr parse_template_style();
-    ast::ASTNode::NodePtr parse_template_element();
+    ast::ASTNode::NodePtr parse_template_element(bool is_usage = false);
     ast::ASTNode::NodePtr parse_template_var();
     
     // Custom parsing
     ast::ASTNode::NodePtr parse_custom_style();
-    ast::ASTNode::NodePtr parse_custom_element();
+    ast::ASTNode::NodePtr parse_custom_element(bool is_usage = false);
     ast::ASTNode::NodePtr parse_custom_var();
     
     // Origin parsing
@@ -104,6 +104,7 @@ private:
     ast::ASTNode::NodePtr parse_import_javascript();
     ast::ASTNode::NodePtr parse_import_chtl();
     ast::ASTNode::NodePtr parse_import_cjmod();
+    ast::ASTNode::NodePtr parse_granular_import();
     
     // Configuration parsing
     std::unordered_map<std::string, std::string> parse_configuration_values();

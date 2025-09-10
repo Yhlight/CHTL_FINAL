@@ -423,6 +423,30 @@ void ImportManager::reset() {
 #include "parser/chtl_parser.h"
 #include "lexer/chtl_lexer.h"
 
+std::vector<std::shared_ptr<chtl::ast::ASTNode>> chtl::import::ImportManager::resolve_granular_import(std::shared_ptr<ast::ImportNode> import_node) {
+    std::vector<std::shared_ptr<ast::ASTNode>> results;
+    if (!import_node) return results;
+
+    auto module_ast = load_module(import_node->file_path);
+    if (!module_ast) return results;
+
+    // TODO: A real implementation needs a robust way to find definitions inside the AST.
+    // For now, we'll simulate finding one item.
+    std::cout << "Searching for granular import '" << import_node->imported_item_name << "' in module '" << import_node->file_path << "'" << std::endl;
+
+    // This is a simplified search. A real one would traverse the AST properly.
+    for(const auto& child : module_ast->children) {
+        // This logic is highly simplified and would need to be much more robust.
+        if (child->name == import_node->imported_item_name) {
+            results.push_back(child->clone());
+            std::cout << "Found and cloned item: " << child->name << std::endl;
+            break; // For precise import, we stop after finding one.
+        }
+    }
+
+    return results;
+}
+
 std::shared_ptr<chtl::ast::ASTNode> chtl::import::ImportManager::load_module(const std::string& module_name) {
     if (imported_asts_.count(module_name)) {
         return imported_asts_[module_name];

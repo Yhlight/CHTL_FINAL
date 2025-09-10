@@ -143,6 +143,7 @@ public:
     void process_imports(const std::string& content, const std::string& current_file);
     void process_import_node(std::shared_ptr<ast::ImportNode> node, std::shared_ptr<ast::ASTNode> current_node);
     std::shared_ptr<ast::ASTNode> load_module(const std::string& module_name);
+    std::vector<std::shared_ptr<ast::ASTNode>> resolve_granular_import(std::shared_ptr<ast::ImportNode> import_node);
     
     // 导入管理
     void add_import(const std::string& name, const std::string& path, ImportType type, const std::string& alias = "");
