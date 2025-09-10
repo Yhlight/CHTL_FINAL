@@ -1156,6 +1156,47 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::createMemberExpressionNode(std::sh
 // 其他未实现的方法
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseCHTLJSSyntax() { return nullptr; }
 
+// Minimal stubs for missing declarations to satisfy linker
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseVariableDeclaration() {
+    return createNode(CHTLJSNodeType::DECLARATION, "var");
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseFunctionDeclaration() {
+    return createNode(CHTLJSNodeType::FUNCTION_DECLARATION, "function");
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseClassDeclaration() {
+    return createNode(CHTLJSNodeType::CLASS_DECLARATION, "class");
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseInterfaceDeclaration() {
+    return createNode(CHTLJSNodeType::INTERFACE_DECLARATION, "interface");
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseEnumDeclaration() {
+    return createNode(CHTLJSNodeType::ENUM_DECLARATION, "enum");
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseNamespaceDeclaration() {
+    return createNode(CHTLJSNodeType::NAMESPACE_DECLARATION, "namespace");
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseModuleDeclaration() {
+    return createNode(CHTLJSNodeType::MODULE_DECLARATION, "module");
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseImportDeclaration() {
+    return createNode(CHTLJSNodeType::IMPORT_DECLARATION, "import");
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseExportDeclaration() {
+    return createNode(CHTLJSNodeType::EXPORT_DECLARATION, "export");
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseObjectExpression() {
+    return createNode(CHTLJSNodeType::OBJECT_EXPRESSION, "object");
+}
+
 void CHTLJSParser::skipWhitespace() {
     while (currentTokenIndex < tokens.size() && 
            (tokens[currentTokenIndex].getType() == CHTLJSTokenType::SINGLE_COMMENT ||

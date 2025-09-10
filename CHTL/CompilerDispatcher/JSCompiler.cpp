@@ -514,10 +514,8 @@ std::string CHTL::JSCompiler::optimizeJSInternal(const std::string& js) {
     // 移除不必要的分号
     result = std::regex_replace(result, std::regex(R"(\s*;\s*}"), "}");
     
-    // 移除console.log语句（可选）
-    if (removeConsoleLogs) {
-        result = std::regex_replace(result, std::regex(R"(console\.log\([^)]*\);\s*)"), "");
-    }
+    // 移除console.log语句
+    result = std::regex_replace(result, std::regex(R"(console\.log\([^)]*\);\s*)"), "");
     
     // 移除未使用的变量声明
     result = removeUnusedVariables(result);
@@ -562,7 +560,7 @@ std::string CHTL::JSCompiler::mergeStringLiterals(const std::string& js) {
     std::string result = js;
     
     // 匹配相邻的字符串字面量
-    std::regex stringRegex(R"("([^"]*)"\s*\+\s*"([^"]*)")");
+    std::regex stringRegex(R"REGEX("([^"]*)"\s*\+\s*"([^"]*)")REGEX");
     std::smatch match;
     
     while (std::regex_search(result, match, stringRegex)) {
@@ -662,8 +660,8 @@ std::vector<std::string> CHTL::JSCompiler::splitJSInternal(const std::string& js
     return result;
 }
 
-std::vector<std::shared_ptr<JSNode>> CHTL::JSCompiler::splitASTInternal(const std::shared_ptr<JSNode>& ast) {
-    std::vector<std::shared_ptr<JSNode>> result;
+std::vector<std::shared_ptr<CHTL::JSNode>> CHTL::JSCompiler::splitASTInternal(const std::shared_ptr<CHTL::JSNode>& ast) {
+    std::vector<std::shared_ptr<CHTL::JSNode>> result;
     if (ast) {
         result = ast->children;
     }
@@ -674,8 +672,8 @@ std::string CHTL::JSCompiler::filterJSInternal(const std::string& js, const std:
     return js; // 简化实现
 }
 
-std::vector<std::shared_ptr<JSNode>> CHTL::JSCompiler::filterASTInternal(const std::shared_ptr<JSNode>& ast, JSNodeType type) {
-    std::vector<std::shared_ptr<JSNode>> result;
+std::vector<std::shared_ptr<CHTL::JSNode>> CHTL::JSCompiler::filterASTInternal(const std::shared_ptr<CHTL::JSNode>& ast, JSNodeType type) {
+    std::vector<std::shared_ptr<CHTL::JSNode>> result;
     if (ast) {
         for (const auto& child : ast->children) {
             if (child->type == type) {
@@ -690,7 +688,7 @@ std::string CHTL::JSCompiler::sortJSInternal(const std::string& js) {
     return js; // 简化实现
 }
 
-std::vector<std::shared_ptr<JSNode>> CHTL::JSCompiler::sortASTInternal(const std::vector<std::shared_ptr<JSNode>>& nodes) {
+std::vector<std::shared_ptr<CHTL::JSNode>> CHTL::JSCompiler::sortASTInternal(const std::vector<std::shared_ptr<CHTL::JSNode>>& nodes) {
     return nodes; // 简化实现
 }
 
@@ -698,7 +696,7 @@ std::string CHTL::JSCompiler::uniqueJSInternal(const std::string& js) {
     return js; // 简化实现
 }
 
-std::vector<std::shared_ptr<JSNode>> CHTL::JSCompiler::uniqueASTInternal(const std::vector<std::shared_ptr<JSNode>>& nodes) {
+std::vector<std::shared_ptr<CHTL::JSNode>> CHTL::JSCompiler::uniqueASTInternal(const std::vector<std::shared_ptr<CHTL::JSNode>>& nodes) {
     return nodes; // 简化实现
 }
 

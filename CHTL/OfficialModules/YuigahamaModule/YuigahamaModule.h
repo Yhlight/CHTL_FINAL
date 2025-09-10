@@ -58,14 +58,14 @@ public:
     YuigahamaEnhancedModule();
     ~YuigahamaEnhancedModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // 增强功能
     std::string processEnhancedElement(const std::string& element) const;
@@ -82,14 +82,14 @@ public:
     YuigahamaAnimationModule();
     ~YuigahamaAnimationModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // 动画功能
     std::string processAnimation(const std::string& animation) const;
@@ -106,14 +106,14 @@ public:
     YuigahamaInteractionModule();
     ~YuigahamaInteractionModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // 交互功能
     std::string processInteraction(const std::string& interaction) const;
@@ -130,14 +130,14 @@ public:
     YuigahamaResponsiveModule();
     ~YuigahamaResponsiveModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // 响应式功能
     std::string processResponsive(const std::string& responsive) const;

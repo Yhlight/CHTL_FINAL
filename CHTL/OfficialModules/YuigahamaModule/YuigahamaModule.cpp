@@ -33,12 +33,9 @@ bool YuigahamaModule::initialize() {
     }
     
     try {
-        // 初始化子模块
+        // 初始化子模块（CMODModule无initialize接口，记录名称即可）
         for (auto& subModule : subModules) {
-            if (!subModule->initialize()) {
-                std::cerr << "Failed to initialize submodule: " << subModule->getModuleName() << std::endl;
-                return false;
-            }
+            std::cout << "Submodule: " << subModule->getName() << std::endl;
         }
         
         initialized = true;
@@ -58,9 +55,9 @@ void YuigahamaModule::cleanup() {
         return;
     }
     
-    // 清理子模块
+    // 清理子模块（CMODModule无cleanup接口，记录名称即可）
     for (auto& subModule : subModules) {
-        subModule->cleanup();
+        std::cout << "Cleaning up submodule: " << subModule->getName() << std::endl;
     }
     
     initialized = false;
@@ -142,7 +139,7 @@ std::vector<std::shared_ptr<CMODModule>> YuigahamaModule::getSubModules() const 
 
 std::shared_ptr<CMODModule> YuigahamaModule::getSubModule(const std::string& name) const {
     for (const auto& subModule : subModules) {
-        if (subModule->getModuleName() == name) {
+        if (subModule->getName() == name) {
             return subModule;
         }
     }

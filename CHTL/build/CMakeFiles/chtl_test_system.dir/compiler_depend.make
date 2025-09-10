@@ -19422,6 +19422,198 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
   /usr/lib/llvm-20/lib/clang/20/include/stddef.h \
   /workspace/CHTL/Util/ZipUtil/ZipUtil.h
 
+chtl_test_system: /lib/x86_64-linux-gnu/Scrt1.o \
+  /lib/x86_64-linux-gnu/crti.o \
+  /lib/x86_64-linux-gnu/crtn.o \
+  /lib/x86_64-linux-gnu/libc.so \
+  /lib/x86_64-linux-gnu/libc.so.6 \
+  /lib/x86_64-linux-gnu/libgcc_s.so.1 \
+  /lib/x86_64-linux-gnu/libm.so \
+  /lib/x86_64-linux-gnu/libm.so.6 \
+  /lib/x86_64-linux-gnu/libmvec.so.1 \
+  /lib64/ld-linux-x86-64.so.2 \
+  /usr/lib/gcc/x86_64-linux-gnu/14/crtbeginS.o \
+  /usr/lib/gcc/x86_64-linux-gnu/14/crtendS.o \
+  /usr/lib/gcc/x86_64-linux-gnu/14/libgcc.a \
+  /usr/lib/gcc/x86_64-linux-gnu/14/libgcc_s.so \
+  /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so \
+  /usr/lib/x86_64-linux-gnu/libc_nonshared.a \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLConfiguration/CHTLConfigurationProcessor.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLConstraint/CHTLConstraintProcessor.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLContext/CHTLContext.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLGenerator/CHTLGenerator.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLIOStream/CHTLIOStream.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLLexer/Token.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLLoader/CHTLLoader.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLManage/CHTLManage.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/BaseNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/CommentNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/ConstraintNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/CustomNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/ElementNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/ImportNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/NamespaceNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/OriginNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/ScriptNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/StyleNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/TemplateNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/TextNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/UseNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLParser/CHTLParser.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLProperty/CHTLPropertyReference.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLState/CHTLState.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLStyle/CHTLStyleProcessor.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CHTLUse/CHTLUseProcessor.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CMODSystem/CMODLoader.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CMODSystem/CMODModule.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL/CMODSystem/CMODSystem.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSContext/CHTLJSContext.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedListener.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedSelector.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSEnhanced/CHTLJSEventDelegation.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSIOStream/CHTLJSIOStream.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSLexer/CHTLJSToken.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSLoader/CHTLJSLoader.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSManage/CHTLJSManage.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSState/CHTLJSState.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CJMODSystem/CJMODArg.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CJMODSystem/CJMODGenerator.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CJMODSystem/CJMODModule.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CJMODSystem/CJMODScanner.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CJMODSystem/CJMODSyntax.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CHTL_JS/CJMODSystem/CJMODSystem.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CodeMerger/CodeMerger.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CompilerDispatcher/CSSCompiler.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CompilerDispatcher/CompilerDispatcher.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CompilerDispatcher/JSCompiler.cpp.o \
+  CMakeFiles/chtl_test_system.dir/CompilerMonitor/CompilerMonitor.cpp.o \
+  CMakeFiles/chtl_test_system.dir/OfficialModules/ChthollyModule/ChthollyModule.cpp.o \
+  CMakeFiles/chtl_test_system.dir/OfficialModules/OfficialModuleManager.cpp.o \
+  CMakeFiles/chtl_test_system.dir/OfficialModules/YuigahamaModule/YuigahamaModule.cpp.o \
+  CMakeFiles/chtl_test_system.dir/Scanner/CHTLUnifiedScanner.cpp.o \
+  CMakeFiles/chtl_test_system.dir/Scanner/UnifiedScanner.cpp.o \
+  CMakeFiles/chtl_test_system.dir/Test/AstTest.cpp.o \
+  CMakeFiles/chtl_test_system.dir/Test/TestFramework.cpp.o \
+  CMakeFiles/chtl_test_system.dir/Test/TokenTest.cpp.o \
+  CMakeFiles/chtl_test_system.dir/Test/UtilTest.cpp.o \
+  CMakeFiles/chtl_test_system.dir/Test/test_main.cpp.o \
+  CMakeFiles/chtl_test_system.dir/Util/FileSystem/FileSystem.cpp.o \
+  CMakeFiles/chtl_test_system.dir/Util/StringUtil/StringUtil.cpp.o \
+  CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o
+
+
+CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/Test/TokenTest.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/Test/TestFramework.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/Test/AstTest.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/Scanner/UnifiedScanner.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/OfficialModules/YuigahamaModule/YuigahamaModule.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/OfficialModules/ChthollyModule/ChthollyModule.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CompilerDispatcher/JSCompiler.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CompilerDispatcher/CompilerDispatcher.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CompilerDispatcher/CSSCompiler.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CodeMerger/CodeMerger.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CJMODSystem/CJMODSystem.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CJMODSystem/CJMODScanner.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CJMODSystem/CJMODModule.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CJMODSystem/CJMODArg.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSState/CHTLJSState.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSIOStream/CHTLJSIOStream.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSEnhanced/CHTLJSEventDelegation.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CMODSystem/CMODSystem.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CMODSystem/CMODModule.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLUse/CHTLUseProcessor.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLStyle/CHTLStyleProcessor.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLProperty/CHTLPropertyReference.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLParser/CHTLParser.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/UseNode.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/StyleNode.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/ScriptNode.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/NamespaceNode.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/ElementNode.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/CustomNode.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/ConstraintNode.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLManage/CHTLManage.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLLoader/CHTLLoader.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLLexer/Token.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLGenerator/CHTLGenerator.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLContext/CHTLContext.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLConstraint/CHTLConstraintProcessor.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLConfiguration/CHTLConfigurationProcessor.cpp.o:
+
+/usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so:
+
+/usr/lib/gcc/x86_64-linux-gnu/14/libgcc_s.so:
+
+/usr/lib/gcc/x86_64-linux-gnu/14/libgcc.a:
+
+/usr/lib/gcc/x86_64-linux-gnu/14/crtendS.o:
+
+/usr/lib/gcc/x86_64-linux-gnu/14/crtbeginS.o:
+
+/lib/x86_64-linux-gnu/libm.so.6:
+
+/lib/x86_64-linux-gnu/libm.so:
+
+/lib/x86_64-linux-gnu/libgcc_s.so.1:
+
+/lib/x86_64-linux-gnu/libc.so:
+
+CMakeFiles/chtl_test_system.dir/Test/UtilTest.cpp.o:
+
+/lib/x86_64-linux-gnu/crtn.o:
 
 /workspace/CHTL/Util/ZipUtil/ZipUtil.cpp:
 
@@ -19453,6 +19645,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 
 /usr/include/c++/14/ext/atomicity.h:
 
+CMakeFiles/chtl_test_system.dir/Util/StringUtil/StringUtil.cpp.o:
+
 /usr/include/c++/14/ext/alloc_traits.h:
 
 /usr/include/c++/14/exception:
@@ -19468,6 +19662,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 /usr/include/c++/14/bits/utility.h:
 
 /workspace/CHTL/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp:
+
+/usr/lib/x86_64-linux-gnu/libc_nonshared.a:
 
 /usr/include/c++/14/cstddef:
 
@@ -19521,7 +19717,13 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 
 /workspace/CHTL/CHTL/CHTLNode/StyleNode.cpp:
 
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLState/CHTLState.cpp.o:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/BaseNode.cpp.o:
+
 /workspace/CHTL/CHTL/CHTLNode/UseNode.cpp:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/OriginNode.cpp.o:
 
 /usr/include/c++/14/bits/regex_scanner.h:
 
@@ -19540,6 +19742,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 /usr/lib/llvm-20/lib/clang/20/include/__stddef_ptrdiff_t.h:
 
 /usr/include/features.h:
+
+CMakeFiles/chtl_test_system.dir/Test/test_main.cpp.o:
 
 /usr/include/c++/14/bits/regex_automaton.tcc:
 
@@ -19562,6 +19766,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 /usr/include/c++/14/bits/algorithmfwd.h:
 
 /workspace/CHTL/CHTL_JS/CHTLJSLoader/CHTLJSLoader.cpp:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/TemplateNode.cpp.o:
 
 /workspace/CHTL/CHTL_JS/CHTLJSParser/CHTLJSParser.h:
 
@@ -19587,6 +19793,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 
 /usr/include/c++/14/bits/std_function.h:
 
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSContext/CHTLJSContext.cpp.o:
+
 /usr/include/x86_64-linux-gnu/bits/struct_mutex.h:
 
 /usr/include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h:
@@ -19602,6 +19810,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 /usr/include/c++/14/bits/streambuf.tcc:
 
 /workspace/CHTL/CHTL_JS/CJMODSystem/CJMODSystem.h:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedSelector.cpp.o:
 
 /usr/include/c++/14/bits/nested_exception.h:
 
@@ -19707,6 +19917,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 
 /usr/include/stdint.h:
 
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.cpp.o:
+
 /workspace/CHTL/CHTL/CHTLNode/ElementNode.cpp:
 
 /usr/include/x86_64-linux-gnu/bits/confname.h:
@@ -19763,6 +19975,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 
 /usr/include/sched.h:
 
+CMakeFiles/chtl_test_system.dir/CompilerMonitor/CompilerMonitor.cpp.o:
+
 /usr/include/wctype.h:
 
 /usr/include/c++/14/filesystem:
@@ -19781,7 +19995,13 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 
 /workspace/CHTL/CHTL_JS/CHTLJSIOStream/CHTLJSIOStream.h:
 
+CMakeFiles/chtl_test_system.dir/Scanner/CHTLUnifiedScanner.cpp.o:
+
 /workspace/CHTL/Test/UtilTest.h:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CMODSystem/CMODLoader.cpp.o:
+
+/lib/x86_64-linux-gnu/Scrt1.o:
 
 /usr/include/c++/14/bits/stl_iterator.h:
 
@@ -19919,6 +20139,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 
 /usr/include/c++/14/stack:
 
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/ImportNode.cpp.o:
+
 /usr/include/c++/14/bits/stl_deque.h:
 
 /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h:
@@ -19945,6 +20167,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 
 /workspace/CHTL/CHTL/CMODSystem/CMODLoader.h:
 
+/lib/x86_64-linux-gnu/libmvec.so.1:
+
 /usr/include/c++/14/ctime:
 
 /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h:
@@ -19954,6 +20178,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 /usr/include/c++/14/bits/fs_dir.h:
 
 /usr/include/string.h:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSLoader/CHTLJSLoader.cpp.o:
 
 /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h:
 
@@ -19986,6 +20212,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 /usr/include/c++/14/bits/regex_constants.h:
 
 /workspace/CHTL/CHTL/CHTLNode/BaseNode.cpp:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSLexer/CHTLJSToken.cpp.o:
 
 /usr/include/x86_64-linux-gnu/bits/stdint-least.h:
 
@@ -20022,6 +20250,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 /workspace/CHTL/CHTL_JS/CJMODSystem/CJMODArg.cpp:
 
 /usr/include/x86_64-linux-gnu/bits/sched.h:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o:
 
 /usr/include/c++/14/bits/shared_ptr.h:
 
@@ -20065,6 +20295,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 
 /usr/include/c++/14/stdexcept:
 
+CMakeFiles/chtl_test_system.dir/Util/FileSystem/FileSystem.cpp.o:
+
 /usr/include/c++/14/tr1/special_function_util.h:
 
 /workspace/CHTL/CHTL/CHTLIOStream/CHTLIOStream.h:
@@ -20076,6 +20308,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 /usr/include/c++/14/algorithm:
 
 /usr/include/x86_64-linux-gnu/bits/timesize.h:
+
+/lib64/ld-linux-x86-64.so.2:
 
 /usr/include/c++/14/type_traits:
 
@@ -20167,6 +20401,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 
 /workspace/CHTL/CHTL/CHTLProperty/CHTLPropertyReference.h:
 
+/lib/x86_64-linux-gnu/libc.so.6:
+
 /workspace/CHTL/CHTL/CHTLStyle/CHTLStyleProcessor.h:
 
 /workspace/CHTL/CHTL/CHTLIOStream/CHTLIOStream.cpp:
@@ -20207,11 +20443,15 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 
 /workspace/CHTL/CHTL/CHTLLexer/Token.h:
 
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedListener.cpp.o:
+
 /workspace/CHTL/CHTL/CHTLLoader/CHTLLoader.cpp:
 
 /workspace/CHTL/CHTL/CHTLNode/CommentNode.cpp:
 
 /usr/include/x86_64-linux-gnu/bits/resource.h:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CJMODSystem/CJMODGenerator.cpp.o:
 
 /workspace/CHTL/CHTL/CHTLNode/ConstraintNode.cpp:
 
@@ -20275,6 +20515,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 
 /usr/include/c++/14/bits/specfun.h:
 
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/CommentNode.cpp.o:
+
 /workspace/CHTL/CHTL_JS/CHTLJSState/CHTLJSState.cpp:
 
 /usr/include/c++/14/bits/std_mutex.h:
@@ -20319,11 +20561,15 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 
 /usr/include/c++/14/thread:
 
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CJMODSystem/CJMODSyntax.cpp.o:
+
 /usr/include/c++/14/tr1/bessel_function.tcc:
 
 /usr/include/c++/14/bits/invoke.h:
 
 /workspace/CHTL/CHTL_JS/CHTLJSLoader/CHTLJSLoader.h:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLIOStream/CHTLIOStream.cpp.o:
 
 /usr/include/c++/14/tr1/legendre_function.tcc:
 
@@ -20439,15 +20685,21 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 
 /usr/include/unistd.h:
 
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/TextNode.cpp.o:
+
 /usr/include/x86_64-linux-gnu/bits/getopt_core.h:
 
 /usr/include/x86_64-linux-gnu/bits/sigaction.h:
+
+/lib/x86_64-linux-gnu/crti.o:
 
 /usr/include/x86_64-linux-gnu/bits/sigcontext.h:
 
 /usr/include/x86_64-linux-gnu/bits/siginfo-consts-arch.h:
 
 /usr/include/x86_64-linux-gnu/bits/siginfo-consts.h:
+
+CMakeFiles/chtl_test_system.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o:
 
 /usr/include/x86_64-linux-gnu/bits/signum-generic.h:
 
@@ -20462,6 +20714,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 /usr/include/x86_64-linux-gnu/bits/types/__sigval_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/sigevent_t.h:
+
+CMakeFiles/chtl_test_system.dir/CHTL_JS/CHTLJSManage/CHTLJSManage.cpp.o:
 
 /usr/include/x86_64-linux-gnu/bits/types/siginfo_t.h:
 
@@ -20500,6 +20754,8 @@ CMakeFiles/chtl_test_system.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util
 /usr/include/x86_64-linux-gnu/bits/environments.h:
 
 /workspace/CHTL/Util/FileSystem/FileSystem.h:
+
+CMakeFiles/chtl_test_system.dir/OfficialModules/OfficialModuleManager.cpp.o:
 
 /usr/include/c++/14/compare:
 

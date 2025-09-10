@@ -530,6 +530,14 @@ bool CHTLConstraintProcessor::applyConstraints(std::shared_ptr<BaseNode> node) {
     return success;
 }
 
+bool CHTLConstraintProcessor::applyGlobalConstraints(std::shared_ptr<BaseNode> node) {
+    if (!node || !enableConstraints) {
+        return true;
+    }
+    // 简化实现：使用全局检查
+    return checkGlobalConstraints(node->getValue());
+}
+
 bool CHTLConstraintProcessor::applyElementConstraints(std::shared_ptr<ElementNode> element) {
     if (!element || !enableConstraints) {
         return true;
