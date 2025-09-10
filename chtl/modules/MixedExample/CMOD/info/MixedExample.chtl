@@ -1,0 +1,12 @@
+// CMOD Info for MixedExample
+
+[Info] {
+    name = "MixedExample-CMOD";
+    version = "1.0.0";
+    description = "The CHTL component part of the mixed module.";
+    author = "Jules";
+}
+
+[Export] {
+    [Template] @Element MyMixedComponent;
+}

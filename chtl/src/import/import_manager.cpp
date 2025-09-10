@@ -428,11 +428,9 @@ std::shared_ptr<chtl::ast::ASTNode> chtl::import::ImportManager::load_module(con
         return imported_asts_[module_name];
     }
 
-    // 1. Resolve path to .cmod file using the PathResolver
     std::string module_path = path_resolver_->resolve_path(module_name + ".cmod");
     std::cout << "Attempting to load module '" << module_name << "' from path: " << module_path << std::endl;
 
-    // 2. Read the packed module file from disk
     std::string packed_content;
     try {
         packed_content = read_file(module_path);
@@ -441,37 +439,62 @@ std::shared_ptr<chtl::ast::ASTNode> chtl::import::ImportManager::load_module(con
         return nullptr;
     }
 
-    // 3. Unpack, parse info, and parse source from the loaded content
     auto unpacked_files = cmod_cjmod::ModulePackager::unpack(packed_content);
 
-    std::string info_path = "info/" + module_name + ".chtl";
-    if (unpacked_files.count(info_path) == 0) {
-        std::cerr << "Warning: Module info file not found for " << module_name << std::endl;
-        return nullptr;
-    }
-    cmod_cjmod::ModuleInfoParser info_parser(unpacked_files[info_path]);
-    auto parsed_info = info_parser.parse();
-    std::cout << "Successfully parsed info for module: " << parsed_info.name << std::endl;
-
-    std::string source_path = "src/" + module_name + ".chtl";
-    if (unpacked_files.count(source_path) == 0) {
-        std::cerr << "Warning: Module source file not found for " << module_name << std::endl;
-        return nullptr;
+    // Check if it's a mixed module by looking for the directory structure in paths
+    bool is_mixed = false;
+    for(const auto& pair : unpacked_files) {
+        if(pair.first.rfind("CJMOD/", 0) == 0) {
+            is_mixed = true;
+            break;
+        }
     }
 
+    // --- Process CMOD part (always present) ---
+    std::string cmod_info_path = is_mixed ? "CMOD/info/" + module_name + ".chtl" : "info/" + module_name + ".chtl";
+    std::string cmod_source_path = is_mixed ? "CMOD/src/" + module_name + ".chtl" : "src/" + module_name + ".chtl";
+
+    if (unpacked_files.count(cmod_info_path) == 0) {
+        std::cerr << "Warning: CMOD info file not found for " << module_name << std::endl;
+        return nullptr;
+    }
+    cmod_cjmod::ModuleInfoParser cmod_info_parser(unpacked_files[cmod_info_path]);
+    auto cmod_parsed_info = cmod_info_parser.parse();
+    std::cout << "Successfully parsed CMOD info for module: " << cmod_parsed_info.name << std::endl;
+
+    if (unpacked_files.count(cmod_source_path) == 0) {
+        std::cerr << "Warning: CMOD source file not found for " << module_name << std::endl;
+        return nullptr;
+    }
+
+    std::shared_ptr<ast::ASTNode> cmod_ast = nullptr;
     try {
-        lexer::CHTLLexer lexer(unpacked_files[source_path]);
+        lexer::CHTLLexer lexer(unpacked_files[cmod_source_path]);
         auto tokens = lexer.tokenize();
         parser::CHTLParser parser(tokens);
-        auto module_ast = parser.parse();
-
-        if (module_ast) {
-            imported_asts_[module_name] = module_ast;
-            return module_ast;
-        }
+        cmod_ast = parser.parse();
     } catch (const std::exception& e) {
-        std::cerr << "Error parsing module source for " << module_name << ": " << e.what() << std::endl;
+        std::cerr << "Error parsing CMOD source for " << module_name << ": " << e.what() << std::endl;
+        return nullptr;
     }
 
-    return nullptr;
+    // --- Process CJMOD part if it exists ---
+    if (is_mixed) {
+        std::cout << "Mixed module detected. Processing CJMOD part..." << std::endl;
+        std::string cjmod_info_path = "CJMOD/info/" + module_name + ".chtl";
+         if (unpacked_files.count(cjmod_info_path)) {
+            cmod_cjmod::ModuleInfoParser cjmod_info_parser(unpacked_files[cjmod_info_path]);
+            auto cjmod_parsed_info = cjmod_info_parser.parse();
+            std::cout << "Successfully parsed CJMOD info for module: " << cjmod_parsed_info.name << std::endl;
+            std::cout << "Simulating registration of CJMOD extensions..." << std::endl;
+            // In a real implementation, we would now process the CJMOD C++ files
+            // and register the extensions with the CHTL JS compiler.
+        }
+    }
+
+    if (cmod_ast) {
+        imported_asts_[module_name] = cmod_ast;
+    }
+
+    return cmod_ast;
 }

@@ -1,0 +1,14 @@
+[Template] @Element MyMixedComponent {
+    div {
+        class: "mixed-component";
+        h3 { text: "Mixed Module Component"; }
+        p { text: "This part comes from the CHTL side of the module."; }
+    }
+    style {
+        .mixed-component {
+            border: 2px dashed purple;
+            padding: 10px;
+            margin: 10px;
+        }
+    }
+}

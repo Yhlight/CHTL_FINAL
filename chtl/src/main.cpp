@@ -27,14 +27,11 @@ std::string read_file_content(const std::string& path) {
     return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 }
 
-// Utility to package the Chtholly module from its source files
 void package_chtholly_module() {
     std::cout << "Packaging 'Chtholly' module from source files..." << std::endl;
     try {
         auto module = std::make_shared<cmod_cjmod::CMODModule>("Chtholly");
-        std::string info_content = read_file_content("chtl/modules/Chtholly/info/Chtholly.chtl");
-        cmod_cjmod::ModuleInfoParser info_parser(info_content);
-        module->setInfo(info_parser.parse());
+        module->setInfo(cmod_cjmod::ModuleInfoParser(read_file_content("chtl/modules/Chtholly/info/Chtholly.chtl")).parse());
         module->addSourceFile("src/Chtholly.chtl", read_file_content("chtl/modules/Chtholly/src/Chtholly.chtl"));
         module->addSourceFile("src/components/Accordion.chtl", read_file_content("chtl/modules/Chtholly/src/components/Accordion.chtl"));
         module->addSourceFile("src/components/Memo.chtl", read_file_content("chtl/modules/Chtholly/src/components/Memo.chtl"));
@@ -48,14 +45,11 @@ void package_chtholly_module() {
     }
 }
 
-// Utility to package the Yuigahama module from its source files
 void package_yuigahama_module() {
     std::cout << "Packaging 'Yuigahama' module from source files..." << std::endl;
     try {
         auto module = std::make_shared<cmod_cjmod::CMODModule>("Yuigahama");
-        std::string info_content = read_file_content("chtl/modules/Yuigahama/info/Yuigahama.chtl");
-        cmod_cjmod::ModuleInfoParser info_parser(info_content);
-        module->setInfo(info_parser.parse());
+        module->setInfo(cmod_cjmod::ModuleInfoParser(read_file_content("chtl/modules/Yuigahama/info/Yuigahama.chtl")).parse());
         module->addSourceFile("src/Yuigahama.chtl", read_file_content("chtl/modules/Yuigahama/src/Yuigahama.chtl"));
         module->addSourceFile("src/components/MusicPlayer.chtl", read_file_content("chtl/modules/Yuigahama/src/components/MusicPlayer.chtl"));
         module->addSourceFile("src/components/SakuraRain.chtl", read_file_content("chtl/modules/Yuigahama/src/components/SakuraRain.chtl"));
@@ -69,10 +63,38 @@ void package_yuigahama_module() {
     }
 }
 
+void package_mixed_module() {
+    std::cout << "Packaging 'MixedExample' module from source files..." << std::endl;
+    try {
+        // Create CMOD part
+        auto cmod_part = std::make_shared<cmod_cjmod::CMODModule>("MixedExample");
+        cmod_part->setInfo(cmod_cjmod::ModuleInfoParser(read_file_content("chtl/modules/MixedExample/CMOD/info/MixedExample.chtl")).parse());
+        cmod_part->addSourceFile("src/MyComponent.chtl", read_file_content("chtl/modules/MixedExample/CMOD/src/MyComponent.chtl"));
+
+        // Create CJMOD part
+        auto cjmod_part = std::make_shared<cmod_cjmod::CJMODModule>("MixedExample");
+        cjmod_part->setInfo(cmod_cjmod::ModuleInfoParser(read_file_content("chtl/modules/MixedExample/CJMOD/info/MixedExample.chtl")).parse());
+        cjmod_part->addSourceFile("src/MyExtension.cpp", read_file_content("chtl/modules/MixedExample/CJMOD/src/MyExtension.cpp"));
+
+        // Create Mixed module
+        auto mixed_module = std::make_shared<cmod_cjmod::MixedModule>("MixedExample");
+        mixed_module->addCMODModule(cmod_part);
+        mixed_module->addCJMODModule(cjmod_part);
+
+        std::string packed_content = cmod_cjmod::ModulePackager::pack(*mixed_module);
+        std::ofstream outfile("modules/MixedExample.cmod");
+        outfile << packed_content;
+        outfile.close();
+        std::cout << "Successfully packaged module to modules/MixedExample.cmod" << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Error during packaging: " << e.what() << std::endl;
+    }
+}
+
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <input_file> | --package-chtholly | --package-yuigahama" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <input_file> | --package-chtholly | --package-yuigahama | --package-mixed" << std::endl;
         return 1;
     }
 
@@ -83,6 +105,10 @@ int main(int argc, char* argv[]) {
     }
     if (arg1 == "--package-yuigahama") {
         package_yuigahama_module();
+        return 0;
+    }
+    if (arg1 == "--package-mixed") {
+        package_mixed_module();
         return 0;
     }
 

@@ -599,15 +599,31 @@ std::string ModulePackager::pack(const CJMODModule& module) {
 }
 
 std::string ModulePackager::pack(const MixedModule& module) {
-    // For simplicity, we'll just pack the constituent modules
     std::stringstream ss;
     ss << "--MIXED_MODULE_START:" << module.getInfo().name << "\n";
 
+    // Pack CMOD parts
     for (const auto& cmod : module.getCMODModules()) {
-        ss << pack(*cmod);
+        ss << "--FILE:CMOD/info/" << cmod->getInfo().name << ".chtl\n";
+        ss << cmod->generateInfoCode();
+        ss << "\n--ENDFILE--\n";
+        for (const auto& pair : cmod->getSourceFiles()) {
+            ss << "--FILE:CMOD/" << pair.first << "\n";
+            ss << pair.second;
+            ss << "\n--ENDFILE--\n";
+        }
     }
+
+    // Pack CJMOD parts
     for (const auto& cjmod : module.getCJMODModules()) {
-        ss << pack(*cjmod);
+        ss << "--FILE:CJMOD/info/" << cjmod->getInfo().name << ".chtl\n";
+        ss << cjmod->generateInfoCode();
+        ss << "\n--ENDFILE--\n";
+        for (const auto& pair : cjmod->getSourceFiles()) {
+            ss << "--FILE:CJMOD/" << pair.first << "\n";
+            ss << pair.second;
+            ss << "\n--ENDFILE--\n";
+        }
     }
 
     ss << "--MIXED_MODULE_END:" << module.getInfo().name << "\n";

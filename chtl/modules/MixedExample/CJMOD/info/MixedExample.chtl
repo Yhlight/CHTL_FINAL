@@ -1,0 +1,14 @@
+// CJMOD Info for MixedExample
+
+[Info] {
+    name = "MixedExample-CJMOD";
+    version = "1.0.0";
+    description = "The CHTL JS extension part of the mixed module.";
+    author = "Jules";
+}
+
+[Export] {
+    // This part of the spec is less clear, but we'll export the name of the function
+    // that the CJMOD extension is supposed to register.
+    [Function] @JavaScript MyExtensionFunction;
+}

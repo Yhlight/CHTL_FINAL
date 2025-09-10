@@ -1,0 +1,27 @@
+html {
+    head {
+        title { "Mixed Module Test" }
+    }
+    body {
+        h1 { text: "Testing Mixed CMOD+CJMOD Modules"; }
+
+        // Import the mixed module
+        [Import] @Chtl from "MixedExample";
+
+        // Use the CHTL component from the module
+        @Element MyMixedComponent;
+
+        // Use the CHTL JS extension from the module
+        script {
+            // This function should be registered by the CJMOD part of the module.
+            // In our simulation, this will not actually work, but it demonstrates
+            // how it would be used. The compiler will parse this, but the
+            // final JS will have an undefined function call.
+            if (typeof MyExtensionFunction !== 'undefined') {
+                MyExtensionFunction();
+            } else {
+                console.log("MyExtensionFunction is not defined (as expected in simulation).");
+            }
+        }
+    }
+}
