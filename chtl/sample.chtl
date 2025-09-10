@@ -1,0 +1,16 @@
+// A sample CHTL file for testing the compiler
+div {
+    class: "main-container";
+
+    h1 {
+        text: "Welcome to CHTL!";
+    }
+
+    p {
+        text {
+            "This is a paragraph generated from a CHTL source file."
+        }
+    }
+
+    hr {}
+}
