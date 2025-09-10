@@ -241,6 +241,10 @@ private:
     bool isValidPropertyInternal(const std::string& property);
     bool isValidValueInternal(const std::string& value);
     
+    // CSS优化辅助方法
+    std::string mergeDuplicateProperties(const std::string& css);
+    std::string removeDuplicateSelectors(const std::string& css);
+    
     // 序列化内部方法
     std::string toJSONInternal() const;
     std::string toXMLInternal() const;

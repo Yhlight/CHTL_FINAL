@@ -23,10 +23,10 @@ int main(int argc, char* argv[]) {
     
     try {
         // 创建编译器调度器
-        CompilerDispatcher dispatcher;
+        CHTL::CompilerDispatcher dispatcher;
         
         // 创建统一扫描器
-        CHTLUnifiedScanner scanner;
+        CHTL::CHTLUnifiedScanner scanner;
         
         // 扫描输入文件
         std::cout << "正在扫描文件: " << inputFile << std::endl;

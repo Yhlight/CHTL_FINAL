@@ -391,7 +391,7 @@ void CLITool::processFile(const std::string& inputFile, const std::string& outpu
     // 编译文件
     auto result = dispatcher.compileFile(inputFile);
     
-    if (!result.success) {
+    if (!result.metadata["success"].empty() && result.metadata["success"] != "true") {
         throw std::runtime_error("编译失败");
     }
     
@@ -401,10 +401,18 @@ void CLITool::processFile(const std::string& inputFile, const std::string& outpu
     merger.setTitle(FileProcessor::getFileName(inputFile));
     
     // 合并代码
-    auto finalResult = merger.merge(result.html, result.css, result.javascript);
+    CompileResult compileResult;
+    compileResult.outputs["html"] = result.html;
+    compileResult.outputs["css"] = result.css;
+    compileResult.outputs["javascript"] = result.javascript;
+    compileResult.errors = result.errors;
+    compileResult.warnings = result.warnings;
+    compileResult.metadata = result.metadata;
+    
+    auto finalResult = merger.merge(compileResult);
     
     // 写入输出文件
-    if (!FileProcessor::writeFile(outputFile, finalResult)) {
+    if (!FileProcessor::writeFile(outputFile, finalResult.html)) {
         throw std::runtime_error("无法写入输出文件: " + outputFile);
     }
     

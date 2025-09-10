@@ -31,8 +31,8 @@ public:
     bool isVoidElementTag(const std::string& tagName) const;
     
     // 属性操作（重写基类方法以支持CHTL特殊语法）
-    void setAttribute(const std::string& key, const std::string& value) override;
-    std::string getAttribute(const std::string& key) const override;
+    void setAttribute(const std::string& key, const std::string& value);
+    std::string getAttribute(const std::string& key) const;
     
     // 特殊属性处理
     void setClass(const std::string& className);
@@ -84,6 +84,7 @@ private:
     std::string attributesToHTML() const;
     std::string indent(int level) const;
     bool isInlineElement(const std::string& tagName) const;
+public:
     bool isBlockElement(const std::string& tagName) const;
     bool isInlineBlockElement(const std::string& tagName) const;
 };

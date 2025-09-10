@@ -625,7 +625,6 @@ std::string CodeMerger::convertToInline(const FinalResult& result) {
 }
 
 std::string CodeMerger::convertToExternal(const FinalResult& result) {
-    // 简化实现：返回基本HTML结构，CSS和JS作为外部文件
     std::ostringstream oss;
     
     if (outputFormat == "html5") {
@@ -636,11 +635,54 @@ std::string CodeMerger::convertToExternal(const FinalResult& result) {
         oss << "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
         oss << "    <title>" << title << "</title>\n";
         oss << generateMetaTags();
-        oss << "    <link rel=\"stylesheet\" href=\"styles.css\">\n";
+        
+        // 添加外部CSS文件
+        for (const auto& cssFile : externalCSS) {
+            oss << "    <link rel=\"stylesheet\" href=\"" << cssFile << "\">\n";
+        }
+        
+        // 如果有关联的CSS文件，添加默认样式文件
+        if (externalCSS.empty() && !result.css.empty()) {
+            oss << "    <link rel=\"stylesheet\" href=\"styles.css\">\n";
+        }
+        
         oss << "</head>\n";
         oss << "<body>\n";
         oss << result.html << "\n";
-        oss << "    <script src=\"script.js\"></script>\n";
+        
+        // 添加外部JS文件
+        for (const auto& jsFile : externalJS) {
+            oss << "    <script src=\"" << jsFile << "\"></script>\n";
+        }
+        
+        // 如果有关联的JS文件，添加默认脚本文件
+        if (externalJS.empty() && !result.js.empty()) {
+            oss << "    <script src=\"script.js\"></script>\n";
+        }
+        
+        oss << "</body>\n";
+        oss << "</html>\n";
+    } else if (outputFormat == "xhtml") {
+        oss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        oss << "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n";
+        oss << "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"" << language << "\">\n";
+        oss << "<head>\n";
+        oss << "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n";
+        oss << "    <title>" << title << "</title>\n";
+        oss << generateMetaTags();
+        
+        for (const auto& cssFile : externalCSS) {
+            oss << "    <link rel=\"stylesheet\" href=\"" << cssFile << "\" type=\"text/css\" />\n";
+        }
+        
+        oss << "</head>\n";
+        oss << "<body>\n";
+        oss << result.html << "\n";
+        
+        for (const auto& jsFile : externalJS) {
+            oss << "    <script src=\"" << jsFile << "\" type=\"text/javascript\"></script>\n";
+        }
+        
         oss << "</body>\n";
         oss << "</html>\n";
     }

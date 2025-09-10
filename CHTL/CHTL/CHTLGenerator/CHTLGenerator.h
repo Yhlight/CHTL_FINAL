@@ -52,6 +52,7 @@ private:
     void decreaseIndent();
     
     // 节点生成
+    std::string generateNode(std::shared_ptr<BaseNode> node) const;
     std::string generateElement(std::shared_ptr<ElementNode> element) const;
     std::string generateText(std::shared_ptr<TextNode> textNode) const;
     std::string generateComment(std::shared_ptr<CommentNode> commentNode) const;

@@ -5,27 +5,9 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include "Common/CommonTypes.h"
 
 namespace CHTL {
-
-// 代码片段结构
-struct CodeFragment {
-    std::string type;        // 片段类型：CHTL, CHTL_JS, CSS, JS
-    std::string content;     // 片段内容
-    size_t startLine;        // 起始行号
-    size_t endLine;          // 结束行号
-    size_t startColumn;      // 起始列号
-    size_t endColumn;        // 结束列号
-    std::map<std::string, std::string> metadata; // 元数据
-};
-
-// 扫描结果
-struct ScanResult {
-    std::vector<CodeFragment> fragments;
-    std::string originalSource;
-    std::vector<std::string> errors;
-    std::vector<std::string> warnings;
-};
 
 class CHTLUnifiedScanner {
 private:

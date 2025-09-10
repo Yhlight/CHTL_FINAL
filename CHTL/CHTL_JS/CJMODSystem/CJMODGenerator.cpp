@@ -437,16 +437,54 @@ std::string CJMODGenerator::replaceVariablesInternal(const std::string& code, co
 
 // 代码转换内部方法实现
 std::string CJMODGenerator::convertToJavaScriptInternal(const std::string& code) {
-    // 简化实现：转换CHTL JS语法到JavaScript
     std::string result = code;
     
     // 转换 {{expression}} 到 expression
     std::regex chtljsRegex(R"(\{\{([^}]+)\}\})");
     result = std::regex_replace(result, chtljsRegex, "$1");
     
+    // 转换 -> 到 .
+    result = std::regex_replace(result, std::regex(R"(\s*->\s*)"), ".");
+    
     // 转换 pow(a, b) 到 Math.pow(a, b)
     std::regex powRegex(R"(pow\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\))");
     result = std::regex_replace(result, powRegex, "Math.pow($1, $2)");
+    
+    // 转换 sqrt(a) 到 Math.sqrt(a)
+    std::regex sqrtRegex(R"(sqrt\s*\(\s*([^)]+)\s*\))");
+    result = std::regex_replace(result, sqrtRegex, "Math.sqrt($1)");
+    
+    // 转换 sin(a) 到 Math.sin(a)
+    std::regex sinRegex(R"(sin\s*\(\s*([^)]+)\s*\))");
+    result = std::regex_replace(result, sinRegex, "Math.sin($1)");
+    
+    // 转换 cos(a) 到 Math.cos(a)
+    std::regex cosRegex(R"(cos\s*\(\s*([^)]+)\s*\))");
+    result = std::regex_replace(result, cosRegex, "Math.cos($1)");
+    
+    // 转换 tan(a) 到 Math.tan(a)
+    std::regex tanRegex(R"(tan\s*\(\s*([^)]+)\s*\))");
+    result = std::regex_replace(result, tanRegex, "Math.tan($1)");
+    
+    // 转换 log(a) 到 Math.log(a)
+    std::regex logRegex(R"(log\s*\(\s*([^)]+)\s*\))");
+    result = std::regex_replace(result, logRegex, "Math.log($1)");
+    
+    // 转换 abs(a) 到 Math.abs(a)
+    std::regex absRegex(R"(abs\s*\(\s*([^)]+)\s*\))");
+    result = std::regex_replace(result, absRegex, "Math.abs($1)");
+    
+    // 转换 floor(a) 到 Math.floor(a)
+    std::regex floorRegex(R"(floor\s*\(\s*([^)]+)\s*\))");
+    result = std::regex_replace(result, floorRegex, "Math.floor($1)");
+    
+    // 转换 ceil(a) 到 Math.ceil(a)
+    std::regex ceilRegex(R"(ceil\s*\(\s*([^)]+)\s*\))");
+    result = std::regex_replace(result, ceilRegex, "Math.ceil($1)");
+    
+    // 转换 round(a) 到 Math.round(a)
+    std::regex roundRegex(R"(round\s*\(\s*([^)]+)\s*\))");
+    result = std::regex_replace(result, roundRegex, "Math.round($1)");
     
     return result;
 }

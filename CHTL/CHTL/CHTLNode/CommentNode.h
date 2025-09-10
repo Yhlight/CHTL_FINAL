@@ -5,17 +5,18 @@
 
 namespace CHTL {
 
+enum class CommentType {
+    SINGLE_LINE,    // 单行注释 //
+    MULTI_LINE,     // 多行注释 /* */
+    GENERATOR       // 生成器注释 --
+};
+
 class CommentNode : public BaseNode {
 private:
     CommentType commentType;
     bool isGeneratorComment;  // 是否为生成器注释
 
 public:
-    enum class CommentType {
-        SINGLE_LINE,    // 单行注释 //
-        MULTI_LINE,     // 多行注释 /* */
-        GENERATOR       // 生成器注释 --
-    };
 
     CommentNode(const std::string& content = "", CommentType type = CommentType::SINGLE_LINE);
     virtual ~CommentNode() = default;

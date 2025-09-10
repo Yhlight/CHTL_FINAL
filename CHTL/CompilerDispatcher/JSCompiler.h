@@ -211,6 +211,10 @@ private:
     std::string minifyJSInternal(const std::string& js);
     std::string beautifyJSInternal(const std::string& js);
     
+    // JavaScript优化辅助方法
+    std::string removeUnusedVariables(const std::string& js);
+    std::string mergeStringLiterals(const std::string& js);
+    
     // JavaScript验证内部方法
     bool validateJSInternal(const std::string& js);
     bool validateASTInternal(const std::shared_ptr<JSNode>& ast);

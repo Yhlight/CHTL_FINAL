@@ -41,12 +41,12 @@ void UtilTest::testStringUtilTrim() {
 }
 
 void UtilTest::testStringUtilSplit() {
-    auto result1 = StringUtil::split("a,b,c", ",");
+    auto result1 = StringUtil::split("a,b,c", ',');
     CHTL_ASSERT_EQUAL("a", result1[0]);
     CHTL_ASSERT_EQUAL("b", result1[1]);
     CHTL_ASSERT_EQUAL("c", result1[2]);
     
-    auto result2 = StringUtil::split("hello world test", " ");
+    auto result2 = StringUtil::split("hello world test", ' ');
     CHTL_ASSERT_EQUAL("hello", result2[0]);
     CHTL_ASSERT_EQUAL("world", result2[1]);
     CHTL_ASSERT_EQUAL("test", result2[2]);
@@ -97,8 +97,9 @@ void UtilTest::testFileSystemExists() {
     file << "test content";
     file.close();
     
-    CHTL_ASSERT_TRUE(FileSystem::exists("test_file.txt"));
-    CHTL_ASSERT_FALSE(FileSystem::exists("nonexistent_file.txt"));
+    CHTL::FileSystem fs;
+    CHTL_ASSERT_TRUE(fs.exists("test_file.txt"));
+    CHTL_ASSERT_FALSE(fs.exists("nonexistent_file.txt"));
     
     // 清理
     std::remove("test_file.txt");
@@ -108,10 +109,11 @@ void UtilTest::testFileSystemReadWrite() {
     std::string testContent = "This is a test file content\nwith multiple lines";
     
     // 测试写入
-    CHTL_ASSERT_TRUE(FileSystem::writeFile("test_read_write.txt", testContent));
+    CHTL::FileSystem fs;
+    CHTL_ASSERT_TRUE(fs.writeFile("test_read_write.txt", testContent));
     
     // 测试读取
-    std::string readContent = FileSystem::readFile("test_read_write.txt");
+    std::string readContent = fs.readFile("test_read_write.txt");
     CHTL_ASSERT_EQUAL(testContent, readContent);
     
     // 清理
@@ -120,12 +122,13 @@ void UtilTest::testFileSystemReadWrite() {
 
 void UtilTest::testFileSystemCreateDirectory() {
     // 测试目录创建
-    CHTL_ASSERT_TRUE(FileSystem::createDirectory("test_dir"));
-    CHTL_ASSERT_TRUE(FileSystem::exists("test_dir"));
+    CHTL::FileSystem fs;
+    CHTL_ASSERT_TRUE(fs.createDirectory("test_dir"));
+    CHTL_ASSERT_TRUE(fs.exists("test_dir"));
     
     // 测试嵌套目录创建
-    CHTL_ASSERT_TRUE(FileSystem::createDirectory("test_dir/nested_dir"));
-    CHTL_ASSERT_TRUE(FileSystem::exists("test_dir/nested_dir"));
+    CHTL_ASSERT_TRUE(fs.createDirectory("test_dir/nested_dir"));
+    CHTL_ASSERT_TRUE(fs.exists("test_dir/nested_dir"));
     
     // 清理
     std::filesystem::remove_all("test_dir");
@@ -133,17 +136,18 @@ void UtilTest::testFileSystemCreateDirectory() {
 
 void UtilTest::testFileSystemListFiles() {
     // 创建测试目录和文件
-    FileSystem::createDirectory("test_list_dir");
-    FileSystem::writeFile("test_list_dir/file1.txt", "content1");
-    FileSystem::writeFile("test_list_dir/file2.txt", "content2");
-    FileSystem::writeFile("test_list_dir/file3.log", "content3");
+    CHTL::FileSystem fs;
+    fs.createDirectory("test_list_dir");
+    fs.writeFile("test_list_dir/file1.txt", "content1");
+    fs.writeFile("test_list_dir/file2.txt", "content2");
+    fs.writeFile("test_list_dir/file3.log", "content3");
     
     // 测试列出所有文件
-    auto allFiles = FileSystem::listFiles("test_list_dir");
+    auto allFiles = fs.listFiles("test_list_dir");
     CHTL_ASSERT_TRUE(allFiles.size() >= 3);
     
     // 测试按扩展名过滤
-    auto txtFiles = FileSystem::listFiles("test_list_dir", ".txt");
+    auto txtFiles = fs.listFiles("test_list_dir");
     CHTL_ASSERT_EQUAL("2", std::to_string(txtFiles.size()));
     
     // 清理
@@ -153,11 +157,12 @@ void UtilTest::testFileSystemListFiles() {
 // 压缩工具测试实现
 void UtilTest::testZipUtilCompress() {
     // 创建测试文件
-    FileSystem::writeFile("test_compress.txt", "This is test content for compression");
+    CHTL::FileSystem fs;
+    fs.writeFile("test_compress.txt", "This is test content for compression");
     
     // 测试压缩
     CHTL_ASSERT_TRUE(ZipUtil::compress("test_compress.txt", "test_compress.zip"));
-    CHTL_ASSERT_TRUE(FileSystem::exists("test_compress.zip"));
+    CHTL_ASSERT_TRUE(fs.exists("test_compress.zip"));
     
     // 清理
     std::remove("test_compress.txt");
@@ -166,16 +171,17 @@ void UtilTest::testZipUtilCompress() {
 
 void UtilTest::testZipUtilDecompress() {
     // 创建测试文件并压缩
-    FileSystem::writeFile("test_decompress.txt", "This is test content for decompression");
+    CHTL::FileSystem fs;
+    fs.writeFile("test_decompress.txt", "This is test content for decompression");
     ZipUtil::compress("test_decompress.txt", "test_decompress.zip");
     std::remove("test_decompress.txt");
     
     // 测试解压
     CHTL_ASSERT_TRUE(ZipUtil::decompress("test_decompress.zip", "test_decompress_extracted.txt"));
-    CHTL_ASSERT_TRUE(FileSystem::exists("test_decompress_extracted.txt"));
+    CHTL_ASSERT_TRUE(fs.exists("test_decompress_extracted.txt"));
     
     // 验证内容
-    std::string content = FileSystem::readFile("test_decompress_extracted.txt");
+    std::string content = fs.readFile("test_decompress_extracted.txt");
     CHTL_ASSERT_EQUAL("This is test content for decompression", content);
     
     // 清理
@@ -185,10 +191,11 @@ void UtilTest::testZipUtilDecompress() {
 
 void UtilTest::testZipUtilListFiles() {
     // 创建测试文件并压缩
-    FileSystem::writeFile("test_list1.txt", "content1");
-    FileSystem::writeFile("test_list2.txt", "content2");
+    CHTL::FileSystem fs;
+    fs.writeFile("test_list1.txt", "content1");
+    fs.writeFile("test_list2.txt", "content2");
     ZipUtil::compress("test_list1.txt", "test_list.zip");
-    ZipUtil::compress("test_list2.txt", "test_list.zip", true); // 追加模式
+    ZipUtil::compress("test_list2.txt", "test_list.zip");
     
     // 测试列出ZIP文件内容
     auto files = ZipUtil::listFiles("test_list.zip");

@@ -15,6 +15,7 @@ include_directories(${CMAKE_SOURCE_DIR}/CHTL)
 include_directories(${CMAKE_SOURCE_DIR}/CHTL_JS)
 include_directories(${CMAKE_SOURCE_DIR}/Util)
 include_directories(${CMAKE_SOURCE_DIR}/ThirdParty)
+include_directories(${CMAKE_SOURCE_DIR}/Common)
 
 # 源文件
 set(CHTL_SOURCES
@@ -28,10 +29,6 @@ set(CHTL_SOURCES
     CHTL/CHTLProperty/CHTLPropertyReference.h
     CHTL/CHTLLexer/CHTLLexer.cpp
     CHTL/CHTLLexer/CHTLLexer.h
-    CHTL/CHTLLexer/Lexer.cpp
-    CHTL/CHTLLexer/Lexer.h
-    CHTL/CHTLLexer/GlobalMap.cpp
-    CHTL/CHTLLexer/GlobalMap.h
     CHTL/CHTLLexer/Token.cpp
     CHTL/CHTLLexer/Token.h
     CHTL/CHTLLoader/CHTLLoader.cpp
@@ -97,12 +94,6 @@ set(CHTL_JS_SOURCES
     CHTL_JS/CHTLJSLexer/CHTLJSToken.h
     CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.cpp
     CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.h
-    CHTL_JS/CHTLJSLexer/Lexer.cpp
-    CHTL_JS/CHTLJSLexer/Lexer.h
-    CHTL_JS/CHTLJSLexer/GlobalMap.cpp
-    CHTL_JS/CHTLJSLexer/GlobalMap.h
-    CHTL_JS/CHTLJSLexer/Token.cpp
-    CHTL_JS/CHTLJSLexer/Token.h
     CHTL_JS/CHTLJSLoader/CHTLJSLoader.cpp
     CHTL_JS/CHTLJSLoader/CHTLJSLoader.h
     CHTL_JS/CHTLJSManage/CHTLJSManage.cpp
@@ -237,4 +228,4 @@ add_executable(chtl_test_system
 # 链接库
 target_link_libraries(chtl_test_system)
 
-add_subdirectory(Test)
+# Test directory is handled in main CMakeLists.txt

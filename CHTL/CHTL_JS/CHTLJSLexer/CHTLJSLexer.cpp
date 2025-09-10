@@ -870,8 +870,19 @@ std::string CHTLJSLexer::getContext(size_t pos, int contextSize) const {
 }
 
 std::string CHTLJSLexer::getLineContext(size_t line) const {
-    // 简化实现，实际应该按行分割
-    return source;
+    // 按行分割获取指定行的上下文
+    std::stringstream ss(source);
+    std::string currentLine;
+    size_t currentLineNum = 1;
+    
+    while (std::getline(ss, currentLine)) {
+        if (currentLineNum == line) {
+            return currentLine;
+        }
+        currentLineNum++;
+    }
+    
+    return "";
 }
 
 void CHTLJSLexer::printContext(size_t pos) const {
@@ -926,8 +937,20 @@ bool CHTLJSLexer::validateTokens(const std::vector<CHTLJSToken>& tokens) const {
 }
 
 bool CHTLJSLexer::validateSyntax(const std::vector<CHTLJSToken>& tokens) const {
-    // 简化的语法验证
-    return !tokens.empty() && tokens.back().getType() == CHTLJSTokenType::END_OF_FILE;
+    // 验证CHTL JS语法
+    if (tokens.empty()) {
+        return false;
+    }
+    
+    // 检查是否有错误token
+    for (const auto& token : tokens) {
+        if (token.getType() == CHTLJSTokenType::ERROR) {
+            return false;
+        }
+    }
+    
+    // 检查是否以END_OF_FILE结束
+    return tokens.back().getType() == CHTLJSTokenType::END_OF_FILE;
 }
 
 // 优化方法实现
@@ -972,12 +995,19 @@ std::vector<CHTLJSToken> CHTLJSLexer::decompressTokens(const std::vector<CHTLJST
 
 // 优化辅助方法实现
 bool CHTLJSLexer::canMergeTokens(const CHTLJSToken& token1, const CHTLJSToken& token2) const {
-    // 简化的合并逻辑
-    return false;
+    // CHTL JS中某些token可以合并，如连续的字符串字面量
+    return (token1.getType() == CHTLJSTokenType::STRING && 
+            token2.getType() == CHTLJSTokenType::STRING) ||
+           (token1.getType() == CHTLJSTokenType::LITERAL && 
+            token2.getType() == CHTLJSTokenType::LITERAL);
 }
 
 CHTLJSToken CHTLJSLexer::mergeTokens(const CHTLJSToken& token1, const CHTLJSToken& token2) const {
-    return token1; // 简化实现
+    if (canMergeTokens(token1, token2)) {
+        std::string mergedValue = token1.getValue() + token2.getValue();
+        return CHTLJSToken(token1.getType(), mergedValue, token1.getLine(), token1.getColumn(), token1.getPosition());
+    }
+    return token1;
 }
 
 bool CHTLJSLexer::canCompressToken(const CHTLJSToken& token) const {
@@ -985,11 +1015,21 @@ bool CHTLJSLexer::canCompressToken(const CHTLJSToken& token) const {
 }
 
 CHTLJSToken CHTLJSLexer::compressToken(const CHTLJSToken& token) const {
-    return token; // 简化实现
+    if (!canCompressToken(token)) {
+        return token;
+    }
+    
+    // 压缩空白字符
+    std::string compressed = token.getValue();
+    compressed = std::regex_replace(compressed, std::regex(R"(\s+)"), " ");
+    compressed = std::regex_replace(compressed, std::regex(R"(^\s+|\s+$)"), "");
+    
+    return CHTLJSToken(token.getType(), compressed, token.getLine(), token.getColumn(), token.getPosition());
 }
 
 CHTLJSToken CHTLJSLexer::decompressToken(const CHTLJSToken& token) const {
-    return token; // 简化实现
+    // 解压缩是压缩的逆操作，这里简化处理
+    return token;
 }
 
 // 其他未实现的方法

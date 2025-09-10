@@ -176,7 +176,7 @@ std::string CHTLStyleProcessor::evaluateArithmeticExpression(const std::string& 
                 if (value != 0) {
                     result /= value;
                 } else {
-                    addError("除零错误");
+                    const_cast<CHTLStyleProcessor*>(this)->addError("除零错误");
                     return expression;
                 }
             } else if (operation == "%") {
@@ -201,7 +201,7 @@ std::string CHTLStyleProcessor::evaluateArithmeticExpression(const std::string& 
                     if (value != 0) {
                         result /= value;
                     } else {
-                        addError("除零错误");
+                        const_cast<CHTLStyleProcessor*>(this)->addError("除零错误");
                         return expression;
                     }
                 } else if (operation == "%") {

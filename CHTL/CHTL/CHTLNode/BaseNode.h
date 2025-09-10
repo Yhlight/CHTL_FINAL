@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <functional>
 
 namespace CHTL {
 
@@ -20,6 +21,7 @@ enum class NodeType {
     IMPORT,         // 导入节点
     CONFIGURATION,  // 配置节点
     NAMESPACE,      // 命名空间节点
+    USE,            // 使用节点
     OPERATOR        // 操作符节点
 };
 

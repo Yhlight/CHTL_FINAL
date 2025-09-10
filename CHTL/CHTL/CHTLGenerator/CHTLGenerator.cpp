@@ -2,6 +2,7 @@
 #include <sstream>
 #include <algorithm>
 #include <regex>
+#include <iostream>
 
 namespace CHTL {
 
@@ -204,7 +205,7 @@ std::string CHTLGenerator::generateElement(std::shared_ptr<ElementNode> element)
         for (const auto& child : element->getChildren()) {
             if (child->getNodeType() == NodeType::ELEMENT) {
                 auto childElement = std::static_pointer_cast<ElementNode>(child);
-                if (childElement->isBlockElementTag(childElement->getTagName())) {
+                if (childElement->isBlockElement(childElement->getTagName())) {
                     hasBlockChildren = true;
                     break;
                 }
@@ -213,11 +214,11 @@ std::string CHTLGenerator::generateElement(std::shared_ptr<ElementNode> element)
         
         if (hasBlockChildren) {
             oss << "\n";
-            increaseIndent();
+            const_cast<CHTLGenerator*>(this)->increaseIndent();
             for (const auto& child : element->getChildren()) {
                 oss << generateNode(child) << "\n";
             }
-            decreaseIndent();
+            const_cast<CHTLGenerator*>(this)->decreaseIndent();
             oss << getIndent();
         } else {
             for (const auto& child : element->getChildren()) {

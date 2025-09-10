@@ -492,14 +492,102 @@ std::string CSSCompiler::generatePropertiesInternal(const std::map<std::string, 
 
 // CSS优化内部方法实现
 std::string CSSCompiler::optimizeCSSInternal(const std::string& css) {
-    // 简化实现：基本优化
     std::string result = css;
     
-    // 移除多余空格
+    // 移除多余空格和换行
     result = std::regex_replace(result, std::regex(R"(\s+)"), " ");
     
     // 移除注释
     result = std::regex_replace(result, std::regex(R"(/\*.*?\*/)"), "");
+    
+    // 移除不必要的分号
+    result = std::regex_replace(result, std::regex(R"(\s*;\s*}"), "}");
+    
+    // 移除0值的单位
+    result = std::regex_replace(result, std::regex(R"(\b0px\b)"), "0");
+    result = std::regex_replace(result, std::regex(R"(\b0em\b)"), "0");
+    result = std::regex_replace(result, std::regex(R"(\b0rem\b)"), "0");
+    result = std::regex_replace(result, std::regex(R"(\b0%\b)"), "0");
+    
+    // 合并相同的属性
+    result = mergeDuplicateProperties(result);
+    
+    // 移除重复的选择器
+    result = removeDuplicateSelectors(result);
+    
+    return result;
+}
+
+// 合并重复属性的辅助方法
+std::string CSSCompiler::mergeDuplicateProperties(const std::string& css) {
+    // 简化实现：移除重复的属性声明
+    std::string result = css;
+    
+    // 使用正则表达式匹配属性声明
+    std::regex propertyRegex(R"(([^{]+)\{([^}]+)\})");
+    std::sregex_iterator iter(result.begin(), result.end(), propertyRegex);
+    std::sregex_iterator end;
+    
+    std::map<std::string, std::set<std::string>> selectorProperties;
+    
+    for (; iter != end; ++iter) {
+        std::string selector = iter->str(1);
+        std::string properties = iter->str(2);
+        
+        // 解析属性
+        std::regex propRegex(R"(([^:]+):([^;]+);?)");
+        std::sregex_iterator propIter(properties.begin(), properties.end(), propRegex);
+        std::sregex_iterator propEnd;
+        
+        for (; propIter != propEnd; ++propIter) {
+            std::string prop = propIter->str(1);
+            std::string value = propIter->str(2);
+            
+            // 去除空格
+            prop = std::regex_replace(prop, std::regex(R"(\s+)"), "");
+            value = std::regex_replace(value, std::regex(R"(\s+)"), " ");
+            value = std::regex_replace(value, std::regex(R"(^\s+|\s+$)"), "");
+            
+            selectorProperties[selector].insert(prop + ": " + value);
+        }
+    }
+    
+    // 重新构建CSS
+    std::ostringstream oss;
+    for (const auto& pair : selectorProperties) {
+        oss << pair.first << " {\n";
+        for (const auto& prop : pair.second) {
+            oss << "  " << prop << ";\n";
+        }
+        oss << "}\n";
+    }
+    
+    return oss.str();
+}
+
+// 移除重复选择器的辅助方法
+std::string CSSCompiler::removeDuplicateSelectors(const std::string& css) {
+    // 简化实现：移除重复的选择器
+    std::set<std::string> seenSelectors;
+    std::string result;
+    
+    std::regex ruleRegex(R"(([^{]+)\{([^}]+)\})");
+    std::sregex_iterator iter(css.begin(), css.end(), ruleRegex);
+    std::sregex_iterator end;
+    
+    for (; iter != end; ++iter) {
+        std::string selector = iter->str(1);
+        std::string properties = iter->str(2);
+        
+        // 去除空格
+        selector = std::regex_replace(selector, std::regex(R"(\s+)"), " ");
+        selector = std::regex_replace(selector, std::regex(R"(^\s+|\s+$)"), "");
+        
+        if (seenSelectors.find(selector) == seenSelectors.end()) {
+            seenSelectors.insert(selector);
+            result += selector + " {" + properties + "}\n";
+        }
+    }
     
     return result;
 }

@@ -43,7 +43,7 @@ std::unique_ptr<TestSuite> AstTest::createTestSuite() {
 // 节点基本功能测试实现
 void AstTest::testBaseNode() {
     BaseNode node(NodeType::ELEMENT);
-    CHTL_ASSERT_TRUE(node.getType() == NodeType::ELEMENT);
+    CHTL_ASSERT_TRUE(node.getNodeType() == NodeType::ELEMENT);
     CHTL_ASSERT_EQUAL("", node.getValue());
     CHTL_ASSERT_EQUAL("0", std::to_string(node.getLine()));
     CHTL_ASSERT_EQUAL("0", std::to_string(node.getColumn()));
@@ -51,7 +51,7 @@ void AstTest::testBaseNode() {
     node.setValue("test");
     CHTL_ASSERT_EQUAL("test", node.getValue());
     
-    node.setPosition(10, 20);
+    node.setPosition(10, 20, 100);
     CHTL_ASSERT_EQUAL("10", std::to_string(node.getLine()));
     CHTL_ASSERT_EQUAL("20", std::to_string(node.getColumn()));
 }
@@ -59,7 +59,7 @@ void AstTest::testBaseNode() {
 void AstTest::testElementNode() {
     ElementNode element("div");
     CHTL_ASSERT_EQUAL("div", element.getTagName());
-    CHTL_ASSERT_TRUE(element.getType() == NodeType::ELEMENT);
+    CHTL_ASSERT_TRUE(element.getNodeType() == NodeType::ELEMENT);
     
     element.addAttribute("class", "container");
     element.addAttribute("id", "main");

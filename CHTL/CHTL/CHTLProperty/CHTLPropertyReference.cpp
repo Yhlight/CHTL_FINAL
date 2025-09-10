@@ -84,7 +84,7 @@ std::string CHTLPropertyReference::resolvePropertyReference(const std::string& r
         return reference;
         
     } catch (const std::exception& e) {
-        addError("解析属性引用时发生错误: " + std::string(e.what()));
+        const_cast<CHTLPropertyReference*>(this)->addError("解析属性引用时发生错误: " + std::string(e.what()));
         return reference;
     }
 }
@@ -99,7 +99,7 @@ std::string CHTLPropertyReference::resolveElementProperty(const std::string& sel
         auto element = findElement(selector);
         if (!element) {
             if (strictMode) {
-                addError("未找到选择器对应的元素: " + selector);
+                const_cast<CHTLPropertyReference*>(this)->addError("未找到选择器对应的元素: " + selector);
             }
             return "";
         }
@@ -114,7 +114,7 @@ std::string CHTLPropertyReference::resolveElementProperty(const std::string& sel
         return value;
         
     } catch (const std::exception& e) {
-        addError("解析元素属性时发生错误: " + std::string(e.what()));
+        const_cast<CHTLPropertyReference*>(this)->addError("解析元素属性时发生错误: " + std::string(e.what()));
         return "";
     }
 }
@@ -129,7 +129,7 @@ std::string CHTLPropertyReference::resolveStyleProperty(const std::string& selec
         auto style = findStyle(selector);
         if (!style) {
             if (strictMode) {
-                addError("未找到选择器对应的样式: " + selector);
+                const_cast<CHTLPropertyReference*>(this)->addError("未找到选择器对应的样式: " + selector);
             }
             return "";
         }
@@ -138,7 +138,7 @@ std::string CHTLPropertyReference::resolveStyleProperty(const std::string& selec
         return style->getStyleProperty(property);
         
     } catch (const std::exception& e) {
-        addError("解析样式属性时发生错误: " + std::string(e.what()));
+        const_cast<CHTLPropertyReference*>(this)->addError("解析样式属性时发生错误: " + std::string(e.what()));
         return "";
     }
 }
@@ -173,7 +173,7 @@ std::string CHTLPropertyReference::resolveComputedProperty(const std::string& se
         return "";
         
     } catch (const std::exception& e) {
-        addError("解析计算属性时发生错误: " + std::string(e.what()));
+        const_cast<CHTLPropertyReference*>(this)->addError("解析计算属性时发生错误: " + std::string(e.what()));
         return "";
     }
 }
@@ -222,7 +222,7 @@ std::string CHTLPropertyReference::resolveChainedCall(const std::string& chain) 
         return result;
         
     } catch (const std::exception& e) {
-        addError("解析链式调用时发生错误: " + std::string(e.what()));
+        const_cast<CHTLPropertyReference*>(this)->addError("解析链式调用时发生错误: " + std::string(e.what()));
         return chain;
     }
 }

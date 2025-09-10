@@ -690,35 +690,81 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseUtilExpression() {
     // util...then表达式属于Chtholly模块，不是CHTL JS核心功能
     return nullptr;
 }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseForStatement() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseWhileStatement() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseDoWhileStatement() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseSwitchStatement() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseCaseStatement() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseDefaultStatement() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseBreakStatement() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseContinueStatement() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseReturnStatement() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseThrowStatement() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseTryStatement() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseCatchStatement() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseFinallyStatement() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseTernaryExpression() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseCallExpression() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseMemberExpression() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseArrayExpression() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseObjectExpression() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseFunctionExpression() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseArrowFunctionExpression() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseVariableDeclaration() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseFunctionDeclaration() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseClassDeclaration() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseInterfaceDeclaration() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseEnumDeclaration() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseNamespaceDeclaration() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseModuleDeclaration() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseImportDeclaration() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseExportDeclaration() { return nullptr; }
+// 这些方法不属于CHTL JS核心功能，由JS编译器处理
+// CHTL JS只支持特定的声明式语法：fileloader, listen, delegate, animate, router, vir
+
+// CHTL JS特有的成员表达式解析（支持->运算符）
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseMemberExpression() {
+    auto left = parsePrimaryExpression();
+    if (!left) {
+        return nullptr;
+    }
+    
+    while (match(CHTLJSTokenType::DOT) || match(CHTLJSTokenType::ARROW)) {
+        auto token = getCurrentToken();
+        advance();
+        
+        if (!match(CHTLJSTokenType::IDENTIFIER) && !match(CHTLJSTokenType::LITERAL)) {
+            reportUnexpectedToken(getCurrentToken(), "identifier or literal");
+            return nullptr;
+        }
+        
+        auto property = parsePrimaryExpression();
+        if (!property) {
+            return nullptr;
+        }
+        
+        auto member = createNode(CHTLJSNodeType::MEMBER_EXPRESSION);
+        member->setValue(token.getType() == CHTLJSTokenType::ARROW ? "->" : ".");
+        member->addChild(left);
+        member->addChild(property);
+        
+        left = member;
+    }
+    
+    return left;
+}
+
+// CHTL JS特有的调用表达式解析
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseCallExpression() {
+    auto callee = parseMemberExpression();
+    if (!callee) {
+        return nullptr;
+    }
+    
+    if (match(CHTLJSTokenType::LEFT_PAREN)) {
+        advance(); // 跳过 (
+        
+        auto call = createNode(CHTLJSNodeType::CALL_EXPRESSION);
+        call->addChild(callee);
+        
+        // 解析参数
+        if (!match(CHTLJSTokenType::RIGHT_PAREN)) {
+            while (true) {
+                auto arg = parseExpression();
+                if (arg) {
+                    call->addChild(arg);
+                }
+                
+                if (match(CHTLJSTokenType::COMMA)) {
+                    advance(); // 跳过逗号
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        if (!match(CHTLJSTokenType::RIGHT_PAREN)) {
+            reportUnexpectedToken(getCurrentToken(), ")");
+            return nullptr;
+        }
+        
+        advance(); // 跳过 )
+        return call;
+    }
+    
+    return callee;
+}
 
 // Token处理实现
 CHTLJSToken CHTLJSParser::getCurrentToken() const {
@@ -860,27 +906,39 @@ bool CHTLJSParser::isUnaryExpressionStart() const {
 }
 
 bool CHTLJSParser::isCallExpressionStart() const {
-    return false; // 简化实现
+    // CHTL JS中调用表达式以标识符、字面量或增强选择器开始
+    auto token = getCurrentToken();
+    return token.getType() == CHTLJSTokenType::IDENTIFIER ||
+           token.getType() == CHTLJSTokenType::LITERAL ||
+           token.getType() == CHTLJSTokenType::ENHANCED_SELECTOR;
 }
 
 bool CHTLJSParser::isMemberExpressionStart() const {
-    return false; // 简化实现
+    // CHTL JS中成员表达式以标识符、字面量或增强选择器开始
+    auto token = getCurrentToken();
+    return token.getType() == CHTLJSTokenType::IDENTIFIER ||
+           token.getType() == CHTLJSTokenType::LITERAL ||
+           token.getType() == CHTLJSTokenType::ENHANCED_SELECTOR;
 }
 
 bool CHTLJSParser::isArrayExpressionStart() const {
-    return match(CHTLJSTokenType::LEFT_BRACKET);
+    // CHTL JS不支持数组表达式，由JS编译器处理
+    return false;
 }
 
 bool CHTLJSParser::isObjectExpressionStart() const {
+    // CHTL JS中对象表达式以{开始，用于无序键值对
     return match(CHTLJSTokenType::LEFT_BRACE);
 }
 
 bool CHTLJSParser::isFunctionExpressionStart() const {
-    return matchKeyword("function");
+    // CHTL JS不支持传统函数表达式，由JS编译器处理
+    return false;
 }
 
 bool CHTLJSParser::isArrowFunctionExpressionStart() const {
-    return false; // 简化实现
+    // CHTL JS不支持箭头函数表达式，由JS编译器处理
+    return false;
 }
 
 // 表达式优先级处理实现

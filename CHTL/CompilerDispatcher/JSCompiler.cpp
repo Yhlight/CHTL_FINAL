@@ -439,15 +439,73 @@ std::string JSCompiler::generateExpressionInternal(const std::shared_ptr<JSNode>
 
 // JavaScript优化内部方法实现
 std::string JSCompiler::optimizeJSInternal(const std::string& js) {
-    // 简化实现：基本优化
     std::string result = js;
     
-    // 移除多余空格
+    // 移除多余空格和换行
     result = std::regex_replace(result, std::regex(R"(\s+)"), " ");
     
     // 移除注释
     result = std::regex_replace(result, std::regex(R"(//.*)"), "");
     result = std::regex_replace(result, std::regex(R"(/\*.*?\*/)"), "");
+    
+    // 移除不必要的分号
+    result = std::regex_replace(result, std::regex(R"(\s*;\s*}"), "}");
+    
+    // 移除console.log语句（可选）
+    if (removeConsoleLogs) {
+        result = std::regex_replace(result, std::regex(R"(console\.log\([^)]*\);\s*)"), "");
+    }
+    
+    // 移除未使用的变量声明
+    result = removeUnusedVariables(result);
+    
+    // 合并连续的字符串
+    result = mergeStringLiterals(result);
+    
+    return result;
+}
+
+// 移除未使用变量的辅助方法
+std::string JSCompiler::removeUnusedVariables(const std::string& js) {
+    // 简化实现：移除明显的未使用变量
+    std::string result = js;
+    
+    // 匹配var/let/const声明
+    std::regex varRegex(R"((var|let|const)\s+(\w+)\s*=\s*[^;]+;)");
+    std::sregex_iterator iter(result.begin(), result.end(), varRegex);
+    std::sregex_iterator end;
+    
+    std::vector<std::string> declarations;
+    for (; iter != end; ++iter) {
+        declarations.push_back(iter->str(2)); // 变量名
+    }
+    
+    // 检查变量是否被使用
+    for (const auto& varName : declarations) {
+        std::regex usageRegex(varName + R"(\s*[^=])");
+        if (!std::regex_search(result, usageRegex)) {
+            // 变量未被使用，移除声明
+            std::regex removeRegex(R"((var|let|const)\s+)" + varName + R"(\s*=\s*[^;]+;)");
+            result = std::regex_replace(result, removeRegex, "");
+        }
+    }
+    
+    return result;
+}
+
+// 合并字符串字面量的辅助方法
+std::string JSCompiler::mergeStringLiterals(const std::string& js) {
+    // 简化实现：合并相邻的字符串字面量
+    std::string result = js;
+    
+    // 匹配相邻的字符串字面量
+    std::regex stringRegex(R"("([^"]*)"\s*\+\s*"([^"]*)")");
+    std::smatch match;
+    
+    while (std::regex_search(result, match, stringRegex)) {
+        std::string merged = "\"" + match.str(1) + match.str(2) + "\"";
+        result = std::regex_replace(result, stringRegex, merged);
+    }
     
     return result;
 }
