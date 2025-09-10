@@ -2059,7 +2059,12 @@ std::cout << arg[0].value << std::endl;  // 输出-> 3
 std::cout << arg[1].value << std::endl;  // 输出-> **
 std::cout << arg[2].value << std::endl;  // 输出-> 4
 
-args.transform("pow(" + args[0].value + args[2].value + ")");
+// args.transform("pow(" + args[0].value + args[2].value + ")");
+
+args.transform("pow(". + 
+args.match("$", [](const std::string& value) { return value; }) + 
+args.match("$", [](const std::string& value) { return value; }) +
+")");
 
 CJMODGenerator::exportResult(args);
 ```
@@ -2132,6 +2137,13 @@ args.bind("**", [](const std::string& value) {
     return Syntax::isCHTLJSFunction(value) ? "" : value;
 });
 ```
+
+###### match
+匹配参数列表中的参数  
+会自动对匹配到的占位符进行计数 + 1  
+
+例如第一次匹配$时，参数列表中的参数$的计数为1，表示第一个$参数  
+第二次匹配$时，参数列表中的参数$的计数+1，表示第二个$参数  
 
 ###### fillValue
 填充参数列表的值  
