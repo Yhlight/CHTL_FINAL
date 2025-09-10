@@ -1,0 +1,63 @@
+// Yuigahama-themed Sakura Rain effect
+
+[Template] @Element SakuraRain {
+    div {
+        class: "sakura-rain-container";
+        // Create multiple petals for the animation
+        div { class: "petal"; }
+        div { class: "petal"; }
+        div { class: "petal"; }
+        div { class: "petal"; }
+        div { class: "petal"; }
+        div { class: "petal"; }
+        div { class: "petal"; }
+        div { class: "petal"; }
+        div { class: "petal"; }
+        div { class: "petal"; }
+    }
+
+    style {
+        .sakura-rain-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .petal {
+            position: absolute;
+            background-color: #ffb6c1; // LightPink
+            border-radius: 150px 0;
+            width: 10px;
+            height: 15px;
+            top: -20px;
+            animation: fall linear infinite;
+        }
+
+        .petal:nth-child(1) { left: 10%; animation-duration: 15s; animation-delay: 0s; }
+        .petal:nth-child(2) { left: 20%; animation-duration: 10s; animation-delay: -5s; }
+        .petal:nth-child(3) { left: 30%; animation-duration: 20s; animation-delay: -2s; }
+        .petal:nth-child(4) { left: 40%; animation-duration: 12s; animation-delay: -10s; }
+        .petal:nth-child(5) { left: 50%; animation-duration: 18s; animation-delay: -3s; }
+        .petal:nth-child(6) { left: 60%; animation-duration: 16s; animation-delay: -8s; }
+        .petal:nth-child(7) { left: 70%; animation-duration: 11s; animation-delay: -1s; }
+        .petal:nth-child(8) { left: 80%; animation-duration: 14s; animation-delay: -4s; }
+        .petal:nth-child(9) { left: 90%; animation-duration: 17s; animation-delay: -9s; }
+        .petal:nth-child(10) { left: 95%; animation-duration: 13s; animation-delay: -7s; }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(105vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    }
+}

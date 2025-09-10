@@ -1,0 +1,19 @@
+// Info file for the Yuigahama module
+
+[Info] {
+    name = "Yuigahama";
+    version = "1.0.0";
+    description = "A set of decorative and media components inspired by Yui Yuigahama.";
+    author = "Jules";
+    license = "MIT";
+    dependencies = "";
+    category = "UI Components";
+    minCHTLVersion = "1.0.0";
+    maxCHTLVersion = "2.0.0";
+}
+
+// This block defines what components are made public when this module is imported.
+[Export] {
+    [Custom] @Element MusicPlayer;
+    [Template] @Element SakuraRain;
+}

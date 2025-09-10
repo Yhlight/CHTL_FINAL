@@ -27,33 +27,43 @@ std::string read_file_content(const std::string& path) {
     return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 }
 
-// Utility to package the real Chtholly module from its source files
+// Utility to package the Chtholly module from its source files
 void package_chtholly_module() {
     std::cout << "Packaging 'Chtholly' module from source files..." << std::endl;
-
     try {
-        auto chtholly_module = std::make_shared<cmod_cjmod::CMODModule>("Chtholly");
-
-        // Read info file
+        auto module = std::make_shared<cmod_cjmod::CMODModule>("Chtholly");
         std::string info_content = read_file_content("chtl/modules/Chtholly/info/Chtholly.chtl");
         cmod_cjmod::ModuleInfoParser info_parser(info_content);
-        chtholly_module->setInfo(info_parser.parse());
-
-        // Read source files
-        chtholly_module->addSourceFile("src/Chtholly.chtl", read_file_content("chtl/modules/Chtholly/src/Chtholly.chtl"));
-        chtholly_module->addSourceFile("src/components/Accordion.chtl", read_file_content("chtl/modules/Chtholly/src/components/Accordion.chtl"));
-        chtholly_module->addSourceFile("src/components/Memo.chtl", read_file_content("chtl/modules/Chtholly/src/components/Memo.chtl"));
-
-        // Pack the module
-        std::string packed_chtholly = cmod_cjmod::ModulePackager::pack(*chtholly_module);
-
-        // Write to .cmod file
+        module->setInfo(info_parser.parse());
+        module->addSourceFile("src/Chtholly.chtl", read_file_content("chtl/modules/Chtholly/src/Chtholly.chtl"));
+        module->addSourceFile("src/components/Accordion.chtl", read_file_content("chtl/modules/Chtholly/src/components/Accordion.chtl"));
+        module->addSourceFile("src/components/Memo.chtl", read_file_content("chtl/modules/Chtholly/src/components/Memo.chtl"));
+        std::string packed_content = cmod_cjmod::ModulePackager::pack(*module);
         std::ofstream outfile("modules/Chtholly.cmod");
-        outfile << packed_chtholly;
+        outfile << packed_content;
         outfile.close();
-
         std::cout << "Successfully packaged module to modules/Chtholly.cmod" << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Error during packaging: " << e.what() << std::endl;
+    }
+}
 
+// Utility to package the Yuigahama module from its source files
+void package_yuigahama_module() {
+    std::cout << "Packaging 'Yuigahama' module from source files..." << std::endl;
+    try {
+        auto module = std::make_shared<cmod_cjmod::CMODModule>("Yuigahama");
+        std::string info_content = read_file_content("chtl/modules/Yuigahama/info/Yuigahama.chtl");
+        cmod_cjmod::ModuleInfoParser info_parser(info_content);
+        module->setInfo(info_parser.parse());
+        module->addSourceFile("src/Yuigahama.chtl", read_file_content("chtl/modules/Yuigahama/src/Yuigahama.chtl"));
+        module->addSourceFile("src/components/MusicPlayer.chtl", read_file_content("chtl/modules/Yuigahama/src/components/MusicPlayer.chtl"));
+        module->addSourceFile("src/components/SakuraRain.chtl", read_file_content("chtl/modules/Yuigahama/src/components/SakuraRain.chtl"));
+        std::string packed_content = cmod_cjmod::ModulePackager::pack(*module);
+        std::ofstream outfile("modules/Yuigahama.cmod");
+        outfile << packed_content;
+        outfile.close();
+        std::cout << "Successfully packaged module to modules/Yuigahama.cmod" << std::endl;
     } catch (const std::exception& e) {
         std::cerr << "Error during packaging: " << e.what() << std::endl;
     }
@@ -62,13 +72,17 @@ void package_chtholly_module() {
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <input_file> | --package-chtholly" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <input_file> | --package-chtholly | --package-yuigahama" << std::endl;
         return 1;
     }
 
     std::string arg1 = argv[1];
     if (arg1 == "--package-chtholly") {
         package_chtholly_module();
+        return 0;
+    }
+    if (arg1 == "--package-yuigahama") {
+        package_yuigahama_module();
         return 0;
     }
 

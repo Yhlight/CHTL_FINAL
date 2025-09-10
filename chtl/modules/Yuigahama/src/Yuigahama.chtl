@@ -1,0 +1,4 @@
+// Main file for the Yuigahama CMOD module.
+
+[Import] @Chtl from "components/MusicPlayer.chtl";
+[Import] @Chtl from "components/SakuraRain.chtl";

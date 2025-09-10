@@ -1,0 +1,18 @@
+html {
+    head {
+        title { "Yuigahama Module Test" }
+    }
+    body {
+        h1 { text: "Testing the Yuigahama Module"; }
+
+        // This should import the 'Yuigahama' module
+        [Import] @Chtl from "Yuigahama";
+
+        // Now, use one of its components
+        h2 { text: "Here is the Music Player component:" ;}
+        @Element MusicPlayer;
+
+        // And the decorative effect
+        @Element SakuraRain;
+    }
+}

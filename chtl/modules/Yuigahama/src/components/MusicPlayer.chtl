@@ -1,0 +1,83 @@
+// Yuigahama-themed Music Player Component
+
+[Custom] @Element MusicPlayer {
+    div {
+        class: "music-player-yuigahama";
+
+        div {
+            class: "album-art";
+        }
+        div {
+            class: "track-info";
+            p { class: "title"; text: "Secret Track"; }
+            p { class: "artist"; text: "Yui Yuigahama"; }
+        }
+        div {
+            class: "controls";
+            button { id: "play-pause-btn"; text: "Play"; }
+        }
+        audio {
+            id: "audio-source";
+            // In a real component, this src would be a parameter
+            src: "music.mp3";
+        }
+    }
+
+    style {
+        .music-player-yuigahama {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #fff0f5; // LavenderBlush
+            border: 1px solid #ffb6c1; // LightPink
+            border-radius: 8px;
+            max-width: 300px;
+            font-family: sans-serif;
+        }
+        .album-art {
+            width: 60px;
+            height: 60px;
+            background-color: #ffc0cb; // Pink
+            border-radius: 4px;
+        }
+        .track-info {
+            flex-grow: 1;
+            margin: 0 15px;
+        }
+        .track-info p {
+            margin: 0;
+            color: #555;
+        }
+        .track-info .title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .track-info .artist {
+            font-size: 14px;
+            color: #777;
+        }
+        .controls button {
+            background-color: #ff69b4; // HotPink
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    }
+
+    script {
+        const playPauseBtn = {{#play-pause-btn}};
+        const audio = {{#audio-source}};
+
+        playPauseBtn->addEventListener("click", () => {
+            if (audio.paused) {
+                audio.play();
+                playPauseBtn.textContent = "Pause";
+            } else {
+                audio.pause();
+                playPauseBtn.textContent = "Play";
+            }
+        });
+    }
+}
