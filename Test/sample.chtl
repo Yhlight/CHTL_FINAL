@@ -1,34 +1,49 @@
-// CHTL End-to-End Test File
+// CHTL Final Integration Test
 
-html {
-    lang = "en";
+[Namespace] MyWebApp {
 
-    head {
-        title { text { "CHTL E2E Test" } }
+    [Template] @Var Theme {
+        brandColor: "#007bff";
+        darkText: "#343a40";
     }
 
-    body {
-        -- A div with attributes and styles
-        div {
-            id = "main-box";
-            class = "container";
+    [Template] @Style BaseButton {
+        padding: "10px 15px";
+        border: "none";
+        border-radius: 5px;
+        color: Theme(darkText);
+    }
 
-            // Style properties
-            width: 300;
-            padding: 10 * 2;
-            border: "1px solid black";
-            background-color: width > 250 ? "lightgreen" : "lightcoral";
-        }
+    [Template] @Style PrimaryButton {
+        @Style BaseButton;
+        background-color: Theme(brandColor);
+    }
 
-        -- A div that references the first one
-        div {
-            margin: #main-box.padding + 5;
-        }
+    [Custom] @Element SpecialCard {
+        // Not implemented by generator yet, but should parse
+    }
 
-        [Origin] @Html {
-            <hr>
-            <!-- Raw HTML Section -->
-            <p>This is a raw HTML block.</p>
+    html {
+        body {
+            div {
+                id = "header";
+                padding: 20;
+
+                button {
+                    @Style PrimaryButton;
+                    text { "Click Me" }
+                }
+            }
+
+            div {
+                width: #header.padding * 10; // 20 * 10 = 200
+                height: 150;
+                background-color: width > 180 ? "green" : "red";
+            }
+
+            [Origin] @Html {
+                <p>Raw HTML.</p>
+            }
         }
     }
 }

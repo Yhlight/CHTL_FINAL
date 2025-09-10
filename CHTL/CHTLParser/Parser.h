@@ -8,6 +8,8 @@
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/NamespaceNode.h"
 #include "../CHTLNode/ImportNode.h"
+#include "../CHTLNode/TemplateNode.h"
+#include "../CHTLNode/CustomNode.h"
 #include "../CHTLNode/ExprNode.h"
 #include <vector>
 #include <memory>
@@ -38,6 +40,10 @@ private:
     AstNodePtr parseOriginNode();
     AstNodePtr parseNamespaceNode();
     AstNodePtr parseImportNode();
+    AstNodePtr parseTemplateNode();
+    AstNodePtr parseTemplateUsageNode();
+    AstNodePtr parseCustomNode();
+    void parseProperties(std::vector<std::pair<std::string, std::unique_ptr<ExprNode>>>& properties);
 
     // Expression Parsing (Recursive Descent)
     std::unique_ptr<ExprNode> parseExpression();

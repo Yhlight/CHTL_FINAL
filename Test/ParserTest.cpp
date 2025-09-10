@@ -44,6 +44,22 @@ void printAst(const AstNodePtr& node, int indent) {
         printNodeList(ns->children, indent + 1);
     } else if (auto* import = dynamic_cast<ImportNode*>(node.get())) {
         std::cout << indentation << "Import: @" << import->info.import_type << " from \"" << import->info.path << "\"" << std::endl;
+    } else if (auto* tmpl = dynamic_cast<TemplateNode*>(node.get())) {
+        std::cout << indentation << "TemplateDef: " << tmpl->name << " (" << (int)tmpl->template_type << ")" << std::endl;
+        if (tmpl->template_type == TemplateType::VAR) {
+            for (const auto& var : tmpl->variables) {
+                std::cout << indentation << "  Var: " << var.first << " = " << var.second << std::endl;
+            }
+        } else if (tmpl->template_type == TemplateType::STYLE) {
+            for (const auto& prop : tmpl->style_properties) {
+                std::cout << indentation << "  Style Property: " << prop.first << ":" << std::endl;
+                printExprNode(prop.second, indent + 2);
+            }
+        }
+    } else if (auto* custom = dynamic_cast<CustomNode*>(node.get())) {
+        std::cout << indentation << "CustomDef: " << custom->name << std::endl;
+    } else if (auto* usage = dynamic_cast<TemplateUsageNode*>(node.get())) {
+        std::cout << indentation << "TemplateUsage: " << usage->name << std::endl;
     } else {
         std::cout << indentation << "Unknown Node" << std::endl;
     }
@@ -76,6 +92,8 @@ void printExprNode(const std::unique_ptr<ExprNode>& expr, int indent) {
         printExprNode(ternary->then_branch, indent + 2);
         std::cout << indentation << "  Else:" << std::endl;
         printExprNode(ternary->else_branch, indent + 2);
+    } else if (auto* var = dynamic_cast<VarAccessNode*>(expr.get())) {
+        std::cout << indentation << "Var Access: " << var->group_name.lexeme << "(" << var->var_name.lexeme << ")" << std::endl;
     }
 }
 

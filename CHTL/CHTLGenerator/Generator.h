@@ -6,6 +6,8 @@
 #include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/NamespaceNode.h"
+#include "../CHTLNode/TemplateNode.h"
+#include "../CHTLNode/CustomNode.h"
 #include "../CHTLNode/ExprNode.h"
 #include <string>
 #include <sstream>
@@ -20,9 +22,11 @@ private:
     const NodeList& ast;
     std::stringstream output;
     std::map<std::string, ElementNode*> symbol_map;
+    std::map<std::string, TemplateNode*> template_map;
 
     void buildSymbolMap(const AstNodePtr& node);
-    void generateNode(const AstNodePtr& node);
+    void buildTemplateMap(const AstNodePtr& node);
+    void generateNode(const AstNodePtr& node, ElementNode* context = nullptr);
 
     // Node visitors
     void visitElementNode(ElementNode* node);
@@ -30,6 +34,8 @@ private:
     void visitCommentNode(CommentNode* node);
     void visitOriginNode(OriginNode* node);
     void visitNamespaceNode(NamespaceNode* node);
+    void visitTemplateUsageNode(TemplateUsageNode* node, ElementNode* context);
+    void applyStyleTemplate(ElementNode* context, TemplateNode* tmpl);
 
     // Expression generator
     std::string generateExpression(const std::unique_ptr<ExprNode>& expr, ElementNode* context);

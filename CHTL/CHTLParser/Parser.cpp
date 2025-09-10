@@ -123,8 +123,28 @@ std::unique_ptr<ExprNode> Parser::parseMemberAccess() {
     return expr;
 }
 std::unique_ptr<ExprNode> Parser::parsePrimary() {
-    if (match(TokenType::TOKEN_STRING) || match(TokenType::TOKEN_NUMBER) || match(TokenType::TOKEN_IDENTIFIER)) {
+    if (check(TokenType::TOKEN_IDENTIFIER) && peek().type == TokenType::TOKEN_LPAREN) {
+        // This is a variable access, e.g. MyGroup(myVar)
+        Token group = currentToken;
+        advance(); // consume group name
+        advance(); // consume '('
+        Token var = currentToken;
+        consume(TokenType::TOKEN_IDENTIFIER, "Expect variable name in parentheses.");
+        consume(TokenType::TOKEN_RPAREN, "Expect ')' after variable name.");
+        return std::make_unique<VarAccessNode>(group, var);
+    }
+
+    if (match(TokenType::TOKEN_STRING) || match(TokenType::TOKEN_IDENTIFIER)) {
         return std::make_unique<LiteralNode>(previousToken);
+    }
+    if (match(TokenType::TOKEN_NUMBER)) {
+        Token numberToken = previousToken;
+        if (check(TokenType::TOKEN_IDENTIFIER)) {
+            // It's a number with a unit, combine them.
+            numberToken.lexeme += currentToken.lexeme;
+            advance();
+        }
+        return std::make_unique<LiteralNode>(numberToken);
     }
     if (match(TokenType::TOKEN_LPAREN)) {
         auto expr = parseExpression();
@@ -144,6 +164,140 @@ std::unique_ptr<ExprNode> Parser::parsePrimary() {
 }
 
 // --- Main Parser Logic ---
+
+AstNodePtr Parser::parseCustomNode() {
+    consume(TokenType::KEYWORD_CUSTOM, "Expect '[Custom]' keyword.");
+    consume(TokenType::TOKEN_AT, "Expect '@' after '[Custom]'.");
+    consume(TokenType::TOKEN_IDENTIFIER, "Expect custom type (Style, Element, Var).");
+    std::string typeStr = previousToken.lexeme;
+
+    TemplateType type;
+    if (typeStr == "Style") type = TemplateType::STYLE;
+    else if (typeStr == "Element") type = TemplateType::ELEMENT;
+    else if (typeStr == "Var") type = TemplateType::VAR;
+    else throw std::runtime_error("Unknown custom type: " + typeStr);
+
+    consume(TokenType::TOKEN_IDENTIFIER, "Expect custom name.");
+    auto node = std::make_unique<CustomNode>(previousToken.lexeme, type);
+
+    consume(TokenType::TOKEN_LBRACE, "Expect '{' to start custom block.");
+
+    // For now, parsing the body is the same as for templates.
+    if (type == TemplateType::STYLE) {
+        while(check(TokenType::TOKEN_IDENTIFIER) || check(TokenType::TOKEN_AT)) {
+            if (check(TokenType::TOKEN_IDENTIFIER)) {
+                parseProperties(node->style_properties);
+            } else if (check(TokenType::TOKEN_AT)) {
+                node->inherited_templates.push_back(
+                    std::unique_ptr<TemplateUsageNode>(dynamic_cast<TemplateUsageNode*>(parseTemplateUsageNode().release()))
+                );
+            }
+        }
+    } else if (type == TemplateType::ELEMENT) {
+        while (!check(TokenType::TOKEN_RBRACE) && !check(TokenType::TOKEN_EOF)) {
+            node->element_children.push_back(parseDeclaration());
+        }
+    } else if (type == TemplateType::VAR) {
+        while (check(TokenType::TOKEN_IDENTIFIER)) {
+            std::string key = currentToken.lexeme;
+            advance();
+            consume(TokenType::TOKEN_COLON, "Expect ':' after var name.");
+            if (match(TokenType::TOKEN_STRING)) {
+                node->variables[key] = previousToken.lexeme.substr(1, previousToken.lexeme.length() - 2);
+            } else {
+                throw std::runtime_error("Expect string literal for var value.");
+            }
+            consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after var value.");
+        }
+    }
+
+    consume(TokenType::TOKEN_RBRACE, "Expect '}' to end custom block.");
+    return node;
+}
+
+
+void Parser::parseProperties(std::vector<std::pair<std::string, std::unique_ptr<ExprNode>>>& properties) {
+     while (check(TokenType::TOKEN_IDENTIFIER) && peek().type == TokenType::TOKEN_COLON) {
+        std::string key = currentToken.lexeme;
+        advance(); // consume identifier
+        advance(); // consume ':'
+
+        auto value = parseExpression();
+        properties.push_back(std::make_pair(key, std::move(value)));
+
+        consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after property value.");
+    }
+}
+
+AstNodePtr Parser::parseTemplateNode() {
+    consume(TokenType::KEYWORD_TEMPLATE, "Expect '[Template]' keyword.");
+    consume(TokenType::TOKEN_AT, "Expect '@' after '[Template]'.");
+    consume(TokenType::TOKEN_IDENTIFIER, "Expect template type (Style, Element, Var).");
+    std::string typeStr = previousToken.lexeme;
+
+    TemplateType type;
+    if (typeStr == "Style") type = TemplateType::STYLE;
+    else if (typeStr == "Element") type = TemplateType::ELEMENT;
+    else if (typeStr == "Var") type = TemplateType::VAR;
+    else throw std::runtime_error("Unknown template type: " + typeStr);
+
+    consume(TokenType::TOKEN_IDENTIFIER, "Expect template name.");
+    auto node = std::make_unique<TemplateNode>(previousToken.lexeme, type);
+
+    consume(TokenType::TOKEN_LBRACE, "Expect '{' to start template block.");
+
+    if (type == TemplateType::STYLE) {
+        // A style template can contain properties or inherit from another style template
+        while(check(TokenType::TOKEN_IDENTIFIER) || check(TokenType::TOKEN_AT)) {
+            if (check(TokenType::TOKEN_IDENTIFIER)) {
+                parseProperties(node->style_properties);
+            } else if (check(TokenType::TOKEN_AT)) {
+                node->inherited_templates.push_back(
+                    std::unique_ptr<TemplateUsageNode>(dynamic_cast<TemplateUsageNode*>(parseTemplateUsageNode().release()))
+                );
+            }
+        }
+    } else if (type == TemplateType::ELEMENT) {
+        // An element template contains child nodes
+        while (!check(TokenType::TOKEN_RBRACE) && !check(TokenType::TOKEN_EOF)) {
+            node->element_children.push_back(parseDeclaration());
+        }
+    } else if (type == TemplateType::VAR) {
+        // A var template contains key-value string pairs
+        while (check(TokenType::TOKEN_IDENTIFIER)) {
+            std::string key = currentToken.lexeme;
+            advance();
+            consume(TokenType::TOKEN_COLON, "Expect ':' after var name.");
+            if (match(TokenType::TOKEN_STRING)) {
+                node->variables[key] = previousToken.lexeme.substr(1, previousToken.lexeme.length() - 2);
+            } else {
+                throw std::runtime_error("Expect string literal for var value.");
+            }
+            consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after var value.");
+        }
+    }
+
+    consume(TokenType::TOKEN_RBRACE, "Expect '}' to end template block.");
+    return node;
+}
+
+AstNodePtr Parser::parseTemplateUsageNode() {
+    consume(TokenType::TOKEN_AT, "Expect '@' keyword for template usage.");
+    consume(TokenType::TOKEN_IDENTIFIER, "Expect template type.");
+     std::string typeStr = previousToken.lexeme;
+
+    TemplateType type;
+    if (typeStr == "Style") type = TemplateType::STYLE;
+    else if (typeStr == "Element") type = TemplateType::ELEMENT;
+    else if (typeStr == "Var") type = TemplateType::VAR;
+    else throw std::runtime_error("Unknown template usage type: " + typeStr);
+
+    consume(TokenType::TOKEN_IDENTIFIER, "Expect template name.");
+    auto node = std::make_unique<TemplateUsageNode>(previousToken.lexeme, type);
+    consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after template usage.");
+    return node;
+}
+
 
 AstNodePtr Parser::parseImportNode() {
     consume(TokenType::KEYWORD_IMPORT, "Expect '[Import]' keyword.");
@@ -222,6 +376,12 @@ AstNodePtr Parser::parseDeclaration() {
     if (check(TokenType::KEYWORD_IMPORT)) {
         return parseImportNode();
     }
+    if (check(TokenType::KEYWORD_TEMPLATE)) {
+        return parseTemplateNode();
+    }
+    if (check(TokenType::KEYWORD_CUSTOM)) {
+        return parseCustomNode();
+    }
     if (check(TokenType::TOKEN_GENERATOR_COMMENT)) {
         return parseCommentNode();
     }
@@ -262,6 +422,8 @@ AstNodePtr Parser::parseElement() {
             element->children.push_back(parseTextNode());
         } else if (check(TokenType::TOKEN_GENERATOR_COMMENT)) {
             element->children.push_back(parseCommentNode());
+        } else if (check(TokenType::TOKEN_AT)) {
+            element->children.push_back(parseTemplateUsageNode());
         } else {
             throw std::runtime_error("Unexpected token in element body: " + currentToken.lexeme);
         }

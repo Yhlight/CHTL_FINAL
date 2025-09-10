@@ -61,6 +61,8 @@ enum class TokenType {
         KEYWORD_IMPORT,
         KEYWORD_FROM,
         KEYWORD_AS,
+        KEYWORD_TEMPLATE,
+        KEYWORD_CUSTOM,
 };
 
 struct Token {

@@ -96,6 +96,14 @@ Token Lexer::nextToken() {
             current += 8;
             return makeToken(TokenType::KEYWORD_IMPORT);
         }
+        if (source.substr(current, 10) == "[Template]") {
+            current += 10;
+            return makeToken(TokenType::KEYWORD_TEMPLATE);
+        }
+        if (source.substr(current, 8) == "[Custom]") {
+            current += 8;
+            return makeToken(TokenType::KEYWORD_CUSTOM);
+        }
     }
 
 
