@@ -259,10 +259,85 @@ std::shared_ptr<BaseNode> CHTLParser::parseText() {
     Token textToken = currentToken();
     advanceToken();
     
-    auto textNode = std::make_shared<TextNode>(textToken.value);
-    textNode->setPosition(textToken.line, textToken.column, textToken.position);
+    skipWhitespaceAndComments();
     
-    return textNode;
+    // 检查是否为text块语法 text { }
+    if (match(TokenType::LEFT_BRACE)) {
+        advanceToken(); // 跳过 {
+        
+        skipWhitespaceAndComments();
+        
+        std::string textContent;
+        
+        // 解析文本内容
+        while (!match(TokenType::RIGHT_BRACE) && currentTokenIndex < tokens.size()) {
+            Token token = currentToken();
+            
+            if (token.type == TokenType::END_OF_FILE) {
+                error("期望 '}' 但遇到文件结束");
+                break;
+            }
+            
+            // 收集文本内容
+            if (token.type == TokenType::TEXT_CONTENT || 
+                token.type == TokenType::UNQUOTED_LITERAL ||
+                token.type == TokenType::SINGLE_QUOTED_LITERAL ||
+                token.type == TokenType::DOUBLE_QUOTED_LITERAL) {
+                textContent += token.value;
+                advanceToken();
+            } else if (token.type == TokenType::WHITESPACE || token.type == TokenType::NEWLINE) {
+                textContent += token.value;
+                advanceToken();
+            } else {
+                error("文本块中意外的token: " + token.getTypeName() + " (" + token.value + ")");
+                advanceToken();
+            }
+            
+            skipWhitespaceAndComments();
+        }
+        
+        if (match(TokenType::RIGHT_BRACE)) {
+            advanceToken(); // 跳过 }
+        } else {
+            error("期望 '}'");
+        }
+        
+        auto textNode = std::make_shared<TextNode>(textContent);
+        textNode->setPosition(textToken.line, textToken.column, textToken.position);
+        
+        return textNode;
+    }
+    // 检查是否为text属性语法 text: "content"
+    else if (match(TokenType::COLON)) {
+        advanceToken(); // 跳过 :
+        
+        skipWhitespaceAndComments();
+        
+        std::string textContent;
+        
+        // 解析属性值
+        if (match(TokenType::UNQUOTED_LITERAL)) {
+            textContent = currentToken().value;
+            advanceToken();
+        } else if (match(TokenType::SINGLE_QUOTED_LITERAL) || match(TokenType::DOUBLE_QUOTED_LITERAL)) {
+            textContent = currentToken().value;
+            advanceToken();
+        } else {
+            error("期望文本内容");
+        }
+        
+        auto textNode = std::make_shared<TextNode>(textContent);
+        textNode->setPosition(textToken.line, textToken.column, textToken.position);
+        
+        return textNode;
+    }
+    // 普通文本内容
+    else {
+        auto textNode = std::make_shared<TextNode>(textToken.value);
+        textNode->setPosition(textToken.line, textToken.column, textToken.position);
+        
+        return textNode;
+    }
 }
 
 std::shared_ptr<BaseNode> CHTLParser::parseComment() {
@@ -796,9 +871,13 @@ void CHTLParser::parseAttributes(std::shared_ptr<ElementNode> element) {
             
             skipWhitespaceAndComments();
             
-            // 检查是否有属性值
-            if (match(TokenType::COLON) || match(TokenType::EQUAL)) {
-                advanceToken(); // 跳过 : 或 =
+            // 检查是否有属性值（支持CE对等式：:和=等价）
+            if (match(TokenType::COLON) || match(TokenType::EQUAL) || match(TokenType::COLON_EQUAL)) {
+                if (match(TokenType::COLON_EQUAL)) {
+                    advanceToken(); // 跳过 :=
+                } else {
+                    advanceToken(); // 跳过 : 或 =
+                }
                 
                 skipWhitespaceAndComments();
                 
@@ -823,6 +902,15 @@ std::string CHTLParser::parseAttributeValue() {
         value = currentToken().value;
         advanceToken();
     } else if (match(TokenType::LITERAL)) {
+        value = currentToken().value;
+        advanceToken();
+    } else if (match(TokenType::UNQUOTED_LITERAL)) {
+        value = currentToken().value;
+        advanceToken();
+    } else if (match(TokenType::SINGLE_QUOTED_LITERAL)) {
+        value = currentToken().value;
+        advanceToken();
+    } else if (match(TokenType::DOUBLE_QUOTED_LITERAL)) {
         value = currentToken().value;
         advanceToken();
     } else if (match(TokenType::NUMBER)) {

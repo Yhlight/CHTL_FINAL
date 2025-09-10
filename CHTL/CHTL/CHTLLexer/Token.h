@@ -64,6 +64,10 @@ enum class TokenType {
     MULTI_COMMENT,  // /* */
     GENERATOR_COMMENT, // --
     
+    // 文本节点
+    TEXT_BLOCK,     // text { }
+    TEXT_ATTRIBUTE, // text: "content"
+    
     // 关键字
     TEXT,           // text
     STYLE,          // style

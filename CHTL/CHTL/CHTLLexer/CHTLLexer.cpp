@@ -68,6 +68,37 @@ TokenStream CHTLLexer::tokenize() {
         else if (isTextStart()) {
             stream.addToken(scanTextContent());
         }
+        // 检查text块
+        else if (c == 't' && peekChar() == 'e' && peekChar(2) == 'x' && peekChar(3) == 't') {
+            // 检查是否为text关键字
+            std::string keyword = "text";
+            for (size_t i = 0; i < keyword.length(); i++) {
+                if (position + i >= source.length() || source[position + i] != keyword[i]) {
+                    keyword = "";
+                    break;
+                }
+            }
+            if (!keyword.empty()) {
+                // 跳过text关键字
+                for (size_t i = 0; i < keyword.length(); i++) {
+                    advance();
+                }
+                skipWhitespace();
+                
+                // 检查是否为text块或text属性
+                if (currentChar() == '{') {
+                    stream.addToken(Token(TokenType::TEXT, "text", line, column - 4, position - 4));
+                } else if (currentChar() == ':') {
+                    stream.addToken(Token(TokenType::TEXT, "text", line, column - 4, position - 4));
+                } else {
+                    // 回退
+                    position -= keyword.length();
+                    stream.addToken(scanIdentifier());
+                }
+            } else {
+                stream.addToken(scanIdentifier());
+            }
+        }
         // 检查标识符
         else if (isAlpha(c) || c == '_') {
             stream.addToken(scanIdentifier());
