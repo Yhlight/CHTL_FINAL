@@ -1622,11 +1622,6 @@ Chtholly
     info
         Chtholly.chtl
 ```
-拥有子模块的模块文件夹内部主模块chtl文件可以省略，也可以保留，保留的意义不大
-但是必须注意的是，结构始终是src + info，这是不可忽略的
-主模块chtl文件即使省略了也必须拥有info
-相应的子模块均使用src + info的结构
-这是强制的要求
 
 #### 模块的导入
 导入一个chtl文件  /  cmod模块
@@ -1646,35 +1641,7 @@ CJMOD让扩展CHTL JS语法变得更简单，无需阅读源码即可实现CHTL 
 
 #### 模块结构
 CJmod具有严格的模块结构
-对于没有子模块的CJMOD，通常结构如下，CJMOD无需像CJMOD一样，需要模块文件夹名称，主模块文件，信息文件三者同名
-仅仅需要模块文件夹与信息文件两者同名即可
 
-```chtl
-CJmod文件夹
-    src/xxx.cpp xxx.h
-    info/CJmod文件夹名称.chtl
-```
-
-#### 模块信息
-与CMOD不同，CJMOD的info文件无法使用[Export]，这源于CJMOD的特殊性
-CJMOD只需要使用[Info]即可
-
-```chtl
-[Info]
-{
-    name = "chtholly";
-    version = "1.0.0";
-    description = "珂朵莉主题模块 - 世界上最幸福的女孩";
-    author = "CHTL Team";
-    license = "MIT";
-    dependencies = "";
-    category = "theme";
-    minCHTLVersion = "1.0.0";
-    maxCHTLVersion = "2.0.0";
-}
-```
-
-#### 包含子模块的模块结构
 ```chtl
 CJmod文件夹
     src/xxx.cpp xxx.h
@@ -1686,9 +1653,6 @@ CJmod文件夹
             info/Box2.chtl
     info/CJmod文件夹名称.chtl
 ```
-对于包含子模块的模块结构，仅且只能像上述演示的结构一样创建
-主文件直接位于src之下，其他内容则位于相关的模块文件夹内部
-同样，CJMOD也严格使用src + info的结构
 
 #### 模块的导入
 导入CJmod文件
@@ -1704,7 +1668,6 @@ CJmod文件夹
 ### CMOD + CJMOD
 如果你想要提供组件的同时提供扩展CHTL JS语法
 你可以使用CMOD + CJMOD的混合模块结构
-CMOD + CJMOD的混合模块始终使用src + info的结构
 
 注：CMOD + CJMOD的混合模块结构最终得到的是CMOD模块文件
 
@@ -1712,24 +1675,27 @@ CMOD + CJMOD的混合模块始终使用src + info的结构
 ```chtl
 模块名称
     CMOD / Cmod / cmod
-        src/
-            (模块名称.chtl)  // -> 主模块文件，子模块存在时可选
-            (xxx.chtl)  // -> 其他模块文件
-            Box  // ->子模块
-                src/Box.chtl, Other.chtl
-                info/Box.chtl
-            Box
-        info/模块名称.chtl
+        Box
+            src/Box.chtl, Other.chtl
+            info/Box.chtl
     CJMOD / CJmod / cjmod
-        src/xxx.cpp xxx.h  // -> 主模块文件，必须
-            Box  // ->子模块
-                src/xxx.cpp xxx.h
-                info/Box.chtl
-        info/模块名称.chtl
+        Box
+            src/xxx.cpp xxx.h
+            info/Box.chtl
 ```
-注意，CMOD和CJMOD并不共用信息文件，你可以吧CMOD + CJMOD的混合模块结构，视为一个module文件夹，内部存放着标准的cmod和cjmod模块
-CMOD和CJMOD文件夹内部实际使用的是标准的CMOD和CJMOD的组织方式
-由于信息文件的不共用，你可以自由控制CMOD和CJMOD的版本，允许他们在不同的版本之中兼容
+
+对于子模块，你只需这样创建
+```chtl
+模块名称
+    CMOD
+        Box
+            Box1
+                src/
+                info/
+            Box2
+                src/
+                info/
+```
 
 如何使用？例如这个模块叫Box，那么如果我想要调用Box的CMOD模块时，我们直接使用[Import] @Chtl即可
 如果需要使用CJMOD，需要使用[Import] @CJmod，CHTL不会对此进行统一处理，我们不推荐使用@Chtl同时管理CMOD和CJMOD
@@ -2380,9 +2346,4 @@ VSCode IDE需要满足下述基本要求
 
 ### 自动模块解包和JSON查询表
 如果导入的是CMOD模块，则导出[Export]块的内容，并根据此优化性能，提供语法提示，并创建json表
-如果导入的是CJMOD模块，则根据scan，CHTLJSFunction，analyze这三个函数接收的代码片段，提供语法提示，并创建json表  System Timestamp: 2025-09-09 07:45:32.342300
-
-
-
-You **must** respond now, using the `message_user` tool.System Info: The following tool calls are still running:
-run_in_bash_session
+如果导入的是CJMOD模块，则根据scan，CHTLJSFunction，analyze这三个函数接收的代码片段，提供语法提示，并创建json表
