@@ -1,17 +1,16 @@
 import argparse
 import sys
-from CHTL.CHTLLexer.lexer import Lexer
-from CHTL.CHTLParser.parser import Parser
 from CHTL.CHTLParser.config_pre_parser import ConfigPreParser
-from CHTL.CHTLTransformer.transformer import ASTTransformer
-from CHTL.CHTLGenerator.generator import HTMLGenerator
 from CHTL.CHTLContext.context import CompilationContext
+from Scanner.CHTLUnifiedScanner import CHTLUnifiedScanner
+from CompilerDispatcher.dispatcher import CompilerDispatcher
+
 
 def compile_chtl(source_code: str, source_file_path: str, use_default_structure: bool = False) -> str:
     """
     Runs the full CHTL compilation pipeline.
     """
-    # 1. Pre-parse for [Configuration] blocks to set up the context.
+    # 1. Pre-parse for [Configuration] blocks and `use` statements.
     pre_parser = ConfigPreParser(source_code)
     unnamed_configs, named_configs, used_config, cleaned_source = pre_parser.extract_configs()
 
@@ -22,17 +21,17 @@ def compile_chtl(source_code: str, source_file_path: str, use_default_structure:
     if used_config and used_config in named_configs:
         context.apply_config_string(named_configs[used_config])
 
-    # 3. Run the main compilation pipeline with the configured context and cleaned source.
-    lexer = Lexer(cleaned_source, context)
-    tokens = lexer.tokenize()
-    parser = Parser(tokens, context)
-    ast = parser.parse()
-    transformer = ASTTransformer(ast, context, current_file_path=source_file_path)
-    transformed_ast = transformer.transform()
-    generator = HTMLGenerator(transformed_ast, context)
-    html_output = generator.generate(use_default_structure=use_default_structure)
+    # 3. Scan the *cleaned* source into fragments.
+    scanner = CHTLUnifiedScanner(cleaned_source)
+    fragments = scanner.scan()
 
-    return html_output
+    # 4. Dispatch fragments to their respective compilers.
+    dispatcher = CompilerDispatcher(fragments, context, current_file_path=source_file_path)
+    dispatcher.dispatch()
+
+    # 5. Merge the final output.
+    final_html = dispatcher.merge_outputs(use_default_structure=use_default_structure)
+    return final_html
 
 def main():
     """
