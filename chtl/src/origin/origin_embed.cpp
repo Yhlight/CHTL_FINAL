@@ -18,16 +18,10 @@ std::vector<std::shared_ptr<OriginBlock>> OriginEmbedParser::parse() {
         skipWhitespace();
         if (position_ >= input_.length()) break;
         
-        std::cout << "Current char: '" << currentChar() << "' at position " << position_ << std::endl;
-        
         if (currentChar() == '[') {
-            std::cout << "Found '[' at position " << position_ << std::endl;
             auto block = parseOriginBlock();
             if (block) {
-                std::cout << "Successfully parsed block" << std::endl;
                 blocks.push_back(block);
-            } else {
-                std::cout << "Failed to parse block" << std::endl;
             }
         } else {
             advance();
@@ -67,27 +61,22 @@ std::shared_ptr<OriginBlock> OriginEmbedParser::parseOriginBlock() {
     
     // Parse "Origin"
     std::string originKeyword = parseIdentifier();
-    std::cout << "Parsed keyword: '" << originKeyword << "'" << std::endl;
     if (originKeyword != "Origin") return nullptr;
     
     skipWhitespace();
-    std::cout << "After Origin, current char: '" << currentChar() << "'" << std::endl;
-    if (currentChar() != ']') {
-        std::cout << "Expected ']' but found '" << currentChar() << "'" << std::endl;
-        return nullptr;
-    }
+    if (currentChar() != ']') return nullptr;
     advance(); // skip ']'
     
     skipWhitespace();
-    std::cout << "After ], current char: '" << currentChar() << "'" << std::endl;
-    if (currentChar() != '{') {
-        std::cout << "Expected '{' but found '" << currentChar() << "'" << std::endl;
-        return nullptr;
-    }
-    advance(); // skip '{'
     
     auto block = std::make_shared<OriginBlock>();
     block->type = parseOriginType();
+    
+    skipWhitespace();
+    if (currentChar() != '{') {
+        return nullptr;
+    }
+    advance(); // skip '{'
     
     skipWhitespace();
     if (currentChar() == '}') {
