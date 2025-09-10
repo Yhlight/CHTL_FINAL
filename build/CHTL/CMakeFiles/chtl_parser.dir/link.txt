@@ -1,0 +1,2 @@
+/usr/bin/ar qc libchtl_parser.a CMakeFiles/chtl_parser.dir/CHTLParser/Parser.cpp.o CMakeFiles/chtl_parser.dir/CHTLParser/ASTPrinter.cpp.o
+/usr/bin/ranlib libchtl_parser.a
