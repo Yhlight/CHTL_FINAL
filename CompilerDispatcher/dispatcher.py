@@ -15,32 +15,20 @@ class CompilerDispatcher:
         self.js_output = ""
 
     def dispatch(self):
-        """
-        Routes fragments to the appropriate compilers.
-        """
         for fragment in self.fragments:
             if fragment.type == FragmentType.CHTL:
-                # CHTL fragments are compiled fully
                 html, css = self.compile_chtl(fragment.content)
                 self.html_output += html
                 self.css_output += css
             elif fragment.type == FragmentType.CSS:
-                # For now, just extract the content of top-level style blocks
-                # and add it to the CSS output.
-                # A real CSS compiler would parse and process this.
-                # Remove the 'style {' and '}' wrapper.
                 inner_content = fragment.content.strip()
                 if inner_content.startswith("style {"):
                     inner_content = inner_content[len("style {"):-1].strip()
                 self.css_output += inner_content
             elif fragment.type == FragmentType.CHTL_JS:
-                # For now, just add a placeholder for JS output
-                self.js_output += f"\n// CHTL_JS block found:\n{fragment.content}\n"
+                self.js_output += f"\n/* CHTL_JS block found:\n{fragment.content}\n*/\n"
 
     def compile_chtl(self, source_code: str) -> (str, str):
-        """
-        Runs the full CHTL compilation pipeline.
-        """
         lexer = Lexer(source_code, self.context)
         tokens = lexer.tokenize()
         parser = Parser(tokens, self.context)
@@ -48,14 +36,10 @@ class CompilerDispatcher:
         transformer = ASTTransformer(ast, self.context, self.source_file_path)
         transformed_ast = transformer.transform()
         generator = HTMLGenerator(transformed_ast, self.context)
-
         html, css = generator.generate_parts()
         return html, css
 
     def merge_outputs(self, use_default_structure: bool = False) -> str:
-        """
-        Merges the compiled HTML, CSS, and JS into a single HTML document.
-        """
         if not use_default_structure:
             parts = []
             if self.css_output.strip():

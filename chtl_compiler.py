@@ -5,7 +5,6 @@ from CHTL.CHTLContext.context import CompilationContext
 from Scanner.CHTLUnifiedScanner import CHTLUnifiedScanner
 from CompilerDispatcher.dispatcher import CompilerDispatcher
 
-
 def compile_chtl(source_code: str, source_file_path: str, use_default_structure: bool = False) -> str:
     """
     Runs the full CHTL compilation pipeline.

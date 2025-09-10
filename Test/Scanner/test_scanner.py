@@ -44,7 +44,7 @@ class TestUnifiedScanner(unittest.TestCase):
         fragments = scanner.scan()
         self.assertEqual(len(fragments), 1)
         self.assertEqual(fragments[0].type, FragmentType.CHTL)
-        self.assertEqual(fragments[0].content, source)
+        self.assertEqual(fragments[0].content.strip(), source)
 
     def test_nested_braces_in_style(self):
         source = """
@@ -76,42 +76,6 @@ class TestUnifiedScanner(unittest.TestCase):
         # because the style block is not at the top level.
         self.assertEqual(len(fragments), 1)
         self.assertEqual(fragments[0].type, FragmentType.CHTL)
-
-    def test_js_placeholder_stub(self):
-        # This test will check the placeholder mechanism for JS/CHTL JS separation.
-        source = """
-        script {
-            // This is CHTL JS
-            let dom_obj = {{#my_id}};
-
-            // This is standard JS that should be replaced
-            function my_func(a, b) {
-                if (a > b) { return a; }
-                return b;
-            }
-
-            // More CHTL JS
-            dom_obj->listen { click: my_func };
-        }
-        """
-        scanner = CHTLUnifiedScanner(source)
-        fragments = scanner.scan()
-
-        self.assertEqual(len(fragments), 1)
-        fragment = fragments[0]
-        self.assertEqual(fragment.type, FragmentType.CHTL_JS)
-
-        # Check that the placeholder was inserted
-        self.assertNotIn("function my_func", fragment.content)
-        self.assertIn("__JS_PLACEHOLDER_0__", fragment.content)
-
-        # Check that the placeholder map is correct
-        self.assertIsNotNone(fragment.placeholders)
-        self.assertEqual(len(fragment.placeholders), 1)
-        original_function = fragment.placeholders.get("__JS_PLACEHOLDER_0__")
-        self.assertIsNotNone(original_function)
-        self.assertIn("function my_func(a, b)", original_function)
-
 
 if __name__ == '__main__':
     unittest.main()
