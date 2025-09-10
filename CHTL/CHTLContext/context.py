@@ -58,33 +58,68 @@ class CompilationContext:
         """
         Parses a string of configuration settings (the inner content of a
         [Configuration] block) and updates the context.
-        This is a simplified parser for a specific job.
         """
-        # This simplified parser will just handle key = value; for now.
-        # A more robust solution might use regex or a more stateful parser.
+        config_key_to_tokentype = {
+            "KEYWORD_STYLE": TokenType.STYLE,
+            "KEYWORD_TEXT": TokenType.TEXT,
+            "KEYWORD_SCRIPT": TokenType.SCRIPT,
+            "KEYWORD_CUSTOM": TokenType.CUSTOM,
+            "KEYWORD_TEMPLATE": TokenType.TEMPLATE,
+            # Add all other mappings from CHTL.md's [Name] block
+        }
+
         lines = [line.strip() for line in config_string.split('\n')]
+        in_name_block = False
+        brace_level = 0
+
         for line in lines:
-            if not line or line.startswith('//') or line.startswith('#'):
+            if not line or line.startswith('//'):
                 continue
 
-            # For now, we won't handle the [Name] block here, just simple settings.
-            if '=' in line:
+            if '[Name]' in line:
+                in_name_block = True
+                continue
+
+            if in_name_block:
+                if '{' in line: brace_level += 1
+                if '}' in line: brace_level -= 1
+                if brace_level == 0 and '}' in line:
+                    in_name_block = False
+                    continue
+
+                if '=' in line:
+                    key, value_str = line.split('=', 1)
+                    key = key.strip()
+                    value_str = value_str.strip().rstrip(';').strip()
+
+                    token_type_to_update = config_key_to_tokentype.get(key)
+                    if not token_type_to_update:
+                        continue
+
+                    # Remove all old keywords pointing to this TokenType
+                    old_keywords = [k for k, v in self.keywords.items() if v == token_type_to_update]
+                    for old_key in old_keywords:
+                        del self.keywords[old_key]
+
+                    # Add new keyword(s)
+                    if value_str.startswith('[') and value_str.endswith(']'):
+                        new_keys = [k.strip() for k in value_str[1:-1].split(',')]
+                        for new_key in new_keys:
+                            self.keywords[new_key] = token_type_to_update
+                    else:
+                        self.keywords[value_str] = token_type_to_update
+
+            elif '=' in line: # Handle simple settings
                 key, value = line.split('=', 1)
                 key = key.strip()
-                # Remove trailing semicolon and strip whitespace/quotes
                 value = value.strip().rstrip(';').strip()
                 if value.startswith('"') and value.endswith('"'):
                     value = value[1:-1]
 
-                # Simple type conversion
-                if value.lower() == 'true':
-                    self.settings[key] = True
-                elif value.lower() == 'false':
-                    self.settings[key] = False
-                elif value.isdigit():
-                    self.settings[key] = int(value)
-                else:
-                    self.settings[key] = value
+                if value.lower() == 'true': self.settings[key] = True
+                elif value.lower() == 'false': self.settings[key] = False
+                elif value.isdigit(): self.settings[key] = int(value)
+                else: self.settings[key] = value
 
 if __name__ == '__main__':
     # Example usage

@@ -1,0 +1,14 @@
+[Configuration] {
+    [Name] {
+        KEYWORD_STYLE = css;
+    }
+}
+
+body {
+    div {
+        // This should now be parsed as a style block
+        css {
+            color: blue;
+        }
+    }
+}
