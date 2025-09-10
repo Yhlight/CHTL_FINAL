@@ -26,12 +26,12 @@ public class CHTLGenerator implements Visitor<String> {
     private final Deque<Map<String, UnitValue>> variableContextStack = new ArrayDeque<>();
     private ElementNode currentElement = null;
 
-    public CHTLGenerator(List<Node> rootNodes, Map<String, TemplateNode> templateTable, Map<String, OriginNode> originTable) {
+    public CHTLGenerator(List<Node> rootNodes, Map<String, TemplateNode> templateTable, Map<String, OriginNode> originTable, com.chtholly.chthl.CHTLConfig config) {
         this.globalCssBuilder = new StringBuilder();
         this.rootNodes = rootNodes;
         this.templateTable = templateTable;
         this.originTable = originTable;
-        this.specializer = new TemplateSpecializer();
+        this.specializer = new TemplateSpecializer(config);
     }
 
     public CompilationResult generate() {

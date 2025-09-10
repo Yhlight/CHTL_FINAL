@@ -24,6 +24,7 @@ public class CHTLLexer {
         keywords.put("Origin", TokenType.ORIGIN);
         keywords.put("Import", TokenType.IMPORT);
         keywords.put("Namespace", TokenType.NAMESPACE);
+        keywords.put("Configuration", TokenType.CONFIGURATION);
         keywords.put("from", TokenType.FROM);
         keywords.put("as", TokenType.AS);
         keywords.put("use", TokenType.USE);

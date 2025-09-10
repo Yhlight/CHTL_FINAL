@@ -19,7 +19,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.chtholly.chthl.CHTLConfig;
+
 public class TemplateSpecializer {
+    private final CHTLConfig config;
+
+    public TemplateSpecializer(CHTLConfig config) {
+        this.config = config;
+    }
 
     // Helper class to return search results for insertions
     private static class SearchResult {
@@ -107,7 +114,7 @@ public class TemplateSpecializer {
     }
 
     private void deleteElementByIndex(List<Node> body, String tagName, int index) {
-        int count = 0;
+        int count = config.indexInitialCount;
         int foundAtIndex = -1;
         for (int i = 0; i < body.size(); i++) {
             Node node = body.get(i);
@@ -212,7 +219,7 @@ public class TemplateSpecializer {
     }
 
     private SearchResult findElementTarget(List<Node> body, String targetTag, int targetIndex) {
-        return findElementRecursive(body, targetTag, targetIndex, new int[]{0});
+        return findElementRecursive(body, targetTag, targetIndex, new int[]{config.indexInitialCount});
     }
 
     private SearchResult findElementRecursive(List<Node> container, String targetTag, int targetIndex, int[] count) {

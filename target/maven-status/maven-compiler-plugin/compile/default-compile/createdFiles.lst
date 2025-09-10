@@ -1,5 +1,6 @@
 com/chtholly/chthl/ast/expr/ReferenceExpr.class
 com/chtholly/chthl/evaluator/ExpressionEvaluator$1.class
+com/chtholly/chthl/ast/ConfigurationNode.class
 com/chtholly/chthl/lexer/Token.class
 com/chtholly/chthl/evaluator/UnitValue.class
 com/chtholly/chthl/ast/expr/LiteralExpr.class
@@ -12,6 +13,7 @@ com/chtholly/chthl/ast/TextNode.class
 com/chtholly/chthl/ast/template/TemplateNode.class
 com/chtholly/chthl/ast/template/ElementTemplateNode.class
 com/chtholly/chthl/lexer/TokenType.class
+com/chtholly/chthl/CHTLConfig.class
 com/chtholly/chthl/ast/CommentNode.class
 com/chtholly/chthl/ast/Node.class
 com/chtholly/chthl/ast/expr/GroupingExpr.class

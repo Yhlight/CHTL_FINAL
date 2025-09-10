@@ -15,13 +15,19 @@ import java.util.regex.Pattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.chtholly.chthl.CHTLConfig;
+
 class CompilerEndToEndTest {
 
     private CompilationResult compile(String source) {
         CHTLParser parser = new CHTLParser(new CHTLLexer(source).scanTokens());
         List<Node> ast = parser.getAst();
         Map<String, com.chtholly.chthl.ast.template.TemplateNode> templateTable = parser.getTemplateTable();
-        CHTLGenerator generator = new CHTLGenerator(ast, templateTable, parser.getOriginTable());
+
+        CHTLConfig config = new CHTLConfig();
+        config.load(parser.getConfiguration());
+
+        CHTLGenerator generator = new CHTLGenerator(ast, templateTable, parser.getOriginTable(), config);
         return generator.generate();
     }
 
@@ -453,6 +459,31 @@ class CompilerEndToEndTest {
         }
         """;
         String expectedHtml = "<body><p>Before</p><div>This is raw</div><p>After</p></body>";
+        CompilationResult result = compile(chtlSource);
+        assertHtmlEquals(expectedHtml, result.getHtml());
+    }
+
+    @Test
+    void testConfigurationIndexInitialCount() {
+        String chtlSource = """
+        [Configuration] {
+            INDEX_INITIAL_COUNT = 1;
+        }
+
+        [Template] @Element MyList {
+            p { text { "Item 1" } }
+            p { text { "Item 2" } }
+            p { text { "Item 3" } }
+        }
+
+        body {
+            // Index 1 should now be the first paragraph
+            @Element MyList {
+                delete p[1];
+            }
+        }
+        """;
+        String expectedHtml = "<body><p>Item 2</p><p>Item 3</p></body>";
         CompilationResult result = compile(chtlSource);
         assertHtmlEquals(expectedHtml, result.getHtml());
     }

@@ -25,6 +25,7 @@
 /app/src/main/java/com/chtholly/chthl/ast/expr/ReferenceExpr.java
 /app/src/main/java/com/chtholly/chthl/ast/StylePropertyNode.java
 /app/src/main/java/com/chtholly/chthl/ast/template/TemplateUsageNode.java
+/app/src/main/java/com/chtholly/chthl/ast/ConfigurationNode.java
 /app/src/main/java/com/chtholly/chthl/ast/template/TemplateNode.java
 /app/src/main/java/com/chtholly/chthl/ast/Visitor.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/GlobalVariableExpr.java
@@ -38,3 +39,4 @@
 /app/src/main/java/com/chtholly/chthl/lexer/Token.java
 /app/src/main/java/com/chtholly/chthl/generator/CHTLGenerator.java
 /app/src/main/java/com/chtholly/chthl/ast/Node.java
+/app/src/main/java/com/chtholly/chthl/CHTLConfig.java

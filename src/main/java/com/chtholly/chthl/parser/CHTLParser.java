@@ -28,6 +28,7 @@ public class CHTLParser {
     private int current = 0;
     private final Map<String, TemplateNode> templateTable = new HashMap<>();
     private final Map<String, OriginNode> originTable = new HashMap<>();
+    private ConfigurationNode configuration = null;
 
     public CHTLParser(List<Token> tokens) {
         this.tokens = tokens;
@@ -52,8 +53,16 @@ public class CHTLParser {
         return originTable;
     }
 
+    public ConfigurationNode getConfiguration() {
+        return configuration;
+    }
+
     private Node declaration() {
         try {
+            if (check(TokenType.LEFT_BRACKET) && peekNext().getType() == TokenType.CONFIGURATION) {
+                parseConfigurationBlock();
+                return null;
+            }
             if (check(TokenType.LEFT_BRACKET) && peekNext().getType() == TokenType.TEMPLATE) {
                 parseTemplateDefinition();
                 return null;
@@ -72,6 +81,49 @@ public class CHTLParser {
             System.err.println(error.getMessage());
             synchronize();
             return null;
+        }
+    }
+
+    private void parseConfigurationBlock() {
+        consume(TokenType.LEFT_BRACKET, "Expect '['.");
+        consume(TokenType.CONFIGURATION, "Expect 'Configuration' keyword.");
+        consume(TokenType.RIGHT_BRACKET, "Expect ']'.");
+
+        // Optional name for named config blocks, not used for now
+        if (check(TokenType.IDENTIFIER)) {
+            advance();
+        }
+
+        consume(TokenType.LEFT_BRACE, "Expect '{' to start configuration block.");
+        Map<String, Object> settings = new HashMap<>();
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            Token key = consume(TokenType.IDENTIFIER, "Expect setting key.");
+            consume(TokenType.EQUAL, "Expect '=' after setting key.");
+
+            Token valueToken;
+            if (match(TokenType.IDENTIFIER)) { // e.g., false, 0
+                valueToken = previous();
+                 try {
+                    settings.put(key.getLexeme(), Integer.parseInt(valueToken.getLexeme()));
+                } catch (NumberFormatException e) {
+                    settings.put(key.getLexeme(), Boolean.parseBoolean(valueToken.getLexeme()));
+                }
+            } else if (match(TokenType.STRING)) {
+                valueToken = previous();
+                settings.put(key.getLexeme(), valueToken.getLiteral());
+            } else {
+                throw new ParseError(peek(), "Expect a literal value for setting.");
+            }
+
+            consume(TokenType.SEMICOLON, "Expect ';' after setting value.");
+        }
+        consume(TokenType.RIGHT_BRACE, "Expect '}' to end configuration block.");
+
+        if (this.configuration == null) {
+            this.configuration = new ConfigurationNode(settings);
+        } else {
+            // Handle merging or error on re-definition if necessary
+            this.configuration.settings.putAll(settings);
         }
     }
 
@@ -132,11 +184,8 @@ public class CHTLParser {
                 modifications.add(parseInsert());
             } else if (match(TokenType.SET)) {
                 modifications.add(parseSet());
-            } else if (check(TokenType.IDENTIFIER) && (peekNext().getType() == TokenType.COLON || peekNext().getType() == TokenType.EQUAL)) {
-                // This handles property definitions inside a customization block
-                modifications.add(parseStyleProperty());
             } else {
-                throw new ParseError(peek(), "Expected a modification keyword or property definition.");
+                throw new ParseError(peek(), "Expected a modification keyword like 'delete', 'insert', or 'set'.");
             }
         }
         consume(TokenType.RIGHT_BRACE, "Expect '}' to end customization block.");
@@ -431,6 +480,8 @@ public class CHTLParser {
                 case DELETE:
                 case INSERT:
                 case SET:
+                case MINUS_MINUS:
+                case CONFIGURATION:
                     return;
             }
             advance();
