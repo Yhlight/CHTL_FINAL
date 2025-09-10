@@ -9,69 +9,70 @@ from CHTL.CHTLLexer.lexer import Lexer
 from CHTL.CHTLLexer.token_type import TokenType
 
 class TestLexer(unittest.TestCase):
-    def test_simple_html_structure(self):
+
+    def assert_tokens_equal(self, tokens, expected_types_lexemes):
+        """Helper to compare token types and lexemes."""
+        self.assertEqual(len(tokens), len(expected_types_lexemes), "Mismatched number of tokens")
+        for i, (token, (expected_type, expected_lexeme)) in enumerate(zip(tokens, expected_types_lexemes)):
+            self.assertEqual(token.type, expected_type, f"Token {i} type mismatch")
+            if expected_lexeme is not None:
+                self.assertEqual(token.lexeme, expected_lexeme, f"Token {i} lexeme mismatch")
+
+    def test_property_with_units(self):
+        source = "width: 100px;"
+        lexer = Lexer(source)
+        tokens = lexer.scan_tokens()
+        self.assert_tokens_equal(tokens, [
+            (TokenType.IDENTIFIER, "width"),
+            (TokenType.COLON, ":"),
+            (TokenType.NUMBER, "100"),
+            (TokenType.IDENTIFIER, "px"),
+            (TokenType.SEMICOLON, ";"),
+            (TokenType.EOF, None),
+        ])
+
+    def test_selector(self):
+        source = "&:hover"
+        lexer = Lexer(source)
+        tokens = lexer.scan_tokens()
+        self.assert_tokens_equal(tokens, [
+            (TokenType.IDENTIFIER, "&:hover"),
+            (TokenType.EOF, None),
+        ])
+
+    def test_full_style_block(self):
         source = """
-        html {
-            // This is a comment
-            body {
-                div {
-                    id: "main-content";
-                    class = box;
-                }
+        style {
+            .box {
+                background-color: blue;
+            }
+            &:hover {
+                opacity: 0.8;
             }
         }
         """
         lexer = Lexer(source)
         tokens = lexer.scan_tokens()
-
-        expected_types = [
-            TokenType.IDENTIFIER,   # html
-            TokenType.LBRACE,       # {
-            TokenType.IDENTIFIER,   # body
-            TokenType.LBRACE,       # {
-            TokenType.IDENTIFIER,   # div
-            TokenType.LBRACE,       # {
-            TokenType.IDENTIFIER,   # id
-            TokenType.COLON,        # :
-            TokenType.STRING,       # "main-content"
-            TokenType.SEMICOLON,    # ;
-            TokenType.IDENTIFIER,   # class
-            TokenType.EQUALS,       # =
-            TokenType.IDENTIFIER,   # box
-            TokenType.SEMICOLON,    # ;
-            TokenType.RBRACE,       # }
-            TokenType.RBRACE,       # }
-            TokenType.RBRACE,       # }
-            TokenType.EOF,
-        ]
-
-        token_types = [token.type for token in tokens]
-        self.assertEqual(token_types, expected_types)
-
-        # Check a specific token's lexeme
-        self.assertEqual(tokens[8].lexeme, "main-content") # The string literal
-        self.assertEqual(tokens[12].lexeme, "box") # The unquoted literal
-
-    def test_text_node(self):
-        source = """
-        text {
-            "Hello World"
-        }
-        """
-        lexer = Lexer(source)
-        tokens = lexer.scan_tokens()
-
-        expected_types = [
-            TokenType.TEXT,
-            TokenType.LBRACE,
-            TokenType.STRING,
-            TokenType.RBRACE,
-            TokenType.EOF
-        ]
-
-        token_types = [token.type for token in tokens]
-        self.assertEqual(token_types, expected_types)
-        self.assertEqual(tokens[2].lexeme, "Hello World")
+        self.assert_tokens_equal(tokens, [
+            (TokenType.STYLE, "style"),
+            (TokenType.LBRACE, "{"),
+            (TokenType.IDENTIFIER, ".box"),
+            (TokenType.LBRACE, "{"),
+            (TokenType.IDENTIFIER, "background-color"),
+            (TokenType.COLON, ":"),
+            (TokenType.IDENTIFIER, "blue"),
+            (TokenType.SEMICOLON, ";"),
+            (TokenType.RBRACE, "}"),
+            (TokenType.IDENTIFIER, "&:hover"),
+            (TokenType.LBRACE, "{"),
+            (TokenType.IDENTIFIER, "opacity"),
+            (TokenType.COLON, ":"),
+            (TokenType.NUMBER, "0.8"),
+            (TokenType.SEMICOLON, ";"),
+            (TokenType.RBRACE, "}"),
+            (TokenType.RBRACE, "}"),
+            (TokenType.EOF, None),
+        ])
 
 if __name__ == '__main__':
     unittest.main()

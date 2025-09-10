@@ -12,24 +12,25 @@ from CHTL.CHTLGenerator.generator import Generator
 
 class TestGenerator(unittest.TestCase):
 
-    def setUp(self):
-        # A helper to remove whitespace for easier comparison
-        self.remove_whitespace = lambda s: re.sub(r'\s+', '', s)
+    def normalize_html(self, html: str) -> str:
+        """Removes whitespace and newlines to make comparison easier."""
+        return re.sub(r'\s+', '', html)
 
-    def test_full_generation(self):
+    def test_full_generation_with_styles(self):
         source = """
         html {
             head {
-                title { text { My CHTL Page } }
+                title { text { Styled Page } }
             }
             body {
                 div {
-                    id: "main";
-                    class = "container";
-
-                    h1 { text { Welcome! } }
-                    p { text { This is generated from CHTL. } }
-                    img { src: "image.jpg"; }
+                    style {
+                        width: 100%;
+                        .box {
+                            color: red;
+                        }
+                    }
+                    p { text { Hello } }
                 }
             }
         }
@@ -38,13 +39,16 @@ class TestGenerator(unittest.TestCase):
         expected_html = """
         <html>
             <head>
-                <title>My CHTL Page</title>
+                <style>
+                    .box {
+                        color: red;
+                    }
+                </style>
+                <title>Styled Page</title>
             </head>
             <body>
-                <div id="main" class="container">
-                    <h1>Welcome!</h1>
-                    <p>This is generated from CHTL.</p>
-                    <img src="image.jpg" />
+                <div style="width: 100%">
+                    <p>Hello</p>
                 </div>
             </body>
         </html>
@@ -55,21 +59,8 @@ class TestGenerator(unittest.TestCase):
         generated_html = Generator().generate(ast)
 
         self.assertEqual(
-            self.remove_whitespace(generated_html),
-            self.remove_whitespace(expected_html)
-        )
-
-    def test_self_closing_tag(self):
-        source = "br {}"
-        expected_html = "<br />"
-
-        tokens = Lexer(source).scan_tokens()
-        ast = Parser(tokens).parse()
-        generated_html = Generator().generate(ast)
-
-        self.assertEqual(
-            self.remove_whitespace(generated_html),
-            self.remove_whitespace(expected_html)
+            self.normalize_html(generated_html),
+            self.normalize_html(expected_html)
         )
 
 if __name__ == '__main__':

@@ -7,17 +7,15 @@ class TokenType(Enum):
     COLON = auto()          # :
     EQUALS = auto()         # =
     SEMICOLON = auto()      # ;
-    SLASH = auto()          # /
-    STAR = auto()           # *
-    QUOTE = auto()          # "
-    SINGLE_QUOTE = auto()   # '
 
     # Literals
-    IDENTIFIER = auto()     # div, id, text, unquoted_literal
+    IDENTIFIER = auto()     # div, id, width, .box, &:hover
     STRING = auto()         # "a string"
+    NUMBER = auto()         # 100, 0.8
 
-    # Special CHTL keywords
-    TEXT = auto()           # text
+    # Keywords
+    TEXT = auto()
+    STYLE = auto()
 
     # End of File
     EOF = auto()

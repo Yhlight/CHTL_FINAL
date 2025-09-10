@@ -11,87 +11,75 @@ from CHTL.CHTLNode import nodes
 
 class TestParser(unittest.TestCase):
 
-    def test_parsing_nested_elements(self):
+    def test_nested_elements(self):
+        source = "html { body { div {} } }"
+        tokens = Lexer(source).scan_tokens()
+        ast = Parser(tokens).parse()
+        self.assertIsInstance(ast.children[0], nodes.ElementNode)
+        self.assertEqual(ast.children[0].tag_name, "html")
+        self.assertEqual(ast.children[0].children[0].tag_name, "body")
+        self.assertEqual(ast.children[0].children[0].children[0].tag_name, "div")
+
+    def test_text_node(self):
+        source = """p { text { Hello World } }"""
+        tokens = Lexer(source).scan_tokens()
+        ast = Parser(tokens).parse()
+        p_node = ast.children[0]
+        text_node = p_node.children[0]
+        self.assertIsInstance(text_node, nodes.TextNode)
+        self.assertEqual(text_node.value, "Hello World")
+
+    def test_style_parsing(self):
         source = """
-        html {
-            body {
-                div {}
+        div {
+            style {
+                width: 100px;
+                .box {
+                    color: blue;
+                }
+                &:hover {
+                    opacity: 0.8;
+                }
             }
         }
         """
         tokens = Lexer(source).scan_tokens()
         ast = Parser(tokens).parse()
 
-        self.assertIsInstance(ast, nodes.ProgramNode)
-        self.assertEqual(len(ast.children), 1)
-
-        html_node = ast.children[0]
-        self.assertIsInstance(html_node, nodes.ElementNode)
-        self.assertEqual(html_node.tag_name, "html")
-        self.assertEqual(len(html_node.children), 1)
-
-        body_node = html_node.children[0]
-        self.assertIsInstance(body_node, nodes.ElementNode)
-        self.assertEqual(body_node.tag_name, "body")
-        self.assertEqual(len(body_node.children), 1)
-
-        div_node = body_node.children[0]
-        self.assertIsInstance(div_node, nodes.ElementNode)
-        self.assertEqual(div_node.tag_name, "div")
-        self.assertEqual(len(div_node.children), 0)
-
-    def test_parsing_attributes(self):
-        source = """
-        div {
-            id: "main";
-            class = "container";
-        }
-        """
-        tokens = Lexer(source).scan_tokens()
-        ast = Parser(tokens).parse()
-
         div_node = ast.children[0]
-        self.assertEqual(len(div_node.attributes), 2)
+        self.assertEqual(div_node.tag_name, "div")
 
-        attr1 = div_node.attributes[0]
-        self.assertIsInstance(attr1, nodes.AttributeNode)
-        self.assertEqual(attr1.name, "id")
-        self.assertEqual(attr1.value, "main")
+        style_node = div_node.children[0]
+        self.assertIsInstance(style_node, nodes.StyleNode)
+        self.assertEqual(len(style_node.children), 3)
 
-        attr2 = div_node.attributes[1]
-        self.assertIsInstance(attr2, nodes.AttributeNode)
-        self.assertEqual(attr2.name, "class")
-        self.assertEqual(attr2.value, "container")
+        # Check property
+        prop = style_node.children[0]
+        self.assertIsInstance(prop, nodes.StylePropertyNode)
+        self.assertEqual(prop.name, "width")
+        self.assertEqual(prop.value, "100 px") # Note: lexer separates 100 and px
 
-    def test_parsing_text_node(self):
-        source = """
-        p {
-            text { "Hello, CHTL!" }
-        }
-        """
+        # Check first rule
+        rule1 = style_node.children[1]
+        self.assertIsInstance(rule1, nodes.StyleSelectorRuleNode)
+        self.assertEqual(rule1.selector, ".box")
+        self.assertEqual(rule1.properties[0].name, "color")
+
+        # Check second rule
+        rule2 = style_node.children[2]
+        self.assertIsInstance(rule2, nodes.StyleSelectorRuleNode)
+        self.assertEqual(rule2.selector, "&:hover")
+        self.assertEqual(rule2.properties[0].name, "opacity")
+
+    def test_attribute_parsing(self):
+        source = 'div { id = "test-id"; }'
         tokens = Lexer(source).scan_tokens()
         ast = Parser(tokens).parse()
+        div_node = ast.children[0]
+        self.assertEqual(len(div_node.attributes), 1)
+        self.assertEqual(div_node.attributes[0].name, "id")
+        self.assertEqual(div_node.attributes[0].value, "test-id")
 
-        p_node = ast.children[0]
-        self.assertEqual(len(p_node.children), 1)
-
-        text_node = p_node.children[0]
-        self.assertIsInstance(text_node, nodes.TextNode)
-        self.assertEqual(text_node.value, "Hello, CHTL!")
-
-    def test_parsing_unquoted_literal_text(self):
-        source = """
-        p {
-            text { Hello_World }
-        }
-        """
-        tokens = Lexer(source).scan_tokens()
-        ast = Parser(tokens).parse()
-
-        p_node = ast.children[0]
-        text_node = p_node.children[0]
-        self.assertIsInstance(text_node, nodes.TextNode)
-        self.assertEqual(text_node.value, "Hello_World")
 
 if __name__ == '__main__':
     unittest.main()

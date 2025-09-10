@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Union
 
-# Forward declaration for type hints
+# A simple base class for type hinting and potential future common functionality
 class BaseNode:
     pass
 
@@ -9,12 +9,29 @@ class BaseNode:
 class AttributeNode:
     """Represents an attribute of an element (e.g., id: "main")."""
     name: str
-    value: str  # For now, the value is a simple string.
+    value: str
 
 @dataclass
 class TextNode(BaseNode):
     """Represents a text node (e.g., text { "Hello" })."""
     value: str
+
+@dataclass
+class StylePropertyNode(BaseNode):
+    """Represents a single CSS property (e.g., width: 100px)."""
+    name: str
+    value: str
+
+@dataclass
+class StyleSelectorRuleNode(BaseNode):
+    """Represents a CSS rule with a selector (e.g., .box { ... })."""
+    selector: str
+    properties: List[StylePropertyNode] = field(default_factory=list)
+
+@dataclass
+class StyleNode(BaseNode):
+    """Represents a style { ... } block within an element."""
+    children: List[Union[StylePropertyNode, StyleSelectorRuleNode]] = field(default_factory=list)
 
 @dataclass
 class ElementNode(BaseNode):
