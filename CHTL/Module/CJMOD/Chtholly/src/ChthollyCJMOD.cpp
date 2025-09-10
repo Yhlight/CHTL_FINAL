@@ -80,5 +80,26 @@ std::string ChthollyCJMOD::processUtilThen(const std::string& code) {
     return result.str();
 }
 
+std::string ChthollyCJMOD::processINeverAway(const std::string& code) {
+    if (!isInitialized) {
+        return "错误: CJMOD模块未初始化";
+    }
+    
+    // 处理iNeverAway功能
+    std::ostringstream result;
+    result << "// iNeverAway功能 - 珂朵莉的特殊功能\n";
+    result << "function iNeverAway(code) {\n";
+    result << "    // 珂朵莉永远不会离开\n";
+    result << "    console.log('珂朵莉永远不会离开: ' + code);\n";
+    result << "    \n";
+    result << "    // 这里会实现iNeverAway的具体功能\n";
+    result << "    // 例如：保持连接、持续监控、永不中断等\n";
+    result << "    \n";
+    result << "    return 'iNeverAway处理完成';\n";
+    result << "}\n";
+    
+    return result.str();
+}
+
 } // namespace CJMOD
 } // namespace CHTL_JS

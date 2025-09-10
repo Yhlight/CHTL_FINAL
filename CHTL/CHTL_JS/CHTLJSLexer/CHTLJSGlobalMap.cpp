@@ -35,7 +35,6 @@ void CHTLJSGlobalMap::initializeKeywords() {
     addKeyword("animate", CHTLJSTokenType::ANIMATE);
     addKeyword("router", CHTLJSTokenType::ROUTER);
     addKeyword("fileloader", CHTLJSTokenType::FILELOADER);
-    addKeyword("iNeverAway", CHTLJSTokenType::INEVERAWAY);
 }
 
 void CHTLJSGlobalMap::initializeOperators() {

@@ -39,7 +39,6 @@ enum class CHTLJSTokenType {
     ANIMATE,            // animate 动画
     ROUTER,             // router 路由
     FILELOADER,         // fileloader 文件加载器
-    INEVERAWAY,         // iNeverAway 特殊功能
     
     // 基本关键字（仅CHTL JS需要的）
     TRUE,               // true 真

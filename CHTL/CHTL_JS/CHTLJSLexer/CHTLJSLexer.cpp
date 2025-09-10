@@ -387,7 +387,6 @@ void CHTLJSLexer::initializeKeywords() {
     keywords["animate"] = CHTLJSTokenType::ANIMATE;
     keywords["router"] = CHTLJSTokenType::ROUTER;
     keywords["fileloader"] = CHTLJSTokenType::FILELOADER;
-    keywords["iNeverAway"] = CHTLJSTokenType::INEVERAWAY;
 }
 
 void CHTLJSLexer::initializeOperators() {

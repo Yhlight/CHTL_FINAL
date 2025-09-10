@@ -34,6 +34,9 @@ public:
     // util...then表达式
     std::string processUtilThen(const std::string& code);
     
+    // iNeverAway功能
+    std::string processINeverAway(const std::string& code);
+    
 private:
     bool isInitialized = false;
 };
