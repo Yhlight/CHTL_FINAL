@@ -6,6 +6,7 @@ com/chtholly/chthl/ast/expr/LiteralExpr.class
 com/chtholly/chthl/parser/CHTLParser$1.class
 com/chtholly/chthl/ast/custom/DeleteNode.class
 com/chtholly/chthl/generator/CompilationResult.class
+com/chtholly/chthl/ast/OriginNode.class
 com/chtholly/chthl/parser/CHTLParser.class
 com/chtholly/chthl/ast/TextNode.class
 com/chtholly/chthl/ast/template/TemplateNode.class
@@ -20,6 +21,7 @@ com/chtholly/chthl/ast/template/StyleTemplateNode.class
 com/chtholly/chthl/ast/expr/Expression.class
 com/chtholly/chthl/parser/CHTLParser$ParseError.class
 com/chtholly/chthl/parser/ExpressionParser.class
+com/chtholly/chthl/ast/expr/ConditionalCase.class
 com/chtholly/chthl/ast/template/VarTemplateNode.class
 com/chtholly/chthl/specializer/TemplateSpecializer.class
 com/chtholly/chthl/generator/CHTLGenerator.class

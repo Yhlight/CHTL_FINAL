@@ -95,7 +95,13 @@ public class CHTLLexer {
                 break;
             case '-':
                 if (match('-')) {
-                    addToken(TokenType.MINUS_MINUS);
+                    // It's a generator comment. Consume the rest of the line.
+                    while (peek() != '\n' && !isAtEnd()) {
+                        advance();
+                    }
+                    // The comment content is from after the '--' to the end of the line.
+                    String commentText = source.substring(start + 2, current).trim();
+                    addToken(TokenType.MINUS_MINUS, commentText);
                 } else {
                     addToken(TokenType.MINUS);
                 }

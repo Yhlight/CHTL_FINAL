@@ -27,6 +27,7 @@ public class CHTLParser {
     private final List<Token> tokens;
     private int current = 0;
     private final Map<String, TemplateNode> templateTable = new HashMap<>();
+    private final Map<String, OriginNode> originTable = new HashMap<>();
 
     public CHTLParser(List<Token> tokens) {
         this.tokens = tokens;
@@ -47,11 +48,18 @@ public class CHTLParser {
         return templateTable;
     }
 
+    public Map<String, OriginNode> getOriginTable() {
+        return originTable;
+    }
+
     private Node declaration() {
         try {
             if (check(TokenType.LEFT_BRACKET) && peekNext().getType() == TokenType.TEMPLATE) {
                 parseTemplateDefinition();
                 return null;
+            }
+            if (check(TokenType.LEFT_BRACKET) && peekNext().getType() == TokenType.ORIGIN) {
+                return parseOriginBlock();
             }
             if (check(TokenType.IDENTIFIER) && peek().getLexeme().startsWith("@")) {
                 return parseTemplateUsage();
@@ -64,6 +72,39 @@ public class CHTLParser {
             System.err.println(error.getMessage());
             synchronize();
             return null;
+        }
+    }
+
+    private Node parseOriginBlock() {
+        consume(TokenType.LEFT_BRACKET, "Expect '['.");
+        consume(TokenType.ORIGIN, "Expect 'Origin' keyword.");
+        consume(TokenType.RIGHT_BRACKET, "Expect ']'.");
+
+        Token type = consume(TokenType.IDENTIFIER, "Expect origin type like '@Html'.");
+        Token name = null;
+        if (check(TokenType.IDENTIFIER)) {
+            name = advance();
+        }
+
+        if (match(TokenType.LEFT_BRACE)) {
+            // It's a definition
+            Token contentToken = consume(TokenType.STRING, "Expect a string literal inside an origin block.");
+            String content = (String) contentToken.getLiteral();
+            consume(TokenType.RIGHT_BRACE, "Expect '}' after origin block.");
+
+            OriginNode node = new OriginNode(type, name, content, false);
+            if (name != null) {
+                originTable.put(name.getLexeme(), node);
+                return null; // Definitions are not part of the render tree
+            }
+            return node; // Anonymous origin block
+        } else {
+            // It's a usage
+            consume(TokenType.SEMICOLON, "Expect ';' after named origin usage.");
+            if (name == null) {
+                throw new ParseError(previous(), "Expect a name for origin usage.");
+            }
+            return new OriginNode(type, name, null, true);
         }
     }
 
@@ -83,7 +124,7 @@ public class CHTLParser {
 
     private CustomizationBlockNode parseCustomizationBlock() {
         consume(TokenType.LEFT_BRACE, "Expect '{' to start customization block.");
-        List<ModificationNode> modifications = new ArrayList<>();
+        List<Node> modifications = new ArrayList<>();
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
             if (match(TokenType.DELETE)) {
                 modifications.add(parseDelete());
@@ -91,8 +132,11 @@ public class CHTLParser {
                 modifications.add(parseInsert());
             } else if (match(TokenType.SET)) {
                 modifications.add(parseSet());
+            } else if (check(TokenType.IDENTIFIER) && (peekNext().getType() == TokenType.COLON || peekNext().getType() == TokenType.EQUAL)) {
+                // This handles property definitions inside a customization block
+                modifications.add(parseStyleProperty());
             } else {
-                throw new ParseError(peek(), "Expected a modification keyword like 'delete', 'insert', or 'set'.");
+                throw new ParseError(peek(), "Expected a modification keyword or property definition.");
             }
         }
         consume(TokenType.RIGHT_BRACE, "Expect '}' to end customization block.");

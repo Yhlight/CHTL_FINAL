@@ -13,6 +13,8 @@ import com.chtholly.chthl.lexer.Token;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -39,7 +41,8 @@ public class TemplateSpecializer {
         }
 
         if (customization != null) {
-            for (ModificationNode mod : customization.modifications) {
+            // We handle StylePropertyNode filling separately in specializeStyle
+            for (Node mod : customization.modifications) {
                 if (mod instanceof DeleteNode) {
                     applyDelete(clonedBody, (DeleteNode) mod);
                 } else if (mod instanceof InsertNode) {
@@ -49,6 +52,37 @@ public class TemplateSpecializer {
         }
 
         return clonedBody;
+    }
+
+    public List<Node> specializeStyle(List<Node> originalBody, CustomizationBlockNode customization) {
+        List<Node> specializedBody = specialize(originalBody, customization);
+
+        if (customization == null) {
+            return specializedBody;
+        }
+
+        Map<String, StylePropertyNode> providedProperties = customization.modifications.stream()
+            .filter(n -> n instanceof StylePropertyNode)
+            .map(n -> (StylePropertyNode) n)
+            .collect(Collectors.toMap(p -> p.key, Function.identity(), (a, b) -> b)); // Keep last on duplicate
+
+        List<Node> finalBody = new ArrayList<>();
+        for (Node node : specializedBody) {
+            if (node instanceof StylePropertyNode) {
+                StylePropertyNode propNode = (StylePropertyNode) node;
+                if (propNode.value == null) { // This is a valueless property
+                    if (providedProperties.containsKey(propNode.key)) {
+                        finalBody.add(providedProperties.get(propNode.key));
+                    }
+                    // If not provided, it's omitted.
+                } else {
+                    finalBody.add(propNode);
+                }
+            } else {
+                finalBody.add(node);
+            }
+        }
+        return finalBody;
     }
 
     private void applyDelete(List<Node> body, DeleteNode deleteNode) {

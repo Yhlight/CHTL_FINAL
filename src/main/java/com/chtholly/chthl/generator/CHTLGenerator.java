@@ -21,14 +21,16 @@ public class CHTLGenerator implements Visitor<String> {
     private final StringBuilder globalCssBuilder;
     private final List<Node> rootNodes;
     private final Map<String, TemplateNode> templateTable;
+    private final Map<String, OriginNode> originTable;
     private final TemplateSpecializer specializer;
     private final Deque<Map<String, UnitValue>> variableContextStack = new ArrayDeque<>();
     private ElementNode currentElement = null;
 
-    public CHTLGenerator(List<Node> rootNodes, Map<String, TemplateNode> templateTable) {
+    public CHTLGenerator(List<Node> rootNodes, Map<String, TemplateNode> templateTable, Map<String, OriginNode> originTable) {
         this.globalCssBuilder = new StringBuilder();
         this.rootNodes = rootNodes;
         this.templateTable = templateTable;
+        this.originTable = originTable;
         this.specializer = new TemplateSpecializer();
     }
 
@@ -126,6 +128,15 @@ public class CHTLGenerator implements Visitor<String> {
     }
 
     @Override
+    public String visitOriginNode(OriginNode node) {
+        if (node.isUsage) {
+            OriginNode definition = originTable.get(node.name.getLexeme());
+            return (definition != null) ? definition.content : "";
+        }
+        return node.content;
+    }
+
+    @Override
     public String visitStyleBlockNode(StyleBlockNode node) {
         for (SelectorBlockNode selectorBlock : node.selectorBlocks) {
             selectorBlock.accept(this);
@@ -160,11 +171,10 @@ public class CHTLGenerator implements Visitor<String> {
         if (hasVariableSpecialization) {
             Map<String, UnitValue> specializedVariables = new HashMap<>();
 
-            for (ModificationNode mod : node.customization.modifications) {
+            for (Node mod : node.customization.modifications) {
                 if (mod instanceof SetNode) {
                     SetNode setNode = (SetNode) mod;
 
-                    // Create a temporary stack for this evaluation that includes the variables we've set so far
                     Deque<Map<String, UnitValue>> evalStack = new ArrayDeque<>();
                     evalStack.push(specializedVariables);
                     evalStack.addAll(this.variableContextStack);
@@ -191,7 +201,7 @@ public class CHTLGenerator implements Visitor<String> {
             }
             result = builder.toString();
         } else if (templateDef instanceof StyleTemplateNode) {
-             List<Node> specializedBody = specializer.specialize(((StyleTemplateNode) templateDef).body, node.customization);
+             List<Node> specializedBody = specializer.specializeStyle(((StyleTemplateNode) templateDef).body, node.customization);
              StringBuilder builder = new StringBuilder();
              for(Node bodyNode : specializedBody) {
                  builder.append(visitStyleTemplateBodyNode(bodyNode));
@@ -209,6 +219,7 @@ public class CHTLGenerator implements Visitor<String> {
     private String visitStyleTemplateBodyNode(Node bodyNode) {
         if (bodyNode instanceof StylePropertyNode) {
             StylePropertyNode prop = (StylePropertyNode) bodyNode;
+            if (prop.value == null) return "";
             ExpressionEvaluator evaluator = new ExpressionEvaluator(this.currentElement, this.rootNodes, this.templateTable, this.variableContextStack);
             Object value = evaluator.evaluate(prop.value);
             return prop.key + ": " + value.toString() + ";";

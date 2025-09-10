@@ -10,6 +10,7 @@
 /app/src/main/java/com/chtholly/chthl/ast/custom/SetNode.java
 /app/src/main/java/com/chtholly/chthl/evaluator/UnitValue.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/Expression.java
+/app/src/main/java/com/chtholly/chthl/ast/OriginNode.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/VariableExpr.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/Visitor.java
 /app/src/main/java/com/chtholly/chthl/ast/custom/CustomizationBlockNode.java
@@ -29,6 +30,7 @@
 /app/src/main/java/com/chtholly/chthl/ast/expr/GlobalVariableExpr.java
 /app/src/main/java/com/chtholly/chthl/generator/CompilationResult.java
 /app/src/main/java/com/chtholly/chthl/ast/ElementNode.java
+/app/src/main/java/com/chtholly/chthl/ast/expr/ConditionalCase.java
 /app/src/main/java/com/chtholly/chthl/ast/TextNode.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/GroupingExpr.java
 /app/src/main/java/com/chtholly/chthl/ast/custom/DeleteNode.java

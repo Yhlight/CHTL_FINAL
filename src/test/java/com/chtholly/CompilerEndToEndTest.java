@@ -21,7 +21,7 @@ class CompilerEndToEndTest {
         CHTLParser parser = new CHTLParser(new CHTLLexer(source).scanTokens());
         List<Node> ast = parser.getAst();
         Map<String, com.chtholly.chthl.ast.template.TemplateNode> templateTable = parser.getTemplateTable();
-        CHTLGenerator generator = new CHTLGenerator(ast, templateTable);
+        CHTLGenerator generator = new CHTLGenerator(ast, templateTable, parser.getOriginTable());
         return generator.generate();
     }
 
@@ -92,6 +92,7 @@ class CompilerEndToEndTest {
         CompilationResult result = compile(chtlSource);
         assertHtmlEquals(expectedHtml, result.getHtml());
     }
+
 
     @Test
     void testConditionalExpressionEvaluation() {
@@ -417,6 +418,41 @@ class CompilerEndToEndTest {
         String expectedHtml = "<div style=\"width:100px;height:200px;padding:5px\"></div>" +
                               "<div style=\"width:500px;height:250px;padding:5px\"></div>";
 
+        CompilationResult result = compile(chtlSource);
+        assertHtmlEquals(expectedHtml, result.getHtml());
+    }
+
+    @Test
+    void testChainedConditionalExpression() {
+        String chtlSource = """
+        div {
+            style {
+                width: 150px;
+                height: 80px;
+                // The first true condition should be chosen
+                color: height < 50px ? "blue", width > 100px ? "green" : "red";
+            }
+        }
+        """;
+        String expectedHtml = "<div style=\"width:150px;height:80px;color:green\"></div>";
+        CompilationResult result = compile(chtlSource);
+        assertHtmlEquals(expectedHtml, result.getHtml());
+    }
+
+    @Test
+    void testOriginBlock() {
+        String chtlSource = """
+        [Origin] @Html MyRawHtml {
+            "<div>This is raw</div>"
+        }
+
+        body {
+            p { text { "Before" } }
+            [Origin] @Html MyRawHtml;
+            p { text { "After" } }
+        }
+        """;
+        String expectedHtml = "<body><p>Before</p><div>This is raw</div><p>After</p></body>";
         CompilationResult result = compile(chtlSource);
         assertHtmlEquals(expectedHtml, result.getHtml());
     }

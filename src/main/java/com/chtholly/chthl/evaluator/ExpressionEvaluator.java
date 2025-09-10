@@ -116,12 +116,17 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
 
     @Override
     public Object visitConditionalExpr(ConditionalExpr expr) {
-        Object conditionResult = evaluate(expr.condition);
-        if (isTruthy(conditionResult)) {
-            return evaluate(expr.thenBranch);
-        } else {
+        for (ConditionalCase aCase : expr.cases) {
+            if (isTruthy(evaluate(aCase.condition))) {
+                return evaluate(aCase.thenBranch);
+            }
+        }
+
+        if (expr.elseBranch != null) {
             return evaluate(expr.elseBranch);
         }
+
+        return null; // Or some default value
     }
 
     @Override

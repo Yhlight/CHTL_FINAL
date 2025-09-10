@@ -1,16 +1,18 @@
 package com.chtholly.chthl.ast.expr;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
- * Represents a conditional (ternary) expression, e.g., <code>width > 50px ? 'red' : 'blue'</code>.
+ * Represents a chain of conditional expressions.
+ * e.g., <code>cond1 ? then1, cond2 ? then2 : elseBranch</code>.
  */
 public class ConditionalExpr extends Expression {
-    public final Expression condition;
-    public final Expression thenBranch;
-    public final Expression elseBranch;
+    public final List<ConditionalCase> cases;
+    public final Expression elseBranch; // Can be null
 
-    public ConditionalExpr(Expression condition, Expression thenBranch, Expression elseBranch) {
-        this.condition = condition;
-        this.thenBranch = thenBranch;
+    public ConditionalExpr(List<ConditionalCase> cases, Expression elseBranch) {
+        this.cases = cases;
         this.elseBranch = elseBranch;
     }
 
@@ -21,6 +23,8 @@ public class ConditionalExpr extends Expression {
 
     @Override
     public Expression clone() {
-        return new ConditionalExpr(this.condition.clone(), this.thenBranch.clone(), this.elseBranch.clone());
+        List<ConditionalCase> clonedCases = cases.stream().map(ConditionalCase::clone).collect(Collectors.toList());
+        Expression clonedElse = (elseBranch != null) ? elseBranch.clone() : null;
+        return new ConditionalExpr(clonedCases, clonedElse);
     }
 }

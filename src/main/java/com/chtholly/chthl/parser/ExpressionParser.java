@@ -37,13 +37,28 @@ public class ExpressionParser {
 
     private Expression conditional() {
         Expression expr = logic_or();
-        if (match(TokenType.QUESTION)) {
-            Expression thenBranch = expression();
-            consume(TokenType.COLON, "Expect ':' after then branch.");
-            Expression elseBranch = conditional();
-            expr = new ConditionalExpr(expr, thenBranch, elseBranch);
+
+        if (!match(TokenType.QUESTION)) {
+            return expr;
         }
-        return expr;
+
+        List<ConditionalCase> cases = new ArrayList<>();
+        Expression thenBranch = logic_or();
+        cases.add(new ConditionalCase(expr, thenBranch));
+
+        while (match(TokenType.COMMA)) {
+            Expression condition = logic_or();
+            consume(TokenType.QUESTION, "Expect '?' after conditional case condition.");
+            Expression tb = logic_or();
+            cases.add(new ConditionalCase(condition, tb));
+        }
+
+        Expression elseBranch = null;
+        if (match(TokenType.COLON)) {
+            elseBranch = conditional();
+        }
+
+        return new ConditionalExpr(cases, elseBranch);
     }
 
     private Expression logic_or() {

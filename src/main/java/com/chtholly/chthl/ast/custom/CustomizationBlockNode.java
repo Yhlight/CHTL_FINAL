@@ -3,15 +3,16 @@ package com.chtholly.chthl.ast.custom;
 import com.chtholly.chthl.ast.Node;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Represents the customization block `{...}` that can follow a template usage.
  * It contains a list of modification instructions.
  */
 public class CustomizationBlockNode implements Node {
-    public final List<ModificationNode> modifications;
+    public final List<Node> modifications;
 
-    public CustomizationBlockNode(List<ModificationNode> modifications) {
+    public CustomizationBlockNode(List<Node> modifications) {
         this.modifications = modifications;
     }
 
@@ -22,10 +23,9 @@ public class CustomizationBlockNode implements Node {
 
     @Override
     public Node clone() {
-        List<ModificationNode> clonedModifications = new ArrayList<>();
-        for (ModificationNode mod : this.modifications) {
-            clonedModifications.add((ModificationNode) mod.clone());
-        }
+        List<Node> clonedModifications = modifications.stream()
+                .map(Node::clone)
+                .collect(Collectors.toList());
         return new CustomizationBlockNode(clonedModifications);
     }
 }
