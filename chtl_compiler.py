@@ -29,7 +29,7 @@ def compile_chtl(source_code: str, source_file_path: str, use_default_structure:
     ast = parser.parse()
     transformer = ASTTransformer(ast, context, current_file_path=source_file_path)
     transformed_ast = transformer.transform()
-    generator = HTMLGenerator(transformed_ast)
+    generator = HTMLGenerator(transformed_ast, context)
     html_output = generator.generate(use_default_structure=use_default_structure)
 
     return html_output

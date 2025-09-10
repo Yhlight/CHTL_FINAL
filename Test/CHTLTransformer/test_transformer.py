@@ -49,12 +49,23 @@ class TestASTTransformer(unittest.TestCase):
                     text: "I was imported!";
                 }
             }
+            [Custom] @Element MyCustomBox {
+                div { class: "box"; }
+            }
             """)
         with open(self.imports_file_path, "w") as f:
             f.write("""
             [Import] @Chtl from "MyComponent";
             body {
                 @Element MyImportedButton from MyComponent;
+
+                @Element MyCustomBox from MyComponent {
+                    div {
+                        style {
+                            border: 1px solid black;
+                        }
+                    }
+                }
             }
             """)
 
@@ -139,16 +150,27 @@ class TestASTTransformer(unittest.TestCase):
         transformer = ASTTransformer(ast, context, self.imports_file_path)
         transformed_ast = transformer.transform()
 
-        # After transformation, the import node should be gone, and the template should be expanded
+        # After transformation, the import node should be gone, and templates should be expanded
         self.assertEqual(len(transformed_ast.children), 1)
         body_node = transformed_ast.children[0]
         self.assertEqual(body_node.tag_name, 'body')
-        self.assertEqual(len(body_node.children), 1)
+        self.assertEqual(len(body_node.children), 2) # Button and Box
 
+        # Check the imported button
         button_node = body_node.children[0]
         self.assertIsInstance(button_node, ElementNode)
         self.assertEqual(button_node.tag_name, 'button')
         self.assertEqual(button_node.attributes[0].value, 'imported-btn')
+
+        # Check the customized box
+        box_node = body_node.children[1]
+        self.assertIsInstance(box_node, ElementNode)
+        self.assertEqual(box_node.tag_name, 'div')
+        self.assertEqual(box_node.attributes[0].value, 'box')
+        # Check that the style override was applied
+        style_node = box_node.children[0]
+        self.assertIsInstance(style_node, StyleNode)
+        self.assertEqual(style_node.children[0].name, 'border')
 
 
 if __name__ == '__main__':

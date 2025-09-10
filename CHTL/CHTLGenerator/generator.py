@@ -3,13 +3,15 @@ from CHTL.CHTLNode.nodes import (
     StyleNode, CssRuleNode, CssPropertyNode, ExpressionNode, LiteralNode
 )
 from CHTL.CHTLevaluator.evaluator import ExpressionEvaluator
+from CHTL.CHTLContext.context import CompilationContext
 import html
 from typing import Optional
 
 class HTMLGenerator:
-    def __init__(self, ast: DocumentNode):
+    def __init__(self, ast: DocumentNode, context: CompilationContext):
         self.ast = ast
-        self.evaluator = ExpressionEvaluator(ast)
+        self.context = context
+        self.evaluator = ExpressionEvaluator(ast, context)
         self.global_styles = []
         self.self_closing_tags = {
             'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',

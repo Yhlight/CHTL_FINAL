@@ -1,7 +1,7 @@
 from CHTL.CHTLLexer.keywords import Token, TokenType
 from CHTL.CHTLNode.nodes import (
     ExpressionNode, LiteralNode, BinaryOpNode, LogicalOpNode,
-    ConditionalExpressionNode, PropertyReferenceNode
+    ConditionalExpressionNode, PropertyReferenceNode, FunctionCallNode
 )
 from .selector_parser import SelectorParser
 from typing import List, Dict, Optional
@@ -37,8 +37,12 @@ class ExpressionParser:
             return self.tokens[self.pos + offset]
         return None
 
-    def consume(self) -> Token:
+    def consume(self, expected_type: Optional[TokenType] = None) -> Token:
         token = self.current_token()
+        if not token:
+            raise RuntimeError("Unexpected end of expression token stream.")
+        if expected_type and token.type != expected_type:
+            raise RuntimeError(f"Line {token.lineno}: Expected token {expected_type} in expression, but got {token.type}")
         self.pos += 1
         return token
 
@@ -93,6 +97,9 @@ class ExpressionParser:
         if is_prop_ref:
             return self.parse_property_reference()
 
+        if token.type == TokenType.IDENTIFIER and self.peek_token() and self.peek_token().type == TokenType.LPAREN:
+            return self.parse_function_call()
+
         if token.type == TokenType.IDENTIFIER:
             self.consume()
             return PropertyReferenceNode(property_name=token.value, selector=None, lineno=token.lineno)
@@ -103,6 +110,23 @@ class ExpressionParser:
             return LiteralNode(value=value, lineno=token.lineno)
 
         raise ValueError(f"Unexpected token in expression: {token.type} ('{token.value}')")
+
+    def parse_function_call(self) -> FunctionCallNode:
+        callee_token = self.consume()
+        self.consume(TokenType.LPAREN)
+
+        args = []
+        if self.current_token().type != TokenType.RPAREN:
+            while True:
+                # For now, assume arguments are simple identifiers/literals, not complex expressions
+                arg_expr = self.parse_primary()
+                args.append(arg_expr)
+                if self.current_token().type == TokenType.RPAREN:
+                    break
+                self.consume(TokenType.COMMA)
+
+        self.consume(TokenType.RPAREN)
+        return FunctionCallNode(callee_name=callee_token.value, arguments=args, lineno=callee_token.lineno)
 
     def parse_property_reference(self) -> PropertyReferenceNode:
         lineno = self.current_token().lineno

@@ -10,13 +10,13 @@ class TestGenerator(unittest.TestCase):
 
     def _compile_source(self, source, use_default_structure=False):
         context = CompilationContext()
-        lexer = Lexer(source)
+        lexer = Lexer(source, context)
         tokens = lexer.tokenize()
         parser = Parser(tokens, context)
         ast = parser.parse()
         transformer = ASTTransformer(ast, context, "test.chtl")
         transformed_ast = transformer.transform()
-        generator = HTMLGenerator(transformed_ast)
+        generator = HTMLGenerator(transformed_ast, context)
         return generator.generate(use_default_structure=use_default_structure)
 
     def _dedent(self, text):

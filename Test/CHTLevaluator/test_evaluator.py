@@ -4,6 +4,7 @@ from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLParser.parser import Parser
 from CHTL.CHTLParser.selector_parser import SelectorParser
 from CHTL.CHTLUtils.ast_search import find_nodes_by_selector
+from CHTL.CHTLTransformer.transformer import ASTTransformer
 from CHTL.CHTLevaluator.evaluator import ExpressionEvaluator
 from CHTL.CHTLNode.nodes import DocumentNode, ElementNode, StyleNode, CssPropertyNode, LiteralNode
 
@@ -12,16 +13,20 @@ class TestExpressionEvaluator(unittest.TestCase):
     def _setup_test_env(self, chtl_source):
         """Helper to create a full AST from source for testing."""
         context = CompilationContext()
-        parser = Parser(Lexer(chtl_source).tokenize(), context)
-        doc_ast = parser.parse()
-        return doc_ast
+        parser = Parser(Lexer(chtl_source, context).tokenize(), context)
+
+        # We need to run the transformer to process template definitions
+        # before the evaluator can use them.
+        transformer = ASTTransformer(parser.parse(), context, "test.chtl")
+        doc_ast = transformer.transform()
+        return doc_ast, context
 
     def _evaluate_expression_in_source(self, source: str, context_selector: str, prop_name: str):
         """
         A helper to find a specific property expression in a source file,
         find its context element, and evaluate it.
         """
-        doc_ast = self._setup_test_env(source)
+        doc_ast, context = self._setup_test_env(source)
 
         # Correctly find the context element using the new selector engine
         selector_ast = SelectorParser(context_selector).parse()
@@ -46,13 +51,14 @@ class TestExpressionEvaluator(unittest.TestCase):
         if not expr_to_eval:
             self.fail(f"Test setup failed: could not find property '{prop_name}' on '{context_selector}'")
 
-        evaluator = ExpressionEvaluator(doc_ast)
+        evaluator = ExpressionEvaluator(doc_ast, context)
         return evaluator.evaluate(expr_to_eval, target_element)
 
     def test_simple_arithmetic(self):
         doc = DocumentNode()
         context_el = ElementNode(tag_name='div')
-        evaluator = ExpressionEvaluator(doc)
+        # Evaluator now requires the context
+        evaluator = ExpressionEvaluator(doc, CompilationContext())
 
         from CHTL.CHTLParser.expression_parser import ExpressionParser
         expr_ast = ExpressionParser(Lexer("10 + 5").tokenize()[:-1]).parse()
@@ -184,6 +190,27 @@ class TestExpressionEvaluator(unittest.TestCase):
         """
         result = self._evaluate_expression_in_source(source, "div", "color")
         self.assertEqual(result, 'orange')
+
+    def test_variable_template_substitution(self):
+        source = """
+        [Template] @Var MyTheme {
+            brandColor: "#ff0000";
+            fontSize: 16px;
+        }
+
+        div {
+            style {
+                color: MyTheme(brandColor);
+                font-size: MyTheme(fontSize) + 2px;
+            }
+        }
+        """
+        color_result = self._evaluate_expression_in_source(source, "div", "color")
+        self.assertEqual(color_result, "#ff0000")
+
+        size_result = self._evaluate_expression_in_source(source, "div", "font-size")
+        self.assertEqual(size_result, "18px")
+
 
 if __name__ == '__main__':
     unittest.main()

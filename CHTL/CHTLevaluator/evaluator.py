@@ -1,19 +1,22 @@
 import re
 from CHTL.CHTLNode.nodes import (
     ExpressionNode, LiteralNode, BinaryOpNode, LogicalOpNode,
-    ConditionalExpressionNode, PropertyReferenceNode, ElementNode, DocumentNode, StyleNode, CssPropertyNode, SelectorNode
+    ConditionalExpressionNode, PropertyReferenceNode, ElementNode, DocumentNode, StyleNode, CssPropertyNode, SelectorNode,
+    FunctionCallNode, AttributeNode
 )
 from CHTL.CHTLParser.selector_parser import SelectorParser
 from CHTL.CHTLUtils.ast_search import find_nodes_by_selector
 from CHTL.CHTLLexer.lexer import TokenType
+from CHTL.CHTLContext.context import CompilationContext
 from typing import Any, Optional, Tuple
 
 class ExpressionEvaluator:
     """
     Walks an expression AST and computes a final value.
     """
-    def __init__(self, document: DocumentNode):
+    def __init__(self, document: DocumentNode, context: CompilationContext):
         self.document = document
+        self.context = context
         # Caching could be added here later for performance
 
     def evaluate(self, node: ExpressionNode, context_element: ElementNode) -> Any:
@@ -111,3 +114,28 @@ class ExpressionEvaluator:
 
         if result_num == int(result_num): return f"{int(result_num)}{result_unit}"
         return f"{result_num:.2f}{result_unit}".rstrip('0').rstrip('.')
+
+    def _visit_FunctionCallNode(self, node: FunctionCallNode, context: ElementNode) -> Any:
+        # This assumes the function call is for a @Var template.
+        # A more robust system might check a registry of functions.
+
+        # TODO: Handle namespaces for var templates. For now, use default.
+        var_template = self.context.get_var_template(node.callee_name)
+        if not var_template:
+            raise NameError(f"Variable template '{node.callee_name}' not found.")
+
+        if len(node.arguments) != 1:
+            raise ValueError(f"Variable template '{node.callee_name}' expects 1 argument, got {len(node.arguments)}.")
+
+        arg = node.arguments[0]
+        if not isinstance(arg, PropertyReferenceNode) or arg.selector:
+            raise TypeError("Variable template arguments must be simple names.")
+
+        var_name_to_find = arg.property_name
+
+        for var_def in var_template:
+            if isinstance(var_def, AttributeNode) and var_def.name == var_name_to_find:
+                # The value in a @Var template is treated as a literal string.
+                return var_def.value
+
+        raise NameError(f"Variable '{var_name_to_find}' not found in template '{node.callee_name}'.")

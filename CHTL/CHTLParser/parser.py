@@ -145,12 +145,21 @@ class Parser:
             from_namespace = ".".join(namespace_parts)
         if self.current_token().type == TokenType.SEMICOLON:
             self.consume(TokenType.SEMICOLON)
-            return TemplateUsageNode(template_type=template_type_token.value, name=template_name_token.value, from_namespace=from_namespace, lineno=start_token.lineno)
+            return TemplateUsageNode(
+                template_type=template_type_token.value,
+                name=template_name_token.value,
+                from_namespace=from_namespace,
+                lineno=start_token.lineno
+            )
         else:
-            if from_namespace:
-                raise RuntimeError(f"Line {start_token.lineno}: Custom usage with 'from' is not supported.")
             body = self.parse_custom_usage_body()
-            return CustomUsageNode(template_type=template_type_token.value, name=template_name_token.value, body=body, lineno=start_token.lineno)
+            return CustomUsageNode(
+                template_type=template_type_token.value,
+                name=template_name_token.value,
+                from_namespace=from_namespace,
+                body=body,
+                lineno=start_token.lineno
+            )
 
     def parse_custom_usage_body(self):
         body = []

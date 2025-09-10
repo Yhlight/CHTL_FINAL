@@ -48,11 +48,27 @@ class ASTTransformer:
         return node
 
     def visit_TemplateDefinitionNode(self, node: TemplateDefinitionNode) -> None:
-        # These are handled at the context level, so we remove them from the tree
+        # Add the template to the context, assuming the default namespace for now.
+        # A more advanced implementation would handle finding the current namespace.
+        if node.template_type == 'Element':
+            self.context.add_element_template(node.name, node.content)
+        elif node.template_type == 'Style':
+            self.context.add_style_template(node.name, node.content)
+        elif node.template_type == 'Var':
+            self.context.add_var_template(node.name, node.content)
+
+        # Remove the definition node from the AST after it's been processed.
         return None
 
     def visit_CustomDefinitionNode(self, node: CustomDefinitionNode) -> None:
-        # These are handled at the context level, so we remove them from the tree
+        # This is an alias for TemplateDefinitionNode, so the logic is the same.
+        # We can treat Custom definitions as templates in the context.
+        if node.template_type == 'Element':
+            self.context.add_element_template(node.name, node.content)
+        elif node.template_type == 'Style':
+            self.context.add_style_template(node.name, node.content)
+        elif node.template_type == 'Var':
+            self.context.add_var_template(node.name, node.content)
         return None
 
     def visit_ImportNode(self, node: ImportNode) -> None:
@@ -122,11 +138,12 @@ class ASTTransformer:
         return copy.deepcopy(template_content)
 
     def visit_CustomUsageNode(self, node: CustomUsageNode) -> List[BaseNode]:
-        # A custom usage implies using a template from the current scope (default namespace).
+        # Create a temporary TemplateUsageNode to expand the base template,
+        # respecting the namespace if one was provided.
         temp_usage_node = TemplateUsageNode(
             template_type=node.template_type,
             name=node.name,
-            from_namespace=None, # This will cause the context to use the default namespace
+            from_namespace=node.from_namespace,
             lineno=node.lineno
         )
         expanded_nodes = self.visit_TemplateUsageNode(temp_usage_node)

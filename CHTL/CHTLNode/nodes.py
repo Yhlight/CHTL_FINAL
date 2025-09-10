@@ -58,6 +58,14 @@ class ConditionalExpressionNode(ExpressionNode):
     lineno: int = 0
     parent: Optional['BaseNode'] = field(default=None, repr=False)
 
+@dataclass
+class FunctionCallNode(ExpressionNode):
+    """Represents a function call-like expression, used for @Var templates."""
+    callee_name: str
+    arguments: List[ExpressionNode] = field(default_factory=list)
+    lineno: int = 0
+    parent: Optional['BaseNode'] = field(default=None, repr=False)
+
 class SelectorType(Enum):
     TAG = auto()
     CLASS = auto()
@@ -138,6 +146,7 @@ CustomizationContent = Union['ElementNode', DeleteNode, InsertNode]
 class CustomUsageNode(BaseNode):
     template_type: str
     name: str
+    from_namespace: Optional[str] = None
     body: List[CustomizationContent] = field(default_factory=list)
     lineno: int = 0
     parent: Optional['BaseNode'] = field(default=None, repr=False)
