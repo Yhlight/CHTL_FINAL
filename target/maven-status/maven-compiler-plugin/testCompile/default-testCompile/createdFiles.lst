@@ -1,3 +1,4 @@
 com/chtholly/CHTLParserTest.class
+com/chtholly/chthl/evaluator/ExpressionEvaluatorTest.class
 com/chtholly/CompilerEndToEndTest.class
 com/chtholly/CHTLLexerTest.class

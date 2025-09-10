@@ -32,4 +32,5 @@ public interface Visitor<R> {
     default R visitCustomizationBlockNode(CustomizationBlockNode node) { return null; }
     default R visitDeleteNode(DeleteNode node) { return null; }
     default R visitInsertNode(InsertNode node) { return null; }
+    default R visitSetNode(com.chtholly.chthl.ast.custom.SetNode node) { return null; }
 }

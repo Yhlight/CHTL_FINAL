@@ -9,9 +9,7 @@ import com.chtholly.chthl.ast.template.TemplateNode;
 import com.chtholly.chthl.ast.template.VarTemplateNode;
 import com.chtholly.chthl.lexer.Token;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -24,20 +22,27 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
     private final List<Node> documentContext;
     private final Map<String, TemplateNode> templateTable;
     private final int evaluationDepth;
+    private final Deque<Map<String, UnitValue>> variableContextStack;
 
     public ExpressionEvaluator(ElementNode localContext, List<Node> documentContext, Map<String, TemplateNode> templateTable) {
-        this(localContext, documentContext, templateTable, 0);
+        this(localContext, documentContext, templateTable, 0, new ArrayDeque<>());
     }
 
-    private ExpressionEvaluator(ElementNode localContext, List<Node> documentContext, Map<String, TemplateNode> templateTable, int depth) {
+    public ExpressionEvaluator(ElementNode localContext, List<Node> documentContext, Map<String, TemplateNode> templateTable, Deque<Map<String, UnitValue>> variableContextStack) {
+        this(localContext, documentContext, templateTable, 0, variableContextStack);
+    }
+
+    private ExpressionEvaluator(ElementNode localContext, List<Node> documentContext, Map<String, TemplateNode> templateTable, int depth, Deque<Map<String, UnitValue>> variableContextStack) {
         this.localContext = localContext;
         this.documentContext = documentContext;
         this.templateTable = templateTable;
         this.evaluationDepth = depth;
+        this.variableContextStack = variableContextStack;
     }
 
     private static UnitValue parseUnitValue(Object literal) {
         if (literal == null) return null;
+        if (literal instanceof UnitValue) return (UnitValue) literal;
         String s = literal.toString();
         if (s.trim().isEmpty()) return null;
 
@@ -52,7 +57,7 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
     public Object evaluate(Expression expr) {
         if (evaluationDepth > MAX_EVALUATION_DEPTH) {
             System.err.println("Error: Max evaluation depth exceeded, possible circular reference.");
-            return "0";
+            return new UnitValue(0, "");
         }
         return expr.accept(this);
     }
@@ -85,20 +90,26 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
         }
         UnitValue leftUnit = parseUnitValue(leftVal);
         UnitValue rightUnit = parseUnitValue(rightVal);
-        if (leftUnit == null || rightUnit == null || (!leftUnit.unit.equals(rightUnit.unit) && !leftUnit.unit.isEmpty() && !rightUnit.unit.isEmpty())) {
+        if (leftUnit == null || rightUnit == null) {
             return false;
         }
+        if (!leftUnit.unit.equals(rightUnit.unit) && !leftUnit.unit.isEmpty() && !rightUnit.unit.isEmpty()) {
+            System.err.println("Warning: Incompatible units in operation: " + leftUnit.unit + " and " + rightUnit.unit);
+            return false;
+        }
+        String resultUnit = !leftUnit.unit.isEmpty() ? leftUnit.unit : rightUnit.unit;
+
         switch (expr.operator.getType()) {
             case GREATER: return leftUnit.value > rightUnit.value;
             case GREATER_EQUAL: return leftUnit.value >= rightUnit.value;
             case LESS: return leftUnit.value < rightUnit.value;
             case LESS_EQUAL: return leftUnit.value <= rightUnit.value;
-            case PLUS: return new UnitValue(leftUnit.value + rightUnit.value, leftUnit.unit);
-            case MINUS: return new UnitValue(leftUnit.value - rightUnit.value, leftUnit.unit);
-            case STAR: return new UnitValue(leftUnit.value * rightUnit.value, leftUnit.unit);
+            case PLUS: return new UnitValue(leftUnit.value + rightUnit.value, resultUnit);
+            case MINUS: return new UnitValue(leftUnit.value - rightUnit.value, resultUnit);
+            case STAR: return new UnitValue(leftUnit.value * rightUnit.value, resultUnit);
             case SLASH:
-                if (rightUnit.value == 0) return new UnitValue(0, leftUnit.unit);
-                return new UnitValue(leftUnit.value / rightUnit.value, leftUnit.unit);
+                if (rightUnit.value == 0) return new UnitValue(0, resultUnit);
+                return new UnitValue(leftUnit.value / rightUnit.value, resultUnit);
         }
         return null;
     }
@@ -120,20 +131,58 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
 
     @Override
     public Object visitLiteralExpr(LiteralExpr expr) {
+        if (expr.value instanceof String) {
+            UnitValue parsed = parseUnitValue(expr.value);
+            if (parsed != null) {
+                return parsed;
+            }
+        }
         return expr.value;
+    }
+
+    @Override
+    public Object visitGlobalVariableExpr(GlobalVariableExpr expr) {
+        String varName = expr.name.getLexeme();
+
+        // 1. Check specialization context stack
+        for (Map<String, UnitValue> context : this.variableContextStack) {
+            if (context.containsKey(varName)) {
+                return context.get(varName);
+            }
+        }
+
+        // 2. Check global @Var templates
+        for (TemplateNode templateNode : templateTable.values()) {
+            if (templateNode instanceof VarTemplateNode) {
+                VarTemplateNode varTemplate = (VarTemplateNode) templateNode;
+                if (varTemplate.variables.containsKey(varName)) {
+                    ExpressionEvaluator newEvaluator = new ExpressionEvaluator(null, this.documentContext, this.templateTable, this.evaluationDepth + 1, this.variableContextStack);
+                    return newEvaluator.evaluate(varTemplate.variables.get(varName));
+                }
+            }
+        }
+
+        return new UnitValue(0, ""); // Fallback for unfound global var
     }
 
     @Override
     public Object visitVariableExpr(VariableExpr expr) {
         String varName = expr.name.getLexeme();
+        // This is for local property resolution, e.g. "height: width;"
         if (localContext != null) {
             Expression propertyExpr = findPropertyInNode(localContext, varName);
             if (propertyExpr != null) {
-                ExpressionEvaluator newEvaluator = new ExpressionEvaluator(this.localContext, this.documentContext, this.templateTable, this.evaluationDepth + 1);
+                // We create a new evaluator to look for the property's value, but critically,
+                // we pass a *new* local context that prevents finding the same property again.
+                // This is a simplification; a more robust solution would track the property being evaluated.
+                ExpressionEvaluator newEvaluator = new ExpressionEvaluator(null, this.documentContext, this.templateTable, this.evaluationDepth + 1, this.variableContextStack);
                 return newEvaluator.evaluate(propertyExpr);
             }
         }
-        return varName;
+
+        // If it's not a local property, it might be a literal number like '100px'
+        // that was parsed as an identifier.
+        return visitLiteralExpr(new LiteralExpr(varName));
     }
 
     @Override
@@ -144,7 +193,7 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
         String propertyName = expr.property.getLexeme();
         Expression propertyExpr = findPropertyInNode(targetNode, propertyName);
         if (propertyExpr == null) return "0";
-        ExpressionEvaluator newEvaluator = new ExpressionEvaluator(targetNode, this.documentContext, this.templateTable, this.evaluationDepth + 1);
+        ExpressionEvaluator newEvaluator = new ExpressionEvaluator(targetNode, this.documentContext, this.templateTable, this.evaluationDepth + 1, this.variableContextStack);
         return newEvaluator.evaluate(propertyExpr);
     }
 
@@ -159,7 +208,7 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
         String varName = ((VariableExpr) expr.arguments.get(0)).name.getLexeme();
         Expression valueExpr = varTemplate.variables.get(varName);
         if (valueExpr == null) return "";
-        ExpressionEvaluator newEvaluator = new ExpressionEvaluator(null, this.documentContext, this.templateTable, this.evaluationDepth + 1);
+        ExpressionEvaluator newEvaluator = new ExpressionEvaluator(null, this.documentContext, this.templateTable, this.evaluationDepth + 1, this.variableContextStack);
         return newEvaluator.evaluate(valueExpr);
     }
 

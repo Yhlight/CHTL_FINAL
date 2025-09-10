@@ -30,12 +30,14 @@ public class CHTLLexer {
         keywords.put("except", TokenType.EXCEPT);
         keywords.put("delete", TokenType.DELETE);
         keywords.put("insert", TokenType.INSERT);
+        keywords.put("set", TokenType.SET);
         keywords.put("after", TokenType.AFTER);
         keywords.put("before", TokenType.BEFORE);
         keywords.put("replace", TokenType.REPLACE);
         keywords.put("at", TokenType.AT);
         keywords.put("top", TokenType.TOP);
         keywords.put("bottom", TokenType.BOTTOM);
+        keywords.put("into", TokenType.INTO);
         keywords.put("inherit", TokenType.INHERIT);
     }
 

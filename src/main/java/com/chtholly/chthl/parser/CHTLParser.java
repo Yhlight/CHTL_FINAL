@@ -5,6 +5,7 @@ import com.chtholly.chthl.ast.custom.CustomizationBlockNode;
 import com.chtholly.chthl.ast.custom.DeleteNode;
 import com.chtholly.chthl.ast.custom.InsertNode;
 import com.chtholly.chthl.ast.custom.ModificationNode;
+import com.chtholly.chthl.ast.custom.SetNode;
 import com.chtholly.chthl.ast.expr.Expression;
 import com.chtholly.chthl.ast.template.*;
 import com.chtholly.chthl.lexer.Token;
@@ -88,8 +89,10 @@ public class CHTLParser {
                 modifications.add(parseDelete());
             } else if (match(TokenType.INSERT)) {
                 modifications.add(parseInsert());
+            } else if (match(TokenType.SET)) {
+                modifications.add(parseSet());
             } else {
-                throw new ParseError(peek(), "Expected a modification keyword like 'delete' or 'insert'.");
+                throw new ParseError(peek(), "Expected a modification keyword like 'delete', 'insert', or 'set'.");
             }
         }
         consume(TokenType.RIGHT_BRACE, "Expect '}' to end customization block.");
@@ -113,27 +116,64 @@ public class CHTLParser {
 
     private InsertNode parseInsert() {
         Token position;
-        if (match(TokenType.AFTER) || match(TokenType.BEFORE) || match(TokenType.REPLACE)) {
+        List<Token> target = new ArrayList<>();
+
+        if (match(TokenType.AFTER, TokenType.BEFORE, TokenType.REPLACE, TokenType.INTO)) {
             position = previous();
         } else {
-            // Handle 'at top' / 'at bottom' in the future
-            throw new ParseError(peek(), "Expect a position keyword like 'after', 'before', or 'replace'.");
+            throw new ParseError(peek(), "Expect a position keyword like 'after', 'before', 'replace', or 'into' after 'insert'.");
         }
 
-        List<Token> target = new ArrayList<>();
         while (!check(TokenType.LEFT_BRACE) && !isAtEnd()) {
             target.add(advance());
+        }
+        if (target.isEmpty()) {
+            throw new ParseError(peek(), "Expect a target selector for '" + position.getLexeme() + "'.");
         }
 
         consume(TokenType.LEFT_BRACE, "Expect '{' for insert body.");
 
         List<Node> body = new ArrayList<>();
-        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            body.add(declaration());
+
+        boolean isInsertIntoStyle = position.getType() == TokenType.INTO &&
+                                    target.size() == 1 &&
+                                    target.get(0).getType() == TokenType.STYLE;
+
+        if (isInsertIntoStyle) {
+            while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+                body.add(parseStyleProperty());
+            }
+        } else {
+            while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+                Node node = declaration();
+                if (node != null) {
+                    body.add(node);
+                }
+            }
         }
+
         consume(TokenType.RIGHT_BRACE, "Expect '}' to end insert body.");
 
         return new InsertNode(position, target, body);
+    }
+
+    private SetNode parseSet() {
+        Token name = consume(TokenType.IDENTIFIER, "Expect variable name after 'set'.");
+        consume(TokenType.EQUAL, "Expect '=' after variable name.");
+
+        List<Token> valueTokens = new ArrayList<>();
+        while (!check(TokenType.SEMICOLON) && !isAtEnd()) {
+            valueTokens.add(advance());
+        }
+
+        if (valueTokens.isEmpty()) {
+            throw new ParseError(peek(), "Variable value cannot be empty.");
+        }
+
+        consume(TokenType.SEMICOLON, "Expect ';' after variable value.");
+
+        Expression value = new ExpressionParser(valueTokens).parse();
+        return new SetNode(name, value);
     }
 
 
@@ -346,6 +386,7 @@ public class CHTLParser {
                 case LEFT_BRACKET:
                 case DELETE:
                 case INSERT:
+                case SET:
                     return;
             }
             advance();

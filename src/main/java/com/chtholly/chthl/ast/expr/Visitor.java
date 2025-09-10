@@ -9,6 +9,7 @@ public interface Visitor<R> {
     R visitGroupingExpr(GroupingExpr expr);
     R visitLiteralExpr(LiteralExpr expr);
     R visitVariableExpr(VariableExpr expr);
+    default R visitGlobalVariableExpr(GlobalVariableExpr expr) { return null; }
     default R visitReferenceExpr(ReferenceExpr expr) { return null; }
     default R visitConditionalExpr(ConditionalExpr expr) { return null; }
     default R visitCallExpr(CallExpr expr) { return null; }

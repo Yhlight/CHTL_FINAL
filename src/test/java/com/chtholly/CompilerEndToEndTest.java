@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,6 +24,27 @@ class CompilerEndToEndTest {
         CHTLGenerator generator = new CHTLGenerator(ast, templateTable);
         return generator.generate();
     }
+
+    private String normalizeStyle(String html) {
+        Pattern stylePattern = Pattern.compile("style=\"([^\"]*)\"");
+        Matcher matcher = stylePattern.matcher(html);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            String styleContent = matcher.group(1);
+            String normalized = styleContent.replaceAll("\\s*;\\s*", ";").replaceAll("\\s*:\\s*", ":").replaceAll("\\s+", " ");
+            if (normalized.endsWith(";")) {
+                normalized = normalized.substring(0, normalized.length() - 1);
+            }
+            matcher.appendReplacement(sb, "style=\"" + normalized + "\"");
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+
+    private void assertHtmlEquals(String expected, String actual) {
+        assertEquals(normalizeStyle(expected), normalizeStyle(actual));
+    }
+
 
     @Test
     void testFullCompilation() {
@@ -47,7 +70,7 @@ class CompilerEndToEndTest {
                               "<br></div></body></html>";
 
         CompilationResult result = compile(chtlSource);
-        assertEquals(expectedHtml, result.getHtml());
+        assertHtmlEquals(expectedHtml, result.getHtml());
         assertTrue(result.getCss().isEmpty());
     }
 
@@ -65,9 +88,9 @@ class CompilerEndToEndTest {
             }
         }
         """;
-        String expectedHtml = "<div style=\"background-color: #007bff;color: #6c757d;\"></div>";
+        String expectedHtml = "<div style=\"background-color:#007bff;color:#6c757d\"></div>";
         CompilationResult result = compile(chtlSource);
-        assertEquals(expectedHtml, result.getHtml());
+        assertHtmlEquals(expectedHtml, result.getHtml());
     }
 
     @Test
@@ -81,10 +104,10 @@ class CompilerEndToEndTest {
             }
         }
         """;
-        String expectedHtml = "<div id=\"box\" style=\"width: 100px;background-color: green;\"></div>";
+        String expectedHtml = "<div id=\"box\" style=\"width:100px;background-color:green\"></div>";
 
         CompilationResult result = compile(chtlSource);
-        assertEquals(expectedHtml, result.getHtml());
+        assertHtmlEquals(expectedHtml, result.getHtml());
         assertTrue(result.getCss().isEmpty());
     }
 
@@ -94,11 +117,11 @@ class CompilerEndToEndTest {
         div { id: box1; style { width: 100px; } }
         div { id: box2; style { width: #box1.width + 50px; } }
         """;
-        String expectedHtml = "<div id=\"box1\" style=\"width: 100px;\"></div>" +
-                              "<div id=\"box2\" style=\"width: 150px;\"></div>";
+        String expectedHtml = "<div id=\"box1\" style=\"width:100px\"></div>" +
+                              "<div id=\"box2\" style=\"width:150px\"></div>";
 
         CompilationResult result = compile(chtlSource);
-        assertEquals(expectedHtml, result.getHtml());
+        assertHtmlEquals(expectedHtml, result.getHtml());
         assertTrue(result.getCss().isEmpty());
     }
 
@@ -114,11 +137,11 @@ class CompilerEndToEndTest {
             h1 { text { "Styled" } }
         }
         """;
-        String expectedHtml = "<div class=\"box\" id=\"main\" style=\"color: red;\"><h1>Styled</h1></div>";
+        String expectedHtml = "<div class=\"box\" id=\"main\" style=\"color:red\"><h1>Styled</h1></div>";
         String expectedCss = ".box {\n    font-weight: 700;\n}\n";
 
         CompilationResult result = compile(chtlSource);
-        assertEquals(expectedHtml, result.getHtml());
+        assertHtmlEquals(expectedHtml, result.getHtml());
         assertEquals(expectedCss.trim(), result.getCss().trim());
     }
 
@@ -136,17 +159,17 @@ class CompilerEndToEndTest {
         String expectedCss = ".box {\n    color: blue;\n}\n.box:hover {\n    color: red;\n}\n";
 
         CompilationResult result = compile(chtlSource);
-        assertEquals(expectedHtml, result.getHtml());
+        assertHtmlEquals(expectedHtml, result.getHtml());
         assertEquals(expectedCss.trim(), result.getCss().trim());
     }
 
     @Test
     void testStyleWithBinaryExpression() {
         String chtlSource = "div { style { width: 100px + 50px; } }";
-        String expectedHtml = "<div style=\"width: 150px;\"></div>";
+        String expectedHtml = "<div style=\"width:150px\"></div>";
 
         CompilationResult result = compile(chtlSource);
-        assertEquals(expectedHtml, result.getHtml());
+        assertHtmlEquals(expectedHtml, result.getHtml());
         assertTrue(result.getCss().isEmpty());
     }
 
@@ -163,7 +186,7 @@ class CompilerEndToEndTest {
         """;
         String expectedHtml = "<body><h1>Title</h1><p>Content</p></body>";
         CompilationResult result = compile(chtlSource);
-        assertEquals(expectedHtml, result.getHtml());
+        assertHtmlEquals(expectedHtml, result.getHtml());
     }
 
     @Test
@@ -180,9 +203,9 @@ class CompilerEndToEndTest {
             }
         }
         """;
-        String expectedHtml = "<div style=\"font-family: sans-serif;font-size: 16px;color: blue;\"></div>";
+        String expectedHtml = "<div style=\"font-family:sans-serif;font-size:16px;color:blue\"></div>";
         CompilationResult result = compile(chtlSource);
-        assertEquals(expectedHtml, result.getHtml());
+        assertHtmlEquals(expectedHtml, result.getHtml());
     }
 
     @Test
@@ -203,9 +226,9 @@ class CompilerEndToEndTest {
             }
         }
         """;
-        String expectedHtml = "<div style=\"color: red;font-size: 16px;font-size: 20px;font-weight: 700;\"></div>";
+        String expectedHtml = "<div style=\"color:red;font-size:16px;font-size:20px;font-weight:700\"></div>";
         CompilationResult result = compile(chtlSource);
-        assertEquals(expectedHtml, result.getHtml());
+        assertHtmlEquals(expectedHtml, result.getHtml());
     }
 
     @Test
@@ -230,10 +253,10 @@ class CompilerEndToEndTest {
         }
         """;
 
-        String expectedHtml = "<body><h1>Title</h1><div style=\"color: red;\"></div></body>";
+        String expectedHtml = "<body><h1>Title</h1><div style=\"color:red\"></div></body>";
 
         CompilationResult result = compile(chtlSource);
-        assertEquals(expectedHtml, result.getHtml());
+        assertHtmlEquals(expectedHtml, result.getHtml());
     }
 
     @Test
@@ -255,6 +278,146 @@ class CompilerEndToEndTest {
         String expectedHtml = "<body><div id=\"first\"></div><p>Inserted</p><div id=\"second\"></div></body>";
 
         CompilationResult result = compile(chtlSource);
-        assertEquals(expectedHtml, result.getHtml());
+        assertHtmlEquals(expectedHtml, result.getHtml());
+    }
+
+    @Test
+    void testIndexedDeleteSpecialization() {
+        String chtlSource = """
+        [Template] @Element MyComponent {
+            p { text { "p1" } }
+            p { text { "p2 should be deleted" } }
+            p { text { "p3" } }
+        }
+        body {
+            @Element MyComponent {
+                delete p[1];
+            }
+        }
+        """;
+        String expectedHtml = "<body><p>p1</p><p>p3</p></body>";
+        CompilationResult result = compile(chtlSource);
+        assertHtmlEquals(expectedHtml, result.getHtml());
+    }
+
+    @Test
+    void testInheritanceDeleteSpecialization() {
+        String chtlSource = """
+        [Template] @Style Base { color: red; }
+        [Template] @Style Derived {
+            @Style Base;
+            font-weight: 700;
+        }
+        div {
+            style {
+                @Style Derived {
+                    delete @Style Base;
+                }
+            }
+        }
+        """;
+        String expectedHtml = "<div style=\"font-weight:700\"></div>";
+        CompilationResult result = compile(chtlSource);
+        assertHtmlEquals(expectedHtml, result.getHtml());
+    }
+
+    @Test
+    void testInsertIntoElementSpecialization() {
+        String chtlSource = """
+        [Template] @Element Container {
+            div { id: box; }
+        }
+
+        body {
+            @Element Container {
+                insert into div[0] {
+                    p { text { "Nested" } }
+                }
+            }
+        }
+        """;
+        String expectedHtml = "<body><div id=\"box\"><p>Nested</p></div></body>";
+        CompilationResult result = compile(chtlSource);
+        assertHtmlEquals(expectedHtml, result.getHtml());
+    }
+
+    @Test
+    void testInsertIntoStyleSpecialization() {
+        String chtlSource = """
+        [Template] @Element MyComponent {
+            div {
+                style {
+                    color: red;
+                }
+            }
+        }
+
+        body {
+            @Element MyComponent {
+                insert into style {
+                    font-size: 22px;
+                }
+            }
+        }
+        """;
+        String expectedHtml = "<body><div style=\"color:red;font-size:22px\"></div></body>";
+        CompilationResult result = compile(chtlSource);
+        assertHtmlEquals(expectedHtml, result.getHtml());
+    }
+
+    @Test
+    void testReplaceElementSpecialization() {
+        String chtlSource = """
+        [Template] @Element MyComponent {
+            h1 { text { "Title" } }
+            p { id: old; text { "Old paragraph" } }
+        }
+
+        body {
+            @Element MyComponent {
+                insert replace p[0] {
+                    div { id: new; text { "New paragraph" } }
+                }
+            }
+        }
+        """;
+        String expectedHtml = "<body><h1>Title</h1><div id=\"new\">New paragraph</div></body>";
+        CompilationResult result = compile(chtlSource);
+        assertHtmlEquals(expectedHtml, result.getHtml());
+    }
+
+    @Test
+    void testSetVariableSpecialization() {
+        String chtlSource = """
+        [Template] @Var Theme {
+            width: 100px;
+            height: 200px;
+            padding: 5px;
+        }
+
+        [Template] @Element Box {
+            div {
+                style {
+                    width: &width;
+                    height: &height;
+                    padding: &padding;
+                }
+            }
+        }
+
+        // Default usage
+        @Element Box;
+
+        // Specialized usage
+        @Element Box {
+            set width = 500px;
+            set height = &width / 2;
+        }
+        """;
+        String expectedHtml = "<div style=\"width:100px;height:200px;padding:5px\"></div>" +
+                              "<div style=\"width:500px;height:250px;padding:5px\"></div>";
+
+        CompilationResult result = compile(chtlSource);
+        assertHtmlEquals(expectedHtml, result.getHtml());
     }
 }

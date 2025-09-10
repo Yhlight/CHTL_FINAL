@@ -7,6 +7,7 @@
 /app/src/main/java/com/chtholly/chthl/specializer/TemplateSpecializer.java
 /app/src/main/java/com/chtholly/chthl/ast/SelectorBlockNode.java
 /app/src/main/java/com/chtholly/chthl/lexer/TokenType.java
+/app/src/main/java/com/chtholly/chthl/ast/custom/SetNode.java
 /app/src/main/java/com/chtholly/chthl/evaluator/UnitValue.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/Expression.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/VariableExpr.java
@@ -25,6 +26,7 @@
 /app/src/main/java/com/chtholly/chthl/ast/template/TemplateUsageNode.java
 /app/src/main/java/com/chtholly/chthl/ast/template/TemplateNode.java
 /app/src/main/java/com/chtholly/chthl/ast/Visitor.java
+/app/src/main/java/com/chtholly/chthl/ast/expr/GlobalVariableExpr.java
 /app/src/main/java/com/chtholly/chthl/generator/CompilationResult.java
 /app/src/main/java/com/chtholly/chthl/ast/ElementNode.java
 /app/src/main/java/com/chtholly/chthl/ast/TextNode.java

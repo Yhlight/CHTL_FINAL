@@ -133,6 +133,10 @@ public class ExpressionParser {
     }
 
     private Expression primary() {
+        if (match(TokenType.AMPERSAND)) {
+            Token name = consume(TokenType.IDENTIFIER, "Expect variable name after '&'.");
+            return new GlobalVariableExpr(name);
+        }
         if (match(TokenType.STRING)) {
             return new LiteralExpr(previous().getLiteral());
         }

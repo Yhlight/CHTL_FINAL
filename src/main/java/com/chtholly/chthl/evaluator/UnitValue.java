@@ -1,6 +1,8 @@
 package com.chtholly.chthl.evaluator;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A data class to represent a numeric value and its associated unit,
@@ -15,9 +17,25 @@ public class UnitValue {
         this.unit = Objects.requireNonNull(unit);
     }
 
+    public static UnitValue fromString(String s) {
+        if (s == null || s.trim().isEmpty()) return new UnitValue(0, "");
+
+        Pattern pattern = Pattern.compile("^([\\-+]?[0-9]*\\.?[0-9]+)(.*)$");
+        Matcher matcher = pattern.matcher(s.trim());
+        if (matcher.matches()) {
+            return new UnitValue(Double.parseDouble(matcher.group(1)), matcher.group(2).trim());
+        }
+        // Fallback for non-numeric values that might be treated as zero
+        return new UnitValue(0, "");
+    }
+
     @Override
     public String toString() {
         // Handle integers cleanly without a ".0"
+        if (unit.isEmpty()) {
+             if (value == (long) value) return String.format("%d", (long)value);
+             return String.format("%s", value);
+        }
         if (value == (long) value) {
             return String.format("%d%s", (long)value, unit);
         } else {
