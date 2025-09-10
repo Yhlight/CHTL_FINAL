@@ -38,13 +38,39 @@ std::string CHTLStyleProcessor::processStyleBlock(std::shared_ptr<StyleNode> sty
                 std::map<std::string, std::string> properties;
                 for (const auto& attr : rule->getAttributes()) {
                     if (attr.first != "type" && attr.first != "selector") {
-                        properties[attr.first] = attr.second;
+                        // 处理属性值中的表达式和引用
+                        std::string processedValue = processPropertyValue(attr.second);
+                        properties[attr.first] = processedValue;
                     }
                 }
                 
                 std::string processedRule = processStyleRule(selector, properties);
                 if (!processedRule.empty()) {
                     oss << processedRule << "\n";
+                }
+            }
+        }
+        
+        // 处理类选择器和ID选择器
+        for (const auto& child : styleNode->getChildren()) {
+            if (child->getNodeType() == NodeType::ELEMENT) {
+                std::string ruleType = child->getAttribute("type");
+                if (ruleType == "class" || ruleType == "id" || ruleType == "pseudo") {
+                    std::string selector = child->getAttribute("selector");
+                    std::map<std::string, std::string> properties;
+                    
+                    for (const auto& attr : child->getAttributes()) {
+                        if (attr.first != "type" && attr.first != "selector") {
+                            // 处理属性值中的表达式和引用
+                            std::string processedValue = processPropertyValue(attr.second);
+                            properties[attr.first] = processedValue;
+                        }
+                    }
+                    
+                    std::string processedRule = processStyleRule(selector, properties);
+                    if (!processedRule.empty()) {
+                        oss << processedRule << "\n";
+                    }
                 }
             }
         }
@@ -675,6 +701,229 @@ std::string CHTLStyleProcessor::getDebugInfo() const {
     oss << "错误数: " << errors.size() << "\n";
     oss << "警告数: " << warnings.size() << "\n";
     return oss.str();
+}
+
+// 新增的局部样式块处理方法
+std::string CHTLStyleProcessor::processPropertyValue(const std::string& value) const {
+    if (value.empty()) {
+        return value;
+    }
+    
+    std::string result = value;
+    
+    // 处理属性引用 (selector.property)
+    result = processPropertyReferences(result);
+    
+    // 处理算术表达式
+    result = processArithmeticExpressions(result);
+    
+    // 处理条件表达式
+    result = processConditionalExpressions(result);
+    
+    // 处理逻辑表达式
+    result = processLogicalExpressions(result);
+    
+    return result;
+}
+
+std::string CHTLStyleProcessor::processPropertyReferences(const std::string& value) const {
+    std::string result = value;
+    
+    // 查找属性引用模式 (selector.property)
+    std::regex propertyRefRegex(R"(([a-zA-Z_][a-zA-Z0-9_]*\.[a-zA-Z_][a-zA-Z0-9_]*))");
+    std::smatch match;
+    
+    while (std::regex_search(result, match, propertyRefRegex)) {
+        std::string fullMatch = match[0].str();
+        std::string selector = match[1].str();
+        std::string property = match[2].str();
+        
+        // 解析选择器和属性
+        size_t dotPos = selector.find('.');
+        if (dotPos != std::string::npos) {
+            std::string selectorName = selector.substr(0, dotPos);
+            std::string propertyName = selector.substr(dotPos + 1);
+            
+            // 查找属性值
+            std::string propertyValue = propertyReference->resolveElementProperty(selectorName, propertyName);
+            if (propertyValue.empty()) {
+                propertyValue = propertyReference->resolveStyleProperty(selectorName, propertyName);
+            }
+            
+            if (!propertyValue.empty()) {
+                result.replace(match.position(), match.length(), propertyValue);
+            } else {
+                // 如果找不到属性，保留原值
+                result.replace(match.position(), match.length(), fullMatch);
+            }
+        }
+    }
+    
+    return result;
+}
+
+std::string CHTLStyleProcessor::processArithmeticExpressions(const std::string& value) const {
+    std::string result = value;
+    
+    // 简单的算术表达式处理
+    // 支持 + - * / % ** 运算符
+    
+    // 处理幂运算 (**)
+    std::regex powerRegex(R"((\d+(?:\.\d+)?)\s*\*\*\s*(\d+(?:\.\d+)?))");
+    std::smatch match;
+    
+    while (std::regex_search(result, match, powerRegex)) {
+        double base = std::stod(match[1].str());
+        double exponent = std::stod(match[2].str());
+        double resultValue = std::pow(base, exponent);
+        
+        std::ostringstream oss;
+        oss << resultValue;
+        result.replace(match.position(), match.length(), oss.str());
+    }
+    
+    // 处理乘除模运算 (* / %)
+    std::regex mulDivModRegex(R"((\d+(?:\.\d+)?)\s*([*/%])\s*(\d+(?:\.\d+)?))");
+    
+    while (std::regex_search(result, match, mulDivModRegex)) {
+        double left = std::stod(match[1].str());
+        std::string op = match[2].str();
+        double right = std::stod(match[3].str());
+        
+        double resultValue = 0;
+        if (op == "*") {
+            resultValue = left * right;
+        } else if (op == "/") {
+            if (right != 0) {
+                resultValue = left / right;
+            } else {
+                resultValue = 0; // 除零处理
+            }
+        } else if (op == "%") {
+            resultValue = std::fmod(left, right);
+        }
+        
+        std::ostringstream oss;
+        oss << resultValue;
+        result.replace(match.position(), match.length(), oss.str());
+    }
+    
+    // 处理加减运算 (+ -)
+    std::regex addSubRegex(R"((\d+(?:\.\d+)?)\s*([+-])\s*(\d+(?:\.\d+)?))");
+    
+    while (std::regex_search(result, match, addSubRegex)) {
+        double left = std::stod(match[1].str());
+        std::string op = match[2].str();
+        double right = std::stod(match[3].str());
+        
+        double resultValue = 0;
+        if (op == "+") {
+            resultValue = left + right;
+        } else if (op == "-") {
+            resultValue = left - right;
+        }
+        
+        std::ostringstream oss;
+        oss << resultValue;
+        result.replace(match.position(), match.length(), oss.str());
+    }
+    
+    return result;
+}
+
+std::string CHTLStyleProcessor::processConditionalExpressions(const std::string& value) const {
+    std::string result = value;
+    
+    // 处理条件表达式 (condition ? trueValue : falseValue)
+    std::regex conditionalRegex(R"(([^?]+)\s*\?\s*([^:]+)\s*:\s*([^?]+))");
+    std::smatch match;
+    
+    while (std::regex_search(result, match, conditionalRegex)) {
+        std::string condition = match[1].str();
+        std::string trueValue = match[2].str();
+        std::string falseValue = match[3].str();
+        
+        // 简单的条件判断（这里可以扩展更复杂的逻辑）
+        bool conditionResult = evaluateCondition(condition);
+        
+        std::string selectedValue = conditionResult ? trueValue : falseValue;
+        result.replace(match.position(), match.length(), selectedValue);
+    }
+    
+    return result;
+}
+
+std::string CHTLStyleProcessor::processLogicalExpressions(const std::string& value) const {
+    std::string result = value;
+    
+    // 处理逻辑表达式 (&& ||)
+    std::regex logicalRegex(R"(([^&|]+)\s*(&&|\|\|)\s*([^&|]+))");
+    std::smatch match;
+    
+    while (std::regex_search(result, match, logicalRegex)) {
+        std::string left = match[1].str();
+        std::string op = match[2].str();
+        std::string right = match[3].str();
+        
+        bool leftResult = evaluateCondition(left);
+        bool rightResult = evaluateCondition(right);
+        
+        bool resultValue = false;
+        if (op == "&&") {
+            resultValue = leftResult && rightResult;
+        } else if (op == "||") {
+            resultValue = leftResult || rightResult;
+        }
+        
+        std::ostringstream oss;
+        oss << (resultValue ? "true" : "false");
+        result.replace(match.position(), match.length(), oss.str());
+    }
+    
+    return result;
+}
+
+bool CHTLStyleProcessor::evaluateCondition(const std::string& condition) const {
+    // 简单的条件求值
+    // 这里可以扩展更复杂的条件逻辑
+    
+    // 去除空白
+    std::string trimmed = condition;
+    trimmed.erase(0, trimmed.find_first_not_of(" \t"));
+    trimmed.erase(trimmed.find_last_not_of(" \t") + 1);
+    
+    // 检查是否为数字
+    if (std::all_of(trimmed.begin(), trimmed.end(), ::isdigit)) {
+        return std::stoi(trimmed) != 0;
+    }
+    
+    // 检查是否为布尔值
+    if (trimmed == "true" || trimmed == "1") {
+        return true;
+    }
+    if (trimmed == "false" || trimmed == "0") {
+        return false;
+    }
+    
+    // 检查比较表达式
+    std::regex comparisonRegex(R"((\d+(?:\.\d+)?)\s*(==|!=|<|>|<=|>=)\s*(\d+(?:\.\d+)?))");
+    std::smatch match;
+    
+    if (std::regex_search(trimmed, match, comparisonRegex)) {
+        double left = std::stod(match[1].str());
+        std::string op = match[2].str();
+        double right = std::stod(match[3].str());
+        
+        if (op == "==") return left == right;
+        if (op == "!=") return left != right;
+        if (op == "<") return left < right;
+        if (op == ">") return left > right;
+        if (op == "<=") return left <= right;
+        if (op == ">=") return left >= right;
+    }
+    
+    // 默认返回false
+    return false;
 }
 
 } // namespace CHTL

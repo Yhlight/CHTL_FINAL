@@ -82,11 +82,22 @@ private:
     std::shared_ptr<BaseNode> parseCustomElement();
     std::shared_ptr<BaseNode> parseCustomVariable();
     
+    // 特例化操作
+    void parseDeleteOperation(std::shared_ptr<BaseNode> parent);
+    void parseInsertOperation(std::shared_ptr<BaseNode> parent);
+    
     // 原始嵌入解析
     std::shared_ptr<BaseNode> parseOriginDefinition();
+    std::shared_ptr<BaseNode> parseOriginStyle();
+    std::shared_ptr<BaseNode> parseOriginElement();
+    std::shared_ptr<BaseNode> parseOriginJavaScript();
     
     // 导入解析
     std::shared_ptr<BaseNode> parseImportStatement();
+    std::shared_ptr<BaseNode> parseImportStyle();
+    std::shared_ptr<BaseNode> parseImportElement();
+    std::shared_ptr<BaseNode> parseImportJavaScript();
+    std::shared_ptr<BaseNode> parseImportCHTL();
     
     // 命名空间解析
     std::shared_ptr<BaseNode> parseNamespaceDefinition();
@@ -113,6 +124,15 @@ private:
     
     // 路径解析
     std::string parsePath();
+    
+    // 局部样式块解析方法
+    void parseClassSelector(std::shared_ptr<BaseNode> styleNode);
+    void parseIdSelector(std::shared_ptr<BaseNode> styleNode);
+    void parseContextReference(std::shared_ptr<BaseNode> styleNode);
+    std::string parseStylePropertyValue();
+    
+    // 辅助方法
+    bool isAlphaNumeric(char c) const;
 
 public:
     CHTLParser();

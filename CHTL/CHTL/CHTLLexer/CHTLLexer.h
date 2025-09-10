@@ -46,6 +46,17 @@ private:
     Token scanQuotedLiteral();
     Token scanColonEqual();
     
+    // 局部样式块词法分析方法
+    Token scanClassSelector();
+    Token scanIdSelector();
+    Token scanContextReference();
+    Token scanConditionalExpression();
+    Token scanPropertyReference();
+    
+    // 模板系统词法分析方法
+    Token scanTemplateSyntax();
+    Token scanTemplateType();
+    
     // 检查是否为字母
     bool isAlpha(char c) const;
     

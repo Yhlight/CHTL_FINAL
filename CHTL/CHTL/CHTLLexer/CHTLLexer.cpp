@@ -99,6 +99,14 @@ TokenStream CHTLLexer::tokenize() {
                 stream.addToken(scanIdentifier());
             }
         }
+        // 检查模板语法 [Template], [Custom], [Origin] 等
+        else if (c == '[') {
+            stream.addToken(scanTemplateSyntax());
+        }
+        // 检查模板类型 @Style, @Element, @Var
+        else if (c == '@') {
+            stream.addToken(scanTemplateType());
+        }
         // 检查标识符
         else if (isAlpha(c) || c == '_') {
             stream.addToken(scanIdentifier());
@@ -118,6 +126,16 @@ TokenStream CHTLLexer::tokenize() {
             stream.addToken(scanComment());
         } else if (c == '-' && peekChar() == '-') {
             stream.addToken(scanComment());
+        }
+        // 检查局部样式块语法
+        else if (c == '.') {
+            stream.addToken(scanClassSelector());
+        } else if (c == '#') {
+            stream.addToken(scanIdSelector());
+        } else if (c == '&') {
+            stream.addToken(scanContextReference());
+        } else if (c == '?' && peekChar() == ':') {
+            stream.addToken(scanConditionalExpression());
         }
         // 检查运算符
         else if (isOperatorChar(c)) {
@@ -759,6 +777,161 @@ bool CHTLLexer::isTextStart() const {
     return !isWhitespace(c) && !isSymbolChar(c) && !isOperatorChar(c) && 
            c != ';' && c != ':' && c != '=' && c != '[' && c != '/' && c != '-' &&
            c != '\0' && c != '\n' && c != '\r' && c != '\t';
+}
+
+// 局部样式块词法分析方法
+Token CHTLLexer::scanClassSelector() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    advance(); // 跳过 '.'
+    
+    std::string className;
+    while (position < source.length() && 
+           (isAlphaNumeric(currentChar()) || currentChar() == '-' || currentChar() == '_')) {
+        className += currentChar();
+        advance();
+    }
+    
+    return Token(TokenType::CLASS_SELECTOR, className, startLine, startColumn, start);
+}
+
+Token CHTLLexer::scanIdSelector() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    advance(); // 跳过 '#'
+    
+    std::string idName;
+    while (position < source.length() && 
+           (isAlphaNumeric(currentChar()) || currentChar() == '-' || currentChar() == '_')) {
+        idName += currentChar();
+        advance();
+    }
+    
+    return Token(TokenType::ID_SELECTOR, idName, startLine, startColumn, start);
+}
+
+Token CHTLLexer::scanContextReference() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    advance(); // 跳过 '&'
+    
+    return Token(TokenType::CONTEXT_REF, "&", startLine, startColumn, start);
+}
+
+Token CHTLLexer::scanConditionalExpression() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    advance(); // 跳过 '?'
+    advance(); // 跳过 ':'
+    
+    return Token(TokenType::CONDITIONAL_EXPR, "?:", startLine, startColumn, start);
+}
+
+Token CHTLLexer::scanPropertyReference() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    std::string reference;
+    
+    // 解析选择器部分
+    while (position < source.length() && 
+           (isAlphaNumeric(currentChar()) || currentChar() == '.' || 
+            currentChar() == '#' || currentChar() == ' ' || currentChar() == '[' || 
+            currentChar() == ']' || currentChar() == '-' || currentChar() == '_')) {
+        reference += currentChar();
+        advance();
+    }
+    
+    // 检查是否有属性部分
+    if (position < source.length() && currentChar() == '.') {
+        reference += currentChar();
+        advance();
+        
+        // 解析属性名
+        while (position < source.length() && 
+               (isAlphaNumeric(currentChar()) || currentChar() == '-' || currentChar() == '_')) {
+            reference += currentChar();
+            advance();
+        }
+    }
+    
+    return Token(TokenType::PROPERTY_REF, reference, startLine, startColumn, start);
+}
+
+Token CHTLLexer::scanTemplateSyntax() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    advance(); // 跳过 '['
+    
+    std::string syntax;
+    while (position < source.length() && currentChar() != ']') {
+        syntax += currentChar();
+        advance();
+    }
+    
+    if (position < source.length() && currentChar() == ']') {
+        advance(); // 跳过 ']'
+    }
+    
+    // 确定Token类型
+    TokenType type = TokenType::IDENTIFIER;
+    if (syntax == "Template") {
+        type = TokenType::TEMPLATE;
+    } else if (syntax == "Custom") {
+        type = TokenType::CUSTOM;
+    } else if (syntax == "Origin") {
+        type = TokenType::ORIGIN;
+    } else if (syntax == "Import") {
+        type = TokenType::IMPORT;
+    } else if (syntax == "Namespace") {
+        type = TokenType::NAMESPACE;
+    } else if (syntax == "Configuration") {
+        type = TokenType::CONFIGURATION;
+    } else if (syntax == "Constraint") {
+        type = TokenType::CONSTRAINT;
+    } else if (syntax == "Use") {
+        type = TokenType::USE;
+    }
+    
+    return Token(type, syntax, startLine, startColumn, start);
+}
+
+Token CHTLLexer::scanTemplateType() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    advance(); // 跳过 '@'
+    
+    std::string type;
+    while (position < source.length() && 
+           (isAlphaNumeric(currentChar()) || currentChar() == '_')) {
+        type += currentChar();
+        advance();
+    }
+    
+    // 确定Token类型
+    TokenType tokenType = TokenType::IDENTIFIER;
+    if (type == "Style") {
+        tokenType = TokenType::TEMPLATE_STYLE;
+    } else if (type == "Element") {
+        tokenType = TokenType::TEMPLATE_ELEMENT;
+    } else if (type == "Var") {
+        tokenType = TokenType::TEMPLATE_VAR;
+    }
+    
+    return Token(tokenType, type, startLine, startColumn, start);
 }
 
 } // namespace CHTL

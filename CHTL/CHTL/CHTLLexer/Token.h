@@ -68,17 +68,39 @@ enum class TokenType {
     TEXT_BLOCK,     // text { }
     TEXT_ATTRIBUTE, // text: "content"
     
+    // 局部样式块语法
+    CLASS_SELECTOR,     // .className
+    ID_SELECTOR,        // #idName
+    PSEUDO_CLASS,       // :hover, :focus等
+    PSEUDO_ELEMENT,     // ::before, ::after等
+    CONTEXT_REF,        // & 上下文引用
+    PROPERTY_REF,       // selector.property 属性引用
+    CONDITIONAL_EXPR,   // ? : 条件表达式
+    ARITHMETIC_OP,      // + - * / % ** 算术运算符
+    LOGICAL_OP,         // && || 逻辑运算符
+    COMPARISON_OP,      // == != < > <= >= 比较运算符
+    
     // 关键字
     TEXT,           // text
     STYLE,          // style
     SCRIPT,         // script
+    
+    // 模板系统语法
     TEMPLATE,       // [Template]
     CUSTOM,         // [Custom]
     ORIGIN,         // [Origin]
     IMPORT,         // [Import]
     NAMESPACE,      // [Namespace]
     CONFIGURATION,  // [Configuration]
-    USE,            // use
+    CONSTRAINT,     // [Constraint]
+    USE,            // [Use]
+    
+    // 模板类型
+    TEMPLATE_STYLE, // @Style
+    TEMPLATE_ELEMENT, // @Element
+    TEMPLATE_VAR,   // @Var
+    
+    // 继承关键字
     INHERIT,        // inherit
     DELETE,         // delete
     INSERT,         // insert

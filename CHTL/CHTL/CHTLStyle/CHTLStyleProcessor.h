@@ -122,6 +122,14 @@ public:
     
     // 调试信息
     std::string getDebugInfo() const;
+    
+    // 局部样式块处理方法
+    std::string processPropertyValue(const std::string& value) const;
+    std::string processPropertyReferences(const std::string& value) const;
+    std::string processArithmeticExpressions(const std::string& value) const;
+    std::string processConditionalExpressions(const std::string& value) const;
+    std::string processLogicalExpressions(const std::string& value) const;
+    bool evaluateCondition(const std::string& condition) const;
 };
 
 } // namespace CHTL
