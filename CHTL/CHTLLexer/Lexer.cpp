@@ -35,7 +35,13 @@ Token Lexer::nextToken() {
         case '}': return makeToken(TokenType::CloseBrace);
         case '(': return makeToken(TokenType::OpenParen);
         case ')': return makeToken(TokenType::CloseParen);
-        case '[': return makeToken(TokenType::OpenBracket);
+        case '[':
+            // The string "Template]" is 9 characters long.
+            if (source.compare(current, 9, "Template]") == 0) {
+                current += 9;
+                return makeToken(TokenType::TemplateKeyword);
+            }
+            return makeToken(TokenType::OpenBracket);
         case ']': return makeToken(TokenType::CloseBracket);
         case ':': return makeToken(TokenType::Colon);
         case ';': return makeToken(TokenType::Semicolon);
@@ -45,6 +51,8 @@ Token Lexer::nextToken() {
         case '.': return makeToken(TokenType::Dot);
         case ',': return makeToken(TokenType::Comma);
         case '?': return makeToken(TokenType::QuestionMark);
+        case '>': return makeToken(TokenType::GreaterThan);
+        case '<': return makeToken(TokenType::LessThan);
 
         case '+': return makeToken(TokenType::Plus);
         case '%': return makeToken(TokenType::Percent);

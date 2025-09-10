@@ -217,7 +217,7 @@ CMakeFiles/chtl_compiler.dir/all: CHTL/CMakeFiles/chtl_generator.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/chtl_compiler.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 9
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 10
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/chtl_compiler.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : CMakeFiles/chtl_compiler.dir/rule
@@ -238,7 +238,7 @@ CMakeFiles/chtl_compiler.dir/clean:
 CHTL/CMakeFiles/chtl_lexer.dir/all:
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lexer.dir/build.make CHTL/CMakeFiles/chtl_lexer.dir/depend
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lexer.dir/build.make CHTL/CMakeFiles/chtl_lexer.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=5,6 "Built target chtl_lexer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=6,7 "Built target chtl_lexer"
 .PHONY : CHTL/CMakeFiles/chtl_lexer.dir/all
 
 # Build rule for subdir invocation for target.
@@ -264,7 +264,7 @@ CHTL/CMakeFiles/chtl_lexer.dir/clean:
 CHTL/CMakeFiles/chtl_parser.dir/all: CHTL/CMakeFiles/chtl_lexer.dir/all
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_parser.dir/build.make CHTL/CMakeFiles/chtl_parser.dir/depend
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_parser.dir/build.make CHTL/CMakeFiles/chtl_parser.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=7,8,9 "Built target chtl_parser"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=8,9,10 "Built target chtl_parser"
 .PHONY : CHTL/CMakeFiles/chtl_parser.dir/all
 
 # Build rule for subdir invocation for target.
@@ -290,12 +290,12 @@ CHTL/CMakeFiles/chtl_parser.dir/clean:
 CHTL/CMakeFiles/chtl_generator.dir/all:
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_generator.dir/build.make CHTL/CMakeFiles/chtl_generator.dir/depend
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_generator.dir/build.make CHTL/CMakeFiles/chtl_generator.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=3,4 "Built target chtl_generator"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=3,4,5 "Built target chtl_generator"
 .PHONY : CHTL/CMakeFiles/chtl_generator.dir/all
 
 # Build rule for subdir invocation for target.
 CHTL/CMakeFiles/chtl_generator.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 3
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL/CMakeFiles/chtl_generator.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : CHTL/CMakeFiles/chtl_generator.dir/rule

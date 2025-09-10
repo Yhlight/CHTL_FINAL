@@ -1,2 +1,2 @@
-/usr/bin/ar qc libchtl_generator.a CMakeFiles/chtl_generator.dir/CHTLGenerator/Generator.cpp.o
+/usr/bin/ar qc libchtl_generator.a CMakeFiles/chtl_generator.dir/CHTLGenerator/Generator.cpp.o CMakeFiles/chtl_generator.dir/CHTLGenerator/ExprGenerator.cpp.o
 /usr/bin/ranlib libchtl_generator.a

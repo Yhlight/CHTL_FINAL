@@ -1,7 +1,8 @@
-CHTL/CMakeFiles/chtl_generator.dir/CHTLGenerator/Generator.cpp.o: \
- /app/CHTL/CHTLGenerator/Generator.cpp /usr/include/stdc-predef.h \
- /app/CHTL/CHTLGenerator/Generator.h /app/CHTL/CHTLNode/Node.h \
- /usr/include/c++/13/memory /usr/include/c++/13/bits/memoryfwd.h \
+CHTL/CMakeFiles/chtl_generator.dir/CHTLGenerator/ExprGenerator.cpp.o: \
+ /app/CHTL/CHTLGenerator/ExprGenerator.cpp /usr/include/stdc-predef.h \
+ /app/CHTL/CHTLGenerator/ExprGenerator.h /app/CHTL/CHTLNode/ExprNode.h \
+ /app/CHTL/CHTLNode/Node.h /usr/include/c++/13/memory \
+ /usr/include/c++/13/bits/memoryfwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -153,12 +154,9 @@ CHTL/CMakeFiles/chtl_generator.dir/CHTLGenerator/Generator.cpp.o: \
  /usr/include/c++/13/bits/uses_allocator_args.h \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc /app/CHTL/CHTLNode/ElementNode.h \
- /app/CHTL/CHTLNode/PropertyNode.h /app/CHTL/CHTLNode/ExprNode.h \
- /app/CHTL/CHTLLexer/Token.h /app/CHTL/CHTLNode/TextNode.h \
- /app/CHTL/CHTLNode/CommentNode.h /usr/include/c++/13/sstream \
- /usr/include/c++/13/istream /usr/include/c++/13/ios \
- /usr/include/c++/13/bits/ios_base.h \
+ /usr/include/c++/13/bits/vector.tcc /app/CHTL/CHTLLexer/Token.h \
+ /usr/include/c++/13/sstream /usr/include/c++/13/istream \
+ /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \
  /usr/include/c++/13/bits/locale_classes.tcc \
  /usr/include/c++/13/system_error \
@@ -175,11 +173,4 @@ CHTL/CMakeFiles/chtl_generator.dir/CHTLGenerator/Generator.cpp.o: \
  /usr/include/c++/13/bits/basic_ios.tcc /usr/include/c++/13/ostream \
  /usr/include/c++/13/bits/ostream.tcc \
  /usr/include/c++/13/bits/istream.tcc \
- /usr/include/c++/13/bits/sstream.tcc /usr/include/c++/13/map \
- /usr/include/c++/13/bits/stl_tree.h \
- /usr/include/c++/13/bits/node_handle.h \
- /usr/include/c++/13/bits/stl_map.h \
- /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h \
- /app/CHTL/CHTLGenerator/ExprGenerator.h /app/CHTL/CHTLNode/StyleNode.h \
- /app/CHTL/CHTLNode/TemplateNode.h /usr/include/c++/13/iostream
+ /usr/include/c++/13/bits/sstream.tcc

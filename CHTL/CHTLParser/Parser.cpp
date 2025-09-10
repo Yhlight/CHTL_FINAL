@@ -3,6 +3,9 @@
 #include "CHTLNode/TextNode.h"
 #include "CHTLNode/CommentNode.h"
 #include "CHTLNode/PropertyNode.h"
+#include "CHTLNode/StyleNode.h"
+#include "CHTLNode/ExprNode.h"
+#include "CHTLNode/TemplateNode.h"
 #include <iostream>
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
@@ -18,13 +21,82 @@ NodeList Parser::parse() {
 }
 
 NodePtr Parser::parseDeclaration() {
-    // For now, we only parse element nodes at the top level.
-    // This will be expanded to handle templates, imports, etc.
     if (peek().type == TokenType::Identifier) {
         return parseElement();
     }
-    throw error(peek(), "Expect a declaration (e.g., an element).");
+    if (match({TokenType::TemplateKeyword})) {
+        return parseTemplateDefinition();
+    }
+    throw error(peek(), "Expect a declaration (e.g., an element or template).");
 }
+
+NodePtr Parser::parseTemplateDefinition() {
+    consume(TokenType::At, "Expect '@' after [Template].");
+    const Token& type = consume(TokenType::Identifier, "Expect template type (Style, Element, Var).");
+
+    if (type.value == "Style") {
+        return parseStyleTemplateDefinition();
+    } else if (type.value == "Element") {
+        return parseElementTemplateDefinition();
+    } else if (type.value == "Var") {
+        return parseVarTemplateDefinition();
+    }
+    throw error(type, "Unknown template type.");
+}
+
+NodePtr Parser::parseStyleTemplateDefinition() {
+    const Token& name = consume(TokenType::Identifier, "Expect template name.");
+    auto node = std::make_unique<StyleTemplateDefinitionNode>(name.value);
+    consume(TokenType::OpenBrace, "Expect '{' after template name.");
+    while(!check(TokenType::CloseBrace) && !isAtEnd()) {
+        skipComments();
+        if(check(TokenType::CloseBrace)) break;
+        node->properties.push_back(std::unique_ptr<PropertyNode>(static_cast<PropertyNode*>(parseProperty().release())));
+    }
+    consume(TokenType::CloseBrace, "Expect '}' after template block.");
+    return node;
+}
+
+NodePtr Parser::parseElementTemplateDefinition() {
+    const Token& name = consume(TokenType::Identifier, "Expect template name.");
+    auto node = std::make_unique<ElementTemplateDefinitionNode>(name.value);
+    consume(TokenType::OpenBrace, "Expect '{' after template name.");
+    while(!check(TokenType::CloseBrace) && !isAtEnd()) {
+        skipComments();
+        if(check(TokenType::CloseBrace)) break;
+        node->children.push_back(parseElement());
+    }
+    consume(TokenType::CloseBrace, "Expect '}' after template block.");
+    return node;
+}
+
+NodePtr Parser::parseVarTemplateDefinition() {
+    const Token& name = consume(TokenType::Identifier, "Expect template name.");
+    auto node = std::make_unique<VarTemplateDefinitionNode>(name.value);
+    consume(TokenType::OpenBrace, "Expect '{' after template name.");
+    while(!check(TokenType::CloseBrace) && !isAtEnd()) {
+        skipComments();
+        if(check(TokenType::CloseBrace)) break;
+        node->variables.push_back(std::unique_ptr<PropertyNode>(static_cast<PropertyNode*>(parseProperty().release())));
+    }
+    consume(TokenType::CloseBrace, "Expect '}' after template block.");
+    return node;
+}
+
+NodePtr Parser::parseTemplateUsage() {
+    consume(TokenType::At, "Expect '@' for template usage.");
+    const Token& type = consume(TokenType::Identifier, "Expect template type (Style, Element).");
+    const Token& name = consume(TokenType::Identifier, "Expect template name.");
+    consume(TokenType::Semicolon, "Expect ';' after template usage.");
+
+    if (type.value == "Style") {
+        return std::make_unique<StyleUsageNode>(name.value);
+    } else if (type.value == "Element") {
+        return std::make_unique<ElementUsageNode>(name.value);
+    }
+    throw error(type, "Unknown template usage type.");
+}
+
 
 NodePtr Parser::parseElement() {
     const Token& nameToken = consume(TokenType::Identifier, "Expect element name.");
@@ -36,25 +108,22 @@ NodePtr Parser::parseElement() {
         skipComments();
         if (check(TokenType::CloseBrace)) break;
 
-        // Inside an element, we can have properties or other nodes.
         if (peek().type == TokenType::Identifier) {
-            // Look ahead to see if it's a property (identifier: value)
-            // or a nested element (identifier { ... })
             if (tokens[current + 1].type == TokenType::Colon || tokens[current + 1].type == TokenType::Equals) {
                 element->addChild(parseProperty());
             } else if (tokens[current + 1].type == TokenType::OpenBrace) {
                  if (peek().value == "text") {
                     element->addChild(parseTextNode());
+                } else if (peek().value == "style") {
+                    element->addChild(parseStyleNode());
                 } else {
-                    // For now, we assume any other identifier followed by a brace is an element.
-                    // This will be expanded for style, script, etc.
                     element->addChild(parseElement());
                 }
             } else {
-                // This could be an unquoted literal inside a text block, but we are not handling that yet.
-                // For now, it's an error.
                 throw error(peek(), "Unexpected token inside element.");
             }
+        } else if (peek().type == TokenType::At) {
+            element->addChild(parseTemplateUsage());
         } else {
             throw error(peek(), "Unexpected token inside element.");
         }
@@ -71,16 +140,11 @@ NodePtr Parser::parseProperty() {
         throw error(peek(), "Expect ':' or '=' after property name.");
     }
 
-    // For now, we handle simple literal values.
-    // This will need to be expanded for expressions.
-    const Token& valueToken = advance(); // Consume the value token.
-    if (valueToken.type != TokenType::Identifier && valueToken.type != TokenType::StringLiteral) {
-        throw error(valueToken, "Property value must be an identifier or a string literal.");
-    }
+    auto value = parseExpression();
 
     consume(TokenType::Semicolon, "Expect ';' after property value.");
 
-    return std::make_unique<PropertyNode>(nameToken.value, valueToken.value);
+    return std::make_unique<PropertyNode>(nameToken.value, std::move(value));
 }
 
 NodePtr Parser::parseTextNode() {
@@ -88,12 +152,9 @@ NodePtr Parser::parseTextNode() {
     consume(TokenType::OpenBrace, "Expect '{' after 'text' keyword.");
 
     std::string textContent;
-    // CHTL allows `text { "string" }` or `text { unquoted text }`
     if (peek().type == TokenType::StringLiteral) {
         textContent = consume(TokenType::StringLiteral, "Expect string literal in text block.").value;
     } else {
-        // Handle unquoted text. The lexer splits it into multiple identifier tokens.
-        // We'll concatenate them until we see the closing brace.
         while (!check(TokenType::CloseBrace) && !isAtEnd()) {
             if (!textContent.empty()) {
                 textContent += " ";
@@ -106,10 +167,115 @@ NodePtr Parser::parseTextNode() {
     return std::make_unique<TextNode>(textContent);
 }
 
+NodePtr Parser::parseStyleNode() {
+    consume(TokenType::Identifier, "Expect 'style' keyword.");
+    consume(TokenType::OpenBrace, "Expect '{' after 'style' keyword.");
+
+    auto styleNode = std::make_unique<StyleNode>();
+
+    while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+        skipComments();
+        if (check(TokenType::CloseBrace)) break;
+
+        if (peek().type == TokenType::At) {
+            // Here we need to handle @Style usage inside a style block.
+            // This is a form of template usage.
+            styleNode->addChild(parseTemplateUsage());
+        } else {
+            styleNode->addChild(parseProperty());
+        }
+    }
+
+    consume(TokenType::CloseBrace, "Expect '}' after style block.");
+    return styleNode;
+}
+
+// --- Expression Parsing ---
+
+ExprNodePtr Parser::parseExpression() {
+    return parseTernary();
+}
+
+ExprNodePtr Parser::parseTernary() {
+    ExprNodePtr expr = parseLogicalOr();
+
+    if (match({TokenType::QuestionMark})) {
+        ExprNodePtr trueExpr = parseExpression();
+        consume(TokenType::Colon, "Expect ':' after true branch of ternary expression.");
+        ExprNodePtr falseExpr = parseExpression();
+        expr = std::make_unique<TernaryExprNode>(std::move(expr), std::move(trueExpr), std::move(falseExpr));
+    }
+
+    return expr;
+}
+
+ExprNodePtr Parser::parseLogicalOr() {
+    ExprNodePtr expr = parseLogicalAnd();
+    while (match({TokenType::LogicalOr})) {
+        Token op = previous();
+        ExprNodePtr right = parseLogicalAnd();
+        expr = std::make_unique<BinaryExprNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+ExprNodePtr Parser::parseLogicalAnd() {
+    ExprNodePtr expr = parseComparison();
+    while (match({TokenType::LogicalAnd})) {
+        Token op = previous();
+        ExprNodePtr right = parseComparison();
+        expr = std::make_unique<BinaryExprNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+ExprNodePtr Parser::parseComparison() {
+    ExprNodePtr expr = parseTerm();
+    while (match({TokenType::GreaterThan, TokenType::LessThan})) {
+        Token op = previous();
+        ExprNodePtr right = parseTerm();
+        expr = std::make_unique<BinaryExprNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+ExprNodePtr Parser::parseTerm() {
+    ExprNodePtr expr = parseFactor();
+    while (match({TokenType::Plus, TokenType::Minus})) {
+        Token op = previous();
+        ExprNodePtr right = parseFactor();
+        expr = std::make_unique<BinaryExprNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+ExprNodePtr Parser::parseFactor() {
+    ExprNodePtr expr = parsePrimary();
+    while (match({TokenType::Asterisk, TokenType::Slash, TokenType::Percent})) {
+        Token op = previous();
+        ExprNodePtr right = parsePrimary();
+        expr = std::make_unique<BinaryExprNode>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+ExprNodePtr Parser::parsePrimary() {
+    if (match({TokenType::Identifier, TokenType::StringLiteral})) {
+        return std::make_unique<LiteralExprNode>(previous());
+    }
+
+    if (match({TokenType::OpenParen})) {
+        ExprNodePtr expr = parseExpression();
+        consume(TokenType::CloseParen, "Expect ')' after expression.");
+        return expr;
+    }
+
+    throw error(peek(), "Expect expression.");
+}
+
 
 NodePtr Parser::parseComment(const Token& token) {
     bool isGenerator = token.type == TokenType::GeneratorComment;
-    // The lexer gives us the full comment line/block, so we just store it.
     return std::make_unique<CommentNode>(token.value, isGenerator);
 }
 
@@ -120,7 +286,6 @@ void Parser::skipComments() {
     while (peek().type == TokenType::SingleLineComment ||
            peek().type == TokenType::MultiLineComment ||
            peek().type == TokenType::GeneratorComment) {
-        // For now, the parser ignores comments. The generator might need them later.
         advance();
     }
 }
@@ -167,12 +332,13 @@ const Token& Parser::consume(TokenType type, const std::string& message) {
 }
 
 Parser::ParseError Parser::error(const Token& token, const std::string& message) {
-    std::string error_message = "Parse Error at line " + std::to_string(token.line) +
-                               " column " + std::to_string(token.column) + ": " + message;
+    std::string error_message;
     if (token.type == TokenType::EndOfFile) {
         error_message = "Parse Error at end of file: " + message;
     } else {
-         error_message = "Parse Error at '" + token.value + "': " + message;
+         error_message = "Parse Error at line " + std::to_string(token.line) +
+                               " column " + std::to_string(token.column) +
+                               " near '" + token.value + "': " + message;
     }
     return ParseError(error_message);
 }

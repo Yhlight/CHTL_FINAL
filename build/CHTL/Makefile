@@ -158,6 +158,30 @@ chtl_generator/fast:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_generator.dir/build.make CHTL/CMakeFiles/chtl_generator.dir/build
 .PHONY : chtl_generator/fast
 
+CHTLGenerator/ExprGenerator.o: CHTLGenerator/ExprGenerator.cpp.o
+.PHONY : CHTLGenerator/ExprGenerator.o
+
+# target to build an object file
+CHTLGenerator/ExprGenerator.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_generator.dir/build.make CHTL/CMakeFiles/chtl_generator.dir/CHTLGenerator/ExprGenerator.cpp.o
+.PHONY : CHTLGenerator/ExprGenerator.cpp.o
+
+CHTLGenerator/ExprGenerator.i: CHTLGenerator/ExprGenerator.cpp.i
+.PHONY : CHTLGenerator/ExprGenerator.i
+
+# target to preprocess a source file
+CHTLGenerator/ExprGenerator.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_generator.dir/build.make CHTL/CMakeFiles/chtl_generator.dir/CHTLGenerator/ExprGenerator.cpp.i
+.PHONY : CHTLGenerator/ExprGenerator.cpp.i
+
+CHTLGenerator/ExprGenerator.s: CHTLGenerator/ExprGenerator.cpp.s
+.PHONY : CHTLGenerator/ExprGenerator.s
+
+# target to generate assembly for a file
+CHTLGenerator/ExprGenerator.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_generator.dir/build.make CHTL/CMakeFiles/chtl_generator.dir/CHTLGenerator/ExprGenerator.cpp.s
+.PHONY : CHTLGenerator/ExprGenerator.cpp.s
+
 CHTLGenerator/Generator.o: CHTLGenerator/Generator.cpp.o
 .PHONY : CHTLGenerator/Generator.o
 
@@ -265,6 +289,9 @@ help:
 	@echo "... chtl_generator"
 	@echo "... chtl_lexer"
 	@echo "... chtl_parser"
+	@echo "... CHTLGenerator/ExprGenerator.o"
+	@echo "... CHTLGenerator/ExprGenerator.i"
+	@echo "... CHTLGenerator/ExprGenerator.s"
 	@echo "... CHTLGenerator/Generator.o"
 	@echo "... CHTLGenerator/Generator.i"
 	@echo "... CHTLGenerator/Generator.s"

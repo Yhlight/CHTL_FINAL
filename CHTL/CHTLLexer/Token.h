@@ -39,7 +39,11 @@ enum class TokenType {
     LogicalAnd,         // &&
     LogicalOr,          // ||
     QuestionMark,       // ?
+    GreaterThan,        // >
+    LessThan,           // <
 
+    // Keywords
+    TemplateKeyword,    // [Template]
 
     // Comments
     SingleLineComment,  // //
@@ -88,6 +92,9 @@ inline std::string tokenTypeToString(TokenType type) {
         case TokenType::LogicalAnd: return "LogicalAnd";
         case TokenType::LogicalOr: return "LogicalOr";
         case TokenType::QuestionMark: return "QuestionMark";
+        case TokenType::GreaterThan: return "GreaterThan";
+        case TokenType::LessThan: return "LessThan";
+        case TokenType::TemplateKeyword: return "TemplateKeyword";
         case TokenType::SingleLineComment: return "SingleLineComment";
         case TokenType::MultiLineComment: return "MultiLineComment";
         case TokenType::GeneratorComment: return "GeneratorComment";

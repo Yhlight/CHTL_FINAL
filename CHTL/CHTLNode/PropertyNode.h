@@ -1,17 +1,19 @@
 #pragma once
 
 #include "Node.h"
+#include "ExprNode.h"
 #include <string>
+#include <memory>
 
 class PropertyNode : public Node {
 public:
-    PropertyNode(const std::string& name, const std::string& value)
-        : name(name), value(value) {}
+    PropertyNode(const std::string& name, ExprNodePtr value)
+        : name(name), value(std::move(value)) {}
 
     void accept(Visitor& visitor) override {
         visitor.visit(this);
     }
 
     std::string name;
-    std::string value; // For now, value is a simple string. This will be expanded later.
+    ExprNodePtr value;
 };

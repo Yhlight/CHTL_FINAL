@@ -1,15 +1,29 @@
-// This is a test CHTL file.
+[Template] @Style DefaultText {
+    color: black;
+    font-size: 16px;
+}
+
+[Template] @Element Box {
+    div {
+        text { "This is a box from a template." }
+    }
+}
+
 html {
     head {
         title { text { "CHTL Page from File" } }
     }
     body {
-        -- This is a generator comment
         div {
-            id = my-div; // Using '=' for this property
+            id = my-div;
             class: 'container';
-            text { Hello from a CHTL file! }
+            style {
+                @Style DefaultText;
+                background-color: blue;
+            }
+            text { "Hello from a CHTL file!" }
         }
-        span {}
+
+        @Element Box;
     }
 }

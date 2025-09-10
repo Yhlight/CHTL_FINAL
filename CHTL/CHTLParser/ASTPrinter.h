@@ -15,6 +15,12 @@ public:
     void visit(TextNode* node) override;
     void visit(CommentNode* node) override;
     void visit(PropertyNode* node) override;
+    void visit(StyleNode* node) override;
+    void visit(StyleTemplateDefinitionNode* node) override;
+    void visit(ElementTemplateDefinitionNode* node) override;
+    void visit(VarTemplateDefinitionNode* node) override;
+    void visit(StyleUsageNode* node) override;
+    void visit(ElementUsageNode* node) override;
 
 private:
     void indent();

@@ -2,6 +2,7 @@
 
 #include "CHTLLexer/Token.h"
 #include "CHTLNode/Node.h"
+#include "CHTLNode/ExprNode.h"
 #include <vector>
 #include <stdexcept>
 
@@ -21,6 +22,24 @@ private:
     NodePtr parseElement();
     NodePtr parseProperty();
     NodePtr parseTextNode();
+    NodePtr parseStyleNode();
+
+    // Expression parsing methods
+    ExprNodePtr parseExpression();
+    ExprNodePtr parseTernary();
+
+    // Template parsing methods
+    NodePtr parseTemplateDefinition();
+    NodePtr parseStyleTemplateDefinition();
+    NodePtr parseElementTemplateDefinition();
+    NodePtr parseVarTemplateDefinition();
+    NodePtr parseTemplateUsage();
+    ExprNodePtr parseLogicalOr();
+    ExprNodePtr parseLogicalAnd();
+    ExprNodePtr parseComparison();
+    ExprNodePtr parseTerm();
+    ExprNodePtr parseFactor();
+    ExprNodePtr parsePrimary();
     NodePtr parseComment(const Token& token);
 
     // Helper methods for token stream navigation

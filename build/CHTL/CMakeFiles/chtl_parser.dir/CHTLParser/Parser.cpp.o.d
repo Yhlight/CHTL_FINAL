@@ -155,11 +155,13 @@ CHTL/CMakeFiles/chtl_parser.dir/CHTLParser/Parser.cpp.o: \
  /usr/include/c++/13/bits/atomic_lockfree_defines.h \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
- /usr/include/c++/13/pstl/execution_defs.h /usr/include/c++/13/stdexcept \
- /app/CHTL/CHTLNode/ElementNode.h /app/CHTL/CHTLNode/PropertyNode.h \
- /app/CHTL/CHTLNode/TextNode.h /app/CHTL/CHTLNode/CommentNode.h \
- /usr/include/c++/13/iostream /usr/include/c++/13/ostream \
- /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
+ /usr/include/c++/13/pstl/execution_defs.h /app/CHTL/CHTLNode/ExprNode.h \
+ /usr/include/c++/13/stdexcept /app/CHTL/CHTLNode/ElementNode.h \
+ /app/CHTL/CHTLNode/PropertyNode.h /app/CHTL/CHTLNode/TextNode.h \
+ /app/CHTL/CHTLNode/CommentNode.h /app/CHTL/CHTLNode/StyleNode.h \
+ /app/CHTL/CHTLNode/TemplateNode.h /usr/include/c++/13/iostream \
+ /usr/include/c++/13/ostream /usr/include/c++/13/ios \
+ /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \
  /usr/include/c++/13/bits/locale_classes.tcc \
  /usr/include/c++/13/system_error \

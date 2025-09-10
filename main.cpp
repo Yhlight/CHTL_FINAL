@@ -29,6 +29,10 @@ int main(int argc, char* argv[]) {
     Lexer lexer(source);
     std::vector<Token> tokens = lexer.tokenize();
 
+    // The ASTPrinter can be used for debugging the parser's output.
+    // ASTPrinter printer;
+    // printer.print(ast);
+
     // 2. Parsing
     NodeList ast;
     try {
