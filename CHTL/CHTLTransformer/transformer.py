@@ -1,5 +1,8 @@
 import os
 import copy
+import zipfile
+import tempfile
+import shutil
 from typing import List, Union, Any
 from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLParser.parser import Parser
@@ -62,27 +65,59 @@ class ASTTransformer:
         if not resolved_path:
             raise RuntimeError(f"Could not resolve import '{node.path}' from '{self.current_file_path}'")
 
-        # Determine the namespace for this import
-        if node.alias:
-            namespace = node.alias
-        else:
-            # Default namespace is the filename without extension
-            namespace = os.path.splitext(os.path.basename(resolved_path))[0]
+        namespace = node.alias or os.path.splitext(os.path.basename(resolved_path))[0]
 
-        try:
-            with open(resolved_path, 'r', encoding='utf-8') as f:
-                source_code = f.read()
-        except FileNotFoundError:
-            raise RuntimeError(f"Imported file not found at resolved path: {resolved_path}")
+        source_code = ""
+        source_path_for_nested_imports = resolved_path
+
+        if resolved_path.endswith(".cmod"):
+            with tempfile.TemporaryDirectory() as temp_dir:
+                with zipfile.ZipFile(resolved_path, 'r') as zip_ref:
+                    zip_ref.extractall(temp_dir)
+
+                module_name = os.path.splitext(os.path.basename(resolved_path))[0]
+                main_chtl_file = os.path.join(temp_dir, module_name, 'src', f"{module_name}.chtl")
+
+                if not os.path.exists(main_chtl_file):
+                    # As per spec, main file is optional if sub-modules exist.
+                    # A real implementation would now parse the info file or scan for sub-modules.
+                    # For now, we'll assume the main file must exist if the import isn't more specific.
+                    raise RuntimeError(f"Main CHTL file '{main_chtl_file}' not found in CMOD archive '{resolved_path}'.")
+
+                source_path_for_nested_imports = main_chtl_file
+                with open(main_chtl_file, 'r', encoding='utf-8') as f:
+                    source_code = f.read()
+        else:
+            try:
+                with open(resolved_path, 'r', encoding='utf-8') as f:
+                    source_code = f.read()
+            except FileNotFoundError:
+                raise RuntimeError(f"Imported file not found at resolved path: {resolved_path}")
 
         # Create a new context for the imported file to avoid pollution
         import_context = CompilationContext()
         lexer = Lexer(source_code)
         tokens = lexer.tokenize()
+        # The new parser needs to know the path of the file it's parsing for its own nested imports.
         parser = Parser(tokens, import_context)
         import_ast = parser.parse()
 
-        # Extract definitions and add them to the main context under the correct namespace
+        # Extract definitions from the parsed AST and add them to the main context.
+        for def_node in import_ast.children:
+            if isinstance(def_node, TemplateDefinitionNode):
+                if def_node.template_type == 'Element':
+                    self.context.add_element_template(def_node.name, def_node.content, namespace=namespace)
+                elif def_node.template_type == 'Style':
+                    self.context.add_style_template(def_node.name, def_node.content, namespace=namespace)
+                elif def_node.template_type == 'Var':
+                    self.context.add_var_template(def_node.name, def_node.content, namespace=namespace)
+
+        # Now, recursively transform the imported AST to handle any *nested* imports.
+        # Note: We use the main context so that nested imports are added to the same scope.
+        nested_transformer = ASTTransformer(import_ast, self.context, source_path_for_nested_imports)
+        nested_transformer.transform()
+
+        return None
         for def_node in import_ast.children:
             if isinstance(def_node, TemplateDefinitionNode):
                 if def_node.template_type == 'Element':

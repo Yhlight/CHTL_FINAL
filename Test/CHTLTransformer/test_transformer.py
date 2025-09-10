@@ -32,7 +32,14 @@ class TestASTTransformer(unittest.TestCase):
         os.makedirs(self.module_dir, exist_ok=True)
 
         self.imports_file_path = os.path.join(self.test_dir, "imports.chtl")
-        component_file_path = os.path.join(self.module_dir, "MyComponent.chtl")
+
+        # Create a source directory for the component that we will package
+        component_source_dir = os.path.join(self.test_dir, "MyComponent")
+        os.makedirs(os.path.join(component_source_dir, "src"), exist_ok=True)
+        os.makedirs(os.path.join(component_source_dir, "info"), exist_ok=True)
+
+        component_file_path = os.path.join(component_source_dir, "src", "MyComponent.chtl")
+        info_file_path = os.path.join(component_source_dir, "info", "MyComponent.chtl")
 
         with open(component_file_path, "w") as f:
             f.write("""
@@ -50,6 +57,17 @@ class TestASTTransformer(unittest.TestCase):
                 @Element MyImportedButton from MyComponent;
             }
             """)
+
+        with open(info_file_path, "w") as f:
+            f.write("""
+            [Info] { name = "MyComponent"; }
+            """)
+
+        # Programmatically create the .cmod file for the test
+        from tools.package_cmod import create_cmod_archive
+        # Place the .cmod file where the resolver will find it (in the module dir)
+        create_cmod_archive(component_source_dir, output_path=self.module_dir)
+
 
     def tearDown(self):
         import shutil
