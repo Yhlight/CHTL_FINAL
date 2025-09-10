@@ -29,6 +29,8 @@
 #include "Scanner/UnifiedScanner.h"
 #include "Scanner/CHTLUnifiedScanner.h"
 #include "CompilerDispatcher/CompilerDispatcher.h"
+#include "CompilerDispatcher/CSSCompiler.h"
+#include "CompilerDispatcher/JSCompiler.h"
 
 int main() {
     std::cout << "CHTL基础功能测试" << std::endl;
@@ -1589,6 +1591,303 @@ int main() {
         
     } catch (const std::exception& e) {
         std::cerr << "统一扫描器测试过程中发生错误: " << e.what() << std::endl;
+        return 1;
+    }
+    
+    // 编译器调度器测试
+    std::cout << "\n\n编译器调度器测试" << std::endl;
+    std::cout << "==================" << std::endl;
+    
+    try {
+        // 测试编译器调度器
+        std::cout << "\n1. 编译器调度器基本功能测试:" << std::endl;
+        CHTL::CompilerDispatcher dispatcher;
+        
+        // 设置配置
+        dispatcher.setDebugMode(true);
+        dispatcher.setStrictMode(true);
+        dispatcher.setGenerateDefaultStructure(false);
+        dispatcher.setOutputFormat("html");
+        
+        std::cout << "调试模式: " << (dispatcher.getErrors().empty() ? "设置成功" : "设置失败") << std::endl;
+        std::cout << "严格模式: " << (dispatcher.getErrors().empty() ? "设置成功" : "设置失败") << std::endl;
+        std::cout << "输出格式: HTML" << std::endl;
+        
+        // 测试配置验证
+        bool configValid = dispatcher.validateConfiguration();
+        std::cout << "配置验证: " << (configValid ? "通过" : "失败") << std::endl;
+        
+        // 测试编译器信息
+        std::string compilerInfo = dispatcher.getCompilerInfo();
+        std::cout << "编译器信息长度: " << compilerInfo.length() << std::endl;
+        
+        std::string version = dispatcher.getVersion();
+        std::cout << "编译器版本: " << version << std::endl;
+        
+        // 测试CSS编译器
+        std::cout << "\n2. CSS编译器测试:" << std::endl;
+        CHTL::CSSCompiler cssCompiler;
+        
+        std::string cssCode = R"(
+            .container {
+                color: red;
+                background: blue;
+            }
+            
+            .header {
+                font-size: 16px;
+                margin: 10px;
+            }
+        )";
+        
+        auto cssResult = cssCompiler.compile(cssCode);
+        std::cout << "CSS编译成功: " << (cssResult.success ? "是" : "否") << std::endl;
+        std::cout << "CSS输出长度: " << cssResult.css.length() << std::endl;
+        std::cout << "CSS错误数量: " << cssResult.errors.size() << std::endl;
+        std::cout << "CSS警告数量: " << cssResult.warnings.size() << std::endl;
+        
+        // 测试CSS规则解析
+        auto cssRules = cssCompiler.parseRules(cssCode);
+        std::cout << "CSS规则数量: " << cssRules.size() << std::endl;
+        
+        // 测试CSS生成
+        std::string generatedCSS = cssCompiler.generateCSS(cssRules);
+        std::cout << "生成CSS长度: " << generatedCSS.length() << std::endl;
+        
+        // 测试CSS优化
+        std::string optimizedCSS = cssCompiler.optimizeCSS(cssCode);
+        std::cout << "优化CSS长度: " << optimizedCSS.length() << std::endl;
+        
+        std::string minifiedCSS = cssCompiler.minifyCSS(cssCode);
+        std::cout << "压缩CSS长度: " << minifiedCSS.length() << std::endl;
+        
+        std::string beautifiedCSS = cssCompiler.beautifyCSS(cssCode);
+        std::cout << "美化CSS长度: " << beautifiedCSS.length() << std::endl;
+        
+        // 测试CSS验证
+        bool cssValid = cssCompiler.validateCSS(cssCode);
+        std::cout << "CSS验证: " << (cssValid ? "通过" : "失败") << std::endl;
+        
+        // 测试CSS统计
+        auto cssStats = cssCompiler.getStatistics(cssCode);
+        std::cout << "CSS统计信息数量: " << cssStats.size() << std::endl;
+        
+        // 测试CSS调试
+        std::string cssDebug = cssCompiler.debugCSS(cssCode);
+        std::cout << "CSS调试信息长度: " << cssDebug.length() << std::endl;
+        
+        // 测试JS编译器
+        std::cout << "\n3. JS编译器测试:" << std::endl;
+        CHTL::JSCompiler jsCompiler;
+        
+        std::string jsCode = R"(
+            function test() {
+                var x = 1;
+                var y = 2;
+                return x + y;
+            }
+            
+            if (true) {
+                console.log("Hello World");
+            }
+        )";
+        
+        auto jsResult = jsCompiler.compile(jsCode);
+        std::cout << "JS编译成功: " << (jsResult.success ? "是" : "否") << std::endl;
+        std::cout << "JS输出长度: " << jsResult.javascript.length() << std::endl;
+        std::cout << "JS错误数量: " << jsResult.errors.size() << std::endl;
+        std::cout << "JS警告数量: " << jsResult.warnings.size() << std::endl;
+        
+        // 测试JS AST解析
+        auto jsAST = jsCompiler.parseAST(jsCode);
+        std::cout << "JS AST节点数量: " << (jsAST ? jsAST->children.size() : 0) << std::endl;
+        
+        // 测试JS生成
+        std::string generatedJS = jsCompiler.generateJS(jsAST);
+        std::cout << "生成JS长度: " << generatedJS.length() << std::endl;
+        
+        // 测试JS优化
+        std::string optimizedJS = jsCompiler.optimizeJS(jsCode);
+        std::cout << "优化JS长度: " << optimizedJS.length() << std::endl;
+        
+        std::string minifiedJS = jsCompiler.minifyJS(jsCode);
+        std::cout << "压缩JS长度: " << minifiedJS.length() << std::endl;
+        
+        std::string beautifiedJS = jsCompiler.beautifyJS(jsCode);
+        std::cout << "美化JS长度: " << beautifiedJS.length() << std::endl;
+        
+        // 测试JS验证
+        bool jsValid = jsCompiler.validateJS(jsCode);
+        std::cout << "JS验证: " << (jsValid ? "通过" : "失败") << std::endl;
+        
+        // 测试JS统计
+        auto jsStats = jsCompiler.getStatistics(jsCode);
+        std::cout << "JS统计信息数量: " << jsStats.size() << std::endl;
+        
+        // 测试JS调试
+        std::string jsDebug = jsCompiler.debugJS(jsCode);
+        std::cout << "JS调试信息长度: " << jsDebug.length() << std::endl;
+        
+        // 测试编译器调度器完整流程
+        std::cout << "\n4. 编译器调度器完整流程测试:" << std::endl;
+        
+        // 创建测试文件内容
+        std::string testFileContent = R"(
+            [Element] div {
+                class: "container"
+            }
+            
+            script {
+                {{console.log("Hello World")}};
+                function test() {
+                    return "test";
+                }
+            }
+            
+            style {
+                .container {
+                    color: red;
+                }
+            }
+        )";
+        
+        // 写入测试文件
+        std::ofstream testFile("test.chtl");
+        testFile << testFileContent;
+        testFile.close();
+        
+        // 测试扫描
+        auto scanResult = dispatcher.scan("test.chtl");
+        std::cout << "扫描成功: " << (scanResult.errors.empty() ? "是" : "否") << std::endl;
+        std::cout << "扫描片段数量: " << scanResult.fragments.size() << std::endl;
+        std::cout << "扫描错误数量: " << scanResult.errors.size() << std::endl;
+        std::cout << "扫描警告数量: " << scanResult.warnings.size() << std::endl;
+        
+        // 测试编译
+        auto compileResult = dispatcher.compile(scanResult);
+        std::cout << "编译成功: " << (compileResult.errors.empty() ? "是" : "否") << std::endl;
+        std::cout << "编译输出类型数量: " << compileResult.outputs.size() << std::endl;
+        std::cout << "编译错误数量: " << compileResult.errors.size() << std::endl;
+        std::cout << "编译警告数量: " << compileResult.warnings.size() << std::endl;
+        
+        // 测试合并
+        auto finalResult = dispatcher.merge(compileResult);
+        std::cout << "合并成功: " << (finalResult.errors.empty() ? "是" : "否") << std::endl;
+        std::cout << "HTML输出长度: " << finalResult.html.length() << std::endl;
+        std::cout << "CSS输出长度: " << finalResult.css.length() << std::endl;
+        std::cout << "JavaScript输出长度: " << finalResult.javascript.length() << std::endl;
+        std::cout << "合并错误数量: " << finalResult.errors.size() << std::endl;
+        std::cout << "合并警告数量: " << finalResult.warnings.size() << std::endl;
+        
+        // 测试输出
+        dispatcher.output(finalResult, "test_output.html");
+        std::cout << "输出文件创建: 成功" << std::endl;
+        
+        // 测试一步完成编译
+        auto oneStepResult = dispatcher.compileFile("test.chtl");
+        std::cout << "一步编译成功: " << (oneStepResult.errors.empty() ? "是" : "否") << std::endl;
+        std::cout << "一步编译HTML长度: " << oneStepResult.html.length() << std::endl;
+        
+        // 测试编译到输出文件
+        dispatcher.compileFileToOutput("test.chtl", "test_final.html");
+        std::cout << "编译到输出文件: 成功" << std::endl;
+        
+        // 测试错误和警告获取
+        std::cout << "\n5. 错误和警告处理测试:" << std::endl;
+        const auto& errors = dispatcher.getErrors();
+        const auto& warnings = dispatcher.getWarnings();
+        std::cout << "当前错误数量: " << errors.size() << std::endl;
+        std::cout << "当前警告数量: " << warnings.size() << std::endl;
+        
+        // 测试清除消息
+        dispatcher.clearMessages();
+        std::cout << "清除消息后错误数量: " << dispatcher.getErrors().size() << std::endl;
+        std::cout << "清除消息后警告数量: " << dispatcher.getWarnings().size() << std::endl;
+        
+        // 测试代码合并器
+        std::cout << "\n6. 代码合并器测试:" << std::endl;
+        CHTL::CodeMerger merger;
+        
+        // 设置配置
+        merger.setDebugMode(true);
+        merger.setMinifyOutput(false);
+        merger.setBeautifyOutput(true);
+        merger.setTitle("测试文档");
+        merger.setLanguage("zh-CN");
+        
+        // 添加元标签
+        merger.addMetaTag("description", "CHTL测试文档");
+        merger.addMetaTag("keywords", "CHTL, 测试, 编译器");
+        merger.addMetaTag("author", "CHTL Team");
+        
+        // 添加外部资源
+        merger.addExternalCSS("bootstrap.css");
+        merger.addExternalJS("jquery.js");
+        
+        std::cout << "代码合并器配置完成" << std::endl;
+        std::cout << "调试模式: " << (merger.getDebugMode() ? "开启" : "关闭") << std::endl;
+        std::cout << "文档标题: " << merger.getTitle() << std::endl;
+        std::cout << "语言: " << merger.getLanguage() << std::endl;
+        
+        // 测试代码分析
+        auto htmlStats = merger.analyzeHTML(finalResult.html);
+        std::cout << "HTML统计信息数量: " << htmlStats.size() << std::endl;
+        
+        auto cssStats = merger.analyzeCSS(finalResult.css);
+        std::cout << "CSS统计信息数量: " << cssStats.size() << std::endl;
+        
+        auto jsStats = merger.analyzeJavaScript(finalResult.javascript);
+        std::cout << "JavaScript统计信息数量: " << jsStats.size() << std::endl;
+        
+        // 测试代码转换
+        std::string inlineHTML = merger.convertToInline(finalResult);
+        std::cout << "内联HTML长度: " << inlineHTML.length() << std::endl;
+        
+        std::string externalHTML = merger.convertToExternal(finalResult);
+        std::cout << "外部HTML长度: " << externalHTML.length() << std::endl;
+        
+        std::string minifiedHTML = merger.convertToMinified(finalResult);
+        std::cout << "压缩HTML长度: " << minifiedHTML.length() << std::endl;
+        
+        std::string beautifiedHTML = merger.convertToBeautified(finalResult);
+        std::cout << "美化HTML长度: " << beautifiedHTML.length() << std::endl;
+        
+        // 测试模板管理
+        std::string currentTemplate = merger.getHTMLTemplate();
+        std::cout << "当前模板长度: " << currentTemplate.length() << std::endl;
+        
+        merger.setHTMLTemplate("<html><body>Custom Template</body></html>");
+        std::cout << "自定义模板设置: 完成" << std::endl;
+        
+        merger.resetHTMLTemplate();
+        std::cout << "模板重置: 完成" << std::endl;
+        
+        // 测试清理功能
+        merger.clearMetaTags();
+        std::cout << "元标签清理: 完成" << std::endl;
+        
+        merger.clearExternalCSS();
+        std::cout << "外部CSS清理: 完成" << std::endl;
+        
+        merger.clearExternalJS();
+        std::cout << "外部JS清理: 完成" << std::endl;
+        
+        // 测试调试信息
+        std::string debugInfo = merger.getDebugInfo();
+        std::cout << "调试信息长度: " << debugInfo.length() << std::endl;
+        
+        // 测试验证
+        bool mergerValid = merger.validate(finalResult);
+        std::cout << "合并器验证: " << (mergerValid ? "通过" : "失败") << std::endl;
+        
+        // 清理测试文件
+        std::remove("test.chtl");
+        std::remove("test_output.html");
+        std::remove("test_final.html");
+        std::cout << "测试文件清理: 完成" << std::endl;
+        
+    } catch (const std::exception& e) {
+        std::cerr << "编译器调度器测试过程中发生错误: " << e.what() << std::endl;
         return 1;
     }
     

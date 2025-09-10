@@ -57,9 +57,11 @@ private:
     std::unique_ptr<class CHTLLexer> chtlLexer;
     std::unique_ptr<class CHTLParser> chtlParser;
     std::unique_ptr<class CHTLGenerator> chtlGenerator;
-    // std::unique_ptr<class CHTLJSCompiler> chtlJSCompiler;
-    // std::unique_ptr<class CSSCompiler> cssCompiler;
-    // std::unique_ptr<class JSCompiler> jsCompiler;
+    std::unique_ptr<class CHTLJSLexer> chtlJSLexer;
+    std::unique_ptr<class CHTLJSParser> chtlJSParser;
+    std::unique_ptr<class CHTLJSGenerator> chtlJSGenerator;
+    std::unique_ptr<class CSSCompiler> cssCompiler;
+    std::unique_ptr<class JSCompiler> jsCompiler;
     
     // 统一扫描器
     std::unique_ptr<class CHTLUnifiedScanner> scanner;

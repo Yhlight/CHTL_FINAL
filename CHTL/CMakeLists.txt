@@ -156,6 +156,10 @@ set(SCANNER_SOURCES
 set(COMPILER_SOURCES
     CompilerDispatcher/CompilerDispatcher.cpp
     CompilerDispatcher/CompilerDispatcher.h
+    CompilerDispatcher/CSSCompiler.cpp
+    CompilerDispatcher/CSSCompiler.h
+    CompilerDispatcher/JSCompiler.cpp
+    CompilerDispatcher/JSCompiler.h
     CodeMerger/CodeMerger.cpp
     CodeMerger/CodeMerger.h
 )

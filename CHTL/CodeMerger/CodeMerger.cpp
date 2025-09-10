@@ -6,7 +6,9 @@
 namespace CHTL {
 
 CodeMerger::CodeMerger() 
-    : debugMode(false), generateDefaultStructure(true), outputFormat("html5") {
+    : debugMode(false), generateDefaultStructure(true), outputFormat("html5"),
+      minifyOutput(false), beautifyOutput(false), optimizeOutput(true),
+      title("CHTL Document"), language("zh-CN") {
     initializeHTMLTemplate();
 }
 
@@ -469,9 +471,254 @@ std::string CodeMerger::getDebugInfo() const {
     oss << "调试模式: " << (debugMode ? "开启" : "关闭") << "\n";
     oss << "生成默认结构: " << (generateDefaultStructure ? "是" : "否") << "\n";
     oss << "输出格式: " << outputFormat << "\n";
+    oss << "压缩输出: " << (minifyOutput ? "是" : "否") << "\n";
+    oss << "美化输出: " << (beautifyOutput ? "是" : "否") << "\n";
+    oss << "优化输出: " << (optimizeOutput ? "是" : "否") << "\n";
+    oss << "文档标题: " << title << "\n";
+    oss << "语言: " << language << "\n";
+    oss << "元标签数: " << metaTags.size() << "\n";
+    oss << "外部CSS数: " << externalCSS.size() << "\n";
+    oss << "外部JS数: " << externalJS.size() << "\n";
     oss << "错误数: " << errors.size() << "\n";
     oss << "警告数: " << warnings.size() << "\n";
     return oss.str();
+}
+
+// 新增功能实现
+void CodeMerger::addMetaTag(const std::string& name, const std::string& content) {
+    metaTags[name] = content;
+}
+
+void CodeMerger::addExternalCSS(const std::string& cssPath) {
+    externalCSS.push_back(cssPath);
+}
+
+void CodeMerger::addExternalJS(const std::string& jsPath) {
+    externalJS.push_back(jsPath);
+}
+
+std::string CodeMerger::generateInlineCSS(const std::string& css) {
+    if (css.empty()) return "";
+    
+    std::ostringstream oss;
+    oss << "<style";
+    if (outputFormat == "xhtml") {
+        oss << " type=\"text/css\"";
+    }
+    oss << ">\n";
+    oss << css << "\n";
+    oss << "</style>";
+    return oss.str();
+}
+
+std::string CodeMerger::generateInlineJS(const std::string& js) {
+    if (js.empty()) return "";
+    
+    std::ostringstream oss;
+    oss << "<script";
+    if (outputFormat == "xhtml" || outputFormat == "html4") {
+        oss << " type=\"text/javascript\"";
+    }
+    oss << ">\n";
+    oss << js << "\n";
+    oss << "</script>";
+    return oss.str();
+}
+
+std::string CodeMerger::generateExternalCSSLinks() {
+    if (externalCSS.empty()) return "";
+    
+    std::ostringstream oss;
+    for (const auto& cssPath : externalCSS) {
+        oss << "<link rel=\"stylesheet\" href=\"" << cssPath << "\"";
+        if (outputFormat == "xhtml") {
+            oss << " type=\"text/css\"";
+        }
+        oss << ">\n";
+    }
+    return oss.str();
+}
+
+std::string CodeMerger::generateExternalJSLinks() {
+    if (externalJS.empty()) return "";
+    
+    std::ostringstream oss;
+    for (const auto& jsPath : externalJS) {
+        oss << "<script src=\"" << jsPath << "\"";
+        if (outputFormat == "xhtml" || outputFormat == "html4") {
+            oss << " type=\"text/javascript\"";
+        }
+        oss << "></script>\n";
+    }
+    return oss.str();
+}
+
+std::string CodeMerger::generateMetaTags() {
+    if (metaTags.empty()) return "";
+    
+    std::ostringstream oss;
+    for (const auto& meta : metaTags) {
+        oss << "<meta name=\"" << meta.first << "\" content=\"" << meta.second << "\"";
+        if (outputFormat == "xhtml") {
+            oss << " /";
+        }
+        oss << ">\n";
+    }
+    return oss.str();
+}
+
+std::map<std::string, int> CodeMerger::analyzeHTML(const std::string& html) {
+    std::map<std::string, int> stats;
+    stats["length"] = html.length();
+    stats["lines"] = std::count(html.begin(), html.end(), '\n') + 1;
+    stats["tags"] = std::count(html.begin(), html.end(), '<');
+    stats["divs"] = std::count(html.begin(), html.end(), 'd') + std::count(html.begin(), html.end(), 'D');
+    stats["spans"] = std::count(html.begin(), html.end(), 's') + std::count(html.begin(), html.end(), 'S');
+    return stats;
+}
+
+std::map<std::string, int> CodeMerger::analyzeCSS(const std::string& css) {
+    std::map<std::string, int> stats;
+    stats["length"] = css.length();
+    stats["lines"] = std::count(css.begin(), css.end(), '\n') + 1;
+    stats["rules"] = std::count(css.begin(), css.end(), '{');
+    stats["properties"] = std::count(css.begin(), css.end(), ':');
+    return stats;
+}
+
+std::map<std::string, int> CodeMerger::analyzeJavaScript(const std::string& js) {
+    std::map<std::string, int> stats;
+    stats["length"] = js.length();
+    stats["lines"] = std::count(js.begin(), js.end(), '\n') + 1;
+    stats["functions"] = std::count(js.begin(), js.end(), 'f') + std::count(js.begin(), js.end(), 'F');
+    stats["variables"] = std::count(js.begin(), js.end(), 'v') + std::count(js.begin(), js.end(), 'V');
+    return stats;
+}
+
+std::string CodeMerger::convertToInline(const FinalResult& result) {
+    std::ostringstream oss;
+    
+    if (outputFormat == "html5") {
+        oss << "<!DOCTYPE html>\n";
+        oss << "<html lang=\"" << language << "\">\n";
+        oss << "<head>\n";
+        oss << "    <meta charset=\"UTF-8\">\n";
+        oss << "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
+        oss << "    <title>" << title << "</title>\n";
+        oss << generateMetaTags();
+        oss << generateExternalCSSLinks();
+        if (!result.css.empty()) {
+            oss << "    " << generateInlineCSS(result.css) << "\n";
+        }
+        oss << "</head>\n";
+        oss << "<body>\n";
+        oss << result.html << "\n";
+        oss << generateExternalJSLinks();
+        if (!result.javascript.empty()) {
+            oss << "    " << generateInlineJS(result.javascript) << "\n";
+        }
+        oss << "</body>\n";
+        oss << "</html>\n";
+    }
+    
+    return oss.str();
+}
+
+std::string CodeMerger::convertToExternal(const FinalResult& result) {
+    // 简化实现：返回基本HTML结构，CSS和JS作为外部文件
+    std::ostringstream oss;
+    
+    if (outputFormat == "html5") {
+        oss << "<!DOCTYPE html>\n";
+        oss << "<html lang=\"" << language << "\">\n";
+        oss << "<head>\n";
+        oss << "    <meta charset=\"UTF-8\">\n";
+        oss << "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
+        oss << "    <title>" << title << "</title>\n";
+        oss << generateMetaTags();
+        oss << "    <link rel=\"stylesheet\" href=\"styles.css\">\n";
+        oss << "</head>\n";
+        oss << "<body>\n";
+        oss << result.html << "\n";
+        oss << "    <script src=\"script.js\"></script>\n";
+        oss << "</body>\n";
+        oss << "</html>\n";
+    }
+    
+    return oss.str();
+}
+
+std::string CodeMerger::convertToMinified(const FinalResult& result) {
+    std::string html = convertToInline(result);
+    return minifyHTML(html);
+}
+
+std::string CodeMerger::convertToBeautified(const FinalResult& result) {
+    std::string html = convertToInline(result);
+    return beautifyHTML(html);
+}
+
+void CodeMerger::setHTMLTemplate(const std::string& template) {
+    htmlTemplate = template;
+}
+
+std::string CodeMerger::getHTMLTemplate() const {
+    return htmlTemplate;
+}
+
+void CodeMerger::resetHTMLTemplate() {
+    initializeHTMLTemplate();
+}
+
+void CodeMerger::clearMetaTags() {
+    metaTags.clear();
+}
+
+void CodeMerger::clearExternalCSS() {
+    externalCSS.clear();
+}
+
+void CodeMerger::clearExternalJS() {
+    externalJS.clear();
+}
+
+void CodeMerger::clearAll() {
+    clearMetaTags();
+    clearExternalCSS();
+    clearExternalJS();
+    clearMessages();
+    resetHTMLTemplate();
+}
+
+// 新增辅助方法
+std::string CodeMerger::minifyHTML(const std::string& html) {
+    std::string minified = html;
+    
+    // 移除注释
+    std::regex commentRegex(R"(<!--[\s\S]*?-->)");
+    minified = std::regex_replace(minified, commentRegex, "");
+    
+    // 压缩空白
+    minified = compressWhitespace(minified);
+    
+    // 移除空元素
+    minified = removeEmptyElements(minified);
+    
+    return minified;
+}
+
+std::string CodeMerger::beautifyHTML(const std::string& html) {
+    std::string beautified = html;
+    
+    // 在标签后添加换行
+    std::regex tagRegex(R"(<([^>]+)>)");
+    beautified = std::regex_replace(beautified, tagRegex, "<$1>\n");
+    
+    // 在结束标签前添加换行
+    std::regex endTagRegex(R"(</([^>]+)>)");
+    beautified = std::regex_replace(beautified, endTagRegex, "\n</$1>");
+    
+    return beautified;
 }
 
 } // namespace CHTL

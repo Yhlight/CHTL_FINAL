@@ -4,6 +4,11 @@
 #include "CHTL/CHTLLexer/CHTLLexer.h"
 #include "CHTL/CHTLParser/CHTLParser.h"
 #include "CHTL/CHTLGenerator/CHTLGenerator.h"
+#include "CHTL_JS/CHTLJSLexer/CHTLJSLexer.h"
+#include "CHTL_JS/CHTLJSParser/CHTLJSParser.h"
+#include "CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.h"
+#include "CSSCompiler.h"
+#include "JSCompiler.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -21,6 +26,11 @@ void CompilerDispatcher::initializeCompilers() {
     chtlLexer = std::make_unique<CHTLLexer>();
     chtlParser = std::make_unique<CHTLParser>();
     chtlGenerator = std::make_unique<CHTLGenerator>();
+    chtlJSLexer = std::make_unique<CHTLJSLexer>();
+    chtlJSParser = std::make_unique<CHTLJSParser>();
+    chtlJSGenerator = std::make_unique<CHTLJSGenerator>();
+    cssCompiler = std::make_unique<CSSCompiler>();
+    jsCompiler = std::make_unique<JSCompiler>();
     scanner = std::make_unique<CHTLUnifiedScanner>();
     codeMerger = std::make_unique<CodeMerger>();
     
@@ -35,6 +45,26 @@ void CompilerDispatcher::initializeCompilers() {
         chtlGenerator->setStrictMode(strictMode);
         chtlGenerator->setGenerateDefaultStructure(generateDefaultStructure);
         chtlGenerator->setOutputFormat(outputFormat);
+    }
+    
+    if (chtlJSParser) {
+        chtlJSParser->setDebugMode(debugMode);
+        chtlJSParser->setStrictMode(strictMode);
+    }
+    
+    if (chtlJSGenerator) {
+        chtlJSGenerator->setDebugMode(debugMode);
+        chtlJSGenerator->setStrictMode(strictMode);
+    }
+    
+    if (cssCompiler) {
+        cssCompiler->setDebugMode(debugMode);
+        cssCompiler->setStrictMode(strictMode);
+    }
+    
+    if (jsCompiler) {
+        jsCompiler->setDebugMode(debugMode);
+        jsCompiler->setStrictMode(strictMode);
     }
 }
 
@@ -244,21 +274,74 @@ std::string CompilerDispatcher::compileCHTLFragment(const CodeFragment& fragment
 }
 
 std::string CompilerDispatcher::compileCHTLJSFragment(const CodeFragment& fragment) {
-    // TODO: 实现CHTL JS编译
-    addWarning("CHTL JS编译器尚未实现，返回原始内容");
-    return fragment.content;
+    try {
+        // 使用CHTL JS词法分析器
+        chtlJSLexer->setSource(fragment.content);
+        auto tokens = chtlJSLexer->tokenize();
+        
+        // 使用CHTL JS语法分析器
+        chtlJSParser->setTokens(tokens);
+        auto ast = chtlJSParser->parse();
+        
+        // 使用CHTL JS代码生成器
+        if (ast && chtlJSGenerator) {
+            return chtlJSGenerator->generate(ast);
+        }
+        
+        return "";
+        
+    } catch (const std::exception& e) {
+        addError("编译CHTL JS片段时发生错误: " + std::string(e.what()));
+        return fragment.content; // 返回原始内容
+    }
 }
 
 std::string CompilerDispatcher::compileCSSFragment(const CodeFragment& fragment) {
-    // TODO: 实现CSS编译
-    addWarning("CSS编译器尚未实现，返回原始内容");
-    return fragment.content;
+    try {
+        // 使用CSS编译器
+        auto result = cssCompiler->compile(fragment.content);
+        
+        if (result.success) {
+            return result.css;
+        } else {
+            // 合并错误
+            for (const auto& error : result.errors) {
+                addError("CSS编译错误: " + error);
+            }
+            for (const auto& warning : result.warnings) {
+                addWarning("CSS编译警告: " + warning);
+            }
+            return fragment.content; // 返回原始内容
+        }
+        
+    } catch (const std::exception& e) {
+        addError("编译CSS片段时发生错误: " + std::string(e.what()));
+        return fragment.content; // 返回原始内容
+    }
 }
 
 std::string CompilerDispatcher::compileJSFragment(const CodeFragment& fragment) {
-    // TODO: 实现JS编译
-    addWarning("JS编译器尚未实现，返回原始内容");
-    return fragment.content;
+    try {
+        // 使用JS编译器
+        auto result = jsCompiler->compile(fragment.content);
+        
+        if (result.success) {
+            return result.javascript;
+        } else {
+            // 合并错误
+            for (const auto& error : result.errors) {
+                addError("JS编译错误: " + error);
+            }
+            for (const auto& warning : result.warnings) {
+                addWarning("JS编译警告: " + warning);
+            }
+            return fragment.content; // 返回原始内容
+        }
+        
+    } catch (const std::exception& e) {
+        addError("编译JS片段时发生错误: " + std::string(e.what()));
+        return fragment.content; // 返回原始内容
+    }
 }
 
 } // namespace CHTL

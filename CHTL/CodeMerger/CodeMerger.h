@@ -31,6 +31,14 @@ private:
     bool debugMode;
     bool generateDefaultStructure;
     std::string outputFormat;
+    bool minifyOutput;
+    bool beautifyOutput;
+    bool optimizeOutput;
+    std::string title;
+    std::string language;
+    std::map<std::string, std::string> metaTags;
+    std::vector<std::string> externalCSS;
+    std::vector<std::string> externalJS;
     
     // HTML模板
     std::string htmlTemplate;
@@ -82,6 +90,24 @@ public:
     void setDebugMode(bool debug) { debugMode = debug; }
     void setGenerateDefaultStructure(bool generate) { generateDefaultStructure = generate; }
     void setOutputFormat(const std::string& format) { outputFormat = format; }
+    void setMinifyOutput(bool minify) { minifyOutput = minify; }
+    void setBeautifyOutput(bool beautify) { beautifyOutput = beautify; }
+    void setOptimizeOutput(bool optimize) { optimizeOutput = optimize; }
+    void setTitle(const std::string& docTitle) { title = docTitle; }
+    void setLanguage(const std::string& lang) { language = lang; }
+    void addMetaTag(const std::string& name, const std::string& content);
+    void addExternalCSS(const std::string& cssPath);
+    void addExternalJS(const std::string& jsPath);
+    
+    // 获取配置
+    bool getDebugMode() const { return debugMode; }
+    bool getGenerateDefaultStructure() const { return generateDefaultStructure; }
+    std::string getOutputFormat() const { return outputFormat; }
+    bool getMinifyOutput() const { return minifyOutput; }
+    bool getBeautifyOutput() const { return beautifyOutput; }
+    bool getOptimizeOutput() const { return optimizeOutput; }
+    std::string getTitle() const { return title; }
+    std::string getLanguage() const { return language; }
     
     // 主要合并方法
     FinalResult merge(const CompileResult& result);
@@ -98,6 +124,35 @@ public:
     
     // 调试信息
     std::string getDebugInfo() const;
+    
+    // 高级功能
+    std::string generateInlineCSS(const std::string& css);
+    std::string generateInlineJS(const std::string& js);
+    std::string generateExternalCSSLinks();
+    std::string generateExternalJSLinks();
+    std::string generateMetaTags();
+    
+    // 代码分析
+    std::map<std::string, int> analyzeHTML(const std::string& html);
+    std::map<std::string, int> analyzeCSS(const std::string& css);
+    std::map<std::string, int> analyzeJavaScript(const std::string& js);
+    
+    // 代码转换
+    std::string convertToInline(const FinalResult& result);
+    std::string convertToExternal(const FinalResult& result);
+    std::string convertToMinified(const FinalResult& result);
+    std::string convertToBeautified(const FinalResult& result);
+    
+    // 模板管理
+    void setHTMLTemplate(const std::string& template);
+    std::string getHTMLTemplate() const;
+    void resetHTMLTemplate();
+    
+    // 清理功能
+    void clearMetaTags();
+    void clearExternalCSS();
+    void clearExternalJS();
+    void clearAll();
 };
 
 } // namespace CHTL
