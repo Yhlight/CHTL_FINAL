@@ -125,6 +125,10 @@ set(CHTL_JS_SOURCES
     CHTL_JS/CJMODSystem/CJMODSyntax.h
     CHTL_JS/CJMODSystem/CJMODArg.cpp
     CHTL_JS/CJMODSystem/CJMODArg.h
+    CHTL_JS/CJMODSystem/CJMODScanner.cpp
+    CHTL_JS/CJMODSystem/CJMODScanner.h
+    CHTL_JS/CJMODSystem/CJMODGenerator.cpp
+    CHTL_JS/CJMODSystem/CJMODGenerator.h
     CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedSelector.cpp
     CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedSelector.h
     CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedListener.cpp
@@ -145,6 +149,8 @@ set(UTIL_SOURCES
 set(SCANNER_SOURCES
     Scanner/CHTLUnifiedScanner.cpp
     Scanner/CHTLUnifiedScanner.h
+    Scanner/UnifiedScanner.cpp
+    Scanner/UnifiedScanner.h
 )
 
 set(COMPILER_SOURCES

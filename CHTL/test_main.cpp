@@ -24,6 +24,9 @@
 #include "CHTL_JS/CJMODSystem/CJMODModule.h"
 #include "CHTL_JS/CJMODSystem/CJMODSyntax.h"
 #include "CHTL_JS/CJMODSystem/CJMODArg.h"
+#include "CHTL_JS/CJMODSystem/CJMODScanner.h"
+#include "CHTL_JS/CJMODSystem/CJMODGenerator.h"
+#include "Scanner/UnifiedScanner.h"
 #include "Scanner/CHTLUnifiedScanner.h"
 #include "CompilerDispatcher/CompilerDispatcher.h"
 
@@ -1082,8 +1085,510 @@ int main() {
         std::cout << "重置后类型: " << static_cast<int>(arg.getType()) << std::endl;
         std::cout << "重置后是否必需: " << (arg.isRequired() ? "是" : "否") << std::endl;
         
+        // 测试CJMOD扫描器
+        std::cout << "\n28. CJMOD扫描器测试:" << std::endl;
+        
+        // 创建测试参数
+        std::vector<CHTL_JS::CJMODArg> testArgs;
+        testArgs.emplace_back("$", std::string("test1"));
+        testArgs.emplace_back("**", std::string("power"));
+        testArgs.emplace_back("$", std::string("test2"));
+        
+        // 双指针扫描测试
+        auto scanResult = CHTL_JS::CJMODScanner::scan(testArgs, "**");
+        std::cout << "双指针扫描结果数量: " << scanResult.size() << std::endl;
+        
+        // 前置截取测试
+        std::string extractedCode = CHTL_JS::CJMODScanner::preExtract("arg ** arg2", "**");
+        std::cout << "前置截取结果: " << extractedCode << std::endl;
+        
+        // 关键字检测测试
+        bool hasKeyword = CHTL_JS::CJMODScanner::hasKeyword("arg ** arg2", "**");
+        std::cout << "关键字检测: " << (hasKeyword ? "找到" : "未找到") << std::endl;
+        
+        // 代码片段处理测试
+        auto fragments = CHTL_JS::CJMODScanner::extractFragments("arg ** arg2", "**");
+        std::cout << "代码片段数量: " << fragments.size() << std::endl;
+        
+        // 参数处理测试
+        auto processedArgs = CHTL_JS::CJMODScanner::processArgs(testArgs, "**");
+        std::cout << "处理后参数数量: " << processedArgs.size() << std::endl;
+        
+        // 代码验证测试
+        bool codeValid = CHTL_JS::CJMODScanner::validateCode("arg ** arg2");
+        std::cout << "代码验证: " << (codeValid ? "有效" : "无效") << std::endl;
+        
+        bool argsValid = CHTL_JS::CJMODScanner::validateArgs(testArgs);
+        std::cout << "参数验证: " << (argsValid ? "有效" : "无效") << std::endl;
+        
+        // 代码格式化测试
+        std::string formattedCode = CHTL_JS::CJMODScanner::formatCode("arg ** arg2");
+        std::cout << "代码格式化: " << formattedCode << std::endl;
+        
+        std::string formattedArgs = CHTL_JS::CJMODScanner::formatArgs(testArgs);
+        std::cout << "参数格式化: " << formattedArgs << std::endl;
+        
+        // 统计信息测试
+        auto codeStats = CHTL_JS::CJMODScanner::getStatistics("arg ** arg2");
+        std::cout << "代码统计长度: " << codeStats["length"] << std::endl;
+        
+        auto argsStats = CHTL_JS::CJMODScanner::getArgsStatistics(testArgs);
+        std::cout << "参数统计数量: " << argsStats["count"] << std::endl;
+        
+        // 调试功能测试
+        std::string debugCode = CHTL_JS::CJMODScanner::debugCode("arg ** arg2");
+        std::cout << "代码调试: " << debugCode << std::endl;
+        
+        std::string debugArgs = CHTL_JS::CJMODScanner::debugArgs(testArgs);
+        std::cout << "参数调试: " << debugArgs << std::endl;
+        
+        // 序列化测试
+        std::string jsonArgs = CHTL_JS::CJMODScanner::toJSON(testArgs);
+        std::cout << "参数JSON序列化长度: " << jsonArgs.length() << std::endl;
+        
+        // 克隆测试
+        auto clonedArgs = CHTL_JS::CJMODScanner::clone(testArgs);
+        std::cout << "参数克隆数量: " << clonedArgs.size() << std::endl;
+        
+        // 比较测试
+        bool argsEqual = CHTL_JS::CJMODScanner::equals(testArgs, clonedArgs);
+        std::cout << "参数比较: " << (argsEqual ? "相等" : "不相等") << std::endl;
+        
+        // 测试CJMOD生成器
+        std::cout << "\n29. CJMOD生成器测试:" << std::endl;
+        
+        // 基本生成功能测试
+        std::string exportResult = CHTL_JS::CJMODGenerator::exportResult(testArgs);
+        std::cout << "导出结果长度: " << exportResult.length() << std::endl;
+        
+        // 代码生成测试
+        std::string generatedCode = CHTL_JS::CJMODGenerator::generateCode(testArgs);
+        std::cout << "生成代码长度: " << generatedCode.length() << std::endl;
+        
+        // 模板处理测试
+        std::string templateResult = CHTL_JS::CJMODGenerator::processTemplate("pow($, $)", testArgs);
+        std::cout << "模板处理结果: " << templateResult << std::endl;
+        
+        // 变量替换测试
+        std::map<std::string, std::any> variables;
+        variables["$"] = std::string("3");
+        std::string replacedCode = CHTL_JS::CJMODGenerator::replaceVariables("pow($, $)", variables);
+        std::cout << "变量替换结果: " << replacedCode << std::endl;
+        
+        // 代码转换测试
+        std::string jsCode = CHTL_JS::CJMODGenerator::convertToJavaScript("pow(3, 4)");
+        std::cout << "转换为JavaScript: " << jsCode << std::endl;
+        
+        // 代码优化测试
+        std::string optimizedCode = CHTL_JS::CJMODGenerator::optimizeCode("pow(3, 4)");
+        std::cout << "优化代码: " << optimizedCode << std::endl;
+        
+        // 代码压缩测试
+        std::string minifiedCode = CHTL_JS::CJMODGenerator::minifyCode("pow( 3 , 4 )");
+        std::cout << "压缩代码: " << minifiedCode << std::endl;
+        
+        // 代码美化测试
+        std::string beautifiedCode = CHTL_JS::CJMODGenerator::beautifyCode("pow(3,4)");
+        std::cout << "美化代码: " << beautifiedCode << std::endl;
+        
+        // 代码验证测试
+        bool generatorCodeValid = CHTL_JS::CJMODGenerator::validateCode("pow(3, 4)");
+        std::cout << "生成器代码验证: " << (generatorCodeValid ? "有效" : "无效") << std::endl;
+        
+        // 代码分析测试
+        auto analysis = CHTL_JS::CJMODGenerator::analyzeCode("pow(3, 4)");
+        std::cout << "代码分析结果数量: " << analysis.size() << std::endl;
+        
+        // 代码统计测试
+        auto generatorStats = CHTL_JS::CJMODGenerator::getStatistics("pow(3, 4)");
+        std::cout << "生成器统计结果数量: " << generatorStats.size() << std::endl;
+        
+        // 代码调试测试
+        std::string generatorDebug = CHTL_JS::CJMODGenerator::debugCode("pow(3, 4)");
+        std::cout << "生成器调试: " << generatorDebug << std::endl;
+        
+        // 代码比较测试
+        bool codeComparison = CHTL_JS::CJMODGenerator::compareCode("pow(3, 4)", "pow(3, 4)");
+        std::cout << "代码比较: " << (codeComparison ? "相同" : "不同") << std::endl;
+        
+        // 代码合并测试
+        std::vector<std::string> codes = {"pow(", "3, 4", ")"};
+        std::string mergedCode = CHTL_JS::CJMODGenerator::mergeCode(codes);
+        std::cout << "代码合并: " << mergedCode << std::endl;
+        
+        // 代码分割测试
+        auto splitResult = CHTL_JS::CJMODGenerator::splitCode("pow(3, 4)");
+        std::cout << "代码分割数量: " << splitResult.size() << std::endl;
+        
+        // 工具函数测试
+        std::string typeString = CHTL_JS::CJMODGenerator::codeTypeToString("javascript");
+        std::cout << "类型转换: " << typeString << std::endl;
+        
+        bool validType = CHTL_JS::CJMODGenerator::isValidCodeType("javascript");
+        std::cout << "类型验证: " << (validType ? "有效" : "无效") << std::endl;
+        
+        // 序列化测试
+        std::string jsonCode = CHTL_JS::CJMODGenerator::toJSON("pow(3, 4)");
+        std::cout << "代码JSON序列化长度: " << jsonCode.length() << std::endl;
+        
+        // 克隆测试
+        std::string clonedCode = CHTL_JS::CJMODGenerator::clone("pow(3, 4)");
+        std::cout << "代码克隆: " << clonedCode << std::endl;
+        
+        // 格式化测试
+        std::string formattedGeneratorCode = CHTL_JS::CJMODGenerator::format("pow(3,4)");
+        std::cout << "生成器格式化: " << formattedGeneratorCode << std::endl;
+        
     } catch (const std::exception& e) {
         std::cerr << "CJMOD API测试过程中发生错误: " << e.what() << std::endl;
+        return 1;
+    }
+    
+    // 统一扫描器测试
+    std::cout << "\n\n统一扫描器测试" << std::endl;
+    std::cout << "=================" << std::endl;
+    
+    try {
+        // 测试统一扫描器
+        std::cout << "\n1. 统一扫描器基本功能测试:" << std::endl;
+        CHTL::UnifiedScanner scanner;
+        
+        // 测试代码扫描
+        std::string testCode = R"(
+            [Element] div {
+                class: "container"
+            }
+            
+            script {
+                {{console.log("Hello World")}};
+                function test() {
+                    return "test";
+                }
+            }
+            
+            style {
+                .container {
+                    color: red;
+                }
+            }
+        )";
+        
+        CHTL::ScanConfig config;
+        config.enableCHTL = true;
+        config.enableCHTLJS = true;
+        config.enableJavaScript = true;
+        config.enableCSS = true;
+        config.enableHTML = true;
+        
+        auto scanResult = scanner.scan(testCode, config);
+        std::cout << "扫描成功: " << (scanResult.success ? "是" : "否") << std::endl;
+        std::cout << "代码片段数量: " << scanResult.fragments.size() << std::endl;
+        std::cout << "语法边界数量: " << scanResult.boundaries.size() << std::endl;
+        std::cout << "占位符数量: " << scanResult.placeholders.size() << std::endl;
+        
+        // 测试代码分离
+        std::cout << "\n2. 代码分离测试:" << std::endl;
+        auto fragments = scanner.separateCode(testCode, config);
+        std::cout << "分离片段数量: " << fragments.size() << std::endl;
+        
+        auto fragmentsByType = scanner.separateCodeByType(testCode, config);
+        std::cout << "CHTL片段数量: " << fragmentsByType[CHTL::CodeType::CHTL].size() << std::endl;
+        std::cout << "CHTL JS片段数量: " << fragmentsByType[CHTL::CodeType::CHTL_JS].size() << std::endl;
+        std::cout << "JavaScript片段数量: " << fragmentsByType[CHTL::CodeType::JAVASCRIPT].size() << std::endl;
+        std::cout << "CSS片段数量: " << fragmentsByType[CHTL::CodeType::CSS].size() << std::endl;
+        std::cout << "HTML片段数量: " << fragmentsByType[CHTL::CodeType::HTML].size() << std::endl;
+        
+        // 测试语法边界检测
+        std::cout << "\n3. 语法边界检测测试:" << std::endl;
+        auto boundaries = scanner.detectBoundaries(testCode, config);
+        std::cout << "检测到边界数量: " << boundaries.size() << std::endl;
+        
+        auto chtlBoundaries = scanner.detectBoundariesByType(testCode, CHTL::CodeType::CHTL, config);
+        std::cout << "CHTL边界数量: " << chtlBoundaries.size() << std::endl;
+        
+        auto chtljsBoundaries = scanner.detectBoundariesByType(testCode, CHTL::CodeType::CHTL_JS, config);
+        std::cout << "CHTL JS边界数量: " << chtljsBoundaries.size() << std::endl;
+        
+        // 测试占位符管理
+        std::cout << "\n4. 占位符管理测试:" << std::endl;
+        auto placeholders = scanner.createPlaceholders(testCode, config);
+        std::cout << "创建占位符数量: " << placeholders.size() << std::endl;
+        
+        std::string replacedCode = scanner.replacePlaceholders(testCode, placeholders);
+        std::cout << "替换后代码长度: " << replacedCode.length() << std::endl;
+        
+        std::string restoredCode = scanner.restorePlaceholders(replacedCode, placeholders);
+        std::cout << "恢复后代码长度: " << restoredCode.length() << std::endl;
+        
+        // 测试代码类型检测
+        std::cout << "\n5. 代码类型检测测试:" << std::endl;
+        auto detectedType = scanner.detectCodeType(testCode, 0, config);
+        std::cout << "检测到的代码类型: " << static_cast<int>(detectedType) << std::endl;
+        
+        auto chtlType = scanner.detectCodeTypeByContent("[Element] div", config);
+        std::cout << "CHTL类型检测: " << static_cast<int>(chtlType) << std::endl;
+        
+        auto chtljsType = scanner.detectCodeTypeByContent("{{console.log}}", config);
+        std::cout << "CHTL JS类型检测: " << static_cast<int>(chtljsType) << std::endl;
+        
+        // 测试代码验证
+        std::cout << "\n6. 代码验证测试:" << std::endl;
+        bool codeValid = scanner.validateCode(testCode, config);
+        std::cout << "代码验证: " << (codeValid ? "有效" : "无效") << std::endl;
+        
+        if (!fragments.empty()) {
+            bool fragmentValid = scanner.validateFragment(fragments[0], config);
+            std::cout << "片段验证: " << (fragmentValid ? "有效" : "无效") << std::endl;
+        }
+        
+        if (!boundaries.empty()) {
+            bool boundaryValid = scanner.validateBoundary(boundaries[0], config);
+            std::cout << "边界验证: " << (boundaryValid ? "有效" : "无效") << std::endl;
+        }
+        
+        // 测试变长切片功能
+        std::cout << "\n7. 变长切片功能测试:" << std::endl;
+        auto variableSlices = scanner.variableLengthSlicing(testCode, config);
+        std::cout << "变长切片数量: " << variableSlices.size() << std::endl;
+        
+        auto expandedSlices = scanner.smartExpansion(testCode, 0, 50, config);
+        std::cout << "智能展开片段数量: " << expandedSlices.size() << std::endl;
+        
+        auto rolledBackSlices = scanner.smartRollback(testCode, 0, 100, config);
+        std::cout << "智能回滚片段数量: " << rolledBackSlices.size() << std::endl;
+        
+        // 测试语法边界识别
+        std::cout << "\n8. 语法边界识别测试:" << std::endl;
+        bool isBoundary = scanner.isSyntaxBoundary(testCode, 10, config);
+        std::cout << "是否为语法边界: " << (isBoundary ? "是" : "否") << std::endl;
+        
+        auto boundaryType = scanner.getBoundaryType(testCode, 10, config);
+        std::cout << "边界类型: " << static_cast<int>(boundaryType) << std::endl;
+        
+        auto foundBoundaries = scanner.findBoundaries(testCode, CHTL::SyntaxBoundaryType::CHTL_START, config);
+        std::cout << "找到的CHTL开始边界数量: " << foundBoundaries.size() << std::endl;
+        
+        // 测试宽泛和严格判断
+        std::cout << "\n9. 宽泛和严格判断测试:" << std::endl;
+        bool isWide = scanner.isWideMode(testCode, 10, config);
+        std::cout << "是否为宽泛模式: " << (isWide ? "是" : "否") << std::endl;
+        
+        bool isStrict = scanner.isStrictMode(testCode, 10, config);
+        std::cout << "是否为严格模式: " << (isStrict ? "是" : "否") << std::endl;
+        
+        bool shouldUseWide = scanner.shouldUseWideMode(testCode, 10, config);
+        std::cout << "应使用宽泛模式: " << (shouldUseWide ? "是" : "否") << std::endl;
+        
+        bool shouldUseStrict = scanner.shouldUseStrictMode(testCode, 10, config);
+        std::cout << "应使用严格模式: " << (shouldUseStrict ? "是" : "否") << std::endl;
+        
+        // 测试针对性处理
+        std::cout << "\n10. 针对性处理测试:" << std::endl;
+        auto targetedFragments = scanner.processTargeted(testCode, fragments, config);
+        std::cout << "针对性处理片段数量: " << targetedFragments.size() << std::endl;
+        
+        auto chtlProcessed = scanner.processByType(testCode, CHTL::CodeType::CHTL, config);
+        std::cout << "CHTL类型处理片段数量: " << chtlProcessed.size() << std::endl;
+        
+        auto boundaryProcessed = scanner.processByBoundary(testCode, boundaries, config);
+        std::cout << "边界处理片段数量: " << boundaryProcessed.size() << std::endl;
+        
+        // 测试代码转换
+        std::cout << "\n11. 代码转换测试:" << std::endl;
+        std::string convertedCode = scanner.convertCode(testCode, CHTL::CodeType::CHTL, CHTL::CodeType::HTML, config);
+        std::cout << "代码转换结果长度: " << convertedCode.length() << std::endl;
+        
+        if (!fragments.empty()) {
+            std::string convertedFragment = scanner.convertFragment(fragments[0], CHTL::CodeType::HTML, config);
+            std::cout << "片段转换结果长度: " << convertedFragment.length() << std::endl;
+        }
+        
+        if (!boundaries.empty()) {
+            std::string convertedBoundary = scanner.convertBoundary(boundaries[0], CHTL::CodeType::HTML, config);
+            std::cout << "边界转换结果长度: " << convertedBoundary.length() << std::endl;
+        }
+        
+        // 测试代码合并
+        std::cout << "\n12. 代码合并测试:" << std::endl;
+        std::string mergedFragments = scanner.mergeFragments(fragments, config);
+        std::cout << "合并片段结果长度: " << mergedFragments.length() << std::endl;
+        
+        std::string mergedByType = scanner.mergeByType(fragmentsByType, config);
+        std::cout << "按类型合并结果长度: " << mergedByType.length() << std::endl;
+        
+        std::string mergedWithBoundaries = scanner.mergeWithBoundaries(fragments, boundaries, config);
+        std::cout << "带边界合并结果长度: " << mergedWithBoundaries.length() << std::endl;
+        
+        // 测试代码格式化
+        std::cout << "\n13. 代码格式化测试:" << std::endl;
+        std::string formattedCode = scanner.formatCode(testCode, config);
+        std::cout << "格式化代码长度: " << formattedCode.length() << std::endl;
+        
+        if (!fragments.empty()) {
+            std::string formattedFragment = scanner.formatFragment(fragments[0], config);
+            std::cout << "格式化片段长度: " << formattedFragment.length() << std::endl;
+        }
+        
+        if (!boundaries.empty()) {
+            std::string formattedBoundary = scanner.formatBoundary(boundaries[0], config);
+            std::cout << "格式化边界长度: " << formattedBoundary.length() << std::endl;
+        }
+        
+        // 测试代码压缩
+        std::cout << "\n14. 代码压缩测试:" << std::endl;
+        std::string minifiedCode = scanner.minifyCode(testCode, config);
+        std::cout << "压缩代码长度: " << minifiedCode.length() << std::endl;
+        
+        if (!fragments.empty()) {
+            std::string minifiedFragment = scanner.minifyFragment(fragments[0], config);
+            std::cout << "压缩片段长度: " << minifiedFragment.length() << std::endl;
+        }
+        
+        if (!boundaries.empty()) {
+            std::string minifiedBoundary = scanner.minifyBoundary(boundaries[0], config);
+            std::cout << "压缩边界长度: " << minifiedBoundary.length() << std::endl;
+        }
+        
+        // 测试代码美化
+        std::cout << "\n15. 代码美化测试:" << std::endl;
+        std::string beautifiedCode = scanner.beautifyCode(testCode, config);
+        std::cout << "美化代码长度: " << beautifiedCode.length() << std::endl;
+        
+        if (!fragments.empty()) {
+            std::string beautifiedFragment = scanner.beautifyFragment(fragments[0], config);
+            std::cout << "美化片段长度: " << beautifiedFragment.length() << std::endl;
+        }
+        
+        if (!boundaries.empty()) {
+            std::string beautifiedBoundary = scanner.beautifyBoundary(boundaries[0], config);
+            std::cout << "美化边界长度: " << beautifiedBoundary.length() << std::endl;
+        }
+        
+        // 测试统计信息
+        std::cout << "\n16. 统计信息测试:" << std::endl;
+        auto scannerStats = scanner.getStatistics(testCode, config);
+        std::cout << "代码统计信息数量: " << scannerStats.size() << std::endl;
+        
+        auto fragmentStats = scanner.getFragmentStatistics(fragments, config);
+        std::cout << "片段统计信息数量: " << fragmentStats.size() << std::endl;
+        
+        auto boundaryStats = scanner.getBoundaryStatistics(boundaries, config);
+        std::cout << "边界统计信息数量: " << boundaryStats.size() << std::endl;
+        
+        // 测试调试功能
+        std::cout << "\n17. 调试功能测试:" << std::endl;
+        std::string debugCode = scanner.debugCode(testCode, config);
+        std::cout << "调试代码长度: " << debugCode.length() << std::endl;
+        
+        if (!fragments.empty()) {
+            std::string debugFragment = scanner.debugFragment(fragments[0], config);
+            std::cout << "调试片段长度: " << debugFragment.length() << std::endl;
+        }
+        
+        if (!boundaries.empty()) {
+            std::string debugBoundary = scanner.debugBoundary(boundaries[0], config);
+            std::cout << "调试边界长度: " << debugBoundary.length() << std::endl;
+        }
+        
+        std::string debugScanResult = scanner.debugScanResult(scanResult, config);
+        std::cout << "调试扫描结果长度: " << debugScanResult.length() << std::endl;
+        
+        // 测试配置管理
+        std::cout << "\n18. 配置管理测试:" << std::endl;
+        scanner.setConfig(config);
+        auto currentConfig = scanner.getConfig();
+        std::cout << "获取配置成功: " << (currentConfig.enableCHTL ? "是" : "否") << std::endl;
+        
+        scanner.resetConfig();
+        auto resetConfig = scanner.getConfig();
+        std::cout << "重置配置成功: " << (resetConfig.enableCHTL ? "是" : "否") << std::endl;
+        
+        // 测试状态管理
+        std::cout << "\n19. 状态管理测试:" << std::endl;
+        std::cout << "是否为空: " << (scanner.isEmpty() ? "是" : "否") << std::endl;
+        std::cout << "片段数量: " << scanner.getFragmentCount() << std::endl;
+        std::cout << "边界数量: " << scanner.getBoundaryCount() << std::endl;
+        std::cout << "占位符数量: " << scanner.getPlaceholderCount() << std::endl;
+        
+        scanner.clear();
+        std::cout << "清理后是否为空: " << (scanner.isEmpty() ? "是" : "否") << std::endl;
+        
+        scanner.reset();
+        std::cout << "重置后是否为空: " << (scanner.isEmpty() ? "是" : "否") << std::endl;
+        
+        // 测试错误处理
+        std::cout << "\n20. 错误处理测试:" << std::endl;
+        std::cout << "是否有错误: " << (scanner.hasError() ? "是" : "否") << std::endl;
+        std::cout << "最后错误: " << scanner.getLastError() << std::endl;
+        
+        scanner.clearError();
+        std::cout << "清除错误后是否有错误: " << (scanner.hasError() ? "是" : "否") << std::endl;
+        
+        // 测试工具函数
+        std::cout << "\n21. 工具函数测试:" << std::endl;
+        std::string typeString = CHTL::UnifiedScanner::codeTypeToString(CHTL::CodeType::CHTL);
+        std::cout << "代码类型转字符串: " << typeString << std::endl;
+        
+        auto stringType = CHTL::UnifiedScanner::stringToCodeType("CHTL");
+        std::cout << "字符串转代码类型: " << static_cast<int>(stringType) << std::endl;
+        
+        bool validCodeType = CHTL::UnifiedScanner::isValidCodeType(CHTL::CodeType::CHTL);
+        std::cout << "代码类型有效: " << (validCodeType ? "是" : "否") << std::endl;
+        
+        std::string boundaryString = CHTL::UnifiedScanner::boundaryTypeToString(CHTL::SyntaxBoundaryType::CHTL_START);
+        std::cout << "边界类型转字符串: " << boundaryString << std::endl;
+        
+        auto stringBoundary = CHTL::UnifiedScanner::stringToBoundaryType("CHTL_START");
+        std::cout << "字符串转边界类型: " << static_cast<int>(stringBoundary) << std::endl;
+        
+        bool validBoundaryType = CHTL::UnifiedScanner::isValidBoundaryType(CHTL::SyntaxBoundaryType::CHTL_START);
+        std::cout << "边界类型有效: " << (validBoundaryType ? "是" : "否") << std::endl;
+        
+        // 测试序列化
+        std::cout << "\n22. 序列化测试:" << std::endl;
+        std::string jsonString = scanner.toJSON();
+        std::cout << "JSON序列化长度: " << jsonString.length() << std::endl;
+        
+        std::string xmlString = scanner.toXML();
+        std::cout << "XML序列化长度: " << xmlString.length() << std::endl;
+        
+        std::string yamlString = scanner.toYAML();
+        std::cout << "YAML序列化长度: " << yamlString.length() << std::endl;
+        
+        std::string scannerString = scanner.toString();
+        std::cout << "字符串序列化长度: " << scannerString.length() << std::endl;
+        
+        std::string debugString = scanner.toDebugString();
+        std::cout << "调试字符串序列化长度: " << debugString.length() << std::endl;
+        
+        // 测试克隆
+        std::cout << "\n23. 克隆测试:" << std::endl;
+        auto clonedScanner = scanner.clone();
+        std::cout << "克隆扫描器: " << (clonedScanner ? "成功" : "失败") << std::endl;
+        
+        // 测试比较
+        std::cout << "\n24. 比较测试:" << std::endl;
+        if (clonedScanner) {
+            bool scannersEqual = scanner.equals(*clonedScanner);
+            std::cout << "扫描器相等: " << (scannersEqual ? "是" : "否") << std::endl;
+        }
+        
+        bool codeEqual = scanner.equals(testCode);
+        std::cout << "代码相等: " << (codeEqual ? "是" : "否") << std::endl;
+        
+        // 测试格式化
+        std::cout << "\n25. 格式化测试:" << std::endl;
+        std::string scannerFormat = scanner.format();
+        std::cout << "扫描器格式化长度: " << scannerFormat.length() << std::endl;
+        
+        std::string scannerMinify = scanner.minify();
+        std::cout << "扫描器压缩长度: " << scannerMinify.length() << std::endl;
+        
+        std::string scannerBeautify = scanner.beautify();
+        std::cout << "扫描器美化长度: " << scannerBeautify.length() << std::endl;
+        
+    } catch (const std::exception& e) {
+        std::cerr << "统一扫描器测试过程中发生错误: " << e.what() << std::endl;
         return 1;
     }
     

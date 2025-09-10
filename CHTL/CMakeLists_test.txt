@@ -51,6 +51,9 @@ set(SOURCES
     CHTL_JS/CJMODSystem/CJMODModule.cpp
     CHTL_JS/CJMODSystem/CJMODSyntax.cpp
     CHTL_JS/CJMODSystem/CJMODArg.cpp
+    CHTL_JS/CJMODSystem/CJMODScanner.cpp
+    CHTL_JS/CJMODSystem/CJMODGenerator.cpp
+    Scanner/UnifiedScanner.cpp
     Scanner/CHTLUnifiedScanner.cpp
     CodeMerger/CodeMerger.cpp
     CompilerDispatcher/CompilerDispatcher.cpp

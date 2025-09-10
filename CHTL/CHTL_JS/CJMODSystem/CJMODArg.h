@@ -114,6 +114,12 @@ public:
     std::any fillValue(const std::vector<std::any>& values) const;
     std::any fillValue(const std::map<std::string, std::any>& object) const;
     
+    // 匹配
+    std::any match(const std::string& pattern, std::function<std::any(const std::string&)> matcher) const;
+    std::any match(const std::string& pattern, std::function<std::string(const std::string&)> matcher) const;
+    std::any match(const std::string& pattern, std::function<int(const std::string&)> matcher) const;
+    std::any match(const std::string& pattern, std::function<bool(const std::string&)> matcher) const;
+    
     // 检查
     bool checkType(const std::any& value) const;
     bool checkValue(const std::any& value) const;

@@ -305,6 +305,35 @@ void CJMODArg::reset() {
     index = -1;
 }
 
+// 匹配方法实现
+std::any CJMODArg::match(const std::string& pattern, std::function<std::any(const std::string&)> matcher) const {
+    if (name == pattern) {
+        return matcher(name);
+    }
+    return std::any{};
+}
+
+std::any CJMODArg::match(const std::string& pattern, std::function<std::string(const std::string&)> matcher) const {
+    if (name == pattern) {
+        return std::any{matcher(name)};
+    }
+    return std::any{};
+}
+
+std::any CJMODArg::match(const std::string& pattern, std::function<int(const std::string&)> matcher) const {
+    if (name == pattern) {
+        return std::any{matcher(name)};
+    }
+    return std::any{};
+}
+
+std::any CJMODArg::match(const std::string& pattern, std::function<bool(const std::string&)> matcher) const {
+    if (name == pattern) {
+        return std::any{matcher(name)};
+    }
+    return std::any{};
+}
+
 // 辅助方法实现
 bool CJMODArg::validateArg() const {
     return !name.empty() && type != ArgType::UNKNOWN;
