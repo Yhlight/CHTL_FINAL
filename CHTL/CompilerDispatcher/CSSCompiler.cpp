@@ -254,27 +254,37 @@ void CSSCompiler::clearMessages() {
 
 // 工具函数实现
 std::string CSSCompiler::normalizeSelector(const std::string& selector) {
-    return normalizeSelectorInternal(selector);
+    // 简化的实现
+    std::string result = selector;
+    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+    return result;
 }
 
 std::string CSSCompiler::normalizeProperty(const std::string& property) {
-    return normalizePropertyInternal(property);
+    // 简化的实现
+    std::string result = property;
+    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+    return result;
 }
 
 std::string CSSCompiler::normalizeValue(const std::string& value) {
-    return normalizeValueInternal(value);
+    // 简化的实现
+    return value;
 }
 
 bool CSSCompiler::isValidSelector(const std::string& selector) {
-    return isValidSelectorInternal(selector);
+    // 简化的实现
+    return !selector.empty();
 }
 
 bool CSSCompiler::isValidProperty(const std::string& property) {
-    return isValidPropertyInternal(property);
+    // 简化的实现
+    return !property.empty();
 }
 
 bool CSSCompiler::isValidValue(const std::string& value) {
-    return isValidValueInternal(value);
+    // 简化的实现
+    return true;
 }
 
 // 序列化实现

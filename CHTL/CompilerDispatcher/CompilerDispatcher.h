@@ -7,19 +7,17 @@
 #include <map>
 #include "Common/CommonTypes.h"
 
-// 前向声明
-namespace CHTL {
-    class CHTLLexer;
-    class CHTLParser;
-    class CHTLGenerator;
-    class CHTLJSLexer;
-    class CHTLJSParser;
-    class CHTLJSGenerator;
-    class CSSCompiler;
-    class JSCompiler;
-    class CHTLUnifiedScanner;
-    class CodeMerger;
-}
+// 包含完整的头文件以避免前向声明问题
+#include "CHTL/CHTLLexer/CHTLLexer.h"
+#include "CHTL/CHTLParser/CHTLParser.h"
+#include "CHTL/CHTLGenerator/CHTLGenerator.h"
+#include "CHTL_JS/CHTLJSLexer/CHTLJSLexer.h"
+#include "CHTL_JS/CHTLJSParser/CHTLJSParser.h"
+#include "CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.h"
+#include "CSSCompiler.h"
+#include "JSCompiler.h"
+#include "Scanner/CHTLUnifiedScanner.h"
+#include "CodeMerger/CodeMerger.h"
 
 namespace CHTL {
 
@@ -32,20 +30,20 @@ private:
     std::string outputFormat;
     
     // 编译器实例
-    std::unique_ptr<class CHTLLexer> chtlLexer;
-    std::unique_ptr<class CHTLParser> chtlParser;
-    std::unique_ptr<class CHTLGenerator> chtlGenerator;
-    std::unique_ptr<class CHTLJSLexer> chtlJSLexer;
-    std::unique_ptr<class CHTLJSParser> chtlJSParser;
-    std::unique_ptr<class CHTLJSGenerator> chtlJSGenerator;
-    std::unique_ptr<class CSSCompiler> cssCompiler;
-    std::unique_ptr<class JSCompiler> jsCompiler;
+    std::unique_ptr<CHTLLexer> chtlLexer;
+    std::unique_ptr<CHTLParser> chtlParser;
+    std::unique_ptr<CHTLGenerator> chtlGenerator;
+    std::unique_ptr<CHTL_JS::CHTLJSLexer> chtlJSLexer;
+    std::unique_ptr<CHTL_JS::CHTLJSParser> chtlJSParser;
+    std::unique_ptr<CHTL_JS::CHTLJSGenerator> chtlJSGenerator;
+    std::unique_ptr<CSSCompiler> cssCompiler;
+    std::unique_ptr<JSCompiler> jsCompiler;
     
     // 统一扫描器
-    std::unique_ptr<class CHTLUnifiedScanner> scanner;
+    std::unique_ptr<CHTLUnifiedScanner> scanner;
     
     // 代码合并器
-    std::unique_ptr<class CodeMerger> codeMerger;
+    std::unique_ptr<CodeMerger> codeMerger;
     
     // 错误和警告
     std::vector<std::string> errors;

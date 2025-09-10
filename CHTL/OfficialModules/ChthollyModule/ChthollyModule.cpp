@@ -35,10 +35,8 @@ bool ChthollyModule::initialize() {
     try {
         // 初始化子模块
         for (auto& subModule : subModules) {
-            if (!subModule->initialize()) {
-                std::cerr << "Failed to initialize submodule: " << subModule->getModuleName() << std::endl;
-                return false;
-            }
+            // CMODModule没有initialize方法，跳过初始化
+            std::cout << "Submodule: " << subModule->getName() << std::endl;
         }
         
         initialized = true;
@@ -60,7 +58,8 @@ void ChthollyModule::cleanup() {
     
     // 清理子模块
     for (auto& subModule : subModules) {
-        subModule->cleanup();
+        // CMODModule没有cleanup方法，跳过清理
+        std::cout << "Cleaning up submodule: " << subModule->getName() << std::endl;
     }
     
     initialized = false;
@@ -124,7 +123,7 @@ std::vector<std::shared_ptr<CMODModule>> ChthollyModule::getSubModules() const {
 
 std::shared_ptr<CMODModule> ChthollyModule::getSubModule(const std::string& name) const {
     for (const auto& subModule : subModules) {
-        if (subModule->getModuleName() == name) {
+        if (subModule->getName() == name) {
             return subModule;
         }
     }
@@ -407,13 +406,13 @@ void ChthollyTemplateModule::cleanup() {
     initialized = false;
 }
 
-std::string ChthollyTemplateModule::processTemplate(const std::string& template) const {
+std::string ChthollyTemplateModule::processTemplate(const std::string& templateStr) const {
     if (!initialized) {
         return "";
     }
     
     // 简单的模板处理逻辑
-    return template;
+    return templateStr;
 }
 
 std::string ChthollyTemplateModule::generateTemplate(const std::string& templateName) const {

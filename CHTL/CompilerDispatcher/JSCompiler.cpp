@@ -228,19 +228,82 @@ void JSCompiler::clearMessages() {
 
 // 工具函数实现
 std::string JSCompiler::nodeTypeToString(JSNodeType type) {
-    return nodeTypeToStringInternal(type);
+    // 简化的实现
+    switch (type) {
+        case JSNodeType::PROGRAM: return "PROGRAM";
+        case JSNodeType::STATEMENT: return "STATEMENT";
+        case JSNodeType::EXPRESSION: return "EXPRESSION";
+        case JSNodeType::DECLARATION: return "DECLARATION";
+        case JSNodeType::FUNCTION: return "FUNCTION";
+        case JSNodeType::VARIABLE: return "VARIABLE";
+        case JSNodeType::LITERAL: return "LITERAL";
+        case JSNodeType::IDENTIFIER: return "IDENTIFIER";
+        case JSNodeType::BINARY_OPERATION: return "BINARY_OPERATION";
+        case JSNodeType::UNARY_OPERATION: return "UNARY_OPERATION";
+        case JSNodeType::CALL_EXPRESSION: return "CALL_EXPRESSION";
+        case JSNodeType::MEMBER_EXPRESSION: return "MEMBER_EXPRESSION";
+        case JSNodeType::ARRAY_EXPRESSION: return "ARRAY_EXPRESSION";
+        case JSNodeType::OBJECT_EXPRESSION: return "OBJECT_EXPRESSION";
+        case JSNodeType::CONDITIONAL_EXPRESSION: return "CONDITIONAL_EXPRESSION";
+        case JSNodeType::ASSIGNMENT_EXPRESSION: return "ASSIGNMENT_EXPRESSION";
+        case JSNodeType::SEQUENCE_EXPRESSION: return "SEQUENCE_EXPRESSION";
+        case JSNodeType::BLOCK_STATEMENT: return "BLOCK_STATEMENT";
+        case JSNodeType::EXPRESSION_STATEMENT: return "EXPRESSION_STATEMENT";
+        case JSNodeType::IF_STATEMENT: return "IF_STATEMENT";
+        case JSNodeType::WHILE_STATEMENT: return "WHILE_STATEMENT";
+        case JSNodeType::FOR_STATEMENT: return "FOR_STATEMENT";
+        case JSNodeType::RETURN_STATEMENT: return "RETURN_STATEMENT";
+        case JSNodeType::BREAK_STATEMENT: return "BREAK_STATEMENT";
+        case JSNodeType::CONTINUE_STATEMENT: return "CONTINUE_STATEMENT";
+        case JSNodeType::TRY_STATEMENT: return "TRY_STATEMENT";
+        case JSNodeType::CATCH_STATEMENT: return "CATCH_STATEMENT";
+        case JSNodeType::THROW_STATEMENT: return "THROW_STATEMENT";
+        case JSNodeType::UNKNOWN: return "UNKNOWN";
+        default: return "UNKNOWN";
+    }
 }
 
 JSNodeType JSCompiler::stringToNodeType(const std::string& type) {
-    return stringToNodeTypeInternal(type);
+    // 简化的实现
+    if (type == "PROGRAM") return JSNodeType::PROGRAM;
+    if (type == "STATEMENT") return JSNodeType::STATEMENT;
+    if (type == "EXPRESSION") return JSNodeType::EXPRESSION;
+    if (type == "DECLARATION") return JSNodeType::DECLARATION;
+    if (type == "FUNCTION") return JSNodeType::FUNCTION;
+    if (type == "VARIABLE") return JSNodeType::VARIABLE;
+    if (type == "LITERAL") return JSNodeType::LITERAL;
+    if (type == "IDENTIFIER") return JSNodeType::IDENTIFIER;
+    if (type == "BINARY_OPERATION") return JSNodeType::BINARY_OPERATION;
+    if (type == "UNARY_OPERATION") return JSNodeType::UNARY_OPERATION;
+    if (type == "CALL_EXPRESSION") return JSNodeType::CALL_EXPRESSION;
+    if (type == "MEMBER_EXPRESSION") return JSNodeType::MEMBER_EXPRESSION;
+    if (type == "ARRAY_EXPRESSION") return JSNodeType::ARRAY_EXPRESSION;
+    if (type == "OBJECT_EXPRESSION") return JSNodeType::OBJECT_EXPRESSION;
+    if (type == "CONDITIONAL_EXPRESSION") return JSNodeType::CONDITIONAL_EXPRESSION;
+    if (type == "ASSIGNMENT_EXPRESSION") return JSNodeType::ASSIGNMENT_EXPRESSION;
+    if (type == "SEQUENCE_EXPRESSION") return JSNodeType::SEQUENCE_EXPRESSION;
+    if (type == "BLOCK_STATEMENT") return JSNodeType::BLOCK_STATEMENT;
+    if (type == "EXPRESSION_STATEMENT") return JSNodeType::EXPRESSION_STATEMENT;
+    if (type == "IF_STATEMENT") return JSNodeType::IF_STATEMENT;
+    if (type == "WHILE_STATEMENT") return JSNodeType::WHILE_STATEMENT;
+    if (type == "FOR_STATEMENT") return JSNodeType::FOR_STATEMENT;
+    if (type == "RETURN_STATEMENT") return JSNodeType::RETURN_STATEMENT;
+    if (type == "BREAK_STATEMENT") return JSNodeType::BREAK_STATEMENT;
+    if (type == "CONTINUE_STATEMENT") return JSNodeType::CONTINUE_STATEMENT;
+    if (type == "TRY_STATEMENT") return JSNodeType::TRY_STATEMENT;
+    if (type == "CATCH_STATEMENT") return JSNodeType::CATCH_STATEMENT;
+    if (type == "THROW_STATEMENT") return JSNodeType::THROW_STATEMENT;
+    return JSNodeType::UNKNOWN;
 }
 
 bool JSCompiler::isValidNodeType(JSNodeType type) {
-    return isValidNodeTypeInternal(type);
+    // 简化的实现
+    return type != JSNodeType::UNKNOWN;
 }
 
 bool JSCompiler::isValidJS(const std::string& js) {
-    return isValidJSInternal(js);
+    // 简化的实现
+    return !js.empty();
 }
 
 // 序列化实现
@@ -438,7 +501,7 @@ std::string JSCompiler::generateExpressionInternal(const std::shared_ptr<JSNode>
 }
 
 // JavaScript优化内部方法实现
-std::string JSCompiler::optimizeJSInternal(const std::string& js) {
+std::string CHTL::JSCompiler::optimizeJSInternal(const std::string& js) {
     std::string result = js;
     
     // 移除多余空格和换行
@@ -466,7 +529,7 @@ std::string JSCompiler::optimizeJSInternal(const std::string& js) {
 }
 
 // 移除未使用变量的辅助方法
-std::string JSCompiler::removeUnusedVariables(const std::string& js) {
+std::string CHTL::JSCompiler::removeUnusedVariables(const std::string& js) {
     // 简化实现：移除明显的未使用变量
     std::string result = js;
     
@@ -494,7 +557,7 @@ std::string JSCompiler::removeUnusedVariables(const std::string& js) {
 }
 
 // 合并字符串字面量的辅助方法
-std::string JSCompiler::mergeStringLiterals(const std::string& js) {
+std::string CHTL::JSCompiler::mergeStringLiterals(const std::string& js) {
     // 简化实现：合并相邻的字符串字面量
     std::string result = js;
     
@@ -510,7 +573,7 @@ std::string JSCompiler::mergeStringLiterals(const std::string& js) {
     return result;
 }
 
-std::string JSCompiler::minifyJSInternal(const std::string& js) {
+std::string CHTL::JSCompiler::minifyJSInternal(const std::string& js) {
     std::string result = js;
     
     // 移除所有空格和换行
@@ -523,7 +586,7 @@ std::string JSCompiler::minifyJSInternal(const std::string& js) {
     return result;
 }
 
-std::string JSCompiler::beautifyJSInternal(const std::string& js) {
+std::string CHTL::JSCompiler::beautifyJSInternal(const std::string& js) {
     std::string result = js;
     
     // 基本美化：添加换行和缩进
@@ -535,41 +598,41 @@ std::string JSCompiler::beautifyJSInternal(const std::string& js) {
 }
 
 // JavaScript验证内部方法实现
-bool JSCompiler::validateJSInternal(const std::string& js) {
+bool CHTL::JSCompiler::validateJSInternal(const std::string& js) {
     // 简化实现：检查基本语法
     return !js.empty() && js.find(';') != std::string::npos;
 }
 
-bool JSCompiler::validateASTInternal(const std::shared_ptr<JSNode>& ast) {
+bool CHTL::JSCompiler::validateASTInternal(const std::shared_ptr<JSNode>& ast) {
     return ast != nullptr && ast->type != JSNodeType::UNKNOWN;
 }
 
-bool JSCompiler::validateStatementInternal(const std::string& statement) {
+bool CHTL::JSCompiler::validateStatementInternal(const std::string& statement) {
     return !statement.empty();
 }
 
-bool JSCompiler::validateExpressionInternal(const std::string& expression) {
+bool CHTL::JSCompiler::validateExpressionInternal(const std::string& expression) {
     return !expression.empty();
 }
 
 // 其他内部方法的简化实现
-std::string JSCompiler::convertToES5Internal(const std::string& js) {
+std::string CHTL::JSCompiler::convertToES5Internal(const std::string& js) {
     return js; // 简化实现
 }
 
-std::string JSCompiler::convertToES6Internal(const std::string& js) {
+std::string CHTL::JSCompiler::convertToES6Internal(const std::string& js) {
     return js; // 简化实现
 }
 
-std::string JSCompiler::convertToTypeScriptInternal(const std::string& js) {
+std::string CHTL::JSCompiler::convertToTypeScriptInternal(const std::string& js) {
     return js; // 简化实现
 }
 
-std::string JSCompiler::convertFromTypeScriptInternal(const std::string& ts) {
+std::string CHTL::JSCompiler::convertFromTypeScriptInternal(const std::string& ts) {
     return ts; // 简化实现
 }
 
-std::string JSCompiler::mergeJSInternal(const std::vector<std::string>& jsFiles) {
+std::string CHTL::JSCompiler::mergeJSInternal(const std::vector<std::string>& jsFiles) {
     std::stringstream ss;
     for (const auto& js : jsFiles) {
         ss << js << "\n";
@@ -577,7 +640,7 @@ std::string JSCompiler::mergeJSInternal(const std::vector<std::string>& jsFiles)
     return ss.str();
 }
 
-std::string JSCompiler::mergeASTInternal(const std::vector<std::shared_ptr<JSNode>>& asts) {
+std::string CHTL::JSCompiler::mergeASTInternal(const std::vector<std::shared_ptr<JSNode>>& asts) {
     std::stringstream ss;
     for (const auto& ast : asts) {
         ss << generateJSInternal(ast) << "\n";
@@ -585,7 +648,7 @@ std::string JSCompiler::mergeASTInternal(const std::vector<std::shared_ptr<JSNod
     return ss.str();
 }
 
-std::vector<std::string> JSCompiler::splitJSInternal(const std::string& js) {
+std::vector<std::string> CHTL::JSCompiler::splitJSInternal(const std::string& js) {
     std::vector<std::string> result;
     std::stringstream ss(js);
     std::string line;
@@ -599,7 +662,7 @@ std::vector<std::string> JSCompiler::splitJSInternal(const std::string& js) {
     return result;
 }
 
-std::vector<std::shared_ptr<JSNode>> JSCompiler::splitASTInternal(const std::shared_ptr<JSNode>& ast) {
+std::vector<std::shared_ptr<JSNode>> CHTL::JSCompiler::splitASTInternal(const std::shared_ptr<JSNode>& ast) {
     std::vector<std::shared_ptr<JSNode>> result;
     if (ast) {
         result = ast->children;
@@ -607,11 +670,11 @@ std::vector<std::shared_ptr<JSNode>> JSCompiler::splitASTInternal(const std::sha
     return result;
 }
 
-std::string JSCompiler::filterJSInternal(const std::string& js, const std::string& pattern) {
+std::string CHTL::JSCompiler::filterJSInternal(const std::string& js, const std::string& pattern) {
     return js; // 简化实现
 }
 
-std::vector<std::shared_ptr<JSNode>> JSCompiler::filterASTInternal(const std::shared_ptr<JSNode>& ast, JSNodeType type) {
+std::vector<std::shared_ptr<JSNode>> CHTL::JSCompiler::filterASTInternal(const std::shared_ptr<JSNode>& ast, JSNodeType type) {
     std::vector<std::shared_ptr<JSNode>> result;
     if (ast) {
         for (const auto& child : ast->children) {
@@ -623,23 +686,23 @@ std::vector<std::shared_ptr<JSNode>> JSCompiler::filterASTInternal(const std::sh
     return result;
 }
 
-std::string JSCompiler::sortJSInternal(const std::string& js) {
+std::string CHTL::JSCompiler::sortJSInternal(const std::string& js) {
     return js; // 简化实现
 }
 
-std::vector<std::shared_ptr<JSNode>> JSCompiler::sortASTInternal(const std::vector<std::shared_ptr<JSNode>>& nodes) {
+std::vector<std::shared_ptr<JSNode>> CHTL::JSCompiler::sortASTInternal(const std::vector<std::shared_ptr<JSNode>>& nodes) {
     return nodes; // 简化实现
 }
 
-std::string JSCompiler::uniqueJSInternal(const std::string& js) {
+std::string CHTL::JSCompiler::uniqueJSInternal(const std::string& js) {
     return js; // 简化实现
 }
 
-std::vector<std::shared_ptr<JSNode>> JSCompiler::uniqueASTInternal(const std::vector<std::shared_ptr<JSNode>>& nodes) {
+std::vector<std::shared_ptr<JSNode>> CHTL::JSCompiler::uniqueASTInternal(const std::vector<std::shared_ptr<JSNode>>& nodes) {
     return nodes; // 简化实现
 }
 
-std::map<std::string, int> JSCompiler::getStatisticsInternal(const std::string& js) {
+std::map<std::string, int> CHTL::JSCompiler::getStatisticsInternal(const std::string& js) {
     std::map<std::string, int> stats;
     stats["length"] = js.length();
     stats["lines"] = std::count(js.begin(), js.end(), '\n') + 1;
@@ -647,7 +710,7 @@ std::map<std::string, int> JSCompiler::getStatisticsInternal(const std::string& 
     return stats;
 }
 
-std::map<std::string, int> JSCompiler::getASTStatisticsInternal(const std::shared_ptr<JSNode>& ast) {
+std::map<std::string, int> CHTL::JSCompiler::getASTStatisticsInternal(const std::shared_ptr<JSNode>& ast) {
     std::map<std::string, int> stats;
     if (ast) {
         stats["nodes"] = ast->children.size();
@@ -655,16 +718,16 @@ std::map<std::string, int> JSCompiler::getASTStatisticsInternal(const std::share
     return stats;
 }
 
-std::string JSCompiler::debugJSInternal(const std::string& js) {
+std::string CHTL::JSCompiler::debugJSInternal(const std::string& js) {
     return "Debug JS: " + js;
 }
 
-std::string JSCompiler::debugASTInternal(const std::shared_ptr<JSNode>& ast) {
+std::string CHTL::JSCompiler::debugASTInternal(const std::shared_ptr<JSNode>& ast) {
     return "Debug AST: " + (ast ? nodeTypeToStringInternal(ast->type) : "null");
 }
 
 // 工具函数内部方法实现
-std::string JSCompiler::nodeTypeToStringInternal(JSNodeType type) {
+std::string CHTL::JSCompiler::nodeTypeToStringInternal(JSNodeType type) {
     switch (type) {
         case JSNodeType::PROGRAM: return "PROGRAM";
         case JSNodeType::STATEMENT: return "STATEMENT";
@@ -698,7 +761,7 @@ std::string JSCompiler::nodeTypeToStringInternal(JSNodeType type) {
     }
 }
 
-JSNodeType JSCompiler::stringToNodeTypeInternal(const std::string& type) {
+CHTL::JSNodeType CHTL::JSCompiler::stringToNodeTypeInternal(const std::string& type) {
     if (type == "PROGRAM") return JSNodeType::PROGRAM;
     if (type == "STATEMENT") return JSNodeType::STATEMENT;
     if (type == "EXPRESSION") return JSNodeType::EXPRESSION;
@@ -730,54 +793,54 @@ JSNodeType JSCompiler::stringToNodeTypeInternal(const std::string& type) {
     return JSNodeType::UNKNOWN;
 }
 
-bool JSCompiler::isValidNodeTypeInternal(JSNodeType type) {
+bool CHTL::JSCompiler::isValidNodeTypeInternal(CHTL::JSNodeType type) {
     return type != JSNodeType::UNKNOWN;
 }
 
-bool JSCompiler::isValidJSInternal(const std::string& js) {
+bool CHTL::JSCompiler::isValidJSInternal(const std::string& js) {
     return !js.empty();
 }
 
 // 序列化内部方法实现
-std::string JSCompiler::toJSONInternal() const {
+std::string CHTL::JSCompiler::toJSONInternal() const {
     return "{\"type\":\"JSCompiler\",\"debugMode\":" + std::to_string(debugMode) + "}";
 }
 
-std::string JSCompiler::toXMLInternal() const {
+std::string CHTL::JSCompiler::toXMLInternal() const {
     return "<JSCompiler><debugMode>" + std::to_string(debugMode) + "</debugMode></JSCompiler>";
 }
 
-std::string JSCompiler::toYAMLInternal() const {
+std::string CHTL::JSCompiler::toYAMLInternal() const {
     return "type: JSCompiler\ndebugMode: " + std::to_string(debugMode);
 }
 
-std::string JSCompiler::toStringInternal() const {
+std::string CHTL::JSCompiler::toStringInternal() const {
     return "JSCompiler";
 }
 
-std::string JSCompiler::toDebugStringInternal() const {
+std::string CHTL::JSCompiler::toDebugStringInternal() const {
     return "JSCompiler(debug=" + std::to_string(debugMode) + ")";
 }
 
 // 反序列化内部方法实现
-bool JSCompiler::fromJSONInternal(const std::string& json) {
+bool CHTL::JSCompiler::fromJSONInternal(const std::string& json) {
     return true; // 简化实现
 }
 
-bool JSCompiler::fromXMLInternal(const std::string& xml) {
+bool CHTL::JSCompiler::fromXMLInternal(const std::string& xml) {
     return true; // 简化实现
 }
 
-bool JSCompiler::fromYAMLInternal(const std::string& yaml) {
+bool CHTL::JSCompiler::fromYAMLInternal(const std::string& yaml) {
     return true; // 简化实现
 }
 
-bool JSCompiler::fromStringInternal(const std::string& str) {
+bool CHTL::JSCompiler::fromStringInternal(const std::string& str) {
     return true; // 简化实现
 }
 
 // 克隆内部方法实现
-std::unique_ptr<JSCompiler> JSCompiler::cloneInternal() const {
+std::unique_ptr<CHTL::JSCompiler> CHTL::JSCompiler::cloneInternal() const {
     auto compiler = std::make_unique<JSCompiler>();
     compiler->debugMode = debugMode;
     compiler->strictMode = strictMode;
@@ -788,24 +851,24 @@ std::unique_ptr<JSCompiler> JSCompiler::cloneInternal() const {
 }
 
 // 比较内部方法实现
-bool JSCompiler::equalsInternal(const JSCompiler& other) const {
+bool CHTL::JSCompiler::equalsInternal(const JSCompiler& other) const {
     return debugMode == other.debugMode && strictMode == other.strictMode;
 }
 
-bool JSCompiler::equalsInternal(const std::string& js) const {
+bool CHTL::JSCompiler::equalsInternal(const std::string& js) const {
     return !js.empty();
 }
 
 // 格式化内部方法实现
-std::string JSCompiler::formatInternal() const {
+std::string CHTL::JSCompiler::formatInternal() const {
     return toStringInternal();
 }
 
-std::string JSCompiler::minifyInternal() const {
+std::string CHTL::JSCompiler::minifyInternal() const {
     return toStringInternal();
 }
 
-std::string JSCompiler::beautifyInternal() const {
+std::string CHTL::JSCompiler::beautifyInternal() const {
     return toStringInternal();
 }
 

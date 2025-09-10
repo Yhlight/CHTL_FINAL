@@ -656,7 +656,7 @@ std::string CodeMerger::convertToExternal(const FinalResult& result) {
         }
         
         // 如果有关联的JS文件，添加默认脚本文件
-        if (externalJS.empty() && !result.js.empty()) {
+        if (externalJS.empty() && !result.javascript.empty()) {
             oss << "    <script src=\"script.js\"></script>\n";
         }
         
@@ -700,8 +700,8 @@ std::string CodeMerger::convertToBeautified(const FinalResult& result) {
     return beautifyHTML(html);
 }
 
-void CodeMerger::setHTMLTemplate(const std::string& template) {
-    htmlTemplate = template;
+void CodeMerger::setHTMLTemplate(const std::string& templateStr) {
+    htmlTemplate = templateStr;
 }
 
 std::string CodeMerger::getHTMLTemplate() const {

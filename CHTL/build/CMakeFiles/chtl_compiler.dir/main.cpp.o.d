@@ -228,6 +228,44 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /workspace/CHTL/main.cpp \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_multimap.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/erase_if.h \
   /workspace/CHTL/Common/CommonTypes.h \
+  /workspace/CHTL/CHTL/CHTLLexer/CHTLLexer.h \
+  /workspace/CHTL/CHTL/CHTLLexer/Token.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/unordered_map \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/unordered_map.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/hashtable.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/hashtable_policy.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/enable_special_members.h \
+  /workspace/CHTL/CHTL/CHTLParser/CHTLParser.h \
+  /workspace/CHTL/CHTL/CHTLNode/BaseNode.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/functional \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/std_function.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/array \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/compare \
+  /workspace/CHTL/CHTL/CHTLNode/ElementNode.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/set \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_set.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_multiset.h \
+  /workspace/CHTL/CHTL/CHTLNode/TextNode.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/stack \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/deque \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_deque.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/deque.tcc \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_stack.h \
+  /workspace/CHTL/CHTL/CHTLGenerator/CHTLGenerator.h \
+  /workspace/CHTL/CHTL/CHTLNode/CommentNode.h \
+  /workspace/CHTL/CHTL/CHTLNode/StyleNode.h \
+  /workspace/CHTL/CHTL/CHTLNode/ScriptNode.h \
+  /workspace/CHTL/CHTL/CHTLStyle/CHTLStyleProcessor.h \
+  /workspace/CHTL/CHTL/CHTLProperty/CHTLPropertyReference.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSLexer.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSToken.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSParser/CHTLJSParser.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.h \
+  /workspace/CHTL/CompilerDispatcher/CSSCompiler.h \
+  /workspace/CHTL/CompilerDispatcher/JSCompiler.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/any \
   /workspace/CHTL/Scanner/CHTLUnifiedScanner.h \
+  /workspace/CHTL/CodeMerger/CodeMerger.h \
   /workspace/CHTL/CHTL/CHTLContext/CHTLContext.h \
   /workspace/CHTL/CHTL_JS/CHTLJSContext/CHTLJSContext.h

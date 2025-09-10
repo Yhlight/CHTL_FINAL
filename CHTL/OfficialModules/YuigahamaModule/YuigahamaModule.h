@@ -18,15 +18,15 @@ public:
     ~YuigahamaModule() = default;
     
     // 模块信息
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
     // 模块功能
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // Yuigahama特有功能
     std::string generateAdvancedHTML(const std::string& content) const;

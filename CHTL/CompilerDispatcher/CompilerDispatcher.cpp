@@ -26,9 +26,9 @@ void CompilerDispatcher::initializeCompilers() {
     chtlLexer = std::make_unique<CHTLLexer>();
     chtlParser = std::make_unique<CHTLParser>();
     chtlGenerator = std::make_unique<CHTLGenerator>();
-    chtlJSLexer = std::make_unique<CHTLJSLexer>();
-    chtlJSParser = std::make_unique<CHTLJSParser>();
-    chtlJSGenerator = std::make_unique<CHTLJSGenerator>();
+    chtlJSLexer = std::make_unique<CHTL_JS::CHTLJSLexer>();
+    chtlJSParser = std::make_unique<CHTL_JS::CHTLJSParser>();
+    chtlJSGenerator = std::make_unique<CHTL_JS::CHTLJSGenerator>();
     cssCompiler = std::make_unique<CSSCompiler>();
     jsCompiler = std::make_unique<JSCompiler>();
     scanner = std::make_unique<CHTLUnifiedScanner>();

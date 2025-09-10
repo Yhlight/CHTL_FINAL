@@ -55,6 +55,8 @@ private:
     std::string optimizeHTML(const std::string& html);
     std::string removeEmptyElements(const std::string& html);
     std::string compressWhitespace(const std::string& html);
+    std::string minifyHTML(const std::string& html);
+    std::string beautifyHTML(const std::string& html);
     
     // 错误处理
     void addError(const std::string& error);

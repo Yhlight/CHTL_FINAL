@@ -11,6 +11,33 @@
 namespace CHTL {
 namespace Official {
 
+// Chtholly核心模块
+class ChthollyCoreModule : public CMODModule {
+public:
+    ChthollyCoreModule();
+    ~ChthollyCoreModule() = default;
+    
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
+    
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
+    
+    // 核心功能
+    std::string generateHTML(const std::string& content) const;
+    std::string generateCSS(const std::string& content) const;
+    std::string generateJS(const std::string& content) const;
+    std::string processElement(const std::string& element) const;
+    std::string processAttribute(const std::string& attribute) const;
+    std::string processText(const std::string& text) const;
+    
+private:
+    bool initialized;
+};
+
 // Chtholly模块 - 官方核心模块
 class ChthollyModule : public CMODModule {
 public:
@@ -18,15 +45,15 @@ public:
     ~ChthollyModule() = default;
     
     // 模块信息
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
     // 模块功能
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // Chtholly特有功能
     std::string generateHTML(const std::string& content) const;
@@ -58,14 +85,14 @@ public:
     ChthollyAccordionModule();
     ~ChthollyAccordionModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // 手风琴功能
     std::string generateAccordion(const std::string& title, const std::string& content) const;
@@ -81,14 +108,14 @@ public:
     ChthollyGalleryModule();
     ~ChthollyGalleryModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // 四叶窗相册功能
     std::string generateGallery(const std::vector<std::string>& images) const;
@@ -104,14 +131,14 @@ public:
     ChthollyMemoModule();
     ~ChthollyMemoModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // 备忘录功能
     std::string generateMemo(const std::string& title, const std::string& content) const;
@@ -127,14 +154,14 @@ public:
     ChthollyNoteModule();
     ~ChthollyNoteModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // 暖色笔记功能
     std::string generateNote(const std::string& content, const std::string& color = "warm") const;
@@ -150,14 +177,14 @@ public:
     ChthollySakuraModule();
     ~ChthollySakuraModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // 樱花雨功能
     std::string generateSakuraRain(int count = 50) const;
@@ -173,14 +200,14 @@ public:
     ChthollyMouseModule();
     ~ChthollyMouseModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // 鼠标特效功能
     std::string generateMouseTrail(const std::string& color = "pink") const;
@@ -196,14 +223,14 @@ public:
     ChthollyProgressModule();
     ~ChthollyProgressModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // 进度条功能
     std::string generateProgressBar(int value, int max = 100) const;
@@ -214,19 +241,19 @@ private:
 };
 
 // Chtholly CJMOD子模块 - printMylove
-class ChthollyPrintMyloveModule : public CJMODModule {
+class ChthollyPrintMyloveModule : public CHTL_JS::CJMODModule {
 public:
     ChthollyPrintMyloveModule();
     ~ChthollyPrintMyloveModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // printMylove功能
     std::string printMylove(const std::string& url, const std::string& mode = "ASCII", 
@@ -238,19 +265,19 @@ private:
 };
 
 // Chtholly CJMOD子模块 - iNeverAway
-class ChthollyINeverAwayModule : public CJMODModule {
+class ChthollyINeverAwayModule : public CHTL_JS::CJMODModule {
 public:
     ChthollyINeverAwayModule();
     ~ChthollyINeverAwayModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // iNeverAway功能
     std::string createVirtualObject(const std::string& name, const std::map<std::string, std::string>& functions) const;
@@ -262,19 +289,19 @@ private:
 };
 
 // Chtholly CJMOD子模块 - util...then表达式
-class ChthollyUtilThenModule : public CJMODModule {
+class ChthollyUtilThenModule : public CHTL_JS::CJMODModule {
 public:
     ChthollyUtilThenModule();
     ~ChthollyUtilThenModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // util...then功能
     std::string generateUtilThen(const std::string& condition, const std::string& changeCode, 
@@ -292,14 +319,14 @@ public:
     ChthollyStyleModule();
     ~ChthollyStyleModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // 样式功能
     std::string processStyle(const std::string& style) const;
@@ -316,14 +343,14 @@ public:
     ChthollyScriptModule();
     ~ChthollyScriptModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // 脚本功能
     std::string processScript(const std::string& script) const;
@@ -340,17 +367,17 @@ public:
     ChthollyTemplateModule();
     ~ChthollyTemplateModule() = default;
     
-    std::string getModuleName() const override;
-    std::string getVersion() const override;
-    std::string getDescription() const override;
-    std::string getAuthor() const override;
+    std::string getModuleName() const;
+    std::string getVersion() const;
+    std::string getDescription() const;
+    std::string getAuthor() const;
     
-    bool initialize() override;
-    bool isInitialized() const override;
-    void cleanup() override;
+    bool initialize();
+    bool isInitialized() const;
+    void cleanup();
     
     // 模板功能
-    std::string processTemplate(const std::string& template) const;
+    std::string processTemplate(const std::string& templateStr) const;
     std::string generateTemplate(const std::string& templateName) const;
     std::string processVariable(const std::string& variable) const;
     
