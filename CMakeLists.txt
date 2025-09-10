@@ -15,7 +15,7 @@ target_include_directories(chtl_compiler PRIVATE Util)
 # Add subdirectories for organizing the project
 add_subdirectory(Util)
 add_subdirectory(CHTL)
-add_subdirectory("CHTL JS")
+add_subdirectory(CHTL_JS)
 add_subdirectory(Scanner)
 add_subdirectory(CodeMerger)
 add_subdirectory(CompilerDispatcher)
