@@ -213,7 +213,21 @@ class OriginNode(BaseNode):
     parent: Optional['BaseNode'] = field(default=None, repr=False)
 
 
-DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode, CustomDefinitionNode, StyleNode, ImportNode, ConfigNode, OriginNode]
+@dataclass
+class InfoNode(BaseNode):
+    """Represents an [Info] block for a module."""
+    metadata: Dict[str, str] = field(default_factory=dict)
+    lineno: int = 0
+    parent: Optional['BaseNode'] = field(default=None, repr=False)
+
+@dataclass
+class ExportNode(BaseNode):
+    """Represents an [Export] block for a module."""
+    exported_items: Dict[str, List[str]] = field(default_factory=dict)
+    lineno: int = 0
+    parent: Optional['BaseNode'] = field(default=None, repr=False)
+
+DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode, CustomDefinitionNode, StyleNode, ImportNode, ConfigNode, OriginNode, InfoNode, ExportNode]
 
 @dataclass
 class DocumentNode(BaseNode):

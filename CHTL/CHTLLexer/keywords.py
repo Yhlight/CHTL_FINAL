@@ -45,6 +45,8 @@ class TokenType(Enum):
     IMPORT = auto()
     NAMESPACE = auto()
     CONFIGURATION = auto()
+    INFO = auto()
+    EXPORT = auto()
     STYLE = auto()
     TEXT = auto()
     SCRIPT = auto()
@@ -85,6 +87,8 @@ KEYWORDS = {
     "Import": TokenType.IMPORT,
     "Namespace": TokenType.NAMESPACE,
     "Configuration": TokenType.CONFIGURATION,
+    "Info": TokenType.INFO,
+    "Export": TokenType.EXPORT,
     "style": TokenType.STYLE,
     "text": TokenType.TEXT,
     "script": TokenType.SCRIPT,

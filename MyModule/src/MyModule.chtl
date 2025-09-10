@@ -1,0 +1,5 @@
+[Template] @Element "MyCard" {
+    div {
+        text: "This is MyCard from a CMOD module.";
+    }
+}

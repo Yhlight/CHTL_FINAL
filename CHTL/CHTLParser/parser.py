@@ -3,7 +3,7 @@ from CHTL.CHTLNode.nodes import (
     BaseNode, DocumentNode, ElementNode, AttributeNode, TextNode, CommentNode, Node,
     StyleNode, CssRuleNode, CssPropertyNode, TemplateDefinitionNode, TemplateUsageNode,
     CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode, LiteralNode,
-    ImportNode, ConfigNode, OriginNode
+    ImportNode, ConfigNode, OriginNode, InfoNode, ExportNode
 )
 from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLParser.expression_parser import ExpressionParser
@@ -52,6 +52,10 @@ class Parser:
                     doc.add_child(self.parse_origin_block(keyword_token))
                 elif keyword_token.type == TokenType.CONFIGURATION:
                     doc.add_child(self.parse_configuration_block(keyword_token))
+                elif keyword_token.type == TokenType.INFO:
+                    doc.add_child(self.parse_info_block(keyword_token))
+                elif keyword_token.type == TokenType.EXPORT:
+                    doc.add_child(self.parse_export_block(keyword_token))
                 else:
                     raise RuntimeError(f"Unknown definition type: {keyword_token.value}")
             elif token.type == TokenType.COMMENT:
@@ -121,9 +125,17 @@ class Parser:
         self.consume(TokenType.RBRACK)
         self.consume(TokenType.AT_SYMBOL)
         template_type_token = self.consume(TokenType.IDENTIFIER)
-        template_name_token = self.consume(TokenType.IDENTIFIER)
+
+        template_name_token = self.current_token()
+        if template_name_token.type not in [TokenType.IDENTIFIER, TokenType.STRING]:
+            raise RuntimeError(f"Line {template_name_token.lineno}: Expected an identifier or string for template name, but got {template_name_token.type}")
+        self.consume()
+
         template_type = template_type_token.value
         template_name = template_name_token.value
+        if template_name_token.type == TokenType.STRING:
+            template_name = template_name[1:-1] # remove quotes
+
         content = self.parse_definition_content(template_type)
         node_class = CustomDefinitionNode if is_custom else TemplateDefinitionNode
         return node_class(template_type=template_type, name=template_name, content=content, lineno=start_token.lineno)
@@ -188,6 +200,42 @@ class Parser:
         self.context.set_keyword_config(config_data)
 
         return ConfigNode(lineno=start_token.lineno, config=config_data)
+
+    def parse_info_block(self, start_token: Token) -> InfoNode:
+        self.consume(TokenType.RBRACK)
+        self.consume(TokenType.LBRACE)
+        metadata = {}
+        while self.current_token().type != TokenType.RBRACE:
+            key_token = self.consume(TokenType.IDENTIFIER)
+            self.consume(TokenType.EQUALS)
+            value_token = self.consume(TokenType.STRING)
+            metadata[key_token.value] = value_token.value[1:-1]
+            if self.current_token().type == TokenType.SEMICOLON:
+                self.consume(TokenType.SEMICOLON)
+        self.consume(TokenType.RBRACE)
+        return InfoNode(metadata=metadata, lineno=start_token.lineno)
+
+    def parse_export_block(self, start_token: Token) -> ExportNode:
+        self.consume(TokenType.RBRACK)
+        self.consume(TokenType.LBRACE)
+        exported_items = {}
+        while self.current_token().type != TokenType.RBRACE:
+            self.consume(TokenType.LBRACK)
+            construct = self.consume().value
+            self.consume(TokenType.RBRACK)
+            self.consume(TokenType.AT_SYMBOL)
+            export_type = self.consume().value
+
+            key = f"[{construct}] @{export_type}"
+            items = []
+            while self.current_token().type != TokenType.SEMICOLON:
+                if self.current_token().type == TokenType.COMMA:
+                    self.consume()
+                items.append(self.consume(TokenType.IDENTIFIER).value)
+            self.consume(TokenType.SEMICOLON)
+            exported_items[key] = items
+        self.consume(TokenType.RBRACE)
+        return ExportNode(exported_items=exported_items, lineno=start_token.lineno)
 
     def parse_at_usage(self):
         start_token = self.consume(TokenType.AT_SYMBOL)
