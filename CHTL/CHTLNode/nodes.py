@@ -98,7 +98,7 @@ class CommentNode(BaseNode):
 @dataclass
 class OriginNode(BaseNode):
     """Represents a block of raw, unprocessed code."""
-    origin_type: str  # e.g., '@Html', '@Style'
+    origin_type: str
     name: Optional[str] = None
     content: str = ""
     lineno: int = 0
@@ -106,7 +106,6 @@ class OriginNode(BaseNode):
 
 @dataclass
 class CssPropertyNode(BaseNode):
-    """A CSS property. Its value can be a simple string or a complex expression tree."""
     name: str
     value: Union[str, ExpressionNode]
     lineno: int = 0
@@ -123,6 +122,8 @@ class CssRuleNode(BaseNode):
 class TemplateUsageNode(BaseNode):
     template_type: str
     name: str
+    # Add namespace for template resolution
+    namespace_from: Optional[List[str]] = None
     lineno: int = 0
     parent: Optional['BaseNode'] = field(default=None, repr=False)
 
@@ -161,6 +162,22 @@ class StyleNode(BaseNode):
         child.parent = self
         self.children.append(child)
 
+@dataclass
+class ImportNode(BaseNode):
+    import_type_parts: List[str]
+    imported_item_name: Optional[str]
+    file_path: str
+    alias: Optional[str] = None
+    lineno: int = 0
+    parent: Optional['BaseNode'] = field(default=None, repr=False)
+
+@dataclass
+class NamespaceNode(BaseNode):
+    name: str
+    children: List['DocumentContent'] = field(default_factory=list)
+    lineno: int = 0
+    parent: Optional['BaseNode'] = field(default=None, repr=False)
+
 Node = Union['ElementNode', TextNode, CommentNode, StyleNode, TemplateUsageNode, CustomUsageNode, OriginNode]
 
 @dataclass
@@ -184,7 +201,7 @@ class TemplateDefinitionNode(BaseNode):
 
 CustomDefinitionNode = TemplateDefinitionNode
 
-DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode, CustomDefinitionNode, StyleNode, OriginNode]
+DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode, CustomDefinitionNode, StyleNode, OriginNode, ImportNode, NamespaceNode]
 
 @dataclass
 class DocumentNode(BaseNode):

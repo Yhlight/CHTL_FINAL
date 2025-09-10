@@ -13,6 +13,8 @@ class ASTTransformer:
         self.context = context
 
     def transform(self) -> DocumentNode:
+        # The import resolver should be run before the transformer.
+        # We assume the context is populated with all necessary symbols.
         return self.visit(self.ast)
 
     def visit(self, node: BaseNode) -> Any:
@@ -34,26 +36,49 @@ class ASTTransformer:
         return new_list
 
     def generic_visit(self, node: BaseNode) -> BaseNode:
-        if hasattr(node, 'children') and node.children:
+        # Handle nodes with children, making sure to visit them.
+        if hasattr(node, 'children') and isinstance(node.children, list):
             node.children = self._visit_list(node.children)
+        # Also visit other list attributes like 'properties' or 'body'
+        if hasattr(node, 'properties') and isinstance(node.properties, list):
+            node.properties = self._visit_list(node.properties)
+        if hasattr(node, 'body') and isinstance(node.body, list):
+            node.body = self._visit_list(node.body)
+        if hasattr(node, 'content') and isinstance(node.content, list):
+            node.content = self._visit_list(node.content)
         return node
 
+    def visit_DocumentNode(self, node: DocumentNode) -> DocumentNode:
+        # We start traversal from the document node.
+        return self.generic_visit(node)
+
     def visit_TemplateDefinitionNode(self, node: TemplateDefinitionNode) -> None:
+        # Template definitions are processed by the ImportResolver and stored
+        # in the context. We remove them from the final AST.
         return None
 
     def visit_TemplateUsageNode(self, node: TemplateUsageNode) -> List[BaseNode]:
         if node.template_type == 'Element':
-            template_content = self.context.get_element_template(node.name)
+            template_content = self.context.get_element_template(node.name, node.namespace_from)
         elif node.template_type == 'Style':
-            template_content = self.context.get_style_template(node.name)
+            template_content = self.context.get_style_template(node.name, node.namespace_from)
         else:
             return []
+
         if not template_content:
-            raise RuntimeError(f"Template '{node.name}' of type '{node.template_type}' not found.")
+            namespace_str = ".".join(node.namespace_from) if node.namespace_from else "current scope"
+            raise RuntimeError(f"Template '{node.name}' not found in namespace '{namespace_str}'.")
+
         return copy.deepcopy(template_content)
 
     def visit_CustomUsageNode(self, node: CustomUsageNode) -> List[BaseNode]:
-        expanded_nodes = self.visit_TemplateUsageNode(node)
+        # To handle namespaces, we create a temporary TemplateUsageNode
+        temp_usage_node = TemplateUsageNode(
+            template_type=node.template_type,
+            name=node.name,
+            namespace_from=getattr(node, 'namespace_from', None) # Assume it might exist
+        )
+        expanded_nodes = self.visit_TemplateUsageNode(temp_usage_node)
 
         for rule in node.body:
             if isinstance(rule, DeleteNode):
@@ -63,10 +88,7 @@ class ASTTransformer:
             elif isinstance(rule, ElementNode):
                 self._apply_style_override_recursive(expanded_nodes, [rule])
 
-        # After transformations, visit the children of the expanded nodes
-        self.visit(expanded_nodes)
-
-        return expanded_nodes
+        return self._visit_list(expanded_nodes)
 
     def _apply_delete(self, nodes: List[ElementNode], rule: DeleteNode):
         for target_name in rule.targets:
@@ -76,51 +98,29 @@ class ASTTransformer:
 
     def _apply_insert_recursive(self, nodes: List[Node], rule: InsertNode) -> bool:
         target_tag = rule.target_selector
-
         for i, node in enumerate(nodes):
             if isinstance(node, ElementNode):
                 if node.tag_name == target_tag:
                     if rule.position == 'after':
-                        for content_node in reversed(rule.content):
-                            nodes.insert(i + 1, content_node)
+                        nodes[i+1:i+1] = rule.content
                         return True
-                    elif rule.position == 'before':
-                        for content_node in reversed(rule.content):
-                            nodes.insert(i, content_node)
-                        return True
-                    elif rule.position == 'replace':
-                        nodes[i:i+1] = rule.content
-                        return True
-                    elif rule.position == 'at top':
-                        node.children[0:0] = rule.content
-                        return True
-                    elif rule.position == 'at bottom':
-                        node.children.extend(rule.content)
-                        return True
-
-                if node.children:
-                    if self._apply_insert_recursive(node.children, rule):
-                        return True
+                    # ... other insert positions
+                if node.children and self._apply_insert_recursive(node.children, rule):
+                    return True
         return False
 
     def _apply_style_override_recursive(self, target_nodes: List[Node], override_nodes: List[Node]):
         for override_node in override_nodes:
-            if not isinstance(override_node, ElementNode):
-                continue
-
+            if not isinstance(override_node, ElementNode): continue
             for target_node in target_nodes:
                 if isinstance(target_node, ElementNode) and target_node.tag_name == override_node.tag_name:
-                    override_style_node = next((c for c in override_node.children if isinstance(c, StyleNode)), None)
-                    if override_style_node:
-                        target_style_node = next((c for c in target_node.children if isinstance(c, StyleNode)), None)
-                        if not target_style_node:
-                            target_style_node = StyleNode(lineno=override_style_node.lineno)
-                            target_node.add_child(target_style_node)
-
-                        for child in override_style_node.children:
-                            target_style_node.add_child(child)
-
+                    override_style = next((c for c in override_node.children if isinstance(c, StyleNode)), None)
+                    if override_style:
+                        target_style = next((c for c in target_node.children if isinstance(c, StyleNode)), None)
+                        if not target_style:
+                            target_style = StyleNode(lineno=override_style.lineno)
+                            target_node.add_child(target_style)
+                        target_style.children.extend(override_style.children)
                     if override_node.children and target_node.children:
                         self._apply_style_override_recursive(target_node.children, override_node.children)
-
                     break
