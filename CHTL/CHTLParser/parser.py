@@ -27,13 +27,10 @@ class Parser:
         token = self.current_token()
         if not token:
             raise RuntimeError("Unexpected end of token stream.")
-
         if expected_type and token.type != expected_type:
             raise RuntimeError(f"Line {token.lineno}: Expected token {expected_type}, but got {token.type} ('{token.value}')")
-
         if expected_value and token.value != expected_value:
             raise RuntimeError(f"Line {token.lineno}: Expected '{expected_value}', but got '{token.value}'")
-
         self.pos += 1
         return token
 
@@ -43,35 +40,28 @@ class Parser:
             token = self.current_token()
             if token.type == TokenType.LBRACK:
                 self.consume(TokenType.LBRACK)
-                keyword_token = self.consume() # Consume the keyword, e.g., TEMPLATE
-
+                keyword_token = self.consume()
                 if keyword_token.type == TokenType.TEMPLATE:
                     doc.add_child(self.parse_template_definition(keyword_token))
                 elif keyword_token.type == TokenType.CUSTOM:
                     doc.add_child(self.parse_template_definition(keyword_token, is_custom=True))
                 elif keyword_token.type == TokenType.IMPORT:
                     doc.add_child(self.parse_import_statement(keyword_token))
-                # Config blocks are handled by the pre-parser, so we ignore them here.
                 elif keyword_token.type == TokenType.CONFIGURATION:
-                    # We need to consume the block to advance the parser, but we don't create a node.
                     self.consume(TokenType.RBRACK)
-                    brace_level = 0
-                    if self.current_token().type == TokenType.LBRACE:
-                        brace_level = 1
-                        self.consume(TokenType.LBRACE)
-                        while brace_level > 0:
-                            t = self.consume()
-                            if t.type == TokenType.LBRACE: brace_level += 1
-                            if t.type == TokenType.RBRACE: brace_level -= 1
+                    brace_level = 1
+                    self.consume(TokenType.LBRACE)
+                    while brace_level > 0:
+                        t = self.consume()
+                        if t.type == TokenType.LBRACE: brace_level += 1
+                        if t.type == TokenType.RBRACE: brace_level -= 1
                 else:
                     raise RuntimeError(f"Unknown definition type: {keyword_token.value}")
-
             elif token.type == TokenType.COMMENT:
                 doc.add_child(self.parse_comment())
             elif token.type == TokenType.STYLE:
                 doc.add_child(self.parse_style_block(parent_element=None))
             elif token.type == TokenType.IDENTIFIER:
-                # title: shorthand is a special case not covered by keywords
                 if token.value == 'title' and self.peek(1) and self.peek(1).type == TokenType.COLON:
                     doc.add_child(self.parse_title_shorthand())
                 else:
@@ -85,13 +75,10 @@ class Parser:
         self.consume(TokenType.COLON)
         value_token = self.consume(TokenType.STRING)
         value = value_token.value[1:-1]
-
         title_element = ElementNode(tag_name='title', lineno=title_token.lineno)
         title_element.add_child(TextNode(value=value, lineno=value_token.lineno))
-
         if self.current_token() and self.current_token().type == TokenType.SEMICOLON:
             self.consume(TokenType.SEMICOLON)
-
         return title_element
 
     def parse_definition_content(self, template_type: str):
@@ -141,8 +128,6 @@ class Parser:
         template_type = template_type_token.value
         template_name = template_name_token.value
         content = self.parse_definition_content(template_type)
-        if template_type == 'Element':
-            self.context.add_element_template(template_name, content)
         node_class = CustomDefinitionNode if is_custom else TemplateDefinitionNode
         return node_class(template_type=template_type, name=template_name, content=content, lineno=start_token.lineno)
 
@@ -150,27 +135,18 @@ class Parser:
         start_token = self.consume(TokenType.AT_SYMBOL)
         template_type_token = self.consume(TokenType.IDENTIFIER)
         template_name_token = self.consume(TokenType.IDENTIFIER)
-
         from_namespace = None
         if self.current_token().type == TokenType.FROM:
             self.consume(TokenType.FROM)
-            # Namespaces can be dotted, e.g., space.room
             namespace_parts = [self.consume(TokenType.IDENTIFIER).value]
             while self.current_token().type == TokenType.DOT:
                 self.consume(TokenType.DOT)
                 namespace_parts.append(self.consume(TokenType.IDENTIFIER).value)
             from_namespace = ".".join(namespace_parts)
-
         if self.current_token().type == TokenType.SEMICOLON:
             self.consume(TokenType.SEMICOLON)
-            return TemplateUsageNode(
-                template_type=template_type_token.value,
-                name=template_name_token.value,
-                from_namespace=from_namespace,
-                lineno=start_token.lineno
-            )
+            return TemplateUsageNode(template_type=template_type_token.value, name=template_name_token.value, from_namespace=from_namespace, lineno=start_token.lineno)
         else:
-            # Custom usage with 'from' is not specified, but we should handle it gracefully
             if from_namespace:
                 raise RuntimeError(f"Line {start_token.lineno}: Custom usage with 'from' is not supported.")
             body = self.parse_custom_usage_body()
@@ -181,7 +157,10 @@ class Parser:
         self.consume(TokenType.LBRACE)
         while self.current_token() and self.current_token().type != TokenType.RBRACE:
             token = self.current_token()
-            if token.type == TokenType.DELETE:
+            if token.type == TokenType.COMMENT:
+                self.consume()
+                continue
+            elif token.type == TokenType.DELETE:
                 body.append(self.parse_delete_rule())
             elif token.type == TokenType.INSERT:
                 body.append(self.parse_insert_rule())
@@ -238,11 +217,7 @@ class Parser:
             alias = alias_token.value
         if self.current_token() and self.current_token().type == TokenType.SEMICOLON:
             self.consume(TokenType.SEMICOLON)
-        return ImportNode(
-            lineno=start_token.lineno, import_type=import_type,
-            construct_type=construct_type, path=path, alias=alias,
-            imported_item=imported_item
-        )
+        return ImportNode(lineno=start_token.lineno, import_type=import_type, construct_type=construct_type, path=path, alias=alias, imported_item=imported_item)
 
     def parse_comment(self) -> CommentNode:
         token = self.consume(TokenType.COMMENT)
@@ -289,7 +264,7 @@ class Parser:
 
     def parse_attribute(self, element: ElementNode):
         attr_name_token = self.consume()
-        self.consume() # colon or equals
+        self.consume()
         if attr_name_token.type == TokenType.TEXT:
              value = self.parse_value_tokens([TokenType.SEMICOLON, TokenType.RBRACE])
              element.add_child(TextNode(value=value, lineno=attr_name_token.lineno))
@@ -328,16 +303,11 @@ class Parser:
     def parse_css_property(self) -> CssPropertyNode:
         name_token = self.consume(TokenType.IDENTIFIER)
         self.consume(TokenType.COLON)
-
         expression_tokens = []
         while self.current_token() and self.current_token().type not in (TokenType.SEMICOLON, TokenType.RBRACE):
             expression_tokens.append(self.consume())
-
         if not expression_tokens:
             raise RuntimeError(f"Line {name_token.lineno}: Missing value for CSS property '{name_token.value}'")
-
-        # If it's a simple, single value, store as a literal string for efficiency.
-        # Otherwise, parse the full expression.
         if len(expression_tokens) == 1 and expression_tokens[0].type in (TokenType.IDENTIFIER, TokenType.UNQUOTED_LITERAL, TokenType.STRING):
             token = expression_tokens[0]
             value = token.value[1:-1] if token.type == TokenType.STRING else token.value
@@ -345,10 +315,8 @@ class Parser:
         else:
             expr_parser = ExpressionParser(expression_tokens)
             value_node = expr_parser.parse()
-
         if self.current_token() and self.current_token().type == TokenType.SEMICOLON:
             self.consume(TokenType.SEMICOLON)
-
         return CssPropertyNode(name=name_token.value, value=value_node, lineno=name_token.lineno)
 
     def parse_css_rule(self, parent_element: Optional[ElementNode]) -> CssRuleNode:
@@ -357,7 +325,6 @@ class Parser:
         while self.current_token() and self.current_token().type != TokenType.LBRACE:
             selector_parts.append(self.consume().value)
         selector = "".join(selector_parts).strip()
-
         if parent_element:
             if selector.startswith('.'):
                 class_name = selector.split(':')[0].split(' ')[0][1:]
@@ -374,7 +341,6 @@ class Parser:
                     if attr.name == 'id':
                         attr.value = id_name; found = True; break
                 if not found: parent_element.attributes.append(AttributeNode(name='id', value=id_name))
-
         rule_node = CssRuleNode(selector=selector, lineno=rule_lineno)
         self.consume(TokenType.LBRACE)
         while self.current_token() and self.current_token().type != TokenType.RBRACE:

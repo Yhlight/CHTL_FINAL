@@ -60,12 +60,27 @@ class CompilationContext:
         [Configuration] block) and updates the context.
         """
         config_key_to_tokentype = {
-            "KEYWORD_STYLE": TokenType.STYLE,
+            "KEYWORD_INHERIT": TokenType.INHERIT,
+            "KEYWORD_DELETE": TokenType.DELETE,
+            "KEYWORD_INSERT": TokenType.INSERT,
+            "KEYWORD_AFTER": TokenType.AFTER,
+            "KEYWORD_BEFORE": TokenType.BEFORE,
+            "KEYWORD_REPLACE": TokenType.REPLACE,
+            "KEYWORD_ATTOP": TokenType.AT_KEYWORD, # Note: at top is two words, lexer handles 'at'
+            "KEYWORD_ATBOTTOM": TokenType.BOTTOM, # Note: lexer handles 'bottom'
+            "KEYWORD_FROM": TokenType.FROM,
+            "KEYWORD_AS": TokenType.AS,
+            "KEYWORD_EXCEPT": TokenType.EXCEPT,
+            "KEYWORD_USE": TokenType.USE,
+            "KEYWORD_HTML5": TokenType.HTML5,
             "KEYWORD_TEXT": TokenType.TEXT,
+            "KEYWORD_STYLE": TokenType.STYLE,
             "KEYWORD_SCRIPT": TokenType.SCRIPT,
             "KEYWORD_CUSTOM": TokenType.CUSTOM,
             "KEYWORD_TEMPLATE": TokenType.TEMPLATE,
-            # Add all other mappings from CHTL.md's [Name] block
+            "KEYWORD_ORIGIN": TokenType.ORIGIN,
+            "KEYWORD_IMPORT": TokenType.IMPORT,
+            "KEYWORD_NAMESPACE": TokenType.NAMESPACE,
         }
 
         lines = [line.strip() for line in config_string.split('\n')]
@@ -103,10 +118,10 @@ class CompilationContext:
 
                     # Add new keyword(s)
                     if value_str.startswith('[') and value_str.endswith(']'):
-                        new_keys = [k.strip() for k in value_str[1:-1].split(',')]
+                        new_keys = [k.strip() for k in value_str[1:-1].split(',') if k.strip()]
                         for new_key in new_keys:
                             self.keywords[new_key] = token_type_to_update
-                    else:
+                    elif value_str:
                         self.keywords[value_str] = token_type_to_update
 
             elif '=' in line: # Handle simple settings

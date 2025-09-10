@@ -1,0 +1,15 @@
+[Configuration] {
+    [Name] {
+        KEYWORD_DELETE = remove;
+    }
+}
+
+[Custom] @Element MyComponent {
+    div { id: "test"; }
+}
+
+body {
+    @Element MyComponent {
+        remove id;
+    }
+}
