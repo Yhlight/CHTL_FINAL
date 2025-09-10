@@ -212,21 +212,55 @@ void ImportManager::process_file(const std::string& file_path) {
     resolve_dependencies(file_path);
 }
 
-void ImportManager::process_imports(const std::string& content, const std::string& current_file) {
-    // 简单的导入语句解析
-    std::regex import_regex(R"(\[Import\]\s+(\w+)\s+from\s+["']([^"']+)["'])");
-    std::sregex_iterator begin(content.begin(), content.end(), import_regex);
-    std::sregex_iterator end;
-    
-    for (auto it = begin; it != end; ++it) {
-        std::string name = (*it)[1].str();
-        std::string path = (*it)[2].str();
-        
-        std::string resolved_path = resolve_import_path(path, current_file);
-        ImportType type = path_resolver_->detect_file_type(resolved_path);
-        
-        process_precise_import(name, resolved_path, type);
+void ImportManager::process_import_node(std::shared_ptr<ast::ImportNode> node) {
+    if (!node) {
+        return;
     }
+
+    // For now, we only handle CHTL imports.
+    // A full implementation would need to handle HTML, CSS, JS, etc.
+    if (node->import_type != ImportType::CHTL) {
+        // Silently ignore non-CHTL imports for now
+        return;
+    }
+
+    std::string path_to_load = path_resolver_->resolve_path(node->file_path);
+
+    // Check for circular dependencies
+    if (processed_files_.count(path_to_load)) {
+        // We could throw an error here, but for now we'll just return
+        // to avoid infinite recursion.
+        return;
+    }
+
+    // Read and parse the imported file
+    try {
+        std::string content = read_file(path_to_load);
+        processed_files_.insert(path_to_load); // Mark as processed
+
+        // Recursively parse the imported file
+        lexer::CHTLLexer lexer(content);
+        auto tokens = lexer.tokenize();
+        parser::CHTLParser parser(tokens);
+        auto imported_ast = parser.parse();
+
+        // Store the parsed AST
+        imported_asts_[path_to_load] = imported_ast;
+
+        // Recursively resolve imports in the new AST
+        // Note: A new resolver might be needed if base paths change
+        ImportResolver resolver(*this);
+        resolver.resolve_imports(imported_ast);
+
+    } catch (const std::exception& e) {
+        // Handle file not found or other parsing errors
+        std::cerr << "Error processing import for file '" << path_to_load << "': " << e.what() << std::endl;
+    }
+}
+
+// This method is now obsolete, the new resolver handles this.
+void ImportManager::process_imports(const std::string& content, const std::string& current_file) {
+    // This function is now handled by the ImportResolver and process_import_node
 }
 
 void ImportManager::process_precise_import(const std::string& name, const std::string& path, ImportType type) {

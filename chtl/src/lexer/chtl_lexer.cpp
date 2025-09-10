@@ -303,9 +303,7 @@ Token CHTLLexer::scan_bracket() {
 }
 
 Token CHTLLexer::scan_chtl_special() {
-    if (current_char() == '[') {
-        return scan_square_bracket_construct();
-    } else if (current_char() == '{' && peek_char() == '{') {
+    if (current_char() == '{' && peek_char() == '{') {
         return scan_curly_selector();
     }
     
@@ -331,38 +329,6 @@ Token CHTLLexer::scan_unknown() {
     char c = current_char();
     advance();
     return create_token(TokenType::UNKNOWN, std::string(1, c));
-}
-
-Token CHTLLexer::scan_square_bracket_construct() {
-    start_position_ = position_;
-    advance(); // skip '['
-    
-    while (position_ < source_.length() && current_char() != ']') {
-        advance();
-    }
-    
-    if (current_char() == ']') {
-        advance(); // skip ']'
-    }
-    
-    std::string value = source_.substr(start_position_, position_ - start_position_);
-    
-    // Determine the type based on content
-    if (value.find("Template") != std::string::npos) {
-        return create_token(TokenType::TEMPLATE, value);
-    } else if (value.find("Custom") != std::string::npos) {
-        return create_token(TokenType::CUSTOM, value);
-    } else if (value.find("Origin") != std::string::npos) {
-        return create_token(TokenType::ORIGIN, value);
-    } else if (value.find("Import") != std::string::npos) {
-        return create_token(TokenType::IMPORT, value);
-    } else if (value.find("Namespace") != std::string::npos) {
-        return create_token(TokenType::NAMESPACE, value);
-    } else if (value.find("Configuration") != std::string::npos) {
-        return create_token(TokenType::CONFIGURATION, value);
-    }
-    
-    return create_token(TokenType::IDENTIFIER, value);
 }
 
 Token CHTLLexer::scan_curly_selector() {
@@ -420,7 +386,7 @@ bool CHTLLexer::is_bracket(char c) const {
 }
 
 bool CHTLLexer::is_chtl_special_start() const {
-    return current_char() == '[' || (current_char() == '{' && peek_char() == '{');
+    return (current_char() == '{' && peek_char() == '{');
 }
 
 bool CHTLLexer::is_selector_start() const {

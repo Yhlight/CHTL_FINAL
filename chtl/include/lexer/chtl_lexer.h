@@ -59,7 +59,6 @@ private:
     Token create_token(TokenType type);
     
     // CHTL specific parsing
-    Token scan_square_bracket_construct();
     Token scan_curly_selector();
     Token scan_unquoted_literal();
     

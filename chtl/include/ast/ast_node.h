@@ -50,6 +50,12 @@ enum class NodeType {
     INSERT_OPERATOR,
     USE_OPERATOR,
     
+    // Expression nodes
+    BINARY_EXPRESSION,
+    UNARY_EXPRESSION,
+    CONDITIONAL_EXPRESSION,
+    LITERAL_EXPRESSION,
+
     // Root node
     ROOT
 };
@@ -58,7 +64,7 @@ class ASTNode : public std::enable_shared_from_this<ASTNode> {
 public:
     using NodePtr = std::shared_ptr<ASTNode>;
     using NodeList = std::vector<NodePtr>;
-    using AttributeMap = std::unordered_map<std::string, std::string>;
+    using AttributeMap = std::unordered_map<std::string, NodePtr>;
     
     NodeType type;
     std::string name;
@@ -84,8 +90,8 @@ public:
     void clear_children();
     
     // Attribute operations
-    void set_attribute(const std::string& key, const std::string& value);
-    std::string get_attribute(const std::string& key) const;
+    void set_attribute(const std::string& key, NodePtr value);
+    NodePtr get_attribute(const std::string& key) const;
     bool has_attribute(const std::string& key) const;
     void remove_attribute(const std::string& key);
     
@@ -116,6 +122,8 @@ public:
 // Specific node types
 class ElementNode : public ASTNode {
 public:
+    std::vector<std::string> constraints;
+
     ElementNode(const std::string& name = "", const std::string& value = "")
         : ASTNode(NodeType::ELEMENT, name, value) {}
     
@@ -256,6 +264,11 @@ public:
     std::string file_path;
     std::string alias;
     
+    // For precise imports, e.g. [Import] [Custom] @Element Box
+    std::string import_category; // "Custom", "Template", "Origin"
+    std::string import_specifier; // "@Element", "@Style", "@Html"
+    std::string imported_item_name; // "Box"
+
     ImportNode(ImportType type, const std::string& file_path = "", const std::string& alias = "")
         : ASTNode(NodeType::IMPORT_HTML, ""), import_type(type), file_path(file_path), alias(alias) {
         switch (type) {
@@ -324,6 +337,70 @@ public:
     virtual void visit(ImportNode& node) { visit(static_cast<ASTNode&>(node)); }
     virtual void visit(ConfigurationNode& node) { visit(static_cast<ASTNode&>(node)); }
     virtual void visit(NamespaceNode& node) { visit(static_cast<ASTNode&>(node)); }
+};
+
+// Expression Nodes
+class LiteralNode : public ASTNode {
+public:
+    LiteralNode(const std::string& value = "")
+        : ASTNode(NodeType::LITERAL_EXPRESSION, "Literal", value) {}
+
+    std::string to_html() const override { return value; }
+    NodePtr clone() const override { return std::make_shared<LiteralNode>(value); }
+};
+
+class BinaryExpressionNode : public ASTNode {
+public:
+    NodePtr left;
+    std::string op;
+    NodePtr right;
+
+    BinaryExpressionNode(NodePtr l, const std::string& o, NodePtr r)
+        : ASTNode(NodeType::BINARY_EXPRESSION, o), left(l), op(o), right(r) {}
+
+    // to_html would need an evaluation context, returning a string for now
+    std::string to_html() const override {
+        return left->to_html() + " " + op + " " + right->to_html();
+    }
+
+    NodePtr clone() const override {
+        return std::make_shared<BinaryExpressionNode>(left->clone(), op, right->clone());
+    }
+};
+
+class UnaryExpressionNode : public ASTNode {
+public:
+    std::string op;
+    NodePtr operand;
+
+    UnaryExpressionNode(const std::string& o, NodePtr r)
+        : ASTNode(NodeType::UNARY_EXPRESSION, o), op(o), operand(r) {}
+
+    std::string to_html() const override {
+        return op + operand->to_html();
+    }
+
+    NodePtr clone() const override {
+        return std::make_shared<UnaryExpressionNode>(op, operand->clone());
+    }
+};
+
+class ConditionalExpressionNode : public ASTNode {
+public:
+    NodePtr condition;
+    NodePtr true_branch;
+    NodePtr false_branch;
+
+    ConditionalExpressionNode(NodePtr c, NodePtr t, NodePtr f)
+        : ASTNode(NodeType::CONDITIONAL_EXPRESSION, "?:"), condition(c), true_branch(t), false_branch(f) {}
+
+    std::string to_html() const override {
+        return condition->to_html() + " ? " + true_branch->to_html() + " : " + false_branch->to_html();
+    }
+
+    NodePtr clone() const override {
+        return std::make_shared<ConditionalExpressionNode>(condition->clone(), true_branch->clone(), false_branch->clone());
+    }
 };
 
 } // namespace ast

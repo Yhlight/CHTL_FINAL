@@ -69,6 +69,9 @@ std::shared_ptr<CHTLJSASTNode> CHTLJSParser::parse_statement() {
             
         case CHTLJSTokenType::LISTEN:
             return parse_listen();
+
+        case CHTLJSTokenType::DELEGATE:
+            return parse_delegate();
             
         case CHTLJSTokenType::ANIMATE:
             return parse_animate();
@@ -441,6 +444,56 @@ std::shared_ptr<CHTLJSASTNode> CHTLJSParser::parse_listen() {
     consume_token(CHTLJSTokenType::RIGHT_BRACE, "Expect '}' after listen");
     
     return std::make_shared<ListenNode>(event, selector, handler);
+}
+
+std::shared_ptr<CHTLJSASTNode> CHTLJSParser::parse_delegate() {
+    advance(); // consume 'delegate'
+    consume_token(CHTLJSTokenType::LEFT_BRACE, "Expect '{' after 'delegate'");
+
+    std::shared_ptr<CHTLJSASTNode> parent_selector = nullptr;
+    std::vector<std::shared_ptr<CHTLJSASTNode>> target_selectors;
+
+    // A bit of a hacky way to create the node first
+    auto delegate_node = std::make_shared<DelegateNode>(parent_selector, target_selectors);
+
+    while (!match_token(CHTLJSTokenType::RIGHT_BRACE) && !is_at_end()) {
+        if (match_token(CHTLJSTokenType::IDENTIFIER)) {
+            auto key_token = advance();
+            consume_token(CHTLJSTokenType::COLON, "Expect ':' after key in delegate block");
+
+            if (key_token.value == "target") {
+                // handle single target or array of targets
+                if(match_token(CHTLJSTokenType::LEFT_BRACKET)) {
+                    advance();
+                    while(!match_token(CHTLJSTokenType::RIGHT_BRACKET) && !is_at_end()) {
+                        delegate_node->target_selectors.push_back(parse_expression());
+                        if(match_token(CHTLJSTokenType::COMMA)) advance();
+                    }
+                    consume_token(CHTLJSTokenType::RIGHT_BRACKET, "Expect ']' to close target array");
+                } else {
+                    delegate_node->target_selectors.push_back(parse_expression());
+                }
+
+            } else {
+                // Assume it's an event handler
+                std::string event_name = key_token.value;
+                auto handler = parse_expression();
+                delegate_node->handlers[event_name] = handler;
+            }
+        } else {
+            advance(); // Skip unexpected tokens
+        }
+    }
+
+    consume_token(CHTLJSTokenType::RIGHT_BRACE, "Expect '}' after delegate block");
+
+    // This is a bit awkward, we should get parent selector from the callee
+    // For now, we assume it's part of the block which is not ideal.
+    // A proper implementation would parse `{{parent}}->delegate { ... }`
+    // This requires refactoring the expression parser to handle this chain.
+    // This implementation is a simplified placeholder.
+
+    return delegate_node;
 }
 
 std::shared_ptr<CHTLJSASTNode> CHTLJSParser::parse_animate() {

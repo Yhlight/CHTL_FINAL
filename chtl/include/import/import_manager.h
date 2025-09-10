@@ -113,6 +113,7 @@ private:
     std::shared_ptr<Namespace> global_namespace_;
     std::unordered_map<std::string, std::shared_ptr<Namespace>> namespaces_;
     std::unordered_set<std::string> processed_files_;
+    std::unordered_map<std::string, std::shared_ptr<ast::ASTNode>> imported_asts_;
     
     // 文件处理
     std::string read_file(const std::string& file_path) const;
@@ -137,6 +138,7 @@ public:
     // 主要接口
     void process_file(const std::string& file_path);
     void process_imports(const std::string& content, const std::string& current_file);
+    void process_import_node(std::shared_ptr<ast::ImportNode> node);
     
     // 导入管理
     void add_import(const std::string& name, const std::string& path, ImportType type, const std::string& alias = "");

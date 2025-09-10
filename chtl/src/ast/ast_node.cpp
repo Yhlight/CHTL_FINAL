@@ -36,13 +36,13 @@ void ASTNode::clear_children() {
     children.clear();
 }
 
-void ASTNode::set_attribute(const std::string& key, const std::string& value) {
+void ASTNode::set_attribute(const std::string& key, NodePtr value) {
     attributes[key] = value;
 }
 
-std::string ASTNode::get_attribute(const std::string& key) const {
+ASTNode::NodePtr ASTNode::get_attribute(const std::string& key) const {
     auto it = attributes.find(key);
-    return it != attributes.end() ? it->second : "";
+    return it != attributes.end() ? it->second : nullptr;
 }
 
 bool ASTNode::has_attribute(const std::string& key) const {
@@ -129,8 +129,9 @@ std::string ASTNode::to_html() const {
                type == NodeType::IMPORT_CJMOD) {
         // For now, just return the content attribute
         auto it = attributes.find("content");
-        if (it != attributes.end()) {
-            return it->second;
+        if (it != attributes.end() && it->second) {
+            // Assuming the attribute value is a node that can be converted to a string
+            return it->second->to_string();
         }
         return "";
     }
@@ -147,7 +148,9 @@ std::string ASTNode::to_js() const {
 
 ASTNode::NodePtr ASTNode::clone() const {
     auto cloned = std::make_shared<ASTNode>(type, name, value);
-    cloned->attributes = attributes;
+    for(const auto& attr : attributes) {
+        cloned->set_attribute(attr.first, attr.second->clone());
+    }
     cloned->line = line;
     cloned->column = column;
     cloned->position = position;
@@ -180,8 +183,16 @@ std::string ElementNode::to_html() const {
     // Add attributes
     for (const auto& attr : attributes) {
         oss << " " << attr.first;
-        if (!attr.second.empty()) {
-            oss << "=\"" << attr.second << "\"";
+        if (attr.second) {
+            // TODO: This should eventually call an evaluate() method
+            // For now, we'll call to_html() on the attribute's value node.
+            std::string value = attr.second->to_html();
+            // The to_html for a simple literal node should just be its value.
+            // We remove quotes for cleaner output if the value is a simple string literal.
+            if (value.front() == '"' && value.back() == '"') {
+                value = value.substr(1, value.length() - 2);
+            }
+            oss << "=\"" << value << "\"";
         }
     }
     
@@ -203,7 +214,10 @@ std::string ElementNode::to_html() const {
 
 ASTNode::NodePtr ElementNode::clone() const {
     auto cloned = std::make_shared<ElementNode>(name, value);
-    cloned->attributes = attributes;
+    cloned->constraints = constraints;
+    for(const auto& attr : attributes) {
+        cloned->set_attribute(attr.first, attr.second->clone());
+    }
     cloned->line = line;
     cloned->column = column;
     cloned->position = position;
@@ -277,7 +291,9 @@ void ScriptNode::accept(ASTVisitor& visitor) {
 // TemplateNode implementation
 ASTNode::NodePtr TemplateNode::clone() const {
     auto cloned = std::make_shared<TemplateNode>(template_type, name);
-    cloned->attributes = attributes;
+    for(const auto& attr : attributes) {
+        cloned->set_attribute(attr.first, attr.second->clone());
+    }
     cloned->line = line;
     cloned->column = column;
     cloned->position = position;
@@ -296,7 +312,9 @@ void TemplateNode::accept(ASTVisitor& visitor) {
 // CustomNode implementation
 ASTNode::NodePtr CustomNode::clone() const {
     auto cloned = std::make_shared<CustomNode>(custom_type, name);
-    cloned->attributes = attributes;
+    for(const auto& attr : attributes) {
+        cloned->set_attribute(attr.first, attr.second->clone());
+    }
     cloned->line = line;
     cloned->column = column;
     cloned->position = position;
@@ -315,7 +333,9 @@ void CustomNode::accept(ASTVisitor& visitor) {
 // OriginNode implementation
 ASTNode::NodePtr OriginNode::clone() const {
     auto cloned = std::make_shared<OriginNode>(origin_type, name);
-    cloned->attributes = attributes;
+    for(const auto& attr : attributes) {
+        cloned->set_attribute(attr.first, attr.second->clone());
+    }
     cloned->line = line;
     cloned->column = column;
     cloned->position = position;
@@ -334,7 +354,12 @@ void OriginNode::accept(ASTVisitor& visitor) {
 // ImportNode implementation
 ASTNode::NodePtr ImportNode::clone() const {
     auto cloned = std::make_shared<ImportNode>(import_type, file_path, alias);
-    cloned->attributes = attributes;
+    cloned->import_category = import_category;
+    cloned->import_specifier = import_specifier;
+    cloned->imported_item_name = imported_item_name;
+    for(const auto& attr : attributes) {
+        cloned->set_attribute(attr.first, attr.second->clone());
+    }
     cloned->line = line;
     cloned->column = column;
     cloned->position = position;
@@ -367,7 +392,9 @@ bool ConfigurationNode::has_config_value(const std::string& key) const {
 ASTNode::NodePtr ConfigurationNode::clone() const {
     auto cloned = std::make_shared<ConfigurationNode>(config_name);
     cloned->config_values = config_values;
-    cloned->attributes = attributes;
+    for(const auto& attr : attributes) {
+        cloned->set_attribute(attr.first, attr.second->clone());
+    }
     cloned->line = line;
     cloned->column = column;
     cloned->position = position;
@@ -386,7 +413,9 @@ void ConfigurationNode::accept(ASTVisitor& visitor) {
 // NamespaceNode implementation
 ASTNode::NodePtr NamespaceNode::clone() const {
     auto cloned = std::make_shared<NamespaceNode>(namespace_name);
-    cloned->attributes = attributes;
+    for(const auto& attr : attributes) {
+        cloned->set_attribute(attr.first, attr.second->clone());
+    }
     cloned->line = line;
     cloned->column = column;
     cloned->position = position;

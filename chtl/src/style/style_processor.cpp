@@ -216,11 +216,48 @@ void StyleProcessor::add_rule(const StyleRule& rule) {
 }
 
 void StyleProcessor::process_style_block(const std::string& style_content, const std::string& parent_selector) {
-    // 这里应该实现CSS解析逻辑
-    // 暂时简化处理
-    StyleRule rule(parent_selector);
-    rule.parent_selector = parent_selector;
-    rules_.push_back(rule);
+    std::istringstream stream(style_content);
+    std::string line;
+    std::regex prop_regex(R"(\s*([\w-]+)\s*:\s*(.+?);)");
+    std::regex class_regex(R"(\s*\.([\w-]+)\s*\{)");
+    std::regex id_regex(R"(\s*#([\w-]+)\s*\{)");
+    std::smatch match;
+
+    std::string inline_styles = "";
+    std::string classes = "";
+    std::string ids = "";
+
+    while (std::getline(stream, line)) {
+        if (std::regex_match(line, match, prop_regex)) {
+            if (match.size() == 3) {
+                inline_styles += match[1].str() + ": " + match[2].str() + ";";
+            }
+        } else if (std::regex_search(line, match, class_regex)) {
+            if (match.size() == 2) {
+                classes += (classes.empty() ? "" : " ") + match[1].str();
+            }
+        } else if (std::regex_search(line, match, id_regex)) {
+            if (match.size() == 2) {
+                ids += (ids.empty() ? "" : " ") + match[1].str();
+            }
+        }
+    }
+
+    // This is a simplified approach. We are directly manipulating strings
+    // instead of modifying the parent AST node, because we don't have it here.
+    // The calling context (a new style aggregator) will be responsible for
+    // taking these strings and applying them to the parent node.
+
+    // For now, we can store them in the context.
+    if (!inline_styles.empty()) {
+        context_.set_attribute("inline_style", inline_styles);
+    }
+    if (!classes.empty()) {
+        context_.set_attribute("class", classes);
+    }
+    if (!ids.empty()) {
+        context_.set_attribute("id", ids);
+    }
 }
 
 void StyleProcessor::set_context_attribute(const std::string& name, const std::string& value) {

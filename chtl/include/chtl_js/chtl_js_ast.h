@@ -34,6 +34,7 @@ enum class CHTLJSASTNodeType {
     // CHTL JS特有语法
     FILELOADER_EXPRESSION,
     LISTEN_EXPRESSION,
+    DELEGATE_EXPRESSION,
     ANIMATE_EXPRESSION,
     VIR_DECLARATION,
     ROUTER_EXPRESSION,
@@ -90,6 +91,22 @@ public:
     
     ProgramNode() : CHTLJSASTNode(CHTLJSASTNodeType::PROGRAM) {}
     
+    std::string to_string() const override;
+    std::string to_js() const override;
+};
+
+// 事件委托节点
+class DelegateNode : public CHTLJSASTNode {
+public:
+    std::shared_ptr<CHTLJSASTNode> parent_selector;
+    std::vector<std::shared_ptr<CHTLJSASTNode>> target_selectors;
+    std::unordered_map<std::string, std::shared_ptr<CHTLJSASTNode>> handlers;
+
+    DelegateNode(std::shared_ptr<CHTLJSASTNode> parent,
+                 const std::vector<std::shared_ptr<CHTLJSASTNode>>& targets)
+        : CHTLJSASTNode(CHTLJSASTNodeType::DELEGATE_EXPRESSION),
+          parent_selector(parent), target_selectors(targets) {}
+
     std::string to_string() const override;
     std::string to_js() const override;
 };

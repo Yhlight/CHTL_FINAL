@@ -142,60 +142,39 @@ ast::ASTNode::NodePtr CHTLParser::parse_html_element() {
         
         auto element = std::make_shared<ast::ElementNode>(element_name);
         
-        // Parse attributes (before the opening brace)
-        while (!is_at_end() && !match_token(lexer::TokenType::LEFT_BRACE)) {
-            if (match_token(lexer::TokenType::IDENTIFIER)) {
-                std::string key = current_token().value;
-                next_token();
-                
-                if (match_token(lexer::TokenType::COLON) || match_token(lexer::TokenType::ASSIGN)) {
-                    next_token(); // consume ':' or '='
-                    
-                    std::string value = parse_attribute_value();
-                    element->set_attribute(key, value);
-                    
-                    // Skip semicolon if present
-                    if (match_token(lexer::TokenType::SEMICOLON)) {
-                        next_token();
-                    }
-                }
-            } else {
-                next_token();
-            }
-        }
+        // HTML elements do not have attributes outside the braces in standard CHTL syntax
+        // but let's be robust for now. A stricter parser might error here.
         
-        // Parse children
+        // Parse body
         if (match_token(lexer::TokenType::LEFT_BRACE)) {
             next_token(); // consume '{'
             
             while (!match_token(lexer::TokenType::RIGHT_BRACE) && !is_at_end()) {
-                // Check if this is an attribute
-                if (match_token(lexer::TokenType::IDENTIFIER) && 
-                    peek_token().type == lexer::TokenType::COLON) {
-                    // Parse attribute
-                    std::string key = current_token().value;
-                    next_token(); // consume key
-                    next_token(); // consume ':'
-                    
-                    std::string value = parse_attribute_value();
-                    element->set_attribute(key, value);
-                    
-                    // Skip semicolon if present
-                    if (match_token(lexer::TokenType::SEMICOLON)) {
-                        next_token();
-                    }
-                } else {
-                    // Parse as child element
-                    auto child = parse_element();
-                    if (child) {
-                        element->add_child(child);
+                // Try to parse attributes first
+                auto attributes = parse_attributes();
+                for(const auto& attr : attributes) {
+                    element->set_attribute(attr.first, attr.second);
+                }
+
+                // If no attributes were parsed, try to parse a constraint or a child element
+                if (attributes.empty()) {
+                    if (match_token(lexer::TokenType::EXCEPT)) {
+                        element->constraints = parse_constraints();
+                    } else {
+                        auto child = parse_element();
+                        if (child) {
+                            element->add_child(child);
+                        } else if (!is_at_end() && !match_token(lexer::TokenType::RIGHT_BRACE)) {
+                            // If parse_element returns nullptr, it means we encountered something
+                            // that isn't a valid element start. Skip the token to avoid an infinite loop.
+                            // A more robust parser would error here.
+                            next_token();
+                        }
                     }
                 }
             }
             
-            if (match_token(lexer::TokenType::RIGHT_BRACE)) {
-                next_token(); // consume '}'
-            }
+            consume_token(lexer::TokenType::RIGHT_BRACE);
         }
         
         return element;
@@ -347,27 +326,55 @@ ast::ASTNode::NodePtr CHTLParser::parse_origin() {
 }
 
 ast::ASTNode::NodePtr CHTLParser::parse_import() {
-    if (match_token(lexer::TokenType::IMPORT)) {
-        next_token(); // consume 'import'
-        
-        if (match_token(lexer::TokenType::LEFT_BRACKET)) {
-            next_token(); // consume '['
+    consume_token(lexer::TokenType::LEFT_BRACKET);
+    consume_token(lexer::TokenType::IMPORT);
+    consume_token(lexer::TokenType::RIGHT_BRACKET);
+
+    auto node = std::make_shared<ast::ImportNode>(ast::ImportNode::ImportType::CHTL);
+
+    // Check for category [Custom], [Template], [Origin]
+    if (match_token(lexer::TokenType::LEFT_BRACKET)) {
+        next_token();
+        if (match_token(lexer::TokenType::CUSTOM) || match_token(lexer::TokenType::TEMPLATE) || match_token(lexer::TokenType::ORIGIN)) {
+            node->import_category = current_token().value;
+            next_token();
         }
-        
-        if (match_token(lexer::TokenType::IMPORT_HTML)) {
-            return parse_import_html();
-        } else if (match_token(lexer::TokenType::IMPORT_STYLE)) {
-            return parse_import_style();
-        } else if (match_token(lexer::TokenType::IMPORT_JAVASCRIPT)) {
-            return parse_import_javascript();
-        } else if (match_token(lexer::TokenType::IMPORT_CHTL)) {
-            return parse_import_chtl();
-        } else if (match_token(lexer::TokenType::IMPORT_CJMOD)) {
-            return parse_import_cjmod();
+        consume_token(lexer::TokenType::RIGHT_BRACKET);
+    }
+
+    // Check for specifier @Element, @Style, @Chtl etc.
+    if (current_token().type == lexer::TokenType::TEMPLATE_STYLE) { // Re-using token types
+        node->import_specifier = current_token().value;
+        next_token();
+
+        // Check for item name if it's not a type import
+        if (match_token(lexer::TokenType::IDENTIFIER)) {
+            node->imported_item_name = current_token().value;
+            next_token();
+        }
+    }
+
+    // Parse 'from' and file path
+    consume_token(lexer::TokenType::FROM);
+    if (match_token(lexer::TokenType::STRING_LITERAL)) {
+        node->file_path = current_token().value;
+        next_token();
+    } else {
+        error("Expected file path string literal in import statement.");
+    }
+
+    // Parse 'as' and alias
+    if (match_token(lexer::TokenType::AS)) {
+        next_token();
+        if (match_token(lexer::TokenType::IDENTIFIER)) {
+            node->alias = current_token().value;
+            next_token();
+        } else {
+            error("Expected identifier for import alias.");
         }
     }
     
-    return nullptr;
+    return node;
 }
 
 ast::ASTNode::NodePtr CHTLParser::parse_configuration() {
@@ -429,26 +436,19 @@ ast::ASTNode::NodePtr CHTLParser::parse_use() {
     return nullptr;
 }
 
-std::unordered_map<std::string, std::string> CHTLParser::parse_attributes() {
-    std::unordered_map<std::string, std::string> attributes;
+ast::ASTNode::AttributeMap CHTLParser::parse_attributes() {
+    ast::ASTNode::AttributeMap attributes;
     
-    while (!is_at_end() && !match_token(lexer::TokenType::LEFT_BRACE)) {
-        if (match_token(lexer::TokenType::IDENTIFIER)) {
-            std::string key = current_token().value;
-            next_token();
-            
-            if (match_token(lexer::TokenType::COLON) || match_token(lexer::TokenType::ASSIGN)) {
-                next_token(); // consume ':' or '='
-                
-                std::string value = parse_attribute_value();
-                attributes[key] = value;
-                
-                // Skip semicolon if present
-                if (match_token(lexer::TokenType::SEMICOLON)) {
-                    next_token();
-                }
-            }
-        } else {
+    while (match_token(lexer::TokenType::IDENTIFIER) && (peek_token().type == lexer::TokenType::COLON || peek_token().type == lexer::TokenType::ASSIGN)) {
+        std::string key = current_token().value;
+        next_token();
+        next_token(); // consume ':' or '='
+
+        auto value = parse_attribute_value();
+        attributes[key] = value;
+
+        // Skip semicolon if present
+        if (match_token(lexer::TokenType::SEMICOLON)) {
             next_token();
         }
     }
@@ -456,32 +456,8 @@ std::unordered_map<std::string, std::string> CHTLParser::parse_attributes() {
     return attributes;
 }
 
-std::string CHTLParser::parse_attribute_value() {
-    if (match_token(lexer::TokenType::STRING_LITERAL)) {
-        std::string value = current_token().value;
-        next_token();
-        return value;
-    } else if (match_token(lexer::TokenType::IDENTIFIER)) {
-        std::string value = current_token().value;
-        next_token();
-        return value;
-    } else if (match_token(lexer::TokenType::NUMBER_LITERAL)) {
-        std::string value = current_token().value;
-        next_token();
-        return value;
-    }
-    
-    return "";
-}
-
-std::string CHTLParser::parse_unquoted_literal() {
-    if (match_token(lexer::TokenType::IDENTIFIER)) {
-        std::string value = current_token().value;
-        next_token();
-        return value;
-    }
-    
-    return "";
+ast::ASTNode::NodePtr CHTLParser::parse_attribute_value() {
+    return parse_expression();
 }
 
 std::string CHTLParser::parse_style_content() {
@@ -567,25 +543,9 @@ ast::ASTNode::NodePtr CHTLParser::parse_template_var() {
             auto template_node = std::make_shared<ast::ASTNode>(ast::NodeType::TEMPLATE_VAR, "template_var");
             
             // Parse variable definitions
-            while (!match_token(lexer::TokenType::RIGHT_BRACE) && !is_at_end()) {
-                if (match_token(lexer::TokenType::IDENTIFIER)) {
-                    std::string var_name = current_token().value;
-                    next_token();
-                    
-                    if (match_token(lexer::TokenType::COLON) || match_token(lexer::TokenType::ASSIGN)) {
-                        next_token(); // consume ':' or '='
-                        
-                        std::string var_value = parse_attribute_value();
-                        template_node->set_attribute(var_name, var_value);
-                        
-                        // Skip semicolon if present
-                        if (match_token(lexer::TokenType::SEMICOLON)) {
-                            next_token();
-                        }
-                    }
-                } else {
-                    next_token();
-                }
+            auto attributes = parse_attributes();
+            for(const auto& attr : attributes) {
+                template_node->set_attribute(attr.first, attr.second);
             }
             
             if (match_token(lexer::TokenType::RIGHT_BRACE)) {
@@ -660,25 +620,9 @@ ast::ASTNode::NodePtr CHTLParser::parse_custom_var() {
             auto custom_node = std::make_shared<ast::ASTNode>(ast::NodeType::CUSTOM_VAR, "custom_var");
             
             // Parse custom variable definitions
-            while (!match_token(lexer::TokenType::RIGHT_BRACE) && !is_at_end()) {
-                if (match_token(lexer::TokenType::IDENTIFIER)) {
-                    std::string var_name = current_token().value;
-                    next_token();
-                    
-                    if (match_token(lexer::TokenType::COLON) || match_token(lexer::TokenType::ASSIGN)) {
-                        next_token(); // consume ':' or '='
-                        
-                        std::string var_value = parse_attribute_value();
-                        custom_node->set_attribute(var_name, var_value);
-                        
-                        // Skip semicolon if present
-                        if (match_token(lexer::TokenType::SEMICOLON)) {
-                            next_token();
-                        }
-                    }
-                } else {
-                    next_token();
-                }
+            auto attributes = parse_attributes();
+            for(const auto& attr : attributes) {
+                custom_node->set_attribute(attr.first, attr.second);
             }
             
             if (match_token(lexer::TokenType::RIGHT_BRACE)) {
@@ -866,6 +810,185 @@ ast::ASTNode::NodePtr CHTLParser::parse_use_config() {
     return use_node;
 }
 
+// Expression Parsing
+ast::ASTNode::NodePtr CHTLParser::parse_expression() {
+    return parse_conditional_expression();
+}
+
+ast::ASTNode::NodePtr CHTLParser::parse_conditional_expression() {
+    auto condition = parse_logical_or_expression();
+
+    if (match_token(lexer::TokenType::QUESTION)) {
+        next_token(); // consume '?'
+        auto true_branch = parse_expression();
+        consume_token(lexer::TokenType::COLON);
+        auto false_branch = parse_expression();
+        return std::make_shared<ast::ConditionalExpressionNode>(condition, true_branch, false_branch);
+    }
+
+    return condition;
+}
+
+ast::ASTNode::NodePtr CHTLParser::parse_logical_or_expression() {
+    auto left = parse_logical_and_expression();
+
+    while (match_token(lexer::TokenType::OR)) {
+        std::string op = current_token().value;
+        next_token();
+        auto right = parse_logical_and_expression();
+        left = std::make_shared<ast::BinaryExpressionNode>(left, op, right);
+    }
+
+    return left;
+}
+
+ast::ASTNode::NodePtr CHTLParser::parse_logical_and_expression() {
+    auto left = parse_equality_expression();
+
+    while (match_token(lexer::TokenType::AND)) {
+        std::string op = current_token().value;
+        next_token();
+        auto right = parse_equality_expression();
+        left = std::make_shared<ast::BinaryExpressionNode>(left, op, right);
+    }
+
+    return left;
+}
+
+ast::ASTNode::NodePtr CHTLParser::parse_equality_expression() {
+    auto left = parse_relational_expression();
+
+    while (match_token(lexer::TokenType::EQUAL) || match_token(lexer::TokenType::NOT_EQUAL)) {
+        std::string op = current_token().value;
+        next_token();
+        auto right = parse_relational_expression();
+        left = std::make_shared<ast::BinaryExpressionNode>(left, op, right);
+    }
+
+    return left;
+}
+
+ast::ASTNode::NodePtr CHTLParser::parse_relational_expression() {
+    auto left = parse_additive_expression();
+
+    while (match_token(lexer::TokenType::LESS) || match_token(lexer::TokenType::LESS_EQUAL) ||
+           match_token(lexer::TokenType::GREATER) || match_token(lexer::TokenType::GREATER_EQUAL)) {
+        std::string op = current_token().value;
+        next_token();
+        auto right = parse_additive_expression();
+        left = std::make_shared<ast::BinaryExpressionNode>(left, op, right);
+    }
+
+    return left;
+}
+
+
+ast::ASTNode::NodePtr CHTLParser::parse_additive_expression() {
+    auto left = parse_multiplicative_expression();
+
+    while (match_token(lexer::TokenType::PLUS) || match_token(lexer::TokenType::MINUS)) {
+        std::string op = current_token().value;
+        next_token();
+        auto right = parse_multiplicative_expression();
+        left = std::make_shared<ast::BinaryExpressionNode>(left, op, right);
+    }
+
+    return left;
+}
+
+ast::ASTNode::NodePtr CHTLParser::parse_multiplicative_expression() {
+    auto left = parse_power_expression();
+
+    while (match_token(lexer::TokenType::MULTIPLY) || match_token(lexer::TokenType::DIVIDE) || match_token(lexer::TokenType::MODULO)) {
+        std::string op = current_token().value;
+        next_token();
+        auto right = parse_power_expression();
+        left = std::make_shared<ast::BinaryExpressionNode>(left, op, right);
+    }
+
+    return left;
+}
+
+ast::ASTNode::NodePtr CHTLParser::parse_power_expression() {
+    auto left = parse_unary_expression();
+
+    while (match_token(lexer::TokenType::POWER)) {
+        std::string op = current_token().value;
+        next_token();
+        auto right = parse_unary_expression();
+        left = std::make_shared<ast::BinaryExpressionNode>(left, op, right);
+    }
+
+    return left;
+}
+
+ast::ASTNode::NodePtr CHTLParser::parse_unary_expression() {
+    if (match_token(lexer::TokenType::MINUS) || match_token(lexer::TokenType::NOT)) {
+        std::string op = current_token().value;
+        next_token();
+        auto operand = parse_unary_expression();
+        return std::make_shared<ast::UnaryExpressionNode>(op, operand);
+    }
+
+    return parse_primary_expression();
+}
+
+ast::ASTNode::NodePtr CHTLParser::parse_primary_expression() {
+    if (match_token(lexer::TokenType::NUMBER_LITERAL) || match_token(lexer::TokenType::STRING_LITERAL)) {
+        auto node = std::make_shared<ast::LiteralNode>(current_token().value);
+        next_token();
+        return node;
+    }
+
+    if (match_token(lexer::TokenType::IDENTIFIER)) {
+        // This could be a literal, a variable, or a property reference.
+        // For now, treat as a literal. A symbol table would be needed to differentiate.
+        auto node = std::make_shared<ast::LiteralNode>(current_token().value);
+        next_token();
+        return node;
+    }
+
+    if (match_token(lexer::TokenType::LEFT_PAREN)) {
+        next_token(); // consume '('
+        auto expr = parse_expression();
+        consume_token(lexer::TokenType::RIGHT_PAREN);
+        return expr;
+    }
+
+    // Fallback for unquoted literals
+    auto node = std::make_shared<ast::LiteralNode>(current_token().value);
+    next_token();
+    return node;
+}
+
+std::vector<std::string> CHTLParser::parse_constraints() {
+    consume_token(lexer::TokenType::EXCEPT);
+    std::vector<std::string> constraints;
+    while (!match_token(lexer::TokenType::SEMICOLON) && !is_at_end()) {
+        if (match_token(lexer::TokenType::IDENTIFIER)) {
+            constraints.push_back(current_token().value);
+            next_token();
+        } else if (match_token(lexer::TokenType::LEFT_BRACKET)) {
+            // Handle complex constraints like [Custom] @Element Box
+            std::string complex_constraint;
+            while(!match_token(lexer::TokenType::SEMICOLON) && !match_token(lexer::TokenType::COMMA) && !is_at_end()) {
+                complex_constraint += current_token().value;
+                next_token();
+            }
+            constraints.push_back(complex_constraint);
+        }
+
+        if (match_token(lexer::TokenType::COMMA)) {
+            next_token(); // consume comma
+        } else {
+            break; // No more constraints in this list
+        }
+    }
+    consume_token(lexer::TokenType::SEMICOLON);
+    return constraints;
+}
+
+
 // Utility methods
 bool CHTLParser::is_element_start() const {
     return element_start_tokens_.find(current_token().type) != element_start_tokens_.end();
@@ -892,7 +1015,7 @@ bool CHTLParser::is_origin_start() const {
 }
 
 bool CHTLParser::is_import_start() const {
-    return match_token(lexer::TokenType::IMPORT);
+    return match_token(lexer::TokenType::LEFT_BRACKET) && peek_token().type == lexer::TokenType::IMPORT;
 }
 
 bool CHTLParser::is_configuration_start() const {

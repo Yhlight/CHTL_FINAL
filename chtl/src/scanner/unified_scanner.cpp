@@ -401,7 +401,8 @@ std::string UnifiedScanner::process_chtl_js_syntax(const std::string& content) {
         
         for (auto it = begin; it != end; ++it) {
             size_t start_pos = it->position();
-            size_t end_pos = find_matching_end_brace(content, start_pos);
+            auto range = find_optimal_boundary(boundary, start_pos);
+            size_t end_pos = range.second;
             if (end_pos != std::string::npos) {
                 chtl_js_blocks.push_back({start_pos, end_pos});
             }
@@ -755,6 +756,63 @@ FragmentType UnifiedScanner::current_context() const {
 bool UnifiedScanner::is_in_context(FragmentType type) const {
     return std::find(context_stack_.begin(), context_stack_.end(), type) != context_stack_.end();
 }
+
+// 可变长度切片与智能扩增
+std::pair<size_t, size_t> UnifiedScanner::find_optimal_boundary(const SyntaxBoundary& boundary, size_t start_pos) {
+    auto range = find_boundary_range(boundary, start_pos);
+    if (should_expand_boundary(range.first, range.second, boundary.type)) {
+        expand_boundary(range.first, range.second, boundary.type);
+        record_expansion(range.first, range.second, boundary.type, "Unterminated ternary operator");
+    }
+    return range;
+}
+
+bool UnifiedScanner::should_expand_boundary(size_t start_pos, size_t end_pos, FragmentType type) {
+    if (type != FragmentType::CSS && type != FragmentType::CHTL) {
+        return false;
+    }
+    std::string fragment = source_.substr(start_pos, end_pos - start_pos);
+    size_t question_mark = fragment.rfind('?');
+    if (question_mark != std::string::npos) {
+        size_t colon = fragment.rfind(':');
+        if (colon == std::string::npos || colon < question_mark) {
+            // Found a '?' without a following ':'
+            return true;
+        }
+    }
+    return false;
+}
+
+void UnifiedScanner::expand_boundary(size_t& start_pos, size_t& end_pos, FragmentType type) {
+    // Expand until we find a semicolon or a closing brace
+    size_t original_end = end_pos;
+    while (end_pos < source_.length()) {
+        if (source_[end_pos] == ';' || source_[end_pos] == '}') {
+            end_pos++; // include the terminator
+            break;
+        }
+        end_pos++;
+    }
+    if (end_pos == original_end) {
+        // Did not find a terminator, reset to original
+        end_pos = original_end;
+    }
+}
+
+void UnifiedScanner::record_expansion(size_t start_pos, size_t end_pos, FragmentType type, const std::string& reason) {
+    expansion_history_.push_back({start_pos, end_pos, type, 100, reason});
+}
+
+std::pair<size_t, size_t> UnifiedScanner::find_boundary_range(const SyntaxBoundary& boundary, size_t start_pos) {
+    // A more sophisticated implementation would use the boundary's end_pattern regex.
+    // For now, we'll use the brace matching logic as a default.
+    size_t end_pos = find_matching_end_brace(source_, start_pos);
+    if (end_pos == std::string::npos) {
+        return {start_pos, std::string::npos};
+    }
+    return {start_pos, end_pos};
+}
+
 
 } // namespace scanner
 } // namespace chtl

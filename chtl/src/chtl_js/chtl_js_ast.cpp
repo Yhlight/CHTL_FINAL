@@ -301,6 +301,44 @@ std::string ListenNode::to_js() const {
     return oss.str();
 }
 
+// DelegateNode实现
+std::string DelegateNode::to_string() const {
+    std::ostringstream oss;
+    oss << "Delegate(parent=" << (parent_selector ? parent_selector->to_string() : "null");
+    oss << ", targets=[";
+    for(size_t i = 0; i < target_selectors.size(); ++i) {
+        if(i > 0) oss << ", ";
+        oss << target_selectors[i]->to_string();
+    }
+    oss << "])";
+    return oss.str();
+}
+
+std::string DelegateNode::to_js() const {
+    std::ostringstream oss;
+    oss << "((parent) => {\n";
+    oss << "  if (!parent) return;\n";
+    oss << "  const targets = [" <<  (target_selectors.empty() ? "" : target_selectors[0]->to_js());
+    for(size_t i = 1; i < target_selectors.size(); ++i) {
+        oss << ", " << target_selectors[i]->to_js();
+    }
+    oss << "];\n";
+
+    for(const auto& pair : handlers) {
+        oss << "  parent.addEventListener('" << pair.first << "', (event) => {\n";
+        oss << "    for (const target of targets) {\n";
+        oss << "      if (event.target.matches(target)) {\n";
+        oss << "        (" << pair.second->to_js() << ")(event);\n";
+        oss << "        break;\n";
+        oss << "      }\n";
+        oss << "    }\n";
+        oss << "  });\n";
+    }
+    oss << "})(" << (parent_selector ? parent_selector->to_js() : "document") << ");";
+    return oss.str();
+}
+
+
 // AnimateNode实现
 std::string AnimateNode::to_string() const {
     std::ostringstream oss;
@@ -311,15 +349,73 @@ std::string AnimateNode::to_string() const {
 }
 
 std::string AnimateNode::to_js() const {
+    // This generates a self-executing anonymous function to encapsulate the animation logic.
     std::ostringstream oss;
-    oss << "const animation = {\n";
-    oss << "  target: " << (target ? target->to_js() : "null") << ",\n";
-    oss << "  duration: " << duration << ",\n";
-    oss << "  easing: '" << easing << "',\n";
-    oss << "  loop: " << loop << ",\n";
-    oss << "  delay: " << delay << "\n";
-    oss << "};\n";
-    oss << "// Animation implementation would go here";
+    oss << "(() => {\n";
+    oss << "  const targetElement = " << (target ? target->to_js() : "null") << ";\n";
+    oss << "  if (!targetElement) return;\n";
+    oss << "  const duration = " << duration << ";\n";
+    oss << "  const delay = " << delay << ";\n";
+    oss << "  const loop = " << loop << ";\n";
+    oss << "  const callback = " << (callback ? callback->to_js() : "null") << ";\n\n";
+
+    oss << "  const keyframes = [];\n";
+    if (begin) {
+        // This is a simplification. A real implementation would parse the object expression.
+        oss << "  keyframes.push({ at: 0, styles: " << begin->to_js() << " });\n";
+    }
+    for (const auto& frame : when) {
+        oss << "  keyframes.push(" << frame->to_js() << ");\n";
+    }
+    if (end) {
+        oss << "  keyframes.push({ at: 1, styles: " << end->to_js() << " });\n";
+    }
+    oss << "  keyframes.sort((a, b) => a.at - b.at);\n\n";
+
+    oss << "  function animate(time) {\n";
+    oss << "    let timeFraction = (time - startTime) / duration;\n";
+    oss << "    if (timeFraction > 1) timeFraction = 1;\n\n";
+
+    oss << "    let currentFrame = keyframes[0];\n";
+    oss << "    let nextFrame = keyframes[0];\n";
+    oss << "    for (let i = 0; i < keyframes.length; i++) {\n";
+    oss << "      if (timeFraction >= keyframes[i].at) {\n";
+    oss << "        currentFrame = keyframes[i];\n";
+    oss << "        nextFrame = keyframes[i+1] || keyframes[i];\n";
+    oss << "      }\n";
+    oss << "    }\n\n";
+
+    oss << "    const frameFraction = (timeFraction - currentFrame.at) / (nextFrame.at - currentFrame.at);\n\n";
+
+    oss << "    for (const prop in currentFrame.styles) {\n";
+    oss << "      const startValue = parseFloat(currentFrame.styles[prop]);\n";
+    oss << "      const endValue = parseFloat(nextFrame.styles[prop]);\n";
+    oss << "      const currentValue = startValue + (endValue - startValue) * frameFraction;\n";
+    // This is a simplification, assumes all properties are numeric and in 'px'
+    oss << "      targetElement.style[prop] = currentValue + (prop !== 'opacity' ? 'px' : '');\n";
+    oss << "    }\n\n";
+
+    oss << "    if (timeFraction < 1) {\n";
+    oss << "      requestAnimationFrame(animate);\n";
+    oss << "    } else {\n";
+    oss << "      if (loopCount > 0 || loop === -1) {\n";
+    oss << "        if (loop !== -1) loopCount--;\n";
+    oss << "        startTime = performance.now();\n";
+    oss << "        requestAnimationFrame(animate);\n";
+    oss << "      } else if (callback) {\n";
+    oss << "        callback();\n";
+    oss << "      }\n";
+    oss << "    }\n";
+    oss << "  }\n\n";
+
+    oss << "  let loopCount = loop;\n";
+    oss << "  let startTime;\n";
+    oss << "  setTimeout(() => {\n";
+    oss << "    startTime = performance.now();\n";
+    oss << "    requestAnimationFrame(animate);\n";
+    oss << "  }, delay);\n";
+
+    oss << "})();";
     return oss.str();
 }
 

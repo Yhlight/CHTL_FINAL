@@ -52,9 +52,22 @@ private:
     ast::ASTNode::NodePtr parse_use();
     
     // Attribute parsing
-    std::unordered_map<std::string, std::string> parse_attributes();
-    std::string parse_attribute_value();
-    std::string parse_unquoted_literal();
+    ast::ASTNode::AttributeMap parse_attributes();
+    ast::ASTNode::NodePtr parse_attribute_value();
+
+    // Expression parsing
+    ast::ASTNode::NodePtr parse_expression();
+    ast::ASTNode::NodePtr parse_conditional_expression();
+    std::vector<std::string> parse_constraints();
+    ast::ASTNode::NodePtr parse_logical_or_expression();
+    ast::ASTNode::NodePtr parse_logical_and_expression();
+    ast::ASTNode::NodePtr parse_equality_expression();
+    ast::ASTNode::NodePtr parse_relational_expression();
+    ast::ASTNode::NodePtr parse_additive_expression();
+    ast::ASTNode::NodePtr parse_multiplicative_expression();
+    ast::ASTNode::NodePtr parse_power_expression();
+    ast::ASTNode::NodePtr parse_unary_expression();
+    ast::ASTNode::NodePtr parse_primary_expression();
     
     // Style parsing
     std::string parse_style_content();

@@ -56,6 +56,7 @@ private:
     // CHTL JS特有语法解析
     std::shared_ptr<CHTLJSASTNode> parse_fileloader();
     std::shared_ptr<CHTLJSASTNode> parse_listen();
+    std::shared_ptr<CHTLJSASTNode> parse_delegate();
     std::shared_ptr<CHTLJSASTNode> parse_animate();
     std::shared_ptr<CHTLJSASTNode> parse_vir();
     std::shared_ptr<CHTLJSASTNode> parse_router();

@@ -4,6 +4,10 @@
 #include "lexer/chtl_lexer.h"
 #include "parser/chtl_parser.h"
 #include "ast/ast_node.h"
+#include "style/style_aggregator.h"
+#include "import/import_manager.h"
+#include "import/import_resolver.h"
+#include "analysis/constraint_validator.h"
 
 using namespace chtl;
 
@@ -42,9 +46,31 @@ int main(int argc, char* argv[]) {
         // Syntax analysis
         parser::CHTLParser parser(tokens);
         auto ast = parser.parse();
+
+        // Resolve imports
+        import::ImportManager import_manager("."); // Base path is current directory
+        import::ImportResolver import_resolver(import_manager);
+        import_resolver.resolve_imports(ast);
         
         std::cout << "\nAST:" << std::endl;
         std::cout << ast->to_string() << std::endl;
+
+        // Process styles
+        style::StyleAggregator style_aggregator;
+        style_aggregator.aggregate_styles(ast);
+
+        std::cout << "\nAST after style processing:" << std::endl;
+        std::cout << ast->to_string() << std::endl;
+
+        // Validate constraints
+        analysis::ConstraintValidator validator;
+        if (!validator.validate(ast)) {
+            std::cerr << "Constraint validation failed:" << std::endl;
+            for (const auto& error : validator.get_errors()) {
+                std::cerr << " - " << error << std::endl;
+            }
+            return 1; // Exit with an error code
+        }
         
         // Generate HTML
         std::cout << "\nGenerated HTML:" << std::endl;
