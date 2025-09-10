@@ -45,6 +45,7 @@ enum class CHTLJSTokenType {
     FALSE,              // false 假
     NULL_VALUE,         // null 空
     UNDEFINED,          // undefined 未定义
+    SCRIPT,             // script 脚本
     // 注释
     SINGLE_COMMENT,     // // 单行注释
     MULTI_COMMENT,      // /* */ 多行注释

@@ -26,6 +26,11 @@ private:
     std::unordered_map<std::string, std::shared_ptr<BaseNode>> customs;
     std::unordered_map<std::string, std::string> variables;
     
+    // 命名空间管理
+    std::unordered_map<std::string, std::shared_ptr<BaseNode>> namespaces;
+    std::vector<std::string> namespaceStack;
+    int currentNamespaceLevel;
+    
     // 配置
     bool debugMode;
     bool strictMode;
@@ -105,6 +110,9 @@ private:
     // 配置解析
     std::shared_ptr<BaseNode> parseConfigurationDefinition();
     
+    // 约束解析
+    std::shared_ptr<BaseNode> parseConstraint();
+    
     // use语句解析
     std::shared_ptr<BaseNode> parseUseStatement();
     
@@ -133,6 +141,15 @@ private:
     
     // 辅助方法
     bool isAlphaNumeric(char c) const;
+    
+    // 命名空间管理
+    bool isNamespaceExists(const std::string& name) const;
+    int getCurrentNamespaceLevel() const;
+    void enterNamespace(const std::string& name);
+    void exitNamespace();
+    void registerNamespace(const std::string& name, std::shared_ptr<BaseNode> node);
+    std::string getCurrentNamespacePath() const;
+    std::shared_ptr<BaseNode> findNamespace(const std::string& name) const;
 
 public:
     CHTLParser();
@@ -151,6 +168,9 @@ public:
     const std::unordered_map<std::string, std::shared_ptr<BaseNode>>& getTemplates() const { return templates; }
     const std::unordered_map<std::string, std::shared_ptr<BaseNode>>& getCustoms() const { return customs; }
     const std::unordered_map<std::string, std::string>& getVariables() const { return variables; }
+    
+    // 获取命名空间
+    const std::unordered_map<std::string, std::shared_ptr<BaseNode>>& getNamespaces() const { return namespaces; }
     
     // 配置
     void setDebugMode(bool debug) { debugMode = debug; }

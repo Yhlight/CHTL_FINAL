@@ -7,7 +7,7 @@
 namespace CHTL {
 
 CHTLParser::CHTLParser() 
-    : currentTokenIndex(0), debugMode(false), strictMode(false) {
+    : currentTokenIndex(0), debugMode(false), strictMode(false), currentNamespaceLevel(0) {
     rootNode = std::make_shared<BaseNode>(NodeType::ELEMENT, "document");
 }
 
@@ -134,6 +134,10 @@ std::shared_ptr<BaseNode> CHTLParser::parseDocument() {
         // 检查配置定义
         else if (token.type == TokenType::CONFIGURATION) {
             node = parseConfiguration();
+        }
+        // 检查约束定义
+        else if (token.type == TokenType::CONSTRAINT) {
+            node = parseConstraint();
         }
         // 检查use语句
         else if (token.type == TokenType::USE) {
@@ -1437,13 +1441,25 @@ std::shared_ptr<BaseNode> CHTLParser::parseNamespace() {
     std::string namespaceName = nameToken.value;
     advanceToken();
     
+    // 检查命名空间冲突
+    if (isNamespaceExists(namespaceName)) {
+        addWarning("命名空间 '" + namespaceName + "' 已存在，将被覆盖");
+    }
+    
     auto namespaceNode = std::make_shared<BaseNode>(NodeType::NAMESPACE, namespaceName);
     namespaceNode->setPosition(nameToken.line, nameToken.column, nameToken.position);
+    
+    // 设置命名空间属性
+    namespaceNode->setAttribute("name", namespaceName);
+    namespaceNode->setAttribute("level", std::to_string(getCurrentNamespaceLevel() + 1));
     
     skipWhitespaceAndComments();
     
     if (match(TokenType::LEFT_BRACE)) {
         advanceToken(); // 跳过 '{'
+        
+        // 进入命名空间作用域
+        enterNamespace(namespaceName);
         
         skipWhitespaceAndComments();
         
@@ -1487,7 +1503,13 @@ std::shared_ptr<BaseNode> CHTLParser::parseNamespace() {
         } else {
             error("期望 '}'");
         }
+        
+        // 退出命名空间作用域
+        exitNamespace();
     }
+    
+    // 注册命名空间
+    registerNamespace(namespaceName, namespaceNode);
     
     return namespaceNode;
 }
@@ -1503,6 +1525,9 @@ std::shared_ptr<BaseNode> CHTLParser::parseConfiguration() {
     skipWhitespaceAndComments();
     
     std::string configName;
+    std::string configType = "default";
+    
+    // 检查是否为命名配置组
     if (match(TokenType::AT)) {
         advanceToken(); // 跳过 @
         
@@ -1510,12 +1535,14 @@ std::shared_ptr<BaseNode> CHTLParser::parseConfiguration() {
             Token nameToken = currentToken();
             configName = nameToken.value;
             advanceToken();
+            configType = "named";
         } else {
             error("期望配置名称");
         }
     }
     
     auto configNode = std::make_shared<BaseNode>(NodeType::CONFIGURATION, configName);
+    configNode->setAttribute("type", configType);
     
     skipWhitespaceAndComments();
     
@@ -1553,6 +1580,18 @@ std::shared_ptr<BaseNode> CHTLParser::parseConfiguration() {
                 } else {
                     error("期望 = 或 :");
                 }
+            } else if (token.type == TokenType::IMPORT) {
+                // 解析导入配置组
+                auto child = parseImport();
+                if (child) {
+                    configNode->addChild(child);
+                }
+            } else if (token.type == TokenType::CONFIGURATION) {
+                // 解析嵌套配置组
+                auto child = parseConfiguration();
+                if (child) {
+                    configNode->addChild(child);
+                }
             } else {
                 error("意外的token: " + token.getTypeName() + " (" + token.value + ")");
                 advanceToken();
@@ -1577,6 +1616,110 @@ std::shared_ptr<BaseNode> CHTLParser::parseConfiguration() {
     return configNode;
 }
 
+std::shared_ptr<BaseNode> CHTLParser::parseConstraint() {
+    if (!match(TokenType::CONSTRAINT)) {
+        error("期望 [Constraint]");
+        return nullptr;
+    }
+    
+    advanceToken(); // 跳过 [Constraint]
+    
+    skipWhitespaceAndComments();
+    
+    if (!match(TokenType::EXCEPT)) {
+        error("期望 except 关键字");
+        return nullptr;
+    }
+    
+    advanceToken(); // 跳过 except
+    
+    skipWhitespaceAndComments();
+    
+    if (!match(TokenType::IDENTIFIER)) {
+        error("期望约束名称");
+        return nullptr;
+    }
+    
+    Token nameToken = currentToken();
+    std::string constraintName = nameToken.value;
+    advanceToken();
+    
+    auto constraintNode = std::make_shared<BaseNode>(NodeType::CONSTRAINT, constraintName);
+    constraintNode->setPosition(nameToken.line, nameToken.column, nameToken.position);
+    
+    // 设置约束属性
+    constraintNode->setAttribute("name", constraintName);
+    constraintNode->setAttribute("type", "except");
+    
+    skipWhitespaceAndComments();
+    
+    if (match(TokenType::LEFT_BRACE)) {
+        advanceToken(); // 跳过 '{'
+        
+        skipWhitespaceAndComments();
+        
+        // 解析约束内容
+        while (!match(TokenType::RIGHT_BRACE) && currentTokenIndex < tokens.size()) {
+            Token token = currentToken();
+            
+            if (token.type == TokenType::END_OF_FILE) {
+                error("期望 '}' 但遇到文件结束");
+                break;
+            }
+            
+            if (token.type == TokenType::IDENTIFIER) {
+                // 解析约束规则
+                std::string ruleName = token.value;
+                advanceToken();
+                
+                skipWhitespaceAndComments();
+                
+                if (match(TokenType::COLON) || match(TokenType::EQUAL)) {
+                    advanceToken(); // 跳过 : 或 =
+                    
+                    skipWhitespaceAndComments();
+                    
+                    std::string ruleValue = parseAttributeValue();
+                    constraintNode->setAttribute(ruleName, ruleValue);
+                } else {
+                    error("期望 : 或 =");
+                }
+            } else if (token.type == TokenType::TEMPLATE) {
+                // 解析模板约束
+                auto child = parseTemplate();
+                if (child) {
+                    constraintNode->addChild(child);
+                }
+            } else if (token.type == TokenType::CUSTOM) {
+                // 解析自定义约束
+                auto child = parseCustom();
+                if (child) {
+                    constraintNode->addChild(child);
+                }
+            } else {
+                error("意外的token: " + token.getTypeName() + " (" + token.value + ")");
+                advanceToken();
+            }
+            
+            skipWhitespaceAndComments();
+            
+            if (match(TokenType::SEMICOLON)) {
+                advanceToken(); // 跳过 ;
+            }
+            
+            skipWhitespaceAndComments();
+        }
+        
+        if (match(TokenType::RIGHT_BRACE)) {
+            advanceToken(); // 跳过 '}'
+        } else {
+            error("期望 '}'");
+        }
+    }
+    
+    return constraintNode;
+}
+
 std::shared_ptr<BaseNode> CHTLParser::parseUse() {
     if (!match(TokenType::USE)) {
         error("期望 use");
@@ -1599,6 +1742,39 @@ std::shared_ptr<BaseNode> CHTLParser::parseUse() {
     auto useNode = std::make_shared<BaseNode>(NodeType::OPERATOR, "use");
     useNode->setValue(useItem);
     useNode->setPosition(useToken.line, useToken.column, useToken.position);
+    
+    // 设置使用类型
+    if (useItem == "html5") {
+        useNode->setAttribute("type", "html5");
+        useNode->setAttribute("standard", "HTML5");
+    } else if (useItem == "html4") {
+        useNode->setAttribute("type", "html4");
+        useNode->setAttribute("standard", "HTML4");
+    } else if (useItem == "xhtml") {
+        useNode->setAttribute("type", "xhtml");
+        useNode->setAttribute("standard", "XHTML");
+    } else {
+        useNode->setAttribute("type", "custom");
+        useNode->setAttribute("target", useItem);
+    }
+    
+    skipWhitespaceAndComments();
+    
+    // 检查是否为配置组使用
+    if (match(TokenType::AT)) {
+        advanceToken(); // 跳过 @
+        
+        if (match(TokenType::IDENTIFIER)) {
+            Token configToken = currentToken();
+            std::string configName = configToken.value;
+            advanceToken();
+            
+            useNode->setAttribute("type", "config");
+            useNode->setAttribute("config", configName);
+        } else {
+            error("期望配置名称");
+        }
+    }
     
     return useNode;
 }
@@ -2106,6 +2282,49 @@ std::string CHTLParser::parseStylePropertyValue() {
 
 bool CHTLParser::isAlphaNumeric(char c) const {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
+}
+
+// 命名空间管理方法实现
+bool CHTLParser::isNamespaceExists(const std::string& name) const {
+    return namespaces.find(name) != namespaces.end();
+}
+
+int CHTLParser::getCurrentNamespaceLevel() const {
+    return currentNamespaceLevel;
+}
+
+void CHTLParser::enterNamespace(const std::string& name) {
+    namespaceStack.push_back(name);
+    currentNamespaceLevel++;
+}
+
+void CHTLParser::exitNamespace() {
+    if (!namespaceStack.empty()) {
+        namespaceStack.pop_back();
+        currentNamespaceLevel--;
+    }
+}
+
+void CHTLParser::registerNamespace(const std::string& name, std::shared_ptr<BaseNode> node) {
+    namespaces[name] = node;
+}
+
+std::string CHTLParser::getCurrentNamespacePath() const {
+    if (namespaceStack.empty()) {
+        return "";
+    }
+    
+    std::string path;
+    for (size_t i = 0; i < namespaceStack.size(); i++) {
+        if (i > 0) path += "::";
+        path += namespaceStack[i];
+    }
+    return path;
+}
+
+std::shared_ptr<BaseNode> CHTLParser::findNamespace(const std::string& name) const {
+    auto it = namespaces.find(name);
+    return (it != namespaces.end()) ? it->second : nullptr;
 }
 
 void CHTLParser::reset() {

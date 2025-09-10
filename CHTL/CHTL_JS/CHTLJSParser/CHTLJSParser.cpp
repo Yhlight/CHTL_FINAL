@@ -61,6 +61,10 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseStatement() {
         return parseCHTLJSSyntax();
     }
     
+    if (match(CHTLJSTokenType::SCRIPT)) {
+        return parseScriptBlock();
+    }
+    
     if (isStatementStart()) {
         return parseStatement();
     }
