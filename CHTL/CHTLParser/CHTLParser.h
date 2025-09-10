@@ -9,6 +9,20 @@
 
 namespace CHTL {
 
+// Precedence levels for operators
+enum Precedence {
+    LOWEST,
+    TERNARY,      // ? :
+    LOGICAL_OR,   // ||
+    LOGICAL_AND,  // &&
+    EQUALS,       // == !=
+    LESS_GREATER, // > < >= <=
+    SUM,          // + -
+    PRODUCT,      // * / %
+    POWER,        // **
+    PREFIX        // -X or !X
+};
+
 class CHTLParser {
 public:
     explicit CHTLParser(std::vector<Token> tokens);
@@ -27,9 +41,12 @@ private:
     NodePtr ParseStyleBlock();
     NodePtr ParseTextBlock();
 
-    // Expression Parsing
-    ExpressionNodePtr ParseExpression();
-    ExpressionNodePtr ParsePrimaryExpression();
+    // Pratt Parser for expressions
+    Precedence GetPrecedence();
+    ExpressionNodePtr ParseExpression(int precedence = 0);
+    ExpressionNodePtr ParsePrefixExpression();
+    ExpressionNodePtr ParseInfixExpression(ExpressionNodePtr left);
+    ExpressionNodePtr ParseTernaryExpression(ExpressionNodePtr condition);
 
     // Style Block Parsing Helper
     NodePtr ParseStyleBlockContent();

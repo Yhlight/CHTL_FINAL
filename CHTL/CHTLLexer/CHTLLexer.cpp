@@ -131,7 +131,6 @@ Token CHTLLexer::GetNextToken() {
         case '}': return CreateToken(TokenType::CloseBrace, std::string(1, Consume()));
         case ':': return CreateToken(TokenType::Colon, std::string(1, Consume()));
         case ';': return CreateToken(TokenType::Semicolon, std::string(1, Consume()));
-        case '=': return CreateToken(TokenType::Equals, std::string(1, Consume()));
         case '(': return CreateToken(TokenType::OpenParen, std::string(1, Consume()));
         case ')': return CreateToken(TokenType::CloseParen, std::string(1, Consume()));
         case '[': return CreateToken(TokenType::OpenBracket, std::string(1, Consume()));
@@ -140,7 +139,25 @@ Token CHTLLexer::GetNextToken() {
         case '#': return CreateToken(TokenType::Hash, std::string(1, Consume()));
         case '.': return CreateToken(TokenType::Dot, std::string(1, Consume()));
         case ',': return CreateToken(TokenType::Comma, std::string(1, Consume()));
-        case '&': return CreateToken(TokenType::Ampersand, std::string(1, Consume()));
+        case '&':
+            if (Peek(1) == '&') { Consume(); Consume(); return CreateToken(TokenType::LogicalAnd, "&&"); }
+            return CreateToken(TokenType::Ampersand, std::string(1, Consume()));
+        case '|':
+            if (Peek(1) == '|') { Consume(); Consume(); return CreateToken(TokenType::LogicalOr, "||"); }
+            break; // Single '|' is not a valid token
+        case '=':
+            if (Peek(1) == '=') { Consume(); Consume(); return CreateToken(TokenType::DoubleEquals, "=="); }
+            return CreateToken(TokenType::Equals, std::string(1, Consume()));
+        case '!':
+            if (Peek(1) == '=') { Consume(); Consume(); return CreateToken(TokenType::NotEquals, "!="); }
+            break; // Single '!' is not a valid token
+        case '>':
+            if (Peek(1) == '=') { Consume(); Consume(); return CreateToken(TokenType::GreaterThanOrEquals, ">="); }
+            return CreateToken(TokenType::GreaterThan, std::string(1, Consume()));
+        case '<':
+            if (Peek(1) == '=') { Consume(); Consume(); return CreateToken(TokenType::LessThanOrEquals, "<="); }
+            return CreateToken(TokenType::LessThan, std::string(1, Consume()));
+        case '?': return CreateToken(TokenType::QuestionMark, std::string(1, Consume()));
         case '+': return CreateToken(TokenType::Plus, std::string(1, Consume()));
         case '-': return CreateToken(TokenType::Minus, std::string(1, Consume()));
         case '/': return CreateToken(TokenType::Slash, std::string(1, Consume()));

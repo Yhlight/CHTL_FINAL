@@ -12,6 +12,8 @@
 #include "CHTLNode/StringLiteralNode.h"
 #include "CHTLNode/ElementTemplateUsageNode.h"
 #include "CHTLNode/VariableUsageNode.h"
+#include "CHTLNode/ConditionalExprNode.h"
+#include "CHTLNode/SelfPropertyReferenceNode.h"
 #include <string>
 #include <sstream>
 #include <map>
@@ -23,10 +25,10 @@ class TemplateDefinitionNode; // Forward declaration
 struct StyleProcessingResult; // Forward declaration
 
 // A struct to hold the result of an expression evaluation
-enum class ValueType { Number, String };
+enum class ValueType { Number, String, Bool };
 struct EvaluatedValue {
     ValueType type;
-    std::variant<double, std::string> value;
+    std::variant<double, std::string, bool> value;
     std::string unit; // for numbers
 };
 
@@ -46,19 +48,22 @@ private:
 
     // Style processing helper
     void ProcessStyleNodes(const ElementNode* node, StyleProcessingResult& result);
+    std::vector<Property> ExpandStyleTemplate(const std::string& templateName);
 
     // Element lookup
     const ElementNode* FindElement(const NodePtr& searchRoot, const std::string& selector);
 
 
     // Expression evaluation
-    EvaluatedValue EvaluateExpression(const ExpressionNodePtr& expr);
-    EvaluatedValue VisitExpression(const ExpressionNode* expr);
-    EvaluatedValue VisitBinaryOp(const BinaryOpNode* node);
+    EvaluatedValue EvaluateExpression(const ExpressionNodePtr& expr, const ElementNode* currentContext);
+    EvaluatedValue VisitExpression(const ExpressionNode* expr, const ElementNode* currentContext);
+    EvaluatedValue VisitBinaryOp(const BinaryOpNode* node, const ElementNode* currentContext);
+    EvaluatedValue VisitConditionalExpr(const ConditionalExprNode* node, const ElementNode* currentContext);
     EvaluatedValue VisitNumberLiteral(const NumberLiteralNode* node);
     EvaluatedValue VisitStringLiteral(const StringLiteralNode* node);
     EvaluatedValue VisitPropertyReference(const PropertyReferenceNode* node);
     EvaluatedValue VisitVariableUsage(const VariableUsageNode* node);
+    EvaluatedValue VisitSelfPropertyReference(const SelfPropertyReferenceNode* node, const ElementNode* currentContext);
 
     NodePtr m_astRoot; // Root of the tree, for lookups
     std::map<std::string, const TemplateDefinitionNode*> m_template_repo;

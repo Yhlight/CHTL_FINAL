@@ -24,6 +24,21 @@ enum class TokenType {
     Percent,        // %
     DoubleStar,     // **
 
+    // Comparison
+    DoubleEquals,   // ==
+    NotEquals,      // !=
+    GreaterThan,    // >
+    LessThan,       // <
+    GreaterThanOrEquals, // >=
+    LessThanOrEquals,    // <=
+
+    // Logical
+    LogicalAnd,     // &&
+    LogicalOr,      // ||
+
+    // Ternary
+    QuestionMark,   // ?
+
     // Punctuation
     OpenBrace,      // {
     CloseBrace,     // }
