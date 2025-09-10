@@ -249,6 +249,30 @@ CHTL/CHTLParser/Parser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.s
 .PHONY : CHTL/CHTLParser/Parser.cpp.s
 
+CHTL/CHTLStore/TemplateStore.o: CHTL/CHTLStore/TemplateStore.cpp.o
+.PHONY : CHTL/CHTLStore/TemplateStore.o
+
+# target to build an object file
+CHTL/CHTLStore/TemplateStore.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CHTLStore/TemplateStore.cpp.o
+.PHONY : CHTL/CHTLStore/TemplateStore.cpp.o
+
+CHTL/CHTLStore/TemplateStore.i: CHTL/CHTLStore/TemplateStore.cpp.i
+.PHONY : CHTL/CHTLStore/TemplateStore.i
+
+# target to preprocess a source file
+CHTL/CHTLStore/TemplateStore.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CHTLStore/TemplateStore.cpp.i
+.PHONY : CHTL/CHTLStore/TemplateStore.cpp.i
+
+CHTL/CHTLStore/TemplateStore.s: CHTL/CHTLStore/TemplateStore.cpp.s
+.PHONY : CHTL/CHTLStore/TemplateStore.s
+
+# target to generate assembly for a file
+CHTL/CHTLStore/TemplateStore.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CHTLStore/TemplateStore.cpp.s
+.PHONY : CHTL/CHTLStore/TemplateStore.cpp.s
+
 Util/FileSystem/FileSystemUtil.o: Util/FileSystem/FileSystemUtil.cpp.o
 .PHONY : Util/FileSystem/FileSystemUtil.o
 
@@ -345,6 +369,9 @@ help:
 	@echo "... CHTL/CHTLParser/Parser.o"
 	@echo "... CHTL/CHTLParser/Parser.i"
 	@echo "... CHTL/CHTLParser/Parser.s"
+	@echo "... CHTL/CHTLStore/TemplateStore.o"
+	@echo "... CHTL/CHTLStore/TemplateStore.i"
+	@echo "... CHTL/CHTLStore/TemplateStore.s"
 	@echo "... Util/FileSystem/FileSystemUtil.o"
 	@echo "... Util/FileSystem/FileSystemUtil.i"
 	@echo "... Util/FileSystem/FileSystemUtil.s"

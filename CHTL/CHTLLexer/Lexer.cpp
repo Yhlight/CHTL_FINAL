@@ -82,7 +82,7 @@ Token Lexer::nextToken() {
         case '}': tok = newToken(TokenType::RIGHT_BRACE, lexeme); break;
         case '(': tok = newToken(TokenType::LEFT_PAREN, lexeme); break;
         case ')': tok = newToken(TokenType::RIGHT_PAREN, lexeme); break;
-        case '[': tok = newToken(TokenType::LEFT_BRACKET, lexeme); break;
+        // Removed case for '[' to allow readIdentifier to handle it.
         case ']': tok = newToken(TokenType::RIGHT_BRACKET, lexeme); break;
         case ':': tok = newToken(TokenType::COLON, lexeme); break;
         case ';': tok = newToken(TokenType::SEMICOLON, lexeme); break;
@@ -140,7 +140,7 @@ Token Lexer::nextToken() {
             break;
 
         default:
-            if (isLetter(m_ch) || m_ch == '_') {
+            if (isLetter(m_ch) || m_ch == '_' || m_ch == '[') {
                 return readIdentifier();
             } else if (isDigit(m_ch)) {
                 return readNumberLiteral();
@@ -164,7 +164,7 @@ Token Lexer::readIdentifier() {
         }
         if (m_ch == ']') readChar(); // consume ']'
     } else {
-         while (isLetter(m_ch) || isDigit(m_ch) || m_ch == '_') {
+         while (isLetter(m_ch) || isDigit(m_ch) || m_ch == '_' || (m_ch == '-' && m_position > startPos)) {
             readChar();
         }
     }

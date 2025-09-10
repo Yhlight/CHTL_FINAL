@@ -10,32 +10,23 @@
 
 class StyleBlockNode : public BaseNode {
 public:
-    // Properties that apply directly as inline styles
-    std::vector<std::unique_ptr<CSSPropertyNode>> inline_properties;
-    // CSS rules that go into the global stylesheet
-    std::vector<std::unique_ptr<CSSRuleNode>> rules;
+    // The body of the style block can contain properties, rules, or other statements.
+    std::vector<std::unique_ptr<BaseNode>> body;
 
     // Constructor
     explicit StyleBlockNode(const Token& token) {
         this->token = token; // The 'style' keyword token
     }
 
-    void addProperty(std::unique_ptr<CSSPropertyNode> prop) {
-        inline_properties.push_back(std::move(prop));
-    }
-
-    void addRule(std::unique_ptr<CSSRuleNode> rule) {
-        rules.push_back(std::move(rule));
+    void addNode(std::unique_ptr<BaseNode> node) {
+        body.push_back(std::move(node));
     }
 
     std::string debugString(int indent = 0) const override {
         std::stringstream ss;
         ss << indentString(indent) << "StyleBlockNode:\n";
-        for (const auto& prop : inline_properties) {
-            ss << prop->debugString(indent + 1);
-        }
-        for (const auto& rule : rules) {
-            ss << rule->debugString(indent + 1);
+        for (const auto& node : body) {
+            ss << node->debugString(indent + 1);
         }
         return ss.str();
     }

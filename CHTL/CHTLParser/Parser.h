@@ -10,6 +10,10 @@
 #include "../CHTLNode/ExpressionNode.h"
 #include "../CHTLNode/CSSPropertyNode.h"
 #include "../CHTLNode/CSSRuleNode.h"
+#include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../CHTLNode/TemplateUsageNode.h"
+#include "../CHTLNode/StyleBlockNode.h"
+#include "../CHTLStore/TemplateStore.h"
 #include <vector>
 #include <string>
 #include <memory>
@@ -36,8 +40,8 @@ enum Precedence {
 
 class Parser {
 public:
-    // Constructor takes the output of the lexer
-    explicit Parser(std::vector<Token> tokens);
+    // Constructor takes the output of the lexer and a reference to the template store
+    explicit Parser(std::vector<Token> tokens, TemplateStore& templateStore);
 
     // Main entry point for parsing. Returns the root of the AST.
     std::vector<std::unique_ptr<BaseNode>> parseProgram();
@@ -51,6 +55,7 @@ private:
     Token m_currentToken;
     Token m_peekToken;
     std::vector<std::string> m_errors;
+    TemplateStore& m_templateStore;
 
     // --- Pratt Parser Members ---
     std::map<TokenType, PrefixParseFn> m_prefixParseFns;
@@ -77,16 +82,21 @@ private:
     std::unique_ptr<TextNode> parseTextElement();
     std::unique_ptr<CommentNode> parseComment();
     std::unique_ptr<BaseNode> parseStyleBlock();
+    void parseStyleBlockBody(StyleBlockNode* styleNode); // Helper for parsing style content
     std::unique_ptr<CSSPropertyNode> parseCSSProperty();
     std::unique_ptr<CSSRuleNode> parseCSSRule();
+    std::shared_ptr<TemplateDefinitionNode> parseTemplateDefinition();
+    std::unique_ptr<TemplateUsageNode> parseTemplateUsage();
 
     // --- Expression Parsing Methods ---
     std::unique_ptr<ExpressionNode> parseExpression(Precedence precedence);
     // Prefix parsing functions
     std::unique_ptr<ExpressionNode> parseIdentifierExpression();
     std::unique_ptr<ExpressionNode> parseNumberLiteralExpression();
-    // Infix parsing function
+    std::unique_ptr<ExpressionNode> parseStringLiteralExpression();
+    // Infix parsing functions
     std::unique_ptr<ExpressionNode> parseInfixExpression(std::unique_ptr<ExpressionNode> left);
+    std::unique_ptr<ExpressionNode> parseCallExpression(std::unique_ptr<ExpressionNode> function);
 };
 
 #endif //CHTL_PARSER_H

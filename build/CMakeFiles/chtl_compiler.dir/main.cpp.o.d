@@ -193,6 +193,13 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
  /app/CHTL/CHTLParser/../CHTLNode/ExpressionNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/CSSRuleNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/CSSPropertyNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/TemplateDefinitionNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/TemplateUsageNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/TemplateDefinitionNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/StyleBlockNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/CSSRuleNode.h \
+ /app/CHTL/CHTLParser/../CHTLStore/TemplateStore.h \
+ /app/CHTL/CHTLParser/../CHTLStore/../CHTLNode/TemplateDefinitionNode.h \
  /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
  /usr/include/c++/13/unordered_map \
  /usr/include/c++/13/bits/unordered_map.h \
@@ -211,4 +218,7 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
  /app/CHTL/CHTLGenerator/../CHTLNode/CommentNode.h \
  /app/CHTL/CHTLGenerator/../CHTLNode/CSSRuleNode.h \
  /usr/include/c++/13/set /usr/include/c++/13/bits/stl_set.h \
- /usr/include/c++/13/bits/stl_multiset.h
+ /usr/include/c++/13/bits/stl_multiset.h \
+ /app/CHTL/CHTLGenerator/../CHTLStore/TemplateStore.h \
+ /app/CHTL/CHTLGenerator/../CHTLNode/TemplateUsageNode.h \
+ /app/CHTL/CHTLStore/TemplateStore.h

@@ -9,6 +9,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/chtl_compiler.dir/CHTL/CHTLLexer/Token.cpp.o.d"
   "CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o"
   "CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o.d"
+  "CMakeFiles/chtl_compiler.dir/CHTL/CHTLStore/TemplateStore.cpp.o"
+  "CMakeFiles/chtl_compiler.dir/CHTL/CHTLStore/TemplateStore.cpp.o.d"
   "CMakeFiles/chtl_compiler.dir/Util/FileSystem/FileSystemUtil.cpp.o"
   "CMakeFiles/chtl_compiler.dir/Util/FileSystem/FileSystemUtil.cpp.o.d"
   "CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.o"

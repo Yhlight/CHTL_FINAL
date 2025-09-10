@@ -1,19 +1,26 @@
-html {
-    head {
-        title { text { "CHTL Stage 2 Test" } }
-    }
-    body {
-        div {
-            style {
-                // Inline style with expression
-                width: 100 + 50;
+[Template] @Var Theme {
+    brand-color: "rgb(255, 100, 100)";
+    text-color: "black";
+}
 
-                // Global rule with auto-class
-                .box {
-                    background-color: red;
-                }
-            }
-            text { "Hello Styles!" }
+[Template] @Style BaseText {
+    font-family: "Arial";
+    color: Theme(text-color);
+}
+
+[Template] @Element MyComponent {
+    div {
+        style {
+            @Style BaseText; // Test inheritance
+            background-color: Theme(brand-color);
+            border: "1px solid black";
         }
+        text { "This component uses variables and inheritance." }
+    }
+}
+
+html {
+    body {
+        @Element MyComponent;
     }
 }

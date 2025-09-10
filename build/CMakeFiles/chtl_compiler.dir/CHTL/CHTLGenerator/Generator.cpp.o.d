@@ -190,11 +190,20 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o: \
  /usr/include/c++/13/bits/stl_set.h \
  /usr/include/c++/13/bits/stl_multiset.h \
  /usr/include/c++/13/bits/erase_if.h \
+ /app/CHTL/CHTLGenerator/../CHTLStore/TemplateStore.h \
+ /app/CHTL/CHTLGenerator/../CHTLStore/../CHTLNode/TemplateDefinitionNode.h \
+ /app/CHTL/CHTLGenerator/../CHTLStore/../CHTLNode/BaseNode.h \
+ /usr/include/c++/13/map /usr/include/c++/13/bits/stl_map.h \
+ /usr/include/c++/13/bits/stl_multimap.h \
+ /app/CHTL/CHTLGenerator/../CHTLNode/TemplateUsageNode.h \
+ /app/CHTL/CHTLGenerator/../CHTLNode/TemplateDefinitionNode.h \
  /app/CHTL/CHTLGenerator/../CHTLEvaluator/Evaluator.h \
  /app/CHTL/CHTLGenerator/../CHTLEvaluator/../CHTLNode/ExpressionNode.h \
  /app/CHTL/CHTLGenerator/../CHTLEvaluator/../CHTLNode/LiteralNode.h \
  /app/CHTL/CHTLGenerator/../CHTLEvaluator/../CHTLNode/ExpressionNode.h \
  /app/CHTL/CHTLGenerator/../CHTLEvaluator/../CHTLNode/BinaryOpNode.h \
+ /app/CHTL/CHTLGenerator/../CHTLEvaluator/../CHTLNode/CallExpressionNode.h \
+ /app/CHTL/CHTLGenerator/../CHTLEvaluator/../CHTLStore/TemplateStore.h \
  /app/CHTL/CHTLGenerator/../CHTLNode/StyleBlockNode.h \
  /app/CHTL/CHTLGenerator/../CHTLNode/CSSRuleNode.h \
  /usr/include/c++/13/algorithm /usr/include/c++/13/bits/stl_algo.h \

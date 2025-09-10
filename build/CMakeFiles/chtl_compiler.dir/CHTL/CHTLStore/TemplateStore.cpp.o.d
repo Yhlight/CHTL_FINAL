@@ -1,9 +1,9 @@
-CMakeFiles/chtl_compiler.dir/CHTL/CHTLEvaluator/Evaluator.cpp.o: \
- /app/CHTL/CHTLEvaluator/Evaluator.cpp /usr/include/stdc-predef.h \
- /app/CHTL/CHTLEvaluator/Evaluator.h \
- /app/CHTL/CHTLEvaluator/../CHTLNode/ExpressionNode.h \
- /app/CHTL/CHTLEvaluator/../CHTLNode/BaseNode.h \
- /app/CHTL/CHTLEvaluator/../CHTLNode/../CHTLLexer/Token.h \
+CMakeFiles/chtl_compiler.dir/CHTL/CHTLStore/TemplateStore.cpp.o: \
+ /app/CHTL/CHTLStore/TemplateStore.cpp /usr/include/stdc-predef.h \
+ /app/CHTL/CHTLStore/TemplateStore.h \
+ /app/CHTL/CHTLStore/../CHTLNode/TemplateDefinitionNode.h \
+ /app/CHTL/CHTLStore/../CHTLNode/BaseNode.h \
+ /app/CHTL/CHTLStore/../CHTLNode/../CHTLLexer/Token.h \
  /usr/include/c++/13/string /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -158,12 +158,9 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLEvaluator/Evaluator.cpp.o: \
  /usr/include/c++/13/bits/atomic_lockfree_defines.h \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
- /usr/include/c++/13/pstl/execution_defs.h \
- /app/CHTL/CHTLEvaluator/../CHTLNode/LiteralNode.h \
- /app/CHTL/CHTLEvaluator/../CHTLNode/ExpressionNode.h \
- /app/CHTL/CHTLEvaluator/../CHTLNode/BinaryOpNode.h \
- /usr/include/c++/13/sstream /usr/include/c++/13/istream \
- /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
+ /usr/include/c++/13/pstl/execution_defs.h /usr/include/c++/13/sstream \
+ /usr/include/c++/13/istream /usr/include/c++/13/ios \
+ /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \
  /usr/include/c++/13/bits/locale_classes.tcc \
  /usr/include/c++/13/system_error \
@@ -180,14 +177,9 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLEvaluator/Evaluator.cpp.o: \
  /usr/include/c++/13/bits/basic_ios.tcc /usr/include/c++/13/ostream \
  /usr/include/c++/13/bits/ostream.tcc \
  /usr/include/c++/13/bits/istream.tcc \
- /usr/include/c++/13/bits/sstream.tcc \
- /app/CHTL/CHTLEvaluator/../CHTLNode/CallExpressionNode.h \
- /app/CHTL/CHTLEvaluator/../CHTLStore/TemplateStore.h \
- /app/CHTL/CHTLEvaluator/../CHTLStore/../CHTLNode/TemplateDefinitionNode.h \
- /app/CHTL/CHTLEvaluator/../CHTLStore/../CHTLNode/BaseNode.h \
- /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \
+ /usr/include/c++/13/bits/sstream.tcc /usr/include/c++/13/map \
+ /usr/include/c++/13/bits/stl_tree.h \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h \
- /app/CHTL/CHTLEvaluator/../CHTLNode/CSSPropertyNode.h
+ /usr/include/c++/13/bits/erase_if.h

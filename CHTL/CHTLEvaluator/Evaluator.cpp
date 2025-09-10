@@ -1,6 +1,9 @@
 #include "Evaluator.h"
+#include "../CHTLNode/CSSPropertyNode.h"
 #include <stdexcept>
-#include <sstream> // Explicitly include for stringstream usage in included headers
+#include <sstream>
+
+Evaluator::Evaluator(const TemplateStore& templateStore) : m_templateStore(templateStore) {}
 
 std::string Evaluator::evaluate(ExpressionNode* node) {
     if (!node) {
@@ -12,6 +15,9 @@ std::string Evaluator::evaluate(ExpressionNode* node) {
     }
     if (auto binaryOpNode = dynamic_cast<const BinaryOpNode*>(node)) {
         return evaluateBinaryOpNode(binaryOpNode);
+    }
+    if (auto callNode = dynamic_cast<const CallExpressionNode*>(node)) {
+        return evaluateCallExpression(callNode);
     }
 
     return ""; // Unknown expression type
@@ -25,32 +31,18 @@ std::string Evaluator::evaluateBinaryOpNode(const BinaryOpNode* node) {
     std::string leftValStr = evaluate(node->left.get());
     std::string rightValStr = evaluate(node->right.get());
 
-    // Major Simplification: For now, assume values are numeric and ignore units.
-    // This is NOT a correct CSS implementation, but a placeholder for the evaluation logic.
-    // A real implementation would need a CSS value type system (e.g., Value(100, "px")).
     try {
         double leftNum = std::stod(leftValStr);
         double rightNum = std::stod(rightValStr);
         double result = 0.0;
 
         switch (node->op.type) {
-            case TokenType::PLUS:
-                result = leftNum + rightNum;
-                break;
-            case TokenType::MINUS:
-                result = leftNum - rightNum;
-                break;
-            case TokenType::ASTERISK:
-                result = leftNum * rightNum;
-                break;
-            case TokenType::SLASH:
-                if (rightNum == 0) return "0"; // Avoid division by zero
-                result = leftNum / rightNum;
-                break;
-            default:
-                return ""; // Unsupported operator
+            case TokenType::PLUS: result = leftNum + rightNum; break;
+            case TokenType::MINUS: result = leftNum - rightNum; break;
+            case TokenType::ASTERISK: result = leftNum * rightNum; break;
+            case TokenType::SLASH: result = (rightNum == 0) ? 0 : leftNum / rightNum; break;
+            default: return "";
         }
-        // Convert result back to string, removing trailing zeros
         std::string resultStr = std::to_string(result);
         resultStr.erase(resultStr.find_last_not_of('0') + 1, std::string::npos);
         if (resultStr.back() == '.') {
@@ -59,11 +51,39 @@ std::string Evaluator::evaluateBinaryOpNode(const BinaryOpNode* node) {
         return resultStr;
 
     } catch (const std::invalid_argument& e) {
-        // If conversion to double fails, just concatenate strings (e.g., for "1px solid black")
-        // This is also a simplification.
         if (node->op.type == TokenType::PLUS) {
              return leftValStr + " " + rightValStr;
         }
         return leftValStr + rightValStr;
     }
+}
+
+std::string Evaluator::evaluateCallExpression(const CallExpressionNode* node) {
+    auto funcNameNode = dynamic_cast<const LiteralNode*>(node->function.get());
+    if (!funcNameNode) {
+        return "";
+    }
+
+    std::string templateName = funcNameNode->token.lexeme;
+    auto templateDef = m_templateStore.get(templateName);
+
+    if (!templateDef || templateDef->type != TemplateType::VAR || node->arguments.size() != 1) {
+        return "";
+    }
+
+    auto argNode = dynamic_cast<const LiteralNode*>(node->arguments[0].get());
+    if (!argNode) {
+        return "";
+    }
+    std::string varName = argNode->token.lexeme;
+
+    for (const auto& varProp : templateDef->body) {
+        if (auto cssProp = dynamic_cast<const CSSPropertyNode*>(varProp.get())) {
+            if (cssProp->propertyName == varName) {
+                return evaluate(cssProp->value.get());
+            }
+        }
+    }
+
+    return "";
 }

@@ -11,13 +11,19 @@
 #include <memory>
 #include <set>
 #include <sstream>
+#include "../CHTLStore/TemplateStore.h"
+#include "../CHTLNode/TemplateUsageNode.h"
 
 class Generator {
 public:
+    // Constructor takes the template store
+    explicit Generator(const TemplateStore& templateStore);
+
     // Main entry point. Takes the AST and returns the generated HTML.
     std::string generate(const std::vector<std::unique_ptr<BaseNode>>& program);
 
 private:
+    const TemplateStore& m_templateStore;
     // Buffer for collecting CSS rules for the global stylesheet
     std::stringstream m_global_styles;
 
@@ -28,7 +34,8 @@ private:
     std::string generateElement(const ElementNode* node);
     std::string generateText(const TextNode* node);
     std::string generateComment(const CommentNode* node);
-    void processStyleBlock(ElementNode* node); // Note: non-const to modify attributes
+    std::string generateTemplateUsage(const TemplateUsageNode* node);
+    void processStyleBody(const std::vector<std::unique_ptr<BaseNode>>& body, ElementNode* parent, std::stringstream& inline_style_stream);
 
     // A set of HTML tags that are self-closing (e.g., <img>, <br>)
     static const std::set<std::string> s_selfClosingTags;

@@ -1,6 +1,7 @@
 #include "Generator.h"
 #include "../CHTLEvaluator/Evaluator.h"
 #include "../CHTLNode/StyleBlockNode.h"
+#include "../CHTLNode/TemplateUsageNode.h"
 #include <sstream>
 #include <algorithm>
 
@@ -9,6 +10,8 @@ const std::set<std::string> Generator::s_selfClosingTags = {
     "area", "base", "br", "col", "embed", "hr", "img", "input",
     "link", "meta", "param", "source", "track", "wbr"
 };
+
+Generator::Generator(const TemplateStore& templateStore) : m_templateStore(templateStore) {}
 
 std::string Generator::generate(const std::vector<std::unique_ptr<BaseNode>>& program) {
     m_global_styles.str(""); // Clear global styles at the start
@@ -53,89 +56,62 @@ std::string Generator::generateNode(const BaseNode* node) {
         // Style blocks are handled by their parent element, so they generate no output themselves.
         return "";
     }
+    if (auto templateUsageNode = dynamic_cast<const TemplateUsageNode*>(node)) {
+        return generateTemplateUsage(templateUsageNode);
+    }
 
     // If we have an unknown node type, we return an empty string.
     return "";
 }
 
-void Generator::processStyleBlock(ElementNode* node) {
-    Evaluator evaluator;
-
-    for (const auto& child : node->children) {
-        if (auto styleNode = dynamic_cast<const StyleBlockNode*>(child.get())) {
-            // Process global CSS rules
-            for (const auto& rule : styleNode->rules) {
-                std::string selector = rule->selector;
-                // Auto-add class/id attributes
-                if (selector.rfind(".", 0) == 0) { // Starts with .
-                    std::string className = selector.substr(1);
-                    bool found = false;
-                    for (const auto& attr : node->attributes) {
-                        if (attr->name == "class") {
-                            // A simple check; doesn't handle multiple classes in the attribute well
-                            if (attr->value.find(className) == std::string::npos) {
-                                attr->value += " " + className;
-                            }
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        node->addAttribute(std::make_unique<AttributeNode>(Token(), "class", className));
-                    }
+// Helper function to process the body of a style block or style template
+void Generator::processStyleBody(const std::vector<std::unique_ptr<BaseNode>>& body, ElementNode* parent, std::stringstream& inline_style_stream) {
+    Evaluator evaluator(m_templateStore);
+    for (const auto& node : body) {
+        if (auto prop = dynamic_cast<const CSSPropertyNode*>(node.get())) {
+            inline_style_stream << prop->propertyName << ":" << evaluator.evaluate(prop->value.get()) << ";";
+        } else if (auto rule = dynamic_cast<const CSSRuleNode*>(node.get())) {
+            // Simplified logic from before
+            m_global_styles << rule->selector << " {\n";
+            for (const auto& p : rule->properties) {
+                m_global_styles << "  " << p->propertyName << ": " << evaluator.evaluate(p->value.get()) << ";\n";
+            }
+            m_global_styles << "}\n";
+        } else if (auto usage = dynamic_cast<const TemplateUsageNode*>(node.get())) {
+            if (usage->type == TemplateType::STYLE) {
+                auto templateDef = m_templateStore.get(usage->name);
+                if (templateDef) {
+                    // Recursively process the body of the used template
+                    processStyleBody(templateDef->body, parent, inline_style_stream);
                 }
-                // Simplified '&' replacement
-                if (selector.rfind("&", 0) == 0) {
-                    // Find parent's primary selector (e.g., first class)
-                     for (const auto& attr : node->attributes) {
-                        if (attr->name == "class") {
-                            std::string firstClass = attr->value.substr(0, attr->value.find(" "));
-                            selector.replace(0, 1, "." + firstClass);
-                            break;
-                        }
-                    }
-                }
-
-                m_global_styles << selector << " {\n";
-                for (const auto& prop : rule->properties) {
-                    m_global_styles << "  " << prop->propertyName << ": " << evaluator.evaluate(prop->value.get()) << ";\n";
-                }
-                m_global_styles << "}\n";
             }
         }
     }
 }
 
-
 std::string Generator::generateElement(const ElementNode* const_node) {
     ElementNode* node = const_cast<ElementNode*>(const_node);
-
-    // Process style blocks first to potentially add attributes
-    processStyleBlock(node);
 
     std::stringstream ss;
     ss << "<" << node->tagName;
 
-    // Append attributes
+    // Process style blocks to gather inline styles and global rules
+    std::stringstream style_ss;
+    for (const auto& child : node->children) {
+        if (auto styleNode = dynamic_cast<const StyleBlockNode*>(child.get())) {
+            processStyleBody(styleNode->body, node, style_ss);
+        }
+    }
+
+    // Append attributes that might have been added by style processing
     for (const auto& attr : node->attributes) {
         ss << " " << attr->name << "=\"" << attr->value << "\"";
     }
 
-    // Find and process inline styles
-    std::stringstream style_ss;
-    Evaluator evaluator;
-    for (const auto& child : node->children) {
-        if (auto styleNode = dynamic_cast<const StyleBlockNode*>(child.get())) {
-            for (const auto& prop : styleNode->inline_properties) {
-                style_ss << prop->propertyName << ":" << evaluator.evaluate(prop->value.get()) << ";";
-            }
-        }
-    }
     std::string style_attr = style_ss.str();
     if (!style_attr.empty()) {
         ss << " style=\"" << style_attr << "\"";
     }
-
 
     // Handle self-closing tags
     if (s_selfClosingTags.count(node->tagName)) {
@@ -174,6 +150,26 @@ std::string escapeHTML(const std::string& data) {
 std::string Generator::generateText(const TextNode* node) {
     // HTML-escape the content to prevent XSS
     return escapeHTML(node->content);
+}
+
+std::string Generator::generateTemplateUsage(const TemplateUsageNode* node) {
+    if (node->type != TemplateType::ELEMENT) {
+        // Only @Element templates produce direct output in the main document flow.
+        // @Style templates are handled within processStyleBlock.
+        // @Var templates will be handled by the evaluator.
+        return "";
+    }
+
+    auto templateDef = m_templateStore.get(node->name);
+    if (!templateDef) {
+        return "<!-- Template not found: " + node->name + " -->";
+    }
+
+    std::stringstream ss;
+    for (const auto& bodyNode : templateDef->body) {
+        ss << generateNode(bodyNode.get());
+    }
+    return ss.str();
 }
 
 std::string Generator::generateComment(const CommentNode* node) {
