@@ -1571,6 +1571,32 @@ div
 }
 ```
 
+### 响应式值
+这是CHTL与CHTL JS的首次交互尝试  
+响应式值属于CHTL JS的范畴，但是与CHTL交互  
+语法：$JS变量名$  
+
+```chtl
+div
+{
+    class = $boxClass$;  // 根据JS变量来设置值
+
+    style
+    {
+        width: $boxWidth$ + 20 + "px";  // 根据JS变量来设置值，算术运算自然是支持的
+    }
+
+    script
+    {
+        let boxClass = "box";  // 绑定的JS变量
+        let boxWidth = 100;  // 绑定的JS变量
+
+        {{boxClass}}.textContent = "Hello, CHTL!";
+    }
+}
+```
+同样，全部样式块因为缺少层级概念，为此响应式值不支持全局样式块  
+
 ## 模块
 ### 模块路径
 什么是模块路径？  
@@ -2474,3 +2500,5 @@ VSCode IDE需要满足下述基本要求
 如果导入的是CMOD模块，则导出[Export]块的内容，并根据此优化性能，提供语法提示，并创建json表    
 如果导入的是CJMOD模块，则根据scan，CHTLJSFunction，analyze这三个函数接收的代码片段，提供语法提示，并创建json表  
 
+## 编译监视器
+编译计时器能够监视编译器的编译时间和使用内存，必要时杀死程序，防止对开发者的造成可能的危害  
