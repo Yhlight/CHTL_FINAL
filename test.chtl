@@ -1,0 +1,27 @@
+-- This is a CHTL document.
+html {
+    lang: "en";
+
+    head {
+        title {
+            text { "My CHTL Page" }
+        }
+    }
+
+    body {
+        // This is a single-line comment, it should be ignored.
+        h1 {
+            id: main_heading;
+            text { "Welcome to CHTL!" }
+        }
+
+        p {
+            -- A paragraph element.
+            text { "This is generated from CHTL source code." }
+        }
+
+        /* This is a multi-line comment.
+           It should also be ignored. */
+        br {}
+    }
+}
