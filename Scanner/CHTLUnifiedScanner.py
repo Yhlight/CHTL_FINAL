@@ -68,8 +68,15 @@ class CHTLUnifiedScanner:
 
                             block_end_pos = k
                             block_content = self.source_code[word_start : block_end_pos + 1]
-                            frag_type = FragmentType.CSS if keyword == 'style' else FragmentType.CHTL_JS
-                            fragments.append(CodeFragment(frag_type, block_content, 0))
+
+                            placeholders = {}
+                            if keyword == 'script':
+                                frag_type = FragmentType.CHTL_JS
+                                block_content, placeholders = self._process_script_block(block_content)
+                            else:
+                                frag_type = FragmentType.CSS
+
+                            fragments.append(CodeFragment(frag_type, block_content, 0, placeholders))
 
                             # Advance main loop past this block
                             i = block_end_pos
@@ -90,3 +97,40 @@ class CHTLUnifiedScanner:
             fragments.append(CodeFragment(FragmentType.CHTL, self.source_code, 0))
 
         return fragments
+
+    def _process_script_block(self, content: str) -> (str, Dict[str, str]):
+        """
+        Finds standard JS functions in a script block and replaces them with placeholders.
+        Returns the modified content and a map of placeholders to original code.
+        """
+        # This regex is a simplified example. It won't handle all edge cases like nested functions.
+        function_pattern = re.compile(r'function\s+\w+\s*\(.*?\)')
+        placeholders = {}
+        modified_content = content
+
+        # Iterate backwards to not mess up indices with replacements
+        for match in reversed(list(function_pattern.finditer(content))):
+            open_brace_index = content.find('{', match.end())
+            if open_brace_index == -1:
+                continue
+
+            brace_level = 1
+            k = open_brace_index + 1
+            while k < len(content):
+                if content[k] == '{': brace_level += 1
+                elif content[k] == '}':
+                    brace_level -= 1
+                    if brace_level == 0: break
+                k += 1
+
+            if brace_level != 0: continue
+
+            close_brace_index = k
+
+            placeholder_id = f"__JS_PLACEHOLDER_{len(placeholders)}__"
+            original_code = content[match.start():close_brace_index + 1]
+
+            placeholders[placeholder_id] = original_code
+            modified_content = modified_content.replace(original_code, placeholder_id, 1)
+
+        return modified_content, placeholders

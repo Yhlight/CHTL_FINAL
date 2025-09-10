@@ -77,5 +77,36 @@ class TestUnifiedScanner(unittest.TestCase):
         self.assertEqual(len(fragments), 1)
         self.assertEqual(fragments[0].type, FragmentType.CHTL)
 
+    def test_js_placeholder_implementation(self):
+        source = """
+        script {
+            let dom_obj = {{#my_id}};
+            function my_func(a, b) {
+                if (a > b) { return a; }
+                return b;
+            }
+            dom_obj->listen { click: my_func };
+        }
+        """
+        scanner = CHTLUnifiedScanner(source)
+        fragments = scanner.scan()
+
+        self.assertEqual(len(fragments), 1)
+        fragment = fragments[0]
+        self.assertEqual(fragment.type, FragmentType.CHTL_JS)
+
+        # Check that the placeholder was inserted
+        self.assertNotIn("function my_func", fragment.content)
+        self.assertIn("__JS_PLACEHOLDER_0__", fragment.content)
+
+        # Check that the placeholder map is correct
+        self.assertIsNotNone(fragment.placeholders)
+        self.assertEqual(len(fragment.placeholders), 1)
+        original_function = fragment.placeholders.get("__JS_PLACEHOLDER_0__")
+        self.assertIsNotNone(original_function)
+        self.assertIn("function my_func(a, b)", original_function)
+        self.assertIn("return a;", original_function)
+
+
 if __name__ == '__main__':
     unittest.main()
