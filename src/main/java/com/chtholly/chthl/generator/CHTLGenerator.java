@@ -11,7 +11,16 @@ import com.chtholly.chthl.specializer.TemplateSpecializer;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.chtholly.chthl.lexer.Token;
+import com.chtholly.chthl.lexer.TokenType;
+
 public class CHTLGenerator implements Visitor<String> {
+
+    public static class CompilationError extends RuntimeException {
+        public CompilationError(String message) {
+            super(message);
+        }
+    }
 
     private static final Set<String> SELF_CLOSING_TAGS = Set.of(
         "area", "base", "br", "col", "embed", "hr", "img", "input",
@@ -105,6 +114,13 @@ public class CHTLGenerator implements Visitor<String> {
         List<Node> contentChildren = node.children.stream()
                 .filter(child -> !(child instanceof StyleBlockNode))
                 .collect(Collectors.toList());
+
+        // Enforce constraints before rendering children
+        if (node.constraints != null && !node.constraints.isEmpty()) {
+            for (Node child : contentChildren) {
+                checkConstraints(child, node.constraints, node.tagName);
+            }
+        }
 
         if (contentChildren.isEmpty() && SELF_CLOSING_TAGS.contains(node.tagName.toLowerCase())) {
             builder.append(">");
@@ -282,4 +298,38 @@ public class CHTLGenerator implements Visitor<String> {
 
     @Override
     public String visitElementTemplateNode(ElementTemplateNode node) { return ""; }
+
+    private void checkConstraints(Node child, List<List<Token>> constraints, String parentTagName) {
+        for (List<Token> constraintTokens : constraints) {
+            if (constraintTokens.isEmpty()) continue;
+
+            // For now, we handle simple cases. This can be expanded.
+            Token firstToken = constraintTokens.get(0);
+
+            // Case 1: Simple tag name constraint (e.g., "except span;")
+            if (firstToken.getType() == TokenType.IDENTIFIER && constraintTokens.size() == 1) {
+                if (child instanceof ElementNode && ((ElementNode) child).tagName.equals(firstToken.getLexeme())) {
+                    throw new CompilationError("Constraint violation in element '" + parentTagName + "': usage of '" + firstToken.getLexeme() + "' is forbidden.");
+                }
+            }
+            // Case 2: Type constraint (e.g., "except @Html;")
+            else if (firstToken.getType() == TokenType.AT_SIGN && constraintTokens.size() == 2) {
+                String typeName = constraintTokens.get(1).getLexeme();
+                if ("Html".equalsIgnoreCase(typeName) && child instanceof ElementNode) {
+                     throw new CompilationError("Constraint violation in element '" + parentTagName + "': usage of HTML elements is forbidden.");
+                }
+            }
+            // Case 3: Bracketed type constraint (e.g., "except [Template];")
+            else if (firstToken.getType() == TokenType.LEFT_BRACKET && constraintTokens.size() == 3) {
+                 Token typeToken = constraintTokens.get(1);
+                 if (typeToken.getType() == TokenType.TEMPLATE && child instanceof TemplateUsageNode) {
+                     throw new CompilationError("Constraint violation in element '" + parentTagName + "': usage of [Template] is forbidden.");
+                 }
+                 if (typeToken.getType() == TokenType.CUSTOM && child instanceof TemplateUsageNode) {
+                    // This is a simplification. Should check if the used template is a [Custom] one.
+                    throw new CompilationError("Constraint violation in element '" + parentTagName + "': usage of [Custom] is forbidden.");
+                 }
+            }
+        }
+    }
 }

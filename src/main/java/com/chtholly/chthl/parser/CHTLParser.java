@@ -493,18 +493,40 @@ public class CHTLParser {
         consume(TokenType.LEFT_BRACE, "Expect '{' after element name.");
         List<Node> children = new ArrayList<>();
         Map<String, String> attributes = new HashMap<>();
+        List<List<Token>> constraints = new ArrayList<>();
+
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
             if (check(TokenType.IDENTIFIER) && peekNext().getType() == TokenType.COLON) {
                 attribute(attributes);
             } else if (check(TokenType.STYLE)) {
                 children.add(styleBlock());
-            } else {
+            } else if (match(TokenType.EXCEPT)) {
+                constraints.addAll(parseConstraintList());
+            }
+            else {
                 Node child = declaration();
                 if (child != null) children.add(child);
             }
         }
         consume(TokenType.RIGHT_BRACE, "Expect '}' after element block.");
-        return new ElementNode(name.getLexeme(), attributes, children);
+        return new ElementNode(name.getLexeme(), attributes, children, constraints);
+    }
+
+    private List<List<Token>> parseConstraintList() {
+        List<List<Token>> allConstraints = new ArrayList<>();
+        do {
+            List<Token> currentConstraint = new ArrayList<>();
+            // A constraint can be complex, e.g., [Custom] @Element Box
+            while (!check(TokenType.COMMA) && !check(TokenType.SEMICOLON) && !isAtEnd()) {
+                currentConstraint.add(advance());
+            }
+            if (currentConstraint.isEmpty()) {
+                throw new ParseError(peek(), "Expect a constraint target.");
+            }
+            allConstraints.add(currentConstraint);
+        } while (match(TokenType.COMMA));
+        consume(TokenType.SEMICOLON, "Expect ';' after except statement.");
+        return allConstraints;
     }
 
     private void attribute(Map<String, String> attributes) {

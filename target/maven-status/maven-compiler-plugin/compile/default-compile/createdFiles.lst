@@ -10,6 +10,7 @@ com/chtholly/chthl/parser/CHTLParser$ParseError.class
 com/chtholly/chthl/specializer/TemplateSpecializer.class
 com/chtholly/chthl/ast/expr/ConditionalExpr.class
 com/chtholly/chthl/generator/CHTLGenerator.class
+com/chtholly/chthl/generator/CHTLGenerator$CompilationError.class
 com/chtholly/chthl/ast/expr/BinaryExpr.class
 com/chtholly/chthl/specializer/TemplateSpecializer$SearchResult.class
 com/chtholly/chthl/loader/CHTLLoader$LoadError.class
