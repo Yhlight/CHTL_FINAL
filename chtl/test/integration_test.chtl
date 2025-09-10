@@ -1,0 +1,42 @@
+// This is a test file for CHTL integration.
+
+html {
+    head {
+        title { "CHTL Integration Test" }
+    }
+
+    body {
+        h1 {
+            id: main_header;
+            text: "Welcome to CHTL";
+        }
+
+        div {
+            class: "container";
+
+            p { text: "This is a CHTL element."; }
+
+            style {
+                .container {
+                    border: 1px solid black;
+                    padding: 10px;
+                }
+            }
+        }
+
+        script {
+            // This is a script block
+            const header = {{#main_header}};
+
+            listen {
+                target: header,
+                click: () => {
+                    console.log("Header clicked!");
+                    header.textContent = "Header was clicked!";
+                }
+            }
+
+            console.log("Script loaded.");
+        }
+    }
+}

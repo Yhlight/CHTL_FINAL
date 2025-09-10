@@ -111,488 +111,177 @@ std::vector<CodeFragment> UnifiedScanner::scan() {
     position_ = 0;
     line_ = 1;
     column_ = 1;
-    context_stack_.clear();
-    in_style_block_ = false;
-    in_script_block_ = false;
-    in_chtl_js_block_ = false;
-    
-    // 首先进行CHTL JS和JS分离
-    std::string processed_source = separate_chtl_js_and_js_completely();
-    
-    // 然后对处理后的源代码进行常规扫描
-    std::string original_source = source_;
-    source_ = processed_source;
-    
+
     while (position_ < source_.length()) {
-        skip_whitespace();
-        
-        if (position_ >= source_.length()) {
+        // Find the next boundary that is a block (`style {` or `script {`)
+        size_t next_style_pos = source_.find("style", position_);
+        size_t next_script_pos = source_.find("script", position_);
+
+        size_t next_boundary_pos = std::string::npos;
+        bool is_style = false;
+
+        if (next_style_pos != std::string::npos && (next_script_pos == std::string::npos || next_style_pos < next_script_pos)) {
+            next_boundary_pos = next_style_pos;
+            is_style = true;
+        } else if (next_script_pos != std::string::npos) {
+            next_boundary_pos = next_script_pos;
+            is_style = false;
+        }
+
+        // If a boundary is found
+        if (next_boundary_pos != std::string::npos) {
+            // Add the CHTL fragment before the boundary
+            if (next_boundary_pos > position_) {
+                fragments.emplace_back(FragmentType::CHTL, source_.substr(position_, next_boundary_pos - position_), position_, next_boundary_pos, line_, column_);
+            }
+
+            // Find the opening brace of the block
+            size_t brace_pos = source_.find('{', next_boundary_pos);
+            if (brace_pos == std::string::npos) {
+                // Malformed block, treat the rest as CHTL
+                position_ = source_.length();
+                break;
+            }
+
+            // Find the matching closing brace
+            size_t end_brace_pos = find_matching_end_brace(source_, brace_pos);
+            if (end_brace_pos == std::string::npos) {
+                // Malformed block, treat the rest as CHTL
+                position_ = source_.length();
+                break;
+            }
+
+            // Extract the block content
+            size_t block_start_pos = next_boundary_pos;
+            size_t block_end_pos = end_brace_pos + 1;
+            std::string block_content = source_.substr(block_start_pos, block_end_pos - block_start_pos);
+
+            // Determine the fragment type and add it
+            FragmentType type = is_style ? FragmentType::CSS : (wide_judgment(block_content, FragmentType::CHTL_JS) ? FragmentType::CHTL_JS : FragmentType::JS);
+            fragments.emplace_back(type, block_content, block_start_pos, block_end_pos, line_, column_);
+
+            // Update position and line/column counts
+            for(size_t i = position_; i < block_end_pos; ++i) {
+                if(source_[i] == '\n') {
+                    line_++;
+                    column_ = 1;
+                } else {
+                    column_++;
+                }
+            }
+            position_ = block_end_pos;
+
+        } else {
+            // No more boundaries, the rest is CHTL
             break;
         }
-        
-        // 检查当前上下文
-        if (is_style_boundary(position_)) {
-            auto fragment = scan_style_fragment();
-            if (!fragment.content.empty()) {
-                fragments.push_back(fragment);
-            }
-        } else if (is_script_boundary(position_)) {
-            auto fragment = scan_script_fragment();
-            if (!fragment.content.empty()) {
-                fragments.push_back(fragment);
-            }
-        } else if (is_chtl_js_boundary(position_)) {
-            auto fragment = scan_chtl_js_fragment();
-            if (!fragment.content.empty()) {
-                fragments.push_back(fragment);
-            }
-        } else {
-            // 默认作为CHTL处理
-            auto fragment = scan_chtl_fragment();
-            if (!fragment.content.empty()) {
-                fragments.push_back(fragment);
-            }
-        }
     }
-    
-    // 恢复原始源代码
-    source_ = original_source;
-    
+
+    // Add any remaining CHTL content at the end of the file
+    if (position_ < source_.length()) {
+        fragments.emplace_back(FragmentType::CHTL, source_.substr(position_), position_, source_.length(), line_, column_);
+    }
+
     return fragments;
 }
 
-CodeFragment UnifiedScanner::scan_chtl_fragment() {
-    size_t start_pos = position_;
-    int start_line = line_;
-    int start_column = column_;
-    
-    // 扫描到下一个边界或文件结束
-    while (position_ < source_.length()) {
-        if (is_style_boundary(position_) || is_script_boundary(position_) || 
-            is_chtl_js_boundary(position_)) {
-            break;
-        }
-        advance();
-    }
-    
-    std::string content = source_.substr(start_pos, position_ - start_pos);
-    return CodeFragment(FragmentType::CHTL, content, start_pos, position_, start_line, start_column);
-}
-
-CodeFragment UnifiedScanner::scan_style_fragment() {
-    size_t start_pos = position_;
-    int start_line = line_;
-    int start_column = column_;
-    
-    // 跳过 "style" 关键字
-    while (position_ < source_.length() && !is_whitespace(current_char()) && current_char() != '{') {
-        advance();
-    }
-    
-    // 跳过空白字符
-    skip_whitespace();
-    
-    // 找到开始的大括号
-    if (current_char() == '{') {
-        advance();
-        
-        // 扫描CSS内容直到匹配的结束大括号
-        int brace_count = 1;
-        while (position_ < source_.length() && brace_count > 0) {
-            if (current_char() == '{') {
-                brace_count++;
-            } else if (current_char() == '}') {
-                brace_count--;
-            }
-            advance();
-        }
-    }
-    
-    std::string content = source_.substr(start_pos, position_ - start_pos);
-    return CodeFragment(FragmentType::CSS, content, start_pos, position_, start_line, start_column);
-}
-
-CodeFragment UnifiedScanner::scan_script_fragment() {
-    size_t start_pos = position_;
-    int start_line = line_;
-    int start_column = column_;
-    
-    // 跳过 "script" 关键字
-    while (position_ < source_.length() && !is_whitespace(current_char()) && current_char() != '{') {
-        advance();
-    }
-    
-    // 跳过空白字符
-    skip_whitespace();
-    
-    // 找到开始的大括号
-    if (current_char() == '{') {
-        advance();
-        
-        // 扫描脚本内容直到匹配的结束大括号
-        int brace_count = 1;
-        while (position_ < source_.length() && brace_count > 0) {
-            if (current_char() == '{') {
-                brace_count++;
-            } else if (current_char() == '}') {
-                brace_count--;
-            }
-            advance();
-        }
-    }
-    
-    std::string content = source_.substr(start_pos, position_ - start_pos);
-    
-    // 判断是CHTL JS还是纯JS
-    FragmentType type = wide_judgment(content, FragmentType::CHTL_JS) ? 
-                       FragmentType::CHTL_JS : FragmentType::JS;
-    
-    return CodeFragment(type, content, start_pos, position_, start_line, start_column);
-}
-
-CodeFragment UnifiedScanner::scan_chtl_js_fragment() {
-    size_t start_pos = position_;
-    int start_line = line_;
-    int start_column = column_;
-    
-    // 扫描CHTL JS特定语法
-    while (position_ < source_.length()) {
-        // 检查是否是CHTL JS关键字
-        if (match_pattern("fileloader", position_) ||
-            match_pattern("listen", position_) ||
-            match_pattern("delegate", position_) ||
-            match_pattern("animate", position_) ||
-            match_pattern("vir", position_) ||
-            match_pattern("router", position_)) {
-            // 扫描到下一个分号或大括号
-            while (position_ < source_.length() && current_char() != ';' && current_char() != '{') {
-                advance();
-            }
-            if (current_char() == '{') {
-                int brace_count = 1;
-                advance();
-                while (position_ < source_.length() && brace_count > 0) {
-                    if (current_char() == '{') {
-                        brace_count++;
-                    } else if (current_char() == '}') {
-                        brace_count--;
-                    }
-                    advance();
-                }
-            } else if (current_char() == ';') {
-                advance();
-            }
-        } else {
-            advance();
-        }
-    }
-    
-    std::string content = source_.substr(start_pos, position_ - start_pos);
-    return CodeFragment(FragmentType::CHTL_JS, content, start_pos, position_, start_line, start_column);
-}
-
-CodeFragment UnifiedScanner::scan_js_fragment() {
-    size_t start_pos = position_;
-    int start_line = line_;
-    int start_column = column_;
-    
-    // 扫描纯JavaScript代码
-    while (position_ < source_.length()) {
-        advance();
-    }
-    
-    std::string content = source_.substr(start_pos, position_ - start_pos);
-    return CodeFragment(FragmentType::JS, content, start_pos, position_, start_line, start_column);
-}
-
-bool UnifiedScanner::is_style_boundary(size_t pos) {
-    return match_pattern("style", pos);
-}
-
-bool UnifiedScanner::is_script_boundary(size_t pos) {
-    return match_pattern("script", pos);
-}
-
-bool UnifiedScanner::is_chtl_js_boundary(size_t pos) {
-    return match_pattern("fileloader", pos) ||
-           match_pattern("listen", pos) ||
-           match_pattern("delegate", pos) ||
-           match_pattern("animate", pos) ||
-           match_pattern("vir", pos) ||
-           match_pattern("router", pos);
-}
-
-bool UnifiedScanner::is_js_boundary(size_t pos) {
-    return match_pattern("function", pos) ||
-           match_pattern("const", pos) ||
-           match_pattern("let", pos) ||
-           match_pattern("var", pos) ||
-           match_pattern("if", pos) ||
-           match_pattern("for", pos) ||
-           match_pattern("while", pos);
-}
-
-std::string UnifiedScanner::create_placeholder(const std::string& prefix) {
-    std::string placeholder = prefix + std::to_string(placeholder_counter_++) + "_";
-    return placeholder;
-}
-
-void UnifiedScanner::replace_with_placeholder(const CodeFragment& fragment, const std::string& parent_placeholder) {
-    std::string placeholder = create_placeholder("_JS_CODE_PLACEHOLDER_");
-    PlaceholderInfo info(placeholder, fragment.type, fragment.content, 
-                        fragment.start_pos, fragment.end_pos, fragment.line, fragment.column, current_state_);
-    
-    if (!parent_placeholder.empty()) {
-        info.parent_placeholder = parent_placeholder;
-        nested_placeholders_[parent_placeholder].push_back(placeholder);
-    }
-    
-    placeholders_.push_back(info);
-    placeholder_map_[placeholder] = info;
-}
-
-std::string UnifiedScanner::restore_placeholders(const std::string& processed_content) {
-    std::string result = processed_content;
-    
-    // 按位置倒序替换，避免位置偏移
-    std::sort(placeholders_.begin(), placeholders_.end(), 
-              [](const PlaceholderInfo& a, const PlaceholderInfo& b) {
-                  return a.start_pos > b.start_pos;
-              });
-    
-    for (const auto& placeholder : placeholders_) {
-        if (placeholder.is_restored) continue;
-        
-        size_t pos = result.find(placeholder.placeholder);
-        if (pos != std::string::npos) {
-            result.replace(pos, placeholder.placeholder.length(), placeholder.original_content);
-            // 标记为已恢复
-            const_cast<PlaceholderInfo&>(placeholder).is_restored = true;
-        }
-    }
-    
-    return result;
-}
-
-// 核心功能：完全分离CHTL JS和JS代码
-std::string UnifiedScanner::separate_chtl_js_and_js_completely() {
-    std::string result = source_;
-    
-    // 第一步：识别并替换所有CHTL JS语法为占位符
-    result = process_chtl_js_syntax(result);
-    
-    // 第二步：将剩余的JS代码替换为占位符
-    result = process_js_placeholders(result);
-    
-    return result;
-}
-
-std::string UnifiedScanner::process_chtl_js_syntax(const std::string& content) {
-    std::string result = content;
-    
-    // 处理CHTL JS语法：fileloader, listen, animate, vir, router等
-    std::vector<std::pair<size_t, size_t>> chtl_js_blocks;
-    
-    // 查找所有CHTL JS块
-    for (const auto& boundary : boundary_map_[BoundaryType::CHTL_JS_BLOCK]) {
-        std::regex pattern(boundary.start_pattern);
-        std::sregex_iterator begin(content.begin(), content.end(), pattern);
-        std::sregex_iterator end;
-        
-        for (auto it = begin; it != end; ++it) {
-            size_t start_pos = it->position();
-            auto range = find_optimal_boundary(boundary, start_pos);
-            size_t end_pos = range.second;
-            if (end_pos != std::string::npos) {
-                chtl_js_blocks.push_back({start_pos, end_pos});
-            }
-        }
-    }
-    
-    // 按位置倒序处理，避免位置偏移
-    std::sort(chtl_js_blocks.begin(), chtl_js_blocks.end(), 
-              [](const std::pair<size_t, size_t>& a, const std::pair<size_t, size_t>& b) {
-                  return a.first > b.first;
-              });
-    
-    // 替换CHTL JS块为占位符
-    for (const auto& block : chtl_js_blocks) {
-        std::string chtl_js_content = content.substr(block.first, block.second - block.first + 1);
-        std::string placeholder = create_placeholder("_CHTL_JS_PLACEHOLDER_");
-        
-        PlaceholderInfo info(placeholder, FragmentType::CHTL_JS, chtl_js_content,
-                           block.first, block.second, 1, 1, current_state_);
-        placeholders_.push_back(info);
-        placeholder_map_[placeholder] = info;
-        
-        result.replace(block.first, block.second - block.first + 1, placeholder);
-    }
-    
-    return result;
-}
-
-std::string UnifiedScanner::process_js_placeholders(const std::string& content) {
-    std::string result = content;
-    
-    // 查找所有JS块（函数、对象、数组等）
-    std::vector<std::pair<size_t, size_t>> js_blocks;
-    
-    for (const auto& boundary : boundary_map_[BoundaryType::JS_BLOCK]) {
-        std::regex pattern(boundary.start_pattern);
-        std::sregex_iterator begin(content.begin(), content.end(), pattern);
-        std::sregex_iterator end;
-        
-        for (auto it = begin; it != end; ++it) {
-            size_t start_pos = it->position();
-            size_t end_pos = find_matching_end_brace(content, start_pos);
-            if (end_pos != std::string::npos) {
-                js_blocks.push_back({start_pos, end_pos});
-            }
-        }
-    }
-    
-    // 按位置倒序处理
-    std::sort(js_blocks.begin(), js_blocks.end(), 
-              [](const std::pair<size_t, size_t>& a, const std::pair<size_t, size_t>& b) {
-                  return a.first > b.first;
-              });
-    
-    // 替换JS块为占位符
-    for (const auto& block : js_blocks) {
-        std::string js_content = content.substr(block.first, block.second - block.first + 1);
-        std::string placeholder = create_placeholder("_JS_CODE_PLACEHOLDER_");
-        
-        PlaceholderInfo info(placeholder, FragmentType::JS, js_content,
-                           block.first, block.second, 1, 1, current_state_);
-        placeholders_.push_back(info);
-        placeholder_map_[placeholder] = info;
-        
-        result.replace(block.first, block.second - block.first + 1, placeholder);
-    }
-    
-    return result;
-}
+// This entire block of old helper methods is being replaced by the logic within the new scan() method.
+// The new approach is simpler and doesn't require these separate processing steps.
+// The judgment logic is now a single call within scan(), and placeholder logic is not needed at this stage.
 
 size_t UnifiedScanner::find_matching_end_brace(const std::string& content, size_t start_pos) {
-    int brace_count = 0;
+    std::stack<char>
+        s;
     bool in_string = false;
     char string_char = 0;
-    
+    bool in_comment = false;
+
     for (size_t i = start_pos; i < content.length(); ++i) {
         char c = content[i];
-        
-        if (!in_string) {
-            if (c == '"' || c == '\'') {
-                in_string = true;
-                string_char = c;
-            } else if (c == '{') {
-                brace_count++;
-            } else if (c == '}') {
-                brace_count--;
-                if (brace_count == 0) {
-                    return i;
-                }
-            }
-        } else {
-            if (c == string_char && content[i-1] != '\\') {
+        char next_c = (i + 1 < content.length()) ? content[i + 1] : '\0';
+
+        if (in_string) {
+            if (c == '\\') {
+                i++; // Skip escaped character
+            } else if (c == string_char) {
                 in_string = false;
+            }
+            continue;
+        }
+        
+        if (in_comment) {
+            if (c == '*' && next_c == '/') {
+                in_comment = false;
+                i++; // Skip '/'
+            }
+            continue;
+        }
+        
+        if (c == '/' && next_c == '/') { // Single line comment
+             while (i < content.length() && content[i] != '\n') {
+                i++;
+            }
+            continue;
+        }
+
+        if (c == '/' && next_c == '*') { // Multi-line comment
+            in_comment = true;
+            i++; // Skip '*'
+            continue;
+        }
+
+        if (c == '"' || c == '\'') {
+            in_string = true;
+            string_char = c;
+            continue;
+        }
+
+        if (c == '{') {
+            s.push('{');
+        } else if (c == '}') {
+            if (s.empty()) {
+                return std::string::npos; // Unmatched closing brace
+            }
+            if (s.top() == '{') {
+                s.pop();
+                if (s.empty()) {
+                    return i; // Found the matching brace
+                }
             }
         }
     }
     
-    return std::string::npos;
+    return std::string::npos; // No matching brace found
 }
 
 bool UnifiedScanner::wide_judgment(const std::string& content, FragmentType type) {
-    // 宽判：检查是否包含CHTL JS特定语法
-    if (type == FragmentType::CHTL_JS) {
-        return content.find("fileloader") != std::string::npos ||
-               content.find("listen") != std::string::npos ||
-               content.find("delegate") != std::string::npos ||
-               content.find("animate") != std::string::npos ||
-               content.find("vir") != std::string::npos ||
-               content.find("router") != std::string::npos ||
-               content.find("{{") != std::string::npos;  // CHTL JS选择器语法
+    if (type != FragmentType::CHTL_JS) {
+        return false;
     }
+    // More robustly check for CHTL JS keywords, ensuring they are not part of other words.
+    const std::vector<std::string> chtl_js_keywords = {
+        "fileloader", "listen", "delegate", "animate", "vir", "router", "iNeverAway", "util"
+    };
+
+    for(const auto& keyword : chtl_js_keywords) {
+        std::regex r("\\b" + keyword + "\\b");
+        if (std::regex_search(content, r)) {
+            return true;
+        }
+    }
+
+    // Check for the selector syntax {{...}}
+    if (content.find("{{") != std::string::npos) {
+        return true;
+    }
+
     return false;
 }
 
+// strict_judgment can be considered for future enhancement, but is not essential for the new scan logic.
 bool UnifiedScanner::strict_judgment(const std::string& content, FragmentType type) {
-    // 严判：更严格的语法检查
-    if (type == FragmentType::CHTL_JS) {
-        // 检查CHTL JS特定的语法模式
-        return content.find("fileloader {") != std::string::npos ||
-               content.find("listen {") != std::string::npos ||
-               content.find("delegate {") != std::string::npos ||
-               content.find("animate {") != std::string::npos ||
-               content.find("vir {") != std::string::npos ||
-               content.find("router {") != std::string::npos;
-    }
-    return false;
-}
-
-std::string UnifiedScanner::process_for_chtl_compiler() {
-    auto fragments = scan();
-    std::string result = source_;
-    
-    // 将非CHTL片段替换为占位符
-    for (const auto& fragment : fragments) {
-        if (fragment.type != FragmentType::CHTL) {
-            replace_with_placeholder(fragment);
-            std::string placeholder = placeholders_.back().placeholder;
-            result.replace(fragment.start_pos, fragment.end_pos - fragment.start_pos, placeholder);
-        }
-    }
-    
-    return result;
-}
-
-std::string UnifiedScanner::process_for_chtl_js_compiler() {
-    auto fragments = scan();
-    std::string result = source_;
-    
-    // 将非CHTL JS片段替换为占位符
-    for (const auto& fragment : fragments) {
-        if (fragment.type != FragmentType::CHTL_JS) {
-            replace_with_placeholder(fragment);
-            std::string placeholder = placeholders_.back().placeholder;
-            result.replace(fragment.start_pos, fragment.end_pos - fragment.start_pos, placeholder);
-        }
-    }
-    
-    return result;
-}
-
-std::string UnifiedScanner::process_for_js_compiler() {
-    auto fragments = scan();
-    std::string result = source_;
-    
-    // 将非JS片段替换为占位符
-    for (const auto& fragment : fragments) {
-        if (fragment.type != FragmentType::JS) {
-            replace_with_placeholder(fragment);
-            std::string placeholder = placeholders_.back().placeholder;
-            result.replace(fragment.start_pos, fragment.end_pos - fragment.start_pos, placeholder);
-        }
-    }
-    
-    return result;
-}
-
-std::string UnifiedScanner::process_for_css_compiler() {
-    auto fragments = scan();
-    std::string result = source_;
-    
-    // 将非CSS片段替换为占位符
-    for (const auto& fragment : fragments) {
-        if (fragment.type != FragmentType::CSS) {
-            replace_with_placeholder(fragment);
-            std::string placeholder = placeholders_.back().placeholder;
-            result.replace(fragment.start_pos, fragment.end_pos - fragment.start_pos, placeholder);
-        }
-    }
-    
-    return result;
+    // For now, wide_judgment is sufficient.
+    return wide_judgment(content, type);
 }
 
 void UnifiedScanner::print_fragments() const {
