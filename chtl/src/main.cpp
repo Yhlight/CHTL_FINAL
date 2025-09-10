@@ -4,6 +4,7 @@
 #include <vector>
 #include <sstream>
 #include <filesystem>
+#include <algorithm>
 
 #include "scanner/unified_scanner.h"
 #include "lexer/chtl_lexer.h"
@@ -66,21 +67,15 @@ void package_yuigahama_module() {
 void package_mixed_module() {
     std::cout << "Packaging 'MixedExample' module from source files..." << std::endl;
     try {
-        // Create CMOD part
         auto cmod_part = std::make_shared<cmod_cjmod::CMODModule>("MixedExample");
         cmod_part->setInfo(cmod_cjmod::ModuleInfoParser(read_file_content("chtl/modules/MixedExample/CMOD/info/MixedExample.chtl")).parse());
         cmod_part->addSourceFile("src/MyComponent.chtl", read_file_content("chtl/modules/MixedExample/CMOD/src/MyComponent.chtl"));
-
-        // Create CJMOD part
         auto cjmod_part = std::make_shared<cmod_cjmod::CJMODModule>("MixedExample");
         cjmod_part->setInfo(cmod_cjmod::ModuleInfoParser(read_file_content("chtl/modules/MixedExample/CJMOD/info/MixedExample.chtl")).parse());
         cjmod_part->addSourceFile("src/MyExtension.cpp", read_file_content("chtl/modules/MixedExample/CJMOD/src/MyExtension.cpp"));
-
-        // Create Mixed module
         auto mixed_module = std::make_shared<cmod_cjmod::MixedModule>("MixedExample");
         mixed_module->addCMODModule(cmod_part);
         mixed_module->addCJMODModule(cjmod_part);
-
         std::string packed_content = cmod_cjmod::ModulePackager::pack(*mixed_module);
         std::ofstream outfile("modules/MixedExample.cmod");
         outfile << packed_content;
@@ -94,34 +89,46 @@ void package_mixed_module() {
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <input_file> | --package-chtholly | --package-yuigahama | --package-mixed" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <input_file> [--default-struct]" << std::endl;
         return 1;
     }
 
-    std::string arg1 = argv[1];
-    if (arg1 == "--package-chtholly") {
-        package_chtholly_module();
-        return 0;
-    }
-    if (arg1 == "--package-yuigahama") {
-        package_yuigahama_module();
-        return 0;
-    }
-    if (arg1 == "--package-mixed") {
-        package_mixed_module();
-        return 0;
+    std::vector<std::string> args(argv + 1, argv + argc);
+    std::string filename;
+    bool use_default_struct = false;
+
+    for (const auto& arg : args) {
+        if (arg == "--package-chtholly") {
+            package_chtholly_module();
+            return 0;
+        }
+        if (arg == "--package-yuigahama") {
+            package_yuigahama_module();
+            return 0;
+        }
+        if (arg == "--package-mixed") {
+            package_mixed_module();
+            return 0;
+        }
+        if (arg == "--default-struct") {
+            use_default_struct = true;
+        } else if (filename.empty()) {
+            filename = arg;
+        }
     }
 
-    std::string filename = arg1;
+    if (filename.empty()) {
+        std::cerr << "No input file specified." << std::endl;
+        return 1;
+    }
+
     std::ifstream file(filename);
-
     if (!file.is_open()) {
         std::cerr << "Error: Could not open file " << filename << std::endl;
         return 1;
     }
 
-    std::string content((std::istreambuf_iterator<char>(file)),
-                        std::istreambuf_iterator<char>());
+    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     file.close();
 
     try {
@@ -145,14 +152,12 @@ int main(int argc, char* argv[]) {
                     }
                     break;
                 }
-                case scanner::FragmentType::CSS: {
+                case scanner::FragmentType::CSS:
                     css_parts.push_back(fragment.content);
                     break;
-                }
-                case scanner::FragmentType::JS: {
+                case scanner::FragmentType::JS:
                     js_parts.push_back(fragment.content);
                     break;
-                }
                 case scanner::FragmentType::CHTL_JS: {
                     chtl_js::CHTLJSParser parser(fragment.content);
                     auto cj_ast = parser.parse();
@@ -170,10 +175,8 @@ int main(int argc, char* argv[]) {
             import::ImportManager import_manager(".");
             import::ImportResolver import_resolver(import_manager);
             import_resolver.resolve_imports(main_ast);
-
             style::StyleAggregator style_aggregator;
             style_aggregator.aggregate_styles(main_ast);
-
             analysis::ConstraintValidator validator;
             if (!validator.validate(main_ast)) {
                 std::cerr << "Constraint validation failed." << std::endl;
@@ -183,7 +186,6 @@ int main(int argc, char* argv[]) {
 
         std::stringstream final_html;
         std::string main_html_content;
-
         for(const auto& part : html_parts) {
             main_html_content += part;
         }
@@ -200,17 +202,9 @@ int main(int argc, char* argv[]) {
         }
         std::string js_content = js_stream.str();
 
-        size_t head_pos = main_html_content.find("</head>");
-        if (head_pos != std::string::npos && !css_content.empty()) {
-            main_html_content.insert(head_pos, "<style>\n" + css_content + "</style>\n");
-        }
+        bool has_html_tag = main_html_content.find("<html") != std::string::npos;
 
-        size_t body_pos = main_html_content.find("</body>");
-        if (body_pos != std::string::npos && !js_content.empty()) {
-            main_html_content.insert(body_pos, "<script>\n" + js_content + "</script>\n");
-        }
-
-        if (head_pos == std::string::npos && body_pos == std::string::npos) {
+        if (use_default_struct && !has_html_tag) {
             final_html << "<!DOCTYPE html>\n<html>\n<head>\n";
             final_html << "  <meta charset=\"UTF-8\">\n  <title>CHTL Output</title>\n";
             if (!css_content.empty()) {
@@ -223,10 +217,17 @@ int main(int argc, char* argv[]) {
             }
             final_html << "</body>\n</html>";
         } else {
+            size_t head_pos = main_html_content.find("</head>");
+            if (head_pos != std::string::npos && !css_content.empty()) {
+                main_html_content.insert(head_pos, "<style>\n" + css_content + "</style>\n");
+            }
+            size_t body_pos = main_html_content.find("</body>");
+            if (body_pos != std::string::npos && !js_content.empty()) {
+                main_html_content.insert(body_pos, "<script>\n" + js_content + "</script>\n");
+            }
             final_html << main_html_content;
         }
 
-        std::cout << "\n\n--- FINAL HTML ---\n";
         std::cout << final_html.str() << std::endl;
 
     } catch (const std::exception& e) {
