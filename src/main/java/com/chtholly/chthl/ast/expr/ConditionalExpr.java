@@ -18,4 +18,9 @@ public class ConditionalExpr extends Expression {
     public <R> R accept(Visitor<R> visitor) {
         return visitor.visitConditionalExpr(this);
     }
+
+    @Override
+    public Expression clone() {
+        return new ConditionalExpr(this.condition.clone(), this.thenBranch.clone(), this.elseBranch.clone());
+    }
 }

@@ -1,5 +1,7 @@
 package com.chtholly.chthl.ast;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,5 +22,15 @@ public class ElementNode implements Node {
     @Override
     public <R> R accept(Visitor<R> visitor) {
         return visitor.visitElementNode(this);
+    }
+
+    @Override
+    public Node clone() {
+        Map<String, String> clonedAttributes = new HashMap<>(this.attributes);
+        List<Node> clonedChildren = new ArrayList<>();
+        for (Node child : this.children) {
+            clonedChildren.add(child.clone());
+        }
+        return new ElementNode(this.tagName, clonedAttributes, clonedChildren);
     }
 }

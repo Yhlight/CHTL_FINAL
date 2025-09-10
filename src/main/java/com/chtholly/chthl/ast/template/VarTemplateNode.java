@@ -2,6 +2,7 @@ package com.chtholly.chthl.ast.template;
 
 import com.chtholly.chthl.ast.expr.Expression;
 import com.chtholly.chthl.lexer.Token;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -18,5 +19,14 @@ public class VarTemplateNode extends TemplateNode {
     @Override
     public <R> R accept(com.chtholly.chthl.ast.Visitor<R> visitor) {
         return visitor.visitVarTemplateNode(this);
+    }
+
+    @Override
+    public com.chtholly.chthl.ast.Node clone() {
+        Map<String, Expression> clonedVariables = new HashMap<>();
+        for (Map.Entry<String, Expression> entry : this.variables.entrySet()) {
+            clonedVariables.put(entry.getKey(), entry.getValue().clone());
+        }
+        return new VarTemplateNode(this.name, clonedVariables);
     }
 }

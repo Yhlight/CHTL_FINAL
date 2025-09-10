@@ -15,4 +15,9 @@ public class CommentNode implements Node {
     public <R> R accept(Visitor<R> visitor) {
         return visitor.visitCommentNode(this);
     }
+
+    @Override
+    public Node clone() {
+        return new CommentNode(this.text);
+    }
 }

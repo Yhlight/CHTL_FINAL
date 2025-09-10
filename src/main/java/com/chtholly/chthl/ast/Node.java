@@ -11,4 +11,10 @@ public interface Node {
      * @return The result of the visitor's operation.
      */
     <R> R accept(Visitor<R> visitor);
+
+    /**
+     * Creates a deep copy of the node.
+     * @return A new Node instance that is a deep copy of this one.
+     */
+    Node clone();
 }

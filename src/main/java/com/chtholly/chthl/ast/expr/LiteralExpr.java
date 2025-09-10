@@ -14,4 +14,10 @@ public class LiteralExpr extends Expression {
     public <R> R accept(Visitor<R> visitor) {
         return visitor.visitLiteralExpr(this);
     }
+
+    @Override
+    public Expression clone() {
+        // value is an immutable String, so shallow copy is fine.
+        return new LiteralExpr(this.value);
+    }
 }

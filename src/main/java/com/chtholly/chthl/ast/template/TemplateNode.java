@@ -13,4 +13,7 @@ public abstract class TemplateNode implements Node {
     public TemplateNode(Token name) {
         this.name = name;
     }
+
+    @Override
+    public abstract Node clone();
 }

@@ -19,4 +19,9 @@ public class ReferenceExpr extends Expression {
     public <R> R accept(Visitor<R> visitor) {
         return visitor.visitReferenceExpr(this);
     }
+
+    @Override
+    public Expression clone() {
+        return new ReferenceExpr(this.object.clone(), this.property);
+    }
 }

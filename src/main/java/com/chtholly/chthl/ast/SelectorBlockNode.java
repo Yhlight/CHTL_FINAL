@@ -1,5 +1,6 @@
 package com.chtholly.chthl.ast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,5 +19,14 @@ public class SelectorBlockNode implements Node {
     @Override
     public <R> R accept(Visitor<R> visitor) {
         return visitor.visitSelectorBlockNode(this);
+    }
+
+    @Override
+    public Node clone() {
+        List<Node> clonedBody = new ArrayList<>();
+        for (Node node : this.body) {
+            clonedBody.add(node.clone());
+        }
+        return new SelectorBlockNode(this.selector, clonedBody);
     }
 }

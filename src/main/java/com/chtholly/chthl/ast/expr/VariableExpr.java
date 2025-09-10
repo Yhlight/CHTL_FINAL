@@ -16,4 +16,9 @@ public class VariableExpr extends Expression {
     public <R> R accept(Visitor<R> visitor) {
         return visitor.visitVariableExpr(this);
     }
+
+    @Override
+    public Expression clone() {
+        return new VariableExpr(this.name);
+    }
 }

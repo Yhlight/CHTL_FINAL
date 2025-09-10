@@ -14,4 +14,9 @@ public class GroupingExpr extends Expression {
     public <R> R accept(Visitor<R> visitor) {
         return visitor.visitGroupingExpr(this);
     }
+
+    @Override
+    public Expression clone() {
+        return new GroupingExpr(this.expression.clone());
+    }
 }

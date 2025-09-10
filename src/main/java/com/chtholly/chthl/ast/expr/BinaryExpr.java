@@ -20,4 +20,9 @@ public class BinaryExpr extends Expression {
     public <R> R accept(Visitor<R> visitor) {
         return visitor.visitBinaryExpr(this);
     }
+
+    @Override
+    public Expression clone() {
+        return new BinaryExpr(this.left.clone(), this.operator, this.right.clone());
+    }
 }

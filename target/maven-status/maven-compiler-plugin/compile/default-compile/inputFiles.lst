@@ -3,14 +3,18 @@
 /app/src/main/java/com/chtholly/chthl/ast/template/VarTemplateNode.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/ConditionalExpr.java
 /app/src/main/java/com/chtholly/chthl/ast/template/ElementTemplateNode.java
+/app/src/main/java/com/chtholly/chthl/ast/custom/ModificationNode.java
+/app/src/main/java/com/chtholly/chthl/specializer/TemplateSpecializer.java
 /app/src/main/java/com/chtholly/chthl/ast/SelectorBlockNode.java
 /app/src/main/java/com/chtholly/chthl/lexer/TokenType.java
 /app/src/main/java/com/chtholly/chthl/evaluator/UnitValue.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/Expression.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/VariableExpr.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/Visitor.java
+/app/src/main/java/com/chtholly/chthl/ast/custom/CustomizationBlockNode.java
 /app/src/main/java/com/chtholly/chthl/evaluator/ExpressionEvaluator.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/BinaryExpr.java
+/app/src/main/java/com/chtholly/chthl/ast/custom/InsertNode.java
 /app/src/main/java/com/chtholly/chthl/ast/template/StyleTemplateNode.java
 /app/src/main/java/com/chtholly/chthl/parser/ExpressionParser.java
 /app/src/main/java/com/chtholly/chthl/ast/CommentNode.java
@@ -25,6 +29,7 @@
 /app/src/main/java/com/chtholly/chthl/ast/ElementNode.java
 /app/src/main/java/com/chtholly/chthl/ast/TextNode.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/GroupingExpr.java
+/app/src/main/java/com/chtholly/chthl/ast/custom/DeleteNode.java
 /app/src/main/java/com/chtholly/chthl/parser/CHTLParser.java
 /app/src/main/java/com/chtholly/chthl/lexer/Token.java
 /app/src/main/java/com/chtholly/chthl/generator/CHTLGenerator.java

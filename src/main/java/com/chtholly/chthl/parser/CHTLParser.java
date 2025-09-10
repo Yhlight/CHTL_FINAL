@@ -1,6 +1,10 @@
 package com.chtholly.chthl.parser;
 
 import com.chtholly.chthl.ast.*;
+import com.chtholly.chthl.ast.custom.CustomizationBlockNode;
+import com.chtholly.chthl.ast.custom.DeleteNode;
+import com.chtholly.chthl.ast.custom.InsertNode;
+import com.chtholly.chthl.ast.custom.ModificationNode;
 import com.chtholly.chthl.ast.expr.Expression;
 import com.chtholly.chthl.ast.template.*;
 import com.chtholly.chthl.lexer.Token;
@@ -65,9 +69,73 @@ public class CHTLParser {
     private TemplateUsageNode parseTemplateUsage() {
         Token type = consume(TokenType.IDENTIFIER, "Expect template type like '@Style'.");
         Token name = consume(TokenType.IDENTIFIER, "Expect template name.");
-        consume(TokenType.SEMICOLON, "Expect ';' after template usage.");
-        return new TemplateUsageNode(type, name);
+
+        CustomizationBlockNode customization = null;
+        if (check(TokenType.LEFT_BRACE)) {
+            customization = parseCustomizationBlock();
+        } else {
+            consume(TokenType.SEMICOLON, "Expect ';' after template usage without a customization block.");
+        }
+
+        return new TemplateUsageNode(type, name, customization);
     }
+
+    private CustomizationBlockNode parseCustomizationBlock() {
+        consume(TokenType.LEFT_BRACE, "Expect '{' to start customization block.");
+        List<ModificationNode> modifications = new ArrayList<>();
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            if (match(TokenType.DELETE)) {
+                modifications.add(parseDelete());
+            } else if (match(TokenType.INSERT)) {
+                modifications.add(parseInsert());
+            } else {
+                throw new ParseError(peek(), "Expected a modification keyword like 'delete' or 'insert'.");
+            }
+        }
+        consume(TokenType.RIGHT_BRACE, "Expect '}' to end customization block.");
+        return new CustomizationBlockNode(modifications);
+    }
+
+    private DeleteNode parseDelete() {
+        List<List<Token>> allTargets = new ArrayList<>();
+        do {
+            List<Token> currentTarget = new ArrayList<>();
+            while (!check(TokenType.COMMA) && !check(TokenType.SEMICOLON) && !isAtEnd()) {
+                currentTarget.add(advance());
+            }
+            if(currentTarget.isEmpty()) throw new ParseError(peek(), "Expect a target for 'delete'.");
+            allTargets.add(currentTarget);
+        } while (match(TokenType.COMMA));
+
+        consume(TokenType.SEMICOLON, "Expect ';' after delete statement.");
+        return new DeleteNode(allTargets);
+    }
+
+    private InsertNode parseInsert() {
+        Token position;
+        if (match(TokenType.AFTER) || match(TokenType.BEFORE) || match(TokenType.REPLACE)) {
+            position = previous();
+        } else {
+            // Handle 'at top' / 'at bottom' in the future
+            throw new ParseError(peek(), "Expect a position keyword like 'after', 'before', or 'replace'.");
+        }
+
+        List<Token> target = new ArrayList<>();
+        while (!check(TokenType.LEFT_BRACE) && !isAtEnd()) {
+            target.add(advance());
+        }
+
+        consume(TokenType.LEFT_BRACE, "Expect '{' for insert body.");
+
+        List<Node> body = new ArrayList<>();
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            body.add(declaration());
+        }
+        consume(TokenType.RIGHT_BRACE, "Expect '}' to end insert body.");
+
+        return new InsertNode(position, target, body);
+    }
+
 
     private void parseTemplateDefinition() {
         consume(TokenType.LEFT_BRACKET, "Expect '['.");
@@ -276,6 +344,8 @@ public class CHTLParser {
                 case TEXT:
                 case STYLE:
                 case LEFT_BRACKET:
+                case DELETE:
+                case INSERT:
                     return;
             }
             advance();

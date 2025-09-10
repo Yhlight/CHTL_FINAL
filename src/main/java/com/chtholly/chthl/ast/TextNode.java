@@ -14,4 +14,9 @@ public class TextNode implements Node {
     public <R> R accept(Visitor<R> visitor) {
         return visitor.visitTextNode(this);
     }
+
+    @Override
+    public Node clone() {
+        return new TextNode(this.text);
+    }
 }

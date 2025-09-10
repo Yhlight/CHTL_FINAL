@@ -19,4 +19,9 @@ public class StylePropertyNode implements Node {
     public <R> R accept(Visitor<R> visitor) {
         return visitor.visitStylePropertyNode(this);
     }
+
+    @Override
+    public Node clone() {
+        return new StylePropertyNode(this.key, this.value.clone());
+    }
 }

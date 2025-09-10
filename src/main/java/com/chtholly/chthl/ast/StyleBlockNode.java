@@ -1,6 +1,6 @@
 package com.chtholly.chthl.ast;
 
-import com.chtholly.chthl.ast.template.StyleTemplateNode;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,5 +20,20 @@ public class StyleBlockNode implements Node {
     @Override
     public <R> R accept(Visitor<R> visitor) {
         return visitor.visitStyleBlockNode(this);
+    }
+
+    @Override
+    public Node clone() {
+        List<Node> clonedDirectProps = new ArrayList<>();
+        for (Node prop : this.directPropertiesAndUsages) {
+            clonedDirectProps.add(prop.clone());
+        }
+
+        List<SelectorBlockNode> clonedSelectorBlocks = new ArrayList<>();
+        for (SelectorBlockNode block : this.selectorBlocks) {
+            clonedSelectorBlocks.add((SelectorBlockNode) block.clone());
+        }
+
+        return new StyleBlockNode(clonedDirectProps, clonedSelectorBlocks);
     }
 }

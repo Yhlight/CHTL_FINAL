@@ -1,5 +1,6 @@
 package com.chtholly.chthl.ast.expr;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,5 +22,14 @@ public class CallExpr extends Expression {
     @Override
     public <R> R accept(Visitor<R> visitor) {
         return visitor.visitCallExpr(this);
+    }
+
+    @Override
+    public Expression clone() {
+        List<Expression> clonedArguments = new ArrayList<>();
+        for (Expression arg : this.arguments) {
+            clonedArguments.add(arg.clone());
+        }
+        return new CallExpr(this.callee.clone(), this.paren, clonedArguments);
     }
 }

@@ -11,4 +11,6 @@ public abstract class Expression {
      * @return The result of the visitor's operation.
      */
     public abstract <R> R accept(Visitor<R> visitor);
+
+    public abstract Expression clone();
 }

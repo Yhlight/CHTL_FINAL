@@ -4,6 +4,7 @@ import com.chtholly.chthl.ast.*;
 import com.chtholly.chthl.ast.expr.Expression;
 import com.chtholly.chthl.ast.template.*;
 import com.chtholly.chthl.evaluator.ExpressionEvaluator;
+import com.chtholly.chthl.specializer.TemplateSpecializer;
 
 import java.util.List;
 import java.util.Map;
@@ -21,12 +22,14 @@ public class CHTLGenerator implements Visitor<String> {
     private final StringBuilder globalCssBuilder;
     private final List<Node> rootNodes;
     private final Map<String, TemplateNode> templateTable;
+    private final TemplateSpecializer specializer;
     private ElementNode currentElement = null;
 
     public CHTLGenerator(List<Node> rootNodes, Map<String, TemplateNode> templateTable) {
         this.globalCssBuilder = new StringBuilder();
         this.rootNodes = rootNodes;
         this.templateTable = templateTable;
+        this.specializer = new TemplateSpecializer();
     }
 
     public CompilationResult generate() {
@@ -61,15 +64,8 @@ public class CHTLGenerator implements Visitor<String> {
         for (Node child : node.children) {
             if (child instanceof StyleBlockNode) {
                 StyleBlockNode styleNode = (StyleBlockNode) child;
-                ExpressionEvaluator evaluator = new ExpressionEvaluator(node, this.rootNodes, this.templateTable);
                 for (Node propOrUsage : styleNode.directPropertiesAndUsages) {
-                    if (propOrUsage instanceof StylePropertyNode) {
-                        StylePropertyNode property = (StylePropertyNode) propOrUsage;
-                        Object value = evaluator.evaluate(property.value);
-                        styleAttrBuilder.append(property.key).append(":").append(value.toString()).append(";");
-                    } else if (propOrUsage instanceof TemplateUsageNode) {
-                        styleAttrBuilder.append(propOrUsage.accept(this));
-                    }
+                    styleAttrBuilder.append(visitStyleTemplateBodyNode(propOrUsage));
                 }
                 for (SelectorBlockNode selectorBlock : styleNode.selectorBlocks) {
                     String selector = selectorBlock.selector.trim();
@@ -136,19 +132,12 @@ public class CHTLGenerator implements Visitor<String> {
     public String visitSelectorBlockNode(SelectorBlockNode node) {
         String resolvedSelector = resolveSelector(node.selector, this.currentElement);
         globalCssBuilder.append(resolvedSelector).append(" {\n");
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(this.currentElement, this.rootNodes, this.templateTable);
         for (Node propOrUsage : node.body) {
-            if (propOrUsage instanceof StylePropertyNode) {
-                StylePropertyNode property = (StylePropertyNode) propOrUsage;
-                Object value = evaluator.evaluate(property.value);
-                globalCssBuilder.append("    ").append(property.key).append(": ").append(value.toString()).append(";\n");
-            } else if (propOrUsage instanceof TemplateUsageNode) {
-                String expanded = propOrUsage.accept(this);
-                String[] props = expanded.split(";");
-                for (String prop : props) {
-                    if (!prop.trim().isEmpty()) {
-                        globalCssBuilder.append("    ").append(prop.trim()).append(";\n");
-                    }
+            String expanded = visitStyleTemplateBodyNode(propOrUsage);
+            String[] props = expanded.split(";");
+            for (String prop : props) {
+                if (!prop.trim().isEmpty()) {
+                    globalCssBuilder.append("    ").append(prop.trim()).append(";\n");
                 }
             }
         }
@@ -158,33 +147,48 @@ public class CHTLGenerator implements Visitor<String> {
 
     @Override
     public String visitTemplateUsageNode(TemplateUsageNode node) {
-        TemplateNode template = this.templateTable.get(node.name.getLexeme());
-        if (template == null) return "";
-        return template.accept(this);
+        TemplateNode templateDef = this.templateTable.get(node.name.getLexeme());
+        if (templateDef == null) return "";
+
+        if (templateDef instanceof ElementTemplateNode) {
+            List<Node> specializedBody = specializer.specialize(((ElementTemplateNode) templateDef).body, node.customization);
+            StringBuilder builder = new StringBuilder();
+            for (Node bodyNode : specializedBody) {
+                builder.append(bodyNode.accept(this));
+            }
+            return builder.toString();
+        } else if (templateDef instanceof StyleTemplateNode) {
+             List<Node> specializedBody = specializer.specialize(((StyleTemplateNode) templateDef).body, node.customization);
+             StringBuilder builder = new StringBuilder();
+             for(Node bodyNode : specializedBody) {
+                 builder.append(visitStyleTemplateBodyNode(bodyNode));
+             }
+             return builder.toString();
+        }
+        return "";
     }
 
-    @Override
-    public String visitElementTemplateNode(ElementTemplateNode node) {
-        StringBuilder builder = new StringBuilder();
-        for (Node bodyNode : node.body) {
-            builder.append(bodyNode.accept(this));
+    private String visitStyleTemplateBodyNode(Node bodyNode) {
+        if (bodyNode instanceof StylePropertyNode) {
+            StylePropertyNode prop = (StylePropertyNode) bodyNode;
+            ExpressionEvaluator evaluator = new ExpressionEvaluator(this.currentElement, this.rootNodes, this.templateTable);
+            Object value = evaluator.evaluate(prop.value);
+            return prop.key + ": " + value.toString() + ";";
+        } else if (bodyNode instanceof TemplateUsageNode) {
+            return bodyNode.accept(this);
         }
-        return builder.toString();
+        return "";
     }
 
     @Override
     public String visitStyleTemplateNode(StyleTemplateNode node) {
         StringBuilder builder = new StringBuilder();
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(this.currentElement, this.rootNodes, this.templateTable);
         for (Node bodyNode : node.body) {
-            if (bodyNode instanceof StylePropertyNode) {
-                StylePropertyNode prop = (StylePropertyNode) bodyNode;
-                String value = evaluator.evaluate(prop.value).toString();
-                builder.append(prop.key).append(":").append(value).append(";");
-            } else if (bodyNode instanceof TemplateUsageNode) {
-                builder.append(bodyNode.accept(this));
-            }
+            builder.append(visitStyleTemplateBodyNode(bodyNode));
         }
         return builder.toString();
     }
+
+    @Override
+    public String visitElementTemplateNode(ElementTemplateNode node) { return ""; }
 }

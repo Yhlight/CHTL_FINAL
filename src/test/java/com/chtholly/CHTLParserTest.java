@@ -4,6 +4,9 @@ import com.chtholly.chthl.ast.*;
 import com.chtholly.chthl.ast.expr.CallExpr;
 import com.chtholly.chthl.ast.expr.ReferenceExpr;
 import com.chtholly.chthl.ast.expr.VariableExpr;
+import com.chtholly.chthl.ast.custom.CustomizationBlockNode;
+import com.chtholly.chthl.ast.custom.DeleteNode;
+import com.chtholly.chthl.ast.custom.InsertNode;
 import com.chtholly.chthl.ast.template.StyleTemplateNode;
 import com.chtholly.chthl.ast.template.TemplateNode;
 import com.chtholly.chthl.ast.template.TemplateUsageNode;
@@ -211,5 +214,43 @@ class CHTLParserTest {
         assertEquals(1, callExpr.arguments.size());
         assertTrue(callExpr.arguments.get(0) instanceof VariableExpr);
         assertEquals("primary", ((VariableExpr) callExpr.arguments.get(0)).name.getLexeme());
+    }
+
+    @Test
+    void testCustomizationBlockParsing() {
+        String input = """
+        body {
+            @Element Box {
+                delete span;
+                insert after div[0] {
+                    p { text { "Inserted" } }
+                }
+            }
+        }
+        """;
+
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        List<Node> ast = parser.getAst();
+
+        ElementNode body = (ElementNode) ast.get(0);
+        TemplateUsageNode usage = (TemplateUsageNode) body.children.get(0);
+        assertNotNull(usage.customization);
+
+        CustomizationBlockNode custom = usage.customization;
+        assertEquals(2, custom.modifications.size());
+
+        // Check delete node
+        assertTrue(custom.modifications.get(0) instanceof DeleteNode);
+        DeleteNode deleteNode = (DeleteNode) custom.modifications.get(0);
+        assertEquals(1, deleteNode.targets.size());
+        assertEquals("span", deleteNode.targets.get(0).get(0).getLexeme());
+
+        // Check insert node
+        assertTrue(custom.modifications.get(1) instanceof InsertNode);
+        InsertNode insertNode = (InsertNode) custom.modifications.get(1);
+        assertEquals("after", insertNode.position.getLexeme());
+        assertEquals("div[0]", insertNode.target.stream().map(Token::getLexeme).collect(Collectors.joining("")));
+        assertEquals(1, insertNode.body.size());
+        assertTrue(insertNode.body.get(0) instanceof ElementNode);
     }
 }
