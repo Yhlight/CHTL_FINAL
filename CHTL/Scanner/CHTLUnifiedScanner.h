@@ -9,6 +9,14 @@
 
 namespace CHTL {
 
+// 语法边界类型
+enum class SyntaxBoundaryType {
+    BRACE_BLOCK,    // 花括号块
+    PAREN_BLOCK,    // 圆括号块
+    STATEMENT,      // 语句
+    LINE            // 行
+};
+
 class CHTLUnifiedScanner {
 private:
     std::string source;
@@ -66,6 +74,9 @@ private:
     std::string createPlaceholder(const std::string& content);
     std::string restorePlaceholder(const std::string& placeholder);
     void processPlaceholders();
+    std::string processPlaceholdersInCode(const std::string& code);
+    bool validatePlaceholders() const;
+    void clearPlaceholders();
     
     // 代码分离
     std::string separateCHTLAndJS(const std::string& code);
@@ -103,9 +114,17 @@ private:
     std::string sliceCode(size_t start, size_t end);
     void adjustSliceBoundary(size_t& start, size_t& end);
     
+    // 可变长度切片
+    std::string sliceCodeDynamic(size_t start, size_t& end);
+    bool isBoundaryChar(char c) const;
+    size_t findSyntaxBoundary(size_t start, SyntaxBoundaryType type) const;
+    
     // 智能扩增
     void expandSlice(size_t& start, size_t& end);
     void shrinkSlice(size_t& start, size_t& end);
+    void expandToSyntaxBoundary(size_t& start, size_t& end, SyntaxBoundaryType type);
+    void expandToCompleteStatement(size_t& start, size_t& end);
+    void expandToCompleteBlock(size_t& start, size_t& end);
 
 public:
     CHTLUnifiedScanner();

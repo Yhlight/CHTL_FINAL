@@ -61,6 +61,21 @@ private:
     bool colorOutput;
     std::string outputFile;
     
+    // 测试发现和过滤
+    std::string testFilter;
+    std::string suiteFilter;
+    std::string tagFilter;
+    std::map<std::string, std::vector<std::string>> testTags;
+    
+    // 测试配置
+    int testTimeout;
+    int maxRetries;
+    bool parallelExecution;
+    
+    // 测试环境
+    bool environmentSetup;
+    std::map<std::string, std::string> environmentVariables;
+    
 public:
     TestFramework();
     ~TestFramework() = default;
@@ -97,6 +112,42 @@ public:
     static void assertGreaterThan(int expected, int actual, const std::string& message = "");
     static void assertLessThan(int expected, int actual, const std::string& message = "");
     static void assertGreaterThanOrEqual(int expected, int actual, const std::string& message = "");
+    
+    // 测试发现
+    void discoverTests(const std::string& directory);
+    void discoverTests(const std::string& directory, const std::string& pattern);
+    std::vector<std::string> findTestFiles(const std::string& directory);
+    
+    // 测试报告
+    void generateReport(const std::string& outputPath);
+    void generateHTMLReport(const std::string& outputPath);
+    void generateJSONReport(const std::string& outputPath);
+    void generateXMLReport(const std::string& outputPath);
+    
+    // 测试统计
+    std::map<std::string, int> getGlobalStatistics() const;
+    std::string getTestSummary() const;
+    double getSuccessRate() const;
+    
+    // 测试过滤
+    void setTestFilter(const std::string& filter);
+    void setSuiteFilter(const std::string& filter);
+    void setTagFilter(const std::string& tag);
+    
+    // 测试标签
+    void addTestTag(const std::string& testName, const std::string& tag);
+    void removeTestTag(const std::string& testName, const std::string& tag);
+    std::vector<std::string> getTestTags(const std::string& testName) const;
+    
+    // 测试配置
+    void setTestTimeout(int timeoutMs);
+    void setMaxRetries(int retries);
+    void setParallelExecution(bool parallel);
+    
+    // 测试环境
+    void setupTestEnvironment();
+    void cleanupTestEnvironment();
+    void resetTestEnvironment();
     static void assertLessThanOrEqual(int expected, int actual, const std::string& message = "");
     
     // 测试报告

@@ -768,4 +768,141 @@ void CLITool::redirectOutput() {
     }
 }
 
+// Renderer 实现
+Renderer::Renderer() : mode(TEXT), theme("default"), width(80), height(24), interactive(false) {
+}
+
+void Renderer::setMode(RenderMode mode) {
+    this->mode = mode;
+}
+
+void Renderer::setTheme(const std::string& theme) {
+    this->theme = theme;
+}
+
+void Renderer::setWidth(int width) {
+    this->width = width;
+}
+
+void Renderer::setHeight(int height) {
+    this->height = height;
+}
+
+std::string Renderer::render(const std::string& content) {
+    switch (mode) {
+        case TEXT:
+            return renderText(content);
+        case HTML:
+            return renderHTML(content);
+        case MARKDOWN:
+            return renderMarkdown(content);
+        case JSON:
+            return renderJSON(content);
+        case XML:
+            return renderXML(content);
+        case YAML:
+            return renderYAML(content);
+        default:
+            return content;
+    }
+}
+
+std::string Renderer::renderFile(const std::string& filePath) {
+    std::string content = FileProcessor::readFile(filePath);
+    if (content.empty()) {
+        return "";
+    }
+    
+    return render(content);
+}
+
+std::string Renderer::renderDirectory(const std::string& dirPath) {
+    std::vector<std::string> files = FileProcessor::listFiles(dirPath, ".chtl");
+    std::string result;
+    
+    for (const auto& file : files) {
+        std::string content = renderFile(file);
+        if (!content.empty()) {
+            result += content + "\n\n";
+        }
+    }
+    
+    return result;
+}
+
+void Renderer::startInteractive() {
+    interactive = true;
+    // 启动交互式渲染
+}
+
+void Renderer::stopInteractive() {
+    interactive = false;
+    // 停止交互式渲染
+}
+
+bool Renderer::isInteractive() const {
+    return interactive;
+}
+
+void Renderer::setConfig(const std::map<std::string, std::string>& config) {
+    this->config = config;
+}
+
+std::map<std::string, std::string> Renderer::getConfig() const {
+    return config;
+}
+
+std::map<std::string, int> Renderer::getStatistics() const {
+    return statistics;
+}
+
+std::string Renderer::getReport() const {
+    std::ostringstream oss;
+    oss << "Renderer Report" << std::endl;
+    oss << "Mode: " << static_cast<int>(mode) << std::endl;
+    oss << "Theme: " << theme << std::endl;
+    oss << "Width: " << width << std::endl;
+    oss << "Height: " << height << std::endl;
+    oss << "Interactive: " << (interactive ? "Yes" : "No") << std::endl;
+    return oss.str();
+}
+
+std::string Renderer::renderText(const std::string& content) {
+    // 文本渲染
+    return content;
+}
+
+std::string Renderer::renderHTML(const std::string& content) {
+    // HTML渲染
+    std::ostringstream oss;
+    oss << "<!DOCTYPE html>" << std::endl;
+    oss << "<html>" << std::endl;
+    oss << "<head><title>CHTL Output</title></head>" << std::endl;
+    oss << "<body>" << std::endl;
+    oss << "<pre>" << content << "</pre>" << std::endl;
+    oss << "</body>" << std::endl;
+    oss << "</html>" << std::endl;
+    return oss.str();
+}
+
+std::string Renderer::renderMarkdown(const std::string& content) {
+    // Markdown渲染
+    return content;
+}
+
+std::string Renderer::renderJSON(const std::string& content) {
+    // JSON渲染
+    return content;
+}
+
+std::string Renderer::renderXML(const std::string& content) {
+    // XML渲染
+    return content;
+}
+
+std::string Renderer::renderYAML(const std::string& content) {
+    // YAML渲染
+    return content;
+}
+
 } // namespace CHTL

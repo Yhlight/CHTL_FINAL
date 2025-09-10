@@ -668,10 +668,53 @@ std::string CHTLUnifiedScanner::restorePlaceholder(const std::string& placeholde
 
 void CHTLUnifiedScanner::processPlaceholders() {
     // 处理占位符，恢复原始内容
-    for (auto& fragment : source) {
-        // 这里需要实现占位符恢复逻辑
-        // 由于source是字符串，需要重新设计
+    for (auto& pair : placeholders) {
+        const std::string& placeholder = pair.first;
+        const std::string& content = pair.second;
+        
+        // 在源代码中查找并替换占位符
+        size_t pos = 0;
+        while ((pos = source.find(placeholder, pos)) != std::string::npos) {
+            source.replace(pos, placeholder.length(), content);
+            pos += content.length();
+        }
     }
+}
+
+// 高级占位符处理
+std::string CHTLUnifiedScanner::processPlaceholdersInCode(const std::string& code) {
+    std::string result = code;
+    
+    for (auto& pair : placeholders) {
+        const std::string& placeholder = pair.first;
+        const std::string& content = pair.second;
+        
+        // 替换所有占位符
+        size_t pos = 0;
+        while ((pos = result.find(placeholder, pos)) != std::string::npos) {
+            result.replace(pos, placeholder.length(), content);
+            pos += content.length();
+        }
+    }
+    
+    return result;
+}
+
+// 占位符验证
+bool CHTLUnifiedScanner::validatePlaceholders() const {
+    for (auto& pair : placeholders) {
+        const std::string& placeholder = pair.first;
+        if (placeholder.empty() || placeholder.length() < 10) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// 占位符清理
+void CHTLUnifiedScanner::clearPlaceholders() {
+    placeholders.clear();
+    placeholderCounter = 0;
 }
 
 // 代码分离方法
@@ -902,6 +945,86 @@ void CHTLUnifiedScanner::adjustSliceBoundary(size_t& start, size_t& end) {
     }
 }
 
+// 动态长度切片
+std::string CHTLUnifiedScanner::sliceCodeDynamic(size_t start, size_t& end) {
+    if (start >= source.length()) {
+        return "";
+    }
+    
+    // 动态确定结束位置
+    size_t dynamicEnd = start;
+    while (dynamicEnd < source.length()) {
+        char c = source[dynamicEnd];
+        if (c == '\n' || c == '\r' || c == ';' || c == '}') {
+            break;
+        }
+        dynamicEnd++;
+    }
+    
+    end = dynamicEnd;
+    return source.substr(start, end - start);
+}
+
+// 智能边界检测
+bool CHTLUnifiedScanner::isBoundaryChar(char c) const {
+    return c == '\n' || c == '\r' || c == ';' || c == '}' || c == '{' || c == '(' || c == ')';
+}
+
+// 语法边界识别
+size_t CHTLUnifiedScanner::findSyntaxBoundary(size_t start, SyntaxBoundaryType type) const {
+    size_t pos = start;
+    int braceCount = 0;
+    int parenCount = 0;
+    bool inString = false;
+    bool inComment = false;
+    
+    while (pos < source.length()) {
+        char c = source[pos];
+        char nextC = (pos + 1 < source.length()) ? source[pos + 1] : '\0';
+        
+        // 处理字符串
+        if (c == '"' || c == '\'') {
+            inString = !inString;
+        }
+        
+        // 处理注释
+        if (!inString && c == '/' && nextC == '/') {
+            inComment = true;
+        }
+        if (inComment && c == '\n') {
+            inComment = false;
+        }
+        
+        if (!inString && !inComment) {
+            // 处理括号
+            if (c == '{') braceCount++;
+            else if (c == '}') braceCount--;
+            else if (c == '(') parenCount++;
+            else if (c == ')') parenCount--;
+            
+            // 根据类型确定边界
+            switch (type) {
+                case SyntaxBoundaryType::BRACE_BLOCK:
+                    if (c == '}' && braceCount == 0) return pos + 1;
+                    break;
+                case SyntaxBoundaryType::PAREN_BLOCK:
+                    if (c == ')' && parenCount == 0) return pos + 1;
+                    break;
+                case SyntaxBoundaryType::STATEMENT:
+                    if (c == ';' && braceCount == 0 && parenCount == 0) return pos + 1;
+                    break;
+                case SyntaxBoundaryType::LINE:
+                    if (c == '\n') return pos + 1;
+                    break;
+            }
+        }
+        
+        pos++;
+    }
+    
+    return source.length();
+}
+
 // 智能扩增
 void CHTLUnifiedScanner::expandSlice(size_t& start, size_t& end) {
     // 智能扩增切片范围
@@ -920,6 +1043,81 @@ void CHTLUnifiedScanner::shrinkSlice(size_t& start, size_t& end) {
     }
     if (end > start) {
         end--;
+    }
+}
+
+// 智能扩增到语法边界
+void CHTLUnifiedScanner::expandToSyntaxBoundary(size_t& start, size_t& end, SyntaxBoundaryType type) {
+    // 向前扩增到语法边界
+    size_t newStart = start;
+    while (newStart > 0) {
+        char c = source[newStart - 1];
+        if (isBoundaryChar(c)) {
+            break;
+        }
+        newStart--;
+    }
+    start = newStart;
+    
+    // 向后扩增到语法边界
+    size_t newEnd = end;
+    while (newEnd < source.length()) {
+        char c = source[newEnd];
+        if (isBoundaryChar(c)) {
+            break;
+        }
+        newEnd++;
+    }
+    end = newEnd;
+}
+
+// 智能扩增到完整语句
+void CHTLUnifiedScanner::expandToCompleteStatement(size_t& start, size_t& end) {
+    // 向前扩增到语句开始
+    while (start > 0) {
+        char c = source[start - 1];
+        if (c == '\n' || c == ';' || c == '}') {
+            break;
+        }
+        start--;
+    }
+    
+    // 向后扩增到语句结束
+    while (end < source.length()) {
+        char c = source[end];
+        if (c == '\n' || c == ';' || c == '}') {
+            end++;
+            break;
+        }
+        end++;
+    }
+}
+
+// 智能扩增到完整块
+void CHTLUnifiedScanner::expandToCompleteBlock(size_t& start, size_t& end) {
+    // 向前扩增到块开始
+    while (start > 0) {
+        char c = source[start - 1];
+        if (c == '{' || c == '\n') {
+            break;
+        }
+        start--;
+    }
+    
+    // 向后扩增到块结束
+    int braceCount = 0;
+    size_t pos = start;
+    while (pos < source.length()) {
+        char c = source[pos];
+        if (c == '{') braceCount++;
+        else if (c == '}') {
+            braceCount--;
+            if (braceCount == 0) {
+                end = pos + 1;
+                break;
+            }
+        }
+        pos++;
     }
 }
 

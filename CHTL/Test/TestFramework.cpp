@@ -100,7 +100,7 @@ void TestSuite::printStatistics() const {
 
 // TestFramework 实现
 TestFramework::TestFramework() 
-    : verboseMode(false), colorOutput(true), outputFile("") {
+    : verboseMode(false), colorOutput(true), outputFile(""), testTimeout(5000), maxRetries(3), parallelExecution(false), environmentSetup(false) {
     globalStatistics["total"] = 0;
     globalStatistics["passed"] = 0;
     globalStatistics["failed"] = 0;
@@ -409,6 +409,202 @@ void TestFramework::saveTestConfig(const std::string& configFile) const {
     // 根据CHTL.md规范，实现测试配置保存功能
     std::cout << "保存测试配置: " << configFile << std::endl;
     // 实现细节可以根据需要添加
+}
+
+// 测试发现
+void TestFramework::discoverTests(const std::string& directory) {
+    discoverTests(directory, "*.test.*");
+}
+
+void TestFramework::discoverTests(const std::string& directory, const std::string& pattern) {
+    std::vector<std::string> testFiles = findTestFiles(directory);
+    
+    for (const auto& file : testFiles) {
+        // 这里可以实现具体的测试发现逻辑
+        // 解析测试文件，创建测试用例
+    }
+}
+
+std::vector<std::string> TestFramework::findTestFiles(const std::string& directory) {
+    std::vector<std::string> testFiles;
+    
+    // 这里可以实现具体的文件查找逻辑
+    // 查找符合模式的测试文件
+    
+    return testFiles;
+}
+
+// 测试报告
+void TestFramework::generateReport(const std::string& outputPath) {
+    generateHTMLReport(outputPath + ".html");
+    generateJSONReport(outputPath + ".json");
+    generateXMLReport(outputPath + ".xml");
+}
+
+void TestFramework::generateHTMLReport(const std::string& outputPath) {
+    std::ofstream file(outputPath);
+    if (!file.is_open()) {
+        throw std::runtime_error("无法创建HTML报告文件: " + outputPath);
+    }
+    
+    file << "<!DOCTYPE html>" << std::endl;
+    file << "<html><head><title>CHTL测试报告</title></head>" << std::endl;
+    file << "<body><h1>CHTL测试报告</h1>" << std::endl;
+    
+    for (const auto& suite : testSuites) {
+        file << "<h2>测试套件: " << suite->name << "</h2>" << std::endl;
+        file << "<ul>" << std::endl;
+        for (const auto& testCase : suite->testCases) {
+            file << "<li>" << testCase->name << " - " << testCase->getResultString() << "</li>" << std::endl;
+        }
+        file << "</ul>" << std::endl;
+    }
+    
+    file << "</body></html>" << std::endl;
+    file.close();
+}
+
+void TestFramework::generateJSONReport(const std::string& outputPath) {
+    std::ofstream file(outputPath);
+    if (!file.is_open()) {
+        throw std::runtime_error("无法创建JSON报告文件: " + outputPath);
+    }
+    
+    file << "{" << std::endl;
+    file << "  \"testSuites\": [" << std::endl;
+    
+    for (size_t i = 0; i < testSuites.size(); i++) {
+        const auto& suite = testSuites[i];
+        file << "    {" << std::endl;
+        file << "      \"name\": \"" << suite->name << "\"," << std::endl;
+        file << "      \"testCases\": [" << std::endl;
+        
+        for (size_t j = 0; j < suite->testCases.size(); j++) {
+            const auto& testCase = suite->testCases[j];
+            file << "        {" << std::endl;
+            file << "          \"name\": \"" << testCase->name << "\"," << std::endl;
+            file << "          \"result\": \"" << testCase->getResultString() << "\"," << std::endl;
+            file << "          \"duration\": " << testCase->duration.count() << std::endl;
+            file << "        }" << (j < suite->testCases.size() - 1 ? "," : "") << std::endl;
+        }
+        
+        file << "      ]" << std::endl;
+        file << "    }" << (i < testSuites.size() - 1 ? "," : "") << std::endl;
+    }
+    
+    file << "  ]" << std::endl;
+    file << "}" << std::endl;
+    file.close();
+}
+
+void TestFramework::generateXMLReport(const std::string& outputPath) {
+    std::ofstream file(outputPath);
+    if (!file.is_open()) {
+        throw std::runtime_error("无法创建XML报告文件: " + outputPath);
+    }
+    
+    file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+    file << "<testReport>" << std::endl;
+    
+    for (const auto& suite : testSuites) {
+        file << "  <testSuite name=\"" << suite->name << "\">" << std::endl;
+        for (const auto& testCase : suite->testCases) {
+            file << "    <testCase name=\"" << testCase->name << "\" result=\"" << testCase->getResultString() << "\" />" << std::endl;
+        }
+        file << "  </testSuite>" << std::endl;
+    }
+    
+    file << "</testReport>" << std::endl;
+    file.close();
+}
+
+// 测试统计
+std::map<std::string, int> TestFramework::getGlobalStatistics() const {
+    return globalStatistics;
+}
+
+std::string TestFramework::getTestSummary() const {
+    std::ostringstream oss;
+    oss << "测试总结:" << std::endl;
+    oss << "  总计: " << globalStatistics.at("total") << std::endl;
+    oss << "  通过: " << globalStatistics.at("passed") << std::endl;
+    oss << "  失败: " << globalStatistics.at("failed") << std::endl;
+    oss << "  跳过: " << globalStatistics.at("skipped") << std::endl;
+    oss << "  错误: " << globalStatistics.at("error") << std::endl;
+    return oss.str();
+}
+
+double TestFramework::getSuccessRate() const {
+    int total = globalStatistics.at("total");
+    if (total == 0) return 0.0;
+    
+    int passed = globalStatistics.at("passed");
+    return static_cast<double>(passed) / total * 100.0;
+}
+
+// 测试过滤
+void TestFramework::setTestFilter(const std::string& filter) {
+    testFilter = filter;
+}
+
+void TestFramework::setSuiteFilter(const std::string& filter) {
+    suiteFilter = filter;
+}
+
+void TestFramework::setTagFilter(const std::string& tag) {
+    tagFilter = tag;
+}
+
+// 测试标签
+void TestFramework::addTestTag(const std::string& testName, const std::string& tag) {
+    testTags[testName].push_back(tag);
+}
+
+void TestFramework::removeTestTag(const std::string& testName, const std::string& tag) {
+    auto it = testTags.find(testName);
+    if (it != testTags.end()) {
+        auto tagIt = std::find(it->second.begin(), it->second.end(), tag);
+        if (tagIt != it->second.end()) {
+            it->second.erase(tagIt);
+        }
+    }
+}
+
+std::vector<std::string> TestFramework::getTestTags(const std::string& testName) const {
+    auto it = testTags.find(testName);
+    if (it != testTags.end()) {
+        return it->second;
+    }
+    return {};
+}
+
+// 测试配置
+void TestFramework::setTestTimeout(int timeoutMs) {
+    testTimeout = timeoutMs;
+}
+
+void TestFramework::setMaxRetries(int retries) {
+    maxRetries = retries;
+}
+
+void TestFramework::setParallelExecution(bool parallel) {
+    parallelExecution = parallel;
+}
+
+// 测试环境
+void TestFramework::setupTestEnvironment() {
+    environmentSetup = true;
+    // 设置测试环境
+}
+
+void TestFramework::cleanupTestEnvironment() {
+    environmentSetup = false;
+    // 清理测试环境
+}
+
+void TestFramework::resetTestEnvironment() {
+    cleanupTestEnvironment();
+    setupTestEnvironment();
 }
 
 } // namespace Test

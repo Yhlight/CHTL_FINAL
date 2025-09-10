@@ -96,6 +96,60 @@ private:
     bool finished;
 };
 
+// 渲染程序
+class Renderer {
+public:
+    enum RenderMode {
+        TEXT,           // 文本模式
+        HTML,           // HTML模式
+        MARKDOWN,       // Markdown模式
+        JSON,           // JSON模式
+        XML,            // XML模式
+        YAML            // YAML模式
+    };
+
+    Renderer();
+    ~Renderer() = default;
+
+    void setMode(RenderMode mode);
+    void setTheme(const std::string& theme);
+    void setWidth(int width);
+    void setHeight(int height);
+    
+    std::string render(const std::string& content);
+    std::string renderFile(const std::string& filePath);
+    std::string renderDirectory(const std::string& dirPath);
+    
+    // 交互式渲染
+    void startInteractive();
+    void stopInteractive();
+    bool isInteractive() const;
+    
+    // 渲染配置
+    void setConfig(const std::map<std::string, std::string>& config);
+    std::map<std::string, std::string> getConfig() const;
+    
+    // 渲染统计
+    std::map<std::string, int> getStatistics() const;
+    std::string getReport() const;
+
+private:
+    RenderMode mode;
+    std::string theme;
+    int width;
+    int height;
+    bool interactive;
+    std::map<std::string, std::string> config;
+    std::map<std::string, int> statistics;
+    
+    std::string renderText(const std::string& content);
+    std::string renderHTML(const std::string& content);
+    std::string renderMarkdown(const std::string& content);
+    std::string renderJSON(const std::string& content);
+    std::string renderXML(const std::string& content);
+    std::string renderYAML(const std::string& content);
+};
+
 // 主CLI工具类
 class CLITool {
 public:
@@ -130,6 +184,13 @@ private:
     void minifyMode();
     void beautifyMode();
     
+    // 渲染功能
+    void renderMode();
+    void renderFile(const std::string& filePath);
+    void renderDirectory(const std::string& dirPath);
+    void startInteractiveRenderer();
+    void stopInteractiveRenderer();
+    
     // 配置管理
     void loadConfig(const std::string& configFile);
     void saveConfig(const std::string& configFile);
@@ -142,6 +203,7 @@ private:
     void redirectOutput();
     
     std::unique_ptr<CLIParser> parser;
+    std::unique_ptr<Renderer> renderer;
     std::string version;
     std::string description;
     bool verbose;

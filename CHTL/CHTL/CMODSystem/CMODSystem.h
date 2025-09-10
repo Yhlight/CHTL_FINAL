@@ -51,6 +51,34 @@ public:
     bool moduleExists(const std::string& moduleName) const;
     std::string getModuleContent(const std::string& moduleName) const;
     
+    // 完整API
+    bool scanModule(const std::string& moduleName);
+    bool generateModule(const std::string& moduleName, const std::string& outputPath);
+    bool processModule(const std::string& moduleName);
+    bool optimizeModule(const std::string& moduleName);
+    bool validateModuleSyntax(const std::string& moduleName) const;
+    bool validateModuleSemantics(const std::string& moduleName) const;
+    
+    // 模块依赖管理
+    std::vector<std::string> getModuleDependencies(const std::string& moduleName) const;
+    bool resolveDependencies(const std::string& moduleName);
+    bool checkCircularDependencies(const std::string& moduleName) const;
+    
+    // 模块版本管理
+    std::string getModuleVersion(const std::string& moduleName) const;
+    bool updateModuleVersion(const std::string& moduleName, const std::string& version);
+    bool compareModuleVersions(const std::string& module1, const std::string& module2) const;
+    
+    // 模块配置管理
+    std::map<std::string, std::string> getModuleConfig(const std::string& moduleName) const;
+    bool setModuleConfig(const std::string& moduleName, const std::map<std::string, std::string>& config);
+    bool updateModuleConfig(const std::string& moduleName, const std::string& key, const std::string& value);
+    
+    // 模块统计信息
+    std::map<std::string, int> getModuleStatistics(const std::string& moduleName) const;
+    std::string getModuleReport(const std::string& moduleName) const;
+    std::string getSystemReport() const;
+    
     // 字符串表示
     std::string toString() const;
     std::string toDebugString() const;
