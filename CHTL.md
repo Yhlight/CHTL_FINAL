@@ -2059,7 +2059,12 @@ std::cout << arg[0].value << std::endl;  // 输出-> 3
 std::cout << arg[1].value << std::endl;  // 输出-> **
 std::cout << arg[2].value << std::endl;  // 输出-> 4
 
-args.transform("pow(" + args[0].value + args[2].value + ")");
+// args.transform("pow(" + args[0].value + args[2].value + ")");
+
+args.transform("pow(". + 
+args.match("$", [](const std::string& value) { return value; }) + 
+args.match("$", [](const std::string& value) { return value; }) +
+")");
 
 CJMODGenerator::exportResult(args);
 ```
@@ -2131,6 +2136,17 @@ args.bind("$", [](const std::string& value) {
 args.bind("**", [](const std::string& value) {
     return Syntax::isCHTLJSFunction(value) ? "" : value;
 });
+```
+
+###### match
+匹配参数列表中的参数  
+会自动对匹配到的占位符进行计数 + 1  
+
+例如第一次匹配$时，参数列表中的参数$的计数为1，表示第一个$参数  
+第二次匹配$时，参数列表中的参数$的计数+1，表示第二个$参数  
+
+```cpp
+args.match("$", [](const std::string& value) { return value; });
 ```
 
 ###### fillValue
@@ -2256,6 +2272,25 @@ CJMOD的代码总是以片段出现，双指针扫描一开始两个指针同时
 ### 概述
 统一扫描器是CHTL项目最核心的组件，需要极其精妙的算法来支持  
 这里大概说明一些机制  
+
+统一扫描器不接管CHTL和CHTL JS编译器的工作，它需要做的是分离全局style块和局部script内部允许的部分CHTL语法，以及核心任务，完全分离JS和CHTL JS代码  
+
+统一扫描器负责-> 分离全局style块和局部script内部允许的部分CHTL语法  
+统一扫描器负责-> 完全分离JS和CHTL JS代码  
+你不应该试图使用统一扫描器去取代CHTL，CHTL JS的Lexer  
+这是一个例子  
+
+统一扫描器拿到的CHTL / CHTL JS片段，必须是完整且能够被各自的编译器处理  
+如果指望统一扫描器能够完全分离多门语言，这是不可能的事情  
+统一扫描器的原理一直是依托于针对性处理和边界识别  
+而不是地毯式判断  
+
+假设统一扫描器除了要分离JS，CHTL JS外，现在还需要分离Vue语法了，这样要如何？  
+正统依靠统一扫描器的做法是寻找Vue语法种的特殊语法边界，通过语法边界使用占位符替换Vue语法，并保留边界信息  
+对于语法冲突，例如JS和Vue语法可能会出现相同的边界，则直接针对性覆写 / 特殊处理，直接交给Vue处理，除非完全无法区分，否则完全可控  
+每一套语法都有自己的范式，为此通过语法边界(语法的表达形式)来使用占位符机制替换相关语法，并保留边界信息，这才是统一扫描器需要做的事情  
+
+统一扫描器最终还是为了服务于CHTL和CHTL JS  
 
 #### 可变长度切片与智能扩增
 扫描器需要根据代码切割的位置动态扩增 / 回退，避免截取位置导致的语法边界破坏  
@@ -2438,3 +2473,4 @@ VSCode IDE需要满足下述基本要求
 ### 自动模块解包和JSON查询表
 如果导入的是CMOD模块，则导出[Export]块的内容，并根据此优化性能，提供语法提示，并创建json表    
 如果导入的是CJMOD模块，则根据scan，CHTLJSFunction，analyze这三个函数接收的代码片段，提供语法提示，并创建json表  
+
