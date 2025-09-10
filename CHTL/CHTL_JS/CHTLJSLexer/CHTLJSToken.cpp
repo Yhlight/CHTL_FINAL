@@ -31,10 +31,7 @@ void CHTLJSToken::removeAttribute(const std::string& key) {
 }
 
 bool CHTLJSToken::isOperator() const {
-    return isArithmeticOperator() || isComparisonOperator() || 
-           isLogicalOperator() || isBitwiseOperator() || 
-           isAssignmentOperator() || isUnaryOperator() || 
-           isBinaryOperator() || isTernaryOperator();
+    return isAssignmentOperator() || isArrowOperator();
 }
 
 bool CHTLJSToken::isKeyword() const {
@@ -72,9 +69,7 @@ bool CHTLJSToken::isPunctuation() const {
         case CHTLJSTokenType::RIGHT_BRACE:
         case CHTLJSTokenType::SEMICOLON:
         case CHTLJSTokenType::COMMA:
-        case CHTLJSTokenType::DOT:
         case CHTLJSTokenType::COLON:
-        case CHTLJSTokenType::QUESTION:
             return true;
         default:
             return false;
@@ -96,41 +91,15 @@ std::string CHTLJSToken::getTypeName() const {
         case CHTLJSTokenType::BOOLEAN: return "BOOLEAN";
         case CHTLJSTokenType::ASSIGN: return "ASSIGN";
         case CHTLJSTokenType::ARROW: return "ARROW";
-        case CHTLJSTokenType::DOT: return "DOT";
         case CHTLJSTokenType::COLON: return "COLON";
         case CHTLJSTokenType::SEMICOLON: return "SEMICOLON";
         case CHTLJSTokenType::COMMA: return "COMMA";
-        case CHTLJSTokenType::PLUS: return "PLUS";
-        case CHTLJSTokenType::MINUS: return "MINUS";
-        case CHTLJSTokenType::MULTIPLY: return "MULTIPLY";
-        case CHTLJSTokenType::DIVIDE: return "DIVIDE";
-        case CHTLJSTokenType::MODULO: return "MODULO";
-        case CHTLJSTokenType::POWER: return "POWER";
-        case CHTLJSTokenType::EQUAL: return "EQUAL";
-        case CHTLJSTokenType::NOT_EQUAL: return "NOT_EQUAL";
-        case CHTLJSTokenType::LESS_THAN: return "LESS_THAN";
-        case CHTLJSTokenType::GREATER_THAN: return "GREATER_THAN";
-        case CHTLJSTokenType::LESS_EQUAL: return "LESS_EQUAL";
-        case CHTLJSTokenType::GREATER_EQUAL: return "GREATER_EQUAL";
-        case CHTLJSTokenType::AND: return "AND";
-        case CHTLJSTokenType::OR: return "OR";
-        case CHTLJSTokenType::NOT: return "NOT";
-        case CHTLJSTokenType::BITWISE_AND: return "BITWISE_AND";
-        case CHTLJSTokenType::BITWISE_OR: return "BITWISE_OR";
-        case CHTLJSTokenType::BITWISE_XOR: return "BITWISE_XOR";
-        case CHTLJSTokenType::BITWISE_NOT: return "BITWISE_NOT";
-        case CHTLJSTokenType::LEFT_SHIFT: return "LEFT_SHIFT";
-        case CHTLJSTokenType::RIGHT_SHIFT: return "RIGHT_SHIFT";
         case CHTLJSTokenType::LEFT_PAREN: return "LEFT_PAREN";
         case CHTLJSTokenType::RIGHT_PAREN: return "RIGHT_PAREN";
         case CHTLJSTokenType::LEFT_BRACKET: return "LEFT_BRACKET";
         case CHTLJSTokenType::RIGHT_BRACKET: return "RIGHT_BRACKET";
         case CHTLJSTokenType::LEFT_BRACE: return "LEFT_BRACE";
         case CHTLJSTokenType::RIGHT_BRACE: return "RIGHT_BRACE";
-        case CHTLJSTokenType::QUESTION: return "QUESTION";
-        case CHTLJSTokenType::TERNARY: return "TERNARY";
-        case CHTLJSTokenType::NULLISH: return "NULLISH";
-        case CHTLJSTokenType::OPTIONAL: return "OPTIONAL";
         case CHTLJSTokenType::ENHANCED_SELECTOR: return "ENHANCED_SELECTOR";
         case CHTLJSTokenType::VIRTUAL_OBJECT: return "VIRTUAL_OBJECT";
         case CHTLJSTokenType::LISTEN: return "LISTEN";
@@ -138,36 +107,14 @@ std::string CHTLJSToken::getTypeName() const {
         case CHTLJSTokenType::ANIMATE: return "ANIMATE";
         case CHTLJSTokenType::ROUTER: return "ROUTER";
         case CHTLJSTokenType::FILELOADER: return "FILELOADER";
-        case CHTLJSTokenType::IF: return "IF";
-        case CHTLJSTokenType::ELSE: return "ELSE";
-        case CHTLJSTokenType::FOR: return "FOR";
-        case CHTLJSTokenType::WHILE: return "WHILE";
-        case CHTLJSTokenType::DO: return "DO";
-        case CHTLJSTokenType::SWITCH: return "SWITCH";
-        case CHTLJSTokenType::CASE: return "CASE";
-        case CHTLJSTokenType::DEFAULT: return "DEFAULT";
-        case CHTLJSTokenType::BREAK: return "BREAK";
-        case CHTLJSTokenType::CONTINUE: return "CONTINUE";
-        case CHTLJSTokenType::RETURN: return "RETURN";
-        case CHTLJSTokenType::FUNCTION: return "FUNCTION";
-        case CHTLJSTokenType::CONST: return "CONST";
-        case CHTLJSTokenType::LET: return "LET";
-        case CHTLJSTokenType::VAR: return "VAR";
+        case CHTLJSTokenType::INEVERAWAY: return "INEVERAWAY";
+        case CHTLJSTokenType::UTIL: return "UTIL";
+        case CHTLJSTokenType::THEN: return "THEN";
+        case CHTLJSTokenType::CHANGE: return "CHANGE";
         case CHTLJSTokenType::TRUE: return "TRUE";
         case CHTLJSTokenType::FALSE: return "FALSE";
         case CHTLJSTokenType::NULL_VALUE: return "NULL";
         case CHTLJSTokenType::UNDEFINED: return "UNDEFINED";
-        case CHTLJSTokenType::THIS: return "THIS";
-        case CHTLJSTokenType::NEW: return "NEW";
-        case CHTLJSTokenType::TYPEOF: return "TYPEOF";
-        case CHTLJSTokenType::INSTANCEOF: return "INSTANCEOF";
-        case CHTLJSTokenType::IN: return "IN";
-        case CHTLJSTokenType::OF: return "OF";
-        case CHTLJSTokenType::WITH: return "WITH";
-        case CHTLJSTokenType::TRY: return "TRY";
-        case CHTLJSTokenType::CATCH: return "CATCH";
-        case CHTLJSTokenType::FINALLY: return "FINALLY";
-        case CHTLJSTokenType::THROW: return "THROW";
         case CHTLJSTokenType::SINGLE_COMMENT: return "SINGLE_COMMENT";
         case CHTLJSTokenType::MULTI_COMMENT: return "MULTI_COMMENT";
         case CHTLJSTokenType::GENERATOR_COMMENT: return "GENERATOR_COMMENT";
@@ -267,82 +214,12 @@ std::string CHTLJSToken::decode() const {
 }
 
 // 辅助方法实现
-bool CHTLJSToken::isArithmeticOperator() const {
-    switch (type) {
-        case CHTLJSTokenType::PLUS:
-        case CHTLJSTokenType::MINUS:
-        case CHTLJSTokenType::MULTIPLY:
-        case CHTLJSTokenType::DIVIDE:
-        case CHTLJSTokenType::MODULO:
-        case CHTLJSTokenType::POWER:
-            return true;
-        default:
-            return false;
-    }
-}
-
-bool CHTLJSToken::isComparisonOperator() const {
-    switch (type) {
-        case CHTLJSTokenType::EQUAL:
-        case CHTLJSTokenType::NOT_EQUAL:
-        case CHTLJSTokenType::LESS_THAN:
-        case CHTLJSTokenType::GREATER_THAN:
-        case CHTLJSTokenType::LESS_EQUAL:
-        case CHTLJSTokenType::GREATER_EQUAL:
-            return true;
-        default:
-            return false;
-    }
-}
-
-bool CHTLJSToken::isLogicalOperator() const {
-    switch (type) {
-        case CHTLJSTokenType::AND:
-        case CHTLJSTokenType::OR:
-        case CHTLJSTokenType::NOT:
-            return true;
-        default:
-            return false;
-    }
-}
-
-bool CHTLJSToken::isBitwiseOperator() const {
-    switch (type) {
-        case CHTLJSTokenType::BITWISE_AND:
-        case CHTLJSTokenType::BITWISE_OR:
-        case CHTLJSTokenType::BITWISE_XOR:
-        case CHTLJSTokenType::BITWISE_NOT:
-        case CHTLJSTokenType::LEFT_SHIFT:
-        case CHTLJSTokenType::RIGHT_SHIFT:
-            return true;
-        default:
-            return false;
-    }
-}
-
 bool CHTLJSToken::isAssignmentOperator() const {
     return type == CHTLJSTokenType::ASSIGN;
 }
 
-bool CHTLJSToken::isUnaryOperator() const {
-    switch (type) {
-        case CHTLJSTokenType::NOT:
-        case CHTLJSTokenType::BITWISE_NOT:
-        case CHTLJSTokenType::MINUS:
-        case CHTLJSTokenType::PLUS:
-            return true;
-        default:
-            return false;
-    }
-}
-
-bool CHTLJSToken::isBinaryOperator() const {
-    return isArithmeticOperator() || isComparisonOperator() || 
-           isLogicalOperator() || isBitwiseOperator();
-}
-
-bool CHTLJSToken::isTernaryOperator() const {
-    return type == CHTLJSTokenType::TERNARY || type == CHTLJSTokenType::QUESTION;
+bool CHTLJSToken::isArrowOperator() const {
+    return type == CHTLJSTokenType::ARROW;
 }
 
 // 类型转换实现
@@ -352,13 +229,7 @@ std::string CHTLJSToken::convertToJavaScript() const {
             // 将{{选择器}}转换为JavaScript选择器代码
             return "document.querySelector('" + value + "')";
         case CHTLJSTokenType::ARROW:
-            return "=>";
-        case CHTLJSTokenType::POWER:
-            return "**";
-        case CHTLJSTokenType::NULLISH:
-            return "??";
-        case CHTLJSTokenType::OPTIONAL:
-            return "?.";
+            return "->";
         default:
             return value;
     }

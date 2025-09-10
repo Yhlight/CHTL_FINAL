@@ -10,54 +10,12 @@ namespace CHTL_JS {
 const std::map<CHTLJSTokenType, int> CHTLJSParser::OPERATOR_PRECEDENCE = {
     {CHTLJSTokenType::COMMA, 1},
     {CHTLJSTokenType::ASSIGN, 2},
-    {CHTLJSTokenType::TERNARY, 3},
-    {CHTLJSTokenType::OR, 4},
-    {CHTLJSTokenType::AND, 5},
-    {CHTLJSTokenType::BITWISE_OR, 6},
-    {CHTLJSTokenType::BITWISE_XOR, 7},
-    {CHTLJSTokenType::BITWISE_AND, 8},
-    {CHTLJSTokenType::EQUAL, 9},
-    {CHTLJSTokenType::NOT_EQUAL, 9},
-    {CHTLJSTokenType::LESS_THAN, 10},
-    {CHTLJSTokenType::GREATER_THAN, 10},
-    {CHTLJSTokenType::LESS_EQUAL, 10},
-    {CHTLJSTokenType::GREATER_EQUAL, 10},
-    {CHTLJSTokenType::LEFT_SHIFT, 11},
-    {CHTLJSTokenType::RIGHT_SHIFT, 11},
-    {CHTLJSTokenType::PLUS, 12},
-    {CHTLJSTokenType::MINUS, 12},
-    {CHTLJSTokenType::MULTIPLY, 13},
-    {CHTLJSTokenType::DIVIDE, 13},
-    {CHTLJSTokenType::MODULO, 13},
-    {CHTLJSTokenType::POWER, 14},
-    {CHTLJSTokenType::DOT, 15},
-    {CHTLJSTokenType::ARROW, 15}
+    {CHTLJSTokenType::ARROW, 3}
 };
 
 const std::map<CHTLJSTokenType, bool> CHTLJSParser::OPERATOR_ASSOCIATIVITY = {
     {CHTLJSTokenType::COMMA, true},
     {CHTLJSTokenType::ASSIGN, false},
-    {CHTLJSTokenType::TERNARY, false},
-    {CHTLJSTokenType::OR, true},
-    {CHTLJSTokenType::AND, true},
-    {CHTLJSTokenType::BITWISE_OR, true},
-    {CHTLJSTokenType::BITWISE_XOR, true},
-    {CHTLJSTokenType::BITWISE_AND, true},
-    {CHTLJSTokenType::EQUAL, true},
-    {CHTLJSTokenType::NOT_EQUAL, true},
-    {CHTLJSTokenType::LESS_THAN, true},
-    {CHTLJSTokenType::GREATER_THAN, true},
-    {CHTLJSTokenType::LESS_EQUAL, true},
-    {CHTLJSTokenType::GREATER_EQUAL, true},
-    {CHTLJSTokenType::LEFT_SHIFT, true},
-    {CHTLJSTokenType::RIGHT_SHIFT, true},
-    {CHTLJSTokenType::PLUS, true},
-    {CHTLJSTokenType::MINUS, true},
-    {CHTLJSTokenType::MULTIPLY, true},
-    {CHTLJSTokenType::DIVIDE, true},
-    {CHTLJSTokenType::MODULO, true},
-    {CHTLJSTokenType::POWER, false},
-    {CHTLJSTokenType::DOT, true},
     {CHTLJSTokenType::ARROW, true}
 };
 
@@ -701,7 +659,7 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseMemberExpression() {
         return nullptr;
     }
     
-    while (match(CHTLJSTokenType::DOT) || match(CHTLJSTokenType::ARROW)) {
+    while (match(CHTLJSTokenType::ARROW)) {
         auto token = getCurrentToken();
         advance();
         
@@ -716,7 +674,7 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseMemberExpression() {
         }
         
         auto member = createNode(CHTLJSNodeType::MEMBER_EXPRESSION);
-        member->setValue(token.getType() == CHTLJSTokenType::ARROW ? "->" : ".");
+        member->setValue("->");
         member->addChild(left);
         member->addChild(property);
         
@@ -826,17 +784,8 @@ bool CHTLJSParser::matchPunctuation(char punct) const {
 
 // 语法检查实现
 bool CHTLJSParser::isStatementStart() const {
-    auto token = getCurrentToken();
-    return token.getType() == CHTLJSTokenType::IF ||
-           token.getType() == CHTLJSTokenType::FOR ||
-           token.getType() == CHTLJSTokenType::WHILE ||
-           token.getType() == CHTLJSTokenType::DO ||
-           token.getType() == CHTLJSTokenType::SWITCH ||
-           token.getType() == CHTLJSTokenType::TRY ||
-           token.getType() == CHTLJSTokenType::BREAK ||
-           token.getType() == CHTLJSTokenType::CONTINUE ||
-           token.getType() == CHTLJSTokenType::RETURN ||
-           token.getType() == CHTLJSTokenType::THROW;
+    // CHTL JS不支持传统语句，这些由JS编译器处理
+    return false;
 }
 
 bool CHTLJSParser::isExpressionStart() const {
@@ -844,12 +793,8 @@ bool CHTLJSParser::isExpressionStart() const {
 }
 
 bool CHTLJSParser::isDeclarationStart() const {
-    auto token = getCurrentToken();
-    return token.getType() == CHTLJSTokenType::CONST ||
-           token.getType() == CHTLJSTokenType::LET ||
-           token.getType() == CHTLJSTokenType::VAR ||
-           token.getType() == CHTLJSTokenType::FUNCTION ||
-           token.getType() == CHTLJSTokenType::CASE;
+    // CHTL JS不支持传统声明，这些由JS编译器处理
+    return false;
 }
 
 bool CHTLJSParser::isCHTLJSSyntaxStart() const {
@@ -879,30 +824,12 @@ bool CHTLJSParser::isPrimaryExpressionStart() const {
 
 bool CHTLJSParser::isBinaryExpressionStart() const {
     auto token = getCurrentToken();
-    return token.getType() == CHTLJSTokenType::PLUS ||
-           token.getType() == CHTLJSTokenType::MINUS ||
-           token.getType() == CHTLJSTokenType::MULTIPLY ||
-           token.getType() == CHTLJSTokenType::DIVIDE ||
-           token.getType() == CHTLJSTokenType::MODULO ||
-           token.getType() == CHTLJSTokenType::POWER ||
-           token.getType() == CHTLJSTokenType::EQUAL ||
-           token.getType() == CHTLJSTokenType::NOT_EQUAL ||
-           token.getType() == CHTLJSTokenType::LESS_THAN ||
-           token.getType() == CHTLJSTokenType::GREATER_THAN ||
-           token.getType() == CHTLJSTokenType::LESS_EQUAL ||
-           token.getType() == CHTLJSTokenType::GREATER_EQUAL ||
-           token.getType() == CHTLJSTokenType::AND ||
-           token.getType() == CHTLJSTokenType::OR ||
-           token.getType() == CHTLJSTokenType::DOT ||
-           token.getType() == CHTLJSTokenType::ARROW;
+    return token.getType() == CHTLJSTokenType::ARROW;
 }
 
 bool CHTLJSParser::isUnaryExpressionStart() const {
-    auto token = getCurrentToken();
-    return token.getType() == CHTLJSTokenType::NOT ||
-           token.getType() == CHTLJSTokenType::MINUS ||
-           token.getType() == CHTLJSTokenType::PLUS ||
-           token.getType() == CHTLJSTokenType::BITWISE_NOT;
+    // CHTL JS不支持一元运算符，这些由JS编译器处理
+    return false;
 }
 
 bool CHTLJSParser::isCallExpressionStart() const {
@@ -1413,10 +1340,7 @@ std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseOptionalPairList
         }
         
         // 检查是否是可选的键值对（以?开头）
-        if (match(CHTLJSTokenType::QUESTION)) {
-            advance(); // 跳过 ?
-            skipWhitespace();
-        }
+        // CHTL JS不支持可选键值对，这些由JS编译器处理
         
         // 解析键值对
         auto pair = parseKeyValuePair();
@@ -1450,7 +1374,7 @@ std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseChainElementList
             auto element = createNode(CHTLJSNodeType::IDENTIFIER, token.getValue());
             elements.push_back(element);
             advance();
-        } else if (token.getType() == CHTLJSTokenType::DOT) {
+        } else if (token.getType() == CHTLJSTokenType::ARROW) {
             advance(); // 跳过点号
         } else {
             break;
@@ -1783,7 +1707,7 @@ std::vector<std::string> CHTLJSParser::parseChainElements() {
             token.getType() == CHTLJSTokenType::LITERAL) {
             elements.push_back(token.getValue());
             advance();
-        } else if (token.getType() == CHTLJSTokenType::DOT) {
+        } else if (token.getType() == CHTLJSTokenType::ARROW) {
             advance(); // 跳过点号
         } else {
             break;

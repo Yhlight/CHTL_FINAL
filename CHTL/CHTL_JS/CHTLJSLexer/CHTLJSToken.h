@@ -164,6 +164,7 @@ private:
     bool isLogicalOperator() const;
     bool isBitwiseOperator() const;
     bool isAssignmentOperator() const;
+    bool isArrowOperator() const;
     bool isUnaryOperator() const;
     bool isBinaryOperator() const;
     bool isTernaryOperator() const;
