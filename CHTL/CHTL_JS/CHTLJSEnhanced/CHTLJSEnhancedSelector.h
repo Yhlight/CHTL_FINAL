@@ -22,6 +22,7 @@ enum class SelectorType {
     ADJACENT,      // 相邻选择器
     GENERAL,       // 通用选择器
     ENHANCED,      // 增强选择器
+    DYNAMIC_CONDITION, // 动态条件表达式
     UNKNOWN
 };
 
@@ -45,6 +46,11 @@ private:
     bool computed;
     bool optional;
     int specificity;
+    
+    // 动态条件表达式
+    std::string conditionExpression;
+    std::string trueValue;
+    std::string falseValue;
     
     // 位置信息
     int line;
@@ -115,6 +121,13 @@ public:
     // 选择器属性
     bool isComputed() const { return computed; }
     void setComputed(bool computed) { this->computed = computed; }
+    
+    // 动态条件表达式
+    void setDynamicCondition(const std::string& condition, const std::string& trueVal, const std::string& falseVal);
+    std::string getConditionExpression() const { return conditionExpression; }
+    std::string getTrueValue() const { return trueValue; }
+    std::string getFalseValue() const { return falseValue; }
+    bool isDynamicCondition() const { return type == SelectorType::DYNAMIC_CONDITION; }
     
     bool isOptional() const { return optional; }
     void setOptional(bool optional) { this->optional = optional; }

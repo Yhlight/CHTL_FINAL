@@ -675,4 +675,13 @@ int CHTLJSEnhancedSelector::calculatePseudoSpecificity() const {
     return (!pseudoClass.empty() || !pseudoElement.empty()) ? 10 : 0;
 }
 
+// 动态条件表达式实现
+void CHTLJSEnhancedSelector::setDynamicCondition(const std::string& condition, const std::string& trueVal, const std::string& falseVal) {
+    conditionExpression = condition;
+    trueValue = trueVal;
+    falseValue = falseVal;
+    type = SelectorType::DYNAMIC_CONDITION;
+    computed = false;
+}
+
 } // namespace CHTL_JS

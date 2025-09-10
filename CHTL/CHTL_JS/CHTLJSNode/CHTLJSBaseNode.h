@@ -65,7 +65,6 @@ enum class CHTLJSNodeType {
     ANIMATE_EXPRESSION,
     ROUTER_EXPRESSION,
     FILELOADER_EXPRESSION,
-    SCRIPT_BLOCK,
     
     // 特殊节点
     COMMENT,
