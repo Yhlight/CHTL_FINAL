@@ -1,0 +1,29 @@
+start: _statement*
+
+_statement: text_element | element
+
+// An element has a tag, and its content can be other elements or attributes.
+element: IDENTIFIER "{" (element | attribute | style_block)* "}"
+text_element: TEXT "{" value "}"
+style_block: STYLE_KEYWORD "{" style_property* "}"
+
+style_property: IDENTIFIER ":" style_value ";"
+style_value: /[^;]+/
+
+attribute: IDENTIFIER ":" value ";"
+
+?value: QUOTED_STRING | UNQUOTED_VALUE
+
+// Terminals
+STYLE_KEYWORD: "style"
+TEXT: "text"
+IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_-]*/
+UNQUOTED_VALUE: /[\w\/.-]+/
+QUOTED_STRING: /"[^"]*"|'[^']*'/
+
+// Comments and Whitespace
+%ignore "//" /[^\n]*/
+%ignore "/*" /(.|\n)*?/ "*/"
+%ignore "--" /[^\n]*/
+%import common.WS
+%ignore WS
