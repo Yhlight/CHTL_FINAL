@@ -8,20 +8,20 @@
 
 int main() {
     std::string source = R"(
-        [Template] @Style DefaultText {
-            color: black;
-            font-size: 16px;
+        [Template] @Var Theme {
+            primaryColor: blue;
+            baseMargin: 10px;
         }
 
         div {
             style {
-                @Style DefaultText;
-                border: 1px solid grey;
+                color: Theme(primaryColor);
+                margin: Theme(baseMargin) * 2;
             }
         }
     )";
 
-    std::cout << "--- CHTL Compilation (Template Test) ---" << std::endl;
+    std::cout << "--- CHTL Compilation (Variable Template Test) ---" << std::endl;
 
     try {
         // 1. Lexing

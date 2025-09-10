@@ -12,6 +12,7 @@ enum class ExpressionNodeType {
     StringLiteral,
     PropertyReference,
     TemplateUsage,
+    VariableUsage,
     BinaryOp
 };
 

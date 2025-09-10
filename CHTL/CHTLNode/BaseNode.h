@@ -14,6 +14,7 @@ enum class NodeType {
     Comment,
     Style,
     TemplateDefinition,
+    ElementTemplateUsage,
     // ... other node types to be added later
 };
 

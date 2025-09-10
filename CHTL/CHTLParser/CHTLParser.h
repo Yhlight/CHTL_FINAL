@@ -33,6 +33,10 @@ private:
 
     // Style Block Parsing Helper
     NodePtr ParseStyleBlockContent();
+
+    // Template Parsing
+    NodePtr ParseTemplateDefinition();
+    NodePtr ParseTemplateUsage();
 };
 
 } // namespace CHTL

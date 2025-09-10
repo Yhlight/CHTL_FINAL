@@ -27,6 +27,8 @@ EvaluatedValue CHTLGenerator::VisitExpression(const ExpressionNode* expr) {
             return VisitPropertyReference(static_cast<const PropertyReferenceNode*>(expr));
         case ExpressionNodeType::TemplateUsage:
             return {ValueType::String, ""}; // Should not be evaluated
+        case ExpressionNodeType::VariableUsage:
+            return VisitVariableUsage(static_cast<const VariableUsageNode*>(expr));
         default:
             throw std::runtime_error("Unknown expression node type.");
     }
@@ -109,6 +111,27 @@ EvaluatedValue CHTLGenerator::VisitPropertyReference(const PropertyReferenceNode
     throw std::runtime_error("Could not find property '" + node->GetPropertyName() + "' on element '" + node->GetSelector() + "'");
 }
 
+EvaluatedValue CHTLGenerator::VisitVariableUsage(const VariableUsageNode* node) {
+    auto it = m_template_repo.find(node->GetGroupName());
+    if (it == m_template_repo.end()) {
+        throw std::runtime_error("Undefined variable group used: " + node->GetGroupName());
+    }
+    const auto* templateDef = it->second;
+    if (templateDef->GetTemplateType() != TemplateType::Var) {
+        throw std::runtime_error("Template is not a variable group: " + node->GetGroupName());
+    }
+
+    // The content of a @Var template is a StyleNode stored in the first element of the NodeList
+    const auto* styleNode = static_cast<const StyleNode*>(templateDef->GetContent().front().get());
+    for (const auto& prop : styleNode->GetProperties()) {
+        if (prop.name == node->GetVariableName()) {
+            return EvaluateExpression(prop.value);
+        }
+    }
+
+    throw std::runtime_error("Undefined variable '" + node->GetVariableName() + "' in group '" + node->GetGroupName() + "'");
+}
+
 
 // --- Style and HTML Generation Logic ---
 
@@ -138,9 +161,11 @@ void CHTLGenerator::ProcessStyleNodes(const ElementNode* node, StyleProcessingRe
                     auto it = m_template_repo.find(usageNode->GetTemplateName());
                     if (it != m_template_repo.end()) {
                         const auto* templateDef = it->second;
-                        const auto* templateStyleNode = static_cast<const StyleNode*>(templateDef->GetContent().get());
-                        for (const auto& templateProp : templateStyleNode->GetProperties()) {
-                             result.inline_styles.push_back(templateProp);
+                        if (templateDef->GetTemplateType() == TemplateType::Style && !templateDef->GetContent().empty()) {
+                            const auto* templateStyleNode = static_cast<const StyleNode*>(templateDef->GetContent().front().get());
+                            for (const auto& templateProp : templateStyleNode->GetProperties()) {
+                                result.inline_styles.push_back(templateProp);
+                            }
                         }
                     }
                 } else {
@@ -212,6 +237,7 @@ void CHTLGenerator::Visit(const NodePtr& node) {
         case NodeType::Text: VisitText(static_cast<const TextNode*>(node.get())); break;
         case NodeType::Comment: VisitComment(static_cast<const CommentNode*>(node.get())); break;
         case NodeType::TemplateDefinition: VisitTemplateDefinition(static_cast<const TemplateDefinitionNode*>(node.get())); break;
+        case NodeType::ElementTemplateUsage: VisitElementTemplateUsage(static_cast<const ElementTemplateUsageNode*>(node.get())); break;
         case NodeType::Style: break;
         default: throw std::runtime_error("Unknown node type in generator.");
     }
@@ -219,6 +245,22 @@ void CHTLGenerator::Visit(const NodePtr& node) {
 
 void CHTLGenerator::VisitTemplateDefinition(const TemplateDefinitionNode* node) {
     m_template_repo[node->GetName()] = node;
+}
+
+void CHTLGenerator::VisitElementTemplateUsage(const ElementTemplateUsageNode* node) {
+    auto it = m_template_repo.find(node->GetTemplateName());
+    if (it != m_template_repo.end()) {
+        const auto* templateDef = it->second;
+        if (templateDef->GetTemplateType() == TemplateType::Element) {
+            for (const auto& contentNode : templateDef->GetContent()) {
+                Visit(contentNode);
+            }
+        } else {
+            throw std::runtime_error("Mismatched template type usage for @" + node->GetTemplateName());
+        }
+    } else {
+        throw std::runtime_error("Undefined element template used: @" + node->GetTemplateName());
+    }
 }
 
 void CHTLGenerator::VisitElement(const ElementNode* node) {

@@ -10,6 +10,8 @@
 #include "CHTLNode/NumberLiteralNode.h"
 #include "CHTLNode/PropertyReferenceNode.h"
 #include "CHTLNode/StringLiteralNode.h"
+#include "CHTLNode/ElementTemplateUsageNode.h"
+#include "CHTLNode/VariableUsageNode.h"
 #include <string>
 #include <sstream>
 #include <map>
@@ -40,6 +42,7 @@ private:
     void VisitText(const TextNode* node);
     void VisitComment(const CommentNode* node);
     void VisitTemplateDefinition(const TemplateDefinitionNode* node);
+    void VisitElementTemplateUsage(const ElementTemplateUsageNode* node);
 
     // Style processing helper
     void ProcessStyleNodes(const ElementNode* node, StyleProcessingResult& result);
@@ -55,6 +58,7 @@ private:
     EvaluatedValue VisitNumberLiteral(const NumberLiteralNode* node);
     EvaluatedValue VisitStringLiteral(const StringLiteralNode* node);
     EvaluatedValue VisitPropertyReference(const PropertyReferenceNode* node);
+    EvaluatedValue VisitVariableUsage(const VariableUsageNode* node);
 
     NodePtr m_astRoot; // Root of the tree, for lookups
     std::map<std::string, const TemplateDefinitionNode*> m_template_repo;
