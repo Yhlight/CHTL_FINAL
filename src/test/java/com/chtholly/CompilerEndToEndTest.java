@@ -20,7 +20,7 @@ import com.chtholly.chthl.CHTLConfig;
 class CompilerEndToEndTest {
 
     private CompilationResult compile(String source) {
-        CHTLParser parser = new CHTLParser(new CHTLLexer(source).scanTokens());
+        CHTLParser parser = new CHTLParser(new CHTLLexer(source).scanTokens(), null);
         List<Node> ast = parser.getAst();
         Map<String, com.chtholly.chthl.ast.template.TemplateNode> templateTable = parser.getTemplateTable();
 

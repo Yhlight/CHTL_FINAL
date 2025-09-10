@@ -11,7 +11,7 @@
     <property name="java.vm.specification.version" value="21"/>
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="sun.boot.library.path" value="/usr/lib/jvm/java-21-openjdk-amd64/lib"/>
-    <property name="sun.java.command" value="/app/target/surefire/surefirebooter-20250910075306361_3.jar /app/target/surefire 2025-09-10T07-53-06_239-jvmRun1 surefire-20250910075306361_1tmp surefire_0-20250910075306361_2tmp"/>
+    <property name="sun.java.command" value="/app/target/surefire/surefirebooter-20250910105010530_3.jar /app/target/surefire 2025-09-10T10-50-10_419-jvmRun1 surefire-20250910105010530_1tmp surefire_0-20250910105010530_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/app/target/test-classes:/app/target/classes:/home/jules/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.8.2/junit-jupiter-api-5.8.2.jar:/home/jules/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/home/jules/.m2/repository/org/junit/platform/junit-platform-commons/1.8.2/junit-platform-commons-1.8.2.jar:/home/jules/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/jules/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.8.2/junit-jupiter-engine-5.8.2.jar:/home/jules/.m2/repository/org/junit/platform/junit-platform-engine/1.8.2/junit-platform-engine-1.8.2.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -26,7 +26,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="/app/target/surefire/surefirebooter-20250910075306361_3.jar"/>
+    <property name="surefire.real.class.path" value="/app/target/surefire/surefirebooter-20250910105010530_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="21.0.8+9-Ubuntu-0ubuntu124.04.1"/>
     <property name="user.name" value="jules"/>
@@ -52,7 +52,7 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="testCommentsAreIgnored" classname="com.chtholly.CHTLLexerTest" time="0.001"/>
+  <testcase name="testCommentsAreIgnored" classname="com.chtholly.CHTLLexerTest" time="0.0"/>
   <testcase name="testTextNodeWithString" classname="com.chtholly.CHTLLexerTest" time="0.001"/>
   <testcase name="testAttributes" classname="com.chtholly.CHTLLexerTest" time="0.001"/>
   <testcase name="testSimpleElements" classname="com.chtholly.CHTLLexerTest" time="0.001"/>

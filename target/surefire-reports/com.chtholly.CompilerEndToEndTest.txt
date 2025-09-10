@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.chtholly.CompilerEndToEndTest
 -------------------------------------------------------------------------------
-Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.099 s -- in com.chtholly.CompilerEndToEndTest
+Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.075 s -- in com.chtholly.CompilerEndToEndTest

@@ -10,6 +10,7 @@ import com.chtholly.chthl.ast.custom.InsertNode;
 import com.chtholly.chthl.ast.custom.ModificationNode;
 import com.chtholly.chthl.ast.template.TemplateUsageNode;
 import com.chtholly.chthl.lexer.Token;
+import com.chtholly.chthl.lexer.TokenType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,9 +103,13 @@ public class TemplateSpecializer {
 
             if (matcher.matches()) {
                 deleteElementByIndex(body, matcher.group(1), Integer.parseInt(matcher.group(2)));
-            } else if (targetTokens.get(0).getLexeme().startsWith("@")) {
-                if (targetTokens.size() > 1) {
-                    deleteTemplateInheritance(body, targetTokens.get(1).getLexeme());
+            } else if (targetTokens.get(0).getType() == TokenType.AT_SIGN) {
+                // This handles 'delete @Style Base;'
+                // The tokens are [@, Style, Base]
+                if (targetTokens.size() >= 3) {
+                    // The name of the template is the third token in this case
+                    String templateNameToDelete = targetTokens.get(2).getLexeme();
+                    deleteTemplateInheritance(body, templateNameToDelete);
                 }
             } else {
                 deleteElementByTag(body, targetStr);

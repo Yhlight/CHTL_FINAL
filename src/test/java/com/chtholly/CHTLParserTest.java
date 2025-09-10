@@ -28,7 +28,7 @@ class CHTLParserTest {
     @Test
     void testSimpleElementParsing() {
         String input = "html { body {} }";
-        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens(), null);
         List<Node> ast = parser.getAst().stream().filter(Objects::nonNull).collect(Collectors.toList());
         assertNotNull(ast);
         assertEquals(1, ast.size());
@@ -47,7 +47,7 @@ class CHTLParserTest {
     @Test
     void testTextNodeParsing() {
         String input = "text { \"hello world\" }";
-        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens(), null);
         List<Node> ast = parser.getAst().stream().filter(Objects::nonNull).collect(Collectors.toList());
         assertNotNull(ast);
         assertEquals(1, ast.size());
@@ -60,7 +60,7 @@ class CHTLParserTest {
     @Test
     void testMixedContentParsing() {
         String input = "div { text { \"I am a div\" } }";
-        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens(), null);
         List<Node> ast = parser.getAst().stream().filter(Objects::nonNull).collect(Collectors.toList());
         assertNotNull(ast);
         assertEquals(1, ast.size());
@@ -78,7 +78,7 @@ class CHTLParserTest {
     @Test
     void testElementWithAttributes() {
         String input = "div { id: box; class: 'container'; }";
-        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens(), null);
         List<Node> ast = parser.getAst();
         assertEquals(1, ast.size());
         assertTrue(ast.get(0) instanceof ElementNode);
@@ -93,7 +93,7 @@ class CHTLParserTest {
     @Test
     void testStyleBlockParsing() {
         String input = "div { style { color: red; font-size: 16px; } }";
-        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens(), null);
         List<Node> ast = parser.getAst();
         assertEquals(1, ast.size());
         assertTrue(ast.get(0) instanceof ElementNode);
@@ -117,7 +117,7 @@ class CHTLParserTest {
     @Test
     void testSelectorBlockParsing() {
         String input = "div { style { color: white; .box { background-color: black; } font-size: 16px; } }";
-        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens(), null);
         List<Node> ast = parser.getAst();
         assertEquals(1, ast.size());
         ElementNode div = (ElementNode) ast.get(0);
@@ -146,7 +146,7 @@ class CHTLParserTest {
     @Test
     void testReferenceExpressionParsing() {
         String input = "div { style { width: .box.width; } }";
-        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens(), null);
         List<Node> ast = parser.getAst();
         ElementNode div = (ElementNode) ast.get(0);
         StyleBlockNode styleNode = (StyleBlockNode) div.children.get(0);
@@ -163,7 +163,7 @@ class CHTLParserTest {
     @Test
     void testTemplateDefinitionParsing() {
         String input = "[Template] @Style DefaultText { color: black; line-height: 1.6; }";
-        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens(), null);
         parser.getAst(); // This runs the parsing
         Map<String, TemplateNode> table = parser.getTemplateTable();
         assertEquals(1, table.size());
@@ -188,7 +188,7 @@ class CHTLParserTest {
             }
         }
         """;
-        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens(), null);
         List<Node> ast = parser.getAst();
 
         // Check @Element usage
@@ -229,7 +229,7 @@ class CHTLParserTest {
         }
         """;
 
-        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens());
+        CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens(), null);
         List<Node> ast = parser.getAst();
 
         ElementNode body = (ElementNode) ast.get(0);

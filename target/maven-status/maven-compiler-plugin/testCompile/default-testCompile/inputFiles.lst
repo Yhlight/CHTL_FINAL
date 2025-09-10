@@ -1,4 +1,5 @@
 /app/src/test/java/com/chtholly/CompilerEndToEndTest.java
+/app/src/test/java/com/chtholly/CHTLImporterTest.java
 /app/src/test/java/com/chtholly/CHTLLexerTest.java
 /app/src/test/java/com/chtholly/CHTLParserTest.java
 /app/src/test/java/com/chtholly/chthl/evaluator/ExpressionEvaluatorTest.java

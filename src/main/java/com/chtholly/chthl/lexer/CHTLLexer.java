@@ -73,6 +73,7 @@ public class CHTLLexer {
             case '%': addToken(TokenType.PERCENT); break;
             case '#': addToken(TokenType.HASH); break;
             case '?': addToken(TokenType.QUESTION); break;
+            case '@': addToken(TokenType.AT_SIGN); break;
             case '!':
                 addToken(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
                 break;
@@ -139,9 +140,15 @@ public class CHTLLexer {
                 break;
 
             default:
-                if (isAlpha(c) || isDigit(c) || c == '@') {
+                if (isAlpha(c)) { // Identifiers must start with a letter or underscore.
                     identifier();
-                } else {
+                } else if (isDigit(c)) {
+                    // For now, we assume numbers are part of unquoted literals or expressions
+                    // which are handled by the parser contextually. Let's treat them as identifiers
+                    // for now, but this might need refinement.
+                    identifier();
+                }
+                else {
                     System.err.println("Line " + line + ": Unexpected character '" + c + "'.");
                 }
                 break;
@@ -149,10 +156,6 @@ public class CHTLLexer {
     }
 
     private void identifier() {
-        // Allow '@' at the start of an identifier for template types like @Style
-        if (peek() == '@') {
-            advance();
-        }
         while (isAlphaNumeric(peek()) || peek() == '-') advance();
 
         String text = source.substring(start, current);
@@ -194,7 +197,9 @@ public class CHTLLexer {
 
     private void addToken(TokenType type, Object literal) {
         String text = source.substring(start, current);
-        tokens.add(new Token(type, text, literal, line));
+        Token token = new Token(type, text, literal, line);
+        // System.out.println(token); // Uncomment for debugging
+        tokens.add(token);
     }
 
     private boolean match(char expected) {

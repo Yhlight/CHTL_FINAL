@@ -8,8 +8,10 @@ import com.chtholly.chthl.ast.custom.ModificationNode;
 import com.chtholly.chthl.ast.custom.SetNode;
 import com.chtholly.chthl.ast.expr.Expression;
 import com.chtholly.chthl.ast.template.*;
+import com.chtholly.chthl.lexer.CHTLLexer;
 import com.chtholly.chthl.lexer.Token;
 import com.chtholly.chthl.lexer.TokenType;
+import com.chtholly.chthl.loader.CHTLLoader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,13 +27,15 @@ public class CHTLParser {
     }
 
     private final List<Token> tokens;
+    private final String filePath;
     private int current = 0;
     private final Map<String, TemplateNode> templateTable = new HashMap<>();
     private final Map<String, OriginNode> originTable = new HashMap<>();
     private ConfigurationNode configuration = null;
 
-    public CHTLParser(List<Token> tokens) {
+    public CHTLParser(List<Token> tokens, String filePath) {
         this.tokens = tokens;
+        this.filePath = filePath;
     }
 
     public List<Node> getAst() {
@@ -70,7 +74,11 @@ public class CHTLParser {
             if (check(TokenType.LEFT_BRACKET) && peekNext().getType() == TokenType.ORIGIN) {
                 return parseOriginBlock();
             }
-            if (check(TokenType.IDENTIFIER) && peek().getLexeme().startsWith("@")) {
+            if (check(TokenType.LEFT_BRACKET) && peekNext().getType() == TokenType.IMPORT) {
+                parseImportStatement();
+                return null;
+            }
+            if (check(TokenType.AT_SIGN)) {
                 return parseTemplateUsage();
             }
             if (peek().getType() == TokenType.TEXT) return textDeclaration();
@@ -78,6 +86,7 @@ public class CHTLParser {
 
             throw new ParseError(peek(), "Expected a declaration or definition.");
         } catch (ParseError error) {
+            System.err.println("CAUGHT PARSE ERROR: " + error.getMessage());
             System.err.println(error.getMessage());
             synchronize();
             return null;
@@ -127,12 +136,69 @@ public class CHTLParser {
         }
     }
 
+    private void parseImportStatement() {
+        consume(TokenType.LEFT_BRACKET, "Expect '['.");
+        consume(TokenType.IMPORT, "Expect 'Import' keyword.");
+        consume(TokenType.RIGHT_BRACKET, "Expect ']'.");
+
+        consume(TokenType.AT_SIGN, "Expect '@' before import type.");
+        Token type = consume(TokenType.IDENTIFIER, "Expect import type like 'Chtl'.");
+
+        if (!type.getLexeme().equals("Chtl")) {
+            throw new ParseError(type, "Unsupported import type. Only '@Chtl' is supported for now.");
+        }
+
+        consume(TokenType.FROM, "Expect 'from' keyword.");
+
+        Token pathToken;
+        if (match(TokenType.STRING)) {
+            pathToken = previous();
+        } else {
+            throw new ParseError(peek(), "Expect a string literal for the import path.");
+        }
+        String importPath = (String) pathToken.getLiteral();
+
+        consume(TokenType.SEMICOLON, "Expect ';' after import statement.");
+
+        try {
+            CHTLLoader loader = new CHTLLoader();
+            String content = loader.load(importPath, this.filePath);
+
+            CHTLLexer lexer = new CHTLLexer(content);
+            List<Token> importedTokens = lexer.scanTokens();
+
+            // Create a new parser for the imported file. Pass the imported file's path for nested imports.
+            CHTLParser importedParser = new CHTLParser(importedTokens, importPath);
+            importedParser.getAst(); // This parses the file and populates the tables.
+
+            // Merge the template tables.
+            this.templateTable.putAll(importedParser.getTemplateTable());
+            this.originTable.putAll(importedParser.getOriginTable());
+
+            // Could merge configurations too, but that requires a merging strategy.
+            // For now, we'll just take the templates and origins.
+
+        } catch (CHTLLoader.LoadError e) {
+            throw new ParseError(pathToken, "Failed to import file: " + e.getMessage());
+        }
+    }
+
     private Node parseOriginBlock() {
         consume(TokenType.LEFT_BRACKET, "Expect '['.");
         consume(TokenType.ORIGIN, "Expect 'Origin' keyword.");
         consume(TokenType.RIGHT_BRACKET, "Expect ']'.");
 
-        Token type = consume(TokenType.IDENTIFIER, "Expect origin type like '@Html'.");
+        Token at = consume(TokenType.AT_SIGN, "Expect '@' for origin type.");
+        Token typeIdentifier = consume(TokenType.IDENTIFIER, "Expect origin type like 'Html'.");
+
+        // Manually create a token for the full type, e.g., "@Html"
+        Token fullType = new Token(
+            TokenType.IDENTIFIER,
+            "@" + typeIdentifier.getLexeme(),
+            null,
+            at.getLine()
+        );
+
         Token name = null;
         if (check(TokenType.IDENTIFIER)) {
             name = advance();
@@ -144,7 +210,7 @@ public class CHTLParser {
             String content = (String) contentToken.getLiteral();
             consume(TokenType.RIGHT_BRACE, "Expect '}' after origin block.");
 
-            OriginNode node = new OriginNode(type, name, content, false);
+            OriginNode node = new OriginNode(fullType, name, content, false);
             if (name != null) {
                 originTable.put(name.getLexeme(), node);
                 return null; // Definitions are not part of the render tree
@@ -156,12 +222,22 @@ public class CHTLParser {
             if (name == null) {
                 throw new ParseError(previous(), "Expect a name for origin usage.");
             }
-            return new OriginNode(type, name, null, true);
+            return new OriginNode(fullType, name, null, true);
         }
     }
 
     private TemplateUsageNode parseTemplateUsage() {
-        Token type = consume(TokenType.IDENTIFIER, "Expect template type like '@Style'.");
+        Token at = consume(TokenType.AT_SIGN, "Expect '@' to start a template usage.");
+        Token typeIdentifier = consume(TokenType.IDENTIFIER, "Expect template type like 'Style'.");
+
+        // Manually create a token for the full type, e.g., "@Style"
+        Token fullType = new Token(
+            TokenType.IDENTIFIER,
+            "@" + typeIdentifier.getLexeme(),
+            null,
+            at.getLine()
+        );
+
         Token name = consume(TokenType.IDENTIFIER, "Expect template name.");
 
         CustomizationBlockNode customization = null;
@@ -171,7 +247,7 @@ public class CHTLParser {
             consume(TokenType.SEMICOLON, "Expect ';' after template usage without a customization block.");
         }
 
-        return new TemplateUsageNode(type, name, customization);
+        return new TemplateUsageNode(fullType, name, customization);
     }
 
     private CustomizationBlockNode parseCustomizationBlock() {
@@ -274,17 +350,19 @@ public class CHTLParser {
         consume(TokenType.LEFT_BRACKET, "Expect '['.");
         consume(TokenType.TEMPLATE, "Expect 'Template' keyword.");
         consume(TokenType.RIGHT_BRACKET, "Expect ']'.");
-        Token type = consume(TokenType.IDENTIFIER, "Expect template type like '@Style'.");
+
+        consume(TokenType.AT_SIGN, "Expect '@' for template type.");
+        Token type = consume(TokenType.IDENTIFIER, "Expect template type like 'Style'.");
         Token name = consume(TokenType.IDENTIFIER, "Expect template name.");
 
         switch (type.getLexeme()) {
-            case "@Style":
+            case "Style":
                 templateTable.put(name.getLexeme(), parseStyleTemplate(name));
                 break;
-            case "@Element":
+            case "Element":
                 templateTable.put(name.getLexeme(), parseElementTemplate(name));
                 break;
-            case "@Var":
+            case "Var":
                 templateTable.put(name.getLexeme(), parseVarTemplate(name));
                 break;
             default:
@@ -296,7 +374,7 @@ public class CHTLParser {
         consume(TokenType.LEFT_BRACE, "Expect '{' to start style template body.");
         List<Node> body = new ArrayList<>();
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            if (check(TokenType.IDENTIFIER) && peek().getLexeme().startsWith("@")) {
+            if (check(TokenType.AT_SIGN)) {
                 body.add(parseTemplateUsage());
             } else {
                 body.add(parseStyleProperty());
@@ -374,7 +452,7 @@ public class CHTLParser {
         List<Node> directPropertiesAndUsages = new ArrayList<>();
         List<SelectorBlockNode> selectorBlocks = new ArrayList<>();
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            if (check(TokenType.IDENTIFIER) && peek().getLexeme().startsWith("@")) {
+            if (check(TokenType.AT_SIGN)) {
                 directPropertiesAndUsages.add(parseTemplateUsage());
             } else if (check(TokenType.IDENTIFIER) && peekNext().getType() == TokenType.COLON) {
                 directPropertiesAndUsages.add(parseStyleProperty());
@@ -408,7 +486,7 @@ public class CHTLParser {
         consume(TokenType.LEFT_BRACE, "Expect '{' after selector.");
         List<Node> body = new ArrayList<>();
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            if (check(TokenType.IDENTIFIER) && peek().getLexeme().startsWith("@")) {
+            if (check(TokenType.AT_SIGN)) {
                 body.add(parseTemplateUsage());
             } else {
                 body.add(parseStyleProperty());
