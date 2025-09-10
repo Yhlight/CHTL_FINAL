@@ -2145,6 +2145,10 @@ args.bind("**", [](const std::string& value) {
 例如第一次匹配$时，参数列表中的参数$的计数为1，表示第一个$参数  
 第二次匹配$时，参数列表中的参数$的计数+1，表示第二个$参数  
 
+```cpp
+args.match("$", [](const std::string& value) { return value; });
+```
+
 ###### fillValue
 填充参数列表的值  
 
