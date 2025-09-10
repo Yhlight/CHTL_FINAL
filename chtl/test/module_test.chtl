@@ -1,0 +1,15 @@
+html {
+    head {
+        title { "Module Loading Test" }
+    }
+    body {
+        h1 { text: "Testing Module Imports"; }
+
+        div {
+            class: "wrapper";
+
+            // This should be replaced by the content of the Chtholly module
+            [Import] @Chtl from "Chtholly";
+        }
+    }
+}

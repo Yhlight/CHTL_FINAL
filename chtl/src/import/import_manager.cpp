@@ -179,6 +179,20 @@ ImportManager::ImportManager(const std::string& base_path)
     path_resolver_ = std::make_shared<PathResolver>(base_path);
     global_namespace_ = std::make_shared<Namespace>("global");
     namespaces_["global"] = global_namespace_;
+
+    // --- Populate the virtual filesystem ---
+    std::cout << "Initializing virtual filesystem with dummy modules..." << std::endl;
+    auto chtholly_module = std::make_shared<cmod_cjmod::CMODModule>("Chtholly");
+    cmod_cjmod::ModuleInfo info("Chtholly");
+    info.version = "1.0.0-vfs";
+    info.author = "VFS";
+    info.exports.push_back("ChthollyComponent");
+    chtholly_module->setInfo(info);
+    chtholly_module->addSourceFile("src/Chtholly.chtl", "div { class: \"chtholly-component\"; text: \"Content from the VIRTUAL Chtholly module\"; }");
+
+    std::string packed_chtholly = cmod_cjmod::ModulePackager::pack(*chtholly_module);
+    virtual_filesystem_["modules/Chtholly.cmod"] = packed_chtholly;
+    std::cout << "Packed 'Chtholly' module into virtual path: modules/Chtholly.cmod" << std::endl;
 }
 
 std::string ImportManager::read_file(const std::string& file_path) const {
@@ -424,52 +438,52 @@ void ImportManager::reset() {
 
 std::shared_ptr<chtl::ast::ASTNode> chtl::import::ImportManager::load_module(const std::string& module_name) {
     if (imported_asts_.count(module_name)) {
-        // Module already loaded and parsed
         return imported_asts_[module_name];
     }
 
-    // --- Simulation of finding and reading a .cmod file ---
-    std::cout << "Simulating loading of module: " << module_name << std::endl;
-    auto dummy_module = std::make_shared<cmod_cjmod::CMODModule>(module_name);
-    cmod_cjmod::ModuleInfo info(module_name);
-    info.version = "1.0.0-simulated";
-    info.author = "CHTL-Dev";
-    info.exports.push_back("SimulatedComponent");
-    dummy_module->setInfo(info);
-    dummy_module->addSourceFile("src/" + module_name + ".chtl", "div { class: \"simulated-module-" + module_name + "\"; text: \"Content from " + module_name + "\"; }");
-
-    std::string packed_content = cmod_cjmod::ModulePackager::pack(*dummy_module);
-    auto unpacked_files = cmod_cjmod::ModulePackager::unpack(packed_content);
-
-    std::string info_path = "info/" + module_name + ".chtl";
-    if (unpacked_files.count(info_path)) {
-        cmod_cjmod::ModuleInfoParser info_parser(unpacked_files[info_path]);
-        auto parsed_info = info_parser.parse();
-        std::cout << "Successfully parsed info for module: " << parsed_info.name << std::endl;
-    } else {
-        std::cerr << "Warning: Module info file not found for " << module_name << std::endl;
+    // --- Use the Virtual Filesystem to find the module ---
+    std::string module_path = "modules/" + module_name + ".cmod";
+    if (virtual_filesystem_.find(module_path) == virtual_filesystem_.end()) {
+        std::cerr << "Error: Module '" << module_name << "' not found in virtual filesystem at path: " << module_path << std::endl;
         return nullptr;
     }
 
-    std::string source_path = "src/" + module_name + ".chtl";
-     if (unpacked_files.count(source_path)) {
-        try {
-            lexer::CHTLLexer lexer(unpacked_files[source_path]);
-            auto tokens = lexer.tokenize();
-            parser::CHTLParser parser(tokens);
-            auto module_ast = parser.parse();
+    std::cout << "Loading module '" << module_name << "' from virtual filesystem..." << std::endl;
+    const std::string& packed_content = virtual_filesystem_[module_path];
 
-            if (module_ast) {
-                // Cache the parsed AST
-                imported_asts_[module_name] = module_ast;
-                loaded_cmod_modules_[module_name] = dummy_module;
-                return module_ast;
-            }
-        } catch (const std::exception& e) {
-            std::cerr << "Error parsing module source for " << module_name << ": " << e.what() << std::endl;
-        }
-    } else {
-        std::cerr << "Warning: Module source file not found for " << module_name << std::endl;
+    // Unpack, parse info, and parse source
+    auto unpacked_files = cmod_cjmod::ModulePackager::unpack(packed_content);
+
+    std::string info_path = "info/" + module_name + ".chtl";
+    if (unpacked_files.count(info_path) == 0) {
+        std::cerr << "Warning: Module info file not found for " << module_name << std::endl;
+        return nullptr;
     }
+    cmod_cjmod::ModuleInfoParser info_parser(unpacked_files[info_path]);
+    auto parsed_info = info_parser.parse();
+    std::cout << "Successfully parsed info for module: " << parsed_info.name << std::endl;
+
+    std::string source_path = "src/" + module_name + ".chtl";
+    if (unpacked_files.count(source_path) == 0) {
+        std::cerr << "Warning: Module source file not found for " << module_name << std::endl;
+        return nullptr;
+    }
+
+    try {
+        lexer::CHTLLexer lexer(unpacked_files[source_path]);
+        auto tokens = lexer.tokenize();
+        parser::CHTLParser parser(tokens);
+        auto module_ast = parser.parse();
+
+        if (module_ast) {
+            imported_asts_[module_name] = module_ast;
+            // We could store the full module object if needed, but for now, caching the AST is enough.
+            // loaded_cmod_modules_[module_name] = dummy_module;
+            return module_ast;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error parsing module source for " << module_name << ": " << e.what() << std::endl;
+    }
+
     return nullptr;
 }
