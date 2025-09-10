@@ -120,6 +120,7 @@ This document breaks down the features and components of the CHTL project as des
 ### 5.1. CLI
 - [ ] Standard command-line tool.
 - [ ] Advanced command-line program with rendering.
+- [ ] Default behavior is to generate a fragment, not a full HTML document. The `--default-struct` flag must be used to generate the full `<html>...</html>` shell.
 
 ### 5.2. VSCode IDE Extension
 - [ ] Syntax Highlighting

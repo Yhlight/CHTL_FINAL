@@ -32,9 +32,9 @@ def main():
         help="The path to the output .html file.\nIf not provided, the output will be printed to the console."
     )
     parser.add_argument(
-        "--no-struct",
+        "--default-struct",
         action="store_true",
-        help="Generate only the HTML fragment, not a full document structure."
+        help="Generate a full HTML document structure (<html>, <head>, <body>)."
     )
 
     args = parser.parse_args()
@@ -43,7 +43,7 @@ def main():
         with open(args.input_file, 'r', encoding='utf-8') as f:
             source_code = f.read()
 
-        html_output = compile_chtl(source_code, source_file_path=args.input_file, use_default_structure=not args.no_struct)
+        html_output = compile_chtl(source_code, source_file_path=args.input_file, use_default_structure=args.default_struct)
 
         if args.output:
             with open(args.output, 'w', encoding='utf-8') as f:

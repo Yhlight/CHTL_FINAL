@@ -48,7 +48,7 @@ class CompilerDispatcher:
         self.css_output += css
 
 
-    def merge_outputs(self, use_default_structure: bool = True) -> str:
+    def merge_outputs(self, use_default_structure: bool = False) -> str:
         """
         Merges the compiled HTML, CSS, and JS into a single HTML document.
         """

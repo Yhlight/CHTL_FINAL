@@ -62,5 +62,21 @@ class TestUnifiedScanner(unittest.TestCase):
         self.assertEqual(fragments[0].type, FragmentType.CSS)
         self.assertIn("&:hover", fragments[0].content)
 
+    def test_local_blocks_are_not_split(self):
+        source = """
+        body {
+            div {
+                style { color: red; }
+            }
+        }
+        """
+        scanner = CHTLUnifiedScanner(source)
+        fragments = scanner.scan()
+        # The entire content should be treated as a single CHTL fragment
+        # because the style block is not at the top level.
+        self.assertEqual(len(fragments), 1)
+        self.assertEqual(fragments[0].type, FragmentType.CHTL)
+
+
 if __name__ == '__main__':
     unittest.main()
