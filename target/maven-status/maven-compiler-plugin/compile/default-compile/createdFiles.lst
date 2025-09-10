@@ -22,6 +22,7 @@ com/chtholly/chthl/ast/expr/LiteralExpr.class
 com/chtholly/chthl/parser/CHTLParser$1.class
 com/chtholly/chthl/generator/CompilationResult.class
 com/chtholly/chthl/ast/TextNode.class
+com/chtholly/chthl/ast/NamespaceNode.class
 com/chtholly/chthl/ast/template/TemplateNode.class
 com/chtholly/chthl/loader/CHTLLoader.class
 com/chtholly/chthl/lexer/TokenType.class

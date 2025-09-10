@@ -11,11 +11,13 @@ import com.chtholly.chthl.lexer.Token;
 public class TemplateUsageNode implements Node {
     public final Token type;
     public final Token name;
+    public final Token fromNamespace; // Can be null
     public final CustomizationBlockNode customization; // Can be null
 
-    public TemplateUsageNode(Token type, Token name, CustomizationBlockNode customization) {
+    public TemplateUsageNode(Token type, Token name, Token fromNamespace, CustomizationBlockNode customization) {
         this.type = type;
         this.name = name;
+        this.fromNamespace = fromNamespace;
         this.customization = customization;
     }
 
@@ -29,6 +31,7 @@ public class TemplateUsageNode implements Node {
         return new TemplateUsageNode(
             this.type,
             this.name,
+            this.fromNamespace,
             this.customization == null ? null : (CustomizationBlockNode) this.customization.clone()
         );
     }

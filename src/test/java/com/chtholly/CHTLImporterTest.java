@@ -47,7 +47,7 @@ public class CHTLImporterTest {
 
         // Create the main file that imports the other file
         String mainContent = "[Import] @Chtl from \"./imports.chtl\";\n" +
-                             "div { style { @Style ImportedStyle; } text { \"Hello Importer!\" } }";
+                             "div { style { @Style ImportedStyle from imports; } text { \"Hello Importer!\" } }";
         Files.write(Paths.get(TEMP_DIR, "main.chtl"), mainContent.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -66,12 +66,11 @@ public class CHTLImporterTest {
 
         CHTLParser parser = new CHTLParser(new CHTLLexer(source).scanTokens(), filePath);
         List<Node> ast = parser.getAst();
-        Map<String, com.chtholly.chthl.ast.template.TemplateNode> templateTable = parser.getTemplateTable();
 
         CHTLConfig config = new CHTLConfig();
         config.load(parser.getConfiguration());
 
-        CHTLGenerator generator = new CHTLGenerator(ast, templateTable, parser.getOriginTable(), config);
+        CHTLGenerator generator = new CHTLGenerator(ast, parser.getTemplateTable(), parser.getOriginTable(), config);
         return generator.generate();
     }
 

@@ -38,4 +38,5 @@ public interface Visitor<R> {
     default R visitOriginNode(OriginNode node) { return null; }
     default R visitConfigurationNode(ConfigurationNode node) { return null; }
     default R visitImportNode(ImportNode node) { return null; }
+    default R visitNamespaceNode(NamespaceNode node) { return null; }
 }

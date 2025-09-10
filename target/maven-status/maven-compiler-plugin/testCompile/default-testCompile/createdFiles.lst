@@ -1,4 +1,5 @@
 com/chtholly/CHTLImporterTest.class
+com/chtholly/CHTLNamespaceTest.class
 com/chtholly/CHTLParserTest.class
 com/chtholly/chthl/evaluator/ExpressionEvaluatorTest.class
 com/chtholly/CompilerEndToEndTest.class

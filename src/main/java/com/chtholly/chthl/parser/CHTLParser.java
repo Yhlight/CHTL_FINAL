@@ -26,16 +26,22 @@ public class CHTLParser {
         }
     }
 
+    private static final String GLOBAL_NAMESPACE = "__global__";
+
     private final List<Token> tokens;
     private final String filePath;
     private int current = 0;
-    private final Map<String, TemplateNode> templateTable = new HashMap<>();
-    private final Map<String, OriginNode> originTable = new HashMap<>();
+    private String currentNamespace = GLOBAL_NAMESPACE;
+
+    private final Map<String, Map<String, TemplateNode>> templateTable = new HashMap<>();
+    private final Map<String, Map<String, OriginNode>> originTable = new HashMap<>();
     private ConfigurationNode configuration = null;
 
     public CHTLParser(List<Token> tokens, String filePath) {
         this.tokens = tokens;
         this.filePath = filePath;
+        this.templateTable.put(GLOBAL_NAMESPACE, new HashMap<>());
+        this.originTable.put(GLOBAL_NAMESPACE, new HashMap<>());
     }
 
     public List<Node> getAst() {
@@ -49,11 +55,11 @@ public class CHTLParser {
         return nodes;
     }
 
-    public Map<String, TemplateNode> getTemplateTable() {
+    public Map<String, Map<String, TemplateNode>> getTemplateTable() {
         return templateTable;
     }
 
-    public Map<String, OriginNode> getOriginTable() {
+    public Map<String, Map<String, OriginNode>> getOriginTable() {
         return originTable;
     }
 
@@ -77,6 +83,9 @@ public class CHTLParser {
             if (check(TokenType.LEFT_BRACKET) && peekNext().getType() == TokenType.IMPORT) {
                 parseImportStatement();
                 return null;
+            }
+            if (check(TokenType.LEFT_BRACKET) && peekNext().getType() == TokenType.NAMESPACE) {
+                return parseNamespaceNode();
             }
             if (check(TokenType.AT_SIGN)) {
                 return parseTemplateUsage();
@@ -172,15 +181,70 @@ public class CHTLParser {
             importedParser.getAst(); // This parses the file and populates the tables.
 
             // Merge the template tables.
-            this.templateTable.putAll(importedParser.getTemplateTable());
-            this.originTable.putAll(importedParser.getOriginTable());
+            boolean hasExplicitNamespace = importedParser.getTemplateTable().keySet().stream().anyMatch(k -> !k.equals(GLOBAL_NAMESPACE));
+            if (hasExplicitNamespace) {
+                importedParser.getTemplateTable().forEach((namespace, table) -> {
+                    this.templateTable.computeIfAbsent(namespace, k -> new HashMap<>()).putAll(table);
+                });
+            } else {
+                String defaultNamespace = deriveNamespaceFromPath(importPath);
+                Map<String, TemplateNode> globalTemplates = importedParser.getTemplateTable().get(GLOBAL_NAMESPACE);
+                if (globalTemplates != null && !globalTemplates.isEmpty()) {
+                    this.templateTable.computeIfAbsent(defaultNamespace, k -> new HashMap<>()).putAll(globalTemplates);
+                }
+            }
 
-            // Could merge configurations too, but that requires a merging strategy.
-            // For now, we'll just take the templates and origins.
+            // Merge the origin tables.
+            hasExplicitNamespace = importedParser.getOriginTable().keySet().stream().anyMatch(k -> !k.equals(GLOBAL_NAMESPACE));
+            if (hasExplicitNamespace) {
+                importedParser.getOriginTable().forEach((namespace, table) -> {
+                    this.originTable.computeIfAbsent(namespace, k -> new HashMap<>()).putAll(table);
+                });
+            } else {
+                String defaultNamespace = deriveNamespaceFromPath(importPath);
+                 Map<String, OriginNode> globalOrigins = importedParser.getOriginTable().get(GLOBAL_NAMESPACE);
+                if (globalOrigins != null && !globalOrigins.isEmpty()) {
+                    this.originTable.computeIfAbsent(defaultNamespace, k -> new HashMap<>()).putAll(globalOrigins);
+                }
+            }
 
         } catch (CHTLLoader.LoadError e) {
             throw new ParseError(pathToken, "Failed to import file: " + e.getMessage());
         }
+    }
+
+    private NamespaceNode parseNamespaceNode() {
+        consume(TokenType.LEFT_BRACKET, "Expect '['.");
+        consume(TokenType.NAMESPACE, "Expect 'Namespace' keyword.");
+        consume(TokenType.RIGHT_BRACKET, "Expect ']'.");
+
+        Token name = consume(TokenType.IDENTIFIER, "Expect namespace name.");
+        String namespaceName = name.getLexeme();
+
+        // Ensure the maps for this namespace exist
+        templateTable.putIfAbsent(namespaceName, new HashMap<>());
+        originTable.putIfAbsent(namespaceName, new HashMap<>());
+
+        List<Node> children = new ArrayList<>();
+        if (match(TokenType.LEFT_BRACE)) {
+            String previousNamespace = this.currentNamespace;
+            this.currentNamespace = namespaceName;
+
+            while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+                Node node = declaration();
+                if (node != null) {
+                    children.add(node);
+                }
+            }
+            consume(TokenType.RIGHT_BRACE, "Expect '}' after namespace block.");
+
+            this.currentNamespace = previousNamespace; // Restore previous namespace
+        } else {
+            // For single-line namespace declarations, it applies to subsequent definitions.
+            this.currentNamespace = namespaceName;
+        }
+
+        return new NamespaceNode(name.getLexeme(), children);
     }
 
     private Node parseOriginBlock() {
@@ -210,19 +274,23 @@ public class CHTLParser {
             String content = (String) contentToken.getLiteral();
             consume(TokenType.RIGHT_BRACE, "Expect '}' after origin block.");
 
-            OriginNode node = new OriginNode(fullType, name, content, false);
+            OriginNode node = new OriginNode(fullType, name, content, false, null); // No 'from' in definition
             if (name != null) {
-                originTable.put(name.getLexeme(), node);
+                originTable.get(currentNamespace).put(name.getLexeme(), node);
                 return null; // Definitions are not part of the render tree
             }
             return node; // Anonymous origin block
         } else {
             // It's a usage
+            Token fromNamespace = null;
+            if (match(TokenType.FROM)) {
+                fromNamespace = consume(TokenType.IDENTIFIER, "Expect namespace name after 'from'.");
+            }
             consume(TokenType.SEMICOLON, "Expect ';' after named origin usage.");
             if (name == null) {
                 throw new ParseError(previous(), "Expect a name for origin usage.");
             }
-            return new OriginNode(fullType, name, null, true);
+            return new OriginNode(fullType, name, null, true, fromNamespace);
         }
     }
 
@@ -240,14 +308,19 @@ public class CHTLParser {
 
         Token name = consume(TokenType.IDENTIFIER, "Expect template name.");
 
+        Token fromNamespace = null;
+        if (match(TokenType.FROM)) {
+            fromNamespace = consume(TokenType.IDENTIFIER, "Expect namespace name after 'from'.");
+        }
+
         CustomizationBlockNode customization = null;
         if (check(TokenType.LEFT_BRACE)) {
             customization = parseCustomizationBlock();
         } else {
-            consume(TokenType.SEMICOLON, "Expect ';' after template usage without a customization block.");
+            consume(TokenType.SEMICOLON, "Expect ';' after template usage.");
         }
 
-        return new TemplateUsageNode(fullType, name, customization);
+        return new TemplateUsageNode(fullType, name, fromNamespace, customization);
     }
 
     private CustomizationBlockNode parseCustomizationBlock() {
@@ -357,13 +430,13 @@ public class CHTLParser {
 
         switch (type.getLexeme()) {
             case "Style":
-                templateTable.put(name.getLexeme(), parseStyleTemplate(name));
+                templateTable.get(currentNamespace).put(name.getLexeme(), parseStyleTemplate(name));
                 break;
             case "Element":
-                templateTable.put(name.getLexeme(), parseElementTemplate(name));
+                templateTable.get(currentNamespace).put(name.getLexeme(), parseElementTemplate(name));
                 break;
             case "Var":
-                templateTable.put(name.getLexeme(), parseVarTemplate(name));
+                templateTable.get(currentNamespace).put(name.getLexeme(), parseVarTemplate(name));
                 break;
             default:
                 throw new ParseError(type, "Unknown template type.");
@@ -564,5 +637,16 @@ public class CHTLParser {
             }
             advance();
         }
+    }
+
+    private String deriveNamespaceFromPath(String path) {
+        // Simple implementation: get filename without extension.
+        // e.g., "path/to/my-theme.chtl" -> "my-theme"
+        String filename = new java.io.File(path).getName();
+        int lastDot = filename.lastIndexOf('.');
+        if (lastDot > 0) {
+            return filename.substring(0, lastDot);
+        }
+        return filename;
     }
 }

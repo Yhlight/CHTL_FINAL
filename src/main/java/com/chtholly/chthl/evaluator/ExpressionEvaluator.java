@@ -18,24 +18,28 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
 
     private static final int MAX_EVALUATION_DEPTH = 10;
 
+    private static final String GLOBAL_NAMESPACE = "__global__";
+
     private final ElementNode localContext;
     private final List<Node> documentContext;
-    private final Map<String, TemplateNode> templateTable;
+    private final Map<String, Map<String, TemplateNode>> templateTable;
+    private final String currentNamespace;
     private final int evaluationDepth;
     private final Deque<Map<String, UnitValue>> variableContextStack;
 
-    public ExpressionEvaluator(ElementNode localContext, List<Node> documentContext, Map<String, TemplateNode> templateTable) {
-        this(localContext, documentContext, templateTable, 0, new ArrayDeque<>());
+    public ExpressionEvaluator(ElementNode localContext, List<Node> documentContext, Map<String, Map<String, TemplateNode>> templateTable, String currentNamespace) {
+        this(localContext, documentContext, templateTable, currentNamespace, 0, new ArrayDeque<>());
     }
 
-    public ExpressionEvaluator(ElementNode localContext, List<Node> documentContext, Map<String, TemplateNode> templateTable, Deque<Map<String, UnitValue>> variableContextStack) {
-        this(localContext, documentContext, templateTable, 0, variableContextStack);
+    public ExpressionEvaluator(ElementNode localContext, List<Node> documentContext, Map<String, Map<String, TemplateNode>> templateTable, String currentNamespace, Deque<Map<String, UnitValue>> variableContextStack) {
+        this(localContext, documentContext, templateTable, currentNamespace, 0, variableContextStack);
     }
 
-    private ExpressionEvaluator(ElementNode localContext, List<Node> documentContext, Map<String, TemplateNode> templateTable, int depth, Deque<Map<String, UnitValue>> variableContextStack) {
+    private ExpressionEvaluator(ElementNode localContext, List<Node> documentContext, Map<String, Map<String, TemplateNode>> templateTable, String currentNamespace, int depth, Deque<Map<String, UnitValue>> variableContextStack) {
         this.localContext = localContext;
         this.documentContext = documentContext;
         this.templateTable = templateTable;
+        this.currentNamespace = currentNamespace;
         this.evaluationDepth = depth;
         this.variableContextStack = variableContextStack;
     }
@@ -156,13 +160,21 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
             }
         }
 
-        // 2. Check global @Var templates
-        for (TemplateNode templateNode : templateTable.values()) {
-            if (templateNode instanceof VarTemplateNode) {
-                VarTemplateNode varTemplate = (VarTemplateNode) templateNode;
-                if (varTemplate.variables.containsKey(varName)) {
-                    ExpressionEvaluator newEvaluator = new ExpressionEvaluator(null, this.documentContext, this.templateTable, this.evaluationDepth + 1, this.variableContextStack);
-                    return newEvaluator.evaluate(varTemplate.variables.get(varName));
+        // 2. Check global @Var templates in current and global namespaces
+        List<Map<String, TemplateNode>> namespacesToSearch = new ArrayList<>();
+        namespacesToSearch.add(templateTable.getOrDefault(currentNamespace, Collections.emptyMap()));
+        if (!currentNamespace.equals(GLOBAL_NAMESPACE)) {
+            namespacesToSearch.add(templateTable.getOrDefault(GLOBAL_NAMESPACE, Collections.emptyMap()));
+        }
+
+        for (Map<String, TemplateNode> namespaceTemplates : namespacesToSearch) {
+            for (TemplateNode templateNode : namespaceTemplates.values()) {
+                if (templateNode instanceof VarTemplateNode) {
+                    VarTemplateNode varTemplate = (VarTemplateNode) templateNode;
+                    if (varTemplate.variables.containsKey(varName)) {
+                        ExpressionEvaluator newEvaluator = new ExpressionEvaluator(null, this.documentContext, this.templateTable, this.currentNamespace, this.evaluationDepth + 1, this.variableContextStack);
+                        return newEvaluator.evaluate(varTemplate.variables.get(varName));
+                    }
                 }
             }
         }
@@ -180,7 +192,7 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
                 // We create a new evaluator to look for the property's value, but critically,
                 // we pass a *new* local context that prevents finding the same property again.
                 // This is a simplification; a more robust solution would track the property being evaluated.
-                ExpressionEvaluator newEvaluator = new ExpressionEvaluator(null, this.documentContext, this.templateTable, this.evaluationDepth + 1, this.variableContextStack);
+                ExpressionEvaluator newEvaluator = new ExpressionEvaluator(null, this.documentContext, this.templateTable, this.currentNamespace, this.evaluationDepth + 1, this.variableContextStack);
                 return newEvaluator.evaluate(propertyExpr);
             }
         }
@@ -198,7 +210,7 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
         String propertyName = expr.property.getLexeme();
         Expression propertyExpr = findPropertyInNode(targetNode, propertyName);
         if (propertyExpr == null) return "0";
-        ExpressionEvaluator newEvaluator = new ExpressionEvaluator(targetNode, this.documentContext, this.templateTable, this.evaluationDepth + 1, this.variableContextStack);
+        ExpressionEvaluator newEvaluator = new ExpressionEvaluator(targetNode, this.documentContext, this.templateTable, this.currentNamespace, this.evaluationDepth + 1, this.variableContextStack);
         return newEvaluator.evaluate(propertyExpr);
     }
 
@@ -206,14 +218,20 @@ public class ExpressionEvaluator implements com.chtholly.chthl.ast.expr.Visitor<
     public Object visitCallExpr(CallExpr expr) {
         if (!(expr.callee instanceof VariableExpr)) return "";
         String templateName = ((VariableExpr) expr.callee).name.getLexeme();
-        Node template = this.templateTable.get(templateName);
+
+        // Resolve VarTemplateNode with namespace awareness
+        TemplateNode template = templateTable.getOrDefault(currentNamespace, Collections.emptyMap()).get(templateName);
+        if (template == null && !currentNamespace.equals(GLOBAL_NAMESPACE)) {
+            template = templateTable.getOrDefault(GLOBAL_NAMESPACE, Collections.emptyMap()).get(templateName);
+        }
+
         if (!(template instanceof VarTemplateNode)) return "";
         VarTemplateNode varTemplate = (VarTemplateNode) template;
         if (expr.arguments.size() != 1 || !(expr.arguments.get(0) instanceof VariableExpr)) return "";
         String varName = ((VariableExpr) expr.arguments.get(0)).name.getLexeme();
         Expression valueExpr = varTemplate.variables.get(varName);
         if (valueExpr == null) return "";
-        ExpressionEvaluator newEvaluator = new ExpressionEvaluator(null, this.documentContext, this.templateTable, this.evaluationDepth + 1, this.variableContextStack);
+        ExpressionEvaluator newEvaluator = new ExpressionEvaluator(null, this.documentContext, this.templateTable, this.currentNamespace, this.evaluationDepth + 1, this.variableContextStack);
         return newEvaluator.evaluate(valueExpr);
     }
 

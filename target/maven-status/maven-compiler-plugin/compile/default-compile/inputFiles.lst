@@ -27,6 +27,7 @@
 /app/src/main/java/com/chtholly/chthl/ast/template/TemplateUsageNode.java
 /app/src/main/java/com/chtholly/chthl/ast/StylePropertyNode.java
 /app/src/main/java/com/chtholly/chthl/ast/ConfigurationNode.java
+/app/src/main/java/com/chtholly/chthl/ast/NamespaceNode.java
 /app/src/main/java/com/chtholly/chthl/ast/template/TemplateNode.java
 /app/src/main/java/com/chtholly/chthl/ast/Visitor.java
 /app/src/main/java/com/chtholly/chthl/ast/expr/GlobalVariableExpr.java

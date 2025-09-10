@@ -29,11 +29,13 @@ class ExpressionEvaluatorTest {
             variables
         );
 
-        Map<String, TemplateNode> templateTable = new HashMap<>();
-        templateTable.put("Theme", varTemplate);
+        Map<String, Map<String, TemplateNode>> templateTable = new HashMap<>();
+        Map<String, TemplateNode> globalNamespace = new HashMap<>();
+        globalNamespace.put("Theme", varTemplate);
+        templateTable.put("__global__", globalNamespace);
 
         // 2. Create the evaluator
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(null, new ArrayList<>(), templateTable);
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(null, new ArrayList<>(), templateTable, "__global__");
 
         // 3. Create the expression to evaluate (&width)
         GlobalVariableExpr exprToEvaluate = new GlobalVariableExpr(new Token(TokenType.IDENTIFIER, "width", null, 1));

@@ -22,12 +22,11 @@ class CompilerEndToEndTest {
     private CompilationResult compile(String source) {
         CHTLParser parser = new CHTLParser(new CHTLLexer(source).scanTokens(), null);
         List<Node> ast = parser.getAst();
-        Map<String, com.chtholly.chthl.ast.template.TemplateNode> templateTable = parser.getTemplateTable();
 
         CHTLConfig config = new CHTLConfig();
         config.load(parser.getConfiguration());
 
-        CHTLGenerator generator = new CHTLGenerator(ast, templateTable, parser.getOriginTable(), config);
+        CHTLGenerator generator = new CHTLGenerator(ast, parser.getTemplateTable(), parser.getOriginTable(), config);
         return generator.generate();
     }
 

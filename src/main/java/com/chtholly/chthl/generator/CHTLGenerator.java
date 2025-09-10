@@ -18,15 +18,18 @@ public class CHTLGenerator implements Visitor<String> {
         "link", "meta", "param", "source", "track", "wbr"
     );
 
+    private static final String GLOBAL_NAMESPACE = "__global__";
+
     private final StringBuilder globalCssBuilder;
     private final List<Node> rootNodes;
-    private final Map<String, TemplateNode> templateTable;
-    private final Map<String, OriginNode> originTable;
+    private final Map<String, Map<String, TemplateNode>> templateTable;
+    private final Map<String, Map<String, OriginNode>> originTable;
     private final TemplateSpecializer specializer;
     private final Deque<Map<String, UnitValue>> variableContextStack = new ArrayDeque<>();
+    private String currentNamespace = GLOBAL_NAMESPACE;
     private ElementNode currentElement = null;
 
-    public CHTLGenerator(List<Node> rootNodes, Map<String, TemplateNode> templateTable, Map<String, OriginNode> originTable, com.chtholly.chthl.CHTLConfig config) {
+    public CHTLGenerator(List<Node> rootNodes, Map<String, Map<String, TemplateNode>> templateTable, Map<String, Map<String, OriginNode>> originTable, com.chtholly.chthl.CHTLConfig config) {
         this.globalCssBuilder = new StringBuilder();
         this.rootNodes = rootNodes;
         this.templateTable = templateTable;
@@ -128,9 +131,45 @@ public class CHTLGenerator implements Visitor<String> {
     }
 
     @Override
+    public String visitNamespaceNode(NamespaceNode node) {
+        String previousNamespace = this.currentNamespace;
+        this.currentNamespace = node.name;
+        StringBuilder builder = new StringBuilder();
+        for (Node child : node.children) {
+            builder.append(child.accept(this));
+        }
+        this.currentNamespace = previousNamespace;
+        return builder.toString();
+    }
+
+    private TemplateNode resolveTemplate(TemplateUsageNode usageNode) {
+        String name = usageNode.name.getLexeme();
+        if (usageNode.fromNamespace != null) {
+            String namespace = usageNode.fromNamespace.getLexeme();
+            return templateTable.getOrDefault(namespace, Collections.emptyMap()).get(name);
+        } else {
+            TemplateNode node = templateTable.getOrDefault(currentNamespace, Collections.emptyMap()).get(name);
+            if (node != null) return node;
+            return templateTable.getOrDefault(GLOBAL_NAMESPACE, Collections.emptyMap()).get(name);
+        }
+    }
+
+    private OriginNode resolveOrigin(OriginNode usageNode) {
+        String name = usageNode.name.getLexeme();
+        if (usageNode.fromNamespace != null) {
+            String namespace = usageNode.fromNamespace.getLexeme();
+            return originTable.getOrDefault(namespace, Collections.emptyMap()).get(name);
+        } else {
+            OriginNode node = originTable.getOrDefault(currentNamespace, Collections.emptyMap()).get(name);
+            if (node != null) return node;
+            return originTable.getOrDefault(GLOBAL_NAMESPACE, Collections.emptyMap()).get(name);
+        }
+    }
+
+    @Override
     public String visitOriginNode(OriginNode node) {
         if (node.isUsage) {
-            OriginNode definition = originTable.get(node.name.getLexeme());
+            OriginNode definition = resolveOrigin(node);
             return (definition != null) ? definition.content : "";
         }
         return node.content;
@@ -163,8 +202,11 @@ public class CHTLGenerator implements Visitor<String> {
 
     @Override
     public String visitTemplateUsageNode(TemplateUsageNode node) {
-        TemplateNode templateDef = this.templateTable.get(node.name.getLexeme());
-        if (templateDef == null) return "";
+        TemplateNode templateDef = resolveTemplate(node);
+        if (templateDef == null) {
+            System.err.println("Warning: Template '" + node.name.getLexeme() + "' not found.");
+            return "";
+        }
 
         boolean hasVariableSpecialization = node.customization != null && node.customization.modifications.stream().anyMatch(m -> m instanceof SetNode);
 
@@ -179,7 +221,7 @@ public class CHTLGenerator implements Visitor<String> {
                     evalStack.push(specializedVariables);
                     evalStack.addAll(this.variableContextStack);
 
-                    ExpressionEvaluator setEvaluator = new ExpressionEvaluator(this.currentElement, this.rootNodes, this.templateTable, evalStack);
+                    ExpressionEvaluator setEvaluator = new ExpressionEvaluator(this.currentElement, this.rootNodes, this.templateTable, this.currentNamespace, evalStack);
 
                     Object value = setEvaluator.evaluate(setNode.value);
                     if (value instanceof UnitValue) {
@@ -220,7 +262,7 @@ public class CHTLGenerator implements Visitor<String> {
         if (bodyNode instanceof StylePropertyNode) {
             StylePropertyNode prop = (StylePropertyNode) bodyNode;
             if (prop.value == null) return "";
-            ExpressionEvaluator evaluator = new ExpressionEvaluator(this.currentElement, this.rootNodes, this.templateTable, this.variableContextStack);
+            ExpressionEvaluator evaluator = new ExpressionEvaluator(this.currentElement, this.rootNodes, this.templateTable, this.currentNamespace, this.variableContextStack);
             Object value = evaluator.evaluate(prop.value);
             return prop.key + ": " + value.toString() + ";";
         } else if (bodyNode instanceof TemplateUsageNode) {

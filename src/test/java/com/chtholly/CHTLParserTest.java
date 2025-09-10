@@ -165,10 +165,15 @@ class CHTLParserTest {
         String input = "[Template] @Style DefaultText { color: black; line-height: 1.6; }";
         CHTLParser parser = new CHTLParser(new CHTLLexer(input).scanTokens(), null);
         parser.getAst(); // This runs the parsing
-        Map<String, TemplateNode> table = parser.getTemplateTable();
-        assertEquals(1, table.size());
-        assertTrue(table.containsKey("DefaultText"));
-        TemplateNode node = table.get("DefaultText");
+        Map<String, Map<String, TemplateNode>> table = parser.getTemplateTable();
+
+        // Check that the template was added to the global namespace
+        Map<String, TemplateNode> globalNamespace = table.get("__global__");
+        assertNotNull(globalNamespace);
+        assertEquals(1, globalNamespace.size());
+        assertTrue(globalNamespace.containsKey("DefaultText"));
+
+        TemplateNode node = globalNamespace.get("DefaultText");
         assertTrue(node instanceof StyleTemplateNode);
         StyleTemplateNode styleTemplate = (StyleTemplateNode) node;
         assertEquals(2, styleTemplate.body.size());
