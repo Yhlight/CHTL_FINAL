@@ -63,6 +63,7 @@ TokenType checkKeyword(const std::string& text) {
     if (text == "text") return TokenType::TOKEN_KEYWORD_TEXT;
     if (text == "from") return TokenType::KEYWORD_FROM;
     if (text == "as") return TokenType::KEYWORD_AS;
+    if (text == "delete") return TokenType::KEYWORD_DELETE;
     return TokenType::TOKEN_IDENTIFIER;
 }
 

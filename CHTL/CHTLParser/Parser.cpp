@@ -186,7 +186,14 @@ AstNodePtr Parser::parseCustomNode() {
     if (type == TemplateType::STYLE) {
         while(check(TokenType::TOKEN_IDENTIFIER) || check(TokenType::TOKEN_AT)) {
             if (check(TokenType::TOKEN_IDENTIFIER)) {
-                parseProperties(node->style_properties);
+                // Check for valueless property vs. property with value
+                if (peek().type == TokenType::TOKEN_SEMICOLON) {
+                    node->valueless_style_properties.push_back(currentToken.lexeme);
+                    advance(); // consume identifier
+                    advance(); // consume semicolon
+                } else {
+                    parseProperties(node->style_properties);
+                }
             } else if (check(TokenType::TOKEN_AT)) {
                 node->inherited_templates.push_back(
                     std::unique_ptr<TemplateUsageNode>(dynamic_cast<TemplateUsageNode*>(parseTemplateUsageNode().release()))
@@ -284,7 +291,7 @@ AstNodePtr Parser::parseTemplateNode() {
 AstNodePtr Parser::parseTemplateUsageNode() {
     consume(TokenType::TOKEN_AT, "Expect '@' keyword for template usage.");
     consume(TokenType::TOKEN_IDENTIFIER, "Expect template type.");
-     std::string typeStr = previousToken.lexeme;
+    std::string typeStr = previousToken.lexeme;
 
     TemplateType type;
     if (typeStr == "Style") type = TemplateType::STYLE;
@@ -294,7 +301,31 @@ AstNodePtr Parser::parseTemplateUsageNode() {
 
     consume(TokenType::TOKEN_IDENTIFIER, "Expect template name.");
     auto node = std::make_unique<TemplateUsageNode>(previousToken.lexeme, type);
-    consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after template usage.");
+
+    // Check for optional specialization block
+    if (match(TokenType::TOKEN_LBRACE)) {
+        while (!check(TokenType::TOKEN_RBRACE) && !check(TokenType::TOKEN_EOF)) {
+            if (match(TokenType::KEYWORD_DELETE)) {
+                // Handle `delete prop;` or `delete @Style Other;`
+                if (match(TokenType::TOKEN_AT)) {
+                    consume(TokenType::TOKEN_IDENTIFIER, "Expect template type after @delete.");
+                    consume(TokenType::TOKEN_IDENTIFIER, "Expect template name after @delete type.");
+                    node->deleted_inherited_templates.push_back(previousToken.lexeme);
+                } else {
+                    consume(TokenType::TOKEN_IDENTIFIER, "Expect property name after delete.");
+                    node->deleted_properties.push_back(previousToken.lexeme);
+                }
+                consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after delete statement.");
+            } else {
+                // Handle property overrides
+                parseProperties(node->property_overrides);
+            }
+        }
+        consume(TokenType::TOKEN_RBRACE, "Expect '}' to end specialization block.");
+    } else {
+        consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after template usage.");
+    }
+
     return node;
 }
 

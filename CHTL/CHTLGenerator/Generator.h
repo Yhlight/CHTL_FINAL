@@ -23,9 +23,11 @@ private:
     std::stringstream output;
     std::map<std::string, ElementNode*> symbol_map;
     std::map<std::string, TemplateNode*> template_map;
+    std::map<std::string, CustomNode*> custom_map;
 
     void buildSymbolMap(const AstNodePtr& node);
     void buildTemplateMap(const AstNodePtr& node);
+    void buildCustomMap(const AstNodePtr& node);
     void generateNode(const AstNodePtr& node, ElementNode* context = nullptr);
 
     // Node visitors
@@ -36,6 +38,7 @@ private:
     void visitNamespaceNode(NamespaceNode* node);
     void visitTemplateUsageNode(TemplateUsageNode* node, ElementNode* context);
     void applyStyleTemplate(ElementNode* context, TemplateNode* tmpl);
+    void applyCustomStyle(ElementNode* context, CustomNode* custom, TemplateUsageNode* usage);
 
     // Expression generator
     std::string generateExpression(const std::unique_ptr<ExprNode>& expr, ElementNode* context);

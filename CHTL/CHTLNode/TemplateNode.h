@@ -28,13 +28,16 @@ public:
 };
 
 // Represents the usage of a template, e.g., `@Style MyStyles;`
+// This node is now also used for Custom usage, as the syntax is similar
 class TemplateUsageNode : public BaseNode {
 public:
     TemplateType template_type;
     std::string name;
 
-    // For specialization later
-    // NodeList specializations;
+    // For specialization
+    std::vector<std::pair<std::string, std::unique_ptr<ExprNode>>> property_overrides;
+    std::vector<std::string> deleted_properties;
+    std::vector<std::string> deleted_inherited_templates;
 
     TemplateUsageNode(const std::string& name, TemplateType type) : name(name), template_type(type) {}
 };

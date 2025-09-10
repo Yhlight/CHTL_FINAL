@@ -58,8 +58,22 @@ void printAst(const AstNodePtr& node, int indent) {
         }
     } else if (auto* custom = dynamic_cast<CustomNode*>(node.get())) {
         std::cout << indentation << "CustomDef: " << custom->name << std::endl;
+        for (const auto& prop : custom->valueless_style_properties) {
+            std::cout << indentation << "  Valueless Prop: " << prop << std::endl;
+        }
+        for (const auto& prop : custom->style_properties) {
+            std::cout << indentation << "  Style Property: " << prop.first << ":" << std::endl;
+            printExprNode(prop.second, indent + 2);
+        }
     } else if (auto* usage = dynamic_cast<TemplateUsageNode*>(node.get())) {
         std::cout << indentation << "TemplateUsage: " << usage->name << std::endl;
+        for (const auto& prop : usage->property_overrides) {
+            std::cout << indentation << "  Override Prop: " << prop.first << ":" << std::endl;
+            printExprNode(prop.second, indent + 2);
+        }
+        for (const auto& del : usage->deleted_properties) {
+            std::cout << indentation << "  Delete Prop: " << del << std::endl;
+        }
     } else {
         std::cout << indentation << "Unknown Node" << std::endl;
     }

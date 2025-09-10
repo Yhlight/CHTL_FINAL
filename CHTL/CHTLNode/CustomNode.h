@@ -16,6 +16,7 @@ public:
     std::string name;
 
     // Content depends on the type
+    std::vector<std::string> valueless_style_properties;
     std::vector<std::pair<std::string, std::unique_ptr<ExprNode>>> style_properties;
     NodeList element_children;
     std::map<std::string, std::string> variables;

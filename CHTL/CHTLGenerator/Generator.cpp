@@ -4,6 +4,10 @@
 #include <stdexcept>
 #include <cmath>
 
+void applyStyleTemplate(ElementNode* context, TemplateNode* tmpl, std::map<std::string, TemplateNode*>& template_map, Generator* generator);
+void applyCustomStyle(ElementNode* context, CustomNode* custom, TemplateUsageNode* usage, std::map<std::string, TemplateNode*>& template_map, std::map<std::string, CustomNode*>& custom_map, Generator* generator);
+
+
 Generator::Generator(const NodeList& ast) : ast(ast) {}
 
 // --- Expression Generation & Evaluation ---
@@ -57,7 +61,7 @@ std::string Generator::generateExpression(const std::unique_ptr<ExprNode>& expr,
         if (template_map.count(var->group_name.lexeme)) {
             TemplateNode* tmpl = template_map[var->group_name.lexeme];
             if (tmpl->template_type == TemplateType::VAR && tmpl->variables.count(var->var_name.lexeme)) {
-                return tmpl->variables[var->var_name.lexeme];
+                return tmpl->variables.at(var->var_name.lexeme);
             }
         }
         return "/* CHTL: Var not found */";
@@ -115,14 +119,22 @@ void Generator::buildTemplateMap(const AstNodePtr& node) {
     }
 }
 
+void Generator::buildCustomMap(const AstNodePtr& node) {
+    if (!node) return;
+    if (auto* custom = dynamic_cast<CustomNode*>(node.get())) {
+        custom_map[custom->name] = custom;
+    } else if (auto* ns = dynamic_cast<NamespaceNode*>(node.get())) {
+        for (const auto& child : ns->children) { buildCustomMap(child); }
+    }
+}
+
+
 void Generator::applyStyleTemplate(ElementNode* context, TemplateNode* tmpl) {
-    // Recursively apply inherited templates first
     for (const auto& inherited : tmpl->inherited_templates) {
         if (template_map.count(inherited->name)) {
             applyStyleTemplate(context, template_map[inherited->name]);
         }
     }
-    // Apply own properties
     for (const auto& prop : tmpl->style_properties) {
         context->style_properties.push_back(std::make_pair(prop.first, prop.second->clone()));
     }
@@ -132,6 +144,7 @@ void Generator::applyStyleTemplate(ElementNode* context, TemplateNode* tmpl) {
 std::string Generator::generate() {
     for (const auto& node : ast) { buildSymbolMap(node); }
     for (const auto& node : ast) { buildTemplateMap(node); }
+    for (const auto& node : ast) { buildCustomMap(node); }
     for (const auto& node : ast) { generateNode(node); }
     return output.str();
 }
@@ -144,19 +157,21 @@ void Generator::generateNode(const AstNodePtr& node, ElementNode* context) {
     else if (auto* origin = dynamic_cast<OriginNode*>(node.get())) { visitOriginNode(origin); }
     else if (auto* ns = dynamic_cast<NamespaceNode*>(node.get())) { visitNamespaceNode(ns); }
     else if (auto* usage = dynamic_cast<TemplateUsageNode*>(node.get())) { visitTemplateUsageNode(usage, context); }
-    // TemplateNode and CustomNode definitions are not generated directly
 }
 
 void Generator::visitElementNode(ElementNode* node) {
-    // Pre-process to expand all style templates into the element's property list
+    // Pre-process to expand all style templates and customs into the element's property list
     for (const auto& child : node->children) {
         if (auto* usage = dynamic_cast<TemplateUsageNode*>(child.get())) {
-            if (usage->template_type == TemplateType::STYLE && template_map.count(usage->name)) {
-                applyStyleTemplate(node, template_map[usage->name]);
+            if (usage->template_type == TemplateType::STYLE) {
+                if (template_map.count(usage->name)) {
+                    applyStyleTemplate(node, template_map[usage->name]);
+                } else if (custom_map.count(usage->name)) {
+                    applyCustomStyle(node, custom_map[usage->name], usage);
+                }
             }
         }
     }
-
 
     output << "<" << node->tagName;
     for (const auto& attr : node->simple_attributes) {
@@ -175,11 +190,9 @@ void Generator::visitElementNode(ElementNode* node) {
 
     output << ">";
     for (const auto& child : node->children) {
-        // Skip template usage nodes as they are already processed or handled by visitTemplateUsageNode
         if (!dynamic_cast<TemplateUsageNode*>(child.get())) {
             generateNode(child, node);
         } else {
-            // Handle non-style template usage
             visitTemplateUsageNode(dynamic_cast<TemplateUsageNode*>(child.get()), node);
         }
     }
@@ -198,9 +211,45 @@ void Generator::visitTemplateUsageNode(TemplateUsageNode* node, ElementNode* con
         TemplateNode* tmpl = template_map[node->name];
         if (tmpl->template_type == TemplateType::ELEMENT) {
             for (const auto& child : tmpl->element_children) {
-                generateNode(child, context); // Pass context for nested style resolutions
+                generateNode(child, context);
             }
         }
-        // Style templates are handled by the parent element in visitElementNode
+    }
+    // Style templates and customs are handled by the parent element in visitElementNode
+}
+
+void Generator::applyCustomStyle(ElementNode* context, CustomNode* custom, TemplateUsageNode* usage) {
+    std::map<std::string, std::unique_ptr<ExprNode>> specialized_props;
+
+    // 1. Handle inheritance first
+    for (const auto& inherited : custom->inherited_templates) {
+        if (template_map.count(inherited->name)) {
+            // This is still not quite right. A custom can inherit from another custom.
+            // For now, we only handle inheriting from templates.
+            TemplateNode* base_tmpl = template_map[inherited->name];
+            for (const auto& p : base_tmpl->style_properties) {
+                specialized_props[p.first] = p.second->clone();
+            }
+        }
+    }
+
+    // 2. Add base properties from the custom definition
+    for (const auto& p : custom->style_properties) {
+        specialized_props[p.first] = p.second->clone();
+    }
+
+    // 3. Handle deletions
+    for (const auto& del_prop : usage->deleted_properties) {
+        specialized_props.erase(del_prop);
+    }
+
+    // 4. Handle overrides and valueless properties
+    for (const auto& override_prop : usage->property_overrides) {
+        specialized_props[override_prop.first] = override_prop.second->clone();
+    }
+
+    // 5. Add the final properties to the element
+    for(auto& prop_pair : specialized_props) {
+        context->style_properties.push_back(std::make_pair(prop_pair.first, std::move(prop_pair.second)));
     }
 }

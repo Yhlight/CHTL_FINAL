@@ -1,49 +1,31 @@
-// CHTL Final Integration Test
+// CHTL Final Integration Test for Templates/Customs
 
-[Namespace] MyWebApp {
+[Template] @Var Theme {
+    textColor: "#333";
+    brandColor: "blue";
+}
 
-    [Template] @Var Theme {
-        brandColor: "#007bff";
-        darkText: "#343a40";
-    }
+[Template] @Style Base {
+    font-family: "sans-serif";
+    color: Theme(textColor);
+}
 
-    [Template] @Style BaseButton {
-        padding: "10px 15px";
-        border: "none";
-        border-radius: 5px;
-        color: Theme(darkText);
-    }
+[Custom] @Style Button {
+    @Style Base;
+    padding;
+    border: "1px solid #ccc";
+    background-color: "white";
+}
 
-    [Template] @Style PrimaryButton {
-        @Style BaseButton;
-        background-color: Theme(brandColor);
-    }
-
-    [Custom] @Element SpecialCard {
-        // Not implemented by generator yet, but should parse
-    }
-
-    html {
-        body {
-            div {
-                id = "header";
-                padding: 20;
-
-                button {
-                    @Style PrimaryButton;
-                    text { "Click Me" }
-                }
+html {
+    body {
+        button {
+            @Style Button {
+                padding: "10px 20px";
+                delete border;
+                background-color: Theme(brandColor);
             }
-
-            div {
-                width: #header.padding * 10; // 20 * 10 = 200
-                height: 150;
-                background-color: width > 180 ? "green" : "red";
-            }
-
-            [Origin] @Html {
-                <p>Raw HTML.</p>
-            }
+            text { "Click Me!" }
         }
     }
 }
