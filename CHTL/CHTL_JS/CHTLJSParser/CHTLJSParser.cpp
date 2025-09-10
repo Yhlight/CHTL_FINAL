@@ -1163,26 +1163,19 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::createMemberExpressionNode(std::sh
 // 其他未实现的方法
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseCHTLJSSyntax() { return nullptr; }
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseDeclarationSyntax(const std::string& keyword) {
-    if (keyword == "const") {
-        return parseVariableDeclaration();
-    } else if (keyword == "let") {
-        return parseVariableDeclaration();
-    } else if (keyword == "var") {
-        return parseVariableDeclaration();
-    } else if (keyword == "function") {
-        return parseFunctionDeclaration();
-    } else if (keyword == "class") {
-        return parseClassDeclaration();
-    } else if (keyword == "interface") {
-        return parseInterfaceDeclaration();
-    } else if (keyword == "enum") {
-        return parseEnumDeclaration();
-    } else if (keyword == "namespace") {
-        return parseNamespaceDeclaration();
-    } else if (keyword == "module") {
-        return parseModuleDeclaration();
-    } else if (keyword == "import") {
-        return parseImportDeclaration();
+    // CHTL JS只支持特定的声明式语法
+    if (keyword == "listen") {
+        return parseListenDeclaration();
+    } else if (keyword == "delegate") {
+        return parseDelegateDeclaration();
+    } else if (keyword == "animate") {
+        return parseAnimateDeclaration();
+    } else if (keyword == "router") {
+        return parseRouterDeclaration();
+    } else if (keyword == "fileloader") {
+        return parseFileloaderDeclaration();
+    } else if (keyword == "util") {
+        return parseUtilDeclaration();
     }
     
     return nullptr;
@@ -1229,16 +1222,8 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseOptionalPairs() {
     return optionalPairs;
 }
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseChainExpression() {
-    if (!isChainSyntaxStart()) {
-        return nullptr;
-    }
-    
-    auto elements = parseChainElements();
-    if (elements.empty()) {
-        return nullptr;
-    }
-    
-    return createChainExpressionNode(elements);
+    // CHTL JS的链式访问通过->运算符实现，在parseMemberExpression中处理
+    return nullptr;
 }
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseUnquotedLiteral() {
     if (!isUnquotedLiteralStart()) {
@@ -1252,141 +1237,21 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseUnquotedLiteral() {
     
     return createNode(CHTLJSNodeType::LITERAL, value);
 }
-std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseParameterList() {
-    std::vector<std::shared_ptr<CHTLJSBaseNode>> parameters;
-    
-    if (!match(CHTLJSTokenType::LEFT_PAREN)) {
-        return parameters;
-    }
-    
-    advance(); // 跳过 (
-    
-    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_PAREN)) {
-        skipWhitespace();
-        
-        if (match(CHTLJSTokenType::RIGHT_PAREN)) {
-            break;
-        }
-        
-        auto parameter = parseExpression();
-        if (parameter) {
-            parameters.push_back(parameter);
-        }
-        
-        if (match(CHTLJSTokenType::COMMA)) {
-            advance(); // 跳过逗号
-        }
-        
-        skipWhitespace();
-    }
-    
-    if (match(CHTLJSTokenType::RIGHT_PAREN)) {
-        advance(); // 跳过 )
-    }
-    
-    return parameters;
+std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseParameterList() { 
+    // CHTL JS不支持参数列表，这些是JS的功能
+    return {}; 
 }
-std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseArgumentList() {
-    std::vector<std::shared_ptr<CHTLJSBaseNode>> arguments;
-    
-    if (!match(CHTLJSTokenType::LEFT_PAREN)) {
-        return arguments;
-    }
-    
-    advance(); // 跳过 (
-    
-    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_PAREN)) {
-        skipWhitespace();
-        
-        if (match(CHTLJSTokenType::RIGHT_PAREN)) {
-            break;
-        }
-        
-        auto argument = parseExpression();
-        if (argument) {
-            arguments.push_back(argument);
-        }
-        
-        if (match(CHTLJSTokenType::COMMA)) {
-            advance(); // 跳过逗号
-        }
-        
-        skipWhitespace();
-    }
-    
-    if (match(CHTLJSTokenType::RIGHT_PAREN)) {
-        advance(); // 跳过 )
-    }
-    
-    return arguments;
+std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseArgumentList() { 
+    // CHTL JS不支持参数列表，这些是JS的功能
+    return {}; 
 }
-std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseArrayElements() {
-    std::vector<std::shared_ptr<CHTLJSBaseNode>> elements;
-    
-    if (!match(CHTLJSTokenType::LEFT_BRACKET)) {
-        return elements;
-    }
-    
-    advance(); // 跳过 [
-    
-    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_BRACKET)) {
-        skipWhitespace();
-        
-        if (match(CHTLJSTokenType::RIGHT_BRACKET)) {
-            break;
-        }
-        
-        auto element = parseExpression();
-        if (element) {
-            elements.push_back(element);
-        }
-        
-        if (match(CHTLJSTokenType::COMMA)) {
-            advance(); // 跳过逗号
-        }
-        
-        skipWhitespace();
-    }
-    
-    if (match(CHTLJSTokenType::RIGHT_BRACKET)) {
-        advance(); // 跳过 ]
-    }
-    
-    return elements;
+std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseArrayElements() { 
+    // CHTL JS不支持数组，这些是JS的功能
+    return {}; 
 }
-std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseObjectProperties() {
-    std::vector<std::shared_ptr<CHTLJSBaseNode>> properties;
-    
-    if (!match(CHTLJSTokenType::LEFT_BRACE)) {
-        return properties;
-    }
-    
-    advance(); // 跳过 {
-    
-    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_BRACE)) {
-        skipWhitespace();
-        
-        if (match(CHTLJSTokenType::RIGHT_BRACE)) {
-            break;
-        }
-        
-        auto property = parseKeyValuePair();
-        if (property) {
-            properties.push_back(property);
-        }
-        
-        if (match(CHTLJSTokenType::COMMA)) {
-            advance(); // 跳过逗号
-        }
-        
-        skipWhitespace();
-    }
-    
-    if (match(CHTLJSTokenType::RIGHT_BRACE)) {
-        advance(); // 跳过 }
-    }
-    
-    return properties;
+std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseObjectProperties() { 
+    // CHTL JS的对象属性解析由parseUnorderedPairList处理
+    return parseUnorderedPairList(); 
 }
 std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseKeyValuePairList() {
     std::vector<std::shared_ptr<CHTLJSBaseNode>> pairs;
@@ -1860,11 +1725,8 @@ std::string CHTLJSParser::parseUnquotedLiteralValue() {
 }
 
 bool CHTLJSParser::isValidUnquotedLiteral(const std::string& literal) const {
-    // 检查无修饰字面量是否有效
-    return !literal.empty() && 
-           std::all_of(literal.begin(), literal.end(), [](char c) {
-               return std::isalnum(c) || c == '_' || c == '-' || c == '.' || c == ':';
-           });
+    // CHTL JS的无修饰字面量验证
+    return !literal.empty();
 }
 bool CHTLJSParser::isChainSyntaxStart() const {
     auto token = getCurrentToken();
