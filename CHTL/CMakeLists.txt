@@ -178,6 +178,7 @@ add_executable(chtl_compiler
     ${UTIL_SOURCES}
     ${SCANNER_SOURCES}
     ${COMPILER_SOURCES}
+    ${OFFICIAL_MODULE_SOURCES}
 )
 
 # 创建CLI工具
@@ -188,6 +189,7 @@ add_executable(chtl_cli
     ${UTIL_SOURCES}
     ${SCANNER_SOURCES}
     ${COMPILER_SOURCES}
+    ${OFFICIAL_MODULE_SOURCES}
 )
 
 # 链接库
@@ -196,6 +198,13 @@ target_link_libraries(chtl_cli)
 
 # 测试
 enable_testing()
+
+# 官方模块
+set(OFFICIAL_MODULE_SOURCES
+    OfficialModules/ChthollyModule/ChthollyModule.cpp
+    OfficialModules/YuigahamaModule/YuigahamaModule.cpp
+    OfficialModules/OfficialModuleManager.cpp
+)
 
 # 测试系统
 set(TEST_SOURCES
@@ -214,6 +223,7 @@ add_executable(chtl_test_system
     ${UTIL_SOURCES}
     ${SCANNER_SOURCES}
     ${COMPILER_SOURCES}
+    ${OFFICIAL_MODULE_SOURCES}
 )
 
 # 链接库
