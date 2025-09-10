@@ -250,6 +250,114 @@ src/ast/ast_node.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/ast/ast_node.cpp.s
 .PHONY : src/ast/ast_node.cpp.s
 
+src/chtl_js/chtl_js_ast.o: src/chtl_js/chtl_js_ast.cpp.o
+.PHONY : src/chtl_js/chtl_js_ast.o
+
+# target to build an object file
+src/chtl_js/chtl_js_ast.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/chtl_js/chtl_js_ast.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/chtl_js/chtl_js_ast.cpp.o
+.PHONY : src/chtl_js/chtl_js_ast.cpp.o
+
+src/chtl_js/chtl_js_ast.i: src/chtl_js/chtl_js_ast.cpp.i
+.PHONY : src/chtl_js/chtl_js_ast.i
+
+# target to preprocess a source file
+src/chtl_js/chtl_js_ast.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/chtl_js/chtl_js_ast.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/chtl_js/chtl_js_ast.cpp.i
+.PHONY : src/chtl_js/chtl_js_ast.cpp.i
+
+src/chtl_js/chtl_js_ast.s: src/chtl_js/chtl_js_ast.cpp.s
+.PHONY : src/chtl_js/chtl_js_ast.s
+
+# target to generate assembly for a file
+src/chtl_js/chtl_js_ast.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/chtl_js/chtl_js_ast.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/chtl_js/chtl_js_ast.cpp.s
+.PHONY : src/chtl_js/chtl_js_ast.cpp.s
+
+src/chtl_js/chtl_js_compiler.o: src/chtl_js/chtl_js_compiler.cpp.o
+.PHONY : src/chtl_js/chtl_js_compiler.o
+
+# target to build an object file
+src/chtl_js/chtl_js_compiler.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/chtl_js/chtl_js_compiler.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/chtl_js/chtl_js_compiler.cpp.o
+.PHONY : src/chtl_js/chtl_js_compiler.cpp.o
+
+src/chtl_js/chtl_js_compiler.i: src/chtl_js/chtl_js_compiler.cpp.i
+.PHONY : src/chtl_js/chtl_js_compiler.i
+
+# target to preprocess a source file
+src/chtl_js/chtl_js_compiler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/chtl_js/chtl_js_compiler.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/chtl_js/chtl_js_compiler.cpp.i
+.PHONY : src/chtl_js/chtl_js_compiler.cpp.i
+
+src/chtl_js/chtl_js_compiler.s: src/chtl_js/chtl_js_compiler.cpp.s
+.PHONY : src/chtl_js/chtl_js_compiler.s
+
+# target to generate assembly for a file
+src/chtl_js/chtl_js_compiler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/chtl_js/chtl_js_compiler.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/chtl_js/chtl_js_compiler.cpp.s
+.PHONY : src/chtl_js/chtl_js_compiler.cpp.s
+
+src/chtl_js/chtl_js_lexer.o: src/chtl_js/chtl_js_lexer.cpp.o
+.PHONY : src/chtl_js/chtl_js_lexer.o
+
+# target to build an object file
+src/chtl_js/chtl_js_lexer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/chtl_js/chtl_js_lexer.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/chtl_js/chtl_js_lexer.cpp.o
+.PHONY : src/chtl_js/chtl_js_lexer.cpp.o
+
+src/chtl_js/chtl_js_lexer.i: src/chtl_js/chtl_js_lexer.cpp.i
+.PHONY : src/chtl_js/chtl_js_lexer.i
+
+# target to preprocess a source file
+src/chtl_js/chtl_js_lexer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/chtl_js/chtl_js_lexer.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/chtl_js/chtl_js_lexer.cpp.i
+.PHONY : src/chtl_js/chtl_js_lexer.cpp.i
+
+src/chtl_js/chtl_js_lexer.s: src/chtl_js/chtl_js_lexer.cpp.s
+.PHONY : src/chtl_js/chtl_js_lexer.s
+
+# target to generate assembly for a file
+src/chtl_js/chtl_js_lexer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/chtl_js/chtl_js_lexer.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/chtl_js/chtl_js_lexer.cpp.s
+.PHONY : src/chtl_js/chtl_js_lexer.cpp.s
+
+src/chtl_js/chtl_js_parser.o: src/chtl_js/chtl_js_parser.cpp.o
+.PHONY : src/chtl_js/chtl_js_parser.o
+
+# target to build an object file
+src/chtl_js/chtl_js_parser.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/chtl_js/chtl_js_parser.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/chtl_js/chtl_js_parser.cpp.o
+.PHONY : src/chtl_js/chtl_js_parser.cpp.o
+
+src/chtl_js/chtl_js_parser.i: src/chtl_js/chtl_js_parser.cpp.i
+.PHONY : src/chtl_js/chtl_js_parser.i
+
+# target to preprocess a source file
+src/chtl_js/chtl_js_parser.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/chtl_js/chtl_js_parser.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/chtl_js/chtl_js_parser.cpp.i
+.PHONY : src/chtl_js/chtl_js_parser.cpp.i
+
+src/chtl_js/chtl_js_parser.s: src/chtl_js/chtl_js_parser.cpp.s
+.PHONY : src/chtl_js/chtl_js_parser.s
+
+# target to generate assembly for a file
+src/chtl_js/chtl_js_parser.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/chtl_js/chtl_js_parser.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/chtl_js/chtl_js_parser.cpp.s
+.PHONY : src/chtl_js/chtl_js_parser.cpp.s
+
 src/generator/code_generator.o: src/generator/code_generator.cpp.o
 .PHONY : src/generator/code_generator.o
 
@@ -540,6 +648,18 @@ help:
 	@echo "... src/ast/ast_node.o"
 	@echo "... src/ast/ast_node.i"
 	@echo "... src/ast/ast_node.s"
+	@echo "... src/chtl_js/chtl_js_ast.o"
+	@echo "... src/chtl_js/chtl_js_ast.i"
+	@echo "... src/chtl_js/chtl_js_ast.s"
+	@echo "... src/chtl_js/chtl_js_compiler.o"
+	@echo "... src/chtl_js/chtl_js_compiler.i"
+	@echo "... src/chtl_js/chtl_js_compiler.s"
+	@echo "... src/chtl_js/chtl_js_lexer.o"
+	@echo "... src/chtl_js/chtl_js_lexer.i"
+	@echo "... src/chtl_js/chtl_js_lexer.s"
+	@echo "... src/chtl_js/chtl_js_parser.o"
+	@echo "... src/chtl_js/chtl_js_parser.i"
+	@echo "... src/chtl_js/chtl_js_parser.s"
 	@echo "... src/generator/code_generator.o"
 	@echo "... src/generator/code_generator.i"
 	@echo "... src/generator/code_generator.s"

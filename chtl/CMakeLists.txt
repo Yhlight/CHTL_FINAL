@@ -30,6 +30,18 @@ set(SOURCES
     src/style/style_processor.cpp
     src/import/import_manager.cpp
     src/generator/code_generator.cpp
+    src/chtl_js/chtl_js_lexer.cpp
+    src/chtl_js/chtl_js_parser.cpp
+    src/chtl_js/chtl_js_ast.cpp
+    src/chtl_js/chtl_js_compiler.cpp
+    src/style/style_system.cpp
+    src/template/template_system.cpp
+    src/custom/custom_system.cpp
+    src/module/cmod_cjmod_system.cpp
+    src/constraint/constraint_system.cpp
+    src/config/config_system.cpp
+    src/use/use_syntax.cpp
+    src/origin/origin_embed.cpp
 )
 
 # Header files
@@ -44,6 +56,13 @@ set(HEADERS
     include/style/style_processor.h
     include/import/import_manager.h
     include/generator/code_generator.h
+    include/chtl/template_system.h
+    include/chtl/custom_system.h
+    include/chtl/cmod_cjmod_system.h
+    include/chtl/constraint_system.h
+    include/chtl/config_system.h
+    include/chtl/use_syntax.h
+    include/chtl/origin_embed.h
 )
 
 # Create executable

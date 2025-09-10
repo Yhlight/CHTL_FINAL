@@ -13,6 +13,10 @@ chtl: \
   CMakeFiles/chtl.dir/src/style/style_processor.cpp.o \
   CMakeFiles/chtl.dir/src/import/import_manager.cpp.o \
   CMakeFiles/chtl.dir/src/generator/code_generator.cpp.o \
+  CMakeFiles/chtl.dir/src/chtl_js/chtl_js_lexer.cpp.o \
+  CMakeFiles/chtl.dir/src/chtl_js/chtl_js_parser.cpp.o \
+  CMakeFiles/chtl.dir/src/chtl_js/chtl_js_ast.cpp.o \
+  CMakeFiles/chtl.dir/src/chtl_js/chtl_js_compiler.cpp.o \
   /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so \
   /lib/x86_64-linux-gnu/libm.so \
   /lib/x86_64-linux-gnu/libm.so \
@@ -68,6 +72,14 @@ CMakeFiles/chtl.dir/src/style/style_processor.cpp.o:
 CMakeFiles/chtl.dir/src/import/import_manager.cpp.o:
 
 CMakeFiles/chtl.dir/src/generator/code_generator.cpp.o:
+
+CMakeFiles/chtl.dir/src/chtl_js/chtl_js_lexer.cpp.o:
+
+CMakeFiles/chtl.dir/src/chtl_js/chtl_js_parser.cpp.o:
+
+CMakeFiles/chtl.dir/src/chtl_js/chtl_js_ast.cpp.o:
+
+CMakeFiles/chtl.dir/src/chtl_js/chtl_js_compiler.cpp.o:
 
 /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so:
 

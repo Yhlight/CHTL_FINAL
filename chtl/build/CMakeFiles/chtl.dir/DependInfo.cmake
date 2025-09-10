@@ -9,6 +9,10 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspace/chtl/src/ast/ast_node.cpp" "CMakeFiles/chtl.dir/src/ast/ast_node.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/ast/ast_node.cpp.o.d"
+  "/workspace/chtl/src/chtl_js/chtl_js_ast.cpp" "CMakeFiles/chtl.dir/src/chtl_js/chtl_js_ast.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/chtl_js/chtl_js_ast.cpp.o.d"
+  "/workspace/chtl/src/chtl_js/chtl_js_compiler.cpp" "CMakeFiles/chtl.dir/src/chtl_js/chtl_js_compiler.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/chtl_js/chtl_js_compiler.cpp.o.d"
+  "/workspace/chtl/src/chtl_js/chtl_js_lexer.cpp" "CMakeFiles/chtl.dir/src/chtl_js/chtl_js_lexer.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/chtl_js/chtl_js_lexer.cpp.o.d"
+  "/workspace/chtl/src/chtl_js/chtl_js_parser.cpp" "CMakeFiles/chtl.dir/src/chtl_js/chtl_js_parser.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/chtl_js/chtl_js_parser.cpp.o.d"
   "/workspace/chtl/src/generator/code_generator.cpp" "CMakeFiles/chtl.dir/src/generator/code_generator.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/generator/code_generator.cpp.o.d"
   "/workspace/chtl/src/import/import_manager.cpp" "CMakeFiles/chtl.dir/src/import/import_manager.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/import/import_manager.cpp.o.d"
   "/workspace/chtl/src/lexer/chtl_lexer.cpp" "CMakeFiles/chtl.dir/src/lexer/chtl_lexer.cpp.o" "gcc" "CMakeFiles/chtl.dir/src/lexer/chtl_lexer.cpp.o.d"
