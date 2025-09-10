@@ -39,36 +39,23 @@ bool CHTLJSToken::isOperator() const {
 
 bool CHTLJSToken::isKeyword() const {
     switch (type) {
-        case CHTLJSTokenType::IF:
-        case CHTLJSTokenType::ELSE:
-        case CHTLJSTokenType::FOR:
-        case CHTLJSTokenType::WHILE:
-        case CHTLJSTokenType::DO:
-        case CHTLJSTokenType::SWITCH:
-        case CHTLJSTokenType::CASE:
-        case CHTLJSTokenType::DEFAULT:
-        case CHTLJSTokenType::BREAK:
-        case CHTLJSTokenType::CONTINUE:
-        case CHTLJSTokenType::RETURN:
-        case CHTLJSTokenType::FUNCTION:
-        case CHTLJSTokenType::CONST:
-        case CHTLJSTokenType::LET:
-        case CHTLJSTokenType::VAR:
+        // 基本关键字（仅CHTL JS需要的）
         case CHTLJSTokenType::TRUE:
         case CHTLJSTokenType::FALSE:
         case CHTLJSTokenType::NULL_VALUE:
         case CHTLJSTokenType::UNDEFINED:
-        case CHTLJSTokenType::THIS:
-        case CHTLJSTokenType::NEW:
-        case CHTLJSTokenType::TYPEOF:
-        case CHTLJSTokenType::INSTANCEOF:
-        case CHTLJSTokenType::IN:
-        case CHTLJSTokenType::OF:
-        case CHTLJSTokenType::WITH:
-        case CHTLJSTokenType::TRY:
-        case CHTLJSTokenType::CATCH:
-        case CHTLJSTokenType::FINALLY:
-        case CHTLJSTokenType::THROW:
+        
+        // CHTL JS特有关键字
+        case CHTLJSTokenType::VIRTUAL_OBJECT:
+        case CHTLJSTokenType::LISTEN:
+        case CHTLJSTokenType::DELEGATE:
+        case CHTLJSTokenType::ANIMATE:
+        case CHTLJSTokenType::ROUTER:
+        case CHTLJSTokenType::FILELOADER:
+        case CHTLJSTokenType::INEVERAWAY:
+        case CHTLJSTokenType::UTIL:
+        case CHTLJSTokenType::THEN:
+        case CHTLJSTokenType::CHANGE:
             return true;
         default:
             return false;

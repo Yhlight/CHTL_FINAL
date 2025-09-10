@@ -22,80 +22,36 @@ void CHTLJSGlobalMap::initialize() {
 }
 
 void CHTLJSGlobalMap::initializeKeywords() {
-    // JavaScript关键字
-    addKeyword("if", CHTLJSTokenType::IF);
-    addKeyword("else", CHTLJSTokenType::ELSE);
-    addKeyword("for", CHTLJSTokenType::FOR);
-    addKeyword("while", CHTLJSTokenType::WHILE);
-    addKeyword("do", CHTLJSTokenType::DO);
-    addKeyword("switch", CHTLJSTokenType::SWITCH);
-    addKeyword("case", CHTLJSTokenType::CASE);
-    addKeyword("default", CHTLJSTokenType::DEFAULT);
-    addKeyword("break", CHTLJSTokenType::BREAK);
-    addKeyword("continue", CHTLJSTokenType::CONTINUE);
-    addKeyword("return", CHTLJSTokenType::RETURN);
-    addKeyword("function", CHTLJSTokenType::FUNCTION);
-    addKeyword("const", CHTLJSTokenType::CONST);
-    addKeyword("let", CHTLJSTokenType::LET);
-    addKeyword("var", CHTLJSTokenType::VAR);
+    // 基本关键字（仅CHTL JS需要的）
     addKeyword("true", CHTLJSTokenType::TRUE);
     addKeyword("false", CHTLJSTokenType::FALSE);
     addKeyword("null", CHTLJSTokenType::NULL_VALUE);
     addKeyword("undefined", CHTLJSTokenType::UNDEFINED);
-    addKeyword("this", CHTLJSTokenType::THIS);
-    addKeyword("new", CHTLJSTokenType::NEW);
-    addKeyword("typeof", CHTLJSTokenType::TYPEOF);
-    addKeyword("instanceof", CHTLJSTokenType::INSTANCEOF);
-    addKeyword("in", CHTLJSTokenType::IN);
-    addKeyword("of", CHTLJSTokenType::OF);
-    addKeyword("with", CHTLJSTokenType::WITH);
-    addKeyword("try", CHTLJSTokenType::TRY);
-    addKeyword("catch", CHTLJSTokenType::CATCH);
-    addKeyword("finally", CHTLJSTokenType::FINALLY);
-    addKeyword("throw", CHTLJSTokenType::THROW);
+    
+    // CHTL JS特有关键字
+    addKeyword("vir", CHTLJSTokenType::VIRTUAL_OBJECT);
+    addKeyword("listen", CHTLJSTokenType::LISTEN);
+    addKeyword("delegate", CHTLJSTokenType::DELEGATE);
+    addKeyword("animate", CHTLJSTokenType::ANIMATE);
+    addKeyword("router", CHTLJSTokenType::ROUTER);
+    addKeyword("fileloader", CHTLJSTokenType::FILELOADER);
+    addKeyword("iNeverAway", CHTLJSTokenType::INEVERAWAY);
+    addKeyword("util", CHTLJSTokenType::UTIL);
+    addKeyword("then", CHTLJSTokenType::THEN);
+    addKeyword("change", CHTLJSTokenType::CHANGE);
 }
 
 void CHTLJSGlobalMap::initializeOperators() {
-    // 赋值运算符
+    // 基本运算符（仅CHTL JS需要的）
     addOperator("=", CHTLJSTokenType::ASSIGN);
-    
-    // 算术运算符
-    addOperator("+", CHTLJSTokenType::PLUS);
-    addOperator("-", CHTLJSTokenType::MINUS);
-    addOperator("*", CHTLJSTokenType::MULTIPLY);
-    addOperator("/", CHTLJSTokenType::DIVIDE);
-    addOperator("%", CHTLJSTokenType::MODULO);
-    addOperator("**", CHTLJSTokenType::POWER);
-    
-    // 比较运算符
-    addOperator("==", CHTLJSTokenType::EQUAL);
-    addOperator("!=", CHTLJSTokenType::NOT_EQUAL);
-    addOperator("<", CHTLJSTokenType::LESS_THAN);
-    addOperator(">", CHTLJSTokenType::GREATER_THAN);
-    addOperator("<=", CHTLJSTokenType::LESS_EQUAL);
-    addOperator(">=", CHTLJSTokenType::GREATER_EQUAL);
-    
-    // 逻辑运算符
-    addOperator("&&", CHTLJSTokenType::AND);
-    addOperator("||", CHTLJSTokenType::OR);
-    addOperator("!", CHTLJSTokenType::NOT);
-    
-    // 位运算符
-    addOperator("&", CHTLJSTokenType::BITWISE_AND);
-    addOperator("|", CHTLJSTokenType::BITWISE_OR);
-    addOperator("^", CHTLJSTokenType::BITWISE_XOR);
-    addOperator("~", CHTLJSTokenType::BITWISE_NOT);
-    addOperator("<<", CHTLJSTokenType::LEFT_SHIFT);
-    addOperator(">>", CHTLJSTokenType::RIGHT_SHIFT);
-    
-    // 特殊运算符
     addOperator("->", CHTLJSTokenType::ARROW);
-    addOperator("?", CHTLJSTokenType::QUESTION);
-    addOperator("??", CHTLJSTokenType::NULLISH);
-    addOperator("?.", CHTLJSTokenType::OPTIONAL);
+    addOperator(":", CHTLJSTokenType::COLON);
+    addOperator(";", CHTLJSTokenType::SEMICOLON);
+    addOperator(",", CHTLJSTokenType::COMMA);
 }
 
 void CHTLJSGlobalMap::initializePunctuation() {
+    // 基本标点符号（仅CHTL JS需要的）
     addPunctuation('(', CHTLJSTokenType::LEFT_PAREN);
     addPunctuation(')', CHTLJSTokenType::RIGHT_PAREN);
     addPunctuation('[', CHTLJSTokenType::LEFT_BRACKET);
@@ -104,9 +60,7 @@ void CHTLJSGlobalMap::initializePunctuation() {
     addPunctuation('}', CHTLJSTokenType::RIGHT_BRACE);
     addPunctuation(';', CHTLJSTokenType::SEMICOLON);
     addPunctuation(',', CHTLJSTokenType::COMMA);
-    addPunctuation('.', CHTLJSTokenType::DOT);
     addPunctuation(':', CHTLJSTokenType::COLON);
-    addPunctuation('?', CHTLJSTokenType::QUESTION);
 }
 
 void CHTLJSGlobalMap::initializeSyntaxBoundaries() {

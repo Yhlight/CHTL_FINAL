@@ -60,6 +60,7 @@ private:
     bool isCHTLJSSyntax();
     bool isCSSSyntax();
     bool isJSSyntax();
+    bool isHTMLSyntax();
     
     // 占位符处理
     std::string createPlaceholder(const std::string& content);

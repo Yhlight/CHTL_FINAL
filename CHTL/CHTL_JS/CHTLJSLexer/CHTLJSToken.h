@@ -15,42 +15,12 @@ enum class CHTLJSTokenType {
     NUMBER,             // 数字
     BOOLEAN,            // 布尔值
     
-    // 运算符
+    // 基本运算符（仅CHTL JS需要的）
     ASSIGN,             // = 赋值
-    ARROW,              // -> 箭头运算符
-    DOT,                // . 点运算符
+    ARROW,              // -> 箭头运算符（代替.）
     COLON,              // : 冒号
     SEMICOLON,          // ; 分号
     COMMA,              // , 逗号
-    
-    // 算术运算符
-    PLUS,               // + 加
-    MINUS,              // - 减
-    MULTIPLY,           // * 乘
-    DIVIDE,             // / 除
-    MODULO,             // % 取模
-    POWER,              // ** 幂
-    
-    // 比较运算符
-    EQUAL,              // == 等于
-    NOT_EQUAL,          // != 不等于
-    LESS_THAN,          // < 小于
-    GREATER_THAN,       // > 大于
-    LESS_EQUAL,         // <= 小于等于
-    GREATER_EQUAL,      // >= 大于等于
-    
-    // 逻辑运算符
-    AND,                // && 逻辑与
-    OR,                 // || 逻辑或
-    NOT,                // ! 逻辑非
-    
-    // 位运算符
-    BITWISE_AND,        // & 按位与
-    BITWISE_OR,         // | 按位或
-    BITWISE_XOR,        // ^ 按位异或
-    BITWISE_NOT,        // ~ 按位非
-    LEFT_SHIFT,         // << 左移
-    RIGHT_SHIFT,        // >> 右移
     
     // 括号和分隔符
     LEFT_PAREN,         // ( 左括号
@@ -60,12 +30,6 @@ enum class CHTLJSTokenType {
     LEFT_BRACE,         // { 左花括号
     RIGHT_BRACE,        // } 右花括号
     
-    // 特殊符号
-    QUESTION,           // ? 问号
-    TERNARY,            // ? : 三元运算符
-    NULLISH,            // ?? 空值合并
-    OPTIONAL,           // ?. 可选链
-    
     // CHTL JS特有语法
     ENHANCED_SELECTOR,  // {{选择器}} 增强选择器
     VIRTUAL_OBJECT,     // vir 虚对象
@@ -74,39 +38,16 @@ enum class CHTLJSTokenType {
     ANIMATE,            // animate 动画
     ROUTER,             // router 路由
     FILELOADER,         // fileloader 文件加载器
+    INEVERAWAY,         // iNeverAway 特殊功能
+    UTIL,               // util 工具函数
+    THEN,               // then 然后
+    CHANGE,             // change 变化
     
-    // 关键字
-    IF,                 // if 条件
-    ELSE,               // else 否则
-    FOR,                // for 循环
-    WHILE,              // while 循环
-    DO,                 // do 循环
-    SWITCH,             // switch 开关
-    CASE,               // case 情况
-    DEFAULT,            // default 默认
-    BREAK,              // break 跳出
-    CONTINUE,           // continue 继续
-    RETURN,             // return 返回
-    FUNCTION,           // function 函数
-    CONST,              // const 常量
-    LET,                // let 变量
-    VAR,                // var 变量
+    // 基本关键字（仅CHTL JS需要的）
     TRUE,               // true 真
     FALSE,              // false 假
     NULL_VALUE,         // null 空
     UNDEFINED,          // undefined 未定义
-    THIS,               // this 当前对象
-    NEW,                // new 新建
-    TYPEOF,             // typeof 类型
-    INSTANCEOF,         // instanceof 实例
-    IN,                 // in 包含
-    OF,                 // of 属于
-    WITH,               // with 使用
-    TRY,                // try 尝试
-    CATCH,              // catch 捕获
-    FINALLY,            // finally 最终
-    THROW,              // throw 抛出
-    
     // 注释
     SINGLE_COMMENT,     // // 单行注释
     MULTI_COMMENT,      // /* */ 多行注释

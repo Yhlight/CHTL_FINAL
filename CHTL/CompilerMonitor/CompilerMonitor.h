@@ -1,166 +1,157 @@
-#ifndef CHTL_COMPILER_MONITOR_H
-#define CHTL_COMPILER_MONITOR_H
+#ifndef COMPILER_MONITOR_H
+#define COMPILER_MONITOR_H
 
 #include <chrono>
 #include <memory>
-#include <thread>
-#include <atomic>
-#include <mutex>
-#include <condition_variable>
-#include <functional>
-#include <map>
 #include <string>
+#include <vector>
+#include <map>
+#include <mutex>
+#include <atomic>
+#include <thread>
+#include <functional>
 
 namespace CHTL {
 
+// 编译监控器配置
+struct CompilerMonitorConfig {
+    bool enableTimeMonitoring = true;
+    bool enableMemoryMonitoring = true;
+    bool enableAutoKill = false;
+    
+    // 时间限制（毫秒）
+    long long maxCompilationTime = 30000; // 30秒
+    
+    // 内存限制（字节）
+    long long maxMemoryUsage = 2LL * 1024 * 1024 * 1024; // 2GB
+    
+    // 监控间隔（毫秒）
+    int monitoringInterval = 100; // 100ms
+    
+    // 统计保留时间（秒）
+    int statisticsRetentionTime = 3600; // 1小时
+};
+
 // 编译统计信息
-struct CompileStats {
-    std::chrono::milliseconds compileTime;
-    size_t memoryUsage; // 字节
-    size_t peakMemoryUsage; // 字节
-    size_t filesProcessed;
-    size_t linesProcessed;
-    size_t tokensGenerated;
-    std::string status;
-    std::string errorMessage;
+struct CompilationStatistics {
+    std::chrono::steady_clock::time_point startTime;
+    std::chrono::steady_clock::time_point endTime;
+    long long durationMs = 0;
+    long long peakMemoryUsage = 0;
+    long long currentMemoryUsage = 0;
+    bool wasKilled = false;
+    std::string killReason;
+    std::vector<std::string> warnings;
+    std::vector<std::string> errors;
     
-    CompileStats() : compileTime(0), memoryUsage(0), peakMemoryUsage(0), 
-                    filesProcessed(0), linesProcessed(0), tokensGenerated(0) {}
+    // 计算持续时间
+    void calculateDuration() {
+        if (endTime > startTime) {
+            durationMs = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+        }
+    }
 };
 
-// 编译监视器配置
-struct MonitorConfig {
-    std::chrono::milliseconds maxCompileTime{30000}; // 30秒
-    size_t maxMemoryUsage{1024 * 1024 * 1024}; // 1GB
-    bool enableMemoryMonitoring{true};
-    bool enableTimeMonitoring{true};
-    bool enableAutoKill{true};
-    std::chrono::milliseconds checkInterval{100}; // 100ms
-    std::function<void(const CompileStats&)> onStatsUpdate;
-    std::function<void(const std::string&)> onError;
-    std::function<void()> onKill;
-    
-    MonitorConfig() = default;
-};
-
-// 编译监视器
+// 编译监控器
 class CompilerMonitor {
 public:
     CompilerMonitor();
+    CompilerMonitor(const CompilerMonitorConfig& config);
     ~CompilerMonitor();
     
-    // 配置监视器
-    void setConfig(const MonitorConfig& config);
-    MonitorConfig getConfig() const;
+    // 配置管理
+    void setConfig(const CompilerMonitorConfig& config);
+    CompilerMonitorConfig getConfig() const;
     
-    // 开始监视编译过程
-    bool startMonitoring(std::function<void()> compileFunction);
-    
-    // 停止监视
+    // 监控控制
+    bool startMonitoring(const std::string& processId = "");
     void stopMonitoring();
-    
-    // 更新统计信息
-    void updateStats(const CompileStats& stats);
-    
-    // 获取当前统计信息
-    CompileStats getCurrentStats() const;
-    
-    // 检查是否应该终止编译
-    bool shouldTerminate() const;
-    
-    // 强制终止编译
-    void forceTerminate();
-    
-    // 重置监视器
-    void reset();
-    
-    // 获取监视器状态
     bool isMonitoring() const;
-    bool isTerminated() const;
     
-    // 设置编译进程ID（用于外部进程监视）
-    void setProcessId(pid_t pid);
+    // 统计信息
+    CompilationStatistics getCurrentStatistics() const;
+    std::vector<CompilationStatistics> getAllStatistics() const;
+    void clearStatistics();
     
-    // 获取内存使用情况
-    size_t getCurrentMemoryUsage() const;
+    // 内存监控
+    long long getCurrentMemoryUsage() const;
+    long long getPeakMemoryUsage() const;
     
-    // 获取编译时间
-    std::chrono::milliseconds getElapsedTime() const;
+    // 时间监控
+    long long getElapsedTime() const;
+    
+    // 自动终止
+    void enableAutoKill(bool enable);
+    void setMemoryLimit(long long limit);
+    void setTimeLimit(long long limit);
+    
+    // 回调函数
+    void setMemoryWarningCallback(std::function<void(long long)> callback);
+    void setTimeWarningCallback(std::function<void(long long)> callback);
+    void setKillCallback(std::function<void(const std::string&)> callback);
+    
+    // 调试和诊断
+    std::string getDebugInfo() const;
+    std::string generateReport() const;
     
 private:
-    MonitorConfig config;
+    CompilerMonitorConfig config;
+    mutable std::mutex monitorMutex;
+    
     std::atomic<bool> monitoring;
-    std::atomic<bool> terminated;
     std::atomic<bool> shouldStop;
+    std::thread monitoringThread;
     
-    mutable std::mutex statsMutex;
-    CompileStats currentStats;
-    std::chrono::steady_clock::time_point startTime;
+    CompilationStatistics currentStats;
+    std::vector<CompilationStatistics> allStats;
     
-    std::thread monitorThread;
-    std::thread memoryMonitorThread;
-    std::condition_variable cv;
-    std::mutex cvMutex;
-    
-    pid_t processId;
-    std::atomic<bool> processKilled;
+    std::function<void(long long)> memoryWarningCallback;
+    std::function<void(long long)> timeWarningCallback;
+    std::function<void(const std::string&)> killCallback;
     
     // 内部方法
-    void monitorLoop();
-    void memoryMonitorLoop();
-    void checkMemoryUsage();
-    void checkCompileTime();
-    bool killProcess();
-    size_t getProcessMemoryUsage() const;
-    void updateMemoryStats();
-    
-    // 统计信息更新
-    void updateCompileTime();
+    void monitoringLoop();
     void updateMemoryUsage();
-    void updateFileStats(size_t files, size_t lines, size_t tokens);
-    
-    // 错误处理
-    void handleError(const std::string& error);
-    void handleTimeout();
-    void handleMemoryLimit();
+    void checkLimits();
+    void killProcess(const std::string& reason);
+    long long getProcessMemoryUsage() const;
+    void cleanup();
 };
 
-// 编译监视器工厂
-class CompilerMonitorFactory {
-public:
-    static std::unique_ptr<CompilerMonitor> createMonitor();
-    static std::unique_ptr<CompilerMonitor> createMonitor(const MonitorConfig& config);
-    static MonitorConfig createDefaultConfig();
-    static MonitorConfig createStrictConfig();
-    static MonitorConfig createLooseConfig();
-};
-
-// 编译监视器管理器
+// 编译监控器管理器
 class CompilerMonitorManager {
 public:
     static CompilerMonitorManager& getInstance();
     
-    // 注册监视器
-    void registerMonitor(const std::string& name, std::shared_ptr<CompilerMonitor> monitor);
-    
-    // 获取监视器
+    // 监控器管理
+    std::shared_ptr<CompilerMonitor> createMonitor(const std::string& name = "");
     std::shared_ptr<CompilerMonitor> getMonitor(const std::string& name);
-    
-    // 移除监视器
     void removeMonitor(const std::string& name);
+    std::vector<std::string> getMonitorNames() const;
     
-    // 获取所有监视器
-    std::map<std::string, std::shared_ptr<CompilerMonitor>> getAllMonitors() const;
+    // 全局配置
+    void setGlobalConfig(const CompilerMonitorConfig& config);
+    CompilerMonitorConfig getGlobalConfig() const;
     
-    // 清理所有监视器
-    void clearAllMonitors();
+    // 全局统计
+    std::map<std::string, CompilationStatistics> getAllMonitorStatistics() const;
+    void clearAllStatistics();
+    
+    // 调试
+    std::string getManagerDebugInfo() const;
     
 private:
     CompilerMonitorManager() = default;
+    ~CompilerMonitorManager() = default;
+    CompilerMonitorManager(const CompilerMonitorManager&) = delete;
+    CompilerMonitorManager& operator=(const CompilerMonitorManager&) = delete;
+    
+    mutable std::mutex managerMutex;
     std::map<std::string, std::shared_ptr<CompilerMonitor>> monitors;
-    mutable std::mutex monitorsMutex;
+    CompilerMonitorConfig globalConfig;
+    std::atomic<int> nextMonitorId{1};
 };
 
 } // namespace CHTL
 
-#endif // CHTL_COMPILER_MONITOR_H
+#endif // COMPILER_MONITOR_H

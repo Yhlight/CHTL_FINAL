@@ -57,6 +57,9 @@ class TestFramework {
 private:
     std::vector<std::unique_ptr<TestSuite>> testSuites;
     std::map<std::string, int> globalStatistics;
+    bool verboseMode;
+    bool colorOutput;
+    std::string outputFile;
     
 public:
     TestFramework();
@@ -64,8 +67,15 @@ public:
     
     void addTestSuite(std::unique_ptr<TestSuite> suite);
     void runAllTests();
+    void runTestSuite(const std::string& suiteName);
+    void runTestCase(const std::string& suiteName, const std::string& testName);
     void printGlobalResults() const;
     void printGlobalStatistics() const;
+    
+    // 配置方法
+    void setVerboseMode(bool verbose) { verboseMode = verbose; }
+    void setColorOutput(bool color) { colorOutput = color; }
+    void setOutputFile(const std::string& file) { outputFile = file; }
     
     // 断言宏
     static void assertTrue(bool condition, const std::string& message = "");
@@ -76,6 +86,28 @@ public:
     static void assertNotNull(void* ptr, const std::string& message = "");
     static void assertThrows(std::function<void()> func, const std::string& message = "");
     static void assertNoThrow(std::function<void()> func, const std::string& message = "");
+    
+    // 高级断言
+    static void assertContains(const std::string& haystack, const std::string& needle, const std::string& message = "");
+    static void assertNotContains(const std::string& haystack, const std::string& needle, const std::string& message = "");
+    static void assertStartsWith(const std::string& str, const std::string& prefix, const std::string& message = "");
+    static void assertEndsWith(const std::string& str, const std::string& suffix, const std::string& message = "");
+    static void assertEmpty(const std::string& str, const std::string& message = "");
+    static void assertNotEmpty(const std::string& str, const std::string& message = "");
+    static void assertGreaterThan(int expected, int actual, const std::string& message = "");
+    static void assertLessThan(int expected, int actual, const std::string& message = "");
+    static void assertGreaterThanOrEqual(int expected, int actual, const std::string& message = "");
+    static void assertLessThanOrEqual(int expected, int actual, const std::string& message = "");
+    
+    // 测试报告
+    void generateReport() const;
+    void exportResults(const std::string& filename) const;
+    void printSummary() const;
+    
+    // 测试发现
+    void discoverTests(const std::string& directory);
+    void loadTestConfig(const std::string& configFile);
+    void saveTestConfig(const std::string& configFile) const;
 };
 
 // 测试宏定义

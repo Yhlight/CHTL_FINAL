@@ -369,36 +369,11 @@ void CHTLJSLexer::printTokens(const std::vector<CHTLJSToken>& tokens) const {
 
 // 初始化方法实现
 void CHTLJSLexer::initializeKeywords() {
-    keywords["if"] = CHTLJSTokenType::IF;
-    keywords["else"] = CHTLJSTokenType::ELSE;
-    keywords["for"] = CHTLJSTokenType::FOR;
-    keywords["while"] = CHTLJSTokenType::WHILE;
-    keywords["do"] = CHTLJSTokenType::DO;
-    keywords["switch"] = CHTLJSTokenType::SWITCH;
-    keywords["case"] = CHTLJSTokenType::CASE;
-    keywords["default"] = CHTLJSTokenType::DEFAULT;
-    keywords["break"] = CHTLJSTokenType::BREAK;
-    keywords["continue"] = CHTLJSTokenType::CONTINUE;
-    keywords["return"] = CHTLJSTokenType::RETURN;
-    keywords["function"] = CHTLJSTokenType::FUNCTION;
-    keywords["const"] = CHTLJSTokenType::CONST;
-    keywords["let"] = CHTLJSTokenType::LET;
-    keywords["var"] = CHTLJSTokenType::VAR;
+    // 基本关键字（仅CHTL JS需要的）
     keywords["true"] = CHTLJSTokenType::TRUE;
     keywords["false"] = CHTLJSTokenType::FALSE;
     keywords["null"] = CHTLJSTokenType::NULL_VALUE;
     keywords["undefined"] = CHTLJSTokenType::UNDEFINED;
-    keywords["this"] = CHTLJSTokenType::THIS;
-    keywords["new"] = CHTLJSTokenType::NEW;
-    keywords["typeof"] = CHTLJSTokenType::TYPEOF;
-    keywords["instanceof"] = CHTLJSTokenType::INSTANCEOF;
-    keywords["in"] = CHTLJSTokenType::IN;
-    keywords["of"] = CHTLJSTokenType::OF;
-    keywords["with"] = CHTLJSTokenType::WITH;
-    keywords["try"] = CHTLJSTokenType::TRY;
-    keywords["catch"] = CHTLJSTokenType::CATCH;
-    keywords["finally"] = CHTLJSTokenType::FINALLY;
-    keywords["throw"] = CHTLJSTokenType::THROW;
     
     // CHTL JS特有关键字
     keywords["vir"] = CHTLJSTokenType::VIRTUAL_OBJECT;
@@ -407,36 +382,19 @@ void CHTLJSLexer::initializeKeywords() {
     keywords["animate"] = CHTLJSTokenType::ANIMATE;
     keywords["router"] = CHTLJSTokenType::ROUTER;
     keywords["fileloader"] = CHTLJSTokenType::FILELOADER;
-    keywords["util"] = CHTLJSTokenType::FILELOADER; // 使用 FILELOADER 代替 UTIL
+    keywords["iNeverAway"] = CHTLJSTokenType::INEVERAWAY;
+    keywords["util"] = CHTLJSTokenType::UTIL;
+    keywords["then"] = CHTLJSTokenType::THEN;
+    keywords["change"] = CHTLJSTokenType::CHANGE;
 }
 
 void CHTLJSLexer::initializeOperators() {
+    // 基本运算符（仅CHTL JS需要的）
     operators["="] = CHTLJSTokenType::ASSIGN;
     operators["->"] = CHTLJSTokenType::ARROW;
-    operators["+"] = CHTLJSTokenType::PLUS;
-    operators["-"] = CHTLJSTokenType::MINUS;
-    operators["*"] = CHTLJSTokenType::MULTIPLY;
-    operators["/"] = CHTLJSTokenType::DIVIDE;
-    operators["%"] = CHTLJSTokenType::MODULO;
-    operators["**"] = CHTLJSTokenType::POWER;
-    operators["=="] = CHTLJSTokenType::EQUAL;
-    operators["!="] = CHTLJSTokenType::NOT_EQUAL;
-    operators["<"] = CHTLJSTokenType::LESS_THAN;
-    operators[">"] = CHTLJSTokenType::GREATER_THAN;
-    operators["<="] = CHTLJSTokenType::LESS_EQUAL;
-    operators[">="] = CHTLJSTokenType::GREATER_EQUAL;
-    operators["&&"] = CHTLJSTokenType::AND;
-    operators["||"] = CHTLJSTokenType::OR;
-    operators["!"] = CHTLJSTokenType::NOT;
-    operators["&"] = CHTLJSTokenType::BITWISE_AND;
-    operators["|"] = CHTLJSTokenType::BITWISE_OR;
-    operators["^"] = CHTLJSTokenType::BITWISE_XOR;
-    operators["~"] = CHTLJSTokenType::BITWISE_NOT;
-    operators["<<"] = CHTLJSTokenType::LEFT_SHIFT;
-    operators[">>"] = CHTLJSTokenType::RIGHT_SHIFT;
-    operators["?"] = CHTLJSTokenType::QUESTION;
-    operators["??"] = CHTLJSTokenType::NULLISH;
-    operators["?."] = CHTLJSTokenType::OPTIONAL;
+    operators[":"] = CHTLJSTokenType::COLON;
+    operators[";"] = CHTLJSTokenType::SEMICOLON;
+    operators[","] = CHTLJSTokenType::COMMA;
 }
 
 void CHTLJSLexer::initializeSingleCharTokens() {
@@ -448,9 +406,7 @@ void CHTLJSLexer::initializeSingleCharTokens() {
     singleCharTokens['}'] = CHTLJSTokenType::RIGHT_BRACE;
     singleCharTokens[';'] = CHTLJSTokenType::SEMICOLON;
     singleCharTokens[','] = CHTLJSTokenType::COMMA;
-    singleCharTokens['.'] = CHTLJSTokenType::DOT;
     singleCharTokens[':'] = CHTLJSTokenType::COLON;
-    singleCharTokens['?'] = CHTLJSTokenType::QUESTION;
 }
 
 void CHTLJSLexer::initializeMultiCharTokens() {
@@ -458,7 +414,7 @@ void CHTLJSLexer::initializeMultiCharTokens() {
 }
 
 void CHTLJSLexer::initializeSyntaxBoundaries() {
-    // CHTL语法边界
+    // CHTL JS语法边界
     addSyntaxBoundary("{{", "}}", "enhanced_selector", true, 10);
     addSyntaxBoundary("vir ", " {", "virtual_object", true, 9);
     addSyntaxBoundary("listen ", " {", "listen", true, 8);
@@ -466,16 +422,9 @@ void CHTLJSLexer::initializeSyntaxBoundaries() {
     addSyntaxBoundary("animate ", " {", "animate", true, 8);
     addSyntaxBoundary("router ", " {", "router", true, 8);
     addSyntaxBoundary("fileloader ", " {", "fileloader", true, 8);
+    addSyntaxBoundary("iNeverAway ", " {", "iNeverAway", true, 8);
     addSyntaxBoundary("util ", " ->", "util", true, 8);
-    
-    // JavaScript语法边界
-    addSyntaxBoundary("function ", " {", "function", true, 5);
-    addSyntaxBoundary("if ", " {", "if", true, 5);
-    addSyntaxBoundary("for ", " {", "for", true, 5);
-    addSyntaxBoundary("while ", " {", "while", true, 5);
-    addSyntaxBoundary("switch ", " {", "switch", true, 5);
-    addSyntaxBoundary("try ", " {", "try", true, 5);
-    addSyntaxBoundary("catch ", " {", "catch", true, 5);
+    addSyntaxBoundary("change ", " {", "change", true, 8);
 }
 
 // 字符处理实现

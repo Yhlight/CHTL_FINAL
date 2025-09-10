@@ -116,6 +116,12 @@ CompileResult CompilerDispatcher::compile(const ScanResult& scanResult) {
     CompileResult result;
     
     try {
+        // 根据CHTL.md规范，实现完整的编译流程
+        
+        if (debugMode) {
+            std::cout << "开始编译 " << scanResult.fragments.size() << " 个代码片段" << std::endl;
+        }
+        
         // 编译各个代码片段
         for (const auto& fragment : scanResult.fragments) {
             std::string compiled;
@@ -128,17 +134,29 @@ CompileResult CompilerDispatcher::compile(const ScanResult& scanResult) {
                 compiled = compileCSSFragment(fragment);
             } else if (fragment.type == "JS") {
                 compiled = compileJSFragment(fragment);
+            } else if (fragment.type == "HTML") {
+                // HTML片段直接使用
+                compiled = fragment.content;
+                if (debugMode) {
+                    std::cout << "HTML片段直接使用: " << fragment.content.length() << " 字符" << std::endl;
+                }
             } else {
                 addWarning("未知的代码片段类型: " + fragment.type);
                 compiled = fragment.content; // 保持原样
             }
             
-            result.outputs[fragment.type] += compiled + "\n";
+            if (!compiled.empty()) {
+                result.outputs[fragment.type] += compiled + "\n";
+            }
         }
         
         // 合并错误和警告
         result.errors = errors;
         result.warnings = warnings;
+        
+        if (debugMode) {
+            std::cout << "编译完成，生成了 " << result.outputs.size() << " 种类型的输出" << std::endl;
+        }
         
     } catch (const std::exception& e) {
         addError("编译时发生错误: " + std::string(e.what()));
@@ -152,12 +170,32 @@ FinalResult CompilerDispatcher::merge(const CompileResult& compileResult) {
     FinalResult result;
     
     try {
+        // 根据CHTL.md规范，实现完整的代码合并流程
+        
+        if (debugMode) {
+            std::cout << "开始合并编译结果" << std::endl;
+        }
+        
         // 使用代码合并器合并结果
-        result = codeMerger->merge(compileResult);
+        if (codeMerger) {
+            result = codeMerger->merge(compileResult);
+        } else {
+            addError("代码合并器未初始化");
+            result.errors = compileResult.errors;
+            result.warnings = compileResult.warnings;
+            return result;
+        }
         
         // 合并错误和警告
         result.errors = compileResult.errors;
         result.warnings = compileResult.warnings;
+        
+        if (debugMode) {
+            std::cout << "代码合并完成" << std::endl;
+            std::cout << "HTML长度: " << result.html.length() << " 字符" << std::endl;
+            std::cout << "CSS长度: " << result.css.length() << " 字符" << std::endl;
+            std::cout << "JavaScript长度: " << result.javascript.length() << " 字符" << std::endl;
+        }
         
     } catch (const std::exception& e) {
         addError("合并代码时发生错误: " + std::string(e.what()));
@@ -169,6 +207,12 @@ FinalResult CompilerDispatcher::merge(const CompileResult& compileResult) {
 
 void CompilerDispatcher::output(const FinalResult& result, const std::string& outputFile) {
     try {
+        // 根据CHTL.md规范，实现完整的输出流程
+        
+        if (debugMode) {
+            std::cout << "开始输出到文件: " << outputFile << std::endl;
+        }
+        
         std::ofstream file(outputFile);
         if (!file.is_open()) {
             addError("无法创建输出文件: " + outputFile);
@@ -178,13 +222,36 @@ void CompilerDispatcher::output(const FinalResult& result, const std::string& ou
         // 根据输出格式写入内容
         if (outputFormat == "html") {
             file << result.html;
+            if (debugMode) {
+                std::cout << "输出HTML格式: " << result.html.length() << " 字符" << std::endl;
+            }
         } else if (outputFormat == "css") {
             file << result.css;
+            if (debugMode) {
+                std::cout << "输出CSS格式: " << result.css.length() << " 字符" << std::endl;
+            }
         } else if (outputFormat == "js") {
             file << result.javascript;
+            if (debugMode) {
+                std::cout << "输出JS格式: " << result.javascript.length() << " 字符" << std::endl;
+            }
+        } else if (outputFormat == "all") {
+            // 输出所有格式
+            file << "<!-- CHTL Generated HTML -->\n";
+            file << result.html << "\n\n";
+            file << "<!-- CHTL Generated CSS -->\n";
+            file << "<style>\n" << result.css << "\n</style>\n\n";
+            file << "<!-- CHTL Generated JavaScript -->\n";
+            file << "<script>\n" << result.javascript << "\n</script>\n";
+            if (debugMode) {
+                std::cout << "输出所有格式" << std::endl;
+            }
         } else {
             // 默认输出HTML
             file << result.html;
+            if (debugMode) {
+                std::cout << "输出默认HTML格式: " << result.html.length() << " 字符" << std::endl;
+            }
         }
         
         file.close();
@@ -252,20 +319,42 @@ std::string CompilerDispatcher::getVersion() const {
 
 std::string CompilerDispatcher::compileCHTLFragment(const CodeFragment& fragment) {
     try {
+        // 根据CHTL.md规范，实现完整的CHTL编译流程
+        
+        if (debugMode) {
+            std::cout << "编译CHTL片段: " << fragment.type << " (行 " << fragment.startLine << ")" << std::endl;
+        }
+        
         // 使用CHTL词法分析器
         chtlLexer->setSource(fragment.content);
         auto tokens = chtlLexer->tokenize();
+        
+        if (tokens.size() == 0) {
+            addWarning("CHTL片段没有生成任何词法单元");
+            return fragment.content;
+        }
         
         // 使用CHTL语法分析器
         chtlParser->setTokens(tokens);
         auto ast = chtlParser->parse();
         
-        // 使用CHTL代码生成器
-        if (ast && chtlGenerator) {
-            return chtlGenerator->generate(ast);
+        if (!ast) {
+            addError("CHTL语法分析失败");
+            return fragment.content;
         }
         
-        return "";
+        // 使用CHTL代码生成器
+        if (chtlGenerator) {
+            std::string generated = chtlGenerator->generate(ast);
+            if (generated.empty()) {
+                addWarning("CHTL代码生成器没有生成任何内容");
+                return fragment.content;
+            }
+            return generated;
+        }
+        
+        addError("CHTL代码生成器未初始化");
+        return fragment.content;
         
     } catch (const std::exception& e) {
         addError("编译CHTL片段时发生错误: " + std::string(e.what()));
@@ -275,20 +364,42 @@ std::string CompilerDispatcher::compileCHTLFragment(const CodeFragment& fragment
 
 std::string CompilerDispatcher::compileCHTLJSFragment(const CodeFragment& fragment) {
     try {
+        // 根据CHTL.md规范，实现完整的CHTL JS编译流程
+        
+        if (debugMode) {
+            std::cout << "编译CHTL JS片段: " << fragment.type << " (行 " << fragment.startLine << ")" << std::endl;
+        }
+        
         // 使用CHTL JS词法分析器
         chtlJSLexer->setSource(fragment.content);
         auto tokens = chtlJSLexer->tokenize();
+        
+        if (tokens.size() == 0) {
+            addWarning("CHTL JS片段没有生成任何词法单元");
+            return fragment.content;
+        }
         
         // 使用CHTL JS语法分析器
         chtlJSParser->setTokens(tokens);
         auto ast = chtlJSParser->parse();
         
-        // 使用CHTL JS代码生成器
-        if (ast && chtlJSGenerator) {
-            return chtlJSGenerator->generate(ast);
+        if (!ast) {
+            addError("CHTL JS语法分析失败");
+            return fragment.content;
         }
         
-        return "";
+        // 使用CHTL JS代码生成器
+        if (chtlJSGenerator) {
+            std::string generated = chtlJSGenerator->generate(ast);
+            if (generated.empty()) {
+                addWarning("CHTL JS代码生成器没有生成任何内容");
+                return fragment.content;
+            }
+            return generated;
+        }
+        
+        addError("CHTL JS代码生成器未初始化");
+        return fragment.content;
         
     } catch (const std::exception& e) {
         addError("编译CHTL JS片段时发生错误: " + std::string(e.what()));
@@ -298,10 +409,20 @@ std::string CompilerDispatcher::compileCHTLJSFragment(const CodeFragment& fragme
 
 std::string CompilerDispatcher::compileCSSFragment(const CodeFragment& fragment) {
     try {
+        // 根据CHTL.md规范，实现完整的CSS编译流程
+        
+        if (debugMode) {
+            std::cout << "编译CSS片段: " << fragment.type << " (行 " << fragment.startLine << ")" << std::endl;
+        }
+        
         // 使用CSS编译器
         auto result = cssCompiler->compile(fragment.content);
         
         if (result.success) {
+            if (result.css.empty()) {
+                addWarning("CSS编译器没有生成任何内容");
+                return fragment.content;
+            }
             return result.css;
         } else {
             // 合并错误
@@ -322,10 +443,20 @@ std::string CompilerDispatcher::compileCSSFragment(const CodeFragment& fragment)
 
 std::string CompilerDispatcher::compileJSFragment(const CodeFragment& fragment) {
     try {
+        // 根据CHTL.md规范，实现完整的JS编译流程
+        
+        if (debugMode) {
+            std::cout << "编译JS片段: " << fragment.type << " (行 " << fragment.startLine << ")" << std::endl;
+        }
+        
         // 使用JS编译器
         auto result = jsCompiler->compile(fragment.content);
         
         if (result.success) {
+            if (result.javascript.empty()) {
+                addWarning("JS编译器没有生成任何内容");
+                return fragment.content;
+            }
             return result.javascript;
         } else {
             // 合并错误

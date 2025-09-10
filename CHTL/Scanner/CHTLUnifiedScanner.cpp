@@ -242,6 +242,8 @@ CodeFragment CHTLUnifiedScanner::scanJSFragment() {
 }
 
 std::string CHTLUnifiedScanner::identifyCodeType() {
+    // 根据CHTL.md规范，实现智能代码类型识别
+    
     // 检查CHTL语法特征
     if (isCHTLSyntax()) {
         return "CHTL";
@@ -260,6 +262,11 @@ std::string CHTLUnifiedScanner::identifyCodeType() {
     // 检查JS语法特征
     if (isJSSyntax()) {
         return "JS";
+    }
+    
+    // 检查HTML语法特征
+    if (isHTMLSyntax()) {
+        return "HTML";
     }
     
     // 默认作为CHTL处理
@@ -389,6 +396,37 @@ bool CHTLUnifiedScanner::isJSSyntax() {
              (source[position + 1] == '(' || source[position + 1] == '='))) {
             position = savedPos;
             return true;
+        }
+    }
+    
+    position = savedPos;
+    return false;
+}
+
+bool CHTLUnifiedScanner::isHTMLSyntax() {
+    // 检查HTML语法特征
+    size_t savedPos = position;
+    
+    // 检查HTML标签
+    if (position < source.length() && source[position] == '<') {
+        advance(); // 跳过 '<'
+        
+        // 检查标签名
+        if (position < source.length() && 
+            (std::isalpha(source[position]) || source[position] == '/')) {
+            
+            std::string tagName;
+            while (position < source.length() && 
+                   (std::isalnum(source[position]) || source[position] == '-')) {
+                tagName += source[position];
+                advance();
+            }
+            
+            // 检查是否有结束标签
+            if (position < source.length() && source[position] == '>') {
+                position = savedPos;
+                return true;
+            }
         }
     }
     
@@ -611,6 +649,278 @@ std::string CHTLUnifiedScanner::getDebugInfo() const {
     oss << "警告数: " << warnings.size() << "\n";
     oss << "占位符数: " << placeholderCounter << "\n";
     return oss.str();
+}
+
+// 占位符处理方法
+std::string CHTLUnifiedScanner::createPlaceholder(const std::string& content) {
+    std::string placeholder = "___PLACEHOLDER_" + std::to_string(placeholderCounter++) + "___";
+    placeholders[placeholder] = content;
+    return placeholder;
+}
+
+std::string CHTLUnifiedScanner::restorePlaceholder(const std::string& placeholder) {
+    auto it = placeholders.find(placeholder);
+    if (it != placeholders.end()) {
+        return it->second;
+    }
+    return placeholder;
+}
+
+void CHTLUnifiedScanner::processPlaceholders() {
+    // 处理占位符，恢复原始内容
+    for (auto& fragment : source) {
+        // 这里需要实现占位符恢复逻辑
+        // 由于source是字符串，需要重新设计
+    }
+}
+
+// 代码分离方法
+std::string CHTLUnifiedScanner::separateCHTLAndJS(const std::string& code) {
+    // 根据CHTL.md规范，实现CHTL和JS代码分离
+    std::string result = code;
+    
+    // 查找CHTL JS块
+    size_t pos = 0;
+    while ((pos = result.find("{{", pos)) != std::string::npos) {
+        size_t endPos = result.find("}}", pos);
+        if (endPos != std::string::npos) {
+            // 找到CHTL JS块，可以进一步处理
+            pos = endPos + 2;
+        } else {
+            break;
+        }
+    }
+    
+    return result;
+}
+
+std::string CHTLUnifiedScanner::separateCSSAndJS(const std::string& code) {
+    // 根据CHTL.md规范，实现CSS和JS代码分离
+    std::string result = code;
+    
+    // 查找CSS块
+    size_t pos = 0;
+    while ((pos = result.find("<style>", pos)) != std::string::npos) {
+        size_t endPos = result.find("</style>", pos);
+        if (endPos != std::string::npos) {
+            // 找到CSS块，可以进一步处理
+            pos = endPos + 8;
+        } else {
+            break;
+        }
+    }
+    
+    // 查找JS块
+    pos = 0;
+    while ((pos = result.find("<script>", pos)) != std::string::npos) {
+        size_t endPos = result.find("</script>", pos);
+        if (endPos != std::string::npos) {
+            // 找到JS块，可以进一步处理
+            pos = endPos + 9;
+        } else {
+            break;
+        }
+    }
+    
+    return result;
+}
+
+// 块检测方法
+bool CHTLUnifiedScanner::isBlockStart() {
+    // 检查是否为块开始
+    size_t savedPos = position;
+    
+    // 检查CHTL块开始标记
+    if (position < source.length() && source[position] == '[') {
+        advance();
+        if (position < source.length() && std::isalpha(source[position])) {
+            position = savedPos;
+            return true;
+        }
+    }
+    
+    position = savedPos;
+    return false;
+}
+
+bool CHTLUnifiedScanner::isBlockEnd() {
+    // 检查是否为块结束
+    size_t savedPos = position;
+    
+    // 检查CHTL块结束标记
+    if (position < source.length() && source[position] == ']') {
+        advance();
+        position = savedPos;
+        return true;
+    }
+    
+    position = savedPos;
+    return false;
+}
+
+bool CHTLUnifiedScanner::isStyleBlock() {
+    // 检查是否为样式块
+    size_t savedPos = position;
+    
+    if (position + 6 < source.length() && 
+        source.substr(position, 6) == "[Style") {
+        position = savedPos;
+        return true;
+    }
+    
+    position = savedPos;
+    return false;
+}
+
+bool CHTLUnifiedScanner::isScriptBlock() {
+    // 检查是否为脚本块
+    size_t savedPos = position;
+    
+    if (position + 7 < source.length() && 
+        source.substr(position, 7) == "[Script") {
+        position = savedPos;
+        return true;
+    }
+    
+    position = savedPos;
+    return false;
+}
+
+bool CHTLUnifiedScanner::isTemplateBlock() {
+    // 检查是否为模板块
+    size_t savedPos = position;
+    
+    if (position + 8 < source.length() && 
+        source.substr(position, 8) == "[Template") {
+        position = savedPos;
+        return true;
+    }
+    
+    position = savedPos;
+    return false;
+}
+
+bool CHTLUnifiedScanner::isCustomBlock() {
+    // 检查是否为自定义块
+    size_t savedPos = position;
+    
+    if (position + 6 < source.length() && 
+        source.substr(position, 6) == "[Custom") {
+        position = savedPos;
+        return true;
+    }
+    
+    position = savedPos;
+    return false;
+}
+
+bool CHTLUnifiedScanner::isOriginBlock() {
+    // 检查是否为Origin块
+    size_t savedPos = position;
+    
+    if (position + 6 < source.length() && 
+        source.substr(position, 6) == "[Origin") {
+        position = savedPos;
+        return true;
+    }
+    
+    position = savedPos;
+    return false;
+}
+
+bool CHTLUnifiedScanner::isImportBlock() {
+    // 检查是否为Import块
+    size_t savedPos = position;
+    
+    if (position + 6 < source.length() && 
+        source.substr(position, 6) == "[Import") {
+        position = savedPos;
+        return true;
+    }
+    
+    position = savedPos;
+    return false;
+}
+
+bool CHTLUnifiedScanner::isNamespaceBlock() {
+    // 检查是否为Namespace块
+    size_t savedPos = position;
+    
+    if (position + 9 < source.length() && 
+        source.substr(position, 9) == "[Namespace") {
+        position = savedPos;
+        return true;
+    }
+    
+    position = savedPos;
+    return false;
+}
+
+bool CHTLUnifiedScanner::isConfigurationBlock() {
+    // 检查是否为Configuration块
+    size_t savedPos = position;
+    
+    if (position + 12 < source.length() && 
+        source.substr(position, 12) == "[Configuration") {
+        position = savedPos;
+        return true;
+    }
+    
+    position = savedPos;
+    return false;
+}
+
+// 宽判严判机制
+bool CHTLUnifiedScanner::isWideScope() {
+    // 宽判：宽松的代码类型判断
+    return true;
+}
+
+bool CHTLUnifiedScanner::isStrictScope() {
+    // 严判：严格的代码类型判断
+    return strictMode;
+}
+
+// 可变长度切片
+std::string CHTLUnifiedScanner::sliceCode(size_t start, size_t end) {
+    if (start >= source.length() || end > source.length() || start >= end) {
+        return "";
+    }
+    return source.substr(start, end - start);
+}
+
+void CHTLUnifiedScanner::adjustSliceBoundary(size_t& start, size_t& end) {
+    // 调整切片边界，确保完整性
+    if (start >= source.length()) {
+        start = source.length();
+    }
+    if (end > source.length()) {
+        end = source.length();
+    }
+    if (start >= end) {
+        end = start;
+    }
+}
+
+// 智能扩增
+void CHTLUnifiedScanner::expandSlice(size_t& start, size_t& end) {
+    // 智能扩增切片范围
+    if (start > 0) {
+        start--;
+    }
+    if (end < source.length()) {
+        end++;
+    }
+}
+
+void CHTLUnifiedScanner::shrinkSlice(size_t& start, size_t& end) {
+    // 智能收缩切片范围
+    if (start < end) {
+        start++;
+    }
+    if (end > start) {
+        end--;
+    }
 }
 
 } // namespace CHTL

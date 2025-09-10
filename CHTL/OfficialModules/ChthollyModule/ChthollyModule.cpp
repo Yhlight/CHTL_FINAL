@@ -70,16 +70,32 @@ std::string ChthollyModule::generateHTML(const std::string& content) const {
         return "";
     }
     
+    // 根据CHTL.md规范，Chtholly模块提供核心CHTL功能
     std::ostringstream html;
     html << "<!DOCTYPE html>\n";
     html << "<html lang=\"en\">\n";
     html << "<head>\n";
     html << "    <meta charset=\"UTF-8\">\n";
     html << "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
-    html << "    <title>Chtholly Generated</title>\n";
+    html << "    <title>Chtholly Core Generated</title>\n";
+    html << "    <style>\n";
+    html << "        .chtholly-container { max-width: 1200px; margin: 0 auto; padding: 20px; }\n";
+    html << "        .chtholly-element { margin: 10px 0; }\n";
+    html << "        .chtholly-attribute { color: #0066cc; }\n";
+    html << "        .chtholly-text { font-family: 'Courier New', monospace; }\n";
+    html << "    </style>\n";
     html << "</head>\n";
     html << "<body>\n";
+    html << "    <div class=\"chtholly-container\">\n";
+    html << "        <h1>Chtholly Core Module Output</h1>\n";
+    html << "        <div class=\"chtholly-content\">\n";
     html << content << "\n";
+    html << "        </div>\n";
+    html << "    </div>\n";
+    html << "    <script>\n";
+    html << "        // Chtholly Core JavaScript\n";
+    html << "        console.log('Chtholly Core Module initialized');\n";
+    html << "    </script>\n";
     html << "</body>\n";
     html << "</html>\n";
     
@@ -91,8 +107,41 @@ std::string ChthollyModule::generateCSS(const std::string& content) const {
         return "";
     }
     
+    // 根据CHTL.md规范，Chtholly模块提供核心CSS功能
     std::ostringstream css;
-    css << "/* Chtholly Generated CSS */\n";
+    css << "/* Chtholly Core Generated CSS */\n";
+    css << "/* CHTL Core Styles - 提供基础样式和核心功能 */\n\n";
+    
+    // 核心容器样式
+    css << ".chtholly-container {\n";
+    css << "    max-width: 1200px;\n";
+    css << "    margin: 0 auto;\n";
+    css << "    padding: 20px;\n";
+    css << "    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n";
+    css << "}\n\n";
+    
+    // 元素样式
+    css << ".chtholly-element {\n";
+    css << "    margin: 10px 0;\n";
+    css << "    padding: 10px;\n";
+    css << "    border: 1px solid #e0e0e0;\n";
+    css << "    border-radius: 4px;\n";
+    css << "    background-color: #f9f9f9;\n";
+    css << "}\n\n";
+    
+    // 属性样式
+    css << ".chtholly-attribute {\n";
+    css << "    color: #0066cc;\n";
+    css << "    font-weight: bold;\n";
+    css << "}\n\n";
+    
+    // 文本样式
+    css << ".chtholly-text {\n";
+    css << "    font-family: 'Courier New', monospace;\n";
+    css << "    color: #333;\n";
+    css << "}\n\n";
+    
+    // 用户内容
     css << content << "\n";
     
     return css.str();
@@ -103,11 +152,51 @@ std::string ChthollyModule::generateJS(const std::string& content) const {
         return "";
     }
     
+    // 根据CHTL.md规范，Chtholly模块提供核心JavaScript功能
     std::ostringstream js;
-    js << "// Chtholly Generated JavaScript\n";
+    js << "// Chtholly Core Generated JavaScript\n";
+    js << "// CHTL Core Module - 提供核心功能和基础组件\n";
     js << "(function() {\n";
     js << "    'use strict';\n";
+    js << "    \n";
+    js << "    // Chtholly Core namespace\n";
+    js << "    window.Chtholly = window.Chtholly || {};\n";
+    js << "    \n";
+    js << "    // 核心功能模块\n";
+    js << "    Chtholly.Core = {\n";
+    js << "        version: '1.0.0',\n";
+    js << "        initialized: false,\n";
+    js << "        \n";
+    js << "        // 初始化核心模块\n";
+    js << "        init: function() {\n";
+    js << "            if (this.initialized) return;\n";
+    js << "            console.log('Chtholly Core Module initialized');\n";
+    js << "            this.initialized = true;\n";
+    js << "        },\n";
+    js << "        \n";
+    js << "        // 元素处理功能\n";
+    js << "        processElement: function(element) {\n";
+    js << "            return element;\n";
+    js << "        },\n";
+    js << "        \n";
+    js << "        // 属性处理功能\n";
+    js << "        processAttribute: function(attribute) {\n";
+    js << "            return attribute;\n";
+    js << "        },\n";
+    js << "        \n";
+    js << "        // 文本处理功能\n";
+    js << "        processText: function(text) {\n";
+    js << "            return text;\n";
+    js << "        }\n";
+    js << "    };\n";
+    js << "    \n";
+    js << "    // 用户内容\n";
     js << "    " << content << "\n";
+    js << "    \n";
+    js << "    // 自动初始化\n";
+    js << "    document.addEventListener('DOMContentLoaded', function() {\n";
+    js << "        Chtholly.Core.init();\n";
+    js << "    });\n";
     js << "})();\n";
     
     return js.str();
@@ -208,8 +297,17 @@ std::string ChthollyCoreModule::processElement(const std::string& element) const
         return "";
     }
     
-    // 简单的元素处理逻辑
-    return "<" + element + ">";
+    // 根据CHTL.md规范，Chtholly核心模块提供元素处理功能
+    std::ostringstream result;
+    result << "<" << element << " class=\"chtholly-element\"";
+    
+    // 添加核心属性
+    result << " data-chtholly-processed=\"true\"";
+    result << " data-chtholly-version=\"1.0.0\"";
+    
+    result << ">";
+    
+    return result.str();
 }
 
 std::string ChthollyCoreModule::processAttribute(const std::string& attribute) const {
@@ -217,8 +315,14 @@ std::string ChthollyCoreModule::processAttribute(const std::string& attribute) c
         return "";
     }
     
-    // 简单的属性处理逻辑
-    return " " + attribute + "=\"\"";
+    // 根据CHTL.md规范，Chtholly核心模块提供属性处理功能
+    std::ostringstream result;
+    result << " " << attribute << "=\"chtholly-" << attribute << "\"";
+    
+    // 添加核心属性标识
+    result << " data-chtholly-attr=\"" << attribute << "\"";
+    
+    return result.str();
 }
 
 std::string ChthollyCoreModule::processText(const std::string& text) const {
@@ -226,8 +330,13 @@ std::string ChthollyCoreModule::processText(const std::string& text) const {
         return "";
     }
     
-    // 简单的文本处理逻辑
-    return text;
+    // 根据CHTL.md规范，Chtholly核心模块提供文本处理功能
+    std::ostringstream result;
+    result << "<span class=\"chtholly-text\" data-chtholly-processed=\"true\">";
+    result << text;
+    result << "</span>";
+    
+    return result.str();
 }
 
 // ChthollyStyleModule 实现

@@ -110,10 +110,36 @@ private:
     void initializeParser();
     void processFile(const std::string& inputFile, const std::string& outputFile);
     void processDirectory(const std::string& inputDir, const std::string& outputDir);
+    void processBatch(const std::vector<std::string>& files);
     void showHelp();
     void showVersion();
     void showStatus();
     void showConfig();
+    void showInfo();
+    void showExamples();
+    void showLicense();
+    void showCredits();
+    
+    // 高级功能
+    void watchMode();
+    void serverMode();
+    void interactiveMode();
+    void benchmarkMode();
+    void validateMode();
+    void formatMode();
+    void minifyMode();
+    void beautifyMode();
+    
+    // 配置管理
+    void loadConfig(const std::string& configFile);
+    void saveConfig(const std::string& configFile);
+    void resetConfig();
+    void showConfigHelp();
+    
+    // 输出管理
+    void setupOutput();
+    void cleanupOutput();
+    void redirectOutput();
     
     std::unique_ptr<CLIParser> parser;
     std::string version;
@@ -121,7 +147,20 @@ private:
     bool verbose;
     bool debug;
     bool force;
+    bool watch;
+    bool server;
+    bool interactive;
+    bool benchmark;
+    bool validate;
+    bool format;
+    bool minify;
+    bool beautify;
     std::string configFile;
+    std::string outputFormat;
+    std::string outputDir;
+    int serverPort;
+    std::string logFile;
+    std::string errorFile;
 };
 
 } // namespace CHTL

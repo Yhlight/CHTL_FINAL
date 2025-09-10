@@ -16,6 +16,7 @@ include_directories(${CMAKE_SOURCE_DIR}/CHTL_JS)
 include_directories(${CMAKE_SOURCE_DIR}/Util)
 include_directories(${CMAKE_SOURCE_DIR}/ThirdParty)
 include_directories(${CMAKE_SOURCE_DIR}/Common)
+include_directories(${CMAKE_SOURCE_DIR}/CompilerMonitor)
 
 # 源文件
 set(CHTL_SOURCES
@@ -195,6 +196,7 @@ enable_testing()
 # 编译监视器
 set(COMPILER_MONITOR_SOURCES
     CompilerMonitor/CompilerMonitor.cpp
+    CompilerMonitor/CompilerMonitor.h
 )
 
 # 官方模块

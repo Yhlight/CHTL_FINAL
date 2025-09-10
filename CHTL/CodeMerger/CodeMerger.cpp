@@ -2,6 +2,7 @@
 #include <sstream>
 #include <algorithm>
 #include <regex>
+#include <iostream>
 
 namespace CHTL {
 
@@ -36,6 +37,13 @@ FinalResult CodeMerger::merge(const CompileResult& result) {
     FinalResult finalResult;
     
     try {
+        // 根据CHTL.md规范，实现完整的代码合并流程
+        
+        if (debugMode) {
+            std::cout << "开始合并编译结果" << std::endl;
+            std::cout << "输入类型数量: " << result.outputs.size() << std::endl;
+        }
+        
         // 生成HTML
         finalResult.html = generateHTML(result);
         
@@ -58,6 +66,13 @@ FinalResult CodeMerger::merge(const CompileResult& result) {
             addError("合并后的代码验证失败");
         }
         
+        if (debugMode) {
+            std::cout << "代码合并完成" << std::endl;
+            std::cout << "HTML长度: " << finalResult.html.length() << " 字符" << std::endl;
+            std::cout << "CSS长度: " << finalResult.css.length() << " 字符" << std::endl;
+            std::cout << "JavaScript长度: " << finalResult.javascript.length() << " 字符" << std::endl;
+        }
+        
     } catch (const std::exception& e) {
         addError("合并代码时发生错误: " + std::string(e.what()));
         finalResult.errors = errors;
@@ -68,6 +83,12 @@ FinalResult CodeMerger::merge(const CompileResult& result) {
 
 std::string CodeMerger::generateHTML(const CompileResult& result) {
     std::string html;
+    
+    // 根据CHTL.md规范，实现完整的HTML生成流程
+    
+    if (debugMode) {
+        std::cout << "开始生成HTML" << std::endl;
+    }
     
     // 获取CHTL输出
     auto chtlIt = result.outputs.find("CHTL");
@@ -84,6 +105,20 @@ std::string CodeMerger::generateHTML(const CompileResult& result) {
     // 获取CHTL JS输出
     auto chtlJSIt = result.outputs.find("CHTL_JS");
     std::string chtlJSOutput = (chtlJSIt != result.outputs.end()) ? chtlJSIt->second : "";
+    
+    // 获取HTML输出
+    auto htmlIt = result.outputs.find("HTML");
+    std::string htmlOutput = (htmlIt != result.outputs.end()) ? htmlIt->second : "";
+    
+    // 合并HTML内容
+    std::string combinedHTML = chtlOutput;
+    if (!htmlOutput.empty()) {
+        if (!combinedHTML.empty()) {
+            combinedHTML += "\n" + htmlOutput;
+        } else {
+            combinedHTML = htmlOutput;
+        }
+    }
     
     // 合并JavaScript
     std::string combinedJS = jsOutput;
@@ -103,14 +138,14 @@ std::string CodeMerger::generateHTML(const CompileResult& result) {
     
     // 生成HTML文档
     if (outputFormat == "html5") {
-        html = generateHTML5Document(chtlOutput, processedCSS, processedJS);
+        html = generateHTML5Document(combinedHTML, processedCSS, processedJS);
     } else if (outputFormat == "html4") {
-        html = generateHTML4Document(chtlOutput, processedCSS, processedJS);
+        html = generateHTML4Document(combinedHTML, processedCSS, processedJS);
     } else if (outputFormat == "xhtml") {
-        html = generateXHTMLDocument(chtlOutput, processedCSS, processedJS);
+        html = generateXHTMLDocument(combinedHTML, processedCSS, processedJS);
     } else {
         // 默认HTML5
-        html = generateHTML5Document(chtlOutput, processedCSS, processedJS);
+        html = generateHTML5Document(combinedHTML, processedCSS, processedJS);
     }
     
     // 优化HTML
@@ -118,23 +153,47 @@ std::string CodeMerger::generateHTML(const CompileResult& result) {
         html = optimizeHTML(html);
     }
     
+    if (debugMode) {
+        std::cout << "HTML生成完成: " << html.length() << " 字符" << std::endl;
+    }
+    
     return html;
 }
 
 std::string CodeMerger::generateCSS(const CompileResult& result) {
+    // 根据CHTL.md规范，实现完整的CSS生成流程
+    
+    if (debugMode) {
+        std::cout << "开始生成CSS" << std::endl;
+    }
+    
     auto cssIt = result.outputs.find("CSS");
     std::string css = (cssIt != result.outputs.end()) ? cssIt->second : "";
     
-    return processCSS(css);
+    // 处理CSS
+    std::string processedCSS = processCSS(css);
+    
+    if (debugMode) {
+        std::cout << "CSS生成完成: " << processedCSS.length() << " 字符" << std::endl;
+    }
+    
+    return processedCSS;
 }
 
 std::string CodeMerger::generateJavaScript(const CompileResult& result) {
+    // 根据CHTL.md规范，实现完整的JavaScript生成流程
+    
+    if (debugMode) {
+        std::cout << "开始生成JavaScript" << std::endl;
+    }
+    
     auto jsIt = result.outputs.find("JS");
     std::string js = (jsIt != result.outputs.end()) ? jsIt->second : "";
     
     auto chtlJSIt = result.outputs.find("CHTL_JS");
     std::string chtlJS = (chtlJSIt != result.outputs.end()) ? chtlJSIt->second : "";
     
+    // 合并JavaScript
     std::string combined = js;
     if (!chtlJS.empty()) {
         if (!combined.empty()) {
@@ -144,7 +203,14 @@ std::string CodeMerger::generateJavaScript(const CompileResult& result) {
         }
     }
     
-    return processJavaScript(combined);
+    // 处理JavaScript
+    std::string processedJS = processJavaScript(combined);
+    
+    if (debugMode) {
+        std::cout << "JavaScript生成完成: " << processedJS.length() << " 字符" << std::endl;
+    }
+    
+    return processedJS;
 }
 
 std::string CodeMerger::generateHTML5Document(const std::string& body, const std::string& css, const std::string& js) {
