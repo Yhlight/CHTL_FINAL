@@ -64,33 +64,33 @@ CMAKE_BINARY_DIR = /app/build
 
 # The main recursive "all" target.
 all: CMakeFiles/chtl_compiler.dir/all
+all: Util/all
 all: CHTL/all
 all: CHTL\ JS/all
 all: Scanner/all
 all: CodeMerger/all
 all: CompilerDispatcher/all
-all: Util/all
 all: Test/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
+preinstall: Util/preinstall
 preinstall: CHTL/preinstall
 preinstall: CHTL\ JS/preinstall
 preinstall: Scanner/preinstall
 preinstall: CodeMerger/preinstall
 preinstall: CompilerDispatcher/preinstall
-preinstall: Util/preinstall
 preinstall: Test/preinstall
 .PHONY : preinstall
 
 # The main recursive "clean" target.
 clean: CMakeFiles/chtl_compiler.dir/clean
+clean: Util/clean
 clean: CHTL/clean
 clean: CHTL\ JS/clean
 clean: Scanner/clean
 clean: CodeMerger/clean
 clean: CompilerDispatcher/clean
-clean: Util/clean
 clean: Test/clean
 .PHONY : clean
 
@@ -192,7 +192,7 @@ Test/clean:
 # Directory level rules for directory Util
 
 # Recursive "all" directory target.
-Util/all:
+Util/all: Util/CMakeFiles/chtl_util.dir/all
 .PHONY : Util/all
 
 # Recursive "preinstall" directory target.
@@ -200,13 +200,14 @@ Util/preinstall:
 .PHONY : Util/preinstall
 
 # Recursive "clean" directory target.
-Util/clean:
+Util/clean: Util/CMakeFiles/chtl_util.dir/clean
 .PHONY : Util/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/chtl_compiler.dir
 
 # All Build rule for target.
+CMakeFiles/chtl_compiler.dir/all: Util/CMakeFiles/chtl_util.dir/all
 CMakeFiles/chtl_compiler.dir/all: CHTL/CMakeFiles/chtl_lexer.dir/all
 CMakeFiles/chtl_compiler.dir/all: CHTL/CMakeFiles/chtl_parser.dir/all
 CMakeFiles/chtl_compiler.dir/all: CHTL/CMakeFiles/chtl_generator.dir/all
@@ -217,7 +218,7 @@ CMakeFiles/chtl_compiler.dir/all: CHTL/CMakeFiles/chtl_generator.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/chtl_compiler.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 10
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 12
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/chtl_compiler.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : CMakeFiles/chtl_compiler.dir/rule
@@ -230,6 +231,32 @@ chtl_compiler: CMakeFiles/chtl_compiler.dir/rule
 CMakeFiles/chtl_compiler.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/clean
 .PHONY : CMakeFiles/chtl_compiler.dir/clean
+
+#=============================================================================
+# Target rules for target Util/CMakeFiles/chtl_util.dir
+
+# All Build rule for target.
+Util/CMakeFiles/chtl_util.dir/all:
+	$(MAKE) $(MAKESILENT) -f Util/CMakeFiles/chtl_util.dir/build.make Util/CMakeFiles/chtl_util.dir/depend
+	$(MAKE) $(MAKESILENT) -f Util/CMakeFiles/chtl_util.dir/build.make Util/CMakeFiles/chtl_util.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=11,12 "Built target chtl_util"
+.PHONY : Util/CMakeFiles/chtl_util.dir/all
+
+# Build rule for subdir invocation for target.
+Util/CMakeFiles/chtl_util.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Util/CMakeFiles/chtl_util.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
+.PHONY : Util/CMakeFiles/chtl_util.dir/rule
+
+# Convenience name for target.
+chtl_util: Util/CMakeFiles/chtl_util.dir/rule
+.PHONY : chtl_util
+
+# clean rule for target.
+Util/CMakeFiles/chtl_util.dir/clean:
+	$(MAKE) $(MAKESILENT) -f Util/CMakeFiles/chtl_util.dir/build.make Util/CMakeFiles/chtl_util.dir/clean
+.PHONY : Util/CMakeFiles/chtl_util.dir/clean
 
 #=============================================================================
 # Target rules for target CHTL/CMakeFiles/chtl_lexer.dir
@@ -287,7 +314,7 @@ CHTL/CMakeFiles/chtl_parser.dir/clean:
 # Target rules for target CHTL/CMakeFiles/chtl_generator.dir
 
 # All Build rule for target.
-CHTL/CMakeFiles/chtl_generator.dir/all:
+CHTL/CMakeFiles/chtl_generator.dir/all: Util/CMakeFiles/chtl_util.dir/all
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_generator.dir/build.make CHTL/CMakeFiles/chtl_generator.dir/depend
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_generator.dir/build.make CHTL/CMakeFiles/chtl_generator.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=3,4,5 "Built target chtl_generator"
@@ -295,7 +322,7 @@ CHTL/CMakeFiles/chtl_generator.dir/all:
 
 # Build rule for subdir invocation for target.
 CHTL/CMakeFiles/chtl_generator.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 5
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL/CMakeFiles/chtl_generator.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : CHTL/CMakeFiles/chtl_generator.dir/rule

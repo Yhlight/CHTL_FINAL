@@ -71,4 +71,6 @@ class ElementUsageNode : public TemplateUsageNode {
 public:
     using TemplateUsageNode::TemplateUsageNode;
     void accept(Visitor& visitor) override { visitor.visit(this); }
+
+    NodeList specializations;
 };

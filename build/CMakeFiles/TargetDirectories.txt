@@ -1,6 +1,9 @@
 /app/build/CMakeFiles/chtl_compiler.dir
 /app/build/CMakeFiles/edit_cache.dir
 /app/build/CMakeFiles/rebuild_cache.dir
+/app/build/Util/CMakeFiles/chtl_util.dir
+/app/build/Util/CMakeFiles/edit_cache.dir
+/app/build/Util/CMakeFiles/rebuild_cache.dir
 /app/build/CHTL/CMakeFiles/chtl_lexer.dir
 /app/build/CHTL/CMakeFiles/chtl_parser.dir
 /app/build/CHTL/CMakeFiles/chtl_generator.dir
@@ -14,7 +17,5 @@
 /app/build/CodeMerger/CMakeFiles/rebuild_cache.dir
 /app/build/CompilerDispatcher/CMakeFiles/edit_cache.dir
 /app/build/CompilerDispatcher/CMakeFiles/rebuild_cache.dir
-/app/build/Util/CMakeFiles/edit_cache.dir
-/app/build/Util/CMakeFiles/rebuild_cache.dir
 /app/build/Test/CMakeFiles/edit_cache.dir
 /app/build/Test/CMakeFiles/rebuild_cache.dir

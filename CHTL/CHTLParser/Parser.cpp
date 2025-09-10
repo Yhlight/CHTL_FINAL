@@ -6,6 +6,7 @@
 #include "CHTLNode/StyleNode.h"
 #include "CHTLNode/ExprNode.h"
 #include "CHTLNode/TemplateNode.h"
+#include "CHTLNode/CustomNode.h"
 #include <iostream>
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
@@ -27,7 +28,51 @@ NodePtr Parser::parseDeclaration() {
     if (match({TokenType::TemplateKeyword})) {
         return parseTemplateDefinition();
     }
-    throw error(peek(), "Expect a declaration (e.g., an element or template).");
+    if (match({TokenType::CustomKeyword})) {
+        return parseCustomDefinition();
+    }
+    throw error(peek(), "Expect a declaration (e.g., an element, template, or custom).");
+}
+
+NodePtr Parser::parseCustomDefinition() {
+    consume(TokenType::At, "Expect '@' after [Custom].");
+    const Token& type = consume(TokenType::Identifier, "Expect custom type (Style, Element, Var).");
+
+    if (type.value == "Style") {
+        const Token& name = consume(TokenType::Identifier, "Expect custom name.");
+        auto node = std::make_unique<CustomStyleDefinitionNode>(name.value);
+        consume(TokenType::OpenBrace, "Expect '{' after custom name.");
+        while(!check(TokenType::CloseBrace) && !isAtEnd()) {
+            skipComments();
+            if(check(TokenType::CloseBrace)) break;
+            node->properties.push_back(std::unique_ptr<PropertyNode>(static_cast<PropertyNode*>(parseProperty().release())));
+        }
+        consume(TokenType::CloseBrace, "Expect '}' after custom block.");
+        return node;
+    } else if (type.value == "Element") {
+        const Token& name = consume(TokenType::Identifier, "Expect custom name.");
+        auto node = std::make_unique<CustomElementDefinitionNode>(name.value);
+        consume(TokenType::OpenBrace, "Expect '{' after custom name.");
+        while(!check(TokenType::CloseBrace) && !isAtEnd()) {
+            skipComments();
+            if(check(TokenType::CloseBrace)) break;
+            node->children.push_back(parseElement());
+        }
+        consume(TokenType::CloseBrace, "Expect '}' after custom block.");
+        return node;
+    } else if (type.value == "Var") {
+        const Token& name = consume(TokenType::Identifier, "Expect custom name.");
+        auto node = std::make_unique<CustomVarDefinitionNode>(name.value);
+        consume(TokenType::OpenBrace, "Expect '{' after custom name.");
+        while(!check(TokenType::CloseBrace) && !isAtEnd()) {
+            skipComments();
+            if(check(TokenType::CloseBrace)) break;
+            node->variables.push_back(std::unique_ptr<PropertyNode>(static_cast<PropertyNode*>(parseProperty().release())));
+        }
+        consume(TokenType::CloseBrace, "Expect '}' after custom block.");
+        return node;
+    }
+    throw error(type, "Unknown custom type.");
 }
 
 NodePtr Parser::parseTemplateDefinition() {
@@ -87,14 +132,50 @@ NodePtr Parser::parseTemplateUsage() {
     consume(TokenType::At, "Expect '@' for template usage.");
     const Token& type = consume(TokenType::Identifier, "Expect template type (Style, Element).");
     const Token& name = consume(TokenType::Identifier, "Expect template name.");
-    consume(TokenType::Semicolon, "Expect ';' after template usage.");
 
     if (type.value == "Style") {
+        consume(TokenType::Semicolon, "Expect ';' after @Style usage.");
         return std::make_unique<StyleUsageNode>(name.value);
-    } else if (type.value == "Element") {
-        return std::make_unique<ElementUsageNode>(name.value);
     }
+
+    if (type.value == "Element") {
+        auto node = std::make_unique<ElementUsageNode>(name.value);
+        if (match({TokenType::OpenBrace})) {
+            // Specialization block
+            while(!check(TokenType::CloseBrace) && !isAtEnd()) {
+                skipComments();
+                if(check(TokenType::CloseBrace)) break;
+                if (peek().type == TokenType::DeleteKeyword) {
+                    node->specializations.push_back(parseDelete());
+                } else if (peek().type == TokenType::InsertKeyword) {
+                    node->specializations.push_back(parseInsert());
+                } else {
+                    throw error(peek(), "Only 'delete' or 'insert' allowed in specialization block.");
+                }
+            }
+            consume(TokenType::CloseBrace, "Expect '}' after specialization block.");
+        } else {
+            consume(TokenType::Semicolon, "Expect ';' after @Element usage.");
+        }
+        return node;
+    }
+
     throw error(type, "Unknown template usage type.");
+}
+
+NodePtr Parser::parseDelete() {
+    consume(TokenType::DeleteKeyword, "Expect 'delete' keyword.");
+    // For now, we assume the target is a simple identifier.
+    // The spec mentions selectors like `div[1]`, which will require a more complex parser later.
+    const Token& target = consume(TokenType::Identifier, "Expect target for delete.");
+    consume(TokenType::Semicolon, "Expect ';' after delete statement.");
+    return std::make_unique<DeleteNode>(target.value);
+}
+
+NodePtr Parser::parseInsert() {
+    consume(TokenType::InsertKeyword, "Expect 'insert' keyword.");
+    // This is a placeholder. A full implementation would parse position, selector, and a block.
+    throw error(peek(), "Insert statement parsing is not yet implemented.");
 }
 
 
@@ -178,8 +259,6 @@ NodePtr Parser::parseStyleNode() {
         if (check(TokenType::CloseBrace)) break;
 
         if (peek().type == TokenType::At) {
-            // Here we need to handle @Style usage inside a style block.
-            // This is a form of template usage.
             styleNode->addChild(parseTemplateUsage());
         } else {
             styleNode->addChild(parseProperty());

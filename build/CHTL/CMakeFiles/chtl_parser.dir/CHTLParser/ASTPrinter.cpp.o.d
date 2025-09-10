@@ -156,7 +156,8 @@ CHTL/CMakeFiles/chtl_parser.dir/CHTLParser/ASTPrinter.cpp.o: \
  /usr/include/c++/13/bits/vector.tcc /app/CHTL/CHTLNode/ElementNode.h \
  /app/CHTL/CHTLNode/PropertyNode.h /app/CHTL/CHTLNode/ExprNode.h \
  /app/CHTL/CHTLLexer/Token.h /app/CHTL/CHTLNode/TextNode.h \
- /app/CHTL/CHTLNode/CommentNode.h /usr/include/c++/13/iostream \
+ /app/CHTL/CHTLNode/CommentNode.h /app/CHTL/CHTLNode/CustomNode.h \
+ /app/CHTL/CHTLNode/TemplateNode.h /usr/include/c++/13/iostream \
  /usr/include/c++/13/ostream /usr/include/c++/13/ios \
  /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \
@@ -175,6 +176,5 @@ CHTL/CMakeFiles/chtl_parser.dir/CHTLParser/ASTPrinter.cpp.o: \
  /usr/include/c++/13/bits/basic_ios.tcc \
  /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
  /usr/include/c++/13/bits/istream.tcc /app/CHTL/CHTLNode/StyleNode.h \
- /app/CHTL/CHTLNode/TemplateNode.h \
  /app/CHTL/CHTLGenerator/ExprGenerator.h /usr/include/c++/13/sstream \
  /usr/include/c++/13/bits/sstream.tcc

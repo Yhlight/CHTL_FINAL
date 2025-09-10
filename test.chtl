@@ -3,6 +3,10 @@
     font-size: 16px;
 }
 
+[Custom] @Style CustomText {
+    color: blue;
+}
+
 [Template] @Element Box {
     div {
         text { "This is a box from a template." }
@@ -24,6 +28,8 @@ html {
             text { "Hello from a CHTL file!" }
         }
 
-        @Element Box;
+        @Element Box {
+            delete div;
+        }
     }
 }

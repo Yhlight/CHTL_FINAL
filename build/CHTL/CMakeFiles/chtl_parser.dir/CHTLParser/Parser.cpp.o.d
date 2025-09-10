@@ -159,9 +159,9 @@ CHTL/CMakeFiles/chtl_parser.dir/CHTLParser/Parser.cpp.o: \
  /usr/include/c++/13/stdexcept /app/CHTL/CHTLNode/ElementNode.h \
  /app/CHTL/CHTLNode/PropertyNode.h /app/CHTL/CHTLNode/TextNode.h \
  /app/CHTL/CHTLNode/CommentNode.h /app/CHTL/CHTLNode/StyleNode.h \
- /app/CHTL/CHTLNode/TemplateNode.h /usr/include/c++/13/iostream \
- /usr/include/c++/13/ostream /usr/include/c++/13/ios \
- /usr/include/c++/13/bits/ios_base.h \
+ /app/CHTL/CHTLNode/TemplateNode.h /app/CHTL/CHTLNode/CustomNode.h \
+ /usr/include/c++/13/iostream /usr/include/c++/13/ostream \
+ /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \
  /usr/include/c++/13/bits/locale_classes.tcc \
  /usr/include/c++/13/system_error \

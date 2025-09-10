@@ -116,6 +116,44 @@ depend:
 	cd /app/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
+# Convenience name for target.
+Util/CMakeFiles/chtl_util.dir/rule:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Util/CMakeFiles/chtl_util.dir/rule
+.PHONY : Util/CMakeFiles/chtl_util.dir/rule
+
+# Convenience name for target.
+chtl_util: Util/CMakeFiles/chtl_util.dir/rule
+.PHONY : chtl_util
+
+# fast build rule for target.
+chtl_util/fast:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f Util/CMakeFiles/chtl_util.dir/build.make Util/CMakeFiles/chtl_util.dir/build
+.PHONY : chtl_util/fast
+
+ASTCloner.o: ASTCloner.cpp.o
+.PHONY : ASTCloner.o
+
+# target to build an object file
+ASTCloner.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f Util/CMakeFiles/chtl_util.dir/build.make Util/CMakeFiles/chtl_util.dir/ASTCloner.cpp.o
+.PHONY : ASTCloner.cpp.o
+
+ASTCloner.i: ASTCloner.cpp.i
+.PHONY : ASTCloner.i
+
+# target to preprocess a source file
+ASTCloner.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f Util/CMakeFiles/chtl_util.dir/build.make Util/CMakeFiles/chtl_util.dir/ASTCloner.cpp.i
+.PHONY : ASTCloner.cpp.i
+
+ASTCloner.s: ASTCloner.cpp.s
+.PHONY : ASTCloner.s
+
+# target to generate assembly for a file
+ASTCloner.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f Util/CMakeFiles/chtl_util.dir/build.make Util/CMakeFiles/chtl_util.dir/ASTCloner.cpp.s
+.PHONY : ASTCloner.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -124,6 +162,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... chtl_util"
+	@echo "... ASTCloner.o"
+	@echo "... ASTCloner.i"
+	@echo "... ASTCloner.s"
 .PHONY : help
 
 

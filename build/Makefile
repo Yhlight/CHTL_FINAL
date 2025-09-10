@@ -130,6 +130,19 @@ chtl_compiler/fast:
 .PHONY : chtl_compiler/fast
 
 #=============================================================================
+# Target rules for targets named chtl_util
+
+# Build rule for target.
+chtl_util: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 chtl_util
+.PHONY : chtl_util
+
+# fast build rule for target.
+chtl_util/fast:
+	$(MAKE) $(MAKESILENT) -f Util/CMakeFiles/chtl_util.dir/build.make Util/CMakeFiles/chtl_util.dir/build
+.PHONY : chtl_util/fast
+
+#=============================================================================
 # Target rules for targets named chtl_lexer
 
 # Build rule for target.
@@ -204,6 +217,7 @@ help:
 	@echo "... chtl_generator"
 	@echo "... chtl_lexer"
 	@echo "... chtl_parser"
+	@echo "... chtl_util"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/chtl_compiler.dir/main.cpp.o -o chtl_compiler  CHTL/libchtl_lexer.a CHTL/libchtl_parser.a CHTL/libchtl_generator.a CHTL/libchtl_lexer.a
+/usr/bin/c++ CMakeFiles/chtl_compiler.dir/main.cpp.o -o chtl_compiler  CHTL/libchtl_lexer.a CHTL/libchtl_parser.a CHTL/libchtl_generator.a Util/libchtl_util.a CHTL/libchtl_lexer.a

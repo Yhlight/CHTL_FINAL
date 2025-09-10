@@ -5,6 +5,7 @@
 #include "CHTLLexer/Lexer.h"
 #include "CHTLParser/Parser.h"
 #include "CHTLGenerator/Generator.h"
+#include "CHTLParser/ASTPrinter.h"
 
 std::string readFile(const std::string& path) {
     std::ifstream file(path);
@@ -29,15 +30,12 @@ int main(int argc, char* argv[]) {
     Lexer lexer(source);
     std::vector<Token> tokens = lexer.tokenize();
 
-    // The ASTPrinter can be used for debugging the parser's output.
-    // ASTPrinter printer;
-    // printer.print(ast);
-
     // 2. Parsing
     NodeList ast;
     try {
         Parser parser(tokens);
         ast = parser.parse();
+
     } catch (const Parser::ParseError& e) {
         std::cerr << e.what() << std::endl;
         return 1;

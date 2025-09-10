@@ -94,6 +94,38 @@ void ASTPrinter::visit(StyleUsageNode* node) {
 void ASTPrinter::visit(ElementUsageNode* node) {
     printIndent();
     std::cout << "@Element " << node->name << std::endl;
+    if (!node->specializations.empty()) {
+        indent();
+        for (const auto& spec : node->specializations) {
+            spec->accept(*this);
+        }
+        dedent();
+    }
+}
+
+void ASTPrinter::visit(CustomStyleDefinitionNode* node) {
+    printIndent();
+    std::cout << "[Custom] @Style " << node->name << std::endl;
+}
+
+void ASTPrinter::visit(CustomElementDefinitionNode* node) {
+    printIndent();
+    std::cout << "[Custom] @Element " << node->name << std::endl;
+}
+
+void ASTPrinter::visit(CustomVarDefinitionNode* node) {
+    printIndent();
+    std::cout << "[Custom] @Var " << node->name << std::endl;
+}
+
+void ASTPrinter::visit(DeleteNode* node) {
+    printIndent();
+    std::cout << "delete " << node->target << std::endl;
+}
+
+void ASTPrinter::visit(InsertNode* node) {
+    printIndent();
+    std::cout << "insert ..." << std::endl;
 }
 
 void ASTPrinter::indent() {

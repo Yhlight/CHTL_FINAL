@@ -26,5 +26,5 @@ add_library(chtl_generator STATIC
     CHTLGenerator/Generator.cpp
     CHTLGenerator/ExprGenerator.cpp
 )
-target_link_libraries(chtl_generator PRIVATE chtl_ast)
+target_link_libraries(chtl_generator PRIVATE chtl_ast chtl_util)
 target_include_directories(chtl_generator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

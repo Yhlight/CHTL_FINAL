@@ -44,12 +44,12 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
+  include("/app/build/Util/cmake_install.cmake")
   include("/app/build/CHTL/cmake_install.cmake")
   include("/app/build/CHTL JS/cmake_install.cmake")
   include("/app/build/Scanner/cmake_install.cmake")
   include("/app/build/CodeMerger/cmake_install.cmake")
   include("/app/build/CompilerDispatcher/cmake_install.cmake")
-  include("/app/build/Util/cmake_install.cmake")
   include("/app/build/Test/cmake_install.cmake")
 
 endif()

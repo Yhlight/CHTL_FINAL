@@ -31,7 +31,10 @@ private:
     // Template parsing methods
     NodePtr parseTemplateDefinition();
     NodePtr parseStyleTemplateDefinition();
+    NodePtr parseCustomDefinition();
     NodePtr parseElementTemplateDefinition();
+    NodePtr parseDelete();
+    NodePtr parseInsert();
     NodePtr parseVarTemplateDefinition();
     NodePtr parseTemplateUsage();
     ExprNodePtr parseLogicalOr();

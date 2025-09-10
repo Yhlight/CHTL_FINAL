@@ -44,6 +44,9 @@ enum class TokenType {
 
     // Keywords
     TemplateKeyword,    // [Template]
+    CustomKeyword,      // [Custom]
+    DeleteKeyword,      // delete
+    InsertKeyword,      // insert
 
     // Comments
     SingleLineComment,  // //
@@ -95,6 +98,9 @@ inline std::string tokenTypeToString(TokenType type) {
         case TokenType::GreaterThan: return "GreaterThan";
         case TokenType::LessThan: return "LessThan";
         case TokenType::TemplateKeyword: return "TemplateKeyword";
+        case TokenType::CustomKeyword: return "CustomKeyword";
+        case TokenType::DeleteKeyword: return "DeleteKeyword";
+        case TokenType::InsertKeyword: return "InsertKeyword";
         case TokenType::SingleLineComment: return "SingleLineComment";
         case TokenType::MultiLineComment: return "MultiLineComment";
         case TokenType::GeneratorComment: return "GeneratorComment";

@@ -36,10 +36,13 @@ Token Lexer::nextToken() {
         case '(': return makeToken(TokenType::OpenParen);
         case ')': return makeToken(TokenType::CloseParen);
         case '[':
-            // The string "Template]" is 9 characters long.
             if (source.compare(current, 9, "Template]") == 0) {
                 current += 9;
                 return makeToken(TokenType::TemplateKeyword);
+            }
+            if (source.compare(current, 7, "Custom]") == 0) {
+                current += 7;
+                return makeToken(TokenType::CustomKeyword);
             }
             return makeToken(TokenType::OpenBracket);
         case ']': return makeToken(TokenType::CloseBracket);
@@ -132,9 +135,10 @@ Token Lexer::identifier() {
         advance();
     }
     std::string value = source.substr(start, current - start);
-    // Here we could check for keywords, but CHTL has context-sensitive keywords.
-    // e.g. `text` is a keyword for a node type, but can be part of a value.
-    // The parser is a better place to handle this.
+
+    if (value == "delete") return makeToken(TokenType::DeleteKeyword, value);
+    if (value == "insert") return makeToken(TokenType::InsertKeyword, value);
+
     return makeToken(TokenType::Identifier, value);
 }
 

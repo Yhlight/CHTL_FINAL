@@ -16,6 +16,11 @@ class ElementTemplateDefinitionNode;
 class VarTemplateDefinitionNode;
 class StyleUsageNode;
 class ElementUsageNode;
+class CustomStyleDefinitionNode;
+class CustomElementDefinitionNode;
+class CustomVarDefinitionNode;
+class DeleteNode;
+class InsertNode;
 
 // Visitor interface for the AST
 class Visitor {
@@ -31,6 +36,11 @@ public:
     virtual void visit(VarTemplateDefinitionNode* node) = 0;
     virtual void visit(StyleUsageNode* node) = 0;
     virtual void visit(ElementUsageNode* node) = 0;
+    virtual void visit(CustomStyleDefinitionNode* node) = 0;
+    virtual void visit(CustomElementDefinitionNode* node) = 0;
+    virtual void visit(CustomVarDefinitionNode* node) = 0;
+    virtual void visit(DeleteNode* node) = 0;
+    virtual void visit(InsertNode* node) = 0;
 };
 
 // Base class for all AST nodes

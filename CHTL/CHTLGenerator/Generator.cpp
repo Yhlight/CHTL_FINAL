@@ -2,6 +2,8 @@
 #include "ExprGenerator.h"
 #include "CHTLNode/StyleNode.h"
 #include "CHTLNode/TemplateNode.h"
+#include "CHTLNode/CustomNode.h"
+#include "ASTCloner.h"
 #include <vector>
 #include <iostream>
 #include <sstream>
@@ -33,6 +35,12 @@ public:
     void visit(StyleNode* node) override {}
     void visit(StyleUsageNode* node) override {}
     void visit(ElementUsageNode* node) override {}
+    // Custom nodes
+    void visit(CustomStyleDefinitionNode* node) override {}
+    void visit(CustomElementDefinitionNode* node) override {}
+    void visit(CustomVarDefinitionNode* node) override {}
+    void visit(DeleteNode* node) override {}
+    void visit(InsertNode* node) override {}
 
 private:
     std::map<std::string, StyleTemplateDefinitionNode*>& styleTemplates;
@@ -154,15 +162,45 @@ void Generator::visit(StyleUsageNode* node) {
     // This is handled inside visit(ElementNode*)
 }
 
+#include <algorithm>
+
 void Generator::visit(ElementUsageNode* node) {
     auto it = elementTemplates.find(node->name);
     if (it != elementTemplates.end()) {
-        // Render the children of the found template
-        for (const auto& child : it->second->children) {
+        // 1. Clone the template's AST
+        ASTCloner cloner;
+        NodeList clonedChildren = cloner.clone(it->second->children);
+
+        // 2. Apply specializations to the clone
+        for (const auto& spec : node->specializations) {
+            if (auto* deleteNode = dynamic_cast<DeleteNode*>(spec.get())) {
+                // Simple delete by tag name for now
+                clonedChildren.erase(
+                    std::remove_if(clonedChildren.begin(), clonedChildren.end(),
+                        [&](const NodePtr& child) {
+                            if (auto* elem = dynamic_cast<ElementNode*>(child.get())) {
+                                return elem->tagName == deleteNode->target;
+                            }
+                            return false;
+                        }),
+                    clonedChildren.end()
+                );
+            }
+            // TODO: Handle InsertNode
+        }
+
+        // 3. Render the modified AST
+        for (const auto& child : clonedChildren) {
             child->accept(*this);
         }
     }
 }
+
+void Generator::visit(CustomStyleDefinitionNode* node) {}
+void Generator::visit(CustomElementDefinitionNode* node) {}
+void Generator::visit(CustomVarDefinitionNode* node) {}
+void Generator::visit(DeleteNode* node) {}
+void Generator::visit(InsertNode* node) {}
 
 
 void Generator::indent() {
