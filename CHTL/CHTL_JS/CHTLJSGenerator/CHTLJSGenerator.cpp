@@ -137,6 +137,8 @@ std::string CHTLJSGenerator::generateExpression(std::shared_ptr<CHTLJSBaseNode> 
             return generateArrowFunctionExpression(expression);
         case CHTLJSNodeType::ENHANCED_SELECTOR:
             return generateEnhancedSelector(expression);
+        case CHTLJSNodeType::RESPONSIVE_VALUE:
+            return generateResponsiveValue(expression);
         case CHTLJSNodeType::VIRTUAL_OBJECT:
             return generateVirtualObject(expression);
         case CHTLJSNodeType::LISTEN_EXPRESSION:
@@ -553,6 +555,7 @@ std::string CHTLJSGenerator::generateNode(std::shared_ptr<CHTLJSBaseNode> node) 
         case CHTLJSNodeType::FUNCTION_EXPRESSION:
         case CHTLJSNodeType::ARROW_FUNCTION_EXPRESSION:
         case CHTLJSNodeType::ENHANCED_SELECTOR:
+        case CHTLJSNodeType::RESPONSIVE_VALUE:
         case CHTLJSNodeType::VIRTUAL_OBJECT:
         case CHTLJSNodeType::LISTEN_EXPRESSION:
         case CHTLJSNodeType::DELEGATE_EXPRESSION:
@@ -748,5 +751,16 @@ std::string CHTLJSGenerator::addLineBreaks(const std::string& code) const { retu
 std::string CHTLJSGenerator::addSpacing(const std::string& code) const { return code; }
 std::string CHTLJSGenerator::formatBrackets(const std::string& code) const { return code; }
 std::string CHTLJSGenerator::formatOperators(const std::string& code) const { return code; }
+
+// 响应式值生成
+std::string CHTLJSGenerator::generateResponsiveValue(std::shared_ptr<CHTLJSBaseNode> responsiveValue) {
+    if (!responsiveValue || responsiveValue->getNodeType() != CHTLJSNodeType::RESPONSIVE_VALUE) {
+        addError("Invalid responsive value node");
+        return "";
+    }
+    
+    // 直接返回变量名，去掉$符号
+    return responsiveValue->getValue();
+}
 
 } // namespace CHTL_JS

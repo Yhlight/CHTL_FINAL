@@ -32,6 +32,7 @@ enum class CHTLJSTokenType {
     
     // CHTL JS特有语法
     ENHANCED_SELECTOR,  // {{选择器}} 增强选择器
+    RESPONSIVE_VALUE,   // $JS变量名$ 响应式值
     VIRTUAL_OBJECT,     // vir 虚对象
     LISTEN,             // listen 增强监听器
     DELEGATE,           // delegate 事件委托

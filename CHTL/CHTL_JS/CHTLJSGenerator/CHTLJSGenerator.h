@@ -112,6 +112,7 @@ public:
     
     // CHTL JS特有语法生成
     std::string generateEnhancedSelector(std::shared_ptr<CHTLJSBaseNode> selector);
+    std::string generateResponsiveValue(std::shared_ptr<CHTLJSBaseNode> responsiveValue);
     std::string generateVirtualObject(std::shared_ptr<CHTLJSBaseNode> virtualObject);
     std::string generateListenExpression(std::shared_ptr<CHTLJSBaseNode> listen);
     std::string generateDelegateExpression(std::shared_ptr<CHTLJSBaseNode> delegate);

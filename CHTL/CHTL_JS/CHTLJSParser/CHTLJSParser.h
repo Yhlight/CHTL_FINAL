@@ -101,6 +101,7 @@ public:
     
     // CHTL JS特有语法解析
     std::shared_ptr<CHTLJSBaseNode> parseEnhancedSelector();
+    std::shared_ptr<CHTLJSBaseNode> parseResponsiveValue();
     std::shared_ptr<CHTLJSBaseNode> parseVirtualObject();
     std::shared_ptr<CHTLJSBaseNode> parseListenExpression();
     std::shared_ptr<CHTLJSBaseNode> parseDelegateExpression();

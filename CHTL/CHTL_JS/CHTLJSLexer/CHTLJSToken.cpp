@@ -101,6 +101,7 @@ std::string CHTLJSToken::getTypeName() const {
         case CHTLJSTokenType::LEFT_BRACE: return "LEFT_BRACE";
         case CHTLJSTokenType::RIGHT_BRACE: return "RIGHT_BRACE";
         case CHTLJSTokenType::ENHANCED_SELECTOR: return "ENHANCED_SELECTOR";
+        case CHTLJSTokenType::RESPONSIVE_VALUE: return "RESPONSIVE_VALUE";
         case CHTLJSTokenType::VIRTUAL_OBJECT: return "VIRTUAL_OBJECT";
         case CHTLJSTokenType::LISTEN: return "LISTEN";
         case CHTLJSTokenType::DELEGATE: return "DELEGATE";
@@ -228,6 +229,9 @@ std::string CHTLJSToken::convertToJavaScript() const {
         case CHTLJSTokenType::ENHANCED_SELECTOR:
             // 将{{选择器}}转换为JavaScript选择器代码
             return "document.querySelector('" + value + "')";
+        case CHTLJSTokenType::RESPONSIVE_VALUE:
+            // 将$JS变量名$转换为JavaScript变量引用
+            return value; // 直接返回变量名，去掉$符号
         case CHTLJSTokenType::ARROW:
             return "->";
         default:

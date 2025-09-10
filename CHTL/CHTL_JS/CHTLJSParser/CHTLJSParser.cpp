@@ -231,6 +231,8 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parsePrimaryExpression() {
         return createLiteralNode(token.getValue(), "boolean");
     } else if (token.getType() == CHTLJSTokenType::ENHANCED_SELECTOR) {
         return parseEnhancedSelector();
+    } else if (token.getType() == CHTLJSTokenType::RESPONSIVE_VALUE) {
+        return parseResponsiveValue();
     } else if (token.getType() == CHTLJSTokenType::VIRTUAL_OBJECT) {
         return parseVirtualObject();
     } else if (token.getType() == CHTLJSTokenType::LISTEN) {
@@ -1738,5 +1740,18 @@ std::string CHTLJSParser::inferDeclarationType(std::shared_ptr<CHTLJSBaseNode> n
 bool CHTLJSParser::validateNodeType(std::shared_ptr<CHTLJSBaseNode> node, CHTLJSNodeType expectedType) const { return true; }
 bool CHTLJSParser::validateNodeStructure(std::shared_ptr<CHTLJSBaseNode> node) const { return true; }
 bool CHTLJSParser::validateNodeSemantics(std::shared_ptr<CHTLJSBaseNode> node) const { return true; }
+
+// 响应式值解析
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseResponsiveValue() {
+    auto token = getCurrentToken();
+    if (token.getType() != CHTLJSTokenType::RESPONSIVE_VALUE) {
+        reportUnexpectedToken(token, "responsive value");
+        return nullptr;
+    }
+    
+    advance();
+    auto responsiveValue = createNode(CHTLJSNodeType::RESPONSIVE_VALUE, "responsive_value", token.getValue());
+    return responsiveValue;
+}
 
 } // namespace CHTL_JS

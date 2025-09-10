@@ -138,6 +138,7 @@ private:
     CHTLJSToken readOperator();
     CHTLJSToken readPunctuation();
     CHTLJSToken readEnhancedSelector();
+    CHTLJSToken readResponsiveValue();
     CHTLJSToken readVirtualObject();
     CHTLJSToken readCHTLJSKeyword();
     CHTLJSToken readUnquotedLiteral();
@@ -202,6 +203,7 @@ private:
     // 特殊语法处理
     bool isCHTLJSSyntax(const std::string& code, size_t pos) const;
     bool isEnhancedSelectorStart(const std::string& code, size_t pos) const;
+    bool isResponsiveValueStart(const std::string& code, size_t pos) const;
     bool isVirtualObjectStart(const std::string& code, size_t pos) const;
     bool isListenStart(const std::string& code, size_t pos) const;
     bool isDelegateStart(const std::string& code, size_t pos) const;

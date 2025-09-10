@@ -99,6 +99,11 @@ CHTLJSToken CHTLJSLexer::getNextToken() {
         return readEnhancedSelector();
     }
     
+    // 响应式值处理
+    if (isResponsiveValueStart(source, position)) {
+        return readResponsiveValue();
+    }
+    
     // 虚对象处理
     if (isVirtualObjectStart(source, position)) {
         return readVirtualObject();
@@ -1005,5 +1010,46 @@ bool CHTLJSLexer::isValidNumber(const std::string& number) const { return true; 
 bool CHTLJSLexer::isValidString(const std::string& str) const { return true; }
 bool CHTLJSLexer::isValidOperator(const std::string& op) const { return true; }
 bool CHTLJSLexer::isValidPunctuation(const std::string& punct) const { return true; }
+
+// 响应式值相关方法
+bool CHTLJSLexer::isResponsiveValueStart(const std::string& code, size_t pos) const {
+    if (pos >= code.length()) return false;
+    return code[pos] == '$';
+}
+
+CHTLJSToken CHTLJSLexer::readResponsiveValue() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    // 跳过开始的$
+    advance();
+    
+    std::string value;
+    
+    // 读取变量名，直到遇到结束的$
+    while (!isAtEnd() && getCurrentChar() != '$') {
+        char c = getCurrentChar();
+        if (isLetter(c) || isDigit(c) || c == '_') {
+            value += c;
+            advance();
+        } else {
+            // 如果遇到非变量名字符，报错
+            addError("响应式值变量名包含非法字符: " + std::string(1, c));
+            break;
+        }
+    }
+    
+    // 检查是否有结束的$
+    if (isAtEnd() || getCurrentChar() != '$') {
+        addError("响应式值缺少结束的$符号");
+        return CHTLJSToken(CHTLJSTokenType::ERROR, "$" + value, startLine, startColumn, start);
+    }
+    
+    // 跳过结束的$
+    advance();
+    
+    return CHTLJSToken(CHTLJSTokenType::RESPONSIVE_VALUE, value, startLine, startColumn, start);
+}
 
 } // namespace CHTL_JS
