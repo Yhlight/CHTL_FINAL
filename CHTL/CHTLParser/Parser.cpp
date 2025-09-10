@@ -1,6 +1,9 @@
 #include "Parser.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
+#include "../CHTLNode/StyleNode.h"
+#include "../CHTLNode/RuleNode.h"
+#include "../CHTLNode/DeclarationNode.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -41,6 +44,9 @@ std::unique_ptr<ElementNode> Parser::parseElement() {
             }
         } else if (peek().type == TokenType::IDENTIFIER && peekNext().type == TokenType::LEFT_BRACE) {
             element->addChild(parseElement());
+        } else if (peek().type == TokenType::STYLE && peekNext().type == TokenType::LEFT_BRACE) {
+            advance(); // consume 'style'
+            element->addChild(parseStyleNode(element.get()));
         } else if (peek().type == TokenType::IDENTIFIER && (peekNext().type == TokenType::COLON || peekNext().type == TokenType::EQUAL)) {
             parseAttribute(element.get());
         } else if (peek().type == TokenType::GEN_COMMENT) {
@@ -128,6 +134,72 @@ std::unique_ptr<CommentNode> Parser::parseCommentNode() {
     }
 
     return std::make_unique<CommentNode>(commentContent);
+}
+
+std::unique_ptr<StyleNode> Parser::parseStyleNode(ElementNode* parent) {
+    auto styleNode = std::make_unique<StyleNode>();
+    if (!match({TokenType::LEFT_BRACE})) {
+        throw std::runtime_error("Expected '{' for style block on line " + std::to_string(peek().line));
+    }
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        // Look ahead to see if it's a rule or a declaration.
+        int bracePos = -1;
+        int semiPos = -1;
+        for (int i = current; !check(TokenType::RIGHT_BRACE) && i < tokens.size(); ++i) {
+            if (tokens[i].type == TokenType::LEFT_BRACE) { bracePos = i; break; }
+            if (tokens[i].type == TokenType::SEMICOLON) { semiPos = i; break; }
+        }
+
+        if (bracePos != -1 && (semiPos == -1 || bracePos < semiPos)) {
+            // It's a RuleNode
+            auto ruleNode = std::make_unique<RuleNode>();
+
+            // --- Auto-attribute logic ---
+            if (peek().type == TokenType::DOT) {
+                std::string className = tokens[current + 1].lexeme;
+                if (parent->attributes.find("class") == parent->attributes.end()) {
+                    parent->addAttribute("class", className);
+                } else {
+                    parent->attributes["class"] += " " + className;
+                }
+            } else if (peek().type == TokenType::HASH) {
+                std::string idName = tokens[current + 1].lexeme;
+                parent->addAttribute("id", idName); // Overwrites if exists
+            }
+
+            while (!check(TokenType::LEFT_BRACE) && !isAtEnd()) {
+                ruleNode->selectorTokens.push_back(advance());
+            }
+            match({TokenType::LEFT_BRACE});
+            while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                auto declNode = std::make_unique<DeclarationNode>(advance().lexeme); // property
+                match({TokenType::COLON});
+                while (!check(TokenType::SEMICOLON) && !check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                    declNode->valueTokens.push_back(advance());
+                }
+                match({TokenType::SEMICOLON});
+                ruleNode->addDeclaration(std::move(declNode));
+            }
+            match({TokenType::RIGHT_BRACE});
+            styleNode->addChild(std::move(ruleNode));
+        } else {
+            // It's a DeclarationNode
+            auto declNode = std::make_unique<DeclarationNode>(advance().lexeme); // property
+            match({TokenType::COLON});
+            while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                declNode->valueTokens.push_back(advance());
+            }
+            match({TokenType::SEMICOLON});
+            styleNode->addChild(std::move(declNode));
+        }
+    }
+
+    if (!match({TokenType::RIGHT_BRACE})) {
+        throw std::runtime_error("Expected '}' to close style block on line " + std::to_string(peek().line));
+    }
+
+    return styleNode;
 }
 
 

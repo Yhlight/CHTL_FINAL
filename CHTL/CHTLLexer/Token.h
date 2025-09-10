@@ -15,6 +15,18 @@ enum class TokenType {
     EQUAL, // =
     SLASH, // /
     STAR, // *
+    PLUS, // +
+    MINUS, // -
+    PERCENT, // %
+    GREATER, // >
+    LESS, // <
+    AMPERSAND, // &
+    DOT, // .
+    HASH, // #
+    QUESTION, // ?
+
+    // Multi-character tokens
+    STAR_STAR, // **
 
     // Comment markers
     LINE_COMMENT, // //
@@ -25,6 +37,7 @@ enum class TokenType {
     // Literals
     IDENTIFIER,
     STRING,
+    NUMBER,
     UNQUOTED_LITERAL,
 
     // Keywords (will be expanded later)

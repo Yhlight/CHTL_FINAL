@@ -1,0 +1,21 @@
+html {
+    head {
+        title { text: "Styling Test"; }
+    }
+    body {
+        div {
+            style {
+                // This will become an inline style
+                color: blue;
+                font-size: 16px;
+
+                // This will be hoisted to a global <style> tag
+                .special {
+                    font-weight: bold;
+                }
+            }
+
+            text: "This div should have inline styles.";
+        }
+    }
+}

@@ -31,8 +31,8 @@ private:
     void addToken(TokenType type, const std::string& literal);
 
     void scanString(char quoteType);
+    void scanNumber();
     void scanIdentifier();
-    void scanComment();
 
 };
 

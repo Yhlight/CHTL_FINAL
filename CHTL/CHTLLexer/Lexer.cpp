@@ -70,8 +70,26 @@ void Lexer::scanString(char quoteType) {
     addToken(TokenType::STRING);
 }
 
+void Lexer::scanNumber() {
+    while (isdigit(peek())) {
+        advance();
+    }
+
+    // Look for a fractional part.
+    if (peek() == '.' && isdigit(peekNext())) {
+        // Consume the "."
+        advance();
+
+        while (isdigit(peek())) {
+            advance();
+        }
+    }
+
+    addToken(TokenType::NUMBER);
+}
+
 void Lexer::scanIdentifier() {
-    while (isalnum(peek()) || peek() == '_') {
+    while (isalnum(peek()) || peek() == '_' || peek() == '-') {
         advance();
     }
 
@@ -97,7 +115,18 @@ void Lexer::scanToken() {
         case ';': addToken(TokenType::SEMICOLON); break;
         case '@': addToken(TokenType::AT); break;
         case '=': addToken(TokenType::EQUAL); break;
-        case '*': addToken(TokenType::STAR); break;
+        case '+': addToken(TokenType::PLUS); break;
+        case '%': addToken(TokenType::PERCENT); break;
+        case '>': addToken(TokenType::GREATER); break;
+        case '<': addToken(TokenType::LESS); break;
+        case '&': addToken(TokenType::AMPERSAND); break;
+        case '.': addToken(TokenType::DOT); break;
+        case '#': addToken(TokenType::HASH); break;
+        case '?': addToken(TokenType::QUESTION); break;
+
+        case '*':
+            addToken(match('*') ? TokenType::STAR_STAR : TokenType::STAR);
+            break;
 
         case '-':
             if (match('-')) {
@@ -106,6 +135,8 @@ void Lexer::scanToken() {
                 // The parser will decide how to handle this.
                 tokens.push_back({TokenType::GEN_COMMENT, "--", line});
                 start = current; // Reset start for the next token.
+            } else {
+                addToken(TokenType::MINUS);
             }
             break;
 
@@ -146,6 +177,8 @@ void Lexer::scanToken() {
         default:
             if (isalpha(c) || c == '_') {
                 scanIdentifier();
+            } else if (isdigit(c)) {
+                scanNumber();
             } else {
                 addToken(TokenType::UNKNOWN);
             }

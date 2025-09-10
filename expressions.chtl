@@ -1,0 +1,14 @@
+html {
+    body {
+        div {
+            style {
+                width: 100px + 50 * 2;
+                height: [10 + 20] * 3px;
+                padding: 100 / 2;
+                margin-left: 10 % 3px;
+                font-size: 2 ** 4px;
+                margin-top: -10px;
+            }
+        }
+    }
+}

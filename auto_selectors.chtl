@@ -1,0 +1,33 @@
+html {
+    head {
+        title { text: "Auto Selector Test"; }
+    }
+    body {
+        // This div has no class attribute initially
+        div {
+            style {
+                .box {
+                    width: 100px;
+                }
+
+                // This should be replaced with .box:hover
+                &:hover {
+                    width: 120px;
+                }
+            }
+            text: "I should get a class='box' attribute.";
+        }
+
+        // This p element has an id
+        p {
+            id: my-para;
+            style {
+                // This should be replaced with #my-para::first-letter
+                &::first-letter {
+                    font-size: 200%;
+                }
+            }
+            text: "My first letter should be big.";
+        }
+    }
+}

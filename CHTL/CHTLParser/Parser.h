@@ -4,6 +4,7 @@
 #include "../CHTLLexer/Token.h"
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/ElementNode.h"
+#include "../CHTLNode/StyleNode.h"
 #include <vector>
 #include <memory>
 
@@ -32,6 +33,7 @@ private:
     std::string parseValue();
     std::unique_ptr<TextNode> parseTextNode();
     std::unique_ptr<CommentNode> parseCommentNode();
+    std::unique_ptr<StyleNode> parseStyleNode(ElementNode* parent);
 };
 
 #endif // CHTL_PARSER_H
