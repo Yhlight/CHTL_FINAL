@@ -180,7 +180,6 @@ public:
     void clearPunctuation();
     void clearSyntaxBoundaries();
     void clearCHTLJSSyntax();
-    void clearPlaceholders();
     
     // 优化
     void optimize();

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <iostream>
 
 namespace CHTL {
 
@@ -481,7 +482,7 @@ bool FileSystem::isExecutable(const std::string& path) const {
     
     try {
         std::filesystem::path file(fullPath);
-        return (file.status().permissions() & std::filesystem::perms::owner_exec) != std::filesystem::perms::none;
+        return (std::filesystem::status(file).permissions() & std::filesystem::perms::owner_exec) != std::filesystem::perms::none;
     } catch (const std::exception& e) {
         if (debugMode) {
             std::cerr << "Error checking if path is executable " << fullPath << ": " << e.what() << std::endl;

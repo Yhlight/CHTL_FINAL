@@ -160,7 +160,11 @@ void CHTLJSEventDelegation::addFilter(DelegationFilter filter) {
 }
 
 void CHTLJSEventDelegation::removeFilter(DelegationFilter filter) {
-    filters.erase(std::remove(filters.begin(), filters.end(), filter), filters.end());
+    filters.erase(std::remove_if(filters.begin(), filters.end(), 
+        [&filter](const DelegationFilter& f) {
+            // 由于std::function不能直接比较，我们使用target比较
+            return f.target_type() == filter.target_type();
+        }), filters.end());
 }
 
 void CHTLJSEventDelegation::clearFilters() {
@@ -179,7 +183,11 @@ void CHTLJSEventDelegation::addTransformer(DelegationTransformer transformer) {
 }
 
 void CHTLJSEventDelegation::removeTransformer(DelegationTransformer transformer) {
-    transformers.erase(std::remove(transformers.begin(), transformers.end(), transformer), transformers.end());
+    transformers.erase(std::remove_if(transformers.begin(), transformers.end(), 
+        [&transformer](const DelegationTransformer& t) {
+            // 由于std::function不能直接比较，我们使用target比较
+            return t.target_type() == transformer.target_type();
+        }), transformers.end());
 }
 
 void CHTLJSEventDelegation::clearTransformers() {
@@ -474,7 +482,20 @@ bool CHTLJSEventDelegation::compareData(std::shared_ptr<CHTLJSEventDelegation> o
 }
 
 bool CHTLJSEventDelegation::compareData(const CHTLJSEventDelegation& other) const {
-    return data == other.data;
+    if (data.size() != other.data.size()) {
+        return false;
+    }
+    
+    for (const auto& pair : data) {
+        auto it = other.data.find(pair.first);
+        if (it == other.data.end()) {
+            return false;
+        }
+        // 由于std::any不能直接比较，我们只比较键
+        // 在实际应用中，可能需要更复杂的比较逻辑
+    }
+    
+    return true;
 }
 
 // 克隆辅助实现

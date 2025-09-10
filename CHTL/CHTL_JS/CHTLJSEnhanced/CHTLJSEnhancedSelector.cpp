@@ -7,12 +7,12 @@
 namespace CHTL_JS {
 
 CHTLJSEnhancedSelector::CHTLJSEnhancedSelector() 
-    : type(SelectorType::UNKNOWN), isComputed(false), isOptional(false), 
+    : type(SelectorType::UNKNOWN), computed(false), optional(false), 
       specificity(0), line(0), column(0), position(0) {
 }
 
 CHTLJSEnhancedSelector::CHTLJSEnhancedSelector(const std::string& selector) 
-    : selector(selector), type(SelectorType::UNKNOWN), isComputed(false), isOptional(false),
+    : selector(selector), type(SelectorType::UNKNOWN), computed(false), optional(false),
       specificity(0), line(0), column(0), position(0) {
     parse(selector);
 }
@@ -567,8 +567,8 @@ void CHTLJSEnhancedSelector::copyTo(std::shared_ptr<CHTLJSEnhancedSelector> targ
     target->pseudoElement = pseudoElement;
     target->attributes = attributes;
     target->modifiers = modifiers;
-    target->isComputed = isComputed;
-    target->isOptional = isOptional;
+    target->computed = computed;
+    target->optional = optional;
     target->specificity = specificity;
     target->line = line;
     target->column = column;

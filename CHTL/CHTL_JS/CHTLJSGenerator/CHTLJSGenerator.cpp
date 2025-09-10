@@ -1,4 +1,5 @@
 #include "CHTLJSGenerator.h"
+#include <iostream>
 #include <sstream>
 #include <algorithm>
 #include <cctype>
@@ -432,17 +433,6 @@ void CHTLJSGenerator::printDebugInfo() const {
     std::cout << getDebugInfo() << std::endl;
 }
 
-int CHTLJSGenerator::getGeneratedLines() const {
-    return generatedLines;
-}
-
-int CHTLJSGenerator::getGeneratedCharacters() const {
-    return generatedCharacters;
-}
-
-std::map<std::string, int> CHTLJSGenerator::getFeatureUsage() const {
-    return featureUsage;
-}
 
 void CHTLJSGenerator::resetStatistics() {
     generatedLines = 0;
@@ -650,7 +640,7 @@ std::string CHTLJSGenerator::generateDirectives(std::shared_ptr<CHTLJSBaseNode> 
 }
 
 // 类型转换实现
-std::string CHTLJSGenerator::convertToJavaScript(std::shared_ptr<CHTLJSBaseNode> node) const {
+std::string CHTLJSGenerator::convertToJavaScript(std::shared_ptr<CHTLJSBaseNode> node) {
     if (!node) return "";
     
     switch (node->getNodeType()) {
@@ -669,7 +659,7 @@ std::string CHTLJSGenerator::convertToCHTLJS(std::shared_ptr<CHTLJSBaseNode> nod
     return node ? node->getValue() : "";
 }
 
-std::string CHTLJSGenerator::convertToHTML(std::shared_ptr<CHTLJSBaseNode> node) const {
+std::string CHTLJSGenerator::convertToHTML(std::shared_ptr<CHTLJSBaseNode> node) {
     return node ? node->getValue() : "";
 }
 
@@ -686,7 +676,7 @@ std::string CHTLJSGenerator::processEnhancedSelector(const std::string& selector
     return result;
 }
 
-std::string CHTLJSGenerator::processVirtualObject(const std::string& name, std::shared_ptr<CHTLJSBaseNode> value) const {
+std::string CHTLJSGenerator::processVirtualObject(const std::string& name, std::shared_ptr<CHTLJSBaseNode> value) {
     std::ostringstream oss;
     oss << "const " << name << " = ";
     
@@ -699,7 +689,7 @@ std::string CHTLJSGenerator::processVirtualObject(const std::string& name, std::
     return oss.str();
 }
 
-std::string CHTLJSGenerator::processListenExpression(std::shared_ptr<CHTLJSBaseNode> listen) const {
+std::string CHTLJSGenerator::processListenExpression(std::shared_ptr<CHTLJSBaseNode> listen) {
     std::ostringstream oss;
     oss << "{\n";
     

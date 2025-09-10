@@ -27,13 +27,13 @@ public:
     
     // 代码生成
     static std::string generateCode(const std::vector<CJMODArg>& args);
-    static std::string generateCode(const std::string& template, const std::vector<CJMODArg>& args);
-    static std::string generateCode(const std::string& template, const std::map<std::string, std::any>& variables);
+    static std::string generateCode(const std::string& templateStr, const std::vector<CJMODArg>& args);
+    static std::string generateCode(const std::string& templateStr, const std::map<std::string, std::any>& variables);
     
     // 模板处理
-    static std::string processTemplate(const std::string& template, const std::vector<CJMODArg>& args);
-    static std::string processTemplate(const std::string& template, const std::map<std::string, std::any>& variables);
-    static std::string processTemplate(const std::string& template, const std::string& pattern, const std::string& replacement);
+    static std::string processTemplate(const std::string& templateStr, const std::vector<CJMODArg>& args);
+    static std::string processTemplate(const std::string& templateStr, const std::map<std::string, std::any>& variables);
+    static std::string processTemplate(const std::string& templateStr, const std::string& pattern, const std::string& replacement);
     
     // 变量替换
     static std::string replaceVariables(const std::string& code, const std::map<std::string, std::any>& variables);
@@ -202,13 +202,13 @@ private:
     
     // 代码生成内部方法
     static std::string generateCodeInternal(const std::vector<CJMODArg>& args);
-    static std::string generateCodeInternal(const std::string& template, const std::vector<CJMODArg>& args);
-    static std::string generateCodeInternal(const std::string& template, const std::map<std::string, std::any>& variables);
+    static std::string generateCodeInternal(const std::string& templateStr, const std::vector<CJMODArg>& args);
+    static std::string generateCodeInternal(const std::string& templateStr, const std::map<std::string, std::any>& variables);
     
     // 模板处理内部方法
-    static std::string processTemplateInternal(const std::string& template, const std::vector<CJMODArg>& args);
-    static std::string processTemplateInternal(const std::string& template, const std::map<std::string, std::any>& variables);
-    static std::string processTemplateInternal(const std::string& template, const std::string& pattern, const std::string& replacement);
+    static std::string processTemplateInternal(const std::string& templateStr, const std::vector<CJMODArg>& args);
+    static std::string processTemplateInternal(const std::string& templateStr, const std::map<std::string, std::any>& variables);
+    static std::string processTemplateInternal(const std::string& templateStr, const std::string& pattern, const std::string& replacement);
     
     // 变量替换内部方法
     static std::string replaceVariablesInternal(const std::string& code, const std::map<std::string, std::any>& variables);

@@ -33,25 +33,25 @@ std::string CJMODGenerator::generateCode(const std::vector<CJMODArg>& args) {
     return generateCodeInternal(args);
 }
 
-std::string CJMODGenerator::generateCode(const std::string& template, const std::vector<CJMODArg>& args) {
-    return generateCodeInternal(template, args);
+std::string CJMODGenerator::generateCode(const std::string& templateStr, const std::vector<CJMODArg>& args) {
+    return generateCodeInternal(templateStr, args);
 }
 
-std::string CJMODGenerator::generateCode(const std::string& template, const std::map<std::string, std::any>& variables) {
-    return generateCodeInternal(template, variables);
+std::string CJMODGenerator::generateCode(const std::string& templateStr, const std::map<std::string, std::any>& variables) {
+    return generateCodeInternal(templateStr, variables);
 }
 
 // 模板处理实现
-std::string CJMODGenerator::processTemplate(const std::string& template, const std::vector<CJMODArg>& args) {
-    return processTemplateInternal(template, args);
+std::string CJMODGenerator::processTemplate(const std::string& templateStr, const std::vector<CJMODArg>& args) {
+    return processTemplateInternal(templateStr, args);
 }
 
-std::string CJMODGenerator::processTemplate(const std::string& template, const std::map<std::string, std::any>& variables) {
-    return processTemplateInternal(template, variables);
+std::string CJMODGenerator::processTemplate(const std::string& templateStr, const std::map<std::string, std::any>& variables) {
+    return processTemplateInternal(templateStr, variables);
 }
 
-std::string CJMODGenerator::processTemplate(const std::string& template, const std::string& pattern, const std::string& replacement) {
-    return processTemplateInternal(template, pattern, replacement);
+std::string CJMODGenerator::processTemplate(const std::string& templateStr, const std::string& pattern, const std::string& replacement) {
+    return processTemplateInternal(templateStr, pattern, replacement);
 }
 
 // 变量替换实现
@@ -365,8 +365,8 @@ std::string CJMODGenerator::generateCodeInternal(const std::vector<CJMODArg>& ar
     return ss.str();
 }
 
-std::string CJMODGenerator::generateCodeInternal(const std::string& template, const std::vector<CJMODArg>& args) {
-    std::string result = template;
+std::string CJMODGenerator::generateCodeInternal(const std::string& templateStr, const std::vector<CJMODArg>& args) {
+    std::string result = templateStr;
     for (const auto& arg : args) {
         std::string placeholder = arg.getName();
         std::string replacement = arg.toString();
@@ -379,8 +379,8 @@ std::string CJMODGenerator::generateCodeInternal(const std::string& template, co
     return result;
 }
 
-std::string CJMODGenerator::generateCodeInternal(const std::string& template, const std::map<std::string, std::any>& variables) {
-    std::string result = template;
+std::string CJMODGenerator::generateCodeInternal(const std::string& templateStr, const std::map<std::string, std::any>& variables) {
+    std::string result = templateStr;
     for (const auto& var : variables) {
         std::string placeholder = var.first;
         std::string replacement;
@@ -404,16 +404,16 @@ std::string CJMODGenerator::generateCodeInternal(const std::string& template, co
 }
 
 // 模板处理内部方法实现
-std::string CJMODGenerator::processTemplateInternal(const std::string& template, const std::vector<CJMODArg>& args) {
-    return generateCodeInternal(template, args);
+std::string CJMODGenerator::processTemplateInternal(const std::string& templateStr, const std::vector<CJMODArg>& args) {
+    return generateCodeInternal(templateStr, args);
 }
 
-std::string CJMODGenerator::processTemplateInternal(const std::string& template, const std::map<std::string, std::any>& variables) {
-    return generateCodeInternal(template, variables);
+std::string CJMODGenerator::processTemplateInternal(const std::string& templateStr, const std::map<std::string, std::any>& variables) {
+    return generateCodeInternal(templateStr, variables);
 }
 
-std::string CJMODGenerator::processTemplateInternal(const std::string& template, const std::string& pattern, const std::string& replacement) {
-    std::string result = template;
+std::string CJMODGenerator::processTemplateInternal(const std::string& templateStr, const std::string& pattern, const std::string& replacement) {
+    std::string result = templateStr;
     size_t pos = 0;
     while ((pos = result.find(pattern, pos)) != std::string::npos) {
         result.replace(pos, pattern.length(), replacement);

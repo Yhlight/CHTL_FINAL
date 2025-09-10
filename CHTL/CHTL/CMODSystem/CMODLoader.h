@@ -57,7 +57,7 @@ public:
     // 缓存管理
     void put(const std::string& key, std::shared_ptr<CMODModule> module);
     std::shared_ptr<CMODModule> get(const std::string& key) const;
-    bool has(const std::string& key) const;
+    bool has(const std::string& key);
     void remove(const std::string& key);
     void clear();
     

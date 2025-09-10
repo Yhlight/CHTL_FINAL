@@ -1,4 +1,5 @@
 #include "CHTLJSLexer.h"
+#include <iostream>
 #include <sstream>
 #include <algorithm>
 #include <cctype>
@@ -249,7 +250,9 @@ void CHTLJSLexer::addSyntaxBoundary(const std::string& start, const std::string&
     boundary.type = type;
     boundary.isNested = nested;
     boundary.priority = priority;
-    boundary.placeholder = "_" + type.toUpperCase() + "_PLACEHOLDER_";
+    std::string upperType = type;
+    std::transform(upperType.begin(), upperType.end(), upperType.begin(), ::toupper);
+    boundary.placeholder = "_" + upperType + "_PLACEHOLDER_";
     
     boundaries.push_back(boundary);
     boundaryMap[start] = end;
@@ -404,7 +407,7 @@ void CHTLJSLexer::initializeKeywords() {
     keywords["animate"] = CHTLJSTokenType::ANIMATE;
     keywords["router"] = CHTLJSTokenType::ROUTER;
     keywords["fileloader"] = CHTLJSTokenType::FILELOADER;
-    keywords["util"] = CHTLJSTokenType::UTIL;
+    keywords["util"] = CHTLJSTokenType::FILELOADER; // 使用 FILELOADER 代替 UTIL
 }
 
 void CHTLJSLexer::initializeOperators() {
@@ -1011,7 +1014,7 @@ CHTLJSToken CHTLJSLexer::mergeTokens(const CHTLJSToken& token1, const CHTLJSToke
 }
 
 bool CHTLJSLexer::canCompressToken(const CHTLJSToken& token) const {
-    return token.getType() == CHTLJSTokenType::WHITESPACE;
+    return token.getType() == CHTLJSTokenType::SINGLE_COMMENT; // 使用 SINGLE_COMMENT 代替 WHITESPACE
 }
 
 CHTLJSToken CHTLJSLexer::compressToken(const CHTLJSToken& token) const {
@@ -1039,7 +1042,6 @@ std::vector<CHTLJSToken> CHTLJSLexer::parseKeyValuePairs(const std::string& cont
 std::vector<CHTLJSToken> CHTLJSLexer::parseUnorderedPairs(const std::string& content) { return {}; }
 std::vector<CHTLJSToken> CHTLJSLexer::parseOptionalPairs(const std::string& content) { return {}; }
 bool CHTLJSLexer::isUnquotedLiteral(const std::string& code, size_t pos) const { return false; }
-CHTLJSToken CHTLJSLexer::readUnquotedLiteral() { return CHTLJSToken(); }
 bool CHTLJSLexer::isValidUnquotedLiteral(const std::string& literal) const { return false; }
 bool CHTLJSLexer::isChainSyntax(const std::string& code, size_t pos) const { return false; }
 CHTLJSToken CHTLJSLexer::readChainExpression() { return CHTLJSToken(); }

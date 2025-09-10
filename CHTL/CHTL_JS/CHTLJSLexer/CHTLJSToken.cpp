@@ -56,7 +56,7 @@ bool CHTLJSToken::isKeyword() const {
         case CHTLJSTokenType::VAR:
         case CHTLJSTokenType::TRUE:
         case CHTLJSTokenType::FALSE:
-        case CHTLJSTokenType::NULL:
+        case CHTLJSTokenType::NULL_VALUE:
         case CHTLJSTokenType::UNDEFINED:
         case CHTLJSTokenType::THIS:
         case CHTLJSTokenType::NEW:
@@ -151,7 +151,6 @@ std::string CHTLJSToken::getTypeName() const {
         case CHTLJSTokenType::ANIMATE: return "ANIMATE";
         case CHTLJSTokenType::ROUTER: return "ROUTER";
         case CHTLJSTokenType::FILELOADER: return "FILELOADER";
-        case CHTLJSTokenType::UTIL: return "UTIL";
         case CHTLJSTokenType::IF: return "IF";
         case CHTLJSTokenType::ELSE: return "ELSE";
         case CHTLJSTokenType::FOR: return "FOR";
@@ -169,7 +168,7 @@ std::string CHTLJSToken::getTypeName() const {
         case CHTLJSTokenType::VAR: return "VAR";
         case CHTLJSTokenType::TRUE: return "TRUE";
         case CHTLJSTokenType::FALSE: return "FALSE";
-        case CHTLJSTokenType::NULL: return "NULL";
+        case CHTLJSTokenType::NULL_VALUE: return "NULL";
         case CHTLJSTokenType::UNDEFINED: return "UNDEFINED";
         case CHTLJSTokenType::THIS: return "THIS";
         case CHTLJSTokenType::NEW: return "NEW";
@@ -386,11 +385,38 @@ std::string CHTLJSToken::convertToCHTLJS() const {
 std::string CHTLJSToken::convertToHTML() const {
     // 转换为HTML实体
     std::string result = value;
-    std::replace(result.begin(), result.end(), '<', '&lt;');
-    std::replace(result.begin(), result.end(), '>', '&gt;');
-    std::replace(result.begin(), result.end(), '&', '&amp;');
-    std::replace(result.begin(), result.end(), '"', '&quot;');
-    std::replace(result.begin(), result.end(), '\'', '&#39;');
+    
+    // 替换HTML特殊字符
+    size_t pos = 0;
+    while ((pos = result.find('<', pos)) != std::string::npos) {
+        result.replace(pos, 1, "&lt;");
+        pos += 4;
+    }
+    
+    pos = 0;
+    while ((pos = result.find('>', pos)) != std::string::npos) {
+        result.replace(pos, 1, "&gt;");
+        pos += 4;
+    }
+    
+    pos = 0;
+    while ((pos = result.find('&', pos)) != std::string::npos) {
+        result.replace(pos, 1, "&amp;");
+        pos += 5;
+    }
+    
+    pos = 0;
+    while ((pos = result.find('"', pos)) != std::string::npos) {
+        result.replace(pos, 1, "&quot;");
+        pos += 6;
+    }
+    
+    pos = 0;
+    while ((pos = result.find('\'', pos)) != std::string::npos) {
+        result.replace(pos, 1, "&#39;");
+        pos += 5;
+    }
+    
     return result;
 }
 

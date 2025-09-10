@@ -210,13 +210,15 @@ private:
     std::shared_ptr<CHTLJSBaseNode> createNode(CHTLJSNodeType type, const std::string& name = "", const std::string& value = "");
     std::shared_ptr<CHTLJSBaseNode> createLiteralNode(const std::string& value, const std::string& type = "string");
     std::shared_ptr<CHTLJSBaseNode> createIdentifierNode(const std::string& name);
-    std::shared_ptr<CHTLJSBaseNode> createBinaryExpressionNode(const std::string& operator, std::shared_ptr<CHTLJSBaseNode> left, std::shared_ptr<CHTLJSBaseNode> right);
-    std::shared_ptr<CHTLJSBaseNode> createUnaryExpressionNode(const std::string& operator, std::shared_ptr<CHTLJSBaseNode> operand);
+    std::shared_ptr<CHTLJSBaseNode> createBinaryExpressionNode(const std::string& op, std::shared_ptr<CHTLJSBaseNode> left, std::shared_ptr<CHTLJSBaseNode> right);
+    std::shared_ptr<CHTLJSBaseNode> createUnaryExpressionNode(const std::string& op, std::shared_ptr<CHTLJSBaseNode> operand);
     std::shared_ptr<CHTLJSBaseNode> createCallExpressionNode(std::shared_ptr<CHTLJSBaseNode> callee, std::vector<std::shared_ptr<CHTLJSBaseNode>> arguments);
     std::shared_ptr<CHTLJSBaseNode> createMemberExpressionNode(std::shared_ptr<CHTLJSBaseNode> object, std::shared_ptr<CHTLJSBaseNode> property, bool computed = false);
     
     // 特殊语法解析辅助
     std::vector<std::shared_ptr<CHTLJSBaseNode>> parseParameterList();
+    std::shared_ptr<CHTLJSBaseNode> parseCHTLJSSyntax();
+    void skipWhitespace();
     std::vector<std::shared_ptr<CHTLJSBaseNode>> parseArgumentList();
     std::vector<std::shared_ptr<CHTLJSBaseNode>> parseArrayElements();
     std::vector<std::shared_ptr<CHTLJSBaseNode>> parseObjectProperties();

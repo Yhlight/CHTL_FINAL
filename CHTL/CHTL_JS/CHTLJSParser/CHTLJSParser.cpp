@@ -1,4 +1,5 @@
 #include "CHTLJSParser.h"
+#include <iostream>
 #include <sstream>
 #include <algorithm>
 #include <cctype>
@@ -848,7 +849,7 @@ bool CHTLJSParser::isDeclarationStart() const {
            token.getType() == CHTLJSTokenType::LET ||
            token.getType() == CHTLJSTokenType::VAR ||
            token.getType() == CHTLJSTokenType::FUNCTION ||
-           token.getType() == CHTLJSTokenType::CLASS;
+           token.getType() == CHTLJSTokenType::CASE;
 }
 
 bool CHTLJSParser::isCHTLJSSyntaxStart() const {
@@ -859,8 +860,7 @@ bool CHTLJSParser::isCHTLJSSyntaxStart() const {
            token.getType() == CHTLJSTokenType::DELEGATE ||
            token.getType() == CHTLJSTokenType::ANIMATE ||
            token.getType() == CHTLJSTokenType::ROUTER ||
-           token.getType() == CHTLJSTokenType::FILELOADER ||
-           token.getType() == CHTLJSTokenType::UTIL;
+           token.getType() == CHTLJSTokenType::FILELOADER;
 }
 
 bool CHTLJSParser::isPrimaryExpressionStart() const {
@@ -1123,15 +1123,15 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::createIdentifierNode(const std::st
     return createNode(CHTLJSNodeType::IDENTIFIER, name);
 }
 
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::createBinaryExpressionNode(const std::string& operator, std::shared_ptr<CHTLJSBaseNode> left, std::shared_ptr<CHTLJSBaseNode> right) {
-    auto node = createNode(CHTLJSNodeType::BINARY_EXPRESSION, "binary", operator);
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::createBinaryExpressionNode(const std::string& op, std::shared_ptr<CHTLJSBaseNode> left, std::shared_ptr<CHTLJSBaseNode> right) {
+    auto node = createNode(CHTLJSNodeType::BINARY_EXPRESSION, "binary", op);
     node->addChild(left);
     node->addChild(right);
     return node;
 }
 
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::createUnaryExpressionNode(const std::string& operator, std::shared_ptr<CHTLJSBaseNode> operand) {
-    auto node = createNode(CHTLJSNodeType::UNARY_EXPRESSION, "unary", operator);
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::createUnaryExpressionNode(const std::string& op, std::shared_ptr<CHTLJSBaseNode> operand) {
+    auto node = createNode(CHTLJSNodeType::UNARY_EXPRESSION, "unary", op);
     node->addChild(operand);
     return node;
 }
@@ -1155,6 +1155,14 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::createMemberExpressionNode(std::sh
 
 // 其他未实现的方法
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseCHTLJSSyntax() { return nullptr; }
+
+void CHTLJSParser::skipWhitespace() {
+    while (currentTokenIndex < tokens.size() && 
+           (tokens[currentTokenIndex].getType() == CHTLJSTokenType::SINGLE_COMMENT ||
+            tokens[currentTokenIndex].getType() == CHTLJSTokenType::MULTI_COMMENT)) {
+        advance();
+    }
+}
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseDeclarationSyntax(const std::string& keyword) {
     // CHTL JS只支持特定的声明式语法
     if (keyword == "listen") {
@@ -1749,7 +1757,7 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::createChainExpressionNode(const st
         return nullptr;
     }
     
-    auto chain = createNode(CHTLJSNodeType::CHAIN_EXPRESSION);
+    auto chain = createNode(CHTLJSNodeType::CALL_EXPRESSION);
     
     for (const auto& element : elements) {
         auto elementNode = createNode(CHTLJSNodeType::IDENTIFIER, element);

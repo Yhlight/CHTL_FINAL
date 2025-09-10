@@ -8,6 +8,9 @@
 #include <any>
 #include <functional>
 
+// 前向声明
+class CJMODModule;
+
 namespace CHTL_JS {
 
 // CJMOD模块类型枚举

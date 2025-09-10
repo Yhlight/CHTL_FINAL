@@ -176,15 +176,15 @@ private:
     std::string generateDirectives(std::shared_ptr<CHTLJSBaseNode> node);
     
     // 类型转换
-    std::string convertToJavaScript(std::shared_ptr<CHTLJSBaseNode> node) const;
+    std::string convertToJavaScript(std::shared_ptr<CHTLJSBaseNode> node);
     std::string convertToCHTLJS(std::shared_ptr<CHTLJSBaseNode> node) const;
-    std::string convertToHTML(std::shared_ptr<CHTLJSBaseNode> node) const;
+    std::string convertToHTML(std::shared_ptr<CHTLJSBaseNode> node);
     std::string convertToCSS(std::shared_ptr<CHTLJSBaseNode> node) const;
     
     // 特殊语法处理
     std::string processEnhancedSelector(const std::string& selector) const;
-    std::string processVirtualObject(const std::string& name, std::shared_ptr<CHTLJSBaseNode> value) const;
-    std::string processListenExpression(std::shared_ptr<CHTLJSBaseNode> listen) const;
+    std::string processVirtualObject(const std::string& name, std::shared_ptr<CHTLJSBaseNode> value);
+    std::string processListenExpression(std::shared_ptr<CHTLJSBaseNode> listen);
     std::string processDelegateExpression(std::shared_ptr<CHTLJSBaseNode> delegate) const;
     std::string processAnimateExpression(std::shared_ptr<CHTLJSBaseNode> animate) const;
     std::string processRouterExpression(std::shared_ptr<CHTLJSBaseNode> router) const;

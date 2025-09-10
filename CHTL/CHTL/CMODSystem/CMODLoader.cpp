@@ -39,7 +39,7 @@ std::shared_ptr<CMODModule> ModuleCache::get(const std::string& key) const {
     return nullptr;
 }
 
-bool ModuleCache::has(const std::string& key) const {
+bool ModuleCache::has(const std::string& key) {
     std::lock_guard<std::mutex> lock(mutex);
     
     auto it = cache.find(key);
@@ -594,7 +594,7 @@ LoadResult CMODLoader::loadModule(const std::string& path, const LoadOptions& op
 LoadResult CMODLoader::loadModuleSync(const std::string& path, const LoadOptions& options) {
     auto start = std::chrono::steady_clock::now();
     
-    std::string resolvedPath = findModuleFile(path);
+    std::string resolvedPath = findModuleFile(path, "");
     if (resolvedPath.empty()) {
         return LoadResult(false, nullptr, "Module not found: " + path);
     }
@@ -739,7 +739,7 @@ DefaultCMODLoader::DefaultCMODLoader() {
 
 DefaultCMODLoader::~DefaultCMODLoader() = default;
 
-bool DefaultCMODLoader::canLoad(const std::string& path) const {
+bool DefaultCMODLoader::canLoad(const std::string& path) {
     std::filesystem::path filePath(path);
     std::string extension = filePath.extension().string();
     
@@ -775,7 +775,7 @@ std::shared_ptr<CMODModule> DefaultCMODLoader::load(const std::string& path) {
     }
 }
 
-std::vector<std::string> DefaultCMODLoader::getSupportedExtensions() const {
+std::vector<std::string> DefaultCMODLoader::getSupportedExtensions() {
     return supportedExtensions;
 }
 

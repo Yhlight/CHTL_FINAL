@@ -25,7 +25,7 @@ enum class SelectorType {
     UNKNOWN
 };
 
-class CHTLJSEnhancedSelector {
+class CHTLJSEnhancedSelector : public std::enable_shared_from_this<CHTLJSEnhancedSelector> {
 private:
     std::string selector;
     SelectorType type;
@@ -42,8 +42,8 @@ private:
     // 选择器属性
     std::map<std::string, std::string> attributes;
     std::vector<std::string> modifiers;
-    bool isComputed;
-    bool isOptional;
+    bool computed;
+    bool optional;
     int specificity;
     
     // 位置信息
@@ -113,11 +113,11 @@ public:
     bool hasModifier(const std::string& modifier) const;
     
     // 选择器属性
-    bool isComputed() const { return isComputed; }
-    void setComputed(bool computed) { isComputed = computed; }
+    bool isComputed() const { return computed; }
+    void setComputed(bool computed) { this->computed = computed; }
     
-    bool isOptional() const { return isOptional; }
-    void setOptional(bool optional) { isOptional = optional; }
+    bool isOptional() const { return optional; }
+    void setOptional(bool optional) { this->optional = optional; }
     
     int getSpecificity() const { return specificity; }
     void setSpecificity(int specificity) { this->specificity = specificity; }

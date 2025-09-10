@@ -177,12 +177,12 @@ std::string CHTLJSIOStream::toYAML() const {
     return oss.str();
 }
 
-CHTLJSIOStream CHTLJSIOStream::clone() const {
-    CHTLJSIOStream cloned;
-    cloned.inputPath = inputPath;
-    cloned.outputPath = outputPath;
-    cloned.buffer.str(buffer.str());
-    cloned.debugMode = debugMode;
+std::shared_ptr<CHTLJSIOStream> CHTLJSIOStream::clone() const {
+    auto cloned = std::make_shared<CHTLJSIOStream>();
+    cloned->inputPath = inputPath;
+    cloned->outputPath = outputPath;
+    cloned->buffer.str(buffer.str());
+    cloned->debugMode = debugMode;
     return cloned;
 }
 

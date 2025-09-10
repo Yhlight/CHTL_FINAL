@@ -221,7 +221,6 @@ private:
     
     // 无修饰字面量处理
     bool isUnquotedLiteral(const std::string& code, size_t pos) const;
-    CHTLJSToken readUnquotedLiteral();
     bool isValidUnquotedLiteral(const std::string& literal) const;
     
     // 链式语法处理

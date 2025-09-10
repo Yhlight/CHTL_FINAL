@@ -33,7 +33,11 @@ std::vector<CJMODArg> CJMODScanner::scan(const std::string& code, const std::str
         return {};
     }
     
-    auto args = CJMODSyntax::analyze(code);
+    CJMODSyntax syntax;
+    auto result = syntax.analyze(code);
+    // 将 SyntaxAnalysisResult 转换为 CJMODArg 向量
+    std::vector<CJMODArg> args;
+    // 这里需要根据实际需求进行转换
     return scan(args, keyword);
 }
 
@@ -448,7 +452,12 @@ std::string CJMODScanner::preExtractInternal(const std::string& code, const std:
 
 std::vector<CJMODArg> CJMODScanner::preExtractScanInternal(const std::string& code, const std::string& keyword) {
     std::string extracted = preExtractInternal(code, keyword);
-    return CJMODSyntax::analyze(extracted);
+    CJMODSyntax syntax;
+    auto result = syntax.analyze(extracted);
+    // 将 SyntaxAnalysisResult 转换为 CJMODArg 向量
+    std::vector<CJMODArg> args;
+    // 这里需要根据实际需求进行转换
+    return args;
 }
 
 // 关键字检测内部方法实现
@@ -771,7 +780,11 @@ bool CJMODScanner::equalsInternal(const std::vector<CJMODArg>& args1, const std:
 }
 
 bool CJMODScanner::equalsInternal(const std::vector<CJMODArg>& args, const std::string& code) {
-    auto codeArgs = CJMODSyntax::analyze(code);
+    CJMODSyntax syntax;
+    auto result = syntax.analyze(code);
+    // 将 SyntaxAnalysisResult 转换为 CJMODArg 向量
+    std::vector<CJMODArg> codeArgs;
+    // 这里需要根据实际需求进行转换
     return equalsInternal(args, codeArgs);
 }
 

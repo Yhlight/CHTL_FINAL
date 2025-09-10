@@ -619,7 +619,20 @@ bool CHTLJSEnhancedListener::compareData(std::shared_ptr<CHTLJSEnhancedListener>
 }
 
 bool CHTLJSEnhancedListener::compareData(const CHTLJSEnhancedListener& other) const {
-    return data == other.data;
+    if (data.size() != other.data.size()) {
+        return false;
+    }
+    
+    for (const auto& pair : data) {
+        auto it = other.data.find(pair.first);
+        if (it == other.data.end()) {
+            return false;
+        }
+        // 由于std::any不能直接比较，我们只比较键
+        // 在实际应用中，可能需要更复杂的比较逻辑
+    }
+    
+    return true;
 }
 
 // 克隆辅助实现

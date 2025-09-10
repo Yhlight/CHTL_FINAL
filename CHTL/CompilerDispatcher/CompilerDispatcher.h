@@ -7,6 +7,20 @@
 #include <map>
 #include "Common/CommonTypes.h"
 
+// 前向声明
+namespace CHTL {
+    class CHTLLexer;
+    class CHTLParser;
+    class CHTLGenerator;
+    class CHTLJSLexer;
+    class CHTLJSParser;
+    class CHTLJSGenerator;
+    class CSSCompiler;
+    class JSCompiler;
+    class CHTLUnifiedScanner;
+    class CodeMerger;
+}
+
 namespace CHTL {
 
 class CompilerDispatcher {

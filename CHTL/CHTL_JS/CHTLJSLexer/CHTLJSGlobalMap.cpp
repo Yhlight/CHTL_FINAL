@@ -1,4 +1,5 @@
 #include "CHTLJSGlobalMap.h"
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -39,7 +40,7 @@ void CHTLJSGlobalMap::initializeKeywords() {
     addKeyword("var", CHTLJSTokenType::VAR);
     addKeyword("true", CHTLJSTokenType::TRUE);
     addKeyword("false", CHTLJSTokenType::FALSE);
-    addKeyword("null", CHTLJSTokenType::NULL);
+    addKeyword("null", CHTLJSTokenType::NULL_VALUE);
     addKeyword("undefined", CHTLJSTokenType::UNDEFINED);
     addKeyword("this", CHTLJSTokenType::THIS);
     addKeyword("new", CHTLJSTokenType::NEW);

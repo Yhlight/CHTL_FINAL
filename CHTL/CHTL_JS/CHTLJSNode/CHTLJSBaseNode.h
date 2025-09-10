@@ -77,7 +77,7 @@ enum class CHTLJSNodeType {
     UNKNOWN
 };
 
-class CHTLJSBaseNode {
+class CHTLJSBaseNode : public std::enable_shared_from_this<CHTLJSBaseNode> {
 protected:
     CHTLJSNodeType nodeType;
     std::string name;
@@ -253,10 +253,11 @@ public:
     virtual std::string format() const;
     virtual std::string minify() const;
     virtual std::string beautify() const;
-
-protected:
+    
     // 辅助方法
     virtual std::string getNodeTypeName() const;
+
+protected:
     virtual std::string formatIndent(int indent) const;
     virtual std::string formatAttributes() const;
     virtual std::string formatChildren(int indent) const;

@@ -6,11 +6,11 @@
 namespace CHTL_JS {
 
 CHTLJSBaseNode::CHTLJSBaseNode() 
-    : nodeType(CHTLJSNodeType::BASE), line(0), column(0), position(0), isOptional(false), isNullable(false) {
+    : nodeType(CHTLJSNodeType::BASE), line(0), column(0), position(0), optional(false), nullable(false) {
 }
 
 CHTLJSBaseNode::CHTLJSBaseNode(CHTLJSNodeType type, const std::string& name, const std::string& value)
-    : nodeType(type), name(name), value(value), line(0), column(0), position(0), isOptional(false), isNullable(false) {
+    : nodeType(type), name(name), value(value), line(0), column(0), position(0), optional(false), nullable(false) {
 }
 
 // 属性管理实现
@@ -664,8 +664,8 @@ void CHTLJSBaseNode::copyTo(std::shared_ptr<CHTLJSBaseNode> target) const {
     target->column = column;
     target->position = position;
     target->typeAnnotation = typeAnnotation;
-    target->isOptional = isOptional;
-    target->isNullable = isNullable;
+    target->optional = optional;
+    target->nullable = nullable;
     target->scope = scope;
     target->dependencies = dependencies;
     target->metadata = metadata;
