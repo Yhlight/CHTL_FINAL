@@ -39,15 +39,46 @@ bool CommentNode::isValid() const {
 std::string CommentNode::toHTML() const {
     // 根据注释类型生成HTML注释
     if (commentType == CommentType::SINGLE_LINE) {
-        return "<!-- " + value + " -->";
+        // // 注释不会被生成器识别，不生成HTML注释
+        return "";
     } else if (commentType == CommentType::MULTI_LINE) {
-        return "<!-- " + value + " -->";
+        // /* */ 注释不会被生成器识别，不生成HTML注释
+        return "";
     } else if (commentType == CommentType::GENERATOR) {
-        // 生成器注释根据上下文生成不同语言的注释
-        return "<!-- " + value + " -->";
+        // -- 注释会被生成器识别，根据上下文生成不同编程语言类型的注释
+        // 在HTML上下文中，生成HTML注释
+        return toHTMLComment();
     }
     
-    return "<!-- " + value + " -->";
+    return "";
+}
+
+std::string CommentNode::toHTMLComment() const {
+    if (commentType != CommentType::GENERATOR) {
+        return "";
+    }
+    return "<!-- " + getTrimmedContent() + " -->";
+}
+
+std::string CommentNode::toCSSComment() const {
+    if (commentType != CommentType::GENERATOR) {
+        return "";
+    }
+    return "/* " + getTrimmedContent() + " */";
+}
+
+std::string CommentNode::toJSComment() const {
+    if (commentType != CommentType::GENERATOR) {
+        return "";
+    }
+    return "// " + getTrimmedContent();
+}
+
+std::string CommentNode::toVueComment() const {
+    if (commentType != CommentType::GENERATOR) {
+        return "";
+    }
+    return "<!-- " + getTrimmedContent() + " -->";
 }
 
 std::string CommentNode::getDebugInfo() const {

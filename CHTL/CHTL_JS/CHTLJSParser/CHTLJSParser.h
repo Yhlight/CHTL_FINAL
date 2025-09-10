@@ -112,6 +112,7 @@ public:
     // 特殊语法解析
     std::shared_ptr<CHTLJSBaseNode> parseDeclarationSyntax(const std::string& keyword);
     std::shared_ptr<CHTLJSBaseNode> parseKeyValuePairs();
+    std::shared_ptr<CHTLJSBaseNode> parseKeyValuePair();
     std::shared_ptr<CHTLJSBaseNode> parseUnorderedPairs();
     std::shared_ptr<CHTLJSBaseNode> parseOptionalPairs();
     std::shared_ptr<CHTLJSBaseNode> parseChainExpression();

@@ -43,6 +43,12 @@ public:
     // 转换为HTML
     std::string toHTML() const override;
     
+    // 根据上下文生成不同编程语言类型的注释
+    std::string toHTMLComment() const;
+    std::string toCSSComment() const;
+    std::string toJSComment() const;
+    std::string toVueComment() const;
+    
     // 调试信息
     std::string getDebugInfo() const override;
     

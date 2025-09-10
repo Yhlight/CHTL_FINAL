@@ -108,6 +108,11 @@ CHTLJSToken CHTLJSLexer::getNextToken() {
         return readCHTLJSKeyword();
     }
     
+    // 无修饰字面量处理（CHTL JS特有）
+    if (isUnquotedLiteralStart(current)) {
+        return readUnquotedLiteral();
+    }
+    
     // 标识符处理
     if (isLetter(current) || current == '_' || current == '$') {
         return readIdentifier();
@@ -127,6 +132,33 @@ CHTLJSToken CHTLJSLexer::getNextToken() {
     addError("未知字符: " + std::string(1, current));
     advance();
     return CHTLJSToken(CHTLJSTokenType::ERROR, std::string(1, current), line, column, position - 1);
+}
+
+// 无修饰字面量处理
+CHTLJSToken CHTLJSLexer::readUnquotedLiteral() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    std::string value;
+    
+    while (!isAtEnd() && isUnquotedLiteralChar(getCurrentChar())) {
+        value += getCurrentChar();
+        advance();
+    }
+    
+    return CHTLJSToken(CHTLJSTokenType::LITERAL, value, startLine, startColumn, start);
+}
+
+bool CHTLJSLexer::isUnquotedLiteralStart(char c) const {
+    // 无修饰字面量不能以数字、运算符、标点符号开始
+    return !isDigit(c) && !isOperatorChar(c) && !isPunctuationChar(c) && 
+           !isWhitespace(c) && c != '"' && c != '\'' && c != '`' && c != '/';
+}
+
+bool CHTLJSLexer::isUnquotedLiteralChar(char c) const {
+    // 无修饰字面量字符：字母、数字、下划线、连字符、点号等
+    return isAlphaNumeric(c) || c == '_' || c == '-' || c == '.' || c == ':' || c == '@';
 }
 
 CHTLJSToken CHTLJSLexer::peekToken() {

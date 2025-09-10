@@ -453,11 +453,308 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseListenExpression() {
 }
 
 // 其他解析方法的简化实现
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseDelegateExpression() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseAnimateExpression() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseRouterExpression() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseFileloaderExpression() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseUtilExpression() { return nullptr; }
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseDelegateExpression() {
+    if (!matchKeyword("delegate")) {
+        reportUnexpectedToken(getCurrentToken(), "delegate");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 delegate
+    
+    if (!match(CHTLJSTokenType::LEFT_BRACE)) {
+        reportUnexpectedToken(getCurrentToken(), "{");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 {
+    
+    auto delegate = createNode(CHTLJSNodeType::DELEGATE_EXPRESSION);
+    
+    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_BRACE)) {
+        // 解析选择器
+        auto selectorToken = getCurrentToken();
+        if (selectorToken.getType() != CHTLJSTokenType::ENHANCED_SELECTOR) {
+            reportUnexpectedToken(selectorToken, "enhanced selector");
+            return nullptr;
+        }
+        
+        advance(); // 跳过选择器
+        
+        if (!match(CHTLJSTokenType::COLON)) {
+            reportUnexpectedToken(getCurrentToken(), ":");
+            return nullptr;
+        }
+        
+        advance(); // 跳过 :
+        
+        // 解析事件名
+        auto eventToken = getCurrentToken();
+        if (eventToken.getType() != CHTLJSTokenType::IDENTIFIER) {
+            reportUnexpectedToken(eventToken, "event name");
+            return nullptr;
+        }
+        
+        advance(); // 跳过事件名
+        
+        if (!match(CHTLJSTokenType::ARROW)) {
+            reportUnexpectedToken(getCurrentToken(), "->");
+            return nullptr;
+        }
+        
+        advance(); // 跳过 ->
+        
+        // 解析处理器
+        auto handler = parseExpression();
+        if (!handler) {
+            reportUnexpectedToken(getCurrentToken(), "handler");
+            return nullptr;
+        }
+        
+        // 创建事件委托节点
+        auto eventDelegate = createNode(CHTLJSNodeType::OBJECT_EXPRESSION);
+        eventDelegate->setAttribute("selector", selectorToken.getValue());
+        eventDelegate->setAttribute("event", eventToken.getValue());
+        eventDelegate->addChild(handler);
+        delegate->addChild(eventDelegate);
+        
+        if (match(CHTLJSTokenType::COMMA)) {
+            advance(); // 跳过 ,
+        }
+    }
+    
+    if (!match(CHTLJSTokenType::RIGHT_BRACE)) {
+        reportUnexpectedEndOfFile("}");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 }
+    return delegate;
+}
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseAnimateExpression() {
+    if (!matchKeyword("animate")) {
+        reportUnexpectedToken(getCurrentToken(), "animate");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 animate
+    
+    if (!match(CHTLJSTokenType::LEFT_BRACE)) {
+        reportUnexpectedToken(getCurrentToken(), "{");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 {
+    
+    auto animate = createNode(CHTLJSNodeType::ANIMATE_EXPRESSION);
+    
+    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_BRACE)) {
+        // 解析目标选择器
+        auto targetToken = getCurrentToken();
+        if (targetToken.getType() != CHTLJSTokenType::ENHANCED_SELECTOR) {
+            reportUnexpectedToken(targetToken, "enhanced selector");
+            return nullptr;
+        }
+        
+        advance(); // 跳过选择器
+        
+        if (!match(CHTLJSTokenType::COLON)) {
+            reportUnexpectedToken(getCurrentToken(), ":");
+            return nullptr;
+        }
+        
+        advance(); // 跳过 :
+        
+        // 解析动画配置
+        auto config = parseUnorderedPairs();
+        if (!config) {
+            reportUnexpectedToken(getCurrentToken(), "animation config");
+            return nullptr;
+        }
+        
+        // 创建动画节点
+        auto animation = createNode(CHTLJSNodeType::OBJECT_EXPRESSION);
+        animation->setAttribute("target", targetToken.getValue());
+        animation->addChild(config);
+        animate->addChild(animation);
+        
+        if (match(CHTLJSTokenType::COMMA)) {
+            advance(); // 跳过 ,
+        }
+    }
+    
+    if (!match(CHTLJSTokenType::RIGHT_BRACE)) {
+        reportUnexpectedEndOfFile("}");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 }
+    return animate;
+}
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseRouterExpression() {
+    if (!matchKeyword("router")) {
+        reportUnexpectedToken(getCurrentToken(), "router");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 router
+    
+    if (!match(CHTLJSTokenType::LEFT_BRACE)) {
+        reportUnexpectedToken(getCurrentToken(), "{");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 {
+    
+    auto router = createNode(CHTLJSNodeType::ROUTER_EXPRESSION);
+    
+    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_BRACE)) {
+        // 解析路由路径
+        auto pathToken = getCurrentToken();
+        if (pathToken.getType() != CHTLJSTokenType::STRING && pathToken.getType() != CHTLJSTokenType::LITERAL) {
+            reportUnexpectedToken(pathToken, "route path");
+            return nullptr;
+        }
+        
+        advance(); // 跳过路径
+        
+        if (!match(CHTLJSTokenType::ARROW)) {
+            reportUnexpectedToken(getCurrentToken(), "->");
+            return nullptr;
+        }
+        
+        advance(); // 跳过 ->
+        
+        // 解析处理器
+        auto handler = parseExpression();
+        if (!handler) {
+            reportUnexpectedToken(getCurrentToken(), "handler");
+            return nullptr;
+        }
+        
+        // 创建路由节点
+        auto route = createNode(CHTLJSNodeType::OBJECT_EXPRESSION);
+        route->setAttribute("path", pathToken.getValue());
+        route->addChild(handler);
+        router->addChild(route);
+        
+        if (match(CHTLJSTokenType::COMMA)) {
+            advance(); // 跳过 ,
+        }
+    }
+    
+    if (!match(CHTLJSTokenType::RIGHT_BRACE)) {
+        reportUnexpectedEndOfFile("}");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 }
+    return router;
+}
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseFileloaderExpression() {
+    auto token = getCurrentToken();
+    if (token.getType() != CHTLJSTokenType::FILELOADER) {
+        return nullptr;
+    }
+    
+    advance(); // 跳过 fileloader
+    
+    skipWhitespace();
+    
+    // 解析文件路径
+    if (!match(CHTLJSTokenType::STRING) && !match(CHTLJSTokenType::LITERAL)) {
+        addError("期望文件路径");
+        return nullptr;
+    }
+    
+    auto pathToken = getCurrentToken();
+    std::string filePath = pathToken.getValue();
+    advance();
+    
+    skipWhitespace();
+    
+    // 检查是否有配置对象
+    std::shared_ptr<CHTLJSBaseNode> config = nullptr;
+    if (match(CHTLJSTokenType::LEFT_BRACE)) {
+        config = parseUnorderedPairs();
+    }
+    
+    // 创建fileloader节点
+    auto fileloader = createNode(CHTLJSNodeType::CALL_EXPRESSION, "fileloader");
+    fileloader->setAttribute("path", filePath);
+    
+    if (config) {
+        fileloader->addChild(config);
+    }
+    
+    return fileloader;
+}
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseUtilExpression() {
+    if (!matchKeyword("util")) {
+        reportUnexpectedToken(getCurrentToken(), "util");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 util
+    
+    // 解析条件表达式
+    auto condition = parseExpression();
+    if (!condition) {
+        reportUnexpectedToken(getCurrentToken(), "condition");
+        return nullptr;
+    }
+    
+    if (!match(CHTLJSTokenType::ARROW)) {
+        reportUnexpectedToken(getCurrentToken(), "->");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 ->
+    
+    // 解析change代码块
+    auto changeKeyword = getCurrentToken();
+    if (changeKeyword.getValue() != "change") {
+        reportUnexpectedToken(changeKeyword, "change");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 change
+    
+    auto changeCode = parseExpression();
+    if (!changeCode) {
+        reportUnexpectedToken(getCurrentToken(), "change code");
+        return nullptr;
+    }
+    
+    if (!match(CHTLJSTokenType::ARROW)) {
+        reportUnexpectedToken(getCurrentToken(), "->");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 ->
+    
+    // 解析then代码块
+    auto thenKeyword = getCurrentToken();
+    if (thenKeyword.getValue() != "then") {
+        reportUnexpectedToken(thenKeyword, "then");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 then
+    
+    auto thenCode = parseExpression();
+    if (!thenCode) {
+        reportUnexpectedToken(getCurrentToken(), "then code");
+        return nullptr;
+    }
+    
+    // 创建util...then节点
+    auto util = createNode(CHTLJSNodeType::UTIL_EXPRESSION);
+    util->addChild(condition);
+    util->addChild(changeCode);
+    util->addChild(thenCode);
+    
+    return util;
+}
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseForStatement() { return nullptr; }
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseWhileStatement() { return nullptr; }
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseDoWhileStatement() { return nullptr; }
@@ -865,32 +1162,749 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::createMemberExpressionNode(std::sh
 
 // 其他未实现的方法
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseCHTLJSSyntax() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseDeclarationSyntax(const std::string& keyword) { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseKeyValuePairs() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseUnorderedPairs() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseOptionalPairs() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseChainExpression() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseUnquotedLiteral() { return nullptr; }
-std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseParameterList() { return {}; }
-std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseArgumentList() { return {}; }
-std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseArrayElements() { return {}; }
-std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseObjectProperties() { return {}; }
-std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseKeyValuePairList() { return {}; }
-std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseUnorderedPairList() { return {}; }
-std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseOptionalPairList() { return {}; }
-std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseChainElementList() { return {}; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseListenDeclaration() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseDelegateDeclaration() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseAnimateDeclaration() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseRouterDeclaration() { return nullptr; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseFileloaderDeclaration() { return nullptr; }
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseDeclarationSyntax(const std::string& keyword) {
+    if (keyword == "const") {
+        return parseVariableDeclaration();
+    } else if (keyword == "let") {
+        return parseVariableDeclaration();
+    } else if (keyword == "var") {
+        return parseVariableDeclaration();
+    } else if (keyword == "function") {
+        return parseFunctionDeclaration();
+    } else if (keyword == "class") {
+        return parseClassDeclaration();
+    } else if (keyword == "interface") {
+        return parseInterfaceDeclaration();
+    } else if (keyword == "enum") {
+        return parseEnumDeclaration();
+    } else if (keyword == "namespace") {
+        return parseNamespaceDeclaration();
+    } else if (keyword == "module") {
+        return parseModuleDeclaration();
+    } else if (keyword == "import") {
+        return parseImportDeclaration();
+    }
+    
+    return nullptr;
+}
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseKeyValuePairs() {
+    auto pairs = parseKeyValuePairList();
+    if (pairs.empty()) {
+        return nullptr;
+    }
+    
+    auto keyValuePairs = createNode(CHTLJSNodeType::OBJECT_EXPRESSION);
+    for (const auto& pair : pairs) {
+        keyValuePairs->addChild(pair);
+    }
+    
+    return keyValuePairs;
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseUnorderedPairs() {
+    auto pairs = parseUnorderedPairList();
+    if (pairs.empty()) {
+        return nullptr;
+    }
+    
+    auto unorderedPairs = createNode(CHTLJSNodeType::OBJECT_EXPRESSION);
+    for (const auto& pair : pairs) {
+        unorderedPairs->addChild(pair);
+    }
+    
+    return unorderedPairs;
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseOptionalPairs() {
+    auto pairs = parseOptionalPairList();
+    if (pairs.empty()) {
+        return nullptr;
+    }
+    
+    auto optionalPairs = createNode(CHTLJSNodeType::OBJECT_EXPRESSION);
+    for (const auto& pair : pairs) {
+        optionalPairs->addChild(pair);
+    }
+    
+    return optionalPairs;
+}
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseChainExpression() {
+    if (!isChainSyntaxStart()) {
+        return nullptr;
+    }
+    
+    auto elements = parseChainElements();
+    if (elements.empty()) {
+        return nullptr;
+    }
+    
+    return createChainExpressionNode(elements);
+}
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseUnquotedLiteral() {
+    if (!isUnquotedLiteralStart()) {
+        return nullptr;
+    }
+    
+    auto value = parseUnquotedLiteralValue();
+    if (value.empty()) {
+        return nullptr;
+    }
+    
+    return createNode(CHTLJSNodeType::LITERAL, value);
+}
+std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseParameterList() {
+    std::vector<std::shared_ptr<CHTLJSBaseNode>> parameters;
+    
+    if (!match(CHTLJSTokenType::LEFT_PAREN)) {
+        return parameters;
+    }
+    
+    advance(); // 跳过 (
+    
+    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_PAREN)) {
+        skipWhitespace();
+        
+        if (match(CHTLJSTokenType::RIGHT_PAREN)) {
+            break;
+        }
+        
+        auto parameter = parseExpression();
+        if (parameter) {
+            parameters.push_back(parameter);
+        }
+        
+        if (match(CHTLJSTokenType::COMMA)) {
+            advance(); // 跳过逗号
+        }
+        
+        skipWhitespace();
+    }
+    
+    if (match(CHTLJSTokenType::RIGHT_PAREN)) {
+        advance(); // 跳过 )
+    }
+    
+    return parameters;
+}
+std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseArgumentList() {
+    std::vector<std::shared_ptr<CHTLJSBaseNode>> arguments;
+    
+    if (!match(CHTLJSTokenType::LEFT_PAREN)) {
+        return arguments;
+    }
+    
+    advance(); // 跳过 (
+    
+    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_PAREN)) {
+        skipWhitespace();
+        
+        if (match(CHTLJSTokenType::RIGHT_PAREN)) {
+            break;
+        }
+        
+        auto argument = parseExpression();
+        if (argument) {
+            arguments.push_back(argument);
+        }
+        
+        if (match(CHTLJSTokenType::COMMA)) {
+            advance(); // 跳过逗号
+        }
+        
+        skipWhitespace();
+    }
+    
+    if (match(CHTLJSTokenType::RIGHT_PAREN)) {
+        advance(); // 跳过 )
+    }
+    
+    return arguments;
+}
+std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseArrayElements() {
+    std::vector<std::shared_ptr<CHTLJSBaseNode>> elements;
+    
+    if (!match(CHTLJSTokenType::LEFT_BRACKET)) {
+        return elements;
+    }
+    
+    advance(); // 跳过 [
+    
+    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_BRACKET)) {
+        skipWhitespace();
+        
+        if (match(CHTLJSTokenType::RIGHT_BRACKET)) {
+            break;
+        }
+        
+        auto element = parseExpression();
+        if (element) {
+            elements.push_back(element);
+        }
+        
+        if (match(CHTLJSTokenType::COMMA)) {
+            advance(); // 跳过逗号
+        }
+        
+        skipWhitespace();
+    }
+    
+    if (match(CHTLJSTokenType::RIGHT_BRACKET)) {
+        advance(); // 跳过 ]
+    }
+    
+    return elements;
+}
+std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseObjectProperties() {
+    std::vector<std::shared_ptr<CHTLJSBaseNode>> properties;
+    
+    if (!match(CHTLJSTokenType::LEFT_BRACE)) {
+        return properties;
+    }
+    
+    advance(); // 跳过 {
+    
+    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_BRACE)) {
+        skipWhitespace();
+        
+        if (match(CHTLJSTokenType::RIGHT_BRACE)) {
+            break;
+        }
+        
+        auto property = parseKeyValuePair();
+        if (property) {
+            properties.push_back(property);
+        }
+        
+        if (match(CHTLJSTokenType::COMMA)) {
+            advance(); // 跳过逗号
+        }
+        
+        skipWhitespace();
+    }
+    
+    if (match(CHTLJSTokenType::RIGHT_BRACE)) {
+        advance(); // 跳过 }
+    }
+    
+    return properties;
+}
+std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseKeyValuePairList() {
+    std::vector<std::shared_ptr<CHTLJSBaseNode>> pairs;
+    
+    if (!match(CHTLJSTokenType::LEFT_BRACE)) {
+        return pairs;
+    }
+    
+    advance(); // 跳过 {
+    
+    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_BRACE)) {
+        skipWhitespace();
+        
+        if (match(CHTLJSTokenType::RIGHT_BRACE)) {
+            break;
+        }
+        
+        auto pair = parseKeyValuePair();
+        if (pair) {
+            pairs.push_back(pair);
+        }
+        
+        if (match(CHTLJSTokenType::COMMA)) {
+            advance(); // 跳过逗号
+        }
+        
+        skipWhitespace();
+    }
+    
+    if (match(CHTLJSTokenType::RIGHT_BRACE)) {
+        advance(); // 跳过 }
+    }
+    
+    return pairs;
+}
+std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseUnorderedPairList() {
+    std::vector<std::shared_ptr<CHTLJSBaseNode>> pairs;
+    
+    if (!match(CHTLJSTokenType::LEFT_BRACE)) {
+        return pairs;
+    }
+    
+    advance(); // 跳过 {
+    
+    while (!match(CHTLJSTokenType::RIGHT_BRACE) && !isAtEnd()) {
+        skipWhitespace();
+        
+        if (match(CHTLJSTokenType::RIGHT_BRACE)) {
+            break;
+        }
+        
+        // 解析键值对
+        auto pair = parseKeyValuePair();
+        if (pair) {
+            pairs.push_back(pair);
+        }
+        
+        // 检查是否有逗号分隔符
+        if (match(CHTLJSTokenType::COMMA)) {
+            advance(); // 跳过逗号
+        }
+        
+        skipWhitespace();
+    }
+    
+    if (match(CHTLJSTokenType::RIGHT_BRACE)) {
+        advance(); // 跳过 }
+    }
+    
+    return pairs;
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseKeyValuePair() {
+    // 解析键
+    auto key = parsePrimaryExpression();
+    if (!key) {
+        return nullptr;
+    }
+    
+    skipWhitespace();
+    
+    // 检查是否有冒号分隔符
+    if (!match(CHTLJSTokenType::COLON)) {
+        // 如果没有冒号，可能是无修饰字面量
+        return key;
+    }
+    
+    advance(); // 跳过冒号
+    skipWhitespace();
+    
+    // 解析值
+    auto value = parsePrimaryExpression();
+    if (!value) {
+        return nullptr;
+    }
+    
+    // 创建键值对节点
+    auto pair = createNode(CHTLJSNodeType::OBJECT_EXPRESSION);
+    pair->setAttribute("key", key->getValue());
+    pair->addChild(value);
+    
+    return pair;
+}
+
+std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseOptionalPairList() {
+    std::vector<std::shared_ptr<CHTLJSBaseNode>> pairs;
+    
+    if (!match(CHTLJSTokenType::LEFT_BRACE)) {
+        return pairs;
+    }
+    
+    advance(); // 跳过 {
+    
+    while (!match(CHTLJSTokenType::RIGHT_BRACE) && !isAtEnd()) {
+        skipWhitespace();
+        
+        if (match(CHTLJSTokenType::RIGHT_BRACE)) {
+            break;
+        }
+        
+        // 检查是否是可选的键值对（以?开头）
+        if (match(CHTLJSTokenType::QUESTION)) {
+            advance(); // 跳过 ?
+            skipWhitespace();
+        }
+        
+        // 解析键值对
+        auto pair = parseKeyValuePair();
+        if (pair) {
+            pair->setAttribute("optional", "true");
+            pairs.push_back(pair);
+        }
+        
+        // 检查是否有逗号分隔符
+        if (match(CHTLJSTokenType::COMMA)) {
+            advance(); // 跳过逗号
+        }
+        
+        skipWhitespace();
+    }
+    
+    if (match(CHTLJSTokenType::RIGHT_BRACE)) {
+        advance(); // 跳过 }
+    }
+    
+    return pairs;
+}
+std::vector<std::shared_ptr<CHTLJSBaseNode>> CHTLJSParser::parseChainElementList() {
+    std::vector<std::shared_ptr<CHTLJSBaseNode>> elements;
+    
+    while (!isAtEnd()) {
+        auto token = getCurrentToken();
+        
+        if (token.getType() == CHTLJSTokenType::IDENTIFIER || 
+            token.getType() == CHTLJSTokenType::LITERAL) {
+            auto element = createNode(CHTLJSNodeType::IDENTIFIER, token.getValue());
+            elements.push_back(element);
+            advance();
+        } else if (token.getType() == CHTLJSTokenType::DOT) {
+            advance(); // 跳过点号
+        } else {
+            break;
+        }
+    }
+    
+    return elements;
+}
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseListenDeclaration() {
+    if (!matchKeyword("listen")) {
+        reportUnexpectedToken(getCurrentToken(), "listen");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 listen
+    
+    if (!match(CHTLJSTokenType::LEFT_BRACE)) {
+        reportUnexpectedToken(getCurrentToken(), "{");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 {
+    
+    auto listen = createNode(CHTLJSNodeType::LISTEN_EXPRESSION);
+    
+    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_BRACE)) {
+        auto eventToken = getCurrentToken();
+        if (eventToken.getType() != CHTLJSTokenType::IDENTIFIER) {
+            reportUnexpectedToken(eventToken, "event name");
+            return nullptr;
+        }
+        
+        advance(); // 跳过事件名
+        
+        if (!match(CHTLJSTokenType::COLON)) {
+            reportUnexpectedToken(getCurrentToken(), ":");
+            return nullptr;
+        }
+        
+        advance(); // 跳过 :
+        
+        auto handler = parseExpression();
+        if (!handler) {
+            reportUnexpectedToken(getCurrentToken(), "handler");
+            return nullptr;
+        }
+        
+        auto eventHandler = createNode(CHTLJSNodeType::OBJECT_EXPRESSION);
+        eventHandler->setAttribute("event", eventToken.getValue());
+        eventHandler->addChild(handler);
+        listen->addChild(eventHandler);
+        
+        if (match(CHTLJSTokenType::COMMA)) {
+            advance(); // 跳过 ,
+        }
+    }
+    
+    if (!match(CHTLJSTokenType::RIGHT_BRACE)) {
+        reportUnexpectedEndOfFile("}");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 }
+    return listen;
+}
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseDelegateDeclaration() {
+    if (!matchKeyword("delegate")) {
+        reportUnexpectedToken(getCurrentToken(), "delegate");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 delegate
+    
+    if (!match(CHTLJSTokenType::LEFT_BRACE)) {
+        reportUnexpectedToken(getCurrentToken(), "{");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 {
+    
+    auto delegate = createNode(CHTLJSNodeType::DELEGATE_EXPRESSION);
+    
+    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_BRACE)) {
+        // 解析选择器
+        auto selectorToken = getCurrentToken();
+        if (selectorToken.getType() != CHTLJSTokenType::ENHANCED_SELECTOR) {
+            reportUnexpectedToken(selectorToken, "enhanced selector");
+            return nullptr;
+        }
+        
+        advance(); // 跳过选择器
+        
+        if (!match(CHTLJSTokenType::COLON)) {
+            reportUnexpectedToken(getCurrentToken(), ":");
+            return nullptr;
+        }
+        
+        advance(); // 跳过 :
+        
+        // 解析事件名
+        auto eventToken = getCurrentToken();
+        if (eventToken.getType() != CHTLJSTokenType::IDENTIFIER) {
+            reportUnexpectedToken(eventToken, "event name");
+            return nullptr;
+        }
+        
+        advance(); // 跳过事件名
+        
+        if (!match(CHTLJSTokenType::ARROW)) {
+            reportUnexpectedToken(getCurrentToken(), "->");
+            return nullptr;
+        }
+        
+        advance(); // 跳过 ->
+        
+        // 解析处理器
+        auto handler = parseExpression();
+        if (!handler) {
+            reportUnexpectedToken(getCurrentToken(), "handler");
+            return nullptr;
+        }
+        
+        // 创建事件委托节点
+        auto eventDelegate = createNode(CHTLJSNodeType::OBJECT_EXPRESSION);
+        eventDelegate->setAttribute("selector", selectorToken.getValue());
+        eventDelegate->setAttribute("event", eventToken.getValue());
+        eventDelegate->addChild(handler);
+        delegate->addChild(eventDelegate);
+        
+        if (match(CHTLJSTokenType::COMMA)) {
+            advance(); // 跳过 ,
+        }
+    }
+    
+    if (!match(CHTLJSTokenType::RIGHT_BRACE)) {
+        reportUnexpectedEndOfFile("}");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 }
+    return delegate;
+}
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseAnimateDeclaration() {
+    if (!matchKeyword("animate")) {
+        reportUnexpectedToken(getCurrentToken(), "animate");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 animate
+    
+    if (!match(CHTLJSTokenType::LEFT_BRACE)) {
+        reportUnexpectedToken(getCurrentToken(), "{");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 {
+    
+    auto animate = createNode(CHTLJSNodeType::ANIMATE_EXPRESSION);
+    
+    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_BRACE)) {
+        // 解析目标选择器
+        auto targetToken = getCurrentToken();
+        if (targetToken.getType() != CHTLJSTokenType::ENHANCED_SELECTOR) {
+            reportUnexpectedToken(targetToken, "enhanced selector");
+            return nullptr;
+        }
+        
+        advance(); // 跳过选择器
+        
+        if (!match(CHTLJSTokenType::COLON)) {
+            reportUnexpectedToken(getCurrentToken(), ":");
+            return nullptr;
+        }
+        
+        advance(); // 跳过 :
+        
+        // 解析动画配置
+        auto config = parseUnorderedPairs();
+        if (!config) {
+            reportUnexpectedToken(getCurrentToken(), "animation config");
+            return nullptr;
+        }
+        
+        // 创建动画节点
+        auto animation = createNode(CHTLJSNodeType::OBJECT_EXPRESSION);
+        animation->setAttribute("target", targetToken.getValue());
+        animation->addChild(config);
+        animate->addChild(animation);
+        
+        if (match(CHTLJSTokenType::COMMA)) {
+            advance(); // 跳过 ,
+        }
+    }
+    
+    if (!match(CHTLJSTokenType::RIGHT_BRACE)) {
+        reportUnexpectedEndOfFile("}");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 }
+    return animate;
+}
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseRouterDeclaration() {
+    if (!matchKeyword("router")) {
+        reportUnexpectedToken(getCurrentToken(), "router");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 router
+    
+    if (!match(CHTLJSTokenType::LEFT_BRACE)) {
+        reportUnexpectedToken(getCurrentToken(), "{");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 {
+    
+    auto router = createNode(CHTLJSNodeType::ROUTER_EXPRESSION);
+    
+    while (!isAtEnd() && !match(CHTLJSTokenType::RIGHT_BRACE)) {
+        // 解析路由路径
+        auto pathToken = getCurrentToken();
+        if (pathToken.getType() != CHTLJSTokenType::STRING && pathToken.getType() != CHTLJSTokenType::LITERAL) {
+            reportUnexpectedToken(pathToken, "route path");
+            return nullptr;
+        }
+        
+        advance(); // 跳过路径
+        
+        if (!match(CHTLJSTokenType::ARROW)) {
+            reportUnexpectedToken(getCurrentToken(), "->");
+            return nullptr;
+        }
+        
+        advance(); // 跳过 ->
+        
+        // 解析处理器
+        auto handler = parseExpression();
+        if (!handler) {
+            reportUnexpectedToken(getCurrentToken(), "handler");
+            return nullptr;
+        }
+        
+        // 创建路由节点
+        auto route = createNode(CHTLJSNodeType::OBJECT_EXPRESSION);
+        route->setAttribute("path", pathToken.getValue());
+        route->addChild(handler);
+        router->addChild(route);
+        
+        if (match(CHTLJSTokenType::COMMA)) {
+            advance(); // 跳过 ,
+        }
+    }
+    
+    if (!match(CHTLJSTokenType::RIGHT_BRACE)) {
+        reportUnexpectedEndOfFile("}");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 }
+    return router;
+}
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseFileloaderDeclaration() {
+    if (!matchKeyword("fileloader")) {
+        reportUnexpectedToken(getCurrentToken(), "fileloader");
+        return nullptr;
+    }
+    
+    advance(); // 跳过 fileloader
+    
+    // 解析文件路径
+    if (!match(CHTLJSTokenType::STRING) && !match(CHTLJSTokenType::LITERAL)) {
+        addError("期望文件路径");
+        return nullptr;
+    }
+    
+    auto pathToken = getCurrentToken();
+    std::string filePath = pathToken.getValue();
+    advance();
+    
+    skipWhitespace();
+    
+    // 检查是否有配置对象
+    std::shared_ptr<CHTLJSBaseNode> config = nullptr;
+    if (match(CHTLJSTokenType::LEFT_BRACE)) {
+        config = parseUnorderedPairs();
+    }
+    
+    // 创建fileloader节点
+    auto fileloader = createNode(CHTLJSNodeType::CALL_EXPRESSION, "fileloader");
+    fileloader->setAttribute("path", filePath);
+    
+    if (config) {
+        fileloader->addChild(config);
+    }
+    
+    return fileloader;
+}
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseUtilDeclaration() { return nullptr; }
-bool CHTLJSParser::isUnquotedLiteralStart() const { return false; }
-std::string CHTLJSParser::parseUnquotedLiteralValue() { return ""; }
-bool CHTLJSParser::isValidUnquotedLiteral(const std::string& literal) const { return false; }
-bool CHTLJSParser::isChainSyntaxStart() const { return false; }
-std::vector<std::string> CHTLJSParser::parseChainElements() { return {}; }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::createChainExpressionNode(const std::vector<std::string>& elements) { return nullptr; }
+bool CHTLJSParser::isUnquotedLiteralStart() const {
+    auto token = getCurrentToken();
+    return token.getType() == CHTLJSTokenType::LITERAL;
+}
+
+std::string CHTLJSParser::parseUnquotedLiteralValue() {
+    auto token = getCurrentToken();
+    if (token.getType() == CHTLJSTokenType::LITERAL) {
+        advance();
+        return token.getValue();
+    }
+    return "";
+}
+
+bool CHTLJSParser::isValidUnquotedLiteral(const std::string& literal) const {
+    // 检查无修饰字面量是否有效
+    return !literal.empty() && 
+           std::all_of(literal.begin(), literal.end(), [](char c) {
+               return std::isalnum(c) || c == '_' || c == '-' || c == '.' || c == ':';
+           });
+}
+bool CHTLJSParser::isChainSyntaxStart() const {
+    auto token = getCurrentToken();
+    return token.getType() == CHTLJSTokenType::IDENTIFIER || 
+           token.getType() == CHTLJSTokenType::LITERAL;
+}
+std::vector<std::string> CHTLJSParser::parseChainElements() {
+    std::vector<std::string> elements;
+    
+    while (!isAtEnd()) {
+        auto token = getCurrentToken();
+        
+        if (token.getType() == CHTLJSTokenType::IDENTIFIER || 
+            token.getType() == CHTLJSTokenType::LITERAL) {
+            elements.push_back(token.getValue());
+            advance();
+        } else if (token.getType() == CHTLJSTokenType::DOT) {
+            advance(); // 跳过点号
+        } else {
+            break;
+        }
+    }
+    
+    return elements;
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::createChainExpressionNode(const std::vector<std::string>& elements) {
+    if (elements.empty()) {
+        return nullptr;
+    }
+    
+    auto chain = createNode(CHTLJSNodeType::CHAIN_EXPRESSION);
+    
+    for (const auto& element : elements) {
+        auto elementNode = createNode(CHTLJSNodeType::IDENTIFIER, element);
+        chain->addChild(elementNode);
+    }
+    
+    return chain;
+}
 std::string CHTLJSParser::inferType(std::shared_ptr<CHTLJSBaseNode> node) const { return "unknown"; }
 std::string CHTLJSParser::inferExpressionType(std::shared_ptr<CHTLJSBaseNode> node) const { return "unknown"; }
 std::string CHTLJSParser::inferStatementType(std::shared_ptr<CHTLJSBaseNode> node) const { return "unknown"; }

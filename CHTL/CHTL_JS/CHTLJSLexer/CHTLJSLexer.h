@@ -140,6 +140,7 @@ private:
     CHTLJSToken readEnhancedSelector();
     CHTLJSToken readVirtualObject();
     CHTLJSToken readCHTLJSKeyword();
+    CHTLJSToken readUnquotedLiteral();
     
     // 类型判断
     bool isLetter(char c) const;
@@ -207,6 +208,8 @@ private:
     bool isAnimateStart(const std::string& code, size_t pos) const;
     bool isRouterStart(const std::string& code, size_t pos) const;
     bool isFileloaderStart(const std::string& code, size_t pos) const;
+    bool isUnquotedLiteralStart(char c) const;
+    bool isUnquotedLiteralChar(char c) const;
     bool isUtilStart(const std::string& code, size_t pos) const;
     
     // 声明式语法处理
