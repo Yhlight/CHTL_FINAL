@@ -199,13 +199,21 @@ class ImportNode(BaseNode):
 @dataclass
 class ConfigNode(BaseNode):
     """Represents a [Configuration] block."""
-    name: Optional[str] = None
-    settings: Dict[str, Any] = field(default_factory=dict)
-    name_group: Dict[str, Union[str, List[str]]] = field(default_factory=dict)
+    config: Dict[str, str] = field(default_factory=dict)
     lineno: int = 0
     parent: Optional['BaseNode'] = field(default=None, repr=False)
 
-DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode, CustomDefinitionNode, StyleNode, ImportNode, ConfigNode]
+@dataclass
+class OriginNode(BaseNode):
+    """Represents a block of raw, untransformed code."""
+    origin_type: str # e.g., 'Html', 'Style', 'JavaScript'
+    name: Optional[str] = None
+    content: str = ""
+    lineno: int = 0
+    parent: Optional['BaseNode'] = field(default=None, repr=False)
+
+
+DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode, CustomDefinitionNode, StyleNode, ImportNode, ConfigNode, OriginNode]
 
 @dataclass
 class DocumentNode(BaseNode):

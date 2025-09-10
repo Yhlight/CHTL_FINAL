@@ -3,15 +3,16 @@ from CHTL.CHTLNode.nodes import (
     BaseNode, DocumentNode, ElementNode, AttributeNode, TextNode, CommentNode, Node,
     StyleNode, CssRuleNode, CssPropertyNode, TemplateDefinitionNode, TemplateUsageNode,
     CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode, LiteralNode,
-    ImportNode, ConfigNode
+    ImportNode, ConfigNode, OriginNode
 )
 from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLParser.expression_parser import ExpressionParser
 from typing import List, Optional, Union
 
 class Parser:
-    def __init__(self, tokens: List[Token], context: CompilationContext):
+    def __init__(self, tokens: List[Token], source_code: str, context: CompilationContext):
         self.tokens = tokens
+        self.source_code = source_code
         self.pos = 0
         self.context = context
 
@@ -47,14 +48,10 @@ class Parser:
                     doc.add_child(self.parse_template_definition(keyword_token, is_custom=True))
                 elif keyword_token.type == TokenType.IMPORT:
                     doc.add_child(self.parse_import_statement(keyword_token))
+                elif keyword_token.type == TokenType.ORIGIN:
+                    doc.add_child(self.parse_origin_block(keyword_token))
                 elif keyword_token.type == TokenType.CONFIGURATION:
-                    self.consume(TokenType.RBRACK)
-                    brace_level = 1
-                    self.consume(TokenType.LBRACE)
-                    while brace_level > 0:
-                        t = self.consume()
-                        if t.type == TokenType.LBRACE: brace_level += 1
-                        if t.type == TokenType.RBRACE: brace_level -= 1
+                    doc.add_child(self.parse_configuration_block(keyword_token))
                 else:
                     raise RuntimeError(f"Unknown definition type: {keyword_token.value}")
             elif token.type == TokenType.COMMENT:
@@ -130,6 +127,67 @@ class Parser:
         content = self.parse_definition_content(template_type)
         node_class = CustomDefinitionNode if is_custom else TemplateDefinitionNode
         return node_class(template_type=template_type, name=template_name, content=content, lineno=start_token.lineno)
+
+    def parse_origin_block(self, start_token: Token) -> OriginNode:
+        self.consume(TokenType.RBRACK)
+        self.consume(TokenType.AT_SYMBOL)
+        origin_type = self.consume(TokenType.IDENTIFIER).value
+
+        name = None
+        content = ""
+
+        if self.current_token().type != TokenType.LBRACE:
+            name = self.consume(TokenType.IDENTIFIER).value
+
+        if self.current_token().type == TokenType.LBRACE:
+            open_brace_token = self.consume(TokenType.LBRACE)
+            content_start_index = open_brace_token.char_offset + len(open_brace_token.value)
+
+            brace_level = 1
+            closing_brace_token = None
+            while brace_level > 0:
+                token = self.consume()
+                if token.type == TokenType.LBRACE:
+                    brace_level += 1
+                elif token.type == TokenType.RBRACE:
+                    brace_level -= 1
+                    if brace_level == 0:
+                        closing_brace_token = token
+                        break
+                elif token.type == TokenType.EOF:
+                    raise RuntimeError(f"Unmatched opening brace for [Origin] block starting at line {start_token.lineno}")
+
+            if closing_brace_token:
+                content_end_index = closing_brace_token.char_offset
+                content = self.source_code[content_start_index:content_end_index]
+        else:
+            self.consume(TokenType.SEMICOLON)
+
+        return OriginNode(origin_type=origin_type, name=name, content=content, lineno=start_token.lineno)
+
+    def parse_configuration_block(self, start_token: Token) -> ConfigNode:
+        self.consume(TokenType.RBRACK)
+        self.consume(TokenType.LBRACE)
+
+        config_data = {}
+        while self.current_token().type != TokenType.RBRACE:
+            key_token = self.consume() # Key can be a keyword or identifier
+            self.consume(TokenType.COLON)
+            value_token = self.consume(TokenType.STRING)
+
+            key = key_token.value
+            value = value_token.value[1:-1] # Remove quotes
+            config_data[key] = value
+
+            if self.current_token().type == TokenType.COMMA:
+                self.consume(TokenType.COMMA)
+
+        self.consume(TokenType.RBRACE)
+
+        # Update the context
+        self.context.set_keyword_config(config_data)
+
+        return ConfigNode(lineno=start_token.lineno, config=config_data)
 
     def parse_at_usage(self):
         start_token = self.consume(TokenType.AT_SYMBOL)

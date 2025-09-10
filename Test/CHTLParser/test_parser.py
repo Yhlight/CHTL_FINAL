@@ -5,16 +5,17 @@ from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLNode.nodes import (
     ElementNode, TextNode, AttributeNode, CommentNode, StyleNode,
     CssRuleNode, CssPropertyNode, TemplateDefinitionNode, TemplateUsageNode,
-    CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode, ImportNode
+    CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode, ImportNode,
+    OriginNode
 )
 
 class TestParser(unittest.TestCase):
 
     def _parse_source(self, source):
-        lexer = Lexer(source)
-        tokens = lexer.tokenize()
         context = CompilationContext()
-        parser = Parser(tokens, context)
+        lexer = Lexer(source, context)
+        tokens = lexer.tokenize()
+        parser = Parser(tokens, source, context)
         ast = parser.parse()
         return ast, context
 
@@ -131,6 +132,52 @@ class TestParser(unittest.TestCase):
         self.assertEqual(import_node.imported_item, "MyButton")
         self.assertEqual(import_node.path, "./components.chtl")
 
+
+    def test_parse_origin_block(self):
+        source = """
+[Origin] @Js MyScript {
+    function hello() {
+        console.log("Hello, World!");
+    }
+}
+"""
+        ast, _ = self._parse_source(source)
+        self.assertEqual(len(ast.children), 1)
+        origin_node = ast.children[0]
+        self.assertIsInstance(origin_node, OriginNode)
+        self.assertEqual(origin_node.origin_type, "Js")
+        self.assertEqual(origin_node.name, "MyScript")
+        expected_content = """
+    function hello() {
+        console.log("Hello, World!");
+    }
+"""
+        self.assertEqual(origin_node.content.strip(), expected_content.strip())
+
+    def test_parse_origin_block_with_nested_braces(self):
+        source = """
+[Origin] @Js MyScript {
+    function outer() {
+        if (true) {
+            console.log("Nested braces");
+        }
+    }
+}
+"""
+        ast, _ = self._parse_source(source)
+        self.assertEqual(len(ast.children), 1)
+        origin_node = ast.children[0]
+        self.assertIsInstance(origin_node, OriginNode)
+        self.assertEqual(origin_node.origin_type, "Js")
+        self.assertEqual(origin_node.name, "MyScript")
+        expected_content = """
+    function outer() {
+        if (true) {
+            console.log("Nested braces");
+        }
+    }
+"""
+        self.assertEqual(origin_node.content.strip(), expected_content.strip())
 
 if __name__ == '__main__':
     unittest.main()

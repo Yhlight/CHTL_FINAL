@@ -76,6 +76,7 @@ class Token:
     value: str
     lineno: int
     col: int
+    char_offset: int
 
 KEYWORDS = {
     "Custom": TokenType.CUSTOM,

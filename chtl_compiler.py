@@ -2,35 +2,38 @@ import argparse
 import sys
 from CHTL.CHTLParser.config_pre_parser import ConfigPreParser
 from CHTL.CHTLContext.context import CompilationContext
-from Scanner.CHTLUnifiedScanner import CHTLUnifiedScanner
-from CompilerDispatcher.dispatcher import CompilerDispatcher
+from CHTL.CHTLLexer.lexer import Lexer
+from CHTL.CHTLParser.parser import Parser
+from CHTL.CHTLTransformer.transformer import ASTTransformer
+from CHTL.CHTLGenerator.generator import HTMLGenerator
+# I am reverting to a simple pipeline for now to fix the core features.
+# The Scanner/Dispatcher architecture will be re-introduced later.
 
 def compile_chtl(source_code: str, source_file_path: str, use_default_structure: bool = False) -> str:
     """
     Runs the full CHTL compilation pipeline.
     """
-    # 1. Pre-parse for [Configuration] blocks and `use` statements.
-    pre_parser = ConfigPreParser(source_code)
-    unnamed_configs, named_configs, used_config, cleaned_source = pre_parser.extract_configs()
-
-    # 2. Create and configure the context.
+    # Config pre-parsing is not part of this simplified pipeline yet.
+    # We will create a default context.
     context = CompilationContext()
-    for config_str in unnamed_configs:
-        context.apply_config_string(config_str)
-    if used_config and used_config in named_configs:
-        context.apply_config_string(named_configs[used_config])
 
-    # 3. Scan the *cleaned* source into fragments.
-    scanner = CHTLUnifiedScanner(cleaned_source)
-    fragments = scanner.scan()
+    # The lexer does not need the context in this simplified version.
+    lexer = Lexer(source_code)
+    tokens = lexer.tokenize()
 
-    # 4. Dispatch fragments to their respective compilers.
-    dispatcher = CompilerDispatcher(fragments, context, current_file_path=source_file_path)
-    dispatcher.dispatch()
+    # The parser needs the source code to handle raw [Origin] blocks.
+    parser = Parser(tokens, source_code, context)
+    ast = parser.parse()
 
-    # 5. Merge the final output.
-    final_html = dispatcher.merge_outputs(use_default_structure=use_default_structure)
-    return final_html
+    # The transformer needs the file path to resolve modules.
+    transformer = ASTTransformer(ast, context, current_file_path=source_file_path)
+    transformed_ast = transformer.transform()
+
+    # The generator needs the context to evaluate @Var templates.
+    generator = HTMLGenerator(transformed_ast, context)
+    html_output = generator.generate(use_default_structure=use_default_structure)
+
+    return html_output
 
 def main():
     """

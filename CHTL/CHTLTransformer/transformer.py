@@ -3,7 +3,7 @@ import copy
 import zipfile
 import tempfile
 import shutil
-from typing import List, Union, Any
+from typing import List, Union, Any, Optional
 from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLParser.parser import Parser
 from CHTL.CHTLLexer.lexer import Lexer
@@ -11,7 +11,7 @@ from CHTL.CHTLUtils.module_resolver import ModuleResolver
 from CHTL.CHTLNode.nodes import (
     BaseNode, DocumentNode, ElementNode, TextNode, CommentNode, StyleNode, Node,
     TemplateDefinitionNode, CustomDefinitionNode, TemplateUsageNode, CssRuleNode, CssPropertyNode,
-    CustomUsageNode, DeleteNode, InsertNode, ImportNode
+    CustomUsageNode, DeleteNode, InsertNode, ImportNode, OriginNode
 )
 
 class ASTTransformer:
@@ -71,6 +71,32 @@ class ASTTransformer:
             self.context.add_var_template(node.name, node.content)
         return None
 
+    def visit_OriginNode(self, node: OriginNode) -> Optional[OriginNode]:
+        # If the node has a name and content, it's a definition.
+        if node.name and node.content:
+            self.context.add_origin_block(node.name, node.content)
+            # The definition itself can also be rendered.
+            return node
+
+        # If it has a name but no content, it's a usage of a named block.
+        elif node.name and not node.content:
+            content = self.context.get_origin_block(node.name)
+            if content is None:
+                raise NameError(f"Named origin block '{node.name}' not found.")
+            # Return a new node with the content filled in.
+            return OriginNode(
+                origin_type=node.origin_type,
+                name=node.name,
+                content=content,
+                lineno=node.lineno
+            )
+
+        # If it has no name but content, it's an anonymous block.
+        elif not node.name and node.content:
+            return node
+
+        return None # Should not happen
+
     def visit_ImportNode(self, node: ImportNode) -> None:
         resolver = ModuleResolver(
             official_module_dir=self.official_module_dir,
@@ -81,8 +107,21 @@ class ASTTransformer:
         if not resolved_path:
             raise RuntimeError(f"Could not resolve import '{node.path}' from '{self.current_file_path}'")
 
-        namespace = node.alias or os.path.splitext(os.path.basename(resolved_path))[0]
+        # Handle raw file imports
+        if node.import_type in ('Html', 'Style', 'JavaScript'):
+            if not node.alias:
+                raise ValueError(f"Import of type '{node.import_type}' requires an 'as' alias.")
+            try:
+                with open(resolved_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                # These are added to the default namespace, as they are not CHTL modules
+                self.context.add_origin_block(name=node.alias, content=content)
+            except FileNotFoundError:
+                raise RuntimeError(f"Imported file not found at resolved path: {resolved_path}")
+            return None # The import node is processed and removed
 
+        # Handle CHTL module imports (.chtl, .cmod)
+        namespace = node.alias or os.path.splitext(os.path.basename(resolved_path))[0]
         source_code = ""
         source_path_for_nested_imports = resolved_path
 
@@ -104,16 +143,13 @@ class ASTTransformer:
             except FileNotFoundError:
                 raise RuntimeError(f"Imported file not found at resolved path: {resolved_path}")
 
-        # Use the main context for parsing the imported file.
         lexer = Lexer(source_code, self.context)
         tokens = lexer.tokenize()
         parser = Parser(tokens, self.context)
         import_ast = parser.parse()
 
-        # Manually traverse the imported AST to process its contents.
         for child_node in import_ast.children:
             if isinstance(child_node, TemplateDefinitionNode):
-                # Add definitions to the context under the correct namespace.
                 if child_node.template_type == 'Element':
                     self.context.add_element_template(child_node.name, child_node.content, namespace=namespace)
                 elif child_node.template_type == 'Style':
@@ -121,7 +157,6 @@ class ASTTransformer:
                 elif child_node.template_type == 'Var':
                     self.context.add_var_template(child_node.name, child_node.content, namespace=namespace)
             elif isinstance(child_node, ImportNode):
-                # Recursively visit nested imports.
                 self.visit(child_node)
 
         return None

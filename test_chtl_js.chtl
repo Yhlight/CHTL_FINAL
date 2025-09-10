@@ -1,0 +1,4 @@
+script {
+    let my_button = {{#submit-btn}};
+    my_button->textContent = "Clicked!";
+}

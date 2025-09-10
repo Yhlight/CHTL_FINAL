@@ -1,6 +1,6 @@
 from CHTL.CHTLNode.nodes import (
     DocumentNode, ElementNode, AttributeNode, TextNode, CommentNode, Node,
-    StyleNode, CssRuleNode, CssPropertyNode, ExpressionNode, LiteralNode
+    StyleNode, CssRuleNode, CssPropertyNode, ExpressionNode, LiteralNode, OriginNode
 )
 from CHTL.CHTLevaluator.evaluator import ExpressionEvaluator
 from CHTL.CHTLContext.context import CompilationContext
@@ -142,6 +142,11 @@ class HTMLGenerator:
 
     def visit_StyleNode(self, node: StyleNode, context: Optional[ElementNode], indent_level: int = 0):
         pass
+
+    def visit_OriginNode(self, node: OriginNode, context: Optional[ElementNode], indent_level: int) -> str:
+        # Simply return the raw content.
+        # A more advanced generator might indent it properly.
+        return node.content
 
     def visit_CssRuleNode(self, node: CssRuleNode, context: Optional[ElementNode], indent_level: int) -> str:
         indent = "  " * indent_level

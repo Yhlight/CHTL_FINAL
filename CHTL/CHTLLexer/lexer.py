@@ -1,22 +1,14 @@
-from typing import Optional
-from .keywords import TokenType, KEYWORDS, Token
-from CHTL.CHTLContext.context import CompilationContext
+from .keywords import TokenType, Token, KEYWORDS
 
 class Lexer:
-    def __init__(self, source_code: str, context: Optional[CompilationContext] = None):
+    def __init__(self, source_code: str, context=None):
         self.source_code = source_code
+        self.context = context
         self.pos = 0
         self.lineno = 1
         self.line_start = 0
         self.tokens: list[Token] = []
-
-        # If no context is provided, use the default keywords.
-        # This is useful for standalone parsing or testing.
-        if context:
-            self.keywords = context.keywords
-        else:
-            self.keywords = KEYWORDS
-
+        self.keywords = self.context.get_keywords() if self.context else KEYWORDS
         self.simple_tokens = {
             '{': TokenType.LBRACE, '}': TokenType.RBRACE, '(': TokenType.LPAREN,
             ')': TokenType.RPAREN, '[': TokenType.LBRACK, ']': TokenType.RBRACK,
@@ -116,7 +108,6 @@ class Lexer:
         start_pos = self.pos
         while self.pos < len(self.source_code):
             char = self.current_char()
-            # Dots are not part of identifiers, they are separate tokens.
             if not (char.isalnum() or char in '_-#'):
                 break
             self.advance()
@@ -139,7 +130,8 @@ class Lexer:
 
     def add_token(self, type, value):
         col = self.pos - self.line_start + 1
-        self.tokens.append(Token(type, value, self.lineno, col))
+        # The character offset is simply the current position in the source string.
+        self.tokens.append(Token(type, value, self.lineno, col, self.pos))
 
     def advance(self, count=1):
         for _ in range(count):

@@ -6,9 +6,10 @@ from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLNode.nodes import (
     DocumentNode, ElementNode, TextNode, TemplateUsageNode,
     TemplateDefinitionNode, CustomUsageNode, DeleteNode, AttributeNode,
-    InsertNode, StyleNode, CssPropertyNode, ImportNode
+    InsertNode, StyleNode, CssPropertyNode, OriginNode
 )
 from CHTL.CHTLTransformer.transformer import ASTTransformer
+from CHTL.CHTLGenerator.generator import HTMLGenerator
 
 import os
 
@@ -79,11 +80,25 @@ class TestASTTransformer(unittest.TestCase):
         # Place the .cmod file where the resolver will find it (in the module dir)
         create_cmod_archive(component_source_dir, output_path=self.module_dir)
 
+        # Create files for raw import test
+        with open("test_styles.css", "w") as f:
+            f.write(".imported-class { font-weight: bold; }")
+
+        with open("test_raw_import.chtl", "w") as f:
+            f.write("""
+            [Import] @Style from "test_styles.css" as my_styles;
+            [Origin] @Style my_styles;
+            """)
+
 
     def tearDown(self):
         import shutil
         if os.path.exists(self.test_dir):
             shutil.rmtree(self.test_dir)
+        if os.path.exists("test_styles.css"):
+            os.remove("test_styles.css")
+        if os.path.exists("test_raw_import.chtl"):
+            os.remove("test_raw_import.chtl")
 
     def test_custom_delete_attribute(self):
         ast = DocumentNode(children=[
@@ -171,6 +186,33 @@ class TestASTTransformer(unittest.TestCase):
         style_node = box_node.children[0]
         self.assertIsInstance(style_node, StyleNode)
         self.assertEqual(style_node.children[0].name, 'border')
+
+    def test_raw_file_import_and_origin_usage(self):
+        with open('test_raw_import.chtl', 'r') as f:
+            source = f.read()
+
+        context = CompilationContext()
+        parser = Parser(Lexer(source, context).tokenize(), context)
+        ast = parser.parse()
+
+        # The transformer needs the path to resolve the import
+        transformer = ASTTransformer(ast, context, "test_raw_import.chtl")
+        transformed_ast = transformer.transform()
+
+        # After transformation, the AST should contain just one OriginNode with the content.
+        self.assertEqual(len(transformed_ast.children), 1)
+
+        origin_node = transformed_ast.children[0]
+        self.assertIsInstance(origin_node, OriginNode)
+        self.assertIn(".imported-class", origin_node.content)
+        self.assertIn("font-weight: bold;", origin_node.content)
+
+        # Now, let's check the final generated output
+        generator = HTMLGenerator(transformed_ast, context)
+        html = generator.generate()
+
+        self.assertIn(".imported-class", html)
+        self.assertIn("font-weight: bold;", html)
 
 
 if __name__ == '__main__':
