@@ -1,0 +1,38 @@
+# Ignore core dumps
+core
+core.*
+
+# Ignore compiled executables
+*.exe
+*.out
+a.out
+
+# Ignore object files
+*.o
+*.obj
+
+# Ignore test executables
+test_*
+!test_*.cpp
+!test_*.h
+
+# Ignore build directories
+build/
+bin/
+obj/
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore temporary files
+*.tmp
+*.temp
+*.log
