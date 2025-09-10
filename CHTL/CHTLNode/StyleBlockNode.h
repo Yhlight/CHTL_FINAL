@@ -30,6 +30,14 @@ public:
         }
         return ss.str();
     }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        auto clonedNode = std::make_unique<StyleBlockNode>(token);
+        for (const auto& node : body) {
+            clonedNode->addNode(node->clone());
+        }
+        return clonedNode;
+    }
 };
 
 #endif //CHTL_STYLEBLOCKNODE_H

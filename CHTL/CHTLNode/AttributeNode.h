@@ -18,6 +18,10 @@ public:
     std::string debugString(int indent = 0) const override {
         return indentString(indent) + "AttributeNode: " + name + "=\"" + value + "\"\n";
     }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        return std::make_unique<AttributeNode>(*this);
+    }
 };
 
 #endif //CHTL_ATTRIBUTENODE_H

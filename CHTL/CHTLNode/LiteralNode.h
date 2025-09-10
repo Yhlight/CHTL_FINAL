@@ -16,6 +16,10 @@ public:
     std::string debugString(int indent = 0) const override {
         return indentString(indent) + "LiteralNode: " + token.lexeme + "\n";
     }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        return std::make_unique<LiteralNode>(*this);
+    }
 };
 
 #endif //CHTL_LITERALNODE_H

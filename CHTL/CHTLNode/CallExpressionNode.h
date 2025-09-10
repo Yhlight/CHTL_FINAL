@@ -28,6 +28,15 @@ public:
         }
         return ss.str();
     }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        auto clonedFunc = std::unique_ptr<ExpressionNode>(static_cast<ExpressionNode*>(function->clone().release()));
+        auto clonedNode = std::make_unique<CallExpressionNode>(token, std::move(clonedFunc));
+        for (const auto& arg : arguments) {
+            clonedNode->arguments.push_back(std::unique_ptr<ExpressionNode>(static_cast<ExpressionNode*>(arg->clone().release())));
+        }
+        return clonedNode;
+    }
 };
 
 #endif //CHTL_CALLEXPRESSIONNODE_H

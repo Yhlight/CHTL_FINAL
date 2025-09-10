@@ -81,8 +81,12 @@ void Generator::processStyleBody(const std::vector<std::unique_ptr<BaseNode>>& b
             if (usage->type == TemplateType::STYLE) {
                 auto templateDef = m_templateStore.get(usage->name);
                 if (templateDef) {
-                    // Recursively process the body of the used template
-                    processStyleBody(templateDef->body, parent, inline_style_stream);
+                    // Clone the body before recursive processing to ensure isolation.
+                    std::vector<std::unique_ptr<BaseNode>> clonedBody;
+                    for (const auto& n : templateDef->body) {
+                        clonedBody.push_back(n->clone());
+                    }
+                    processStyleBody(clonedBody, parent, inline_style_stream);
                 }
             }
         }
@@ -155,7 +159,7 @@ std::string Generator::generateText(const TextNode* node) {
 std::string Generator::generateTemplateUsage(const TemplateUsageNode* node) {
     if (node->type != TemplateType::ELEMENT) {
         // Only @Element templates produce direct output in the main document flow.
-        // @Style templates are handled within processStyleBlock.
+        // @Style templates are handled within processStyleBody.
         // @Var templates will be handled by the evaluator.
         return "";
     }
@@ -167,7 +171,8 @@ std::string Generator::generateTemplateUsage(const TemplateUsageNode* node) {
 
     std::stringstream ss;
     for (const auto& bodyNode : templateDef->body) {
-        ss << generateNode(bodyNode.get());
+        // Clone the node before generating to ensure isolation
+        ss << generateNode(bodyNode->clone().get());
     }
     return ss.str();
 }

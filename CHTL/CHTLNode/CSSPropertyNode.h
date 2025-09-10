@@ -24,6 +24,11 @@ public:
         ss << value->debugString(indent + 1);
         return ss.str();
     }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        auto clonedValue = std::unique_ptr<ExpressionNode>(static_cast<ExpressionNode*>(value->clone().release()));
+        return std::make_unique<CSSPropertyNode>(token, propertyName, std::move(clonedValue));
+    }
 };
 
 #endif //CHTL_CSSPROPERTYNODE_H

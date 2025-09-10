@@ -25,6 +25,12 @@ public:
         ss << right->debugString(indent + 1);
         return ss.str();
     }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        auto clonedLeft = std::unique_ptr<ExpressionNode>(static_cast<ExpressionNode*>(left->clone().release()));
+        auto clonedRight = std::unique_ptr<ExpressionNode>(static_cast<ExpressionNode*>(right->clone().release()));
+        return std::make_unique<BinaryOpNode>(std::move(clonedLeft), op, std::move(clonedRight));
+    }
 };
 
 #endif //CHTL_BINARYOPNODE_H

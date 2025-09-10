@@ -114,7 +114,6 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLEvaluator/Evaluator.cpp.o: /app/CHTL/CHTLE
   /usr/include/c++/13/initializer_list \
   /usr/include/c++/13/ios \
   /usr/include/c++/13/iosfwd \
-  /usr/include/c++/13/iostream \
   /usr/include/c++/13/istream \
   /usr/include/c++/13/map \
   /usr/include/c++/13/memory \
@@ -916,7 +915,6 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o: /app/CHTL/CHTLParser/
   /usr/include/c++/13/initializer_list \
   /usr/include/c++/13/ios \
   /usr/include/c++/13/iosfwd \
-  /usr/include/c++/13/iostream \
   /usr/include/c++/13/istream \
   /usr/include/c++/13/map \
   /usr/include/c++/13/memory \
@@ -1919,6 +1917,8 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h
 
 
+/usr/include/c++/13/iostream:
+
 /app/Util/StringUtil/StringUtil.cpp:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h:
@@ -1959,8 +1959,6 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
 
 /usr/include/c++/13/initializer_list:
 
-/usr/include/c++/13/iostream:
-
 /usr/include/c++/13/ext/type_traits.h:
 
 /usr/include/c++/13/ext/string_conversions.h:
@@ -1970,6 +1968,8 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
 /usr/include/c++/13/ext/concurrence.h:
 
 /usr/include/c++/13/pstl/glue_algorithm_defs.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h:
 
 /usr/include/c++/13/debug/assertions.h:
 
@@ -2231,6 +2231,10 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
 
 /usr/include/c++/13/bits/istream.tcc:
 
+/usr/include/c++/13/tuple:
+
+/usr/include/c++/13/bits/nested_exception.h:
+
 /usr/include/c++/13/map:
 
 /usr/include/c++/13/string_view:
@@ -2264,12 +2268,6 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
 /usr/include/c++/13/ios:
 
 /app/CHTL/CHTLNode/TextNode.h:
-
-/usr/include/c++/13/bits/nested_exception.h:
-
-/usr/include/c++/13/tuple:
-
-/usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h:
 
 /usr/include/c++/13/type_traits:
 
@@ -2381,10 +2379,6 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h:
 
-/usr/include/c++/13/bits/unordered_map.h:
-
-/app/CHTL/CHTLNode/TemplateUsageNode.h:
-
 /usr/include/c++/13/ext/atomicity.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
@@ -2462,3 +2456,7 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
 /usr/include/x86_64-linux-gnu/bits/types/error_t.h:
 
 /usr/include/c++/13/bits/hashtable.h:
+
+/app/CHTL/CHTLNode/TemplateUsageNode.h:
+
+/usr/include/c++/13/bits/unordered_map.h:

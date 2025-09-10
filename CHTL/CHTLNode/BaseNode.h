@@ -22,8 +22,10 @@ public:
     virtual ~BaseNode() = default;
 
     // A pure virtual function for debugging, forcing derived classes to implement it.
-    // The 'override' keyword in derived classes will ensure it's implemented.
     virtual std::string debugString(int indent = 0) const = 0;
+
+    // A pure virtual function for cloning, returning a deep copy of the node.
+    virtual std::unique_ptr<BaseNode> clone() const = 0;
 
 protected:
     // Helper for indentation in debug strings

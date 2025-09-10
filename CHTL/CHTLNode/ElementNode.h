@@ -44,6 +44,17 @@ public:
 
         return ss.str();
     }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        auto clonedNode = std::make_unique<ElementNode>(token, tagName);
+        for (const auto& attr : attributes) {
+            clonedNode->addAttribute(std::unique_ptr<AttributeNode>(static_cast<AttributeNode*>(attr->clone().release())));
+        }
+        for (const auto& child : children) {
+            clonedNode->addChild(child->clone());
+        }
+        return clonedNode;
+    }
 };
 
 #endif //CHTL_ELEMENTNODE_H

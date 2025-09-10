@@ -32,6 +32,14 @@ public:
         ss << indentString(indent) << "}\n";
         return ss.str();
     }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        auto clonedNode = std::make_unique<CSSRuleNode>(token, selector);
+        for (const auto& prop : properties) {
+            clonedNode->addProperty(std::unique_ptr<CSSPropertyNode>(static_cast<CSSPropertyNode*>(prop->clone().release())));
+        }
+        return clonedNode;
+    }
 };
 
 #endif //CHTL_CSSRULENODE_H

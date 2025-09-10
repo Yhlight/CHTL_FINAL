@@ -17,6 +17,10 @@ public:
     std::string debugString(int indent = 0) const override {
         return indentString(indent) + "TextNode: \"" + content + "\"\n";
     }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        return std::make_unique<TextNode>(*this);
+    }
 };
 
 #endif //CHTL_TEXTNODE_H

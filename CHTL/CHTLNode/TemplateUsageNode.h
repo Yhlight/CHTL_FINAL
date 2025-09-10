@@ -31,6 +31,10 @@ public:
         ss << indentString(indent) << "TemplateUsageNode: @" << typeToString() << " " << name << "\n";
         return ss.str();
     }
+
+    std::unique_ptr<BaseNode> clone() const override {
+        return std::make_unique<TemplateUsageNode>(*this);
+    }
 };
 
 #endif //CHTL_TEMPLATEUSAGENODE_H
