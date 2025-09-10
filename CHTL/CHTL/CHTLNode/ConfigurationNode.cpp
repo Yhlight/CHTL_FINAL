@@ -670,7 +670,7 @@ std::shared_ptr<BaseNode> ConfigurationNode::clone() const {
     
     // 复制基本属性
     cloned->setValue(value);
-    cloned->setAttributes(attributes);
+    // cloned->setAttributes(attributes);
     
     // 复制配置属性
     cloned->configurationGroup = configurationGroup;
@@ -871,29 +871,6 @@ void ConfigurationNode::applyConfigurationParameters() {
     }
 }
 
-void ConfigurationNode::applyConfigurationRules() {
-    for (const auto& rule : configurationRules) {
-        // 应用配置规则
-    }
-}
-
-void ConfigurationNode::applyConfigurationOptions() {
-    for (const auto& option : configurationOptions) {
-        // 应用配置选项
-    }
-}
-
-void ConfigurationNode::applyConfigurationLimits() {
-    for (const auto& limit : configurationLimits) {
-        // 应用配置限制
-    }
-}
-
-void ConfigurationNode::applyConfigurationDefaults() {
-    for (const auto& def : configurationDefaults) {
-        // 应用配置默认值
-    }
-}
 
 void ConfigurationNode::handleConfigurationError(const std::string& error) {
     addConfigurationError(error);

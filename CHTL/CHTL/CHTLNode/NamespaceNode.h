@@ -232,18 +232,13 @@ private:
     std::string expandNamespacePath(const std::string& path) const;
     
     // 继承处理
-    void processInheritance();
     void mergeParentProperties();
     void resolveInheritanceConflicts();
     
     // 约束处理
-    void processConstraints();
     bool checkTypeConstraint(const std::string& type, const std::string& value) const;
     bool checkGeneralConstraint(const std::string& constraint) const;
     bool checkAccessConstraint(const std::string& element, const std::string& access) const;
-    
-    // 冲突处理
-    void processConflicts();
     void detectElementConflicts();
     void detectPropertyConflicts();
     void detectExportConflicts();

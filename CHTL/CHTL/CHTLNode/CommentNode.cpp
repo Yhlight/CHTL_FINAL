@@ -1,5 +1,6 @@
 #include "CommentNode.h"
 #include <algorithm>
+#include <sstream>
 #include <cctype>
 
 namespace CHTL {

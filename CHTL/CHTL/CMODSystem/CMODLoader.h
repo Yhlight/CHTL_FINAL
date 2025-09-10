@@ -82,6 +82,8 @@ private:
         std::chrono::steady_clock::time_point timestamp;
         std::chrono::milliseconds ttl;
         
+        CacheEntry() : module(nullptr), timestamp(std::chrono::steady_clock::now()), ttl(std::chrono::milliseconds(0)) {}
+        
         CacheEntry(std::shared_ptr<CMODModule> module, std::chrono::milliseconds ttl)
             : module(module), timestamp(std::chrono::steady_clock::now()), ttl(ttl) {}
         

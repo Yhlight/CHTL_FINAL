@@ -10,6 +10,9 @@
 
 namespace CHTL {
 
+// 前向声明
+class CMODModule;
+
 // 模块类型枚举
 enum class ModuleType {
     UNKNOWN = 0,

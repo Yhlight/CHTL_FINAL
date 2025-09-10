@@ -67,6 +67,7 @@ public:
     std::string getAttribute(const std::string& key) const;
     bool hasAttribute(const std::string& key) const;
     void removeAttribute(const std::string& key);
+    void clearAttributes();
     const std::map<std::string, std::string>& getAttributes() const { return attributes; }
     
     // 子节点操作

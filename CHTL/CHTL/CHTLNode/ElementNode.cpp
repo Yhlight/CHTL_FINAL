@@ -33,6 +33,27 @@ std::string ElementNode::getAttribute(const std::string& key) const {
     return BaseNode::getAttribute(key);
 }
 
+std::string ElementNode::getStyleProperty(const std::string& property) const {
+    // 从style属性中解析CSS属性
+    std::string styleAttr = getAttribute("style");
+    if (styleAttr.empty()) {
+        return "";
+    }
+    
+    // 简单的CSS属性解析
+    std::regex propertyRegex(property + "\\s*:\\s*([^;]+)");
+    std::smatch match;
+    if (std::regex_search(styleAttr, match, propertyRegex)) {
+        std::string value = match[1].str();
+        // 去除前后空格
+        value.erase(0, value.find_first_not_of(" \t"));
+        value.erase(value.find_last_not_of(" \t") + 1);
+        return value;
+    }
+    
+    return "";
+}
+
 bool ElementNode::isVoidElementTag(const std::string& tagName) const {
     return voidElements.find(tagName) != voidElements.end();
 }
@@ -303,7 +324,7 @@ std::string ElementNode::toHTML(int indentLevel) const {
             for (const auto& child : children) {
                 if (child->getNodeType() == NodeType::ELEMENT) {
                     auto element = std::static_pointer_cast<ElementNode>(child);
-                    oss << element->toHTML();
+                    oss << element->toHTML(indentLevel);
                 } else if (child->getNodeType() == NodeType::TEXT) {
                     oss << child->getValue();
                 }

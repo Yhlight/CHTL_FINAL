@@ -177,12 +177,12 @@ std::string CHTLIOStream::toYAML() const {
     return oss.str();
 }
 
-CHTLIOStream CHTLIOStream::clone() const {
-    CHTLIOStream cloned;
-    cloned.inputPath = inputPath;
-    cloned.outputPath = outputPath;
-    cloned.buffer.str(buffer.str());
-    cloned.debugMode = debugMode;
+std::shared_ptr<CHTLIOStream> CHTLIOStream::clone() const {
+    auto cloned = std::make_shared<CHTLIOStream>();
+    cloned->inputPath = inputPath;
+    cloned->outputPath = outputPath;
+    cloned->buffer << buffer.str();
+    cloned->debugMode = debugMode;
     return cloned;
 }
 

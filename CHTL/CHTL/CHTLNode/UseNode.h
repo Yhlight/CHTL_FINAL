@@ -11,7 +11,7 @@
 namespace CHTL {
 
 class UseNode : public BaseNode {
-private:
+public:
     // Use类型
     enum class UseType {
         HTML5,          // HTML5类型
@@ -20,7 +20,8 @@ private:
         TEMPLATE,       // 模板类型
         CUSTOM          // 自定义类型
     };
-    
+
+private:
     UseType useType;
     std::string useName;
     std::string useGroup;
@@ -256,10 +257,6 @@ private:
     
     // Use应用
     void applyUseParameters();
-    void applyUseOptions();
-    void applyUseLimits();
-    void applyUseDefaults();
-    void applyUseRules();
     
     // 错误处理
     void handleUseError(const std::string& error);

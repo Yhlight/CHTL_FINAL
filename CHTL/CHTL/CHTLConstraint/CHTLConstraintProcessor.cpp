@@ -523,7 +523,7 @@ bool CHTLConstraintProcessor::applyConstraints(std::shared_ptr<BaseNode> node) {
     }
     
     // 应用类型约束
-    if (!applyTypeConstraints(node, node->getNodeTypeName())) {
+    if (!applyTypeConstraints(node, "ELEMENT")) {
         success = false;
     }
     
@@ -900,76 +900,10 @@ bool CHTLConstraintProcessor::checkExactConstraints(const std::string& value) co
     return success;
 }
 
-bool CHTLConstraintProcessor::checkTypeConstraints(const std::string& type, const std::string& value) const {
-    auto typeConstraints = getConstraintsByType(ConstraintNode::ConstraintType::TYPE);
-    bool success = true;
-    
-    for (const auto& constraint : typeConstraints) {
-        if (!constraint->checkTypeConstraint(type, value)) {
-            success = false;
-        }
-    }
-    
-    return success;
-}
-
-bool CHTLConstraintProcessor::checkGlobalConstraints(const std::string& value) const {
-    auto globalConstraints = getConstraintsByType(ConstraintNode::ConstraintType::GLOBAL);
-    bool success = true;
-    
-    for (const auto& constraint : globalConstraints) {
-        if (!constraint->checkConstraint(value)) {
-            success = false;
-        }
-    }
-    
-    return success;
-}
-
-bool CHTLConstraintProcessor::checkLocalConstraints(const std::string& value) const {
-    auto localConstraints = getConstraintsByType(ConstraintNode::ConstraintType::LOCAL);
-    bool success = true;
-    
-    for (const auto& constraint : localConstraints) {
-        if (!constraint->checkConstraint(value)) {
-            success = false;
-        }
-    }
-    
-    return success;
-}
-
-bool CHTLConstraintProcessor::checkInheritedConstraints(const std::string& value) const {
-    auto inheritedConstraints = getConstraintsByType(ConstraintNode::ConstraintType::INHERITED);
-    bool success = true;
-    
-    for (const auto& constraint : inheritedConstraints) {
-        if (!constraint->checkConstraint(value)) {
-            success = false;
-        }
-    }
-    
-    return success;
-}
 
 bool CHTLConstraintProcessor::applyExactConstraints(std::shared_ptr<BaseNode> node) {
     return checkExactConstraints(node->getValue());
 }
 
-bool CHTLConstraintProcessor::applyTypeConstraints(std::shared_ptr<BaseNode> node, const std::string& type) {
-    return checkTypeConstraints(type, node->getValue());
-}
-
-bool CHTLConstraintProcessor::applyGlobalConstraints(std::shared_ptr<BaseNode> node) {
-    return checkGlobalConstraints(node->getValue());
-}
-
-bool CHTLConstraintProcessor::applyLocalConstraints(std::shared_ptr<BaseNode> node) {
-    return checkLocalConstraints(node->getValue());
-}
-
-bool CHTLConstraintProcessor::applyInheritedConstraints(std::shared_ptr<BaseNode> node) {
-    return checkInheritedConstraints(node->getValue());
-}
 
 } // namespace CHTL

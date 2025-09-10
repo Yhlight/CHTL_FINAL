@@ -327,14 +327,9 @@ private:
     
     // 约束检查
     bool checkExactConstraints(const std::string& value) const;
-    bool checkTypeConstraints(const std::string& type, const std::string& value) const;
-    bool checkGlobalConstraints(const std::string& value) const;
-    bool checkLocalConstraints(const std::string& value) const;
-    bool checkInheritedConstraints(const std::string& value) const;
     
     // 约束应用
     bool applyExactConstraints(std::shared_ptr<BaseNode> node);
-    bool applyTypeConstraints(std::shared_ptr<BaseNode> node, const std::string& type);
     bool applyGlobalConstraints(std::shared_ptr<BaseNode> node);
     bool applyLocalConstraints(std::shared_ptr<BaseNode> node);
     bool applyInheritedConstraints(std::shared_ptr<BaseNode> node);

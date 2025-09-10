@@ -692,7 +692,20 @@ bool CMODModule::compareMetadata(std::shared_ptr<CMODModule> other) const {
 }
 
 bool CMODModule::compareMetadata(const CMODModule& other) const {
-    return info.metadata == other.info.metadata;
+    if (info.metadata.size() != other.info.metadata.size()) {
+        return false;
+    }
+    
+    for (const auto& pair : info.metadata) {
+        auto it = other.info.metadata.find(pair.first);
+        if (it == other.info.metadata.end()) {
+            return false;
+        }
+        // 由于std::any不能直接比较，我们只比较键
+        // 在实际应用中，可能需要更复杂的比较逻辑
+    }
+    
+    return true;
 }
 
 // 克隆辅助实现

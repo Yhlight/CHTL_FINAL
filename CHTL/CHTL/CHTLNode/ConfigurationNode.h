@@ -11,7 +11,7 @@
 namespace CHTL {
 
 class ConfigurationNode : public BaseNode {
-private:
+public:
     // 配置类型
     enum class ConfigurationType {
         GLOBAL,         // 全局配置
@@ -20,7 +20,8 @@ private:
         TEMPLATE,       // 模板配置
         CUSTOM          // 自定义配置
     };
-    
+
+private:
     ConfigurationType configurationType;
     std::string configurationName;
     std::string configurationGroup;
@@ -251,10 +252,6 @@ private:
     
     // 配置应用
     void applyConfigurationParameters();
-    void applyConfigurationRules();
-    void applyConfigurationOptions();
-    void applyConfigurationLimits();
-    void applyConfigurationDefaults();
     
     // 错误处理
     void handleConfigurationError(const std::string& error);

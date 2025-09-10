@@ -63,7 +63,7 @@ public:
     std::string toYAML() const;
     
     // 克隆
-    CHTLIOStream clone() const;
+    std::shared_ptr<CHTLIOStream> clone() const;
     
     // 比较
     bool operator==(const CHTLIOStream& other) const;

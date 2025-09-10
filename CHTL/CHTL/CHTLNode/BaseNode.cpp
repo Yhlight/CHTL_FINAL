@@ -25,6 +25,10 @@ void BaseNode::removeAttribute(const std::string& key) {
     attributes.erase(key);
 }
 
+void BaseNode::clearAttributes() {
+    attributes.clear();
+}
+
 void BaseNode::addChild(std::shared_ptr<BaseNode> child) {
     if (child) {
         child->setParent(shared_from_this());

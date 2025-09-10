@@ -15,7 +15,7 @@ ModuleCache::ModuleCache() : maxSize(1000), defaultTTL(std::chrono::minutes(30))
 ModuleCache::~ModuleCache() = default;
 
 void ModuleCache::put(const std::string& key, std::shared_ptr<CMODModule> module) {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     
     if (cache.size() >= maxSize) {
         evictLRU();
@@ -25,12 +25,12 @@ void ModuleCache::put(const std::string& key, std::shared_ptr<CMODModule> module
 }
 
 std::shared_ptr<CMODModule> ModuleCache::get(const std::string& key) const {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     
     auto it = cache.find(key);
     if (it != cache.end()) {
         if (it->second.isExpired()) {
-            cache.erase(it);
+            // 在const方法中不能修改cache，所以这里不能erase
             return nullptr;
         }
         return it->second.module;
@@ -40,7 +40,7 @@ std::shared_ptr<CMODModule> ModuleCache::get(const std::string& key) const {
 }
 
 bool ModuleCache::has(const std::string& key) const {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     
     auto it = cache.find(key);
     if (it != cache.end()) {
@@ -55,22 +55,22 @@ bool ModuleCache::has(const std::string& key) const {
 }
 
 void ModuleCache::remove(const std::string& key) {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     cache.erase(key);
 }
 
 void ModuleCache::clear() {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     cache.clear();
 }
 
 size_t ModuleCache::size() const {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     return cache.size();
 }
 
 std::vector<std::string> ModuleCache::keys() const {
-    std::lock_guard<std::mutx> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     std::vector<std::string> keys;
     for (const auto& pair : cache) {
         keys.push_back(pair.first);
@@ -79,7 +79,7 @@ std::vector<std::string> ModuleCache::keys() const {
 }
 
 std::vector<std::shared_ptr<CMODModule>> ModuleCache::values() const {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     std::vector<std::shared_ptr<CMODModule>> values;
     for (const auto& pair : cache) {
         values.push_back(pair.second.module);
@@ -88,7 +88,7 @@ std::vector<std::shared_ptr<CMODModule>> ModuleCache::values() const {
 }
 
 void ModuleCache::setMaxSize(size_t maxSize) {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     this->maxSize = maxSize;
     while (cache.size() > maxSize) {
         evictLRU();
@@ -100,7 +100,7 @@ size_t ModuleCache::getMaxSize() const {
 }
 
 void ModuleCache::setTTL(std::chrono::milliseconds ttl) {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     defaultTTL = ttl;
 }
 
@@ -109,7 +109,7 @@ std::chrono::milliseconds ModuleCache::getTTL() const {
 }
 
 bool ModuleCache::isValid(const std::string& key) const {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     
     auto it = cache.find(key);
     if (it != cache.end()) {
@@ -120,7 +120,7 @@ bool ModuleCache::isValid(const std::string& key) const {
 }
 
 void ModuleCache::validate() {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     evictExpired();
 }
 
@@ -156,48 +156,48 @@ CMODLoader::~CMODLoader() = default;
 // 加载器注册实现
 void CMODLoader::registerLoader(std::shared_ptr<IModuleLoader> loader) {
     if (loader) {
-        std::lock_guard<std::mutex> lock(mutx);
+        std::lock_guard<std::mutex> lock(mutex);
         loaders.push_back(loader);
     }
 }
 
 void CMODLoader::unregisterLoader(std::shared_ptr<IModuleLoader> loader) {
     if (loader) {
-        std::lock_guard<std::mutex> lock(mutx);
+        std::lock_guard<std::mutex> lock(mutex);
         loaders.erase(std::remove(loaders.begin(), loaders.end(), loader), loaders.end());
     }
 }
 
 void CMODLoader::clearLoaders() {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     loaders.clear();
 }
 
 std::vector<std::shared_ptr<IModuleLoader>> CMODLoader::getLoaders() const {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     return loaders;
 }
 
 // 搜索路径管理实现
 void CMODLoader::addSearchPath(const std::string& path) {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     if (std::find(searchPaths.begin(), searchPaths.end(), path) == searchPaths.end()) {
         searchPaths.push_back(path);
     }
 }
 
 void CMODLoader::removeSearchPath(const std::string& path) {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     searchPaths.erase(std::remove(searchPaths.begin(), searchPaths.end(), path), searchPaths.end());
 }
 
 void CMODLoader::clearSearchPaths() {
-    std::lock_guard<std::mutx> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     searchPaths.clear();
 }
 
 std::vector<std::string> CMODLoader::getSearchPaths() const {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     return searchPaths;
 }
 
@@ -260,7 +260,7 @@ std::future<std::vector<LoadResult>> CMODLoader::loadAllAsync(const std::vector<
 
 // 模块管理实现
 void CMODLoader::unload(const std::string& path) {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     loadedModules.erase(path);
     
     if (cache) {
@@ -275,7 +275,7 @@ void CMODLoader::unload(std::shared_ptr<CMODModule> module) {
 }
 
 void CMODLoader::unloadAll() {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     loadedModules.clear();
     
     if (cache) {
@@ -284,13 +284,13 @@ void CMODLoader::unloadAll() {
 }
 
 std::shared_ptr<CMODModule> CMODLoader::getModule(const std::string& path) const {
-    std::lock_guard<std::mutx> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     auto it = loadedModules.find(path);
     return it != loadedModules.end() ? it->second : nullptr;
 }
 
 std::vector<std::shared_ptr<CMODModule>> CMODLoader::getAllModules() const {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     std::vector<std::shared_ptr<CMODModule>> modules;
     for (const auto& pair : loadedModules) {
         modules.push_back(pair.second);
@@ -299,7 +299,7 @@ std::vector<std::shared_ptr<CMODModule>> CMODLoader::getAllModules() const {
 }
 
 std::vector<std::shared_ptr<CMODModule>> CMODLoader::getModulesByType(ModuleType type) const {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     std::vector<std::shared_ptr<CMODModule>> modules;
     for (const auto& pair : loadedModules) {
         if (pair.second && pair.second->getType() == type) {
@@ -396,12 +396,12 @@ std::vector<std::string> CMODLoader::findModules(const std::string& pattern) con
 
 // 缓存管理实现
 void CMODLoader::setCache(std::shared_ptr<ModuleCache> cache) {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     this->cache = cache;
 }
 
 std::shared_ptr<ModuleCache> CMODLoader::getCache() const {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     return cache;
 }
 
@@ -413,22 +413,22 @@ void CMODLoader::clearCache() {
 
 // 状态管理实现
 void CMODLoader::setEnabled(bool enabled) {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     this->enabled = enabled;
 }
 
 bool CMODLoader::isEnabled() const {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     return enabled;
 }
 
 void CMODLoader::setDebug(bool debug) {
-    std::lock_guard<std::mutx> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     this->debug = debug;
 }
 
 bool CMODLoader::isDebug() const {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     return debug;
 }
 
@@ -457,7 +457,7 @@ std::vector<std::string> CMODLoader::validate() const {
 
 // 统计实现
 size_t CMODLoader::getLoadedModuleCount() const {
-    std::lock_guard<std::mutex> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     return loadedModules.size();
 }
 
@@ -466,12 +466,12 @@ size_t CMODLoader::getCacheSize() const {
 }
 
 std::chrono::milliseconds CMODLoader::getTotalLoadTime() const {
-    std::lock_guard<std::mutx> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     return totalLoadTime;
 }
 
 std::chrono::milliseconds CMODLoader::getAverageLoadTime() const {
-    std::lock_guard<std::mutx> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     return totalLoadCount > 0 ? 
         std::chrono::milliseconds(totalLoadTime.count() / totalLoadCount) : 
         std::chrono::milliseconds(0);
@@ -479,7 +479,7 @@ std::chrono::milliseconds CMODLoader::getAverageLoadTime() const {
 
 // 重置实现
 void CMODLoader::reset() {
-    std::lock_guard<std::mutx> lock(mutx);
+    std::lock_guard<std::mutex> lock(mutex);
     loaders.clear();
     searchPaths.clear();
     loadedModules.clear();
@@ -620,7 +620,7 @@ LoadResult CMODLoader::loadModuleSync(const std::string& path, const LoadOptions
     }
     
     {
-        std::lock_guard<std::mutx> lock(mutx);
+        std::lock_guard<std::mutex> lock(mutex);
         loadedModules[resolvedPath] = module;
     }
     

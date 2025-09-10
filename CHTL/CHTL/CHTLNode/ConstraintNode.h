@@ -11,7 +11,7 @@
 namespace CHTL {
 
 class ConstraintNode : public BaseNode {
-private:
+public:
     // 约束类型
     enum class ConstraintType {
         EXACT,      // 精确约束
@@ -21,6 +21,16 @@ private:
         INHERITED   // 继承约束
     };
     
+    // 约束操作
+    enum class ConstraintOperation {
+        ALLOW,      // 允许
+        DENY,       // 拒绝
+        REQUIRE,    // 要求
+        OPTIONAL,   // 可选
+        WARN        // 警告
+    };
+
+private:
     ConstraintType constraintType;
     std::string constraintName;
     std::string constraintExpression;
@@ -35,15 +45,6 @@ private:
     std::vector<std::string> conditions;
     std::map<std::string, std::string> conditionValues;
     std::map<std::string, std::function<bool(const std::string&)>> conditionFunctions;
-    
-    // 约束操作
-    enum class ConstraintOperation {
-        ALLOW,      // 允许
-        DENY,       // 拒绝
-        REQUIRE,    // 要求
-        OPTIONAL,   // 可选
-        WARN        // 警告
-    };
     
     ConstraintOperation operation;
     std::string operationMessage;
@@ -248,7 +249,6 @@ private:
     
     // 约束检查
     bool checkExactConstraint(const std::string& value) const;
-    bool checkTypeConstraint(const std::string& type, const std::string& value) const;
     bool checkGlobalConstraint(const std::string& value) const;
     bool checkLocalConstraint(const std::string& value) const;
     bool checkInheritedConstraint(const std::string& value) const;

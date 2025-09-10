@@ -349,7 +349,7 @@ std::string ImportNode::toHTML() const {
     switch (importType) {
         case ImportType::HTML:
             return importedContent;
-        case ImportType::STYLE:
+        case ImportType::CSS:
             return "<style>\n" + importedContent + "\n</style>";
         case ImportType::JAVASCRIPT:
             return "<script>\n" + importedContent + "\n</script>";
@@ -363,7 +363,7 @@ std::string ImportNode::toHTML() const {
 }
 
 std::string ImportNode::toCSS() const {
-    if (importType == ImportType::STYLE) {
+    if (importType == ImportType::CSS) {
         return importedContent;
     }
     return "";

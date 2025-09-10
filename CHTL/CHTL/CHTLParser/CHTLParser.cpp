@@ -1,4 +1,5 @@
 #include "CHTLParser.h"
+#include <iostream>
 #include <sstream>
 #include <algorithm>
 #include <regex>
@@ -87,6 +88,13 @@ void CHTLParser::error(const std::string& message, const Token& token) const {
     std::ostringstream oss;
     oss << "第" << token.line << "行第" << token.column << "列: " << message;
     errors.push_back(oss.str());
+}
+
+void CHTLParser::addError(const std::string& message) {
+    errors.push_back(message);
+    if (debugMode) {
+        std::cout << "错误: " << message << std::endl;
+    }
 }
 
 std::shared_ptr<BaseNode> CHTLParser::parseDocument() {

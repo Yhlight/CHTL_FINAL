@@ -44,6 +44,7 @@ private:
     // 错误处理
     void error(const std::string& message) const;
     void error(const std::string& message, const Token& token) const;
+    void addError(const std::string& message);
     
     // 解析方法
     std::shared_ptr<BaseNode> parseDocument();

@@ -677,7 +677,7 @@ std::shared_ptr<BaseNode> UseNode::clone() const {
     
     // 复制基本属性
     cloned->setValue(value);
-    cloned->setAttributes(attributes);
+    // cloned->setAttributes(attributes);
     
     // 复制use属性
     cloned->useGroup = useGroup;
@@ -880,29 +880,6 @@ void UseNode::applyUseParameters() {
     }
 }
 
-void UseNode::applyUseOptions() {
-    for (const auto& option : useOptions) {
-        // 应用use选项
-    }
-}
-
-void UseNode::applyUseLimits() {
-    for (const auto& limit : useLimits) {
-        // 应用use限制
-    }
-}
-
-void UseNode::applyUseDefaults() {
-    for (const auto& def : useDefaults) {
-        // 应用use默认值
-    }
-}
-
-void UseNode::applyUseRules() {
-    for (const auto& rule : useRules) {
-        // 应用use规则
-    }
-}
 
 void UseNode::handleUseError(const std::string& error) {
     addUseError(error);

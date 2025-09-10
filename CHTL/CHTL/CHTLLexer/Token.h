@@ -31,7 +31,7 @@ enum class TokenType {
     EXCLAMATION,    // !
     PIPE,           // |
     SLASH,          // /
-    BACKSLASH,      // \
+    BACKSLASH,      // backslash
     ASTERISK,       // *
     PLUS,           // +
     MINUS,          // -

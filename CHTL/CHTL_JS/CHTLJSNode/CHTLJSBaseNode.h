@@ -93,8 +93,8 @@ protected:
     
     // 类型信息
     std::string typeAnnotation;
-    bool isOptional;
-    bool isNullable;
+    bool optional;
+    bool nullable;
     
     // 作用域信息
     std::string scope;
@@ -158,11 +158,11 @@ public:
     const std::string& getTypeAnnotation() const { return typeAnnotation; }
     void setTypeAnnotation(const std::string& type) { typeAnnotation = type; }
     
-    bool isOptional() const { return isOptional; }
-    void setOptional(bool optional) { isOptional = optional; }
+    bool isOptional() const { return optional; }
+    void setOptional(bool optional) { this->optional = optional; }
     
-    bool isNullable() const { return isNullable; }
-    void setNullable(bool nullable) { isNullable = nullable; }
+    bool isNullable() const { return nullable; }
+    void setNullable(bool nullable) { this->nullable = nullable; }
     
     // 作用域信息
     const std::string& getScope() const { return scope; }

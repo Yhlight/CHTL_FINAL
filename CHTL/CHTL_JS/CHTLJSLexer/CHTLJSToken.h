@@ -93,7 +93,7 @@ enum class CHTLJSTokenType {
     VAR,                // var 变量
     TRUE,               // true 真
     FALSE,              // false 假
-    NULL,               // null 空
+    NULL_VALUE,         // null 空
     UNDEFINED,          // undefined 未定义
     THIS,               // this 当前对象
     NEW,                // new 新建

@@ -7,7 +7,7 @@
 namespace CHTL {
 
 ConstraintNode::ConstraintNode(const std::string& name, ConstraintType type)
-    : BaseNode(NodeType::CONSTRAINT, name, ""), constraintType(type), constraintName(name),
+    : BaseNode(NodeType::ELEMENT, name, ""), constraintType(type), constraintName(name),
       operation(ConstraintOperation::ALLOW), operationPriority(0), isActive(true), isProcessed(false),
       isViolated(false), priority(0), isRequired(false), isOptional(false) {
 }
@@ -639,7 +639,7 @@ std::shared_ptr<BaseNode> ConstraintNode::clone() const {
     
     // 复制基本属性
     cloned->setValue(value);
-    cloned->setAttributes(attributes);
+    // cloned->setAttributes(attributes);
     
     // 复制约束属性
     cloned->constraintExpression = constraintExpression;
@@ -858,18 +858,6 @@ bool ConstraintNode::checkExactConstraint(const std::string& value) const {
     return value == constraintExpression;
 }
 
-bool ConstraintNode::checkTypeConstraint(const std::string& type, const std::string& value) const {
-    if (targetTypes.empty()) {
-        return true;
-    }
-    
-    if (!hasTargetType(type)) {
-        return true;
-    }
-    
-    // 检查类型约束
-    return true;
-}
 
 bool ConstraintNode::checkGlobalConstraint(const std::string& value) const {
     // 检查全局约束

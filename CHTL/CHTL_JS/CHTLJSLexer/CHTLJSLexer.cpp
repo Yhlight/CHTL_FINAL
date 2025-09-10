@@ -383,7 +383,7 @@ void CHTLJSLexer::initializeKeywords() {
     keywords["var"] = CHTLJSTokenType::VAR;
     keywords["true"] = CHTLJSTokenType::TRUE;
     keywords["false"] = CHTLJSTokenType::FALSE;
-    keywords["null"] = CHTLJSTokenType::NULL;
+    keywords["null"] = CHTLJSTokenType::NULL_VALUE;
     keywords["undefined"] = CHTLJSTokenType::UNDEFINED;
     keywords["this"] = CHTLJSTokenType::THIS;
     keywords["new"] = CHTLJSTokenType::NEW;

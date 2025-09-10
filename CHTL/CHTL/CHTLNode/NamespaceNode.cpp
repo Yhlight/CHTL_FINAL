@@ -387,8 +387,8 @@ std::string NamespaceNode::toCSS() const {
     
     for (const auto& content : namespaceContent) {
         if (content->getNodeType() == NodeType::STYLE) {
-            auto styleContent = std::static_pointer_cast<StyleNode>(content);
-            oss << styleContent->toCSS() << "\n";
+            auto styleContent = std::static_pointer_cast<BaseNode>(content);
+            oss << styleContent->toHTML() << "\n";
         }
     }
     
@@ -400,8 +400,8 @@ std::string NamespaceNode::toJavaScript() const {
     
     for (const auto& content : namespaceContent) {
         if (content->getNodeType() == NodeType::SCRIPT) {
-            auto scriptContent = std::static_pointer_cast<ScriptNode>(content);
-            oss << scriptContent->toJavaScript() << "\n";
+            auto scriptContent = std::static_pointer_cast<BaseNode>(content);
+            oss << scriptContent->toHTML() << "\n";
         }
     }
     

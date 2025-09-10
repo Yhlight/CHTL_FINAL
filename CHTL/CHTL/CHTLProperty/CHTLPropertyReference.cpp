@@ -67,7 +67,7 @@ std::string CHTLPropertyReference::resolvePropertyReference(const std::string& r
         }
         
         // 检查是否是可选链式调用
-        if (enableOptionalChaining && reference.find('?.') != std::string::npos) {
+        if (enableOptionalChaining && reference.find("?.") != std::string::npos) {
             return resolveOptionalChaining(reference);
         }
         
@@ -277,7 +277,7 @@ std::string CHTLPropertyReference::resolveOptionalChaining(const std::string& ch
         return result;
         
     } catch (const std::exception& e) {
-        addError("解析可选链式调用时发生错误: " + std::string(e.what()));
+        const_cast<CHTLPropertyReference*>(this)->addError("解析可选链式调用时发生错误: " + std::string(e.what()));
         return chain;
     }
 }
@@ -310,7 +310,7 @@ std::string CHTLPropertyReference::evaluateExpression(const std::string& express
         return expression;
         
     } catch (const std::exception& e) {
-        addError("求值表达式时发生错误: " + std::string(e.what()));
+        const_cast<CHTLPropertyReference*>(this)->addError("求值表达式时发生错误: " + std::string(e.what()));
         return expression;
     }
 }
@@ -338,7 +338,7 @@ std::string CHTLPropertyReference::evaluateArithmeticExpression(const std::strin
                 if (value != 0) {
                     result /= value;
                 } else {
-                    addError("除零错误");
+                    const_cast<CHTLPropertyReference*>(this)->addError("除零错误");
                     return expression;
                 }
             } else if (operation == "%") {
@@ -363,7 +363,7 @@ std::string CHTLPropertyReference::evaluateArithmeticExpression(const std::strin
                     if (value != 0) {
                         result /= value;
                     } else {
-                        addError("除零错误");
+                        const_cast<CHTLPropertyReference*>(this)->addError("除零错误");
                         return expression;
                     }
                 } else if (operation == "%") {
@@ -640,7 +640,7 @@ std::string CHTLPropertyReference::processMethodCall(const std::string& method, 
         return "";
         
     } catch (const std::exception& e) {
-        addError("处理方法调用时发生错误: " + std::string(e.what()));
+        const_cast<CHTLPropertyReference*>(this)->addError("处理方法调用时发生错误: " + std::string(e.what()));
         return "";
     }
 }
