@@ -30,7 +30,7 @@ enum class CHTLJSTokenType {
     LEFT_BRACE,         // { 左花括号
     RIGHT_BRACE,        // } 右花括号
     
-    // CHTL JS特有语法
+    // CHTL JS特有语法（仅语法解析，不包含CJMOD功能）
     ENHANCED_SELECTOR,  // {{选择器}} 增强选择器
     RESPONSIVE_VALUE,   // $JS变量名$ 响应式值
     VIRTUAL_OBJECT,     // vir 虚对象
@@ -40,9 +40,6 @@ enum class CHTLJSTokenType {
     ROUTER,             // router 路由
     FILELOADER,         // fileloader 文件加载器
     INEVERAWAY,         // iNeverAway 特殊功能
-    UTIL,               // util 工具函数
-    THEN,               // then 然后
-    CHANGE,             // change 变化
     
     // 基本关键字（仅CHTL JS需要的）
     TRUE,               // true 真

@@ -56,7 +56,7 @@ enum class CHTLJSNodeType {
     NAMESPACE_DECLARATION,
     MODULE_DECLARATION,
     
-    // CHTL JS特有节点
+    // CHTL JS特有节点（仅语法解析，不包含CJMOD功能）
     ENHANCED_SELECTOR,
     RESPONSIVE_VALUE,
     VIRTUAL_OBJECT,
@@ -65,7 +65,6 @@ enum class CHTLJSNodeType {
     ANIMATE_EXPRESSION,
     ROUTER_EXPRESSION,
     FILELOADER_EXPRESSION,
-    UTIL_EXPRESSION,
     
     // 特殊节点
     COMMENT,

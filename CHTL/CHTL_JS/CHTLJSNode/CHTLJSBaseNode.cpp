@@ -161,7 +161,6 @@ bool CHTLJSBaseNode::isExpression() const {
         case CHTLJSNodeType::ANIMATE_EXPRESSION:
         case CHTLJSNodeType::ROUTER_EXPRESSION:
         case CHTLJSNodeType::FILELOADER_EXPRESSION:
-        case CHTLJSNodeType::UTIL_EXPRESSION:
             return true;
         default:
             return false;
@@ -240,7 +239,6 @@ bool CHTLJSBaseNode::isCHTLJSSpecific() const {
         case CHTLJSNodeType::ANIMATE_EXPRESSION:
         case CHTLJSNodeType::ROUTER_EXPRESSION:
         case CHTLJSNodeType::FILELOADER_EXPRESSION:
-        case CHTLJSNodeType::UTIL_EXPRESSION:
             return true;
         default:
             return false;
@@ -492,7 +490,6 @@ std::string CHTLJSBaseNode::getNodeTypeName() const {
         case CHTLJSNodeType::ANIMATE_EXPRESSION: return "ANIMATE_EXPRESSION";
         case CHTLJSNodeType::ROUTER_EXPRESSION: return "ROUTER_EXPRESSION";
         case CHTLJSNodeType::FILELOADER_EXPRESSION: return "FILELOADER_EXPRESSION";
-        case CHTLJSNodeType::UTIL_EXPRESSION: return "UTIL_EXPRESSION";
         case CHTLJSNodeType::COMMENT: return "COMMENT";
         case CHTLJSNodeType::DIRECTIVE: return "DIRECTIVE";
         case CHTLJSNodeType::IMPORT_DECLARATION: return "IMPORT_DECLARATION";

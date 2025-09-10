@@ -647,12 +647,25 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseFileloaderExpression() {
     
     return fileloader;
 }
-std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseUtilExpression() {
-    // util...then表达式属于Chtholly模块，不是CHTL JS核心功能
-    return nullptr;
-}
+// parseUtilExpression方法已移除 - util...then表达式属于CJMOD功能，不是CHTL JS核心功能
 // 这些方法不属于CHTL JS核心功能，由JS编译器处理
 // CHTL JS只支持特定的声明式语法：fileloader, listen, delegate, animate, router, vir
+
+// 缺失的方法实现（占位符）
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseArrayExpression() {
+    // 数组表达式解析 - 占位符实现
+    return nullptr;
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseFunctionExpression() {
+    // 函数表达式解析 - 占位符实现
+    return nullptr;
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseArrowFunctionExpression() {
+    // 箭头函数表达式解析 - 占位符实现
+    return nullptr;
+}
 
 // CHTL JS特有的成员表达式解析（支持->运算符）
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseMemberExpression() {

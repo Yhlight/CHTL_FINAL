@@ -380,7 +380,7 @@ void CHTLJSLexer::initializeKeywords() {
     keywords["null"] = CHTLJSTokenType::NULL_VALUE;
     keywords["undefined"] = CHTLJSTokenType::UNDEFINED;
     
-    // CHTL JS特有关键字
+    // CHTL JS特有关键字（仅语法解析，不包含CJMOD功能）
     keywords["vir"] = CHTLJSTokenType::VIRTUAL_OBJECT;
     keywords["listen"] = CHTLJSTokenType::LISTEN;
     keywords["delegate"] = CHTLJSTokenType::DELEGATE;
@@ -388,9 +388,6 @@ void CHTLJSLexer::initializeKeywords() {
     keywords["router"] = CHTLJSTokenType::ROUTER;
     keywords["fileloader"] = CHTLJSTokenType::FILELOADER;
     keywords["iNeverAway"] = CHTLJSTokenType::INEVERAWAY;
-    keywords["util"] = CHTLJSTokenType::UTIL;
-    keywords["then"] = CHTLJSTokenType::THEN;
-    keywords["change"] = CHTLJSTokenType::CHANGE;
 }
 
 void CHTLJSLexer::initializeOperators() {

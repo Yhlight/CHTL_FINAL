@@ -28,7 +28,7 @@ void CHTLJSGlobalMap::initializeKeywords() {
     addKeyword("null", CHTLJSTokenType::NULL_VALUE);
     addKeyword("undefined", CHTLJSTokenType::UNDEFINED);
     
-    // CHTL JS特有关键字
+    // CHTL JS特有关键字（仅语法解析，不包含CJMOD功能）
     addKeyword("vir", CHTLJSTokenType::VIRTUAL_OBJECT);
     addKeyword("listen", CHTLJSTokenType::LISTEN);
     addKeyword("delegate", CHTLJSTokenType::DELEGATE);
@@ -36,9 +36,6 @@ void CHTLJSGlobalMap::initializeKeywords() {
     addKeyword("router", CHTLJSTokenType::ROUTER);
     addKeyword("fileloader", CHTLJSTokenType::FILELOADER);
     addKeyword("iNeverAway", CHTLJSTokenType::INEVERAWAY);
-    addKeyword("util", CHTLJSTokenType::UTIL);
-    addKeyword("then", CHTLJSTokenType::THEN);
-    addKeyword("change", CHTLJSTokenType::CHANGE);
 }
 
 void CHTLJSGlobalMap::initializeOperators() {
@@ -672,7 +669,7 @@ std::string CHTLJSGlobalMap::formatStatistics() const {
         oss << "\nTop 10 Most Used Items:\n";
         std::vector<std::pair<std::string, int>> sortedUsage(usageCount.begin(), usageCount.end());
         std::sort(sortedUsage.begin(), sortedUsage.end(), 
-                 [](const auto& a, const auto& b) { return a.second > b.second; });
+                 [](const std::pair<std::string, int>& a, const std::pair<std::string, int>& b) { return a.second > b.second; });
         
         for (size_t i = 0; i < std::min(size_t(10), sortedUsage.size()); i++) {
             oss << "  " << sortedUsage[i].first << ": " << sortedUsage[i].second << "\n";

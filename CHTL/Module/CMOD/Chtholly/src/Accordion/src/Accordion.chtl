@@ -1,0 +1,90 @@
+// 珂朵莉主题手风琴组件
+
+[Namespace] Accordion
+{
+    // 手风琴容器
+    div.accordion
+    {
+        class: chtholly-accordion;
+        
+        style
+        {
+            .chtholly-accordion
+            {
+                border: 1px solid var(--primary-color);
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(255, 107, 157, 0.1);
+            }
+        }
+    }
+    
+    // 手风琴项目
+    div.accordion-item
+    {
+        class: chtholly-accordion-item;
+        
+        style
+        {
+            .chtholly-accordion-item
+            {
+                border-bottom: 1px solid var(--secondary-color);
+                
+                &:last-child
+                {
+                    border-bottom: none;
+                }
+            }
+        }
+    }
+    
+    // 手风琴头部
+    div.accordion-header
+    {
+        class: chtholly-accordion-header;
+        
+        style
+        {
+            .chtholly-accordion-header
+            {
+                padding: 16px 20px;
+                background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+                color: white;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                
+                &:hover
+                {
+                    background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+                }
+            }
+        }
+    }
+    
+    // 手风琴内容
+    div.accordion-content
+    {
+        class: chtholly-accordion-content;
+        
+        style
+        {
+            .chtholly-accordion-content
+            {
+                padding: 20px;
+                background: white;
+                border-top: 1px solid var(--secondary-color);
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+                
+                &.active
+                {
+                    max-height: 500px;
+                }
+            }
+        }
+    }
+}

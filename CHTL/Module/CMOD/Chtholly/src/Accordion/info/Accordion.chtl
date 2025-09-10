@@ -1,0 +1,19 @@
+[Info]
+{
+    name = "accordion";
+    version = "1.0.0";
+    description = "珂朵莉主题手风琴组件";
+    author = "CHTL Team";
+    license = "MIT";
+    dependencies = "";
+    category = "component";
+    minCHTLVersion = "1.0.0";
+}
+
+[Export]
+{
+    accordion = "Accordion.Accordion";
+    accordionItem = "Accordion.AccordionItem";
+    accordionHeader = "Accordion.AccordionHeader";
+    accordionContent = "Accordion.AccordionContent";
+}

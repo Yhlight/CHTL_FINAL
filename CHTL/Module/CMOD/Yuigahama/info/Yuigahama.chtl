@@ -1,0 +1,29 @@
+[Info]
+{
+    name = "yuigahama";
+    version = "1.0.0";
+    description = "由比滨结衣模块 - 温柔的女孩";
+    author = "CHTL Team";
+    license = "MIT";
+    dependencies = "";
+    category = "theme";
+    minCHTLVersion = "1.0.0";
+}
+
+[Export]
+{
+    // 音乐播放器组件
+    musicPlayer = "Yuigahama.MusicPlayer";
+    
+    // 手风琴组件
+    accordion = "Yuigahama.Accordion";
+    
+    // 四叶窗相册组件
+    fourLeafGallery = "Yuigahama.FourLeafGallery";
+    
+    // 备忘录组件
+    memo = "Yuigahama.Memo";
+    
+    // 鼠标特效组件
+    mouseEffect = "Yuigahama.MouseEffect";
+}

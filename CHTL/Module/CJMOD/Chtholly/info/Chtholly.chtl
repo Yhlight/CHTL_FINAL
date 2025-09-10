@@ -1,0 +1,11 @@
+[Info]
+{
+    name = "chtholly-cjmod";
+    version = "1.0.0";
+    description = "珂朵莉CJMOD模块 - 提供CHTL JS语法扩展";
+    author = "CHTL Team";
+    license = "MIT";
+    dependencies = "";
+    category = "extension";
+    minCHTLVersion = "1.0.0";
+}

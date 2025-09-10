@@ -1,0 +1,40 @@
+// 由比滨结衣主题模块 - 主模块文件
+
+[Namespace] Yuigahama
+{
+    // 基础样式
+    style
+    {
+        -- 由比滨结衣主题基础样式
+        :root
+        {
+            --primary-color: #87ceeb;
+            --secondary-color: #b0e0e6;
+            --accent-color: #98d8e8;
+            --text-color: #2c3e50;
+            --bg-color: #f8f9fa;
+        }
+        
+        body
+        {
+            font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+    }
+    
+    // 音乐播放器组件
+    [Import] @Chtl from Yuigahama.MusicPlayer
+    
+    // 手风琴组件
+    [Import] @Chtl from Yuigahama.Accordion
+    
+    // 四叶窗相册组件
+    [Import] @Chtl from Yuigahama.FourLeafGallery
+    
+    // 备忘录组件
+    [Import] @Chtl from Yuigahama.Memo
+    
+    // 鼠标特效组件
+    [Import] @Chtl from Yuigahama.MouseEffect
+}

@@ -50,9 +50,6 @@ bool CHTLJSToken::isKeyword() const {
         case CHTLJSTokenType::ROUTER:
         case CHTLJSTokenType::FILELOADER:
         case CHTLJSTokenType::INEVERAWAY:
-        case CHTLJSTokenType::UTIL:
-        case CHTLJSTokenType::THEN:
-        case CHTLJSTokenType::CHANGE:
             return true;
         default:
             return false;
@@ -109,9 +106,6 @@ std::string CHTLJSToken::getTypeName() const {
         case CHTLJSTokenType::ROUTER: return "ROUTER";
         case CHTLJSTokenType::FILELOADER: return "FILELOADER";
         case CHTLJSTokenType::INEVERAWAY: return "INEVERAWAY";
-        case CHTLJSTokenType::UTIL: return "UTIL";
-        case CHTLJSTokenType::THEN: return "THEN";
-        case CHTLJSTokenType::CHANGE: return "CHANGE";
         case CHTLJSTokenType::TRUE: return "TRUE";
         case CHTLJSTokenType::FALSE: return "FALSE";
         case CHTLJSTokenType::NULL_VALUE: return "NULL";

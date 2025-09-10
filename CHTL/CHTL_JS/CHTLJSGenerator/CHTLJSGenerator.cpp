@@ -151,8 +151,6 @@ std::string CHTLJSGenerator::generateExpression(std::shared_ptr<CHTLJSBaseNode> 
             return generateRouterExpression(expression);
         case CHTLJSNodeType::FILELOADER_EXPRESSION:
             return generateFileloaderExpression(expression);
-        case CHTLJSNodeType::UTIL_EXPRESSION:
-            return generateUtilExpression(expression);
         default:
             addError("Unknown expression type: " + expression->getNodeTypeName());
             return "";
@@ -356,7 +354,6 @@ std::string CHTLJSGenerator::generateDelegateExpression(std::shared_ptr<CHTLJSBa
 std::string CHTLJSGenerator::generateAnimateExpression(std::shared_ptr<CHTLJSBaseNode> animate) { return ""; }
 std::string CHTLJSGenerator::generateRouterExpression(std::shared_ptr<CHTLJSBaseNode> router) { return ""; }
 std::string CHTLJSGenerator::generateFileloaderExpression(std::shared_ptr<CHTLJSBaseNode> fileloader) { return ""; }
-std::string CHTLJSGenerator::generateUtilExpression(std::shared_ptr<CHTLJSBaseNode> util) { return ""; }
 std::string CHTLJSGenerator::generateDeclarationSyntax(std::shared_ptr<CHTLJSBaseNode> declaration) { return ""; }
 std::string CHTLJSGenerator::generateKeyValuePairs(std::shared_ptr<CHTLJSBaseNode> pairs) { return ""; }
 std::string CHTLJSGenerator::generateUnorderedPairs(std::shared_ptr<CHTLJSBaseNode> pairs) { return ""; }
@@ -562,7 +559,6 @@ std::string CHTLJSGenerator::generateNode(std::shared_ptr<CHTLJSBaseNode> node) 
         case CHTLJSNodeType::ANIMATE_EXPRESSION:
         case CHTLJSNodeType::ROUTER_EXPRESSION:
         case CHTLJSNodeType::FILELOADER_EXPRESSION:
-        case CHTLJSNodeType::UTIL_EXPRESSION:
             return generateExpression(node);
         case CHTLJSNodeType::VARIABLE_DECLARATION:
         case CHTLJSNodeType::FUNCTION_DECLARATION:

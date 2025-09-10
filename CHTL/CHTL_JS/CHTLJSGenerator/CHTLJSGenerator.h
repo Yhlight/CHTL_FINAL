@@ -1,8 +1,8 @@
 #ifndef CHTL_JS_GENERATOR_H
 #define CHTL_JS_GENERATOR_H
 
-#include "CHTLJSNode/CHTLJSBaseNode.h"
-#include "CHTLJSLexer/CHTLJSToken.h"
+#include "../CHTLJSNode/CHTLJSBaseNode.h"
+#include "../CHTLJSLexer/CHTLJSToken.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -119,7 +119,6 @@ public:
     std::string generateAnimateExpression(std::shared_ptr<CHTLJSBaseNode> animate);
     std::string generateRouterExpression(std::shared_ptr<CHTLJSBaseNode> router);
     std::string generateFileloaderExpression(std::shared_ptr<CHTLJSBaseNode> fileloader);
-    std::string generateUtilExpression(std::shared_ptr<CHTLJSBaseNode> util);
     
     // 特殊语法生成
     std::string generateDeclarationSyntax(std::shared_ptr<CHTLJSBaseNode> declaration);

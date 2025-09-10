@@ -1,0 +1,44 @@
+// 珂朵莉主题模块 - 主模块文件
+// 这是一个框架模块，提供基础的主题功能
+
+[Namespace] Chtholly
+{
+    // 基础样式
+    style
+    {
+        -- 珂朵莉主题基础样式
+        :root
+        {
+            --primary-color: #ff6b9d;
+            --secondary-color: #ffc1cc;
+            --accent-color: #ff9ec7;
+            --text-color: #333;
+            --bg-color: #fff;
+        }
+        
+        body
+        {
+            font-family: "Microsoft YaHei", sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+    }
+    
+    // 手风琴组件
+    [Import] @Chtl from Chtholly.Accordion
+    
+    // 四叶窗相册组件
+    [Import] @Chtl from Chtholly.FourLeafGallery
+    
+    // 备忘录组件
+    [Import] @Chtl from Chtholly.Memo
+    
+    // 暖色笔记组件
+    [Import] @Chtl from Chtholly.WarmNote
+    
+    // 樱花雨组件
+    [Import] @Chtl from Chtholly.SakuraRain
+    
+    // 进度条组件
+    [Import] @Chtl from Chtholly.ProgressBar
+}

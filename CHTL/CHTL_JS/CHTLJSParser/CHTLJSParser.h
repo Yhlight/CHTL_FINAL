@@ -1,9 +1,9 @@
 #ifndef CHTL_JS_PARSER_H
 #define CHTL_JS_PARSER_H
 
-#include "CHTLJSLexer/CHTLJSLexer.h"
-#include "CHTLJSLexer/CHTLJSToken.h"
-#include "CHTLJSNode/CHTLJSBaseNode.h"
+#include "../CHTLJSLexer/CHTLJSLexer.h"
+#include "../CHTLJSLexer/CHTLJSToken.h"
+#include "../CHTLJSNode/CHTLJSBaseNode.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -108,7 +108,6 @@ public:
     std::shared_ptr<CHTLJSBaseNode> parseAnimateExpression();
     std::shared_ptr<CHTLJSBaseNode> parseRouterExpression();
     std::shared_ptr<CHTLJSBaseNode> parseFileloaderExpression();
-    std::shared_ptr<CHTLJSBaseNode> parseUtilExpression();
     
     // 特殊语法解析
     std::shared_ptr<CHTLJSBaseNode> parseDeclarationSyntax(const std::string& keyword);
