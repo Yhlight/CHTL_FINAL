@@ -74,7 +74,6 @@ enum class CHTLJSTokenType {
     ANIMATE,            // animate 动画
     ROUTER,             // router 路由
     FILELOADER,         // fileloader 文件加载器
-    UTIL,               // util 工具表达式
     
     // 关键字
     IF,                 // if 条件
@@ -179,7 +178,6 @@ public:
     bool isAnimate() const { return type == CHTLJSTokenType::ANIMATE; }
     bool isRouter() const { return type == CHTLJSTokenType::ROUTER; }
     bool isFileloader() const { return type == CHTLJSTokenType::FILELOADER; }
-    bool isUtil() const { return type == CHTLJSTokenType::UTIL; }
     
     // 字符串表示
     std::string getTypeName() const;

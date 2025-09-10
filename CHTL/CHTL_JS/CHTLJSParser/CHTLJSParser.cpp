@@ -284,8 +284,6 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parsePrimaryExpression() {
         return parseRouterExpression();
     } else if (token.getType() == CHTLJSTokenType::FILELOADER) {
         return parseFileloaderExpression();
-    } else if (token.getType() == CHTLJSTokenType::UTIL) {
-        return parseUtilExpression();
     } else if (match(CHTLJSTokenType::LEFT_PAREN)) {
         advance(); // 跳过 (
         auto expression = parseExpression();
@@ -689,71 +687,8 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseFileloaderExpression() {
     return fileloader;
 }
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseUtilExpression() {
-    if (!matchKeyword("util")) {
-        reportUnexpectedToken(getCurrentToken(), "util");
-        return nullptr;
-    }
-    
-    advance(); // 跳过 util
-    
-    // 解析条件表达式
-    auto condition = parseExpression();
-    if (!condition) {
-        reportUnexpectedToken(getCurrentToken(), "condition");
-        return nullptr;
-    }
-    
-    if (!match(CHTLJSTokenType::ARROW)) {
-        reportUnexpectedToken(getCurrentToken(), "->");
-        return nullptr;
-    }
-    
-    advance(); // 跳过 ->
-    
-    // 解析change代码块
-    auto changeKeyword = getCurrentToken();
-    if (changeKeyword.getValue() != "change") {
-        reportUnexpectedToken(changeKeyword, "change");
-        return nullptr;
-    }
-    
-    advance(); // 跳过 change
-    
-    auto changeCode = parseExpression();
-    if (!changeCode) {
-        reportUnexpectedToken(getCurrentToken(), "change code");
-        return nullptr;
-    }
-    
-    if (!match(CHTLJSTokenType::ARROW)) {
-        reportUnexpectedToken(getCurrentToken(), "->");
-        return nullptr;
-    }
-    
-    advance(); // 跳过 ->
-    
-    // 解析then代码块
-    auto thenKeyword = getCurrentToken();
-    if (thenKeyword.getValue() != "then") {
-        reportUnexpectedToken(thenKeyword, "then");
-        return nullptr;
-    }
-    
-    advance(); // 跳过 then
-    
-    auto thenCode = parseExpression();
-    if (!thenCode) {
-        reportUnexpectedToken(getCurrentToken(), "then code");
-        return nullptr;
-    }
-    
-    // 创建util...then节点
-    auto util = createNode(CHTLJSNodeType::UTIL_EXPRESSION);
-    util->addChild(condition);
-    util->addChild(changeCode);
-    util->addChild(thenCode);
-    
-    return util;
+    // util...then表达式属于Chtholly模块，不是CHTL JS核心功能
+    return nullptr;
 }
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseForStatement() { return nullptr; }
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseWhileStatement() { return nullptr; }
@@ -1174,8 +1109,6 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseDeclarationSyntax(const std::
         return parseRouterDeclaration();
     } else if (keyword == "fileloader") {
         return parseFileloaderDeclaration();
-    } else if (keyword == "util") {
-        return parseUtilDeclaration();
     }
     
     return nullptr;
