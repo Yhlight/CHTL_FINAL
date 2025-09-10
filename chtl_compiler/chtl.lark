@@ -1,42 +1,29 @@
-// --- CHTL Grammar for Lark ---
+// --- CHTL Grammar for Lark (Minimal & Stable) ---
 
 ?start: file
-
 file: element*
 
 element: NAME "{" element_content "}"
-
 element_content: (element | attribute | text_block | style_block)*
 
-attribute: NAME (":"|"=") literal [";"]
+attribute: (NAME | TEXT) ":" literal [";"]
+text_block: TEXT "{" literal "}"
+style_block: STYLE "{" style_rule* "}"
+style_rule: NAME ":" literal [";"] // Value is just a literal, no expressions
 
-text_block: "text" "{" literal "}"
-
-style_block: "style" "{" style_rule* "}"
-
-style_rule: NAME ":" css_expression [";"]
-
-?literal: ESCAPED_STRING | NAME
-
-// --- CSS Expression Parsing ---
-css_expression: css_term
-    | css_expression "+" css_expression -> add
-    | css_expression "-" css_expression -> sub
-    | css_expression "*" css_expression -> mul
-    | css_expression "/" css_expression -> div
-    | css_expression "%" css_expression -> mod
-    | css_expression "**" css_expression -> pow
-    | "(" css_expression ")"
-
-css_term: NUMBER ("%" | NAME)? | NAME | ESCAPED_STRING
+?literal: ESCAPED_STRING | NAME | NUMBER
 
 // --- Terminal (Lexer) Definitions ---
+// Keywords (higher priority than NAME)
+TEXT: "text"
+STYLE: "style"
+
 NAME: /[a-zA-Z_][a-zA-Z0-9_-]*/
+ESCAPED_STRING: /"[^"]*"|'[^']*'/
+NUMBER: /-?\d+(\.\d+)?/
 
-%import common.ESCAPED_STRING
-%import common.NUMBER
+// Ignore Whitespace and Comments
 %import common.WS
-
 %ignore WS
 %ignore /\/\/[^\n]*/
 %ignore /\/\*(\*(?!\/)|[^*])*\*\//

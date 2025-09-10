@@ -1,33 +1,14 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Union
 
-# --- Base Classes ---
-
+@dataclass
 class Node:
-    """Base class for all AST nodes."""
     pass
-
-class Expression(Node):
-    """Base class for all expression nodes."""
-    pass
-
-# --- AST Node Classes ---
-
-@dataclass
-class Term(Expression):
-    value: str
-    unit: str = None
-
-@dataclass
-class BinaryOpExpression(Expression):
-    left: Expression
-    operator: str
-    right: Expression
 
 @dataclass
 class StyleNode(Node):
     prop: str
-    value: Expression
+    value: str
 
 @dataclass
 class AttributeNode(Node):
@@ -47,4 +28,4 @@ class ElementNode(Node):
 
 @dataclass
 class Document(Node):
-    children: List[ElementNode]
+    children: List[ElementNode] = field(default_factory=list)
