@@ -11,6 +11,9 @@ add_subdirectory(CHTL)
 # Add scanner library
 add_subdirectory(Scanner)
 
+# Add CHTL JS library
+add_subdirectory("CHTL JS")
+
 # Add the subdirectory for the main executable
 add_subdirectory(CompilerDispatcher)
 
