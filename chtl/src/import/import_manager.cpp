@@ -73,6 +73,7 @@ void Namespace::print_structure(int indent) const {
 // PathResolver 实现
 PathResolver::PathResolver(const std::string& base_path) : base_path_(base_path) {
     search_paths_.push_back(base_path);
+    search_paths_.push_back("modules"); // Add modules directory to search paths
 }
 
 std::string PathResolver::resolve_path(const std::string& path) const {
@@ -441,17 +442,28 @@ std::shared_ptr<chtl::ast::ASTNode> chtl::import::ImportManager::load_module(con
         return imported_asts_[module_name];
     }
 
-    // --- Use the Virtual Filesystem to find the module ---
-    std::string module_path = "modules/" + module_name + ".cmod";
-    if (virtual_filesystem_.find(module_path) == virtual_filesystem_.end()) {
-        std::cerr << "Error: Module '" << module_name << "' not found in virtual filesystem at path: " << module_path << std::endl;
-        return nullptr;
+    std::string packed_content;
+    bool loaded_from_vfs = false;
+
+    // 1. Try to load from the real filesystem first
+    std::string module_path = path_resolver_->resolve_path(module_name + ".cmod");
+    try {
+        packed_content = read_file(module_path);
+        std::cout << "Loading module '" << module_name << "' from filesystem: " << module_path << std::endl;
+    } catch (const std::exception& e) {
+        // 2. Fallback to virtual filesystem if real file not found
+        std::cout << "Could not find module '" << module_name << "' on disk. Falling back to virtual filesystem." << std::endl;
+        module_path = "modules/" + module_name + ".cmod"; // VFS uses a simpler path
+        if (virtual_filesystem_.count(module_path)) {
+            packed_content = virtual_filesystem_[module_path];
+            loaded_from_vfs = true;
+        } else {
+            std::cerr << "Error: Module '" << module_name << "' not found in virtual filesystem either." << std::endl;
+            return nullptr;
+        }
     }
 
-    std::cout << "Loading module '" << module_name << "' from virtual filesystem..." << std::endl;
-    const std::string& packed_content = virtual_filesystem_[module_path];
-
-    // Unpack, parse info, and parse source
+    // 3. Unpack, parse info, and parse source from the loaded content
     auto unpacked_files = cmod_cjmod::ModulePackager::unpack(packed_content);
 
     std::string info_path = "info/" + module_name + ".chtl";
@@ -477,8 +489,6 @@ std::shared_ptr<chtl::ast::ASTNode> chtl::import::ImportManager::load_module(con
 
         if (module_ast) {
             imported_asts_[module_name] = module_ast;
-            // We could store the full module object if needed, but for now, caching the AST is enough.
-            // loaded_cmod_modules_[module_name] = dummy_module;
             return module_ast;
         }
     } catch (const std::exception& e) {
