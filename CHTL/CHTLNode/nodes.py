@@ -62,3 +62,25 @@ class ElementNode(BaseNode):
 @dataclass
 class ProgramNode(BaseNode):
     children: List[BaseNode] = field(default_factory=list)
+
+# --- Template-related Nodes ---
+
+@dataclass
+class TemplateDefinitionNode(BaseNode):
+    """Represents [Template] @Style MyStyles { ... }"""
+    template_type: str # e.g., "Style", "Element", "Var"
+    name: str
+    body: List[BaseNode] = field(default_factory=list) # Can contain properties or other elements
+
+@dataclass
+class TemplateUsageNode(BaseNode):
+    """Represents @Style MyStyles;"""
+    template_type: str
+    name: str
+
+@dataclass
+class ImportNode(BaseNode):
+    """Represents [Import] @Chtl from "./file.chtl";"""
+    import_type: str # e.g., Chtl, Style
+    path: str
+    alias: str = None

@@ -88,6 +88,8 @@ class ExpressionEvaluator:
         if not style_node: return EvaluationResult(0)
 
         prop_node = next((p for p in style_node.children if isinstance(p, nodes.StylePropertyNode) and p.name == node.property_name), None)
-        if not prop_node: return EvaluationResult(0)
+        if not prop_node:
+            # If the property is not found in the style block, treat the reference name as a literal string value.
+            return EvaluationResult(node.property_name)
 
         return self._evaluate_node(prop_node.value_expression, target_element)

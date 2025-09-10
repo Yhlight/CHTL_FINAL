@@ -12,6 +12,10 @@ class Lexer:
         self.keywords = {
             "text": TokenType.TEXT,
             "style": TokenType.STYLE,
+            "from": TokenType.IDENTIFIER, # Special-cased by parser
+            "as": TokenType.IDENTIFIER,   # Special-cased by parser
+            "Template": TokenType.IDENTIFIER,
+            "Import": TokenType.IDENTIFIER,
         }
 
     def scan_tokens(self) -> list[Token]:
@@ -30,6 +34,9 @@ class Lexer:
         # Single-character tokens
         if char == '{': self._add_token(TokenType.LBRACE); return
         if char == '}': self._add_token(TokenType.RBRACE); return
+        if char == '[': self._add_token(TokenType.LBRACKET); return
+        if char == ']': self._add_token(TokenType.RBRACKET); return
+        if char == '@': self._add_token(TokenType.AT); return
         if char == ';': self._add_token(TokenType.SEMICOLON); return
         if char == '.': self._add_token(TokenType.DOT); return
         if char == '#': self._add_token(TokenType.HASH); return

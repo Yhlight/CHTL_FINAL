@@ -4,6 +4,9 @@ class TokenType(Enum):
     # Single-character tokens
     LBRACE = auto()         # {
     RBRACE = auto()         # }
+    LBRACKET = auto()       # [
+    RBRACKET = auto()       # ]
+    AT = auto()             # @
     COLON = auto()          # :
     EQUALS = auto()         # =
     SEMICOLON = auto()      # ;
