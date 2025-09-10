@@ -1,27 +1,19 @@
--- This is a CHTL document.
 html {
-    lang: "en";
-
     head {
-        title {
-            text { "My CHTL Page" }
-        }
+        title { text { "CHTL Stage 2 Test" } }
     }
-
     body {
-        // This is a single-line comment, it should be ignored.
-        h1 {
-            id: main_heading;
-            text { "Welcome to CHTL!" }
-        }
+        div {
+            style {
+                // Inline style with expression
+                width: 100 + 50;
 
-        p {
-            -- A paragraph element.
-            text { "This is generated from CHTL source code." }
+                // Global rule with auto-class
+                .box {
+                    background-color: red;
+                }
+            }
+            text { "Hello Styles!" }
         }
-
-        /* This is a multi-line comment.
-           It should also be ignored. */
-        br {}
     }
 }
