@@ -1,0 +1,43 @@
+// --- CHTL Grammar for Lark ---
+
+?start: file
+
+file: element*
+
+element: NAME "{" element_content "}"
+
+element_content: (element | attribute | text_block | style_block)*
+
+attribute: NAME (":"|"=") literal [";"]
+
+text_block: "text" "{" literal "}"
+
+style_block: "style" "{" style_rule* "}"
+
+style_rule: NAME ":" css_expression [";"]
+
+?literal: ESCAPED_STRING | NAME
+
+// --- CSS Expression Parsing ---
+css_expression: css_term
+    | css_expression "+" css_expression -> add
+    | css_expression "-" css_expression -> sub
+    | css_expression "*" css_expression -> mul
+    | css_expression "/" css_expression -> div
+    | css_expression "%" css_expression -> mod
+    | css_expression "**" css_expression -> pow
+    | "(" css_expression ")"
+
+css_term: NUMBER ("%" | NAME)? | NAME | ESCAPED_STRING
+
+// --- Terminal (Lexer) Definitions ---
+NAME: /[a-zA-Z_][a-zA-Z0-9_-]*/
+
+%import common.ESCAPED_STRING
+%import common.NUMBER
+%import common.WS
+
+%ignore WS
+%ignore /\/\/[^\n]*/
+%ignore /\/\*(\*(?!\/)|[^*])*\*\//
+%ignore /--[^\n]*/
