@@ -1,0 +1,189 @@
+{
+  "name": "chtl-language-support",
+  "displayName": "CHTL Language Support",
+  "description": "Complete CHTL language support for Visual Studio Code",
+  "version": "1.0.0",
+  "publisher": "chtl-team",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "chtl",
+    "html",
+    "css",
+    "javascript",
+    "template",
+    "language"
+  ],
+  "activationEvents": [
+    "onLanguage:chtl",
+    "onCommand:chtl.compile",
+    "onCommand:chtl.preview",
+    "onCommand:chtl.format"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "chtl",
+        "aliases": ["CHTL", "chtl"],
+        "extensions": [".chtl"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "chtl",
+        "scopeName": "source.chtl",
+        "path": "./syntaxes/chtl.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "chtl",
+        "path": "./snippets/chtl.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "chtl.compile",
+        "title": "Compile CHTL",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.preview",
+        "title": "Preview CHTL",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.format",
+        "title": "Format CHTL",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.livePreview",
+        "title": "Live Preview",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.unpackModule",
+        "title": "Unpack Module",
+        "category": "CHTL"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "resourceExtname == .chtl",
+          "command": "chtl.compile",
+          "group": "chtl"
+        },
+        {
+          "when": "resourceExtname == .chtl",
+          "command": "chtl.preview",
+          "group": "chtl"
+        },
+        {
+          "when": "resourceExtname == .chtl",
+          "command": "chtl.format",
+          "group": "chtl"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "chtl.compile",
+          "when": "resourceExtname == .chtl"
+        },
+        {
+          "command": "chtl.preview",
+          "when": "resourceExtname == .chtl"
+        },
+        {
+          "command": "chtl.format",
+          "when": "resourceExtname == .chtl"
+        },
+        {
+          "command": "chtl.livePreview",
+          "when": "resourceExtname == .chtl"
+        },
+        {
+          "command": "chtl.unpackModule",
+          "when": "resourceExtname == .chtl"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "CHTL",
+      "properties": {
+        "chtl.compiler.debugMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable debug mode for CHTL compiler"
+        },
+        "chtl.compiler.minifyOutput": {
+          "type": "boolean",
+          "default": false,
+          "description": "Minify output HTML"
+        },
+        "chtl.compiler.beautifyOutput": {
+          "type": "boolean",
+          "default": true,
+          "description": "Beautify output HTML"
+        },
+        "chtl.preview.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto refresh preview when file changes"
+        },
+        "chtl.preview.port": {
+          "type": "number",
+          "default": 3000,
+          "description": "Port for live preview server"
+        },
+        "chtl.formatting.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable CHTL formatting"
+        },
+        "chtl.formatting.indentSize": {
+          "type": "number",
+          "default": 2,
+          "description": "Indent size for CHTL formatting"
+        }
+      }
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "chtlModules",
+          "name": "CHTL Modules",
+          "when": "resourceExtname == .chtl"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "ws": "^8.13.0"
+  }
+}

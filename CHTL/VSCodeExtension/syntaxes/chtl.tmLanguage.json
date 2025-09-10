@@ -1,0 +1,169 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "CHTL",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#templates"
+    },
+    {
+      "include": "#elements"
+    },
+    {
+      "include": "#attributes"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#operators"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.chtl",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.chtl",
+          "begin": "/\\*",
+          "end": "\\*/"
+        },
+        {
+          "name": "comment.line.dash.chtl",
+          "match": "--.*$"
+        }
+      ]
+    },
+    "templates": {
+      "patterns": [
+        {
+          "name": "keyword.control.template.chtl",
+          "match": "\\[Template\\]"
+        },
+        {
+          "name": "keyword.control.custom.chtl",
+          "match": "\\[Custom\\]"
+        },
+        {
+          "name": "keyword.control.origin.chtl",
+          "match": "\\[Origin\\]"
+        },
+        {
+          "name": "keyword.control.import.chtl",
+          "match": "\\[Import\\]"
+        },
+        {
+          "name": "keyword.control.namespace.chtl",
+          "match": "\\[Namespace\\]"
+        },
+        {
+          "name": "keyword.control.configuration.chtl",
+          "match": "\\[Configuration\\]"
+        },
+        {
+          "name": "keyword.control.constraint.chtl",
+          "match": "\\[Constraint\\]"
+        }
+      ]
+    },
+    "elements": {
+      "patterns": [
+        {
+          "name": "entity.name.tag.chtl",
+          "match": "\\b(div|span|p|h[1-6]|a|img|ul|ol|li|table|tr|td|th|form|input|button|textarea|select|option|label|section|article|header|footer|nav|main|aside|text|style|script)\\b"
+        },
+        {
+          "name": "entity.name.tag.custom.chtl",
+          "match": "\\b[A-Z][a-zA-Z0-9]*\\b"
+        }
+      ]
+    },
+    "attributes": {
+      "patterns": [
+        {
+          "name": "entity.other.attribute-name.chtl",
+          "match": "\\b(class|id|style|src|href|alt|title|type|value|placeholder|required|disabled|readonly|checked|selected|multiple|rows|cols|maxlength|minlength|pattern|autocomplete|autofocus|tabindex|role|aria-label|aria-describedby|data-\\w+|on\\w+)\\b"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.chtl",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.chtl",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.chtl",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.chtl",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.chtl",
+          "match": "\\b(use|inherit|delete|insert|except|from|as|after|before|replace|html5|xhtml|html4)\\b"
+        },
+        {
+          "name": "keyword.operator.chtl",
+          "match": "\\b(and|or|not|in|is|as)\\b"
+        },
+        {
+          "name": "keyword.other.chtl",
+          "match": "\\b(true|false|null|undefined)\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.assignment.chtl",
+          "match": ":="
+        },
+        {
+          "name": "keyword.operator.comparison.chtl",
+          "match": "==|!=|<=|>=|<|>"
+        },
+        {
+          "name": "keyword.operator.logical.chtl",
+          "match": "&&|\\|\\||!"
+        },
+        {
+          "name": "keyword.operator.arithmetic.chtl",
+          "match": "\\+|-|\\*|/|%"
+        },
+        {
+          "name": "keyword.operator.ternary.chtl",
+          "match": "\\?|:"
+        },
+        {
+          "name": "keyword.operator.access.chtl",
+          "match": "\\.|::"
+        }
+      ]
+    }
+  ],
+  "scopeName": "source.chtl"
+}
