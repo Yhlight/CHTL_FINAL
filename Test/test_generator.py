@@ -47,7 +47,7 @@ class TestGenerator(unittest.TestCase):
                 <title>Styled Page</title>
             </head>
             <body>
-                <div style="width: 100%">
+                <div class="box" style="width: 100%">
                     <p>Hello</p>
                 </div>
             </body>

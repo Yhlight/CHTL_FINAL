@@ -76,7 +76,7 @@ class Lexer:
             self._advance()
         if self._is_at_end(): return
         self._advance()
-        self._add_token(TokenType.STRING, self.source[self.start + 1:self.current - 1])
+        self._add_token(TokenType.STRING)
 
     def _block_comment(self):
         while not (self._peek() == '*' and self._peek_next() == '/') and not self._is_at_end():

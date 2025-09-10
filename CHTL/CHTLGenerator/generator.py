@@ -12,38 +12,46 @@ class Generator:
 
     def generate(self, ast: nodes.ProgramNode) -> str:
         """The main entry point for the generator."""
-        # First pass: collect all global styles from selector rules
+        self.global_styles = [] # Reset for multiple calls
         self._collect_styles(ast)
+        body_html = self._visit(ast)
 
-        # Second pass: build the HTML string
-        body_html = self._visit(ast, is_root=True)
-
-        # Inject the collected global styles into the <head>
         if self.global_styles:
             style_block = "<style>\n" + "\n".join(self.global_styles) + "\n</style>"
-            # A more robust solution would be to find the head node and inject there,
-            # but for now, simple string replacement is sufficient if a head tag exists.
             if "<head>" in body_html.lower():
                  body_html = body_html.replace("<head>", f"<head>\n{style_block}", 1)
             else:
-                # If no head, inject it at the start (less ideal, but a fallback)
                 body_html = style_block + body_html
 
         return body_html
 
-    def _collect_styles(self, node):
+    def _collect_styles(self, node, parent_element=None):
         """Recursively traverses the AST to find and collect global styles."""
-        if isinstance(node, nodes.StyleNode):
+        if isinstance(node, nodes.StyleNode) and parent_element:
             for child in node.children:
                 if isinstance(child, nodes.StyleSelectorRuleNode):
-                    properties_str = ""
-                    for prop in child.properties:
-                        properties_str += f"  {prop.name}: {prop.value};\n"
-                    self.global_styles.append(f"{child.selector} {{\n{properties_str}}}")
+                    selector = child.selector
+                    # Resolve '&' selectors
+                    if selector.startswith('&'):
+                        class_attr = next((attr for attr in parent_element.attributes if attr.name == 'class'), None)
+                        id_attr = next((attr for attr in parent_element.attributes if attr.name == 'id'), None)
+
+                        if class_attr:
+                            parent_selector = "." + class_attr.value.split()[0]
+                            selector = selector.replace('&', parent_selector, 1)
+                        elif id_attr:
+                            parent_selector = "#" + id_attr.value
+                            selector = selector.replace('&', parent_selector, 1)
+                        else:
+                            selector = selector[1:].lstrip() # Remove '&' and leading space
+
+                    properties_str = "".join([f"  {p.name}: {p.value};\n" for p in child.properties])
+                    self.global_styles.append(f"{selector} {{\n{properties_str}}}")
 
         if hasattr(node, 'children'):
+            new_parent = node if isinstance(node, nodes.ElementNode) else parent_element
             for child in node.children:
-                self._collect_styles(child)
+                if child: self._collect_styles(child, new_parent)
 
     def _visit(self, node, is_root=False):
         """Dispatches to the appropriate visit method."""

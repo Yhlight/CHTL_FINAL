@@ -57,35 +57,31 @@ class Parser:
 
     def _element_statement(self):
         tag_name = self._consume(TokenType.IDENTIFIER, "Expect element tag name.").lexeme
+        element = nodes.ElementNode(tag_name=tag_name)
         self._consume(TokenType.LBRACE, "Expect '{' after element tag name.")
-
-        attributes = []
-        children = []
 
         while not self._check(TokenType.RBRACE) and not self._is_at_end():
             if self._check(TokenType.STYLE):
-                children.append(self._style_statement())
+                element.children.append(self._style_statement(element))
             elif self._is_attribute():
-                attributes.append(self._attribute())
+                element.attributes.append(self._attribute())
             elif self._check(TokenType.IDENTIFIER) or self._check(TokenType.TEXT):
-                children.append(self._statement())
+                element.children.append(self._statement())
             else:
                 raise self._error(self._peek(), "Unexpected token inside element block.")
 
         self._consume(TokenType.RBRACE, "Expect '}' after element block.")
-        return nodes.ElementNode(tag_name=tag_name, attributes=attributes, children=children)
+        return element
 
-    def _style_statement(self):
+    def _style_statement(self, parent_element: nodes.ElementNode):
         self._consume(TokenType.STYLE, "Expect 'style' keyword.")
         self._consume(TokenType.LBRACE, "Expect '{' after 'style'.")
         style_node = nodes.StyleNode()
         while not self._check(TokenType.RBRACE) and not self._is_at_end():
-            # A selector is just an IDENTIFIER now, thanks to the new lexer.
-            # A property also starts with an IDENTIFIER. We look ahead for a colon.
             if self._peek_at(1).type == TokenType.COLON:
                 style_node.children.append(self._style_property())
             else:
-                style_node.children.append(self._style_selector_rule())
+                style_node.children.append(self._style_selector_rule(parent_element))
         self._consume(TokenType.RBRACE, "Expect '}' after style block.")
         return style_node
 
@@ -99,8 +95,29 @@ class Parser:
         self._consume(TokenType.SEMICOLON, "Expect ';' after property value.")
         return nodes.StylePropertyNode(name=name, value=value)
 
-    def _style_selector_rule(self):
+    def _style_selector_rule(self, parent_element: nodes.ElementNode):
         selector = self._consume(TokenType.IDENTIFIER, "Expect selector.").lexeme
+
+        # --- Automatic Attribute Injection Logic ---
+        if selector.startswith('.'):
+            class_name_to_add = selector[1:]
+            # Find existing class attribute to append to, or create a new one.
+            class_attr = next((attr for attr in parent_element.attributes if attr.name == 'class'), None)
+            if class_attr:
+                classes = set(class_attr.value.split())
+                if class_name_to_add not in classes:
+                    class_attr.value += f" {class_name_to_add}"
+            else:
+                parent_element.attributes.append(nodes.AttributeNode(name='class', value=class_name_to_add))
+        elif selector.startswith('#'):
+            id_to_add = selector[1:]
+            # Overwrite existing id or create a new one.
+            id_attr = next((attr for attr in parent_element.attributes if attr.name == 'id'), None)
+            if id_attr:
+                id_attr.value = id_to_add
+            else:
+                parent_element.attributes.append(nodes.AttributeNode(name='id', value=id_to_add))
+
         self._consume(TokenType.LBRACE, "Expect '{' after selector.")
         properties = []
         while not self._check(TokenType.RBRACE) and not self._is_at_end():
@@ -110,8 +127,18 @@ class Parser:
 
     def _attribute(self):
         name = self._consume(TokenType.IDENTIFIER, "Expect attribute name.").lexeme
-        self._consume(TokenType.EQUALS, "Expect '=' or ':' after attribute name.")
-        value = self._consume(TokenType.STRING, "Expect string literal for attribute value.").lexeme
+
+        if not self._match(TokenType.EQUALS, TokenType.COLON):
+            raise self._error(self._peek(), "Expect '=' or ':' after attribute name.")
+
+        if self._match(TokenType.STRING):
+            lexeme = self._previous().lexeme
+            value = lexeme[1:-1] # Strip the surrounding quotes
+        elif self._match(TokenType.IDENTIFIER):
+            value = self._previous().lexeme
+        else:
+            raise self._error(self._peek(), "Expect string or identifier for attribute value.")
+
         self._consume(TokenType.SEMICOLON, "Expect ';' after attribute value.")
         return nodes.AttributeNode(name=name, value=value)
 
