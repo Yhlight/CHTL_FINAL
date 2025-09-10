@@ -6,14 +6,17 @@
 namespace chtl {
 namespace cmod_cjmod {
 
-// CJMOD API - 语法分析实现
+// CJMOD API - 语法分析实现 (Simulated)
 bool CJMODSyntax::analyze(const std::string& code) {
-    // 简化的语法分析
-    return !code.empty() && code.find("function") != std::string::npos;
+    // In a real implementation, this would involve a proper C++ parser.
+    // For simulation, we just do a basic check.
+    return !code.empty();
 }
 
 bool CJMODSyntax::isObject(const std::string& code) {
-    return code.find("{") != std::string::npos && code.find("}") != std::string::npos;
+    std::string trimmed = code;
+    trimmed.erase(std::remove_if(trimmed.begin(), trimmed.end(), isspace), trimmed.end());
+    return trimmed.front() == '{' && trimmed.back() == '}';
 }
 
 bool CJMODSyntax::isFunction(const std::string& code) {
@@ -21,24 +24,28 @@ bool CJMODSyntax::isFunction(const std::string& code) {
 }
 
 bool CJMODSyntax::isArray(const std::string& code) {
-    return code.find("[") != std::string::npos && code.find("]") != std::string::npos;
+    std::string trimmed = code;
+    trimmed.erase(std::remove_if(trimmed.begin(), trimmed.end(), isspace), trimmed.end());
+    return trimmed.front() == '[' && trimmed.back() == ']';
 }
 
 bool CJMODSyntax::isCHTLJSFunction(const std::string& code) {
-    return code.find("chtl::") != std::string::npos || code.find("->") != std::string::npos;
+    // Check for CHTL JS specific keywords or syntax
+    std::regex r("\\b(listen|animate|router|vir|delegate)\\b");
+    return std::regex_search(code, r);
 }
 
-// CJMOD API - 参数处理实现
+// CJMOD API - 参数处理实现 (Simulated)
 std::string CJMODArg::bind(const std::string& arg, const std::string& value) {
-    return "bind(" + arg + ", " + value + ")";
+    return "// Simulated bind: " + arg + " = " + value + ";\n";
 }
 
 std::string CJMODArg::fillValue(const std::string& arg, const std::string& value) {
-    return "fillValue(" + arg + ", " + value + ")";
+    return "// Simulated fillValue: " + arg + " gets value " + value + ";\n";
 }
 
 std::string CJMODArg::transform(const std::string& arg, const std::string& transform) {
-    return "transform(" + arg + ", " + transform + ")";
+    return "// Simulated transform: " + arg + " into " + transform + ";\n";
 }
 
 // CJMOD API - 扫描器实现
@@ -129,27 +136,32 @@ void CJMODGenerator::addExport(const std::string& name, const std::string& value
     exports_[name] = value;
 }
 
-// CJMOD API - 原子参数实现
+// CJMOD API - 原子参数实现 (Simulated)
 const std::string CJMODAtomArg::PLACEHOLDER_DOLLAR = "$";
 const std::string CJMODAtomArg::PLACEHOLDER_QUESTION = "$?";
 const std::string CJMODAtomArg::PLACEHOLDER_EXCLAMATION = "$!";
 const std::string CJMODAtomArg::PLACEHOLDER_UNDERSCORE = "$_";
 
 std::string CJMODAtomArg::bind(const std::string& placeholder, const std::string& value) {
-    return "bind(" + placeholder + ", " + value + ")";
+    return "// Simulated AtomArg::bind for " + placeholder + "\n";
 }
 
 std::string CJMODAtomArg::fillValue(const std::string& placeholder, const std::string& value) {
-    return "fillValue(" + placeholder + ", " + value + ")";
+    return "// Simulated AtomArg::fillValue for " + placeholder + "\n";
 }
 
-// CJMOD API - CHTL JS函数实现
+// CJMOD API - CHTL JS函数实现 (Simulated)
 std::string CJMODCHTLJSFunction::CreateCHTLJSFunction(const std::string& name, const std::string& body) {
-    return "function " + name + "() {\n    " + body + "\n}";
+    std::string cpp_code = "    // Simulated C++ code for a CHTL JS function\n";
+    cpp_code += "    auto " + name + " = chtl_js::Function::create([](const auto& args) {\n";
+    cpp_code += "        " + body + "\n";
+    cpp_code += "    });\n";
+    cpp_code += "    context.register_function(\"" + name + "\", " + name + ");\n";
+    return cpp_code;
 }
 
 std::string CJMODCHTLJSFunction::bindVirtualObject(const std::string& function, const std::string& object) {
-    return "bindVirtualObject(" + function + ", " + object + ")";
+    return "// Simulated binding of virtual object " + object + " to function " + function + "\n";
 }
 
 // CMOD模块实现
@@ -163,8 +175,8 @@ void CMODModule::addExport(const ModuleExport& exp) {
     exports_.push_back(exp);
 }
 
-void CMODModule::addSourceFile(const std::string& filePath) {
-    sourceFiles_.push_back(filePath);
+void CMODModule::addSourceFile(const std::string& filePath, const std::string& content) {
+    sourceFiles_[filePath] = content;
 }
 
 void CMODModule::addInfoFile(const std::string& filePath) {
@@ -179,7 +191,7 @@ std::vector<ModuleExport> CMODModule::getExports() const {
     return exports_;
 }
 
-std::vector<std::string> CMODModule::getSourceFiles() const {
+const std::map<std::string, std::string>& CMODModule::getSourceFiles() const {
     return sourceFiles_;
 }
 
@@ -188,17 +200,12 @@ std::vector<std::string> CMODModule::getInfoFiles() const {
 }
 
 std::string CMODModule::generateModuleCode() const {
-    std::string result = "// CMOD Module: " + name_ + "\n";
-    result += "// Version: " + info_.version + "\n";
-    result += "// Description: " + info_.description + "\n\n";
-    
-    for (const auto& exp : exports_) {
-        if (exp.isPublic) {
-            result += "export " + exp.type + " " + exp.name + " = " + exp.value + ";\n";
-        }
+    std::stringstream ss;
+    for (const auto& pair : sourceFiles_) {
+        ss << "/* --- Source File: " << pair.first << " --- */\n";
+        ss << pair.second << "\n\n";
     }
-    
-    return result;
+    return ss.str();
 }
 
 std::string CMODModule::generateInfoCode() const {
@@ -234,8 +241,8 @@ void CJMODModule::addExport(const ModuleExport& exp) {
     exports_.push_back(exp);
 }
 
-void CJMODModule::addSourceFile(const std::string& filePath) {
-    sourceFiles_.push_back(filePath);
+void CJMODModule::addSourceFile(const std::string& filePath, const std::string& content) {
+    sourceFiles_[filePath] = content;
 }
 
 void CJMODModule::addInfoFile(const std::string& filePath) {
@@ -250,7 +257,7 @@ std::vector<ModuleExport> CJMODModule::getExports() const {
     return exports_;
 }
 
-std::vector<std::string> CJMODModule::getSourceFiles() const {
+const std::map<std::string, std::string>& CJMODModule::getSourceFiles() const {
     return sourceFiles_;
 }
 
@@ -259,28 +266,26 @@ std::vector<std::string> CJMODModule::getInfoFiles() const {
 }
 
 std::string CJMODModule::generateModuleCode() const {
-    std::string result = "// CJMOD Module: " + name_ + "\n";
-    result += "// Version: " + info_.version + "\n";
-    result += "// Description: " + info_.description + "\n\n";
+    std::stringstream ss;
+    ss << "/* === CJMOD Module: " << name_ << " === */\n\n";
     
-    // 生成CHTL JS函数
+    ss << "/* --- Main Source Files --- */\n";
+    for (const auto& pair : sourceFiles_) {
+        ss << "// --- Source File: " << pair.first << " ---\n";
+        ss << pair.second << "\n\n";
+    }
+
+    ss << "/* --- Generated CHTL JS Functions --- */\n";
     for (const auto& func : chtljsFunctions_) {
-        result += CJMODCHTLJSFunction::CreateCHTLJSFunction(func.first, func.second) + "\n\n";
+        ss << CJMODCHTLJSFunction::CreateCHTLJSFunction(func.first, func.second) << "\n";
     }
     
-    // 生成虚拟对象
+    ss << "/* --- Generated Virtual Objects --- */\n";
     for (const auto& obj : virtualObjects_) {
-        result += "var " + obj.first + " = " + obj.second + ";\n";
+        ss << "var " << obj.first << " = " << obj.second << ";\n";
     }
     
-    // 生成导出
-    for (const auto& exp : exports_) {
-        if (exp.isPublic) {
-            result += "export " + exp.type + " " + exp.name + " = " + exp.value + ";\n";
-        }
-    }
-    
-    return result;
+    return ss.str();
 }
 
 std::string CJMODModule::generateInfoCode() const {
@@ -550,6 +555,148 @@ std::string ModuleManager::validateModuleStructure(const std::string& moduleName
     // 验证模块结构
     return "";
 }
+
+// ModulePackager 实现
+std::string ModulePackager::pack(const CMODModule& module) {
+    std::stringstream ss;
+    ss << "--CMOD_MODULE_START:" << module.getInfo().name << "\n";
+
+    // Pack info file content
+    // In a real scenario, we'd read this from a file. Here we generate it.
+    ss << "--FILE:info/" << module.getInfo().name << ".chtl\n";
+    ss << module.generateInfoCode();
+    ss << "\n--ENDFILE--\n";
+
+    // Pack source files
+    for (const auto& pair : module.getSourceFiles()) {
+        ss << "--FILE:" << pair.first << "\n";
+        ss << pair.second;
+        ss << "\n--ENDFILE--\n";
+    }
+
+    ss << "--CMOD_MODULE_END:" << module.getInfo().name << "\n";
+    return ss.str();
+}
+
+std::string ModulePackager::pack(const CJMODModule& module) {
+    std::stringstream ss;
+    ss << "--CJMOD_MODULE_START:" << module.getInfo().name << "\n";
+
+    // Pack info file content
+    ss << "--FILE:info/" << module.getInfo().name << ".chtl\n";
+    ss << module.generateInfoCode();
+    ss << "\n--ENDFILE--\n";
+
+    // Pack source files
+    for (const auto& pair : module.getSourceFiles()) {
+        ss << "--FILE:" << pair.first << "\n";
+        ss << pair.second;
+        ss << "\n--ENDFILE--\n";
+    }
+
+    ss << "--CJMOD_MODULE_END:" << module.getInfo().name << "\n";
+    return ss.str();
+}
+
+std::string ModulePackager::pack(const MixedModule& module) {
+    // For simplicity, we'll just pack the constituent modules
+    std::stringstream ss;
+    ss << "--MIXED_MODULE_START:" << module.getInfo().name << "\n";
+
+    for (const auto& cmod : module.getCMODModules()) {
+        ss << pack(*cmod);
+    }
+    for (const auto& cjmod : module.getCJMODModules()) {
+        ss << pack(*cjmod);
+    }
+
+    ss << "--MIXED_MODULE_END:" << module.getInfo().name << "\n";
+    return ss.str();
+}
+
+std::map<std::string, std::string> ModulePackager::unpack(const std::string& packed_content) {
+    std::map<std::string, std::string> unpacked_files;
+    std::string file_delimiter = "--FILE:";
+    std::string end_delimiter = "--ENDFILE--";
+
+    size_t current_pos = 0;
+    while ((current_pos = packed_content.find(file_delimiter, current_pos)) != std::string::npos) {
+        current_pos += file_delimiter.length();
+
+        size_t newline_pos = packed_content.find('\n', current_pos);
+        if (newline_pos == std::string::npos) break;
+
+        std::string filename = packed_content.substr(current_pos, newline_pos - current_pos);
+
+        size_t content_start_pos = newline_pos + 1;
+        size_t content_end_pos = packed_content.find(end_delimiter, content_start_pos);
+        if (content_end_pos == std::string::npos) break;
+
+        std::string content = packed_content.substr(content_start_pos, content_end_pos - content_start_pos);
+
+        // Trim trailing newline if any
+        if (!content.empty() && content.back() == '\n') {
+            content.pop_back();
+        }
+
+        unpacked_files[filename] = content;
+
+        current_pos = content_end_pos + end_delimiter.length();
+    }
+
+    return unpacked_files;
+}
+
+// ModuleInfoParser 实现
+ModuleInfoParser::ModuleInfoParser(const std::string& info_content) : content_(info_content) {}
+
+ModuleInfo ModuleInfoParser::parse() {
+    ModuleInfo info;
+    parse_info_block(info);
+    parse_export_block(info);
+    return info;
+}
+
+void ModuleInfoParser::parse_info_block(ModuleInfo& info) {
+    std::regex info_block_regex(R"(\[Info\]\s*\{([\s\S]*?)\})");
+    std::smatch match;
+    if (std::regex_search(content_, match, info_block_regex)) {
+        std::string block_content = match[1].str();
+        std::regex pair_regex(R"((\w+)\s*=\s*\"(.*?)\")");
+        auto begin = std::sregex_iterator(block_content.begin(), block_content.end(), pair_regex);
+        auto end = std::sregex_iterator();
+        for (auto i = begin; i != end; ++i) {
+            std::string key = (*i)[1].str();
+            std::string value = (*i)[2].str();
+            if (key == "name") info.name = value;
+            else if (key == "version") info.version = value;
+            else if (key == "description") info.description = value;
+            else if (key == "author") info.author = value;
+            // Dependencies would need more complex parsing for a list
+        }
+    }
+}
+
+void ModuleInfoParser::parse_export_block(ModuleInfo& info) {
+    std::regex export_block_regex(R"(\[Export\]\s*\{([\s\S]*?)\})");
+    std::smatch match;
+    if (std::regex_search(content_, match, export_block_regex)) {
+        std::string block_content = match[1].str();
+        std::regex line_regex(R"(\[\w+\]\s+@\w+\s+([^;]+);)");
+        auto begin = std::sregex_iterator(block_content.begin(), block_content.end(), line_regex);
+        auto end = std::sregex_iterator();
+        for (auto i = begin; i != end; ++i) {
+            std::string items_str = (*i)[1].str();
+            std::regex item_regex(R"(\w+)");
+            auto item_begin = std::sregex_iterator(items_str.begin(), items_str.end(), item_regex);
+            auto item_end = std::sregex_iterator();
+            for (auto j = item_begin; j != item_end; ++j) {
+                info.exports.push_back(j->str());
+            }
+        }
+    }
+}
+
 
 } // namespace cmod_cjmod
 } // namespace chtl

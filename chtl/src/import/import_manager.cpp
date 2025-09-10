@@ -212,51 +212,50 @@ void ImportManager::process_file(const std::string& file_path) {
     resolve_dependencies(file_path);
 }
 
-void ImportManager::process_import_node(std::shared_ptr<ast::ImportNode> node) {
-    if (!node) {
+void ImportManager::process_import_node(std::shared_ptr<ast::ImportNode> node, std::shared_ptr<ast::ASTNode> current_node) {
+    if (!node || !current_node) {
         return;
     }
 
-    // For now, we only handle CHTL imports.
-    // A full implementation would need to handle HTML, CSS, JS, etc.
-    if (node->import_type != ImportType::CHTL) {
-        // Silently ignore non-CHTL imports for now
-        return;
-    }
+    // This function now only handles direct file imports. Module imports are handled by the resolver.
+    if (node->import_type != ImportType::CHTL || !path_resolver_->get_file_extension(node->file_path).empty()) {
+        std::string path_to_load = path_resolver_->resolve_path(node->file_path);
 
-    std::string path_to_load = path_resolver_->resolve_path(node->file_path);
+        if (processed_files_.count(path_to_load)) {
+            return;
+        }
 
-    // Check for circular dependencies
-    if (processed_files_.count(path_to_load)) {
-        // We could throw an error here, but for now we'll just return
-        // to avoid infinite recursion.
-        return;
-    }
+        try {
+            std::string content = read_file(path_to_load);
+            processed_files_.insert(path_to_load);
 
-    // Read and parse the imported file
-    try {
-        std::string content = read_file(path_to_load);
-        processed_files_.insert(path_to_load); // Mark as processed
+            lexer::CHTLLexer lexer(content);
+            auto tokens = lexer.tokenize();
+            parser::CHTLParser parser(tokens);
+            auto imported_ast = parser.parse();
 
-        // Recursively parse the imported file
-        lexer::CHTLLexer lexer(content);
-        auto tokens = lexer.tokenize();
-        parser::CHTLParser parser(tokens);
-        auto imported_ast = parser.parse();
+            imported_asts_[path_to_load] = imported_ast;
 
-        // Store the parsed AST
-        imported_asts_[path_to_load] = imported_ast;
+            // Recursively resolve imports in the new AST
+            ImportResolver resolver(*this);
+            resolver.resolve_imports(imported_ast);
 
-        // Recursively resolve imports in the new AST
-        // Note: A new resolver might be needed if base paths change
-        ImportResolver resolver(*this);
-        resolver.resolve_imports(imported_ast);
+            // Replace the import node with the content of the imported file's AST
+            if (imported_ast && current_node->parent) {
+                auto parent = current_node->parent;
+                // This is a simplified replacement. A real implementation would be more careful.
+                // For now, we just add the children of the imported AST.
+                for(const auto& child : imported_ast->children) {
+                    parent->add_child(child);
+                }
+            }
 
-    } catch (const std::exception& e) {
-        // Handle file not found or other parsing errors
-        std::cerr << "Error processing import for file '" << path_to_load << "': " << e.what() << std::endl;
+        } catch (const std::exception& e) {
+            std::cerr << "Error processing import for file '" << path_to_load << "': " << e.what() << std::endl;
+        }
     }
 }
+
 
 // This method is now obsolete, the new resolver handles this.
 void ImportManager::process_imports(const std::string& content, const std::string& current_file) {
@@ -419,3 +418,58 @@ void ImportManager::reset() {
 
 } // namespace import
 } // namespace chtl
+
+#include "parser/chtl_parser.h"
+#include "lexer/chtl_lexer.h"
+
+std::shared_ptr<chtl::ast::ASTNode> chtl::import::ImportManager::load_module(const std::string& module_name) {
+    if (imported_asts_.count(module_name)) {
+        // Module already loaded and parsed
+        return imported_asts_[module_name];
+    }
+
+    // --- Simulation of finding and reading a .cmod file ---
+    std::cout << "Simulating loading of module: " << module_name << std::endl;
+    auto dummy_module = std::make_shared<cmod_cjmod::CMODModule>(module_name);
+    cmod_cjmod::ModuleInfo info(module_name);
+    info.version = "1.0.0-simulated";
+    info.author = "CHTL-Dev";
+    info.exports.push_back("SimulatedComponent");
+    dummy_module->setInfo(info);
+    dummy_module->addSourceFile("src/" + module_name + ".chtl", "div { class: \"simulated-module-" + module_name + "\"; text: \"Content from " + module_name + "\"; }");
+
+    std::string packed_content = cmod_cjmod::ModulePackager::pack(*dummy_module);
+    auto unpacked_files = cmod_cjmod::ModulePackager::unpack(packed_content);
+
+    std::string info_path = "info/" + module_name + ".chtl";
+    if (unpacked_files.count(info_path)) {
+        cmod_cjmod::ModuleInfoParser info_parser(unpacked_files[info_path]);
+        auto parsed_info = info_parser.parse();
+        std::cout << "Successfully parsed info for module: " << parsed_info.name << std::endl;
+    } else {
+        std::cerr << "Warning: Module info file not found for " << module_name << std::endl;
+        return nullptr;
+    }
+
+    std::string source_path = "src/" + module_name + ".chtl";
+     if (unpacked_files.count(source_path)) {
+        try {
+            lexer::CHTLLexer lexer(unpacked_files[source_path]);
+            auto tokens = lexer.tokenize();
+            parser::CHTLParser parser(tokens);
+            auto module_ast = parser.parse();
+
+            if (module_ast) {
+                // Cache the parsed AST
+                imported_asts_[module_name] = module_ast;
+                loaded_cmod_modules_[module_name] = dummy_module;
+                return module_ast;
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Error parsing module source for " << module_name << ": " << e.what() << std::endl;
+        }
+    } else {
+        std::cerr << "Warning: Module source file not found for " << module_name << std::endl;
+    }
+    return nullptr;
+}

@@ -128,12 +128,12 @@ public:
     
     void setInfo(const ModuleInfo& info);
     void addExport(const ModuleExport& exp);
-    void addSourceFile(const std::string& filePath);
+    void addSourceFile(const std::string& filePath, const std::string& content);
     void addInfoFile(const std::string& filePath);
     
     ModuleInfo getInfo() const;
     std::vector<ModuleExport> getExports() const;
-    std::vector<std::string> getSourceFiles() const;
+    const std::map<std::string, std::string>& getSourceFiles() const;
     std::vector<std::string> getInfoFiles() const;
     
     std::string generateModuleCode() const;
@@ -143,7 +143,7 @@ private:
     std::string name_;
     ModuleInfo info_;
     std::vector<ModuleExport> exports_;
-    std::vector<std::string> sourceFiles_;
+    std::map<std::string, std::string> sourceFiles_; // Path -> Content
     std::vector<std::string> infoFiles_;
 };
 
@@ -154,12 +154,12 @@ public:
     
     void setInfo(const ModuleInfo& info);
     void addExport(const ModuleExport& exp);
-    void addSourceFile(const std::string& filePath);
+    void addSourceFile(const std::string& filePath, const std::string& content);
     void addInfoFile(const std::string& filePath);
     
     ModuleInfo getInfo() const;
     std::vector<ModuleExport> getExports() const;
-    std::vector<std::string> getSourceFiles() const;
+    const std::map<std::string, std::string>& getSourceFiles() const;
     std::vector<std::string> getInfoFiles() const;
     
     std::string generateModuleCode() const;
@@ -173,7 +173,7 @@ private:
     std::string name_;
     ModuleInfo info_;
     std::vector<ModuleExport> exports_;
-    std::vector<std::string> sourceFiles_;
+    std::map<std::string, std::string> sourceFiles_; // Path -> Content
     std::vector<std::string> infoFiles_;
     std::map<std::string, std::string> chtljsFunctions_;
     std::map<std::string, std::string> virtualObjects_;
@@ -239,6 +239,27 @@ private:
     
     std::string processModuleDependencies(const std::string& content);
     std::string validateModuleStructure(const std::string& moduleName, ModuleType type);
+};
+
+// 模块打包器
+class ModulePackager {
+public:
+    static std::string pack(const CMODModule& module);
+    static std::string pack(const CJMODModule& module);
+    static std::string pack(const MixedModule& module);
+    static std::map<std::string, std::string> unpack(const std::string& packed_content);
+};
+
+// 模块信息解析器
+class ModuleInfoParser {
+public:
+    explicit ModuleInfoParser(const std::string& info_content);
+    ModuleInfo parse();
+
+private:
+    std::string content_;
+    void parse_info_block(ModuleInfo& info);
+    void parse_export_block(ModuleInfo& info);
 };
 
 } // namespace cmod_cjmod

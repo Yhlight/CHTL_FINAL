@@ -15,7 +15,7 @@ public:
     void resolve_imports(ast::ASTNode::NodePtr root);
 
 private:
-    void visit_node(ast::ASTNode::NodePtr node);
+    void visit_node(ast::ASTNode::NodePtr node, ast::ASTNode::NodePtr parent);
 
     ImportManager& manager_;
 };

@@ -6,6 +6,8 @@
 #include <unordered_set>
 #include <memory>
 #include <filesystem>
+#include "chtl/cmod_cjmod_system.h"
+#include "ast/ast_node.h"
 
 namespace chtl {
 namespace import {
@@ -114,6 +116,7 @@ private:
     std::unordered_map<std::string, std::shared_ptr<Namespace>> namespaces_;
     std::unordered_set<std::string> processed_files_;
     std::unordered_map<std::string, std::shared_ptr<ast::ASTNode>> imported_asts_;
+    std::unordered_map<std::string, std::shared_ptr<cmod_cjmod::CMODModule>> loaded_cmod_modules_;
     
     // 文件处理
     std::string read_file(const std::string& file_path) const;
@@ -138,7 +141,8 @@ public:
     // 主要接口
     void process_file(const std::string& file_path);
     void process_imports(const std::string& content, const std::string& current_file);
-    void process_import_node(std::shared_ptr<ast::ImportNode> node);
+    void process_import_node(std::shared_ptr<ast::ImportNode> node, std::shared_ptr<ast::ASTNode> current_node);
+    std::shared_ptr<ast::ASTNode> load_module(const std::string& module_name);
     
     // 导入管理
     void add_import(const std::string& name, const std::string& path, ImportType type, const std::string& alias = "");
