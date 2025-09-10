@@ -1,0 +1,34 @@
+// CHTL End-to-End Test File
+
+html {
+    lang = "en";
+
+    head {
+        title { text { "CHTL E2E Test" } }
+    }
+
+    body {
+        -- A div with attributes and styles
+        div {
+            id = "main-box";
+            class = "container";
+
+            // Style properties
+            width: 300;
+            padding: 10 * 2;
+            border: "1px solid black";
+            background-color: width > 250 ? "lightgreen" : "lightcoral";
+        }
+
+        -- A div that references the first one
+        div {
+            margin: #main-box.padding + 5;
+        }
+
+        [Origin] @Html {
+            <hr>
+            <!-- Raw HTML Section -->
+            <p>This is a raw HTML block.</p>
+        }
+    }
+}
