@@ -2,20 +2,32 @@ import argparse
 import sys
 from CHTL.CHTLLexer.lexer import Lexer
 from CHTL.CHTLParser.parser import Parser
+from CHTL.CHTLParser.config_pre_parser import ConfigPreParser
 from CHTL.CHTLTransformer.transformer import ASTTransformer
 from CHTL.CHTLGenerator.generator import HTMLGenerator
 from CHTL.CHTLContext.context import CompilationContext
 
-def compile_chtl(source_code: str, use_default_structure: bool = False) -> str:
+def compile_chtl(source_code: str, source_file_path: str, use_default_structure: bool = False) -> str:
     """
     Runs the full CHTL compilation pipeline.
     """
+    # 1. Pre-parse for [Configuration] blocks to set up the context.
+    pre_parser = ConfigPreParser(source_code)
+    unnamed_configs, named_configs, used_config, cleaned_source = pre_parser.extract_configs()
+
+    # 2. Create and configure the context.
     context = CompilationContext()
-    lexer = Lexer(source_code)
+    for config_str in unnamed_configs:
+        context.apply_config_string(config_str)
+    if used_config and used_config in named_configs:
+        context.apply_config_string(named_configs[used_config])
+
+    # 3. Run the main compilation pipeline with the configured context and cleaned source.
+    lexer = Lexer(cleaned_source, context)
     tokens = lexer.tokenize()
     parser = Parser(tokens, context)
     ast = parser.parse()
-    transformer = ASTTransformer(ast, context)
+    transformer = ASTTransformer(ast, context, current_file_path=source_file_path)
     transformed_ast = transformer.transform()
     generator = HTMLGenerator(transformed_ast)
     html_output = generator.generate(use_default_structure=use_default_structure)
@@ -50,7 +62,7 @@ def main():
         with open(args.input_file, 'r', encoding='utf-8') as f:
             source_code = f.read()
 
-        html_output = compile_chtl(source_code, use_default_structure=args.default_struct)
+        html_output = compile_chtl(source_code, source_file_path=args.input_file, use_default_structure=args.default_struct)
 
         if args.output:
             with open(args.output, 'w', encoding='utf-8') as f:

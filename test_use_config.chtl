@@ -1,0 +1,22 @@
+[Configuration] @Config Basic {
+    [Name] {
+        KEYWORD_STYLE = css;
+    }
+}
+
+[Configuration] @Config DarkMode {
+    [Name] {
+        KEYWORD_STYLE = dark-css;
+    }
+}
+
+use @Config DarkMode;
+
+body {
+    div {
+        dark-css {
+            background-color: black;
+            color: white;
+        }
+    }
+}

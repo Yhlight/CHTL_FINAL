@@ -1,42 +1,56 @@
 import re
+from typing import List, Dict, Optional, Tuple
 
 class ConfigPreParser:
     """
-    A simple, fast pre-parser to find, extract, and remove [Configuration]
-    blocks from a raw CHTL source string. This runs before the main lexer.
+    A simple, fast pre-parser to find/extract/remove [Configuration] blocks
+    and `use @Config` statements from a raw CHTL source string.
+    This runs before the main lexer.
     """
     def __init__(self, source_code: str):
         self.source_code = source_code
+        self.use_pattern = re.compile(r'^\s*use\s+@Config\s+([a-zA-Z0-9_]+)\s*;', re.MULTILINE)
+        self.config_pattern = re.compile(r'\[\s*Configuration\s*\]\s*(?:@Config\s+([a-zA-Z0-9_]+))?')
 
-    def extract_configs(self) -> (list[str], str):
+    def extract_configs(self) -> Tuple[List[str], Dict[str, str], Optional[str], str]:
         """
-        Finds all top-level [Configuration] blocks, returns their inner
-        content, and returns the source code with the blocks removed.
+        Finds all config blocks and the 'use' statement.
+        Returns: (unnamed_configs, named_configs, used_config_name, cleaned_source)
         """
-        config_contents = []
+        unnamed_configs = []
+        named_configs = {}
+        used_config_name = None
         cleaned_source = self.source_code
 
+        # 1. Find and remove the 'use' statement first.
+        use_match = self.use_pattern.search(cleaned_source)
+        if use_match:
+            used_config_name = use_match.group(1)
+            # Remove the 'use' statement from the source
+            cleaned_source = cleaned_source.replace(use_match.group(0), '', 1)
+
+        # 2. Find all configuration blocks
         search_pos = 0
         while True:
-            # Find the start of a potential block in the *original* source
-            start_index = self.source_code.find('[Configuration]', search_pos)
-            if start_index == -1:
+            match = self.config_pattern.search(cleaned_source, search_pos)
+            if not match:
                 break
 
-            open_brace_index = self.source_code.find('{', start_index)
+            start_index = match.start()
+            config_name = match.group(1)
+
+            open_brace_index = cleaned_source.find('{', match.end())
             if open_brace_index == -1:
-                search_pos = start_index + 1
+                search_pos = match.end()
                 continue
 
             brace_level = 1
             i = open_brace_index + 1
-            while i < len(self.source_code):
-                if self.source_code[i] == '{':
-                    brace_level += 1
-                elif self.source_code[i] == '}':
+            while i < len(cleaned_source):
+                if cleaned_source[i] == '{': brace_level += 1
+                elif cleaned_source[i] == '}':
                     brace_level -= 1
-                    if brace_level == 0:
-                        break
+                    if brace_level == 0: break
                 i += 1
 
             if brace_level != 0:
@@ -44,16 +58,19 @@ class ConfigPreParser:
                 continue
 
             close_brace_index = i
+            content = cleaned_source[open_brace_index + 1 : close_brace_index]
 
-            # Extract the content and the full block text
-            content = self.source_code[open_brace_index + 1 : close_brace_index]
-            full_block_text = self.source_code[start_index : close_brace_index + 1]
+            if config_name:
+                named_configs[config_name] = content
+            else:
+                unnamed_configs.append(content)
 
-            config_contents.append(content)
-
-            # Remove the block from the source code for the main parser
+            # Remove the full block for the next iteration of finding its text
+            # and for the final cleaned source
+            full_block_text = cleaned_source[start_index : close_brace_index + 1]
             cleaned_source = cleaned_source.replace(full_block_text, '', 1)
 
-            search_pos = close_brace_index + 1
+            # Start searching from the beginning of the cleaned source
+            search_pos = 0
 
-        return config_contents, cleaned_source
+        return unnamed_configs, named_configs, used_config_name, cleaned_source.strip()
