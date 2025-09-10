@@ -8,6 +8,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Add CHTL library
 add_subdirectory(CHTL)
 
+# Add scanner library
+add_subdirectory(Scanner)
+
 # Add the subdirectory for the main executable
 add_subdirectory(CompilerDispatcher)
 
