@@ -1,0 +1,19 @@
+// Info file for the Chtholly module
+
+[Info] {
+    name = "Chtholly";
+    version = "1.0.0";
+    description = "A set of UI components inspired by Chtholly Nota Seniorious.";
+    author = "Jules";
+    license = "MIT";
+    dependencies = "";
+    category = "UI Components";
+    minCHTLVersion = "1.0.0";
+    maxCHTLVersion = "2.0.0";
+}
+
+// This block defines what components are made public when this module is imported.
+[Export] {
+    [Custom] @Element Accordion;
+    [Template] @Element Memo;
+}

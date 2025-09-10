@@ -8,8 +8,12 @@ html {
         div {
             class: "wrapper";
 
-            // This should be replaced by the content of the Chtholly module
+            // This should import the module and make its components available
             [Import] @Chtl from "Chtholly";
+
+            // Now, use one of the exported components
+            h2 { text: "Here is the Accordion component from the module:" ;}
+            @Element Accordion;
         }
     }
 }

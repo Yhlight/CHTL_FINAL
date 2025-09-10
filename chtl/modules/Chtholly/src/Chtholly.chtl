@@ -1,0 +1,7 @@
+// Main file for the Chtholly CMOD module.
+// It imports all the components that make up the module.
+
+// Since the file paths are relative, CHTL will look for these
+// files in the same directory or subdirectories.
+[Import] @Chtl from "components/Accordion.chtl";
+[Import] @Chtl from "components/Memo.chtl";

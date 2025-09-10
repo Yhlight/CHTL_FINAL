@@ -1,0 +1,84 @@
+// Chtholly-themed Accordion Component
+
+[Custom] @Element Accordion {
+    // Default structure for the accordion
+    div {
+        class: "accordion-chtholly";
+
+        // Accordion Item 1
+        div {
+            class: "accordion-item";
+            div {
+                class: "accordion-header";
+                text: "First Item Header";
+            }
+            div {
+                class: "accordion-content";
+                p { text: "Content for the first item."; }
+            }
+        }
+
+        // Accordion Item 2
+        div {
+            class: "accordion-item";
+            div {
+                class: "accordion-header";
+                text: "Second Item Header";
+            }
+            div {
+                class: "accordion-content";
+                p { text: "Content for the second item."; }
+            }
+        }
+    }
+
+    style {
+        .accordion-chtholly {
+            border: 1px solid #4a90e2; // Blue border
+            border-radius: 4px;
+        }
+        .accordion-item {
+            border-top: 1px solid #4a90e2;
+        }
+        .accordion-item:first-child {
+            border-top: none;
+        }
+        .accordion-header {
+            background-color: #e9f2fb; // Light blue
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #333;
+            transition: background-color 0.3s;
+        }
+        .accordion-header:hover {
+            background-color: #d0e8ff;
+        }
+        .accordion-header.active {
+            background-color: #e74c3c; // Red when active
+            color: white;
+        }
+        .accordion-content {
+            padding: 15px;
+            display: none; // Initially hidden
+            border-top: 1px solid #d0e8ff;
+        }
+    }
+
+    script {
+        const headers = document.querySelectorAll(".accordion-header");
+        headers.forEach(header => {
+            header.addEventListener("click", () => {
+                // Toggle active class on header
+                header.classList.toggle("active");
+
+                const content = header.nextElementSibling;
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                }
+            });
+        });
+    }
+}

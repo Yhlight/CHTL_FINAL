@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <filesystem>
 
 #include "scanner/unified_scanner.h"
 #include "lexer/chtl_lexer.h"
@@ -17,36 +18,57 @@
 
 using namespace chtl;
 
-// Helper function to create a dummy module file for testing
-void create_dummy_module_file() {
-    std::cout << "Creating dummy module 'Chtholly.cmod'..." << std::endl;
-    auto chtholly_module = std::make_shared<cmod_cjmod::CMODModule>("Chtholly");
-    cmod_cjmod::ModuleInfo info("Chtholly");
-    info.version = "1.0.0-packaged";
-    info.author = "Packager";
-    info.exports.push_back("ChthollyComponent");
-    chtholly_module->setInfo(info);
-    chtholly_module->addSourceFile("src/Chtholly.chtl", "div { class: \"chtholly-component\"; text: \"Content from the FILE-BASED Chtholly module\"; }");
+// Helper function to read a file into a string
+std::string read_file_content(const std::string& path) {
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open file for packaging: " + path);
+    }
+    return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+}
 
-    std::string packed_chtholly = cmod_cjmod::ModulePackager::pack(*chtholly_module);
+// Utility to package the real Chtholly module from its source files
+void package_chtholly_module() {
+    std::cout << "Packaging 'Chtholly' module from source files..." << std::endl;
 
-    std::ofstream outfile("modules/Chtholly.cmod");
-    outfile << packed_chtholly;
-    outfile.close();
+    try {
+        auto chtholly_module = std::make_shared<cmod_cjmod::CMODModule>("Chtholly");
 
-    std::cout << "Dummy module written to modules/Chtholly.cmod" << std::endl;
+        // Read info file
+        std::string info_content = read_file_content("chtl/modules/Chtholly/info/Chtholly.chtl");
+        cmod_cjmod::ModuleInfoParser info_parser(info_content);
+        chtholly_module->setInfo(info_parser.parse());
+
+        // Read source files
+        chtholly_module->addSourceFile("src/Chtholly.chtl", read_file_content("chtl/modules/Chtholly/src/Chtholly.chtl"));
+        chtholly_module->addSourceFile("src/components/Accordion.chtl", read_file_content("chtl/modules/Chtholly/src/components/Accordion.chtl"));
+        chtholly_module->addSourceFile("src/components/Memo.chtl", read_file_content("chtl/modules/Chtholly/src/components/Memo.chtl"));
+
+        // Pack the module
+        std::string packed_chtholly = cmod_cjmod::ModulePackager::pack(*chtholly_module);
+
+        // Write to .cmod file
+        std::ofstream outfile("modules/Chtholly.cmod");
+        outfile << packed_chtholly;
+        outfile.close();
+
+        std::cout << "Successfully packaged module to modules/Chtholly.cmod" << std::endl;
+
+    } catch (const std::exception& e) {
+        std::cerr << "Error during packaging: " << e.what() << std::endl;
+    }
 }
 
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <input_file> | --package-dummy" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <input_file> | --package-chtholly" << std::endl;
         return 1;
     }
 
     std::string arg1 = argv[1];
-    if (arg1 == "--package-dummy") {
-        create_dummy_module_file();
+    if (arg1 == "--package-chtholly") {
+        package_chtholly_module();
         return 0;
     }
 
@@ -63,34 +85,23 @@ int main(int argc, char* argv[]) {
     file.close();
 
     try {
-        // 1. Use the UnifiedScanner to get code fragments
         scanner::UnifiedScanner scanner(content);
         auto fragments = scanner.scan();
 
-        // std::cout << "Found " << fragments.size() << " fragments." << std::endl;
-
-        // Lists to hold the final generated code parts
         std::vector<std::string> html_parts;
         std::vector<std::string> css_parts;
         std::vector<std::string> js_parts;
         ast::ASTNode::NodePtr main_ast = nullptr;
 
-
-        // 2. Dispatch fragments to the correct parsers
         for (const auto& fragment : fragments) {
-            // std::cout << "\n--- Processing fragment of type: " << static_cast<int>(fragment.type) << " ---\n";
-            // std::cout << fragment.content.substr(0, 200) << "...\n";
-
             switch (fragment.type) {
                 case scanner::FragmentType::CHTL: {
                     lexer::CHTLLexer lexer(fragment.content);
                     auto tokens = lexer.tokenize();
                     parser::CHTLParser parser(tokens);
-                    main_ast = parser.parse(); // Assume the first CHTL block is the main one
-
+                    main_ast = parser.parse();
                     if (main_ast) {
-                        // We run processors on the main AST after all fragments are processed
-                        html_parts.push_back(fragment.content); // Store raw for now
+                        html_parts.push_back(fragment.content);
                     }
                     break;
                 }
@@ -111,12 +122,10 @@ int main(int argc, char* argv[]) {
                     break;
                 }
                 default:
-                    std::cerr << "Warning: Unknown fragment type encountered." << std::endl;
                     break;
             }
         }
 
-        // 3. Process the main CHTL AST after initial fragment parsing
         if(main_ast) {
             import::ImportManager import_manager(".");
             import::ImportResolver import_resolver(import_manager);
@@ -129,11 +138,9 @@ int main(int argc, char* argv[]) {
             if (!validator.validate(main_ast)) {
                 std::cerr << "Constraint validation failed." << std::endl;
             }
-            html_parts[0] = main_ast->to_html(); // Replace raw CHTL with processed HTML
+            html_parts[0] = main_ast->to_html();
         }
 
-
-        // 4. Merge the generated parts into a final HTML document
         std::stringstream final_html;
         std::string main_html_content;
 
