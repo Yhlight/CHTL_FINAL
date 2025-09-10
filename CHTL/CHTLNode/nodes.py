@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
-from typing import List, Union, Any, Optional
+from typing import List, Union, Any, Optional, Dict
 from enum import Enum, auto
 # Import Token for type hinting in expression nodes
-from CHTL.CHTLLexer.lexer import Token
+from CHTL.CHTLLexer.keywords import Token
 
 @dataclass
 class BaseNode:
@@ -187,7 +187,16 @@ class ImportNode(BaseNode):
     lineno: int = 0
     parent: Optional['BaseNode'] = field(default=None, repr=False)
 
-DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode, CustomDefinitionNode, StyleNode, ImportNode]
+@dataclass
+class ConfigNode(BaseNode):
+    """Represents a [Configuration] block."""
+    name: Optional[str] = None
+    settings: Dict[str, Any] = field(default_factory=dict)
+    name_group: Dict[str, Union[str, List[str]]] = field(default_factory=dict)
+    lineno: int = 0
+    parent: Optional['BaseNode'] = field(default=None, repr=False)
+
+DocumentContent = Union[ElementNode, CommentNode, TemplateDefinitionNode, CustomDefinitionNode, StyleNode, ImportNode, ConfigNode]
 
 @dataclass
 class DocumentNode(BaseNode):

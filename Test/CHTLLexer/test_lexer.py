@@ -1,5 +1,6 @@
 import unittest
-from CHTL.CHTLLexer.lexer import Lexer, TokenType
+from CHTL.CHTLLexer.lexer import Lexer
+from CHTL.CHTLLexer.keywords import TokenType
 
 class TestLexer(unittest.TestCase):
 

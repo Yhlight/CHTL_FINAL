@@ -1,0 +1,7 @@
+[Configuration] {
+    DEBUG_MODE = true;
+    INDEX_INITIAL_COUNT = 1;
+}
+
+// Some other CHTL code to make sure it still parses
+div { text: "hello"; }

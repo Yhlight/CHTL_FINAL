@@ -2,16 +2,32 @@ import argparse
 import sys
 from Scanner.CHTLUnifiedScanner import CHTLUnifiedScanner
 from CompilerDispatcher.dispatcher import CompilerDispatcher
+from CHTL.CHTLParser.config_pre_parser import ConfigPreParser
+from CHTL.CHTLContext.context import CompilationContext
 
 
-def compile_chtl(source_code: str, source_file_path: str, use_default_structure: bool = True) -> str:
+def compile_chtl(source_code: str, source_file_path: str, use_default_structure: bool = False) -> str:
     """
     Runs the full CHTL compilation pipeline using the scanner and dispatcher.
     """
-    scanner = CHTLUnifiedScanner(source_code)
+    # 1. Pre-parse for [Configuration] blocks
+    pre_parser = ConfigPreParser(source_code)
+    config_strings, cleaned_source = pre_parser.extract_configs()
+
+    # 2. Create and configure the context
+    context = CompilationContext()
+    for config_str in config_strings:
+        context.apply_config_string(config_str)
+
+    # 3. Scan the *cleaned* source into fragments
+    scanner = CHTLUnifiedScanner(cleaned_source)
     fragments = scanner.scan()
-    dispatcher = CompilerDispatcher(fragments, current_file_path=source_file_path)
+
+    # 4. Dispatch fragments to their respective compilers
+    dispatcher = CompilerDispatcher(fragments, context, current_file_path=source_file_path)
     dispatcher.dispatch()
+
+    # 5. Merge the final output
     final_html = dispatcher.merge_outputs(use_default_structure=use_default_structure)
     return final_html
 

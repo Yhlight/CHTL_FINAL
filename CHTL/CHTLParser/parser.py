@@ -1,9 +1,9 @@
-from CHTL.CHTLLexer.lexer import Token, TokenType
+from CHTL.CHTLLexer.keywords import Token, TokenType
 from CHTL.CHTLNode.nodes import (
     BaseNode, DocumentNode, ElementNode, AttributeNode, TextNode, CommentNode, Node,
     StyleNode, CssRuleNode, CssPropertyNode, TemplateDefinitionNode, TemplateUsageNode,
     CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode, LiteralNode,
-    ImportNode
+    ImportNode, ConfigNode
 )
 from CHTL.CHTLContext.context import CompilationContext
 from CHTL.CHTLParser.expression_parser import ExpressionParser
@@ -43,76 +43,55 @@ class Parser:
             token = self.current_token()
             if token.type == TokenType.LBRACK:
                 self.consume(TokenType.LBRACK)
-                keyword_token = self.current_token()
-                if not keyword_token: raise RuntimeError("Unexpected EOF after '['")
+                keyword_token = self.consume() # Consume the keyword, e.g., TEMPLATE
 
                 if keyword_token.type == TokenType.TEMPLATE:
-                    self.consume()
                     doc.add_child(self.parse_template_definition(keyword_token))
                 elif keyword_token.type == TokenType.CUSTOM:
-                    self.consume()
                     doc.add_child(self.parse_template_definition(keyword_token, is_custom=True))
                 elif keyword_token.type == TokenType.IMPORT:
-                    self.consume()
                     doc.add_child(self.parse_import_statement(keyword_token))
+                # Config blocks are handled by the pre-parser, so we ignore them here.
+                elif keyword_token.type == TokenType.CONFIGURATION:
+                    # We need to consume the block to advance the parser, but we don't create a node.
+                    self.consume(TokenType.RBRACK)
+                    brace_level = 0
+                    if self.current_token().type == TokenType.LBRACE:
+                        brace_level = 1
+                        self.consume(TokenType.LBRACE)
+                        while brace_level > 0:
+                            t = self.consume()
+                            if t.type == TokenType.LBRACE: brace_level += 1
+                            if t.type == TokenType.RBRACE: brace_level -= 1
                 else:
                     raise RuntimeError(f"Unknown definition type: {keyword_token.value}")
+
             elif token.type == TokenType.COMMENT:
                 doc.add_child(self.parse_comment())
+            elif token.type == TokenType.STYLE:
+                doc.add_child(self.parse_style_block(parent_element=None))
             elif token.type == TokenType.IDENTIFIER:
+                # title: shorthand is a special case not covered by keywords
                 if token.value == 'title' and self.peek(1) and self.peek(1).type == TokenType.COLON:
                     doc.add_child(self.parse_title_shorthand())
                 else:
                     doc.add_child(self.parse_element())
-            elif token.type == TokenType.STYLE:
-                 doc.add_child(self.parse_style_block(parent_element=None))
             else:
                 raise RuntimeError(f"Line {token.lineno}: Unexpected token {token.type} ('{token.value}') at top level.")
         return doc
-
-    def parse_import_statement(self, start_token: Token) -> ImportNode:
-        self.consume(TokenType.RBRACK)
-        is_construct_import = self.current_token().type == TokenType.LBRACK
-        construct_type = None
-        if is_construct_import:
-            self.consume(TokenType.LBRACK)
-            construct_type = self.consume().value
-            self.consume(TokenType.RBRACK)
-        self.consume(TokenType.AT_SYMBOL)
-        import_type = self.consume().value
-        imported_item = None
-        if self.current_token().type != TokenType.FROM:
-            imported_item = self.consume().value
-        self.consume(TokenType.FROM)
-        path_token = self.current_token()
-        if path_token.type not in (TokenType.STRING, TokenType.UNQUOTED_LITERAL):
-             raise RuntimeError(f"Line {path_token.lineno}: Expected a path string or literal for import.")
-        self.consume()
-        path = path_token.value
-        if path_token.type == TokenType.STRING:
-            path = path[1:-1]
-        alias = None
-        if self.current_token() and self.current_token().type == TokenType.AS:
-            self.consume(TokenType.AS)
-            alias_token = self.consume(TokenType.IDENTIFIER)
-            alias = alias_token.value
-        if self.current_token() and self.current_token().type == TokenType.SEMICOLON:
-            self.consume(TokenType.SEMICOLON)
-        return ImportNode(
-            lineno=start_token.lineno, import_type=import_type,
-            construct_type=construct_type, path=path, alias=alias,
-            imported_item=imported_item
-        )
 
     def parse_title_shorthand(self) -> ElementNode:
         title_token = self.consume(TokenType.IDENTIFIER, 'title')
         self.consume(TokenType.COLON)
         value_token = self.consume(TokenType.STRING)
         value = value_token.value[1:-1]
+
         title_element = ElementNode(tag_name='title', lineno=title_token.lineno)
         title_element.add_child(TextNode(value=value, lineno=value_token.lineno))
+
         if self.current_token() and self.current_token().type == TokenType.SEMICOLON:
             self.consume(TokenType.SEMICOLON)
+
         return title_element
 
     def parse_definition_content(self, template_type: str):
@@ -231,6 +210,40 @@ class Parser:
         content = self.parse_element_template_content()
         return InsertNode(position=position, target_selector=target_selector, content=content, lineno=start_token.lineno)
 
+    def parse_import_statement(self, start_token: Token) -> ImportNode:
+        self.consume(TokenType.RBRACK)
+        is_construct_import = self.current_token().type == TokenType.LBRACK
+        construct_type = None
+        if is_construct_import:
+            self.consume(TokenType.LBRACK)
+            construct_type = self.consume().value
+            self.consume(TokenType.RBRACK)
+        self.consume(TokenType.AT_SYMBOL)
+        import_type = self.consume().value
+        imported_item = None
+        if self.current_token().type != TokenType.FROM:
+            imported_item = self.consume().value
+        self.consume(TokenType.FROM)
+        path_token = self.current_token()
+        if path_token.type not in (TokenType.STRING, TokenType.UNQUOTED_LITERAL):
+             raise RuntimeError(f"Line {path_token.lineno}: Expected a path string or literal for import.")
+        self.consume()
+        path = path_token.value
+        if path_token.type == TokenType.STRING:
+            path = path[1:-1]
+        alias = None
+        if self.current_token() and self.current_token().type == TokenType.AS:
+            self.consume(TokenType.AS)
+            alias_token = self.consume(TokenType.IDENTIFIER)
+            alias = alias_token.value
+        if self.current_token() and self.current_token().type == TokenType.SEMICOLON:
+            self.consume(TokenType.SEMICOLON)
+        return ImportNode(
+            lineno=start_token.lineno, import_type=import_type,
+            construct_type=construct_type, path=path, alias=alias,
+            imported_item=imported_item
+        )
+
     def parse_comment(self) -> CommentNode:
         token = self.consume(TokenType.COMMENT)
         cleaned_value = token.value.strip()
@@ -281,6 +294,8 @@ class Parser:
              value = self.parse_value_tokens([TokenType.SEMICOLON, TokenType.RBRACE])
              element.add_child(TextNode(value=value, lineno=attr_name_token.lineno))
         else:
+             if attr_name_token.type != TokenType.IDENTIFIER:
+                 raise RuntimeError(f"Unexpected token {attr_name_token.type} for an attribute name.")
              value = self.parse_value_tokens([TokenType.SEMICOLON, TokenType.RBRACE])
              element.attributes.append(AttributeNode(name=attr_name_token.value, value=value, lineno=attr_name_token.lineno))
         if self.current_token().type == TokenType.SEMICOLON:

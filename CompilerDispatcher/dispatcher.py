@@ -6,10 +6,10 @@ from CHTL.CHTLGenerator.generator import HTMLGenerator
 from CHTL.CHTLContext.context import CompilationContext
 
 class CompilerDispatcher:
-    def __init__(self, fragments: list[CodeFragment], current_file_path: str):
+    def __init__(self, fragments: list[CodeFragment], context: CompilationContext, current_file_path: str):
         self.fragments = fragments
         self.current_file_path = current_file_path
-        self.context = CompilationContext()
+        self.context = context
         self.html_output = ""
         self.css_output = ""
         self.js_output = ""
@@ -35,7 +35,8 @@ class CompilerDispatcher:
         """
         Runs the full CHTL compilation pipeline.
         """
-        lexer = Lexer(source_code)
+        # The lexer now needs the context to get the correct keywords
+        lexer = Lexer(source_code, self.context)
         tokens = lexer.tokenize()
         parser = Parser(tokens, self.context)
         ast = parser.parse()

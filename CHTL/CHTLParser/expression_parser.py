@@ -1,4 +1,4 @@
-from CHTL.CHTLLexer.lexer import Token, TokenType
+from CHTL.CHTLLexer.keywords import Token, TokenType
 from CHTL.CHTLNode.nodes import (
     ExpressionNode, LiteralNode, BinaryOpNode, LogicalOpNode,
     ConditionalExpressionNode, PropertyReferenceNode

@@ -1,115 +1,22 @@
-from enum import Enum, auto
-from dataclasses import dataclass
-
-class TokenType(Enum):
-    # Single-character tokens
-    LBRACE = auto()
-    RBRACE = auto()
-    LPAREN = auto()
-    RPAREN = auto()
-    LBRACK = auto()
-    RBRACK = auto()
-    COLON = auto()
-    SEMICOLON = auto()
-    EQUALS = auto()
-    COMMA = auto()
-    DOT = auto()
-    AT_SYMBOL = auto()
-    QUESTION = auto()
-    SLASH = auto()
-    GT = auto()
-    LT = auto()
-
-    # Operators
-    PLUS = auto()
-    MINUS = auto()
-    STAR = auto()
-    PERCENT = auto()
-    POWER = auto()
-    AMPERSAND = auto()
-    AND = auto()
-    OR = auto()
-    EQ_EQ = auto()
-    NOT_EQ = auto()
-    GTE = auto()
-    LTE = auto()
-
-    # Literals
-    IDENTIFIER = auto()
-    STRING = auto()
-    UNQUOTED_LITERAL = auto()
-
-    # Keywords
-    CUSTOM = auto()
-    TEMPLATE = auto()
-    ORIGIN = auto()
-    IMPORT = auto()
-    NAMESPACE = auto()
-    CONFIGURATION = auto()
-    STYLE = auto()
-    TEXT = auto()
-    SCRIPT = auto()
-    FROM = auto()
-    AS = auto()
-    USE = auto()
-    EXCEPT = auto()
-    HTML5 = auto()
-    INHERIT = auto()
-    DELETE = auto()
-    INSERT = auto()
-    AFTER = auto()
-    BEFORE = auto()
-    REPLACE = auto()
-    AT_KEYWORD = auto()
-    TOP = auto()
-    BOTTOM = auto()
-
-    # Other
-    COMMENT = auto()
-    EOF = auto()
-    UNKNOWN = auto()
-
-@dataclass
-class Token:
-    type: TokenType
-    value: str
-    lineno: int
-    col: int
-
-KEYWORDS = {
-    "Custom": TokenType.CUSTOM,
-    "Template": TokenType.TEMPLATE,
-    "Origin": TokenType.ORIGIN,
-    "Import": TokenType.IMPORT,
-    "Namespace": TokenType.NAMESPACE,
-    "Configuration": TokenType.CONFIGURATION,
-    "style": TokenType.STYLE,
-    "text": TokenType.TEXT,
-    "script": TokenType.SCRIPT,
-    "from": TokenType.FROM,
-    "as": TokenType.AS,
-    "use": TokenType.USE,
-    "except": TokenType.EXCEPT,
-    "html5": TokenType.HTML5,
-    "inherit": TokenType.INHERIT,
-    "delete": TokenType.DELETE,
-    "insert": TokenType.INSERT,
-    "after": TokenType.AFTER,
-    "before": TokenType.BEFORE,
-    "replace": TokenType.REPLACE,
-    "at": TokenType.AT_KEYWORD,
-    "top": TokenType.TOP,
-    "bottom": TokenType.BOTTOM,
-}
+from typing import Optional
+from .keywords import TokenType, KEYWORDS, Token
+from CHTL.CHTLContext.context import CompilationContext
 
 class Lexer:
-    def __init__(self, source_code: str):
+    def __init__(self, source_code: str, context: Optional[CompilationContext] = None):
         self.source_code = source_code
         self.pos = 0
         self.lineno = 1
         self.line_start = 0
         self.tokens: list[Token] = []
-        self.keywords = KEYWORDS
+
+        # If no context is provided, use the default keywords.
+        # This is useful for standalone parsing or testing.
+        if context:
+            self.keywords = context.keywords
+        else:
+            self.keywords = KEYWORDS
+
         self.simple_tokens = {
             '{': TokenType.LBRACE, '}': TokenType.RBRACE, '(': TokenType.LPAREN,
             ')': TokenType.RPAREN, '[': TokenType.LBRACK, ']': TokenType.RBRACK,
