@@ -180,20 +180,6 @@ ImportManager::ImportManager(const std::string& base_path)
     path_resolver_ = std::make_shared<PathResolver>(base_path);
     global_namespace_ = std::make_shared<Namespace>("global");
     namespaces_["global"] = global_namespace_;
-
-    // --- Populate the virtual filesystem ---
-    std::cout << "Initializing virtual filesystem with dummy modules..." << std::endl;
-    auto chtholly_module = std::make_shared<cmod_cjmod::CMODModule>("Chtholly");
-    cmod_cjmod::ModuleInfo info("Chtholly");
-    info.version = "1.0.0-vfs";
-    info.author = "VFS";
-    info.exports.push_back("ChthollyComponent");
-    chtholly_module->setInfo(info);
-    chtholly_module->addSourceFile("src/Chtholly.chtl", "div { class: \"chtholly-component\"; text: \"Content from the VIRTUAL Chtholly module\"; }");
-
-    std::string packed_chtholly = cmod_cjmod::ModulePackager::pack(*chtholly_module);
-    virtual_filesystem_["modules/Chtholly.cmod"] = packed_chtholly;
-    std::cout << "Packed 'Chtholly' module into virtual path: modules/Chtholly.cmod" << std::endl;
 }
 
 std::string ImportManager::read_file(const std::string& file_path) const {
@@ -442,25 +428,17 @@ std::shared_ptr<chtl::ast::ASTNode> chtl::import::ImportManager::load_module(con
         return imported_asts_[module_name];
     }
 
-    std::string packed_content;
-    bool loaded_from_vfs = false;
-
-    // 1. Try to load from the real filesystem first
+    // 1. Resolve path to .cmod file using the PathResolver
     std::string module_path = path_resolver_->resolve_path(module_name + ".cmod");
+    std::cout << "Attempting to load module '" << module_name << "' from path: " << module_path << std::endl;
+
+    // 2. Read the packed module file from disk
+    std::string packed_content;
     try {
         packed_content = read_file(module_path);
-        std::cout << "Loading module '" << module_name << "' from filesystem: " << module_path << std::endl;
     } catch (const std::exception& e) {
-        // 2. Fallback to virtual filesystem if real file not found
-        std::cout << "Could not find module '" << module_name << "' on disk. Falling back to virtual filesystem." << std::endl;
-        module_path = "modules/" + module_name + ".cmod"; // VFS uses a simpler path
-        if (virtual_filesystem_.count(module_path)) {
-            packed_content = virtual_filesystem_[module_path];
-            loaded_from_vfs = true;
-        } else {
-            std::cerr << "Error: Module '" << module_name << "' not found in virtual filesystem either." << std::endl;
-            return nullptr;
-        }
+        std::cerr << "Error: Could not read module file '" << module_path << "'. " << e.what() << std::endl;
+        return nullptr;
     }
 
     // 3. Unpack, parse info, and parse source from the loaded content

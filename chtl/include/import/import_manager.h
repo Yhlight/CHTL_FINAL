@@ -117,7 +117,6 @@ private:
     std::unordered_set<std::string> processed_files_;
     std::unordered_map<std::string, std::shared_ptr<ast::ASTNode>> imported_asts_;
     std::unordered_map<std::string, std::shared_ptr<cmod_cjmod::CMODModule>> loaded_cmod_modules_;
-    std::unordered_map<std::string, std::string> virtual_filesystem_;
     
     // 文件处理
     std::string read_file(const std::string& file_path) const;
