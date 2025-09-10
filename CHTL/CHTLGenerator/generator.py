@@ -1,137 +1,171 @@
-from CHTL.CHTLNode import nodes
-from CHTL.CHTLLexer.token_type import TokenType
-from CHTL.CHTLGenerator.evaluator import ExpressionEvaluator
+import re
 import html
+from CHTL.CHTLNode import nodes
+from CHTL.CHTLLexer.lexer import Lexer
+from CHTL.CHTLParser.parser import Parser
+from CHTL.CHTLLexer.token_type import TokenType
+from CHTL.CHTLLoader.file_loader import FileLoader
 
 class Generator:
     def __init__(self):
         self.self_closing_tags = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
-        self.global_styles = []
         self.templates = {}
-        self.evaluator = None
-        self.html_output = ""
+        self.global_styles = []
+        self.ast_root = None
+        self.file_loader = FileLoader()
 
     def generate(self, ast: nodes.ProgramNode) -> str:
-        self.global_styles = []
+        self.ast_root = ast
         self.templates = {}
-        self.evaluator = ExpressionEvaluator(ast)
-
-        # Pre-passes
+        self.global_styles = []
         self._collect_templates(ast)
+        self._process_imports(ast)
 
-        # Main pass
-        self.html_output = self._visit(ast)
+        html_output = self._visit(ast)
 
-        # Post-pass injection
         if self.global_styles:
-            style_block = "<style>\n" + "\n".join(self.global_styles) + "\n</style>"
-            if "<head>" in self.html_output.lower():
-                 self.html_output = self.html_output.replace("</head>", f"{style_block}\n</head>", 1)
-            else:
-                self.html_output = style_block + self.html_output
+            style_block = "<style>\n" + "\n".join(sorted(self.global_styles)) + "\n</style>"
+            if "<head>" in html_output.lower():
+                return html_output.replace("</head>", f"{style_block}\n</head>", 1)
+            return style_block + html_output
+        return html_output
 
-        return self.html_output
+    def _process_imports(self, node):
+        if isinstance(node, nodes.ImportNode) and node.import_type == "Chtl":
+            source = self.file_loader.read(node.path)
+            if source:
+                tokens = Lexer(source).scan_tokens()
+                self._collect_templates(Parser(tokens).parse())
+        if hasattr(node, 'children'):
+            for child in node.children:
+                if child: self._process_imports(child)
 
     def _collect_templates(self, node):
-        """Pre-pass to find all template definitions and store them."""
         if isinstance(node, nodes.TemplateDefinitionNode):
-            # Store the node in the repo, keyed by type and name
-            if node.template_type not in self.templates:
-                self.templates[node.template_type] = {}
+            if node.template_type not in self.templates: self.templates[node.template_type] = {}
             self.templates[node.template_type][node.name] = node
-
         if hasattr(node, 'children'):
             for child in node.children:
                 if child: self._collect_templates(child)
 
-    def _expand_style_template(self, usage_node: nodes.TemplateUsageNode, parent_element: nodes.ElementNode):
-        """Finds a style template and returns a list of its property nodes."""
-        template_def = self.templates.get("Style", {}).get(usage_node.name)
-        if not template_def: return []
-        # The body of a style template contains StylePropertyNodes
-        return [p for p in template_def.body if isinstance(p, nodes.StylePropertyNode)]
-
-    def _visit(self, node, parent_element=None):
+    def _visit(self, node, parent_element=None, selector_context=""):
         method_name = f'_visit_{type(node).__name__.lower()}'
-        visitor = getattr(self, method_name, self._generic_visit)
-        return visitor(node, parent_element) if method_name in ['_visit_elementnode', '_visit_stylenode'] else visitor(node)
+        visitor = getattr(self, method_name, lambda n, pe, sc: "")
+        return visitor(node, parent_element, selector_context)
 
-    def _generic_visit(self, node): raise Exception(f"No visit method for node type: {type(node).__name__}")
-    def _visit_programnode(self, node: nodes.ProgramNode) -> str:
-        # Filter out template definitions from the main render pass
-        children_to_render = [c for c in node.children if c and not isinstance(c, nodes.TemplateDefinitionNode)]
+    def _visit_programnode(self, node, parent_element, selector_context):
+        children_to_render = [c for c in node.children if not isinstance(c, (nodes.TemplateDefinitionNode, nodes.ImportNode))]
         return "".join(self._visit(child) for child in children_to_render)
 
-    def _visit_elementnode(self, node: nodes.ElementNode, parent_element=None) -> str:
+    def _visit_elementnode(self, node, parent_element, selector_context):
+        style_node = next((c for c in node.children if isinstance(c, nodes.StyleNode)), None)
+        if style_node:
+            for child in style_node.children:
+                if isinstance(child, nodes.StyleSelectorRuleNode):
+                    selector = "".join(t.lexeme for t in child.selector_tokens)
+                    if selector.startswith('.'):
+                        class_attr = next((a for a in node.attributes if a.name == 'class'), None)
+                        if not class_attr: node.attributes.append(nodes.AttributeNode(name='class', value=selector[1:]))
+                        elif selector[1:] not in class_attr.value.split(): class_attr.value += f" {selector[1:]}"
+                    elif selector.startswith('#'):
+                        id_attr = next((a for a in node.attributes if a.name == 'id'), None)
+                        if not id_attr: node.attributes.append(nodes.AttributeNode(name='id', value=selector[1:]))
+                        else: id_attr.value = selector[1:]
+
         html_str = f"<{node.tag_name}"
-        for attr in node.attributes:
+        for attr in sorted(node.attributes, key=lambda x: x.name):
             html_str += f' {attr.name}="{html.escape(attr.value)}"'
 
-        style_node = next((child for child in node.children if isinstance(child, nodes.StyleNode)), None)
         if style_node:
-            self._visit_stylenode(style_node, parent_element=node)
-            inline_props = [p for p in style_node.children if isinstance(p, nodes.StylePropertyNode)]
-            # Check for template usages inside the style block
-            for usage in [u for u in style_node.children if isinstance(u, nodes.TemplateUsageNode)]:
-                if usage.template_type == "Style":
-                    inline_props.extend(self._expand_style_template(usage, node))
-
-            if inline_props:
-                style_strings = [f"{p.name}: {self.evaluator.evaluate(p.value_expression, node)}" for p in inline_props]
+            all_props = [p for p in style_node.children if isinstance(p, nodes.StylePropertyNode)]
+            template_usages = [u for u in style_node.children if isinstance(u, nodes.TemplateUsageNode)]
+            for usage in template_usages:
+                template_def = self.templates.get(usage.template_type, {}).get(usage.name)
+                if template_def: all_props.extend(template_def.body)
+            if all_props:
+                style_strings = [f"{p.name}: {self._evaluate_expression(p.value_expression, node)}" for p in sorted(all_props, key=lambda x: x.name)]
                 html_str += f' style="{html.escape("; ".join(style_strings))}"'
 
         if node.tag_name in self.self_closing_tags and not any(not isinstance(c, nodes.StyleNode) for c in node.children):
-            html_str += " />"
-            return html_str
-
+            return html_str + " />"
         html_str += ">"
-        # Render children, expanding element templates
+
+        id_attr = next((a for a in node.attributes if a.name == 'id'), None)
+        class_attr = next((a for a in node.attributes if a.name == 'class'), None)
+        my_selector = f"#{id_attr.value}" if id_attr else f".{class_attr.value.split()[0]}" if class_attr else ""
+
         for child in node.children:
-            if isinstance(child, nodes.TemplateUsageNode) and child.template_type == "Element":
-                template_def = self.templates.get("Element", {}).get(child.name)
-                if template_def:
-                    for template_child in template_def.body:
-                        html_str += self._visit(template_child, parent_element=node)
-            elif child and not isinstance(child, nodes.StyleNode):
-                html_str += self._visit(child, parent_element=node)
+            if not isinstance(child, nodes.StyleNode):
+                html_str += self._visit(child, node, my_selector)
+        if style_node: self._visit_stylenode(style_node, node, my_selector)
         html_str += f"</{node.tag_name}>"
         return html_str
 
-    def _visit_stylenode(self, node: nodes.StyleNode, parent_element=None):
-        base_selector = ""
-        id_attr = next((attr for attr in parent_element.attributes if attr.name == 'id'), None)
-        class_attr = next((attr for attr in parent_element.attributes if attr.name == 'class'), None)
-        if id_attr: base_selector = f"#{id_attr.value}"
-        elif class_attr: base_selector = f".{class_attr.value.split()[0]}"
-        last_full_selector = base_selector
-
-        # Expand any style templates first
-        all_children = list(node.children)
+    def _visit_stylenode(self, node, parent_element, selector_context):
+        last_full_selector = selector_context
         for child in node.children:
-            if isinstance(child, nodes.TemplateUsageNode) and child.template_type == "Style":
-                all_children.extend(self._expand_style_template(child, parent_element))
-
-        for child in all_children:
             if isinstance(child, nodes.StyleSelectorRuleNode):
                 raw_selector = "".join(t.lexeme for t in child.selector_tokens)
-                if raw_selector.startswith('&'):
-                    final_selector = last_full_selector + raw_selector[1:]
-                else:
-                    final_selector = f"{base_selector} {raw_selector}".strip()
+                final_selector = (last_full_selector + raw_selector[1:]) if raw_selector.startswith('&') else f"{selector_context} {raw_selector}".strip()
                 last_full_selector = final_selector
-                prop_strings = [f"  {p.name}: {self.evaluator.evaluate(p.value_expression, parent_element)};" for p in child.properties]
+                prop_strings = [f"  {p.name}: {self._evaluate_expression(p.value_expression, parent_element)};" for p in sorted(child.properties, key=lambda x: x.name)]
                 self.global_styles.append(f"{final_selector} {{\n" + "\n".join(prop_strings) + "\n}}")
+
+    def _visit_textnode(self, node, parent_element, selector_context):
+        return html.escape(node.value.strip().strip('"\''))
+
+    def _evaluate_expression(self, node, current_element):
+        if isinstance(node, nodes.LiteralNode): return node.value
+        if isinstance(node, nodes.ValueWithUnitNode):
+            val = node.value
+            if val == int(val): val = int(val)
+            return f"{val}{node.unit}"
+
+        if isinstance(node, nodes.ReferenceNode):
+            target_element = self._find_node(node.selector_tokens) if node.selector_tokens else current_element
+            if not target_element: return node.property_name
+            style_node = next((c for c in target_element.children if isinstance(c, nodes.StyleNode)), None)
+            if not style_node: return 0
+            prop_node = next((p for p in style_node.children if isinstance(p, nodes.StylePropertyNode) and p.name == node.property_name), None)
+            if not prop_node: return 0
+            return self._evaluate_expression(prop_node.value_expression, target_element)
+
+        if isinstance(node, nodes.ConditionalNode):
+            cond_val = self._evaluate_expression(node.condition, current_element)
+            if isinstance(cond_val, (int,float)): cond_val = cond_val != 0
+            return self._evaluate_expression(node.true_branch if cond_val else node.false_branch, current_element)
+
+        if isinstance(node, nodes.BinaryOpNode):
+            left = self._evaluate_expression(node.left, current_element)
+            right = self._evaluate_expression(node.right, current_element)
+            left_val = float(re.sub(r"[a-zA-Z%]+$", "", str(left)))
+            right_val = float(re.sub(r"[a-zA-Z%]+$", "", str(right)))
+            unit_match = re.search(r"[a-zA-Z%]+$", str(left)) or re.search(r"[a-zA-Z%]+$", str(right))
+            unit = unit_match.group(0) if unit_match else ""
+            op = node.op.type
+            if op == TokenType.PLUS: res = left_val + right_val
+            elif op == TokenType.MINUS: res = left_val - right_val
+            elif op == TokenType.STAR: res = left_val * right_val
+            elif op == TokenType.SLASH: res = left_val / right_val if right_val != 0 else 0
+            else: res = 0
+            if res == int(res): res = int(res)
+            return f"{res}{unit}"
         return ""
 
-    def _visit_textnode(self, node: nodes.TextNode) -> str: return html.escape(node.value)
-    def _visit_templateusagenode(self, node: nodes.TemplateUsageNode): return ""
-    def _visit_stylepropertynode(self, n): return ""
-    def _visit_styleselectorrulenode(self, n): return ""
-    def _visit_attributenode(self, n): return ""
-    def _visit_expressionnode(self, n): return ""
-    def _visit_conditionalnode(self, n): return ""
-    def _visit_binaryopnode(self, n): return ""
-    def _visit_referencenode(self, n): return ""
-    def _visit_literalnode(self, n): return ""
-    def _visit_valuewithunitnode(self, n): return ""
-    def _visit_templatedefinitionnode(self, n): return ""
+    def _find_node(self, selector_tokens: list) -> nodes.ElementNode:
+        if not selector_tokens: return None
+        selector_type = selector_tokens[0].type
+        selector_name = selector_tokens[1].lexeme if len(selector_tokens) > 1 else ""
+        def traverse(root):
+            if isinstance(root, nodes.ElementNode):
+                if selector_type == TokenType.HASH:
+                    id_attr = next((a for a in root.attributes if a.name == 'id'), None)
+                    if id_attr and id_attr.value == selector_name: return root
+                elif selector_type == TokenType.DOT:
+                    class_attr = next((a for a in root.attributes if a.name == 'class'), None)
+                    if class_attr and selector_name in class_attr.value.split(): return root
+            if hasattr(root, 'children'):
+                for child in root.children:
+                    if child and (found := traverse(child)): return found
+            return None
+        return traverse(self.ast_root)

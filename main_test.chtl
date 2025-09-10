@@ -1,0 +1,16 @@
+[Import] @Chtl from "templates.chtl";
+
+html {
+    head {
+        title { text { Import Test } }
+    }
+    body {
+        button {
+            style {
+                @Style Button;
+                background-color: blue;
+            }
+            text { "Click Me" }
+        }
+    }
+}

@@ -128,7 +128,14 @@ class Parser:
         value_tokens = []
         while not self._check(TokenType.SEMICOLON) and not self._is_at_end():
             value_tokens.append(self._advance())
-        expression_ast = ExpressionParser(value_tokens).parse()
+
+        operator_types = {TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.SLASH, TokenType.PERCENT, TokenType.QUESTION}
+        if any(t.type in operator_types for t in value_tokens):
+            expression_ast = ExpressionParser(value_tokens).parse()
+        else:
+            literal_value = " ".join(t.lexeme for t in value_tokens)
+            expression_ast = nodes.LiteralNode(value=literal_value)
+
         self._consume(TokenType.SEMICOLON, "Expect ';'.")
         return nodes.StylePropertyNode(name=name, value_expression=expression_ast)
 
