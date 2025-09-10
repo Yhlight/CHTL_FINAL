@@ -178,6 +178,7 @@ add_executable(chtl_compiler
     ${UTIL_SOURCES}
     ${SCANNER_SOURCES}
     ${COMPILER_SOURCES}
+    ${COMPILER_MONITOR_SOURCES}
     ${OFFICIAL_MODULE_SOURCES}
 )
 
@@ -189,6 +190,7 @@ add_executable(chtl_cli
     ${UTIL_SOURCES}
     ${SCANNER_SOURCES}
     ${COMPILER_SOURCES}
+    ${COMPILER_MONITOR_SOURCES}
     ${OFFICIAL_MODULE_SOURCES}
 )
 
@@ -198,6 +200,11 @@ target_link_libraries(chtl_cli)
 
 # 测试
 enable_testing()
+
+# 编译监视器
+set(COMPILER_MONITOR_SOURCES
+    CompilerMonitor/CompilerMonitor.cpp
+)
 
 # 官方模块
 set(OFFICIAL_MODULE_SOURCES
@@ -223,6 +230,7 @@ add_executable(chtl_test_system
     ${UTIL_SOURCES}
     ${SCANNER_SOURCES}
     ${COMPILER_SOURCES}
+    ${COMPILER_MONITOR_SOURCES}
     ${OFFICIAL_MODULE_SOURCES}
 )
 

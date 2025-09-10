@@ -35,6 +35,7 @@
 #include "OfficialModules/OfficialModuleManager.h"
 #include "OfficialModules/ChthollyModule/ChthollyModule.h"
 #include "OfficialModules/YuigahamaModule/YuigahamaModule.h"
+#include "CompilerMonitor/CompilerMonitor.h"
 #include <thread>
 #include <chrono>
 
@@ -2196,6 +2197,105 @@ div: Text with := colon equal
         std::cout << "  代码折叠: 支持CHTL代码块折叠" << std::endl;
         
         std::cout << "VSCode扩展测试: 完成" << std::endl;
+        
+        // 测试编译监视器
+        std::cout << "\n12. 编译监视器测试:" << std::endl;
+        
+        // 创建编译监视器
+        auto monitor = CHTL::CompilerMonitorFactory::createMonitor();
+        CHTL::MonitorConfig config = CHTL::CompilerMonitorFactory::createDefaultConfig();
+        config.maxCompileTime = std::chrono::milliseconds(5000); // 5秒
+        config.maxMemoryUsage = 100 * 1024 * 1024; // 100MB
+        config.enableAutoKill = true;
+        monitor->setConfig(config);
+        
+        std::cout << "编译监视器配置:" << std::endl;
+        std::cout << "  最大编译时间: " << config.maxCompileTime.count() << "ms" << std::endl;
+        std::cout << "  最大内存使用: " << config.maxMemoryUsage / (1024 * 1024) << "MB" << std::endl;
+        std::cout << "  自动终止: " << (config.enableAutoKill ? "启用" : "禁用") << std::endl;
+        
+        // 测试正常编译
+        std::cout << "测试正常编译监视:" << std::endl;
+        bool success = monitor->startMonitoring([&]() {
+            // 模拟编译过程
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            
+            // 更新统计信息
+            CHTL::CompileStats stats;
+            stats.compileTime = std::chrono::milliseconds(100);
+            stats.memoryUsage = 50 * 1024 * 1024; // 50MB
+            stats.peakMemoryUsage = 60 * 1024 * 1024; // 60MB
+            stats.filesProcessed = 1;
+            stats.linesProcessed = 100;
+            stats.tokensGenerated = 500;
+            stats.status = "success";
+            monitor->updateStats(stats);
+        });
+        
+        std::cout << "正常编译结果: " << (success ? "成功" : "失败") << std::endl;
+        
+        // 获取编译统计信息
+        CHTL::CompileStats stats = monitor->getCurrentStats();
+        std::cout << "编译统计信息:" << std::endl;
+        std::cout << "  编译时间: " << stats.compileTime.count() << "ms" << std::endl;
+        std::cout << "  内存使用: " << stats.memoryUsage / (1024 * 1024) << "MB" << std::endl;
+        std::cout << "  峰值内存: " << stats.peakMemoryUsage / (1024 * 1024) << "MB" << std::endl;
+        std::cout << "  处理文件: " << stats.filesProcessed << std::endl;
+        std::cout << "  处理行数: " << stats.linesProcessed << std::endl;
+        std::cout << "  生成令牌: " << stats.tokensGenerated << std::endl;
+        std::cout << "  状态: " << stats.status << std::endl;
+        
+        // 测试超时监视
+        std::cout << "测试超时监视:" << std::endl;
+        auto timeoutMonitor = CHTL::CompilerMonitorFactory::createMonitor();
+        CHTL::MonitorConfig timeoutConfig = CHTL::CompilerMonitorFactory::createStrictConfig();
+        timeoutConfig.maxCompileTime = std::chrono::milliseconds(100); // 100ms
+        timeoutConfig.enableAutoKill = false; // 不自动终止，只记录
+        timeoutMonitor->setConfig(timeoutConfig);
+        
+        bool timeoutSuccess = timeoutMonitor->startMonitoring([&]() {
+            // 模拟长时间编译
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        });
+        
+        std::cout << "超时编译结果: " << (timeoutSuccess ? "成功" : "失败") << std::endl;
+        
+        // 测试内存监视
+        std::cout << "测试内存监视:" << std::endl;
+        auto memoryMonitor = CHTL::CompilerMonitorFactory::createMonitor();
+        CHTL::MonitorConfig memoryConfig = CHTL::CompilerMonitorFactory::createStrictConfig();
+        memoryConfig.maxMemoryUsage = 10 * 1024 * 1024; // 10MB
+        memoryConfig.enableAutoKill = false; // 不自动终止，只记录
+        memoryMonitor->setConfig(memoryConfig);
+        
+        bool memorySuccess = memoryMonitor->startMonitoring([&]() {
+            // 模拟内存使用
+            std::vector<char> memory(20 * 1024 * 1024); // 20MB
+            std::fill(memory.begin(), memory.end(), 'A');
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        });
+        
+        std::cout << "内存监视结果: " << (memorySuccess ? "成功" : "失败") << std::endl;
+        
+        // 测试监视器管理器
+        std::cout << "测试监视器管理器:" << std::endl;
+        CHTL::CompilerMonitorManager& manager = CHTL::CompilerMonitorManager::getInstance();
+        manager.registerMonitor("test_monitor", monitor);
+        manager.registerMonitor("timeout_monitor", timeoutMonitor);
+        manager.registerMonitor("memory_monitor", memoryMonitor);
+        
+        auto allMonitors = manager.getAllMonitors();
+        std::cout << "注册的监视器数量: " << allMonitors.size() << std::endl;
+        
+        auto retrievedMonitor = manager.getMonitor("test_monitor");
+        if (retrievedMonitor) {
+            std::cout << "成功获取监视器: " << retrievedMonitor->getCurrentStats().status << std::endl;
+        }
+        
+        manager.removeMonitor("test_monitor");
+        std::cout << "移除监视器后数量: " << manager.getAllMonitors().size() << std::endl;
+        
+        std::cout << "编译监视器测试: 完成" << std::endl;
         
         // 清理测试文件
         std::remove("test.chtl");
