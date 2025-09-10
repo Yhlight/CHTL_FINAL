@@ -59,6 +59,7 @@ set(SOURCES
     CompilerDispatcher/JSCompiler.cpp
     CodeMerger/CodeMerger.cpp
     CompilerDispatcher/CompilerDispatcher.cpp
+    CLI/CLITool.cpp
 )
 
 # 创建测试可执行文件

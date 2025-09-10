@@ -164,6 +164,12 @@ set(COMPILER_SOURCES
     CodeMerger/CodeMerger.h
 )
 
+set(CLI_SOURCES
+    CLI/CLITool.cpp
+    CLI/CLITool.h
+    CLI/main.cpp
+)
+
 # 创建可执行文件
 add_executable(chtl_compiler
     main.cpp
@@ -174,8 +180,19 @@ add_executable(chtl_compiler
     ${COMPILER_SOURCES}
 )
 
+# 创建CLI工具
+add_executable(chtl_cli
+    ${CLI_SOURCES}
+    ${CHTL_SOURCES}
+    ${CHTL_JS_SOURCES}
+    ${UTIL_SOURCES}
+    ${SCANNER_SOURCES}
+    ${COMPILER_SOURCES}
+)
+
 # 链接库
 target_link_libraries(chtl_compiler)
+target_link_libraries(chtl_cli)
 
 # 测试
 enable_testing()

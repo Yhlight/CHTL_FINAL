@@ -31,6 +31,9 @@
 #include "CompilerDispatcher/CompilerDispatcher.h"
 #include "CompilerDispatcher/CSSCompiler.h"
 #include "CompilerDispatcher/JSCompiler.h"
+#include "CLI/CLITool.h"
+#include <thread>
+#include <chrono>
 
 int main() {
     std::cout << "CHTL基础功能测试" << std::endl;
@@ -1880,10 +1883,69 @@ int main() {
         bool mergerValid = merger.validate(finalResult);
         std::cout << "合并器验证: " << (mergerValid ? "通过" : "失败") << std::endl;
         
+        // 测试CLI工具
+        std::cout << "\n7. CLI工具测试:" << std::endl;
+        CHTL::CLITool cliTool;
+        
+        // 设置版本和描述
+        cliTool.setVersion("1.0.0");
+        cliTool.setDescription("CHTL Compiler CLI Tool");
+        
+        // 测试文件处理器
+        std::cout << "测试文件处理器功能:" << std::endl;
+        std::string testFile = "test_cli.chtl";
+        std::string testContent = "div: Hello World";
+        
+        // 创建测试文件
+        if (CHTL::FileProcessor::writeFile(testFile, testContent)) {
+            std::cout << "测试文件创建: 成功" << std::endl;
+        }
+        
+        // 测试文件存在性检查
+        bool fileExists = CHTL::FileProcessor::fileExists(testFile);
+        std::cout << "文件存在性检查: " << (fileExists ? "通过" : "失败") << std::endl;
+        
+        // 测试文件读取
+        std::string readContent = CHTL::FileProcessor::readFile(testFile);
+        std::cout << "文件读取: " << (readContent == testContent ? "成功" : "失败") << std::endl;
+        
+        // 测试文件扩展名获取
+        std::string extension = CHTL::FileProcessor::getFileExtension(testFile);
+        std::cout << "文件扩展名: " << extension << std::endl;
+        
+        // 测试文件名获取
+        std::string fileName = CHTL::FileProcessor::getFileName(testFile);
+        std::cout << "文件名: " << fileName << std::endl;
+        
+        // 测试目录获取
+        std::string directory = CHTL::FileProcessor::getDirectory(testFile);
+        std::cout << "目录: " << directory << std::endl;
+        
+        // 测试颜色输出
+        std::cout << "测试颜色输出功能:" << std::endl;
+        CHTL::ColorOutput::printInfo("信息消息");
+        CHTL::ColorOutput::printSuccess("成功消息");
+        CHTL::ColorOutput::printWarning("警告消息");
+        CHTL::ColorOutput::printError("错误消息");
+        
+        // 测试进度条
+        std::cout << "测试进度条功能:" << std::endl;
+        CHTL::ProgressBar progressBar(100, 50);
+        for (int i = 0; i <= 100; i += 10) {
+            progressBar.update(i);
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        progressBar.finish();
+        
+        // 测试文件列表
+        std::vector<std::string> files = CHTL::FileProcessor::listFiles(".", ".chtl");
+        std::cout << "找到的.chtl文件数量: " << files.size() << std::endl;
+        
         // 清理测试文件
         std::remove("test.chtl");
         std::remove("test_output.html");
         std::remove("test_final.html");
+        std::remove("test_cli.chtl");
         std::cout << "测试文件清理: 完成" << std::endl;
         
     } catch (const std::exception& e) {
