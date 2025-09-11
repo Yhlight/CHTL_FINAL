@@ -1,0 +1,31 @@
+#pragma once
+
+#include "Node.h"
+#include "ExpressionNode.h"
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace CHTL {
+
+class CSSPropertyNode : public Node {
+public:
+    CSSPropertyNode(std::string key, ExpressionPtr value)
+        : key(std::move(key)), value(std::move(value)) {}
+
+    std::string ToString(int indent = 0) const override {
+        std::stringstream ss;
+        ss << std::string(indent, ' ') << "CSSProperty( " << key << " ) [\n";
+        ss << value->ToString(indent + 2) << "\n";
+        ss << std::string(indent, ' ') << "]";
+        return ss.str();
+    }
+
+    std::string key;
+    ExpressionPtr value;
+};
+
+using CSSPropertyPtr = std::shared_ptr<CSSPropertyNode>;
+using CSSPropertyList = std::vector<CSSPropertyPtr>;
+
+} // namespace CHTL
