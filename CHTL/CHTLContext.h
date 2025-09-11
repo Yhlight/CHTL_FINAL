@@ -18,6 +18,8 @@ public:
 
     // Generation State
     std::stringstream globalCss;
+    std::stringstream globalJs;
+    std::unordered_map<std::string, std::string> scriptBlocks;
 
     // TODO: Add maps for Customizations as well.
 };

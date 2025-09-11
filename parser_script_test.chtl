@@ -1,0 +1,10 @@
+html {
+    body {
+        div {
+            id: my-div;
+            script {
+                console.log("hello from script");
+            }
+        }
+    }
+}

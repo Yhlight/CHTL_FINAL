@@ -9,17 +9,16 @@ int ExpressionParser::getPrecedence(TokenType type) {
     switch (type) {
         case TokenType::GREATER:
         case TokenType::LESS:
-            // TODO: Add >=, <=, ==, !=
-            return 1;
+            return 10;
         case TokenType::PLUS:
         case TokenType::MINUS:
-            return 2;
+            return 20;
         case TokenType::STAR:
         case TokenType::SLASH:
         case TokenType::PERCENT:
-            return 2;
+            return 30;
         case TokenType::STAR_STAR:
-            return 3; // Right-associative, but we'll handle that in the loop
+            return 40;
         default:
             return 0; // Not an infix operator
     }

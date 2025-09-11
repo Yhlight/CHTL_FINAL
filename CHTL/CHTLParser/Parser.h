@@ -5,6 +5,7 @@
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/StyleNode.h"
+#include "../CHTLNode/ScriptNode.h"
 #include "../CHTLNode/TemplateNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
 #include "../CHTLContext.h"

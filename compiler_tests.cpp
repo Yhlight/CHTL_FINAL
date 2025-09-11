@@ -1,4 +1,6 @@
 #include "CHTL/CHTLExpressionEvaluator/ExpressionEvaluator.h"
+#include "CHTL/CHTLExpressionParser/ExpressionParser.h"
+#include "CHTL/CHTLLexer/Token.h"
 #include <iostream>
 #include <cassert>
 #include <string_view>
@@ -78,12 +80,45 @@ void testSelfReference() {
 }
 
 
+void testParserPrecedence() {
+    // 100 + 50 * 2
+    std::vector<Token> tokens = {
+        {TokenType::NUMBER, "100", 1},
+        {TokenType::PLUS, "+", 1},
+        {TokenType::NUMBER, "50", 1},
+        {TokenType::STAR, "*", 1},
+        {TokenType::NUMBER, "2", 1}
+    };
+    ExpressionParser parser(tokens);
+    auto expr = parser.parse();
+
+    // Expected tree: BinaryOp(+, Literal(100), BinaryOp(*, Literal(50), Literal(2)))
+    auto* root = dynamic_cast<BinaryOpExprNode*>(expr.get());
+    assert(root != nullptr);
+    assert(root->op.type == TokenType::PLUS);
+
+    auto* left = dynamic_cast<LiteralExprNode*>(root->left.get());
+    assert(left != nullptr);
+    assert(left->value.lexeme == "100");
+
+    auto* right = dynamic_cast<BinaryOpExprNode*>(root->right.get());
+    assert(right != nullptr);
+    assert(right->op.type == TokenType::STAR);
+
+    auto* right_left = dynamic_cast<LiteralExprNode*>(right->left.get());
+    assert(right_left->value.lexeme == "50");
+    auto* right_right = dynamic_cast<LiteralExprNode*>(right->right.get());
+    assert(right_right->value.lexeme == "2");
+}
+
+
 int main() {
     try {
         runTest("Simple Arithmetic", testSimpleArithmetic);
         runTest("Comparison", testComparison);
         runTest("Conditional (True case)", testConditionalTrue);
         runTest("Self-Reference", testSelfReference);
+        runTest("Parser Precedence", testParserPrecedence);
     } catch (const std::exception& e) {
         std::cerr << "  [FAIL] Exception thrown: " << e.what() << std::endl;
         return 1;

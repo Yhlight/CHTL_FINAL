@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include "CHTL/CHTLContext.h"
+#include "Scanner/UnifiedScanner.h"
 #include "Lexer.h"
 #include "Parser.h"
 #include "Generator.h"
@@ -29,18 +30,21 @@ int main(int argc, char* argv[]) {
     }
 
     std::string sourcePath = argv[1];
-    std::string chtlSource = readFile(sourcePath);
+    std::string rawSource = readFile(sourcePath);
 
-    // 1. Setup Context
+    // 1. Unified Scanner
+    UnifiedScanner unifiedScanner;
+    ScannedSource scanned = unifiedScanner.scan(rawSource);
+
+    // 2. Setup Context
     CHTLContext context;
+    context.scriptBlocks = scanned.scriptBlocks;
 
-    // 2. Lexing
-    Lexer lexer(chtlSource);
+    // 3. Lexing
+    Lexer lexer(scanned.chtlSource);
     std::vector<Token> tokens = lexer.scanTokens();
 
-    // 3. Parsing
-    // The parser populates the context with definitions and returns renderable root nodes.
-    // We must keep the `topLevelNodes` vector alive, as the context holds raw pointers to nodes owned by it.
+    // 4. Parsing
     std::vector<std::unique_ptr<BaseNode>> topLevelNodes;
     try {
         Parser parser(tokens, context);
@@ -50,19 +54,16 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // 4. Generating HTML
-    // We iterate through the renderable nodes (non-definitions) and generate HTML for each.
+    // 5. Generating HTML
     Generator generator;
     std::stringstream finalHtml;
     for (const auto& node : topLevelNodes) {
-        // We only try to render nodes that are not definitions.
-        // A better design might be to have the parser return two separate lists.
         if (dynamic_cast<ElementNode*>(node.get())) {
              finalHtml << generator.generate(node.get(), context);
         }
     }
 
-    // 5. Print the final output
+    // 6. Print the final output
     std::cout << finalHtml.str() << std::endl;
 
     return 0;

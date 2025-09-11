@@ -4,6 +4,7 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/RuleNode.h"
 #include "../CHTLNode/DeclarationNode.h"
+#include "../CHTLNode/ScriptNode.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -37,7 +38,19 @@ std::unique_ptr<ElementNode> Parser::parseElement() {
 
     // Parse attributes and children
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        if (peek().type == TokenType::TEXT && peekNext().type == TokenType::LEFT_BRACE) {
+        if (peek().type == TokenType::SCRIPT && peekNext().type == TokenType::LEFT_BRACE) {
+            advance(); // consume 'script'
+            if (!match({TokenType::LEFT_BRACE})) throw std::runtime_error("Expected '{' for script block");
+
+            // The content should be a single identifier token (the placeholder)
+            Token placeholder = advance();
+            if (placeholder.type != TokenType::IDENTIFIER) throw std::runtime_error("Expected placeholder identifier inside script block");
+
+            element->addChild(std::make_unique<ScriptNode>(placeholder.lexeme));
+
+            if (!match({TokenType::RIGHT_BRACE})) throw std::runtime_error("Expected '}' to close script block");
+
+        } else if (peek().type == TokenType::TEXT && peekNext().type == TokenType::LEFT_BRACE) {
             advance(); // consume 'text'
             element->addChild(parseTextNode());
         } else if (peek().type == TokenType::TEXT && (peekNext().type == TokenType::COLON || peekNext().type == TokenType::EQUAL)) {

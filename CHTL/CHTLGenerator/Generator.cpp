@@ -1,8 +1,18 @@
 #include "Generator.h"
+#include "../CHTLNode/ScriptNode.h"
 #include "../CHTLExpressionParser/ExpressionParser.h"
 #include "../CHTLExpressionEvaluator/ExpressionEvaluator.h"
+#include "/app/CHTL JS/CHTLJSParser/CHTLJSParser.h"
+#include "/app/CHTL JS/CHTLJSGenerator/CHTLJSGenerator.h"
 #include <stdexcept>
 #include <algorithm>
+#include <atomic>
+
+// Helper for generating unique IDs
+std::atomic<int> id_counter(0);
+std::string generateUniqueId() {
+    return "chtl-id-" + std::to_string(++id_counter);
+}
 
 // Helper function for HTML escaping
 std::string escapeHTML(const std::string& data) {
@@ -26,16 +36,23 @@ std::string Generator::generate(const BaseNode* root, CHTLContext& context) {
     output.str("");
     visit(root, context);
     std::string finalHtml = output.str();
+
     std::string globalStyles = context.globalCss.str();
     if (!globalStyles.empty()) {
         std::string styleBlock = "<style>" + globalStyles + "</style>";
         size_t headEndPos = finalHtml.find("</head>");
-        if (headEndPos != std::string::npos) {
-            finalHtml.insert(headEndPos, styleBlock);
-        } else {
-            finalHtml = styleBlock + finalHtml;
-        }
+        if (headEndPos != std::string::npos) finalHtml.insert(headEndPos, styleBlock);
+        else finalHtml = styleBlock + finalHtml;
     }
+
+    std::string globalJs = context.globalJs.str();
+    if (!globalJs.empty()) {
+        std::string scriptBlock = "<script>" + globalJs + "</script>";
+        size_t bodyEndPos = finalHtml.find("</body>");
+        if (bodyEndPos != std::string::npos) finalHtml.insert(bodyEndPos, scriptBlock);
+        else finalHtml += scriptBlock;
+    }
+
     return finalHtml;
 }
 
@@ -47,41 +64,40 @@ void Generator::visit(const BaseNode* node, CHTLContext& context) {
 }
 
 void Generator::visitElementNode(const ElementNode* node, CHTLContext& context) {
+    auto mutable_attributes = node->attributes;
+    bool needsId = false;
+    for (const auto& child : node->children) {
+        if (dynamic_cast<const ScriptNode*>(child.get())) {
+            needsId = true;
+            break;
+        }
+    }
+    if (needsId && mutable_attributes.find("id") == mutable_attributes.end()) {
+        mutable_attributes["id"] = generateUniqueId();
+    }
+
     output << "<" << node->tagName;
-    for (const auto& attr : node->attributes) {
+    for (const auto& attr : mutable_attributes) {
         output << " " << attr.first << "=\"" << escapeHTML(attr.second) << "\"";
     }
 
     std::stringstream inlineStyle;
-    // Two-pass evaluation for self-referencing properties
+    PropertyMap localProps;
+    ExpressionEvaluator evaluator;
     for (const auto& child : node->children) {
         if (const auto* style = dynamic_cast<const StyleNode*>(child.get())) {
-            PropertyMap localProps;
-            ExpressionEvaluator evaluator; // Create one evaluator for the whole block
-            // First pass: evaluate simple declarations to populate context
             for (const auto& styleChild : style->children) {
-                if (const auto* decl = dynamic_cast<const DeclarationNode*>(styleChild.get())) {
-                    // A "simple" declaration is a single number or keyword, optionally with a unit.
-                    if (decl->valueTokens.size() == 1 || (decl->valueTokens.size() == 2 && decl->valueTokens[0].type == TokenType::NUMBER && decl->valueTokens[1].type == TokenType::IDENTIFIER)) {
-                        const auto& firstToken = decl->valueTokens[0];
-                        if (firstToken.type == TokenType::NUMBER) {
-                             if (decl->valueTokens.size() > 1) {
-                                localProps[decl->property] = CssValue{ std::stod(firstToken.lexeme), decl->valueTokens[1].lexeme };
-                             } else {
-                                localProps[decl->property] = CssValue{ std::stod(firstToken.lexeme), "" };
-                             }
-                        } else {
-                            localProps[decl->property] = CssValue{ firstToken.lexeme, "" };
-                        }
+                 if (const auto* decl = dynamic_cast<const DeclarationNode*>(styleChild.get())) {
+                    bool isSimple = decl->valueTokens.size() == 1 || (decl->valueTokens.size() == 2 && decl->valueTokens[0].type == TokenType::NUMBER && decl->valueTokens[1].type == TokenType::IDENTIFIER);
+                    if (isSimple) {
+                        PropertyMap emptyContext;
+                        localProps[decl->property] = evaluator.visit(ExpressionParser(decl->valueTokens).parse().get(), emptyContext);
                     }
                 }
             }
-            // Second pass: evaluate all declarations
             for (const auto& styleChild : style->children) {
                 if (const auto* decl = dynamic_cast<const DeclarationNode*>(styleChild.get())) {
-                    ExpressionParser parser(decl->valueTokens);
-                    auto expr = parser.parse();
-                    inlineStyle << decl->property << ": " << evaluator.evaluate(expr.get(), localProps) << "; ";
+                    inlineStyle << decl->property << ": " << evaluator.evaluate(ExpressionParser(decl->valueTokens).parse().get(), localProps) << "; ";
                 } else if (const auto* rule = dynamic_cast<const RuleNode*>(styleChild.get())) {
                     visitRuleNode(rule, context, node);
                 } else if (const auto* usage = dynamic_cast<const TemplateUsageNode*>(styleChild.get())) {
@@ -90,16 +106,20 @@ void Generator::visitElementNode(const ElementNode* node, CHTLContext& context) 
             }
         }
     }
-
     std::string styleAttr = inlineStyle.str();
-    if (!styleAttr.empty()) {
-        output << " style=\"" << escapeHTML(styleAttr) << "\"";
-    }
-
+    if (!styleAttr.empty()) output << " style=\"" << escapeHTML(styleAttr) << "\"";
     output << ">";
 
     for (const auto& child : node->children) {
-        if (!dynamic_cast<const StyleNode*>(child.get())) {
+        if (const auto* script = dynamic_cast<const ScriptNode*>(child.get())) {
+            std::string rawScript = context.scriptBlocks.at(script->placeholder);
+            CHTLJSParser parser(rawScript);
+            auto cjsAst = parser.parse();
+            CHTLJSGenerator cjsGen;
+            std::string parentSelector = "#" + mutable_attributes.at("id");
+            std::string processedJs = cjsGen.generate(cjsAst, parentSelector);
+            context.globalJs << processedJs;
+        } else if (!dynamic_cast<const StyleNode*>(child.get())) {
             visit(child.get(), context);
         }
     }
@@ -126,8 +146,8 @@ void Generator::visitRuleNode(const RuleNode* node, CHTLContext& context, const 
             selector += token.lexeme;
         }
     }
-
     context.globalCss << selector << " { ";
+    PropertyMap emptyContext;
     for (const auto& decl : node->declarations) {
         context.globalCss << visitDeclarationNode(decl.get(), context);
     }
@@ -150,7 +170,6 @@ std::string Generator::visitTemplateUsageNode(const TemplateUsageNode* node, CHT
     } else if (node->type == TemplateType::ELEMENT) {
         if (context.elementTemplates.count(node->name)) templateDef = context.elementTemplates.at(node->name);
     }
-
     if (templateDef) {
         std::stringstream templateOutput;
         for (const auto& child : templateDef->body) {

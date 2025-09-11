@@ -5,6 +5,7 @@
 #include "../../CHTL/CHTLNode/ElementNode.h"
 #include "../../CHTL/CHTLNode/TextNode.h"
 #include "../../CHTL/CHTLNode/CommentNode.h"
+#include "../../CHTL/CHTLNode/ScriptNode.h"
 #include <iostream>
 #include <string>
 
@@ -41,6 +42,8 @@ private:
             std::cout << "Text: \"" << text->content << "\"" << std::endl;
         } else if (const auto* comment = dynamic_cast<const CommentNode*>(node)) {
             std::cout << "Comment: \"" << comment->content << "\"" << std::endl;
+        } else if (const auto* script = dynamic_cast<const ScriptNode*>(node)) {
+            std::cout << "Script: placeholder=\"" << script->placeholder << "\"" << std::endl;
         } else {
             std::cout << "Unknown Node" << std::endl;
         }
