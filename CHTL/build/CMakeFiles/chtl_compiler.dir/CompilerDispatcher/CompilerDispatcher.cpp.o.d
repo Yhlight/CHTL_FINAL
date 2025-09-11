@@ -115,7 +115,6 @@ CMakeFiles/chtl_compiler.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
   /usr/include/alloca.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/std_abs.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cstdio \
@@ -125,7 +124,6 @@ CMakeFiles/chtl_compiler.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: \
   /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
   /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cerrno \
   /usr/include/errno.h /usr/include/x86_64-linux-gnu/bits/errno.h \
   /usr/include/linux/errno.h /usr/include/x86_64-linux-gnu/asm/errno.h \
@@ -237,8 +235,12 @@ CMakeFiles/chtl_compiler.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: \
   /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSLexer.h \
   /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSToken.h \
   /workspace/CHTL/CHTL_JS/CHTLJSParser/CHTLJSParser.h \
-  /workspace/CHTL/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSParser/../CHTLJSLexer/CHTLJSLexer.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSParser/../CHTLJSLexer/CHTLJSToken.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSParser/../CHTLJSNode/CHTLJSBaseNode.h \
   /workspace/CHTL/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSGenerator/../CHTLJSNode/CHTLJSBaseNode.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSGenerator/../CHTLJSLexer/CHTLJSToken.h \
   /workspace/CHTL/CompilerDispatcher/CSSCompiler.h \
   /workspace/CHTL/CompilerDispatcher/JSCompiler.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/any \

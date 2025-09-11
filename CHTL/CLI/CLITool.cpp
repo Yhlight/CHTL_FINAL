@@ -391,30 +391,15 @@ void CLITool::processFile(const std::string& inputFile, const std::string& outpu
     CompilerDispatcher dispatcher;
     dispatcher.setDebugMode(debug);
     
-    // 编译文件
-    auto result = dispatcher.compileFile(inputFile);
+    // 编译文件（包含扫描、编译与合并）
+    auto finalResult = dispatcher.compileFile(inputFile);
     
-    if (!result.metadata["success"].empty() && result.metadata["success"] != "true") {
+    // 检查是否成功（若未提供success元数据，则视为成功）
+    if (!finalResult.metadata["success"].empty() && finalResult.metadata["success"] != "true") {
         throw std::runtime_error("编译失败");
     }
     
-    // 创建代码合并器
-    CodeMerger merger;
-    merger.setDebugMode(debug);
-    merger.setTitle(FileProcessor::getFileName(inputFile));
-    
-    // 合并代码
-    CompileResult compileResult;
-    compileResult.outputs["html"] = result.html;
-    compileResult.outputs["css"] = result.css;
-    compileResult.outputs["javascript"] = result.javascript;
-    compileResult.errors = result.errors;
-    compileResult.warnings = result.warnings;
-    compileResult.metadata = result.metadata;
-    
-    auto finalResult = merger.merge(compileResult);
-    
-    // 写入输出文件
+    // 直接写入合并后的HTML
     if (!FileProcessor::writeFile(outputFile, finalResult.html)) {
         throw std::runtime_error("无法写入输出文件: " + outputFile);
     }

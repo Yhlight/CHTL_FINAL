@@ -55,10 +55,13 @@ std::string CHTLGenerator::generateHTML(std::shared_ptr<BaseNode> ast) {
         oss << "    <title>CHTL Document</title>\n";
         
         // 添加全局样式
-        if (!globalStyles.empty()) {
+        if (!globalStyles.empty() || !collectedLocalCSS.empty()) {
             oss << "    <style>\n";
             for (const auto& style : globalStyles) {
                 oss << "        " << style.first << ": " << style.second << ";\n";
+            }
+            if (!collectedLocalCSS.empty()) {
+                oss << collectedLocalCSS << "\n";
             }
             oss << "    </style>\n";
         }
@@ -216,12 +219,29 @@ std::string CHTLGenerator::generateElement(std::shared_ptr<ElementNode> element)
             oss << "\n";
             const_cast<CHTLGenerator*>(this)->increaseIndent();
             for (const auto& child : element->getChildren()) {
+                if (child->getNodeType() == NodeType::STYLE && styleProcessor) {
+                    // 将局部样式与元素上下文打通，并收集为全局样式
+                    auto styleNode = std::static_pointer_cast<StyleNode>(child);
+                    std::string css = styleProcessor->processStyleBlock(styleNode, element);
+                    if (!css.empty()) {
+                        collectedLocalCSS += css + "\n";
+                    }
+                    continue;
+                }
                 oss << generateNode(child) << "\n";
             }
             const_cast<CHTLGenerator*>(this)->decreaseIndent();
             oss << getIndent();
         } else {
             for (const auto& child : element->getChildren()) {
+                if (child->getNodeType() == NodeType::STYLE && styleProcessor) {
+                    auto styleNode = std::static_pointer_cast<StyleNode>(child);
+                    std::string css = styleProcessor->processStyleBlock(styleNode, element);
+                    if (!css.empty()) {
+                        collectedLocalCSS += css + "\n";
+                    }
+                    continue;
+                }
                 oss << generateNode(child);
             }
         }

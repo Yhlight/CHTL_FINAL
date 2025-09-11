@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/workspace/CHTL
+CXX_INCLUDES = -I/workspace/CHTL -I/workspace/CHTL/CHTL -I/workspace/CHTL/CHTL/CHTL -I/workspace/CHTL/CHTL_JS
 
-CXX_FLAGS = -std=gnu++11
+CXX_FLAGS = -std=gnu++17
 

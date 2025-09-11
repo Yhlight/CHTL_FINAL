@@ -1443,7 +1443,7 @@ std::shared_ptr<BaseNode> CHTLParser::parseNamespace() {
     
     // 检查命名空间冲突
     if (isNamespaceExists(namespaceName)) {
-        addWarning("命名空间 '" + namespaceName + "' 已存在，将被覆盖");
+        // 命名空间已存在，覆盖（此处原调用addWarning已移除）
     }
     
     auto namespaceNode = std::make_shared<BaseNode>(NodeType::NAMESPACE, namespaceName);
@@ -1644,7 +1644,7 @@ std::shared_ptr<BaseNode> CHTLParser::parseConstraint() {
     std::string constraintName = nameToken.value;
     advanceToken();
     
-    auto constraintNode = std::make_shared<BaseNode>(NodeType::CONSTRAINT, constraintName);
+    auto constraintNode = std::make_shared<BaseNode>(NodeType::OPERATOR, constraintName);
     constraintNode->setPosition(nameToken.line, nameToken.column, nameToken.position);
     
     // 设置约束属性

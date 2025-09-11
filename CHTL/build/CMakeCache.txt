@@ -15,6 +15,15 @@
 ########################
 
 //Value Computed by CMake
+CHTLProject_BINARY_DIR:STATIC=/workspace/CHTL/build
+
+//Value Computed by CMake
+CHTLProject_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+CHTLProject_SOURCE_DIR:STATIC=/workspace/CHTL
+
+//Value Computed by CMake
 CHTLResponsiveValueTest_BINARY_DIR:STATIC=/workspace/CHTL/build
 
 //Value Computed by CMake
@@ -168,7 +177,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=CHTLResponsiveValueTest
+CMAKE_PROJECT_NAME:STATIC=CHTLProject
 
 //Value Computed by CMake
 CMAKE_PROJECT_VERSION:STATIC=1.0.0
