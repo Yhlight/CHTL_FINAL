@@ -118,12 +118,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/chtl_cli.dir/Scanner/CHTLUnifiedScanner.cpp.o.d"
   "CMakeFiles/chtl_cli.dir/Scanner/UnifiedScanner.cpp.o"
   "CMakeFiles/chtl_cli.dir/Scanner/UnifiedScanner.cpp.o.d"
-  "CMakeFiles/chtl_cli.dir/Util/FileSystem/FileSystem.cpp.o"
-  "CMakeFiles/chtl_cli.dir/Util/FileSystem/FileSystem.cpp.o.d"
-  "CMakeFiles/chtl_cli.dir/Util/StringUtil/StringUtil.cpp.o"
-  "CMakeFiles/chtl_cli.dir/Util/StringUtil/StringUtil.cpp.o.d"
-  "CMakeFiles/chtl_cli.dir/Util/ZipUtil/ZipUtil.cpp.o"
-  "CMakeFiles/chtl_cli.dir/Util/ZipUtil/ZipUtil.cpp.o.d"
   "chtl_cli"
   "chtl_cli.pdb"
 )

@@ -55,9 +55,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLConfiguration/CHTLConfigurationProcessor.cpp.o:
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -346,9 +344,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLConstraint/CHTLConstraintProcessor.cpp.o: /work
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -640,9 +636,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLContext/CHTLContext.cpp.o: /workspace/CHTL/CHTL
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -893,9 +887,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: /workspace/CHTL/
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -1194,9 +1186,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLIOStream/CHTLIOStream.cpp.o: /workspace/CHTL/CH
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -1433,9 +1423,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o: /workspace/CHTL/CHTL/CHT
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
   /usr/include/x86_64-linux-gnu/bits/select.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -1629,9 +1617,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLLexer/Token.cpp.o: /workspace/CHTL/CHTL/CHTLLex
   /usr/include/x86_64-linux-gnu/bits/select.h \
   /usr/include/x86_64-linux-gnu/bits/setjmp.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -1859,9 +1845,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLLoader/CHTLLoader.cpp.o: /workspace/CHTL/CHTL/C
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -2130,9 +2114,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLManage/CHTLManage.cpp.o: /workspace/CHTL/CHTL/C
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -2376,9 +2358,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/BaseNode.cpp.o: /workspace/CHTL/CHTL/CHTLN
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -2637,9 +2617,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/CommentNode.cpp.o: /workspace/CHTL/CHTL/CH
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -2900,9 +2878,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o: /workspace/CHTL/C
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -3190,9 +3166,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ConstraintNode.cpp.o: /workspace/CHTL/CHTL
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -3499,9 +3473,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/CustomNode.cpp.o: /workspace/CHTL/CHTL/CHT
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -3866,9 +3838,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ElementNode.cpp.o: /workspace/CHTL/CHTL/CH
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -4159,9 +4129,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ImportNode.cpp.o: /workspace/CHTL/CHTL/CHT
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -4462,9 +4430,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/NamespaceNode.cpp.o: /workspace/CHTL/CHTL/
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -4752,9 +4718,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/OriginNode.cpp.o: /workspace/CHTL/CHTL/CHT
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -5042,9 +5006,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ScriptNode.cpp.o: /workspace/CHTL/CHTL/CHT
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -5332,9 +5294,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/StyleNode.cpp.o: /workspace/CHTL/CHTL/CHTL
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -5641,9 +5601,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/TemplateNode.cpp.o: /workspace/CHTL/CHTL/C
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -6007,9 +5965,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/TextNode.cpp.o: /workspace/CHTL/CHTL/CHTLN
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -6270,9 +6226,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/UseNode.cpp.o: /workspace/CHTL/CHTL/CHTLNo
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -6560,9 +6514,7 @@ CMakeFiles/chtl_cli.dir/CHTL/CHTLParser/CHTLParser.cpp.o: /workspace/CHTL/CHTL/C
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -14487,9 +14439,7 @@ CMakeFiles/chtl_cli.dir/CLI/CLITool.cpp.o: /workspace/CHTL/CLI/CLITool.cpp \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -14744,7 +14694,11 @@ CMakeFiles/chtl_cli.dir/CLI/CLITool.cpp.o: /workspace/CHTL/CLI/CLITool.cpp \
   /workspace/CHTL/CHTL/CHTLParser/CHTLParser.h \
   /workspace/CHTL/CHTL/CHTLProperty/CHTLPropertyReference.h \
   /workspace/CHTL/CHTL/CHTLStyle/CHTLStyleProcessor.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSToken.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.h \
   /workspace/CHTL/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSLexer.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSToken.h \
   /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSLexer.h \
   /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSToken.h \
   /workspace/CHTL/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.h \
@@ -14812,9 +14766,7 @@ CMakeFiles/chtl_cli.dir/CLI/main.cpp.o: /workspace/CHTL/CLI/main.cpp \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -15097,9 +15049,7 @@ CMakeFiles/chtl_cli.dir/CodeMerger/CodeMerger.cpp.o: /workspace/CHTL/CodeMerger/
   /usr/include/x86_64-linux-gnu/bits/select.h \
   /usr/include/x86_64-linux-gnu/bits/setjmp.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -15370,9 +15320,7 @@ CMakeFiles/chtl_cli.dir/CompilerDispatcher/CSSCompiler.cpp.o: /workspace/CHTL/Co
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -15657,9 +15605,7 @@ CMakeFiles/chtl_cli.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: /workspace/
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -15884,7 +15830,11 @@ CMakeFiles/chtl_cli.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: /workspace/
   /workspace/CHTL/CHTL/CHTLParser/CHTLParser.h \
   /workspace/CHTL/CHTL/CHTLProperty/CHTLPropertyReference.h \
   /workspace/CHTL/CHTL/CHTLStyle/CHTLStyleProcessor.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSToken.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.h \
   /workspace/CHTL/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSLexer.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSToken.h \
   /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSLexer.h \
   /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSToken.h \
   /workspace/CHTL/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.h \
@@ -15950,9 +15900,7 @@ CMakeFiles/chtl_cli.dir/CompilerDispatcher/JSCompiler.cpp.o: /workspace/CHTL/Com
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -16236,9 +16184,7 @@ CMakeFiles/chtl_cli.dir/Scanner/CHTLUnifiedScanner.cpp.o: /workspace/CHTL/Scanne
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -16523,9 +16469,7 @@ CMakeFiles/chtl_cli.dir/Scanner/UnifiedScanner.cpp.o: /workspace/CHTL/Scanner/Un
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -16769,744 +16713,6 @@ CMakeFiles/chtl_cli.dir/Scanner/UnifiedScanner.cpp.o: /workspace/CHTL/Scanner/Un
   /usr/lib/llvm-20/lib/clang/20/include/stdint.h \
   /workspace/CHTL/Scanner/UnifiedScanner.h
 
-CMakeFiles/chtl_cli.dir/Util/FileSystem/FileSystem.cpp.o: /workspace/CHTL/Util/FileSystem/FileSystem.cpp \
-  /usr/include/alloca.h \
-  /usr/include/asm-generic/bitsperlong.h \
-  /usr/include/asm-generic/errno-base.h \
-  /usr/include/asm-generic/errno.h \
-  /usr/include/asm-generic/int-ll64.h \
-  /usr/include/asm-generic/posix_types.h \
-  /usr/include/asm-generic/types.h \
-  /usr/include/ctype.h \
-  /usr/include/endian.h \
-  /usr/include/errno.h \
-  /usr/include/features-time64.h \
-  /usr/include/features.h \
-  /usr/include/libintl.h \
-  /usr/include/linux/errno.h \
-  /usr/include/linux/posix_types.h \
-  /usr/include/linux/sched/types.h \
-  /usr/include/linux/stddef.h \
-  /usr/include/linux/types.h \
-  /usr/include/locale.h \
-  /usr/include/pthread.h \
-  /usr/include/sched.h \
-  /usr/include/stdc-predef.h \
-  /usr/include/stdint.h \
-  /usr/include/stdio.h \
-  /usr/include/stdlib.h \
-  /usr/include/time.h \
-  /usr/include/wchar.h \
-  /usr/include/wctype.h \
-  /usr/include/x86_64-linux-gnu/asm/bitsperlong.h \
-  /usr/include/x86_64-linux-gnu/asm/errno.h \
-  /usr/include/x86_64-linux-gnu/asm/posix_types.h \
-  /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
-  /usr/include/x86_64-linux-gnu/asm/types.h \
-  /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h \
-  /usr/include/x86_64-linux-gnu/bits/byteswap.h \
-  /usr/include/x86_64-linux-gnu/bits/cpu-set.h \
-  /usr/include/x86_64-linux-gnu/bits/endian.h \
-  /usr/include/x86_64-linux-gnu/bits/endianness.h \
-  /usr/include/x86_64-linux-gnu/bits/errno.h \
-  /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
-  /usr/include/x86_64-linux-gnu/bits/floatn.h \
-  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
-  /usr/include/x86_64-linux-gnu/bits/locale.h \
-  /usr/include/x86_64-linux-gnu/bits/long-double.h \
-  /usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h \
-  /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
-  /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
-  /usr/include/x86_64-linux-gnu/bits/sched.h \
-  /usr/include/x86_64-linux-gnu/bits/select.h \
-  /usr/include/x86_64-linux-gnu/bits/setjmp.h \
-  /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
-  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
-  /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
-  /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
-  /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h \
-  /usr/include/x86_64-linux-gnu/bits/time.h \
-  /usr/include/x86_64-linux-gnu/bits/time64.h \
-  /usr/include/x86_64-linux-gnu/bits/timesize.h \
-  /usr/include/x86_64-linux-gnu/bits/timex.h \
-  /usr/include/x86_64-linux-gnu/bits/types.h \
-  /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/clock_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h \
-  /usr/include/x86_64-linux-gnu/bits/types/time_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/timer_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
-  /usr/include/x86_64-linux-gnu/bits/typesizes.h \
-  /usr/include/x86_64-linux-gnu/bits/uintn-identity.h \
-  /usr/include/x86_64-linux-gnu/bits/waitflags.h \
-  /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
-  /usr/include/x86_64-linux-gnu/bits/wchar.h \
-  /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
-  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
-  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
-  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
-  /usr/include/x86_64-linux-gnu/sys/cdefs.h \
-  /usr/include/x86_64-linux-gnu/sys/select.h \
-  /usr/include/x86_64-linux-gnu/sys/single_threaded.h \
-  /usr/include/x86_64-linux-gnu/sys/types.h \
-  /usr/include/c++/14/algorithm \
-  /usr/include/c++/14/backward/auto_ptr.h \
-  /usr/include/c++/14/backward/binders.h \
-  /usr/include/c++/14/bit \
-  /usr/include/c++/14/bits/algorithmfwd.h \
-  /usr/include/c++/14/bits/align.h \
-  /usr/include/c++/14/bits/alloc_traits.h \
-  /usr/include/c++/14/bits/allocated_ptr.h \
-  /usr/include/c++/14/bits/allocator.h \
-  /usr/include/c++/14/bits/atomic_base.h \
-  /usr/include/c++/14/bits/atomic_lockfree_defines.h \
-  /usr/include/c++/14/bits/basic_ios.h \
-  /usr/include/c++/14/bits/basic_ios.tcc \
-  /usr/include/c++/14/bits/basic_string.h \
-  /usr/include/c++/14/bits/basic_string.tcc \
-  /usr/include/c++/14/bits/char_traits.h \
-  /usr/include/c++/14/bits/charconv.h \
-  /usr/include/c++/14/bits/chrono.h \
-  /usr/include/c++/14/bits/codecvt.h \
-  /usr/include/c++/14/bits/concept_check.h \
-  /usr/include/c++/14/bits/cpp_type_traits.h \
-  /usr/include/c++/14/bits/cxxabi_forced.h \
-  /usr/include/c++/14/bits/cxxabi_init_exception.h \
-  /usr/include/c++/14/bits/erase_if.h \
-  /usr/include/c++/14/bits/exception.h \
-  /usr/include/c++/14/bits/exception_defines.h \
-  /usr/include/c++/14/bits/exception_ptr.h \
-  /usr/include/c++/14/bits/fs_dir.h \
-  /usr/include/c++/14/bits/fs_fwd.h \
-  /usr/include/c++/14/bits/fs_ops.h \
-  /usr/include/c++/14/bits/fs_path.h \
-  /usr/include/c++/14/bits/fstream.tcc \
-  /usr/include/c++/14/bits/functexcept.h \
-  /usr/include/c++/14/bits/functional_hash.h \
-  /usr/include/c++/14/bits/hash_bytes.h \
-  /usr/include/c++/14/bits/invoke.h \
-  /usr/include/c++/14/bits/ios_base.h \
-  /usr/include/c++/14/bits/istream.tcc \
-  /usr/include/c++/14/bits/locale_classes.h \
-  /usr/include/c++/14/bits/locale_classes.tcc \
-  /usr/include/c++/14/bits/locale_conv.h \
-  /usr/include/c++/14/bits/locale_facets.h \
-  /usr/include/c++/14/bits/locale_facets.tcc \
-  /usr/include/c++/14/bits/locale_facets_nonio.h \
-  /usr/include/c++/14/bits/locale_facets_nonio.tcc \
-  /usr/include/c++/14/bits/localefwd.h \
-  /usr/include/c++/14/bits/memory_resource.h \
-  /usr/include/c++/14/bits/memoryfwd.h \
-  /usr/include/c++/14/bits/move.h \
-  /usr/include/c++/14/bits/nested_exception.h \
-  /usr/include/c++/14/bits/new_allocator.h \
-  /usr/include/c++/14/bits/node_handle.h \
-  /usr/include/c++/14/bits/ostream.tcc \
-  /usr/include/c++/14/bits/ostream_insert.h \
-  /usr/include/c++/14/bits/parse_numbers.h \
-  /usr/include/c++/14/bits/postypes.h \
-  /usr/include/c++/14/bits/predefined_ops.h \
-  /usr/include/c++/14/bits/ptr_traits.h \
-  /usr/include/c++/14/bits/quoted_string.h \
-  /usr/include/c++/14/bits/range_access.h \
-  /usr/include/c++/14/bits/refwrap.h \
-  /usr/include/c++/14/bits/requires_hosted.h \
-  /usr/include/c++/14/bits/shared_ptr.h \
-  /usr/include/c++/14/bits/shared_ptr_atomic.h \
-  /usr/include/c++/14/bits/shared_ptr_base.h \
-  /usr/include/c++/14/bits/sstream.tcc \
-  /usr/include/c++/14/bits/std_abs.h \
-  /usr/include/c++/14/bits/stl_algo.h \
-  /usr/include/c++/14/bits/stl_algobase.h \
-  /usr/include/c++/14/bits/stl_bvector.h \
-  /usr/include/c++/14/bits/stl_construct.h \
-  /usr/include/c++/14/bits/stl_function.h \
-  /usr/include/c++/14/bits/stl_heap.h \
-  /usr/include/c++/14/bits/stl_iterator.h \
-  /usr/include/c++/14/bits/stl_iterator_base_funcs.h \
-  /usr/include/c++/14/bits/stl_iterator_base_types.h \
-  /usr/include/c++/14/bits/stl_map.h \
-  /usr/include/c++/14/bits/stl_multimap.h \
-  /usr/include/c++/14/bits/stl_pair.h \
-  /usr/include/c++/14/bits/stl_raw_storage_iter.h \
-  /usr/include/c++/14/bits/stl_tempbuf.h \
-  /usr/include/c++/14/bits/stl_tree.h \
-  /usr/include/c++/14/bits/stl_uninitialized.h \
-  /usr/include/c++/14/bits/stl_vector.h \
-  /usr/include/c++/14/bits/streambuf.tcc \
-  /usr/include/c++/14/bits/streambuf_iterator.h \
-  /usr/include/c++/14/bits/string_view.tcc \
-  /usr/include/c++/14/bits/stringfwd.h \
-  /usr/include/c++/14/bits/uniform_int_dist.h \
-  /usr/include/c++/14/bits/unique_ptr.h \
-  /usr/include/c++/14/bits/uses_allocator.h \
-  /usr/include/c++/14/bits/uses_allocator_args.h \
-  /usr/include/c++/14/bits/utility.h \
-  /usr/include/c++/14/bits/vector.tcc \
-  /usr/include/c++/14/bits/version.h \
-  /usr/include/c++/14/cctype \
-  /usr/include/c++/14/cerrno \
-  /usr/include/c++/14/clocale \
-  /usr/include/c++/14/codecvt \
-  /usr/include/c++/14/concepts \
-  /usr/include/c++/14/cstddef \
-  /usr/include/c++/14/cstdint \
-  /usr/include/c++/14/cstdio \
-  /usr/include/c++/14/cstdlib \
-  /usr/include/c++/14/ctime \
-  /usr/include/c++/14/cwchar \
-  /usr/include/c++/14/cwctype \
-  /usr/include/c++/14/debug/assertions.h \
-  /usr/include/c++/14/debug/debug.h \
-  /usr/include/c++/14/exception \
-  /usr/include/c++/14/ext/aligned_buffer.h \
-  /usr/include/c++/14/ext/alloc_traits.h \
-  /usr/include/c++/14/ext/atomicity.h \
-  /usr/include/c++/14/ext/concurrence.h \
-  /usr/include/c++/14/ext/numeric_traits.h \
-  /usr/include/c++/14/ext/string_conversions.h \
-  /usr/include/c++/14/ext/type_traits.h \
-  /usr/include/c++/14/filesystem \
-  /usr/include/c++/14/fstream \
-  /usr/include/c++/14/initializer_list \
-  /usr/include/c++/14/iomanip \
-  /usr/include/c++/14/ios \
-  /usr/include/c++/14/iosfwd \
-  /usr/include/c++/14/iostream \
-  /usr/include/c++/14/istream \
-  /usr/include/c++/14/limits \
-  /usr/include/c++/14/locale \
-  /usr/include/c++/14/map \
-  /usr/include/c++/14/memory \
-  /usr/include/c++/14/new \
-  /usr/include/c++/14/ostream \
-  /usr/include/c++/14/pstl/execution_defs.h \
-  /usr/include/c++/14/pstl/glue_algorithm_defs.h \
-  /usr/include/c++/14/pstl/glue_memory_defs.h \
-  /usr/include/c++/14/pstl/pstl_config.h \
-  /usr/include/c++/14/ratio \
-  /usr/include/c++/14/sstream \
-  /usr/include/c++/14/stdexcept \
-  /usr/include/c++/14/streambuf \
-  /usr/include/c++/14/string \
-  /usr/include/c++/14/string_view \
-  /usr/include/c++/14/system_error \
-  /usr/include/c++/14/tuple \
-  /usr/include/c++/14/type_traits \
-  /usr/include/c++/14/typeinfo \
-  /usr/include/c++/14/vector \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/atomic_word.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/basic_file.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/c++allocator.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/c++config.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/c++io.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/c++locale.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_inline.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/error_constants.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/gthr-default.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/gthr.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/messages_members.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/os_defines.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/time_members.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stdarg___gnuc_va_list.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_header_macro.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_max_align_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_null.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_nullptr_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_offsetof.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_ptrdiff_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_size_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_wchar_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/sanitizer/tsan_interface.h \
-  /usr/lib/llvm-20/lib/clang/20/include/stdarg.h \
-  /usr/lib/llvm-20/lib/clang/20/include/stddef.h \
-  /usr/lib/llvm-20/lib/clang/20/include/stdint.h \
-  /workspace/CHTL/Util/FileSystem/FileSystem.h
-
-CMakeFiles/chtl_cli.dir/Util/StringUtil/StringUtil.cpp.o: /workspace/CHTL/Util/StringUtil/StringUtil.cpp \
-  /usr/include/alloca.h \
-  /usr/include/asm-generic/bitsperlong.h \
-  /usr/include/asm-generic/errno-base.h \
-  /usr/include/asm-generic/errno.h \
-  /usr/include/asm-generic/int-ll64.h \
-  /usr/include/asm-generic/posix_types.h \
-  /usr/include/asm-generic/types.h \
-  /usr/include/ctype.h \
-  /usr/include/endian.h \
-  /usr/include/errno.h \
-  /usr/include/features-time64.h \
-  /usr/include/features.h \
-  /usr/include/linux/errno.h \
-  /usr/include/linux/posix_types.h \
-  /usr/include/linux/sched/types.h \
-  /usr/include/linux/stddef.h \
-  /usr/include/linux/types.h \
-  /usr/include/locale.h \
-  /usr/include/pthread.h \
-  /usr/include/sched.h \
-  /usr/include/stdc-predef.h \
-  /usr/include/stdio.h \
-  /usr/include/stdlib.h \
-  /usr/include/time.h \
-  /usr/include/wchar.h \
-  /usr/include/wctype.h \
-  /usr/include/x86_64-linux-gnu/asm/bitsperlong.h \
-  /usr/include/x86_64-linux-gnu/asm/errno.h \
-  /usr/include/x86_64-linux-gnu/asm/posix_types.h \
-  /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
-  /usr/include/x86_64-linux-gnu/asm/types.h \
-  /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h \
-  /usr/include/x86_64-linux-gnu/bits/byteswap.h \
-  /usr/include/x86_64-linux-gnu/bits/cpu-set.h \
-  /usr/include/x86_64-linux-gnu/bits/endian.h \
-  /usr/include/x86_64-linux-gnu/bits/endianness.h \
-  /usr/include/x86_64-linux-gnu/bits/errno.h \
-  /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
-  /usr/include/x86_64-linux-gnu/bits/floatn.h \
-  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
-  /usr/include/x86_64-linux-gnu/bits/locale.h \
-  /usr/include/x86_64-linux-gnu/bits/long-double.h \
-  /usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h \
-  /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
-  /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
-  /usr/include/x86_64-linux-gnu/bits/sched.h \
-  /usr/include/x86_64-linux-gnu/bits/select.h \
-  /usr/include/x86_64-linux-gnu/bits/setjmp.h \
-  /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
-  /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
-  /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
-  /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h \
-  /usr/include/x86_64-linux-gnu/bits/time.h \
-  /usr/include/x86_64-linux-gnu/bits/time64.h \
-  /usr/include/x86_64-linux-gnu/bits/timesize.h \
-  /usr/include/x86_64-linux-gnu/bits/timex.h \
-  /usr/include/x86_64-linux-gnu/bits/types.h \
-  /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/clock_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h \
-  /usr/include/x86_64-linux-gnu/bits/types/time_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/timer_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
-  /usr/include/x86_64-linux-gnu/bits/typesizes.h \
-  /usr/include/x86_64-linux-gnu/bits/uintn-identity.h \
-  /usr/include/x86_64-linux-gnu/bits/waitflags.h \
-  /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
-  /usr/include/x86_64-linux-gnu/bits/wchar.h \
-  /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
-  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
-  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
-  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
-  /usr/include/x86_64-linux-gnu/sys/cdefs.h \
-  /usr/include/x86_64-linux-gnu/sys/select.h \
-  /usr/include/x86_64-linux-gnu/sys/single_threaded.h \
-  /usr/include/x86_64-linux-gnu/sys/types.h \
-  /usr/include/c++/14/algorithm \
-  /usr/include/c++/14/backward/binders.h \
-  /usr/include/c++/14/bit \
-  /usr/include/c++/14/bits/algorithmfwd.h \
-  /usr/include/c++/14/bits/alloc_traits.h \
-  /usr/include/c++/14/bits/allocator.h \
-  /usr/include/c++/14/bits/basic_ios.h \
-  /usr/include/c++/14/bits/basic_ios.tcc \
-  /usr/include/c++/14/bits/basic_string.h \
-  /usr/include/c++/14/bits/basic_string.tcc \
-  /usr/include/c++/14/bits/char_traits.h \
-  /usr/include/c++/14/bits/charconv.h \
-  /usr/include/c++/14/bits/concept_check.h \
-  /usr/include/c++/14/bits/cpp_type_traits.h \
-  /usr/include/c++/14/bits/cxxabi_forced.h \
-  /usr/include/c++/14/bits/cxxabi_init_exception.h \
-  /usr/include/c++/14/bits/exception.h \
-  /usr/include/c++/14/bits/exception_defines.h \
-  /usr/include/c++/14/bits/exception_ptr.h \
-  /usr/include/c++/14/bits/functexcept.h \
-  /usr/include/c++/14/bits/functional_hash.h \
-  /usr/include/c++/14/bits/hash_bytes.h \
-  /usr/include/c++/14/bits/invoke.h \
-  /usr/include/c++/14/bits/ios_base.h \
-  /usr/include/c++/14/bits/istream.tcc \
-  /usr/include/c++/14/bits/locale_classes.h \
-  /usr/include/c++/14/bits/locale_classes.tcc \
-  /usr/include/c++/14/bits/locale_facets.h \
-  /usr/include/c++/14/bits/locale_facets.tcc \
-  /usr/include/c++/14/bits/localefwd.h \
-  /usr/include/c++/14/bits/memory_resource.h \
-  /usr/include/c++/14/bits/memoryfwd.h \
-  /usr/include/c++/14/bits/move.h \
-  /usr/include/c++/14/bits/nested_exception.h \
-  /usr/include/c++/14/bits/new_allocator.h \
-  /usr/include/c++/14/bits/ostream.tcc \
-  /usr/include/c++/14/bits/ostream_insert.h \
-  /usr/include/c++/14/bits/postypes.h \
-  /usr/include/c++/14/bits/predefined_ops.h \
-  /usr/include/c++/14/bits/ptr_traits.h \
-  /usr/include/c++/14/bits/range_access.h \
-  /usr/include/c++/14/bits/refwrap.h \
-  /usr/include/c++/14/bits/requires_hosted.h \
-  /usr/include/c++/14/bits/sstream.tcc \
-  /usr/include/c++/14/bits/std_abs.h \
-  /usr/include/c++/14/bits/stl_algo.h \
-  /usr/include/c++/14/bits/stl_algobase.h \
-  /usr/include/c++/14/bits/stl_bvector.h \
-  /usr/include/c++/14/bits/stl_construct.h \
-  /usr/include/c++/14/bits/stl_function.h \
-  /usr/include/c++/14/bits/stl_heap.h \
-  /usr/include/c++/14/bits/stl_iterator.h \
-  /usr/include/c++/14/bits/stl_iterator_base_funcs.h \
-  /usr/include/c++/14/bits/stl_iterator_base_types.h \
-  /usr/include/c++/14/bits/stl_pair.h \
-  /usr/include/c++/14/bits/stl_tempbuf.h \
-  /usr/include/c++/14/bits/stl_uninitialized.h \
-  /usr/include/c++/14/bits/stl_vector.h \
-  /usr/include/c++/14/bits/streambuf.tcc \
-  /usr/include/c++/14/bits/streambuf_iterator.h \
-  /usr/include/c++/14/bits/string_view.tcc \
-  /usr/include/c++/14/bits/stringfwd.h \
-  /usr/include/c++/14/bits/uniform_int_dist.h \
-  /usr/include/c++/14/bits/uses_allocator.h \
-  /usr/include/c++/14/bits/uses_allocator_args.h \
-  /usr/include/c++/14/bits/utility.h \
-  /usr/include/c++/14/bits/vector.tcc \
-  /usr/include/c++/14/bits/version.h \
-  /usr/include/c++/14/cctype \
-  /usr/include/c++/14/cerrno \
-  /usr/include/c++/14/clocale \
-  /usr/include/c++/14/concepts \
-  /usr/include/c++/14/cstddef \
-  /usr/include/c++/14/cstdio \
-  /usr/include/c++/14/cstdlib \
-  /usr/include/c++/14/cwchar \
-  /usr/include/c++/14/cwctype \
-  /usr/include/c++/14/debug/assertions.h \
-  /usr/include/c++/14/debug/debug.h \
-  /usr/include/c++/14/exception \
-  /usr/include/c++/14/ext/alloc_traits.h \
-  /usr/include/c++/14/ext/atomicity.h \
-  /usr/include/c++/14/ext/numeric_traits.h \
-  /usr/include/c++/14/ext/string_conversions.h \
-  /usr/include/c++/14/ext/type_traits.h \
-  /usr/include/c++/14/initializer_list \
-  /usr/include/c++/14/ios \
-  /usr/include/c++/14/iosfwd \
-  /usr/include/c++/14/istream \
-  /usr/include/c++/14/new \
-  /usr/include/c++/14/ostream \
-  /usr/include/c++/14/pstl/execution_defs.h \
-  /usr/include/c++/14/pstl/glue_algorithm_defs.h \
-  /usr/include/c++/14/pstl/pstl_config.h \
-  /usr/include/c++/14/sstream \
-  /usr/include/c++/14/stdexcept \
-  /usr/include/c++/14/streambuf \
-  /usr/include/c++/14/string \
-  /usr/include/c++/14/string_view \
-  /usr/include/c++/14/system_error \
-  /usr/include/c++/14/tuple \
-  /usr/include/c++/14/type_traits \
-  /usr/include/c++/14/typeinfo \
-  /usr/include/c++/14/vector \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/atomic_word.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/c++allocator.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/c++config.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/c++locale.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_inline.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/error_constants.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/gthr-default.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/gthr.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/os_defines.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stdarg___gnuc_va_list.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_header_macro.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_max_align_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_null.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_nullptr_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_offsetof.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_ptrdiff_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_size_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_wchar_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/stdarg.h \
-  /usr/lib/llvm-20/lib/clang/20/include/stddef.h \
-  /workspace/CHTL/Util/StringUtil/StringUtil.h
-
-CMakeFiles/chtl_cli.dir/Util/ZipUtil/ZipUtil.cpp.o: /workspace/CHTL/Util/ZipUtil/ZipUtil.cpp \
-  /usr/include/alloca.h \
-  /usr/include/asm-generic/bitsperlong.h \
-  /usr/include/asm-generic/errno-base.h \
-  /usr/include/asm-generic/errno.h \
-  /usr/include/asm-generic/int-ll64.h \
-  /usr/include/asm-generic/posix_types.h \
-  /usr/include/asm-generic/types.h \
-  /usr/include/ctype.h \
-  /usr/include/endian.h \
-  /usr/include/errno.h \
-  /usr/include/features-time64.h \
-  /usr/include/features.h \
-  /usr/include/linux/errno.h \
-  /usr/include/linux/posix_types.h \
-  /usr/include/linux/sched/types.h \
-  /usr/include/linux/stddef.h \
-  /usr/include/linux/types.h \
-  /usr/include/locale.h \
-  /usr/include/pthread.h \
-  /usr/include/sched.h \
-  /usr/include/stdc-predef.h \
-  /usr/include/stdio.h \
-  /usr/include/stdlib.h \
-  /usr/include/time.h \
-  /usr/include/wchar.h \
-  /usr/include/wctype.h \
-  /usr/include/x86_64-linux-gnu/asm/bitsperlong.h \
-  /usr/include/x86_64-linux-gnu/asm/errno.h \
-  /usr/include/x86_64-linux-gnu/asm/posix_types.h \
-  /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
-  /usr/include/x86_64-linux-gnu/asm/types.h \
-  /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h \
-  /usr/include/x86_64-linux-gnu/bits/byteswap.h \
-  /usr/include/x86_64-linux-gnu/bits/cpu-set.h \
-  /usr/include/x86_64-linux-gnu/bits/endian.h \
-  /usr/include/x86_64-linux-gnu/bits/endianness.h \
-  /usr/include/x86_64-linux-gnu/bits/errno.h \
-  /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
-  /usr/include/x86_64-linux-gnu/bits/floatn.h \
-  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
-  /usr/include/x86_64-linux-gnu/bits/locale.h \
-  /usr/include/x86_64-linux-gnu/bits/long-double.h \
-  /usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h \
-  /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
-  /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
-  /usr/include/x86_64-linux-gnu/bits/sched.h \
-  /usr/include/x86_64-linux-gnu/bits/select.h \
-  /usr/include/x86_64-linux-gnu/bits/setjmp.h \
-  /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
-  /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
-  /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
-  /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h \
-  /usr/include/x86_64-linux-gnu/bits/time.h \
-  /usr/include/x86_64-linux-gnu/bits/time64.h \
-  /usr/include/x86_64-linux-gnu/bits/timesize.h \
-  /usr/include/x86_64-linux-gnu/bits/timex.h \
-  /usr/include/x86_64-linux-gnu/bits/types.h \
-  /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/clock_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h \
-  /usr/include/x86_64-linux-gnu/bits/types/time_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/timer_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
-  /usr/include/x86_64-linux-gnu/bits/typesizes.h \
-  /usr/include/x86_64-linux-gnu/bits/uintn-identity.h \
-  /usr/include/x86_64-linux-gnu/bits/waitflags.h \
-  /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
-  /usr/include/x86_64-linux-gnu/bits/wchar.h \
-  /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
-  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
-  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
-  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
-  /usr/include/x86_64-linux-gnu/sys/cdefs.h \
-  /usr/include/x86_64-linux-gnu/sys/select.h \
-  /usr/include/x86_64-linux-gnu/sys/single_threaded.h \
-  /usr/include/x86_64-linux-gnu/sys/types.h \
-  /usr/include/c++/14/backward/binders.h \
-  /usr/include/c++/14/bit \
-  /usr/include/c++/14/bits/alloc_traits.h \
-  /usr/include/c++/14/bits/allocator.h \
-  /usr/include/c++/14/bits/basic_ios.h \
-  /usr/include/c++/14/bits/basic_ios.tcc \
-  /usr/include/c++/14/bits/basic_string.h \
-  /usr/include/c++/14/bits/basic_string.tcc \
-  /usr/include/c++/14/bits/char_traits.h \
-  /usr/include/c++/14/bits/charconv.h \
-  /usr/include/c++/14/bits/codecvt.h \
-  /usr/include/c++/14/bits/concept_check.h \
-  /usr/include/c++/14/bits/cpp_type_traits.h \
-  /usr/include/c++/14/bits/cxxabi_forced.h \
-  /usr/include/c++/14/bits/cxxabi_init_exception.h \
-  /usr/include/c++/14/bits/erase_if.h \
-  /usr/include/c++/14/bits/exception.h \
-  /usr/include/c++/14/bits/exception_defines.h \
-  /usr/include/c++/14/bits/exception_ptr.h \
-  /usr/include/c++/14/bits/fstream.tcc \
-  /usr/include/c++/14/bits/functexcept.h \
-  /usr/include/c++/14/bits/functional_hash.h \
-  /usr/include/c++/14/bits/hash_bytes.h \
-  /usr/include/c++/14/bits/invoke.h \
-  /usr/include/c++/14/bits/ios_base.h \
-  /usr/include/c++/14/bits/istream.tcc \
-  /usr/include/c++/14/bits/locale_classes.h \
-  /usr/include/c++/14/bits/locale_classes.tcc \
-  /usr/include/c++/14/bits/locale_facets.h \
-  /usr/include/c++/14/bits/locale_facets.tcc \
-  /usr/include/c++/14/bits/localefwd.h \
-  /usr/include/c++/14/bits/memory_resource.h \
-  /usr/include/c++/14/bits/memoryfwd.h \
-  /usr/include/c++/14/bits/move.h \
-  /usr/include/c++/14/bits/nested_exception.h \
-  /usr/include/c++/14/bits/new_allocator.h \
-  /usr/include/c++/14/bits/node_handle.h \
-  /usr/include/c++/14/bits/ostream.tcc \
-  /usr/include/c++/14/bits/ostream_insert.h \
-  /usr/include/c++/14/bits/postypes.h \
-  /usr/include/c++/14/bits/predefined_ops.h \
-  /usr/include/c++/14/bits/ptr_traits.h \
-  /usr/include/c++/14/bits/range_access.h \
-  /usr/include/c++/14/bits/refwrap.h \
-  /usr/include/c++/14/bits/requires_hosted.h \
-  /usr/include/c++/14/bits/sstream.tcc \
-  /usr/include/c++/14/bits/std_abs.h \
-  /usr/include/c++/14/bits/stl_algobase.h \
-  /usr/include/c++/14/bits/stl_bvector.h \
-  /usr/include/c++/14/bits/stl_construct.h \
-  /usr/include/c++/14/bits/stl_function.h \
-  /usr/include/c++/14/bits/stl_iterator.h \
-  /usr/include/c++/14/bits/stl_iterator_base_funcs.h \
-  /usr/include/c++/14/bits/stl_iterator_base_types.h \
-  /usr/include/c++/14/bits/stl_map.h \
-  /usr/include/c++/14/bits/stl_multimap.h \
-  /usr/include/c++/14/bits/stl_pair.h \
-  /usr/include/c++/14/bits/stl_tree.h \
-  /usr/include/c++/14/bits/stl_uninitialized.h \
-  /usr/include/c++/14/bits/stl_vector.h \
-  /usr/include/c++/14/bits/streambuf.tcc \
-  /usr/include/c++/14/bits/streambuf_iterator.h \
-  /usr/include/c++/14/bits/string_view.tcc \
-  /usr/include/c++/14/bits/stringfwd.h \
-  /usr/include/c++/14/bits/uses_allocator.h \
-  /usr/include/c++/14/bits/uses_allocator_args.h \
-  /usr/include/c++/14/bits/utility.h \
-  /usr/include/c++/14/bits/vector.tcc \
-  /usr/include/c++/14/bits/version.h \
-  /usr/include/c++/14/cctype \
-  /usr/include/c++/14/cerrno \
-  /usr/include/c++/14/clocale \
-  /usr/include/c++/14/concepts \
-  /usr/include/c++/14/cstddef \
-  /usr/include/c++/14/cstdio \
-  /usr/include/c++/14/cstdlib \
-  /usr/include/c++/14/cwchar \
-  /usr/include/c++/14/cwctype \
-  /usr/include/c++/14/debug/assertions.h \
-  /usr/include/c++/14/debug/debug.h \
-  /usr/include/c++/14/exception \
-  /usr/include/c++/14/ext/aligned_buffer.h \
-  /usr/include/c++/14/ext/alloc_traits.h \
-  /usr/include/c++/14/ext/atomicity.h \
-  /usr/include/c++/14/ext/numeric_traits.h \
-  /usr/include/c++/14/ext/string_conversions.h \
-  /usr/include/c++/14/ext/type_traits.h \
-  /usr/include/c++/14/fstream \
-  /usr/include/c++/14/initializer_list \
-  /usr/include/c++/14/ios \
-  /usr/include/c++/14/iosfwd \
-  /usr/include/c++/14/iostream \
-  /usr/include/c++/14/istream \
-  /usr/include/c++/14/map \
-  /usr/include/c++/14/new \
-  /usr/include/c++/14/ostream \
-  /usr/include/c++/14/pstl/pstl_config.h \
-  /usr/include/c++/14/sstream \
-  /usr/include/c++/14/stdexcept \
-  /usr/include/c++/14/streambuf \
-  /usr/include/c++/14/string \
-  /usr/include/c++/14/string_view \
-  /usr/include/c++/14/system_error \
-  /usr/include/c++/14/tuple \
-  /usr/include/c++/14/type_traits \
-  /usr/include/c++/14/typeinfo \
-  /usr/include/c++/14/vector \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/atomic_word.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/basic_file.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/c++allocator.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/c++config.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/c++io.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/c++locale.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_inline.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/error_constants.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/gthr-default.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/gthr.h \
-  /usr/include/x86_64-linux-gnu/c++/14/bits/os_defines.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stdarg___gnuc_va_list.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_header_macro.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_max_align_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_null.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_nullptr_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_offsetof.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_ptrdiff_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_size_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_wchar_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/stdarg.h \
-  /usr/lib/llvm-20/lib/clang/20/include/stddef.h \
-  /workspace/CHTL/Util/ZipUtil/ZipUtil.h
-
 chtl_cli: /lib/x86_64-linux-gnu/Scrt1.o \
   /lib/x86_64-linux-gnu/crti.o \
   /lib/x86_64-linux-gnu/crtn.o \
@@ -17523,57 +16729,6 @@ chtl_cli: /lib/x86_64-linux-gnu/Scrt1.o \
   /usr/lib/gcc/x86_64-linux-gnu/14/libgcc_s.so \
   /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so \
   /usr/lib/x86_64-linux-gnu/libc_nonshared.a \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLConfiguration/CHTLConfigurationProcessor.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLConstraint/CHTLConstraintProcessor.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLContext/CHTLContext.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLGenerator/CHTLGenerator.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLIOStream/CHTLIOStream.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLLexer/Token.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLLoader/CHTLLoader.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLManage/CHTLManage.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/BaseNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/CommentNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ConstraintNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/CustomNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ElementNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ImportNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/NamespaceNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/OriginNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ScriptNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/StyleNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/TemplateNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/TextNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/UseNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLParser/CHTLParser.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLProperty/CHTLPropertyReference.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLState/CHTLState.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLStyle/CHTLStyleProcessor.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CHTLUse/CHTLUseProcessor.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CMODSystem/CMODLoader.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CMODSystem/CMODModule.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL/CMODSystem/CMODSystem.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSContext/CHTLJSContext.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedListener.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedSelector.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSEnhanced/CHTLJSEventDelegation.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSIOStream/CHTLJSIOStream.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSLexer/CHTLJSToken.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSLoader/CHTLJSLoader.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSManage/CHTLJSManage.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSState/CHTLJSState.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CJMODSystem/CJMODArg.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CJMODSystem/CJMODGenerator.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CJMODSystem/CJMODModule.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CJMODSystem/CJMODScanner.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CJMODSystem/CJMODSyntax.cpp.o \
-  CMakeFiles/chtl_cli.dir/CHTL_JS/CJMODSystem/CJMODSystem.cpp.o \
   CMakeFiles/chtl_cli.dir/CLI/CLITool.cpp.o \
   CMakeFiles/chtl_cli.dir/CLI/main.cpp.o \
   CMakeFiles/chtl_cli.dir/CodeMerger/CodeMerger.cpp.o \
@@ -17581,1156 +16736,1033 @@ chtl_cli: /lib/x86_64-linux-gnu/Scrt1.o \
   CMakeFiles/chtl_cli.dir/CompilerDispatcher/CompilerDispatcher.cpp.o \
   CMakeFiles/chtl_cli.dir/CompilerDispatcher/JSCompiler.cpp.o \
   CMakeFiles/chtl_cli.dir/Scanner/CHTLUnifiedScanner.cpp.o \
-  CMakeFiles/chtl_cli.dir/Scanner/UnifiedScanner.cpp.o \
-  CMakeFiles/chtl_cli.dir/Util/FileSystem/FileSystem.cpp.o \
-  CMakeFiles/chtl_cli.dir/Util/StringUtil/StringUtil.cpp.o \
-  CMakeFiles/chtl_cli.dir/Util/ZipUtil/ZipUtil.cpp.o
+  CMakeFiles/chtl_cli.dir/Scanner/UnifiedScanner.cpp.o
 
 
-CMakeFiles/chtl_cli.dir/Util/ZipUtil/ZipUtil.cpp.o:
-
-CMakeFiles/chtl_cli.dir/Util/StringUtil/StringUtil.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CompilerDispatcher/CSSCompiler.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CJMODSystem/CJMODSystem.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CJMODSystem/CJMODSyntax.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CJMODSystem/CJMODModule.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CJMODSystem/CJMODArg.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSState/CHTLJSState.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSManage/CHTLJSManage.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSLoader/CHTLJSLoader.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSEnhanced/CHTLJSEventDelegation.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedSelector.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedListener.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSContext/CHTLJSContext.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL/CMODSystem/CMODModule.cpp.o:
-
-/usr/include/c++/14/tuple:
-
-/usr/include/c++/14/sstream:
-
-/usr/include/c++/14/cmath:
-
-/usr/include/c++/14/pstl/glue_algorithm_defs.h:
-
-CMakeFiles/chtl_cli.dir/CHTL/CHTLIOStream/CHTLIOStream.cpp.o:
-
-/usr/include/c++/14/memory:
-
-/usr/include/c++/14/bits/stl_function.h:
-
-/usr/include/c++/14/bits/random.tcc:
-
-/usr/include/c++/14/initializer_list:
-
-/workspace/CHTL/CHTL/CHTLGenerator/CHTLGenerator.h:
-
-/usr/include/c++/14/ext/string_conversions.h:
-
-/usr/include/c++/14/ext/concurrence.h:
-
-/workspace/CHTL/Scanner/UnifiedScanner.h:
-
-/usr/include/c++/14/map:
-
-/usr/include/c++/14/ext/atomicity.h:
-
-/usr/include/c++/14/ext/alloc_traits.h:
-
-/usr/include/c++/14/exception:
-
-/usr/include/x86_64-linux-gnu/bits/wordsize.h:
-
-/usr/include/c++/14/atomic:
-
-/usr/include/c++/14/chrono:
-
-/usr/include/c++/14/ext/numeric_traits.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp:
-
-/usr/include/c++/14/cerrno:
-
-/usr/include/c++/14/string:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/c++config.h:
-
-/usr/include/c++/14/bitset:
-
-CMakeFiles/chtl_cli.dir/Scanner/CHTLUnifiedScanner.cpp.o:
-
-/workspace/CHTL/CHTL/CHTLNode/ElementNode.h:
-
-/usr/include/c++/14/bits/vector.tcc:
-
-/usr/include/c++/14/bits/uses_allocator_args.h:
-
-/usr/include/c++/14/bits/unordered_map.h:
-
-/usr/include/c++/14/bits/unique_ptr.h:
-
-/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODSyntax.h:
-
-/usr/include/c++/14/bits/stl_tree.h:
-
-/usr/include/c++/14/bits/stl_raw_storage_iter.h:
-
-/usr/include/c++/14/bits/stl_multimap.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/sanitizer/tsan_interface.h:
-
-/usr/include/c++/14/deque:
-
-/usr/include/c++/14/bits/stl_stack.h:
-
-/usr/include/c++/14/bits/stl_construct.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/opt_random.h:
-
-/usr/include/c++/14/bits/basic_string.tcc:
-
-/usr/include/c++/14/bits/sstream.tcc:
-
-/usr/include/c++/14/bits/regex_scanner.tcc:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CJMODSystem/CJMODScanner.cpp.o:
-
-/lib/x86_64-linux-gnu/libm.so.6:
-
-/usr/include/c++/14/bits/regex_executor.tcc:
-
-/usr/include/x86_64-linux-gnu/bits/types.h:
-
-/usr/include/c++/14/bits/regex_compiler.tcc:
-
-/usr/include/c++/14/bits/regex_automaton.h:
+CMakeFiles/chtl_cli.dir/Scanner/UnifiedScanner.cpp.o:
 
 CMakeFiles/chtl_cli.dir/CompilerDispatcher/JSCompiler.cpp.o:
 
-/workspace/CHTL/CHTL/CHTLNode/StyleNode.cpp:
+CMakeFiles/chtl_cli.dir/CompilerDispatcher/CompilerDispatcher.cpp.o:
 
-/workspace/CHTL/CHTL/CHTLNode/UseNode.cpp:
+CMakeFiles/chtl_cli.dir/CodeMerger/CodeMerger.cpp.o:
 
-/usr/include/c++/14/bits/regex_scanner.h:
+CMakeFiles/chtl_cli.dir/CLI/CLITool.cpp.o:
 
-/usr/include/c++/14/bits/regex.h:
+/usr/lib/x86_64-linux-gnu/libc_nonshared.a:
 
-/usr/include/c++/14/bits/refwrap.h:
+/usr/lib/gcc/x86_64-linux-gnu/14/libgcc.a:
 
-/usr/include/c++/14/bits/range_access.h:
+/usr/lib/gcc/x86_64-linux-gnu/14/crtbeginS.o:
 
-/usr/include/c++/14/bits/regex_compiler.h:
+/lib64/ld-linux-x86-64.so.2:
 
-/workspace/CHTL/CHTL/CHTLLoader/CHTLLoader.h:
+/lib/x86_64-linux-gnu/libgcc_s.so.1:
 
-/usr/include/c++/14/bits/ostream_insert.h:
+/lib/x86_64-linux-gnu/crti.o:
 
-/usr/include/c++/14/bits/stl_pair.h:
+/workspace/CHTL/Scanner/UnifiedScanner.cpp:
 
-/usr/lib/llvm-20/lib/clang/20/include/__stddef_ptrdiff_t.h:
+/workspace/CHTL/CompilerDispatcher/CompilerDispatcher.cpp:
 
-/workspace/CHTL/CLI/CLITool.cpp:
+/workspace/CHTL/CLI/main.cpp:
 
-/usr/include/c++/14/bits/regex_automaton.tcc:
+/workspace/CHTL/CompilerDispatcher/CSSCompiler.h:
 
-/usr/include/c++/14/bits/shared_ptr_atomic.h:
+/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODSyntax.cpp:
 
-/usr/include/c++/14/bits/nested_exception.h:
+/workspace/CHTL/CHTL_JS/CHTLJSState/CHTLJSState.h:
 
-/usr/include/c++/14/bits/unordered_set.h:
+/workspace/CHTL/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.cpp:
 
-/usr/include/c++/14/bits/memory_resource.h:
+/workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.h:
 
-/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODSystem.cpp:
+/workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.cpp:
 
-/usr/include/c++/14/bits/locale_facets_nonio.tcc:
+/workspace/CHTL/CHTL_JS/CHTLJSIOStream/CHTLJSIOStream.cpp:
 
-/usr/include/c++/14/bits/locale_facets_nonio.h:
+/workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSToken.h:
 
-/usr/include/c++/14/bits/locale_conv.h:
+/workspace/CHTL/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.h:
 
-/usr/include/c++/14/bits/ptr_traits.h:
+/workspace/CHTL/Scanner/CHTLUnifiedScanner.h:
 
-/usr/include/c++/14/bits/algorithmfwd.h:
+/workspace/CHTL/CHTL_JS/CHTLJSEnhanced/CHTLJSEventDelegation.h:
 
-/workspace/CHTL/CHTL_JS/CHTLJSLoader/CHTLJSLoader.cpp:
+/workspace/CHTL/CHTL_JS/CHTLJSEnhanced/CHTLJSEventDelegation.cpp:
 
-/workspace/CHTL/CHTL_JS/CHTLJSParser/CHTLJSParser.h:
+/workspace/CHTL/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedSelector.h:
 
-/usr/include/c++/14/bits/ios_base.h:
+/workspace/CHTL/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedListener.h:
 
-/usr/include/x86_64-linux-gnu/bits/posix2_lim.h:
+/workspace/CHTL/CHTL/CMODSystem/CMODModule.cpp:
 
-/usr/include/c++/14/bits/functional_hash.h:
+/usr/include/c++/14/any:
 
-/usr/include/c++/14/iomanip:
+/workspace/CHTL/CHTL/CHTLUse/CHTLUseProcessor.h:
 
-/usr/include/c++/14/limits:
+/workspace/CHTL/CHTL/CHTLStyle/CHTLStyleProcessor.cpp:
 
-/usr/include/c++/14/bits/exception_ptr.h:
+/workspace/CHTL/CHTL/CHTLProperty/CHTLPropertyReference.cpp:
 
-/workspace/CHTL/CHTL/CHTLNode/NamespaceNode.cpp:
+/workspace/CHTL/CHTL/CHTLNode/TextNode.cpp:
 
-/usr/include/c++/14/bits/exception.h:
+/workspace/CHTL/CHTL/CHTLUse/CHTLUseProcessor.cpp:
 
-/usr/include/c++/14/bits/enable_special_members.h:
+/workspace/CHTL/CHTL/CHTLNode/TemplateNode.cpp:
 
-/usr/include/c++/14/bits/std_function.h:
+/workspace/CHTL/CHTL/CHTLNode/ScriptNode.cpp:
 
-/usr/include/x86_64-linux-gnu/bits/struct_mutex.h:
+/workspace/CHTL/CHTL/CHTLNode/OriginNode.cpp:
 
-/usr/include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h:
+/workspace/CHTL/CHTL/CHTLNode/TemplateNode.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
+/workspace/CHTL/CHTL/CHTLNode/NamespaceNode.h:
 
-/usr/include/c++/14/ios:
+/workspace/CHTL/CHTL/CHTLNode/CustomNode.h:
 
-/usr/include/asm-generic/int-ll64.h:
+/usr/lib/llvm-20/lib/clang/20/include/limits.h:
 
-/workspace/CHTL/CHTL/CHTLConstraint/CHTLConstraintProcessor.cpp:
+/usr/include/c++/14/unordered_set:
 
-/usr/include/c++/14/bits/streambuf.tcc:
+/usr/include/c++/14/tr1/riemann_zeta.tcc:
 
-/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODSystem.h:
+/usr/include/c++/14/tr1/poly_laguerre.tcc:
 
-/usr/include/c++/14/bits/locale_facets.h:
+/usr/include/c++/14/tr1/modified_bessel_func.tcc:
 
-/usr/include/c++/14/bits/basic_string.h:
+/usr/include/c++/14/tr1/legendre_function.tcc:
 
-/usr/include/c++/14/bits/stringfwd.h:
+/workspace/CHTL/CHTL_JS/CHTLJSLoader/CHTLJSLoader.h:
 
-/usr/include/c++/14/bits/deque.tcc:
+/usr/include/c++/14/tr1/bessel_function.tcc:
 
-/usr/include/c++/14/bits/exception_defines.h:
+/usr/include/c++/14/thread:
 
-/usr/include/c++/14/bits/stl_vector.h:
+/usr/include/c++/14/queue:
 
-/workspace/CHTL/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp:
+/usr/include/c++/14/pstl/glue_numeric_defs.h:
 
-/usr/include/x86_64-linux-gnu/bits/time.h:
+/usr/include/c++/14/future:
 
-CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSLexer/CHTLJSToken.cpp.o:
+/usr/include/c++/14/cstring:
 
-/usr/include/x86_64-linux-gnu/bits/libc-header-start.h:
+/usr/include/c++/14/condition_variable:
 
-/workspace/CHTL/CHTL/CHTLLexer/Token.cpp:
+/usr/include/c++/14/climits:
 
-/usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h:
+/usr/include/c++/14/cfloat:
 
-/usr/include/x86_64-linux-gnu/bits/long-double.h:
+/usr/include/c++/14/cassert:
 
-/usr/include/c++/14/bits/atomic_base.h:
+/usr/include/c++/14/bits/unique_lock.h:
 
-/usr/include/c++/14/optional:
+/usr/include/c++/14/bits/this_thread_sleep.h:
 
-CMakeFiles/chtl_cli.dir/CHTL/CHTLProperty/CHTLPropertyReference.cpp.o:
+/usr/include/c++/14/bits/stl_queue.h:
+
+/usr/include/c++/14/bits/stl_numeric.h:
+
+/usr/include/c++/14/bits/std_mutex.h:
+
+/workspace/CHTL/CHTL_JS/CHTLJSState/CHTLJSState.cpp:
+
+/usr/include/c++/14/bits/specfun.h:
+
+/usr/include/c++/14/bits/random.h:
+
+/usr/include/c++/14/bits/atomic_futex.h:
+
+/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODModule.cpp:
+
+/usr/include/x86_64-linux-gnu/bits/xopen_lim.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix1_lim.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathcalls-macros.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:
+
+/usr/include/x86_64-linux-gnu/bits/math-vector.h:
+
+/usr/include/x86_64-linux-gnu/bits/local_lim.h:
+
+/usr/include/c++/14/tr1/poly_hermite.tcc:
+
+/usr/include/x86_64-linux-gnu/bits/iscanonical.h:
+
+/lib/x86_64-linux-gnu/crtn.o:
+
+/workspace/CHTL/CHTL/CHTLState/CHTLState.cpp:
+
+/usr/include/x86_64-linux-gnu/bits/fp-logb.h:
+
+/usr/include/x86_64-linux-gnu/bits/fp-fast.h:
+
+/usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
+
+/usr/include/c++/14/random:
+
+/usr/include/strings.h:
+
+/usr/include/limits.h:
+
+/workspace/CHTL/CHTL/CHTLNode/CustomNode.cpp:
+
+/workspace/CHTL/CHTL/CHTLNode/ConstraintNode.cpp:
+
+/workspace/CHTL/CHTL/CHTLNode/ConfigurationNode.cpp:
+
+/workspace/CHTL/CHTL/CHTLNode/CommentNode.cpp:
+
+/workspace/CHTL/CHTL/CHTLManage/CHTLManage.cpp:
+
+/workspace/CHTL/CHTL/CHTLLoader/CHTLLoader.cpp:
+
+/workspace/CHTL/CHTL/CHTLLexer/Token.h:
+
+/workspace/CHTL/Scanner/CHTLUnifiedScanner.cpp:
+
+/workspace/CHTL/CHTL/CHTLLexer/CHTLLexer.h:
+
+/usr/include/x86_64-linux-gnu/bits/uio_lim.h:
+
+/workspace/CHTL/CHTL/CHTLLexer/CHTLLexer.cpp:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/c++io.h:
+
+/usr/include/c++/14/fstream:
+
+/usr/include/c++/14/codecvt:
+
+/usr/include/c++/14/bits/quoted_string.h:
+
+/usr/include/c++/14/bits/fstream.tcc:
+
+/lib/x86_64-linux-gnu/libc.so:
+
+/usr/include/c++/14/bits/fs_path.h:
+
+/usr/include/c++/14/bits/fs_ops.h:
+
+/usr/include/c++/14/bits/fs_fwd.h:
+
+/workspace/CHTL/CHTL/CHTLIOStream/CHTLIOStream.cpp:
+
+/usr/lib/gcc/x86_64-linux-gnu/14/crtendS.o:
+
+/workspace/CHTL/CHTL/CHTLStyle/CHTLStyleProcessor.h:
+
+/workspace/CHTL/CHTL/CHTLProperty/CHTLPropertyReference.h:
+
+CMakeFiles/chtl_cli.dir/CompilerDispatcher/CSSCompiler.cpp.o:
+
+/workspace/CHTL/CHTL/CHTLNode/TextNode.h:
+
+/workspace/CHTL/CHTL/CHTLNode/StyleNode.h:
+
+/workspace/CHTL/CHTL/CHTLNode/CommentNode.h:
+
+/usr/include/c++/14/iostream:
+
+/workspace/CHTL/CHTL/CHTLGenerator/CHTLGenerator.cpp:
+
+/usr/include/c++/14/bits/stl_multiset.h:
+
+/usr/include/c++/14/cstdint:
+
+/workspace/CHTL/CHTL/CHTLConfiguration/CHTLConfigurationProcessor.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/stdint.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/stdarg.h:
+
+/workspace/CHTL/CHTL/CHTLContext/CHTLContext.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/__stddef_wchar_t.h:
+
+/workspace/CHTL/CHTL_JS/CHTLJSManage/CHTLJSManage.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/__stddef_size_t.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/__stddef_offsetof.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/__stddef_null.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/__stddef_max_align_t.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/__stddef_header_macro.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/__stdarg___gnuc_va_list.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/time_members.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/os_defines.h:
+
+/usr/include/c++/14/tr1/exp_integral.tcc:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/messages_members.h:
+
+/workspace/CHTL/CHTL/CHTLNode/ConstraintNode.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/error_constants.h:
+
+/workspace/CHTL/CHTL/CHTLManage/CHTLManage.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h:
+
+/usr/include/c++/14/bits/std_thread.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/c++locale.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/c++allocator.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/atomic_word.h:
+
+/workspace/CHTL/CodeMerger/CodeMerger.cpp:
+
+/usr/include/c++/14/vector:
+
+/workspace/CHTL/CHTL/CHTLContext/CHTLContext.cpp:
+
+/usr/include/c++/14/unordered_map:
+
+/usr/include/c++/14/bits/erase_if.h:
+
+/workspace/CHTL/CHTL/CHTLState/CHTLState.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/error_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/stdio.h:
 
 /usr/include/c++/14/bits/cpp_type_traits.h:
 
-/usr/include/linux/types.h:
+/usr/include/x86_64-linux-gnu/bits/timesize.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o:
-
-/usr/include/c++/14/iosfwd:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/gthr.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/basic_file.h:
-
-/usr/include/c++/14/bits/postypes.h:
-
-/workspace/CHTL/CHTL/CHTLNode/BaseNode.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h:
-
-/usr/include/x86_64-linux-gnu/bits/wctype-wchar.h:
-
-/usr/include/c++/14/bits/shared_ptr_base.h:
-
-/usr/include/x86_64-linux-gnu/bits/cpu-set.h:
-
-/usr/include/x86_64-linux-gnu/asm/posix_types_64.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/time_t.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/FILE.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
-
-/usr/include/x86_64-linux-gnu/bits/timex.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/float.h:
-
-/usr/include/linux/posix_types.h:
-
-/usr/include/c++/14/clocale:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/ctype_inline.h:
-
-/usr/include/c++/14/new:
-
-/usr/include/c++/14/ext/aligned_buffer.h:
-
-/usr/include/c++/14/bits/ostream.tcc:
-
-/usr/include/c++/14/bits/align.h:
-
-/usr/include/c++/14/bits/concept_check.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSToken.cpp:
-
-CMakeFiles/chtl_cli.dir/Scanner/UnifiedScanner.cpp.o:
-
-/usr/include/linux/stddef.h:
-
-/usr/include/c++/14/bits/stl_tempbuf.h:
-
-/workspace/CHTL/CHTL/CHTLNode/UseNode.h:
-
-/usr/include/endian.h:
-
-/usr/include/stdint.h:
-
-/workspace/CHTL/CHTL/CHTLNode/ElementNode.cpp:
-
-/workspace/CHTL/Util/ZipUtil/ZipUtil.cpp:
-
-/usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
-
-/usr/include/c++/14/cwctype:
-
-/usr/include/asm-generic/bitsperlong.h:
-
-/usr/include/asm-generic/types.h:
-
-/usr/include/c++/14/pstl/execution_defs.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
-
-/usr/include/c++/14/regex:
-
-/usr/include/c++/14/bits/istream.tcc:
-
-/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODGenerator.cpp:
-
-/usr/include/c++/14/pstl/pstl_config.h:
-
-/usr/include/c++/14/bits/std_abs.h:
-
-/lib/x86_64-linux-gnu/libm.so:
-
-/usr/include/c++/14/bits/streambuf_iterator.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
-
-/usr/include/c++/14/bits/parse_numbers.h:
-
-/usr/include/asm-generic/errno.h:
-
-/workspace/CHTL/CHTL/CHTLParser/CHTLParser.cpp:
-
-/workspace/CHTL/CHTL_JS/CHTLJSManage/CHTLJSManage.cpp:
-
-/usr/include/x86_64-linux-gnu/asm/types.h:
-
-/usr/include/c++/14/bits/regex_executor.h:
-
-/usr/include/x86_64-linux-gnu/bits/time64.h:
-
-/usr/include/c++/14/bits/functexcept.h:
-
-/usr/include/c++/14/set:
-
-/usr/include/pthread.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.h:
-
-/usr/include/c++/14/bits/new_allocator.h:
-
-/usr/include/sched.h:
-
-/usr/include/wctype.h:
-
-/usr/include/c++/14/filesystem:
-
-/usr/include/stdc-predef.h:
-
-/workspace/CHTL/CHTL/CHTLConstraint/CHTLConstraintProcessor.h:
-
-/usr/include/x86_64-linux-gnu/bits/typesizes.h:
-
-/usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ConstraintNode.cpp.o:
-
-/usr/include/c++/14/bits/predefined_ops.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSIOStream/CHTLJSIOStream.h:
-
-/lib/x86_64-linux-gnu/Scrt1.o:
-
-/usr/include/c++/14/bits/stl_iterator.h:
-
-/usr/include/c++/14/bits/stl_algobase.h:
-
-/workspace/CHTL/CHTL/CHTLNode/OriginNode.h:
-
-/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODScanner.cpp:
-
-/usr/include/c++/14/bits/hashtable_policy.h:
-
-/usr/include/asm-generic/errno-base.h:
-
-/workspace/CHTL/CHTL/CMODSystem/CMODLoader.cpp:
-
-/workspace/CHTL/CompilerDispatcher/CompilerDispatcher.h:
-
-/usr/include/c++/14/bits/hash_bytes.h:
-
-/usr/include/x86_64-linux-gnu/bits/waitflags.h:
-
-/usr/include/c++/14/ext/type_traits.h:
-
-/usr/include/x86_64-linux-gnu/asm/posix_types.h:
-
-/usr/include/c++/14/bits/char_traits.h:
-
-/workspace/CHTL/Common/CommonTypes.h:
-
-/usr/include/c++/14/bits/stl_iterator_base_funcs.h:
-
-/usr/include/assert.h:
-
-/usr/include/c++/14/tr1/gamma.tcc:
-
-/usr/include/c++/14/bits/codecvt.h:
-
-/usr/include/c++/14/bits/locale_classes.h:
-
-/usr/include/c++/14/bits/stl_uninitialized.h:
-
-/usr/include/c++/14/cctype:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stddef_nullptr_t.h:
-
-/usr/include/c++/14/bits/stl_bvector.h:
-
-/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODModule.h:
-
-/usr/include/x86_64-linux-gnu/bits/endianness.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
-
-/workspace/CHTL/CHTL/CHTLConfiguration/CHTLConfigurationProcessor.cpp:
-
-/usr/include/c++/14/compare:
-
-/usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h:
-
-/usr/include/x86_64-linux-gnu/bits/wchar.h:
-
-/usr/include/c++/14/bits/basic_ios.h:
-
-/usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h:
-
-/usr/include/linux/errno.h:
-
-/usr/include/c++/14/mutex:
-
-/usr/include/x86_64-linux-gnu/asm/bitsperlong.h:
-
-/usr/include/c++/14/numeric:
-
-/usr/include/c++/14/bits/regex.tcc:
-
-/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODArg.h:
-
-/usr/include/c++/14/tr1/hypergeometric.tcc:
-
-/usr/include/errno.h:
-
-/usr/include/c++/14/string_view:
-
-/usr/include/c++/14/bits/cxxabi_init_exception.h:
-
-/usr/include/ctype.h:
-
-/usr/include/wchar.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
-
-/usr/include/c++/14/locale:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.cpp.o:
-
-/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSContext/CHTLJSContext.cpp:
-
-/usr/include/linux/sched/types.h:
-
-/usr/include/x86_64-linux-gnu/bits/floatn-common.h:
-
-/usr/include/stdio.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/__locale_t.h:
-
-/usr/include/time.h:
-
-/usr/include/c++/14/bits/hashtable.h:
-
-/usr/include/x86_64-linux-gnu/bits/errno.h:
-
-/usr/include/c++/14/bits/requires_hosted.h:
-
-/usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
-
-/usr/include/libintl.h:
-
-/usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
-
-/usr/include/c++/14/array:
-
-/usr/include/c++/14/bits/cxxabi_forced.h:
-
-/workspace/CHTL/CHTL/CHTLNode/ConfigurationNode.h:
-
-/usr/include/c++/14/bits/node_handle.h:
-
-/workspace/CHTL/CHTL/CMODSystem/CMODModule.h:
-
-/usr/include/c++/14/stack:
-
-/usr/include/c++/14/bits/stl_deque.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h:
-
-/usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h:
-
-/usr/include/alloca.h:
-
-/workspace/CHTL/CHTL/CHTLParser/CHTLParser.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h:
-
-/usr/include/math.h:
-
-/usr/include/x86_64-linux-gnu/bits/byteswap.h:
-
-/workspace/CHTL/CompilerDispatcher/CSSCompiler.cpp:
-
-/usr/include/c++/14/debug/debug.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
-
-/workspace/CHTL/CHTL/CHTLNode/ImportNode.h:
-
-/workspace/CHTL/CHTL/CMODSystem/CMODLoader.h:
-
-/usr/include/c++/14/bits/allocator.h:
-
-/usr/include/c++/14/bits/fs_dir.h:
-
-/usr/include/string.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/clockid_t.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp:
-
-/workspace/CHTL/CompilerDispatcher/JSCompiler.cpp:
-
-/usr/include/c++/14/system_error:
-
-/workspace/CHTL/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedListener.cpp:
-
-/usr/include/c++/14/cstdlib:
-
-/workspace/CHTL/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedSelector.cpp:
-
-/usr/include/c++/14/bits/erase_if.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/error_t.h:
-
-/workspace/CHTL/CHTL/CHTLState/CHTLState.h:
-
-/workspace/CHTL/CodeMerger/CodeMerger.h:
-
-/usr/include/c++/14/bits/localefwd.h:
-
-CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/NamespaceNode.cpp.o:
-
-/usr/include/c++/14/streambuf:
-
-/workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSLexer.h:
-
-/usr/include/c++/14/bits/string_view.tcc:
-
-/usr/include/c++/14/bits/regex_constants.h:
-
-/workspace/CHTL/CHTL/CHTLNode/BaseNode.cpp:
-
-/usr/include/x86_64-linux-gnu/bits/stdint-least.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CJMODSystem/CJMODGenerator.cpp.o:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:
-
-/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODGenerator.h:
-
-/usr/include/x86_64-linux-gnu/bits/floatn.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
-
-/usr/include/c++/14/bits/move.h:
-
-/usr/include/c++/14/tr1/ell_integral.tcc:
-
-/usr/include/asm-generic/posix_types.h:
-
-/workspace/CHTL/CLI/CLITool.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
-
-/workspace/CHTL/Util/ZipUtil/ZipUtil.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/gthr-default.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/wint_t.h:
-
-CMakeFiles/chtl_cli.dir/CompilerDispatcher/CompilerDispatcher.cpp.o:
-
-/usr/include/c++/14/backward/auto_ptr.h:
-
-/usr/include/c++/14/bits/atomic_lockfree_defines.h:
-
-/usr/include/linux/limits.h:
-
-CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ElementNode.cpp.o:
-
-CMakeFiles/chtl_cli.dir/CHTL/CMODSystem/CMODSystem.cpp.o:
-
-/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
-
-CMakeFiles/chtl_cli.dir/Util/FileSystem/FileSystem.cpp.o:
-
-/usr/include/c++/14/bits/stl_algo.h:
-
-/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODArg.cpp:
-
-/usr/include/x86_64-linux-gnu/bits/sched.h:
-
-/usr/include/c++/14/bits/shared_ptr.h:
-
-/usr/include/x86_64-linux-gnu/sys/select.h:
-
-/usr/include/x86_64-linux-gnu/sys/single_threaded.h:
-
-/usr/include/x86_64-linux-gnu/sys/types.h:
-
-/workspace/CHTL/CHTL/CHTLNode/ImportNode.cpp:
-
-CMakeFiles/chtl_cli.dir/CodeMerger/CodeMerger.cpp.o:
-
-/workspace/CHTL/CHTL/CMODSystem/CMODSystem.h:
-
-/usr/include/c++/14/istream:
-
-/usr/include/stdlib.h:
-
-/usr/include/c++/14/ctime:
-
-/usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h:
-
-/lib/x86_64-linux-gnu/libmvec.so.1:
-
-/usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so:
-
-/usr/include/c++/14/backward/binders.h:
-
-CMakeFiles/chtl_cli.dir/CHTL/CHTLState/CHTLState.cpp.o:
-
-/usr/include/c++/14/bit:
-
-/usr/lib/gcc/x86_64-linux-gnu/14/libgcc_s.so:
-
-/usr/include/c++/14/bits/alloc_traits.h:
-
-/usr/include/c++/14/pstl/glue_memory_defs.h:
-
-/workspace/CHTL/CompilerDispatcher/JSCompiler.h:
-
-/usr/include/c++/14/bits/basic_ios.tcc:
-
-CMakeFiles/chtl_cli.dir/CLI/main.cpp.o:
-
-/workspace/CHTL/CHTL_JS/CHTLJSContext/CHTLJSContext.h:
-
-/usr/include/x86_64-linux-gnu/bits/select.h:
-
-/usr/include/c++/14/stdexcept:
-
-/usr/include/c++/14/tr1/special_function_util.h:
-
-CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/BaseNode.cpp.o:
-
-/workspace/CHTL/CHTL/CHTLIOStream/CHTLIOStream.h:
-
-/usr/include/c++/14/cwchar:
+CMakeFiles/chtl_cli.dir/Scanner/CHTLUnifiedScanner.cpp.o:
 
 /usr/lib/llvm-20/lib/clang/20/include/stddef.h:
 
-/usr/include/c++/14/algorithm:
+/usr/include/c++/14/cwchar:
 
-/usr/include/x86_64-linux-gnu/bits/timesize.h:
+/usr/include/c++/14/tr1/special_function_util.h:
 
-/usr/include/x86_64-linux-gnu/gnu/stubs.h:
-
-/workspace/CHTL/CHTL/CMODSystem/CMODSystem.cpp:
-
-/usr/include/c++/14/unordered_map:
-
-/usr/include/c++/14/bits/stl_iterator_base_types.h:
-
-/workspace/CHTL/CHTL/CHTLContext/CHTLContext.cpp:
-
-CMakeFiles/chtl_cli.dir/CHTL_JS/CHTLJSIOStream/CHTLJSIOStream.cpp.o:
-
-/usr/include/c++/14/vector:
-
-/workspace/CHTL/CodeMerger/CodeMerger.cpp:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/atomic_word.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/c++allocator.h:
-
-/usr/include/c++/14/bits/stl_heap.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/c++locale.h:
-
-/usr/include/c++/14/bits/std_thread.h:
-
-/usr/include/features-time64.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h:
-
-/workspace/CHTL/CHTL/CHTLManage/CHTLManage.h:
-
-/workspace/CHTL/CHTL/CHTLNode/ConstraintNode.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/messages_members.h:
-
-/usr/include/c++/14/tr1/exp_integral.tcc:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/os_defines.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/time_members.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stdarg___gnuc_va_list.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stddef_header_macro.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stddef_max_align_t.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stddef_null.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stddef_offsetof.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stddef_size_t.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSManage/CHTLJSManage.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stddef_wchar_t.h:
-
-/workspace/CHTL/CHTL/CHTLContext/CHTLContext.h:
-
-/usr/include/c++/14/bits/memoryfwd.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/stdarg.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/stdint.h:
-
-/workspace/CHTL/CHTL/CHTLConfiguration/CHTLConfigurationProcessor.h:
-
-/usr/include/c++/14/cstdint:
-
-/usr/include/c++/14/bits/stl_multiset.h:
-
-/workspace/CHTL/CHTL/CHTLGenerator/CHTLGenerator.cpp:
-
-/usr/include/c++/14/iostream:
-
-/workspace/CHTL/CHTL/CHTLNode/CommentNode.h:
-
-/workspace/CHTL/CHTL/CHTLNode/StyleNode.h:
-
-/workspace/CHTL/CHTL/CHTLNode/TextNode.h:
-
-/usr/include/c++/14/tr1/beta_function.tcc:
-
-/workspace/CHTL/CHTL/CHTLProperty/CHTLPropertyReference.h:
-
-/lib/x86_64-linux-gnu/libc.so.6:
-
-/workspace/CHTL/CHTL/CHTLStyle/CHTLStyleProcessor.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/14/crtendS.o:
-
-/workspace/CHTL/CHTL/CHTLIOStream/CHTLIOStream.cpp:
-
-/usr/include/c++/14/bits/fs_fwd.h:
-
-/usr/include/c++/14/bits/fs_ops.h:
-
-/usr/include/c++/14/bits/fs_path.h:
-
-/lib/x86_64-linux-gnu/libc.so:
-
-/usr/include/c++/14/bits/fstream.tcc:
-
-CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/CustomNode.cpp.o:
-
-/usr/include/c++/14/bits/quoted_string.h:
-
-/usr/include/c++/14/codecvt:
-
-/usr/include/c++/14/fstream:
-
-/usr/include/c++/14/bits/regex_error.h:
-
-/usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/c++io.h:
-
-/usr/include/c++/14/bits/allocated_ptr.h:
-
-/workspace/CHTL/CHTL/CHTLLexer/CHTLLexer.cpp:
-
-/usr/include/x86_64-linux-gnu/bits/uio_lim.h:
-
-/usr/include/x86_64-linux-gnu/asm/errno.h:
-
-/usr/include/c++/14/ratio:
-
-/workspace/CHTL/Scanner/CHTLUnifiedScanner.cpp:
-
-/workspace/CHTL/CHTL/CHTLLexer/Token.h:
-
-/workspace/CHTL/CHTL/CHTLLoader/CHTLLoader.cpp:
-
-/workspace/CHTL/CHTL/CHTLNode/CommentNode.cpp:
-
-/workspace/CHTL/CHTL/CHTLNode/ConfigurationNode.cpp:
-
-/workspace/CHTL/CHTL/CHTLNode/ConstraintNode.cpp:
-
-/workspace/CHTL/CHTL/CHTLNode/CustomNode.cpp:
-
-/usr/include/limits.h:
-
-/usr/include/strings.h:
-
-/workspace/CHTL/CHTL/CHTLLexer/CHTLLexer.h:
-
-/usr/include/c++/14/random:
-
-/usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
-
-/usr/include/x86_64-linux-gnu/bits/fp-fast.h:
-
-/usr/include/x86_64-linux-gnu/bits/fp-logb.h:
-
-/workspace/CHTL/CHTL/CHTLState/CHTLState.cpp:
-
-/lib/x86_64-linux-gnu/crtn.o:
-
-/usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
-
-/usr/include/c++/14/tr1/poly_hermite.tcc:
-
-/usr/include/c++/14/bits/uses_allocator.h:
-
-/usr/include/x86_64-linux-gnu/bits/local_lim.h:
-
-/usr/include/c++/14/concepts:
-
-/workspace/CHTL/CHTL/CHTLNode/ScriptNode.h:
-
-/usr/include/x86_64-linux-gnu/bits/math-vector.h:
-
-/usr/include/features.h:
-
-CMakeFiles/chtl_cli.dir/CHTL/CHTLManage/CHTLManage.cpp.o:
-
-/usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:
-
-CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o:
-
-/usr/include/x86_64-linux-gnu/bits/mathcalls-macros.h:
-
-/usr/include/x86_64-linux-gnu/bits/endian.h:
-
-/usr/include/x86_64-linux-gnu/bits/mathcalls.h:
-
-/usr/include/x86_64-linux-gnu/bits/locale.h:
-
-/usr/include/x86_64-linux-gnu/bits/posix1_lim.h:
-
-/usr/include/x86_64-linux-gnu/bits/xopen_lim.h:
-
-/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
-
-/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODModule.cpp:
-
-/usr/include/c++/14/bits/atomic_futex.h:
-
-/usr/include/c++/14/bits/random.h:
-
-/usr/include/c++/14/bits/specfun.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSState/CHTLJSState.cpp:
-
-/usr/include/c++/14/bits/std_mutex.h:
-
-/usr/include/c++/14/bits/stl_numeric.h:
-
-/usr/include/c++/14/bits/version.h:
-
-/usr/include/c++/14/bits/stl_queue.h:
-
-/usr/include/c++/14/bits/this_thread_sleep.h:
-
-/usr/include/c++/14/bits/unique_lock.h:
-
-/usr/include/c++/14/cassert:
-
-/usr/include/c++/14/cfloat:
-
-/usr/include/c++/14/climits:
-
-/usr/include/c++/14/condition_variable:
-
-/usr/include/c++/14/cstring:
-
-/usr/include/c++/14/typeinfo:
-
-/usr/include/c++/14/future:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h:
-
-/usr/include/c++/14/pstl/glue_numeric_defs.h:
-
-/usr/include/locale.h:
-
-/usr/include/c++/14/queue:
-
-CMakeFiles/chtl_cli.dir/CHTL/CHTLContext/CHTLContext.cpp.o:
-
-/usr/include/c++/14/thread:
-
-/usr/include/c++/14/tr1/bessel_function.tcc:
-
-/usr/include/c++/14/bits/invoke.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSLoader/CHTLJSLoader.h:
-
-/usr/include/c++/14/tr1/legendre_function.tcc:
-
-/usr/include/c++/14/tr1/poly_laguerre.tcc:
-
-/usr/include/c++/14/tr1/riemann_zeta.tcc:
-
-/usr/include/c++/14/unordered_set:
-
-/usr/lib/llvm-20/lib/clang/20/include/limits.h:
-
-/usr/include/c++/14/cstdio:
-
-/workspace/CHTL/CHTL/CHTLNode/CustomNode.h:
-
-/workspace/CHTL/CHTL/CHTLNode/NamespaceNode.h:
-
-/workspace/CHTL/CHTL/CHTLNode/TemplateNode.h:
-
-/workspace/CHTL/CHTL/CHTLNode/OriginNode.cpp:
-
-/usr/include/c++/14/ostream:
-
-/workspace/CHTL/CHTL/CHTLNode/ScriptNode.cpp:
-
-/workspace/CHTL/CHTL/CHTLNode/TemplateNode.cpp:
-
-/workspace/CHTL/CHTL/CHTLUse/CHTLUseProcessor.cpp:
-
-/usr/include/c++/14/bits/stl_set.h:
-
-/workspace/CHTL/CHTL/CHTLManage/CHTLManage.cpp:
-
-/workspace/CHTL/CHTL/CHTLNode/TextNode.cpp:
-
-/usr/include/c++/14/bits/stl_map.h:
-
-/usr/include/x86_64-linux-gnu/bits/iscanonical.h:
-
-/workspace/CHTL/CHTL/CHTLProperty/CHTLPropertyReference.cpp:
-
-/workspace/CHTL/CHTL/CHTLUse/CHTLUseProcessor.h:
-
-/usr/include/c++/14/any:
-
-/workspace/CHTL/CHTL/CMODSystem/CMODModule.cpp:
-
-/workspace/CHTL/CHTL/CHTLStyle/CHTLStyleProcessor.cpp:
-
-/workspace/CHTL/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedListener.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedSelector.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSEnhanced/CHTLJSEventDelegation.cpp:
-
-/workspace/CHTL/CHTL_JS/CHTLJSEnhanced/CHTLJSEventDelegation.h:
-
-/workspace/CHTL/Scanner/CHTLUnifiedScanner.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.h:
-
-/usr/include/c++/14/debug/assertions.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSToken.h:
-
-/usr/include/x86_64-linux-gnu/c++/14/bits/error_constants.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.cpp:
-
-/workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.h:
-
-/usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h:
-
-/usr/include/x86_64-linux-gnu/bits/setjmp.h:
-
-/workspace/CHTL/Util/StringUtil/StringUtil.h:
-
-/workspace/CHTL/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.cpp:
-
-/workspace/CHTL/CHTL_JS/CHTLJSState/CHTLJSState.h:
-
-/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODSyntax.cpp:
-
-/usr/include/c++/14/functional:
-
-/workspace/CHTL/CompilerDispatcher/CSSCompiler.h:
-
-/workspace/CHTL/CLI/main.cpp:
-
-/workspace/CHTL/CompilerDispatcher/CompilerDispatcher.cpp:
+/usr/include/c++/14/stdexcept:
 
 /usr/include/c++/14/bits/charconv.h:
 
-/workspace/CHTL/Scanner/UnifiedScanner.cpp:
+/usr/include/c++/14/bits/basic_ios.tcc:
 
-/workspace/CHTL/Util/FileSystem/FileSystem.cpp:
+/lib/x86_64-linux-gnu/libc.so.6:
 
-/workspace/CHTL/Util/FileSystem/FileSystem.h:
+/workspace/CHTL/CompilerDispatcher/JSCompiler.h:
 
-CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/UseNode.cpp.o:
+/usr/include/c++/14/pstl/glue_memory_defs.h:
 
-/usr/include/c++/14/bits/locale_facets.tcc:
+/usr/include/c++/14/bits/alloc_traits.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/14/libgcc_s.so:
 
 /usr/include/c++/14/bits/chrono.h:
 
-/workspace/CHTL/Util/StringUtil/StringUtil.cpp:
+/usr/include/c++/14/bit:
 
-/lib/x86_64-linux-gnu/crti.o:
+/usr/include/c++/14/backward/binders.h:
 
-/lib/x86_64-linux-gnu/libgcc_s.so.1:
+/usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so:
+
+/usr/include/c++/14/algorithm:
+
+/lib/x86_64-linux-gnu/libmvec.so.1:
+
+/usr/include/stdlib.h:
+
+/usr/include/c++/14/istream:
+
+/workspace/CHTL/CHTL/CMODSystem/CMODSystem.h:
+
+/workspace/CHTL/CHTL/CHTLNode/ImportNode.cpp:
+
+/usr/include/x86_64-linux-gnu/sys/types.h:
+
+/usr/include/x86_64-linux-gnu/sys/single_threaded.h:
+
+/usr/include/x86_64-linux-gnu/sys/select.h:
+
+/usr/include/c++/14/bits/shared_ptr.h:
+
+/usr/include/c++/14/ratio:
+
+/usr/include/x86_64-linux-gnu/bits/sched.h:
+
+/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODArg.cpp:
+
+/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
 
 /usr/include/c++/14/type_traits:
 
-/lib64/ld-linux-x86-64.so.2:
+/usr/include/linux/limits.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/14/crtbeginS.o:
+/usr/include/c++/14/bits/atomic_lockfree_defines.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/14/libgcc.a:
+/usr/include/x86_64-linux-gnu/bits/types/wint_t.h:
 
-/usr/include/c++/14/cstddef:
-
-/usr/lib/x86_64-linux-gnu/libc_nonshared.a:
-
-CMakeFiles/chtl_cli.dir/CHTL/CHTLConfiguration/CHTLConfigurationProcessor.cpp.o:
-
-/usr/include/c++/14/bits/utility.h:
-
-CMakeFiles/chtl_cli.dir/CHTL/CHTLConstraint/CHTLConstraintProcessor.cpp.o:
-
-/workspace/CHTL/CHTL_JS/CHTLJSIOStream/CHTLJSIOStream.cpp:
-
-CMakeFiles/chtl_cli.dir/CHTL/CHTLGenerator/CHTLGenerator.cpp.o:
-
-/usr/include/c++/14/tr1/modified_bessel_func.tcc:
-
-CMakeFiles/chtl_cli.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o:
+/usr/include/x86_64-linux-gnu/c++/14/bits/gthr-default.h:
 
 /usr/include/x86_64-linux-gnu/sys/cdefs.h:
 
-CMakeFiles/chtl_cli.dir/CHTL/CHTLLexer/Token.cpp.o:
+/usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
 
-CMakeFiles/chtl_cli.dir/CLI/CLITool.cpp.o:
+/workspace/CHTL/CLI/CLITool.h:
 
-CMakeFiles/chtl_cli.dir/CHTL/CHTLLoader/CHTLLoader.cpp.o:
+/usr/include/c++/14/backward/auto_ptr.h:
 
-CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/CommentNode.cpp.o:
+/usr/include/c++/14/tr1/ell_integral.tcc:
 
-CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ImportNode.cpp.o:
+/usr/include/c++/14/bits/move.h:
 
-CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/OriginNode.cpp.o:
+/usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
 
-CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/StyleNode.cpp.o:
+/usr/include/x86_64-linux-gnu/bits/floatn.h:
 
-CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/TemplateNode.cpp.o:
+/usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h:
 
-CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/TextNode.cpp.o:
+/usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:
 
-CMakeFiles/chtl_cli.dir/CHTL/CHTLNode/ScriptNode.cpp.o:
+/usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
 
-CMakeFiles/chtl_cli.dir/CHTL/CHTLParser/CHTLParser.cpp.o:
+/usr/include/x86_64-linux-gnu/bits/stdint-least.h:
 
-/usr/include/c++/14/bits/locale_classes.tcc:
+/workspace/CHTL/CHTL/CHTLNode/BaseNode.cpp:
 
-CMakeFiles/chtl_cli.dir/CHTL/CHTLStyle/CHTLStyleProcessor.cpp.o:
+/usr/include/c++/14/bits/string_view.tcc:
 
-/usr/include/c++/14/bits/uniform_int_dist.h:
+/workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSLexer.h:
+
+/usr/include/c++/14/streambuf:
+
+/workspace/CHTL/CodeMerger/CodeMerger.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
+
+/workspace/CHTL/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedSelector.cpp:
+
+/usr/include/c++/14/cstdlib:
+
+/workspace/CHTL/CHTL_JS/CHTLJSEnhanced/CHTLJSEnhancedListener.cpp:
+
+/usr/include/c++/14/system_error:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h:
+
+/workspace/CHTL/CHTL/CHTLParser/CHTLParser.cpp:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/clockid_t.h:
+
+/workspace/CHTL/CompilerDispatcher/JSCompiler.cpp:
+
+/workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp:
+
+/usr/include/string.h:
+
+/usr/include/c++/14/bits/allocator.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h:
+
+/workspace/CHTL/CHTL/CMODSystem/CMODLoader.h:
+
+/workspace/CHTL/CHTL/CHTLNode/ImportNode.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
+
+/workspace/CHTL/CompilerDispatcher/CSSCompiler.cpp:
+
+/usr/include/math.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
+
+/workspace/CHTL/CHTL/CHTLParser/CHTLParser.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h:
+
+/usr/include/c++/14/bits/allocated_ptr.h:
+
+/usr/include/c++/14/stack:
+
+/workspace/CHTL/CHTL/CMODSystem/CMODModule.h:
+
+/workspace/CHTL/CHTL/CHTLNode/ConfigurationNode.h:
+
+/usr/include/x86_64-linux-gnu/asm/errno.h:
+
+/usr/include/c++/14/bits/cxxabi_forced.h:
+
+/usr/include/x86_64-linux-gnu/bits/errno.h:
+
+/usr/include/x86_64-linux-gnu/bits/setjmp.h:
+
+/usr/include/time.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/__locale_t.h:
+
+/usr/include/stdio.h:
+
+/usr/include/x86_64-linux-gnu/bits/floatn-common.h:
+
+/usr/include/c++/14/bits/locale_facets.tcc:
+
+/workspace/CHTL/CHTL_JS/CHTLJSContext/CHTLJSContext.cpp:
+
+/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
+
+/usr/include/c++/14/locale:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
+
+/usr/include/ctype.h:
+
+/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODGenerator.h:
+
+/usr/include/c++/14/bits/cxxabi_init_exception.h:
+
+/usr/include/c++/14/string_view:
+
+/usr/include/errno.h:
+
+/usr/include/c++/14/tr1/hypergeometric.tcc:
+
+/usr/include/c++/14/debug/debug.h:
+
+/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODArg.h:
+
+/usr/include/locale.h:
+
+/usr/include/c++/14/numeric:
+
+/usr/include/x86_64-linux-gnu/asm/bitsperlong.h:
+
+/usr/include/c++/14/mutex:
+
+/usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h:
+
+/usr/include/linux/errno.h:
+
+/usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h:
+
+/usr/include/c++/14/bits/basic_ios.h:
+
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h:
+
+/usr/include/c++/14/bits/stl_iterator_base_types.h:
+
+/workspace/CHTL/CHTL/CHTLConfiguration/CHTLConfigurationProcessor.cpp:
+
+/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
+
+/usr/include/x86_64-linux-gnu/bits/endianness.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/__stddef_nullptr_t.h:
+
+/usr/include/c++/14/bits/stl_uninitialized.h:
+
+/usr/include/c++/14/bits/codecvt.h:
+
+/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODModule.h:
+
+/usr/include/c++/14/tr1/gamma.tcc:
 
 /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
 
-CMakeFiles/chtl_cli.dir/CHTL/CHTLUse/CHTLUseProcessor.cpp.o:
+/usr/include/assert.h:
+
+/usr/include/c++/14/bits/stl_iterator_base_funcs.h:
+
+/usr/include/wchar.h:
+
+/usr/include/alloca.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/basic_file.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/gthr.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/FILE.h:
+
+/usr/include/x86_64-linux-gnu/bits/timex.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
+
+/usr/include/linux/types.h:
+
+/workspace/CHTL/Common/CommonTypes.h:
+
+/usr/include/c++/14/bits/char_traits.h:
+
+/usr/include/x86_64-linux-gnu/asm/posix_types.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+
+/usr/include/c++/14/bits/hash_bytes.h:
+
+/workspace/CHTL/CompilerDispatcher/CompilerDispatcher.h:
+
+/usr/include/asm-generic/errno-base.h:
+
+/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODScanner.cpp:
+
+/workspace/CHTL/CHTL/CHTLNode/OriginNode.h:
+
+/usr/include/c++/14/bits/stl_algobase.h:
+
+/usr/include/c++/14/bits/stl_iterator.h:
+
+/workspace/CHTL/CHTL_JS/CHTLJSIOStream/CHTLJSIOStream.h:
+
+/usr/include/c++/14/bits/predefined_ops.h:
+
+/usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
+
+/usr/include/c++/14/bits/enable_special_members.h:
+
+/usr/include/c++/14/bits/std_function.h:
+
+/usr/include/x86_64-linux-gnu/bits/typesizes.h:
+
+/usr/include/asm-generic/posix_types.h:
+
+/workspace/CHTL/CHTL/CHTLConstraint/CHTLConstraintProcessor.h:
+
+/usr/include/stdc-predef.h:
+
+/usr/include/c++/14/filesystem:
+
+/usr/include/wctype.h:
+
+/usr/include/sched.h:
+
+/workspace/CHTL/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.h:
+
+/usr/include/pthread.h:
+
+/usr/include/c++/14/set:
+
+/usr/include/c++/14/bits/functexcept.h:
+
+/usr/include/x86_64-linux-gnu/bits/time64.h:
+
+/usr/include/c++/14/bits/regex_constants.h:
+
+/usr/include/c++/14/bits/regex_executor.h:
+
+/usr/include/x86_64-linux-gnu/asm/types.h:
+
+/usr/include/c++/14/bits/regex_error.h:
+
+/usr/include/asm-generic/errno.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
+
+/usr/include/x86_64-linux-gnu/gnu/stubs.h:
+
+/lib/x86_64-linux-gnu/libm.so:
+
+/usr/include/linux/sched/types.h:
+
+/usr/include/c++/14/bits/std_abs.h:
+
+/usr/include/c++/14/pstl/pstl_config.h:
+
+/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODGenerator.cpp:
+
+/usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
+
+/usr/include/c++/14/pstl/execution_defs.h:
+
+/usr/include/asm-generic/types.h:
+
+/usr/include/asm-generic/bitsperlong.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
+
+/usr/include/c++/14/bits/hashtable_policy.h:
+
+/workspace/CHTL/CHTL/CHTLNode/ElementNode.cpp:
+
+/usr/include/stdint.h:
+
+/usr/include/endian.h:
+
+/workspace/CHTL/CHTL/CHTLNode/UseNode.h:
+
+/usr/include/c++/14/bits/localefwd.h:
+
+/usr/include/c++/14/bits/stl_tempbuf.h:
+
+/usr/include/linux/stddef.h:
+
+/workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSToken.cpp:
+
+/usr/include/c++/14/bits/concept_check.h:
+
+/usr/include/c++/14/bits/align.h:
+
+/usr/include/c++/14/bits/ostream.tcc:
+
+/usr/include/c++/14/ext/aligned_buffer.h:
+
+/usr/include/c++/14/new:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/ctype_inline.h:
+
+/usr/include/c++/14/clocale:
+
+/usr/include/c++/14/bits/parse_numbers.h:
+
+/usr/include/c++/14/compare:
+
+/usr/include/x86_64-linux-gnu/bits/endian.h:
+
+/usr/include/c++/14/ostream:
+
+/usr/include/c++/14/functional:
+
+/usr/include/linux/posix_types.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/float.h:
+
+/usr/include/libintl.h:
+
+/usr/include/c++/14/bits/locale_classes.tcc:
 
 /workspace/CHTL/CHTL_JS/CJMODSystem/CJMODScanner.h:
 
-CMakeFiles/chtl_cli.dir/CHTL/CMODSystem/CMODLoader.cpp.o:
+/usr/include/x86_64-linux-gnu/asm/posix_types_64.h:
+
+/usr/include/x86_64-linux-gnu/bits/cpu-set.h:
+
+/usr/include/c++/14/tr1/beta_function.tcc:
+
+/usr/include/c++/14/bits/shared_ptr_base.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
+
+/usr/include/c++/14/bits/uniform_int_dist.h:
+
+/usr/include/c++/14/optional:
+
+/usr/include/c++/14/bits/atomic_base.h:
+
+/usr/include/x86_64-linux-gnu/bits/long-double.h:
+
+/usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h:
+
+CMakeFiles/chtl_cli.dir/CLI/main.cpp.o:
+
+/workspace/CHTL/CHTL/CHTLLexer/Token.cpp:
+
+/usr/include/x86_64-linux-gnu/bits/libc-header-start.h:
+
+/usr/include/x86_64-linux-gnu/bits/time.h:
+
+/usr/include/x86_64-linux-gnu/bits/select.h:
+
+/lib/x86_64-linux-gnu/Scrt1.o:
+
+/usr/include/c++/14/bits/locale_classes.h:
+
+/workspace/CHTL/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp:
+
+/usr/include/x86_64-linux-gnu/bits/locale.h:
+
+/usr/include/x86_64-linux-gnu/bits/wctype-wchar.h:
+
+/usr/include/c++/14/bits/exception_defines.h:
+
+/usr/include/c++/14/bits/deque.tcc:
+
+/usr/include/c++/14/bits/stringfwd.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/time_t.h:
+
+/usr/include/c++/14/bits/basic_string.h:
+
+/usr/include/c++/14/bits/locale_facets.h:
+
+/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODSystem.h:
+
+/usr/include/c++/14/bits/streambuf.tcc:
+
+/workspace/CHTL/CHTL/CHTLConstraint/CHTLConstraintProcessor.cpp:
+
+/usr/include/asm-generic/int-ll64.h:
+
+/usr/include/c++/14/ios:
+
+/usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
+
+/usr/include/x86_64-linux-gnu/bits/byteswap.h:
+
+/workspace/CHTL/CHTL/CHTLNode/ScriptNode.h:
+
+/usr/include/features-time64.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h:
+
+/usr/include/x86_64-linux-gnu/bits/struct_mutex.h:
+
+/usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
+
+/usr/include/c++/14/bits/requires_hosted.h:
+
+/usr/include/c++/14/array:
+
+/usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
+
+/usr/include/c++/14/bits/fs_dir.h:
+
+/usr/include/c++/14/bits/exception.h:
+
+/workspace/CHTL/CHTL/CHTLNode/NamespaceNode.cpp:
+
+/usr/include/c++/14/cctype:
+
+/usr/include/c++/14/bits/exception_ptr.h:
+
+/workspace/CHTL/CHTL_JS/CHTLJSManage/CHTLJSManage.cpp:
+
+/usr/include/c++/14/limits:
+
+/usr/include/c++/14/iomanip:
+
+/usr/include/c++/14/bits/functional_hash.h:
+
+/usr/include/c++/14/bits/hashtable.h:
+
+/usr/include/c++/14/bits/invoke.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix2_lim.h:
+
+/usr/include/c++/14/bits/ios_base.h:
+
+/workspace/CHTL/CHTL_JS/CHTLJSParser/CHTLJSParser.h:
+
+/workspace/CHTL/CHTL_JS/CHTLJSLoader/CHTLJSLoader.cpp:
+
+/usr/include/c++/14/bits/algorithmfwd.h:
+
+/usr/include/c++/14/bits/istream.tcc:
+
+/usr/include/c++/14/bits/locale_conv.h:
+
+/usr/include/c++/14/bits/locale_facets_nonio.h:
+
+/usr/include/c++/14/bits/ptr_traits.h:
+
+/usr/include/c++/14/bits/locale_facets_nonio.tcc:
+
+/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODSystem.cpp:
+
+/usr/include/c++/14/bits/memory_resource.h:
+
+/usr/include/c++/14/bits/unordered_set.h:
+
+/usr/include/c++/14/bits/memoryfwd.h:
+
+/usr/include/c++/14/bits/nested_exception.h:
+
+/usr/include/c++/14/bits/shared_ptr_atomic.h:
+
+/usr/include/c++/14/bits/regex_automaton.tcc:
+
+/workspace/CHTL/CLI/CLITool.cpp:
+
+/usr/include/features.h:
+
+/usr/include/c++/14/bits/node_handle.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/__stddef_ptrdiff_t.h:
+
+/usr/include/c++/14/bits/stl_pair.h:
+
+/usr/include/c++/14/bits/ostream_insert.h:
+
+/workspace/CHTL/CHTL/CHTLLoader/CHTLLoader.h:
+
+/usr/include/c++/14/bits/regex_compiler.h:
+
+/usr/include/c++/14/bits/range_access.h:
+
+/usr/include/c++/14/bits/refwrap.h:
+
+/usr/include/c++/14/bits/regex.h:
+
+/usr/include/c++/14/bits/regex_scanner.h:
+
+/usr/include/c++/14/bits/regex.tcc:
+
+/workspace/CHTL/CHTL/CHTLNode/UseNode.cpp:
+
+/workspace/CHTL/CHTL/CHTLNode/StyleNode.cpp:
+
+/usr/include/c++/14/bits/regex_automaton.h:
+
+/usr/include/c++/14/bits/regex_compiler.tcc:
+
+/usr/include/x86_64-linux-gnu/bits/types.h:
+
+/usr/include/c++/14/bits/regex_executor.tcc:
+
+/lib/x86_64-linux-gnu/libm.so.6:
+
+/usr/include/c++/14/iosfwd:
+
+/usr/include/c++/14/bits/regex_scanner.tcc:
+
+/usr/include/c++/14/bits/stl_set.h:
+
+/usr/include/c++/14/bits/sstream.tcc:
+
+/workspace/CHTL/CHTL/CHTLNode/BaseNode.h:
+
+/usr/include/c++/14/bits/new_allocator.h:
+
+/usr/include/c++/14/bits/stl_bvector.h:
+
+/usr/include/c++/14/bits/basic_string.tcc:
+
+/usr/include/c++/14/bits/stl_vector.h:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/opt_random.h:
+
+/usr/include/c++/14/bits/stl_construct.h:
+
+/usr/include/c++/14/bits/stl_heap.h:
+
+/usr/include/c++/14/bits/stl_stack.h:
+
+/usr/include/c++/14/deque:
+
+/usr/include/c++/14/bits/stl_map.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/sanitizer/tsan_interface.h:
+
+/usr/include/c++/14/bits/stl_multimap.h:
+
+/usr/include/c++/14/bits/stl_raw_storage_iter.h:
+
+/usr/include/c++/14/bits/stl_tree.h:
+
+/usr/include/c++/14/bits/streambuf_iterator.h:
+
+/workspace/CHTL/CHTL_JS/CJMODSystem/CJMODSyntax.h:
+
+/usr/include/c++/14/bits/stl_deque.h:
+
+/usr/include/c++/14/bits/unique_ptr.h:
+
+/usr/include/c++/14/bits/unordered_map.h:
+
+/usr/include/c++/14/bits/uses_allocator.h:
+
+/usr/include/c++/14/bits/uses_allocator_args.h:
+
+/usr/include/c++/14/bits/vector.tcc:
+
+/usr/include/c++/14/bits/version.h:
+
+/workspace/CHTL/CHTL/CHTLNode/ElementNode.h:
+
+/usr/include/c++/14/bitset:
+
+/usr/include/x86_64-linux-gnu/c++/14/bits/c++config.h:
+
+/usr/include/c++/14/cerrno:
+
+/usr/include/c++/14/concepts:
+
+/usr/include/c++/14/cstddef:
+
+/workspace/CHTL/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp:
+
+/usr/include/c++/14/bits/utility.h:
+
+/usr/include/c++/14/cstdio:
+
+/usr/include/c++/14/ext/numeric_traits.h:
+
+/usr/include/c++/14/ctime:
+
+/usr/include/c++/14/cwctype:
+
+/usr/include/c++/14/debug/assertions.h:
+
+/usr/include/c++/14/chrono:
+
+/usr/include/c++/14/atomic:
+
+/usr/include/x86_64-linux-gnu/bits/wordsize.h:
+
+/usr/include/c++/14/exception:
+
+/workspace/CHTL/CHTL/CHTLIOStream/CHTLIOStream.h:
+
+/usr/include/c++/14/ext/alloc_traits.h:
+
+/usr/include/c++/14/regex:
+
+/usr/include/c++/14/ext/atomicity.h:
+
+/workspace/CHTL/CHTL_JS/CHTLJSContext/CHTLJSContext.h:
+
+/usr/include/c++/14/map:
+
+/workspace/CHTL/Scanner/UnifiedScanner.h:
+
+/usr/include/c++/14/ext/concurrence.h:
+
+/usr/include/c++/14/ext/string_conversions.h:
+
+/usr/include/c++/14/ext/type_traits.h:
+
+/workspace/CHTL/CHTL/CHTLGenerator/CHTLGenerator.h:
+
+/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
+
+/usr/include/c++/14/bits/postypes.h:
+
+/usr/include/c++/14/initializer_list:
+
+/usr/include/c++/14/bits/random.tcc:
+
+/usr/include/c++/14/bits/stl_function.h:
+
+/usr/include/c++/14/memory:
+
+/workspace/CHTL/CHTL/CMODSystem/CMODLoader.cpp:
+
+/usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h:
+
+/usr/include/c++/14/pstl/glue_algorithm_defs.h:
+
+/usr/include/c++/14/cmath:
+
+/usr/include/c++/14/bits/stl_algo.h:
+
+/usr/include/c++/14/sstream:
+
+/usr/include/c++/14/string:
+
+/usr/include/c++/14/tuple:
+
+/workspace/CHTL/CHTL/CMODSystem/CMODSystem.cpp:
+
+/usr/include/c++/14/typeinfo:

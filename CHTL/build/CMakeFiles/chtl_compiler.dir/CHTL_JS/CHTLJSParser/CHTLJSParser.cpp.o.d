@@ -1,8 +1,8 @@
 CMakeFiles/chtl_compiler.dir/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o: \
   /workspace/CHTL/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp \
   /workspace/CHTL/CHTL_JS/CHTLJSParser/CHTLJSParser.h \
-  /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSLexer.h \
-  /workspace/CHTL/CHTL_JS/CHTLJSLexer/CHTLJSToken.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSParser/../CHTLJSLexer/CHTLJSLexer.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSParser/../CHTLJSLexer/CHTLJSToken.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/string \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/requires_hosted.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++config.h \
@@ -117,7 +117,6 @@ CMakeFiles/chtl_compiler.dir/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o: \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
   /usr/include/alloca.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/std_abs.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cstdio \
@@ -127,7 +126,6 @@ CMakeFiles/chtl_compiler.dir/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o: \
   /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
   /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cerrno \
   /usr/include/errno.h /usr/include/x86_64-linux-gnu/bits/errno.h \
   /usr/include/linux/errno.h /usr/include/x86_64-linux-gnu/asm/errno.h \
@@ -215,7 +213,7 @@ CMakeFiles/chtl_compiler.dir/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/enable_special_members.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/array \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/compare \
-  /workspace/CHTL/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.h \
+  /workspace/CHTL/CHTL_JS/CHTLJSParser/../CHTLJSNode/CHTLJSBaseNode.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iostream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ostream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ios \
