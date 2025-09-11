@@ -16,7 +16,7 @@ enum class TokenType {
 
     // Multi-character tokens
     STAR_STAR,
-    GEN_COMMENT, // --
+    GEN_COMMENT,
 
     // Literals
     IDENTIFIER,
@@ -28,6 +28,7 @@ enum class TokenType {
     STYLE,
     SCRIPT,
     KEYWORD_ORIGIN,
+    KEYWORD_NAMESPACE,
     KEYWORD_IMPORT,
     KEYWORD_FROM,
     KEYWORD_AS,
@@ -40,7 +41,7 @@ enum class TokenType {
 struct Token {
     TokenType type;
     std::string lexeme;
-    std::string content; // Used for [Origin] blocks
+    std::string content;
     int line;
 
     std::string toString() const;

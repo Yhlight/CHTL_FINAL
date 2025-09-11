@@ -31,6 +31,7 @@ std::string Token::toString() const {
         case TokenType::STYLE: typeStr = "STYLE"; break;
         case TokenType::SCRIPT: typeStr = "SCRIPT"; break;
         case TokenType::KEYWORD_ORIGIN: typeStr = "KEYWORD_ORIGIN"; break;
+        case TokenType::KEYWORD_NAMESPACE: typeStr = "KEYWORD_NAMESPACE"; break;
         case TokenType::KEYWORD_IMPORT: typeStr = "KEYWORD_IMPORT"; break;
         case TokenType::KEYWORD_FROM: typeStr = "KEYWORD_FROM"; break;
         case TokenType::KEYWORD_AS: typeStr = "KEYWORD_AS"; break;
