@@ -44,6 +44,21 @@ class CHTLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CHTLParser#specializationBody.
+    def visitSpecializationBody(self, ctx:CHTLParser.SpecializationBodyContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#insertStatement.
+    def visitInsertStatement(self, ctx:CHTLParser.InsertStatementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#deleteStatement.
+    def visitDeleteStatement(self, ctx:CHTLParser.DeleteStatementContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CHTLParser#attribute.
     def visitAttribute(self, ctx:CHTLParser.AttributeContext):
         return self.visitChildren(ctx)
@@ -66,6 +81,11 @@ class CHTLVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by CHTLParser#value.
     def visitValue(self, ctx:CHTLParser.ValueContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#valuePart.
+    def visitValuePart(self, ctx:CHTLParser.ValuePartContext):
         return self.visitChildren(ctx)
 
 

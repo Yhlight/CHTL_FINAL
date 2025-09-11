@@ -4,7 +4,8 @@ from CHTL.generated.CHTLParser import CHTLParser
 from CHTL.ast.nodes import (
     DocumentNode, ElementNode, AttributeNode, TextNode, StyleNode, StyleUsageNode,
     TemplateDefinitionNode, CustomDefinitionNode,
-    UsageNode, ElementUsageNode, VarUsageNode
+    UsageNode, ElementUsageNode, VarUsageNode,
+    SpecializationNode, InsertStatementNode, DeleteStatementNode
 )
 from CHTL.symbol_table import SymbolTable
 
@@ -24,10 +25,7 @@ class AstBuilder(CHTLVisitor):
                         self.symbol_table.define(node)
                     elif node:
                         children.append(node)
-
-        doc = DocumentNode(children=children)
-        # Style processing is now handled by the TemplateExpander
-        return doc
+        return DocumentNode(children=children)
 
     def visitDefinition(self, ctx:CHTLParser.DefinitionContext):
         node_data = self.visit(ctx.getChild(1))
@@ -80,7 +78,23 @@ class AstBuilder(CHTLVisitor):
 
     def visitElementUsage(self, ctx:CHTLParser.ElementUsageContext):
         name = ctx.IDENTIFIER().getText()
-        return ElementUsageNode(name=name)
+        # With the simplified grammar, there are no specializations yet.
+        return ElementUsageNode(name=name, specializations=[])
+
+    def visitSpecializationBody(self, ctx:CHTLParser.SpecializationBodyContext):
+        if ctx.insertStatement():
+            return self.visit(ctx.insertStatement())
+        elif ctx.deleteStatement():
+            return self.visit(ctx.deleteStatement())
+        return None
+
+    def visitInsertStatement(self, ctx:CHTLParser.InsertStatementContext):
+        elements = [self.visit(el) for el in ctx.element()]
+        return InsertStatementNode(elements=elements)
+
+    def visitDeleteStatement(self, ctx:CHTLParser.DeleteStatementContext):
+        tag_name = ctx.IDENTIFIER().getText()
+        return DeleteStatementNode(tag_name=tag_name)
 
     def visitAttribute(self, ctx:CHTLParser.AttributeContext):
         name = ctx.IDENTIFIER().getText()
@@ -97,26 +111,32 @@ class AstBuilder(CHTLVisitor):
         if not style_data or style_data.get('type') != 'style':
             return None
         return StyleNode(
-            raw_content="", # Raw content is not used in the AST, only for parsing
+            raw_content="",
             inline_styles=style_data.get('inline', ''),
             global_rules=style_data.get('global', []),
-            style_usages=style_data.get('usages', [])
+            style_usages=style_data.get('usages', []),
+            deleted_properties=style_data.get('deleted', [])
         )
 
     def visitValue(self, ctx:CHTLParser.ValueContext):
+        parts = [self.visit(child) for child in ctx.children]
+        if len(parts) == 1 and isinstance(parts[0], VarUsageNode):
+            return parts[0]
+        str_parts = [str(p) if not isinstance(p, VarUsageNode) else f"{p.template_name}({p.var_name})" for p in parts]
+        return "".join(str_parts)
+
+    def visitValuePart(self, ctx:CHTLParser.ValuePartContext):
         if ctx.STRING():
             return ctx.STRING().getText()[1:-1]
         elif ctx.varUsage():
             return self.visit(ctx.varUsage())
-        parts = []
-        if ctx.children:
-            for child in ctx.children:
-                parts.append(child.getText())
-        if parts:
-            return " ".join(parts)
-        return ""
+        else:
+            return ctx.getChild(0).getText()
 
     def visitVarUsage(self, ctx:CHTLParser.VarUsageContext):
         template_name = ctx.IDENTIFIER(0).getText()
         var_name = ctx.IDENTIFIER(1).getText()
-        return VarUsageNode(template_name=template_name, var_name=var_name)
+        override_value = None
+        if ctx.value():
+            override_value = self.visit(ctx.value())
+        return VarUsageNode(template_name=template_name, var_name=var_name, override_value=override_value)

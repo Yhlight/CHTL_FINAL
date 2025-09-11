@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Any
 
 class AstNode:
     """Base class for all AST nodes."""
@@ -29,21 +29,41 @@ class UsageNode(AstNode):
     """Base class for template usage nodes."""
     pass
 
+class SpecializationNode(AstNode):
+    """Base class for specialization statements like insert/delete."""
+    pass
+
+class InsertStatementNode(SpecializationNode):
+    def __init__(self, elements: List['ElementNode']):
+        self.elements = elements
+    def __repr__(self):
+        return f"InsertStatementNode(elements_len={len(self.elements)})"
+
+class DeleteStatementNode(SpecializationNode):
+    def __init__(self, tag_name: str):
+        self.tag_name = tag_name
+    def __repr__(self):
+        return f"DeleteStatementNode(tag_name='{self.tag_name}')"
+
 class ElementUsageNode(UsageNode):
     """Represents a @Element usage."""
-    def __init__(self, name: str):
+    def __init__(self, name: str, specializations: List[SpecializationNode]):
         self.name = name
+        self.specializations = specializations
 
     def __repr__(self):
-        return f"ElementUsageNode(name='{self.name}')"
+        return f"ElementUsageNode(name='{self.name}', specializations={len(self.specializations)})"
 
 class VarUsageNode(UsageNode):
     """Represents a variable usage like VarName(varName)."""
-    def __init__(self, template_name: str, var_name: str):
+    def __init__(self, template_name: str, var_name: str, override_value: Any = None):
         self.template_name = template_name
         self.var_name = var_name
+        self.override_value = override_value
 
     def __repr__(self):
+        if self.override_value:
+            return f"VarUsageNode(template='{self.template_name}', var='{self.var_name}', override='{self.override_value}')"
         return f"VarUsageNode(template='{self.template_name}', var='{self.var_name}')"
 
 
@@ -93,14 +113,15 @@ class StyleUsageNode(UsageNode):
 
 class StyleNode(AstNode):
     """Represents a style block."""
-    def __init__(self, raw_content: str, inline_styles: str, global_rules: List[str], style_usages: List[StyleUsageNode]):
+    def __init__(self, raw_content: str, inline_styles: str, global_rules: List[str], style_usages: List[StyleUsageNode], deleted_properties: List[str]):
         self.raw_content = raw_content
         self.inline_styles = inline_styles
         self.global_rules = global_rules
         self.style_usages = style_usages
+        self.deleted_properties = deleted_properties
 
     def __repr__(self):
-        return f"StyleNode(inline='{self.inline_styles}', global_rules={len(self.global_rules)}, usages={len(self.style_usages)})"
+        return f"StyleNode(inline='{self.inline_styles}', global_rules={len(self.global_rules)}, usages={len(self.style_usages)}, deleted={len(self.deleted_properties)})"
 
 # A type hint for any node that can be a child of an element
 ElementChild = Union[ElementNode, TextNode, StyleNode]

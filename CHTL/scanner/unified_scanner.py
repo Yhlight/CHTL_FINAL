@@ -55,13 +55,14 @@ class UnifiedScanner:
                 block_content = source_text[content_start:content_end]
                 block_id = self._generate_id()
 
-                inline_styles, global_rules, style_usages = parse_style_content(block_content)
+                inline_styles, global_rules, style_usages, deleted_properties = parse_style_content(block_content)
 
                 self.registry[block_id] = {
                     'type': 'style',
                     'inline': inline_styles,
                     'global': global_rules,
-                    'usages': style_usages
+                    'usages': style_usages,
+                    'deleted': deleted_properties
                 }
 
                 modified_source += f'__style_ref__("{block_id}");'

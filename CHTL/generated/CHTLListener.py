@@ -71,6 +71,33 @@ class CHTLListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CHTLParser#specializationBody.
+    def enterSpecializationBody(self, ctx:CHTLParser.SpecializationBodyContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#specializationBody.
+    def exitSpecializationBody(self, ctx:CHTLParser.SpecializationBodyContext):
+        pass
+
+
+    # Enter a parse tree produced by CHTLParser#insertStatement.
+    def enterInsertStatement(self, ctx:CHTLParser.InsertStatementContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#insertStatement.
+    def exitInsertStatement(self, ctx:CHTLParser.InsertStatementContext):
+        pass
+
+
+    # Enter a parse tree produced by CHTLParser#deleteStatement.
+    def enterDeleteStatement(self, ctx:CHTLParser.DeleteStatementContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#deleteStatement.
+    def exitDeleteStatement(self, ctx:CHTLParser.DeleteStatementContext):
+        pass
+
+
     # Enter a parse tree produced by CHTLParser#attribute.
     def enterAttribute(self, ctx:CHTLParser.AttributeContext):
         pass
@@ -113,6 +140,15 @@ class CHTLListener(ParseTreeListener):
 
     # Exit a parse tree produced by CHTLParser#value.
     def exitValue(self, ctx:CHTLParser.ValueContext):
+        pass
+
+
+    # Enter a parse tree produced by CHTLParser#valuePart.
+    def enterValuePart(self, ctx:CHTLParser.ValuePartContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#valuePart.
+    def exitValuePart(self, ctx:CHTLParser.ValuePartContext):
         pass
 
 

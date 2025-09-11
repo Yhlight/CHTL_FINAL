@@ -14,7 +14,12 @@ varTemplate: AT_VAR IDENTIFIER LBRACE attribute* RBRACE;
 
 
 element: IDENTIFIER LBRACE (attribute | element | textNode | stylePlaceholder | elementUsage)* RBRACE;
-elementUsage: AT_ELEMENT IDENTIFIER (LBRACE RBRACE)? SEMI; // For now, only empty body for customization placeholder
+elementUsage: AT_ELEMENT IDENTIFIER SEMI;
+
+specializationBody: insertStatement | deleteStatement;
+insertStatement: INSERT LBRACE element+ RBRACE;
+deleteStatement: DELETE IDENTIFIER SEMI;
+
 
 attribute: IDENTIFIER (COLON | EQ) value SEMI;
 
@@ -23,10 +28,12 @@ textNode: TEXT LBRACE value RBRACE;
 stylePlaceholder: STYLE_REF LPAR STRING RPAR SEMI;
 
 styleContent
-    : IDENTIFIER | STRING | COLON | SEMI | TEXT | LBRACE | EQ | NUMBER | DOT
+    : IDENTIFIER | STRING | COLON | SEMI | TEXT | LBRACE | EQ | NUMBER | DOT | varUsage
     ;
 
-value: STRING | varUsage | (IDENTIFIER | TEXT | STYLE)+ ;
+value: (valuePart)+ ;
+valuePart: STRING | varUsage | IDENTIFIER | TEXT | STYLE | NUMBER | DOT;
+
 varUsage: IDENTIFIER LPAR IDENTIFIER (EQ value)? RPAR;
 
 
@@ -36,6 +43,8 @@ CUSTOM: '[Custom]';
 AT_STYLE: '@Style';
 AT_ELEMENT: '@Element';
 AT_VAR: '@Var';
+INSERT: 'insert';
+DELETE: 'delete';
 
 STYLE_REF: '__style_ref__';
 STYLE: 'style';

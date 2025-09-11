@@ -1,27 +1,11 @@
-[Template] @Var Theme {
-    mainColor: red;
-}
-
-[Template] @Style BoxStyle {
-    border: 1px solid black;
-    padding: 10px;
-}
-
-[Template] @Element MyBox {
+[Template] @Element Card {
     div {
-        class: box;
-        text { A box }
+        class: card;
+        h2 { text { Card Title } }
     }
 }
 
 div {
-    id: "app";
-    color: Theme(mainColor); // Var usage
-
-    style {
-        @Style BoxStyle; // Style usage
-        background-color: white;
-    }
-
-    @Element MyBox; // Element usage
+    id: app;
+    @Element Card;
 }

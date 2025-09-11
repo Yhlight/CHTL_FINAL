@@ -1,26 +1,22 @@
 import copy
+import cssutils
+import logging
 from CHTL.ast.nodes import (
     AstNode, DocumentNode, ElementNode, AttributeNode, TextNode, StyleNode, StyleUsageNode,
-    UsageNode, ElementUsageNode, VarUsageNode
+    UsageNode, ElementUsageNode, VarUsageNode, InsertStatementNode, DeleteStatementNode
 )
 from CHTL.symbol_table import SymbolTable
-from CHTL.css_parser import parse_style_content
 
 class TemplateExpander:
-    """
-    Walks the AST and expands all template usages (@Element, @Var, @Style).
-    This is a transformative pass that modifies the AST in place.
-    """
     def __init__(self, symbol_table: SymbolTable):
         self.symbol_table = symbol_table
+        cssutils.log.setLevel(logging.CRITICAL)
 
     def expand(self, node: AstNode):
-        """Public method to start the expansion and style processing."""
         self._expand_templates(node)
-        self._process_styles(node) # New style processing pass
+        self._process_styles(node)
 
     def _expand_templates(self, node: AstNode):
-        """Recursively expands @Element and @Var usages."""
         method_name = f'_visit_and_expand_{node.__class__.__name__.lower()}'
         visitor_method = getattr(self, method_name, self._visit_default)
         return visitor_method(node)
@@ -37,7 +33,6 @@ class TemplateExpander:
             if isinstance(child, ElementUsageNode):
                 expanded_nodes = self._expand_element_usage(child)
                 node.children[i:i+1] = expanded_nodes
-                # Re-visit the newly inserted nodes
                 for expanded_node in expanded_nodes:
                     self._expand_templates(expanded_node)
                 i += len(expanded_nodes)
@@ -65,45 +60,72 @@ class TemplateExpander:
 
     def _expand_element_usage(self, node: ElementUsageNode):
         template = self.symbol_table.lookup(node.name, 'Element')
-        if template:
-            return copy.deepcopy(template.body)
-        return []
+        if not template:
+            return []
+
+        # Get the base nodes from the template
+        expanded_nodes = copy.deepcopy(template.body)
+
+        # Apply specializations
+        for spec in node.specializations:
+            if isinstance(spec, DeleteStatementNode):
+                # Filter out nodes with the matching tag name
+                expanded_nodes = [n for n in expanded_nodes if not (isinstance(n, ElementNode) and n.tag_name == spec.tag_name)]
+            elif isinstance(spec, InsertStatementNode):
+                # For this simplified version, we just append the new elements
+                expanded_nodes.extend(spec.elements)
+
+        return expanded_nodes
 
     def _expand_var_usage(self, node: VarUsageNode):
+        if node.override_value is not None:
+            if isinstance(node.override_value, VarUsageNode):
+                return self._expand_var_usage(node.override_value)
+            return node.override_value
         var_template = self.symbol_table.lookup(node.template_name, 'Var')
         if var_template:
             for attr in var_template.body:
                 if attr.name == node.var_name:
+                    if isinstance(attr.value, VarUsageNode):
+                        return self._expand_var_usage(attr.value)
                     return attr.value
         return f"{node.template_name}({node.var_name})"
 
     def _process_styles(self, node, global_rules_list=None):
         if isinstance(node, DocumentNode):
             global_rules_list = []
-
         if isinstance(node, ElementNode):
-            child_inline_styles = []
+            child_inline_styles_parts = []
+            deleted_in_block = []
             for child in node.children:
                 if isinstance(child, StyleNode):
-                    # Expand @Style usages within the style block
-                    self._expand_style_usages(child)
-
+                    expanded_styles = self._expand_style_usages(child)
+                    if expanded_styles:
+                        child_inline_styles_parts.append(expanded_styles)
                     if child.inline_styles:
-                        child_inline_styles.append(child.inline_styles)
+                        child_inline_styles_parts.append(child.inline_styles)
                     if child.global_rules:
                         global_rules_list.extend(child.global_rules)
+                    if child.deleted_properties:
+                        deleted_in_block.extend(child.deleted_properties)
 
-            if child_inline_styles:
-                # ... (merging logic from ast_builder) ...
+            if child_inline_styles_parts:
+                full_style_string = "; ".join(filter(None, child_inline_styles_parts))
+                style_decl = cssutils.parseStyle(full_style_string)
+                for prop_name in deleted_in_block:
+                    style_decl.removeProperty(prop_name)
+                final_style_text = style_decl.cssText.replace('\n', ' ').strip()
+
                 existing_style_attr = None
                 for attr in node.attributes:
                     if attr.name.lower() == 'style':
                         existing_style_attr = attr
                         break
                 if existing_style_attr:
-                    existing_style_attr.value = "; ".join(child_inline_styles) + "; " + existing_style_attr.value
+                    existing_style_attr.value = final_style_text + "; " + existing_style_attr.value
                 else:
-                    node.attributes.append(AttributeNode(name='style', value="; ".join(child_inline_styles)))
+                    if final_style_text:
+                        node.attributes.append(AttributeNode(name='style', value=final_style_text))
 
         if hasattr(node, 'children'):
             for child in node.children:
@@ -113,28 +135,11 @@ class TemplateExpander:
             node.global_rules = global_rules_list
 
     def _expand_style_usages(self, style_node: StyleNode):
-        """
-        Expands @Style usages within a StyleNode by looking up the template
-        and prepending its content to the node's inline styles.
-        """
         if not style_node.style_usages:
-            return
-
+            return ""
         expanded_styles = []
         for usage in style_node.style_usages:
             template = self.symbol_table.lookup(usage.name, 'Style')
             if template and template.body and isinstance(template.body[0], TextNode):
-                # The body of a style template is its raw text content
                 expanded_styles.append(template.body[0].value)
-
-        # Prepend the expanded styles to the existing inline styles
-        all_inline_styles = expanded_styles
-        if style_node.inline_styles:
-            all_inline_styles.append(style_node.inline_styles)
-
-        # Clean up parts before joining to avoid double semicolons
-        cleaned_styles = [s.strip().removesuffix(';') for s in all_inline_styles if s.strip()]
-        style_node.inline_styles = "; ".join(filter(None, cleaned_styles))
-
-        # Mark the usages as expanded
-        style_node.style_usages = []
+        return "; ".join(filter(None, expanded_styles))
