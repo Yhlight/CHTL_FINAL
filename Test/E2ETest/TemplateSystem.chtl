@@ -1,0 +1,37 @@
+// Test for the CHTL Template System
+
+[Template] @Style BaseTheme {
+    color: "blue";
+    font-size: 16px;
+}
+
+[Template] @Style TitleTheme {
+    @Style BaseTheme;
+    font-size: 24px; // This should override the base
+    font-weight: "bold";
+}
+
+[Template] @Element Card {
+    div {
+        class: "card-wrapper";
+        h2 {
+            style {
+                @Style TitleTheme;
+            }
+            text { A Card Title }
+        }
+        p {
+            text { Some card content. }
+        }
+    }
+}
+
+// --- Now use the templates ---
+
+body {
+    // Use the element template
+    @Element Card;
+
+    // Use it again
+    @Element Card;
+}

@@ -1,4 +1,5 @@
 #include "CHTLGenerator.h"
+#include "CHTLNode/TemplateUsageNode.h"
 #include <stdexcept>
 #include <vector>
 #include <string>
@@ -6,6 +7,7 @@
 #include <set>
 #include <cmath>
 #include <algorithm>
+#include <map>
 
 namespace CHTL {
 
@@ -48,8 +50,18 @@ std::string CHTLGenerator::escapeHTML(const std::string& data) {
 std::string CHTLGenerator::Generate(const NodeList& ast) {
     m_output_body.str("");
     m_output_css.str("");
+    m_template_repo.clear();
+
     for (const auto& node : ast) {
-        Visit(node);
+        if (node->GetType() == NodeType::TemplateDefinition) {
+            VisitTemplateDefinition(static_cast<const TemplateDefinitionNode*>(node.get()));
+        }
+    }
+
+    for (const auto& node : ast) {
+        if (node->GetType() != NodeType::TemplateDefinition) {
+            Visit(node);
+        }
     }
 
     std::string css = m_output_css.str();
@@ -68,11 +80,72 @@ void CHTLGenerator::Visit(const NodePtr& node) {
         case NodeType::Element: VisitElement(static_cast<const ElementNode*>(node.get())); break;
         case NodeType::Text: VisitText(static_cast<const TextNode*>(node.get())); break;
         case NodeType::Comment: VisitComment(static_cast<const CommentNode*>(node.get())); break;
-        // Style nodes are visited from within VisitElement, not at the top level
+        case NodeType::ElementTemplateUsage: VisitElementTemplateUsage(static_cast<const ElementTemplateUsageNode*>(node.get())); break;
+        case NodeType::TemplateDefinition: break;
         case NodeType::Style: break;
         default: break;
     }
 }
+
+void CHTLGenerator::VisitTemplateDefinition(const TemplateDefinitionNode* node) {
+    if (m_template_repo.count(node->GetName())) {
+        throw std::runtime_error("Template with name '" + node->GetName() + "' is already defined.");
+    }
+    m_template_repo[node->GetName()] = node;
+}
+
+void CHTLGenerator::VisitElementTemplateUsage(const ElementTemplateUsageNode* node) {
+    auto it = m_template_repo.find(node->GetTemplateName());
+    if (it == m_template_repo.end()) {
+        throw std::runtime_error("Undefined element template used: @" + node->GetTemplateName());
+    }
+    const auto* templateDef = it->second;
+    if (templateDef->GetTemplateType() != TemplateType::Element) {
+        throw std::runtime_error("Mismatched template type usage for @" + node->GetTemplateName() + ". Expected @Element.");
+    }
+
+    for (const auto& contentNode : templateDef->GetContent()) {
+        Visit(contentNode);
+    }
+}
+
+std::vector<Property> CHTLGenerator::ExpandStyleTemplate(const std::string& templateName) {
+    auto it = m_template_repo.find(templateName);
+    if (it == m_template_repo.end()) {
+        throw std::runtime_error("Undefined style template used: " + templateName);
+    }
+    const auto* templateDef = it->second;
+    if (templateDef->GetTemplateType() != TemplateType::Style && templateDef->GetTemplateType() != TemplateType::Var) {
+        throw std::runtime_error("Template '" + templateName + "' is not a @Style or @Var template.");
+    }
+
+    // This should contain exactly one StyleNode.
+    const auto* styleNode = static_cast<const StyleNode*>(templateDef->GetContent().front().get());
+
+    std::map<std::string, Property> final_properties;
+
+    for (const auto& prop : styleNode->GetProperties()) {
+        if (prop.name == "__TEMPLATE_USAGE__") {
+            const auto* usageNode = static_cast<const TemplateUsageNode*>(prop.value.get());
+            std::vector<Property> inherited_props = ExpandStyleTemplate(usageNode->GetTemplateName());
+            for (const auto& inherited_prop : inherited_props) {
+                // Add inherited properties, they can be overridden later.
+                if (final_properties.find(inherited_prop.name) == final_properties.end()) {
+                    final_properties[inherited_prop.name] = inherited_prop;
+                }
+            }
+        } else {
+            final_properties[prop.name] = prop;
+        }
+    }
+
+    std::vector<Property> result;
+    for (const auto& pair : final_properties) {
+        result.push_back(pair.second);
+    }
+    return result;
+}
+
 
 void CHTLGenerator::VisitElement(const ElementNode* node) {
     static const std::set<std::string> selfClosingTags = {
@@ -82,52 +155,52 @@ void CHTLGenerator::VisitElement(const ElementNode* node) {
 
     m_output_body << "<" << node->GetTagName();
 
-    // --- Attribute and Style Processing ---
     std::stringstream inline_style_stream;
     std::string primary_selector;
+    std::vector<Property> inline_properties;
 
-    // First pass for attributes to determine primary selector
     for (const auto& prop : node->GetProperties()) {
-        if (prop.name == "id") {
-            primary_selector = "#" + ValueToString(EvaluateExpression(prop.value, node));
-        } else if (prop.name == "class" && primary_selector.empty()) {
-            primary_selector = "." + ValueToString(EvaluateExpression(prop.value, node));
-        }
+        if (prop.name == "id") primary_selector = "#" + ValueToString(EvaluateExpression(prop.value, node));
+        else if (prop.name == "class" && primary_selector.empty()) primary_selector = "." + ValueToString(EvaluateExpression(prop.value, node));
         EvaluatedValue val = EvaluateExpression(prop.value, node);
         m_output_body << " " << prop.name << "=\"" << escapeHTML(ValueToString(val)) << "\"";
     }
 
-    // Second pass for style blocks
     for (const auto& child : node->GetChildren()) {
         if (child->GetType() == NodeType::Style) {
             const auto* styleNode = static_cast<const StyleNode*>(child.get());
 
-            // Process direct properties for inline styles
             for (const auto& prop : styleNode->GetProperties()) {
-                EvaluatedValue val = EvaluateExpression(prop.value, node);
-                inline_style_stream << prop.name << ":" << ValueToString(val) << ";";
+                if (prop.name == "__TEMPLATE_USAGE__") {
+                    const auto* usageNode = static_cast<const TemplateUsageNode*>(prop.value.get());
+                    std::vector<Property> expanded_props = ExpandStyleTemplate(usageNode->GetTemplateName());
+                    inline_properties.insert(inline_properties.end(), expanded_props.begin(), expanded_props.end());
+                } else {
+                    inline_properties.push_back(prop);
+                }
             }
 
-            // Process nested rules for hoisting
             for (const auto& rule : styleNode->GetRules()) {
                 VisitStyleRule(rule.get(), node, primary_selector);
             }
         }
     }
 
+    for(const auto& prop : inline_properties) {
+        EvaluatedValue val = EvaluateExpression(prop.value, node);
+        inline_style_stream << prop.name << ":" << ValueToString(val) << ";";
+    }
+
     std::string inline_style = inline_style_stream.str();
     if (!inline_style.empty()) {
         m_output_body << " style=\"" << escapeHTML(inline_style) << "\"";
     }
-    // --- End Attribute and Style Processing ---
 
     m_output_body << ">";
 
     if (selfClosingTags.count(node->GetTagName()) == 0) {
         for (const auto& child : node->GetChildren()) {
-            if (child->GetType() != NodeType::Style) {
-                Visit(child);
-            }
+            if (child->GetType() != NodeType::Style) Visit(child);
         }
         m_output_body << "</" << node->GetTagName() << ">";
     }
@@ -145,11 +218,8 @@ void CHTLGenerator::VisitComment(const CommentNode* node) {
 
 void CHTLGenerator::VisitStyleRule(const StyleRuleNode* node, const ElementNode* context, const std::string& primary_selector) {
     std::string final_selector = node->GetSelector();
-    // Handle contextual '&' selector
     if (final_selector.rfind('&', 0) == 0) {
-        if (primary_selector.empty()) {
-            throw std::runtime_error("Cannot use '&' selector on an element with no class or id.");
-        }
+        if (primary_selector.empty()) throw std::runtime_error("Cannot use '&' selector on an element with no class or id.");
         final_selector.replace(0, 1, primary_selector);
     }
 
@@ -176,6 +246,8 @@ EvaluatedValue CHTLGenerator::EvaluateExpression(const ExpressionNodePtr& expr, 
             return VisitBinaryOp(static_cast<const BinaryOpNode*>(expr.get()), context);
         case ExpressionNodeType::Conditional:
             return VisitConditionalExpr(static_cast<const ConditionalExprNode*>(expr.get()), context);
+        case ExpressionNodeType::TemplateUsage:
+            throw std::runtime_error("Template usages should be expanded before expression evaluation.");
         default:
             throw std::runtime_error("Unsupported expression type in generator.");
     }

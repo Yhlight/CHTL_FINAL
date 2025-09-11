@@ -149,6 +149,9 @@ NodePtr CHTLParser::ParseNode() {
     SkipComments();
     Token current = Peek();
 
+    if (current.type == TokenType::OpenBracket) {
+        return ParseTemplateDefinition();
+    }
     if (current.type == TokenType::Identifier) {
         return ParseElement();
     }
@@ -156,8 +159,11 @@ NodePtr CHTLParser::ParseNode() {
         return ParseTextBlock();
     }
     if (current.type == TokenType::Style) {
-        // Global style block
         return ParseStyleBlock();
+    }
+    if (current.type == TokenType::At) {
+        // This must be an element template usage at the root level
+        return ParseElementTemplateUsage();
     }
 
     if (current.type == TokenType::EndOfFile || current.type == TokenType::CloseBrace) {
@@ -177,30 +183,30 @@ NodePtr CHTLParser::ParseElement() {
         SkipComments();
         if (Peek().type == TokenType::CloseBrace) break;
 
-        if (Peek().type == TokenType::Identifier) {
+        Token token = Peek();
+        if (token.type == TokenType::Identifier) {
             if (Peek(1).type == TokenType::Colon || Peek(1).type == TokenType::Equals) {
-                // This is a property
                 Token propName = Consume();
                 Consume(); // The ':' or '='
-
                 ExpressionNodePtr propValue = ParseExpression(LOWEST);
                 element->AddProperty({propName.value, propValue});
-
                 Expect(TokenType::Semicolon);
             } else {
-                // This is a nested element
                 NodePtr child = ParseNode();
                 if (child) element->AddChild(child);
             }
-        } else if (Peek().type == TokenType::Text) {
+        } else if (token.type == TokenType::Text) {
             NodePtr child = ParseTextBlock();
             if (child) element->AddChild(child);
-        } else if (Peek().type == TokenType::Style) {
+        } else if (token.type == TokenType::Style) {
             NodePtr child = ParseStyleBlock();
+            if (child) element->AddChild(child);
+        } else if (token.type == TokenType::At) {
+            NodePtr child = ParseElementTemplateUsage();
             if (child) element->AddChild(child);
         }
         else {
-             throw std::runtime_error("Unexpected token inside element " + tagNameToken.value + ": " + Peek().value);
+             throw std::runtime_error("Unexpected token inside element '" + tagNameToken.value + "': " + token.value);
         }
     }
 
@@ -224,9 +230,8 @@ NodePtr CHTLParser::ParseTextBlock() {
     }
 
     size_t first = textContent.find_first_not_of(" \t\n\r");
-    if (std::string::npos == first) {
-        textContent = "";
-    } else {
+    if (std::string::npos == first) textContent = "";
+    else {
         size_t last = textContent.find_last_not_of(" \t\n\r");
         textContent = textContent.substr(first, (last - first + 1));
     }
@@ -246,12 +251,19 @@ NodePtr CHTLParser::ParseStyleBlock() {
         if (Peek().type == TokenType::CloseBrace) break;
 
         Token token1 = Peek();
-        Token token2 = Peek(1);
 
-        if (token1.type == TokenType::Identifier && token2.type == TokenType::Colon) {
+        if (token1.type == TokenType::At) {
+            // Style template usage: @Style MyTheme;
+            Consume(); // @
+            Expect(TokenType::Style);
+            Token templateName = Expect(TokenType::Identifier);
+            Expect(TokenType::Semicolon);
+            styleNode->AddProperty({"__TEMPLATE_USAGE__", std::make_shared<TemplateUsageNode>(templateName.value)});
+        }
+        else if (token1.type == TokenType::Identifier) {
             // Direct property for inline style
             Token propName = Consume();
-            Consume(); // Consume ':'
+            Expect(TokenType::Colon);
             ExpressionNodePtr propValue = ParseExpression(LOWEST);
             styleNode->AddProperty({propName.value, propValue});
             Expect(TokenType::Semicolon);
@@ -259,15 +271,13 @@ NodePtr CHTLParser::ParseStyleBlock() {
             // This is a nested style rule (e.g., .class, #id, &:pseudo)
             std::string selector;
             if (token1.type == TokenType::Dot || token1.type == TokenType::Hash) {
-                selector += Consume().value; // . or #
+                selector += Consume().value;
                 selector += Expect(TokenType::Identifier).value;
             } else if (token1.type == TokenType::Ampersand) {
-                selector += Consume().value; // &
+                selector += Consume().value;
                 if(Peek().type == TokenType::Colon) {
-                    selector += Consume().value; // :
-                    if(Peek().type == TokenType::Colon) { // ::pseudo-element
-                        selector += Consume().value;
-                    }
+                    selector += Consume().value;
+                    if(Peek().type == TokenType::Colon) selector += Consume().value;
                     selector += Expect(TokenType::Identifier).value;
                 }
             } else {
@@ -295,10 +305,41 @@ NodePtr CHTLParser::ParseStyleBlock() {
     return styleNode;
 }
 
+NodePtr CHTLParser::ParseTemplateDefinition() {
+    Expect(TokenType::OpenBracket);
+    // For now, we assume the identifier is always "Template" as per the spec
+    Expect(TokenType::Identifier);
+    Expect(TokenType::CloseBracket);
+    Expect(TokenType::At);
 
-// Keeping these stubs for future implementation
-NodePtr CHTLParser::ParseStyleBlockContent() { return nullptr; }
-NodePtr CHTLParser::ParseTemplateDefinition() { return nullptr; }
-NodePtr CHTLParser::ParseTemplateUsage() { return nullptr; }
+    Token typeToken = Expect(TokenType::Identifier);
+    Token nameToken = Expect(TokenType::Identifier);
+
+    TemplateType type;
+    if (typeToken.value == "Style") type = TemplateType::Style;
+    else if (typeToken.value == "Element") type = TemplateType::Element;
+    else if (typeToken.value == "Var") type = TemplateType::Var;
+    else throw std::runtime_error("Unknown template type: " + typeToken.value);
+
+    NodeList content;
+    Expect(TokenType::OpenBrace);
+    while(Peek().type != TokenType::CloseBrace && Peek().type != TokenType::EndOfFile) {
+        NodePtr node = (type == TemplateType::Element) ? ParseNode() : ParseStyleBlock();
+        if (node) content.push_back(node);
+        // For Style/Var templates, there's only one style block
+        if (type != TemplateType::Element) break;
+    }
+    Expect(TokenType::CloseBrace);
+
+    return std::make_shared<TemplateDefinitionNode>(nameToken.value, type, content);
+}
+
+NodePtr CHTLParser::ParseElementTemplateUsage() {
+    Expect(TokenType::At);
+    Expect(TokenType::Element);
+    Token name = Expect(TokenType::Identifier);
+    Expect(TokenType::Semicolon);
+    return std::make_shared<ElementTemplateUsageNode>(name.value);
+}
 
 } // namespace CHTL
