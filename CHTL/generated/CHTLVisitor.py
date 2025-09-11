@@ -14,8 +14,33 @@ class CHTLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CHTLParser#definition.
+    def visitDefinition(self, ctx:CHTLParser.DefinitionContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#styleTemplate.
+    def visitStyleTemplate(self, ctx:CHTLParser.StyleTemplateContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#elementTemplate.
+    def visitElementTemplate(self, ctx:CHTLParser.ElementTemplateContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#varTemplate.
+    def visitVarTemplate(self, ctx:CHTLParser.VarTemplateContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CHTLParser#element.
     def visitElement(self, ctx:CHTLParser.ElementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#elementUsage.
+    def visitElementUsage(self, ctx:CHTLParser.ElementUsageContext):
         return self.visitChildren(ctx)
 
 
@@ -34,8 +59,18 @@ class CHTLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CHTLParser#styleContent.
+    def visitStyleContent(self, ctx:CHTLParser.StyleContentContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CHTLParser#value.
     def visitValue(self, ctx:CHTLParser.ValueContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#varUsage.
+    def visitVarUsage(self, ctx:CHTLParser.VarUsageContext):
         return self.visitChildren(ctx)
 
 

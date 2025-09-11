@@ -50,30 +50,27 @@ class UnifiedScanner:
                         break
 
             if content_end != -1:
-                # Append the text before the style block
                 modified_source += source_text[last_index:start_index]
 
                 block_content = source_text[content_start:content_end]
                 block_id = self._generate_id()
 
-                inline_styles, global_rules = parse_style_content(block_content)
+                inline_styles, global_rules, style_usages = parse_style_content(block_content)
 
                 self.registry[block_id] = {
                     'type': 'style',
                     'inline': inline_styles,
-                    'global': global_rules
+                    'global': global_rules,
+                    'usages': style_usages
                 }
 
-                # Append the placeholder to the modified source
                 modified_source += f'__style_ref__("{block_id}");'
 
-                # Update indices
                 i = content_end + 1
                 last_index = i
             else:
                 i = brace_index + 1
 
-        # Append any remaining text after the last style block
         modified_source += source_text[last_index:]
 
         return modified_source, self.registry

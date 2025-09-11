@@ -1,20 +1,27 @@
+[Template] @Var Theme {
+    mainColor: red;
+}
+
+[Template] @Style BoxStyle {
+    border: 1px solid black;
+    padding: 10px;
+}
+
+[Template] @Element MyBox {
+    div {
+        class: box;
+        text { A box }
+    }
+}
+
 div {
-    id: main-container;
+    id: "app";
+    color: Theme(mainColor); // Var usage
 
     style {
-        /* This is an inline style */
-        color: red;
-
-        /* This is a global rule */
-        .sub-heading {
-            font-size: 20px;
-        }
+        @Style BoxStyle; // Style usage
+        background-color: white;
     }
 
-    h1 {
-        class: sub-heading;
-        text {
-            I should be large
-        }
-    }
+    @Element MyBox; // Element usage
 }
