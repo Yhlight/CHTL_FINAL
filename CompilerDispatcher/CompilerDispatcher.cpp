@@ -21,13 +21,37 @@ CompilationResult CompilerDispatcher::dispatch() {
     const auto& imports = import_visitor.getImports();
     std::stringstream css_ss;
     std::stringstream js_ss;
+
+    // We need to mutate the AST, so we work on a copy.
+    NodeList mutable_ast = ast;
+
     for (const auto* importNode : imports) {
         auto loaded_module = loader.load(importNode);
-        if (loaded_module.success) {
-            if (importNode->import_type == "Style") {
-                css_ss << loaded_module.content << "\n";
-            } else if (importNode->import_type == "JavaScript") {
-                js_ss << loaded_module.content << "\n";
+        if (!loaded_module.success) continue;
+
+        if (importNode->import_type == "Style") {
+            css_ss << loaded_module.content << "\n";
+        } else if (importNode->import_type == "JavaScript") {
+            js_ss << loaded_module.content << "\n";
+        } else if (importNode->import_type == "Chtl") {
+            if (loaded_module.info) { // This was a CMOD module
+                auto module_namespace = std::make_unique<NamespaceNode>(loaded_module.info->name);
+                std::string src_path = std::filesystem::path(loaded_module.content) / "src";
+                for (const auto& entry : std::filesystem::directory_iterator(src_path)) {
+                    if (entry.path().extension() == ".chtl") {
+                        std::string file_content = loader.readTextFile(entry.path().string());
+                        Lexer lexer(file_content, config);
+                        auto tokens = lexer.tokenize();
+                        Parser parser(tokens);
+                        auto module_ast = parser.parse();
+                        for (auto& node : module_ast) {
+                            module_namespace->addChild(std::move(node));
+                        }
+                    }
+                }
+                mutable_ast.push_back(std::move(module_namespace));
+            } else { // This was a simple .chtl file
+                // TODO: Handle simple .chtl file imports
             }
         }
     }
@@ -57,11 +81,10 @@ CompilationResult CompilerDispatcher::dispatch() {
     }
 
 
-    // 3. Generate the base HTML from the CHTL AST
+    // 3. Generate the base HTML from the potentially modified CHTL AST
     try {
         Generator chtl_generator;
-        NodeList ast_copy = ast;
-        result.base_html = chtl_generator.generate(ast_copy);
+        result.base_html = chtl_generator.generate(mutable_ast);
     } catch (const std::exception& e) {
         result.base_html = "<!-- CHTL Compilation Failed: " + std::string(e.what()) + " -->";
     }

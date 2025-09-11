@@ -49,6 +49,7 @@ private:
     NodePtr parseNamespace();
     NodePtr parseUseStatement();
     NodePtr parseConstraint();
+    NodePtr parseExport();
     NodePtr parseVarTemplateDefinition();
     NodePtr parseTemplateUsage();
     NodePtr parseComment(const Token& token);

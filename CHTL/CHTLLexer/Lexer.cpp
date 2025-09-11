@@ -18,6 +18,7 @@ void Lexer::buildKeywordMap() {
     for (const auto& kw : config.getKeyword("KEYWORD_IMPORT")) keyword_map[kw] = TokenType::ImportKeyword;
     for (const auto& kw : config.getKeyword("KEYWORD_CONFIGURATION")) keyword_map[kw] = TokenType::ConfigurationKeyword;
     for (const auto& kw : config.getKeyword("KEYWORD_NAMESPACE")) keyword_map[kw] = TokenType::NamespaceKeyword;
+    for (const auto& kw : config.getKeyword("KEYWORD_EXPORT")) keyword_map[kw] = TokenType::ExportKeyword;
 }
 
 std::vector<Token> Lexer::tokenize() {

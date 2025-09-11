@@ -52,6 +52,9 @@ NodePtr Parser::parseDeclaration() {
     if (match({TokenType::NamespaceKeyword})) {
         return parseNamespace();
     }
+    if (match({TokenType::ExportKeyword})) {
+        return parseExport();
+    }
     throw error(peek(), "Expect a declaration (e.g., an element, template, custom, import, or namespace).");
 }
 
@@ -217,6 +220,35 @@ NodePtr Parser::parseConstraint() {
     } while (match({TokenType::Comma}));
     consume(TokenType::Semicolon, "Expect ';' after except statement.");
     return std::make_unique<ConstraintNode>(std::move(targets));
+}
+
+NodePtr Parser::parseExport() {
+    auto node = std::make_unique<ExportNode>();
+    consume(TokenType::OpenBrace, "Expect '{' after [Export].");
+    while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+        skipComments();
+        if (check(TokenType::CloseBrace)) break;
+
+        std::string type_key;
+        if (match({TokenType::OpenBracket})) {
+            type_key += "[";
+            type_key += consume(TokenType::Identifier, "Expect keyword in brackets.").value;
+            type_key += consume(TokenType::CloseBracket, "Expect ']'.").value;
+        }
+        type_key += " ";
+        type_key += consume(TokenType::At, "Expect '@' for export type.").value;
+        type_key += consume(TokenType::Identifier, "Expect export type identifier.").value;
+
+        std::vector<std::string> names;
+        do {
+            names.push_back(consume(TokenType::Identifier, "Expect name of exported item.").value);
+        } while (match({TokenType::Comma}));
+
+        node->exports[type_key] = names;
+        consume(TokenType::Semicolon, "Expect ';' after export list.");
+    }
+    consume(TokenType::CloseBrace, "Expect '}' after [Export] block.");
+    return node;
 }
 
 NodePtr Parser::parseDelete() {

@@ -27,6 +27,7 @@ ConfigurationContext::ConfigurationContext() {
     addKeyword("KEYWORD_FROM", "from");
     addKeyword("KEYWORD_USE", "use");
     addKeyword("KEYWORD_EXCEPT", "except");
+    addKeyword("KEYWORD_EXPORT", "[Export]");
 }
 
 void ConfigurationContext::setString(const std::string& key, const std::string& value) {

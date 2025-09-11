@@ -1,0 +1,12 @@
+[Info]
+{
+    name = "MyModule";
+    version = "1.0.0";
+    author = "Jules";
+    description = "A simple test module.";
+}
+
+[Export]
+{
+    [Template] @Element MyCard;
+}

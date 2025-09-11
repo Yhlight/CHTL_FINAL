@@ -1,0 +1,13 @@
+[Template] @Element MyCard
+{
+    div
+    {
+        style {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        h3 { text: "Card Title from Module"; }
+        p { text: "This card was imported from a CMOD module."; }
+    }
+}

@@ -1,34 +1,12 @@
-div
-{
-    id: test-box;
-    style {
-        width: 100px;
-        height: 100px;
-        background-color: blue;
-        transition: all 1s;
-    }
-    text: "Click Me";
-}
+use html5;
 
-script
-{
-    const box = {{#test-box}};
+// The loader should find 'MyModule' in the 'module/' directory
+[Import] @Chtl from "MyModule";
 
-    box->listen {
-        click: () => {
-            const anim = animate {
-                target: box,
-                duration: 1000,
-                easing: "ease-in-out",
-                begin: {
-                    transform: 'scale(1) rotate(0deg)',
-                    backgroundColor: 'blue'
-                },
-                end: {
-                    transform: 'scale(1.5) rotate(180deg)',
-                    backgroundColor: 'red'
-                }
-            };
-        }
-    };
+body
+{
+    h1 { text: "Module Test"; }
+
+    // This should now be resolved from the imported module
+    @Element MyCard from MyModule;
 }

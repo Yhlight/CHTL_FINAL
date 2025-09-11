@@ -27,6 +27,7 @@ public:
     void visit(TextNode* node) override;
     void visit(CommentNode* node) override;
     void visit(PropertyNode* node) override;
+    void visit(ExportNode* node) override;
     void visit(StyleNode* node) override;
     void visit(ScriptNode* node) override;
     void visit(StyleTemplateDefinitionNode* node) override;

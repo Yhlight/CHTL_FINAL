@@ -28,6 +28,7 @@ class ConfigurationNode;
 class NamespaceNode;
 class UseNode;
 class ConstraintNode;
+class ExportNode;
 
 class Visitor {
 public:
@@ -53,6 +54,7 @@ public:
     virtual void visit(NamespaceNode* node) = 0;
     virtual void visit(UseNode* node) = 0;
     virtual void visit(ConstraintNode* node) = 0;
+    virtual void visit(ExportNode* node) = 0;
 };
 
 class Node {

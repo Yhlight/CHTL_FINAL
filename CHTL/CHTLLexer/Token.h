@@ -24,6 +24,7 @@ enum class TokenType {
     // Keywords
     TemplateKeyword, CustomKeyword, ImportKeyword, DeleteKeyword, InsertKeyword,
     FromKeyword, UseKeyword, ExceptKeyword, ConfigurationKeyword, NamespaceKeyword,
+    ExportKeyword,      // [Export]
 
     // Comments
     SingleLineComment, MultiLineComment, GeneratorComment,

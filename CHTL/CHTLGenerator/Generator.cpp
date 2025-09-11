@@ -42,7 +42,7 @@ public:
 
     // Unchanged visit methods...
     void visit(ElementNode* n) override{ for(const auto& child : n->children) child->accept(*this); }
-    void visit(TextNode* n) override{} void visit(CommentNode* n) override{} void visit(PropertyNode* n) override{} void visit(StyleNode* n) override{} void visit(ScriptNode* n) override{} void visit(StyleUsageNode* n) override{} void visit(ElementUsageNode* n) override{} void visit(ImportNode* n) override{} void visit(ConfigurationNode* n) override{} void visit(CustomStyleDefinitionNode* n) override{} void visit(CustomElementDefinitionNode* n) override{} void visit(CustomVarDefinitionNode* n) override{} void visit(DeleteNode* n) override{} void visit(InsertNode* n) override{} void visit(UseNode* n) override{} void visit(ConstraintNode* n) override{}
+    void visit(TextNode* n) override{} void visit(CommentNode* n) override{} void visit(PropertyNode* n) override{} void visit(StyleNode* n) override{} void visit(ScriptNode* n) override{} void visit(StyleUsageNode* n) override{} void visit(ElementUsageNode* n) override{} void visit(ImportNode* n) override{} void visit(ConfigurationNode* n) override{} void visit(CustomStyleDefinitionNode* n) override{} void visit(CustomElementDefinitionNode* n) override{} void visit(CustomVarDefinitionNode* n) override{} void visit(DeleteNode* n) override{} void visit(InsertNode* n) override{} void visit(UseNode* n) override{} void visit(ConstraintNode* n) override{} void visit(ExportNode* n) override{}
 
 private:
     std::string currentNamespace() {
@@ -212,6 +212,7 @@ void Generator::visit(DeleteNode* node) {}
 void Generator::visit(InsertNode* node) {}
 void Generator::visit(ImportNode* node) {}
 void Generator::visit(ConfigurationNode* node) {}
+void Generator::visit(ExportNode* node) {}
 
 void Generator::indent() { indent_level++; }
 void Generator::dedent() { indent_level--; }
