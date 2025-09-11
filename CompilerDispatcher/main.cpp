@@ -1,49 +1,58 @@
 #include <iostream>
-#include <fstream>
-#include <sstream>
 #include <vector>
 #include <memory>
-
+#include "Scanner/UnifiedScanner.h"
 #include "CHTLLexer/CHTLLexer.h"
 #include "CHTLParser/CHTLParser.h"
 #include "CHTLGenerator/CHTLGenerator.h"
 #include "CHTLNode/BaseNode.h"
 
-int main(int argc, char* argv[]) {
-    if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " <input_file.chtl>" << std::endl;
-        return 1;
-    }
+int main() {
+    std::string source = R"(
+        [Template] @Style BaseStyle {
+            color: red;
+            font-size: 16px;
+        }
 
-    std::string filename = argv[1];
-    std::ifstream file(filename);
-    if (!file) {
-        std::cerr << "Error: Could not open file '" << filename << "'" << std::endl;
-        return 1;
-    }
+        [Template] @Style DerivedStyle {
+            @Style BaseStyle;
+            font-size: 20px; // Override base
+            font-weight: bold;
+        }
 
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    std::string source = buffer.str();
+        div {
+            style {
+                @Style DerivedStyle;
+            }
+        }
+    )";
+
+    std::cout << "--- CHTL Compilation (Template Inheritance Test) ---" << std::endl;
 
     try {
-        // Step 1: Lexer
-        CHTL::CHTLLexer lexer(source);
-        std::vector<CHTL::Token> tokens = lexer.Tokenize();
+        CHTL::UnifiedScanner scanner;
+        auto fragments = scanner.Scan(source);
+        const std::string& chtl_source = fragments[0].content;
 
-        // Step 2: Parser
+        CHTL::CHTLLexer lexer(chtl_source);
+        auto tokens = lexer.Tokenize();
+
         CHTL::CHTLParser parser(tokens);
-        CHTL::NodeList ast = parser.Parse();
+        auto ast = parser.Parse();
 
-        // Step 3: Generator
+        if (ast.empty()) {
+            std::cerr << "Parsing failed. Aborting." << std::endl;
+            return 1;
+        }
+
         CHTL::CHTLGenerator generator;
         std::string html_output = generator.Generate(ast);
 
-        // Step 4: Print the output
-        std::cout << html_output << std::endl;
+        std::cout << "\nOutput:\n" << html_output << std::endl;
+        std::cout << "\nCompilation successful." << std::endl;
 
     } catch (const std::exception& e) {
-        std::cerr << "Compilation Error: " << e.what() << std::endl;
+        std::cerr << "Compilation error: " << e.what() << std::endl;
         return 1;
     }
 

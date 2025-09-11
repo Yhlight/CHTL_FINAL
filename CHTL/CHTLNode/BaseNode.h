@@ -15,9 +15,6 @@ enum class NodeType {
     Style,
     TemplateDefinition,
     ElementTemplateUsage,
-    ElementModification,
-    ElementDeletion,
-    ElementInsertion,
     // ... other node types to be added later
 };
 
@@ -25,7 +22,6 @@ class BaseNode {
 public:
     virtual ~BaseNode() = default;
     virtual NodeType GetType() const = 0;
-    virtual NodePtr Clone() const = 0;
     // We can add a virtual `Accept(Visitor* visitor)` method here later
     // for the generator (Visitor design pattern).
 };

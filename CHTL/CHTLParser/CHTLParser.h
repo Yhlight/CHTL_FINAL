@@ -6,7 +6,6 @@
 #include "CHTLNode/ExpressionNode.h"
 #include <vector>
 #include <memory>
-#include <map>
 
 namespace CHTL {
 
@@ -33,32 +32,28 @@ private:
     std::vector<Token> m_tokens;
     size_t m_cursor = 0;
 
-    // Token helpers
     Token Peek(size_t offset = 0);
     Token Consume();
     Token Expect(TokenType type);
-    void SkipComments();
 
-    // Node Parsers
     NodePtr ParseNode();
     NodePtr ParseElement();
-    NodePtr ParseStyleBlock(bool isGlobal);
+    NodePtr ParseStyleBlock();
     NodePtr ParseTextBlock();
-    NodePtr ParseTemplateDefinition();
-    NodePtr ParseElementTemplateUsage();
 
-    // Expression (Pratt) Parser
+    // Pratt Parser for expressions
     Precedence GetPrecedence();
-    ExpressionNodePtr ParseExpression(int precedence = LOWEST);
+    ExpressionNodePtr ParseExpression(int precedence = 0);
     ExpressionNodePtr ParsePrefixExpression();
     ExpressionNodePtr ParseInfixExpression(ExpressionNodePtr left);
     ExpressionNodePtr ParseTernaryExpression(ExpressionNodePtr condition);
-    ExpressionNodePtr ParseVariableUsage();
 
-    // Element Specialization Parsers
-    NodePtr ParseElementModification();
-    NodePtr ParseElementDeletion();
-    NodePtr ParseElementInsertion();
+    // Style Block Parsing Helper
+    NodePtr ParseStyleBlockContent();
+
+    // Template Parsing
+    NodePtr ParseTemplateDefinition();
+    NodePtr ParseTemplateUsage();
 };
 
 } // namespace CHTL

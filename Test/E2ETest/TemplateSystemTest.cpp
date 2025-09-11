@@ -53,15 +53,10 @@ int main() {
     )";
 
     try {
-        // 1. Lexer
         CHTL::CHTLLexer lexer(source);
         std::vector<CHTL::Token> tokens = lexer.Tokenize();
-
-        // 2. Parser
         CHTL::CHTLParser parser(tokens);
         CHTL::NodeList ast = parser.Parse();
-
-        // 3. Generator
         CHTL::CHTLGenerator generator;
         std::string actual_html = generator.Generate(ast);
 

@@ -41,14 +41,6 @@ Token CHTLLexer::HandleIdentifier() {
     if (value == "text") return CreateToken(TokenType::Text, value);
     if (value == "style") return CreateToken(TokenType::Style, value);
     if (value == "script") return CreateToken(TokenType::Script, value);
-    if (value == "delete") return CreateToken(TokenType::Delete, value);
-    if (value == "insert") return CreateToken(TokenType::Insert, value);
-    if (value == "after") return CreateToken(TokenType::After, value);
-    if (value == "before") return CreateToken(TokenType::Before, value);
-    if (value == "replace") return CreateToken(TokenType::Replace, value);
-    if (value == "at") return CreateToken(TokenType::At, value);
-    if (value == "top") return CreateToken(TokenType::Top, value);
-    if (value == "bottom") return CreateToken(TokenType::Bottom, value);
 
     return CreateToken(TokenType::Identifier, value);
 }

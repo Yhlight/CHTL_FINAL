@@ -60,18 +60,10 @@ enum class TokenType {
     BlockComment,   // /* ... */
     GeneratorComment, // --
 
-    // Keywords
+    // Keywords (will be expanded later)
     Text,
     Style,
-    Script,
-    Delete,
-    Insert,
-    After,
-    Before,
-    Replace,
-    At,
-    Top,
-    Bottom
+    Script
 };
 
 struct Token {

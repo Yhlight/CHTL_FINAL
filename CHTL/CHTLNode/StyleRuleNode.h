@@ -17,14 +17,6 @@ public:
         m_properties.push_back(std::move(property));
     }
 
-    std::shared_ptr<StyleRuleNode> Clone() const {
-        auto clonedNode = std::make_shared<StyleRuleNode>(m_selector);
-        for (const auto& prop : m_properties) {
-            clonedNode->AddProperty({prop.name, prop.value ? prop.value->Clone() : nullptr});
-        }
-        return clonedNode;
-    }
-
 private:
     std::string m_selector;
     std::vector<Property> m_properties;

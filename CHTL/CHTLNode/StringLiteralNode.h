@@ -14,10 +14,6 @@ public:
 
     const std::string& GetValue() const { return m_value; }
 
-    ExpressionNodePtr Clone() const override {
-        return std::make_shared<StringLiteralNode>(m_value);
-    }
-
 private:
     std::string m_value;
 };

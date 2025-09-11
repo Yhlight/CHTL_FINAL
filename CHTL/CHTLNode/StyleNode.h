@@ -34,18 +34,6 @@ public:
         return m_rules;
     }
 
-    NodePtr Clone() const override {
-        auto clonedNode = std::make_shared<StyleNode>();
-        for (const auto& prop : m_properties) {
-            clonedNode->AddProperty({prop.name, prop.value ? prop.value->Clone() : nullptr});
-        }
-        for (const auto& rule : m_rules) {
-            // StyleRuleNode is not a BaseNode, so it needs its own Clone method
-            clonedNode->AddRule(rule->Clone());
-        }
-        return clonedNode;
-    }
-
 private:
     std::vector<Property> m_properties; // For inline styles
     std::vector<StyleRuleNodePtr> m_rules; // For hoisted styles

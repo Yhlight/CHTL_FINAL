@@ -19,10 +19,6 @@ public:
     const std::string& GetText() const { return m_text; }
     CommentType GetCommentType() const { return m_commentType; }
 
-    NodePtr Clone() const override {
-        return std::make_shared<CommentNode>(m_text, m_commentType);
-    }
-
 private:
     std::string m_text;
     CommentType m_commentType;

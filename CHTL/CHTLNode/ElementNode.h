@@ -1,12 +1,16 @@
 #pragma once
 
 #include "BaseNode.h"
-#include "PropertyNode.h"
 #include <string>
 #include <vector>
-#include <memory>
+#include <map>
 
 namespace CHTL {
+
+struct Attribute {
+    std::string name;
+    std::string value;
+};
 
 class ElementNode : public BaseNode {
 public:
@@ -15,32 +19,20 @@ public:
     NodeType GetType() const override { return NodeType::Element; }
 
     const std::string& GetTagName() const { return m_tagName; }
-    const std::vector<Property>& GetProperties() const { return m_properties; }
+    const std::vector<Attribute>& GetAttributes() const { return m_attributes; }
     const NodeList& GetChildren() const { return m_children; }
 
-    void AddProperty(const Property& property) {
-        m_properties.push_back(property);
+    void AddAttribute(const Attribute& attribute) {
+        m_attributes.push_back(attribute);
     }
 
     void AddChild(NodePtr child) {
         m_children.push_back(std::move(child));
     }
 
-    NodePtr Clone() const override {
-        auto clonedNode = std::make_shared<ElementNode>(m_tagName);
-        for (const auto& prop : m_properties) {
-            // Properties contain ExpressionNodes which also need cloning
-            clonedNode->AddProperty({prop.name, prop.value ? prop.value->Clone() : nullptr});
-        }
-        for (const auto& child : m_children) {
-            clonedNode->AddChild(child->Clone());
-        }
-        return clonedNode;
-    }
-
 private:
     std::string m_tagName;
-    std::vector<Property> m_properties;
+    std::vector<Attribute> m_attributes;
     NodeList m_children;
 };
 
