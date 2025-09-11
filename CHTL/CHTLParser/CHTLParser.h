@@ -9,6 +9,7 @@
 #include "../CHTLNode/ExpressionNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
+#include "../CHTLNode/ImportNode.h"
 #include <vector>
 #include <map>
 #include <functional>
@@ -33,6 +34,7 @@ public:
 
 private:
     // General parsing helpers
+    void pushError(const std::string& msg);
     void nextToken();
     bool currentTokenIs(TokenType type) const;
     bool peekTokenIs(TokenType type) const;
@@ -44,6 +46,7 @@ private:
     NodePtr parseStatement();
     std::shared_ptr<TemplateDefinitionNode> parseTemplateDefinition();
     NodePtr parseTemplateUsage();
+    std::shared_ptr<ImportNode> parseImportStatement();
 
     // Node-specific parsing functions
     std::shared_ptr<ElementNode> parseElementNode();

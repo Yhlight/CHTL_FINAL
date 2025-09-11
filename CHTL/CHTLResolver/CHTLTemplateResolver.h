@@ -15,7 +15,7 @@ public:
 
 private:
     void collectTemplates(const NodePtr& node);
-    NodePtr expandTemplates(const NodePtr& node);
+    void expandTemplates(const NodePtr& node);
 
     std::map<std::string, std::shared_ptr<TemplateDefinitionNode>> m_template_registry;
 };

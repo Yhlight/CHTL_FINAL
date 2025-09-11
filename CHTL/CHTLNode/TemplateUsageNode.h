@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Node.h"
-#include "TemplateDefinitionNode.h" // For TemplateType enum
+#include "TemplateDefinitionNode.h"
 #include <string>
 #include <utility>
 
@@ -14,6 +14,10 @@ public:
 
     std::string ToString(int indent = 0) const override {
         return std::string(indent, ' ') + "TemplateUsage( @" + name + " )";
+    }
+
+    NodePtr clone() const override {
+        return std::make_shared<TemplateUsageNode>(template_type, name);
     }
 
     TemplateType template_type;

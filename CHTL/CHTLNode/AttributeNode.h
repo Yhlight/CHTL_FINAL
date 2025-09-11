@@ -15,6 +15,10 @@ public:
         return std::string(indent, ' ') + "Attribute( " + key + " = \"" + value + "\" )";
     }
 
+    NodePtr clone() const override {
+        return std::make_shared<AttributeNode>(key, value);
+    }
+
     std::string key;
     std::string value;
 };

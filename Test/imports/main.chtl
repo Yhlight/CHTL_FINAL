@@ -1,0 +1,7 @@
+[Import] @Chtl from "styles.chtl";
+
+div {
+    style {
+        @Style ImportedStyle;
+    }
+}

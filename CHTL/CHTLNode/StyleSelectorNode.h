@@ -23,6 +23,14 @@ public:
         return ss.str();
     }
 
+    NodePtr clone() const override {
+        auto new_selector_node = std::make_shared<StyleSelectorNode>(selector);
+        for (const auto& prop : properties) {
+            new_selector_node->properties.push_back(std::dynamic_pointer_cast<CSSPropertyNode>(prop->clone()));
+        }
+        return new_selector_node;
+    }
+
     std::string selector;
     CSSPropertyList properties;
 };

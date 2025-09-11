@@ -38,6 +38,20 @@ public:
         return ss.str();
     }
 
+    NodePtr clone() const override {
+        auto new_style_node = std::make_shared<StyleNode>();
+        for (const auto& prop : inline_properties) {
+            new_style_node->inline_properties.push_back(std::dynamic_pointer_cast<CSSPropertyNode>(prop->clone()));
+        }
+        for (const auto& sel : selector_blocks) {
+            new_style_node->selector_blocks.push_back(std::dynamic_pointer_cast<StyleSelectorNode>(sel->clone()));
+        }
+        for (const auto& usage : template_usages) {
+            new_style_node->template_usages.push_back(std::dynamic_pointer_cast<TemplateUsageNode>(usage->clone()));
+        }
+        return new_style_node;
+    }
+
     CSSPropertyList inline_properties;
     StyleSelectorList selector_blocks;
     NodeList template_usages;

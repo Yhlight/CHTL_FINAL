@@ -5,6 +5,7 @@ add_library(chtl_lib STATIC
     CHTLGenerator/CHTLGenerator.cpp
     CHTLAnalyzer/CHTLSemanticAnalyzer.cpp
     CHTLResolver/CHTLTemplateResolver.cpp
+    CHTLLoader/CHTLLoader.cpp
 )
 
 # Add include directories for the library

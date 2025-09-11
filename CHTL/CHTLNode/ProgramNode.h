@@ -20,6 +20,14 @@ public:
         return ss.str();
     }
 
+    NodePtr clone() const override {
+        auto new_program_node = std::make_shared<ProgramNode>();
+        for (const auto& stmt : statements) {
+            new_program_node->statements.push_back(stmt->clone());
+        }
+        return new_program_node;
+    }
+
     NodeList statements;
 };
 

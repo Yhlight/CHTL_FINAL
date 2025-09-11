@@ -5,6 +5,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <sstream>
 
 namespace CHTL {
 
@@ -19,6 +20,11 @@ public:
         ss << value->ToString(indent + 2) << "\n";
         ss << std::string(indent, ' ') << "]";
         return ss.str();
+    }
+
+    NodePtr clone() const override {
+        auto value_clone = std::dynamic_pointer_cast<ExpressionNode>(value->clone());
+        return std::make_shared<CSSPropertyNode>(key, value_clone);
     }
 
     std::string key;

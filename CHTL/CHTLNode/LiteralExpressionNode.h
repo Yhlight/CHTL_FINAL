@@ -13,6 +13,10 @@ public:
         return std::string(indent, ' ') + "Literal(" + token.literal + ")";
     }
 
+    NodePtr clone() const override {
+        return std::make_shared<LiteralExpressionNode>(token);
+    }
+
     Token token;
 };
 

@@ -153,14 +153,11 @@ CHTL/CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/CHTL/main.cpp \
  /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h \
  /usr/include/c++/13/bits/fstream.tcc /usr/include/c++/13/sstream \
- /usr/include/c++/13/bits/sstream.tcc /app/CHTL/CHTLLexer/CHTLLexer.h \
- /app/CHTL/CHTLLexer/Token.h /usr/include/c++/13/vector \
- /usr/include/c++/13/bits/stl_uninitialized.h \
- /usr/include/c++/13/bits/stl_vector.h \
- /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc /app/CHTL/CHTLParser/CHTLParser.h \
- /app/CHTL/CHTLParser/../CHTLNode/Node.h /usr/include/c++/13/memory \
+ /usr/include/c++/13/bits/sstream.tcc /app/CHTL/CHTLLoader/CHTLLoader.h \
+ /app/CHTL/CHTLLoader/../CHTLNode/ProgramNode.h \
+ /app/CHTL/CHTLLoader/../CHTLNode/Node.h /usr/include/c++/13/memory \
  /usr/include/c++/13/bits/stl_tempbuf.h \
+ /usr/include/c++/13/bits/stl_uninitialized.h \
  /usr/include/c++/13/bits/stl_raw_storage_iter.h \
  /usr/include/c++/13/bits/align.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
@@ -177,35 +174,28 @@ CHTL/CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/CHTL/main.cpp \
  /usr/include/c++/13/bits/atomic_lockfree_defines.h \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
- /usr/include/c++/13/pstl/execution_defs.h \
- /app/CHTL/CHTLParser/../CHTLNode/ProgramNode.h \
- /app/CHTL/CHTLParser/../CHTLNode/ElementNode.h \
- /app/CHTL/CHTLParser/../CHTLNode/AttributeNode.h \
- /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
- /app/CHTL/CHTLParser/../CHTLNode/TextNode.h \
- /app/CHTL/CHTLParser/../CHTLNode/StyleNode.h \
- /app/CHTL/CHTLParser/../CHTLNode/CSSPropertyNode.h \
- /app/CHTL/CHTLParser/../CHTLNode/ExpressionNode.h \
- /app/CHTL/CHTLParser/../CHTLNode/StyleSelectorNode.h \
- /app/CHTL/CHTLParser/../CHTLNode/TemplateUsageNode.h \
- /app/CHTL/CHTLParser/../CHTLNode/TemplateDefinitionNode.h \
- /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \
+ /usr/include/c++/13/pstl/execution_defs.h /usr/include/c++/13/vector \
+ /usr/include/c++/13/bits/stl_vector.h \
+ /usr/include/c++/13/bits/stl_bvector.h \
+ /usr/include/c++/13/bits/vector.tcc /usr/include/c++/13/set \
+ /usr/include/c++/13/bits/stl_tree.h \
  /usr/include/c++/13/bits/node_handle.h \
- /usr/include/c++/13/bits/stl_map.h \
- /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h /usr/include/c++/13/functional \
- /usr/include/c++/13/bits/std_function.h \
- /usr/include/c++/13/unordered_map \
- /usr/include/c++/13/bits/unordered_map.h \
- /usr/include/c++/13/bits/hashtable.h \
- /usr/include/c++/13/bits/hashtable_policy.h \
- /usr/include/c++/13/bits/enable_special_members.h \
- /usr/include/c++/13/array /usr/include/c++/13/compare \
- /usr/include/c++/13/bits/stl_algo.h \
- /usr/include/c++/13/bits/algorithmfwd.h \
- /usr/include/c++/13/bits/stl_heap.h \
- /usr/include/c++/13/bits/uniform_int_dist.h \
+ /usr/include/c++/13/bits/stl_set.h \
+ /usr/include/c++/13/bits/stl_multiset.h \
+ /usr/include/c++/13/bits/erase_if.h \
  /app/CHTL/CHTLResolver/CHTLTemplateResolver.h \
+ /app/CHTL/CHTLResolver/../CHTLNode/TemplateDefinitionNode.h \
+ /usr/include/c++/13/map /usr/include/c++/13/bits/stl_map.h \
+ /usr/include/c++/13/bits/stl_multimap.h \
  /app/CHTL/CHTLAnalyzer/CHTLSemanticAnalyzer.h \
+ /app/CHTL/CHTLAnalyzer/../CHTLNode/ElementNode.h \
+ /app/CHTL/CHTLAnalyzer/../CHTLNode/AttributeNode.h \
+ /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
+ /app/CHTL/CHTLAnalyzer/../CHTLNode/StyleNode.h \
+ /app/CHTL/CHTLAnalyzer/../CHTLNode/CSSPropertyNode.h \
+ /app/CHTL/CHTLAnalyzer/../CHTLNode/ExpressionNode.h \
+ /app/CHTL/CHTLAnalyzer/../CHTLNode/StyleSelectorNode.h \
+ /app/CHTL/CHTLAnalyzer/../CHTLNode/TemplateUsageNode.h \
  /app/CHTL/CHTLGenerator/CHTLGenerator.h \
+ /app/CHTL/CHTLGenerator/../CHTLNode/TextNode.h \
  /app/CHTL/CHTLGenerator/../CHTLObject/Object.h

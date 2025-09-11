@@ -10,6 +10,7 @@ class Node {
 public:
     virtual ~Node() = default;
     virtual std::string ToString(int indent = 0) const = 0;
+    virtual std::shared_ptr<Node> clone() const = 0;
 };
 
 // Using shared_ptr for automatic memory management of nodes

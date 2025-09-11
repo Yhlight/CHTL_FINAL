@@ -14,6 +14,10 @@ public:
         return std::string(indent, ' ') + "Text( \"" + text + "\" )";
     }
 
+    NodePtr clone() const override {
+        return std::make_shared<TextNode>(text);
+    }
+
     std::string text;
 };
 

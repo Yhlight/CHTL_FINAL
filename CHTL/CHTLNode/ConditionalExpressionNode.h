@@ -25,6 +25,13 @@ public:
         return ss.str();
     }
 
+    NodePtr clone() const override {
+        auto condition_clone = std::dynamic_pointer_cast<ExpressionNode>(condition->clone());
+        auto consequence_clone = std::dynamic_pointer_cast<ExpressionNode>(consequence->clone());
+        auto alternative_clone = std::dynamic_pointer_cast<ExpressionNode>(alternative->clone());
+        return std::make_shared<ConditionalExpressionNode>(condition_clone, consequence_clone, alternative_clone);
+    }
+
     ExpressionPtr condition;
     ExpressionPtr consequence;
     ExpressionPtr alternative;

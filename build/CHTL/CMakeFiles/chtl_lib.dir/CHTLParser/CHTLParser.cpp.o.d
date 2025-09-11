@@ -189,7 +189,8 @@ CHTL/CMakeFiles/chtl_lib.dir/CHTLParser/CHTLParser.cpp.o: \
  /app/CHTL/CHTLParser/../CHTLNode/StyleSelectorNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/TemplateUsageNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/TemplateDefinitionNode.h \
- /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \
+ /app/CHTL/CHTLParser/../CHTLNode/ImportNode.h /usr/include/c++/13/map \
+ /usr/include/c++/13/bits/stl_tree.h \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \

@@ -1,5 +1,4 @@
 [Template] @Style DefaultText {
-    color: black;
     font-size: 16px;
 }
 
@@ -15,7 +14,8 @@
 
 html {
     body {
-        // Use the element template
+        // Use the element template multiple times
+        @Element Card;
         @Element Card;
     }
 }

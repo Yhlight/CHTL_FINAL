@@ -1,2 +1,2 @@
-/usr/bin/ar qc libchtl_lib.a CMakeFiles/chtl_lib.dir/CHTLLexer/CHTLLexer.cpp.o CMakeFiles/chtl_lib.dir/CHTLParser/CHTLParser.cpp.o CMakeFiles/chtl_lib.dir/CHTLGenerator/CHTLGenerator.cpp.o CMakeFiles/chtl_lib.dir/CHTLAnalyzer/CHTLSemanticAnalyzer.cpp.o CMakeFiles/chtl_lib.dir/CHTLResolver/CHTLTemplateResolver.cpp.o
+/usr/bin/ar qc libchtl_lib.a CMakeFiles/chtl_lib.dir/CHTLLexer/CHTLLexer.cpp.o CMakeFiles/chtl_lib.dir/CHTLParser/CHTLParser.cpp.o CMakeFiles/chtl_lib.dir/CHTLGenerator/CHTLGenerator.cpp.o CMakeFiles/chtl_lib.dir/CHTLAnalyzer/CHTLSemanticAnalyzer.cpp.o CMakeFiles/chtl_lib.dir/CHTLResolver/CHTLTemplateResolver.cpp.o CMakeFiles/chtl_lib.dir/CHTLLoader/CHTLLoader.cpp.o
 /usr/bin/ranlib libchtl_lib.a

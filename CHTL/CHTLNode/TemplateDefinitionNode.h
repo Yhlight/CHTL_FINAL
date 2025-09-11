@@ -28,6 +28,14 @@ public:
         return ss.str();
     }
 
+    NodePtr clone() const override {
+        NodeList new_body;
+        for (const auto& node : body) {
+            new_body.push_back(node->clone());
+        }
+        return std::make_shared<TemplateDefinitionNode>(template_type, name, new_body);
+    }
+
     TemplateType template_type;
     std::string name;
     NodeList body;

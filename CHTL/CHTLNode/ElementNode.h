@@ -17,7 +17,6 @@ public:
         std::stringstream ss;
         ss << std::string(indent, ' ') << "Element( " << tagName << " ) [\n";
 
-        // Print Attributes
         if (!attributes.empty()) {
             ss << std::string(indent + 2, ' ') << "Attributes:\n";
             for (const auto& attr : attributes) {
@@ -25,7 +24,6 @@ public:
             }
         }
 
-        // Print Children
         if (!children.empty()) {
             ss << std::string(indent + 2, ' ') << "Children:\n";
             for (const auto& child : children) {
@@ -35,6 +33,17 @@ public:
 
         ss << std::string(indent, ' ') << "]";
         return ss.str();
+    }
+
+    NodePtr clone() const override {
+        auto new_element_node = std::make_shared<ElementNode>(tagName);
+        for (const auto& attr : attributes) {
+            new_element_node->attributes.push_back(std::dynamic_pointer_cast<AttributeNode>(attr->clone()));
+        }
+        for (const auto& child : children) {
+            new_element_node->children.push_back(child->clone());
+        }
+        return new_element_node;
     }
 
     std::string tagName;

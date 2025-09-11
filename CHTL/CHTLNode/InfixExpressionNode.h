@@ -2,6 +2,7 @@
 
 #include "ExpressionNode.h"
 #include "../CHTLLexer/Token.h"
+#include <sstream>
 
 namespace CHTL {
 
@@ -17,6 +18,12 @@ public:
         ss << right->ToString(indent + 2) << "\n";
         ss << std::string(indent, ' ') << "]";
         return ss.str();
+    }
+
+    NodePtr clone() const override {
+        auto left_clone = std::dynamic_pointer_cast<ExpressionNode>(left->clone());
+        auto right_clone = std::dynamic_pointer_cast<ExpressionNode>(right->clone());
+        return std::make_shared<InfixExpressionNode>(left_clone, op, right_clone);
     }
 
     ExpressionPtr left;
