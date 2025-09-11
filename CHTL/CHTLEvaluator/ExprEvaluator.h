@@ -6,6 +6,13 @@
 #include <map>
 #include <any>
 
+// Forward declare to avoid circular dependency
+class VarTemplateDefinitionNode;
+namespace Generator {
+    using VarTemplateMap = std::map<std::string, VarTemplateDefinitionNode*>;
+}
+
+
 // A simple struct to hold a computed value, which can be a number or a string.
 // It also holds the unit if the value is numeric (e.g., "px", "%").
 struct EvaluatedValue {
@@ -22,8 +29,8 @@ struct EvaluatedValue {
 // It implements the ExprVisitor interface.
 class ExprEvaluator : public ExprVisitor {
 public:
-    // The evaluator needs a context to resolve property references.
-    explicit ExprEvaluator(Node& ast_root);
+    // The evaluator needs a context to resolve property references and variables.
+    explicit ExprEvaluator(Node& ast_root, std::map<std::string, Generator::VarTemplateMap>& var_templates);
 
     EvaluatedValue evaluate(ExprNode& expr);
 
@@ -33,9 +40,11 @@ public:
     void visit(UnaryExprNode* node) override;
     void visit(TernaryExprNode* node) override;
     void visit(PropertyRefNode* node) override;
+    void visit(FunctionCallNode* node) override;
 
 private:
     Node& ast_root;
+    std::map<std::string, Generator::VarTemplateMap>& var_templates;
     EvaluatedValue last_value;
     std::map<const PropertyNode*, EvaluatedValue> evaluation_cache;
 

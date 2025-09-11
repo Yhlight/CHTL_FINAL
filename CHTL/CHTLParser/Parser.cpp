@@ -430,6 +430,28 @@ ExprNodePtr Parser::parseUnary() {
 }
 
 ExprNodePtr Parser::parsePrimary() {
+    if (peek().type == TokenType::Identifier && tokens[current + 1].type == TokenType::OpenParen) {
+        Token callee = advance();
+        consume(TokenType::OpenParen, "Expect '(' after function call callee.");
+        std::vector<ExprNodePtr> arguments;
+        if (!check(TokenType::CloseParen)) {
+            do {
+                // An argument can be a simple identifier or a key-value pair for specialization
+                ExprNodePtr arg = parseExpression();
+                if (auto* lit = dynamic_cast<LiteralExprNode*>(arg.get())) {
+                    if (match({TokenType::Equals})) {
+                        Token op = previous();
+                        ExprNodePtr val = parseExpression();
+                        arg = std::make_unique<BinaryExprNode>(std::move(arg), op, std::move(val));
+                    }
+                }
+                arguments.push_back(std::move(arg));
+            } while (match({TokenType::Comma}));
+        }
+        consume(TokenType::CloseParen, "Expect ')' after arguments.");
+        return std::make_unique<FunctionCallNode>(callee, std::move(arguments));
+    }
+
     if ((peek().type == TokenType::Hash || peek().type == TokenType::Dot || peek().type == TokenType::Identifier) && tokens[current + 1].type == TokenType::Dot) {
         Token selector = advance();
         consume(TokenType::Dot, "Expect '.' after selector in property reference.");

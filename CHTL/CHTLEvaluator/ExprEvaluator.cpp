@@ -1,6 +1,7 @@
 #include "ExprEvaluator.h"
 #include "CHTLNode/PropertyNode.h"
 #include "CHTLNode/ElementNode.h"
+#include "CHTLNode/TemplateNode.h" // For VarTemplateDefinitionNode
 #include "CHTLNode/StyleNode.h"
 #include <stdexcept>
 #include <iostream>
@@ -14,7 +15,8 @@ std::string EvaluatedValue::toString() const {
 }
 
 // --- ExprEvaluator ---
-ExprEvaluator::ExprEvaluator(Node& ast_root) : ast_root(ast_root) {}
+ExprEvaluator::ExprEvaluator(Node& ast_root, std::map<std::string, Generator::VarTemplateMap>& var_templates)
+    : ast_root(ast_root), var_templates(var_templates) {}
 
 EvaluatedValue ExprEvaluator::evaluate(ExprNode& expr) {
     expr.accept(*this);
@@ -144,4 +146,59 @@ void ExprEvaluator::visit(PropertyRefNode* node) {
     EvaluatedValue result = evaluate(*referenced_prop->value);
     evaluation_cache[referenced_prop] = result;
     last_value = result;
+}
+
+void ExprEvaluator::visit(FunctionCallNode* node) {
+    std::string group_name = node->callee.value;
+
+    // --- Pass 1: Collect all specialized values ---
+    std::map<std::string, EvaluatedValue> specialized_values;
+    for (const auto& arg : node->arguments) {
+        if (auto* spec_arg = dynamic_cast<BinaryExprNode*>(arg.get())) {
+            if (spec_arg->op.type == TokenType::Equals) {
+                if (auto* var_name_node = dynamic_cast<LiteralExprNode*>(spec_arg->left.get())) {
+                    std::string var_name = var_name_node->value.value;
+                    specialized_values[var_name] = evaluate(*spec_arg->right);
+                }
+            }
+        }
+    }
+
+    // --- Pass 2: Evaluate the first non-specialization argument ---
+    // This will be the return value of the function call expression.
+    bool result_found = false;
+    for (const auto& arg : node->arguments) {
+        if (auto* lookup_arg = dynamic_cast<LiteralExprNode*>(arg.get())) {
+            std::string var_name = lookup_arg->value.value;
+
+            // Check for a specialized value first.
+            if (specialized_values.count(var_name)) {
+                last_value = specialized_values.at(var_name);
+                result_found = true;
+                break;
+            }
+
+            // If not specialized, look in the template.
+            // For now, assume global namespace
+            auto ns_it = var_templates.find("");
+            if (ns_it != var_templates.end()) {
+                 auto group_it = ns_it->second.find(group_name);
+                if (group_it != ns_it->second.end()) {
+                    VarTemplateDefinitionNode* var_group = group_it->second;
+                    for (const auto& prop : var_group->variables) {
+                        if (prop->name == var_name) {
+                            last_value = evaluate(*prop->value);
+                            result_found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(result_found) break;
+        }
+    }
+
+    if (!result_found) {
+        throw std::runtime_error("Could not resolve a return value from variable group call '" + group_name + "'.");
+    }
 }

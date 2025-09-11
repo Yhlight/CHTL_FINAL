@@ -12,6 +12,7 @@ class BinaryExprNode;
 class UnaryExprNode;
 class TernaryExprNode;
 class PropertyRefNode;
+class FunctionCallNode;
 
 // Visitor for expressions
 class ExprVisitor {
@@ -22,6 +23,7 @@ public:
     virtual void visit(UnaryExprNode* node) = 0;
     virtual void visit(TernaryExprNode* node) = 0;
     virtual void visit(PropertyRefNode* node) = 0;
+    virtual void visit(FunctionCallNode* node) = 0;
 };
 
 // Base class for all expression nodes
@@ -81,4 +83,16 @@ public:
     void accept(ExprVisitor& visitor) override { visitor.visit(this); }
     Token selector;
     Token propertyName;
+};
+
+// Represents a function-like call for variable groups (e.g., ThemeColor(tableColor))
+class FunctionCallNode : public ExprNode {
+public:
+    FunctionCallNode(Token callee, std::vector<ExprNodePtr> arguments)
+        : callee(std::move(callee)), arguments(std::move(arguments)) {}
+
+    void accept(ExprVisitor& visitor) override { visitor.visit(this); }
+
+    Token callee;
+    std::vector<ExprNodePtr> arguments;
 };

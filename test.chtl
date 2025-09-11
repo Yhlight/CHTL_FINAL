@@ -1,31 +1,28 @@
 use html5;
 
-[Import] @Style from "styles.css";
-
-[Template] @Element Box
+[Template] @Var Theme
 {
-    div { text: "first"; }
-    div { text: "second"; }
-    p { text: "a paragraph"; }
-}
-
-[Namespace] mySpace
-{
-    [Template] @Element Box
-    {
-        h1 { text: "This is the Box from mySpace"; }
-    }
+    mainColor: "blue";
+    secondaryColor: "gray";
+    defaultPadding: 10px;
 }
 
 body
 {
-    // Test qualified name resolution
-    @Element Box from mySpace;
-
-    // Test template specialization
-    @Element Box
+    style
     {
-        delete div[0]; // Should delete "first"
-        except p;      // This should cause an error!
+        background-color: Theme(secondaryColor);
+        padding: Theme(defaultPadding);
+        // Test specialization
+        border: 1px solid Theme(mainColor = "red");
+    }
+
+    h1
+    {
+        text: "Variable Group Test";
+        style
+        {
+            color: Theme(mainColor);
+        }
     }
 }

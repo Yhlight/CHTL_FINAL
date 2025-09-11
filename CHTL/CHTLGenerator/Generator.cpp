@@ -101,7 +101,7 @@ void Generator::visit(ElementNode* node) {
         else otherChildren.push_back(child.get());
     }
 
-    ExprEvaluator evaluator(*ast_root);
+    ExprEvaluator evaluator(*ast_root, varTemplates);
 
     for (const auto* prop : properties) {
         std::string value = evaluator.evaluate(*prop->value).toString();
