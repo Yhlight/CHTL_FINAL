@@ -9,16 +9,8 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        std::filesystem::path entry_path(argv[1]);
-        // The base directory for all relative imports will be the directory
-        // of the main entry file.
-        std::string base_dir = entry_path.parent_path().string();
-        if (base_dir.empty()) {
-            base_dir = ".";
-        }
-
-        CHTL::Compiler compiler(base_dir);
-        std::string html = compiler.compile(entry_path.string());
+        CHTL::Compiler compiler( (std::filesystem::path(argv[1]).parent_path().string()) );
+        std::string html = compiler.compile(argv[1]);
         std::cout << html << std::endl;
 
     } catch (const std::exception& e) {

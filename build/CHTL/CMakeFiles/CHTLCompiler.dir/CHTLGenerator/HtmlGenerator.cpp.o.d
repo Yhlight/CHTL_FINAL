@@ -168,6 +168,7 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o: \
  /usr/include/c++/13/bits/stl_multimap.h \
  /usr/include/c++/13/bits/erase_if.h /app/CHTL/CHTLContext.hpp \
  /app/CHTL/CHTLNode/ElementNode.hpp /app/CHTL/CHTLNode/AttributeNode.hpp \
+ /app/CHTL/CHTLNode/../CSSExt/Expression.hpp \
  /app/CHTL/CHTLGenerator/../CHTLNode/TextNode.hpp \
  /app/CHTL/CHTLGenerator/../CHTLNode/CommentNode.hpp \
  /app/CHTL/CHTLGenerator/../CHTLNode/TemplateUsageNode.hpp \
@@ -175,8 +176,9 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o: \
  /app/CHTL/CHTLGenerator/../CHTLNode/CustomDefinitionNode.hpp \
  /app/CHTL/CHTLGenerator/../CHTLNode/ImportNode.hpp \
  /app/CHTL/CHTLGenerator/../CHTLNode/NamespaceNode.hpp \
+ /app/CHTL/CHTLGenerator/../CHTLNode/DeleteNode.hpp \
+ /app/CHTL/CHTLGenerator/../CHTLNode/InsertNode.hpp \
  /app/CHTL/CHTLGenerator/../CSSExt/ExpressionParser.hpp \
- /app/CHTL/CHTLGenerator/../CSSExt/Expression.hpp \
  /app/CHTL/CHTLGenerator/../CSSExt/ExpressionEvaluator.hpp \
  /usr/include/c++/13/set /usr/include/c++/13/bits/stl_set.h \
  /usr/include/c++/13/bits/stl_multiset.h /usr/include/c++/13/sstream \
@@ -198,4 +200,9 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o: \
  /usr/include/c++/13/bits/basic_ios.tcc /usr/include/c++/13/ostream \
  /usr/include/c++/13/bits/ostream.tcc \
  /usr/include/c++/13/bits/istream.tcc \
- /usr/include/c++/13/bits/sstream.tcc
+ /usr/include/c++/13/bits/sstream.tcc /usr/include/c++/13/algorithm \
+ /usr/include/c++/13/bits/stl_algo.h \
+ /usr/include/c++/13/bits/algorithmfwd.h \
+ /usr/include/c++/13/bits/stl_heap.h \
+ /usr/include/c++/13/bits/uniform_int_dist.h \
+ /usr/include/c++/13/pstl/glue_algorithm_defs.h

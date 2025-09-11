@@ -26,6 +26,8 @@ private:
     NodePtr customDefinition();
     NodePtr importStatement();
     NodePtr namespaceStatement();
+    NodePtr deleteStatement();
+    NodePtr insertStatement();
 
     Token advance();
     Token peek();

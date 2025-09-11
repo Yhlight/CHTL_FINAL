@@ -27,6 +27,10 @@ enum class TokenType {
     NAMESPACE,
     FROM,
     AS,
+    DELETE,
+    INSERT,
+    AFTER,
+    BEFORE,
 
     // Comments
     LINE_COMMENT, // //

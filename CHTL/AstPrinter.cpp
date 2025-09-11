@@ -10,6 +10,8 @@
 #include "CHTLNode/CustomDefinitionNode.hpp"
 #include "CHTLNode/ImportNode.hpp"
 #include "CHTLNode/NamespaceNode.hpp"
+#include "CHTLNode/DeleteNode.hpp"
+#include "CHTLNode/InsertNode.hpp"
 
 namespace CHTL {
 
@@ -68,14 +70,13 @@ void AstPrinter::visit(TextNode& node) {
 }
 
 void AstPrinter::visit(AttributeNode& node) {
-    m_result += "(attr " + node.name + " \"";
-    for (const auto& token : node.valueTokens) {
-        m_result += token.lexeme + " ";
+    m_result += "(attr " + node.name + " ";
+    if (node.valueExpression) {
+        m_result += "(expr)"; // Placeholder for the expression
+    } else {
+        m_result += "\"\"";
     }
-     if (!node.valueTokens.empty()) {
-        m_result.pop_back();
-    }
-    m_result += "\")";
+    m_result += ")";
 }
 
 void AstPrinter::visit(CommentNode& node) {
@@ -109,7 +110,12 @@ void AstPrinter::visit(TemplateDefinitionNode& node) {
 }
 
 void AstPrinter::visit(TemplateUsageNode& node) {
-    m_result += "(" + node.type.lexeme + " " + node.name + ")";
+    m_result += "(@" + node.type.lexeme + " " + node.name;
+    if (!node.specializationBody.empty()) {
+        m_result += " ";
+        parenthesize("specialization", node.specializationBody);
+    }
+    m_result += ")";
 }
 
 void AstPrinter::visit(StyleRuleNode& node) {
@@ -128,6 +134,21 @@ void AstPrinter::visit(NamespaceNode& node) {
     m_result += "([Namespace] " + node.name;
     m_result += " ";
     parenthesize("body", node.body);
+    m_result += ")";
+}
+
+void AstPrinter::visit(DeleteNode& node) {
+    m_result += "(delete";
+    for (const auto& token : node.targets) {
+        m_result += " " + token.lexeme;
+    }
+    m_result += ")";
+}
+
+void AstPrinter::visit(InsertNode& node) {
+    m_result += "(insert " + node.position.lexeme + " " + node.selector;
+    m_result += " ";
+    parenthesize("body", node.nodesToInsert);
     m_result += ")";
 }
 

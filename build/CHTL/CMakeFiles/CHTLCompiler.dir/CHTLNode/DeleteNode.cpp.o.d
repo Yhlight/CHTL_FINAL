@@ -1,8 +1,7 @@
-CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o: \
- /app/CHTL/AstPrinter.cpp /usr/include/stdc-predef.h \
- /app/CHTL/AstPrinter.hpp /app/CHTL/CHTLNode/AstVisitor.hpp \
- /app/CHTL/CHTLNode/BaseNode.hpp /usr/include/c++/13/memory \
- /usr/include/c++/13/bits/memoryfwd.h \
+CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/DeleteNode.cpp.o: \
+ /app/CHTL/CHTLNode/DeleteNode.cpp /usr/include/stdc-predef.h \
+ /app/CHTL/CHTLNode/DeleteNode.hpp /app/CHTL/CHTLNode/BaseNode.hpp \
+ /usr/include/c++/13/memory /usr/include/c++/13/bits/memoryfwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -115,7 +114,8 @@ CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o: \
  /usr/include/c++/13/bits/atomic_lockfree_defines.h \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
- /usr/include/c++/13/pstl/execution_defs.h /usr/include/c++/13/string \
+ /usr/include/c++/13/pstl/execution_defs.h \
+ /app/CHTL/CHTLNode/../CHTLLexer/Token.hpp /usr/include/c++/13/string \
  /usr/include/c++/13/bits/char_traits.h \
  /usr/include/c++/13/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
@@ -152,24 +152,9 @@ CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o: \
  /usr/include/c++/13/bits/basic_string.tcc \
  /usr/include/c++/13/bits/memory_resource.h /usr/include/c++/13/cstddef \
  /usr/include/c++/13/bits/uses_allocator_args.h \
- /usr/include/c++/13/vector /usr/include/c++/13/bits/stl_vector.h \
- /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc /app/CHTL/CHTLNode/ElementNode.hpp \
- /app/CHTL/CHTLNode/AttributeNode.hpp \
- /app/CHTL/CHTLNode/../CSSExt/Expression.hpp \
- /app/CHTL/CHTLNode/../CSSExt/../CHTLLexer/Token.hpp \
  /usr/include/c++/13/variant \
  /usr/include/c++/13/bits/enable_special_members.h \
- /usr/include/c++/13/bits/parse_numbers.h /app/CHTL/CHTLNode/TextNode.hpp \
- /app/CHTL/CHTLNode/CommentNode.hpp /app/CHTL/CHTLNode/StyleNode.hpp \
- /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \
- /usr/include/c++/13/bits/node_handle.h \
- /usr/include/c++/13/bits/stl_map.h \
- /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h \
- /app/CHTL/CHTLNode/TemplateDefinitionNode.hpp \
- /app/CHTL/CHTLNode/TemplateUsageNode.hpp \
- /app/CHTL/CHTLNode/StyleRuleNode.hpp \
- /app/CHTL/CHTLNode/CustomDefinitionNode.hpp \
- /app/CHTL/CHTLNode/ImportNode.hpp /app/CHTL/CHTLNode/NamespaceNode.hpp \
- /app/CHTL/CHTLNode/DeleteNode.hpp /app/CHTL/CHTLNode/InsertNode.hpp
+ /usr/include/c++/13/bits/parse_numbers.h /usr/include/c++/13/vector \
+ /usr/include/c++/13/bits/stl_vector.h \
+ /usr/include/c++/13/bits/stl_bvector.h \
+ /usr/include/c++/13/bits/vector.tcc /app/CHTL/CHTLNode/AstVisitor.hpp

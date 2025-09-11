@@ -160,6 +160,7 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLParser/Parser.cpp.o: \
  /usr/include/c++/13/pstl/execution_defs.h \
  /app/CHTL/CHTLParser/../CHTLNode/ElementNode.hpp \
  /app/CHTL/CHTLParser/../CHTLNode/AttributeNode.hpp \
+ /app/CHTL/CHTLParser/../CHTLNode/../CSSExt/Expression.hpp \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
  /usr/include/c++/13/bits/vector.tcc \
@@ -177,4 +178,7 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLParser/Parser.cpp.o: \
  /app/CHTL/CHTLParser/../CHTLNode/StyleRuleNode.hpp \
  /app/CHTL/CHTLParser/../CHTLNode/CustomDefinitionNode.hpp \
  /app/CHTL/CHTLParser/../CHTLNode/ImportNode.hpp \
- /app/CHTL/CHTLParser/../CHTLNode/NamespaceNode.hpp
+ /app/CHTL/CHTLParser/../CHTLNode/NamespaceNode.hpp \
+ /app/CHTL/CHTLParser/../CHTLNode/DeleteNode.hpp \
+ /app/CHTL/CHTLParser/../CHTLNode/InsertNode.hpp \
+ /app/CHTL/CHTLParser/../CSSExt/ExpressionParser.hpp

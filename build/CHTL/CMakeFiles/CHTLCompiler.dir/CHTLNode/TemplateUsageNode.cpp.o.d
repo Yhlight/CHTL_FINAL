@@ -154,5 +154,7 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/TemplateUsageNode.cpp.o: \
  /usr/include/c++/13/bits/uses_allocator_args.h \
  /usr/include/c++/13/variant \
  /usr/include/c++/13/bits/enable_special_members.h \
- /usr/include/c++/13/bits/parse_numbers.h \
- /app/CHTL/CHTLNode/AstVisitor.hpp
+ /usr/include/c++/13/bits/parse_numbers.h /usr/include/c++/13/vector \
+ /usr/include/c++/13/bits/stl_vector.h \
+ /usr/include/c++/13/bits/stl_bvector.h \
+ /usr/include/c++/13/bits/vector.tcc /app/CHTL/CHTLNode/AstVisitor.hpp

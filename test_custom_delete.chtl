@@ -1,0 +1,11 @@
+[Custom] @Element MyBox
+{
+    span { text: "Hello"; }
+    div { text: "World"; }
+}
+
+body {
+    @Element MyBox {
+        delete span;
+    }
+}

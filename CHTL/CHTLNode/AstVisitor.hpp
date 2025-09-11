@@ -13,6 +13,8 @@ namespace CHTL {
     class CustomDefinitionNode;
     class ImportNode;
     class NamespaceNode;
+    class DeleteNode;
+    class InsertNode;
 }
 
 namespace CHTL {
@@ -31,6 +33,8 @@ public:
     virtual void visit(CustomDefinitionNode& node) = 0;
     virtual void visit(ImportNode& node) = 0;
     virtual void visit(NamespaceNode& node) = 0;
+    virtual void visit(DeleteNode& node) = 0;
+    virtual void visit(InsertNode& node) = 0;
 };
 
 } // namespace CHTL

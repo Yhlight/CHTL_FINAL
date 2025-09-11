@@ -1,0 +1,13 @@
+[Custom] @Element MyList
+{
+    p { text: "Item 1"; }
+    p { text: "Item 3"; }
+}
+
+body {
+    @Element MyList {
+        insert after p {
+            p { text: "Item 2"; }
+        }
+    }
+}

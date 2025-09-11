@@ -2,18 +2,16 @@
 
 #include "BaseNode.hpp"
 #include "../CHTLLexer/Token.hpp"
-#include <string>
 #include <vector>
 
 namespace CHTL {
 
-class TemplateUsageNode : public BaseNode {
+class DeleteNode : public BaseNode {
 public:
     void accept(AstVisitor& visitor) override;
 
-    Token type; // @Style, @Element, etc.
-    std::string name;
-    std::vector<NodePtr> specializationBody;
+    // A list of things to delete, e.g., [span, color, @, Style, MyStyle]
+    std::vector<Token> targets;
 };
 
 } // namespace CHTL

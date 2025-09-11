@@ -115,8 +115,9 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/AttributeNode.cpp.o: \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h \
- /app/CHTL/CHTLNode/../CHTLLexer/Token.hpp /usr/include/c++/13/string \
- /usr/include/c++/13/bits/char_traits.h \
+ /app/CHTL/CHTLNode/../CSSExt/Expression.hpp \
+ /app/CHTL/CHTLNode/../CSSExt/../CHTLLexer/Token.hpp \
+ /usr/include/c++/13/string /usr/include/c++/13/bits/char_traits.h \
  /usr/include/c++/13/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
  /usr/include/c++/13/clocale /usr/include/locale.h \

@@ -185,7 +185,9 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h \
  /app/CHTL/CHTLNode/ElementNode.hpp /app/CHTL/CHTLNode/AttributeNode.hpp \
- /app/CHTL/CHTLNode/../CHTLLexer/Token.hpp /usr/include/c++/13/variant \
+ /app/CHTL/CHTLNode/../CSSExt/Expression.hpp \
+ /app/CHTL/CHTLNode/../CSSExt/../CHTLLexer/Token.hpp \
+ /usr/include/c++/13/variant \
  /usr/include/c++/13/bits/enable_special_members.h \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \

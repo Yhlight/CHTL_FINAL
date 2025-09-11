@@ -17,6 +17,10 @@ void initializeKeywords() {
     keywords["Custom"] = TokenType::CUSTOM;
     keywords["Import"] = TokenType::IMPORT;
     keywords["Namespace"] = TokenType::NAMESPACE;
+    keywords["delete"] = TokenType::DELETE;
+    keywords["insert"] = TokenType::INSERT;
+    keywords["after"] = TokenType::AFTER;
+    keywords["before"] = TokenType::BEFORE;
 }
 
 

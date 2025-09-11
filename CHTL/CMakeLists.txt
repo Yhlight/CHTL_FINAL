@@ -12,6 +12,8 @@ add_library(CHTLCompiler STATIC
     CHTLNode/CustomDefinitionNode.cpp
     CHTLNode/ImportNode.cpp
     CHTLNode/NamespaceNode.cpp
+    CHTLNode/DeleteNode.cpp
+    CHTLNode/InsertNode.cpp
     CHTLParser/Parser.cpp
     CHTLContext.cpp
     Compiler.cpp
@@ -20,6 +22,8 @@ add_library(CHTLCompiler STATIC
     CSSExt/Expression.cpp
     CSSExt/ExpressionParser.cpp
     CSSExt/ExpressionEvaluator.cpp
+    CHTLContext.cpp
+    Compiler.cpp
 )
 
 # Publicly expose the include directory for this library

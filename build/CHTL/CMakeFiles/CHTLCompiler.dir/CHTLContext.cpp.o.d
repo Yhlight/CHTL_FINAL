@@ -116,8 +116,9 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.o: \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h \
  /app/CHTL/CHTLNode/ElementNode.hpp /app/CHTL/CHTLNode/AttributeNode.hpp \
- /app/CHTL/CHTLNode/../CHTLLexer/Token.hpp /usr/include/c++/13/string \
- /usr/include/c++/13/bits/char_traits.h \
+ /app/CHTL/CHTLNode/../CSSExt/Expression.hpp \
+ /app/CHTL/CHTLNode/../CSSExt/../CHTLLexer/Token.hpp \
+ /usr/include/c++/13/string /usr/include/c++/13/bits/char_traits.h \
  /usr/include/c++/13/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
  /usr/include/c++/13/clocale /usr/include/locale.h \
@@ -165,4 +166,5 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.o: \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h
+ /usr/include/c++/13/bits/erase_if.h \
+ /app/CHTL/CHTLNode/CustomDefinitionNode.hpp

@@ -308,6 +308,30 @@ CHTLNode/CustomDefinitionNode.cpp.s:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/CustomDefinitionNode.cpp.s
 .PHONY : CHTLNode/CustomDefinitionNode.cpp.s
 
+CHTLNode/DeleteNode.o: CHTLNode/DeleteNode.cpp.o
+.PHONY : CHTLNode/DeleteNode.o
+
+# target to build an object file
+CHTLNode/DeleteNode.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/DeleteNode.cpp.o
+.PHONY : CHTLNode/DeleteNode.cpp.o
+
+CHTLNode/DeleteNode.i: CHTLNode/DeleteNode.cpp.i
+.PHONY : CHTLNode/DeleteNode.i
+
+# target to preprocess a source file
+CHTLNode/DeleteNode.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/DeleteNode.cpp.i
+.PHONY : CHTLNode/DeleteNode.cpp.i
+
+CHTLNode/DeleteNode.s: CHTLNode/DeleteNode.cpp.s
+.PHONY : CHTLNode/DeleteNode.s
+
+# target to generate assembly for a file
+CHTLNode/DeleteNode.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/DeleteNode.cpp.s
+.PHONY : CHTLNode/DeleteNode.cpp.s
+
 CHTLNode/ElementNode.o: CHTLNode/ElementNode.cpp.o
 .PHONY : CHTLNode/ElementNode.o
 
@@ -355,6 +379,30 @@ CHTLNode/ImportNode.s: CHTLNode/ImportNode.cpp.s
 CHTLNode/ImportNode.cpp.s:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/ImportNode.cpp.s
 .PHONY : CHTLNode/ImportNode.cpp.s
+
+CHTLNode/InsertNode.o: CHTLNode/InsertNode.cpp.o
+.PHONY : CHTLNode/InsertNode.o
+
+# target to build an object file
+CHTLNode/InsertNode.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/InsertNode.cpp.o
+.PHONY : CHTLNode/InsertNode.cpp.o
+
+CHTLNode/InsertNode.i: CHTLNode/InsertNode.cpp.i
+.PHONY : CHTLNode/InsertNode.i
+
+# target to preprocess a source file
+CHTLNode/InsertNode.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/InsertNode.cpp.i
+.PHONY : CHTLNode/InsertNode.cpp.i
+
+CHTLNode/InsertNode.s: CHTLNode/InsertNode.cpp.s
+.PHONY : CHTLNode/InsertNode.s
+
+# target to generate assembly for a file
+CHTLNode/InsertNode.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/InsertNode.cpp.s
+.PHONY : CHTLNode/InsertNode.cpp.s
 
 CHTLNode/NamespaceNode.o: CHTLNode/NamespaceNode.cpp.o
 .PHONY : CHTLNode/NamespaceNode.o
@@ -651,12 +699,18 @@ help:
 	@echo "... CHTLNode/CustomDefinitionNode.o"
 	@echo "... CHTLNode/CustomDefinitionNode.i"
 	@echo "... CHTLNode/CustomDefinitionNode.s"
+	@echo "... CHTLNode/DeleteNode.o"
+	@echo "... CHTLNode/DeleteNode.i"
+	@echo "... CHTLNode/DeleteNode.s"
 	@echo "... CHTLNode/ElementNode.o"
 	@echo "... CHTLNode/ElementNode.i"
 	@echo "... CHTLNode/ElementNode.s"
 	@echo "... CHTLNode/ImportNode.o"
 	@echo "... CHTLNode/ImportNode.i"
 	@echo "... CHTLNode/ImportNode.s"
+	@echo "... CHTLNode/InsertNode.o"
+	@echo "... CHTLNode/InsertNode.i"
+	@echo "... CHTLNode/InsertNode.s"
 	@echo "... CHTLNode/NamespaceNode.o"
 	@echo "... CHTLNode/NamespaceNode.i"
 	@echo "... CHTLNode/NamespaceNode.s"

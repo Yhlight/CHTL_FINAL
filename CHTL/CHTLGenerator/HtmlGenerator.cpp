@@ -9,10 +9,13 @@
 #include "../CHTLNode/CustomDefinitionNode.hpp"
 #include "../CHTLNode/ImportNode.hpp"
 #include "../CHTLNode/NamespaceNode.hpp"
+#include "../CHTLNode/DeleteNode.hpp"
+#include "../CHTLNode/InsertNode.hpp"
 #include "../CSSExt/ExpressionParser.hpp"
 #include "../CSSExt/ExpressionEvaluator.hpp"
 #include <set>
 #include <sstream>
+#include <algorithm>
 
 namespace CHTL {
 
@@ -137,12 +140,22 @@ void HtmlGenerator::visit(TextNode& node) {
 }
 
 void HtmlGenerator::visit(AttributeNode& node) {
-    std::string value_content;
-    for (size_t i = 0; i < node.valueTokens.size(); ++i) {
-        value_content += node.valueTokens[i].lexeme;
-        if (i < node.valueTokens.size() - 1) value_content += " ";
+    if (!node.valueExpression) {
+        m_result += node.name + "=\"\"";
+        return;
     }
-    m_result += node.name + "=\"" + escapeHtml(value_content) + "\"";
+
+    CSSExt::ExpressionEvaluator evaluator;
+    CSSExt::Value val = evaluator.evaluate(node.valueExpression);
+
+    std::stringstream ss;
+    if (val.is_number) {
+        ss << val.number << val.unit;
+    } else {
+        ss << val.string_val;
+    }
+
+    m_result += node.name + "=\"" + escapeHtml(ss.str()) + "\"";
 }
 
 void HtmlGenerator::visit(CommentNode& node) {
@@ -163,7 +176,54 @@ void HtmlGenerator::visit(TemplateUsageNode& node) {
     if (node.type.lexeme == "Element") {
         if (m_elementTemplates.count(node.name)) {
             auto def = m_elementTemplates[node.name];
-            for (const auto& bodyNode : def->bodyNodes) {
+
+            // Start with a copy of the template's body
+            auto finalBodyNodes = def->bodyNodes;
+
+            // Process specializations
+            for (const auto& specNode : node.specializationBody) {
+                if (auto deleteNode = std::dynamic_pointer_cast<DeleteNode>(specNode)) {
+                    // Handle delete instructions
+                    std::vector<std::string> targets_to_delete;
+                    for(const auto& token : deleteNode->targets) {
+                        targets_to_delete.push_back(token.lexeme);
+                    }
+
+                    finalBodyNodes.erase(
+                        std::remove_if(finalBodyNodes.begin(), finalBodyNodes.end(),
+                            [&](const NodePtr& bodyNode){
+                                if (auto elem = std::dynamic_pointer_cast<ElementNode>(bodyNode)) {
+                                    for (const auto& target : targets_to_delete) {
+                                        if (elem->tagName == target) return true;
+                                    }
+                                }
+                                return false;
+                            }),
+                        finalBodyNodes.end());
+                }
+                else if (auto insertNode = std::dynamic_pointer_cast<InsertNode>(specNode)) {
+                    // Find the target node to insert before/after
+                    auto it = std::find_if(finalBodyNodes.begin(), finalBodyNodes.end(),
+                        [&](const NodePtr& bodyNode){
+                            if (auto elem = std::dynamic_pointer_cast<ElementNode>(bodyNode)) {
+                                // Simplified selector logic
+                                return elem->tagName == insertNode->selector;
+                            }
+                            return false;
+                        });
+
+                    if (it != finalBodyNodes.end()) {
+                        if (insertNode->position.type == TokenType::BEFORE) {
+                            finalBodyNodes.insert(it, insertNode->nodesToInsert.begin(), insertNode->nodesToInsert.end());
+                        } else if (insertNode->position.type == TokenType::AFTER) {
+                            finalBodyNodes.insert(it + 1, insertNode->nodesToInsert.begin(), insertNode->nodesToInsert.end());
+                        }
+                    }
+                }
+            }
+
+            // Visit the final, specialized body
+            for (const auto& bodyNode : finalBodyNodes) {
                 bodyNode->accept(*this);
             }
         }
@@ -175,6 +235,14 @@ void HtmlGenerator::visit(NamespaceNode& node) {
     for (const auto& child : node.body) {
         child->accept(*this);
     }
+}
+
+void HtmlGenerator::visit(DeleteNode& node) {
+    // This logic will be handled by the parent node that is being specialized.
+}
+
+void HtmlGenerator::visit(InsertNode& node) {
+    // This logic will be handled by the parent node that is being specialized.
 }
 
 }

@@ -7,6 +7,9 @@
 #include "../CHTLNode/CustomDefinitionNode.hpp"
 #include "../CHTLNode/ImportNode.hpp"
 #include "../CHTLNode/NamespaceNode.hpp"
+#include "../CHTLNode/DeleteNode.hpp"
+#include "../CHTLNode/InsertNode.hpp"
+#include "../CSSExt/ExpressionParser.hpp"
 
 namespace CHTL {
 
@@ -81,7 +84,24 @@ NodePtr Parser::element() {
             usage->type = template_type;
 
             usage->name = consume(TokenType::IDENTIFIER, "Expect template name after type.").lexeme;
-            consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+
+            // Check for an optional specialization body
+            if (match({TokenType::LEFT_BRACE})) {
+                while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                    if (match({TokenType::DELETE})) {
+                        usage->specializationBody.push_back(deleteStatement());
+                    } else if (match({TokenType::INSERT})) {
+                        usage->specializationBody.push_back(insertStatement());
+                    }
+                    else {
+                        // For now, assume other things are errors or just advance
+                        throw std::runtime_error("Unexpected token in specialization body.");
+                    }
+                }
+                consume(TokenType::RIGHT_BRACE, "Expect '}' after specialization body.");
+            } else {
+                consume(TokenType::SEMICOLON, "Expect ';' after template usage without a body.");
+            }
             node->children.push_back(usage);
         }
         else if (peek().type == TokenType::GENERATOR_COMMENT) {
@@ -194,9 +214,14 @@ std::shared_ptr<AttributeNode> Parser::attribute() {
         throw std::runtime_error("Expect ':' or '=' after attribute name.");
     }
 
+    std::vector<Token> valueTokens;
     while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
-        node->valueTokens.push_back(advance());
+        valueTokens.push_back(advance());
     }
+
+    // Parse the value tokens as an expression
+    CSSExt::ExpressionParser exprParser(valueTokens);
+    node->valueExpression = exprParser.parse();
 
     consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
     return node;
@@ -313,6 +338,41 @@ NodePtr Parser::namespaceStatement() {
     }
     // Namespace can also be declared without braces, applying to the rest of the file.
     // This would require parser state changes, so we'll only handle blocks for now.
+
+    return node;
+}
+
+
+NodePtr Parser::deleteStatement() {
+    auto node = std::make_shared<DeleteNode>();
+    node->line = previous().line; // line of the 'delete' keyword
+
+    while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
+        node->targets.push_back(advance());
+    }
+    consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
+    return node;
+}
+
+
+NodePtr Parser::insertStatement() {
+    auto node = std::make_shared<InsertNode>();
+    node->line = previous().line; // line of 'insert'
+
+    if (!match({TokenType::AFTER, TokenType::BEFORE})) {
+        throw std::runtime_error("Expect 'after' or 'before' after 'insert'.");
+    }
+    node->position = previous();
+
+    // The selector parsing here is simplified. A real implementation would need
+    // to handle complex CSS selectors. For now, we'll just take an identifier.
+    node->selector = consume(TokenType::IDENTIFIER, "Expect selector after insert position.").lexeme;
+
+    consume(TokenType::LEFT_BRACE, "Expect '{' for insert body.");
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        node->nodesToInsert.push_back(declaration());
+    }
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after insert body.");
 
     return node;
 }
