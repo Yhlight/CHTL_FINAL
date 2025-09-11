@@ -24,6 +24,16 @@ class CHTLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CHTLParser#importType.
+    def visitImportType(self, ctx:CHTLParser.ImportTypeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#path.
+    def visitPath(self, ctx:CHTLParser.PathContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CHTLParser#namespaceStatement.
     def visitNamespaceStatement(self, ctx:CHTLParser.NamespaceStatementContext):
         return self.visitChildren(ctx)
@@ -111,6 +121,11 @@ class CHTLVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by CHTLParser#scriptPlaceholder.
     def visitScriptPlaceholder(self, ctx:CHTLParser.ScriptPlaceholderContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#originPlaceholder.
+    def visitOriginPlaceholder(self, ctx:CHTLParser.OriginPlaceholderContext):
         return self.visitChildren(ctx)
 
 

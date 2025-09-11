@@ -23,10 +23,15 @@ class TemplateExpander:
         return visitor_method(node)
 
     def _visit_default(self, node: AstNode):
-        # We don't want to recurse into StyleNodes from the default visitor
-        if hasattr(node, 'children') and not isinstance(node, StyleNode):
+        # We don't want to recurse into StyleNodes or ImportNodes from the default visitor
+        if hasattr(node, 'children') and not isinstance(node, (StyleNode, ImportNode)):
             for child in node.children:
                 self._expand_templates(child)
+
+    def _visit_and_expand_importnode(self, node: AstNode):
+        # The template expander does not handle imports; the driver does.
+        # We just need to prevent it from recursing.
+        pass
 
     def _visit_and_expand_documentnode(self, node: DocumentNode):
         i = 0
@@ -72,7 +77,8 @@ class TemplateExpander:
         return -1
 
     def _expand_element_usage(self, node: ElementUsageNode):
-        namespace = ".".join(node.from_namespace) if node.from_namespace else 'global'
+        # If a 'from' clause exists, use it. Otherwise, use the namespace where the usage occurred.
+        namespace = ".".join(node.from_namespace) if node.from_namespace else node.current_namespace
         template = self.symbol_table.lookup(node.name, 'Element', namespace=namespace)
         if not template:
             return []

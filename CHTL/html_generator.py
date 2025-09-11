@@ -39,11 +39,7 @@ class HtmlGenerator:
             for name, expr_ast in props_to_eval.items():
                 try:
                     evaluated_props[name] = evaluator.evaluate(expr_ast)
-                except BaseException as e:
-                    import traceback
-                    print(f"--- CAUGHT BASE EXCEPTION evaluating '{name}' ---")
-                    traceback.print_exc()
-                    print("------------------------------------------")
+                except (KeyError, TypeError, ValueError):
                     unevaluated[name] = expr_ast
 
             if not unevaluated:
@@ -119,6 +115,10 @@ class HtmlGenerator:
 
     def visit_scriptnode(self, node: ScriptNode):
         return ""
+
+    def visit_originnode(self, node):
+        """Visits an origin node and returns its raw content."""
+        return node.content
 
     def visit_default(self, node):
         raise TypeError(f"No visit_{type(node).__name__.lower()} method for node type {type(node).__name__}")

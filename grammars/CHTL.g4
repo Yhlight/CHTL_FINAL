@@ -1,7 +1,7 @@
 grammar CHTL;
 
 // Parser Rules
-document: (directive | definition | element)*;
+document: (directive | definition | element | originPlaceholder)*;
 
 directive
     : importStatement
@@ -9,7 +9,10 @@ directive
     | configurationStatement
     ;
 
-importStatement: IMPORT AT_CHTL FROM (STRING | IDENTIFIER) SEMI;
+importStatement: IMPORT importType FROM path (AS IDENTIFIER)? SEMI;
+importType: AT_HTML | AT_STYLE | AT_JAVASCRIPT | AT_CHTL;
+path: STRING | IDENTIFIER;
+
 namespaceStatement: NAMESPACE IDENTIFIER SEMI;
 configurationStatement: CONFIGURATION (AT_CONFIG IDENTIFIER)? LBRACE attribute* RBRACE;
 
@@ -22,8 +25,8 @@ styleTemplate: AT_STYLE IDENTIFIER LBRACE attribute* RBRACE;
 elementTemplate: AT_ELEMENT IDENTIFIER LBRACE element* RBRACE;
 varTemplate: AT_VAR IDENTIFIER LBRACE attribute* RBRACE;
 
-element: IDENTIFIER LBRACE (attribute | element | textNode | stylePlaceholder | scriptPlaceholder | elementUsage)* RBRACE;
-elementUsage: AT_ELEMENT IDENTIFIER ( (LBRACE specializationBody* RBRACE) | SEMI );
+element: IDENTIFIER LBRACE (attribute | element | textNode | stylePlaceholder | scriptPlaceholder | elementUsage | originPlaceholder)* RBRACE;
+elementUsage: AT_ELEMENT IDENTIFIER (FROM namespacePath)? ( (LBRACE specializationBody* RBRACE) | SEMI );
 specializationBody: insertStatement | deleteStatement;
 insertStatement: INSERT (insertPosition)? LBRACE element+ RBRACE;
 deleteStatement: DELETE selector SEMI;
@@ -40,6 +43,7 @@ attribute: IDENTIFIER ((COLON | EQ) value)? SEMI;
 textNode: TEXT LBRACE value RBRACE;
 stylePlaceholder: STYLE_REF LPAR STRING RPAR SEMI;
 scriptPlaceholder: SCRIPT_REF LPAR STRING RPAR SEMI;
+originPlaceholder: ORIGIN_REF LPAR STRING RPAR SEMI;
 
 styleContent: (IDENTIFIER | STRING | COLON | SEMI | TEXT | LBRACE | EQ | NUMBER | DOT | varUsage);
 value: (valuePart)+ ;
@@ -55,7 +59,9 @@ TEMPLATE: '[Template]';
 CUSTOM: '[Custom]';
 AT_CHTL: '@Chtl';
 AT_CONFIG: '@Config';
+AT_HTML: '@Html';
 AT_STYLE: '@Style';
+AT_JAVASCRIPT: '@JavaScript';
 AT_ELEMENT: '@Element';
 AT_VAR: '@Var';
 INSERT: 'insert';
@@ -70,6 +76,7 @@ FROM: 'from';
 AS: 'as';
 STYLE_REF: '__style_ref__';
 SCRIPT_REF: '__script_ref__';
+ORIGIN_REF: '__origin_ref__';
 STYLE: 'style';
 TEXT: 'text';
 NUMBER: [0-9]+;

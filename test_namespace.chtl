@@ -1,5 +1,0 @@
-[Namespace] my_stuff;
-
-div {
-    id: app;
-}

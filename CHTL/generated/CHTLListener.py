@@ -35,6 +35,24 @@ class CHTLListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CHTLParser#importType.
+    def enterImportType(self, ctx:CHTLParser.ImportTypeContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#importType.
+    def exitImportType(self, ctx:CHTLParser.ImportTypeContext):
+        pass
+
+
+    # Enter a parse tree produced by CHTLParser#path.
+    def enterPath(self, ctx:CHTLParser.PathContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#path.
+    def exitPath(self, ctx:CHTLParser.PathContext):
+        pass
+
+
     # Enter a parse tree produced by CHTLParser#namespaceStatement.
     def enterNamespaceStatement(self, ctx:CHTLParser.NamespaceStatementContext):
         pass
@@ -194,6 +212,15 @@ class CHTLListener(ParseTreeListener):
 
     # Exit a parse tree produced by CHTLParser#scriptPlaceholder.
     def exitScriptPlaceholder(self, ctx:CHTLParser.ScriptPlaceholderContext):
+        pass
+
+
+    # Enter a parse tree produced by CHTLParser#originPlaceholder.
+    def enterOriginPlaceholder(self, ctx:CHTLParser.OriginPlaceholderContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#originPlaceholder.
+    def exitOriginPlaceholder(self, ctx:CHTLParser.OriginPlaceholderContext):
         pass
 
 

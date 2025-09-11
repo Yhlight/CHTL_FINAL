@@ -5,8 +5,8 @@ from CHTL.ast.nodes import (
     DocumentNode, ElementNode, AttributeNode, TextNode, StyleNode, StyleUsageNode,
     ScriptNode, TemplateDefinitionNode, CustomDefinitionNode,
     UsageNode, ElementUsageNode, VarUsageNode,
-    SpecializationNode, InsertStatementNode, DeleteStatementNode, SelectorNode,
-    DirectiveNode, ImportNode, NamespaceNode, ConfigurationNode
+    SpecializationNode, InsertStatementNode, DeleteStatementNode, SelectorNode, OriginNode,
+    DirectiveNode, ImportNode, ConfigurationNode
 )
 from CHTL.symbol_table import SymbolTable
 
@@ -22,16 +22,16 @@ class AstBuilder(CHTLVisitor):
         children = []
         if ctx.children:
             for child in ctx.children:
-                if isinstance(child, (CHTLParser.DirectiveContext, CHTLParser.DefinitionContext, CHTLParser.ElementContext)):
-                    node = self.visit(child)
-                    if isinstance(node, (TemplateDefinitionNode, CustomDefinitionNode)):
-                        self.symbol_table.define(node, namespace=self.current_namespace)
-                    elif isinstance(node, (NamespaceNode, ImportNode, ConfigurationNode)):
-                        # These are processed by the driver, not kept in the main tree
-                        # We still need to visit them to populate symbol table etc.
-                        children.append(node) # Add them to the tree for now
-                    elif node:
-                        children.append(node)
+                node = self.visit(child)
+                # Some nodes like Namespace are for state change and don't return an AST node
+                if node is None:
+                    continue
+
+                # Definitions are added to the symbol table, not the tree directly
+                if isinstance(node, (TemplateDefinitionNode, CustomDefinitionNode)):
+                    self.symbol_table.define(node, namespace=self.current_namespace)
+                else:
+                    children.append(node)
         return DocumentNode(children=children)
 
     def visitDirective(self, ctx:CHTLParser.DirectiveContext):
@@ -39,17 +39,23 @@ class AstBuilder(CHTLVisitor):
         return self.visit(ctx.getChild(0))
 
     def visitImportStatement(self, ctx:CHTLParser.ImportStatementContext):
-        # Simplified: just get the path for now
-        path_node = ctx.getChild(3)
-        path = path_node.getText()
+        import_type = ctx.importType().getText()
+        path = ctx.path().getText()
         if path.startswith('"') or path.startswith("'"):
             path = path[1:-1]
-        return ImportNode(import_type='Chtl', path=path)
+
+        alias = None
+        if ctx.IDENTIFIER():
+            alias = ctx.IDENTIFIER().getText()
+
+        return ImportNode(import_type=import_type, path=path, alias=alias)
 
     def visitNamespaceStatement(self, ctx:CHTLParser.NamespaceStatementContext):
-        # Simplified version
         name = ctx.IDENTIFIER().getText()
-        return NamespaceNode(name=name, body=[])
+        # This directive changes the state of the builder for all subsequent definitions
+        self.current_namespace = name
+        # It does not produce a node in the final AST, it's a compiler directive
+        return None
 
     def visitConfigurationStatement(self, ctx:CHTLParser.ConfigurationStatementContext):
         name = ctx.IDENTIFIER().getText() if ctx.IDENTIFIER() else None
@@ -161,6 +167,11 @@ class AstBuilder(CHTLVisitor):
 
     def visitElementUsage(self, ctx:CHTLParser.ElementUsageContext):
         name = ctx.IDENTIFIER().getText()
+
+        from_namespace = []
+        if ctx.namespacePath():
+            from_namespace = [ident.getText() for ident in ctx.namespacePath().IDENTIFIER()]
+
         specializations = []
         if ctx.LBRACE():
             for spec_body in ctx.specializationBody():
@@ -168,8 +179,12 @@ class AstBuilder(CHTLVisitor):
                 if spec_node:
                     specializations.append(spec_node)
 
-        # TODO: Add from_namespace parsing when grammar supports it
-        return ElementUsageNode(name=name, specializations=specializations, from_namespace=[])
+        return ElementUsageNode(
+            name=name,
+            specializations=specializations,
+            from_namespace=from_namespace,
+            current_namespace=self.current_namespace
+        )
 
     def visitSpecializationBody(self, ctx:CHTLParser.SpecializationBodyContext):
         if ctx.insertStatement():
@@ -233,6 +248,17 @@ class AstBuilder(CHTLVisitor):
     def visitScriptPlaceholder(self, ctx:CHTLParser.ScriptPlaceholderContext):
         script_id = ctx.STRING().getText()[1:-1]
         return ScriptNode(script_id=script_id)
+
+    def visitOriginPlaceholder(self, ctx:CHTLParser.OriginPlaceholderContext):
+        block_id = ctx.STRING().getText()[1:-1]
+        origin_data = self.registry.get(block_id)
+        if not origin_data or origin_data.get('type') != 'origin':
+            return None
+
+        return OriginNode(
+            origin_type=origin_data.get('origin_type', '@Html'),
+            content=origin_data.get('content', '')
+        )
 
     def visitValue(self, ctx:CHTLParser.ValueContext):
         parts = [self.visit(child) for child in ctx.children]

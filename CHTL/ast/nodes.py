@@ -25,10 +25,13 @@ class TextNode(AstNode):
 class DirectiveNode(AstNode):
     pass
 class ImportNode(DirectiveNode):
-    def __init__(self, import_type: str, path: str):
+    def __init__(self, import_type: str, path: str, alias: Optional[str] = None):
         self.import_type = import_type
         self.path = path
+        self.alias = alias
     def __repr__(self):
+        if self.alias:
+            return f"ImportNode(type='{self.import_type}', path='{self.path}', as='{self.alias}')"
         return f"ImportNode(type='{self.import_type}', path='{self.path}')"
 class NamespaceNode(DirectiveNode):
     def __init__(self, name: str, body: List[AstNode]):
@@ -65,12 +68,13 @@ class UsageNode(AstNode):
     pass
 
 class ElementUsageNode(UsageNode):
-    def __init__(self, name: str, specializations: List['SpecializationNode'], from_namespace: List[str] = None):
+    def __init__(self, name: str, specializations: List['SpecializationNode'], from_namespace: List[str] = None, current_namespace: str = 'global'):
         self.name = name
         self.specializations = specializations
         self.from_namespace = from_namespace or []
+        self.current_namespace = current_namespace
     def __repr__(self):
-        return f"ElementUsageNode(name='{self.name}', specializations={len(self.specializations)}, from={self.from_namespace})"
+        return f"ElementUsageNode(name='{self.name}', specializations={len(self.specializations)}, from={self.from_namespace}, context='{self.current_namespace}')"
 
 class VarUsageNode(UsageNode):
     def __init__(self, template_name: str, var_name: str, override_value: Any = None):
@@ -153,4 +157,11 @@ class ScriptNode(AstNode):
     def __repr__(self):
         return f"ScriptNode(id='{self.script_id}')"
 
-ElementChild = Union[ElementNode, TextNode, StyleNode, ScriptNode, UsageNode]
+class OriginNode(AstNode):
+    def __init__(self, origin_type: str, content: str):
+        self.origin_type = origin_type
+        self.content = content
+    def __repr__(self):
+        return f"OriginNode(type='{self.origin_type}', content_len={len(self.content)})"
+
+ElementChild = Union[ElementNode, TextNode, StyleNode, ScriptNode, UsageNode, OriginNode]

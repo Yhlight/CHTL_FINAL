@@ -12,9 +12,8 @@ class UnifiedScanner:
         return f"__chtl_ref_{self._next_id}"
 
     def scan(self, source_text: str) -> Tuple[str, Dict[str, Any]]:
-        # This regex will find either 'style' or 'script' as a whole word
-        # followed by an opening brace.
-        block_pattern = re.compile(r'\b(style|script)\s*{')
+        # This regex will find 'style', 'script', or '[Origin]' as whole words/tokens
+        block_pattern = re.compile(r'\b(style|script)\s*\{|(\[Origin\])')
 
         modified_source = ""
         last_index = 0
@@ -24,9 +23,23 @@ class UnifiedScanner:
             if not match:
                 break
 
-            block_type = match.group(1)
             start_index = match.start()
-            brace_index = match.end() - 1
+
+            # Determine block type and find the opening brace
+            if match.group(1): # Matched 'style' or 'script'
+                block_type = match.group(1)
+                brace_index = source_text.find('{', match.end(1))
+            elif match.group(2): # Matched '[Origin]'
+                block_type = 'origin'
+                brace_index = source_text.find('{', match.end(2))
+            else:
+                last_index = match.end()
+                continue
+
+            if brace_index == -1:
+                # Malformed block, skip
+                last_index = match.end()
+                continue
 
             # Append the text before the block
             modified_source += source_text[last_index:start_index]
@@ -67,6 +80,20 @@ class UnifiedScanner:
                         'content': block_content
                     }
                     modified_source += f'__script_ref__("{block_id}");'
+
+                elif block_type == 'origin':
+                    # Extract the origin type (e.g., @Html)
+                    type_text = source_text[match.end(2):brace_index].strip()
+                    # A simple regex to grab the @Type part.
+                    type_match = re.match(r'(@[a-zA-Z]+)', type_text)
+                    origin_type = type_match.group(1) if type_match else '@Html' # Default to Html
+
+                    self.registry[block_id] = {
+                        'type': 'origin',
+                        'origin_type': origin_type,
+                        'content': block_content
+                    }
+                    modified_source += f'__origin_ref__("{block_id}");'
 
                 last_index = content_end + 1
             else:
