@@ -6,27 +6,41 @@ from CHTL.CHTLParser.parser import Parser
 from CHTL.CHTLLexer.token_type import TokenType
 from CHTL.CHTLLoader.file_loader import FileLoader
 
+# Import the entire CHTL JS pipeline
+from Scanner.unified_scanner import CHTLUnifiedScanner
+from CHTL_JS.CHTLJSLexer.lexer import CHTLJSLexer
+from CHTL_JS.CHTLJSParser.parser import CHTLJSParser
+from CHTL_JS.CHTLJSGenerator.generator import CHTLJSGenerator
+
 class Generator:
     def __init__(self):
         self.self_closing_tags = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
         self.templates = {}
         self.global_styles = []
+        self.global_scripts = [] # Added for JS
         self.ast_root = None
         self.file_loader = FileLoader()
 
-    def generate(self, ast: nodes.ProgramNode) -> str:
+    def generate(self, ast: nodes.ProgramNode) -> tuple[str, str, str]:
         self.ast_root = ast
         self.templates = {}
         self.global_styles = []
+        self.global_scripts = [] # Reset scripts
         self._collect_templates(ast)
         self._process_imports(ast)
+
         html_output = self._visit(ast)
+
+        # Consolidate styles
+        css_output = ""
         if self.global_styles:
-            style_block = "<style>\n" + "\n".join(sorted(self.global_styles)) + "\n</style>"
-            if "<head>" in html_output.lower():
-                return html_output.replace("</head>", f"{style_block}\n</head>", 1)
-            return style_block + html_output
-        return html_output
+            css_output = "\n".join(sorted(self.global_styles))
+
+        # Consolidate scripts
+        js_output = "\n".join(self.global_scripts)
+
+        return html_output, css_output, js_output
+
 
     def _process_imports(self, node):
         if isinstance(node, nodes.ImportNode) and node.import_type == "Chtl":
@@ -56,6 +70,30 @@ class Generator:
         return "".join(self._visit(child) for child in children_to_render)
 
     def _visit_elementnode(self, node, parent_element, selector_context):
+        # Handle script blocks by dispatching to the CHTL JS pipeline
+        if node.tag_name.lower() == 'script':
+            # The content of a script tag is a single TextNode
+            script_content_node = next((c for c in node.children if isinstance(c, nodes.TextNode)), None)
+            if script_content_node:
+                raw_script = script_content_node.value
+
+                # 1. Scan for JS fragments
+                scanner = CHTLUnifiedScanner()
+                processed_script, js_fragments = scanner.scan_script_fragment(raw_script)
+
+                # 2. Lex and Parse the CHTL JS
+                js_lexer = CHTLJSLexer(processed_script)
+                js_tokens = js_lexer.scan_tokens()
+                js_parser = CHTLJSParser(js_tokens)
+                js_ast = js_parser.parse()
+
+                # 3. Generate the final JS
+                js_generator = CHTLJSGenerator(js_fragments)
+                final_js = js_generator.generate(js_ast)
+                self.global_scripts.append(final_js)
+
+            return "" # Don't render the <script> tag itself in the HTML output
+
         style_node = next((c for c in node.children if isinstance(c, nodes.StyleNode)), None)
         if style_node:
             for child in style_node.children:
@@ -115,7 +153,12 @@ class Generator:
                 prop_strings = [f"  {p.name}: {self._evaluate_expression(p.value_expression, parent_element)};" for p in sorted(child.properties, key=lambda x: x.name)]
                 self.global_styles.append(f"{final_selector} {{\n" + "\n".join(prop_strings) + "\n}}")
 
-    def _visit_textnode(self, node, parent_element, selector_context): return html.escape(node.value.strip().strip('"\''))
+    def _visit_textnode(self, node, parent_element, selector_context):
+        # For script tags, we need the raw, unescaped content
+        if parent_element and parent_element.tag_name.lower() == 'script':
+            return node.value
+        return html.escape(node.value.strip().strip('"\''))
+
     def _visit_originnode(self, node, parent_element, selector_context): return node.content
 
     def _evaluate_expression(self, node, current_element):
@@ -145,9 +188,7 @@ class Generator:
             left_val, left_unit = self._eval_recursive(node.left, current_element)
             right_val, right_unit = self._eval_recursive(node.right, current_element)
 
-            # Unit logic:
             if left_unit and right_unit and left_unit != right_unit:
-                # Prohibit operations on different units
                 return ("(error: incompatible units)", None)
             unit = left_unit or right_unit
 

@@ -39,7 +39,7 @@ class CHTLUnifiedScanner:
 
             if content_end != -1:
                 script_content = self.source[content_start:content_end]
-                processed_content, js_fragments = self._scan_script_fragment(script_content)
+                processed_content, js_fragments = self.scan_script_fragment(script_content)
                 self.fragments.update(js_fragments)
                 self.output_source.append(processed_content)
                 self.output_source.append(self.source[content_end])
@@ -52,61 +52,70 @@ class CHTLUnifiedScanner:
 
     def scan_script_fragment(self, fragment: str) -> (str, dict):
         local_fragments = {}
-        # Manual scan for `listen` blocks
-        try:
-            listen_pos = fragment.index("listen")
-            open_brace_pos = fragment.index('{', listen_pos)
-        except ValueError:
-            return fragment, local_fragments
+        output_parts = []
+        cursor = 0
 
-        # Extract content inside listen { ... }
-        brace_level = 1
-        content_start = open_brace_pos + 1
-        content_end = -1
-        for i in range(content_start, len(fragment)):
-            if fragment[i] == '{': brace_level += 1
-            elif fragment[i] == '}': brace_level -= 1
-            if brace_level == 0:
-                content_end = i
+        block_start_regex = re.compile(r'\s*(listen|animate)\s*\{')
+
+        while cursor < len(fragment):
+            match = block_start_regex.search(fragment, cursor)
+            if not match:
+                output_parts.append(fragment[cursor:])
                 break
 
-        if content_end == -1: return fragment, local_fragments # Unterminated
+            output_parts.append(fragment[cursor:match.start()])
+            block_type = match.group(1)
 
-        listen_content = fragment[content_start:content_end]
+            open_brace_pos = match.end() - 1
+            brace_level = 1
+            content_start = open_brace_pos + 1
+            content_end = -1
 
-        # Now, process the content to replace JS callbacks
-        # This is a simplified parser for `key: value, key2: value2`
-        modified_content = []
-        i = 0
-        while i < len(listen_content):
-            try:
-                colon_pos = listen_content.index(':', i)
-                modified_content.append(listen_content[i:colon_pos+1])
+            for i in range(content_start, len(fragment)):
+                if fragment[i] == '{': brace_level += 1
+                elif fragment[i] == '}': brace_level -= 1
+                if brace_level == 0:
+                    content_end = i
+                    break
 
-                # Find end of callback (comma or end of block)
-                brace_level = 0
-                callback_start = colon_pos + 1
-                callback_end = len(listen_content)
-                for j in range(callback_start, len(listen_content)):
-                    char = listen_content[j]
-                    if char == '{': brace_level += 1
-                    elif char == '}': brace_level -= 1
-                    elif char in [',', ';'] and brace_level == 0:
-                        callback_end = j
-                        break
-
-                js_code = listen_content[callback_start:callback_end].strip()
-                placeholder = self._get_placeholder("JS")
-                local_fragments[placeholder] = js_code
-                modified_content.append(f" {placeholder}")
-                if callback_end < len(listen_content):
-                    modified_content.append(listen_content[callback_end]) # Append the comma/semicolon
-
-                i = callback_end + 1
-            except ValueError:
-                modified_content.append(listen_content[i:])
+            if content_end == -1:
+                output_parts.append(fragment[match.start():])
                 break
 
-        processed_content = "".join(modified_content)
-        final_fragment = fragment.replace(listen_content, processed_content)
-        return final_fragment, local_fragments
+            inner_content = fragment[content_start:content_end]
+
+            if block_type == 'listen':
+                js_code = inner_content.strip()
+                if not js_code:
+                    output_parts.append(match.group(0) + inner_content + '}')
+                else:
+                    placeholder = self._get_placeholder("JS")
+                    local_fragments[placeholder] = js_code
+                    output_parts.append(f'{match.group(0).rstrip()} {placeholder} }}')
+
+            elif block_type == 'animate':
+                try:
+                    callback_key_pos = inner_content.index("callback")
+                    colon_pos = inner_content.index(":", callback_key_pos)
+                    val_start_pos = colon_pos + 1
+
+                    # Simplified logic: Assume callback is the last property
+                    js_code = inner_content[val_start_pos:].strip()
+
+                    if not js_code:
+                        output_parts.append(match.group(0) + inner_content + '}')
+                    else:
+                        placeholder = self._get_placeholder("JS")
+                        local_fragments[placeholder] = js_code
+
+                        # Reconstruct the animate block content carefully
+                        pre_callback_part = inner_content[:val_start_pos]
+                        modified_inner_content = pre_callback_part + " " + placeholder
+                        output_parts.append(f'animate {{ {modified_inner_content} }}')
+
+                except ValueError:
+                    output_parts.append(match.group(0) + inner_content + '}')
+
+            cursor = content_end + 1
+
+        return "".join(output_parts), local_fragments

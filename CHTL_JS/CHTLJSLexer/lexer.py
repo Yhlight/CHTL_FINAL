@@ -8,7 +8,10 @@ class CHTLJSLexer:
         self.start = 0
         self.current = 0
         self.line = 1
-        self.keywords = {"listen": CHTLJSTokenType.IDENTIFIER} # Can be expanded
+        self.keywords = {
+            "listen": CHTLJSTokenType.IDENTIFIER,
+            "animate": CHTLJSTokenType.ANIMATE,
+        }
 
     def scan_tokens(self) -> list[CHTLJSToken]:
         while not self._is_at_end():
@@ -27,19 +30,30 @@ class CHTLJSLexer:
         elif char == '}':
             if self._match('}'): self._add_token(CHTLJSTokenType.RBRACE_RBRACE)
             else: self._add_token(CHTLJSTokenType.RBRACE)
+        elif char == '[': self._add_token(CHTLJSTokenType.LBRACKET)
+        elif char == ']': self._add_token(CHTLJSTokenType.RBRACKET)
         elif char == '-':
             if self._match('>'): self._add_token(CHTLJSTokenType.ARROW)
+            else:
+                # It's part of an identifier, so handle it there.
+                self.current -= 1
+                self._identifier()
         elif char == ':': self._add_token(CHTLJSTokenType.COLON)
         elif char == ';': self._add_token(CHTLJSTokenType.SEMICOLON)
+        elif char == ',': self._add_token(CHTLJSTokenType.COMMA)
         else:
-            # This simplified lexer assumes anything else is an identifier
-            # or a placeholder from the Unified Scanner.
-            while not self._is_at_end() and self._peek() not in ' \r\t\n{}:;':
-                self._advance()
-            text = self.source[self.start:self.current]
-            # Check for keywords, otherwise it's an identifier/placeholder
-            ttype = self.keywords.get(text, CHTLJSTokenType.IDENTIFIER)
-            self._add_token(ttype)
+            self.current -= 1
+            self._identifier()
+
+    def _identifier(self):
+        while not self._is_at_end() and self._peek() not in ' \r\t\n[]{}:;,' :
+            # Break if we see '->' but not if it's just '-'
+            if self._peek() == '-' and self._peek_next() == '>':
+                break
+            self._advance()
+        text = self.source[self.start:self.current]
+        ttype = self.keywords.get(text, CHTLJSTokenType.IDENTIFIER)
+        self._add_token(ttype)
 
     def _is_at_end(self) -> bool: return self.current >= len(self.source)
     def _advance(self) -> str:
@@ -48,6 +62,7 @@ class CHTLJSLexer:
         if self._is_at_end() or self.source[self.current] != expected: return False
         self.current += 1; return True
     def _peek(self) -> str: return '\0' if self._is_at_end() else self.source[self.current]
+    def _peek_next(self) -> str: return '\0' if self.current + 1 >= len(self.source) else self.source[self.current + 1]
     def _add_token(self, type: CHTLJSTokenType):
         text = self.source[self.start:self.current]
         self.tokens.append(CHTLJSToken(type, text, self.line, self.start))

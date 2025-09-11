@@ -17,11 +17,70 @@ class CHTLJSParser:
         return program
 
     def _parse_statement(self):
+        if self._match(CHTLJSTokenType.ANIMATE):
+            return self._parse_animate_statement()
         if self._check(CHTLJSTokenType.LBRACE_LBRACE):
             return self._parse_listen_statement()
         if self._check(CHTLJSTokenType.EOF): return None
         self._advance()
         return None
+
+    def _parse_animate_statement(self):
+        self._consume(CHTLJSTokenType.LBRACE, "Expect '{' after 'animate'")
+        anim_node = nodes.AnimateNode()
+
+        while not self._check(CHTLJSTokenType.RBRACE) and not self._is_at_end():
+            key_token = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect property key.")
+            self._consume(CHTLJSTokenType.COLON, "Expect ':' after property key.")
+
+            key = key_token.lexeme
+            if key in ['target', 'duration', 'easing', 'loop', 'direction', 'delay', 'callback']:
+                value = self._parse_simple_value()
+                setattr(anim_node, key, value)
+            elif key == 'begin' or key == 'end':
+                props = self._parse_property_block()
+                setattr(anim_node, key, props)
+            elif key == 'when':
+                anim_node.when = self._parse_when_block()
+            else:
+                raise CHTLJSParseError(f"Unknown animate property: {key}")
+
+            if self._check(CHTLJSTokenType.COMMA): self._advance()
+
+        self._consume(CHTLJSTokenType.RBRACE, "Expect '}' to close animate block.")
+        return anim_node
+
+    def _parse_simple_value(self) -> str:
+        if self._check(CHTLJSTokenType.LBRACE_LBRACE):
+            self._advance() # consume {{
+            selector_text = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect selector text.").lexeme
+            self._consume(CHTLJSTokenType.RBRACE_RBRACE, "Expect '}}'.")
+            return f"{{{{{selector_text}}}}}"
+        else:
+            value_token = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect property value.")
+            return value_token.lexeme
+
+    def _parse_property_block(self) -> list[nodes.PropertyNode]:
+        self._consume(CHTLJSTokenType.LBRACE, "Expect '{' to open property block.")
+        properties = []
+        while not self._check(CHTLJSTokenType.RBRACE) and not self._is_at_end():
+            key = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect property key.").lexeme
+            self._consume(CHTLJSTokenType.COLON, "Expect ':' after key.")
+            value = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect property value.").lexeme
+            properties.append(nodes.PropertyNode(key=key, value=value))
+            if self._check(CHTLJSTokenType.COMMA): self._advance()
+        self._consume(CHTLJSTokenType.RBRACE, "Expect '}' to close property block.")
+        return properties
+
+    def _parse_when_block(self) -> list[nodes.KeyframeNode]:
+        self._consume(CHTLJSTokenType.LBRACKET, "Expect '[' to open 'when' block.")
+        keyframes = []
+        while not self._check(CHTLJSTokenType.RBRACKET) and not self._is_at_end():
+            props = self._parse_property_block()
+            keyframes.append(nodes.KeyframeNode(properties=props))
+            if self._check(CHTLJSTokenType.COMMA): self._advance()
+        self._consume(CHTLJSTokenType.RBRACKET, "Expect ']' to close 'when' block.")
+        return keyframes
 
     def _parse_listen_statement(self):
         target_node = self._parse_enhanced_selector()
@@ -34,11 +93,10 @@ class CHTLJSParser:
             event_name = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect event name").lexeme
             self._consume(CHTLJSTokenType.COLON, "Expect ':'")
 
-            # The callback is now a single identifier (the placeholder)
             callback_code = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect callback placeholder").lexeme
             listeners.append(nodes.EventListenerNode(event_name=event_name.strip(), callback_code=callback_code.strip()))
 
-            if self._match(CHTLJSTokenType.SEMICOLON):
+            if self._match(CHTLJSTokenType.SEMICOLON) or self._match(CHTLJSTokenType.COMMA):
                 continue
 
         self._consume(CHTLJSTokenType.RBRACE, "Expect '}'")
@@ -49,7 +107,6 @@ class CHTLJSParser:
         selector_token = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect selector text")
         end_brace = self._consume(CHTLJSTokenType.RBRACE_RBRACE, "Expect '}}'")
 
-        # The selector text should include the braces
         full_text = start_brace.lexeme + selector_token.lexeme + end_brace.lexeme
         return nodes.EnhancedSelectorNode(selector_text=full_text)
 

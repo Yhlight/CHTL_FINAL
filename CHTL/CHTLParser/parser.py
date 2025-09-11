@@ -146,6 +146,36 @@ class Parser:
     def _element_statement(self):
         tag_name = self._consume(TokenType.IDENTIFIER, "element tag name").lexeme
         element = nodes.ElementNode(tag_name=tag_name)
+
+        # Special handling for script tags to treat their content as a single block of text
+        if tag_name.lower() == 'script':
+            self._consume(TokenType.LBRACE, "{")
+
+            # Find the start and end of the script content tokens
+            content_start_index = self.current
+            brace_level = 1
+            content_end_index = -1
+
+            i = self.current
+            while i < len(self.tokens):
+                token_type = self.tokens[i].type
+                if token_type == TokenType.LBRACE: brace_level += 1
+                elif token_type == TokenType.RBRACE: brace_level -= 1
+                if brace_level == 0:
+                    content_end_index = i
+                    break
+                i += 1
+
+            if content_end_index != -1:
+                content_tokens = self.tokens[content_start_index:content_end_index]
+                # Reconstruct the raw string from the tokens' lexemes
+                raw_content = "".join(t.lexeme for t in content_tokens)
+                element.children.append(nodes.TextNode(value=raw_content))
+                self.current = content_end_index # Move the parser's cursor
+
+            self._consume(TokenType.RBRACE, "}")
+            return element
+
         self._consume(TokenType.LBRACE, "{")
         while not self._check(TokenType.RBRACE) and not self._is_at_end():
             if self._check(TokenType.AT): element.children.append(self._template_usage())

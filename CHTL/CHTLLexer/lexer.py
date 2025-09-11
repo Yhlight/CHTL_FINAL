@@ -85,7 +85,9 @@ class Lexer:
         if self._is_digit(char): self._number(); return
         if self._is_alpha(char): self._identifier(); return
 
-        print(f"Lexer Error: Unexpected character '{char}' on line {self.line}")
+        # Any other character is unexpected in CHTL, but might be valid in embedded JS.
+        # Preserve it so the parser can reconstruct the script content.
+        self._add_token(TokenType.UNEXPECTED)
 
     def _string(self, quote_type: str):
         while self._peek() != quote_type and not self._is_at_end():

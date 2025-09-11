@@ -2,37 +2,34 @@ from enum import Enum, auto
 
 class TokenType(Enum):
     # Single-character tokens
-    LBRACE = auto()         # {
-    RBRACE = auto()         # }
-    LBRACKET = auto()       # [
-    RBRACKET = auto()       # ]
-    AT = auto()             # @
-    COMMA = auto()          # ,
-    COLON = auto()          # :
-    EQUALS = auto()         # =
-    SEMICOLON = auto()      # ;
-    DOT = auto()            # .
-    HASH = auto()           # #
-    AMPERSAND = auto()      # &
-    QUESTION = auto()       # ?
-
-    # Operators
-    PLUS = auto()           # +
-    MINUS = auto()          # -
-    STAR = auto()           # *
-    SLASH = auto()          # /
-    PERCENT = auto()        # %
+    LBRACE = auto()
+    RBRACE = auto()
+    LBRACKET = auto()
+    RBRACKET = auto()
+    COLON = auto()
+    SEMICOLON = auto()
+    DOT = auto()
+    PLUS = auto()
+    MINUS = auto()
+    STAR = auto()
+    SLASH = auto()
+    PERCENT = auto()
+    HASH = auto()
+    AT = auto()
+    COMMA = auto()
+    AMPERSAND = auto()
+    QUESTION = auto()
 
     # One or two character tokens
-    STAR_STAR = auto()      # **
-    GREATER = auto()        # >
-    LESS = auto()           # <
-    GREATER_EQUAL = auto()  # >=
-    LESS_EQUAL = auto()     # <=
-    EQUAL_EQUAL = auto()    # ==
-    BANG_EQUAL = auto()     # !=
-    AMPERSAND_AMPERSAND = auto() # &&
-    PIPE_PIPE = auto()      # ||
+    EQUALS = auto()
+    EQUAL_EQUAL = auto()
+    BANG_EQUAL = auto()
+    GREATER = auto()
+    GREATER_EQUAL = auto()
+    LESS = auto()
+    LESS_EQUAL = auto()
+    STAR_STAR = auto()
+    PIPE_PIPE = auto()
 
     # Literals
     IDENTIFIER = auto()
@@ -43,5 +40,6 @@ class TokenType(Enum):
     TEXT = auto()
     STYLE = auto()
 
-    # End of File
+    # Special
+    UNEXPECTED = auto() # For characters that are not part of CHTL syntax but should be preserved in script blocks
     EOF = auto()

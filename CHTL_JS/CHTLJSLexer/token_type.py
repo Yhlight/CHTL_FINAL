@@ -10,8 +10,14 @@ class CHTLJSTokenType(Enum):
     IDENTIFIER = auto()
     LBRACE = auto()
     RBRACE = auto()
+    LBRACKET = auto()
+    RBRACKET = auto()
     COLON = auto()
     SEMICOLON = auto()
+    COMMA = auto()
+
+    # Keywords
+    ANIMATE = auto()
 
     # For now, we'll treat JS code as opaque identifiers
     JS_CODE = auto()
