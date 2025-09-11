@@ -49,13 +49,15 @@ class UnifiedScanner:
                 block_id = self._generate_id()
 
                 if block_type == 'style':
-                    inline, global_rules, usages, deleted = parse_style_content(block_content)
+                    style_data = parse_style_content(block_content)
                     self.registry[block_id] = {
                         'type': 'style',
-                        'inline': inline,
-                        'global': global_rules,
-                        'usages': usages,
-                        'deleted': deleted
+                        'inline': style_data.get('inline', ''),
+                        'global': style_data.get('global', []),
+                        'usages': style_data.get('usages', []),
+                        'deleted': style_data.get('deleted', []),
+                        'auto_classes': style_data.get('auto_classes', []),
+                        'auto_ids': style_data.get('auto_ids', [])
                     }
                     modified_source += f'__style_ref__("{block_id}");'
 

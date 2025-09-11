@@ -15,6 +15,7 @@ class AstBuilder(CHTLVisitor):
         self.registry = registry
         self.symbol_table = symbol_table
         self.current_namespace = 'global'
+        self.current_contextual_selector = None
         super().__init__()
 
     def visitDocument(self, ctx:CHTLParser.DocumentContext):
@@ -87,23 +88,81 @@ class AstBuilder(CHTLVisitor):
 
     def visitElement(self, ctx:CHTLParser.ElementContext):
         tag_name = ctx.IDENTIFIER().getText()
-        attributes = []
-        children = []
-        # The children of the element are inside the LBRACE and RBRACE.
-        # The actual content starts at index 2.
-        if len(ctx.children) > 3: # IDENTIFIER LBRACE ... RBRACE
+
+        # --- Stage 1: Gather all potential attributes and style info ---
+
+        user_attributes = []
+        style_placeholders = []
+        other_child_contexts = []
+
+        if len(ctx.children) > 3:
             for i in range(2, len(ctx.children) - 1):
                 child_ctx = ctx.getChild(i)
-                # It's possible to get a TerminalNode here (e.g. for a SEMI), so we check the type
-                if not hasattr(child_ctx, 'accept'):
-                    continue
-                node = self.visit(child_ctx)
+                if isinstance(child_ctx, CHTLParser.AttributeContext):
+                    user_attributes.append(self.visit(child_ctx))
+                elif isinstance(child_ctx, CHTLParser.StylePlaceholderContext):
+                    style_placeholders.append(child_ctx)
+                elif hasattr(child_ctx, 'accept'):
+                    other_child_contexts.append(child_ctx)
 
-                if isinstance(node, AttributeNode):
-                    attributes.append(node)
-                elif node:
-                    children.append(node)
-        return ElementNode(tag_name=tag_name, attributes=attributes, children=children)
+        # --- Stage 2: Determine final attributes and contextual selector ---
+
+        auto_classes = []
+        auto_ids = []
+        for placeholder_ctx in style_placeholders:
+            block_id = placeholder_ctx.STRING().getText()[1:-1]
+            style_data = self.registry.get(block_id, {})
+            auto_classes.extend(style_data.get('auto_classes', []))
+            auto_ids.extend(style_data.get('auto_ids', []))
+
+        final_attributes = list(user_attributes)
+        has_id = any(attr.name == 'id' for attr in user_attributes)
+        has_class = any(attr.name == 'class' for attr in user_attributes)
+
+        if auto_ids and not has_id:
+            final_attributes.append(AttributeNode(name='id', value=auto_ids[0]))
+
+        if auto_classes:
+            if not has_class:
+                final_attributes.append(AttributeNode(name='class', value=' '.join(sorted(list(set(auto_classes))))))
+            else:
+                for attr in final_attributes:
+                    if attr.name == 'class':
+                        existing = set(attr.value.split())
+                        existing.update(auto_classes)
+                        attr.value = ' '.join(sorted(list(existing)))
+                        break
+
+        # Determine the selector for '&' replacement, ID takes precedence
+        new_contextual_selector = None
+        final_id_attr = next((attr for attr in final_attributes if attr.name == 'id'), None)
+        if final_id_attr:
+            new_contextual_selector = f"#{final_id_attr.value}"
+        else:
+            final_class_attr = next((attr for attr in final_attributes if attr.name == 'class'), None)
+            if final_class_attr:
+                # Use the first class name for the context
+                new_contextual_selector = f".{final_class_attr.value.split()[0]}"
+
+        # --- Stage 3: Build the final node and its children ---
+
+        previous_selector = self.current_contextual_selector
+        self.current_contextual_selector = new_contextual_selector
+
+        children = []
+        # Visit the style placeholders first, now with the correct context
+        for placeholder_ctx in style_placeholders:
+            children.append(self.visit(placeholder_ctx))
+
+        # Visit the rest of the children
+        for child_ctx in other_child_contexts:
+            node = self.visit(child_ctx)
+            if node:
+                children.append(node)
+
+        self.current_contextual_selector = previous_selector # Restore context
+
+        return ElementNode(tag_name=tag_name, attributes=final_attributes, children=children)
 
     def visitElementUsage(self, ctx:CHTLParser.ElementUsageContext):
         name = ctx.IDENTIFIER().getText()
@@ -140,12 +199,13 @@ class AstBuilder(CHTLVisitor):
         style_data = self.registry.get(block_id)
         if not style_data or style_data.get('type') != 'style':
             return None
+
         return StyleNode(
-            raw_content="",
-            inline_styles=style_data.get('inline', ''),
-            global_rules=style_data.get('global', []),
+            inline_styles=style_data.get('inline', {}),
+            global_rules=style_data.get('global', {}),
             style_usages=style_data.get('usages', []),
-            deleted_properties=style_data.get('deleted', [])
+            deleted_properties=style_data.get('deleted', []),
+            contextual_selector=self.current_contextual_selector
         )
 
     def visitScriptPlaceholder(self, ctx:CHTLParser.ScriptPlaceholderContext):

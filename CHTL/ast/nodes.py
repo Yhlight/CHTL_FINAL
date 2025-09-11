@@ -108,10 +108,8 @@ class DeleteStatementNode(SpecializationNode):
 class DocumentNode(AstNode):
     def __init__(self, children: List[Union['ElementNode', 'DefinitionNode', 'DirectiveNode']]):
         self.children = children
-        self.global_rules: List[str] = []
-        self.scripts: Dict[str, str] = {}
     def __repr__(self):
-        return f"DocumentNode(children={len(self.children)}, global_rules={len(self.global_rules)}, scripts={len(self.scripts)})"
+        return f"DocumentNode(children={len(self.children)})"
 
 class ElementNode(AstNode):
     def __init__(self, tag_name: str, attributes: List['AttributeNode'], children: List['AstNode']):
@@ -122,14 +120,19 @@ class ElementNode(AstNode):
         return f"ElementNode(tag='{self.tag_name}', attributes={self.attributes}, children={self.children})"
 
 class StyleNode(AstNode):
-    def __init__(self, raw_content: str, inline_styles: str, global_rules: List[str], style_usages: List[StyleUsageNode], deleted_properties: List[str]):
-        self.raw_content = raw_content
+    def __init__(self,
+                 inline_styles: Dict[str, 'ExprNode'],
+                 global_rules: Dict[str, Dict[str, 'ExprNode']],
+                 style_usages: List[StyleUsageNode],
+                 deleted_properties: List[str],
+                 contextual_selector: Optional[str] = None):
         self.inline_styles = inline_styles
         self.global_rules = global_rules
         self.style_usages = style_usages
         self.deleted_properties = deleted_properties
+        self.contextual_selector = contextual_selector
     def __repr__(self):
-        return f"StyleNode(inline='{self.inline_styles}', global_rules={len(self.global_rules)}, usages={len(self.style_usages)}, deleted={len(self.deleted_properties)})"
+        return f"StyleNode(inline_count={len(self.inline_styles)}, global_rules_count={len(self.global_rules)}, context='{self.contextual_selector}')"
 
 class ScriptNode(AstNode):
     def __init__(self, script_id: str):

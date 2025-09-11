@@ -48,10 +48,10 @@ class CompilerDriver:
         expander = TemplateExpander(symbol_table=self.symbol_table)
         expander.expand(ast)
 
-        if isinstance(ast, DocumentNode):
-            process_scripts(ast, registry, ast)
+        # Script processing is now handled entirely by the HtmlGenerator by finding ScriptNodes.
+        # The old process_scripts function is obsolete.
 
         # The final generation happens after all files are processed and linked.
-        html_generator = HtmlGenerator()
+        html_generator = HtmlGenerator(registry=registry)
         html_output = html_generator.visit(ast)
         return html_output

@@ -14,7 +14,8 @@ class TemplateExpander:
 
     def expand(self, node: AstNode):
         self._expand_templates(node)
-        self._process_styles(node)
+        # The _process_styles method is now obsolete. Style processing and evaluation
+        # is handled by the HtmlGenerator.
 
     def _expand_templates(self, node: AstNode):
         method_name = f'_visit_and_expand_{node.__class__.__name__.lower()}'
@@ -128,9 +129,6 @@ class TemplateExpander:
         if hasattr(node, 'children'):
             for child in node.children:
                 self._process_styles(child, global_rules_list)
-
-        if isinstance(node, DocumentNode):
-            node.global_rules = global_rules_list
 
     def _expand_style_usages(self, style_node: StyleNode):
         if not style_node.style_usages:
