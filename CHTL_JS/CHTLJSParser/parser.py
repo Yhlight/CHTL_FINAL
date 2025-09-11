@@ -20,37 +20,38 @@ class CHTLJSParser:
         if self._check(CHTLJSTokenType.LBRACE_LBRACE):
             return self._parse_listen_statement()
         if self._check(CHTLJSTokenType.EOF): return None
-        self._advance() # Skip unknown tokens
+        self._advance()
         return None
 
     def _parse_listen_statement(self):
         target_node = self._parse_enhanced_selector()
-        self._consume(CHTLJSTokenType.ARROW, "Expect '->' after enhanced selector.")
-        self._consume(CHTLJSTokenType.IDENTIFIER, "Expect 'listen' keyword.")
-        self._consume(CHTLJSTokenType.LBRACE, "Expect '{' for listen block.")
+        self._consume(CHTLJSTokenType.ARROW, "Expect '->'")
+        self._consume(CHTLJSTokenType.IDENTIFIER, "Expect 'listen'")
+        self._consume(CHTLJSTokenType.LBRACE, "Expect '{'")
 
         listeners = []
         while not self._check(CHTLJSTokenType.RBRACE) and not self._is_at_end():
-            event_name = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect event name.").lexeme
-            self._consume(CHTLJSTokenType.COLON, "Expect ':' after event name.")
+            event_name = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect event name").lexeme
+            self._consume(CHTLJSTokenType.COLON, "Expect ':'")
 
-            callback_parts = []
-            while not self._check(CHTLJSTokenType.SEMICOLON) and not self._is_at_end():
-                callback_parts.append(self._advance().lexeme)
-            callback_code = "".join(callback_parts).strip()
+            # The callback is now a single identifier (the placeholder)
+            callback_code = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect callback placeholder").lexeme
+            listeners.append(nodes.EventListenerNode(event_name=event_name.strip(), callback_code=callback_code.strip()))
 
-            listeners.append(nodes.EventListenerNode(event_name=event_name.strip(), callback_code=callback_code))
-            self._consume(CHTLJSTokenType.SEMICOLON, "Expect ';' after callback.")
+            if self._match(CHTLJSTokenType.SEMICOLON):
+                continue
 
-        self._consume(CHTLJSTokenType.RBRACE, "Expect '}' to close listen block.")
+        self._consume(CHTLJSTokenType.RBRACE, "Expect '}'")
         return nodes.ListenBlockNode(target=target_node, listeners=listeners)
 
     def _parse_enhanced_selector(self) -> nodes.EnhancedSelectorNode:
-        self._consume(CHTLJSTokenType.LBRACE_LBRACE, "Expect '{{'.")
-        # The content of the selector is a single identifier
-        selector_text = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect selector text.").lexeme
-        self._consume(CHTLJSTokenType.RBRACE_RBRACE, "Expect '}}'.")
-        return nodes.EnhancedSelectorNode(selector_text=selector_text)
+        start_brace = self._consume(CHTLJSTokenType.LBRACE_LBRACE, "Expect '{{'")
+        selector_token = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect selector text")
+        end_brace = self._consume(CHTLJSTokenType.RBRACE_RBRACE, "Expect '}}'")
+
+        # The selector text should include the braces
+        full_text = start_brace.lexeme + selector_token.lexeme + end_brace.lexeme
+        return nodes.EnhancedSelectorNode(selector_text=full_text)
 
     # --- Helpers ---
     def _consume(self, ttype: CHTLJSTokenType, message: str) -> CHTLJSToken:

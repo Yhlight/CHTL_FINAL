@@ -1,10 +1,10 @@
 from CHTL_JS.CHTLJSNode import nodes
 
 class CHTLJSGenerator:
+    def __init__(self, js_fragments: dict):
+        self.js_fragments = js_fragments
+
     def generate(self, ast: nodes.CHTLJS_ProgramNode) -> str:
-        """The main entry point for the CHTL JS generator."""
-        # The generated code should be wrapped in a script tag or similar
-        # by the main CHTL generator. This just generates the raw JS.
         return "".join(self._visit(node) for node in ast.children if node)
 
     def _visit(self, node):
@@ -13,17 +13,15 @@ class CHTLJSGenerator:
         return visitor(node)
 
     def _visit_listenblocknode(self, node: nodes.ListenBlockNode) -> str:
-        # A simple querySelector is used for now. The spec implies a more
-        # complex selector mapping, but this is a good start.
-        selector = node.target.selector_text
+        # Reconstruct the JS code from the AST
+        # Strip the outer {{}} from the selector text
+        selector_content = node.target.selector_text[2:-2]
 
-        # A real implementation would need to handle different selector types (.class, #id)
-        # and might need to escape the selector string.
-        js_str = f"document.querySelector('{selector}').addEventListener("
+        js_str = f"document.querySelector('{selector_content}')"
 
-        # This only handles the first listener for now.
-        if node.listeners:
-            listener = node.listeners[0]
-            js_str += f"'{listener.event_name}', {listener.callback_code});"
+        # This implementation handles multiple listeners
+        for listener in node.listeners:
+            raw_callback = self.js_fragments.get(listener.callback_code.strip(), "() => {}")
+            js_str += f".addEventListener('{listener.event_name}', {raw_callback});\n"
 
-        return js_str
+        return js_str.strip()
