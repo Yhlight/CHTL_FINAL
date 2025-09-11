@@ -5,6 +5,7 @@
 #include "Scanner/UnifiedScanner.h"
 #include "CHTL/CHTLLexer/Lexer.h"
 #include "CHTL/CHTLParser/Parser.h"
+#include "CHTL/CHTLSemantic/SemanticAnalyzer.h"
 #include "Context/ConfigurationContext.h"
 #include "CompilerDispatcher/CompilerDispatcher.h"
 #include "CodeMerger/CodeMerger.h"
@@ -75,6 +76,15 @@ int main(int argc, char* argv[]) {
 
     Parser parser(tokens);
     NodeList ast = parser.parse();
+
+    // 3.5. Semantic Analysis
+    try {
+        SemanticAnalyzer analyzer(ast);
+        analyzer.analyze();
+    } catch (const SemanticAnalyzer::SemanticError& e) {
+        std::cerr << "Semantic Error: " << e.what() << std::endl;
+        return 1;
+    }
 
     // 4. Dispatch and Generate
     // The dispatcher will generate HTML containing placeholders

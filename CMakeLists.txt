@@ -19,6 +19,7 @@ add_subdirectory(Test)
 target_link_libraries(chtl_compiler PRIVATE
     merger
     dispatcher
+    chtl_semantic
     # The rest are dependencies of dispatcher and merger,
     # and will be linked transitively because of PUBLIC linking.
 )

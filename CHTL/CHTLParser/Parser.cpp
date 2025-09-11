@@ -157,12 +157,19 @@ NodePtr Parser::parseTemplateUsage() {
     consume(TokenType::At, "Expect '@' for template usage.");
     const Token& type = consume(TokenType::Identifier, "Expect template type (Style, Element).");
     const Token& name = consume(TokenType::Identifier, "Expect template name.");
+
+    std::string namespace_name;
+    if (match({TokenType::FromKeyword})) {
+        namespace_name = consume(TokenType::Identifier, "Expect namespace name after 'from'.").value;
+        // TODO: Handle nested namespaces like `space.room`
+    }
+
     if (type.value == "Style") {
         consume(TokenType::Semicolon, "Expect ';' after @Style usage.");
-        return std::make_unique<StyleUsageNode>(name.value);
+        return std::make_unique<StyleUsageNode>(name.value, namespace_name);
     }
     if (type.value == "Element") {
-        auto node = std::make_unique<ElementUsageNode>(name.value);
+        auto node = std::make_unique<ElementUsageNode>(name.value, namespace_name);
         if (match({TokenType::OpenBrace})) {
             while(!check(TokenType::CloseBrace) && !isAtEnd()) {
                 skipComments();
@@ -215,13 +222,50 @@ NodePtr Parser::parseConstraint() {
 NodePtr Parser::parseDelete() {
     consume(TokenType::DeleteKeyword, "Expect 'delete' keyword.");
     const Token& target = consume(TokenType::Identifier, "Expect target for delete.");
+
+    int index = -1;
+    if (match({TokenType::OpenBracket})) {
+        const Token& indexToken = consume(TokenType::Identifier, "Expect index inside [].");
+        try {
+            index = std::stoi(indexToken.value);
+        } catch (const std::invalid_argument&) {
+            throw error(indexToken, "Invalid index in delete statement.");
+        }
+        consume(TokenType::CloseBracket, "Expect ']' after index.");
+    }
+
     consume(TokenType::Semicolon, "Expect ';' after delete statement.");
-    return std::make_unique<DeleteNode>(target.value);
+    return std::make_unique<DeleteNode>(target.value, index);
 }
 
 NodePtr Parser::parseInsert() {
     consume(TokenType::InsertKeyword, "Expect 'insert' keyword.");
-    throw error(peek(), "Insert statement parsing is not yet implemented.");
+
+    // Parse position
+    const Token& posToken = consume(TokenType::Identifier, "Expect position keyword (after, before, etc.).");
+    InsertNode::Position position;
+    if (posToken.value == "after") position = InsertNode::Position::After;
+    else if (posToken.value == "before") position = InsertNode::Position::Before;
+    else if (posToken.value == "replace") position = InsertNode::Position::Replace;
+    else if (posToken.value == "top") position = InsertNode::Position::AtTop;
+    else if (posToken.value == "bottom") position = InsertNode::Position::AtBottom;
+    else throw error(posToken, "Invalid insert position.");
+
+    // Parse selector
+    const Token& selector = consume(TokenType::Identifier, "Expect selector for insert.");
+    // TODO: Handle complex selectors
+
+    // Parse block
+    NodeList children;
+    consume(TokenType::OpenBrace, "Expect '{' for insert block.");
+    while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+        skipComments();
+        if (check(TokenType::CloseBrace)) break;
+        children.push_back(parseDeclaration());
+    }
+    consume(TokenType::CloseBrace, "Expect '}' after insert block.");
+
+    return std::make_unique<InsertNode>(position, selector.value, std::move(children));
 }
 
 NodePtr Parser::parseElement() {

@@ -50,9 +50,14 @@ private:
     void dedent();
     void printIndent();
 
-    std::map<std::string, StyleTemplateDefinitionNode*> styleTemplates;
-    std::map<std::string, ElementTemplateDefinitionNode*> elementTemplates;
-    std::map<std::string, VarTemplateDefinitionNode*> varTemplates;
+    // Namespace-aware symbol tables
+    using StyleTemplateMap = std::map<std::string, StyleTemplateDefinitionNode*>;
+    using ElementTemplateMap = std::map<std::string, ElementTemplateDefinitionNode*>;
+    using VarTemplateMap = std::map<std::string, VarTemplateDefinitionNode*>;
+
+    std::map<std::string, StyleTemplateMap> styleTemplates;
+    std::map<std::string, ElementTemplateMap> elementTemplates;
+    std::map<std::string, VarTemplateMap> varTemplates;
 
     Node* ast_root = nullptr;
     std::stringstream output;

@@ -57,8 +57,10 @@ public:
 
 class TemplateUsageNode : public Node {
 public:
-    TemplateUsageNode(const std::string& name) : name(name) {}
+    TemplateUsageNode(const std::string& name, std::string namespace_name = "")
+        : name(name), namespace_name(std::move(namespace_name)) {}
     std::string name;
+    std::string namespace_name;
 };
 
 class StyleUsageNode : public TemplateUsageNode {

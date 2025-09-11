@@ -16,10 +16,13 @@
 class TemplateCollector : public Visitor {
 public:
     TemplateCollector(
-        std::map<std::string, StyleTemplateDefinitionNode*>& styleTemplates,
-        std::map<std::string, ElementTemplateDefinitionNode*>& elementTemplates,
-        std::map<std::string, VarTemplateDefinitionNode*>& varTemplates
-    ) : styleTemplates(styleTemplates), elementTemplates(elementTemplates), varTemplates(varTemplates) {}
+        std::map<std::string, Generator::StyleTemplateMap>& styleTemplates,
+        std::map<std::string, Generator::ElementTemplateMap>& elementTemplates,
+        std::map<std::string, Generator::VarTemplateMap>& varTemplates
+    ) : styleTemplates(styleTemplates), elementTemplates(elementTemplates), varTemplates(varTemplates) {
+        // Start in the global namespace
+        namespace_stack.push_back("");
+    }
 
     void collect(const NodeList& ast) {
         for (const auto& node : ast) {
@@ -27,15 +30,30 @@ public:
         }
     }
 
-    void visit(StyleTemplateDefinitionNode* node) override { styleTemplates[node->name] = node; }
-    void visit(ElementTemplateDefinitionNode* node) override { elementTemplates[node->name] = node; }
-    void visit(VarTemplateDefinitionNode* node) override { varTemplates[node->name] = node; }
-    void visit(NamespaceNode* node) override { for(const auto& child : node->children) child->accept(*this); }
-    void visit(ElementNode* n) override{} void visit(TextNode* n) override{} void visit(CommentNode* n) override{} void visit(PropertyNode* n) override{} void visit(StyleNode* n) override{} void visit(ScriptNode* n) override{} void visit(StyleUsageNode* n) override{} void visit(ElementUsageNode* n) override{} void visit(ImportNode* n) override{} void visit(ConfigurationNode* n) override{} void visit(CustomStyleDefinitionNode* n) override{} void visit(CustomElementDefinitionNode* n) override{} void visit(CustomVarDefinitionNode* n) override{} void visit(DeleteNode* n) override{} void visit(InsertNode* n) override{} void visit(UseNode* n) override{} void visit(ConstraintNode* n) override{}
+    void visit(StyleTemplateDefinitionNode* node) override { styleTemplates[currentNamespace()][node->name] = node; }
+    void visit(ElementTemplateDefinitionNode* node) override { elementTemplates[currentNamespace()][node->name] = node; }
+    void visit(VarTemplateDefinitionNode* node) override { varTemplates[currentNamespace()][node->name] = node; }
+
+    void visit(NamespaceNode* node) override {
+        namespace_stack.push_back(node->name);
+        for(const auto& child : node->children) child->accept(*this);
+        namespace_stack.pop_back();
+    }
+
+    // Unchanged visit methods...
+    void visit(ElementNode* n) override{ for(const auto& child : n->children) child->accept(*this); }
+    void visit(TextNode* n) override{} void visit(CommentNode* n) override{} void visit(PropertyNode* n) override{} void visit(StyleNode* n) override{} void visit(ScriptNode* n) override{} void visit(StyleUsageNode* n) override{} void visit(ElementUsageNode* n) override{} void visit(ImportNode* n) override{} void visit(ConfigurationNode* n) override{} void visit(CustomStyleDefinitionNode* n) override{} void visit(CustomElementDefinitionNode* n) override{} void visit(CustomVarDefinitionNode* n) override{} void visit(DeleteNode* n) override{} void visit(InsertNode* n) override{} void visit(UseNode* n) override{} void visit(ConstraintNode* n) override{}
+
 private:
-    std::map<std::string, StyleTemplateDefinitionNode*>& styleTemplates;
-    std::map<std::string, ElementTemplateDefinitionNode*>& elementTemplates;
-    std::map<std::string, VarTemplateDefinitionNode*>& varTemplates;
+    std::string currentNamespace() {
+        // TODO: Handle nested namespaces (e.g., "space.room")
+        return namespace_stack.back();
+    }
+
+    std::map<std::string, Generator::StyleTemplateMap>& styleTemplates;
+    std::map<std::string, Generator::ElementTemplateMap>& elementTemplates;
+    std::map<std::string, Generator::VarTemplateMap>& varTemplates;
+    std::vector<std::string> namespace_stack;
 };
 
 std::string Generator::generate(NodeList& ast) {
@@ -98,11 +116,15 @@ void Generator::visit(ElementNode* node) {
                     std::string value = evaluator.evaluate(*styleProp->value).toString();
                     style_ss << styleProp->name << ":" << value << ";";
                 } else if (auto* styleUsage = dynamic_cast<StyleUsageNode*>(styleChild.get())) {
-                    auto it = styleTemplates.find(styleUsage->name);
-                    if (it != styleTemplates.end()) {
-                        for (const auto& prop : it->second->properties) {
-                            std::string value = evaluator.evaluate(*prop->value).toString();
-                            style_ss << prop->name << ":" << value << ";";
+                    std::string ns = styleUsage->namespace_name.empty() ? "" : styleUsage->namespace_name;
+                    auto ns_it = styleTemplates.find(ns);
+                    if (ns_it != styleTemplates.end()) {
+                        auto it = ns_it->second.find(styleUsage->name);
+                        if (it != ns_it->second.end()) {
+                            for (const auto& prop : it->second->properties) {
+                                std::string value = evaluator.evaluate(*prop->value).toString();
+                                style_ss << prop->name << ":" << value << ";";
+                            }
                         }
                     }
                 }
@@ -136,21 +158,47 @@ void Generator::visit(StyleUsageNode* node) {}
 void Generator::visit(ScriptNode* node) { printIndent(); output << "<script>" << node->placeholder << "</script>\n"; }
 
 void Generator::visit(ElementUsageNode* node) {
-    auto it = elementTemplates.find(node->name);
-    if (it != elementTemplates.end()) {
-        ASTCloner cloner;
-        NodeList clonedChildren = cloner.clone(it->second->children);
-        for (const auto& spec : node->specializations) {
-            if (auto* deleteNode = dynamic_cast<DeleteNode*>(spec.get())) {
-                clonedChildren.erase(std::remove_if(clonedChildren.begin(), clonedChildren.end(),
-                    [&](const NodePtr& child) {
-                        if (auto* elem = dynamic_cast<ElementNode*>(child.get())) return elem->tagName == deleteNode->target;
-                        return false;
-                    }),
-                    clonedChildren.end());
+    std::string ns = node->namespace_name.empty() ? "" : node->namespace_name;
+    auto ns_it = elementTemplates.find(ns);
+    if (ns_it != elementTemplates.end()) {
+        auto it = ns_it->second.find(node->name);
+        if (it != ns_it->second.end()) {
+            ASTCloner cloner;
+            NodeList clonedChildren = cloner.clone(it->second->children);
+            for (const auto& spec : node->specializations) {
+                if (auto* deleteNode = dynamic_cast<DeleteNode*>(spec.get())) {
+                    int match_count = 0;
+                    clonedChildren.erase(
+                        std::remove_if(clonedChildren.begin(), clonedChildren.end(),
+                            [&](const NodePtr& child) {
+                                if (auto* elem = dynamic_cast<ElementNode*>(child.get())) {
+                                    if (elem->tagName == deleteNode->target) {
+                                        if (deleteNode->index == -1 || deleteNode->index == match_count) {
+                                            match_count++;
+                                            return true;
+                                        }
+                                        match_count++;
+                                    }
+                                }
+                                return false;
+                            }),
+                        clonedChildren.end()
+                    );
+                } else if (auto* insertNode = dynamic_cast<InsertNode*>(spec.get())) {
+                    if (insertNode->position == InsertNode::Position::AtBottom) {
+                        for(auto& child : insertNode->children) {
+                            clonedChildren.push_back(std::move(child));
+                        }
+                    } else if (insertNode->position == InsertNode::Position::AtTop) {
+                        for(auto it_child = insertNode->children.rbegin(); it_child != insertNode->children.rend(); ++it_child) {
+                            clonedChildren.insert(clonedChildren.begin(), std::move(*it_child));
+                        }
+                    }
+                    // TODO: Implement other insert positions
+                }
             }
+            for (const auto& child : clonedChildren) child->accept(*this);
         }
-        for (const auto& child : clonedChildren) child->accept(*this);
     }
 }
 

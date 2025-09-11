@@ -42,9 +42,10 @@ class SpecializationNode : public Node {};
 class DeleteNode : public SpecializationNode {
 public:
     // The target could be a property name, an element selector, etc.
-    DeleteNode(const std::string& target) : target(target) {}
+    DeleteNode(std::string target, int index = -1) : target(std::move(target)), index(index) {}
     void accept(Visitor& visitor) override { visitor.visit(this); }
     std::string target;
+    int index; // -1 means no index was specified
 };
 
 class InsertNode : public SpecializationNode {

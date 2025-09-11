@@ -46,3 +46,10 @@ add_library(chtl_generator STATIC
 )
 target_include_directories(chtl_generator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(chtl_generator PUBLIC chtl_ast chtl_util chtl_evaluator)
+
+# --- Semantic Analyzer Library ---
+add_library(chtl_semantic STATIC
+    CHTLSemantic/SemanticAnalyzer.cpp
+)
+target_include_directories(chtl_semantic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(chtl_semantic PUBLIC chtl_ast)
