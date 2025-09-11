@@ -34,15 +34,13 @@ func (e *Element) statementNode()       {}
 func (e *Element) TokenLiteral() string { return e.Token.Literal }
 func (e *Element) String() string       { var out strings.Builder; out.WriteString(e.Name); if e.Body != nil { out.WriteString(e.Body.String()) }; return out.String() }
 
-type ImportStatement struct {
-	Token    lexer.Token // The '[' token
-	ImportType string      // e.g., "@Chtl", "@Html"
-	Path     Expression
-	Alias    *Identifier
+type ScriptStatement struct {
+	Token   lexer.Token // The 'script' token
+	Content string      // The raw, unprocessed content of the script block
 }
-func (is *ImportStatement) statementNode()       {}
-func (is *ImportStatement) TokenLiteral() string { return is.Token.Literal }
-func (is *ImportStatement) String() string       { var out strings.Builder; out.WriteString("[Import] " + is.ImportType + " from " + is.Path.String()); if is.Alias != nil { out.WriteString(" as " + is.Alias.String()) }; return out.String() }
+func (ss *ScriptStatement) statementNode()       {}
+func (ss *ScriptStatement) TokenLiteral() string { return ss.Token.Literal }
+func (ss *ScriptStatement) String() string       { return "script { ... }" }
 
 
 type Text struct {
@@ -114,6 +112,16 @@ type TemplateUsage struct {
 func (tu *TemplateUsage) statementNode()       {}
 func (tu *TemplateUsage) TokenLiteral() string { return tu.Token.Literal }
 func (tu *TemplateUsage) String() string       { return "@" + tu.TemplateType + " " + tu.Name.String() + ";" }
+
+type ImportStatement struct {
+	Token    lexer.Token
+	ImportType string
+	Path     Expression
+	Alias    *Identifier
+}
+func (is *ImportStatement) statementNode()       {}
+func (is *ImportStatement) TokenLiteral() string { return is.Token.Literal }
+func (is *ImportStatement) String() string       { var out strings.Builder; out.WriteString("[Import] " + is.ImportType + " from " + is.Path.String()); if is.Alias != nil { out.WriteString(" as " + is.Alias.String()) }; return out.String() }
 
 type PrefixExpression struct {
 	Token    lexer.Token

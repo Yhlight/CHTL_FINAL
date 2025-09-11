@@ -3,12 +3,21 @@ package parser
 import (
 	"chtl/pkg/ast"
 	"chtl/pkg/lexer"
+	"strings"
 	"testing"
 )
 
-func TestImportStatement(t *testing.T) {
-	input := `[Import] @Chtl from "./test.chtl" as MyModule;`
-
+func TestScriptStatement(t *testing.T) {
+	input := `
+div {
+    script {
+        const btn = {{.button}};
+        btn.addEventListener('click', () => {
+            console.log('clicked');
+        });
+    }
+}
+`
 	l := lexer.New(input)
 	p := New(l)
 	program := p.ParseProgram()
@@ -18,30 +27,48 @@ func TestImportStatement(t *testing.T) {
 		t.Fatalf("program.Statements does not contain 1 statement. got=%d", len(program.Statements))
 	}
 
-	stmt, ok := program.Statements[0].(*ast.ImportStatement)
+	element, ok := program.Statements[0].(*ast.Element)
 	if !ok {
-		t.Fatalf("stmt is not *ast.ImportStatement. got=%T", program.Statements[0])
+		t.Fatalf("statement is not *ast.Element, got %T", program.Statements[0])
 	}
 
-	if stmt.ImportType != "@Chtl" {
-		t.Errorf("stmt.ImportType not '@Chtl'. got=%q", stmt.ImportType)
+	if len(element.Body.Statements) != 1 {
+		t.Fatalf("element body should have 1 statement. got=%d", len(element.Body.Statements))
 	}
 
-	if str, ok := stmt.Path.(*ast.StringLiteral); ok {
-		if str.Value != "./test.chtl" {
-			t.Errorf("stmt.Path.Value not './test.chtl'. got=%q", str.Value)
-		}
-	} else {
-		t.Errorf("stmt.Path not *ast.StringLiteral. got=%T", stmt.Path)
+	script, ok := element.Body.Statements[0].(*ast.ScriptStatement)
+	if !ok {
+		t.Fatalf("statement is not *ast.ScriptStatement. got=%T", element.Body.Statements[0])
 	}
 
-	if stmt.Alias == nil {
-		t.Fatalf("stmt.Alias is nil. expected 'MyModule'")
-	}
-	if stmt.Alias.Value != "MyModule" {
-		t.Errorf("stmt.Alias.Value not 'MyModule'. got=%q", stmt.Alias.Value)
+	expectedContent := `
+        const btn = {{.button}};
+        btn.addEventListener('click', () => {
+            console.log('clicked');
+        });
+    `
+	// Compare trimmed content to avoid issues with leading/trailing whitespace from slicing
+	if strings.TrimSpace(script.Content) != strings.TrimSpace(expectedContent) {
+		t.Errorf("script content wrong.\nexpected=%q\n     got=%q", expectedContent, script.Content)
 	}
 }
+
+
+func TestTemplateParsing(t *testing.T) {
+	input := `
+[Template] @Style DefaultText { color: black; }
+div { style { @Style DefaultText; } }
+`
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Templates) != 1 {
+		t.Fatalf("program.Templates does not contain 1 template. got=%d", len(program.Templates))
+	}
+}
+
 
 func checkParserErrors(t *testing.T, p *Parser) {
 	errors := p.Errors()

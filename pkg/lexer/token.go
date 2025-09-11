@@ -1,33 +1,26 @@
 package lexer
 
-// TokenType is a string representing the type of a token.
 type TokenType string
 
-// Token represents a single token in the source code.
 type Token struct {
-	Type    TokenType
-	Literal string
+	Type     TokenType
+	Literal  string
+	Position int // The starting position of the token in the input string
 }
 
 const (
 	ILLEGAL TokenType = "ILLEGAL"
 	EOF     TokenType = "EOF"
-
-	// --- Identifiers & Literals ---
-	IDENT  TokenType = "IDENT"
-	STRING TokenType = "STRING"
-	NUMBER TokenType = "NUMBER"
-
-	// --- Operators ---
-	ASSIGN   TokenType = "="
-	COLON    TokenType = ":"
-	PLUS     TokenType = "+"
-	MINUS    TokenType = "-"
-	BANG     TokenType = "!"
+	IDENT   TokenType = "IDENT"
+	STRING  TokenType = "STRING"
+	NUMBER  TokenType = "NUMBER"
+	ASSIGN  TokenType = "="
+	COLON   TokenType = ":"
+	PLUS    TokenType = "+"
+	MINUS   TokenType = "-"
+	BANG    TokenType = "!"
 	ASTERISK TokenType = "*"
 	SLASH    TokenType = "/"
-
-	// --- Delimiters ---
 	LBRACE    TokenType = "{"
 	RBRACE    TokenType = "}"
 	LBRACKET  TokenType = "["
@@ -37,12 +30,8 @@ const (
 	DOT       TokenType = "."
 	HASH      TokenType = "#"
 	AMPERSAND TokenType = "&"
-
-	// --- Keywords ---
-	FROM TokenType = "from"
-	AS   TokenType = "as"
-
-	// --- Comments ---
+	FROM      TokenType = "from"
+	AS        TokenType = "as"
 	COMMENT     TokenType = "COMMENT"
 	GEN_COMMENT TokenType = "GEN_COMMENT"
 )

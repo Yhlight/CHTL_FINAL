@@ -2,7 +2,9 @@ package generator
 
 import (
 	"chtl/pkg/ast"
+	"chtl/pkg/chtljs"
 	"chtl/pkg/parser"
+	"chtl/pkg/scanner"
 	"fmt"
 	"strings"
 )
@@ -45,13 +47,43 @@ func (g *Generator) generateNode(node ast.Node, b *strings.Builder) error {
 		content, err := g.expressionToString(n.Content, false)
 		if err != nil { return err }
 		b.WriteString(content)
-	case *ast.Style, *ast.TemplateUsage:
+	case *ast.ScriptStatement:
+		return g.generateScript(n, b)
+	case *ast.Style, *ast.TemplateUsage, *ast.ImportStatement:
 		return nil
 	default:
 		return fmt.Errorf("unknown node type for generation: %T", n)
 	}
 	return nil
 }
+
+func (g *Generator) generateScript(n *ast.ScriptStatement, b *strings.Builder) error {
+	s := scanner.New()
+	fragments := s.ScanScript(n.Content)
+
+	jsCompiler := chtljs.NewCompiler()
+	var finalScript strings.Builder
+
+	for _, frag := range fragments {
+		if frag.Type == scanner.FragmentJS {
+			finalScript.WriteString(frag.Content)
+		} else if frag.Type == scanner.FragmentCHTLJS {
+			compiled, err := jsCompiler.CompileFragment(frag.Content)
+			if err != nil {
+				// For now, just embed the error in the script
+				finalScript.WriteString(fmt.Sprintf("/* CHTL JS COMPILE ERROR: %v */", err))
+			} else {
+				finalScript.WriteString(compiled)
+			}
+		}
+	}
+
+	b.WriteString("<script>")
+	b.WriteString(finalScript.String())
+	b.WriteString("</script>")
+	return nil
+}
+
 
 func (g *Generator) generateElement(n *ast.Element, b *strings.Builder) error {
 	attrs := make(map[string]string)
@@ -63,7 +95,7 @@ func (g *Generator) generateElement(n *ast.Element, b *strings.Builder) error {
 		for _, styleStmt := range body.Statements {
 			switch ss := styleStmt.(type) {
 			case *ast.StyleRule:
-				val, err := g.expressionToString(ss.Value, true) // Pass true to enable calc() wrapping
+				val, err := g.expressionToString(ss.Value, true)
 				if err != nil { return err }
 				inlineStyles = append(inlineStyles, fmt.Sprintf("%s: %s", ss.Name, val))
 			case *ast.Ruleset:
@@ -150,7 +182,7 @@ func (g *Generator) expressionToString(exp ast.Expression, useCalc bool) (string
 
 	case *ast.StringLiteral: return e.Value, nil
 	case *ast.Identifier: return e.Value, nil
-	case *ast.NumberLiteral: return e.Value, nil
+	case *ast.NumberLiteral: return e.String(), nil
 	case *ast.PrefixExpression:
 		right, err := g.expressionToString(e.Right, useCalc)
 		if err != nil { return "", err }

@@ -113,6 +113,8 @@ func (p *Parser) parseStatement(inStyleBlock bool, program *ast.Program) ast.Sta
 				if p.peekTokenIs(lexer.LBRACE) { return p.parseStyleStatement(program) }
 			case "text":
 				if p.peekTokenIs(lexer.LBRACE) { return p.parseTextStatement() }
+			case "script":
+				if p.peekTokenIs(lexer.LBRACE) { return p.parseScriptStatement() }
 			}
 			if p.peekTokenIs(lexer.LBRACE) {
 				return p.parseElementStatement(program)
@@ -130,31 +132,52 @@ func (p *Parser) parseStatement(inStyleBlock bool, program *ast.Program) ast.Sta
 
 func (p *Parser) parseImportStatement() ast.Statement {
 	stmt := &ast.ImportStatement{Token: p.curToken}
-	p.nextToken() // consume '['
-
+	p.nextToken()
 	if !p.curTokenIs(lexer.IDENT) || p.curToken.Literal != "Import" {
 		p.errors = append(p.errors, "Expected 'Import' keyword after '['")
 		return nil
 	}
-
 	if !p.expectPeek(lexer.RBRACKET) { return nil }
 	if !p.expectPeek(lexer.AT) { return nil }
 	if !p.expectPeek(lexer.IDENT) { return nil }
 	stmt.ImportType = "@" + p.curToken.Literal
-
 	if !p.expectPeek(lexer.FROM) { return nil }
 	p.nextToken()
 	stmt.Path = p.parseExpression(LOWEST)
-
 	if p.peekTokenIs(lexer.AS) {
 		p.nextToken()
 		if !p.expectPeek(lexer.IDENT) { return nil }
 		stmt.Alias = p.parseIdentifier().(*ast.Identifier)
 	}
-
 	if p.peekTokenIs(lexer.SEMICOLON) {
 		p.nextToken()
 	}
+	return stmt
+}
+
+func (p *Parser) parseScriptStatement() *ast.ScriptStatement {
+	stmt := &ast.ScriptStatement{Token: p.curToken}
+	if !p.expectPeek(lexer.LBRACE) { return nil }
+
+	braceLevel := 1
+	startPos := p.curToken.Position + len(p.curToken.Literal)
+
+	for braceLevel > 0 && !p.curTokenIs(lexer.EOF) {
+		p.nextToken()
+		if p.curTokenIs(lexer.LBRACE) {
+			braceLevel++
+		} else if p.curTokenIs(lexer.RBRACE) {
+			braceLevel--
+		}
+	}
+
+	if braceLevel != 0 {
+		p.errors = append(p.errors, "unterminated script block")
+		return nil
+	}
+
+	endPos := p.curToken.Position
+	stmt.Content = p.l.GetInput()[startPos:endPos]
 
 	return stmt
 }

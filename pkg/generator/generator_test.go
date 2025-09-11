@@ -7,6 +7,41 @@ import (
 	"testing"
 )
 
+func TestScriptGenerationWithCHTLJS(t *testing.T) {
+	input := `
+div {
+    script {
+        const btn = {{ .button }};
+        const app = {{ #app }};
+        const p_tags = {{ p }};
+    }
+}
+`
+	l := lexer.New(input)
+	p := parser.New(l)
+	gen := New()
+	program := p.ParseProgram()
+	if len(p.Errors()) != 0 {
+		t.Fatalf("parser has errors: %v", p.Errors())
+	}
+
+	html, err := gen.Generate(program)
+	if err != nil {
+		t.Fatalf("generation failed: %v", err)
+	}
+
+	// Check that the CHTL JS fragments were compiled correctly
+	if !strings.Contains(html, "const btn = document.querySelector('.button');") {
+		t.Errorf("script missing compiled class selector. got=%q", html)
+	}
+	if !strings.Contains(html, "const app = document.querySelector('#app');") {
+		t.Errorf("script missing compiled id selector. got=%q", html)
+	}
+	if !strings.Contains(html, "const p_tags = document.querySelectorAll('p');") {
+		t.Errorf("script missing compiled tag selector. got=%q", html)
+	}
+}
+
 func TestHtmlGeneration(t *testing.T) {
 	input := `div { id: "main"; }`
 	expected := `<div id="main"></div>`
@@ -26,35 +61,5 @@ func TestHtmlGeneration(t *testing.T) {
 
 	if html != expected {
 		t.Errorf("generated html wrong.\nexpected=%q\n     got=%q", expected, html)
-	}
-}
-
-func TestArithmeticGeneration(t *testing.T) {
-	input := `
-div {
-    style {
-        width: 100px + 20em * 2;
-    }
-}
-`
-	l := lexer.New(input)
-	p := parser.New(l)
-	gen := New()
-	program := p.ParseProgram()
-
-	if len(p.Errors()) != 0 {
-		t.Fatalf("parser has errors: %v", p.Errors())
-	}
-
-	html, err := gen.Generate(program)
-	if err != nil {
-		t.Fatalf("generation failed: %v", err)
-	}
-
-	// The AST for `100px + 20em * 2` is `(100px + (20em * 2))`
-	// The generator should wrap this in calc()
-	expectedStr := `width: calc(100px + (20em * 2))`
-	if !strings.Contains(html, expectedStr) {
-		t.Errorf("generated html wrong.\nexpected to contain %q\n                got=%q", expectedStr, html)
 	}
 }

@@ -13,6 +13,10 @@ func New(input string) *Lexer {
 	return l
 }
 
+func (l *Lexer) GetInput() string {
+	return l.input
+}
+
 func (l *Lexer) readChar() {
 	if l.readPosition >= len(l.input) {
 		l.ch = 0
@@ -32,62 +36,72 @@ func (l *Lexer) peekChar() byte {
 
 func (l *Lexer) NextToken() Token {
 	var tok Token
+	startPos := l.position
+
 	l.skipWhitespace()
+	startPos = l.position // Update position after skipping whitespace
 
 	switch l.ch {
-	case '=': tok = newToken(ASSIGN, l.ch)
-	case ':': tok = newToken(COLON, l.ch)
-	case ';': tok = newToken(SEMICOLON, l.ch)
-	case '+': tok = newToken(PLUS, l.ch)
+	case '=': tok = l.newToken(ASSIGN, l.ch)
+	case ':': tok = l.newToken(COLON, l.ch)
+	case ';': tok = l.newToken(SEMICOLON, l.ch)
+	case '+': tok = l.newToken(PLUS, l.ch)
 	case '-':
 		if l.peekChar() == '-' {
 			l.readChar(); l.readChar()
 			tok.Type = GEN_COMMENT
 			tok.Literal = l.readLineComment()
+			tok.Position = startPos
 			return tok
 		}
-		tok = newToken(MINUS, l.ch)
-	case '*': tok = newToken(ASTERISK, l.ch)
+		tok = l.newToken(MINUS, l.ch)
+	case '*': tok = l.newToken(ASTERISK, l.ch)
 	case '/':
 		if l.peekChar() == '/' {
 			l.readChar(); l.readChar()
 			tok.Type = COMMENT
 			tok.Literal = l.readLineComment()
+			tok.Position = startPos
 			return tok
 		} else if l.peekChar() == '*' {
 			l.readChar(); l.readChar()
 			tok.Type = COMMENT
 			tok.Literal = l.readBlockComment()
+			tok.Position = startPos
 			return tok
 		}
-		tok = newToken(SLASH, l.ch)
-	case '{': tok = newToken(LBRACE, l.ch)
-	case '}': tok = newToken(RBRACE, l.ch)
-	case '[': tok = newToken(LBRACKET, l.ch)
-	case ']': tok = newToken(RBRACKET, l.ch)
-	case '@': tok = newToken(AT, l.ch)
-	case '.': tok = newToken(DOT, l.ch)
-	case '#': tok = newToken(HASH, l.ch)
-	case '&': tok = newToken(AMPERSAND, l.ch)
+		tok = l.newToken(SLASH, l.ch)
+	case '{': tok = l.newToken(LBRACE, l.ch)
+	case '}': tok = l.newToken(RBRACE, l.ch)
+	case '[': tok = l.newToken(LBRACKET, l.ch)
+	case ']': tok = l.newToken(RBRACKET, l.ch)
+	case '@': tok = l.newToken(AT, l.ch)
+	case '.': tok = l.newToken(DOT, l.ch)
+	case '#': tok = l.newToken(HASH, l.ch)
+	case '&': tok = l.newToken(AMPERSAND, l.ch)
 	case '"', '\'':
 		tok.Type = STRING
 		tok.Literal = l.readString(l.ch)
+		tok.Position = startPos
 		l.readChar()
 		return tok
 	case 0:
 		tok.Literal = ""
 		tok.Type = EOF
+		tok.Position = startPos
 	default:
 		if isLetter(l.ch) {
 			tok.Literal = l.readIdentifier()
-			tok.Type = LookupIdent(tok.Literal) // Check for keywords
+			tok.Type = LookupIdent(tok.Literal)
+			tok.Position = startPos
 			return tok
 		} else if isDigit(l.ch) {
 			tok.Type = NUMBER
 			tok.Literal = l.readNumber()
+			tok.Position = startPos
 			return tok
 		} else {
-			tok = newToken(ILLEGAL, l.ch)
+			tok = l.newToken(ILLEGAL, l.ch)
 		}
 	}
 
@@ -117,4 +131,6 @@ func (l *Lexer) readNumber() string {
 func isLetter(ch byte) bool { return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' }
 func isDigit(ch byte) bool { return '0' <= ch && ch <= '9' }
 func isIdentifierChar(ch byte) bool { return isLetter(ch) || isDigit(ch) || ch == '-' }
-func newToken(tokenType TokenType, ch byte) Token { return Token{Type: tokenType, Literal: string(ch)} }
+func (l *Lexer) newToken(tokenType TokenType, ch byte) Token {
+	return Token{Type: tokenType, Literal: string(ch), Position: l.position}
+}
