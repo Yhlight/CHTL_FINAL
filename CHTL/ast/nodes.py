@@ -90,18 +90,31 @@ class StyleUsageNode(UsageNode):
         return f"StyleUsageNode(name='{self.name}', from={self.from_namespace})"
 
 # --- Specializations ---
+class SelectorNode(AstNode):
+    def __init__(self, tag_name: str, index: Optional[int] = None):
+        self.tag_name = tag_name
+        self.index = index
+    def __repr__(self):
+        if self.index is not None:
+            return f"SelectorNode(tag='{self.tag_name}', index={self.index})"
+        return f"SelectorNode(tag='{self.tag_name}')"
+
 class SpecializationNode(AstNode):
     pass
+
 class InsertStatementNode(SpecializationNode):
-    def __init__(self, elements: List['ElementNode']):
+    def __init__(self, elements: List['ElementNode'], position: str, target_selector: Optional[SelectorNode] = None):
         self.elements = elements
+        self.position = position # e.g., 'after', 'before', 'at_top', 'at_bottom', 'replace'
+        self.target_selector = target_selector
     def __repr__(self):
-        return f"InsertStatementNode(elements_len={len(self.elements)})"
+        return f"InsertStatementNode(pos='{self.position}', target={self.target_selector}, elements_len={len(self.elements)})"
+
 class DeleteStatementNode(SpecializationNode):
-    def __init__(self, tag_name: str):
-        self.tag_name = tag_name
+    def __init__(self, target_selector: SelectorNode):
+        self.target_selector = target_selector
     def __repr__(self):
-        return f"DeleteStatementNode(tag_name='{self.tag_name}')"
+        return f"DeleteStatementNode(target={self.target_selector})"
 
 
 # --- Top Level Nodes ---

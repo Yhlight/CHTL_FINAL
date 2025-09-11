@@ -18,18 +18,25 @@ definition
     | CUSTOM (styleTemplate | elementTemplate | varTemplate)
     ;
 
-styleTemplate: AT_STYLE IDENTIFIER LBRACE styleContent* RBRACE;
+styleTemplate: AT_STYLE IDENTIFIER LBRACE attribute* RBRACE;
 elementTemplate: AT_ELEMENT IDENTIFIER LBRACE element* RBRACE;
 varTemplate: AT_VAR IDENTIFIER LBRACE attribute* RBRACE;
 
 element: IDENTIFIER LBRACE (attribute | element | textNode | stylePlaceholder | scriptPlaceholder | elementUsage)* RBRACE;
 elementUsage: AT_ELEMENT IDENTIFIER ( (LBRACE specializationBody* RBRACE) | SEMI );
 specializationBody: insertStatement | deleteStatement;
-insertStatement: INSERT LBRACE element+ RBRACE;
-deleteStatement: DELETE IDENTIFIER SEMI;
+insertStatement: INSERT (insertPosition)? LBRACE element+ RBRACE;
+deleteStatement: DELETE selector SEMI;
+
+insertPosition
+    : (AFTER | BEFORE | REPLACE) selector
+    | AT (TOP | BOTTOM)
+    ;
+
+selector: IDENTIFIER (LBRACK NUMBER RBRACK)?;
 
 namespacePath: IDENTIFIER (DOT IDENTIFIER)*;
-attribute: IDENTIFIER (COLON | EQ) value SEMI;
+attribute: IDENTIFIER ((COLON | EQ) value)? SEMI;
 textNode: TEXT LBRACE value RBRACE;
 stylePlaceholder: STYLE_REF LPAR STRING RPAR SEMI;
 scriptPlaceholder: SCRIPT_REF LPAR STRING RPAR SEMI;
@@ -53,6 +60,12 @@ AT_ELEMENT: '@Element';
 AT_VAR: '@Var';
 INSERT: 'insert';
 DELETE: 'delete';
+AFTER: 'after';
+BEFORE: 'before';
+REPLACE: 'replace';
+AT: 'at';
+TOP: 'top';
+BOTTOM: 'bottom';
 FROM: 'from';
 AS: 'as';
 STYLE_REF: '__style_ref__';
@@ -65,6 +78,8 @@ LPAR: '(';
 RPAR: ')';
 LBRACE: '{';
 RBRACE: '}';
+LBRACK: '[';
+RBRACK: ']';
 COLON: ':';
 EQ: '=';
 SEMI: ';';

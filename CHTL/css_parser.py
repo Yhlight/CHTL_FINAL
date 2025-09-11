@@ -5,7 +5,7 @@ from CHTL.css_expr.generated.CSSValueExpressionLexer import CSSValueExpressionLe
 from CHTL.css_expr.generated.CSSValueExpressionParser import CSSValueExpressionParser
 from CHTL.css_expr.ast_builder import ExpressionAstBuilder
 
-def _parse_expression(expr_string: str):
+def parse_expression(expr_string: str):
     """Helper function to parse an expression string and return our custom AST."""
     input_stream = InputStream(expr_string)
     lexer = CSSValueExpressionLexer(input_stream)
@@ -31,7 +31,7 @@ def _parse_properties_string(props_str: str):
             name = match.group(1).strip()
             value_str = match.group(2).strip()
             if name and value_str:
-                properties[name] = _parse_expression(value_str)
+                properties[name] = parse_expression(value_str)
     return properties
 
 

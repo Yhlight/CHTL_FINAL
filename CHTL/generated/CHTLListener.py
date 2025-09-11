@@ -134,6 +134,24 @@ class CHTLListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CHTLParser#insertPosition.
+    def enterInsertPosition(self, ctx:CHTLParser.InsertPositionContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#insertPosition.
+    def exitInsertPosition(self, ctx:CHTLParser.InsertPositionContext):
+        pass
+
+
+    # Enter a parse tree produced by CHTLParser#selector.
+    def enterSelector(self, ctx:CHTLParser.SelectorContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#selector.
+    def exitSelector(self, ctx:CHTLParser.SelectorContext):
+        pass
+
+
     # Enter a parse tree produced by CHTLParser#namespacePath.
     def enterNamespacePath(self, ctx:CHTLParser.NamespacePathContext):
         pass

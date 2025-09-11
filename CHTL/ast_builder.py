@@ -5,7 +5,7 @@ from CHTL.ast.nodes import (
     DocumentNode, ElementNode, AttributeNode, TextNode, StyleNode, StyleUsageNode,
     ScriptNode, TemplateDefinitionNode, CustomDefinitionNode,
     UsageNode, ElementUsageNode, VarUsageNode,
-    SpecializationNode, InsertStatementNode, DeleteStatementNode,
+    SpecializationNode, InsertStatementNode, DeleteStatementNode, SelectorNode,
     DirectiveNode, ImportNode, NamespaceNode, ConfigurationNode
 )
 from CHTL.symbol_table import SymbolTable
@@ -68,12 +68,7 @@ class AstBuilder(CHTLVisitor):
 
     def visitStyleTemplate(self, ctx:CHTLParser.StyleTemplateContext):
         name = ctx.IDENTIFIER().getText()
-        start = ctx.LBRACE().symbol.stop + 1
-        stop = ctx.RBRACE().symbol.start - 1
-        content = ""
-        if start <= stop:
-            content = ctx.start.getInputStream().getText(start, stop).strip()
-        body = [TextNode(value=content)]
+        body = [self.visit(attr) for attr in ctx.attribute()]
         return ('Style', name, body)
 
     def visitElementTemplate(self, ctx:CHTLParser.ElementTemplateContext):
@@ -166,9 +161,15 @@ class AstBuilder(CHTLVisitor):
 
     def visitElementUsage(self, ctx:CHTLParser.ElementUsageContext):
         name = ctx.IDENTIFIER().getText()
-        # This rule was simplified in the grammar to debug a parser issue.
-        # The body and from_namespace parts are temporarily removed.
-        return ElementUsageNode(name=name, specializations=[], from_namespace=[])
+        specializations = []
+        if ctx.LBRACE():
+            for spec_body in ctx.specializationBody():
+                spec_node = self.visit(spec_body)
+                if spec_node:
+                    specializations.append(spec_node)
+
+        # TODO: Add from_namespace parsing when grammar supports it
+        return ElementUsageNode(name=name, specializations=specializations, from_namespace=[])
 
     def visitSpecializationBody(self, ctx:CHTLParser.SpecializationBodyContext):
         if ctx.insertStatement():
@@ -177,17 +178,38 @@ class AstBuilder(CHTLVisitor):
             return self.visit(ctx.deleteStatement())
         return None
 
+    def visitSelector(self, ctx:CHTLParser.SelectorContext):
+        tag_name = ctx.IDENTIFIER().getText()
+        index = None
+        if ctx.NUMBER():
+            index = int(ctx.NUMBER().getText())
+        return SelectorNode(tag_name=tag_name, index=index)
+
     def visitInsertStatement(self, ctx:CHTLParser.InsertStatementContext):
         elements = [self.visit(el) for el in ctx.element()]
-        return InsertStatementNode(elements=elements)
+        position = 'at_bottom' # Default behavior if no position is specified
+        target_selector = None
+
+        if ctx.insertPosition():
+            pos_ctx = ctx.insertPosition()
+            if pos_ctx.selector():
+                target_selector = self.visit(pos_ctx.selector())
+                position = pos_ctx.getChild(0).getText() # AFTER, BEFORE, or REPLACE
+            elif pos_ctx.AT():
+                # The child at index 1 will be either TOP or BOTTOM
+                position = f"at_{pos_ctx.getChild(1).getText()}"
+
+        return InsertStatementNode(elements=elements, position=position, target_selector=target_selector)
 
     def visitDeleteStatement(self, ctx:CHTLParser.DeleteStatementContext):
-        tag_name = ctx.IDENTIFIER().getText()
-        return DeleteStatementNode(tag_name=tag_name)
+        selector = self.visit(ctx.selector())
+        return DeleteStatementNode(target_selector=selector)
 
     def visitAttribute(self, ctx:CHTLParser.AttributeContext):
         name = ctx.IDENTIFIER().getText()
-        value = self.visit(ctx.value())
+        value = None
+        if ctx.value():
+            value = self.visit(ctx.value())
         return AttributeNode(name=name, value=value)
 
     def visitTextNode(self, ctx:CHTLParser.TextNodeContext):

@@ -79,6 +79,16 @@ class CHTLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CHTLParser#insertPosition.
+    def visitInsertPosition(self, ctx:CHTLParser.InsertPositionContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#selector.
+    def visitSelector(self, ctx:CHTLParser.SelectorContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CHTLParser#namespacePath.
     def visitNamespacePath(self, ctx:CHTLParser.NamespacePathContext):
         return self.visitChildren(ctx)
