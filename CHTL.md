@@ -1249,6 +1249,8 @@ CHTL JS是CHTL项目的扩展语法(不是CHTL的JS，而是CHTL项目能够使�
 CHTL JS完全独立于JS，是一门独立的编程语言，与JS毫无关系，只是最终转变为JS代码  
 JS的语法由CHTL内置的JS编译器解析，CHTL JS的语法由CHTL JS编译器解析  
 两者之间并不兼容，CHTL JS的语法是CHTL JS编译器的扩展语法  
+CHTL JS的实现依赖于统一扫描器，在实现CHTL JS编译器之前，你应该查阅后续的统一扫描器的说明，以及静态环境与运行时代码的说明  
+这些是你正确实现CHTL JS的基础，请不要试图让CHTL JS去解析JS代码  
 
 CHTL JS的函数皆为声明式语法  
 均支持无序键值对，可选键值对，无修饰字面量  
