@@ -15,6 +15,10 @@ public:
     double GetValue() const { return m_value; }
     const std::string& GetUnit() const { return m_unit; }
 
+    ExpressionNodePtr Clone() const override {
+        return std::make_shared<NumberLiteralNode>(m_value, m_unit);
+    }
+
 private:
     double m_value;
     std::string m_unit;

@@ -16,6 +16,10 @@ public:
     const ExpressionNodePtr& GetRight() const { return m_right; }
     TokenType GetOperator() const { return m_operator.type; }
 
+    ExpressionNodePtr Clone() const override {
+        return std::make_shared<BinaryOpNode>(m_left->Clone(), m_operator, m_right->Clone());
+    }
+
 private:
     ExpressionNodePtr m_left;
     Token m_operator;

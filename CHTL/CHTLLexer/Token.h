@@ -64,7 +64,14 @@ enum class TokenType {
     Text,
     Style,
     Script,
-    Delete          // delete keyword
+    Delete,
+    Insert,
+    After,
+    Before,
+    Replace,
+    At,
+    Top,
+    Bottom
 };
 
 struct Token {

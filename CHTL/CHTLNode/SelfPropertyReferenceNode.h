@@ -14,6 +14,10 @@ public:
 
     const std::string& GetPropertyName() const { return m_propertyName; }
 
+    ExpressionNodePtr Clone() const override {
+        return std::make_shared<SelfPropertyReferenceNode>(m_propertyName);
+    }
+
 private:
     std::string m_propertyName;
 };

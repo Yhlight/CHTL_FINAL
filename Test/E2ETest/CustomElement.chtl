@@ -1,0 +1,38 @@
+// Test for the [Custom] @Element System
+
+[Custom] @Element ProfileCard {
+    div {
+        class: "profile";
+        img { src: "default.png"; }
+        h3 { text { Default Name } }
+        p { text { Default description. } }
+    }
+}
+
+// --- Now use the custom element template ---
+
+// Case 1: Use the template as is
+@Element ProfileCard;
+
+// Case 2: Modify the h3 element's style
+@Element ProfileCard {
+    h3[0] {
+        style {
+            color: "blue";
+        }
+    }
+}
+
+// Case 3: Delete the paragraph
+@Element ProfileCard {
+    delete p;
+}
+
+// Case 4: Insert a new element
+@Element ProfileCard {
+    insert at bottom {
+        footer {
+            text { Copyright 2025 }
+        }
+    }
+}

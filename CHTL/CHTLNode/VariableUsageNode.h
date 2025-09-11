@@ -28,6 +28,17 @@ public:
     const std::map<std::string, ExpressionNodePtr>& GetSpecializations() const { return m_specializations; }
     bool IsSpecialized() const { return !m_specializations.empty(); }
 
+    ExpressionNodePtr Clone() const override {
+        if (IsSpecialized()) {
+            std::map<std::string, ExpressionNodePtr> clonedSpecs;
+            for(const auto& pair : m_specializations) {
+                clonedSpecs[pair.first] = pair.second->Clone();
+            }
+            return std::make_shared<VariableUsageNode>(m_groupName, clonedSpecs);
+        } else {
+            return std::make_shared<VariableUsageNode>(m_groupName, m_variableName);
+        }
+    }
 
 private:
     std::string m_groupName;

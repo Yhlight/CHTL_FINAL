@@ -22,6 +22,7 @@ class ExpressionNode {
 public:
     virtual ~ExpressionNode() = default;
     virtual ExpressionNodeType GetType() const = 0;
+    virtual std::shared_ptr<ExpressionNode> Clone() const = 0;
     // virtual Value Accept(ExpressionVisitor* visitor) = 0;
 };
 
