@@ -2,9 +2,30 @@
 #include "CHTLNode/StyleNode.h"
 #include "CHTLNode/ScriptNode.h"
 #include "CHTLNode/LiteralExpressionNode.h"
+#include "CHTLNode/InfixExpressionNode.h"
+#include "CHTLNode/ConditionalExpressionNode.h"
+#include "CHTLObject/NumberObject.h"
+#include "CHTLObject/StringObject.h"
+#include "CHTLObject/BooleanObject.h"
+#include <stdexcept>
 #include <vector>
 
 namespace CHTL {
+
+// Helper to parse a string like "100px" into a NumberObject
+static ObjectPtr parseDimension(const std::string& literal) {
+    size_t i = 0;
+    while (i < literal.length() && (std::isdigit(literal[i]) || literal[i] == '.')) {
+        i++;
+    }
+    try {
+        double val = std::stod(literal.substr(0, i));
+        std::string unit = literal.substr(i);
+        return std::make_shared<NumberObject>(val, unit);
+    } catch (const std::invalid_argument& e) {
+        return std::make_shared<StringObject>(literal);
+    }
+}
 
 CHTLGenerator::CHTLGenerator(NodePtr rootNode, bool default_struct)
     : m_rootNode(std::move(rootNode)), m_default_struct(default_struct) {}
@@ -39,7 +60,6 @@ std::string CHTLGenerator::Generate() {
         }
     }
 
-    // Add default structure if requested and if an <html> tag isn't already present
     if (m_default_struct) {
         bool html_tag_exists = false;
         if (auto element = std::dynamic_pointer_cast<ElementNode>(m_rootNode)) {
@@ -52,13 +72,62 @@ std::string CHTLGenerator::Generate() {
         }
     }
 
-
     return final_output;
+}
+
+ObjectPtr CHTLGenerator::evaluateInfixExpression(const std::string& op, const ObjectPtr& left, const ObjectPtr& right) {
+    if (left->Type() == ObjectType::NUMBER_OBJ && right->Type() == ObjectType::NUMBER_OBJ) {
+        auto leftVal = std::static_pointer_cast<NumberObject>(left);
+        auto rightVal = std::static_pointer_cast<NumberObject>(right);
+        if (op == "+") return std::make_shared<NumberObject>(leftVal->value + rightVal->value, leftVal->unit);
+        if (op == "-") return std::make_shared<NumberObject>(leftVal->value - rightVal->value, leftVal->unit);
+        if (op == "*") return std::make_shared<NumberObject>(leftVal->value * rightVal->value, leftVal->unit);
+        if (op == "/") return std::make_shared<NumberObject>(leftVal->value / rightVal->value, leftVal->unit);
+        if (op == ">") return std::make_shared<BooleanObject>(leftVal->value > rightVal->value);
+        if (op == "<") return std::make_shared<BooleanObject>(leftVal->value < rightVal->value);
+    }
+    return std::make_shared<StringObject>("ERROR: Invalid infix operation");
+}
+
+ObjectPtr CHTLGenerator::evaluate(const ExpressionPtr& node, EvalContext& context) {
+    if (auto literal = std::dynamic_pointer_cast<LiteralExpressionNode>(node)) {
+        if (context.count(literal->token.literal)) {
+            return context.at(literal->token.literal);
+        }
+        return parseDimension(literal->token.literal);
+    }
+    if (auto infix = std::dynamic_pointer_cast<InfixExpressionNode>(node)) {
+        ObjectPtr left = evaluate(infix->left, context);
+        ObjectPtr right = evaluate(infix->right, context);
+        return evaluateInfixExpression(infix->op.literal, left, right);
+    }
+    if (auto conditional = std::dynamic_pointer_cast<ConditionalExpressionNode>(node)) {
+        ObjectPtr condition_res = evaluate(conditional->condition, context);
+        if (auto bool_obj = std::dynamic_pointer_cast<BooleanObject>(condition_res)) {
+            if (bool_obj->value) {
+                return evaluate(conditional->consequence, context);
+            } else {
+                return evaluate(conditional->alternative, context);
+            }
+        }
+    }
+    return std::make_shared<StringObject>("ERROR: Cannot evaluate expression");
 }
 
 std::string CHTLGenerator::generateExpression(const ExpressionPtr& node, bool is_sub_expression) {
     if (auto literal = std::dynamic_pointer_cast<LiteralExpressionNode>(node)) {
         return literal->token.literal;
+    }
+    if (auto infix = std::dynamic_pointer_cast<InfixExpressionNode>(node)) {
+        std::string left = generateExpression(infix->left, true);
+        std::string right = generateExpression(infix->right, true);
+        std::string result = left + " " + infix->op.literal + " " + right;
+        if (is_sub_expression) return "(" + result + ")";
+        return "calc(" + result + ")";
+    }
+    if (std::dynamic_pointer_cast<ConditionalExpressionNode>(node)) {
+        EvalContext context; // Create an empty context for now. This is a limitation.
+        return evaluate(node, context)->RawValue();
     }
     return "INVALID_EXPRESSION";
 }
@@ -79,32 +148,55 @@ void CHTLGenerator::visitElement(const std::shared_ptr<ElementNode>& node) {
         visitAttribute(attr);
     }
 
-    CSSPropertyList all_inline_properties;
-    NodeList other_children;
+    EvalContext style_context;
+    CSSPropertyList deferred_properties;
 
+    // Collect all properties from style nodes
     for (const auto& child : node->children) {
         if (auto styleNode = std::dynamic_pointer_cast<StyleNode>(child)) {
-            all_inline_properties.insert(all_inline_properties.end(), styleNode->inline_properties.begin(), styleNode->inline_properties.end());
-        } else if (auto scriptNode = std::dynamic_pointer_cast<ScriptNode>(child)) {
-            m_global_js << scriptNode->content << std::endl;
-        }
-        else {
-            other_children.push_back(child);
+            for (const auto& prop : styleNode->inline_properties) {
+                 if (std::dynamic_pointer_cast<ConditionalExpressionNode>(prop->value)) {
+                    deferred_properties.push_back(prop);
+                } else {
+                    style_context[prop->key] = evaluate(prop->value, style_context);
+                }
+            }
+            for (const auto& selector : styleNode->selector_blocks) {
+                m_global_css << selector->selector << " {";
+                for (const auto& prop : selector->properties) {
+                    m_global_css << prop->key << ":" << generateExpression(prop->value) << ";";
+                }
+                m_global_css << "}";
+            }
         }
     }
+    // Evaluate conditional properties
+    for (const auto& prop : deferred_properties) {
+        style_context[prop->key] = evaluate(prop->value, style_context);
+    }
 
-    if (!all_inline_properties.empty()) {
+    if (!style_context.empty()) {
         m_output << " style=\"";
-        for (const auto& prop : all_inline_properties) {
-            m_output << prop->key << ":" << generateExpression(prop->value) << ";";
+        for (const auto& pair : style_context) {
+            m_output << pair.first << ":" << pair.second->RawValue() << ";";
         }
         m_output << "\"";
     }
 
     m_output << ">";
-    for (const auto& child : other_children) {
-        visit(child);
+    for (const auto& child : node->children) {
+        if (!std::dynamic_pointer_cast<StyleNode>(child) && !std::dynamic_pointer_cast<ScriptNode>(child)) {
+            visit(child);
+        }
     }
+
+    // Collect and append scripts at the end
+    for(const auto& child : node->children) {
+        if (auto scriptNode = std::dynamic_pointer_cast<ScriptNode>(child)) {
+            m_global_js << scriptNode->content << std::endl;
+        }
+    }
+
     m_output << "</" << node->tagName << ">";
 }
 

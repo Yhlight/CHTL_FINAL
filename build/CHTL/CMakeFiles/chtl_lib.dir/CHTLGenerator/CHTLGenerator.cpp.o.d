@@ -193,4 +193,8 @@ CHTL/CMakeFiles/chtl_lib.dir/CHTLGenerator/CHTLGenerator.cpp.o: \
  /usr/include/c++/13/bits/stl_multimap.h \
  /usr/include/c++/13/bits/erase_if.h /app/CHTL/CHTLNode/ScriptNode.h \
  /app/CHTL/CHTLNode/LiteralExpressionNode.h \
- /app/CHTL/CHTLNode/../CHTLLexer/Token.h
+ /app/CHTL/CHTLNode/../CHTLLexer/Token.h \
+ /app/CHTL/CHTLNode/InfixExpressionNode.h \
+ /app/CHTL/CHTLNode/ConditionalExpressionNode.h \
+ /app/CHTL/CHTLObject/NumberObject.h /app/CHTL/CHTLObject/StringObject.h \
+ /app/CHTL/CHTLObject/BooleanObject.h

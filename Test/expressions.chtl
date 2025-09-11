@@ -1,0 +1,13 @@
+div {
+    style {
+        width: 100px;
+        padding: 10px * 2;
+
+        // Test arithmetic
+        margin: calc(10px + 5px); // Using calc() explicitly for clarity
+
+        // Test conditionals by comparing a property to a literal
+        color: width > 50px ? 'blue' : 'red';
+        background-color: width < 50px ? 'yellow' : 'green';
+    }
+}

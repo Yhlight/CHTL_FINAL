@@ -11,7 +11,12 @@
 
 namespace CHTL {
 
-const std::map<TokenType, Precedence> CHTLParser::m_precedences = {};
+const std::map<TokenType, Precedence> CHTLParser::m_precedences = {
+    {TokenType::TOKEN_QUESTION, TERNARY}, {TokenType::TOKEN_PLUS, SUM},
+    {TokenType::TOKEN_MINUS, SUM},        {TokenType::TOKEN_GT, SUM},
+    {TokenType::TOKEN_LT, SUM},           {TokenType::TOKEN_SLASH, PRODUCT},
+    {TokenType::TOKEN_STAR, PRODUCT},     {TokenType::TOKEN_PERCENT, PRODUCT},
+    {TokenType::TOKEN_POWER, PRODUCT}};
 
 CHTLParser::CHTLParser(CHTLLexer& lexer, bool debug_mode) : m_lexer(lexer), m_debug_mode(debug_mode) {
     nextToken();
@@ -39,8 +44,15 @@ bool CHTLParser::expectPeek(TokenType type) {
     return false;
 }
 
-Precedence CHTLParser::currentPrecedence() { return LOWEST; }
-Precedence CHTLParser::peekPrecedence() { return LOWEST; }
+Precedence CHTLParser::currentPrecedence() {
+    if (m_precedences.count(m_currentToken.type)) return m_precedences.at(m_currentToken.type);
+    return LOWEST;
+}
+
+Precedence CHTLParser::peekPrecedence() {
+    if (m_precedences.count(m_peekToken.type)) return m_precedences.at(m_peekToken.type);
+    return LOWEST;
+}
 
 std::shared_ptr<ProgramNode> CHTLParser::ParseProgram() {
     auto program = std::make_shared<ProgramNode>();
@@ -131,26 +143,47 @@ NodePtr CHTLParser::parseTemplateUsage() {
 }
 
 ExpressionPtr CHTLParser::parseExpression(Precedence precedence) {
-    std::string literal_value;
-    while (!currentTokenIs(TokenType::TOKEN_SEMICOLON) && !currentTokenIs(TokenType::TOKEN_RBRACE) && !currentTokenIs(TokenType::TOKEN_EOF)) {
-        literal_value += m_currentToken.literal;
-        if (!peekTokenIs(TokenType::TOKEN_SEMICOLON) && !peekTokenIs(TokenType::TOKEN_RBRACE) && !peekTokenIs(TokenType::TOKEN_EOF)) {
-            literal_value += " ";
+    ExpressionPtr leftExp = parseIdentifierAsExpression();
+    if (!leftExp) return nullptr;
+    while (!peekTokenIs(TokenType::TOKEN_SEMICOLON) && !peekTokenIs(TokenType::TOKEN_RBRACE) && precedence < peekPrecedence()) {
+        if (peekTokenIs(TokenType::TOKEN_QUESTION)) {
+             nextToken();
+             leftExp = parseConditionalExpression(leftExp);
+        } else if (m_precedences.count(m_peekToken.type)) {
+            nextToken();
+            leftExp = parseInfixExpression(leftExp);
+        } else {
+            return leftExp;
         }
-        nextToken();
     }
-    if (!literal_value.empty() && literal_value.back() == ' ') {
-        literal_value.pop_back();
-    }
-    Token t;
-    t.literal = literal_value;
-    t.type = TokenType::TOKEN_STRING;
-    return std::make_shared<LiteralExpressionNode>(t);
+    return leftExp;
 }
 
-ExpressionPtr CHTLParser::parseIdentifierAsExpression() { return nullptr; }
-ExpressionPtr CHTLParser::parseInfixExpression(ExpressionPtr left) { return nullptr; }
-ExpressionPtr CHTLParser::parseConditionalExpression(ExpressionPtr condition) { return nullptr; }
+ExpressionPtr CHTLParser::parseIdentifierAsExpression() {
+    if (m_currentToken.type != TokenType::TOKEN_IDENTIFIER && m_currentToken.type != TokenType::TOKEN_STRING) {
+        pushError("Unexpected token in expression");
+        return nullptr;
+    }
+    return std::make_shared<LiteralExpressionNode>(m_currentToken);
+}
+
+ExpressionPtr CHTLParser::parseInfixExpression(ExpressionPtr left) {
+    auto op = m_currentToken;
+    auto precedence = currentPrecedence();
+    nextToken();
+    auto right = parseExpression(precedence);
+    if (!right) return nullptr;
+    return std::make_shared<InfixExpressionNode>(left, op, right);
+}
+
+ExpressionPtr CHTLParser::parseConditionalExpression(ExpressionPtr condition) {
+    nextToken();
+    ExpressionPtr consequence = parseExpression(LOWEST);
+    if (!expectPeek(TokenType::TOKEN_COLON)) return nullptr;
+    nextToken();
+    ExpressionPtr alternative = parseExpression(LOWEST);
+    return std::make_shared<ConditionalExpressionNode>(condition, consequence, alternative);
+}
 
 std::shared_ptr<TextNode> CHTLParser::parseTextNodeShorthand() {
     if (!currentTokenIs(TokenType::TOKEN_COLON) && !currentTokenIs(TokenType::TOKEN_ASSIGN)) return nullptr;
@@ -174,6 +207,7 @@ std::shared_ptr<StyleNode> CHTLParser::parseStyleNode() {
             nextToken();
             auto value = parseExpression(LOWEST);
             if (value) styleNode->inline_properties.push_back(std::make_shared<CSSPropertyNode>(key, value));
+            if (peekTokenIs(TokenType::TOKEN_SEMICOLON)) nextToken();
         }
     }
     if (!expectPeek(TokenType::TOKEN_RBRACE)) return nullptr;
@@ -182,37 +216,23 @@ std::shared_ptr<StyleNode> CHTLParser::parseStyleNode() {
 
 std::shared_ptr<ScriptNode> CHTLParser::parseScriptNode() {
     if (!expectPeek(TokenType::TOKEN_LBRACE)) return nullptr;
-
     const auto& source = m_lexer.GetInput();
     size_t start_pos = m_lexer.GetReadPosition();
-
     int brace_level = 1;
     size_t current_pos = start_pos;
-
     while (brace_level > 0 && current_pos < source.length()) {
-        if (source[current_pos] == '{') {
-            brace_level++;
-        } else if (source[current_pos] == '}') {
-            brace_level--;
-        }
+        if (source[current_pos] == '{') brace_level++;
+        else if (source[current_pos] == '}') brace_level--;
         current_pos++;
     }
-
     if (brace_level != 0) {
         pushError("Unterminated script block");
         return nullptr;
     }
-
-    // We have found the closing brace. The content is between start_pos and the char before the closing brace.
     std::string content = source.substr(start_pos, current_pos - start_pos - 1);
-
-    // Now, we need to advance the lexer past this block.
-    // This is tricky. A simple way is to just re-lex until we're past it.
-    size_t end_offset = current_pos -1;
-    while(m_lexer.GetPosition() < end_offset) {
+    while(m_lexer.GetPosition() < current_pos -1) {
         nextToken();
     }
-
     return std::make_shared<ScriptNode>(content);
 }
 
