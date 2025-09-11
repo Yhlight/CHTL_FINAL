@@ -97,14 +97,26 @@ std::string CHTLStyleProcessor::processGlobalStyleBlock(std::shared_ptr<StyleNod
     try {
         std::ostringstream oss;
         
-        // 处理样式规则
+        // 处理样式规则（全局样式：允许算术与条件表达式，但不支持属性引用）
         for (const auto& rule : styleNode->getStyleRules()) {
             std::string selector = rule->getAttribute("selector");
             if (!selector.empty()) {
                 std::map<std::string, std::string> properties;
                 for (const auto& attr : rule->getAttributes()) {
                     if (attr.first != "type" && attr.first != "selector") {
-                        properties[attr.first] = attr.second;
+                        std::string value = attr.second;
+                        // 仅处理算术与条件表达式，禁止属性引用
+                        if (value.find('+') != std::string::npos || 
+                            value.find('-') != std::string::npos ||
+                            value.find('*') != std::string::npos ||
+                            value.find('/') != std::string::npos ||
+                            value.find('%') != std::string::npos) {
+                            value = evaluateArithmeticExpression(value);
+                        }
+                        if (value.find('?') != std::string::npos) {
+                            value = evaluateConditionalExpression(value);
+                        }
+                        properties[attr.first] = value;
                     }
                 }
                 
@@ -723,6 +735,9 @@ std::string CHTLStyleProcessor::processPropertyValue(const std::string& value) c
     // 处理逻辑表达式
     result = processLogicalExpressions(result);
     
+    // 处理响应式值
+    // result = processResponsiveValues(result);
+    
     return result;
 }
 
@@ -924,6 +939,26 @@ bool CHTLStyleProcessor::evaluateCondition(const std::string& condition) const {
     
     // 默认返回false
     return false;
+}
+
+std::string CHTLStyleProcessor::processResponsiveValues(const std::string& value) const {
+    std::string result = value;
+    
+    // 处理响应式值 $JS变量名$
+    std::regex responsivePattern(R"(\$([a-zA-Z_][a-zA-Z0-9_]*)\$)");
+    std::smatch match;
+    
+    while (std::regex_search(result, match, responsivePattern)) {
+        std::string fullMatch = match[0].str();
+        std::string varName = match[1].str();
+        
+        // 将响应式值转换为JavaScript变量引用
+        // 在CSS中，响应式值需要特殊处理，这里先保留原格式
+        // 实际实现中可能需要生成特殊的CSS变量或JavaScript代码
+        result.replace(match.position(), match.length(), "var(--" + varName + ")");
+    }
+    
+    return result;
 }
 
 } // namespace CHTL

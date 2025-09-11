@@ -96,6 +96,8 @@ private:
     std::shared_ptr<BaseNode> parseOriginStyle();
     std::shared_ptr<BaseNode> parseOriginElement();
     std::shared_ptr<BaseNode> parseOriginJavaScript();
+    std::shared_ptr<BaseNode> parseOriginHtml();
+    std::shared_ptr<BaseNode> parseOriginCustom(const std::string& type);
     
     // 导入解析
     std::shared_ptr<BaseNode> parseImportStatement();
@@ -103,6 +105,8 @@ private:
     std::shared_ptr<BaseNode> parseImportElement();
     std::shared_ptr<BaseNode> parseImportJavaScript();
     std::shared_ptr<BaseNode> parseImportCHTL();
+    std::shared_ptr<BaseNode> parseImportHtml();
+    std::shared_ptr<BaseNode> parseImportCJmod();
     
     // 命名空间解析
     std::shared_ptr<BaseNode> parseNamespaceDefinition();

@@ -39,11 +39,18 @@ std::shared_ptr<BaseNode> CHTLParser::parse() {
 }
 
 Token CHTLParser::currentToken() const {
-    return tokens.peek(0);
+    if (currentTokenIndex >= tokens.size()) {
+        return Token(TokenType::END_OF_FILE, "", 0, 0, 0);
+    }
+    return tokens[currentTokenIndex];
 }
 
 Token CHTLParser::peekToken(size_t offset) const {
-    return tokens.peek(offset);
+    size_t index = currentTokenIndex + offset;
+    if (index >= tokens.size()) {
+        return Token(TokenType::END_OF_FILE, "", 0, 0, 0);
+    }
+    return tokens[index];
 }
 
 void CHTLParser::advanceToken() {
@@ -1017,8 +1024,19 @@ std::shared_ptr<BaseNode> CHTLParser::parseOrigin() {
         return parseOriginElement();
     } else if (match(TokenType::TEMPLATE_VAR)) {
         return parseOriginJavaScript();
-    } else {
-        error("期望 @Style, @Element 或 @Var");
+    } /*else if (match(TokenType::IDENTIFIER)) {
+        // 检查自定义原始嵌入类型
+        Token typeToken = currentToken();
+        if (typeToken.value == "Html") {
+            return parseOriginHtml();
+        } else if (typeToken.value == "JavaScript") {
+            return parseOriginJavaScript();
+        } else {
+            // 自定义类型
+            return parseOriginCustom(typeToken.value);
+        }
+    }*/ else {
+        error("期望 @Style, @Element, @Var, @Html, @JavaScript 或自定义类型");
         return nullptr;
     }
 }
@@ -1173,6 +1191,101 @@ std::shared_ptr<BaseNode> CHTLParser::parseOriginJavaScript() {
     return originNode;
 }
 
+std::shared_ptr<BaseNode> CHTLParser::parseOriginHtml() {
+    if (!match(TokenType::IDENTIFIER) || currentToken().value != "Html") {
+        error("期望 Html");
+        return nullptr;
+    }
+    
+    Token htmlToken = currentToken();
+    advanceToken(); // 跳过 Html
+    
+    skipWhitespaceAndComments();
+    
+    std::string originName;
+    if (match(TokenType::IDENTIFIER)) {
+        Token nameToken = currentToken();
+        originName = nameToken.value;
+        advanceToken();
+    }
+    
+    auto originNode = std::make_shared<BaseNode>(NodeType::ORIGIN, originName);
+    originNode->setAttribute("type", "html");
+    originNode->setPosition(htmlToken.line, htmlToken.column, htmlToken.position);
+    
+    skipWhitespaceAndComments();
+    
+    if (match(TokenType::LEFT_BRACE)) {
+        advanceToken(); // 跳过 '{'
+        
+        std::string content;
+        while (!match(TokenType::RIGHT_BRACE) && currentTokenIndex < tokens.size()) {
+            Token token = currentToken();
+            if (token.type == TokenType::END_OF_FILE) {
+                error("期望 '}' 但遇到文件结束");
+                break;
+            }
+            content += token.value + " ";
+            advanceToken();
+        }
+        
+        if (match(TokenType::RIGHT_BRACE)) {
+            advanceToken(); // 跳过 '}'
+        } else {
+            error("期望 '}'");
+        }
+        
+        originNode->setValue(content);
+    }
+    
+    return originNode;
+}
+
+std::shared_ptr<BaseNode> CHTLParser::parseOriginCustom(const std::string& type) {
+    Token typeToken = currentToken();
+    advanceToken(); // 跳过类型标识符
+    
+    skipWhitespaceAndComments();
+    
+    std::string originName;
+    if (match(TokenType::IDENTIFIER)) {
+        Token nameToken = currentToken();
+        originName = nameToken.value;
+        advanceToken();
+    }
+    
+    auto originNode = std::make_shared<BaseNode>(NodeType::ORIGIN, originName);
+    originNode->setAttribute("type", type);
+    originNode->setPosition(typeToken.line, typeToken.column, typeToken.position);
+    
+    skipWhitespaceAndComments();
+    
+    if (match(TokenType::LEFT_BRACE)) {
+        advanceToken(); // 跳过 '{'
+        
+        std::string content;
+        while (!match(TokenType::RIGHT_BRACE) && currentTokenIndex < tokens.size()) {
+            Token token = currentToken();
+            if (token.type == TokenType::END_OF_FILE) {
+                error("期望 '}' 但遇到文件结束");
+                break;
+            }
+            content += token.value + " ";
+            advanceToken();
+        }
+        
+        if (match(TokenType::RIGHT_BRACE)) {
+            advanceToken(); // 跳过 '}'
+        } else {
+            error("期望 '}'");
+        }
+        
+        originNode->setValue(content);
+    }
+    
+    return originNode;
+}
+
 std::shared_ptr<BaseNode> CHTLParser::parseImport() {
     if (!match(TokenType::IMPORT)) {
         error("期望 [Import]");
@@ -1190,17 +1303,25 @@ std::shared_ptr<BaseNode> CHTLParser::parseImport() {
         return parseImportElement();
     } else if (match(TokenType::TEMPLATE_VAR)) {
         return parseImportJavaScript();
-    } else if (match(TokenType::IDENTIFIER)) {
-        // 检查是否为CHTL导入
+    } /*else if (match(TokenType::IDENTIFIER)) {
+        // 检查导入类型
         Token typeToken = currentToken();
-        if (typeToken.value == "CHTL") {
+        if (typeToken.value == "Html") {
+            return parseImportHtml();
+        } else if (typeToken.value == "Style") {
+            return parseImportStyle();
+        } else if (typeToken.value == "JavaScript") {
+            return parseImportJavaScript();
+        } else if (typeToken.value == "CHTL") {
             return parseImportCHTL();
+        } else if (typeToken.value == "CJmod") {
+            return parseImportCJmod();
         } else {
-            error("期望 @Style, @Element, @Var 或 CHTL");
+            error("期望 @Style, @Element, @Var, @Html, @JavaScript, @Chtl 或 @CJmod");
             return nullptr;
         }
-    } else {
-        error("期望 @Style, @Element, @Var 或 CHTL");
+    }*/ else {
+        error("期望 @Style, @Element, @Var, @Html, @JavaScript, @Chtl 或 @CJmod");
         return nullptr;
     }
 }
@@ -1402,6 +1523,122 @@ std::shared_ptr<BaseNode> CHTLParser::parseImportCHTL() {
     importNode->setAttribute("type", "chtl");
     importNode->setAttribute("path", filePath);
     importNode->setPosition(chtlToken.line, chtlToken.column, chtlToken.position);
+    
+    skipWhitespaceAndComments();
+    
+    if (match(TokenType::AS)) {
+        advanceToken(); // 跳过 as
+        
+        skipWhitespaceAndComments();
+        
+        if (match(TokenType::IDENTIFIER)) {
+            Token aliasToken = currentToken();
+            importNode->setAttribute("alias", aliasToken.value);
+            advanceToken();
+        } else {
+            error("期望别名");
+        }
+    }
+    
+    return importNode;
+}
+
+std::shared_ptr<BaseNode> CHTLParser::parseImportHtml() {
+    if (!match(TokenType::IDENTIFIER)) {
+        error("期望 Html");
+        return nullptr;
+    }
+    
+    Token htmlToken = currentToken();
+    if (htmlToken.value != "Html") {
+        error("期望 Html");
+        return nullptr;
+    }
+    
+    advanceToken(); // 跳过 Html
+    
+    skipWhitespaceAndComments();
+    
+    if (!match(TokenType::FROM)) {
+        error("期望 from 关键字");
+        return nullptr;
+    }
+    
+    advanceToken(); // 跳过 from
+    
+    skipWhitespaceAndComments();
+    
+    if (!match(TokenType::STRING) && !match(TokenType::LITERAL)) {
+        error("期望文件路径");
+        return nullptr;
+    }
+    
+    Token pathToken = currentToken();
+    std::string filePath = pathToken.value;
+    advanceToken();
+    
+    auto importNode = std::make_shared<BaseNode>(NodeType::IMPORT, "import");
+    importNode->setAttribute("type", "html");
+    importNode->setAttribute("path", filePath);
+    importNode->setPosition(htmlToken.line, htmlToken.column, htmlToken.position);
+    
+    skipWhitespaceAndComments();
+    
+    if (match(TokenType::AS)) {
+        advanceToken(); // 跳过 as
+        
+        skipWhitespaceAndComments();
+        
+        if (match(TokenType::IDENTIFIER)) {
+            Token aliasToken = currentToken();
+            importNode->setAttribute("alias", aliasToken.value);
+            advanceToken();
+        } else {
+            error("期望别名");
+        }
+    }
+    
+    return importNode;
+}
+
+std::shared_ptr<BaseNode> CHTLParser::parseImportCJmod() {
+    if (!match(TokenType::IDENTIFIER)) {
+        error("期望 CJmod");
+        return nullptr;
+    }
+    
+    Token cjmodToken = currentToken();
+    if (cjmodToken.value != "CJmod") {
+        error("期望 CJmod");
+        return nullptr;
+    }
+    
+    advanceToken(); // 跳过 CJmod
+    
+    skipWhitespaceAndComments();
+    
+    if (!match(TokenType::FROM)) {
+        error("期望 from 关键字");
+        return nullptr;
+    }
+    
+    advanceToken(); // 跳过 from
+    
+    skipWhitespaceAndComments();
+    
+    if (!match(TokenType::STRING) && !match(TokenType::LITERAL)) {
+        error("期望文件路径");
+        return nullptr;
+    }
+    
+    Token pathToken = currentToken();
+    std::string filePath = pathToken.value;
+    advanceToken();
+    
+    auto importNode = std::make_shared<BaseNode>(NodeType::IMPORT, "import");
+    importNode->setAttribute("type", "cjmod");
+    importNode->setAttribute("path", filePath);
+    importNode->setPosition(cjmodToken.line, cjmodToken.column, cjmodToken.position);
     
     skipWhitespaceAndComments();
     
@@ -1847,7 +2084,10 @@ std::string CHTLParser::parseAttributeValue() {
     } else if (match(TokenType::NUMBER)) {
         value = currentToken().value;
         advanceToken();
-    } else {
+    } /*else if (match(TokenType::RESPONSIVE_VALUE)) {
+        value = currentToken().value;
+        advanceToken();
+    }*/ else {
         error("期望属性值");
     }
     
@@ -2268,6 +2508,11 @@ std::string CHTLParser::parseStylePropertyValue() {
             value += token.value;
             advanceToken();
         }
+        // 处理响应式值
+        /*else if (token.type == TokenType::RESPONSIVE_VALUE) {
+            value += token.value;
+            advanceToken();
+        }*/
         // 处理其他值
         else {
             value += token.value;

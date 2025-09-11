@@ -129,6 +129,7 @@ public:
     std::string processArithmeticExpressions(const std::string& value) const;
     std::string processConditionalExpressions(const std::string& value) const;
     std::string processLogicalExpressions(const std::string& value) const;
+    std::string processResponsiveValues(const std::string& value) const;
     bool evaluateCondition(const std::string& condition) const;
 };
 
