@@ -25,6 +25,8 @@ ConfigurationContext::ConfigurationContext() {
     addKeyword("KEYWORD_DELETE", "delete");
     addKeyword("KEYWORD_INSERT", "insert");
     addKeyword("KEYWORD_FROM", "from");
+    addKeyword("KEYWORD_USE", "use");
+    addKeyword("KEYWORD_EXCEPT", "except");
 }
 
 void ConfigurationContext::setString(const std::string& key, const std::string& value) {

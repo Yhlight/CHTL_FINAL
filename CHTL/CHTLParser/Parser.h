@@ -23,12 +23,21 @@ private:
     NodePtr parseProperty();
     NodePtr parseTextNode();
     NodePtr parseStyleNode();
+    NodePtr parseScriptNode();
 
     // Expression parsing methods
     ExprNodePtr parseExpression();
     ExprNodePtr parseTernary();
+    ExprNodePtr parseLogicalOr();
+    ExprNodePtr parseLogicalAnd();
+    ExprNodePtr parseComparison();
+    ExprNodePtr parseTerm();
+    ExprNodePtr parseFactor();
+    ExprNodePtr parsePower();
+    ExprNodePtr parseUnary();
+    ExprNodePtr parsePrimary();
 
-    // Template parsing methods
+    // Template and other parsing methods
     NodePtr parseTemplateDefinition();
     NodePtr parseStyleTemplateDefinition();
     NodePtr parseCustomDefinition();
@@ -37,17 +46,14 @@ private:
     NodePtr parseInsert();
     NodePtr parseImport();
     NodePtr parseConfiguration();
+    NodePtr parseNamespace();
+    NodePtr parseUseStatement();
+    NodePtr parseConstraint();
     NodePtr parseVarTemplateDefinition();
     NodePtr parseTemplateUsage();
-    ExprNodePtr parseLogicalOr();
-    ExprNodePtr parseLogicalAnd();
-    ExprNodePtr parseComparison();
-    ExprNodePtr parseTerm();
-    ExprNodePtr parseFactor();
-    ExprNodePtr parsePrimary();
     NodePtr parseComment(const Token& token);
 
-    // Helper methods for token stream navigation
+    // Helper methods
     const Token& peek() const;
     const Token& previous() const;
     const Token& advance();

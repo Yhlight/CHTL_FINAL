@@ -1,49 +1,50 @@
+use html5;
+
 [Import] @Style from "styles.css";
 
-[Configuration] {
-    KEYWORD_DELETE = remove;
-}
+[Namespace] mySpace
+{
+    div
+    {
+        id: main-box;
+        class: container;
 
-style {
-    body { margin: 0; }
-}
+        style
+        {
+            width: 100px + 50px;
+            height: 2 * 25px;
+            border: 1px solid black;
+        }
 
-[Template] @Style DefaultText {
-    color: black;
-    font-size: 16px;
-}
-
-[Custom] @Style CustomText {
-    color: blue;
-}
-
-[Template] @Element Box {
-    div {
-        text { "This is a box from a template." }
+        p
+        {
+            text: "This is the content.";
+        }
     }
 }
 
-html {
-    head {
-        title { text { "CHTL Page from File" } }
+[Origin @Html]
+{
+    <hr>
+    <p>This is a raw HTML block.</p>
+}
+
+div
+{
+    id: footer;
+    text: "Footer text here.";
+    style
+    {
+        // Reference property from another element
+        margin-top: #main-box.height + 10px;
     }
-    body {
-        div {
-            id = my-div;
-            class: 'container';
-            style {
-                @Style DefaultText;
-                background-color: blue;
+    script
+    {
+        // CHTL JS Block
+        {{#footer}}.listen {
+            click: () => {
+                console.log("Footer clicked!");
             }
-            text { "Hello from a CHTL file!" }
-        }
-
-        @Element Box {
-            remove div;
-        }
+        };
     }
-}
-
-script {
-    console.log("This is a global script.");
 }

@@ -33,10 +33,16 @@ add_library(chtl_parser STATIC
 target_include_directories(chtl_parser PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(chtl_parser PUBLIC chtl_lexer chtl_ast)
 
+# --- Evaluator Library ---
+add_library(chtl_evaluator STATIC
+    CHTLEvaluator/ExprEvaluator.cpp
+)
+target_include_directories(chtl_evaluator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(chtl_evaluator PUBLIC chtl_ast)
+
 # --- Generator Library ---
 add_library(chtl_generator STATIC
     CHTLGenerator/Generator.cpp
-    CHTLGenerator/ExprGenerator.cpp
 )
 target_include_directories(chtl_generator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(chtl_generator PUBLIC chtl_ast chtl_util)
+target_link_libraries(chtl_generator PUBLIC chtl_ast chtl_util chtl_evaluator)

@@ -11,9 +11,11 @@ class TextNode;
 class CommentNode;
 class PropertyNode;
 class StyleNode;
+class ScriptNode;
 class StyleTemplateDefinitionNode;
 class ElementTemplateDefinitionNode;
 class VarTemplateDefinitionNode;
+class TemplateDefinitionNode;
 class StyleUsageNode;
 class ElementUsageNode;
 class CustomStyleDefinitionNode;
@@ -23,8 +25,10 @@ class DeleteNode;
 class InsertNode;
 class ImportNode;
 class ConfigurationNode;
+class NamespaceNode;
+class UseNode;
+class ConstraintNode;
 
-// Visitor interface for the AST
 class Visitor {
 public:
     virtual ~Visitor() = default;
@@ -33,6 +37,7 @@ public:
     virtual void visit(CommentNode* node) = 0;
     virtual void visit(PropertyNode* node) = 0;
     virtual void visit(StyleNode* node) = 0;
+    virtual void visit(ScriptNode* node) = 0;
     virtual void visit(StyleTemplateDefinitionNode* node) = 0;
     virtual void visit(ElementTemplateDefinitionNode* node) = 0;
     virtual void visit(VarTemplateDefinitionNode* node) = 0;
@@ -45,15 +50,16 @@ public:
     virtual void visit(InsertNode* node) = 0;
     virtual void visit(ImportNode* node) = 0;
     virtual void visit(ConfigurationNode* node) = 0;
+    virtual void visit(NamespaceNode* node) = 0;
+    virtual void visit(UseNode* node) = 0;
+    virtual void visit(ConstraintNode* node) = 0;
 };
 
-// Base class for all AST nodes
 class Node {
 public:
     virtual ~Node() = default;
     virtual void accept(Visitor& visitor) = 0;
 };
 
-// Use unique_ptr for memory management of nodes
 using NodePtr = std::unique_ptr<Node>;
 using NodeList = std::vector<NodePtr>;

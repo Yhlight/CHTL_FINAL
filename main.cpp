@@ -12,35 +12,6 @@
 #include "CHTL_JS/CHTLJSParser/Parser.h"
 #include "CHTL_JS/CHTLJSGenerator/Generator.h"
 
-void testCHTLJS() {
-    std::cout << "\n--- Testing CHTL JS Generator ---\n";
-    std::string source = R"~(
-        {{my_button}}.listen {
-            click: () => { console.log("Button clicked!"); },
-            mouseenter: onMouseEnter
-        };
-    )~";
-
-    CHTLJSLexer lexer(source);
-    std::vector<CHTLJSToken> tokens = lexer.tokenize();
-
-    CHTLJSNodeList ast;
-    try {
-        CHTLJSParser parser(tokens);
-        ast = parser.parse();
-    } catch (const CHTLJSParser::ParseError& e) {
-        std::cerr << "Parser Error: " << e.what() << std::endl;
-        return;
-    }
-
-    CHTLJSGenerator generator;
-    std::string js_output = generator.generate(ast);
-    std::cout << js_output << std::endl;
-
-    std::cout << "-------------------------------\n";
-}
-
-
 std::string readFile(const std::string& path) {
     std::ifstream file(path);
     if (!file.is_open()) {
@@ -52,6 +23,7 @@ std::string readFile(const std::string& path) {
     return buffer.str();
 }
 
+// This config population is still basic and will need to be improved later.
 void populateConfigFromTokens(ConfigurationContext& config, const std::string& source) {
     Lexer lexer_for_config(source, config);
     auto tokens_for_config = lexer_for_config.tokenize();
@@ -82,40 +54,36 @@ void populateConfigFromTokens(ConfigurationContext& config, const std::string& s
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        testCHTLJS();
+        std::cerr << "Usage: " << argv[0] << " <input_file.chtl>" << std::endl;
         return 1;
     }
 
     std::string source = readFile(argv[1]);
 
-    // 1. Configuration Pass
+    // 1. Configuration Pass (remains basic for now)
     ConfigurationContext config;
     populateConfigFromTokens(config, source);
 
-    // 2. Main Compilation
+    // 2. Scan with the new UnifiedScanner
     UnifiedScanner scanner(source);
     ScannedContent scanned_content = scanner.scan();
 
+    // 3. CHTL Parsing
+    // The lexer and parser now receive CHTL with placeholders
     Lexer lexer(scanned_content.chtl_content, config);
     auto tokens = lexer.tokenize();
 
     Parser parser(tokens);
     NodeList ast = parser.parse();
 
-    // 3. Dispatch and Generate
-    CompilerDispatcher dispatcher(ast, config);
+    // 4. Dispatch and Generate
+    // The dispatcher will generate HTML containing placeholders
+    CompilerDispatcher dispatcher(ast, scanned_content, config, argv[1]);
     CompilationResult compilation_result = dispatcher.dispatch();
 
-    // 4. Add global blocks
-    for(const auto& pair : scanned_content.css_blocks) {
-        compilation_result.compiled_css += pair.second;
-    }
-    for(const auto& pair : scanned_content.script_blocks) {
-        compilation_result.compiled_js += pair.second;
-    }
-
-    // 5. Merge
-    CodeMerger merger(compilation_result);
+    // 5. Merge and Decode Placeholders
+    // The new merger takes the result and the scanned content to fill in the placeholders
+    CodeMerger merger(compilation_result, scanned_content);
     std::string final_html = merger.merge();
 
     std::cout << final_html << std::endl;
