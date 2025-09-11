@@ -28,6 +28,8 @@ public:
     void visit(CustomVarDefinitionNode* node) override;
     void visit(DeleteNode* node) override;
     void visit(InsertNode* node) override;
+    void visit(ImportNode* node) override;
+    void visit(ConfigurationNode* node) override;
 
 private:
     void indent();

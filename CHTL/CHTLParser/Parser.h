@@ -35,6 +35,8 @@ private:
     NodePtr parseElementTemplateDefinition();
     NodePtr parseDelete();
     NodePtr parseInsert();
+    NodePtr parseImport();
+    NodePtr parseConfiguration();
     NodePtr parseVarTemplateDefinition();
     NodePtr parseTemplateUsage();
     ExprNodePtr parseLogicalOr();

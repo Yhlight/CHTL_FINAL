@@ -3,6 +3,8 @@
 #include "CHTLNode/StyleNode.h"
 #include "CHTLNode/TemplateNode.h"
 #include "CHTLNode/CustomNode.h"
+#include "CHTLNode/ImportNode.h"
+#include "CHTLNode/ConfigurationNode.h"
 #include "CHTLUtil/ASTCloner.h"
 #include <vector>
 #include <iostream>
@@ -35,6 +37,8 @@ public:
     void visit(StyleNode* node) override {}
     void visit(StyleUsageNode* node) override {}
     void visit(ElementUsageNode* node) override {}
+    void visit(ImportNode* node) override {}
+    void visit(ConfigurationNode* node) override {}
     // Custom nodes
     void visit(CustomStyleDefinitionNode* node) override {}
     void visit(CustomElementDefinitionNode* node) override {}
@@ -201,6 +205,8 @@ void Generator::visit(CustomElementDefinitionNode* node) {}
 void Generator::visit(CustomVarDefinitionNode* node) {}
 void Generator::visit(DeleteNode* node) {}
 void Generator::visit(InsertNode* node) {}
+void Generator::visit(ImportNode* node) {}
+void Generator::visit(ConfigurationNode* node) {}
 
 
 void Generator::indent() {

@@ -18,7 +18,6 @@ CHTLJSNodePtr CHTLJSParser::parseStatement() {
     if (peek().type == CHTLJSTokenType::FileLoader) {
         return parseFileLoaderBlock();
     }
-    // Add other statement types here later
     throw error(peek(), "Expect a statement (e.g., 'vir', 'fileloader').");
 }
 
@@ -50,25 +49,11 @@ CHTLJSNodePtr CHTLJSParser::parseListenBlock() {
         const CHTLJSToken& key = consume(CHTLJSTokenType::Identifier, "Expect event name (e.g., 'click').");
         consume(CHTLJSTokenType::Colon, "Expect ':' after event name.");
 
-        // For now, we treat the value (the JS function) as an opaque block.
-        // We will consume tokens until we hit a comma or the closing brace.
-        // This is a simplification until the Unified Scanner is implemented.
-        std::string valueStr;
-        int brace_level = 0;
-        while (!isAtEnd()) {
-            if (peek().type == CHTLJSTokenType::Comma && brace_level == 0) break;
-            if (peek().type == CHTLJSTokenType::CloseBrace && brace_level == 0) break;
-
-            if (peek().type == CHTLJSTokenType::OpenBrace) brace_level++;
-            if (peek().type == CHTLJSTokenType::CloseBrace) brace_level--;
-
-            valueStr += advance().value + " ";
-        }
-
+        std::string valueStr = consumeValue();
         listenNode->eventHandlers.push_back(std::make_unique<CHTLJSPropertyNode>(key.value, valueStr));
 
         if (peek().type == CHTLJSTokenType::Comma) {
-            advance(); // Consume the comma
+            advance();
         }
     }
 
@@ -86,28 +71,11 @@ CHTLJSNodePtr CHTLJSParser::parseAnimateBlock() {
         const CHTLJSToken& key = consume(CHTLJSTokenType::Identifier, "Expect property name.");
         consume(CHTLJSTokenType::Colon, "Expect ':' after property name.");
 
-        // This is a simplification. The 'when' property contains an array of objects.
-        // A full implementation would need to parse this structure.
-        // For now, we consume tokens until the next comma or closing brace.
-        std::string valueStr;
-        int brace_level = 0;
-        int bracket_level = 0;
-        while (!isAtEnd()) {
-            if (peek().type == CHTLJSTokenType::Comma && brace_level == 0 && bracket_level == 0) break;
-            if (peek().type == CHTLJSTokenType::CloseBrace && brace_level == 0 && bracket_level == 0) break;
-
-            if (peek().type == CHTLJSTokenType::OpenBrace) brace_level++;
-            if (peek().type == CHTLJSTokenType::CloseBrace) brace_level--;
-            if (peek().type == CHTLJSTokenType::OpenBracket) bracket_level++;
-            if (peek().type == CHTLJSTokenType::CloseBracket) bracket_level--;
-
-            valueStr += advance().value + " ";
-        }
-
+        std::string valueStr = consumeValue();
         animateNode->properties.push_back(std::make_unique<CHTLJSPropertyNode>(key.value, valueStr));
 
         if (peek().type == CHTLJSTokenType::Comma) {
-            advance(); // Consume the comma
+            advance();
         }
     }
 
@@ -128,7 +96,6 @@ CHTLJSNodePtr CHTLJSParser::parseFileLoaderBlock() {
         }
         consume(CHTLJSTokenType::Colon, "Expect ':' after 'load' property.");
 
-        // Handle single path or comma-separated list of paths
         do {
             const CHTLJSToken& path = consume(CHTLJSTokenType::Identifier, "Expect file path.");
             fileLoaderNode->files.push_back(path.value);
@@ -145,6 +112,32 @@ CHTLJSNodePtr CHTLJSParser::parseFileLoaderBlock() {
 
 
 // --- Helper Methods ---
+
+std::string CHTLJSParser::consumeValue() {
+    std::string valueStr;
+    int brace_level = 0;
+    int bracket_level = 0;
+
+    if (peek().type == CHTLJSTokenType::OpenBrace || peek().type == CHTLJSTokenType::OpenBracket) {
+        do {
+            if (peek().type == CHTLJSTokenType::OpenBrace) brace_level++;
+            else if (peek().type == CHTLJSTokenType::CloseBrace) brace_level--;
+            else if (peek().type == CHTLJSTokenType::OpenBracket) bracket_level++;
+            else if (peek().type == CHTLJSTokenType::CloseBracket) bracket_level--;
+
+            valueStr += advance().value + " ";
+
+        } while ((brace_level > 0 || bracket_level > 0) && !isAtEnd());
+    } else {
+        while (!isAtEnd()) {
+            if (peek().type == CHTLJSTokenType::Comma) break;
+            if (peek().type == CHTLJSTokenType::CloseBrace) break;
+            valueStr += advance().value + " ";
+        }
+    }
+    return valueStr;
+}
+
 
 const CHTLJSToken& CHTLJSParser::peek() const {
     return tokens[current];

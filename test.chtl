@@ -1,3 +1,9 @@
+[Import] @Style from "./styles.css";
+
+[Configuration] {
+    DEBUG_MODE = true;
+}
+
 style {
     body { margin: 0; }
 }

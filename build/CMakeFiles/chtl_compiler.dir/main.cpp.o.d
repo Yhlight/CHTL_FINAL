@@ -163,6 +163,28 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h \
- /app/CompilerDispatcher/CompilerDispatcher.h \
- /app/CodeMerger/CodeMerger.h
+ /usr/include/c++/13/bits/erase_if.h /app/CHTL/CHTLLexer/Lexer.h \
+ /app/CHTL/CHTLLexer/Token.h /app/CHTL/CHTLParser/Parser.h \
+ /app/CHTL/CHTLNode/Node.h /usr/include/c++/13/memory \
+ /usr/include/c++/13/bits/stl_tempbuf.h \
+ /usr/include/c++/13/bits/stl_raw_storage_iter.h \
+ /usr/include/c++/13/bits/align.h \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
+ /usr/include/c++/13/bits/unique_ptr.h \
+ /usr/include/c++/13/bits/shared_ptr.h \
+ /usr/include/c++/13/bits/shared_ptr_base.h \
+ /usr/include/c++/13/bits/allocated_ptr.h \
+ /usr/include/c++/13/ext/concurrence.h \
+ /usr/include/c++/13/bits/shared_ptr_atomic.h \
+ /usr/include/c++/13/bits/atomic_base.h \
+ /usr/include/c++/13/bits/atomic_lockfree_defines.h \
+ /usr/include/c++/13/backward/auto_ptr.h \
+ /usr/include/c++/13/pstl/glue_memory_defs.h \
+ /usr/include/c++/13/pstl/execution_defs.h /app/CHTL/CHTLNode/ExprNode.h \
+ /app/CHTL/CHTLParser/ASTPrinter.h /app/CHTL/CHTLNode/ElementNode.h \
+ /app/CHTL/CHTLNode/PropertyNode.h /app/CHTL/CHTLNode/TextNode.h \
+ /app/CHTL/CHTLNode/CommentNode.h /app/CHTL/CHTLNode/CustomNode.h \
+ /app/CHTL/CHTLNode/TemplateNode.h /app/CHTL/CHTLNode/ImportNode.h \
+ /app/CHTL/CHTLNode/ConfigurationNode.h

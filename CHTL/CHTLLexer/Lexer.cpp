@@ -44,6 +44,14 @@ Token Lexer::nextToken() {
                 current += 7;
                 return makeToken(TokenType::CustomKeyword);
             }
+            if (source.compare(current, 7, "Import]") == 0) {
+                current += 7;
+                return makeToken(TokenType::ImportKeyword);
+            }
+            if (source.compare(current, 14, "Configuration]") == 0) {
+                current += 14;
+                return makeToken(TokenType::ConfigurationKeyword);
+            }
             return makeToken(TokenType::OpenBracket);
         case ']': return makeToken(TokenType::CloseBracket);
         case ':': return makeToken(TokenType::Colon);
@@ -138,6 +146,7 @@ Token Lexer::identifier() {
 
     if (value == "delete") return makeToken(TokenType::DeleteKeyword, value);
     if (value == "insert") return makeToken(TokenType::InsertKeyword, value);
+    if (value == "from") return makeToken(TokenType::FromKeyword, value);
 
     return makeToken(TokenType::Identifier, value);
 }

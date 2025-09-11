@@ -128,6 +128,21 @@ void ASTPrinter::visit(InsertNode* node) {
     std::cout << "insert ..." << std::endl;
 }
 
+void ASTPrinter::visit(ImportNode* node) {
+    printIndent();
+    std::cout << "[Import] @" << node->import_type << " from \"" << node->path << "\"" << std::endl;
+}
+
+void ASTPrinter::visit(ConfigurationNode* node) {
+    printIndent();
+    std::cout << "[Configuration]" << std::endl;
+    indent();
+    for (const auto& setting : node->settings) {
+        setting->accept(*this);
+    }
+    dedent();
+}
+
 void ASTPrinter::indent() {
     indent_level++;
 }

@@ -6,6 +6,8 @@
 #include "CHTLNode/CommentNode.h"
 #include "CHTLNode/PropertyNode.h"
 #include "CHTLNode/CustomNode.h"
+#include "CHTLNode/ImportNode.h"
+#include "CHTLNode/ConfigurationNode.h"
 #include <iostream>
 
 class ASTPrinter : public Visitor {
@@ -27,6 +29,8 @@ public:
     void visit(CustomVarDefinitionNode* node) override;
     void visit(DeleteNode* node) override;
     void visit(InsertNode* node) override;
+    void visit(ImportNode* node) override;
+    void visit(ConfigurationNode* node) override;
 
 private:
     void indent();

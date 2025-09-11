@@ -183,6 +183,7 @@ CHTL/CMakeFiles/chtl_generator.dir/CHTLGenerator/Generator.cpp.o: \
  /usr/include/c++/13/bits/erase_if.h \
  /app/CHTL/CHTLGenerator/ExprGenerator.h /app/CHTL/CHTLNode/StyleNode.h \
  /app/CHTL/CHTLNode/TemplateNode.h /app/CHTL/CHTLNode/CustomNode.h \
+ /app/CHTL/CHTLNode/ImportNode.h /app/CHTL/CHTLNode/ConfigurationNode.h \
  /app/CHTL/CHTLUtil/ASTCloner.h /usr/include/c++/13/iostream \
  /usr/include/c++/13/algorithm /usr/include/c++/13/bits/stl_algo.h \
  /usr/include/c++/13/bits/algorithmfwd.h \

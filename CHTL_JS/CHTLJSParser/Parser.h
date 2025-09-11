@@ -30,6 +30,7 @@ private:
     bool isAtEnd() const;
     const CHTLJSToken& consume(CHTLJSTokenType type, const std::string& message);
     bool match(const std::vector<CHTLJSTokenType>& types);
+    std::string consumeValue();
 
     ParseError error(const CHTLJSToken& token, const std::string& message);
 

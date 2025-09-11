@@ -1,5 +1,6 @@
 #include "UnifiedScanner.h"
 #include <sstream>
+#include <cctype>
 
 UnifiedScanner::UnifiedScanner(const std::string& source) : source(source) {}
 
@@ -29,28 +30,36 @@ ScannedContent UnifiedScanner::scan() {
     int brace_depth = 0;
 
     while (current < source.length()) {
-        bool is_global_style = (brace_depth == 0 && source.substr(current, 5) == "style" && source.find('{', current) != std::string::npos);
-        bool is_global_script = (brace_depth == 0 && source.substr(current, 6) == "script" && source.find('{', current) != std::string::npos);
+        bool is_global_style = (brace_depth == 0 &&
+                                source.substr(current, 5) == "style" &&
+                                (current + 5 == source.length() || isspace(source[current + 5]) || source[current + 5] == '{')
+                               );
+        bool is_global_script = (brace_depth == 0 &&
+                                 source.substr(current, 6) == "script" &&
+                                 (current + 6 == source.length() || isspace(source[current + 6]) || source[current + 6] == '{')
+                                );
 
         if (is_global_style || is_global_script) {
             size_t block_start = source.find('{', current);
-            size_t block_end = find_matching_brace(source, block_start);
-
-            if (block_end != std::string::npos) {
-                std::string block_content = source.substr(block_start + 1, block_end - block_start - 1);
-                if (is_global_style) {
-                    result.css_blocks["global_style_" + std::to_string(css_block_count++)] = block_content;
-                } else {
-                    result.script_blocks["global_script_" + std::to_string(script_block_count++)] = block_content;
+            if (block_start != std::string::npos) {
+                size_t block_end = find_matching_brace(source, block_start);
+                if (block_end != std::string::npos) {
+                    std::string block_content = source.substr(block_start + 1, block_end - block_start - 1);
+                    if (is_global_style) {
+                        result.css_blocks["global_style_" + std::to_string(css_block_count++)] = block_content;
+                    } else {
+                        result.script_blocks["global_script_" + std::to_string(script_block_count++)] = block_content;
+                    }
+                    current = block_end + 1;
+                    continue;
                 }
-                current = block_end + 1;
-                continue; // Skip appending this block to chtl_ss
             }
         }
 
         // If not a global block, process normally
         if (source[current] == '{') brace_depth++;
-        if (source[current] == '}') brace_depth--;
+        else if (source[current] == '}') brace_depth--;
+
         chtl_ss << source[current];
         current++;
     }

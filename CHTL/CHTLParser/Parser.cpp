@@ -7,6 +7,8 @@
 #include "CHTLNode/ExprNode.h"
 #include "CHTLNode/TemplateNode.h"
 #include "CHTLNode/CustomNode.h"
+#include "CHTLNode/ImportNode.h"
+#include "CHTLNode/ConfigurationNode.h"
 #include <iostream>
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
@@ -31,7 +33,44 @@ NodePtr Parser::parseDeclaration() {
     if (match({TokenType::CustomKeyword})) {
         return parseCustomDefinition();
     }
-    throw error(peek(), "Expect a declaration (e.g., an element, template, or custom).");
+    if (match({TokenType::ImportKeyword})) {
+        return parseImport();
+    }
+    if (match({TokenType::ConfigurationKeyword})) {
+        return parseConfiguration();
+    }
+    throw error(peek(), "Expect a declaration (e.g., an element, template, custom, or import).");
+}
+
+NodePtr Parser::parseConfiguration() {
+    auto node = std::make_unique<ConfigurationNode>();
+    consume(TokenType::OpenBrace, "Expect '{' after [Configuration].");
+    while(!check(TokenType::CloseBrace) && !isAtEnd()) {
+        skipComments();
+        if(check(TokenType::CloseBrace)) break;
+        node->settings.push_back(std::unique_ptr<PropertyNode>(static_cast<PropertyNode*>(parseProperty().release())));
+    }
+    consume(TokenType::CloseBrace, "Expect '}' after configuration block.");
+    return node;
+}
+
+NodePtr Parser::parseImport() {
+    // This is a simplified parser for now. It assumes a simple `@Type from "path"` syntax.
+    consume(TokenType::At, "Expect '@' after [Import].");
+    const Token& type = consume(TokenType::Identifier, "Expect import type.");
+
+    consume(TokenType::FromKeyword, "Expect 'from' keyword.");
+
+    const Token& path = consume(TokenType::StringLiteral, "Expect path string.");
+
+    std::string alias;
+    if (match({TokenType::Identifier}) && previous().value == "as") {
+        alias = consume(TokenType::Identifier, "Expect alias name.").value;
+    }
+
+    consume(TokenType::Semicolon, "Expect ';' after import statement.");
+
+    return std::make_unique<ImportNode>(type.value, path.value, alias);
 }
 
 NodePtr Parser::parseCustomDefinition() {

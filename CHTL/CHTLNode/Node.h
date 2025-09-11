@@ -21,6 +21,8 @@ class CustomElementDefinitionNode;
 class CustomVarDefinitionNode;
 class DeleteNode;
 class InsertNode;
+class ImportNode;
+class ConfigurationNode;
 
 // Visitor interface for the AST
 class Visitor {
@@ -41,6 +43,8 @@ public:
     virtual void visit(CustomVarDefinitionNode* node) = 0;
     virtual void visit(DeleteNode* node) = 0;
     virtual void visit(InsertNode* node) = 0;
+    virtual void visit(ImportNode* node) = 0;
+    virtual void visit(ConfigurationNode* node) = 0;
 };
 
 // Base class for all AST nodes
