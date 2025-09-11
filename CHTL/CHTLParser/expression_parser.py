@@ -74,31 +74,30 @@ class ExpressionParser:
     def _primary(self):
         if self._match(TokenType.NUMBER):
             number_token = self._previous()
+            # Check for a unit following the number
             if not self._is_at_end() and self._peek().type == TokenType.IDENTIFIER:
                 unit_token = self._advance()
                 return nodes.ValueWithUnitNode(value=float(number_token.lexeme), unit=unit_token.lexeme)
             return nodes.LiteralNode(value=float(number_token.lexeme))
 
         if self._match(TokenType.STRING):
-            return nodes.LiteralNode(value=self._previous().lexeme[1:-1])
+            return nodes.LiteralNode(value=self._previous().lexeme)
 
         # Handle full selector references like #box.width
         if self._peek().type in [TokenType.HASH, TokenType.DOT]:
-            selector_tokens = [self._advance()] # Consume '#' or '.'
+            selector_tokens = [self._advance()]
             selector_tokens.append(self._consume(TokenType.IDENTIFIER, "Expect identifier after '#' or '.' in selector."))
-
             self._consume(TokenType.DOT, "Expect '.' to access a property in a reference.")
             prop_name_token = self._consume(TokenType.IDENTIFIER, "Expect property name after '.' in a reference.")
-
             return nodes.ReferenceNode(property_name=prop_name_token.lexeme, selector_tokens=selector_tokens)
 
         if self._match(TokenType.IDENTIFIER):
-            # This is a local reference.
+            # If followed by a dot, it's a local property reference
+            # It's a local reference, like 'width'
             return nodes.ReferenceNode(property_name=self._previous().lexeme)
 
         raise self._error(self._peek(), "Expect expression.")
 
-    # --- Helpers ---
     def _consume(self, ttype: TokenType, message: str) -> Token:
         if self._check(ttype): return self._advance()
         raise self._error(self._peek(), message)
@@ -107,7 +106,7 @@ class ExpressionParser:
         return self._peek().type == ttype
     def _is_at_end(self) -> bool: return self.current >= len(self.tokens)
     def _peek(self) -> Token:
-        if self._is_at_end(): return self.tokens[-1] # Gracefully handle peeking at the end
+        if self._is_at_end(): return self.tokens[-1]
         return self.tokens[self.current]
     def _previous(self) -> Token: return self.tokens[self.current - 1]
     def _advance(self) -> Token:

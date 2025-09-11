@@ -2,23 +2,23 @@ from enum import Enum, auto
 
 class TokenType(Enum):
     # Single-character tokens
-    LBRACE = auto()
-    RBRACE = auto()
-    LBRACKET = auto()
-    RBRACKET = auto()
-    COLON = auto()
-    SEMICOLON = auto()
-    DOT = auto()
-    PLUS = auto()
-    MINUS = auto()
-    STAR = auto()
-    SLASH = auto()
-    PERCENT = auto()
-    HASH = auto()
-    AT = auto()
-    COMMA = auto()
-    AMPERSAND = auto()
-    QUESTION = auto()
+    LBRACE = auto()         # {
+    RBRACE = auto()         # }
+    LBRACKET = auto()       # [
+    RBRACKET = auto()       # ]
+    COLON = auto()          # :
+    SEMICOLON = auto()      # ;
+    DOT = auto()            # .
+    PLUS = auto()           # +
+    MINUS = auto()          # -
+    STAR = auto()           # *
+    SLASH = auto()          # /
+    PERCENT = auto()        # %
+    HASH = auto()           # #
+    AT = auto()             # @
+    COMMA = auto()          # ,
+    AMPERSAND = auto()      # &
+    QUESTION = auto()       # ?
 
     # One or two character tokens
     EQUALS = auto()
@@ -40,7 +40,14 @@ class TokenType(Enum):
     # Keywords
     TEXT = auto()
     STYLE = auto()
+    # Keywords for features to be added later
+    TEMPLATE = auto()
+    IMPORT = auto()
+    CUSTOM = auto()
+    ORIGIN = auto()
+    DELETE = auto()
+    INSERT = auto()
 
     # Special
-    UNEXPECTED = auto() # For characters that are not part of CHTL syntax but should be preserved in script blocks
+    UNEXPECTED = auto()
     EOF = auto()

@@ -6,4 +6,7 @@ class Token:
     type: TokenType
     lexeme: str
     line: int
-    col: int
+    column: int
+
+    def __repr__(self):
+        return f"Token(type={self.type.name}, lexeme='{self.lexeme}')"
