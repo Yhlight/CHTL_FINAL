@@ -97,14 +97,26 @@ std::string CHTLStyleProcessor::processGlobalStyleBlock(std::shared_ptr<StyleNod
     try {
         std::ostringstream oss;
         
-        // 处理样式规则
+        // 处理样式规则（全局样式：允许算术与条件表达式，但不支持属性引用）
         for (const auto& rule : styleNode->getStyleRules()) {
             std::string selector = rule->getAttribute("selector");
             if (!selector.empty()) {
                 std::map<std::string, std::string> properties;
                 for (const auto& attr : rule->getAttributes()) {
                     if (attr.first != "type" && attr.first != "selector") {
-                        properties[attr.first] = attr.second;
+                        std::string value = attr.second;
+                        // 仅处理算术与条件表达式，禁止属性引用
+                        if (value.find('+') != std::string::npos || 
+                            value.find('-') != std::string::npos ||
+                            value.find('*') != std::string::npos ||
+                            value.find('/') != std::string::npos ||
+                            value.find('%') != std::string::npos) {
+                            value = evaluateArithmeticExpression(value);
+                        }
+                        if (value.find('?') != std::string::npos) {
+                            value = evaluateConditionalExpression(value);
+                        }
+                        properties[attr.first] = value;
                     }
                 }
                 
