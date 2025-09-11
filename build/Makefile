@@ -334,6 +334,30 @@ Scanner/CHTLUnifiedScanner.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/Scanner/CHTLUnifiedScanner.cpp.s
 .PHONY : Scanner/CHTLUnifiedScanner.cpp.s
 
+Util/StringUtil/StringUtil.o: Util/StringUtil/StringUtil.cpp.o
+.PHONY : Util/StringUtil/StringUtil.o
+
+# target to build an object file
+Util/StringUtil/StringUtil.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.o
+.PHONY : Util/StringUtil/StringUtil.cpp.o
+
+Util/StringUtil/StringUtil.i: Util/StringUtil/StringUtil.cpp.i
+.PHONY : Util/StringUtil/StringUtil.i
+
+# target to preprocess a source file
+Util/StringUtil/StringUtil.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.i
+.PHONY : Util/StringUtil/StringUtil.cpp.i
+
+Util/StringUtil/StringUtil.s: Util/StringUtil/StringUtil.cpp.s
+.PHONY : Util/StringUtil/StringUtil.s
+
+# target to generate assembly for a file
+Util/StringUtil/StringUtil.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.s
+.PHONY : Util/StringUtil/StringUtil.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -392,6 +416,9 @@ help:
 	@echo "... Scanner/CHTLUnifiedScanner.o"
 	@echo "... Scanner/CHTLUnifiedScanner.i"
 	@echo "... Scanner/CHTLUnifiedScanner.s"
+	@echo "... Util/StringUtil/StringUtil.o"
+	@echo "... Util/StringUtil/StringUtil.i"
+	@echo "... Util/StringUtil/StringUtil.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

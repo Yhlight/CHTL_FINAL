@@ -2,13 +2,28 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
+#include "../CHTLContext.h"
 
-std::string Generator::generate(std::shared_ptr<BaseNode> root) {
+std::string Generator::generate(std::shared_ptr<BaseNode> root, CHTLContext& context) {
     output.clear();
     indentLevel = 0;
     if (root) {
         root->accept(*this);
     }
+
+    // Post-processing step: inject global CSS into the <head>
+    if (!context.globalCssContent.empty()) {
+        std::string styleBlock = "\n    <style>\n" + context.globalCssContent + "    </style>\n";
+        size_t head_end_pos = output.find("</head>");
+        if (head_end_pos != std::string::npos) {
+            output.insert(head_end_pos, styleBlock);
+        } else {
+            // As a fallback if no <head> is present, just prepend it.
+            // A better solution would be to ensure a <head> exists.
+            output.insert(0, styleBlock);
+        }
+    }
+
     return output;
 }
 

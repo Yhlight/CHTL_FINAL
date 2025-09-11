@@ -6,9 +6,10 @@
 #include "CHTLParser/Parser.h"
 #include "CHTLGenerator/Generator.h"
 #include "ASTProcessors/StyleProcessor.h"
+#include "CHTLContext.h"
 
 // --- CHTL Compiler Invocation ---
-void invoke_chtl_compiler(const std::string& code) {
+void invoke_chtl_compiler(const std::string& code, CHTLContext& context) {
     std::cout << "--- CHTL Compiler Invoked ---" << std::endl;
 
     // 1. Lexer
@@ -32,11 +33,11 @@ void invoke_chtl_compiler(const std::string& code) {
 
     // 3. AST Processing
     StyleProcessor styleProcessor;
-    styleProcessor.process(ast_root);
+    styleProcessor.process(ast_root, context);
 
     // 4. Generator
     Generator generator;
-    std::string html_output = generator.generate(ast_root);
+    std::string html_output = generator.generate(ast_root, context);
 
     std::cout << "--- Generated HTML ---" << std::endl;
     std::cout << html_output;
@@ -59,10 +60,14 @@ void invoke_js_compiler(const std::string& code) {
 // --- CompilerDispatcher Implementation ---
 
 void CompilerDispatcher::dispatch(const std::vector<CodeFragment>& fragments) {
+    CHTLContext context;
+    // Note: A more advanced implementation might have separate contexts or merge them.
+    // For now, a single context for the whole dispatch is fine.
+
     for (const auto& fragment : fragments) {
         switch (fragment.type) {
             case FragmentType::CHTL:
-                invoke_chtl_compiler(fragment.code);
+                invoke_chtl_compiler(fragment.code, context);
                 break;
             case FragmentType::CSS:
                 invoke_css_compiler(fragment.code);

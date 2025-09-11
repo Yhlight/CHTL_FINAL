@@ -8,7 +8,7 @@
 class Generator : public AstVisitor {
 public:
     // The main entry point. Traverses the AST and returns the generated HTML.
-    std::string generate(std::shared_ptr<class BaseNode> root);
+    std::string generate(std::shared_ptr<class BaseNode> root, class CHTLContext& context);
 
     // Visitor methods for each node type
     void visit(class ElementNode& node) override;

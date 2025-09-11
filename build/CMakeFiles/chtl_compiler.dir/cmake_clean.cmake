@@ -15,6 +15,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/chtl_compiler.dir/CompilerDispatcher/CompilerDispatcher.cpp.o.d"
   "CMakeFiles/chtl_compiler.dir/Scanner/CHTLUnifiedScanner.cpp.o"
   "CMakeFiles/chtl_compiler.dir/Scanner/CHTLUnifiedScanner.cpp.o.d"
+  "CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.o"
+  "CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.o.d"
   "CMakeFiles/chtl_compiler.dir/main.cpp.o"
   "CMakeFiles/chtl_compiler.dir/main.cpp.o.d"
   "chtl_compiler"

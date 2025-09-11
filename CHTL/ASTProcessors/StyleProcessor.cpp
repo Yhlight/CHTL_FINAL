@@ -4,45 +4,68 @@
 #include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../LocalStyleParser/LocalStyleParser.h"
+#include "../CHTLContext.h"
+#include "../../Util/StringUtil/StringUtil.h"
 #include <algorithm>
+#include <iostream>
 
-void StyleProcessor::process(std::shared_ptr<BaseNode> root) {
+void StyleProcessor::process(std::shared_ptr<BaseNode> root, CHTLContext& context) {
     if (root) {
+        // We need to pass the context to the visit methods.
+        // A simple way is to store it as a member before starting.
+        this->context = &context;
         root->accept(*this);
     }
 }
 
 void StyleProcessor::visit(ElementNode& node) {
-    // Set the current element context for child nodes
     currentElement = &node;
 
-    // First, process any direct StyleNode children
     LocalStyleParser styleParser;
+    std::vector<std::shared_ptr<BaseNode>> remainingChildren;
+
     for (const auto& child : node.children) {
-        // We need to check the type before visiting.
-        // A dynamic_cast is a safe way to do this.
         if (auto styleNode = std::dynamic_pointer_cast<StyleNode>(child)) {
-            auto parsedStyles = styleParser.parse(styleNode->rawContent);
-            // Merge the parsed styles into the element's style map
-            node.processedStyles.insert(parsedStyles.begin(), parsedStyles.end());
+            // This is a style node, process it
+            ParsedStyleBlock parsedBlock = styleParser.parse(styleNode->rawContent);
+
+            // 1. Merge inline styles
+            node.processedStyles.insert(parsedBlock.inlineStyles.begin(), parsedBlock.inlineStyles.end());
+
+            // 2. Process global rules
+            for (const auto& rule : parsedBlock.globalRules) {
+                // 2a. Add rule to global CSS content
+                context->globalCssContent += rule.selector + " { " + rule.content + " }\n";
+
+                // 2b. Automatically add class/id attributes
+                std::string selector = trim(rule.selector);
+                if (selector.rfind('.', 0) == 0) { // Starts with .
+                    std::string className = selector.substr(1);
+                    if (node.attributes.count("class")) {
+                        node.attributes["class"] += " " + className;
+                    } else {
+                        node.attributes["class"] = className;
+                    }
+                } else if (selector.rfind('#', 0) == 0) { // Starts with #
+                    std::string idName = selector.substr(1);
+                    // Note: Overwrites if an ID already exists. This is reasonable.
+                    node.attributes["id"] = idName;
+                }
+            }
+        } else {
+            // This is not a style node, keep it
+            remainingChildren.push_back(child);
         }
     }
 
-    // Remove all StyleNode children after processing them
-    node.children.erase(
-        std::remove_if(node.children.begin(), node.children.end(),
-            [](const std::shared_ptr<BaseNode>& child) {
-                return std::dynamic_pointer_cast<StyleNode>(child) != nullptr;
-            }),
-        node.children.end()
-    );
+    // Replace the old children list with the one that has StyleNodes removed
+    node.children = remainingChildren;
 
-    // Now, recursively visit the remaining children
+    // Recursively visit the remaining children
     for (const auto& child : node.children) {
         child->accept(*this);
     }
 
-    // Reset the context when we leave the element
     currentElement = nullptr;
 }
 
@@ -55,7 +78,5 @@ void StyleProcessor::visit(CommentNode& node) {
 }
 
 void StyleProcessor::visit(StyleNode& node) {
-    // This method should ideally not be called directly if the logic
-    // in visit(ElementNode&) is correct, as StyleNodes are processed
-    // and removed there. We include it to satisfy the visitor interface.
+    // Should not be called directly.
 }

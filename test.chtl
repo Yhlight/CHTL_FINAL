@@ -2,24 +2,36 @@ html
 {
     head
     {
-        title { text { "Local Style Test" } }
+        title { text { "Auto-Class Test" } }
     }
 
     body
     {
+        // This div should get class="fancy-text" automatically
         div
         {
-            id: "styled-div";
-
             style {
-                color: red;
-                font-size: 16px;
-                border: 1px solid black;
+                // This rule should be hoisted to a global <style> tag
+                .fancy-text {
+                    color: blue;
+                    font-family: sans-serif;
+                }
+
+                // This should be an inline style on the div
+                border: 1px solid grey;
             }
 
-            text { "This text should be styled." }
+            text { "This text should be blue and have a border." }
         }
 
-        -- A comment for testing
+        // This div should get id="important" automatically
+        div {
+            style {
+                #important {
+                    font-weight: bold;
+                }
+            }
+            text { "This text should be bold." }
+        }
     }
 }

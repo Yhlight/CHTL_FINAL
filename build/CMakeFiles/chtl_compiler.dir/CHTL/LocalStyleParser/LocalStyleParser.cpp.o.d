@@ -1,7 +1,8 @@
 CMakeFiles/chtl_compiler.dir/CHTL/LocalStyleParser/LocalStyleParser.cpp.o: \
  /app/CHTL/LocalStyleParser/LocalStyleParser.cpp \
  /usr/include/stdc-predef.h /app/CHTL/LocalStyleParser/LocalStyleParser.h \
- /usr/include/c++/13/string /usr/include/c++/13/bits/requires_hosted.h \
+ /app/CHTL/LocalStyleParser/ParsedStyleBlock.h /usr/include/c++/13/string \
+ /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -124,8 +125,9 @@ CMakeFiles/chtl_compiler.dir/CHTL/LocalStyleParser/LocalStyleParser.cpp.o: \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h /usr/include/c++/13/algorithm \
- /usr/include/c++/13/bits/stl_algo.h \
+ /usr/include/c++/13/bits/erase_if.h \
+ /app/CHTL/LocalStyleParser/../../Util/StringUtil/StringUtil.h \
+ /usr/include/c++/13/algorithm /usr/include/c++/13/bits/stl_algo.h \
  /usr/include/c++/13/bits/algorithmfwd.h \
  /usr/include/c++/13/bits/stl_heap.h \
  /usr/include/c++/13/bits/uniform_int_dist.h \

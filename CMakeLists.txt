@@ -15,6 +15,7 @@ add_executable(chtl_compiler main.cpp
     CHTL/CHTLGenerator/Generator.cpp
     CHTL/LocalStyleParser/LocalStyleParser.cpp
     CHTL/ASTProcessors/StyleProcessor.cpp
+    Util/StringUtil/StringUtil.cpp
 )
 
 # Include directories
