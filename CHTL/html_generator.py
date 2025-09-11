@@ -1,7 +1,8 @@
 import re
 from typing import Dict
-from CHTL.ast.nodes import DocumentNode, ElementNode, AttributeNode, TextNode, StyleNode, ScriptNode
+from CHTL.ast.nodes import DocumentNode, ElementNode, AttributeNode, TextNode, StyleNode, ScriptNode, OriginNode
 from CHTL.css_expr.evaluator import ExpressionEvaluator
+from CHTL.js.compiler import CHTLJS_Compiler
 
 class HtmlGenerator:
     def __init__(self, registry: Dict):
@@ -78,9 +79,18 @@ class HtmlGenerator:
 
         all_script_ids = {s.script_id for s in all_script_nodes}
         if all_script_ids:
-            all_js = [self.registry.get(sid)['content'] for sid in all_script_ids if self.registry.get(sid)]
-            if all_js:
-                script_content = f"<script>\n{''.join(all_js)}\n</script>"
+            js_compiler = CHTLJS_Compiler(registry=self.registry)
+            compiled_js = []
+            for script_id in all_script_ids:
+                script_data = self.registry.get(script_id)
+                if script_data and script_data.get('type') == 'script':
+                    raw_content = script_data['content']
+                    # This is where the new pipeline gets called
+                    compiled_code = js_compiler.compile(raw_content)
+                    compiled_js.append(compiled_code)
+
+            if compiled_js:
+                script_content = f"<script>\n{''.join(compiled_js)}\n</script>"
 
         body_content = "".join(self.visit(child) for child in node.children)
 

@@ -1,0 +1,30 @@
+div {
+    id: "box-to-animate";
+    style {
+        width: 100px;
+        height: 100px;
+        background-color: cornflowerblue;
+        position: relative; /* Needed for transform */
+    }
+
+    script {
+        // This script will animate its parent div
+        animate {
+            keyframes: [
+                { transform: 'translateX(0px) rotate(0deg)', backgroundColor: 'cornflowerblue' },
+                { transform: 'translateX(200px) rotate(90deg)', backgroundColor: 'orangered' },
+                { transform: 'translateX(0px) rotate(0deg)', backgroundColor: 'cornflowerblue' }
+            ],
+            options: {
+                duration: 3000,
+                easing: 'cubic-bezier(0.42, 0.0, 0.58, 1.0)',
+                iterations: Infinity
+            },
+            when: 'click' // Animate when the box is clicked
+        }
+    }
+}
+
+div {
+    text { "Another element to make sure parsing continues" }
+}

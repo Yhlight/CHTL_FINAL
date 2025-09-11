@@ -1,7 +1,7 @@
 grammar CHTL;
 
 // Parser Rules
-document: (directive | definition | element | originPlaceholder)*;
+document: (directive | definition | element | originPlaceholder | scriptPlaceholder | stylePlaceholder)*;
 
 directive
     : importStatement

@@ -11,33 +11,8 @@ from .symbol_table import SymbolTable
 from .template_expander import TemplateExpander
 from .ast.nodes import ScriptNode, AstNode, DocumentNode
 
-# CHTL JS Compiler components (using relative imports)
-from .js.generated.CHTLJSLexer import CHTLJSLexer
-from .js.generated.CHTLJSParser import CHTLJSParser
-from .js.ast_builder import ChtlJsAstBuilder
-from .js.js_generator import JavaScriptGenerator
-
-def compile_chtl_js(source_text: str) -> str:
-    input_stream = InputStream(source_text)
-    lexer = CHTLJSLexer(input_stream)
-    stream = CommonTokenStream(lexer)
-    parser = CHTLJSParser(stream)
-    parse_tree = parser.program()
-    ast_builder = ChtlJsAstBuilder()
-    ast = ast_builder.visit(parse_tree)
-    js_generator = JavaScriptGenerator()
-    js_code = js_generator.visit(ast)
-    return js_code
-
-def process_scripts(node: AstNode, registry: dict, doc_node: DocumentNode):
-    if isinstance(node, ScriptNode):
-        script_content = registry.get(node.script_id, {}).get('content', '')
-        if script_content:
-            generated_js = compile_chtl_js(script_content)
-            doc_node.scripts[node.script_id] = generated_js
-    if hasattr(node, 'children'):
-        for child in node.children:
-            process_scripts(child, registry, doc_node)
+# CHTL JS compilation is now handled by the CHTLJS_Compiler class,
+# which is invoked by the HtmlGenerator. These old functions are obsolete.
 
 def compile_single_file(filepath: str, symbol_table: SymbolTable, registry_override: dict = None):
     with open(filepath, 'r') as f:

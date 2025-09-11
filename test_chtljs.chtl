@@ -1,7 +1,0 @@
-div {
-    id: "my-div";
-
-    script {
-        {{#my-div}};
-    }
-}
