@@ -21,6 +21,7 @@ class CHTLJSTokenType(Enum):
     ANIMATE = auto()
     DELEGATE = auto()
     VIR = auto()
+    ROUTER = auto()
 
     # For now, we'll treat JS code as opaque identifiers
     JS_CODE = auto()

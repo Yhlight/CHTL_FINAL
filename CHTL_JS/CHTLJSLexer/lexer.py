@@ -13,6 +13,7 @@ class CHTLJSLexer:
             "animate": CHTLJSTokenType.ANIMATE,
             "delegate": CHTLJSTokenType.DELEGATE,
             "vir": CHTLJSTokenType.VIR,
+            "router": CHTLJSTokenType.ROUTER,
         }
 
     def scan_tokens(self) -> list[CHTLJSToken]:

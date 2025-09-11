@@ -71,6 +71,11 @@ class ExpressionStatementNode(CHTLJS_BaseNode):
     expression: CHTLJS_BaseNode
 
 @dataclass
+class RouterNode(CHTLJS_BaseNode):
+    """Represents a router { ... } block."""
+    properties: List[PropertyNode] = field(default_factory=list)
+
+@dataclass
 class CHTLJS_ProgramNode(CHTLJS_BaseNode):
     """The root node for a CHTL JS fragment."""
     children: List[CHTLJS_BaseNode] = field(default_factory=list)

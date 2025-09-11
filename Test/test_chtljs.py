@@ -89,6 +89,35 @@ class TestCHTLJSPipeline(unittest.TestCase):
         self.assertEqual(norm_js.count("addEventListener('click'"), 1)
         self.assertEqual(norm_js.count("addEventListener('mouseenter'"), 1)
 
+    def test_full_pipeline_for_router(self):
+        source = """
+        html {
+            body {
+                div { id: home-page; }
+                div { id: about-page; }
+                script {
+                    router {
+                url: "/home", "/about",
+                page: {{#home-page}}, {{#about-page}},
+                mode: 'hash'
+                    }
+                }
+            }
+        }
+        """
+        tokens = Lexer(source).scan_tokens()
+        ast = Parser(tokens).parse()
+        html_output = Generator().generate(ast)
+        js_code = self._get_script_content(html_output)
+
+        self.assertIn('const CHTL_ROUTES =', js_code)
+        self.assertIn('"path": "/home"', js_code)
+        self.assertIn('"view": "#home-page"', js_code)
+        self.assertIn('"path": "/about"', js_code)
+        self.assertIn('"view": "#about-page"', js_code)
+        self.assertIn('const router = async () =>', js_code)
+        self.assertIn("window.addEventListener('hashchange', router);", js_code)
+
     def test_parser_for_virtual_object(self):
         source = """
             vir myListener = {{#my-btn}}->listen {

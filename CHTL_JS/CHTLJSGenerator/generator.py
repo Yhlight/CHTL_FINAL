@@ -1,19 +1,26 @@
 from CHTL_JS.CHTLJSNode import nodes
+import json
 
 class CHTLJSGenerator:
     def __init__(self, js_fragments: dict):
         self.js_fragments = js_fragments
         self.delegated_events = {}
-        self.virtual_objects = {} # Symbol table for vir
+        self.virtual_objects = {}
+        self.routes = []
+        self.router_config = {}
 
     def generate(self, ast: nodes.CHTLJS_ProgramNode) -> str:
-        # First pass: collect vir definitions
         self._collect_virtual_objects(ast)
 
-        # Second pass: visit all nodes to generate JS.
-        direct_js = "".join(self._visit(node) for node in ast.children if node)
+        direct_js_parts = [self._visit(node) for node in ast.children if node]
+        direct_js = "".join(filter(None, direct_js_parts))
 
-        # Third pass: generate the consolidated delegate listeners
+        delegated_js = self._generate_delegated_events()
+        router_js = self._generate_router_logic()
+
+        return direct_js + "\n" + delegated_js + "\n" + router_js
+
+    def _generate_delegated_events(self) -> str:
         delegated_js = []
         for parent_selector, events in self.delegated_events.items():
             for event_name, data in events.items():
@@ -26,13 +33,66 @@ class CHTLJSGenerator:
                     target_checks.append(f"if (event.target.matches('{target_selector}')) {{ {callback_logic} }}")
 
                 listener_body = " else ".join(target_checks)
-                delegated_js.append(f"""
-                document.querySelector('{parent_selector}').addEventListener('{event_name}', (event) => {{
-                    {listener_body}
-                }});
-                """)
+                delegated_js.append(f"document.querySelector('{parent_selector}').addEventListener('{event_name}', (event) => {{ {listener_body} }});")
+        return "\n".join(delegated_js)
 
-        return direct_js + "\n" + "\n".join(delegated_js)
+    def _generate_router_logic(self) -> str:
+        if not self.routes:
+            return ""
+
+        mode = self.router_config.get('mode', 'history').strip("'\"")
+        root_container_selector = self.router_config.get('root', 'body').strip("'\"")
+        routes_json = json.dumps(self.routes, indent=4)
+        event_name = 'popstate' if mode == 'history' else 'hashchange'
+
+        return f"""
+const CHTL_ROUTES = {routes_json};
+const CHTL_ROUTER_ROOT = document.querySelector('{root_container_selector}');
+
+const navigate = (url) => {{
+    window.history.pushState(null, null, url);
+    router();
+}};
+
+const router = async () => {{
+    const path = window.location.pathname;
+    const potentialMatches = CHTL_ROUTES.map(route => ({{
+        route: route,
+        isMatch: path === route.path
+    }}));
+
+    let match = potentialMatches.find(potentialMatch => potentialMatch.isMatch);
+    if (!match) {{
+        match = {{
+            route: CHTL_ROUTES.find(r => r.path === '/404') || CHTL_ROUTES[0],
+            isMatch: true
+        }};
+    }}
+
+    CHTL_ROUTES.forEach(route => {{
+        const page = document.querySelector(route.view);
+        if (page) {{
+            page.style.display = 'none';
+        }}
+    }});
+
+    const view = document.querySelector(match.route.view);
+    if (view) {{
+        view.style.display = 'block';
+    }}
+}};
+
+window.addEventListener('{event_name}', router);
+document.addEventListener('DOMContentLoaded', () => {{
+    document.body.addEventListener('click', e => {{
+        if (e.target.matches('[data-link]')) {{
+            e.preventDefault();
+            navigate(e.target.href);
+        }}
+    }});
+    router();
+}});
+"""
 
     def _collect_virtual_objects(self, node):
         if isinstance(node, nodes.VirtualObjectNode):
@@ -46,6 +106,25 @@ class CHTLJSGenerator:
         visitor = getattr(self, method_name, lambda n: "")
         return visitor(node)
 
+    def _visit_routernode(self, node: nodes.RouterNode):
+        route_defs = {}
+        for prop in node.properties:
+            if prop.key not in route_defs:
+                route_defs[prop.key] = []
+            route_defs[prop.key].append(prop.value)
+
+        if 'url' in route_defs and 'page' in route_defs:
+            for i, url in enumerate(route_defs['url']):
+                if i < len(route_defs['page']):
+                    self.routes.append({
+                        "path": url.strip("'\""),
+                        "view": route_defs['page'][i].strip()[2:-2]
+                    })
+        if 'root' in route_defs: self.router_config['root'] = route_defs['root'][0]
+        if 'mode' in route_defs: self.router_config['mode'] = route_defs['mode'][0]
+        return ""
+
+
     def _visit_virtualobjectnode(self, node: nodes.VirtualObjectNode):
         return self._visit(node.value)
 
@@ -56,12 +135,10 @@ class CHTLJSGenerator:
         virtual_obj = self.virtual_objects.get(node.object_name)
         if not virtual_obj:
             return f"/* ERROR: Virtual object '{node.object_name}' not found. */"
-
         if isinstance(virtual_obj, nodes.ListenBlockNode):
             for listener in virtual_obj.listeners:
                 if listener.event_name == node.member_name:
                     return self.js_fragments.get(listener.callback_code, "() => {}")
-
         return f"/* ERROR: Member '{node.member_name}' not found on virtual object '{node.object_name}'. */"
 
     def _visit_delegatenode(self, node: nodes.DelegateNode):
