@@ -25,6 +25,14 @@ public:
     const NodeList& GetContent() const { return m_content; }
     bool IsCustom() const { return m_isCustom; }
 
+    NodePtr Clone() const override {
+        NodeList clonedContent;
+        for (const auto& node : m_content) {
+            clonedContent.push_back(node->Clone());
+        }
+        return std::make_shared<TemplateDefinitionNode>(m_name, m_type, clonedContent, m_isCustom);
+    }
+
 private:
     std::string m_name;
     TemplateType m_type;

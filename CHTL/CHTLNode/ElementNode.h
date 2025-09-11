@@ -1,9 +1,10 @@
 #pragma once
 
 #include "BaseNode.h"
-#include "PropertyNode.h" // Includes ExpressionNode
+#include "PropertyNode.h"
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace CHTL {
 
@@ -23,6 +24,18 @@ public:
 
     void AddChild(NodePtr child) {
         m_children.push_back(std::move(child));
+    }
+
+    NodePtr Clone() const override {
+        auto clonedNode = std::make_shared<ElementNode>(m_tagName);
+        for (const auto& prop : m_properties) {
+            // Properties contain ExpressionNodes which also need cloning
+            clonedNode->AddProperty({prop.name, prop.value ? prop.value->Clone() : nullptr});
+        }
+        for (const auto& child : m_children) {
+            clonedNode->AddChild(child->Clone());
+        }
+        return clonedNode;
     }
 
 private:

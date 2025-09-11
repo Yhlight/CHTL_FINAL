@@ -20,6 +20,10 @@ public:
     const std::shared_ptr<StyleNode>& GetSpecialization() const { return m_specialization; }
     bool IsSpecialized() const { return m_specialization != nullptr; }
 
+    ExpressionNodePtr Clone() const override {
+        return std::make_shared<TemplateUsageNode>(m_templateName, m_specialization ? std::static_pointer_cast<StyleNode>(m_specialization->Clone()) : nullptr);
+    }
+
 private:
     std::string m_templateName;
     std::shared_ptr<StyleNode> m_specialization;
