@@ -1,0 +1,700 @@
+#include "CHTL/CHTLGenerator.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <regex>
+
+namespace CHTL {
+
+CHTLGenerator::CHTLGenerator(std::shared_ptr<ASTNode> ast, CHTLContext& context)
+    : ast_(ast), context_(context), inStyleBlock_(false), inScriptBlock_(false), indentLevel_(0) {
+}
+
+void CHTLGenerator::generate(const std::string& outputFile) {
+    // 清空输出代码
+    htmlCode_.clear();
+    cssCode_.clear();
+    jsCode_.clear();
+    
+    // 生成代码
+    generateNode(ast_);
+    
+    // 写入文件
+    writeToFile(outputFile, htmlCode_);
+    
+    // 生成单独的CSS和JS文件
+    if (!cssCode_.empty()) {
+        std::string cssFile = outputFile.substr(0, outputFile.find_last_of('.')) + ".css";
+        writeToFile(cssFile, cssCode_);
+    }
+    
+    if (!jsCode_.empty()) {
+        std::string jsFile = outputFile.substr(0, outputFile.find_last_of('.')) + ".js";
+        writeToFile(jsFile, jsCode_);
+    }
+}
+
+void CHTLGenerator::generateHTML(const std::string& outputFile) {
+    generateNode(ast_);
+    writeToFile(outputFile, htmlCode_);
+}
+
+void CHTLGenerator::generateCSS(const std::string& outputFile) {
+    generateNode(ast_);
+    writeToFile(outputFile, cssCode_);
+}
+
+void CHTLGenerator::generateJS(const std::string& outputFile) {
+    generateNode(ast_);
+    writeToFile(outputFile, jsCode_);
+}
+
+void CHTLGenerator::generateNode(std::shared_ptr<ASTNode> node) {
+    if (!node) return;
+    
+    switch (node->getType()) {
+        case ASTNodeType::ELEMENT:
+            generateElement(std::static_pointer_cast<ElementNode>(node));
+            break;
+        case ASTNodeType::TEXT:
+            generateText(std::static_pointer_cast<TextNode>(node));
+            break;
+        case ASTNodeType::STYLE_BLOCK:
+            generateStyle(std::static_pointer_cast<StyleNode>(node));
+            break;
+        case ASTNodeType::SCRIPT_BLOCK:
+            generateScript(std::static_pointer_cast<ScriptNode>(node));
+            break;
+        case ASTNodeType::TEMPLATE:
+            generateTemplate(std::static_pointer_cast<TemplateNode>(node));
+            break;
+        case ASTNodeType::CUSTOM:
+            generateCustom(std::static_pointer_cast<CustomNode>(node));
+            break;
+        case ASTNodeType::ORIGIN:
+            generateOrigin(std::static_pointer_cast<OriginNode>(node));
+            break;
+        case ASTNodeType::IMPORT:
+            generateImport(std::static_pointer_cast<ImportNode>(node));
+            break;
+        case ASTNodeType::NAMESPACE:
+            generateNamespace(std::static_pointer_cast<NamespaceNode>(node));
+            break;
+        case ASTNodeType::CONFIGURATION:
+            generateConfiguration(std::static_pointer_cast<ConfigurationNode>(node));
+            break;
+        case ASTNodeType::CONSTRAINT:
+            generateConstraint(std::static_pointer_cast<ConstraintNode>(node));
+            break;
+        case ASTNodeType::USE:
+            generateUse(std::static_pointer_cast<UseNode>(node));
+            break;
+        default:
+            // 递归处理子节点
+            for (auto& child : node->getChildren()) {
+                generateNode(child);
+            }
+            break;
+    }
+}
+
+void CHTLGenerator::generateElement(std::shared_ptr<ElementNode> element) {
+    std::string tagName = element->getTagName();
+    
+    // 处理特殊元素
+    if (tagName == "root") {
+        // 根节点，只处理子节点
+        for (auto& child : element->getChildren()) {
+            generateNode(child);
+        }
+        return;
+    }
+    
+    // 处理配置元素（这些不应该生成HTML）
+    if (tagName == "DEBUG_MODE" || tagName == "INDEX_INITIAL_COUNT" || 
+        tagName == "DefaultText" || tagName == "Box" || tagName == "false") {
+        // 这些是配置或模板，不应该生成HTML
+        return;
+    }
+    
+    // 处理@Element引用
+    if (tagName.find("@Element") != std::string::npos) {
+        std::string refName = tagName.substr(9); // 跳过 "@Element "
+        std::string customContent = context_.getCustom(refName, "Element");
+        if (!customContent.empty()) {
+            htmlCode_ += customContent + "\n";
+        }
+        return;
+    }
+    
+    std::string attributes = generateAttributes(element->getAttributes());
+    
+    // 开始标签
+    htmlCode_ += getIndent() + "<" + tagName;
+    if (!attributes.empty()) {
+        htmlCode_ += " " + attributes;
+    }
+    
+    if (element->isSelfClosing()) {
+        htmlCode_ += " />\n";
+    } else {
+        htmlCode_ += ">\n";
+        
+        // 处理子节点
+        addIndent();
+        for (auto& child : element->getChildren()) {
+            generateNode(child);
+        }
+        removeIndent();
+        
+        // 结束标签
+        htmlCode_ += getIndent() + "</" + tagName + ">\n";
+    }
+}
+
+void CHTLGenerator::generateText(std::shared_ptr<TextNode> text) {
+    std::string content = escapeHTML(text->getText());
+    htmlCode_ += getIndent() + content + "\n";
+}
+
+void CHTLGenerator::generateStyle(std::shared_ptr<StyleNode> style) {
+    // 处理子节点（样式规则）
+    for (auto& child : style->getChildren()) {
+        if (child->getType() == ASTNodeType::STYLE_RULE) {
+            auto rule = std::static_pointer_cast<StyleRuleNode>(child);
+            auto selectors = rule->getSelectors();
+            auto declarations = rule->getDeclarations();
+            
+            if (!selectors.empty() && !declarations.empty()) {
+                for (const auto& selector : selectors) {
+                    cssCode_ += getIndent() + selector + " {\n";
+                    addIndent();
+                    
+                    for (const auto& decl : declarations) {
+                        cssCode_ += getIndent() + decl.first + ": " + decl.second + ";\n";
+                    }
+                    
+                    removeIndent();
+                    cssCode_ += getIndent() + "}\n";
+                }
+            }
+        } else if (child->getType() == ASTNodeType::ELEMENT) {
+            auto element = std::static_pointer_cast<ElementNode>(child);
+            std::string tagName = element->getTagName();
+            if (tagName.find("@Style") != std::string::npos) {
+                // 处理@Style引用
+                std::string refName = tagName.substr(7); // 跳过 "@Style "
+                std::string templateContent = context_.getTemplate(refName, "Style");
+                if (!templateContent.empty()) {
+                    cssCode_ += templateContent;
+                }
+            }
+        }
+    }
+}
+
+void CHTLGenerator::generateScript(std::shared_ptr<ScriptNode> script) {
+    if (inScriptBlock_) {
+        // 局部脚本块
+        std::string scriptContent = escapeJS(script->getScript());
+        if (!scriptContent.empty()) {
+            jsCode_ += getIndent() + scriptContent + "\n";
+        }
+    } else {
+        // 全局脚本块
+        jsCode_ += getIndent() + "<script>\n";
+        addIndent();
+        
+        std::string scriptContent = escapeJS(script->getScript());
+        if (!scriptContent.empty()) {
+            jsCode_ += getIndent() + scriptContent + "\n";
+        }
+        
+        removeIndent();
+        jsCode_ += getIndent() + "</script>\n";
+    }
+}
+
+void CHTLGenerator::generateTemplate(std::shared_ptr<TemplateNode> template_) {
+    // 模板处理逻辑
+    std::string templateType = template_->getTemplateType();
+    std::string templateName = template_->getTemplateName();
+    
+    // 生成模板内容
+    std::string templateContent;
+    for (auto& child : template_->getChildren()) {
+        if (child->getType() == ASTNodeType::STYLE_BLOCK) {
+            // 样式模板
+            auto style = std::static_pointer_cast<StyleNode>(child);
+            templateContent = generateStyleProperties(style->getProperties());
+        } else {
+            // 其他模板内容
+            templateContent += child->toString();
+        }
+    }
+    
+    // 将模板存储到上下文中
+    context_.addTemplate(templateName, templateType, templateContent);
+    
+    // 模板本身不生成HTML，只存储到上下文中
+}
+
+void CHTLGenerator::generateCustom(std::shared_ptr<CustomNode> custom) {
+    // 自定义处理逻辑
+    std::string customType = custom->getCustomType();
+    std::string customName = custom->getCustomName();
+    
+    // 生成自定义内容
+    std::string customContent;
+    for (auto& child : custom->getChildren()) {
+        if (child->getType() == ASTNodeType::ELEMENT) {
+            // 元素自定义
+            auto element = std::static_pointer_cast<ElementNode>(child);
+            customContent += "<" + element->getTagName();
+            
+            // 添加属性
+            std::string attributes = generateAttributes(element->getAttributes());
+            if (!attributes.empty()) {
+                customContent += " " + attributes;
+            }
+            customContent += ">";
+            
+            // 添加子元素
+            for (auto& grandChild : element->getChildren()) {
+                customContent += grandChild->toString();
+            }
+            
+            customContent += "</" + element->getTagName() + ">";
+        } else {
+            customContent += child->toString();
+        }
+    }
+    
+    // 将自定义存储到上下文中
+    context_.addCustom(customName, customType, customContent);
+    
+    // 自定义本身不生成HTML，只存储到上下文中
+}
+
+void CHTLGenerator::generateOrigin(std::shared_ptr<OriginNode> origin) {
+    std::string originType = origin->getOriginType();
+    std::string content = origin->getText();
+    
+    if (originType == "Html" || originType == "HTML") {
+        htmlCode_ += content + "\n";
+    } else if (originType == "Style" || originType == "CSS") {
+        cssCode_ += content + "\n";
+    } else if (originType == "JavaScript" || originType == "JS") {
+        jsCode_ += content + "\n";
+    }
+}
+
+void CHTLGenerator::generateImport(std::shared_ptr<ImportNode> import_) {
+    std::string importType = import_->getImportType();
+    std::string importPath = import_->getImportPath();
+    std::string importAlias = import_->getImportAlias();
+    
+    // 处理导入逻辑
+    if (importType == "Html" || importType == "HTML") {
+        std::string content = readFile(importPath);
+        htmlCode_ += content + "\n";
+    } else if (importType == "Style" || importType == "CSS") {
+        std::string content = readFile(importPath);
+        cssCode_ += content + "\n";
+    } else if (importType == "JavaScript" || importType == "JS") {
+        std::string content = readFile(importPath);
+        jsCode_ += content + "\n";
+    } else if (importType == "Chtl" || importType == "CHTL") {
+        // 处理CHTL文件导入
+        // 这里需要递归处理导入的CHTL文件
+    }
+}
+
+void CHTLGenerator::generateNamespace(std::shared_ptr<NamespaceNode> namespace_) {
+    std::string namespaceName = namespace_->getName();
+    
+    // 将命名空间存储到上下文中
+    context_.addNamespace(namespaceName, namespace_->toString());
+    
+    // 生成命名空间内容
+    for (auto& child : namespace_->getChildren()) {
+        generateNode(child);
+    }
+}
+
+void CHTLGenerator::generateConfiguration(std::shared_ptr<ConfigurationNode> config) {
+    // 配置处理逻辑
+    for (const auto& item : config->getConfigItems()) {
+        context_.setConfiguration(item.first, item.second);
+    }
+}
+
+void CHTLGenerator::generateConstraint(std::shared_ptr<ConstraintNode> constraint) {
+    // 约束处理逻辑
+}
+
+void CHTLGenerator::generateUse(std::shared_ptr<UseNode> use) {
+    std::string useTarget = use->getUseTarget();
+    
+    // 处理use语句
+    if (useTarget == "html5") {
+        htmlCode_ = "<!DOCTYPE html>\n" + htmlCode_;
+    } else {
+        // 处理其他use目标
+    }
+}
+
+// AST访问者接口实现
+void CHTLGenerator::visitElement(ElementNode& node) {
+    generateElement(std::make_shared<ElementNode>(node));
+}
+
+void CHTLGenerator::visitText(TextNode& node) {
+    generateText(std::make_shared<TextNode>(node));
+}
+
+void CHTLGenerator::visitStyle(StyleNode& node) {
+    generateStyle(std::make_shared<StyleNode>(node));
+}
+
+void CHTLGenerator::visitScript(ScriptNode& node) {
+    generateScript(std::make_shared<ScriptNode>(node));
+}
+
+void CHTLGenerator::visitTemplate(TemplateNode& node) {
+    generateTemplate(std::make_shared<TemplateNode>(node));
+}
+
+void CHTLGenerator::visitCustom(CustomNode& node) {
+    generateCustom(std::make_shared<CustomNode>(node));
+}
+
+void CHTLGenerator::visitOrigin(OriginNode& node) {
+    generateOrigin(std::make_shared<OriginNode>(node));
+}
+
+void CHTLGenerator::visitImport(ImportNode& node) {
+    generateImport(std::make_shared<ImportNode>(node));
+}
+
+void CHTLGenerator::visitNamespace(NamespaceNode& node) {
+    generateNamespace(std::make_shared<NamespaceNode>(node));
+}
+
+void CHTLGenerator::visitConfiguration(ConfigurationNode& node) {
+    generateConfiguration(std::make_shared<ConfigurationNode>(node));
+}
+
+void CHTLGenerator::visitConstraint(ConstraintNode& node) {
+    generateConstraint(std::make_shared<ConstraintNode>(node));
+}
+
+void CHTLGenerator::visitUse(UseNode& node) {
+    generateUse(std::make_shared<UseNode>(node));
+}
+
+std::string CHTLGenerator::getIndent() const {
+    return std::string(indentLevel_ * 2, ' ');
+}
+
+void CHTLGenerator::addIndent() {
+    indentLevel_++;
+}
+
+void CHTLGenerator::removeIndent() {
+    if (indentLevel_ > 0) {
+        indentLevel_--;
+    }
+}
+
+std::string CHTLGenerator::escapeHTML(const std::string& text) {
+    std::string result = text;
+    
+    // 替换HTML特殊字符
+    size_t pos = 0;
+    while ((pos = result.find('&', pos)) != std::string::npos) {
+        result.replace(pos, 1, "&amp;");
+        pos += 5;
+    }
+    
+    pos = 0;
+    while ((pos = result.find('<', pos)) != std::string::npos) {
+        result.replace(pos, 1, "&lt;");
+        pos += 4;
+    }
+    
+    pos = 0;
+    while ((pos = result.find('>', pos)) != std::string::npos) {
+        result.replace(pos, 1, "&gt;");
+        pos += 4;
+    }
+    
+    pos = 0;
+    while ((pos = result.find('"', pos)) != std::string::npos) {
+        result.replace(pos, 1, "&quot;");
+        pos += 6;
+    }
+    
+    pos = 0;
+    while ((pos = result.find('\'', pos)) != std::string::npos) {
+        result.replace(pos, 1, "&#39;");
+        pos += 5;
+    }
+    
+    return result;
+}
+
+std::string CHTLGenerator::escapeCSS(const std::string& text) {
+    // CSS转义逻辑
+    return text;
+}
+
+std::string CHTLGenerator::escapeJS(const std::string& text) {
+    // JavaScript转义逻辑
+    return text;
+}
+
+std::string CHTLGenerator::generateAttributes(const std::unordered_map<std::string, AttributeValue>& attributes) {
+    std::string result;
+    
+    for (const auto& attr : attributes) {
+        if (!result.empty()) {
+            result += " ";
+        }
+        
+        result += attr.first + "=\"";
+        
+        // 处理不同类型的属性值
+        if (std::holds_alternative<std::string>(attr.second)) {
+            result += escapeHTML(std::get<std::string>(attr.second));
+        } else if (std::holds_alternative<double>(attr.second)) {
+            result += std::to_string(std::get<double>(attr.second));
+        } else if (std::holds_alternative<bool>(attr.second)) {
+            result += std::get<bool>(attr.second) ? "true" : "false";
+        }
+        
+        result += "\"";
+    }
+    
+    return result;
+}
+
+std::string CHTLGenerator::generateStyleProperties(const std::unordered_map<std::string, std::string>& properties) {
+    std::string result;
+    
+    for (const auto& prop : properties) {
+        result += getIndent() + prop.first + ": " + prop.second + ";\n";
+    }
+    
+    return result;
+}
+
+std::string CHTLGenerator::processTemplate(const std::string& template_, const std::string& name, const std::string& type) {
+    // 模板处理逻辑
+    return template_;
+}
+
+std::string CHTLGenerator::processCustom(const std::string& custom, const std::string& name, const std::string& type) {
+    // 自定义处理逻辑
+    return custom;
+}
+
+std::string CHTLGenerator::processExpression(const std::string& expression) {
+    // 表达式处理逻辑
+    return expression;
+}
+
+void CHTLGenerator::writeToFile(const std::string& filename, const std::string& content) {
+    std::ofstream file(filename);
+    if (file.is_open()) {
+        file << content;
+        file.close();
+    } else {
+        reportError("无法写入文件: " + filename);
+    }
+}
+
+std::string CHTLGenerator::readFile(const std::string& filename) {
+    std::ifstream file(filename);
+    if (file.is_open()) {
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        file.close();
+        return buffer.str();
+    } else {
+        reportError("无法读取文件: " + filename);
+        return "";
+    }
+}
+
+void CHTLGenerator::reportError(const std::string& message) {
+    throw std::runtime_error("代码生成错误: " + message);
+}
+
+// 新增的访问者方法实现
+void CHTLGenerator::visitStyleRule(StyleRuleNode& node) {
+    // 样式规则处理
+    std::string selector = node.getSelectors().empty() ? "" : node.getSelectors()[0];
+    std::string properties = generateStyleProperties(node.getProperties());
+    
+    if (!selector.empty() && !properties.empty()) {
+        cssCode_ += getIndent() + selector + " {\n";
+        addIndent();
+        cssCode_ += properties;
+        removeIndent();
+        cssCode_ += getIndent() + "}\n";
+    }
+}
+
+void CHTLGenerator::visitExpression(ExpressionNode& node) {
+    // 表达式处理
+    std::string expression = node.getExpression();
+    if (!expression.empty()) {
+        htmlCode_ += getIndent() + expression + "\n";
+    }
+}
+
+void CHTLGenerator::visitBinaryOp(BinaryOpNode& node) {
+    // 二元运算处理
+    std::string left = node.getLeft() ? node.getLeft()->getText() : "";
+    std::string right = node.getRight() ? node.getRight()->getText() : "";
+    std::string op = getOperatorString(node.getOperator());
+    
+    std::string result = left + " " + op + " " + right;
+    htmlCode_ += getIndent() + result + "\n";
+}
+
+void CHTLGenerator::visitConditional(ConditionalNode& node) {
+    // 条件表达式处理
+    std::string condition = node.getCondition() ? node.getCondition()->getText() : "";
+    std::string trueExpr = node.getTrueExpr() ? node.getTrueExpr()->getText() : "";
+    std::string falseExpr = node.getFalseExpr() ? node.getFalseExpr()->getText() : "";
+    
+    std::string result = condition + " ? " + trueExpr + " : " + falseExpr;
+    htmlCode_ += getIndent() + result + "\n";
+}
+
+void CHTLGenerator::visitReference(ReferenceNode& node) {
+    // 引用处理
+    std::string reference = node.getReference();
+    std::string value = context_.getReference(reference);
+    
+    if (!value.empty()) {
+        htmlCode_ += getIndent() + value + "\n";
+    }
+}
+
+void CHTLGenerator::visitSelector(SelectorNode& node) {
+    // 选择器处理
+    std::string selector = node.getSelector();
+    if (!selector.empty()) {
+        cssCode_ += getIndent() + selector + "\n";
+    }
+}
+
+void CHTLGenerator::visitCHTLJSFunction(CHTLJSFunctionNode& node) {
+    // CHTL JS函数处理
+    std::string functionName = node.getFunctionName();
+    std::string functionBody = node.getFunctionBody();
+    
+    jsCode_ += getIndent() + "function " + functionName + "() {\n";
+    addIndent();
+    jsCode_ += getIndent() + functionBody + "\n";
+    removeIndent();
+    jsCode_ += getIndent() + "}\n";
+}
+
+void CHTLGenerator::visitCHTLJSVir(CHTLJSVirNode& node) {
+    // CHTL JS虚对象处理
+    std::string virName = node.getVirName();
+    std::string virBody = node.getVirBody();
+    
+    jsCode_ += getIndent() + "var " + virName + " = {\n";
+    addIndent();
+    jsCode_ += getIndent() + virBody + "\n";
+    removeIndent();
+    jsCode_ += getIndent() + "};\n";
+}
+
+// 辅助方法
+std::string CHTLGenerator::generateSelector(std::shared_ptr<ASTNode> selector) {
+    if (!selector) return "";
+    
+    if (auto selectorNode = std::dynamic_pointer_cast<SelectorNode>(selector)) {
+        switch (selectorNode->getSelectorType()) {
+            case SelectorType::TAG:
+                return selectorNode->getTagName();
+            case SelectorType::CLASS:
+                return "." + selectorNode->getClassName();
+            case SelectorType::ID:
+                return "#" + selectorNode->getIdName();
+            case SelectorType::PSEUDO:
+                return ":" + selectorNode->getPseudoName();
+            default:
+                return selectorNode->getSelectorValue();
+        }
+    }
+    
+    return selector->getText();
+}
+
+std::string CHTLGenerator::generateExpression(std::shared_ptr<ASTNode> expr) {
+    if (!expr) return "";
+    
+    std::string result;
+    
+    if (auto expressionNode = std::dynamic_pointer_cast<ExpressionNode>(expr)) {
+        switch (expressionNode->getExpressionType()) {
+            case ExpressionType::LITERAL:
+                result = expressionNode->getLiteralValue();
+                break;
+            case ExpressionType::IDENTIFIER:
+                result = expressionNode->getIdentifierName();
+                break;
+            default:
+                result = expressionNode->getExpression();
+                break;
+        }
+    } else if (auto binaryOp = std::dynamic_pointer_cast<BinaryOpNode>(expr)) {
+        std::string left = generateExpression(binaryOp->getLeft());
+        std::string right = generateExpression(binaryOp->getRight());
+        std::string op = getOperatorString(binaryOp->getOperator());
+        result = left + " " + op + " " + right;
+    } else if (auto conditional = std::dynamic_pointer_cast<ConditionalNode>(expr)) {
+        std::string condition = generateExpression(conditional->getCondition());
+        std::string trueExpr = generateExpression(conditional->getTrueExpr());
+        std::string falseExpr = generateExpression(conditional->getFalseExpr());
+        result = condition + " ? " + trueExpr + " : " + falseExpr;
+    } else if (auto reference = std::dynamic_pointer_cast<ReferenceNode>(expr)) {
+        result = context_.getReference(reference->getReference());
+    } else {
+        result = expr->getText();
+    }
+    
+    return result;
+}
+
+std::string CHTLGenerator::getOperatorString(TokenType op) {
+    switch (op) {
+        case TokenType::PLUS: return "+";
+        case TokenType::MINUS: return "-";
+        case TokenType::ASTERISK: return "*";
+        case TokenType::SLASH: return "/";
+        case TokenType::PERCENT: return "%";
+        case TokenType::POWER: return "**";
+        case TokenType::EQUALS: return "=";
+        case TokenType::DOUBLE_EQUALS: return "==";
+        case TokenType::NOT_EQUALS: return "!=";
+        case TokenType::LESS: return "<";
+        case TokenType::GREATER: return ">";
+        case TokenType::LESS_EQUALS: return "<=";
+        case TokenType::GREATER_EQUALS: return ">=";
+        case TokenType::AND: return "&&";
+        case TokenType::OR: return "||";
+        case TokenType::EXCLAMATION: return "!";
+        default: return "";
+    }
+}
+
+} // namespace CHTL

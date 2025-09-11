@@ -1,0 +1,61 @@
+// 简单的CHTL测试文件
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                CHTL测试页面
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            id: main;
+            class: container;
+            
+            h1
+            {
+                text
+                {
+                    欢迎使用CHTL
+                }
+            }
+            
+            p
+            {
+                text
+                {
+                    CHTL是基于C++语言实现的超文本语言
+                }
+            }
+            
+            style
+            {
+                .container
+                {
+                    width: 800px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+                
+                h1
+                {
+                    color: blue;
+                    text-align: center;
+                }
+                
+                p
+                {
+                    color: gray;
+                    line-height: 1.6;
+                }
+            }
+        }
+    }
+}
