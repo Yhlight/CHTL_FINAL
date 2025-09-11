@@ -17,29 +17,40 @@ class Generator:
         self.self_closing_tags = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
         self.templates = {}
         self.global_styles = []
-        self.global_scripts = [] # Added for JS
+        self.global_scripts = []
         self.ast_root = None
         self.file_loader = FileLoader()
 
-    def generate(self, ast: nodes.ProgramNode) -> tuple[str, str, str]:
+    def generate(self, ast: nodes.ProgramNode) -> str:
         self.ast_root = ast
         self.templates = {}
         self.global_styles = []
-        self.global_scripts = [] # Reset scripts
+        self.global_scripts = []
         self._collect_templates(ast)
         self._process_imports(ast)
 
+        # Generate the main HTML structure
         html_output = self._visit(ast)
 
-        # Consolidate styles
-        css_output = ""
+        # Inject collected styles
         if self.global_styles:
-            css_output = "\n".join(sorted(self.global_styles))
+            style_content = "\n".join(sorted(self.global_styles))
+            style_block = f"<style>\n{style_content}\n</style>"
+            if "</head>" in html_output.lower():
+                html_output = re.sub(r'</head>', f'{style_block}\n</head>', html_output, flags=re.IGNORECASE, count=1)
+            else:
+                html_output = style_block + "\n" + html_output
 
-        # Consolidate scripts
-        js_output = "\n".join(self.global_scripts)
+        # Inject collected scripts
+        if self.global_scripts:
+            script_content = "\n".join(self.global_scripts)
+            script_block = f"<script>\n{script_content}\n</script>"
+            if "</body>" in html_output.lower():
+                 html_output = re.sub(r'</body>', f'{script_block}\n</body>', html_output, flags=re.IGNORECASE, count=1)
+            else:
+                html_output += "\n" + script_block
 
-        return html_output, css_output, js_output
+        return html_output
 
 
     def _process_imports(self, node):
@@ -70,29 +81,24 @@ class Generator:
         return "".join(self._visit(child) for child in children_to_render)
 
     def _visit_elementnode(self, node, parent_element, selector_context):
-        # Handle script blocks by dispatching to the CHTL JS pipeline
         if node.tag_name.lower() == 'script':
-            # The content of a script tag is a single TextNode
             script_content_node = next((c for c in node.children if isinstance(c, nodes.TextNode)), None)
             if script_content_node:
                 raw_script = script_content_node.value
 
-                # 1. Scan for JS fragments
                 scanner = CHTLUnifiedScanner()
                 processed_script, js_fragments = scanner.scan_script_fragment(raw_script)
 
-                # 2. Lex and Parse the CHTL JS
                 js_lexer = CHTLJSLexer(processed_script)
                 js_tokens = js_lexer.scan_tokens()
                 js_parser = CHTLJSParser(js_tokens)
                 js_ast = js_parser.parse()
 
-                # 3. Generate the final JS
                 js_generator = CHTLJSGenerator(js_fragments)
                 final_js = js_generator.generate(js_ast)
                 self.global_scripts.append(final_js)
 
-            return "" # Don't render the <script> tag itself in the HTML output
+            return ""
 
         style_node = next((c for c in node.children if isinstance(c, nodes.StyleNode)), None)
         if style_node:
@@ -151,10 +157,9 @@ class Generator:
                 final_selector = (last_full_selector + raw_selector[1:]) if raw_selector.startswith('&') else f"{selector_context} {raw_selector}".strip()
                 last_full_selector = final_selector
                 prop_strings = [f"  {p.name}: {self._evaluate_expression(p.value_expression, parent_element)};" for p in sorted(child.properties, key=lambda x: x.name)]
-                self.global_styles.append(f"{final_selector} {{\n" + "\n".join(prop_strings) + "\n}}")
+                self.global_styles.append(f"{final_selector} {{\n" + "\n".join(prop_strings) + "\n}")
 
     def _visit_textnode(self, node, parent_element, selector_context):
-        # For script tags, we need the raw, unescaped content
         if parent_element and parent_element.tag_name.lower() == 'script':
             return node.value
         return html.escape(node.value.strip().strip('"\''))
@@ -167,7 +172,15 @@ class Generator:
         return f"{value}{unit or ''}"
 
     def _eval_recursive(self, node, current_element):
-        if isinstance(node, nodes.LiteralNode): return (node.value, None)
+        if isinstance(node, nodes.LiteralNode):
+            val_str = str(node.value)
+            # This regex captures a number (int or float) and an optional unit.
+            match = re.match(r'^(-?\d+\.?\d*)\s*(.*)$', val_str.strip())
+            if match:
+                number_part, unit_part = match.groups()
+                return (float(number_part), unit_part or None)
+            return (node.value, None) # It's just a string like 'solid' or 'blue'
+
         if isinstance(node, nodes.ValueWithUnitNode): return (node.value, node.unit)
 
         if isinstance(node, nodes.ReferenceNode):
@@ -221,7 +234,7 @@ class Generator:
                     id_attr = next((a for a in root.attributes if a.name == 'id'), None)
                     if id_attr and id_attr.value == selector_name: return root
                 elif selector_type == TokenType.DOT:
-                    class_attr = next((a for a in root.attributes if a.name == 'class'), None)
+                    class_attr = next((a for a in node.attributes if a.name == 'class'), None)
                     if class_attr and selector_name in class_attr.value.split(): return root
             if hasattr(root, 'children'):
                 for child in root.children:

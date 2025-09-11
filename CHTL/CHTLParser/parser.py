@@ -147,15 +147,11 @@ class Parser:
         tag_name = self._consume(TokenType.IDENTIFIER, "element tag name").lexeme
         element = nodes.ElementNode(tag_name=tag_name)
 
-        # Special handling for script tags to treat their content as a single block of text
         if tag_name.lower() == 'script':
             self._consume(TokenType.LBRACE, "{")
-
-            # Find the start and end of the script content tokens
             content_start_index = self.current
             brace_level = 1
             content_end_index = -1
-
             i = self.current
             while i < len(self.tokens):
                 token_type = self.tokens[i].type
@@ -165,14 +161,11 @@ class Parser:
                     content_end_index = i
                     break
                 i += 1
-
             if content_end_index != -1:
                 content_tokens = self.tokens[content_start_index:content_end_index]
-                # Reconstruct the raw string from the tokens' lexemes
                 raw_content = "".join(t.lexeme for t in content_tokens)
                 element.children.append(nodes.TextNode(value=raw_content))
-                self.current = content_end_index # Move the parser's cursor
-
+                self.current = content_end_index
             self._consume(TokenType.RBRACE, "}")
             return element
 
@@ -223,12 +216,16 @@ class Parser:
         value_tokens = []
         while not self._check(TokenType.SEMICOLON) and not self._is_at_end():
             value_tokens.append(self._advance())
-        operator_types = {TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.SLASH, TokenType.PERCENT, TokenType.QUESTION}
-        if any(t.type in operator_types for t in value_tokens):
+
+        # Only use the expression parser if we detect an operator that requires it.
+        operator_types = {TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.SLASH, TokenType.PERCENT, TokenType.QUESTION, TokenType.STAR_STAR, TokenType.GREATER, TokenType.LESS, TokenType.EQUAL_EQUAL, TokenType.BANG_EQUAL, TokenType.AMPERSAND_AMPERSAND, TokenType.PIPE_PIPE}
+        if any(t.type in operator_types for t in value_tokens) or any('.' in t.lexeme for t in value_tokens if t.type == TokenType.IDENTIFIER):
             expression_ast = ExpressionParser(value_tokens).parse()
         else:
+            # Otherwise, treat it as a simple literal string value
             literal_value = " ".join(t.lexeme for t in value_tokens)
             expression_ast = nodes.LiteralNode(value=literal_value)
+
         self._consume(TokenType.SEMICOLON, "';'")
         return nodes.StylePropertyNode(name=name, value_expression=expression_ast)
 

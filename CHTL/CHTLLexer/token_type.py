@@ -30,6 +30,7 @@ class TokenType(Enum):
     LESS_EQUAL = auto()
     STAR_STAR = auto()
     PIPE_PIPE = auto()
+    AMPERSAND_AMPERSAND = auto()
 
     # Literals
     IDENTIFIER = auto()

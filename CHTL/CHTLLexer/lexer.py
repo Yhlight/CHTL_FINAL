@@ -45,7 +45,7 @@ class Lexer:
         if char == ';': self._add_token(TokenType.SEMICOLON); return
         if char == '.': self._add_token(TokenType.DOT); return
         if char == '#': self._add_token(TokenType.HASH); return
-        if char == '&': self._add_token(TokenType.AMPERSAND); return
+        if char == '&': self._add_token(TokenType.AMPERSAND_AMPERSAND if self._match('&') else TokenType.AMPERSAND); return
         if char == '?': self._add_token(TokenType.QUESTION); return
         if char == '+': self._add_token(TokenType.PLUS); return
         if char == '-': self._add_token(TokenType.MINUS); return

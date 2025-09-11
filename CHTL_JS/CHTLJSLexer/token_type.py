@@ -15,10 +15,12 @@ class CHTLJSTokenType(Enum):
     COLON = auto()
     SEMICOLON = auto()
     COMMA = auto()
+    EQUALS = auto()
 
     # Keywords
     ANIMATE = auto()
     DELEGATE = auto()
+    VIR = auto()
 
     # For now, we'll treat JS code as opaque identifiers
     JS_CODE = auto()

@@ -54,6 +54,23 @@ class DelegateNode(CHTLJS_BaseNode):
     listeners: List[EventListenerNode] = field(default_factory=list)
 
 @dataclass
+class VirtualObjectNode(CHTLJS_BaseNode):
+    """Represents a virtual object assignment, e.g., vir myVar = listen { ... }."""
+    name: str
+    value: CHTLJS_BaseNode # The CHTL JS function being assigned (e.g., ListenBlockNode)
+
+@dataclass
+class MemberAccessNode(CHTLJS_BaseNode):
+    """Represents a member access, e.g., myVar->click."""
+    object_name: str
+    member_name: str
+
+@dataclass
+class ExpressionStatementNode(CHTLJS_BaseNode):
+    """Represents a statement that is just an expression, e.g., a function call."""
+    expression: CHTLJS_BaseNode
+
+@dataclass
 class CHTLJS_ProgramNode(CHTLJS_BaseNode):
     """The root node for a CHTL JS fragment."""
     children: List[CHTLJS_BaseNode] = field(default_factory=list)

@@ -12,6 +12,7 @@ class CHTLJSLexer:
             "listen": CHTLJSTokenType.IDENTIFIER,
             "animate": CHTLJSTokenType.ANIMATE,
             "delegate": CHTLJSTokenType.DELEGATE,
+            "vir": CHTLJSTokenType.VIR,
         }
 
     def scan_tokens(self) -> list[CHTLJSToken]:
@@ -42,12 +43,13 @@ class CHTLJSLexer:
         elif char == ':': self._add_token(CHTLJSTokenType.COLON)
         elif char == ';': self._add_token(CHTLJSTokenType.SEMICOLON)
         elif char == ',': self._add_token(CHTLJSTokenType.COMMA)
+        elif char == '=': self._add_token(CHTLJSTokenType.EQUALS)
         else:
             self.current -= 1
             self._identifier()
 
     def _identifier(self):
-        while not self._is_at_end() and self._peek() not in ' \r\t\n[]{}:;,' :
+        while not self._is_at_end() and self._peek() not in ' \r\t\n[]{}:;,=' :
             # Break if we see '->' but not if it's just '-'
             if self._peek() == '-' and self._peek_next() == '>':
                 break

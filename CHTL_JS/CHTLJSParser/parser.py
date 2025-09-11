@@ -17,17 +17,62 @@ class CHTLJSParser:
         return program
 
     def _parse_statement(self):
+        if self._match(CHTLJSTokenType.VIR):
+            return self._parse_virtual_object_assignment()
+
+        # If it's not a vir assignment, it could be a standalone expression
+        # like a function call (myVar->click()), which we will treat as
+        # a potential member access.
+        if self._peek().type == CHTLJSTokenType.IDENTIFIER and self._peek(1).type == CHTLJSTokenType.ARROW:
+             return self._parse_expression_statement()
+
         if self._match(CHTLJSTokenType.ANIMATE):
             return self._parse_animate_statement()
+
         if self._check(CHTLJSTokenType.LBRACE_LBRACE):
             # Look past '{{', 'selector', '}}', '->' to find the keyword
             if self._peek(4).type == CHTLJSTokenType.DELEGATE:
                 return self._parse_delegate_statement()
             else:
                 return self._parse_listen_statement()
+
         if self._check(CHTLJSTokenType.EOF): return None
-        self._advance()
+        self._advance() # Skip unknown tokens
         return None
+
+    def _parse_expression_statement(self):
+        expr = self._parse_expression()
+        self._consume(CHTLJSTokenType.SEMICOLON, "Expect ';' after expression.")
+        return nodes.ExpressionStatementNode(expression=expr)
+
+    def _parse_expression(self):
+        # For now, our only expression is member access
+        if self._peek().type == CHTLJSTokenType.IDENTIFIER and self._peek(1).type == CHTLJSTokenType.ARROW:
+            object_name = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect object name.").lexeme
+            self._consume(CHTLJSTokenType.ARROW, "Expect '->'.")
+            member_name = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect member name.").lexeme
+            # This doesn't handle chained calls like a->b->c, but is sufficient for now.
+            return nodes.MemberAccessNode(object_name=object_name, member_name=member_name)
+
+        # This can be expanded later to parse other expression types
+        raise CHTLJSParseError(f"Unexpected token in expression: {self._peek().lexeme}")
+
+
+    def _parse_virtual_object_assignment(self):
+        name = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect variable name after 'vir'.").lexeme
+        self._consume(CHTLJSTokenType.EQUALS, "Expect '=' after variable name.")
+
+        # The value can be any CHTL JS function block
+        if self._check(CHTLJSTokenType.LBRACE_LBRACE):
+            value_node = self._parse_listen_statement()
+        elif self._check(CHTLJSTokenType.ANIMATE):
+            value_node = self._parse_animate_statement()
+        else:
+            raise CHTLJSParseError(f"Unexpected token for virtual object value: {self._peek().lexeme}")
+
+        self._consume(CHTLJSTokenType.SEMICOLON, "Expect ';' after virtual object assignment.")
+        return nodes.VirtualObjectNode(name=name, value=value_node)
+
 
     def _parse_animate_statement(self):
         self._consume(CHTLJSTokenType.LBRACE, "Expect '{' after 'animate'")
@@ -68,7 +113,6 @@ class CHTLJSParser:
             self._consume(CHTLJSTokenType.COLON, "Expect ':' after key.")
 
             if key_token.lexeme == 'target':
-                # Handle one or more target selectors
                 if self._match(CHTLJSTokenType.LBRACKET):
                     while not self._check(CHTLJSTokenType.RBRACKET):
                         target_selectors.append(self._parse_simple_value())
@@ -76,7 +120,7 @@ class CHTLJSParser:
                     self._consume(CHTLJSTokenType.RBRACKET, "Expect ']' to close target list.")
                 else:
                     target_selectors.append(self._parse_simple_value())
-            else: # It's an event listener
+            else:
                 event_name = key_token.lexeme
                 callback_code = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect callback placeholder.").lexeme
                 listeners.append(nodes.EventListenerNode(event_name=event_name.strip(), callback_code=callback_code.strip()))
@@ -92,7 +136,7 @@ class CHTLJSParser:
 
     def _parse_simple_value(self) -> str:
         if self._check(CHTLJSTokenType.LBRACE_LBRACE):
-            self._advance() # consume {{
+            self._advance()
             selector_text = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect selector text.").lexeme
             self._consume(CHTLJSTokenType.RBRACE_RBRACE, "Expect '}}'.")
             return f"{{{{{selector_text}}}}}"

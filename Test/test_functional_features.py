@@ -29,12 +29,12 @@ class TestFunctionalFeatures(unittest.TestCase):
 
         normalized_html = self.normalize_html(generated_html)
 
-        # Check for each property individually to avoid order-dependency issues.
+        # The button should have styles from the template and the local definition.
+        # We check for each property individually to avoid order-dependency issues.
         self.assertIn('background-color:blue', normalized_html)
         self.assertIn('border-radius:5px', normalized_html)
         self.assertIn('font-weight:bold', normalized_html)
-        # The space between 10px and 20px is significant
-        self.assertIn('padding:10px20px', self.normalize_html("padding: 10px 20px"))
+        self.assertIn('padding:10px20px', normalized_html)
 
 if __name__ == '__main__':
     unittest.main()
