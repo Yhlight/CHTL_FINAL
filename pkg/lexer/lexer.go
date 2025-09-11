@@ -138,3 +138,7 @@ func (l *Lexer) SetReadPosition(pos int) {
 	l.readPosition = pos
 	l.readChar()
 }
+
+func (l *Lexer) GetReadPosition() int {
+	return l.readPosition
+}
