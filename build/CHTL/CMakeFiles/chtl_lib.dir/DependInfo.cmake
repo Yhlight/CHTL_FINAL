@@ -14,6 +14,8 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/app/CHTL/CHTLLoader/CHTLLoader.cpp" "CHTL/CMakeFiles/chtl_lib.dir/CHTLLoader/CHTLLoader.cpp.o" "gcc" "CHTL/CMakeFiles/chtl_lib.dir/CHTLLoader/CHTLLoader.cpp.o.d"
   "/app/CHTL/CHTLParser/CHTLParser.cpp" "CHTL/CMakeFiles/chtl_lib.dir/CHTLParser/CHTLParser.cpp.o" "gcc" "CHTL/CMakeFiles/chtl_lib.dir/CHTLParser/CHTLParser.cpp.o.d"
   "/app/CHTL/CHTLResolver/CHTLTemplateResolver.cpp" "CHTL/CMakeFiles/chtl_lib.dir/CHTLResolver/CHTLTemplateResolver.cpp.o" "gcc" "CHTL/CMakeFiles/chtl_lib.dir/CHTLResolver/CHTLTemplateResolver.cpp.o.d"
+  "/app/CHTL/CompilerDispatcher/CompilerDispatcher.cpp" "CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o" "gcc" "CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o.d"
+  "/app/CHTL/Scanner/CHTLUnifiedScanner.cpp" "CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o" "gcc" "CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

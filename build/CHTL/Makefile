@@ -288,6 +288,54 @@ CHTLResolver/CHTLTemplateResolver.cpp.s:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/CHTLResolver/CHTLTemplateResolver.cpp.s
 .PHONY : CHTLResolver/CHTLTemplateResolver.cpp.s
 
+CompilerDispatcher/CompilerDispatcher.o: CompilerDispatcher/CompilerDispatcher.cpp.o
+.PHONY : CompilerDispatcher/CompilerDispatcher.o
+
+# target to build an object file
+CompilerDispatcher/CompilerDispatcher.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o
+.PHONY : CompilerDispatcher/CompilerDispatcher.cpp.o
+
+CompilerDispatcher/CompilerDispatcher.i: CompilerDispatcher/CompilerDispatcher.cpp.i
+.PHONY : CompilerDispatcher/CompilerDispatcher.i
+
+# target to preprocess a source file
+CompilerDispatcher/CompilerDispatcher.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.i
+.PHONY : CompilerDispatcher/CompilerDispatcher.cpp.i
+
+CompilerDispatcher/CompilerDispatcher.s: CompilerDispatcher/CompilerDispatcher.cpp.s
+.PHONY : CompilerDispatcher/CompilerDispatcher.s
+
+# target to generate assembly for a file
+CompilerDispatcher/CompilerDispatcher.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.s
+.PHONY : CompilerDispatcher/CompilerDispatcher.cpp.s
+
+Scanner/CHTLUnifiedScanner.o: Scanner/CHTLUnifiedScanner.cpp.o
+.PHONY : Scanner/CHTLUnifiedScanner.o
+
+# target to build an object file
+Scanner/CHTLUnifiedScanner.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o
+.PHONY : Scanner/CHTLUnifiedScanner.cpp.o
+
+Scanner/CHTLUnifiedScanner.i: Scanner/CHTLUnifiedScanner.cpp.i
+.PHONY : Scanner/CHTLUnifiedScanner.i
+
+# target to preprocess a source file
+Scanner/CHTLUnifiedScanner.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.i
+.PHONY : Scanner/CHTLUnifiedScanner.cpp.i
+
+Scanner/CHTLUnifiedScanner.s: Scanner/CHTLUnifiedScanner.cpp.s
+.PHONY : Scanner/CHTLUnifiedScanner.s
+
+# target to generate assembly for a file
+Scanner/CHTLUnifiedScanner.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.s
+.PHONY : Scanner/CHTLUnifiedScanner.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -340,6 +388,12 @@ help:
 	@echo "... CHTLResolver/CHTLTemplateResolver.o"
 	@echo "... CHTLResolver/CHTLTemplateResolver.i"
 	@echo "... CHTLResolver/CHTLTemplateResolver.s"
+	@echo "... CompilerDispatcher/CompilerDispatcher.o"
+	@echo "... CompilerDispatcher/CompilerDispatcher.i"
+	@echo "... CompilerDispatcher/CompilerDispatcher.s"
+	@echo "... Scanner/CHTLUnifiedScanner.o"
+	@echo "... Scanner/CHTLUnifiedScanner.i"
+	@echo "... Scanner/CHTLUnifiedScanner.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

@@ -153,6 +153,34 @@ CHTL/CMakeFiles/chtl_lib.dir/CHTLLoader/CHTLLoader.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/CHTLLoader/CHTLLoader.cpp.s"
 	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/CHTL/CHTLLoader/CHTLLoader.cpp -o CMakeFiles/chtl_lib.dir/CHTLLoader/CHTLLoader.cpp.s
 
+CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o: CHTL/CMakeFiles/chtl_lib.dir/flags.make
+CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o: /app/CHTL/Scanner/CHTLUnifiedScanner.cpp
+CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o: CHTL/CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o -MF CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o.d -o CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o -c /app/CHTL/Scanner/CHTLUnifiedScanner.cpp
+
+CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.i"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/CHTL/Scanner/CHTLUnifiedScanner.cpp > CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.i
+
+CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.s"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/CHTL/Scanner/CHTLUnifiedScanner.cpp -o CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.s
+
+CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: CHTL/CMakeFiles/chtl_lib.dir/flags.make
+CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: /app/CHTL/CompilerDispatcher/CompilerDispatcher.cpp
+CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: CHTL/CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o -MF CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o.d -o CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o -c /app/CHTL/CompilerDispatcher/CompilerDispatcher.cpp
+
+CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.i"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/CHTL/CompilerDispatcher/CompilerDispatcher.cpp > CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.i
+
+CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.s"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/CHTL/CompilerDispatcher/CompilerDispatcher.cpp -o CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.s
+
 # Object files for target chtl_lib
 chtl_lib_OBJECTS = \
 "CMakeFiles/chtl_lib.dir/CHTLLexer/CHTLLexer.cpp.o" \
@@ -160,7 +188,9 @@ chtl_lib_OBJECTS = \
 "CMakeFiles/chtl_lib.dir/CHTLGenerator/CHTLGenerator.cpp.o" \
 "CMakeFiles/chtl_lib.dir/CHTLAnalyzer/CHTLSemanticAnalyzer.cpp.o" \
 "CMakeFiles/chtl_lib.dir/CHTLResolver/CHTLTemplateResolver.cpp.o" \
-"CMakeFiles/chtl_lib.dir/CHTLLoader/CHTLLoader.cpp.o"
+"CMakeFiles/chtl_lib.dir/CHTLLoader/CHTLLoader.cpp.o" \
+"CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o" \
+"CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o"
 
 # External object files for target chtl_lib
 chtl_lib_EXTERNAL_OBJECTS =
@@ -171,9 +201,11 @@ CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/CHTLGenerator/CHTLGenerator.cpp
 CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/CHTLAnalyzer/CHTLSemanticAnalyzer.cpp.o
 CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/CHTLResolver/CHTLTemplateResolver.cpp.o
 CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/CHTLLoader/CHTLLoader.cpp.o
+CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o
+CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o
 CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/build.make
 CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX static library libchtl_lib.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX static library libchtl_lib.a"
 	cd /app/build/CHTL && $(CMAKE_COMMAND) -P CMakeFiles/chtl_lib.dir/cmake_clean_target.cmake
 	cd /app/build/CHTL && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/chtl_lib.dir/link.txt --verbose=$(VERBOSE)
 

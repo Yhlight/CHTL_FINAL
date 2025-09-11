@@ -6,6 +6,8 @@ add_library(chtl_lib STATIC
     CHTLAnalyzer/CHTLSemanticAnalyzer.cpp
     CHTLResolver/CHTLTemplateResolver.cpp
     CHTLLoader/CHTLLoader.cpp
+    Scanner/CHTLUnifiedScanner.cpp
+    CompilerDispatcher/CompilerDispatcher.cpp
 )
 
 # Add include directories for the library

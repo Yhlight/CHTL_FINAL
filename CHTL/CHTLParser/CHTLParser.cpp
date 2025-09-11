@@ -86,7 +86,11 @@ std::shared_ptr<ImportNode> CHTLParser::parseImportStatement() {
 
     if (!expectPeek(TokenType::TOKEN_IDENTIFIER) || m_currentToken.literal != "from") return nullptr;
 
-    if (!expectPeek(TokenType::TOKEN_IDENTIFIER)) return nullptr;
+    if (!peekTokenIs(TokenType::TOKEN_IDENTIFIER) && !peekTokenIs(TokenType::TOKEN_STRING)) {
+        pushError("Expected path (string or identifier) for import statement");
+        return nullptr;
+    }
+    nextToken(); // consume path token
     std::string path = m_currentToken.literal;
 
     if (peekTokenIs(TokenType::TOKEN_SEMICOLON)) nextToken();

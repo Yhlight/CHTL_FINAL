@@ -11,6 +11,10 @@ file(REMOVE_RECURSE
   "CMakeFiles/chtl_lib.dir/CHTLParser/CHTLParser.cpp.o.d"
   "CMakeFiles/chtl_lib.dir/CHTLResolver/CHTLTemplateResolver.cpp.o"
   "CMakeFiles/chtl_lib.dir/CHTLResolver/CHTLTemplateResolver.cpp.o.d"
+  "CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o"
+  "CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o.d"
+  "CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o"
+  "CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o.d"
   "libchtl_lib.a"
   "libchtl_lib.pdb"
 )
