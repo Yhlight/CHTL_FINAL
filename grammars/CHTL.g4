@@ -9,7 +9,7 @@ attribute: IDENTIFIER (COLON | EQ) value SEMI;
 
 textNode: TEXT LBRACE value RBRACE;
 
-value: STRING | IDENTIFIER;
+value: STRING | (IDENTIFIER | TEXT)+ ;
 
 
 // Lexer Rules
@@ -21,10 +21,9 @@ COLON: ':';
 EQ: '=';
 SEMI: ';';
 
-IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
+IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_-]*;
 
 // NOTE: This is a simplified string rule that does not support escaped quotes.
-// This is a temporary measure to get the parser working in the current environment.
 STRING
     : '"' ~["]* '"'
     | '\'' ~[']* '\''

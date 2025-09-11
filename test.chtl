@@ -1,16 +1,11 @@
-/*
- * This is a multi-line
- * block comment.
- */
 div {
-    id: "main-container";
+    id: main-container;
     class = "container";
 
     text {
-        'Hello, "CHTL"!' // Using single quotes to avoid escaping.
+        This is an unquoted text block with the word text in it
     }
 
-    /* Another block comment */
     span {
         // empty span
     }
