@@ -26,9 +26,9 @@ const (
 	BANG     TokenType = "!"
 	ASTERISK TokenType = "*"
 	SLASH    TokenType = "/"
-	QUESTION TokenType = "?"
 	LT       TokenType = "<"
 	GT       TokenType = ">"
+	QUESTION TokenType = "?"
 
 	// --- Delimiters ---
 	LBRACE    TokenType = "{"

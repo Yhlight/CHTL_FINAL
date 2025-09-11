@@ -55,15 +55,21 @@ func (p *ExpressionParser) Parse() ast.Expression {
 }
 
 func (p *ExpressionParser) parseExpression(precedence int) ast.Expression {
-	if p.curToken().Type == lexer.EOF { return nil }
+	if p.curToken().Type == lexer.EOF {
+		return nil
+	}
 
 	prefix := p.prefixParseFns[p.curToken().Type]
-	if prefix == nil { return nil }
+	if prefix == nil {
+		return nil
+	}
 	leftExp := prefix()
 
 	for precedence < p.peekPrecedence() {
 		infix := p.infixParseFns[p.peekToken().Type]
-		if infix == nil { return leftExp }
+		if infix == nil {
+			return leftExp
+		}
 		p.nextToken()
 		leftExp = infix(leftExp)
 	}
@@ -72,6 +78,10 @@ func (p *ExpressionParser) parseExpression(precedence int) ast.Expression {
 
 func (p *ExpressionParser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.curToken(), Value: p.curToken().Literal}
+}
+
+func (p *ExpressionParser) parseStringLiteral() ast.Expression {
+	return &ast.StringLiteral{Token: p.curToken(), Value: p.curToken().Literal}
 }
 
 func (p *ExpressionParser) parseNumberLiteral() ast.Expression {
@@ -103,16 +113,12 @@ func (p *ExpressionParser) parseConditionalExpression(condition ast.Expression) 
 	p.nextToken()
 	exp.Consequence = p.parseExpression(LOWEST)
 	if p.peekToken().Type != lexer.COLON {
-		return nil
+		return nil // Simplified: no optional alternative for now
 	}
-	p.nextToken()
-	p.nextToken()
+	p.nextToken() // consume ':'
+	p.nextToken() // consume consequence
 	exp.Alternative = p.parseExpression(LOWEST)
 	return exp
-}
-
-func (p *ExpressionParser) parseStringLiteral() ast.Expression {
-	return &ast.StringLiteral{Token: p.curToken(), Value: p.curToken().Literal}
 }
 
 func (p *ExpressionParser) parseCallExpression(function ast.Expression) ast.Expression {
@@ -159,5 +165,9 @@ func (p *ExpressionParser) curPrecedence() int {
 	return LOWEST
 }
 
-func (p *ExpressionParser) registerPrefix(tokenType lexer.TokenType, fn prefixParseFn) { p.prefixParseFns[tokenType] = fn }
-func (p *ExpressionParser) registerInfix(tokenType lexer.TokenType, fn infixParseFn) { p.infixParseFns[tokenType] = fn }
+func (p *ExpressionParser) registerPrefix(tokenType lexer.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+func (p *ExpressionParser) registerInfix(tokenType lexer.TokenType, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
+}

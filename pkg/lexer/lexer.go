@@ -37,47 +37,70 @@ func (l *Lexer) NextToken() Token {
 	l.skipWhitespace()
 
 	switch l.ch {
-	case '=': tok = newToken(ASSIGN, l.ch)
-	case ':': tok = newToken(COLON, l.ch)
-	case ';': tok = newToken(SEMICOLON, l.ch)
-	case '+': tok = newToken(PLUS, l.ch)
+	case '=':
+		tok = newToken(ASSIGN, l.ch)
+	case ':':
+		tok = newToken(COLON, l.ch)
+	case ';':
+		tok = newToken(SEMICOLON, l.ch)
+	case '+':
+		tok = newToken(PLUS, l.ch)
 	case '-':
 		if l.peekChar() == '-' {
-			l.readChar(); l.readChar()
+			l.readChar()
+			l.readChar()
 			tok.Type = GEN_COMMENT
 			tok.Literal = l.readLineComment()
 			return tok
 		}
 		tok = newToken(MINUS, l.ch)
-	case '!': tok = newToken(BANG, l.ch)
-	case '*': tok = newToken(ASTERISK, l.ch)
+	case '!':
+		tok = newToken(BANG, l.ch)
+	case '*':
+		tok = newToken(ASTERISK, l.ch)
 	case '/':
 		if l.peekChar() == '/' {
-			l.readChar(); l.readChar()
+			l.readChar()
+			l.readChar()
 			tok.Type = COMMENT
 			tok.Literal = l.readLineComment()
 			return tok
 		} else if l.peekChar() == '*' {
-			l.readChar(); l.readChar()
+			l.readChar()
+			l.readChar()
 			tok.Type = COMMENT
 			tok.Literal = l.readBlockComment()
 			return tok
 		}
 		tok = newToken(SLASH, l.ch)
-	case '<': tok = newToken(LT, l.ch)
-	case '>': tok = newToken(GT, l.ch)
-	case '?': tok = newToken(QUESTION, l.ch)
-	case '{': tok = newToken(LBRACE, l.ch)
-	case '}': tok = newToken(RBRACE, l.ch)
-	case '[': tok = newToken(LBRACKET, l.ch)
-	case ']': tok = newToken(RBRACKET, l.ch)
-	case '(': tok = newToken(LPAREN, l.ch)
-	case ')': tok = newToken(RPAREN, l.ch)
-	case ',': tok = newToken(COMMA, l.ch)
-	case '@': tok = newToken(AT, l.ch)
-	case '.': tok = newToken(DOT, l.ch)
-	case '#': tok = newToken(HASH, l.ch)
-	case '&': tok = newToken(AMPERSAND, l.ch)
+	case '<':
+		tok = newToken(LT, l.ch)
+	case '>':
+		tok = newToken(GT, l.ch)
+	case '?':
+		tok = newToken(QUESTION, l.ch)
+	case '{':
+		tok = newToken(LBRACE, l.ch)
+	case '}':
+		tok = newToken(RBRACE, l.ch)
+	case '[':
+		tok = newToken(LBRACKET, l.ch)
+	case ']':
+		tok = newToken(RBRACKET, l.ch)
+	case '(':
+		tok = newToken(LPAREN, l.ch)
+	case ')':
+		tok = newToken(RPAREN, l.ch)
+	case ',':
+		tok = newToken(COMMA, l.ch)
+	case '@':
+		tok = newToken(AT, l.ch)
+	case '.':
+		tok = newToken(DOT, l.ch)
+	case '#':
+		tok = newToken(HASH, l.ch)
+	case '&':
+		tok = newToken(AMPERSAND, l.ch)
 	case '"', '\'':
 		tok.Type = STRING
 		tok.Literal = l.readString(l.ch)
@@ -104,11 +127,46 @@ func (l *Lexer) NextToken() Token {
 	return tok
 }
 
-func (l *Lexer) skipWhitespace() { for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' { l.readChar() } }
-func (l *Lexer) readIdentifier() string { position := l.position; for isIdentifierChar(l.ch) { l.readChar() }; return l.input[position:l.position] }
-func (l *Lexer) readString(quote byte) string { position := l.position + 1; for { l.readChar(); if l.ch == quote || l.ch == 0 { break } }; return l.input[position:l.position] }
-func (l *Lexer) readLineComment() string { position := l.position; for l.ch != '\n' && l.ch != 0 { l.readChar() }; return l.input[position:l.position] }
-func (l *Lexer) readBlockComment() string { position := l.position; for !(l.ch == '*' && l.peekChar() == '/') && l.ch != 0 { l.readChar() }; if l.ch != 0 { l.readChar(); l.readChar() }; return l.input[position : l.position-2] }
+func (l *Lexer) skipWhitespace() {
+	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+		l.readChar()
+	}
+}
+func (l *Lexer) readIdentifier() string {
+	position := l.position
+	for isIdentifierChar(l.ch) {
+		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+func (l *Lexer) readString(quote byte) string {
+	position := l.position + 1
+	for {
+		l.readChar()
+		if l.ch == quote || l.ch == 0 {
+			break
+		}
+	}
+	return l.input[position:l.position]
+}
+func (l *Lexer) readLineComment() string {
+	position := l.position
+	for l.ch != '\n' && l.ch != 0 {
+		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+func (l *Lexer) readBlockComment() string {
+	position := l.position
+	for !(l.ch == '*' && l.peekChar() == '/') && l.ch != 0 {
+		l.readChar()
+	}
+	if l.ch != 0 {
+		l.readChar()
+		l.readChar()
+	}
+	return l.input[position : l.position-2]
+}
 func (l *Lexer) readNumber() string {
 	position := l.position
 	for isDigit(l.ch) {
@@ -123,10 +181,18 @@ func (l *Lexer) readNumber() string {
 	return l.input[position:l.position]
 }
 
-func isLetter(ch byte) bool { return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' }
-func isDigit(ch byte) bool { return '0' <= ch && ch <= '9' }
-func isIdentifierChar(ch byte) bool { return isLetter(ch) || isDigit(ch) || ch == '-' }
-func newToken(tokenType TokenType, ch byte) Token { return Token{Type: tokenType, Literal: string(ch)} }
+func isLetter(ch byte) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
+func isDigit(ch byte) bool {
+	return '0' <= ch && ch <= '9'
+}
+func isIdentifierChar(ch byte) bool {
+	return isLetter(ch) || isDigit(ch) || ch == '-'
+}
+func newToken(tokenType TokenType, ch byte) Token {
+	return Token{Type: tokenType, Literal: string(ch)}
+}
 
 func (l *Lexer) Input() string {
 	return l.input
@@ -146,7 +212,16 @@ func (l *Lexer) GetReadPosition() int {
 }
 
 func (l *Lexer) ReadRawBlock() (string, error) {
-	startPos := l.readPosition
+	// Calling this assumes the parser has just consumed a token and the lexer's
+	// current char `l.ch` is the character right after that token.
+	// We skip any whitespace to find the opening brace.
+	l.skipWhitespace()
+	if l.ch != '{' {
+		return "", fmt.Errorf("expected '{' to start raw block, got %q", string(l.ch))
+	}
+
+	l.readChar() // Consume '{'
+	startPos := l.position
 	braceLevel := 1
 	i := startPos
 
@@ -167,6 +242,6 @@ func (l *Lexer) ReadRawBlock() (string, error) {
 	}
 
 	content := l.input[startPos:i]
-	l.SetReadPosition(i)
+	l.SetReadPosition(i) // Position lexer to read the final '}'
 	return content, nil
 }

@@ -174,12 +174,13 @@ func (p *Parser) parseOriginStatement() ast.Statement {
 		return nil
 	}
 	stmt.Content = content
-	p.nextToken() // curToken is now '}'
+	p.nextToken()
 	return stmt
 }
 
 func (p *Parser) parseScriptStatement() ast.Statement {
 	stmt := &ast.ScriptStatement{Token: p.curToken}
+
 	if !p.expectPeek(lexer.LBRACE) {
 		return nil
 	}
@@ -190,7 +191,7 @@ func (p *Parser) parseScriptStatement() ast.Statement {
 		return nil
 	}
 	stmt.Content = content
-	p.nextToken() // curToken is now '}'
+	p.nextToken()
 	return stmt
 }
 
