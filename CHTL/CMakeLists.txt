@@ -28,3 +28,10 @@ add_library(chtl_generator STATIC
 )
 target_link_libraries(chtl_generator PRIVATE chtl_ast chtl_util)
 target_include_directories(chtl_generator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+# --- Util Library (for AST Cloner, etc.) ---
+add_library(chtl_util STATIC
+    CHTLUtil/ASTCloner.cpp
+)
+target_link_libraries(chtl_util PRIVATE chtl_ast)
+target_include_directories(chtl_util PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

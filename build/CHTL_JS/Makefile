@@ -130,6 +130,20 @@ chtl_js_lexer/fast:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build.make CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build
 .PHONY : chtl_js_lexer/fast
 
+# Convenience name for target.
+CHTL_JS/CMakeFiles/chtl_js_parser.dir/rule:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL_JS/CMakeFiles/chtl_js_parser.dir/rule
+.PHONY : CHTL_JS/CMakeFiles/chtl_js_parser.dir/rule
+
+# Convenience name for target.
+chtl_js_parser: CHTL_JS/CMakeFiles/chtl_js_parser.dir/rule
+.PHONY : chtl_js_parser
+
+# fast build rule for target.
+chtl_js_parser/fast:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_parser.dir/build.make CHTL_JS/CMakeFiles/chtl_js_parser.dir/build
+.PHONY : chtl_js_parser/fast
+
 CHTLJSLexer/Lexer.o: CHTLJSLexer/Lexer.cpp.o
 .PHONY : CHTLJSLexer/Lexer.o
 
@@ -154,6 +168,30 @@ CHTLJSLexer/Lexer.cpp.s:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build.make CHTL_JS/CMakeFiles/chtl_js_lexer.dir/CHTLJSLexer/Lexer.cpp.s
 .PHONY : CHTLJSLexer/Lexer.cpp.s
 
+CHTLJSParser/Parser.o: CHTLJSParser/Parser.cpp.o
+.PHONY : CHTLJSParser/Parser.o
+
+# target to build an object file
+CHTLJSParser/Parser.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_parser.dir/build.make CHTL_JS/CMakeFiles/chtl_js_parser.dir/CHTLJSParser/Parser.cpp.o
+.PHONY : CHTLJSParser/Parser.cpp.o
+
+CHTLJSParser/Parser.i: CHTLJSParser/Parser.cpp.i
+.PHONY : CHTLJSParser/Parser.i
+
+# target to preprocess a source file
+CHTLJSParser/Parser.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_parser.dir/build.make CHTL_JS/CMakeFiles/chtl_js_parser.dir/CHTLJSParser/Parser.cpp.i
+.PHONY : CHTLJSParser/Parser.cpp.i
+
+CHTLJSParser/Parser.s: CHTLJSParser/Parser.cpp.s
+.PHONY : CHTLJSParser/Parser.s
+
+# target to generate assembly for a file
+CHTLJSParser/Parser.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_parser.dir/build.make CHTL_JS/CMakeFiles/chtl_js_parser.dir/CHTLJSParser/Parser.cpp.s
+.PHONY : CHTLJSParser/Parser.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -163,9 +201,13 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... chtl_js_lexer"
+	@echo "... chtl_js_parser"
 	@echo "... CHTLJSLexer/Lexer.o"
 	@echo "... CHTLJSLexer/Lexer.i"
 	@echo "... CHTLJSLexer/Lexer.s"
+	@echo "... CHTLJSParser/Parser.o"
+	@echo "... CHTLJSParser/Parser.i"
+	@echo "... CHTLJSParser/Parser.s"
 .PHONY : help
 
 

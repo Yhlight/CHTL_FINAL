@@ -1,7 +1,7 @@
-Util/CMakeFiles/chtl_util.dir/ASTCloner.cpp.o: /app/Util/ASTCloner.cpp \
- /usr/include/stdc-predef.h /app/Util/ASTCloner.h \
- /app/CHTL/CHTLNode/Node.h /usr/include/c++/13/memory \
- /usr/include/c++/13/bits/memoryfwd.h \
+CHTL/CMakeFiles/chtl_util.dir/CHTLUtil/ASTCloner.cpp.o: \
+ /app/CHTL/CHTLUtil/ASTCloner.cpp /usr/include/stdc-predef.h \
+ /app/CHTL/CHTLUtil/ASTCloner.h /app/CHTL/CHTLNode/Node.h \
+ /usr/include/c++/13/memory /usr/include/c++/13/bits/memoryfwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \

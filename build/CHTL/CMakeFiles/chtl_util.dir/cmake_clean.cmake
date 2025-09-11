@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/chtl_util.dir/ASTCloner.cpp.o"
-  "CMakeFiles/chtl_util.dir/ASTCloner.cpp.o.d"
+  "CMakeFiles/chtl_util.dir/CHTLUtil/ASTCloner.cpp.o"
+  "CMakeFiles/chtl_util.dir/CHTLUtil/ASTCloner.cpp.o.d"
   "libchtl_util.a"
   "libchtl_util.pdb"
 )

@@ -14,7 +14,6 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/app/CompilerDispatcher/CMakeLists.txt"
   "/app/Scanner/CMakeLists.txt"
   "/app/Test/CMakeLists.txt"
-  "/app/Util/CMakeLists.txt"
   "CMakeFiles/3.28.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.28.3/CMakeSystem.cmake"
   "/usr/share/cmake-3.28/Modules/CMakeCXXCompiler.cmake.in"
@@ -105,7 +104,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/3.28.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.28.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/CMakeDirectoryInformation.cmake"
-  "Util/CMakeFiles/CMakeDirectoryInformation.cmake"
   "CHTL/CMakeFiles/CMakeDirectoryInformation.cmake"
   "CHTL_JS/CMakeFiles/CMakeDirectoryInformation.cmake"
   "Scanner/CMakeFiles/CMakeDirectoryInformation.cmake"
@@ -117,9 +115,10 @@ set(CMAKE_MAKEFILE_PRODUCTS
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/chtl_compiler.dir/DependInfo.cmake"
-  "Util/CMakeFiles/chtl_util.dir/DependInfo.cmake"
   "CHTL/CMakeFiles/chtl_lexer.dir/DependInfo.cmake"
   "CHTL/CMakeFiles/chtl_parser.dir/DependInfo.cmake"
   "CHTL/CMakeFiles/chtl_generator.dir/DependInfo.cmake"
+  "CHTL/CMakeFiles/chtl_util.dir/DependInfo.cmake"
   "CHTL_JS/CMakeFiles/chtl_js_lexer.dir/DependInfo.cmake"
+  "CHTL_JS/CMakeFiles/chtl_js_parser.dir/DependInfo.cmake"
   )

@@ -7,17 +7,10 @@
 #include "CHTLGenerator/Generator.h"
 #include "CHTL_JS/CHTLJSLexer/Token.h"
 #include "CHTL_JS/CHTLJSLexer/Lexer.h"
+#include "CHTL_JS/CHTLJSParser/Parser.h"
 
-// Helper to print CHTL JS tokens
-void printCHTLJSTokens(const std::vector<CHTLJSToken>& tokens) {
-    for (const auto& token : tokens) {
-        std::cout << "Type: " << static_cast<int>(token.type)
-                  << ", Value: '" << token.value << "'" << std::endl;
-    }
-}
-
-void testCHTLJSLexer() {
-    std::cout << "\n--- Testing CHTL JS Lexer ---\n";
+void testCHTLJS() {
+    std::cout << "\n--- Testing CHTL JS Parser ---\n";
     std::string source = R"~(
         vir test = listen {
             click: () => {
@@ -28,8 +21,16 @@ void testCHTLJSLexer() {
 
     CHTLJSLexer lexer(source);
     std::vector<CHTLJSToken> tokens = lexer.tokenize();
-    printCHTLJSTokens(tokens);
-    std::cout << "---------------------------\n";
+
+    try {
+        CHTLJSParser parser(tokens);
+        CHTLJSNodeList ast = parser.parse();
+        std::cout << "CHTL JS Parser ran successfully!" << std::endl;
+    } catch (const CHTLJSParser::ParseError& e) {
+        std::cerr << e.what() << std::endl;
+    }
+
+    std::cout << "----------------------------\n";
 }
 
 
@@ -47,7 +48,7 @@ std::string readFile(const std::string& path) {
 int main(int argc, char* argv[]) {
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " <file>" << std::endl;
-        testCHTLJSLexer(); // Run CHTL JS lexer test if no file is provided
+        testCHTLJS(); // Run CHTL JS parser test if no file is provided
         return 1;
     }
 

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libchtl_js_parser.a CMakeFiles/chtl_js_parser.dir/CHTLJSParser/Parser.cpp.o
+/usr/bin/ranlib libchtl_js_parser.a

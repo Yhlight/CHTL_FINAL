@@ -130,19 +130,6 @@ chtl_compiler/fast:
 .PHONY : chtl_compiler/fast
 
 #=============================================================================
-# Target rules for targets named chtl_util
-
-# Build rule for target.
-chtl_util: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 chtl_util
-.PHONY : chtl_util
-
-# fast build rule for target.
-chtl_util/fast:
-	$(MAKE) $(MAKESILENT) -f Util/CMakeFiles/chtl_util.dir/build.make Util/CMakeFiles/chtl_util.dir/build
-.PHONY : chtl_util/fast
-
-#=============================================================================
 # Target rules for targets named chtl_lexer
 
 # Build rule for target.
@@ -182,6 +169,19 @@ chtl_generator/fast:
 .PHONY : chtl_generator/fast
 
 #=============================================================================
+# Target rules for targets named chtl_util
+
+# Build rule for target.
+chtl_util: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 chtl_util
+.PHONY : chtl_util
+
+# fast build rule for target.
+chtl_util/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_util.dir/build.make CHTL/CMakeFiles/chtl_util.dir/build
+.PHONY : chtl_util/fast
+
+#=============================================================================
 # Target rules for targets named chtl_js_lexer
 
 # Build rule for target.
@@ -193,6 +193,19 @@ chtl_js_lexer: cmake_check_build_system
 chtl_js_lexer/fast:
 	$(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build.make CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build
 .PHONY : chtl_js_lexer/fast
+
+#=============================================================================
+# Target rules for targets named chtl_js_parser
+
+# Build rule for target.
+chtl_js_parser: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 chtl_js_parser
+.PHONY : chtl_js_parser
+
+# fast build rule for target.
+chtl_js_parser/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_parser.dir/build.make CHTL_JS/CMakeFiles/chtl_js_parser.dir/build
+.PHONY : chtl_js_parser/fast
 
 main.o: main.cpp.o
 .PHONY : main.o
@@ -229,6 +242,7 @@ help:
 	@echo "... chtl_compiler"
 	@echo "... chtl_generator"
 	@echo "... chtl_js_lexer"
+	@echo "... chtl_js_parser"
 	@echo "... chtl_lexer"
 	@echo "... chtl_parser"
 	@echo "... chtl_util"

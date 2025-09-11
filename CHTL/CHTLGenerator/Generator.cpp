@@ -3,7 +3,7 @@
 #include "CHTLNode/StyleNode.h"
 #include "CHTLNode/TemplateNode.h"
 #include "CHTLNode/CustomNode.h"
-#include "ASTCloner.h"
+#include "CHTLUtil/ASTCloner.h"
 #include <vector>
 #include <iostream>
 #include <sstream>

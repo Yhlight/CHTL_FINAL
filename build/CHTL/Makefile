@@ -158,6 +158,20 @@ chtl_generator/fast:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_generator.dir/build.make CHTL/CMakeFiles/chtl_generator.dir/build
 .PHONY : chtl_generator/fast
 
+# Convenience name for target.
+CHTL/CMakeFiles/chtl_util.dir/rule:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL/CMakeFiles/chtl_util.dir/rule
+.PHONY : CHTL/CMakeFiles/chtl_util.dir/rule
+
+# Convenience name for target.
+chtl_util: CHTL/CMakeFiles/chtl_util.dir/rule
+.PHONY : chtl_util
+
+# fast build rule for target.
+chtl_util/fast:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_util.dir/build.make CHTL/CMakeFiles/chtl_util.dir/build
+.PHONY : chtl_util/fast
+
 CHTLGenerator/ExprGenerator.o: CHTLGenerator/ExprGenerator.cpp.o
 .PHONY : CHTLGenerator/ExprGenerator.o
 
@@ -278,6 +292,30 @@ CHTLParser/Parser.cpp.s:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_parser.dir/build.make CHTL/CMakeFiles/chtl_parser.dir/CHTLParser/Parser.cpp.s
 .PHONY : CHTLParser/Parser.cpp.s
 
+CHTLUtil/ASTCloner.o: CHTLUtil/ASTCloner.cpp.o
+.PHONY : CHTLUtil/ASTCloner.o
+
+# target to build an object file
+CHTLUtil/ASTCloner.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_util.dir/build.make CHTL/CMakeFiles/chtl_util.dir/CHTLUtil/ASTCloner.cpp.o
+.PHONY : CHTLUtil/ASTCloner.cpp.o
+
+CHTLUtil/ASTCloner.i: CHTLUtil/ASTCloner.cpp.i
+.PHONY : CHTLUtil/ASTCloner.i
+
+# target to preprocess a source file
+CHTLUtil/ASTCloner.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_util.dir/build.make CHTL/CMakeFiles/chtl_util.dir/CHTLUtil/ASTCloner.cpp.i
+.PHONY : CHTLUtil/ASTCloner.cpp.i
+
+CHTLUtil/ASTCloner.s: CHTLUtil/ASTCloner.cpp.s
+.PHONY : CHTLUtil/ASTCloner.s
+
+# target to generate assembly for a file
+CHTLUtil/ASTCloner.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_util.dir/build.make CHTL/CMakeFiles/chtl_util.dir/CHTLUtil/ASTCloner.cpp.s
+.PHONY : CHTLUtil/ASTCloner.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -289,6 +327,7 @@ help:
 	@echo "... chtl_generator"
 	@echo "... chtl_lexer"
 	@echo "... chtl_parser"
+	@echo "... chtl_util"
 	@echo "... CHTLGenerator/ExprGenerator.o"
 	@echo "... CHTLGenerator/ExprGenerator.i"
 	@echo "... CHTLGenerator/ExprGenerator.s"
@@ -304,6 +343,9 @@ help:
 	@echo "... CHTLParser/Parser.o"
 	@echo "... CHTLParser/Parser.i"
 	@echo "... CHTLParser/Parser.s"
+	@echo "... CHTLUtil/ASTCloner.o"
+	@echo "... CHTLUtil/ASTCloner.i"
+	@echo "... CHTLUtil/ASTCloner.s"
 .PHONY : help
 
 

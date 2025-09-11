@@ -1,2 +1,0 @@
-/usr/bin/ar qc libchtl_util.a CMakeFiles/chtl_util.dir/ASTCloner.cpp.o
-/usr/bin/ranlib libchtl_util.a
