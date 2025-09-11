@@ -9,6 +9,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeCache.txt"
   "/app/CHTL/CMakeLists.txt"
   "/app/CMakeLists.txt"
+  "/app/Test/CMakeLists.txt"
   "CMakeFiles/3.28.3/CMakeCCompiler.cmake"
   "CMakeFiles/3.28.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.28.3/CMakeSystem.cmake"
@@ -124,10 +125,12 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/3.28.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/CMakeDirectoryInformation.cmake"
   "CHTL/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "Test/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "CHTL/CMakeFiles/chtl_lib.dir/DependInfo.cmake"
   "CHTL/CMakeFiles/chtl_compiler.dir/DependInfo.cmake"
+  "Test/CMakeFiles/parser_test.dir/DependInfo.cmake"
   )

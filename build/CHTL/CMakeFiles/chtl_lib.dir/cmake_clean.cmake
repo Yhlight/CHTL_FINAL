@@ -15,6 +15,12 @@ file(REMOVE_RECURSE
   "CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o.d"
   "CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o"
   "CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o.d"
+  "CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o"
+  "CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o.d"
+  "CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o"
+  "CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o.d"
+  "CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o"
+  "CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o.d"
   "libchtl_lib.a"
   "libchtl_lib.pdb"
 )

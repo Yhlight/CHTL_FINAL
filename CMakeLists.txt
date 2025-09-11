@@ -10,3 +10,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Add the main CHTL source directory
 add_subdirectory(CHTL)
+
+# Add the test directory
+add_subdirectory(Test)

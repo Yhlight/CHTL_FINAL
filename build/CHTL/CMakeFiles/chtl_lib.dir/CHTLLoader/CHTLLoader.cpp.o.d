@@ -196,6 +196,7 @@ CHTL/CMakeFiles/chtl_lib.dir/CHTLLoader/CHTLLoader.cpp.o: \
  /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/TemplateUsageNode.h \
  /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/TemplateDefinitionNode.h \
  /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/ImportNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/ScriptNode.h \
  /usr/include/c++/13/map /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h /usr/include/c++/13/functional \
  /usr/include/c++/13/bits/std_function.h \

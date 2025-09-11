@@ -142,6 +142,19 @@ chtl_compiler/fast:
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_compiler.dir/build.make CHTL/CMakeFiles/chtl_compiler.dir/build
 .PHONY : chtl_compiler/fast
 
+#=============================================================================
+# Target rules for targets named parser_test
+
+# Build rule for target.
+parser_test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 parser_test
+.PHONY : parser_test
+
+# fast build rule for target.
+parser_test/fast:
+	$(MAKE) $(MAKESILENT) -f Test/CMakeFiles/parser_test.dir/build.make Test/CMakeFiles/parser_test.dir/build
+.PHONY : parser_test/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -152,6 +165,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... chtl_compiler"
 	@echo "... chtl_lib"
+	@echo "... parser_test"
 .PHONY : help
 
 

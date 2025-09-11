@@ -1,21 +1,14 @@
-[Template] @Style DefaultText {
-    font-size: 16px;
-}
-
-[Template] @Element Card {
-    div {
-        style {
-            @Style DefaultText;
-            border: 1px solid black;
-        }
-        text: "This is a card";
+div {
+    id: "test-box";
+    style {
+        width: 100px;
+        height: 100px;
+        background-color: blue;
     }
-}
-
-html {
-    body {
-        // Use the element template multiple times
-        @Element Card;
-        @Element Card;
+    script {
+        const box = document.getElementById('test-box');
+        box.addEventListener('click', () => {
+            box.style.backgroundColor = 'red';
+        });
     }
 }

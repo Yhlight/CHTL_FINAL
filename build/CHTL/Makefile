@@ -336,6 +336,78 @@ Scanner/CHTLUnifiedScanner.cpp.s:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.s
 .PHONY : Scanner/CHTLUnifiedScanner.cpp.s
 
+__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.o: __/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o
+.PHONY : __/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.o
+
+# target to build an object file
+__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o
+.PHONY : __/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o
+
+__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.i: __/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.i
+.PHONY : __/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.i
+
+# target to preprocess a source file
+__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.i
+.PHONY : __/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.i
+
+__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.s: __/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.s
+.PHONY : __/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.s
+
+# target to generate assembly for a file
+__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.s
+.PHONY : __/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.s
+
+__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.o: __/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o
+.PHONY : __/CHTL_JS/CHTLJSLexer/CHTLJSLexer.o
+
+# target to build an object file
+__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o
+.PHONY : __/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o
+
+__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.i: __/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.i
+.PHONY : __/CHTL_JS/CHTLJSLexer/CHTLJSLexer.i
+
+# target to preprocess a source file
+__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.i
+.PHONY : __/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.i
+
+__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.s: __/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.s
+.PHONY : __/CHTL_JS/CHTLJSLexer/CHTLJSLexer.s
+
+# target to generate assembly for a file
+__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.s
+.PHONY : __/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.s
+
+__/CHTL_JS/CHTLJSParser/CHTLJSParser.o: __/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o
+.PHONY : __/CHTL_JS/CHTLJSParser/CHTLJSParser.o
+
+# target to build an object file
+__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o
+.PHONY : __/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o
+
+__/CHTL_JS/CHTLJSParser/CHTLJSParser.i: __/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.i
+.PHONY : __/CHTL_JS/CHTLJSParser/CHTLJSParser.i
+
+# target to preprocess a source file
+__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.i
+.PHONY : __/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.i
+
+__/CHTL_JS/CHTLJSParser/CHTLJSParser.s: __/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.s
+.PHONY : __/CHTL_JS/CHTLJSParser/CHTLJSParser.s
+
+# target to generate assembly for a file
+__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lib.dir/build.make CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.s
+.PHONY : __/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -394,6 +466,15 @@ help:
 	@echo "... Scanner/CHTLUnifiedScanner.o"
 	@echo "... Scanner/CHTLUnifiedScanner.i"
 	@echo "... Scanner/CHTLUnifiedScanner.s"
+	@echo "... __/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.o"
+	@echo "... __/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.i"
+	@echo "... __/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.s"
+	@echo "... __/CHTL_JS/CHTLJSLexer/CHTLJSLexer.o"
+	@echo "... __/CHTL_JS/CHTLJSLexer/CHTLJSLexer.i"
+	@echo "... __/CHTL_JS/CHTLJSLexer/CHTLJSLexer.s"
+	@echo "... __/CHTL_JS/CHTLJSParser/CHTLJSParser.o"
+	@echo "... __/CHTL_JS/CHTLJSParser/CHTLJSParser.i"
+	@echo "... __/CHTL_JS/CHTLJSParser/CHTLJSParser.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

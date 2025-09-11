@@ -17,7 +17,7 @@ using EvalContext = std::map<std::string, ObjectPtr>;
 
 class CHTLGenerator {
 public:
-    CHTLGenerator(NodePtr rootNode);
+    CHTLGenerator(NodePtr rootNode, bool default_struct = false);
 
     std::string Generate();
 
@@ -37,8 +37,10 @@ private:
 
     // Member variables
     NodePtr m_rootNode;
+    bool m_default_struct;
     std::stringstream m_output;
     std::stringstream m_global_css;
+    std::stringstream m_global_js;
 };
 
 } // namespace CHTL

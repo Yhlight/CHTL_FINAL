@@ -8,12 +8,16 @@ add_library(chtl_lib STATIC
     CHTLLoader/CHTLLoader.cpp
     Scanner/CHTLUnifiedScanner.cpp
     CompilerDispatcher/CompilerDispatcher.cpp
+    "../CHTL JS/CHTLJSLexer/CHTLJSLexer.cpp"
+    "../CHTL JS/CHTLJSParser/CHTLJSParser.cpp"
+    "../CHTL JS/CHTLJSGenerator/CHTLJSGenerator.cpp"
 )
 
 # Add include directories for the library
 target_include_directories(chtl_lib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/CHTLObject
+    ${CMAKE_SOURCE_DIR}
 )
 
 # Define the executable for the CHTL compiler

@@ -181,6 +181,48 @@ CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.s: cmake_
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.s"
 	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/CHTL/CompilerDispatcher/CompilerDispatcher.cpp -o CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.s
 
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o: CHTL/CMakeFiles/chtl_lib.dir/flags.make
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o: /app/CHTL\ JS/CHTLJSLexer/CHTLJSLexer.cpp
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o: CHTL/CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o -MF CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o.d -o CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o -c "/app/CHTL JS/CHTLJSLexer/CHTLJSLexer.cpp"
+
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.i"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/app/CHTL JS/CHTLJSLexer/CHTLJSLexer.cpp" > CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.i
+
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.s"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/app/CHTL JS/CHTLJSLexer/CHTLJSLexer.cpp" -o CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.s
+
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o: CHTL/CMakeFiles/chtl_lib.dir/flags.make
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o: /app/CHTL\ JS/CHTLJSParser/CHTLJSParser.cpp
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o: CHTL/CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o -MF CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o.d -o CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o -c "/app/CHTL JS/CHTLJSParser/CHTLJSParser.cpp"
+
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.i"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/app/CHTL JS/CHTLJSParser/CHTLJSParser.cpp" > CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.i
+
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.s"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/app/CHTL JS/CHTLJSParser/CHTLJSParser.cpp" -o CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.s
+
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o: CHTL/CMakeFiles/chtl_lib.dir/flags.make
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o: /app/CHTL\ JS/CHTLJSGenerator/CHTLJSGenerator.cpp
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o: CHTL/CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o -MF CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o.d -o CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o -c "/app/CHTL JS/CHTLJSGenerator/CHTLJSGenerator.cpp"
+
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.i"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/app/CHTL JS/CHTLJSGenerator/CHTLJSGenerator.cpp" > CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.i
+
+CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.s"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/app/CHTL JS/CHTLJSGenerator/CHTLJSGenerator.cpp" -o CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.s
+
 # Object files for target chtl_lib
 chtl_lib_OBJECTS = \
 "CMakeFiles/chtl_lib.dir/CHTLLexer/CHTLLexer.cpp.o" \
@@ -190,7 +232,10 @@ chtl_lib_OBJECTS = \
 "CMakeFiles/chtl_lib.dir/CHTLResolver/CHTLTemplateResolver.cpp.o" \
 "CMakeFiles/chtl_lib.dir/CHTLLoader/CHTLLoader.cpp.o" \
 "CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o" \
-"CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o"
+"CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o" \
+"CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o" \
+"CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o" \
+"CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o"
 
 # External object files for target chtl_lib
 chtl_lib_EXTERNAL_OBJECTS =
@@ -203,9 +248,12 @@ CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/CHTLResolver/CHTLTemplateResolv
 CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/CHTLLoader/CHTLLoader.cpp.o
 CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/Scanner/CHTLUnifiedScanner.cpp.o
 CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/CompilerDispatcher/CompilerDispatcher.cpp.o
+CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o
+CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o
+CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/__/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o
 CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/build.make
 CHTL/libchtl_lib.a: CHTL/CMakeFiles/chtl_lib.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX static library libchtl_lib.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX static library libchtl_lib.a"
 	cd /app/build/CHTL && $(CMAKE_COMMAND) -P CMakeFiles/chtl_lib.dir/cmake_clean_target.cmake
 	cd /app/build/CHTL && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/chtl_lib.dir/link.txt --verbose=$(VERBOSE)
 

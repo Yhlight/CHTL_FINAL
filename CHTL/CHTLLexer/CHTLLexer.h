@@ -10,6 +10,9 @@ public:
     CHTLLexer(const std::string& input);
 
     Token NextToken();
+    const std::string& GetInput() const { return m_input; }
+    size_t GetPosition() const { return m_position; }
+    size_t GetReadPosition() const { return m_readPosition; }
 
 private:
     void readChar();

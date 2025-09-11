@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/parser_test.dir/parser_test.cpp.o -o parser_test  ../CHTL/libchtl_lib.a

@@ -10,6 +10,7 @@
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
 #include "../CHTLNode/ImportNode.h"
+#include "../CHTLNode/ScriptNode.h"
 #include <vector>
 #include <map>
 #include <functional>
@@ -27,7 +28,7 @@ enum Precedence {
 
 class CHTLParser {
 public:
-    CHTLParser(CHTLLexer& lexer);
+    CHTLParser(CHTLLexer& lexer, bool debug_mode = false);
 
     std::shared_ptr<ProgramNode> ParseProgram();
     const std::vector<std::string>& Errors() const { return m_errors; }
@@ -52,6 +53,7 @@ private:
     std::shared_ptr<ElementNode> parseElementNode();
     std::shared_ptr<TextNode> parseTextNodeShorthand();
     std::shared_ptr<StyleNode> parseStyleNode();
+    std::shared_ptr<ScriptNode> parseScriptNode();
 
     // Expression parsing (Pratt parser)
     ExpressionPtr parseExpression(Precedence precedence);
@@ -61,6 +63,7 @@ private:
 
     // Member variables
     CHTLLexer& m_lexer;
+    bool m_debug_mode;
     std::vector<std::string> m_errors;
 
     Token m_currentToken;

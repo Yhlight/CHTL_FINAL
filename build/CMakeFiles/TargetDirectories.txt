@@ -4,3 +4,6 @@
 /app/build/CHTL/CMakeFiles/chtl_compiler.dir
 /app/build/CHTL/CMakeFiles/edit_cache.dir
 /app/build/CHTL/CMakeFiles/rebuild_cache.dir
+/app/build/Test/CMakeFiles/parser_test.dir
+/app/build/Test/CMakeFiles/edit_cache.dir
+/app/build/Test/CMakeFiles/rebuild_cache.dir
