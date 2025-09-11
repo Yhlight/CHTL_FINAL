@@ -2,36 +2,26 @@ html
 {
     head
     {
-        title { text { "Auto-Class Test" } }
+        title { text { "Context Deduction Test" } }
     }
 
     body
     {
-        // This div should get class="fancy-text" automatically
+        // This div should get class="box" and have a hover effect.
         div
         {
             style {
-                // This rule should be hoisted to a global <style> tag
-                .fancy-text {
+                .box {
                     color: blue;
-                    font-family: sans-serif;
                 }
 
-                // This should be an inline style on the div
-                border: 1px solid grey;
-            }
-
-            text { "This text should be blue and have a border." }
-        }
-
-        // This div should get id="important" automatically
-        div {
-            style {
-                #important {
-                    font-weight: bold;
+                &:hover {
+                    color: red;
+                    text-decoration: underline;
                 }
             }
-            text { "This text should be bold." }
+
+            text { "This text should turn red on hover." }
         }
     }
 }
