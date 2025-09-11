@@ -148,6 +148,7 @@ std::string Token::getTypeName() const {
         {TokenType::BEFORE, "BEFORE"},
         {TokenType::REPLACE, "REPLACE"},
         {TokenType::HTML5, "HTML5"},
+        {TokenType::RESPONSIVE_VALUE, "RESPONSIVE_VALUE"},
         {TokenType::END_OF_FILE, "END_OF_FILE"},
         {TokenType::NEWLINE, "NEWLINE"},
         {TokenType::WHITESPACE, "WHITESPACE"},

@@ -56,6 +56,7 @@ private:
     // 模板系统词法分析方法
     Token scanTemplateSyntax();
     Token scanTemplateType();
+    Token scanResponsiveValue();
     
     // 检查是否为字母
     bool isAlpha(char c) const;

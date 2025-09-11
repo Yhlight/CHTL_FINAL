@@ -137,6 +137,10 @@ TokenStream CHTLLexer::tokenize() {
         } else if (c == '?' && peekChar() == ':') {
             stream.addToken(scanConditionalExpression());
         }
+        // 检查响应式值
+        /*else if (c == '$') {
+            stream.addToken(scanResponsiveValue());
+        }*/
         // 检查运算符
         else if (isOperatorChar(c)) {
             stream.addToken(scanOperator());
@@ -932,6 +936,29 @@ Token CHTLLexer::scanTemplateType() {
     }
     
     return Token(tokenType, type, startLine, startColumn, start);
+}
+
+Token CHTLLexer::scanResponsiveValue() {
+    size_t start = position;
+    size_t startLine = line;
+    size_t startColumn = column;
+    
+    advance(); // 跳过 '$'
+    
+    std::string value;
+    while (position < source.length() && 
+           (isAlphaNumeric(currentChar()) || currentChar() == '_')) {
+        value += currentChar();
+        advance();
+    }
+    
+    if (currentChar() == '$') {
+        advance(); // 跳过结束的 '$'
+        return Token(TokenType::RESPONSIVE_VALUE, value, startLine, startColumn, start);
+    } else {
+        // 错误：未找到匹配的 '$'
+        return Token(TokenType::UNKNOWN, "$" + value, startLine, startColumn, start);
+    }
 }
 
 } // namespace CHTL

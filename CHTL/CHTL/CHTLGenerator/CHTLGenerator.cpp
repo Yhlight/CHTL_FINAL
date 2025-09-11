@@ -497,7 +497,14 @@ std::string CHTLGenerator::processAttributes(const std::map<std::string, std::st
 }
 
 std::string CHTLGenerator::processAttributeValue(const std::string& value) const {
-    // 简单的属性值处理
+    // 处理响应式值
+    if (value.find('$') != std::string::npos) {
+        // 将响应式值转换为JavaScript变量引用
+        std::string result = value;
+        std::regex responsivePattern(R"(\$([a-zA-Z_][a-zA-Z0-9_]*)\$)");
+        result = std::regex_replace(result, responsivePattern, R"($1)");
+        return result;
+    }
     return value;
 }
 

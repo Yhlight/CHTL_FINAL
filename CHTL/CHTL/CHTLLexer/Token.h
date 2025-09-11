@@ -125,6 +125,7 @@ enum class TokenType {
     UNQUOTED_LITERAL, // 无引号字面量
     SINGLE_QUOTED_LITERAL, // 单引号字面量
     DOUBLE_QUOTED_LITERAL, // 双引号字面量
+    RESPONSIVE_VALUE, // $JS变量名$ 响应式值
     
     // 特殊
     END_OF_FILE,    // 文件结束
