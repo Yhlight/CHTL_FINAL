@@ -1,0 +1,25 @@
+// This is the main CHTL body
+html
+{
+    head
+    {
+        // Text nodes must be in a text block.
+        title {
+            text { "My CHTL Page" }
+        }
+    }
+
+    body
+    {
+        div
+        {
+            id: "main-container";
+
+            // A nested text block.
+            text { "Hello, World!" }
+        }
+
+        // A generator comment.
+        -- This should appear as an HTML comment.
+    }
+}
