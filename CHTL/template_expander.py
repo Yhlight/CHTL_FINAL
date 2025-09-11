@@ -59,30 +59,28 @@ class TemplateExpander:
                 attr.value = self._expand_var_usage(attr.value)
 
     def _expand_element_usage(self, node: ElementUsageNode):
-        template = self.symbol_table.lookup(node.name, 'Element')
+        namespace = ".".join(node.from_namespace) if node.from_namespace else 'global'
+        template = self.symbol_table.lookup(node.name, 'Element', namespace=namespace)
         if not template:
             return []
-
-        # Get the base nodes from the template
         expanded_nodes = copy.deepcopy(template.body)
-
-        # Apply specializations
         for spec in node.specializations:
             if isinstance(spec, DeleteStatementNode):
-                # Filter out nodes with the matching tag name
                 expanded_nodes = [n for n in expanded_nodes if not (isinstance(n, ElementNode) and n.tag_name == spec.tag_name)]
             elif isinstance(spec, InsertStatementNode):
-                # For this simplified version, we just append the new elements
                 expanded_nodes.extend(spec.elements)
-
         return expanded_nodes
 
     def _expand_var_usage(self, node: VarUsageNode):
+        # Note: VarUsage doesn't have a 'from' clause in the current grammar.
+        # This would need to be added for namespaced variables.
+        # Assuming global for now.
+        namespace = 'global'
         if node.override_value is not None:
             if isinstance(node.override_value, VarUsageNode):
                 return self._expand_var_usage(node.override_value)
             return node.override_value
-        var_template = self.symbol_table.lookup(node.template_name, 'Var')
+        var_template = self.symbol_table.lookup(node.template_name, 'Var', namespace=namespace)
         if var_template:
             for attr in var_template.body:
                 if attr.name == node.var_name:
@@ -139,7 +137,8 @@ class TemplateExpander:
             return ""
         expanded_styles = []
         for usage in style_node.style_usages:
-            template = self.symbol_table.lookup(usage.name, 'Style')
+            namespace = ".".join(usage.from_namespace) if usage.from_namespace else 'global'
+            template = self.symbol_table.lookup(usage.name, 'Style', namespace=namespace)
             if template and template.body and isinstance(template.body[0], TextNode):
                 expanded_styles.append(template.body[0].value)
         return "; ".join(filter(None, expanded_styles))

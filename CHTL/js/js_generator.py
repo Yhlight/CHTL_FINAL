@@ -1,4 +1,4 @@
-from CHTL.js.ast.nodes import ProgramNode, StatementNode, SelectorNode
+from .ast.nodes import ProgramNode, StatementNode, SelectorNode
 
 class JavaScriptGenerator:
     """

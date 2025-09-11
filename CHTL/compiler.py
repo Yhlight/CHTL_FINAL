@@ -2,20 +2,20 @@ import sys
 from antlr4 import *
 
 # CHTL Compiler components
-from CHTL.generated.CHTLLexer import CHTLLexer
-from CHTL.generated.CHTLParser import CHTLParser
-from CHTL.ast_builder import AstBuilder
-from CHTL.html_generator import HtmlGenerator
-from CHTL.scanner.unified_scanner import UnifiedScanner
-from CHTL.symbol_table import SymbolTable
-from CHTL.template_expander import TemplateExpander
-from CHTL.ast.nodes import ScriptNode, AstNode, DocumentNode
+from .generated.CHTLLexer import CHTLLexer
+from .generated.CHTLParser import CHTLParser
+from .ast_builder import AstBuilder
+from .html_generator import HtmlGenerator
+from .scanner.unified_scanner import UnifiedScanner
+from .symbol_table import SymbolTable
+from .template_expander import TemplateExpander
+from .ast.nodes import ScriptNode, AstNode, DocumentNode
 
-# CHTL JS Compiler components (new paths)
-from CHTL.js.generated.CHTLJSLexer import CHTLJSLexer
-from CHTL.js.generated.CHTLJSParser import CHTLJSParser
-from CHTL.js.ast_builder import ChtlJsAstBuilder
-from CHTL.js.js_generator import JavaScriptGenerator
+# CHTL JS Compiler components (using relative imports)
+from .js.generated.CHTLJSLexer import CHTLJSLexer
+from .js.generated.CHTLJSParser import CHTLJSParser
+from .js.ast_builder import ChtlJsAstBuilder
+from .js.js_generator import JavaScriptGenerator
 
 def compile_chtl_js(source_text: str) -> str:
     input_stream = InputStream(source_text)
@@ -39,29 +39,26 @@ def process_scripts(node: AstNode, registry: dict, doc_node: DocumentNode):
         for child in node.children:
             process_scripts(child, registry, doc_node)
 
-def main(argv):
-    if len(argv) < 2:
-        print("Usage: python -m CHTL.compiler <filename>")
-        return
-    with open(argv[1], 'r') as f:
+def compile_single_file(filepath: str, symbol_table: SymbolTable, registry_override: dict = None):
+    with open(filepath, 'r') as f:
         source_text = f.read()
+
     scanner = UnifiedScanner()
     modified_source, registry = scanner.scan(source_text)
+
+    if registry_override is not None:
+        registry.update(registry_override)
+
     input_stream = InputStream(modified_source)
     lexer = CHTLLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = CHTLParser(stream)
     parse_tree = parser.document()
-    symbol_table = SymbolTable()
+
     ast_builder = AstBuilder(registry=registry, symbol_table=symbol_table)
     ast = ast_builder.visit(parse_tree)
-    expander = TemplateExpander(symbol_table=symbol_table)
-    expander.expand(ast)
-    if isinstance(ast, DocumentNode):
-        process_scripts(ast, registry, ast)
-    html_generator = HtmlGenerator()
-    html_output = html_generator.visit(ast)
-    print(html_output)
 
-if __name__ == '__main__':
-    main(sys.argv)
+    return ast, registry
+
+# This file contains the core compilation logic for a single CHTL file.
+# The project-level compilation is handled by the CompilerDriver.

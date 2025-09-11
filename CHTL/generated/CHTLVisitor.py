@@ -14,6 +14,26 @@ class CHTLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CHTLParser#directive.
+    def visitDirective(self, ctx:CHTLParser.DirectiveContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#importStatement.
+    def visitImportStatement(self, ctx:CHTLParser.ImportStatementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#namespaceStatement.
+    def visitNamespaceStatement(self, ctx:CHTLParser.NamespaceStatementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#configurationStatement.
+    def visitConfigurationStatement(self, ctx:CHTLParser.ConfigurationStatementContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CHTLParser#definition.
     def visitDefinition(self, ctx:CHTLParser.DefinitionContext):
         return self.visitChildren(ctx)
@@ -56,6 +76,11 @@ class CHTLVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by CHTLParser#deleteStatement.
     def visitDeleteStatement(self, ctx:CHTLParser.DeleteStatementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CHTLParser#namespacePath.
+    def visitNamespacePath(self, ctx:CHTLParser.NamespacePathContext):
         return self.visitChildren(ctx)
 
 

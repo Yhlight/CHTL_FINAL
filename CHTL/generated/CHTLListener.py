@@ -17,6 +17,42 @@ class CHTLListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CHTLParser#directive.
+    def enterDirective(self, ctx:CHTLParser.DirectiveContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#directive.
+    def exitDirective(self, ctx:CHTLParser.DirectiveContext):
+        pass
+
+
+    # Enter a parse tree produced by CHTLParser#importStatement.
+    def enterImportStatement(self, ctx:CHTLParser.ImportStatementContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#importStatement.
+    def exitImportStatement(self, ctx:CHTLParser.ImportStatementContext):
+        pass
+
+
+    # Enter a parse tree produced by CHTLParser#namespaceStatement.
+    def enterNamespaceStatement(self, ctx:CHTLParser.NamespaceStatementContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#namespaceStatement.
+    def exitNamespaceStatement(self, ctx:CHTLParser.NamespaceStatementContext):
+        pass
+
+
+    # Enter a parse tree produced by CHTLParser#configurationStatement.
+    def enterConfigurationStatement(self, ctx:CHTLParser.ConfigurationStatementContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#configurationStatement.
+    def exitConfigurationStatement(self, ctx:CHTLParser.ConfigurationStatementContext):
+        pass
+
+
     # Enter a parse tree produced by CHTLParser#definition.
     def enterDefinition(self, ctx:CHTLParser.DefinitionContext):
         pass
@@ -95,6 +131,15 @@ class CHTLListener(ParseTreeListener):
 
     # Exit a parse tree produced by CHTLParser#deleteStatement.
     def exitDeleteStatement(self, ctx:CHTLParser.DeleteStatementContext):
+        pass
+
+
+    # Enter a parse tree produced by CHTLParser#namespacePath.
+    def enterNamespacePath(self, ctx:CHTLParser.NamespacePathContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#namespacePath.
+    def exitNamespacePath(self, ctx:CHTLParser.NamespacePathContext):
         pass
 
 

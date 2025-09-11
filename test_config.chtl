@@ -1,0 +1,8 @@
+[Configuration] {
+    DEBUG_MODE: true;
+    INDEX_INITIAL_COUNT: 1;
+}
+
+div {
+    text { hello }
+}

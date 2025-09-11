@@ -1,6 +1,6 @@
-from CHTL.js.generated.CHTLJSVisitor import CHTLJSVisitor
-from CHTL.js.generated.CHTLJSParser import CHTLJSParser
-from CHTL.js.ast.nodes import ProgramNode, StatementNode, SelectorNode
+from .generated.CHTLJSVisitor import CHTLJSVisitor
+from .generated.CHTLJSParser import CHTLJSParser
+from .ast.nodes import ProgramNode, StatementNode, SelectorNode
 
 class ChtlJsAstBuilder(CHTLJSVisitor):
 
