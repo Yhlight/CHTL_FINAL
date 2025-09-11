@@ -1,0 +1,7 @@
+[Custom] @Element Box
+{
+    div
+    {
+        // I am a box
+    }
+}

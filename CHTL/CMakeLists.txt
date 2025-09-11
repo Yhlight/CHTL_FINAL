@@ -7,6 +7,11 @@ add_library(CHTLCompiler STATIC
     CHTLNode/CommentNode.cpp
     CHTLNode/StyleNode.cpp
     CHTLNode/TemplateDefinitionNode.cpp
+    CHTLNode/TemplateUsageNode.cpp
+    CHTLNode/StyleRuleNode.cpp
+    CHTLNode/CustomDefinitionNode.cpp
+    CHTLNode/ImportNode.cpp
+    CHTLNode/NamespaceNode.cpp
     CHTLParser/Parser.cpp
     AstPrinter.cpp
     CHTLGenerator/HtmlGenerator.cpp

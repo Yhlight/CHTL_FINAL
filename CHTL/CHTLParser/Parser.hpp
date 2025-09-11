@@ -23,6 +23,9 @@ private:
     std::shared_ptr<AttributeNode> attribute();
     NodePtr styleBlock();
     NodePtr templateDefinition();
+    NodePtr customDefinition();
+    NodePtr importStatement();
+    NodePtr namespaceStatement();
 
     Token advance();
     Token peek();

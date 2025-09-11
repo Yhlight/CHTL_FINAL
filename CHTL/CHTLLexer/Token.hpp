@@ -20,8 +20,13 @@ enum class TokenType {
     IDENTIFIER,
     STRING, // For "...", '...', and unquoted literals
 
-    // Keywords - for now, only [Template] is a special token
+    // Keywords
     TEMPLATE,
+    CUSTOM,
+    IMPORT,
+    NAMESPACE,
+    FROM,
+    AS,
 
     // Comments
     LINE_COMMENT, // //

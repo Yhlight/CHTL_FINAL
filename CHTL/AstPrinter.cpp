@@ -5,6 +5,11 @@
 #include "CHTLNode/CommentNode.hpp"
 #include "CHTLNode/StyleNode.hpp" // Include full definition
 #include "CHTLNode/TemplateDefinitionNode.hpp"
+#include "CHTLNode/TemplateUsageNode.hpp"
+#include "CHTLNode/StyleRuleNode.hpp"
+#include "CHTLNode/CustomDefinitionNode.hpp"
+#include "CHTLNode/ImportNode.hpp"
+#include "CHTLNode/NamespaceNode.hpp"
 
 namespace CHTL {
 
@@ -31,6 +36,22 @@ void AstPrinter::visit(ElementNode& node) {
         parenthesize("children", node.children);
     }
 
+    m_result += ")";
+}
+
+void AstPrinter::visit(CustomDefinitionNode& node) {
+    std::string type;
+    switch(node.customType) {
+        case TemplateType::STYLE: type = "Style"; break;
+        case TemplateType::ELEMENT: type = "Element"; break;
+        case TemplateType::VAR: type = "Var"; break;
+    }
+    m_result += "([Custom] @" + type + " " + node.name;
+
+    if (!node.bodyNodes.empty()) {
+        m_result += " ";
+        parenthesize("body", node.bodyNodes);
+    }
     m_result += ")";
 }
 
@@ -63,12 +84,9 @@ void AstPrinter::visit(CommentNode& node) {
 
 void AstPrinter::visit(StyleNode& node) {
     m_result += "(style";
-    for (const auto& rule : node.rules) {
-        m_result += " (rule";
-        for (const auto& token : rule) {
-            m_result += " " + token.lexeme;
-        }
-        m_result += ")";
+    for (const auto& child : node.children) {
+        m_result += " ";
+        child->accept(*this);
     }
     m_result += ")";
 }
@@ -87,6 +105,29 @@ void AstPrinter::visit(TemplateDefinitionNode& node) {
         parenthesize("body", node.bodyNodes);
     }
     // Could add printing for style rules too if needed
+    m_result += ")";
+}
+
+void AstPrinter::visit(TemplateUsageNode& node) {
+    m_result += "(" + node.type.lexeme + " " + node.name + ")";
+}
+
+void AstPrinter::visit(StyleRuleNode& node) {
+    m_result += "(rule";
+    for (const auto& token : node.rule) {
+        m_result += " " + token.lexeme;
+    }
+    m_result += ")";
+}
+
+void AstPrinter::visit(ImportNode& node) {
+    m_result += "([Import] from \"" + node.path.lexeme + "\")";
+}
+
+void AstPrinter::visit(NamespaceNode& node) {
+    m_result += "([Namespace] " + node.name;
+    m_result += " ";
+    parenthesize("body", node.body);
     m_result += ")";
 }
 

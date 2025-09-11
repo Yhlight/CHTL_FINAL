@@ -171,6 +171,11 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o: \
  /app/CHTL/CHTLGenerator/../CHTLNode/AttributeNode.hpp \
  /app/CHTL/CHTLGenerator/../CHTLNode/TextNode.hpp \
  /app/CHTL/CHTLGenerator/../CHTLNode/CommentNode.hpp \
+ /app/CHTL/CHTLGenerator/../CHTLNode/TemplateUsageNode.hpp \
+ /app/CHTL/CHTLGenerator/../CHTLNode/StyleRuleNode.hpp \
+ /app/CHTL/CHTLGenerator/../CHTLNode/CustomDefinitionNode.hpp \
+ /app/CHTL/CHTLGenerator/../CHTLNode/ImportNode.hpp \
+ /app/CHTL/CHTLGenerator/../CHTLNode/NamespaceNode.hpp \
  /app/CHTL/CHTLGenerator/../CSSExt/ExpressionParser.hpp \
  /app/CHTL/CHTLGenerator/../CSSExt/Expression.hpp \
  /app/CHTL/CHTLGenerator/../CSSExt/ExpressionEvaluator.hpp \
@@ -194,4 +199,4 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o: \
  /usr/include/c++/13/bits/basic_ios.tcc /usr/include/c++/13/ostream \
  /usr/include/c++/13/bits/ostream.tcc \
  /usr/include/c++/13/bits/istream.tcc \
- /usr/include/c++/13/bits/sstream.tcc /usr/include/c++/13/iostream
+ /usr/include/c++/13/bits/sstream.tcc

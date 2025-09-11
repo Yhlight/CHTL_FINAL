@@ -2,6 +2,11 @@
 #include <stdexcept>
 #include "../CHTLNode/StyleNode.hpp" // For StyleNode and StyleRule
 #include "../CHTLNode/TemplateDefinitionNode.hpp"
+#include "../CHTLNode/TemplateUsageNode.hpp"
+#include "../CHTLNode/StyleRuleNode.hpp"
+#include "../CHTLNode/CustomDefinitionNode.hpp"
+#include "../CHTLNode/ImportNode.hpp"
+#include "../CHTLNode/NamespaceNode.hpp"
 
 namespace CHTL {
 
@@ -19,8 +24,23 @@ std::vector<NodePtr> Parser::parse() {
 
 NodePtr Parser::declaration() {
     try {
-        if (match({TokenType::TEMPLATE})) {
-            return templateDefinition();
+        if (match({TokenType::LEFT_BRACKET})) {
+            if (match({TokenType::TEMPLATE})) {
+                consume(TokenType::RIGHT_BRACKET, "Expect ']' after [Template.");
+                return templateDefinition();
+            }
+            if (match({TokenType::CUSTOM})) {
+                consume(TokenType::RIGHT_BRACKET, "Expect ']' after [Custom.");
+                return customDefinition();
+            }
+            if (match({TokenType::IMPORT})) {
+                consume(TokenType::RIGHT_BRACKET, "Expect ']' after [Import.");
+                return importStatement();
+            }
+            if (match({TokenType::NAMESPACE})) {
+                consume(TokenType::RIGHT_BRACKET, "Expect ']' after [Namespace.");
+                return namespaceStatement();
+            }
         }
         if (match({TokenType::GENERATOR_COMMENT})) {
             auto comment = std::make_shared<CommentNode>();
@@ -50,7 +70,21 @@ NodePtr Parser::element() {
     consume(TokenType::LEFT_BRACE, "Expect '{' after element name.");
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        if (peek().type == TokenType::GENERATOR_COMMENT) {
+        if (match({TokenType::AT})) {
+            auto usage = std::make_shared<TemplateUsageNode>();
+            usage->line = previous().line;
+
+            Token template_type = consume(TokenType::IDENTIFIER, "Expect template type after '@'.");
+            if (template_type.lexeme != "Element") {
+                throw std::runtime_error("Only @Element templates can be used here.");
+            }
+            usage->type = template_type;
+
+            usage->name = consume(TokenType::IDENTIFIER, "Expect template name after type.").lexeme;
+            consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+            node->children.push_back(usage);
+        }
+        else if (peek().type == TokenType::GENERATOR_COMMENT) {
             advance(); // Consume the comment token
             auto comment = std::make_shared<CommentNode>();
             comment->content = previous().lexeme;
@@ -87,6 +121,53 @@ NodePtr Parser::element() {
     }
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' after element block.");
+    return node;
+}
+
+NodePtr Parser::customDefinition() {
+    auto node = std::make_shared<CustomDefinitionNode>();
+    node->line = previous().line;
+
+    consume(TokenType::AT, "Expect '@' after [Custom].");
+    Token type = consume(TokenType::IDENTIFIER, "Expect custom type (Style, Element, Var).");
+    node->name = consume(TokenType::IDENTIFIER, "Expect custom name.").lexeme;
+
+    if (type.lexeme == "Style") {
+        node->customType = TemplateType::STYLE;
+        consume(TokenType::LEFT_BRACE, "Expect '{' after custom style name.");
+        // For now, parsing the body is the same as for templates
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            StyleRule rule;
+            while (!check(TokenType::SEMICOLON) && !check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                rule.push_back(advance());
+            }
+            if (match({TokenType::SEMICOLON})) {
+                rule.push_back(previous());
+            }
+            if (!rule.empty()) {
+                node->styleRules.push_back(rule);
+            }
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' after custom style body.");
+    } else if (type.lexeme == "Element") {
+        node->customType = TemplateType::ELEMENT;
+        consume(TokenType::LEFT_BRACE, "Expect '{' after custom element name.");
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            node->bodyNodes.push_back(declaration());
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' after custom element body.");
+    } else if (type.lexeme == "Var") {
+        node->customType = TemplateType::VAR;
+        // TODO: Implement Var custom parsing
+        consume(TokenType::LEFT_BRACE, "Expect '{' for Var custom.");
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            advance(); // Just consume tokens for now
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' after Var custom.");
+    } else {
+        throw std::runtime_error("Unknown custom type: " + type.lexeme);
+    }
+
     return node;
 }
 
@@ -128,15 +209,29 @@ NodePtr Parser::styleBlock() {
     consume(TokenType::LEFT_BRACE, "Expect '{' after 'style'.");
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        StyleRule rule;
-        while (!check(TokenType::SEMICOLON) && !check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            rule.push_back(advance());
-        }
-        if (match({TokenType::SEMICOLON})) {
-            rule.push_back(previous()); // include the semicolon in the rule
-        }
-        if (!rule.empty()) {
-            node->rules.push_back(rule);
+        if (match({TokenType::AT})) {
+            auto usage = std::make_shared<TemplateUsageNode>();
+            usage->line = previous().line;
+            Token template_type = consume(TokenType::IDENTIFIER, "Expect template type after '@'.");
+            if (template_type.lexeme != "Style") {
+                 throw std::runtime_error("Only @Style templates can be used here.");
+            }
+            usage->type = template_type;
+            usage->name = consume(TokenType::IDENTIFIER, "Expect template name after type.").lexeme;
+            consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+            node->children.push_back(usage);
+        } else {
+            auto ruleNode = std::make_shared<StyleRuleNode>();
+            ruleNode->line = peek().line;
+            while (!check(TokenType::SEMICOLON) && !check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                ruleNode->rule.push_back(advance());
+            }
+            if (match({TokenType::SEMICOLON})) {
+                ruleNode->rule.push_back(previous());
+            }
+            if (!ruleNode->rule.empty()) {
+                node->children.push_back(ruleNode);
+            }
         }
     }
 
@@ -186,6 +281,38 @@ NodePtr Parser::templateDefinition() {
     } else {
         throw std::runtime_error("Unknown template type: " + type.lexeme);
     }
+
+    return node;
+}
+
+
+NodePtr Parser::importStatement() {
+    // [Import] @Chtl from "path.chtl"
+    // For now, we only parse the simplest form
+    consume(TokenType::AT, "Expect '@' after [Import].");
+    consume(TokenType::IDENTIFIER, "Expect import type (e.g. Chtl).");
+    consume(TokenType::FROM, "Expect 'from' after import type.");
+
+    auto node = std::make_shared<ImportNode>();
+    node->line = previous().line;
+    node->path = consume(TokenType::STRING, "Expect path string after 'from'.");
+
+    return node;
+}
+
+NodePtr Parser::namespaceStatement() {
+    auto node = std::make_shared<NamespaceNode>();
+    node->line = previous().line;
+    node->name = consume(TokenType::IDENTIFIER, "Expect namespace name.").lexeme;
+
+    if (match({TokenType::LEFT_BRACE})) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            node->body.push_back(declaration());
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' after namespace body.");
+    }
+    // Namespace can also be declared without braces, applying to the rest of the file.
+    // This would require parser state changes, so we'll only handle blocks for now.
 
     return node;
 }

@@ -8,6 +8,11 @@ namespace CHTL {
     class CommentNode;
     class StyleNode;
     class TemplateDefinitionNode;
+    class TemplateUsageNode;
+    class StyleRuleNode;
+    class CustomDefinitionNode;
+    class ImportNode;
+    class NamespaceNode;
 }
 
 namespace CHTL {
@@ -21,6 +26,11 @@ public:
     virtual void visit(CommentNode& node) = 0;
     virtual void visit(StyleNode& node) = 0;
     virtual void visit(TemplateDefinitionNode& node) = 0;
+    virtual void visit(TemplateUsageNode& node) = 0;
+    virtual void visit(StyleRuleNode& node) = 0;
+    virtual void visit(CustomDefinitionNode& node) = 0;
+    virtual void visit(ImportNode& node) = 0;
+    virtual void visit(NamespaceNode& node) = 0;
 };
 
 } // namespace CHTL

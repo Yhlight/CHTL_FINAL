@@ -260,6 +260,30 @@ CHTLNode/CommentNode.cpp.s:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/CommentNode.cpp.s
 .PHONY : CHTLNode/CommentNode.cpp.s
 
+CHTLNode/CustomDefinitionNode.o: CHTLNode/CustomDefinitionNode.cpp.o
+.PHONY : CHTLNode/CustomDefinitionNode.o
+
+# target to build an object file
+CHTLNode/CustomDefinitionNode.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/CustomDefinitionNode.cpp.o
+.PHONY : CHTLNode/CustomDefinitionNode.cpp.o
+
+CHTLNode/CustomDefinitionNode.i: CHTLNode/CustomDefinitionNode.cpp.i
+.PHONY : CHTLNode/CustomDefinitionNode.i
+
+# target to preprocess a source file
+CHTLNode/CustomDefinitionNode.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/CustomDefinitionNode.cpp.i
+.PHONY : CHTLNode/CustomDefinitionNode.cpp.i
+
+CHTLNode/CustomDefinitionNode.s: CHTLNode/CustomDefinitionNode.cpp.s
+.PHONY : CHTLNode/CustomDefinitionNode.s
+
+# target to generate assembly for a file
+CHTLNode/CustomDefinitionNode.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/CustomDefinitionNode.cpp.s
+.PHONY : CHTLNode/CustomDefinitionNode.cpp.s
+
 CHTLNode/ElementNode.o: CHTLNode/ElementNode.cpp.o
 .PHONY : CHTLNode/ElementNode.o
 
@@ -283,6 +307,54 @@ CHTLNode/ElementNode.s: CHTLNode/ElementNode.cpp.s
 CHTLNode/ElementNode.cpp.s:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/ElementNode.cpp.s
 .PHONY : CHTLNode/ElementNode.cpp.s
+
+CHTLNode/ImportNode.o: CHTLNode/ImportNode.cpp.o
+.PHONY : CHTLNode/ImportNode.o
+
+# target to build an object file
+CHTLNode/ImportNode.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/ImportNode.cpp.o
+.PHONY : CHTLNode/ImportNode.cpp.o
+
+CHTLNode/ImportNode.i: CHTLNode/ImportNode.cpp.i
+.PHONY : CHTLNode/ImportNode.i
+
+# target to preprocess a source file
+CHTLNode/ImportNode.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/ImportNode.cpp.i
+.PHONY : CHTLNode/ImportNode.cpp.i
+
+CHTLNode/ImportNode.s: CHTLNode/ImportNode.cpp.s
+.PHONY : CHTLNode/ImportNode.s
+
+# target to generate assembly for a file
+CHTLNode/ImportNode.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/ImportNode.cpp.s
+.PHONY : CHTLNode/ImportNode.cpp.s
+
+CHTLNode/NamespaceNode.o: CHTLNode/NamespaceNode.cpp.o
+.PHONY : CHTLNode/NamespaceNode.o
+
+# target to build an object file
+CHTLNode/NamespaceNode.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/NamespaceNode.cpp.o
+.PHONY : CHTLNode/NamespaceNode.cpp.o
+
+CHTLNode/NamespaceNode.i: CHTLNode/NamespaceNode.cpp.i
+.PHONY : CHTLNode/NamespaceNode.i
+
+# target to preprocess a source file
+CHTLNode/NamespaceNode.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/NamespaceNode.cpp.i
+.PHONY : CHTLNode/NamespaceNode.cpp.i
+
+CHTLNode/NamespaceNode.s: CHTLNode/NamespaceNode.cpp.s
+.PHONY : CHTLNode/NamespaceNode.s
+
+# target to generate assembly for a file
+CHTLNode/NamespaceNode.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/NamespaceNode.cpp.s
+.PHONY : CHTLNode/NamespaceNode.cpp.s
 
 CHTLNode/StyleNode.o: CHTLNode/StyleNode.cpp.o
 .PHONY : CHTLNode/StyleNode.o
@@ -308,6 +380,30 @@ CHTLNode/StyleNode.cpp.s:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/StyleNode.cpp.s
 .PHONY : CHTLNode/StyleNode.cpp.s
 
+CHTLNode/StyleRuleNode.o: CHTLNode/StyleRuleNode.cpp.o
+.PHONY : CHTLNode/StyleRuleNode.o
+
+# target to build an object file
+CHTLNode/StyleRuleNode.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/StyleRuleNode.cpp.o
+.PHONY : CHTLNode/StyleRuleNode.cpp.o
+
+CHTLNode/StyleRuleNode.i: CHTLNode/StyleRuleNode.cpp.i
+.PHONY : CHTLNode/StyleRuleNode.i
+
+# target to preprocess a source file
+CHTLNode/StyleRuleNode.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/StyleRuleNode.cpp.i
+.PHONY : CHTLNode/StyleRuleNode.cpp.i
+
+CHTLNode/StyleRuleNode.s: CHTLNode/StyleRuleNode.cpp.s
+.PHONY : CHTLNode/StyleRuleNode.s
+
+# target to generate assembly for a file
+CHTLNode/StyleRuleNode.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/StyleRuleNode.cpp.s
+.PHONY : CHTLNode/StyleRuleNode.cpp.s
+
 CHTLNode/TemplateDefinitionNode.o: CHTLNode/TemplateDefinitionNode.cpp.o
 .PHONY : CHTLNode/TemplateDefinitionNode.o
 
@@ -331,6 +427,30 @@ CHTLNode/TemplateDefinitionNode.s: CHTLNode/TemplateDefinitionNode.cpp.s
 CHTLNode/TemplateDefinitionNode.cpp.s:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/TemplateDefinitionNode.cpp.s
 .PHONY : CHTLNode/TemplateDefinitionNode.cpp.s
+
+CHTLNode/TemplateUsageNode.o: CHTLNode/TemplateUsageNode.cpp.o
+.PHONY : CHTLNode/TemplateUsageNode.o
+
+# target to build an object file
+CHTLNode/TemplateUsageNode.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/TemplateUsageNode.cpp.o
+.PHONY : CHTLNode/TemplateUsageNode.cpp.o
+
+CHTLNode/TemplateUsageNode.i: CHTLNode/TemplateUsageNode.cpp.i
+.PHONY : CHTLNode/TemplateUsageNode.i
+
+# target to preprocess a source file
+CHTLNode/TemplateUsageNode.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/TemplateUsageNode.cpp.i
+.PHONY : CHTLNode/TemplateUsageNode.cpp.i
+
+CHTLNode/TemplateUsageNode.s: CHTLNode/TemplateUsageNode.cpp.s
+.PHONY : CHTLNode/TemplateUsageNode.s
+
+# target to generate assembly for a file
+CHTLNode/TemplateUsageNode.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/TemplateUsageNode.cpp.s
+.PHONY : CHTLNode/TemplateUsageNode.cpp.s
 
 CHTLNode/TextNode.o: CHTLNode/TextNode.cpp.o
 .PHONY : CHTLNode/TextNode.o
@@ -477,15 +597,30 @@ help:
 	@echo "... CHTLNode/CommentNode.o"
 	@echo "... CHTLNode/CommentNode.i"
 	@echo "... CHTLNode/CommentNode.s"
+	@echo "... CHTLNode/CustomDefinitionNode.o"
+	@echo "... CHTLNode/CustomDefinitionNode.i"
+	@echo "... CHTLNode/CustomDefinitionNode.s"
 	@echo "... CHTLNode/ElementNode.o"
 	@echo "... CHTLNode/ElementNode.i"
 	@echo "... CHTLNode/ElementNode.s"
+	@echo "... CHTLNode/ImportNode.o"
+	@echo "... CHTLNode/ImportNode.i"
+	@echo "... CHTLNode/ImportNode.s"
+	@echo "... CHTLNode/NamespaceNode.o"
+	@echo "... CHTLNode/NamespaceNode.i"
+	@echo "... CHTLNode/NamespaceNode.s"
 	@echo "... CHTLNode/StyleNode.o"
 	@echo "... CHTLNode/StyleNode.i"
 	@echo "... CHTLNode/StyleNode.s"
+	@echo "... CHTLNode/StyleRuleNode.o"
+	@echo "... CHTLNode/StyleRuleNode.i"
+	@echo "... CHTLNode/StyleRuleNode.s"
 	@echo "... CHTLNode/TemplateDefinitionNode.o"
 	@echo "... CHTLNode/TemplateDefinitionNode.i"
 	@echo "... CHTLNode/TemplateDefinitionNode.s"
+	@echo "... CHTLNode/TemplateUsageNode.o"
+	@echo "... CHTLNode/TemplateUsageNode.i"
+	@echo "... CHTLNode/TemplateUsageNode.s"
 	@echo "... CHTLNode/TextNode.o"
 	@echo "... CHTLNode/TextNode.i"
 	@echo "... CHTLNode/TextNode.s"

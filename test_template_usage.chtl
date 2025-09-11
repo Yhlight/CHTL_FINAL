@@ -1,0 +1,19 @@
+[Template] @Style RedText
+{
+	color: red;
+}
+
+[Template] @Element MyBox
+{
+    div {
+        style {
+            @Style RedText;
+            border: 1px solid black;
+        }
+        text { "This is a box from a template." }
+    }
+}
+
+body {
+    @Element MyBox;
+}

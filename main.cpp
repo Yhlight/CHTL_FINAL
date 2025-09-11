@@ -25,17 +25,19 @@ int main(int argc, char* argv[]) {
 
         // 3. Parse
         CHTL::Parser parser(tokens);
+        std::cout << "DEBUG: Lexer produced " << tokens.size() << " tokens." << std::endl;
         std::vector<CHTL::NodePtr> ast = parser.parse();
+        std::cout << "DEBUG: Parser produced " << ast.size() << " AST nodes." << std::endl;
 
-        // 4. Print AST for debugging
-        CHTL::AstPrinter printer;
-        std::string astString = printer.print(ast);
-        std::cout << astString << std::endl;
+        // 4. (Optional) Print AST for debugging
+        // CHTL::AstPrinter printer;
+        // std::string astString = printer.print(ast);
+        // std::cout << astString << std::endl;
 
-        // 5. (Optional) Generate HTML
-        // CHTL::HtmlGenerator generator;
-        // std::string html = generator.generate(ast);
-        // std::cout << html << std::endl;
+        // 5. Generate HTML
+        CHTL::HtmlGenerator generator;
+        std::string html = generator.generate(ast);
+        std::cout << html << std::endl;
 
 
     } catch (const std::exception& e) {

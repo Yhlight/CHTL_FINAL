@@ -15,7 +15,7 @@ class StyleNode : public BaseNode {
 public:
     void accept(AstVisitor& visitor) override;
 
-    std::vector<StyleRule> rules;
+    std::vector<NodePtr> children;
 };
 
 } // namespace CHTL

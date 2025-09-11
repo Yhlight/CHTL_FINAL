@@ -1,8 +1,7 @@
-CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o: \
- /app/CHTL/AstPrinter.cpp /usr/include/stdc-predef.h \
- /app/CHTL/AstPrinter.hpp /app/CHTL/CHTLNode/AstVisitor.hpp \
- /app/CHTL/CHTLNode/BaseNode.hpp /usr/include/c++/13/memory \
- /usr/include/c++/13/bits/memoryfwd.h \
+CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/NamespaceNode.cpp.o: \
+ /app/CHTL/CHTLNode/NamespaceNode.cpp /usr/include/stdc-predef.h \
+ /app/CHTL/CHTLNode/NamespaceNode.hpp /app/CHTL/CHTLNode/BaseNode.hpp \
+ /usr/include/c++/13/memory /usr/include/c++/13/bits/memoryfwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -154,19 +153,4 @@ CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o: \
  /usr/include/c++/13/bits/uses_allocator_args.h \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc /app/CHTL/CHTLNode/ElementNode.hpp \
- /app/CHTL/CHTLNode/AttributeNode.hpp \
- /app/CHTL/CHTLNode/../CHTLLexer/Token.hpp /usr/include/c++/13/variant \
- /usr/include/c++/13/bits/enable_special_members.h \
- /usr/include/c++/13/bits/parse_numbers.h /app/CHTL/CHTLNode/TextNode.hpp \
- /app/CHTL/CHTLNode/CommentNode.hpp /app/CHTL/CHTLNode/StyleNode.hpp \
- /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \
- /usr/include/c++/13/bits/node_handle.h \
- /usr/include/c++/13/bits/stl_map.h \
- /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h \
- /app/CHTL/CHTLNode/TemplateDefinitionNode.hpp \
- /app/CHTL/CHTLNode/TemplateUsageNode.hpp \
- /app/CHTL/CHTLNode/StyleRuleNode.hpp \
- /app/CHTL/CHTLNode/CustomDefinitionNode.hpp \
- /app/CHTL/CHTLNode/ImportNode.hpp /app/CHTL/CHTLNode/NamespaceNode.hpp
+ /usr/include/c++/13/bits/vector.tcc /app/CHTL/CHTLNode/AstVisitor.hpp

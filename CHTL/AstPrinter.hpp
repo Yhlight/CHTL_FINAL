@@ -17,6 +17,11 @@ public:
     void visit(CommentNode& node) override;
     void visit(StyleNode& node) override;
     void visit(TemplateDefinitionNode& node) override;
+    void visit(TemplateUsageNode& node) override;
+    void visit(StyleRuleNode& node) override;
+    void visit(CustomDefinitionNode& node) override;
+    void visit(ImportNode& node) override;
+    void visit(NamespaceNode& node) override;
 
 private:
     void parenthesize(const std::string& name, const std::vector<NodePtr>& nodes);

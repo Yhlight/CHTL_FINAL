@@ -172,4 +172,9 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLParser/Parser.cpp.o: \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
  /usr/include/c++/13/bits/erase_if.h \
- /app/CHTL/CHTLParser/../CHTLNode/TemplateDefinitionNode.hpp
+ /app/CHTL/CHTLParser/../CHTLNode/TemplateDefinitionNode.hpp \
+ /app/CHTL/CHTLParser/../CHTLNode/TemplateUsageNode.hpp \
+ /app/CHTL/CHTLParser/../CHTLNode/StyleRuleNode.hpp \
+ /app/CHTL/CHTLParser/../CHTLNode/CustomDefinitionNode.hpp \
+ /app/CHTL/CHTLParser/../CHTLNode/ImportNode.hpp \
+ /app/CHTL/CHTLParser/../CHTLNode/NamespaceNode.hpp

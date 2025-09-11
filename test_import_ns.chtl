@@ -1,0 +1,6 @@
+[Import] @Chtl from "another.chtl"
+
+[Namespace] MyStuff
+{
+    [Template] @Element MyButton { button { text: "Click Me"; } }
+}

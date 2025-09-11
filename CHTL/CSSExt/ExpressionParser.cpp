@@ -66,7 +66,12 @@ ExprPtr ExpressionParser::unary() {
 // primary -> IDENTIFIER | STRING | "(" expression ")"
 ExprPtr ExpressionParser::primary() {
     if (match({TokenType::IDENTIFIER, TokenType::STRING})) {
-        return std::make_shared<Literal>(previous());
+        Token start_token = previous();
+        // Greedily consume subsequent identifiers as part of a single literal value
+        while (check(TokenType::IDENTIFIER)) {
+            start_token.lexeme += " " + advance().lexeme;
+        }
+        return std::make_shared<Literal>(start_token);
     }
 
     if (match({TokenType::LEFT_PAREN})) {

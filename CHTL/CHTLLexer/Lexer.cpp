@@ -2,10 +2,29 @@
 #include <stdexcept>
 #include <cstring> // For strchr
 #include <iostream> // For debugging
+#include <map>
 
 namespace CHTL {
 
-Lexer::Lexer(const std::string& source) : m_source(source) {}
+static std::map<std::string, TokenType> keywords;
+
+void initializeKeywords() {
+    keywords["from"] = TokenType::FROM;
+    keywords["as"] = TokenType::AS;
+    // We can add the bracketed keywords here too, but without brackets.
+    // The parser will handle the brackets.
+    keywords["Template"] = TokenType::TEMPLATE;
+    keywords["Custom"] = TokenType::CUSTOM;
+    keywords["Import"] = TokenType::IMPORT;
+    keywords["Namespace"] = TokenType::NAMESPACE;
+}
+
+
+Lexer::Lexer(const std::string& source) : m_source(source) {
+    if (keywords.empty()) {
+        initializeKeywords();
+    }
+}
 
 std::vector<Token> Lexer::scanTokens() {
     while (m_current < m_source.length()) {
@@ -20,17 +39,7 @@ std::vector<Token> Lexer::scanTokens() {
 void Lexer::scanToken() {
     char c = advance();
     switch (c) {
-        case '[':
-            // This is a bit of a hack. A better lexer would handle all bracketed keywords.
-            if (m_source.substr(m_current, 8) == "Template]") {
-                std::cout << "DEBUG: Found [Template]" << std::endl;
-                m_current += 8;
-                addToken(TokenType::TEMPLATE);
-            } else {
-                std::cout << "DEBUG: Found [" << std::endl;
-                addToken(TokenType::LEFT_BRACKET);
-            }
-            break;
+        case '[': addToken(TokenType::LEFT_BRACKET); break;
         case ']': addToken(TokenType::RIGHT_BRACKET); break;
         case '@': addToken(TokenType::AT); break;
         case '(': addToken(TokenType::LEFT_PAREN); break;
@@ -166,7 +175,11 @@ void Lexer::identifier() {
     }
 
     std::string text = m_source.substr(m_start, m_current - m_start);
-    m_tokens.push_back({TokenType::IDENTIFIER, text, m_line});
+    TokenType type = TokenType::IDENTIFIER;
+    if (keywords.count(text)) {
+        type = keywords[text];
+    }
+    m_tokens.push_back({type, text, m_line});
 }
 
 } // namespace CHTL
