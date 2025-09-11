@@ -4,12 +4,9 @@
 #include "BaseNode.h"
 #include <string>
 
-// Represents a text literal in the CHTL source.
 class TextNode : public BaseNode {
 public:
     std::string content;
-
-    // Constructor to initialize the text node with its content.
     explicit TextNode(const std::string& text) : content(text) {}
 };
 

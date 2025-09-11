@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/chtl.dir/main.cpp.o CMakeFiles/chtl.dir/CHTL/CHTLLexer/Token.cpp.o CMakeFiles/chtl.dir/CHTL/CHTLLexer/Lexer.cpp.o -o chtl

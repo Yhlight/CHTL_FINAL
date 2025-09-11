@@ -1,0 +1,17 @@
+[Import] @Style from "/app/test.css" as MyStyles
+[Import] @Html from "/app/test.html" as MyHtml
+[Import] @JavaScript from "/app/test.js" as MyScript
+
+html {
+    head {
+        [Origin] @Style MyStyles;
+    }
+    body {
+        div {
+            class: "imported-style";
+            [Origin] @Html MyHtml;
+        }
+
+        [Origin] @JavaScript MyScript;
+    }
+}

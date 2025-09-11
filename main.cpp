@@ -5,11 +5,9 @@
 #include <sstream>
 
 #include "CHTL/CHTLContext.h"
-#include "Scanner/UnifiedScanner.h"
-#include "Lexer.h"
-#include "Parser.h"
-#include "Generator.h"
-#include "Token.h"
+#include "CHTL/CHTLLexer/Lexer.h"
+#include "CHTL/CHTLParser/Parser.h"
+#include "CHTL/CHTLGenerator/Generator.h"
 
 // Function to read a whole file into a string
 std::string readFile(const std::string& path) {
@@ -32,38 +30,21 @@ int main(int argc, char* argv[]) {
     std::string sourcePath = argv[1];
     std::string rawSource = readFile(sourcePath);
 
-    // 1. Unified Scanner
-    UnifiedScanner unifiedScanner;
-    ScannedSource scanned = unifiedScanner.scan(rawSource);
-
-    // 2. Setup Context
     CHTLContext context;
-    context.scriptBlocks = scanned.scriptBlocks;
-
-    // 3. Lexing
-    Lexer lexer(scanned.chtlSource);
+    Lexer lexer(rawSource);
     std::vector<Token> tokens = lexer.scanTokens();
 
-    // 4. Parsing
-    std::vector<std::unique_ptr<BaseNode>> topLevelNodes;
-    try {
-        Parser parser(tokens, context);
-        topLevelNodes = parser.parse();
-    } catch (const std::runtime_error& e) {
-        std::cerr << "Parsing Error: " << e.what() << std::endl;
-        return 1;
-    }
+    Parser parser(tokens, context);
+    std::vector<std::unique_ptr<BaseNode>> topLevelNodes = parser.parse();
 
-    // 5. Generating HTML
     Generator generator;
     std::stringstream finalHtml;
     for (const auto& node : topLevelNodes) {
-        if (dynamic_cast<ElementNode*>(node.get())) {
+        if (dynamic_cast<ElementNode*>(node.get()) || dynamic_cast<OriginNode*>(node.get())) {
              finalHtml << generator.generate(node.get(), context);
         }
     }
 
-    // 6. Print the final output
     std::cout << finalHtml.str() << std::endl;
 
     return 0;

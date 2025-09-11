@@ -4,10 +4,8 @@
 #include "../CHTLLexer/Token.h"
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/ElementNode.h"
-#include "../CHTLNode/StyleNode.h"
-#include "../CHTLNode/ScriptNode.h"
-#include "../CHTLNode/TemplateNode.h"
-#include "../CHTLNode/TemplateUsageNode.h"
+#include "../CHTLNode/OriginNode.h"
+#include "../CHTLNode/OriginUsageNode.h"
 #include "../CHTLContext.h"
 #include <vector>
 #include <memory>
@@ -22,25 +20,19 @@ private:
     CHTLContext& context;
     int current = 0;
 
-    // --- Parser Helper Methods ---
+    // Helper methods
     bool isAtEnd();
     Token peek();
     Token peekNext();
-    Token previous();
     Token advance();
+    bool match(TokenType type);
     bool check(TokenType type);
-    bool match(const std::vector<TokenType>& types);
 
-    // --- Grammar Parsing Methods ---
+    // Grammar parsing methods
     std::unique_ptr<ElementNode> parseElement();
-    void parseChildren(ElementNode* parent);
-    void parseAttribute(ElementNode* element);
-    std::string parseValue();
-    std::unique_ptr<TextNode> parseTextNode();
-    std::unique_ptr<CommentNode> parseCommentNode();
-    std::unique_ptr<StyleNode> parseStyleNode(ElementNode* parent);
-    std::unique_ptr<TemplateNode> parseTemplateDefinition();
-    std::unique_ptr<TemplateUsageNode> parseTemplateUsage();
+    std::unique_ptr<OriginNode> parseOriginBlock();
+    std::unique_ptr<OriginUsageNode> parseOriginUsage();
+    void parseImportStatement();
 };
 
 #endif // CHTL_PARSER_H

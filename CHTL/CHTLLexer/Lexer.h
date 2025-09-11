@@ -28,12 +28,11 @@ private:
     char peekNext();
 
     void addToken(TokenType type);
-    void addToken(TokenType type, const std::string& literal);
+    void addToken(TokenType type, const std::string& literal, const std::string& content);
 
     void scanString(char quoteType);
     void scanNumber();
     void scanIdentifier();
-
 };
 
 #endif // CHTL_LEXER_H

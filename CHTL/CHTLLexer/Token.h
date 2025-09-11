@@ -4,53 +4,31 @@
 #include <string>
 #include <vector>
 
-// Enum for all possible token types in CHTL
 enum class TokenType {
     // Single-character tokens
-    LEFT_BRACE, RIGHT_BRACE, // { }
-    LEFT_BRACKET, RIGHT_BRACKET, // [ ]
-    COLON, SEMICOLON, AT, // : ; @
+    LEFT_BRACE, RIGHT_BRACE,
+    LEFT_BRACKET, RIGHT_BRACKET,
+    COLON, SEMICOLON, AT,
 
-    // One or two character tokens
-    EQUAL, // =
-    SLASH, // /
-    STAR, // *
-    PLUS, // +
-    MINUS, // -
-    PERCENT, // %
-    GREATER, // >
-    LESS, // <
-    AMPERSAND, // &
-    DOT, // .
-    HASH, // #
-    QUESTION, // ?
+    // Operators
+    EQUAL, PLUS, MINUS, STAR, SLASH, PERCENT,
+    GREATER, LESS, AMPERSAND, DOT, HASH, QUESTION,
 
     // Multi-character tokens
-    STAR_STAR, // **
-
-    // Comment markers
-    LINE_COMMENT, // //
-    BLOCK_COMMENT_START, // /*
-    BLOCK_COMMENT_END, // */
+    STAR_STAR,
     GEN_COMMENT, // --
 
     // Literals
     IDENTIFIER,
     STRING,
     NUMBER,
-    UNQUOTED_LITERAL,
 
-    // Keywords (will be expanded later)
+    // Keywords
     TEXT,
     STYLE,
     SCRIPT,
-    KEYWORD_TEMPLATE,
-    KEYWORD_CUSTOM,
-    KEYWORD_DELETE,
-    KEYWORD_INSERT,
-    KEYWORD_AFTER,
-    KEYWORD_BEFORE,
-    KEYWORD_REPLACE,
+    KEYWORD_ORIGIN,
+    KEYWORD_IMPORT,
     KEYWORD_FROM,
     KEYWORD_AS,
 
@@ -59,13 +37,12 @@ enum class TokenType {
     END_OF_FILE
 };
 
-// A struct to represent a token
 struct Token {
     TokenType type;
     std::string lexeme;
-    int line; // Line number for error reporting
+    std::string content; // Used for [Origin] blocks
+    int line;
 
-    // Helper to convert token type to string for debugging
     std::string toString() const;
 };
 
