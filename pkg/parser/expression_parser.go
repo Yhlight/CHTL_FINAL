@@ -19,12 +19,17 @@ func NewExpressionParser(tokens []lexer.Token) *ExpressionParser {
 	p.prefixParseFns = make(map[lexer.TokenType]prefixParseFn)
 	p.registerPrefix(lexer.IDENT, p.parseIdentifier)
 	p.registerPrefix(lexer.NUMBER, p.parseNumberLiteral)
+	p.registerPrefix(lexer.STRING, p.parseStringLiteral)
 
 	p.infixParseFns = make(map[lexer.TokenType]infixParseFn)
 	p.registerInfix(lexer.PLUS, p.parseInfixExpression)
 	p.registerInfix(lexer.MINUS, p.parseInfixExpression)
 	p.registerInfix(lexer.SLASH, p.parseInfixExpression)
 	p.registerInfix(lexer.ASTERISK, p.parseInfixExpression)
+	p.registerInfix(lexer.GT, p.parseInfixExpression)
+	p.registerInfix(lexer.LT, p.parseInfixExpression)
+	p.registerInfix(lexer.QUESTION, p.parseConditionalExpression)
+	p.registerInfix(lexer.LPAREN, p.parseCallExpression)
 	return p
 }
 
@@ -90,12 +95,67 @@ func (p *ExpressionParser) parseInfixExpression(left ast.Expression) ast.Express
 	return expression
 }
 
+func (p *ExpressionParser) parseConditionalExpression(condition ast.Expression) ast.Expression {
+	exp := &ast.ConditionalExpression{
+		Token:     p.curToken(),
+		Condition: condition,
+	}
+	p.nextToken()
+	exp.Consequence = p.parseExpression(LOWEST)
+	if p.peekToken().Type != lexer.COLON {
+		return nil
+	}
+	p.nextToken()
+	p.nextToken()
+	exp.Alternative = p.parseExpression(LOWEST)
+	return exp
+}
+
+func (p *ExpressionParser) parseStringLiteral() ast.Expression {
+	return &ast.StringLiteral{Token: p.curToken(), Value: p.curToken().Literal}
+}
+
+func (p *ExpressionParser) parseCallExpression(function ast.Expression) ast.Expression {
+	exp := &ast.CallExpression{Token: p.curToken(), Function: function}
+	exp.Arguments = p.parseExpressionList(lexer.RPAREN)
+	return exp
+}
+
+func (p *ExpressionParser) parseExpressionList(end lexer.TokenType) []ast.Expression {
+	list := []ast.Expression{}
+
+	if p.peekToken().Type == end {
+		p.nextToken()
+		return list
+	}
+
+	p.nextToken()
+	list = append(list, p.parseExpression(LOWEST))
+
+	for p.peekToken().Type == lexer.COMMA {
+		p.nextToken()
+		p.nextToken()
+		list = append(list, p.parseExpression(LOWEST))
+	}
+
+	if p.peekToken().Type != end {
+		return nil
+	}
+	p.nextToken()
+
+	return list
+}
+
 func (p *ExpressionParser) peekPrecedence() int {
-	if pr, ok := precedences[p.peekToken().Type]; ok { return pr }
+	if pr, ok := precedences[p.peekToken().Type]; ok {
+		return pr
+	}
 	return LOWEST
 }
 func (p *ExpressionParser) curPrecedence() int {
-	if pr, ok := precedences[p.curToken().Type]; ok { return pr }
+	if pr, ok := precedences[p.curToken().Type]; ok {
+		return pr
+	}
 	return LOWEST
 }
 

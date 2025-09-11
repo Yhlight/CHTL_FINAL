@@ -2,6 +2,7 @@ package ast
 
 import (
 	"chtl/pkg/lexer"
+	"fmt"
 	"strings"
 )
 
@@ -43,6 +44,27 @@ type ImportStatement struct {
 func (is *ImportStatement) statementNode()       {}
 func (is *ImportStatement) TokenLiteral() string { return is.Token.Literal }
 func (is *ImportStatement) String() string       { var out strings.Builder; out.WriteString("[Import] " + is.ImportType + " from " + is.Path.String()); if is.Alias != nil { out.WriteString(" as " + is.Alias.String()) }; return out.String() }
+
+type OriginStatement struct {
+	Token   lexer.Token
+	Type    string
+	Content string
+}
+
+func (os *OriginStatement) statementNode()       {}
+func (os *OriginStatement) TokenLiteral() string { return os.Token.Literal }
+func (os *OriginStatement) String() string {
+	return fmt.Sprintf("[Origin] @%s { %s }", os.Type, os.Content)
+}
+
+type ScriptStatement struct {
+	Token   lexer.Token
+	Content string
+}
+
+func (ss *ScriptStatement) statementNode()       {}
+func (ss *ScriptStatement) TokenLiteral() string { return ss.Token.Literal }
+func (ss *ScriptStatement) String() string       { return "script { " + ss.Content + " }" }
 
 
 type Text struct {
@@ -111,7 +133,9 @@ type TemplateUsage struct {
 	TemplateType string
 	Name         *Identifier
 }
+
 func (tu *TemplateUsage) statementNode()       {}
+func (tu *TemplateUsage) expressionNode()      {}
 func (tu *TemplateUsage) TokenLiteral() string { return tu.Token.Literal }
 func (tu *TemplateUsage) String() string       { return "@" + tu.TemplateType + " " + tu.Name.String() + ";" }
 
@@ -133,6 +157,48 @@ type InfixExpression struct {
 func (ie *InfixExpression) expressionNode()      {}
 func (ie *InfixExpression) TokenLiteral() string { return ie.Token.Literal }
 func (ie *InfixExpression) String() string       { return "(" + ie.Left.String() + " " + ie.Operator + " " + ie.Right.String() + ")" }
+
+type CallExpression struct {
+	Token     lexer.Token
+	Function  Expression
+	Arguments []Expression
+}
+
+func (ce *CallExpression) expressionNode()      {}
+func (ce *CallExpression) TokenLiteral() string { return ce.Token.Literal }
+func (ce *CallExpression) String() string {
+	var out strings.Builder
+	args := []string{}
+	for _, a := range ce.Arguments {
+		args = append(args, a.String())
+	}
+	out.WriteString(ce.Function.String())
+	out.WriteString("(")
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
+	return out.String()
+}
+
+type ConditionalExpression struct {
+	Token       lexer.Token
+	Condition   Expression
+	Consequence Expression
+	Alternative Expression
+}
+
+func (ce *ConditionalExpression) expressionNode()      {}
+func (ce *ConditionalExpression) TokenLiteral() string { return ce.Token.Literal }
+func (ce *ConditionalExpression) String() string {
+	var out strings.Builder
+	out.WriteString("(")
+	out.WriteString(ce.Condition.String())
+	out.WriteString(" ? ")
+	out.WriteString(ce.Consequence.String())
+	out.WriteString(" : ")
+	out.WriteString(ce.Alternative.String())
+	out.WriteString(")")
+	return out.String()
+}
 
 type Identifier struct {
 	Token lexer.Token

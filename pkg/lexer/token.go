@@ -26,12 +26,18 @@ const (
 	BANG     TokenType = "!"
 	ASTERISK TokenType = "*"
 	SLASH    TokenType = "/"
+	QUESTION TokenType = "?"
+	LT       TokenType = "<"
+	GT       TokenType = ">"
 
 	// --- Delimiters ---
 	LBRACE    TokenType = "{"
 	RBRACE    TokenType = "}"
 	LBRACKET  TokenType = "["
 	RBRACKET  TokenType = "]"
+	LPAREN    TokenType = "("
+	RPAREN    TokenType = ")"
+	COMMA     TokenType = ","
 	AT        TokenType = "@"
 	SEMICOLON TokenType = ";"
 	DOT       TokenType = "."

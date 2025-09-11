@@ -47,6 +47,7 @@ func (l *Lexer) NextToken() Token {
 			return tok
 		}
 		tok = newToken(MINUS, l.ch)
+	case '!': tok = newToken(BANG, l.ch)
 	case '*': tok = newToken(ASTERISK, l.ch)
 	case '/':
 		if l.peekChar() == '/' {
@@ -61,10 +62,16 @@ func (l *Lexer) NextToken() Token {
 			return tok
 		}
 		tok = newToken(SLASH, l.ch)
+	case '<': tok = newToken(LT, l.ch)
+	case '>': tok = newToken(GT, l.ch)
+	case '?': tok = newToken(QUESTION, l.ch)
 	case '{': tok = newToken(LBRACE, l.ch)
 	case '}': tok = newToken(RBRACE, l.ch)
 	case '[': tok = newToken(LBRACKET, l.ch)
 	case ']': tok = newToken(RBRACKET, l.ch)
+	case '(': tok = newToken(LPAREN, l.ch)
+	case ')': tok = newToken(RPAREN, l.ch)
+	case ',': tok = newToken(COMMA, l.ch)
 	case '@': tok = newToken(AT, l.ch)
 	case '.': tok = newToken(DOT, l.ch)
 	case '#': tok = newToken(HASH, l.ch)
@@ -118,3 +125,16 @@ func isLetter(ch byte) bool { return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <
 func isDigit(ch byte) bool { return '0' <= ch && ch <= '9' }
 func isIdentifierChar(ch byte) bool { return isLetter(ch) || isDigit(ch) || ch == '-' }
 func newToken(tokenType TokenType, ch byte) Token { return Token{Type: tokenType, Literal: string(ch)} }
+
+func (l *Lexer) Input() string {
+	return l.input
+}
+
+func (l *Lexer) Position() int {
+	return l.position
+}
+
+func (l *Lexer) SetReadPosition(pos int) {
+	l.readPosition = pos
+	l.readChar()
+}

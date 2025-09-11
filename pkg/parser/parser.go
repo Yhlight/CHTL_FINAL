@@ -9,9 +9,12 @@ import (
 const (
 	_ int = iota
 	LOWEST
+	TERNARY
+	LESSGREATER
 	SUM
 	PRODUCT
 	PREFIX
+	CALL
 )
 
 var precedences = map[lexer.TokenType]int{
@@ -19,6 +22,10 @@ var precedences = map[lexer.TokenType]int{
 	lexer.MINUS:    SUM,
 	lexer.SLASH:    PRODUCT,
 	lexer.ASTERISK: PRODUCT,
+	lexer.LPAREN:   CALL,
+	lexer.LT:       LESSGREATER,
+	lexer.GT:       LESSGREATER,
+	lexer.QUESTION: TERNARY,
 }
 
 type (
@@ -46,11 +53,15 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(lexer.DOT, p.parsePrefixExpression)
 	p.registerPrefix(lexer.HASH, p.parsePrefixExpression)
 	p.registerPrefix(lexer.AMPERSAND, p.parsePrefixExpression)
+	p.registerPrefix(lexer.AT, p.parseTemplateUsageExpression)
+
 	p.infixParseFns = make(map[lexer.TokenType]infixParseFn)
 	p.registerInfix(lexer.PLUS, p.parseInfixExpression)
 	p.registerInfix(lexer.MINUS, p.parseInfixExpression)
 	p.registerInfix(lexer.SLASH, p.parseInfixExpression)
 	p.registerInfix(lexer.ASTERISK, p.parseInfixExpression)
+	p.registerInfix(lexer.LPAREN, p.parseCallExpression)
+
 	p.nextToken()
 	p.nextToken()
 	return p
@@ -95,12 +106,12 @@ func (p *Parser) parseStatement(inStyleBlock bool, program *ast.Program) ast.Sta
 				return p.parseTemplateDefinitionStatement()
 			case "Import":
 				return p.parseImportStatement()
+			case "Origin":
+				return p.parseOriginStatement()
 			}
 		}
 	case lexer.AT:
-		if inStyleBlock {
-			return p.parseTemplateUsageStatement()
-		}
+		return p.parseTemplateUsageStatement()
 	case lexer.IDENT:
 		if inStyleBlock {
 			if p.peekTokenIs(lexer.COLON) {
@@ -110,9 +121,17 @@ func (p *Parser) parseStatement(inStyleBlock bool, program *ast.Program) ast.Sta
 		} else {
 			switch p.curToken.Literal {
 			case "style":
-				if p.peekTokenIs(lexer.LBRACE) { return p.parseStyleStatement(program) }
+				if p.peekTokenIs(lexer.LBRACE) {
+					return p.parseStyleStatement(program)
+				}
 			case "text":
-				if p.peekTokenIs(lexer.LBRACE) { return p.parseTextStatement() }
+				if p.peekTokenIs(lexer.LBRACE) {
+					return p.parseTextStatement()
+				}
+			case "script":
+				if p.peekTokenIs(lexer.LBRACE) {
+					return p.parseScriptStatement()
+				}
 			}
 			if p.peekTokenIs(lexer.LBRACE) {
 				return p.parseElementStatement(program)
@@ -128,6 +147,89 @@ func (p *Parser) parseStatement(inStyleBlock bool, program *ast.Program) ast.Sta
 	return nil
 }
 
+func (p *Parser) parseOriginStatement() ast.Statement {
+	stmt := &ast.OriginStatement{Token: p.curToken}
+	if !p.expectPeek(lexer.IDENT) || p.curToken.Literal != "Origin" {
+		p.errors = append(p.errors, "Expected 'Origin' keyword after '['")
+		return nil
+	}
+	if !p.expectPeek(lexer.RBRACKET) {
+		return nil
+	}
+	if !p.expectPeek(lexer.AT) {
+		return nil
+	}
+	if !p.expectPeek(lexer.IDENT) {
+		return nil
+	}
+	stmt.Type = p.curToken.Literal
+
+	if !p.expectPeek(lexer.LBRACE) {
+		return nil
+	}
+
+	startPos := p.l.Position() + 1
+	braceLevel := 1
+	input := p.l.Input()
+	i := startPos
+
+	for i < len(input) {
+		if input[i] == '{' {
+			braceLevel++
+		} else if input[i] == '}' {
+			braceLevel--
+			if braceLevel == 0 {
+				break
+			}
+		}
+		i++
+	}
+
+	if braceLevel != 0 {
+		p.errors = append(p.errors, "unterminated [Origin] block")
+		return nil
+	}
+
+	stmt.Content = input[startPos:i]
+	p.l.SetReadPosition(i)
+	p.nextToken() // curToken is now '}'
+	return stmt
+}
+
+func (p *Parser) parseScriptStatement() ast.Statement {
+	stmt := &ast.ScriptStatement{Token: p.curToken}
+	if !p.expectPeek(lexer.LBRACE) {
+		return nil
+	}
+
+	startPos := p.l.Position() + 1
+	braceLevel := 1
+	input := p.l.Input()
+	i := startPos
+
+	for i < len(input) {
+		if input[i] == '{' {
+			braceLevel++
+		} else if input[i] == '}' {
+			braceLevel--
+			if braceLevel == 0 {
+				break
+			}
+		}
+		i++
+	}
+
+	if braceLevel != 0 {
+		p.errors = append(p.errors, "unterminated script block")
+		return nil
+	}
+
+	stmt.Content = input[startPos:i]
+	p.l.SetReadPosition(i)
+	p.nextToken() // curToken is now '}'
+	return stmt
+}
+
 func (p *Parser) parseImportStatement() ast.Statement {
 	stmt := &ast.ImportStatement{Token: p.curToken}
 	p.nextToken() // consume '['
@@ -137,18 +239,28 @@ func (p *Parser) parseImportStatement() ast.Statement {
 		return nil
 	}
 
-	if !p.expectPeek(lexer.RBRACKET) { return nil }
-	if !p.expectPeek(lexer.AT) { return nil }
-	if !p.expectPeek(lexer.IDENT) { return nil }
+	if !p.expectPeek(lexer.RBRACKET) {
+		return nil
+	}
+	if !p.expectPeek(lexer.AT) {
+		return nil
+	}
+	if !p.expectPeek(lexer.IDENT) {
+		return nil
+	}
 	stmt.ImportType = "@" + p.curToken.Literal
 
-	if !p.expectPeek(lexer.FROM) { return nil }
+	if !p.expectPeek(lexer.FROM) {
+		return nil
+	}
 	p.nextToken()
 	stmt.Path = p.parseExpression(LOWEST)
 
 	if p.peekTokenIs(lexer.AS) {
 		p.nextToken()
-		if !p.expectPeek(lexer.IDENT) { return nil }
+		if !p.expectPeek(lexer.IDENT) {
+			return nil
+		}
 		stmt.Alias = p.parseIdentifier().(*ast.Identifier)
 	}
 
@@ -159,67 +271,108 @@ func (p *Parser) parseImportStatement() ast.Statement {
 	return stmt
 }
 
-
 func (p *Parser) parseTemplateDefinitionStatement() ast.Statement {
 	stmt := &ast.TemplateDefinition{Token: p.curToken}
 	if !p.expectPeek(lexer.IDENT) || p.curToken.Literal != "Template" {
 		p.errors = append(p.errors, "Expected 'Template' keyword after '['")
 		return nil
 	}
-	if !p.expectPeek(lexer.RBRACKET) { return nil }
-	if !p.expectPeek(lexer.AT) { return nil }
-	if !p.expectPeek(lexer.IDENT) { return nil }
+	if !p.expectPeek(lexer.RBRACKET) {
+		return nil
+	}
+	if !p.expectPeek(lexer.AT) {
+		return nil
+	}
+	if !p.expectPeek(lexer.IDENT) {
+		return nil
+	}
 	stmt.TemplateType = p.curToken.Literal
-	if !p.expectPeek(lexer.IDENT) { return nil }
+	if !p.expectPeek(lexer.IDENT) {
+		return nil
+	}
 	stmt.Name = p.parseIdentifier().(*ast.Identifier)
-	if !p.expectPeek(lexer.LBRACE) { return nil }
+	if !p.expectPeek(lexer.LBRACE) {
+		return nil
+	}
 	stmt.Body = p.parseBlockStatement(true, nil)
 	return stmt
 }
 
 func (p *Parser) parseTemplateUsageStatement() ast.Statement {
 	stmt := &ast.TemplateUsage{Token: p.curToken}
-	if !p.expectPeek(lexer.IDENT) { return nil }
+	if !p.expectPeek(lexer.IDENT) {
+		return nil
+	}
 	stmt.TemplateType = p.curToken.Literal
-	if !p.expectPeek(lexer.IDENT) { return nil }
+	if !p.expectPeek(lexer.IDENT) {
+		return nil
+	}
 	stmt.Name = p.parseIdentifier().(*ast.Identifier)
-	if !p.expectPeek(lexer.SEMICOLON) { return nil }
+	if !p.expectPeek(lexer.SEMICOLON) {
+		return nil
+	}
 	return stmt
+}
+
+func (p *Parser) parseTemplateUsageExpression() ast.Expression {
+	stmt := p.parseTemplateUsageStatement()
+	if stmt == nil {
+		return nil
+	}
+	return stmt.(ast.Expression)
 }
 
 func (p *Parser) parseElementStatement(program *ast.Program) *ast.Element {
 	element := &ast.Element{Token: p.curToken, Name: p.curToken.Literal}
-	if !p.expectPeek(lexer.LBRACE) { return nil }
+	if !p.expectPeek(lexer.LBRACE) {
+		return nil
+	}
 	element.Body = p.parseBlockStatement(false, program)
 	return element
 }
 
 func (p *Parser) parseTextStatement() *ast.Text {
 	text := &ast.Text{Token: p.curToken}
-	p.nextToken(); p.nextToken()
+	if !p.expectPeek(lexer.LBRACE) {
+		return nil
+	}
+	p.nextToken() // consume {
 	text.Content = p.parseExpression(LOWEST)
-	if !p.expectPeek(lexer.RBRACE) { return nil }
+	if !p.expectPeek(lexer.RBRACE) {
+		return nil
+	}
 	return text
 }
 
 func (p *Parser) parseAttributeStatement() *ast.Attribute {
 	attribute := &ast.Attribute{Token: p.curToken, Name: p.curToken.Literal}
-	p.nextToken(); p.nextToken()
+	if !p.peekTokenIs(lexer.COLON) && !p.peekTokenIs(lexer.ASSIGN) {
+		p.peekError(lexer.COLON)
+		return nil
+	}
+	p.nextToken() // consume name
+	p.nextToken() // consume : or =
 	attribute.Value = p.parseExpression(LOWEST)
-	if !p.expectPeek(lexer.SEMICOLON) { return nil }
+	if !p.expectPeek(lexer.SEMICOLON) {
+		return nil
+	}
 	return attribute
 }
 
 func (p *Parser) parseStyleStatement(program *ast.Program) *ast.Style {
 	style := &ast.Style{Token: p.curToken}
-	if !p.expectPeek(lexer.LBRACE) { return nil }
+	if !p.expectPeek(lexer.LBRACE) {
+		return nil
+	}
 	style.Body = p.parseBlockStatement(true, program)
 	return style
 }
 
 func (p *Parser) parseStyleRuleStatement() *ast.StyleRule {
 	rule := &ast.StyleRule{Token: p.curToken, Name: p.curToken.Literal}
-	if !p.expectPeek(lexer.COLON) { return nil }
+	if !p.expectPeek(lexer.COLON) {
+		return nil
+	}
 	p.nextToken()
 
 	rawExpr := &ast.RawExpression{Tokens: []lexer.Token{}}
@@ -239,7 +392,9 @@ func (p *Parser) parseStyleRuleStatement() *ast.StyleRule {
 func (p *Parser) parseRulesetStatement(program *ast.Program) *ast.Ruleset {
 	ruleset := &ast.Ruleset{Token: p.curToken}
 	ruleset.Selector = p.parseExpression(PREFIX)
-	if !p.expectPeek(lexer.LBRACE) { return nil }
+	if !p.expectPeek(lexer.LBRACE) {
+		return nil
+	}
 	ruleset.Body = p.parseBlockStatement(true, program)
 	return ruleset
 }
@@ -263,11 +418,16 @@ func (p *Parser) parseBlockStatement(inStyleBlock bool, program *ast.Program) *a
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
-	if prefix == nil { p.noPrefixParseFnError(p.curToken.Type); return nil }
+	if prefix == nil {
+		p.noPrefixParseFnError(p.curToken.Type)
+		return nil
+	}
 	leftExp := prefix()
 	for !p.peekTokenIs(lexer.SEMICOLON) && precedence < p.peekPrecedence() {
 		infix := p.infixParseFns[p.peekToken.Type]
-		if infix == nil { return leftExp }
+		if infix == nil {
+			return leftExp
+		}
 		p.nextToken()
 		leftExp = infix(leftExp)
 	}
@@ -289,15 +449,75 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	return expression
 }
 
-func (p *Parser) parseIdentifier() ast.Expression { return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal} }
-func (p *Parser) parseStringLiteral() ast.Expression { return &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal} }
-func (p *Parser) parseNumberLiteral() ast.Expression { return &ast.NumberLiteral{Token: p.curToken, Value: p.curToken.Literal} }
-func (p *Parser) peekPrecedence() int { if p, ok := precedences[p.peekToken.Type]; ok { return p }; return LOWEST }
-func (p *Parser) curPrecedence() int { if p, ok := precedences[p.curToken.Type]; ok { return p }; return LOWEST }
-func (p *Parser) registerPrefix(tokenType lexer.TokenType, fn prefixParseFn) { p.prefixParseFns[tokenType] = fn }
-func (p *Parser) registerInfix(tokenType lexer.TokenType, fn infixParseFn) { p.infixParseFns[tokenType] = fn }
-func (p *Parser) noPrefixParseFnError(t lexer.TokenType) { p.errors = append(p.errors, fmt.Sprintf("no prefix parse function for %s found", t)) }
-func (p *Parser) curTokenIs(t lexer.TokenType) bool { return p.curToken.Type == t }
-func (p *Parser) peekTokenIs(t lexer.TokenType) bool { return p.peekToken.Type == t }
-func (p *Parser) expectPeek(t lexer.TokenType) bool { if p.peekTokenIs(t) { p.nextToken(); return true }; p.peekError(t); return false }
-func (p *Parser) peekError(t lexer.TokenType) { p.errors = append(p.errors, fmt.Sprintf("expected next token to be %s, got %s instead", t, p.peekToken.Type)) }
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+}
+func (p *Parser) parseStringLiteral() ast.Expression {
+	return &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}
+}
+func (p *Parser) parseNumberLiteral() ast.Expression {
+	return &ast.NumberLiteral{Token: p.curToken, Value: p.curToken.Literal}
+}
+func (p *Parser) peekPrecedence() int {
+	if p, ok := precedences[p.peekToken.Type]; ok {
+		return p
+	}
+	return LOWEST
+}
+func (p *Parser) curPrecedence() int {
+	if p, ok := precedences[p.curToken.Type]; ok {
+		return p
+	}
+	return LOWEST
+}
+func (p *Parser) registerPrefix(tokenType lexer.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+func (p *Parser) registerInfix(tokenType lexer.TokenType, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
+}
+func (p *Parser) noPrefixParseFnError(t lexer.TokenType) {
+	p.errors = append(p.errors, fmt.Sprintf("no prefix parse function for %s found", t))
+}
+func (p *Parser) curTokenIs(t lexer.TokenType) bool {
+	return p.curToken.Type == t
+}
+func (p *Parser) peekTokenIs(t lexer.TokenType) bool {
+	return p.peekToken.Type == t
+}
+func (p *Parser) expectPeek(t lexer.TokenType) bool {
+	if p.peekTokenIs(t) {
+		p.nextToken()
+		return true
+	}
+	p.peekError(t)
+	return false
+}
+func (p *Parser) peekError(t lexer.TokenType) {
+	p.errors = append(p.errors, fmt.Sprintf("expected next token to be %s, got %s instead", t, p.peekToken.Type))
+}
+
+func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
+	exp := &ast.CallExpression{Token: p.curToken, Function: function}
+	exp.Arguments = p.parseExpressionList(lexer.RPAREN)
+	return exp
+}
+
+func (p *Parser) parseExpressionList(end lexer.TokenType) []ast.Expression {
+	list := []ast.Expression{}
+	if p.peekTokenIs(end) {
+		p.nextToken()
+		return list
+	}
+	p.nextToken()
+	list = append(list, p.parseExpression(LOWEST))
+	for p.peekTokenIs(lexer.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		list = append(list, p.parseExpression(LOWEST))
+	}
+	if !p.expectPeek(end) {
+		return nil
+	}
+	return list
+}
