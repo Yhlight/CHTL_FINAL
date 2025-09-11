@@ -52,6 +52,10 @@ CHTLJSToken CHTLJSLexer::nextToken() {
         case '=':
             if (peek() == '>') { advance(); return makeToken(CHTLJSTokenType::FatArrow); }
             return makeToken(CHTLJSTokenType::Equals);
+        case '-':
+            if (peek() == '>') { advance(); return makeToken(CHTLJSTokenType::Arrow); }
+            // For now, CHTL JS doesn't have subtraction, so a lone '-' is an error.
+            return errorToken("Unexpected character '-'. Use spaces for subtraction in JS.");
         case '"':
         case '\'':
             return stringLiteral(c);

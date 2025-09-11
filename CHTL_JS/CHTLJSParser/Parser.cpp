@@ -31,7 +31,7 @@ CHTLJSNodePtr CHTLJSParser::parseExpressionStatement() {
 CHTLJSNodePtr CHTLJSParser::parseExpression() {
     CHTLJSNodePtr expr = parsePrimary();
 
-    while (match({CHTLJSTokenType::Dot})) {
+    while (match({CHTLJSTokenType::Dot, CHTLJSTokenType::Arrow})) {
         expr = parseMethodCall(std::move(expr));
     }
 
@@ -39,6 +39,9 @@ CHTLJSNodePtr CHTLJSParser::parseExpression() {
 }
 
 CHTLJSNodePtr CHTLJSParser::parsePrimary() {
+    if (match({CHTLJSTokenType::Animate})) {
+        return parseAnimateBlock();
+    }
     if (match({CHTLJSTokenType::DoubleCurlyOpen})) {
         std::string selector_str;
         while (peek().type != CHTLJSTokenType::DoubleCurlyClose && !isAtEnd()) {
@@ -56,7 +59,10 @@ CHTLJSNodePtr CHTLJSParser::parseMethodCall(CHTLJSNodePtr callee) {
     CHTLJSNodePtr arguments;
     if (methodName.value == "listen") {
         arguments = parseListenBlock();
-    } else {
+    } else if (methodName.value == "delegate") {
+        arguments = parseDelegateBlock();
+    }
+    else {
         throw error(methodName, "Unsupported method call.");
     }
 
@@ -95,6 +101,28 @@ CHTLJSNodePtr CHTLJSParser::parseListenBlock() {
 
     consume(CHTLJSTokenType::CloseBrace, "Expect '}' after listen block.");
     return listenNode;
+}
+
+CHTLJSNodePtr CHTLJSParser::parseDelegateBlock() {
+    consume(CHTLJSTokenType::Delegate, "Expect 'delegate' keyword.");
+    consume(CHTLJSTokenType::OpenBrace, "Expect '{' after 'delegate'.");
+
+    auto delegateNode = std::make_unique<DelegateNode>();
+
+    while (peek().type != CHTLJSTokenType::CloseBrace && !isAtEnd()) {
+        const CHTLJSToken& key = consume(CHTLJSTokenType::Identifier, "Expect property name (e.g., 'target', 'click').");
+        consume(CHTLJSTokenType::Colon, "Expect ':' after property name.");
+
+        std::string valueStr = consumeValue();
+        delegateNode->properties.push_back(std::make_unique<CHTLJSPropertyNode>(key.value, valueStr));
+
+        if (peek().type == CHTLJSTokenType::Comma) {
+            advance();
+        }
+    }
+
+    consume(CHTLJSTokenType::CloseBrace, "Expect '}' after delegate block.");
+    return delegateNode;
 }
 
 CHTLJSNodePtr CHTLJSParser::parseAnimateBlock() {

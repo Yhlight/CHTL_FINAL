@@ -1,4 +1,5 @@
 #include "Generator.h"
+#include "../CHTLJSNode/Node.h" // For DelegateNode
 
 // Helper to trim leading/trailing whitespace
 std::string trim(const std::string& str) {
@@ -38,54 +39,55 @@ void CHTLJSGenerator::visit(ListenNode* node) {
 }
 
 void CHTLJSGenerator::visit(AnimateNode* node) {
-    std::string target;
-    std::vector<std::string> options_list;
-    std::vector<std::string> keyframes_list;
+    std::string target_str;
+    std::string options_str = "{";
+    std::string keyframes_str = "[";
 
+    // The parser logic for animate is very basic, it just gives us key-value pairs.
+    // We have to do more work here to generate correct JS.
     for (const auto& prop : node->properties) {
+        std::string key = prop->key;
         std::string value = trim(prop->value);
-        if (prop->key == "target") {
-            target = value;
-        } else if (prop->key == "duration" || prop->key == "delay" || prop->key == "loop") {
-            options_list.push_back(prop->key + ": " + value);
-        } else if (prop->key == "easing" || prop->key == "direction") {
-            options_list.push_back(prop->key + ": '" + value + "'");
-        } else if (prop->key == "begin") {
-            value.erase(0, value.find_first_not_of(" \t\n\r{"));
-            value.erase(value.find_last_not_of(" \t\n\r}") + 1);
-            keyframes_list.push_back("{ \"offset\": 0, " + value + " }");
-        } else if (prop->key == "end") {
-            value.erase(0, value.find_first_not_of(" \t\n\r{"));
-            value.erase(value.find_last_not_of(" \t\n\r}") + 1);
-            keyframes_list.push_back("{ \"offset\": 1, " + value + " }");
+
+        if (key == "target") {
+            // The value of target is CHTL JS code, e.g. {{selector}}
+            // We need a sub-compiler/generator to handle this.
+            // This is a limitation of the current setup. For now, we'll assume it's a simple selector.
+             if (value.find("{{") != std::string::npos) {
+                size_t start = value.find("{{");
+                size_t end = value.find("}}");
+                std::string selector = value.substr(start + 2, end - start - 2);
+                target_str = "document.querySelector('" + trim(selector) + "')";
+            } else {
+                target_str = value; // Assume it's already a JS variable
+            }
+        } else if (key == "duration" || key == "delay" || key == "loop") {
+            options_str += key + ": " + value + ", ";
+        } else if (key == "easing" || key == "direction") {
+            options_str += key + ": '" + value + "', ";
+        } else if (key == "begin") {
+            keyframes_str += "{ \"offset\": 0, " + value + " }, ";
+        } else if (key == "end") {
+            keyframes_str += "{ \"offset\": 1, " + value + " }, ";
+        } else if (key == "when") {
+             // This is a simplified handler for 'when'. A real one would parse the array.
+             keyframes_str += value + ", ";
         }
     }
 
-    // Build options string
-    std::string options_str = "{ ";
-    for(size_t i = 0; i < options_list.size(); ++i) {
-        options_str += options_list[i] + (i < options_list.size() - 1 ? ", " : "");
-    }
-    options_str += " }";
+    // Clean up trailing commas
+    if (options_str.length() > 1) options_str.pop_back(); options_str.pop_back();
+    if (keyframes_str.length() > 1) keyframes_str.pop_back(); keyframes_str.pop_back();
 
-    // Build keyframes string
-    std::string keyframes_str = "[ ";
-    for(size_t i = 0; i < keyframes_list.size(); ++i) {
-        keyframes_str += keyframes_list[i] + (i < keyframes_list.size() - 1 ? ", " : "");
-    }
-    keyframes_str += " ]";
+    options_str += "}";
+    keyframes_str += "]";
 
-
-    // Replace the {{...}} syntax with a document.querySelector call
-    if (target.find("{{") != std::string::npos) {
-        size_t start = target.find("{{");
-        size_t end = target.find("}}");
-        std::string selector = target.substr(start + 2, end - start - 2);
-        selector = trim(selector);
-        target = "document.querySelector('" + selector + "')";
+    if (target_str.empty()) {
+        output << "/* CHTL JS Error: 'animate' block requires a 'target' property. */";
+        return;
     }
 
-    output << target << ".animate(" << keyframes_str << ", " << options_str << ")";
+    output << target_str << ".animate(" << keyframes_str << ", " << options_str << ")";
 }
 
 void CHTLJSGenerator::visit(VirDeclNode* node) {
@@ -95,7 +97,9 @@ void CHTLJSGenerator::visit(VirDeclNode* node) {
 }
 
 void CHTLJSGenerator::visit(EnhancedSelectorNode* node) {
-    output << "`{{ " << node->selector << " }}`";
+    // Basic implementation: assumes querySelector. A more advanced version
+    // could check for multiple results and use querySelectorAll.
+    output << "document.querySelector('" << node->selector << "')";
 }
 
 void CHTLJSGenerator::visit(CHTLJSPropertyNode* node) {
@@ -106,10 +110,64 @@ void CHTLJSGenerator::visit(MethodCallNode* node) {
     if (node->methodName == "listen") {
         if (auto* listenBlock = dynamic_cast<ListenNode*>(node->arguments.get())) {
             for (const auto& handler : listenBlock->eventHandlers) {
-                // Generate `callee.addEventListener('event', callback);`
-                node->callee->accept(*this); // This will generate the selector
+                node->callee->accept(*this);
                 output << ".addEventListener('" << handler->key << "', " << trim(handler->value) << ");\n";
             }
         }
+    } else if (node->methodName == "delegate") {
+        if (auto* delegateBlock = dynamic_cast<DelegateNode*>(node->arguments.get())) {
+            // Extract target and event handlers from the delegate block
+            std::string target_selector_str;
+            std::map<std::string, std::string> event_handlers;
+            for (const auto& prop : delegateBlock->properties) {
+                if (prop->key == "target") {
+                    target_selector_str = trim(prop->value);
+                } else {
+                    event_handlers[prop->key] = trim(prop->value);
+                }
+            }
+
+            if (target_selector_str.empty()) {
+                output << "/* CHTL JS Error: 'delegate' block requires a 'target' property. */\n";
+                return;
+            }
+
+            // Generate the parent selector string by temporarily redirecting the output
+            std::stringstream parent_ss;
+            std::swap(parent_ss, output);
+            node->callee->accept(*this);
+            std::swap(parent_ss, output);
+            std::string parent_selector_str = parent_ss.str();
+
+            output << "(function() {\n";
+            output << "  window.__chtl_delegates = window.__chtl_delegates || {};\n";
+            output << "  const parentSelector = " << parent_selector_str << ";\n";
+            output << "  const parentId = parentSelector.id || parentSelector.tagName;\n"; // Simplified ID
+            output << "  if (!window.__chtl_delegates[parentId]) {\n";
+            output << "    window.__chtl_delegates[parentId] = { handlers: {}, listener: function(event) {\n";
+            output << "      const parentHandlers = window.__chtl_delegates[parentId].handlers;\n";
+            output << "      for (const childSelector in parentHandlers) {\n";
+            output << "        if (event.target.matches(childSelector)) {\n";
+            output << "          if (parentHandlers[childSelector][event.type]) {\n";
+            output << "            parentHandlers[childSelector][event.type].call(event.target, event);\n";
+            output << "          }\n        }\n      }\n    }};\n";
+            // Add listeners for all event types
+            for(const auto& pair : event_handlers) {
+                 output << "    parentSelector.addEventListener('" << pair.first << "', window.__chtl_delegates[parentId].listener);\n";
+            }
+            output << "  }\n";
+
+            // Add the specific handlers for this call
+            output << "  const childSelector = \"" << target_selector_str << "\";\n";
+            output << "  window.__chtl_delegates[parentId].handlers[childSelector] = window.__chtl_delegates[parentId].handlers[childSelector] || {};\n";
+            for(const auto& pair : event_handlers) {
+                 output << "  window.__chtl_delegates[parentId].handlers[childSelector]['" << pair.first << "'] = " << pair.second << ";\n";
+            }
+            output << "})();\n";
+        }
     }
+}
+
+void CHTLJSGenerator::visit(DelegateNode* node) {
+    // This node is handled by the MethodCallNode visitor
 }

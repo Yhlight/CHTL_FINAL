@@ -15,6 +15,7 @@ public:
     void visit(EnhancedSelectorNode* node) override;
     void visit(CHTLJSPropertyNode* node) override;
     void visit(MethodCallNode* node) override;
+    void visit(DelegateNode* node) override;
 
 private:
     std::stringstream output;

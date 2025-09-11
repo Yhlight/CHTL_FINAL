@@ -24,6 +24,7 @@ private:
     CHTLJSNodePtr parseMethodCall(CHTLJSNodePtr callee);
     CHTLJSNodePtr parseVirDeclaration();
     CHTLJSNodePtr parseListenBlock();
+    CHTLJSNodePtr parseDelegateBlock();
     CHTLJSNodePtr parseAnimateBlock();
     CHTLJSNodePtr parseFileLoaderBlock();
     // ... other parsing methods for router, etc.

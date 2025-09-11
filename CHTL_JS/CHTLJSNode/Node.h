@@ -14,6 +14,7 @@ class VirDeclNode;
 class EnhancedSelectorNode;
 class CHTLJSPropertyNode;
 class MethodCallNode;
+class DelegateNode;
 class CHTLJSVisitor;
 
 // Base class for all CHTL JS AST nodes
@@ -37,6 +38,7 @@ public:
     virtual void visit(EnhancedSelectorNode* node) = 0;
     virtual void visit(CHTLJSPropertyNode* node) = 0;
     virtual void visit(MethodCallNode* node) = 0;
+    virtual void visit(DelegateNode* node) = 0;
 };
 
 // Represents a method call like `{{box}}->listen { ... }`
@@ -103,4 +105,11 @@ class FileLoaderNode : public CHTLJSNode {
 public:
     void accept(CHTLJSVisitor& visitor) override { visitor.visit(this); }
     std::vector<std::string> files;
+};
+
+// Represents a `delegate { ... }` block
+class DelegateNode : public CHTLJSNode {
+public:
+    void accept(CHTLJSVisitor& visitor) override { visitor.visit(this); }
+    std::vector<std::unique_ptr<CHTLJSPropertyNode>> properties;
 };
