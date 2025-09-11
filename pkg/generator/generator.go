@@ -64,10 +64,12 @@ func (g *Generator) generateNode(node ast.Node, b *strings.Builder) error {
 			return err
 		}
 		b.WriteString(content)
+	case *ast.Attribute:
+		return nil // Attributes are handled in generateElement's first pass
 	case *ast.Style:
-		return nil
+		return nil // Styles are handled in generateElement's first pass
 	case *ast.Ruleset:
-		return nil
+		return nil // Rulesets are handled in processStyleBody
 	case *ast.TemplateUsage:
 		return g.generateTemplateUsage(n, b)
 	default:
@@ -78,7 +80,7 @@ func (g *Generator) generateNode(node ast.Node, b *strings.Builder) error {
 
 func (g *Generator) generateTemplateUsage(tu *ast.TemplateUsage, b *strings.Builder) error {
 	if tu.TemplateType == "Style" {
-		return nil
+		return nil // Style templates are handled in processStyleBody
 	}
 
 	template, ok := g.templates[tu.Name.Value]
@@ -101,73 +103,11 @@ func (g *Generator) generateTemplateUsage(tu *ast.TemplateUsage, b *strings.Buil
 
 func (g *Generator) generateElement(n *ast.Element, b *strings.Builder) error {
 	attrs := make(map[string]string)
-	var bodyStmts []ast.Statement
 	var inlineStyles []string
+	var bodyContentStmts []ast.Statement
 
-	var processStyleBody func(body *ast.BlockStatement) error
-	processStyleBody = func(body *ast.BlockStatement) error {
-		styleCtx := make(map[string]ast.Expression)
-		rulesets := []*ast.Ruleset{}
-		templateUsages := []*ast.TemplateUsage{}
-
-		for _, styleStmt := range body.Statements {
-			switch ss := styleStmt.(type) {
-			case *ast.StyleRule:
-				styleCtx[ss.Name] = ss.Value
-			case *ast.Ruleset:
-				rulesets = append(rulesets, ss)
-			case *ast.TemplateUsage:
-				templateUsages = append(templateUsages, ss)
-			}
-		}
-
-		for _, tu := range templateUsages {
-			template, ok := g.templates[tu.Name.Value]
-			if !ok {
-				return fmt.Errorf("template %q not found", tu.Name.Value)
-			}
-			if err := processStyleBody(template.Body); err != nil {
-				return err
-			}
-		}
-
-		for name, exp := range styleCtx {
-			val, err := g.evaluateStyleExpression(exp, styleCtx)
-			if err != nil {
-				return err
-			}
-			inlineStyles = append(inlineStyles, fmt.Sprintf("%s: %s", name, val))
-		}
-
-		for _, ss := range rulesets {
-			selector, err := g.expressionToString(ss.Selector, false)
-			if err != nil {
-				return err
-			}
-			var rulesetBuilder strings.Builder
-			for _, rule := range ss.Body.Statements {
-				if r, ok := rule.(*ast.StyleRule); ok {
-					val, err := g.expressionToString(r.Value, true)
-					if err != nil {
-						return err
-					}
-					rulesetBuilder.WriteString(fmt.Sprintf("  %s: %s;\n", r.Name, val))
-				}
-			}
-			g.globalStyles.WriteString(fmt.Sprintf("%s {\n%s}\n", selector, rulesetBuilder.String()))
-			if prefix, ok := ss.Selector.(*ast.PrefixExpression); ok {
-				if ident, ok := prefix.Right.(*ast.Identifier); ok {
-					if prefix.Operator == "." {
-						attrs["class"] = strings.TrimSpace(attrs["class"] + " " + ident.Value)
-					} else if prefix.Operator == "#" {
-						attrs["id"] = ident.Value
-					}
-				}
-			}
-		}
-		return nil
-	}
-
+	// First pass: collect attributes, styles, and scripts.
+	// Separate content statements for the second pass.
 	if n.Body != nil {
 		for _, stmt := range n.Body.Statements {
 			switch s := stmt.(type) {
@@ -178,7 +118,7 @@ func (g *Generator) generateElement(n *ast.Element, b *strings.Builder) error {
 				}
 				attrs[s.Name] = val
 			case *ast.Style:
-				if err := processStyleBody(s.Body); err != nil {
+				if err := g.processStyleBody(s, attrs, &inlineStyles); err != nil {
 					return err
 				}
 			case *ast.ScriptStatement:
@@ -189,15 +129,17 @@ func (g *Generator) generateElement(n *ast.Element, b *strings.Builder) error {
 				g.globalScripts.WriteString(processedScript)
 				g.globalScripts.WriteString("\n")
 			default:
-				bodyStmts = append(bodyStmts, stmt)
+				bodyContentStmts = append(bodyContentStmts, s)
 			}
 		}
 	}
 
+	// Combine inline styles into the style attribute.
 	if len(inlineStyles) > 0 {
 		attrs["style"] = strings.Join(inlineStyles, "; ")
 	}
 
+	// Write the opening tag with all attributes.
 	b.WriteString("<")
 	b.WriteString(n.Name)
 	for key, val := range attrs {
@@ -205,15 +147,86 @@ func (g *Generator) generateElement(n *ast.Element, b *strings.Builder) error {
 	}
 	b.WriteString(">")
 
-	for _, stmt := range bodyStmts {
+	// Second pass: generate content (child elements, text, templates, etc.).
+	for _, stmt := range bodyContentStmts {
 		if err := g.generateNode(stmt, b); err != nil {
 			return err
 		}
 	}
 
+	// Write the closing tag.
 	b.WriteString("</")
 	b.WriteString(n.Name)
 	b.WriteString(">")
+	return nil
+}
+
+func (g *Generator) processStyleBody(style *ast.Style, attrs map[string]string, inlineStyles *[]string) error {
+	styleCtx := make(map[string]ast.Expression)
+	rulesets := []*ast.Ruleset{}
+	templateUsages := []*ast.TemplateUsage{}
+
+	if style.Body == nil {
+		return nil
+	}
+
+	for _, styleStmt := range style.Body.Statements {
+		switch ss := styleStmt.(type) {
+		case *ast.StyleRule:
+			styleCtx[ss.Name] = ss.Value
+		case *ast.Ruleset:
+			rulesets = append(rulesets, ss)
+		case *ast.TemplateUsage:
+			templateUsages = append(templateUsages, ss)
+		}
+	}
+
+	for _, tu := range templateUsages {
+		template, ok := g.templates[tu.Name.Value]
+		if !ok {
+			return fmt.Errorf("template %q not found", tu.Name.Value)
+		}
+		for _, stmt := range template.Body.Statements {
+			if rule, ok := stmt.(*ast.StyleRule); ok {
+				styleCtx[rule.Name] = rule.Value
+			}
+		}
+	}
+
+	for name, exp := range styleCtx {
+		val, err := g.evaluateStyleExpression(exp, styleCtx)
+		if err != nil {
+			return err
+		}
+		*inlineStyles = append(*inlineStyles, fmt.Sprintf("%s: %s", name, val))
+	}
+
+	for _, ss := range rulesets {
+		selector, err := g.expressionToString(ss.Selector, false)
+		if err != nil {
+			return err
+		}
+		var rulesetBuilder strings.Builder
+		for _, rule := range ss.Body.Statements {
+			if r, ok := rule.(*ast.StyleRule); ok {
+				val, err := g.expressionToString(r.Value, true)
+				if err != nil {
+					return err
+				}
+				rulesetBuilder.WriteString(fmt.Sprintf("  %s: %s;\n", r.Name, val))
+			}
+		}
+		g.globalStyles.WriteString(fmt.Sprintf("%s {\n%s}\n", selector, rulesetBuilder.String()))
+		if prefix, ok := ss.Selector.(*ast.PrefixExpression); ok {
+			if ident, ok := prefix.Right.(*ast.Identifier); ok {
+				if prefix.Operator == "." {
+					attrs["class"] = strings.TrimSpace(attrs["class"] + " " + ident.Value)
+				} else if prefix.Operator == "#" {
+					attrs["id"] = ident.Value
+				}
+			}
+		}
+	}
 	return nil
 }
 
@@ -225,62 +238,48 @@ func (g *Generator) expressionToString(exp ast.Expression, useCalc bool) (string
 		if parsedExp == nil {
 			return e.String(), nil
 		}
-
+		// Infix expressions are the only ones that need calc
 		if _, ok := parsedExp.(*ast.InfixExpression); ok && useCalc {
 			return "calc" + parsedExp.String(), nil
 		}
 		return parsedExp.String(), nil
-
-	case *ast.StringLiteral: return e.Value, nil
-	case *ast.Identifier: return e.Value, nil
-	case *ast.NumberLiteral: return e.Value, nil
+	case *ast.StringLiteral:
+		return e.Value, nil
+	case *ast.Identifier:
+		return e.Value, nil
+	case *ast.NumberLiteral:
+		return e.Value + e.Unit, nil // Re-add unit
 	case *ast.PrefixExpression:
 		right, err := g.expressionToString(e.Right, useCalc)
-		if err != nil { return "", err }
+		if err != nil {
+			return "", err
+		}
 		return e.Operator + right, nil
 	case *ast.InfixExpression:
+		// This case should ideally not be hit directly if RawExpression is used,
+		// but we handle it for completeness.
 		if useCalc {
 			return "calc" + e.String(), nil
 		}
 		return e.String(), nil
 	case *ast.CallExpression:
-		return g.generateCallExpression(e)
+		// This is for attribute values, not style expressions, so no calc.
+		val, err := g.evaluate(e, nil) // No context for attributes
+		if err != nil {
+			return "", err
+		}
+		return val.String(), nil
 	default:
-		return "", fmt.Errorf("unhandled expression type for generation: %T", e)
+		return "", fmt.Errorf("unhandled expression type for string conversion: %T", e)
 	}
 }
 
 func (g *Generator) generateCallExpression(ce *ast.CallExpression) (string, error) {
-	templateName, ok := ce.Function.(*ast.Identifier)
-	if !ok {
-		return "", fmt.Errorf("template call must be an identifier, got %T", ce.Function)
+	val, err := g.evaluateCallExpression(ce, nil)
+	if err != nil {
+		return "", err
 	}
-
-	template, ok := g.templates[templateName.Value]
-	if !ok {
-		return "", fmt.Errorf("template %q not found", templateName.Value)
-	}
-	if template.TemplateType != "Var" {
-		return "", fmt.Errorf("template %q is not a @Var template", templateName.Value)
-	}
-
-	if len(ce.Arguments) != 1 {
-		return "", fmt.Errorf("template @Var call expects 1 argument, got %d", len(ce.Arguments))
-	}
-	varName, ok := ce.Arguments[0].(*ast.Identifier)
-	if !ok {
-		return "", fmt.Errorf("template @Var argument must be an identifier, got %T", ce.Arguments[0])
-	}
-
-	for _, stmt := range template.Body.Statements {
-		if rule, ok := stmt.(*ast.StyleRule); ok {
-			if rule.Name == varName.Value {
-				return g.expressionToString(rule.Value, false)
-			}
-		}
-	}
-
-	return "", fmt.Errorf("variable %q not found in @Var template %q", varName.Value, templateName.Value)
+	return val.String(), nil
 }
 
 var selectorRegex = regexp.MustCompile(`\{\{([^}]+)\}\}`)
@@ -354,8 +353,10 @@ func (g *Generator) evaluate(exp ast.Expression, ctx map[string]ast.Expression) 
 		}
 		return g.evaluate(parsedExp, ctx)
 	case *ast.Identifier:
-		if valExp, ok := ctx[e.Value]; ok {
-			return g.evaluate(valExp, ctx)
+		if ctx != nil {
+			if valExp, ok := ctx[e.Value]; ok {
+				return g.evaluate(valExp, ctx)
+			}
 		}
 		return StyleValue{Str: e.Value}, nil
 	case *ast.StringLiteral:

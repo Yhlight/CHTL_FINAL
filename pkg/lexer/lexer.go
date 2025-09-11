@@ -1,5 +1,7 @@
 package lexer
 
+import "fmt"
+
 type Lexer struct {
 	input        string
 	position     int
@@ -141,4 +143,30 @@ func (l *Lexer) SetReadPosition(pos int) {
 
 func (l *Lexer) GetReadPosition() int {
 	return l.readPosition
+}
+
+func (l *Lexer) ReadRawBlock() (string, error) {
+	startPos := l.readPosition
+	braceLevel := 1
+	i := startPos
+
+	for i < len(l.input) {
+		if l.input[i] == '{' {
+			braceLevel++
+		} else if l.input[i] == '}' {
+			braceLevel--
+			if braceLevel == 0 {
+				break
+			}
+		}
+		i++
+	}
+
+	if braceLevel != 0 {
+		return "", fmt.Errorf("unterminated raw block")
+	}
+
+	content := l.input[startPos:i]
+	l.SetReadPosition(i)
+	return content, nil
 }

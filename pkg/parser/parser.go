@@ -168,30 +168,12 @@ func (p *Parser) parseOriginStatement() ast.Statement {
 		return nil
 	}
 
-	startPos := p.l.Position() + 1
-	braceLevel := 1
-	input := p.l.Input()
-	i := startPos
-
-	for i < len(input) {
-		if input[i] == '{' {
-			braceLevel++
-		} else if input[i] == '}' {
-			braceLevel--
-			if braceLevel == 0 {
-				break
-			}
-		}
-		i++
-	}
-
-	if braceLevel != 0 {
-		p.errors = append(p.errors, "unterminated [Origin] block")
+	content, err := p.l.ReadRawBlock()
+	if err != nil {
+		p.errors = append(p.errors, err.Error())
 		return nil
 	}
-
-	stmt.Content = input[startPos:i]
-	p.l.SetReadPosition(i)
+	stmt.Content = content
 	p.nextToken() // curToken is now '}'
 	return stmt
 }
@@ -202,30 +184,12 @@ func (p *Parser) parseScriptStatement() ast.Statement {
 		return nil
 	}
 
-	startPos := p.l.Position() + 1
-	braceLevel := 1
-	input := p.l.Input()
-	i := startPos
-
-	for i < len(input) {
-		if input[i] == '{' {
-			braceLevel++
-		} else if input[i] == '}' {
-			braceLevel--
-			if braceLevel == 0 {
-				break
-			}
-		}
-		i++
-	}
-
-	if braceLevel != 0 {
-		p.errors = append(p.errors, "unterminated script block")
+	content, err := p.l.ReadRawBlock()
+	if err != nil {
+		p.errors = append(p.errors, err.Error())
 		return nil
 	}
-
-	stmt.Content = input[startPos:i]
-	p.l.SetReadPosition(i)
+	stmt.Content = content
 	p.nextToken() // curToken is now '}'
 	return stmt
 }

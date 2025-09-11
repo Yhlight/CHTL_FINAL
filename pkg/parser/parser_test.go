@@ -43,6 +43,36 @@ func TestImportStatement(t *testing.T) {
 	}
 }
 
+func TestTemplateUsageInElement(t *testing.T) {
+	input := `
+div {
+    @Element Box;
+}
+`
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statements. got=%d", len(program.Statements))
+	}
+
+	element, ok := program.Statements[0].(*ast.Element)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.Element. got=%T", program.Statements[0])
+	}
+
+	if len(element.Body.Statements) != 1 {
+		t.Fatalf("element.Body.Statements does not contain 1 statement. got=%d", len(element.Body.Statements))
+	}
+
+	_, ok = element.Body.Statements[0].(*ast.TemplateUsage)
+	if !ok {
+		t.Fatalf("element.Body.Statements[0] is not ast.TemplateUsage. got=%T", element.Body.Statements[0])
+	}
+}
+
 func checkParserErrors(t *testing.T, p *Parser) {
 	errors := p.Errors()
 	if len(errors) == 0 {
