@@ -1,0 +1,1 @@
+/usr/bin/c++  -static CMakeFiles/chtl_compiler.dir/main.cpp.o -o chtl_compiler  CHTL/libCHTLCompiler.a Util/libUtil.a

@@ -1,0 +1,16 @@
+// This is a comment
+html {
+    head {
+        title { "My Website" }
+    }
+    body {
+        div {
+            id: main_div;
+            class = "container";
+            text {
+                Hello CHTL!
+            }
+        }
+        -- a generator comment
+    }
+}

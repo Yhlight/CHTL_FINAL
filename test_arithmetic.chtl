@@ -1,0 +1,10 @@
+div {
+    style {
+        width: 100px + 20 * 2;
+        height: (50% - 10) * 2;
+        padding: 5px;
+    }
+    text {
+        "This box has calculated dimensions."
+    }
+}

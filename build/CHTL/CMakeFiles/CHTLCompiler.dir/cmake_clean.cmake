@@ -1,0 +1,35 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/CHTLLexer/Lexer.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/CHTLLexer/Lexer.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/CHTLNode/AttributeNode.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/CHTLNode/AttributeNode.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/CHTLNode/CommentNode.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/CHTLNode/CommentNode.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/CHTLNode/ElementNode.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/CHTLNode/ElementNode.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/CHTLNode/StyleNode.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/CHTLNode/StyleNode.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/CHTLNode/TemplateDefinitionNode.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/CHTLNode/TemplateDefinitionNode.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/CHTLNode/TextNode.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/CHTLNode/TextNode.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/CHTLParser/Parser.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/CHTLParser/Parser.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/CSSExt/Expression.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/CSSExt/Expression.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionEvaluator.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionEvaluator.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.o.d"
+  "libCHTLCompiler.a"
+  "libCHTLCompiler.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/CHTLCompiler.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

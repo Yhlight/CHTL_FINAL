@@ -1,0 +1,19 @@
+main {
+    header {
+        h1 { "Complex Test" }
+    }
+    section {
+        p {
+            "This is a test with a line break."
+            br {}
+            "And an image."
+            img {
+                src: "image.png";
+                alt: "An image > file";
+            }
+        }
+    }
+    footer {
+        "Footer content"
+    }
+}

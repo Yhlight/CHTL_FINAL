@@ -1,0 +1,9 @@
+div {
+    style {
+        color: red;
+        font-size: 16px;
+    }
+    text {
+        "This text should be styled."
+    }
+}

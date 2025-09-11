@@ -1,0 +1,13 @@
+[Template] @Style DefaultText
+{
+	color: "black";
+	line-height: 1.6;
+}
+
+[Template] @Element Box
+{
+    span
+    {
+        text { "A box" }
+    }
+}
