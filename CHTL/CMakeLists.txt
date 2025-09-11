@@ -2,6 +2,8 @@ add_library(chtl_lib STATIC
     CHTLLexer/CHTLLexer.cpp
     CHTLParser/CHTLParser.cpp
     CHTLGenerator/CHTLGenerator.cpp
+    CHTLCompiler/CompilationContext.cpp
+    CHTLCompiler/CHTLCompiler.cpp
 )
 
 target_include_directories(chtl_lib PUBLIC

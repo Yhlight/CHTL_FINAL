@@ -11,15 +11,19 @@
 
 namespace CHTL {
 
+class CompilationContext; // Forward declaration
+
 enum Precedence { LOWEST, TERNARY, LOGICAL_OR, LOGICAL_AND, EQUALS, LESS_GREATER, SUM, PRODUCT, POWER, PREFIX };
 
 class CHTLParser {
 public:
-    explicit CHTLParser(std::vector<Token> tokens);
+    explicit CHTLParser(std::vector<Token> tokens, std::string source, CompilationContext& context);
     NodeList Parse();
 
 private:
     std::vector<Token> m_tokens;
+    std::string m_source;
+    CompilationContext& m_context;
     size_t m_cursor = 0;
 
     // Token helpers
@@ -32,10 +36,12 @@ private:
     NodePtr ParseNode();
     NodePtr ParseElement();
     NodePtr ParseStyleBlock(bool isGlobal);
+    void ParseStyleContent(std::shared_ptr<class StyleNode> styleNode);
     NodePtr ParseTextBlock();
     NodePtr ParseTemplateDefinition();
     NodePtr ParseElementTemplateUsage();
     NodePtr ParseOriginBlock();
+    NodePtr ParseImportStatement();
 
     // Expression (Pratt) Parser
     Precedence GetPrecedence();

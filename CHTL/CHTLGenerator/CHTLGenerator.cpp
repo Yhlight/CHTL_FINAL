@@ -21,9 +21,13 @@
 #include <set>
 #include <cmath>
 #include <algorithm>
+#include <functional>
 #include <map>
+#include "CHTLCompiler/CompilationContext.h"
 
 namespace CHTL {
+
+CHTLGenerator::CHTLGenerator(const CompilationContext& context) : m_context(context) {}
 
 // --- Helper Functions ---
 std::string ValueToString(const EvaluatedValue& val) { if (val.type == ValueType::String) return std::get<std::string>(val.value); if (val.type == ValueType::Number) { std::stringstream ss; ss << std::get<double>(val.value); return ss.str() + val.unit; } if (val.type == ValueType::Bool) return std::get<bool>(val.value) ? "true" : "false"; return ""; }
@@ -33,18 +37,26 @@ std::string CHTLGenerator::escapeHTML(const std::string& data) { std::string buf
 // --- Main Generation Logic ---
 
 std::string CHTLGenerator::Generate(const NodeList& ast) {
-    m_output_body.str(""); m_output_css.str(""); m_template_repo.clear(); m_origin_repo.clear(); m_astRoot = ast.empty() ? nullptr : ast.front();
+    m_output_body.str(""); m_output_css.str(""); m_output_js.str(""); m_astRoot = ast.empty() ? nullptr : ast.front();
+    // The template population is now handled by the parser and context.
+    // The generator just needs to visit the nodes of the main file.
     for (const auto& node : ast) {
-        if (node->GetType() == NodeType::TemplateDefinition) {
-            VisitTemplateDefinition(static_cast<const TemplateDefinitionNode*>(node.get()));
-        }
+        Visit(node);
     }
-    for (const auto& node : ast) {
-        if (node->GetType() != NodeType::TemplateDefinition) Visit(node);
+    std::string css = m_output_css.str();
+    std::string js = m_output_js.str();
+    std::string body = m_output_body.str();
+
+    std::string final_output;
+    if (!css.empty()) {
+        final_output += "<style>\n" + css + "</style>\n";
     }
-    std::string css = m_output_css.str(); std::string body = m_output_body.str();
-    if (css.empty()) return body;
-    return "<style>\n" + css + "</style>\n" + body;
+    final_output += body;
+    if (!js.empty()) {
+        final_output += "\n<script>\n" + js + "</script>\n";
+    }
+
+    return final_output;
 }
 
 void CHTLGenerator::Visit(const NodePtr& node) {
@@ -54,13 +66,19 @@ void CHTLGenerator::Visit(const NodePtr& node) {
         case NodeType::Text: VisitText(static_cast<const TextNode*>(node.get())); break;
         case NodeType::Comment: VisitComment(static_cast<const CommentNode*>(node.get())); break;
         case NodeType::ElementTemplateUsage: VisitElementTemplateUsage(static_cast<const ElementTemplateUsageNode*>(node.get())); break;
+        case NodeType::Origin: VisitOrigin(static_cast<const OriginNode*>(node.get())); break;
+        // Template definitions and imports are handled by the parser/compiler, not generated directly.
+        case NodeType::TemplateDefinition:
+        case NodeType::Import:
+            break;
         default: break;
     }
 }
 
 void CHTLGenerator::VisitTemplateDefinition(const TemplateDefinitionNode* node) {
-    if (m_template_repo.count(node->GetName())) throw std::runtime_error("Template with name '" + node->GetName() + "' is already defined.");
-    m_template_repo[node->GetName()] = node;
+    // This function is now effectively a no-op in the generator,
+    // as template definitions are collected by the parser into the context.
+    // It's kept for conceptual clarity but could be removed.
 }
 
 
@@ -118,10 +136,9 @@ void CHTLGenerator::ApplyInsertion(NodeList& nodes, const ElementInsertNode* ins
 }
 
 void CHTLGenerator::VisitElementTemplateUsage(const ElementTemplateUsageNode* node) {
-    auto it = m_template_repo.find(node->GetTemplateName());
-    if (it == m_template_repo.end()) throw std::runtime_error("Undefined element template used: @" + node->GetTemplateName());
+    const auto* templateDef = m_context.GetTemplate(node->GetTemplateName());
+    if (!templateDef) throw std::runtime_error("Undefined element template used: @" + node->GetTemplateName());
 
-    const auto* templateDef = it->second;
     if (templateDef->GetTemplateType() != TemplateType::Element) throw std::runtime_error("Mismatched template type.");
 
     NodeList clonedContent;
@@ -217,8 +234,9 @@ void CHTLGenerator::VisitStyleRule(const StyleRuleNode* node, const ElementNode*
     m_output_css << "}\n";
 }
 std::vector<Property> CHTLGenerator::ExpandStyleTemplate(const std::string& templateName, const std::shared_ptr<StyleNode>& specialization) {
-    auto it = m_template_repo.find(templateName); if (it == m_template_repo.end()) throw std::runtime_error("Undefined style template used: " + templateName);
-    const auto* templateDef = it->second;
+    const auto* templateDef = m_context.GetTemplate(templateName);
+    if (!templateDef) throw std::runtime_error("Undefined style template used: " + templateName);
+
     if (templateDef->GetTemplateType() != TemplateType::Style && templateDef->GetTemplateType() != TemplateType::Var) throw std::runtime_error("Template '" + templateName + "' is not a @Style or @Var template.");
     const auto* styleNode = static_cast<const StyleNode*>(templateDef->GetContent().front().get());
     std::map<std::string, Property> final_properties;
@@ -268,9 +286,9 @@ EvaluatedValue CHTLGenerator::VisitVariableUsage(const VariableUsageNode* node, 
         auto const& [varName, varValue] = *node->GetSpecializations().begin();
         return EvaluateExpression(varValue, context);
     }
-    auto it = m_template_repo.find(node->GetGroupName());
-    if (it == m_template_repo.end()) throw std::runtime_error("Undefined variable group used: " + node->GetGroupName());
-    const auto* templateDef = it->second;
+    const auto* templateDef = m_context.GetTemplate(node->GetGroupName());
+    if (!templateDef) throw std::runtime_error("Undefined variable group used: " + node->GetGroupName());
+
     if (templateDef->GetTemplateType() != TemplateType::Var) throw std::runtime_error("Template is not a variable group: " + node->GetGroupName());
     const auto* styleNode = static_cast<const StyleNode*>(templateDef->GetContent().front().get());
     for (const auto& prop : styleNode->GetProperties()) {
@@ -278,6 +296,32 @@ EvaluatedValue CHTLGenerator::VisitVariableUsage(const VariableUsageNode* node, 
     }
     throw std::runtime_error("Undefined variable '" + node->GetVariableName() + "' in group '" + node->GetGroupName() + "'");
 }
+
+const ElementNode* CHTLGenerator::FindElement(const NodePtr& root, const std::string& selector) {
+    if (!root) return nullptr;
+
+    std::function<const ElementNode*(const NodePtr&, const std::string&)> search =
+        [&](const NodePtr& currentNode, const std::string& currentSelector) -> const ElementNode* {
+        if (!currentNode || currentNode->GetType() != NodeType::Element) return nullptr;
+
+        const auto* element = static_cast<const ElementNode*>(currentNode.get());
+        // This is a simplification. A real implementation would parse the selector
+        // and match class, id, etc. For now, we only match tag name.
+        if (element->GetTagName() == currentSelector) {
+            return element;
+        }
+
+        for (const auto& child : element->GetChildren()) {
+            const ElementNode* found = search(child, currentSelector);
+            if (found) return found;
+        }
+
+        return nullptr;
+    };
+
+    return search(root, selector);
+}
+
 EvaluatedValue CHTLGenerator::VisitPropertyReference(const PropertyReferenceNode* node) {
     const ElementNode* targetElement = FindElement(m_astRoot, node->GetSelector());
     if (!targetElement) throw std::runtime_error("Could not find element with selector: " + node->GetSelector());
@@ -339,6 +383,20 @@ EvaluatedValue CHTLGenerator::VisitConditionalExpr(const ConditionalExprNode* no
     bool condition_bool = (condition.type == ValueType::Bool) ? std::get<bool>(condition.value) : (condition.type == ValueType::Number && std::get<double>(condition.value) != 0);
     if (condition_bool) return EvaluateExpression(node->GetTrueBranch(), context);
     else { if (node->GetFalseBranch()) return EvaluateExpression(node->GetFalseBranch(), context); return {ValueType::String, ""}; }
+}
+
+void CHTLGenerator::VisitOrigin(const OriginNode* node) {
+    switch (node->GetOriginType()) {
+        case OriginType::Html:
+            m_output_body << node->GetContent();
+            break;
+        case OriginType::Style:
+            m_output_css << node->GetContent();
+            break;
+        case OriginType::JavaScript:
+            m_output_js << node->GetContent();
+            break;
+    }
 }
 
 } // namespace CHTL

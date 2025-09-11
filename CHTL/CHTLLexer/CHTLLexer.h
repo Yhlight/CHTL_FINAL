@@ -22,7 +22,7 @@ private:
     char Consume();
     void ConsumeWhitespace();
 
-    Token CreateToken(TokenType type, std::string value);
+    Token CreateToken(TokenType type, std::string value, size_t pos);
     Token HandleIdentifier();
     Token HandleStringLiteral();
     Token HandleNumber();

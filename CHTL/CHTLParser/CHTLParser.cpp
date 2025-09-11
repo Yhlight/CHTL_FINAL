@@ -9,6 +9,7 @@
 #include "CHTLNode/ElementModificationNode.h"
 #include "CHTLNode/ElementDeleteNode.h"
 #include "CHTLNode/ElementInsertNode.h"
+#include "CHTLNode/ImportNode.h"
 #include "CHTLNode/NumberLiteralNode.h"
 #include "CHTLNode/StringLiteralNode.h"
 #include "CHTLNode/BinaryOpNode.h"
@@ -18,22 +19,39 @@
 #include "CHTLNode/SelfPropertyReferenceNode.h"
 #include <stdexcept>
 #include <map>
+#include <algorithm>
+
+#include "CHTLCompiler/CompilationContext.h"
 
 namespace CHTL {
 
-// --- Pratt Parser Implementation (omitted for brevity) ---
-// ...
+// Helper function to trim whitespace from both ends of a string
+std::string trim(const std::string& str) {
+    const std::string& whitespace = " \t\n\r\f\v";
+    size_t first = str.find_first_not_of(whitespace);
+    if (std::string::npos == first) {
+        return str;
+    }
+    size_t last = str.find_last_not_of(whitespace);
+    return str.substr(first, (last - first + 1));
+}
 
 // --- CHTL Structure Parsing ---
 
-CHTLParser::CHTLParser(std::vector<Token> tokens) : m_tokens(std::move(tokens)) {}
-
-// ... (omitting unchanged helpers and expression parser for brevity) ...
+CHTLParser::CHTLParser(std::vector<Token> tokens, std::string source, CompilationContext& context)
+    : m_tokens(std::move(tokens)), m_source(std::move(source)), m_context(context) {}
 
 NodePtr CHTLParser::ParseNode() {
     SkipComments();
     Token current = Peek();
     if (current.type == TokenType::OpenBracket) {
+        if (Peek(1).type == TokenType::Identifier) {
+            if (Peek(1).value == "Origin") {
+                return ParseOriginBlock();
+            } else if (Peek(1).value == "Import") {
+                return ParseImportStatement();
+            }
+        }
         return ParseTemplateDefinition();
     }
     if (current.type == TokenType::Identifier) {
@@ -56,7 +74,10 @@ NodePtr CHTLParser::ParseNode() {
 
 NodePtr CHTLParser::ParseElementTemplateUsage() {
     Expect(TokenType::At);
-    Expect(TokenType::Element);
+    Token typeToken = Expect(TokenType::Identifier);
+    if (typeToken.value != "Element") {
+        throw std::runtime_error("Expected 'Element' after @ in element template usage, but got '" + typeToken.value + "'");
+    }
     Token name = Expect(TokenType::Identifier);
     NodeList instructions;
     if (Peek().type == TokenType::OpenBrace) {
@@ -149,6 +170,29 @@ NodePtr CHTLParser::ParseElementInsertion() {
     return std::make_shared<ElementInsertNode>(position, targetSelector, nodesToInsert);
 }
 
+NodePtr CHTLParser::ParseImportStatement() {
+    Expect(TokenType::OpenBracket);
+    Expect(TokenType::Identifier); // "Import"
+    Expect(TokenType::CloseBracket);
+    Expect(TokenType::At);
+
+    Token typeToken = Expect(TokenType::Identifier);
+    ImportType importType;
+    if (typeToken.value == "Chtl") {
+        importType = ImportType::Chtl;
+    } else {
+        throw std::runtime_error("Unsupported import type: " + typeToken.value);
+    }
+
+    Expect(TokenType::From); // "from"
+    Token pathToken = Expect(TokenType::StringLiteral);
+    Expect(TokenType::Semicolon);
+
+    auto importNode = std::make_shared<ImportNode>(importType, pathToken.value);
+    m_context.AddImport(importNode.get());
+    return importNode;
+}
+
 
 // --- Full implementations are restored here ---
 static std::map<TokenType, Precedence> precedences = {
@@ -162,8 +206,8 @@ static std::map<TokenType, Precedence> precedences = {
 };
 Token CHTLParser::Peek(size_t offset) { if (m_cursor + offset >= m_tokens.size()) return m_tokens.back(); return m_tokens[m_cursor + offset]; }
 Token CHTLParser::Consume() { if (m_cursor >= m_tokens.size()) return m_tokens.back(); return m_tokens[m_cursor++]; }
-Token CHTLParser::Expect(TokenType type) { Token token = Peek(); if (token.type != type) throw std::runtime_error("Unexpected token"); return Consume(); }
 void CHTLParser::SkipComments() { while (Peek().type == TokenType::LineComment || Peek().type == TokenType::BlockComment || Peek().type == TokenType::GeneratorComment) Consume(); }
+Token CHTLParser::Expect(TokenType type) { Token token = Peek(); if (token.type != type) throw std::runtime_error("Unexpected token"); return Consume(); }
 NodeList CHTLParser::Parse() {
     NodeList nodes;
     while (Peek().type != TokenType::EndOfFile) {
@@ -173,6 +217,8 @@ NodeList CHTLParser::Parse() {
     return nodes;
 }
 Precedence CHTLParser::GetPrecedence() { if (precedences.count(Peek().type)) return precedences[Peek().type]; return LOWEST; }
+
+
 ExpressionNodePtr CHTLParser::ParsePrefixExpression() {
     Token token = Peek();
     if (token.type == TokenType::Number) { Consume(); std::string unit; if (Peek().type == TokenType::Identifier) unit = Consume().value; return std::make_shared<NumberLiteralNode>(std::stod(token.value), unit); }
@@ -241,9 +287,7 @@ NodePtr CHTLParser::ParseTextBlock() {
     }
     Expect(TokenType::CloseBrace); return std::make_shared<TextNode>(textContent);
 }
-NodePtr CHTLParser::ParseStyleBlock(bool isGlobal) {
-    Expect(TokenType::Style); Expect(TokenType::OpenBrace);
-    auto styleNode = std::make_shared<StyleNode>();
+void CHTLParser::ParseStyleContent(std::shared_ptr<StyleNode> styleNode) {
     while (Peek().type != TokenType::CloseBrace && Peek().type != TokenType::EndOfFile) {
         SkipComments(); if (Peek().type == TokenType::CloseBrace) break;
         Token token1 = Peek();
@@ -257,8 +301,14 @@ NodePtr CHTLParser::ParseStyleBlock(bool isGlobal) {
         } else if (token1.type == TokenType::At) {
             Consume(); Expect(TokenType::Style); Token templateName = Expect(TokenType::Identifier);
             std::shared_ptr<StyleNode> specialization = nullptr;
-            if (Peek().type == TokenType::OpenBrace) specialization = std::static_pointer_cast<StyleNode>(ParseStyleBlock(isGlobal));
-            else Expect(TokenType::Semicolon);
+            if (Peek().type == TokenType::OpenBrace) {
+                Expect(TokenType::OpenBrace);
+                specialization = std::make_shared<StyleNode>();
+                ParseStyleContent(specialization);
+                Expect(TokenType::CloseBrace);
+            } else {
+                Expect(TokenType::Semicolon);
+            }
             styleNode->AddProperty({"__TEMPLATE_USAGE__", std::make_shared<TemplateUsageNode>(templateName.value, specialization)});
         } else if (token1.type == TokenType::Identifier) {
             if (Peek(1).type == TokenType::Colon) {
@@ -286,32 +336,100 @@ NodePtr CHTLParser::ParseStyleBlock(bool isGlobal) {
                 }
             } else { throw std::runtime_error("Invalid start of style rule: " + token1.value); }
             auto styleRule = std::make_shared<StyleRuleNode>(selector);
-            auto nestedBlock = std::static_pointer_cast<StyleNode>(ParseStyleBlock(isGlobal));
+            auto nestedBlock = std::static_pointer_cast<StyleNode>(ParseStyleBlock(true)); // This recursive call is for nested rules like .class { &:hover { ... } }
             for(const auto& prop : nestedBlock->GetProperties()) styleRule->AddProperty(prop);
             styleNode->AddRule(styleRule);
         }
     }
-    Expect(TokenType::CloseBrace); return styleNode;
 }
+
+NodePtr CHTLParser::ParseStyleBlock(bool isGlobal) {
+    Expect(TokenType::Style);
+    Expect(TokenType::OpenBrace);
+    auto styleNode = std::make_shared<StyleNode>();
+    ParseStyleContent(styleNode);
+    Expect(TokenType::CloseBrace);
+    return styleNode;
+}
+
 NodePtr CHTLParser::ParseTemplateDefinition() {
     Expect(TokenType::OpenBracket);
     Token definitionType = Expect(TokenType::Identifier); bool isCustom = (definitionType.value == "Custom");
     if (!isCustom && definitionType.value != "Template") throw std::runtime_error("Expected '[Template]' or '[Custom]'");
     Expect(TokenType::CloseBracket); Expect(TokenType::At);
-    Token typeToken = Expect(TokenType::Identifier); Token nameToken = Expect(TokenType::Identifier);
+    Token typeToken = Expect(TokenType::Identifier);
     TemplateType type;
     if (typeToken.value == "Style") type = TemplateType::Style;
     else if (typeToken.value == "Element") type = TemplateType::Element;
     else if (typeToken.value == "Var") type = TemplateType::Var;
     else throw std::runtime_error("Unknown template type: " + typeToken.value);
-    NodeList content; Expect(TokenType::OpenBrace);
+    Token nameToken = Expect(TokenType::Identifier);
+
+    NodeList content;
+    Expect(TokenType::OpenBrace);
     if (type == TemplateType::Element) {
         while(Peek().type != TokenType::CloseBrace && Peek().type != TokenType::EndOfFile) {
             NodePtr node = ParseNode(); if (node) content.push_back(node);
         }
-    } else { content.push_back(ParseStyleBlock(true)); }
+    } else { // Style or Var
+        auto styleNode = std::make_shared<StyleNode>();
+        ParseStyleContent(styleNode);
+        content.push_back(styleNode);
+    }
     Expect(TokenType::CloseBrace);
-    return std::make_shared<TemplateDefinitionNode>(nameToken.value, type, content, isCustom);
+    auto templateNode = std::make_shared<TemplateDefinitionNode>(nameToken.value, type, content, isCustom);
+    m_context.AddTemplate(templateNode->GetName(), templateNode.get());
+    return templateNode;
+}
+
+NodePtr CHTLParser::ParseOriginBlock() {
+    Expect(TokenType::OpenBracket);
+    Expect(TokenType::Identifier); // "Origin"
+    Expect(TokenType::CloseBracket);
+    Expect(TokenType::At);
+    Token typeToken = Expect(TokenType::Identifier);
+    OriginType originType;
+    if (typeToken.value == "Html") {
+        originType = OriginType::Html;
+    } else if (typeToken.value == "Style") {
+        originType = OriginType::Style;
+    } else if (typeToken.value == "JavaScript") {
+        originType = OriginType::JavaScript;
+    } else {
+        throw std::runtime_error("Unknown origin type: " + typeToken.value);
+    }
+
+    Token nameToken = Expect(TokenType::Identifier);
+    Token openBrace = Expect(TokenType::OpenBrace);
+
+    size_t startPos = openBrace.pos + 1;
+    size_t braceCount = 1;
+    size_t currentPos = startPos;
+    while (braceCount > 0 && currentPos < m_source.length()) {
+        if (m_source[currentPos] == '{') {
+            braceCount++;
+        } else if (m_source[currentPos] == '}') {
+            braceCount--;
+        }
+        currentPos++;
+    }
+
+    if (braceCount != 0) {
+        throw std::runtime_error("Unmatched braces in origin block");
+    }
+
+    size_t endPos = currentPos - 1;
+    std::string content = m_source.substr(startPos, endPos - startPos);
+    std::string trimmed_content = trim(content);
+
+    // Manually advance the cursor past the raw content
+    m_cursor = 0; // Reset cursor to search from the beginning
+    while(m_cursor < m_tokens.size() && m_tokens[m_cursor].pos < endPos) {
+        m_cursor++;
+    }
+    Expect(TokenType::CloseBrace);
+
+    return std::make_shared<OriginNode>(originType, nameToken.value, trimmed_content);
 }
 
 

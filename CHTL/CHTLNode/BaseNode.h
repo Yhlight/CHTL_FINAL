@@ -7,6 +7,11 @@ namespace CHTL {
 
 // Forward declaration
 class CHTLGenerator;
+class BaseNode;
+
+// Use smart pointers for memory management of AST nodes
+using NodePtr = std::shared_ptr<BaseNode>;
+using NodeList = std::vector<NodePtr>;
 
 enum class NodeType {
     Element,
@@ -18,6 +23,8 @@ enum class NodeType {
     ElementModification,
     ElementDeletion,
     ElementInsertion,
+    Origin,
+    Import,
     // ... other node types to be added later
 };
 
@@ -29,9 +36,5 @@ public:
     // We can add a virtual `Accept(Visitor* visitor)` method here later
     // for the generator (Visitor design pattern).
 };
-
-// Use smart pointers for memory management of AST nodes
-using NodePtr = std::shared_ptr<BaseNode>;
-using NodeList = std::vector<NodePtr>;
 
 } // namespace CHTL

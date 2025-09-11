@@ -1,0 +1,10 @@
+[Import] @Chtl from "modules/module1.chtl";
+
+[Origin] @JavaScript MyScript {
+    console.log("This is from an origin block.");
+}
+
+div {
+    id: "main-container";
+    @Element MyModuleTemplate;
+}

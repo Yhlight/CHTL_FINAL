@@ -1,0 +1,5 @@
+[Template] @Element MyImportedTemplate {
+    p {
+        text { "This template was imported!" }
+    }
+}

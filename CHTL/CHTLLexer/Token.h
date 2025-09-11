@@ -69,9 +69,9 @@ enum class TokenType {
     After,
     Before,
     Replace,
-    At,
     Top,
-    Bottom
+    Bottom,
+    From
 };
 
 struct Token {
@@ -79,6 +79,8 @@ struct Token {
     std::string value;
     size_t line;
     size_t column;
+    size_t pos;
+    size_t length;
 };
 
 } // namespace CHTL
