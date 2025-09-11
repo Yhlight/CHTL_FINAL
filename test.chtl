@@ -1,0 +1,17 @@
+/*
+ * This is a multi-line
+ * block comment.
+ */
+div {
+    id: "main-container";
+    class = "container";
+
+    text {
+        'Hello, "CHTL"!' // Using single quotes to avoid escaping.
+    }
+
+    /* Another block comment */
+    span {
+        // empty span
+    }
+}
