@@ -1,8 +1,6 @@
-CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o: \
- /app/CHTL/CHTLGenerator/HtmlGenerator.cpp /usr/include/stdc-predef.h \
- /app/CHTL/CHTLGenerator/HtmlGenerator.hpp \
- /app/CHTL/CHTLGenerator/../CHTLNode/AstVisitor.hpp \
- /app/CHTL/CHTLGenerator/../CHTLNode/BaseNode.hpp \
+CHTL/CMakeFiles/CHTLCompiler.dir/Compiler.cpp.o: /app/CHTL/Compiler.cpp \
+ /usr/include/stdc-predef.h /app/CHTL/Compiler.hpp \
+ /app/CHTL/CHTLContext.hpp /app/CHTL/CHTLNode/BaseNode.hpp \
  /usr/include/c++/13/memory /usr/include/c++/13/bits/memoryfwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -117,10 +115,9 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o: \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/TemplateDefinitionNode.hpp \
- /app/CHTL/CHTLGenerator/../CHTLNode/StyleNode.hpp \
- /app/CHTL/CHTLGenerator/../CHTLNode/../CHTLLexer/Token.hpp \
- /usr/include/c++/13/string /usr/include/c++/13/bits/char_traits.h \
+ /app/CHTL/CHTLNode/ElementNode.hpp /app/CHTL/CHTLNode/AttributeNode.hpp \
+ /app/CHTL/CHTLNode/../CHTLLexer/Token.hpp /usr/include/c++/13/string \
+ /usr/include/c++/13/bits/char_traits.h \
  /usr/include/c++/13/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
  /usr/include/c++/13/clocale /usr/include/locale.h \
@@ -161,41 +158,54 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o: \
  /usr/include/c++/13/bits/parse_numbers.h /usr/include/c++/13/vector \
  /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc /usr/include/c++/13/map \
+ /usr/include/c++/13/bits/vector.tcc \
+ /app/CHTL/CHTLNode/TemplateDefinitionNode.hpp \
+ /app/CHTL/CHTLNode/StyleNode.hpp /usr/include/c++/13/map \
  /usr/include/c++/13/bits/stl_tree.h \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h /app/CHTL/CHTLContext.hpp \
- /app/CHTL/CHTLNode/ElementNode.hpp /app/CHTL/CHTLNode/AttributeNode.hpp \
- /app/CHTL/CHTLGenerator/../CHTLNode/TextNode.hpp \
- /app/CHTL/CHTLGenerator/../CHTLNode/CommentNode.hpp \
- /app/CHTL/CHTLGenerator/../CHTLNode/TemplateUsageNode.hpp \
- /app/CHTL/CHTLGenerator/../CHTLNode/StyleRuleNode.hpp \
- /app/CHTL/CHTLGenerator/../CHTLNode/CustomDefinitionNode.hpp \
- /app/CHTL/CHTLGenerator/../CHTLNode/ImportNode.hpp \
- /app/CHTL/CHTLGenerator/../CHTLNode/NamespaceNode.hpp \
- /app/CHTL/CHTLGenerator/../CSSExt/ExpressionParser.hpp \
- /app/CHTL/CHTLGenerator/../CSSExt/Expression.hpp \
- /app/CHTL/CHTLGenerator/../CSSExt/ExpressionEvaluator.hpp \
- /usr/include/c++/13/set /usr/include/c++/13/bits/stl_set.h \
- /usr/include/c++/13/bits/stl_multiset.h /usr/include/c++/13/sstream \
- /usr/include/c++/13/istream /usr/include/c++/13/ios \
- /usr/include/c++/13/bits/ios_base.h \
- /usr/include/c++/13/bits/locale_classes.h \
- /usr/include/c++/13/bits/locale_classes.tcc \
+ /usr/include/c++/13/bits/erase_if.h \
+ /app/CHTL/CHTLGenerator/HtmlGenerator.hpp \
+ /app/CHTL/CHTLGenerator/../CHTLNode/AstVisitor.hpp \
+ /app/CHTL/CHTLLexer/Lexer.hpp /app/CHTL/CHTLParser/Parser.hpp \
+ /app/CHTL/CHTLParser/../CHTLNode/TextNode.hpp \
+ /app/CHTL/CHTLParser/../CHTLNode/CommentNode.hpp \
+ /app/CHTL/CHTLNode/ImportNode.hpp /app/CHTL/CHTLNode/NamespaceNode.hpp \
+ /app/Util/FileSystem/FileSystem.hpp /usr/include/c++/13/algorithm \
+ /usr/include/c++/13/bits/stl_algo.h \
+ /usr/include/c++/13/bits/algorithmfwd.h \
+ /usr/include/c++/13/bits/stl_heap.h \
+ /usr/include/c++/13/bits/uniform_int_dist.h \
+ /usr/include/c++/13/pstl/glue_algorithm_defs.h \
+ /usr/include/c++/13/filesystem /usr/include/c++/13/bits/fs_fwd.h \
  /usr/include/c++/13/system_error \
  /usr/include/x86_64-linux-gnu/c++/13/bits/error_constants.h \
- /usr/include/c++/13/stdexcept /usr/include/c++/13/streambuf \
- /usr/include/c++/13/bits/streambuf.tcc \
- /usr/include/c++/13/bits/basic_ios.h \
+ /usr/include/c++/13/stdexcept /usr/include/c++/13/cstdint \
+ /usr/include/c++/13/bits/chrono.h /usr/include/c++/13/ratio \
+ /usr/include/c++/13/limits /usr/include/c++/13/ctime \
+ /usr/include/c++/13/bits/fs_path.h /usr/include/c++/13/locale \
+ /usr/include/c++/13/bits/locale_classes.h \
+ /usr/include/c++/13/bits/locale_classes.tcc \
  /usr/include/c++/13/bits/locale_facets.h /usr/include/c++/13/cwctype \
  /usr/include/wctype.h /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h \
+ /usr/include/c++/13/bits/ios_base.h /usr/include/c++/13/streambuf \
+ /usr/include/c++/13/bits/streambuf.tcc \
  /usr/include/c++/13/bits/streambuf_iterator.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h \
  /usr/include/c++/13/bits/locale_facets.tcc \
+ /usr/include/c++/13/bits/locale_facets_nonio.h \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/time_members.h \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/messages_members.h \
+ /usr/include/libintl.h /usr/include/c++/13/bits/codecvt.h \
+ /usr/include/c++/13/bits/locale_facets_nonio.tcc \
+ /usr/include/c++/13/bits/locale_conv.h /usr/include/c++/13/iomanip \
+ /usr/include/c++/13/bits/quoted_string.h /usr/include/c++/13/sstream \
+ /usr/include/c++/13/istream /usr/include/c++/13/ios \
+ /usr/include/c++/13/bits/basic_ios.h \
  /usr/include/c++/13/bits/basic_ios.tcc /usr/include/c++/13/ostream \
  /usr/include/c++/13/bits/ostream.tcc \
  /usr/include/c++/13/bits/istream.tcc \
- /usr/include/c++/13/bits/sstream.tcc
+ /usr/include/c++/13/bits/sstream.tcc /usr/include/c++/13/codecvt \
+ /usr/include/c++/13/bits/fs_dir.h /usr/include/c++/13/bits/fs_ops.h

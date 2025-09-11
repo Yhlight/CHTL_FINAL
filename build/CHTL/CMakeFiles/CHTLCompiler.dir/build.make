@@ -251,10 +251,38 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLParser/Parser.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLCompiler.dir/CHTLParser/Parser.cpp.s"
 	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/CHTL/CHTLParser/Parser.cpp -o CMakeFiles/CHTLCompiler.dir/CHTLParser/Parser.cpp.s
 
+CHTL/CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.o: CHTL/CMakeFiles/CHTLCompiler.dir/flags.make
+CHTL/CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.o: /app/CHTL/CHTLContext.cpp
+CHTL/CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.o: CHTL/CMakeFiles/CHTLCompiler.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CHTL/CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.o"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.o -MF CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.o.d -o CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.o -c /app/CHTL/CHTLContext.cpp
+
+CHTL/CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.i"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/CHTL/CHTLContext.cpp > CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.i
+
+CHTL/CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.s"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/CHTL/CHTLContext.cpp -o CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.s
+
+CHTL/CMakeFiles/CHTLCompiler.dir/Compiler.cpp.o: CHTL/CMakeFiles/CHTLCompiler.dir/flags.make
+CHTL/CMakeFiles/CHTLCompiler.dir/Compiler.cpp.o: /app/CHTL/Compiler.cpp
+CHTL/CMakeFiles/CHTLCompiler.dir/Compiler.cpp.o: CHTL/CMakeFiles/CHTLCompiler.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CHTL/CMakeFiles/CHTLCompiler.dir/Compiler.cpp.o"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CMakeFiles/CHTLCompiler.dir/Compiler.cpp.o -MF CMakeFiles/CHTLCompiler.dir/Compiler.cpp.o.d -o CMakeFiles/CHTLCompiler.dir/Compiler.cpp.o -c /app/CHTL/Compiler.cpp
+
+CHTL/CMakeFiles/CHTLCompiler.dir/Compiler.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLCompiler.dir/Compiler.cpp.i"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/CHTL/Compiler.cpp > CMakeFiles/CHTLCompiler.dir/Compiler.cpp.i
+
+CHTL/CMakeFiles/CHTLCompiler.dir/Compiler.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLCompiler.dir/Compiler.cpp.s"
+	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/CHTL/Compiler.cpp -o CMakeFiles/CHTLCompiler.dir/Compiler.cpp.s
+
 CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o: CHTL/CMakeFiles/CHTLCompiler.dir/flags.make
 CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o: /app/CHTL/AstPrinter.cpp
 CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o: CHTL/CMakeFiles/CHTLCompiler.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o"
 	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o -MF CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o.d -o CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o -c /app/CHTL/AstPrinter.cpp
 
 CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.i: cmake_force
@@ -268,7 +296,7 @@ CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.s: cmake_force
 CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o: CHTL/CMakeFiles/CHTLCompiler.dir/flags.make
 CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o: /app/CHTL/CHTLGenerator/HtmlGenerator.cpp
 CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o: CHTL/CMakeFiles/CHTLCompiler.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o"
 	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o -MF CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o.d -o CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o -c /app/CHTL/CHTLGenerator/HtmlGenerator.cpp
 
 CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.i: cmake_force
@@ -282,7 +310,7 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.s: cmake_force
 CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/Expression.cpp.o: CHTL/CMakeFiles/CHTLCompiler.dir/flags.make
 CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/Expression.cpp.o: /app/CHTL/CSSExt/Expression.cpp
 CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/Expression.cpp.o: CHTL/CMakeFiles/CHTLCompiler.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/Expression.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/Expression.cpp.o"
 	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/Expression.cpp.o -MF CMakeFiles/CHTLCompiler.dir/CSSExt/Expression.cpp.o.d -o CMakeFiles/CHTLCompiler.dir/CSSExt/Expression.cpp.o -c /app/CHTL/CSSExt/Expression.cpp
 
 CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/Expression.cpp.i: cmake_force
@@ -296,7 +324,7 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/Expression.cpp.s: cmake_force
 CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.o: CHTL/CMakeFiles/CHTLCompiler.dir/flags.make
 CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.o: /app/CHTL/CSSExt/ExpressionParser.cpp
 CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.o: CHTL/CMakeFiles/CHTLCompiler.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.o"
 	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.o -MF CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.o.d -o CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.o -c /app/CHTL/CSSExt/ExpressionParser.cpp
 
 CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.i: cmake_force
@@ -310,7 +338,7 @@ CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.s: cmake_force
 CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionEvaluator.cpp.o: CHTL/CMakeFiles/CHTLCompiler.dir/flags.make
 CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionEvaluator.cpp.o: /app/CHTL/CSSExt/ExpressionEvaluator.cpp
 CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionEvaluator.cpp.o: CHTL/CMakeFiles/CHTLCompiler.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionEvaluator.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionEvaluator.cpp.o"
 	cd /app/build/CHTL && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionEvaluator.cpp.o -MF CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionEvaluator.cpp.o.d -o CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionEvaluator.cpp.o -c /app/CHTL/CSSExt/ExpressionEvaluator.cpp
 
 CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionEvaluator.cpp.i: cmake_force
@@ -336,6 +364,8 @@ CHTLCompiler_OBJECTS = \
 "CMakeFiles/CHTLCompiler.dir/CHTLNode/ImportNode.cpp.o" \
 "CMakeFiles/CHTLCompiler.dir/CHTLNode/NamespaceNode.cpp.o" \
 "CMakeFiles/CHTLCompiler.dir/CHTLParser/Parser.cpp.o" \
+"CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.o" \
+"CMakeFiles/CHTLCompiler.dir/Compiler.cpp.o" \
 "CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o" \
 "CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o" \
 "CMakeFiles/CHTLCompiler.dir/CSSExt/Expression.cpp.o" \
@@ -358,6 +388,8 @@ CHTL/libCHTLCompiler.a: CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/CustomDefiniti
 CHTL/libCHTLCompiler.a: CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/ImportNode.cpp.o
 CHTL/libCHTLCompiler.a: CHTL/CMakeFiles/CHTLCompiler.dir/CHTLNode/NamespaceNode.cpp.o
 CHTL/libCHTLCompiler.a: CHTL/CMakeFiles/CHTLCompiler.dir/CHTLParser/Parser.cpp.o
+CHTL/libCHTLCompiler.a: CHTL/CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.o
+CHTL/libCHTLCompiler.a: CHTL/CMakeFiles/CHTLCompiler.dir/Compiler.cpp.o
 CHTL/libCHTLCompiler.a: CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o
 CHTL/libCHTLCompiler.a: CHTL/CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o
 CHTL/libCHTLCompiler.a: CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/Expression.cpp.o
@@ -365,7 +397,7 @@ CHTL/libCHTLCompiler.a: CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser
 CHTL/libCHTLCompiler.a: CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionEvaluator.cpp.o
 CHTL/libCHTLCompiler.a: CHTL/CMakeFiles/CHTLCompiler.dir/build.make
 CHTL/libCHTLCompiler.a: CHTL/CMakeFiles/CHTLCompiler.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Linking CXX static library libCHTLCompiler.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Linking CXX static library libCHTLCompiler.a"
 	cd /app/build/CHTL && $(CMAKE_COMMAND) -P CMakeFiles/CHTLCompiler.dir/cmake_clean_target.cmake
 	cd /app/build/CHTL && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/CHTLCompiler.dir/link.txt --verbose=$(VERBOSE)
 

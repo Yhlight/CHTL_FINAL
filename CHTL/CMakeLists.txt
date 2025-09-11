@@ -13,6 +13,8 @@ add_library(CHTLCompiler STATIC
     CHTLNode/ImportNode.cpp
     CHTLNode/NamespaceNode.cpp
     CHTLParser/Parser.cpp
+    CHTLContext.cpp
+    Compiler.cpp
     AstPrinter.cpp
     CHTLGenerator/HtmlGenerator.cpp
     CSSExt/Expression.cpp
@@ -21,7 +23,10 @@ add_library(CHTLCompiler STATIC
 )
 
 # Publicly expose the include directory for this library
-target_include_directories(CHTLCompiler PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(CHTLCompiler PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/Util
+)
 
 # Link against utility library
 target_link_libraries(CHTLCompiler PUBLIC Util)

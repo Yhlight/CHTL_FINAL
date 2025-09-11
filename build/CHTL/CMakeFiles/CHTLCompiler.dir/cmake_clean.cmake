@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o"
   "CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.o.d"
   "CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o"
   "CMakeFiles/CHTLCompiler.dir/CHTLGenerator/HtmlGenerator.cpp.o.d"
   "CMakeFiles/CHTLCompiler.dir/CHTLLexer/Lexer.cpp.o"
@@ -35,6 +37,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionEvaluator.cpp.o.d"
   "CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.o"
   "CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.o.d"
+  "CMakeFiles/CHTLCompiler.dir/Compiler.cpp.o"
+  "CMakeFiles/CHTLCompiler.dir/Compiler.cpp.o.d"
   "libCHTLCompiler.a"
   "libCHTLCompiler.pdb"
 )

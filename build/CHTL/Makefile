@@ -164,6 +164,30 @@ AstPrinter.cpp.s:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/AstPrinter.cpp.s
 .PHONY : AstPrinter.cpp.s
 
+CHTLContext.o: CHTLContext.cpp.o
+.PHONY : CHTLContext.o
+
+# target to build an object file
+CHTLContext.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.o
+.PHONY : CHTLContext.cpp.o
+
+CHTLContext.i: CHTLContext.cpp.i
+.PHONY : CHTLContext.i
+
+# target to preprocess a source file
+CHTLContext.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.i
+.PHONY : CHTLContext.cpp.i
+
+CHTLContext.s: CHTLContext.cpp.s
+.PHONY : CHTLContext.s
+
+# target to generate assembly for a file
+CHTLContext.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CHTLContext.cpp.s
+.PHONY : CHTLContext.cpp.s
+
 CHTLGenerator/HtmlGenerator.o: CHTLGenerator/HtmlGenerator.cpp.o
 .PHONY : CHTLGenerator/HtmlGenerator.o
 
@@ -572,6 +596,30 @@ CSSExt/ExpressionParser.cpp.s:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/CSSExt/ExpressionParser.cpp.s
 .PHONY : CSSExt/ExpressionParser.cpp.s
 
+Compiler.o: Compiler.cpp.o
+.PHONY : Compiler.o
+
+# target to build an object file
+Compiler.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/Compiler.cpp.o
+.PHONY : Compiler.cpp.o
+
+Compiler.i: Compiler.cpp.i
+.PHONY : Compiler.i
+
+# target to preprocess a source file
+Compiler.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/Compiler.cpp.i
+.PHONY : Compiler.cpp.i
+
+Compiler.s: Compiler.cpp.s
+.PHONY : Compiler.s
+
+# target to generate assembly for a file
+Compiler.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/CHTLCompiler.dir/build.make CHTL/CMakeFiles/CHTLCompiler.dir/Compiler.cpp.s
+.PHONY : Compiler.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -585,6 +633,9 @@ help:
 	@echo "... AstPrinter.o"
 	@echo "... AstPrinter.i"
 	@echo "... AstPrinter.s"
+	@echo "... CHTLContext.o"
+	@echo "... CHTLContext.i"
+	@echo "... CHTLContext.s"
 	@echo "... CHTLGenerator/HtmlGenerator.o"
 	@echo "... CHTLGenerator/HtmlGenerator.i"
 	@echo "... CHTLGenerator/HtmlGenerator.s"
@@ -636,6 +687,9 @@ help:
 	@echo "... CSSExt/ExpressionParser.o"
 	@echo "... CSSExt/ExpressionParser.i"
 	@echo "... CSSExt/ExpressionParser.s"
+	@echo "... Compiler.o"
+	@echo "... Compiler.i"
+	@echo "... Compiler.s"
 .PHONY : help
 
 

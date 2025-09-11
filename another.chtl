@@ -1,0 +1,7 @@
+[Template] @Element ImportedBox
+{
+    div {
+        style { color: blue; }
+        text: "I was imported!";
+    }
+}

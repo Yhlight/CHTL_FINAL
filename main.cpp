@@ -1,12 +1,6 @@
 #include <iostream>
-#include <fstream>
-#include <vector>
-#include "Util/FileSystem/FileSystem.hpp"
-#include "CHTL/CHTLLexer/Lexer.hpp"
-#include "CHTL/CHTLParser/Parser.hpp"
-#include "CHTL/AstPrinter.hpp"
-#include "CHTL/CHTLGenerator/HtmlGenerator.hpp"
-
+#include <filesystem>
+#include "CHTL/Compiler.hpp"
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -14,31 +8,18 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string filename = argv[1];
     try {
-        // 1. Read file
-        std::string source = CHTL::FileSystem::readFile(filename);
+        std::filesystem::path entry_path(argv[1]);
+        // The base directory for all relative imports will be the directory
+        // of the main entry file.
+        std::string base_dir = entry_path.parent_path().string();
+        if (base_dir.empty()) {
+            base_dir = ".";
+        }
 
-        // 2. Lex
-        CHTL::Lexer lexer(source);
-        std::vector<CHTL::Token> tokens = lexer.scanTokens();
-
-        // 3. Parse
-        CHTL::Parser parser(tokens);
-        std::cout << "DEBUG: Lexer produced " << tokens.size() << " tokens." << std::endl;
-        std::vector<CHTL::NodePtr> ast = parser.parse();
-        std::cout << "DEBUG: Parser produced " << ast.size() << " AST nodes." << std::endl;
-
-        // 4. (Optional) Print AST for debugging
-        // CHTL::AstPrinter printer;
-        // std::string astString = printer.print(ast);
-        // std::cout << astString << std::endl;
-
-        // 5. Generate HTML
-        CHTL::HtmlGenerator generator;
-        std::string html = generator.generate(ast);
+        CHTL::Compiler compiler(base_dir);
+        std::string html = compiler.compile(entry_path.string());
         std::cout << html << std::endl;
-
 
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

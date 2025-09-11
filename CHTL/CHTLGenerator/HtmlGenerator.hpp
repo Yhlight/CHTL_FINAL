@@ -3,6 +3,7 @@
 #include "../CHTLNode/AstVisitor.hpp"
 #include "../CHTLNode/BaseNode.hpp"
 #include "../CHTLNode/TemplateDefinitionNode.hpp"
+#include "CHTLContext.hpp"
 #include <string>
 #include <vector>
 #include <map>
@@ -12,7 +13,7 @@ namespace CHTL {
 
 class HtmlGenerator : public AstVisitor {
 public:
-    std::string generate(const std::vector<NodePtr>& nodes);
+    std::string generate(const std::vector<NodePtr>& nodes, CHTLContext& context);
 
     void visit(ElementNode& node) override;
     void visit(TextNode& node) override;
