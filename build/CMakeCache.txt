@@ -207,6 +207,12 @@ chtl_js_parser_LIB_DEPENDS:STATIC=general;chtl_js_lexer;
 //Dependencies for the target
 chtl_parser_LIB_DEPENDS:STATIC=general;chtl_lexer;
 
+//Dependencies for the target
+dispatcher_LIB_DEPENDS:STATIC=general;scanner;general;chtl_lexer;general;chtl_parser;general;chtl_generator;general;chtl_js_lexer;general;chtl_js_parser;general;chtl_js_generator;
+
+//Dependencies for the target
+merger_LIB_DEPENDS:STATIC=general;dispatcher;
+
 
 ########################
 # INTERNAL cache entries

@@ -121,4 +121,8 @@ set(CMAKE_DEPEND_INFO_FILES
   "CHTL/CMakeFiles/chtl_util.dir/DependInfo.cmake"
   "CHTL_JS/CMakeFiles/chtl_js_lexer.dir/DependInfo.cmake"
   "CHTL_JS/CMakeFiles/chtl_js_parser.dir/DependInfo.cmake"
+  "CHTL_JS/CMakeFiles/chtl_js_generator.dir/DependInfo.cmake"
+  "Scanner/CMakeFiles/scanner.dir/DependInfo.cmake"
+  "CodeMerger/CMakeFiles/merger.dir/DependInfo.cmake"
+  "CompilerDispatcher/CMakeFiles/dispatcher.dir/DependInfo.cmake"
   )

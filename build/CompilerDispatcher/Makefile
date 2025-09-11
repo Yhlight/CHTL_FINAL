@@ -116,6 +116,44 @@ depend:
 	cd /app/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
+# Convenience name for target.
+CompilerDispatcher/CMakeFiles/dispatcher.dir/rule:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CompilerDispatcher/CMakeFiles/dispatcher.dir/rule
+.PHONY : CompilerDispatcher/CMakeFiles/dispatcher.dir/rule
+
+# Convenience name for target.
+dispatcher: CompilerDispatcher/CMakeFiles/dispatcher.dir/rule
+.PHONY : dispatcher
+
+# fast build rule for target.
+dispatcher/fast:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make CompilerDispatcher/CMakeFiles/dispatcher.dir/build
+.PHONY : dispatcher/fast
+
+CompilerDispatcher.o: CompilerDispatcher.cpp.o
+.PHONY : CompilerDispatcher.o
+
+# target to build an object file
+CompilerDispatcher.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make CompilerDispatcher/CMakeFiles/dispatcher.dir/CompilerDispatcher.cpp.o
+.PHONY : CompilerDispatcher.cpp.o
+
+CompilerDispatcher.i: CompilerDispatcher.cpp.i
+.PHONY : CompilerDispatcher.i
+
+# target to preprocess a source file
+CompilerDispatcher.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make CompilerDispatcher/CMakeFiles/dispatcher.dir/CompilerDispatcher.cpp.i
+.PHONY : CompilerDispatcher.cpp.i
+
+CompilerDispatcher.s: CompilerDispatcher.cpp.s
+.PHONY : CompilerDispatcher.s
+
+# target to generate assembly for a file
+CompilerDispatcher.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make CompilerDispatcher/CMakeFiles/dispatcher.dir/CompilerDispatcher.cpp.s
+.PHONY : CompilerDispatcher.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -124,6 +162,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... dispatcher"
+	@echo "... CompilerDispatcher.o"
+	@echo "... CompilerDispatcher.i"
+	@echo "... CompilerDispatcher.s"
 .PHONY : help
 
 

@@ -33,9 +33,6 @@ CHTLJSToken CHTLJSLexer::nextToken() {
 
     char c = advance();
 
-    if (isAlpha(c)) return identifier();
-    if (isDigit(c)) return number();
-
     switch (c) {
         case '{':
             if (peek() == '{') { advance(); return makeToken(CHTLJSTokenType::DoubleCurlyOpen); }
@@ -50,7 +47,7 @@ CHTLJSToken CHTLJSLexer::nextToken() {
         case ':': return makeToken(CHTLJSTokenType::Colon);
         case ';': return makeToken(CHTLJSTokenType::Semicolon);
         case ',': return makeToken(CHTLJSTokenType::Comma);
-        case '.': return makeToken(CHTLJSTokenType::Dot);
+        // case '.': return makeToken(CHTLJSTokenType::Dot); // Dot is part of identifiers now
         case '=':
             if (peek() == '>') { advance(); return makeToken(CHTLJSTokenType::FatArrow); }
             return makeToken(CHTLJSTokenType::Equals);
@@ -60,6 +57,12 @@ CHTLJSToken CHTLJSLexer::nextToken() {
         case '"':
         case '\'':
             return stringLiteral(c);
+        default:
+            if (isAlpha(c)) return identifier();
+            if (isDigit(c)) return number();
+            // Check for identifiers that don't start with alpha, like ./path
+            if (isIdentifierChar(c)) return identifier();
+            break;
     }
 
     return errorToken("Unexpected character.");
@@ -86,7 +89,7 @@ void CHTLJSLexer::skipWhitespace() {
 }
 
 CHTLJSToken CHTLJSLexer::identifier() {
-    while (isAlpha(peek()) || isDigit(peek())) {
+    while (isIdentifierChar(peek())) {
         advance();
     }
     std::string text = source.substr(start, current - start);
@@ -157,4 +160,23 @@ bool CHTLJSLexer::isAlpha(char c) const {
 
 bool CHTLJSLexer::isDigit(char c) const {
     return c >= '0' && c <= '9';
+}
+
+bool CHTLJSLexer::isIdentifierChar(char c) const {
+    switch (c) {
+        case '{':
+        case '}':
+        case '(':
+        case ')':
+        case '[':
+        case ']':
+        case ':':
+        case ';':
+        case ',':
+        case '=':
+        case '\0':
+            return false;
+        default:
+            return !isspace(c);
+    }
 }

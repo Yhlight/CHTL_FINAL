@@ -12,15 +12,30 @@ class ListenNode;
 class AnimateNode;
 class VirDeclNode;
 class EnhancedSelectorNode;
+class CHTLJSPropertyNode;
+class CHTLJSVisitor;
 
 // Base class for all CHTL JS AST nodes
 class CHTLJSNode {
 public:
     virtual ~CHTLJSNode() = default;
+    virtual void accept(CHTLJSVisitor& visitor) = 0;
 };
 
 using CHTLJSNodePtr = std::unique_ptr<CHTLJSNode>;
 using CHTLJSNodeList = std::vector<CHTLJSNodePtr>;
+
+// Visitor interface for the CHTL JS AST
+class CHTLJSVisitor {
+public:
+    virtual ~CHTLJSVisitor() = default;
+    virtual void visit(FileLoaderNode* node) = 0;
+    virtual void visit(ListenNode* node) = 0;
+    virtual void visit(AnimateNode* node) = 0;
+    virtual void visit(VirDeclNode* node) = 0;
+    virtual void visit(EnhancedSelectorNode* node) = 0;
+    virtual void visit(CHTLJSPropertyNode* node) = 0;
+};
 
 
 // Represents a `vir` variable declaration
@@ -28,6 +43,8 @@ class VirDeclNode : public CHTLJSNode {
 public:
     VirDeclNode(const std::string& name, CHTLJSNodePtr value)
         : name(name), value(std::move(value)) {}
+
+    void accept(CHTLJSVisitor& visitor) override { visitor.visit(this); }
 
     std::string name;
     CHTLJSNodePtr value;
@@ -37,16 +54,16 @@ public:
 class EnhancedSelectorNode : public CHTLJSNode {
 public:
     EnhancedSelectorNode(const std::string& selector) : selector(selector) {}
+    void accept(CHTLJSVisitor& visitor) override { visitor.visit(this); }
     std::string selector;
 };
 
 // Represents a key-value pair inside a CHTL JS block
 class CHTLJSPropertyNode : public CHTLJSNode {
 public:
-    // The value can be complex (e.g., a JS function body), so we store it as a string for now.
-    // The Unified Scanner will eventually separate this out.
     CHTLJSPropertyNode(const std::string& key, const std::string& value)
         : key(key), value(value) {}
+    void accept(CHTLJSVisitor& visitor) override { visitor.visit(this); }
 
     std::string key;
     std::string value;
@@ -55,17 +72,20 @@ public:
 // Represents a `listen { ... }` block
 class ListenNode : public CHTLJSNode {
 public:
+    void accept(CHTLJSVisitor& visitor) override { visitor.visit(this); }
     std::vector<std::unique_ptr<CHTLJSPropertyNode>> eventHandlers;
 };
 
 // Represents an `animate { ... }` block
 class AnimateNode : public CHTLJSNode {
 public:
+    void accept(CHTLJSVisitor& visitor) override { visitor.visit(this); }
     std::vector<std::unique_ptr<CHTLJSPropertyNode>> properties;
 };
 
 // Represents a `fileloader { ... }` block
 class FileLoaderNode : public CHTLJSNode {
 public:
+    void accept(CHTLJSVisitor& visitor) override { visitor.visit(this); }
     std::vector<std::string> files;
 };

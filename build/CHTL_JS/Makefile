@@ -144,6 +144,44 @@ chtl_js_parser/fast:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_parser.dir/build.make CHTL_JS/CMakeFiles/chtl_js_parser.dir/build
 .PHONY : chtl_js_parser/fast
 
+# Convenience name for target.
+CHTL_JS/CMakeFiles/chtl_js_generator.dir/rule:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL_JS/CMakeFiles/chtl_js_generator.dir/rule
+.PHONY : CHTL_JS/CMakeFiles/chtl_js_generator.dir/rule
+
+# Convenience name for target.
+chtl_js_generator: CHTL_JS/CMakeFiles/chtl_js_generator.dir/rule
+.PHONY : chtl_js_generator
+
+# fast build rule for target.
+chtl_js_generator/fast:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_generator.dir/build.make CHTL_JS/CMakeFiles/chtl_js_generator.dir/build
+.PHONY : chtl_js_generator/fast
+
+CHTLJSGenerator/Generator.o: CHTLJSGenerator/Generator.cpp.o
+.PHONY : CHTLJSGenerator/Generator.o
+
+# target to build an object file
+CHTLJSGenerator/Generator.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_generator.dir/build.make CHTL_JS/CMakeFiles/chtl_js_generator.dir/CHTLJSGenerator/Generator.cpp.o
+.PHONY : CHTLJSGenerator/Generator.cpp.o
+
+CHTLJSGenerator/Generator.i: CHTLJSGenerator/Generator.cpp.i
+.PHONY : CHTLJSGenerator/Generator.i
+
+# target to preprocess a source file
+CHTLJSGenerator/Generator.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_generator.dir/build.make CHTL_JS/CMakeFiles/chtl_js_generator.dir/CHTLJSGenerator/Generator.cpp.i
+.PHONY : CHTLJSGenerator/Generator.cpp.i
+
+CHTLJSGenerator/Generator.s: CHTLJSGenerator/Generator.cpp.s
+.PHONY : CHTLJSGenerator/Generator.s
+
+# target to generate assembly for a file
+CHTLJSGenerator/Generator.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_generator.dir/build.make CHTL_JS/CMakeFiles/chtl_js_generator.dir/CHTLJSGenerator/Generator.cpp.s
+.PHONY : CHTLJSGenerator/Generator.cpp.s
+
 CHTLJSLexer/Lexer.o: CHTLJSLexer/Lexer.cpp.o
 .PHONY : CHTLJSLexer/Lexer.o
 
@@ -200,8 +238,12 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... chtl_js_generator"
 	@echo "... chtl_js_lexer"
 	@echo "... chtl_js_parser"
+	@echo "... CHTLJSGenerator/Generator.o"
+	@echo "... CHTLJSGenerator/Generator.i"
+	@echo "... CHTLJSGenerator/Generator.s"
 	@echo "... CHTLJSLexer/Lexer.o"
 	@echo "... CHTLJSLexer/Lexer.i"
 	@echo "... CHTLJSLexer/Lexer.s"

@@ -118,6 +118,7 @@ CHTL/clean: CHTL/CMakeFiles/chtl_util.dir/clean
 # Recursive "all" directory target.
 CHTL_JS/all: CHTL_JS/CMakeFiles/chtl_js_lexer.dir/all
 CHTL_JS/all: CHTL_JS/CMakeFiles/chtl_js_parser.dir/all
+CHTL_JS/all: CHTL_JS/CMakeFiles/chtl_js_generator.dir/all
 .PHONY : CHTL_JS/all
 
 # Recursive "preinstall" directory target.
@@ -127,13 +128,14 @@ CHTL_JS/preinstall:
 # Recursive "clean" directory target.
 CHTL_JS/clean: CHTL_JS/CMakeFiles/chtl_js_lexer.dir/clean
 CHTL_JS/clean: CHTL_JS/CMakeFiles/chtl_js_parser.dir/clean
+CHTL_JS/clean: CHTL_JS/CMakeFiles/chtl_js_generator.dir/clean
 .PHONY : CHTL_JS/clean
 
 #=============================================================================
 # Directory level rules for directory CodeMerger
 
 # Recursive "all" directory target.
-CodeMerger/all:
+CodeMerger/all: CodeMerger/CMakeFiles/merger.dir/all
 .PHONY : CodeMerger/all
 
 # Recursive "preinstall" directory target.
@@ -141,14 +143,14 @@ CodeMerger/preinstall:
 .PHONY : CodeMerger/preinstall
 
 # Recursive "clean" directory target.
-CodeMerger/clean:
+CodeMerger/clean: CodeMerger/CMakeFiles/merger.dir/clean
 .PHONY : CodeMerger/clean
 
 #=============================================================================
 # Directory level rules for directory CompilerDispatcher
 
 # Recursive "all" directory target.
-CompilerDispatcher/all:
+CompilerDispatcher/all: CompilerDispatcher/CMakeFiles/dispatcher.dir/all
 .PHONY : CompilerDispatcher/all
 
 # Recursive "preinstall" directory target.
@@ -156,14 +158,14 @@ CompilerDispatcher/preinstall:
 .PHONY : CompilerDispatcher/preinstall
 
 # Recursive "clean" directory target.
-CompilerDispatcher/clean:
+CompilerDispatcher/clean: CompilerDispatcher/CMakeFiles/dispatcher.dir/clean
 .PHONY : CompilerDispatcher/clean
 
 #=============================================================================
 # Directory level rules for directory Scanner
 
 # Recursive "all" directory target.
-Scanner/all:
+Scanner/all: Scanner/CMakeFiles/scanner.dir/all
 .PHONY : Scanner/all
 
 # Recursive "preinstall" directory target.
@@ -171,7 +173,7 @@ Scanner/preinstall:
 .PHONY : Scanner/preinstall
 
 # Recursive "clean" directory target.
-Scanner/clean:
+Scanner/clean: Scanner/CMakeFiles/scanner.dir/clean
 .PHONY : Scanner/clean
 
 #=============================================================================
@@ -199,6 +201,10 @@ CMakeFiles/chtl_compiler.dir/all: CHTL/CMakeFiles/chtl_generator.dir/all
 CMakeFiles/chtl_compiler.dir/all: CHTL/CMakeFiles/chtl_util.dir/all
 CMakeFiles/chtl_compiler.dir/all: CHTL_JS/CMakeFiles/chtl_js_lexer.dir/all
 CMakeFiles/chtl_compiler.dir/all: CHTL_JS/CMakeFiles/chtl_js_parser.dir/all
+CMakeFiles/chtl_compiler.dir/all: CHTL_JS/CMakeFiles/chtl_js_generator.dir/all
+CMakeFiles/chtl_compiler.dir/all: Scanner/CMakeFiles/scanner.dir/all
+CMakeFiles/chtl_compiler.dir/all: CodeMerger/CMakeFiles/merger.dir/all
+CMakeFiles/chtl_compiler.dir/all: CompilerDispatcher/CMakeFiles/dispatcher.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=1,2 "Built target chtl_compiler"
@@ -206,7 +212,7 @@ CMakeFiles/chtl_compiler.dir/all: CHTL_JS/CMakeFiles/chtl_js_parser.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/chtl_compiler.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 16
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 24
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/chtl_compiler.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : CMakeFiles/chtl_compiler.dir/rule
@@ -227,7 +233,7 @@ CMakeFiles/chtl_compiler.dir/clean:
 CHTL/CMakeFiles/chtl_lexer.dir/all:
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lexer.dir/build.make CHTL/CMakeFiles/chtl_lexer.dir/depend
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_lexer.dir/build.make CHTL/CMakeFiles/chtl_lexer.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=10,11 "Built target chtl_lexer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=12,13 "Built target chtl_lexer"
 .PHONY : CHTL/CMakeFiles/chtl_lexer.dir/all
 
 # Build rule for subdir invocation for target.
@@ -253,7 +259,7 @@ CHTL/CMakeFiles/chtl_lexer.dir/clean:
 CHTL/CMakeFiles/chtl_parser.dir/all: CHTL/CMakeFiles/chtl_lexer.dir/all
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_parser.dir/build.make CHTL/CMakeFiles/chtl_parser.dir/depend
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_parser.dir/build.make CHTL/CMakeFiles/chtl_parser.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=12,13,14 "Built target chtl_parser"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=14,15,16 "Built target chtl_parser"
 .PHONY : CHTL/CMakeFiles/chtl_parser.dir/all
 
 # Build rule for subdir invocation for target.
@@ -305,7 +311,7 @@ CHTL/CMakeFiles/chtl_generator.dir/clean:
 CHTL/CMakeFiles/chtl_util.dir/all:
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_util.dir/build.make CHTL/CMakeFiles/chtl_util.dir/depend
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_util.dir/build.make CHTL/CMakeFiles/chtl_util.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=15,16 "Built target chtl_util"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=17,18 "Built target chtl_util"
 .PHONY : CHTL/CMakeFiles/chtl_util.dir/all
 
 # Build rule for subdir invocation for target.
@@ -331,7 +337,7 @@ CHTL/CMakeFiles/chtl_util.dir/clean:
 CHTL_JS/CMakeFiles/chtl_js_lexer.dir/all:
 	$(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build.make CHTL_JS/CMakeFiles/chtl_js_lexer.dir/depend
 	$(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build.make CHTL_JS/CMakeFiles/chtl_js_lexer.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=6,7 "Built target chtl_js_lexer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=8,9 "Built target chtl_js_lexer"
 .PHONY : CHTL_JS/CMakeFiles/chtl_js_lexer.dir/all
 
 # Build rule for subdir invocation for target.
@@ -357,7 +363,7 @@ CHTL_JS/CMakeFiles/chtl_js_lexer.dir/clean:
 CHTL_JS/CMakeFiles/chtl_js_parser.dir/all: CHTL_JS/CMakeFiles/chtl_js_lexer.dir/all
 	$(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_parser.dir/build.make CHTL_JS/CMakeFiles/chtl_js_parser.dir/depend
 	$(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_parser.dir/build.make CHTL_JS/CMakeFiles/chtl_js_parser.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=8,9 "Built target chtl_js_parser"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=10,11 "Built target chtl_js_parser"
 .PHONY : CHTL_JS/CMakeFiles/chtl_js_parser.dir/all
 
 # Build rule for subdir invocation for target.
@@ -375,6 +381,125 @@ chtl_js_parser: CHTL_JS/CMakeFiles/chtl_js_parser.dir/rule
 CHTL_JS/CMakeFiles/chtl_js_parser.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_parser.dir/build.make CHTL_JS/CMakeFiles/chtl_js_parser.dir/clean
 .PHONY : CHTL_JS/CMakeFiles/chtl_js_parser.dir/clean
+
+#=============================================================================
+# Target rules for target CHTL_JS/CMakeFiles/chtl_js_generator.dir
+
+# All Build rule for target.
+CHTL_JS/CMakeFiles/chtl_js_generator.dir/all:
+	$(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_generator.dir/build.make CHTL_JS/CMakeFiles/chtl_js_generator.dir/depend
+	$(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_generator.dir/build.make CHTL_JS/CMakeFiles/chtl_js_generator.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=6,7 "Built target chtl_js_generator"
+.PHONY : CHTL_JS/CMakeFiles/chtl_js_generator.dir/all
+
+# Build rule for subdir invocation for target.
+CHTL_JS/CMakeFiles/chtl_js_generator.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL_JS/CMakeFiles/chtl_js_generator.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
+.PHONY : CHTL_JS/CMakeFiles/chtl_js_generator.dir/rule
+
+# Convenience name for target.
+chtl_js_generator: CHTL_JS/CMakeFiles/chtl_js_generator.dir/rule
+.PHONY : chtl_js_generator
+
+# clean rule for target.
+CHTL_JS/CMakeFiles/chtl_js_generator.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_generator.dir/build.make CHTL_JS/CMakeFiles/chtl_js_generator.dir/clean
+.PHONY : CHTL_JS/CMakeFiles/chtl_js_generator.dir/clean
+
+#=============================================================================
+# Target rules for target Scanner/CMakeFiles/scanner.dir
+
+# All Build rule for target.
+Scanner/CMakeFiles/scanner.dir/all:
+	$(MAKE) $(MAKESILENT) -f Scanner/CMakeFiles/scanner.dir/build.make Scanner/CMakeFiles/scanner.dir/depend
+	$(MAKE) $(MAKESILENT) -f Scanner/CMakeFiles/scanner.dir/build.make Scanner/CMakeFiles/scanner.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=23,24 "Built target scanner"
+.PHONY : Scanner/CMakeFiles/scanner.dir/all
+
+# Build rule for subdir invocation for target.
+Scanner/CMakeFiles/scanner.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Scanner/CMakeFiles/scanner.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
+.PHONY : Scanner/CMakeFiles/scanner.dir/rule
+
+# Convenience name for target.
+scanner: Scanner/CMakeFiles/scanner.dir/rule
+.PHONY : scanner
+
+# clean rule for target.
+Scanner/CMakeFiles/scanner.dir/clean:
+	$(MAKE) $(MAKESILENT) -f Scanner/CMakeFiles/scanner.dir/build.make Scanner/CMakeFiles/scanner.dir/clean
+.PHONY : Scanner/CMakeFiles/scanner.dir/clean
+
+#=============================================================================
+# Target rules for target CodeMerger/CMakeFiles/merger.dir
+
+# All Build rule for target.
+CodeMerger/CMakeFiles/merger.dir/all: CHTL/CMakeFiles/chtl_lexer.dir/all
+CodeMerger/CMakeFiles/merger.dir/all: CHTL/CMakeFiles/chtl_parser.dir/all
+CodeMerger/CMakeFiles/merger.dir/all: CHTL/CMakeFiles/chtl_generator.dir/all
+CodeMerger/CMakeFiles/merger.dir/all: CHTL/CMakeFiles/chtl_util.dir/all
+CodeMerger/CMakeFiles/merger.dir/all: CHTL_JS/CMakeFiles/chtl_js_lexer.dir/all
+CodeMerger/CMakeFiles/merger.dir/all: CHTL_JS/CMakeFiles/chtl_js_parser.dir/all
+CodeMerger/CMakeFiles/merger.dir/all: CHTL_JS/CMakeFiles/chtl_js_generator.dir/all
+CodeMerger/CMakeFiles/merger.dir/all: Scanner/CMakeFiles/scanner.dir/all
+CodeMerger/CMakeFiles/merger.dir/all: CompilerDispatcher/CMakeFiles/dispatcher.dir/all
+	$(MAKE) $(MAKESILENT) -f CodeMerger/CMakeFiles/merger.dir/build.make CodeMerger/CMakeFiles/merger.dir/depend
+	$(MAKE) $(MAKESILENT) -f CodeMerger/CMakeFiles/merger.dir/build.make CodeMerger/CMakeFiles/merger.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=21,22 "Built target merger"
+.PHONY : CodeMerger/CMakeFiles/merger.dir/all
+
+# Build rule for subdir invocation for target.
+CodeMerger/CMakeFiles/merger.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 22
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CodeMerger/CMakeFiles/merger.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
+.PHONY : CodeMerger/CMakeFiles/merger.dir/rule
+
+# Convenience name for target.
+merger: CodeMerger/CMakeFiles/merger.dir/rule
+.PHONY : merger
+
+# clean rule for target.
+CodeMerger/CMakeFiles/merger.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CodeMerger/CMakeFiles/merger.dir/build.make CodeMerger/CMakeFiles/merger.dir/clean
+.PHONY : CodeMerger/CMakeFiles/merger.dir/clean
+
+#=============================================================================
+# Target rules for target CompilerDispatcher/CMakeFiles/dispatcher.dir
+
+# All Build rule for target.
+CompilerDispatcher/CMakeFiles/dispatcher.dir/all: CHTL/CMakeFiles/chtl_lexer.dir/all
+CompilerDispatcher/CMakeFiles/dispatcher.dir/all: CHTL/CMakeFiles/chtl_parser.dir/all
+CompilerDispatcher/CMakeFiles/dispatcher.dir/all: CHTL/CMakeFiles/chtl_generator.dir/all
+CompilerDispatcher/CMakeFiles/dispatcher.dir/all: CHTL/CMakeFiles/chtl_util.dir/all
+CompilerDispatcher/CMakeFiles/dispatcher.dir/all: CHTL_JS/CMakeFiles/chtl_js_lexer.dir/all
+CompilerDispatcher/CMakeFiles/dispatcher.dir/all: CHTL_JS/CMakeFiles/chtl_js_parser.dir/all
+CompilerDispatcher/CMakeFiles/dispatcher.dir/all: CHTL_JS/CMakeFiles/chtl_js_generator.dir/all
+CompilerDispatcher/CMakeFiles/dispatcher.dir/all: Scanner/CMakeFiles/scanner.dir/all
+	$(MAKE) $(MAKESILENT) -f CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make CompilerDispatcher/CMakeFiles/dispatcher.dir/depend
+	$(MAKE) $(MAKESILENT) -f CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make CompilerDispatcher/CMakeFiles/dispatcher.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=19,20 "Built target dispatcher"
+.PHONY : CompilerDispatcher/CMakeFiles/dispatcher.dir/all
+
+# Build rule for subdir invocation for target.
+CompilerDispatcher/CMakeFiles/dispatcher.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 20
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CompilerDispatcher/CMakeFiles/dispatcher.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
+.PHONY : CompilerDispatcher/CMakeFiles/dispatcher.dir/rule
+
+# Convenience name for target.
+dispatcher: CompilerDispatcher/CMakeFiles/dispatcher.dir/rule
+.PHONY : dispatcher
+
+# clean rule for target.
+CompilerDispatcher/CMakeFiles/dispatcher.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make CompilerDispatcher/CMakeFiles/dispatcher.dir/clean
+.PHONY : CompilerDispatcher/CMakeFiles/dispatcher.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

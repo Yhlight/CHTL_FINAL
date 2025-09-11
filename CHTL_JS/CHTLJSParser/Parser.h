@@ -20,7 +20,9 @@ private:
     CHTLJSNodePtr parseStatement();
     CHTLJSNodePtr parseVirDeclaration();
     CHTLJSNodePtr parseListenBlock();
-    // ... other parsing methods for animate, router, etc.
+    CHTLJSNodePtr parseAnimateBlock();
+    CHTLJSNodePtr parseFileLoaderBlock();
+    // ... other parsing methods for router, etc.
 
     // Helper methods
     const CHTLJSToken& peek() const;

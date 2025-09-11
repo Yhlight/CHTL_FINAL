@@ -116,6 +116,44 @@ depend:
 	cd /app/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
+# Convenience name for target.
+CodeMerger/CMakeFiles/merger.dir/rule:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CodeMerger/CMakeFiles/merger.dir/rule
+.PHONY : CodeMerger/CMakeFiles/merger.dir/rule
+
+# Convenience name for target.
+merger: CodeMerger/CMakeFiles/merger.dir/rule
+.PHONY : merger
+
+# fast build rule for target.
+merger/fast:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CodeMerger/CMakeFiles/merger.dir/build.make CodeMerger/CMakeFiles/merger.dir/build
+.PHONY : merger/fast
+
+CodeMerger.o: CodeMerger.cpp.o
+.PHONY : CodeMerger.o
+
+# target to build an object file
+CodeMerger.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CodeMerger/CMakeFiles/merger.dir/build.make CodeMerger/CMakeFiles/merger.dir/CodeMerger.cpp.o
+.PHONY : CodeMerger.cpp.o
+
+CodeMerger.i: CodeMerger.cpp.i
+.PHONY : CodeMerger.i
+
+# target to preprocess a source file
+CodeMerger.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CodeMerger/CMakeFiles/merger.dir/build.make CodeMerger/CMakeFiles/merger.dir/CodeMerger.cpp.i
+.PHONY : CodeMerger.cpp.i
+
+CodeMerger.s: CodeMerger.cpp.s
+.PHONY : CodeMerger.s
+
+# target to generate assembly for a file
+CodeMerger.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CodeMerger/CMakeFiles/merger.dir/build.make CodeMerger/CMakeFiles/merger.dir/CodeMerger.cpp.s
+.PHONY : CodeMerger.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -124,6 +162,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... merger"
+	@echo "... CodeMerger.o"
+	@echo "... CodeMerger.i"
+	@echo "... CodeMerger.s"
 .PHONY : help
 
 

@@ -28,6 +28,7 @@ private:
     bool isAtEnd() const;
     bool isAlpha(char c) const;
     bool isDigit(char c) const;
+    bool isIdentifierChar(char c) const;
 
     std::string source;
     size_t start = 0;

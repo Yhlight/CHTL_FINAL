@@ -207,6 +207,58 @@ chtl_js_parser/fast:
 	$(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_parser.dir/build.make CHTL_JS/CMakeFiles/chtl_js_parser.dir/build
 .PHONY : chtl_js_parser/fast
 
+#=============================================================================
+# Target rules for targets named chtl_js_generator
+
+# Build rule for target.
+chtl_js_generator: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 chtl_js_generator
+.PHONY : chtl_js_generator
+
+# fast build rule for target.
+chtl_js_generator/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL_JS/CMakeFiles/chtl_js_generator.dir/build.make CHTL_JS/CMakeFiles/chtl_js_generator.dir/build
+.PHONY : chtl_js_generator/fast
+
+#=============================================================================
+# Target rules for targets named scanner
+
+# Build rule for target.
+scanner: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 scanner
+.PHONY : scanner
+
+# fast build rule for target.
+scanner/fast:
+	$(MAKE) $(MAKESILENT) -f Scanner/CMakeFiles/scanner.dir/build.make Scanner/CMakeFiles/scanner.dir/build
+.PHONY : scanner/fast
+
+#=============================================================================
+# Target rules for targets named merger
+
+# Build rule for target.
+merger: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 merger
+.PHONY : merger
+
+# fast build rule for target.
+merger/fast:
+	$(MAKE) $(MAKESILENT) -f CodeMerger/CMakeFiles/merger.dir/build.make CodeMerger/CMakeFiles/merger.dir/build
+.PHONY : merger/fast
+
+#=============================================================================
+# Target rules for targets named dispatcher
+
+# Build rule for target.
+dispatcher: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 dispatcher
+.PHONY : dispatcher
+
+# fast build rule for target.
+dispatcher/fast:
+	$(MAKE) $(MAKESILENT) -f CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make CompilerDispatcher/CMakeFiles/dispatcher.dir/build
+.PHONY : dispatcher/fast
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -241,11 +293,15 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... chtl_compiler"
 	@echo "... chtl_generator"
+	@echo "... chtl_js_generator"
 	@echo "... chtl_js_lexer"
 	@echo "... chtl_js_parser"
 	@echo "... chtl_lexer"
 	@echo "... chtl_parser"
 	@echo "... chtl_util"
+	@echo "... dispatcher"
+	@echo "... merger"
+	@echo "... scanner"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

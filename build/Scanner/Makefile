@@ -116,6 +116,44 @@ depend:
 	cd /app/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
+# Convenience name for target.
+Scanner/CMakeFiles/scanner.dir/rule:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Scanner/CMakeFiles/scanner.dir/rule
+.PHONY : Scanner/CMakeFiles/scanner.dir/rule
+
+# Convenience name for target.
+scanner: Scanner/CMakeFiles/scanner.dir/rule
+.PHONY : scanner
+
+# fast build rule for target.
+scanner/fast:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f Scanner/CMakeFiles/scanner.dir/build.make Scanner/CMakeFiles/scanner.dir/build
+.PHONY : scanner/fast
+
+UnifiedScanner.o: UnifiedScanner.cpp.o
+.PHONY : UnifiedScanner.o
+
+# target to build an object file
+UnifiedScanner.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f Scanner/CMakeFiles/scanner.dir/build.make Scanner/CMakeFiles/scanner.dir/UnifiedScanner.cpp.o
+.PHONY : UnifiedScanner.cpp.o
+
+UnifiedScanner.i: UnifiedScanner.cpp.i
+.PHONY : UnifiedScanner.i
+
+# target to preprocess a source file
+UnifiedScanner.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f Scanner/CMakeFiles/scanner.dir/build.make Scanner/CMakeFiles/scanner.dir/UnifiedScanner.cpp.i
+.PHONY : UnifiedScanner.cpp.i
+
+UnifiedScanner.s: UnifiedScanner.cpp.s
+.PHONY : UnifiedScanner.s
+
+# target to generate assembly for a file
+UnifiedScanner.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f Scanner/CMakeFiles/scanner.dir/build.make Scanner/CMakeFiles/scanner.dir/UnifiedScanner.cpp.s
+.PHONY : UnifiedScanner.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -124,6 +162,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... scanner"
+	@echo "... UnifiedScanner.o"
+	@echo "... UnifiedScanner.i"
+	@echo "... UnifiedScanner.s"
 .PHONY : help
 
 
