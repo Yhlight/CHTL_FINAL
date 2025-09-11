@@ -136,8 +136,14 @@ void CHTLGenerator::ApplyInsertion(NodeList& nodes, const ElementInsertNode* ins
 }
 
 void CHTLGenerator::VisitElementTemplateUsage(const ElementTemplateUsageNode* node) {
-    const auto* templateDef = m_context.GetTemplate(node->GetTemplateName());
-    if (!templateDef) throw std::runtime_error("Undefined element template used: @" + node->GetTemplateName());
+    std::string full_name = node->GetFrom();
+    if (!full_name.empty()) {
+        full_name += ".";
+    }
+    full_name += node->GetTemplateName();
+
+    const auto* templateDef = m_context.GetTemplate(full_name);
+    if (!templateDef) throw std::runtime_error("Undefined element template used: @" + full_name);
 
     if (templateDef->GetTemplateType() != TemplateType::Element) throw std::runtime_error("Mismatched template type.");
 
@@ -186,7 +192,14 @@ void CHTLGenerator::VisitElement(const ElementNode* node) {
             for (const auto& prop : styleNode->GetProperties()) {
                 if (prop.name == "__TEMPLATE_USAGE__") {
                     const auto* usageNode = static_cast<const TemplateUsageNode*>(prop.value.get());
-                    std::vector<Property> expanded_props = ExpandStyleTemplate(usageNode->GetTemplateName(), usageNode->GetSpecialization());
+
+                    std::string full_name = usageNode->GetFrom();
+                    if (!full_name.empty()) {
+                        full_name += ".";
+                    }
+                    full_name += usageNode->GetTemplateName();
+
+                    std::vector<Property> expanded_props = ExpandStyleTemplate(full_name, usageNode->GetSpecialization());
                     inline_properties.insert(inline_properties.end(), expanded_props.begin(), expanded_props.end());
                 } else {
                     inline_properties.push_back(prop);
@@ -243,7 +256,14 @@ std::vector<Property> CHTLGenerator::ExpandStyleTemplate(const std::string& temp
     for (const auto& prop : styleNode->GetProperties()) {
         if (prop.name == "__TEMPLATE_USAGE__") {
             const auto* usageNode = static_cast<const TemplateUsageNode*>(prop.value.get());
-            std::vector<Property> inherited_props = ExpandStyleTemplate(usageNode->GetTemplateName(), usageNode->GetSpecialization());
+
+            std::string full_name = usageNode->GetFrom();
+            if (!full_name.empty()) {
+                full_name += ".";
+            }
+            full_name += usageNode->GetTemplateName();
+
+            std::vector<Property> inherited_props = ExpandStyleTemplate(full_name, usageNode->GetSpecialization());
             for (const auto& inherited_prop : inherited_props) {
                 if (final_properties.find(inherited_prop.name) == final_properties.end()) final_properties[inherited_prop.name] = inherited_prop;
             }
@@ -286,10 +306,17 @@ EvaluatedValue CHTLGenerator::VisitVariableUsage(const VariableUsageNode* node, 
         auto const& [varName, varValue] = *node->GetSpecializations().begin();
         return EvaluateExpression(varValue, context);
     }
-    const auto* templateDef = m_context.GetTemplate(node->GetGroupName());
-    if (!templateDef) throw std::runtime_error("Undefined variable group used: " + node->GetGroupName());
 
-    if (templateDef->GetTemplateType() != TemplateType::Var) throw std::runtime_error("Template is not a variable group: " + node->GetGroupName());
+    std::string full_name = node->GetFrom();
+    if (!full_name.empty()) {
+        full_name += ".";
+    }
+    full_name += node->GetGroupName();
+
+    const auto* templateDef = m_context.GetTemplate(full_name);
+    if (!templateDef) throw std::runtime_error("Undefined variable group used: " + full_name);
+
+    if (templateDef->GetTemplateType() != TemplateType::Var) throw std::runtime_error("Template is not a variable group: " + full_name);
     const auto* styleNode = static_cast<const StyleNode*>(templateDef->GetContent().front().get());
     for (const auto& prop : styleNode->GetProperties()) {
         if (prop.name == node->GetVariableName()) return EvaluateExpression(prop.value, context);

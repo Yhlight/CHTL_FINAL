@@ -25,6 +25,7 @@ enum class NodeType {
     ElementInsertion,
     Origin,
     Import,
+    Namespace,
     // ... other node types to be added later
 };
 

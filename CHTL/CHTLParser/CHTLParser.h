@@ -19,14 +19,18 @@ class CHTLParser {
 public:
     explicit CHTLParser(std::vector<Token> tokens, std::string source, CompilationContext& context);
     NodeList Parse();
+    void PushNamespace(const std::string& name);
+    void PopNamespace();
 
 private:
     std::vector<Token> m_tokens;
     std::string m_source;
     CompilationContext& m_context;
+    std::vector<std::string> m_namespace_stack;
     size_t m_cursor = 0;
 
     // Token helpers
+    std::string GetCurrentNamespace() const;
     Token Peek(size_t offset = 0);
     Token Consume();
     Token Expect(TokenType type);
@@ -34,6 +38,7 @@ private:
 
     // Node Parsers
     NodePtr ParseNode();
+    NodePtr ParseNamespace();
     NodePtr ParseElement();
     NodePtr ParseStyleBlock(bool isGlobal);
     void ParseStyleContent(std::shared_ptr<class StyleNode> styleNode);

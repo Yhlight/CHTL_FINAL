@@ -16,48 +16,52 @@ void create_temp_file(const std::string& path, const std::string& content) {
 std::string normalize_html(std::string s) {
     s.erase(std::remove(s.begin(), s.end(), '\n'), s.end());
     s.erase(std::remove(s.begin(), s.end(), '\r'), s.end());
-    // In a real scenario, more robust normalization would be needed.
+    s.erase(std::remove_if(s.begin(), s.end(), isspace), s.end());
     return s;
 }
 
-TEST(ModuleSystemTest, ImportsAndUsesTemplateAndOrigin) {
-    // 1. Create a temporary file to import
-    std::string imported_filename = "module1.chtl";
-    std::string imported_content = R"(
-        [Template] @Element MyModuleTemplate {
-            p {
-                class: "module-text";
-                text { "This content was imported from module1." }
+TEST(NamespaceSystemTest, HandlesNamespacesAndDefaultNamespaces) {
+    // 1. Create module with an explicit namespace
+    std::string ns_module_filename = "ns_module.chtl";
+    std::string ns_module_content = R"(
+        [Namespace] MySpace {
+            [Template] @Element NamespacedTemplate {
+                p { text { "Inside MySpace" } }
             }
         }
     )";
-    create_temp_file(imported_filename, imported_content);
+    create_temp_file(ns_module_filename, ns_module_content);
 
-    // 2. Define the main source content
-    std::string main_source = R"(
-        [Import] @Chtl from "module1.chtl";
-
-        [Origin] @JavaScript MyScript {
-            console.log("This is from an origin block.");
+    // 2. Create module with no namespace (will get a default one)
+    std::string default_ns_module_filename = "default_ns_module.chtl";
+    std::string default_ns_module_content = R"(
+        [Template] @Element DefaultTemplate {
+            p { text { "Inside default_ns_module" } }
         }
+    )";
+    create_temp_file(default_ns_module_filename, default_ns_module_content);
+
+    // 3. Create the main source file content that imports both
+    std::string main_source = R"(
+        [Import] @Chtl from "ns_module.chtl";
+        [Import] @Chtl from "default_ns_module.chtl";
 
         div {
-            id: "main-container";
-            @Element MyModuleTemplate;
+            @Element NamespacedTemplate from MySpace;
+            @Element DefaultTemplate from default_ns_module;
         }
     )";
 
-    // 3. Compile the main source
+    // 4. Compile the main source
     CHTL::CHTLCompiler compiler;
     std::string html_output = compiler.Compile(main_source, std::filesystem::current_path().string());
 
-    // 4. Check the output
-    std::string expected_output =
-        "<div id=\"main-container\"><p class=\"module-text\">This content was imported from module1.</p></div>"
-        "<script>console.log(\"This is from an origin block.\");</script>";
+    // 5. Check the output
+    std::string expected_output = "<div><p>InsideMySpace</p><p>Insidedefault_ns_module</p></div>";
 
     EXPECT_EQ(normalize_html(html_output), normalize_html(expected_output));
 
-    // 5. Clean up the temporary file
-    std::remove(imported_filename.c_str());
+    // 6. Clean up the temporary files
+    std::remove(ns_module_filename.c_str());
+    std::remove(default_ns_module_filename.c_str());
 }

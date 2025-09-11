@@ -10,6 +10,7 @@
 #include "CHTLNode/ElementDeleteNode.h"
 #include "CHTLNode/ElementInsertNode.h"
 #include "CHTLNode/ImportNode.h"
+#include "CHTLNode/NamespaceNode.h"
 #include "CHTLNode/NumberLiteralNode.h"
 #include "CHTLNode/StringLiteralNode.h"
 #include "CHTLNode/BinaryOpNode.h"
@@ -41,6 +42,30 @@ std::string trim(const std::string& str) {
 CHTLParser::CHTLParser(std::vector<Token> tokens, std::string source, CompilationContext& context)
     : m_tokens(std::move(tokens)), m_source(std::move(source)), m_context(context) {}
 
+std::string CHTLParser::GetCurrentNamespace() const {
+    if (m_namespace_stack.empty()) {
+        return "";
+    }
+    std::string full_namespace;
+    for (size_t i = 0; i < m_namespace_stack.size(); ++i) {
+        full_namespace += m_namespace_stack[i];
+        if (i < m_namespace_stack.size() - 1) {
+            full_namespace += ".";
+        }
+    }
+    return full_namespace;
+}
+
+void CHTLParser::PushNamespace(const std::string& name) {
+    m_namespace_stack.push_back(name);
+}
+
+void CHTLParser::PopNamespace() {
+    if (!m_namespace_stack.empty()) {
+        m_namespace_stack.pop_back();
+    }
+}
+
 NodePtr CHTLParser::ParseNode() {
     SkipComments();
     Token current = Peek();
@@ -50,6 +75,8 @@ NodePtr CHTLParser::ParseNode() {
                 return ParseOriginBlock();
             } else if (Peek(1).value == "Import") {
                 return ParseImportStatement();
+            } else if (Peek(1).value == "Namespace") {
+                return ParseNamespace();
             }
         }
         return ParseTemplateDefinition();
@@ -79,6 +106,12 @@ NodePtr CHTLParser::ParseElementTemplateUsage() {
         throw std::runtime_error("Expected 'Element' after @ in element template usage, but got '" + typeToken.value + "'");
     }
     Token name = Expect(TokenType::Identifier);
+    std::string from;
+    if (Peek().type == TokenType::From) {
+        Consume(); // Consume 'from'
+        from = Expect(TokenType::Identifier).value; // This will need to handle dot-separated namespaces later
+    }
+
     NodeList instructions;
     if (Peek().type == TokenType::OpenBrace) {
         Expect(TokenType::OpenBrace);
@@ -98,7 +131,7 @@ NodePtr CHTLParser::ParseElementTemplateUsage() {
     } else {
         Expect(TokenType::Semicolon);
     }
-    return std::make_shared<ElementTemplateUsageNode>(name.value, instructions);
+    return std::make_shared<ElementTemplateUsageNode>(name.value, instructions, from);
 }
 
 // --- Element Specialization Parsers ---
@@ -193,6 +226,35 @@ NodePtr CHTLParser::ParseImportStatement() {
     return importNode;
 }
 
+NodePtr CHTLParser::ParseNamespace() {
+    Expect(TokenType::OpenBracket);
+    Expect(TokenType::Identifier); // "Namespace"
+    Expect(TokenType::CloseBracket);
+
+    Token nameToken = Expect(TokenType::Identifier);
+    m_namespace_stack.push_back(nameToken.value);
+
+    NodeList content;
+    if (Peek().type == TokenType::OpenBrace) {
+        Expect(TokenType::OpenBrace);
+        while (Peek().type != TokenType::CloseBrace && Peek().type != TokenType::EndOfFile) {
+            content.push_back(ParseNode());
+        }
+        Expect(TokenType::CloseBrace);
+    } else {
+        // Handle namespace without braces
+        while (Peek().type != TokenType::EndOfFile) {
+            // This is tricky. How to know when the namespace ends?
+            // For now, I will assume it consumes the rest of the file.
+            // This is a simplification and might need to be revisited.
+            content.push_back(ParseNode());
+        }
+    }
+
+    m_namespace_stack.pop_back();
+    return std::make_shared<NamespaceNode>(nameToken.value, content);
+}
+
 
 // --- Full implementations are restored here ---
 static std::map<TokenType, Precedence> precedences = {
@@ -235,7 +297,15 @@ ExpressionNodePtr CHTLParser::ParseInfixExpression(ExpressionNodePtr left) { Tok
 ExpressionNodePtr CHTLParser::ParseTernaryExpression(ExpressionNodePtr condition) { Consume(); ExpressionNodePtr trueBranch = ParseExpression(LOWEST); ExpressionNodePtr falseBranch = nullptr; if (Peek().type == TokenType::Colon) { Consume(); falseBranch = ParseExpression(LOWEST); } return std::make_shared<ConditionalExprNode>(condition, trueBranch, falseBranch); }
 ExpressionNodePtr CHTLParser::ParseExpression(int precedence) { ExpressionNodePtr left = ParsePrefixExpression(); while (precedence < GetPrecedence()) { if (Peek().type == TokenType::QuestionMark) left = ParseTernaryExpression(left); else left = ParseInfixExpression(left); } return left; }
 ExpressionNodePtr CHTLParser::ParseVariableUsage() {
-    Token groupName = Expect(TokenType::Identifier); Expect(TokenType::OpenParen);
+    Token groupName = Expect(TokenType::Identifier);
+
+    std::string from;
+    if (Peek().type == TokenType::From) {
+        Consume(); // Consume 'from'
+        from = Expect(TokenType::Identifier).value;
+    }
+
+    Expect(TokenType::OpenParen);
     if (Peek().type == TokenType::CloseParen) throw std::runtime_error("Empty variable group usage is not allowed.");
     if (Peek(1).type == TokenType::Equals) {
         std::map<std::string, ExpressionNodePtr> specializations;
@@ -245,10 +315,10 @@ ExpressionNodePtr CHTLParser::ParseVariableUsage() {
             specializations[varName.value] = value;
             if (Peek().type == TokenType::Comma) Consume();
         }
-        Expect(TokenType::CloseParen); return std::make_shared<VariableUsageNode>(groupName.value, specializations);
+        Expect(TokenType::CloseParen); return std::make_shared<VariableUsageNode>(groupName.value, specializations, from);
     } else {
         Token varName = Expect(TokenType::Identifier); Expect(TokenType::CloseParen);
-        return std::make_shared<VariableUsageNode>(groupName.value, varName.value);
+        return std::make_shared<VariableUsageNode>(groupName.value, varName.value, from);
     }
 }
 NodePtr CHTLParser::ParseElement() {
@@ -300,6 +370,13 @@ void CHTLParser::ParseStyleContent(std::shared_ptr<StyleNode> styleNode) {
             Expect(TokenType::Semicolon); styleNode->AddProperty({"__DELETE__", std::make_shared<StringLiteralNode>(deletedItems)});
         } else if (token1.type == TokenType::At) {
             Consume(); Expect(TokenType::Style); Token templateName = Expect(TokenType::Identifier);
+
+            std::string from;
+            if (Peek().type == TokenType::From) {
+                Consume(); // Consume 'from'
+                from = Expect(TokenType::Identifier).value; // This will need to handle dot-separated namespaces later
+            }
+
             std::shared_ptr<StyleNode> specialization = nullptr;
             if (Peek().type == TokenType::OpenBrace) {
                 Expect(TokenType::OpenBrace);
@@ -309,7 +386,7 @@ void CHTLParser::ParseStyleContent(std::shared_ptr<StyleNode> styleNode) {
             } else {
                 Expect(TokenType::Semicolon);
             }
-            styleNode->AddProperty({"__TEMPLATE_USAGE__", std::make_shared<TemplateUsageNode>(templateName.value, specialization)});
+            styleNode->AddProperty({"__TEMPLATE_USAGE__", std::make_shared<TemplateUsageNode>(templateName.value, specialization, from)});
         } else if (token1.type == TokenType::Identifier) {
             if (Peek(1).type == TokenType::Colon) {
                 Token propName = Consume(); Consume();
@@ -378,7 +455,14 @@ NodePtr CHTLParser::ParseTemplateDefinition() {
     }
     Expect(TokenType::CloseBrace);
     auto templateNode = std::make_shared<TemplateDefinitionNode>(nameToken.value, type, content, isCustom);
-    m_context.AddTemplate(templateNode->GetName(), templateNode.get());
+
+    std::string full_name = GetCurrentNamespace();
+    if (!full_name.empty()) {
+        full_name += ".";
+    }
+    full_name += templateNode->GetName();
+
+    m_context.AddTemplate(full_name, templateNode.get());
     return templateNode;
 }
 
