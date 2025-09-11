@@ -1,0 +1,28 @@
+// This is a standard comment and should be ignored.
+-- This is a generator comment and should be rendered.
+
+html {
+    head {
+        title {
+            text { CHTL Test Page }
+        }
+    }
+    body {
+        div {
+            id: main-content;
+            class: "container";
+
+            h1 {
+                text { Welcome to CHTL }
+            }
+            p {
+                text { This is a paragraph with some text. }
+            }
+            img {
+                src: "image.jpg";
+                alt: "An example image";
+                width: 100;
+            }
+        }
+    }
+}

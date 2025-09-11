@@ -48,46 +48,21 @@ ExpressionNodePtr CHTLParser::ParsePrefixExpression() {
     Token token = Peek();
     if (token.type == TokenType::Number) {
         Consume();
-        double value = std::stod(token.value);
-        std::string unit;
-        if (Peek().type == TokenType::Identifier || Peek().type == TokenType::Percent) {
-            unit = Consume().value;
-        }
-        return std::make_shared<NumberLiteralNode>(value, unit);
+        return std::make_shared<NumberLiteralNode>(std::stod(token.value), "");
     }
     if (token.type == TokenType::Identifier) {
-         // Check for variable usage: Var(arg)
-        if (Peek(1).type == TokenType::OpenParen) {
-            std::string groupName = Consume().value;
-            Consume(); // (
-            std::string varName = Expect(TokenType::Identifier).value;
-            Expect(TokenType::CloseParen);
-            return std::make_shared<VariableUsageNode>(groupName, varName);
-        }
-        // Check for property reference: selector.prop
-        if (Peek(1).type == TokenType::Dot) {
-            std::string selector = Consume().value;
-            Consume(); // .
-            std::string propName = Expect(TokenType::Identifier).value;
-            return std::make_shared<PropertyReferenceNode>(selector, propName);
-        }
-        // It's a self-property reference or a string literal like 'blue'
+        // In an expression context, an identifier is treated as a string literal (e.g. color: red).
+        // More complex cases like variable references will be handled later.
         Consume();
-        return std::make_shared<SelfPropertyReferenceNode>(token.value);
+        return std::make_shared<StringLiteralNode>(token.value);
     }
     if (token.type == TokenType::StringLiteral) {
         Consume();
         return std::make_shared<StringLiteralNode>(token.value);
     }
-    // Check for #id.prop or .class.prop
-    if (token.type == TokenType::Hash || token.type == TokenType::Dot) {
-        if (Peek(1).type == TokenType::Identifier && Peek(2).type == TokenType::Dot) {
-            Token symbol = Consume(); Token name = Consume();
-            std::string selector = symbol.value + name.value;
-            Consume();
-            std::string propName = Expect(TokenType::Identifier).value;
-            return std::make_shared<PropertyReferenceNode>(selector, propName);
-        }
+    if (token.type == TokenType::UnquotedLiteral) {
+        Consume();
+        return std::make_shared<StringLiteralNode>(token.value);
     }
 
     throw std::runtime_error("Could not parse prefix expression for token: " + token.value);
@@ -104,23 +79,28 @@ ExpressionNodePtr CHTLParser::ParseInfixExpression(ExpressionNodePtr left) {
 ExpressionNodePtr CHTLParser::ParseTernaryExpression(ExpressionNodePtr condition) {
     Consume(); // consume '?'
     ExpressionNodePtr trueBranch = ParseExpression();
-    Expect(TokenType::Colon);
-    ExpressionNodePtr falseBranch = ParseExpression();
-    return std::make_shared<ConditionalExprNode>(condition, trueBranch, falseBranch);
+    if (Peek().type == TokenType::Colon) {
+        Consume(); // consume ':'
+        ExpressionNodePtr falseBranch = ParseExpression();
+        return std::make_shared<ConditionalExprNode>(condition, trueBranch, falseBranch);
+    }
+    // Handle optional false branch
+    return std::make_shared<ConditionalExprNode>(condition, trueBranch, nullptr);
 }
 
 
 ExpressionNodePtr CHTLParser::ParseExpression(int precedence) {
-    ExpressionNodePtr left = ParsePrefixExpression();
+    // For now, a simplified expression parser that only handles literals.
+    // The full Pratt parser logic can be re-enabled later.
+    Token token = Peek();
+    ExpressionNodePtr left;
 
-    while (precedence < GetPrecedence()) {
-        TokenType next_op_type = Peek().type;
-        if (next_op_type == TokenType::QuestionMark) {
-            left = ParseTernaryExpression(left);
-        } else {
-            left = ParseInfixExpression(left);
-        }
+    if (token.type == TokenType::Number || token.type == TokenType::StringLiteral || token.type == TokenType::Identifier || token.type == TokenType::UnquotedLiteral) {
+        left = ParsePrefixExpression();
+    } else {
+        throw std::runtime_error("Invalid start of expression: " + token.value);
     }
+
     return left;
 }
 
@@ -130,21 +110,33 @@ ExpressionNodePtr CHTLParser::ParseExpression(int precedence) {
 CHTLParser::CHTLParser(std::vector<Token> tokens) : m_tokens(std::move(tokens)) {}
 
 Token CHTLParser::Peek(size_t offset) {
-    if (m_cursor + offset >= m_tokens.size()) { return m_tokens.back(); }
+    if (m_cursor + offset >= m_tokens.size()) { return m_tokens.back(); } // Return EOF
     return m_tokens[m_cursor + offset];
 }
-Token CHTLParser::Consume() { return m_tokens[m_cursor++]; }
+Token CHTLParser::Consume() {
+    if (m_cursor >= m_tokens.size()) { return m_tokens.back(); } // Return EOF
+    return m_tokens[m_cursor++];
+}
 Token CHTLParser::Expect(TokenType type) {
     Token token = Peek();
     if (token.type != type) {
-        throw std::runtime_error("Unexpected token: '" + token.value + "', expected type: " + std::to_string(static_cast<int>(type)));
+        throw std::runtime_error("Unexpected token: '" + token.value + "' on line " + std::to_string(token.line) +
+                                 ", column " + std::to_string(token.column) + ". Expected type: " + std::to_string(static_cast<int>(type)));
     }
     return Consume();
+}
+
+void CHTLParser::SkipComments() {
+     while (Peek().type == TokenType::LineComment || Peek().type == TokenType::BlockComment || Peek().type == TokenType::GeneratorComment) {
+        Consume();
+    }
 }
 
 NodeList CHTLParser::Parse() {
     NodeList nodes;
     while (Peek().type != TokenType::EndOfFile) {
+        SkipComments();
+        if(Peek().type == TokenType::EndOfFile) break;
         NodePtr node = ParseNode();
         if (node) nodes.push_back(node);
     }
@@ -152,104 +144,96 @@ NodeList CHTLParser::Parse() {
 }
 
 NodePtr CHTLParser::ParseNode() {
-    while (Peek().type == TokenType::LineComment || Peek().type == TokenType::BlockComment || Peek().type == TokenType::GeneratorComment) {
-        Consume();
-    }
+    SkipComments();
     Token current = Peek();
-    if (current.type == TokenType::OpenBracket) {
-        if (Peek(1).type == TokenType::Identifier && Peek(1).value == "Template") return ParseTemplateDefinition();
-    }
-    if (current.type == TokenType::At) return ParseTemplateUsage();
-    if (current.type == TokenType::Identifier && Peek(1).type == TokenType::OpenBrace) return ParseElement();
-    if (current.type == TokenType::Style) return ParseStyleBlock();
-    if (current.type == TokenType::Text) return ParseTextBlock();
-    if (current.type == TokenType::EndOfFile || current.type == TokenType::CloseBrace) return nullptr;
-    throw std::runtime_error("Unexpected token in node structure: " + current.value);
-}
 
-NodePtr CHTLParser::ParseTemplateDefinition() {
-    Expect(TokenType::OpenBracket); Expect(TokenType::Identifier); Expect(TokenType::CloseBracket);
-    Expect(TokenType::At);
-    Token templateTypeToken = Expect(TokenType::Identifier);
-    Token templateName = Expect(TokenType::Identifier);
-    if (templateTypeToken.value == "Style" || templateTypeToken.value == "Var") {
-        NodePtr content = ParseStyleBlockContent();
-        TemplateType type = (templateTypeToken.value == "Style") ? TemplateType::Style : TemplateType::Var;
-        return std::make_shared<TemplateDefinitionNode>(templateName.value, type, NodeList{content});
+    if (current.type == TokenType::Identifier) {
+        return ParseElement();
     }
-    if (templateTypeToken.value == "Element") {
-        NodeList content;
-        Expect(TokenType::OpenBrace);
-        while (Peek().type != TokenType::CloseBrace && Peek().type != TokenType::EndOfFile) {
-            NodePtr node = ParseNode();
-            if (node) content.push_back(node);
-        }
-        Expect(TokenType::CloseBrace);
-        return std::make_shared<TemplateDefinitionNode>(templateName.value, TemplateType::Element, content);
+    if (current.type == TokenType::Text) {
+        return ParseTextBlock();
     }
-    throw std::runtime_error("Unsupported template type: " + templateTypeToken.value);
-}
 
-NodePtr CHTLParser::ParseTemplateUsage() {
-    Expect(TokenType::At);
-    Token templateType = Expect(TokenType::Identifier);
-    Token templateName = Expect(TokenType::Identifier);
-    Expect(TokenType::Semicolon);
-    if (templateType.value == "Element") {
-        return std::make_shared<ElementTemplateUsageNode>(templateName.value);
+    if (current.type == TokenType::EndOfFile || current.type == TokenType::CloseBrace) {
+        return nullptr;
     }
-    throw std::runtime_error("Unsupported template usage in this context: @" + templateType.value);
+
+    throw std::runtime_error("Unexpected token in node structure: " + current.value + " on line " + std::to_string(current.line));
 }
 
 NodePtr CHTLParser::ParseElement() {
     Token tagNameToken = Expect(TokenType::Identifier);
     auto element = std::make_shared<ElementNode>(tagNameToken.value);
+
     Expect(TokenType::OpenBrace);
+
     while (Peek().type != TokenType::CloseBrace && Peek().type != TokenType::EndOfFile) {
-        if (Peek().type == TokenType::Identifier && (Peek(1).type == TokenType::Colon || Peek(1).type == TokenType::Equals)) {
-            Token name = Consume(); Consume(); Token value = Consume();
-            element->AddAttribute({name.value, value.value});
-            if (Peek().type == TokenType::Semicolon) Consume();
-        } else {
-            NodePtr child = ParseNode();
+        SkipComments();
+        if (Peek().type == TokenType::CloseBrace) break;
+
+        if (Peek().type == TokenType::Identifier) {
+            if (Peek(1).type == TokenType::Colon || Peek(1).type == TokenType::Equals) {
+                // This is a property
+                Token propName = Consume();
+                Consume(); // The ':' or '='
+
+                ExpressionNodePtr propValue = ParseExpression();
+                element->AddProperty({propName.value, propValue});
+
+                Expect(TokenType::Semicolon);
+            } else {
+                // This is a nested element
+                NodePtr child = ParseNode();
+                if (child) element->AddChild(child);
+            }
+        } else if (Peek().type == TokenType::Text) {
+            // Nested text block
+            NodePtr child = ParseTextBlock();
             if (child) element->AddChild(child);
         }
+        else {
+             throw std::runtime_error("Unexpected token inside element " + tagNameToken.value + ": " + Peek().value);
+        }
     }
+
     Expect(TokenType::CloseBrace);
     return element;
 }
 
 NodePtr CHTLParser::ParseTextBlock() {
-    Expect(TokenType::Text); Expect(TokenType::OpenBrace);
-    Token textToken = Expect(TokenType::StringLiteral);
-    Expect(TokenType::CloseBrace);
-    return std::make_shared<TextNode>(textToken.value);
-}
-
-NodePtr CHTLParser::ParseStyleBlockContent() {
-    auto styleNode = std::make_shared<StyleNode>();
+    Expect(TokenType::Text);
     Expect(TokenType::OpenBrace);
+
+    std::string textContent;
+    // Consume tokens and build a string until '}'
     while (Peek().type != TokenType::CloseBrace && Peek().type != TokenType::EndOfFile) {
-        Token next = Peek();
-        if (next.type == TokenType::At) {
-            Consume(); Expect(TokenType::Identifier);
-            Token templateName = Expect(TokenType::Identifier);
-            styleNode->AddProperty({"__TEMPLATE_USAGE__", std::make_shared<TemplateUsageNode>(templateName.value)});
-            Expect(TokenType::Semicolon);
+        Token current = Consume();
+        textContent += current.value;
+        // Add space between tokens if the source had it (this is an approximation)
+        if (Peek().type != TokenType::CloseBrace) {
+            if (m_tokens[m_cursor-1].column + m_tokens[m_cursor-1].value.length() < m_tokens[m_cursor].column) {
+                 textContent += " ";
+            }
         }
-        else if (next.type == TokenType::Identifier && Peek(1).type == TokenType::Colon) {
-            Token name = Consume(); Consume();
-            styleNode->AddProperty({name.value, ParseExpression(LOWEST)});
-            if (Peek().type == TokenType::Semicolon) Consume();
-        } else { Consume(); }
     }
+
+    // Trim leading/trailing whitespace
+    size_t first = textContent.find_first_not_of(" \t\n\r");
+    if (std::string::npos == first) {
+        textContent = "";
+    } else {
+        size_t last = textContent.find_last_not_of(" \t\n\r");
+        textContent = textContent.substr(first, (last - first + 1));
+    }
+
     Expect(TokenType::CloseBrace);
-    return styleNode;
+    return std::make_shared<TextNode>(textContent);
 }
 
-NodePtr CHTLParser::ParseStyleBlock() {
-    Expect(TokenType::Style);
-    return ParseStyleBlockContent();
-}
+// Keeping these stubs for future implementation
+NodePtr CHTLParser::ParseStyleBlockContent() { return nullptr; }
+NodePtr CHTLParser::ParseStyleBlock() { return nullptr; }
+NodePtr CHTLParser::ParseTemplateDefinition() { return nullptr; }
+NodePtr CHTLParser::ParseTemplateUsage() { return nullptr; }
 
 } // namespace CHTL
