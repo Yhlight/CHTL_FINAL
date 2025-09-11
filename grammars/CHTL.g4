@@ -3,18 +3,26 @@ grammar CHTL;
 // Parser Rules
 document: element*;
 
-element: IDENTIFIER LBRACE (attribute | element | textNode)* RBRACE;
+element: IDENTIFIER LBRACE (attribute | element | textNode | stylePlaceholder)* RBRACE;
 
 attribute: IDENTIFIER (COLON | EQ) value SEMI;
 
 textNode: TEXT LBRACE value RBRACE;
 
-value: STRING | (IDENTIFIER | TEXT)+ ;
+stylePlaceholder: STYLE_REF LPAR STRING RPAR SEMI;
+
+value: STRING | (IDENTIFIER | TEXT | STYLE)+ ;
 
 
 // Lexer Rules
+STYLE_REF: '__style_ref__';
+STYLE: 'style';
 TEXT: 'text';
+NUMBER: [0-9]+;
+DOT: '.';
 
+LPAR: '(';
+RPAR: ')';
 LBRACE: '{';
 RBRACE: '}';
 COLON: ':';

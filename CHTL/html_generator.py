@@ -1,4 +1,4 @@
-from CHTL.ast.nodes import DocumentNode, ElementNode, AttributeNode, TextNode
+from CHTL.ast.nodes import DocumentNode, ElementNode, AttributeNode, TextNode, StyleNode
 
 class HtmlGenerator:
     def visit(self, node):
@@ -6,8 +6,25 @@ class HtmlGenerator:
         return node.accept(self)
 
     def visit_documentnode(self, node: DocumentNode):
-        """Visits the root document node."""
-        return "".join(self.visit(child) for child in node.children)
+        """Visits the root document node and constructs the full HTML page."""
+        body_content = "".join(self.visit(child) for child in node.children)
+
+        head_content = ""
+        if node.global_rules:
+            # Join all global rules into one block
+            global_styles = "\n".join(node.global_rules)
+            head_content += f"    <style>\n{global_styles}\n    </style>"
+
+        # Using a simple template for the final HTML document
+        return f"""<!DOCTYPE html>
+<html>
+<head>
+{head_content}
+</head>
+<body>
+{body_content}
+</body>
+</html>"""
 
     def visit_elementnode(self, node: ElementNode):
         """Visits an element node and generates an HTML element."""
@@ -30,6 +47,10 @@ class HtmlGenerator:
         """Visits a text node."""
         # Basic HTML escaping for text content (e.g., <, >) can be added here.
         return node.value
+
+    def visit_stylenode(self, node: StyleNode):
+        """Visits a style node. For now, this does nothing as styles will be handled separately."""
+        return ""
 
     def visit_default(self, node):
         """Default visitor method for unhandled node types."""

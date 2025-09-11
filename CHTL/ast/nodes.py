@@ -12,9 +12,10 @@ class DocumentNode(AstNode):
     """Represents the root of a CHTL document."""
     def __init__(self, children: List['AstNode']):
         self.children = children
+        self.global_rules: List[str] = []
 
     def __repr__(self):
-        return f"DocumentNode(children={self.children})"
+        return f"DocumentNode(children={self.children}, global_rules={len(self.global_rules)})"
 
 class ElementNode(AstNode):
     """Represents an HTML element."""
@@ -43,5 +44,15 @@ class TextNode(AstNode):
     def __repr__(self):
         return f"TextNode(value='{self.value}')"
 
+class StyleNode(AstNode):
+    """Represents a style block."""
+    def __init__(self, raw_content: str, inline_styles: str, global_rules: List[str]):
+        self.raw_content = raw_content
+        self.inline_styles = inline_styles
+        self.global_rules = global_rules
+
+    def __repr__(self):
+        return f"StyleNode(inline='{self.inline_styles}', global_rules={len(self.global_rules)})"
+
 # A type hint for any node that can be a child of an element
-ElementChild = Union[ElementNode, TextNode]
+ElementChild = Union[ElementNode, TextNode, StyleNode]

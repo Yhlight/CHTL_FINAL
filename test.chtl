@@ -1,12 +1,20 @@
 div {
     id: main-container;
-    class = "container";
 
-    text {
-        This is an unquoted text block with the word text in it
+    style {
+        /* This is an inline style */
+        color: red;
+
+        /* This is a global rule */
+        .sub-heading {
+            font-size: 20px;
+        }
     }
 
-    span {
-        // empty span
+    h1 {
+        class: sub-heading;
+        text {
+            I should be large
+        }
     }
 }

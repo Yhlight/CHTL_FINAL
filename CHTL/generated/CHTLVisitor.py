@@ -29,6 +29,11 @@ class CHTLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CHTLParser#stylePlaceholder.
+    def visitStylePlaceholder(self, ctx:CHTLParser.StylePlaceholderContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CHTLParser#value.
     def visitValue(self, ctx:CHTLParser.ValueContext):
         return self.visitChildren(ctx)

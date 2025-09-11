@@ -44,6 +44,15 @@ class CHTLListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CHTLParser#stylePlaceholder.
+    def enterStylePlaceholder(self, ctx:CHTLParser.StylePlaceholderContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#stylePlaceholder.
+    def exitStylePlaceholder(self, ctx:CHTLParser.StylePlaceholderContext):
+        pass
+
+
     # Enter a parse tree produced by CHTLParser#value.
     def enterValue(self, ctx:CHTLParser.ValueContext):
         pass

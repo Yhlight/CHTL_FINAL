@@ -10,21 +10,24 @@ else:
 
 def serializedATN():
     return [
-        4,1,11,47,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,1,0,5,0,12,8,0,
-        10,0,12,0,15,9,0,1,1,1,1,1,1,1,1,1,1,5,1,22,8,1,10,1,12,1,25,9,1,
-        1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,3,1,3,1,3,1,3,1,3,1,4,1,4,4,4,41,8,
-        4,11,4,12,4,42,3,4,45,8,4,1,4,0,0,5,0,2,4,6,8,0,2,1,0,4,5,2,0,1,
-        1,7,7,47,0,13,1,0,0,0,2,16,1,0,0,0,4,28,1,0,0,0,6,33,1,0,0,0,8,44,
-        1,0,0,0,10,12,3,2,1,0,11,10,1,0,0,0,12,15,1,0,0,0,13,11,1,0,0,0,
-        13,14,1,0,0,0,14,1,1,0,0,0,15,13,1,0,0,0,16,17,5,7,0,0,17,23,5,2,
-        0,0,18,22,3,4,2,0,19,22,3,2,1,0,20,22,3,6,3,0,21,18,1,0,0,0,21,19,
-        1,0,0,0,21,20,1,0,0,0,22,25,1,0,0,0,23,21,1,0,0,0,23,24,1,0,0,0,
-        24,26,1,0,0,0,25,23,1,0,0,0,26,27,5,3,0,0,27,3,1,0,0,0,28,29,5,7,
-        0,0,29,30,7,0,0,0,30,31,3,8,4,0,31,32,5,6,0,0,32,5,1,0,0,0,33,34,
-        5,1,0,0,34,35,5,2,0,0,35,36,3,8,4,0,36,37,5,3,0,0,37,7,1,0,0,0,38,
-        45,5,8,0,0,39,41,7,1,0,0,40,39,1,0,0,0,41,42,1,0,0,0,42,40,1,0,0,
-        0,42,43,1,0,0,0,43,45,1,0,0,0,44,38,1,0,0,0,44,40,1,0,0,0,45,9,1,
-        0,0,0,5,13,21,23,42,44
+        4,1,17,56,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,1,0,5,
+        0,14,8,0,10,0,12,0,17,9,0,1,1,1,1,1,1,1,1,1,1,1,1,5,1,25,8,1,10,
+        1,12,1,28,9,1,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,3,1,3,1,3,1,3,1,3,1,
+        4,1,4,1,4,1,4,1,4,1,4,1,5,1,5,4,5,50,8,5,11,5,12,5,51,3,5,54,8,5,
+        1,5,0,0,6,0,2,4,6,8,10,0,2,1,0,10,11,2,0,2,3,13,13,56,0,15,1,0,0,
+        0,2,18,1,0,0,0,4,31,1,0,0,0,6,36,1,0,0,0,8,41,1,0,0,0,10,53,1,0,
+        0,0,12,14,3,2,1,0,13,12,1,0,0,0,14,17,1,0,0,0,15,13,1,0,0,0,15,16,
+        1,0,0,0,16,1,1,0,0,0,17,15,1,0,0,0,18,19,5,13,0,0,19,26,5,8,0,0,
+        20,25,3,4,2,0,21,25,3,2,1,0,22,25,3,6,3,0,23,25,3,8,4,0,24,20,1,
+        0,0,0,24,21,1,0,0,0,24,22,1,0,0,0,24,23,1,0,0,0,25,28,1,0,0,0,26,
+        24,1,0,0,0,26,27,1,0,0,0,27,29,1,0,0,0,28,26,1,0,0,0,29,30,5,9,0,
+        0,30,3,1,0,0,0,31,32,5,13,0,0,32,33,7,0,0,0,33,34,3,10,5,0,34,35,
+        5,12,0,0,35,5,1,0,0,0,36,37,5,3,0,0,37,38,5,8,0,0,38,39,3,10,5,0,
+        39,40,5,9,0,0,40,7,1,0,0,0,41,42,5,1,0,0,42,43,5,6,0,0,43,44,5,14,
+        0,0,44,45,5,7,0,0,45,46,5,12,0,0,46,9,1,0,0,0,47,54,5,14,0,0,48,
+        50,7,1,0,0,49,48,1,0,0,0,50,51,1,0,0,0,51,49,1,0,0,0,51,52,1,0,0,
+        0,52,54,1,0,0,0,53,47,1,0,0,0,53,49,1,0,0,0,54,11,1,0,0,0,5,15,24,
+        26,51,53
     ]
 
 class CHTLParser ( Parser ):
@@ -37,10 +40,12 @@ class CHTLParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ "<INVALID>", "'text'", "'{'", "'}'", "':'", "'='",
-                     "';'" ]
+    literalNames = [ "<INVALID>", "'__style_ref__'", "'style'", "'text'",
+                     "<INVALID>", "'.'", "'('", "')'", "'{'", "'}'", "':'",
+                     "'='", "';'" ]
 
-    symbolicNames = [ "<INVALID>", "TEXT", "LBRACE", "RBRACE", "COLON",
+    symbolicNames = [ "<INVALID>", "STYLE_REF", "STYLE", "TEXT", "NUMBER",
+                      "DOT", "LPAR", "RPAR", "LBRACE", "RBRACE", "COLON",
                       "EQ", "SEMI", "IDENTIFIER", "STRING", "LINE_COMMENT",
                       "BLOCK_COMMENT", "WS" ]
 
@@ -48,22 +53,30 @@ class CHTLParser ( Parser ):
     RULE_element = 1
     RULE_attribute = 2
     RULE_textNode = 3
-    RULE_value = 4
+    RULE_stylePlaceholder = 4
+    RULE_value = 5
 
-    ruleNames =  [ "document", "element", "attribute", "textNode", "value" ]
+    ruleNames =  [ "document", "element", "attribute", "textNode", "stylePlaceholder",
+                   "value" ]
 
     EOF = Token.EOF
-    TEXT=1
-    LBRACE=2
-    RBRACE=3
-    COLON=4
-    EQ=5
-    SEMI=6
-    IDENTIFIER=7
-    STRING=8
-    LINE_COMMENT=9
-    BLOCK_COMMENT=10
-    WS=11
+    STYLE_REF=1
+    STYLE=2
+    TEXT=3
+    NUMBER=4
+    DOT=5
+    LPAR=6
+    RPAR=7
+    LBRACE=8
+    RBRACE=9
+    COLON=10
+    EQ=11
+    SEMI=12
+    IDENTIFIER=13
+    STRING=14
+    LINE_COMMENT=15
+    BLOCK_COMMENT=16
+    WS=17
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -115,13 +128,13 @@ class CHTLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 13
+            self.state = 15
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==7:
-                self.state = 10
+            while _la==13:
+                self.state = 12
                 self.element()
-                self.state = 15
+                self.state = 17
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -171,6 +184,13 @@ class CHTLParser ( Parser ):
                 return self.getTypedRuleContext(CHTLParser.TextNodeContext,i)
 
 
+        def stylePlaceholder(self, i:int=None):
+            if i is None:
+                return self.getTypedRuleContexts(CHTLParser.StylePlaceholderContext)
+            else:
+                return self.getTypedRuleContext(CHTLParser.StylePlaceholderContext,i)
+
+
         def getRuleIndex(self):
             return CHTLParser.RULE_element
 
@@ -198,38 +218,43 @@ class CHTLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 16
+            self.state = 18
             self.match(CHTLParser.IDENTIFIER)
-            self.state = 17
+            self.state = 19
             self.match(CHTLParser.LBRACE)
-            self.state = 23
+            self.state = 26
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==1 or _la==7:
-                self.state = 21
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 8202) != 0):
+                self.state = 24
                 self._errHandler.sync(self)
                 la_ = self._interp.adaptivePredict(self._input,1,self._ctx)
                 if la_ == 1:
-                    self.state = 18
+                    self.state = 20
                     self.attribute()
                     pass
 
                 elif la_ == 2:
-                    self.state = 19
+                    self.state = 21
                     self.element()
                     pass
 
                 elif la_ == 3:
-                    self.state = 20
+                    self.state = 22
                     self.textNode()
                     pass
 
+                elif la_ == 4:
+                    self.state = 23
+                    self.stylePlaceholder()
+                    pass
 
-                self.state = 25
+
+                self.state = 28
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
-            self.state = 26
+            self.state = 29
             self.match(CHTLParser.RBRACE)
         except RecognitionException as re:
             localctx.exception = re
@@ -290,18 +315,18 @@ class CHTLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 28
+            self.state = 31
             self.match(CHTLParser.IDENTIFIER)
-            self.state = 29
+            self.state = 32
             _la = self._input.LA(1)
-            if not(_la==4 or _la==5):
+            if not(_la==10 or _la==11):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
                 self.consume()
-            self.state = 30
+            self.state = 33
             self.value()
-            self.state = 31
+            self.state = 34
             self.match(CHTLParser.SEMI)
         except RecognitionException as re:
             localctx.exception = re
@@ -358,14 +383,81 @@ class CHTLParser ( Parser ):
         self.enterRule(localctx, 6, self.RULE_textNode)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 33
-            self.match(CHTLParser.TEXT)
-            self.state = 34
-            self.match(CHTLParser.LBRACE)
-            self.state = 35
-            self.value()
             self.state = 36
+            self.match(CHTLParser.TEXT)
+            self.state = 37
+            self.match(CHTLParser.LBRACE)
+            self.state = 38
+            self.value()
+            self.state = 39
             self.match(CHTLParser.RBRACE)
+        except RecognitionException as re:
+            localctx.exception = re
+            self._errHandler.reportError(self, re)
+            self._errHandler.recover(self, re)
+        finally:
+            self.exitRule()
+        return localctx
+
+
+    class StylePlaceholderContext(ParserRuleContext):
+        __slots__ = 'parser'
+
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
+            self.parser = parser
+
+        def STYLE_REF(self):
+            return self.getToken(CHTLParser.STYLE_REF, 0)
+
+        def LPAR(self):
+            return self.getToken(CHTLParser.LPAR, 0)
+
+        def STRING(self):
+            return self.getToken(CHTLParser.STRING, 0)
+
+        def RPAR(self):
+            return self.getToken(CHTLParser.RPAR, 0)
+
+        def SEMI(self):
+            return self.getToken(CHTLParser.SEMI, 0)
+
+        def getRuleIndex(self):
+            return CHTLParser.RULE_stylePlaceholder
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterStylePlaceholder" ):
+                listener.enterStylePlaceholder(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitStylePlaceholder" ):
+                listener.exitStylePlaceholder(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitStylePlaceholder" ):
+                return visitor.visitStylePlaceholder(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+
+
+    def stylePlaceholder(self):
+
+        localctx = CHTLParser.StylePlaceholderContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 8, self.RULE_stylePlaceholder)
+        try:
+            self.enterOuterAlt(localctx, 1)
+            self.state = 41
+            self.match(CHTLParser.STYLE_REF)
+            self.state = 42
+            self.match(CHTLParser.LPAR)
+            self.state = 43
+            self.match(CHTLParser.STRING)
+            self.state = 44
+            self.match(CHTLParser.RPAR)
+            self.state = 45
+            self.match(CHTLParser.SEMI)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -397,6 +489,12 @@ class CHTLParser ( Parser ):
             else:
                 return self.getToken(CHTLParser.TEXT, i)
 
+        def STYLE(self, i:int=None):
+            if i is None:
+                return self.getTokens(CHTLParser.STYLE)
+            else:
+                return self.getToken(CHTLParser.STYLE, i)
+
         def getRuleIndex(self):
             return CHTLParser.RULE_value
 
@@ -420,34 +518,34 @@ class CHTLParser ( Parser ):
     def value(self):
 
         localctx = CHTLParser.ValueContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 8, self.RULE_value)
+        self.enterRule(localctx, 10, self.RULE_value)
         self._la = 0 # Token type
         try:
-            self.state = 44
+            self.state = 53
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [8]:
+            if token in [14]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 38
+                self.state = 47
                 self.match(CHTLParser.STRING)
                 pass
-            elif token in [1, 7]:
+            elif token in [2, 3, 13]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 40
+                self.state = 49
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 while True:
-                    self.state = 39
+                    self.state = 48
                     _la = self._input.LA(1)
-                    if not(_la==1 or _la==7):
+                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 8204) != 0)):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
                         self.consume()
-                    self.state = 42
+                    self.state = 51
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
-                    if not (_la==1 or _la==7):
+                    if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & 8204) != 0)):
                         break
 
                 pass
