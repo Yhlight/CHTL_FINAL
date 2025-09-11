@@ -18,6 +18,7 @@ class CHTLJSTokenType(Enum):
 
     # Keywords
     ANIMATE = auto()
+    DELEGATE = auto()
 
     # For now, we'll treat JS code as opaque identifiers
     JS_CODE = auto()

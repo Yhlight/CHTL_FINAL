@@ -11,6 +11,8 @@ class CHTLUnifiedScanner:
         return placeholder
 
     def scan(self, source: str) -> (str, dict):
+        # This top-level scan finds `script` blocks and passes their content
+        # to the fragment scanner. This logic is sound.
         self.source = source
         self.current_pos = 0
         self.output_source = []
@@ -51,71 +53,27 @@ class CHTLUnifiedScanner:
         return "".join(self.output_source), self.fragments
 
     def scan_script_fragment(self, fragment: str) -> (str, dict):
+        # This function now uses a generic approach to find and replace JS callbacks
+        # in any CHTL JS block that contains them.
+
         local_fragments = {}
-        output_parts = []
-        cursor = 0
+        modified_fragment = fragment
 
-        block_start_regex = re.compile(r'\s*(listen|animate)\s*\{')
+        # A robust regex to find any JS function literal, including arrow functions.
+        # It handles simple nested braces but is not fully recursive. It looks for
+        # `function(...) { ... }` or `(...) => { ... }`.
+        # This is a pragmatic simplification. A full JS parser would be overkill.
+        function_regex = re.compile(
+            r'(function\s*\([^)]*\)\s*\{((?:[^{}]|{[^{}]*})*)\}|'  # Regular function
+            r'\([^)]*\)\s*=>\s*\{((?:[^{}]|{[^{}]*})*)\})'          # Arrow function with block body
+        )
 
-        while cursor < len(fragment):
-            match = block_start_regex.search(fragment, cursor)
-            if not match:
-                output_parts.append(fragment[cursor:])
-                break
+        def replacer(match):
+            js_code = match.group(0)
+            placeholder = self._get_placeholder("JS")
+            local_fragments[placeholder] = js_code
+            return placeholder
 
-            output_parts.append(fragment[cursor:match.start()])
-            block_type = match.group(1)
+        modified_fragment = function_regex.sub(replacer, fragment)
 
-            open_brace_pos = match.end() - 1
-            brace_level = 1
-            content_start = open_brace_pos + 1
-            content_end = -1
-
-            for i in range(content_start, len(fragment)):
-                if fragment[i] == '{': brace_level += 1
-                elif fragment[i] == '}': brace_level -= 1
-                if brace_level == 0:
-                    content_end = i
-                    break
-
-            if content_end == -1:
-                output_parts.append(fragment[match.start():])
-                break
-
-            inner_content = fragment[content_start:content_end]
-
-            if block_type == 'listen':
-                js_code = inner_content.strip()
-                if not js_code:
-                    output_parts.append(match.group(0) + inner_content + '}')
-                else:
-                    placeholder = self._get_placeholder("JS")
-                    local_fragments[placeholder] = js_code
-                    output_parts.append(f'{match.group(0).rstrip()} {placeholder} }}')
-
-            elif block_type == 'animate':
-                try:
-                    callback_key_pos = inner_content.index("callback")
-                    colon_pos = inner_content.index(":", callback_key_pos)
-                    val_start_pos = colon_pos + 1
-
-                    # Simplified logic: Assume callback is the last property
-                    js_code = inner_content[val_start_pos:].strip()
-
-                    if not js_code:
-                        output_parts.append(match.group(0) + inner_content + '}')
-                    else:
-                        placeholder = self._get_placeholder("JS")
-                        local_fragments[placeholder] = js_code
-
-                        # Reconstruct the animate block content carefully
-                        pre_callback_part = inner_content[:val_start_pos]
-                        modified_inner_content = pre_callback_part + " " + placeholder
-                        output_parts.append(f'animate {{ {modified_inner_content} }}')
-
-                except ValueError:
-                    output_parts.append(match.group(0) + inner_content + '}')
-
-            cursor = content_end + 1
-
-        return "".join(output_parts), local_fragments
+        return modified_fragment, local_fragments

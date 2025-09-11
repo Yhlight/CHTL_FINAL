@@ -1,5 +1,6 @@
 import unittest
 import os
+import re
 from unittest.mock import MagicMock, patch
 
 # Correctly import the classes and alias them to the names used in the test.
@@ -46,6 +47,43 @@ class TestCHTLJSPipeline(unittest.TestCase):
             "".join(expected_js.split())
         )
         self.assertEqual(html, '<div id="my-box"></div>')
+
+    def test_full_pipeline_for_delegate_block(self):
+        source = """
+        ul {
+            id: my-list;
+            li { text { Item 1 } }
+            li { class: special; text { Item 2 } }
+        }
+        script {
+            {{#my-list}}->delegate {
+                target: {{li}},
+                click: () => { console.log("Li clicked!"); }
+            }
+
+            {{#my-list}}->delegate {
+                target: {{.special}},
+                mouseenter: () => { console.log("Special item hovered!"); }
+            }
+        }
+        """
+        tokens = Lexer(source).scan_tokens()
+        ast = Parser(tokens).parse()
+        html, css, js = Generator().generate(ast)
+
+        # Normalize the generated JS to make assertions resilient to formatting
+        norm_js = re.sub(r'\s+', ' ', js).strip()
+
+        self.assertIn("document.querySelector('#my-list')", norm_js)
+        self.assertIn(".addEventListener('click', (event) => {", norm_js)
+        self.assertIn("if (event.target.matches('li')) {", norm_js)
+        self.assertIn("console.log(\"Li clicked!\")", norm_js)
+        self.assertIn(".addEventListener('mouseenter', (event) => {", norm_js)
+        self.assertIn("if (event.target.matches('.special')) {", norm_js)
+        self.assertIn("console.log(\"Special item hovered!\")", norm_js)
+
+        self.assertEqual(norm_js.count("addEventListener('click'"), 1)
+        self.assertEqual(norm_js.count("addEventListener('mouseenter'"), 1)
 
 
     def test_parser_for_animate_block(self):

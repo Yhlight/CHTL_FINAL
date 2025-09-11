@@ -20,7 +20,11 @@ class CHTLJSParser:
         if self._match(CHTLJSTokenType.ANIMATE):
             return self._parse_animate_statement()
         if self._check(CHTLJSTokenType.LBRACE_LBRACE):
-            return self._parse_listen_statement()
+            # Look past '{{', 'selector', '}}', '->' to find the keyword
+            if self._peek(4).type == CHTLJSTokenType.DELEGATE:
+                return self._parse_delegate_statement()
+            else:
+                return self._parse_listen_statement()
         if self._check(CHTLJSTokenType.EOF): return None
         self._advance()
         return None
@@ -49,6 +53,42 @@ class CHTLJSParser:
 
         self._consume(CHTLJSTokenType.RBRACE, "Expect '}' to close animate block.")
         return anim_node
+
+    def _parse_delegate_statement(self):
+        parent_selector_node = self._parse_enhanced_selector()
+        self._consume(CHTLJSTokenType.ARROW, "Expect '->'")
+        self._consume(CHTLJSTokenType.DELEGATE, "Expect 'delegate'")
+        self._consume(CHTLJSTokenType.LBRACE, "Expect '{'")
+
+        target_selectors = []
+        listeners = []
+
+        while not self._check(CHTLJSTokenType.RBRACE) and not self._is_at_end():
+            key_token = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect property key.")
+            self._consume(CHTLJSTokenType.COLON, "Expect ':' after key.")
+
+            if key_token.lexeme == 'target':
+                # Handle one or more target selectors
+                if self._match(CHTLJSTokenType.LBRACKET):
+                    while not self._check(CHTLJSTokenType.RBRACKET):
+                        target_selectors.append(self._parse_simple_value())
+                        if not self._match(CHTLJSTokenType.COMMA): break
+                    self._consume(CHTLJSTokenType.RBRACKET, "Expect ']' to close target list.")
+                else:
+                    target_selectors.append(self._parse_simple_value())
+            else: # It's an event listener
+                event_name = key_token.lexeme
+                callback_code = self._consume(CHTLJSTokenType.IDENTIFIER, "Expect callback placeholder.").lexeme
+                listeners.append(nodes.EventListenerNode(event_name=event_name.strip(), callback_code=callback_code.strip()))
+
+            if self._check(CHTLJSTokenType.COMMA): self._advance()
+
+        self._consume(CHTLJSTokenType.RBRACE, "Expect '}'")
+        return nodes.DelegateNode(
+            parent_selector=parent_selector_node,
+            target_selectors=target_selectors,
+            listeners=listeners
+        )
 
     def _parse_simple_value(self) -> str:
         if self._check(CHTLJSTokenType.LBRACE_LBRACE):
@@ -118,7 +158,10 @@ class CHTLJSParser:
         if self._is_at_end(): return False
         return self._peek().type == ttype
     def _is_at_end(self) -> bool: return self._peek().type == CHTLJSTokenType.EOF
-    def _peek(self) -> CHTLJSToken: return self.tokens[self.current]
+    def _peek(self, offset=0) -> CHTLJSToken:
+        if self.current + offset >= len(self.tokens):
+            return self.tokens[-1] # EOF
+        return self.tokens[self.current + offset]
     def _previous(self) -> CHTLJSToken: return self.tokens[self.current - 1]
     def _advance(self) -> CHTLJSToken:
         if not self._is_at_end(): self.current += 1

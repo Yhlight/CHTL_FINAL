@@ -47,6 +47,13 @@ class AnimateNode(CHTLJS_BaseNode):
     callback: str = None # This will hold the placeholder
 
 @dataclass
+class DelegateNode(CHTLJS_BaseNode):
+    """Represents a delegate { ... } block for event delegation."""
+    parent_selector: EnhancedSelectorNode
+    target_selectors: List[str] # Storing target selectors as raw strings
+    listeners: List[EventListenerNode] = field(default_factory=list)
+
+@dataclass
 class CHTLJS_ProgramNode(CHTLJS_BaseNode):
     """The root node for a CHTL JS fragment."""
     children: List[CHTLJS_BaseNode] = field(default_factory=list)

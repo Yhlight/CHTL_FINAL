@@ -11,6 +11,7 @@ class CHTLJSLexer:
         self.keywords = {
             "listen": CHTLJSTokenType.IDENTIFIER,
             "animate": CHTLJSTokenType.ANIMATE,
+            "delegate": CHTLJSTokenType.DELEGATE,
         }
 
     def scan_tokens(self) -> list[CHTLJSToken]:
