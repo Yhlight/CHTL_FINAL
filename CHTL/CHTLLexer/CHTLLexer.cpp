@@ -41,6 +41,7 @@ Token CHTLLexer::HandleIdentifier() {
     if (value == "text") return CreateToken(TokenType::Text, value);
     if (value == "style") return CreateToken(TokenType::Style, value);
     if (value == "script") return CreateToken(TokenType::Script, value);
+    if (value == "delete") return CreateToken(TokenType::Delete, value);
 
     return CreateToken(TokenType::Identifier, value);
 }

@@ -15,6 +15,7 @@
 #include "CHTLNode/ConditionalExprNode.h"
 #include "CHTLNode/SelfPropertyReferenceNode.h"
 #include "CHTLNode/TemplateDefinitionNode.h"
+#include "CHTLNode/VariableUsageNode.h"
 #include <string>
 #include <sstream>
 #include <variant>
@@ -44,11 +45,13 @@ private:
     void VisitStyleRule(const StyleRuleNode* node, const ElementNode* context, const std::string& primary_selector);
     void VisitElementTemplateUsage(const ElementTemplateUsageNode* node);
     void VisitTemplateDefinition(const TemplateDefinitionNode* node);
+    std::vector<Property> ExpandStyleTemplate(const std::string& templateName, const std::shared_ptr<StyleNode>& specialization);
 
     // Expression evaluation
     EvaluatedValue EvaluateExpression(const ExpressionNodePtr& expr, const ElementNode* context);
     EvaluatedValue VisitBinaryOp(const BinaryOpNode* node, const ElementNode* context);
     EvaluatedValue VisitConditionalExpr(const ConditionalExprNode* node, const ElementNode* context);
+    EvaluatedValue VisitVariableUsage(const VariableUsageNode* node, const ElementNode* context);
 
     std::string escapeHTML(const std::string& data);
 

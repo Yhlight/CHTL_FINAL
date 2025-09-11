@@ -15,6 +15,8 @@
 #include <stdexcept>
 #include <map>
 
+// This file is being restored to the state at the end of the "Template System" phase.
+
 namespace CHTL {
 
 // --- Pratt Parser Implementation ---
@@ -55,6 +57,9 @@ ExpressionNodePtr CHTLParser::ParsePrefixExpression() {
         return std::make_shared<NumberLiteralNode>(std::stod(token.value), unit);
     }
     if (token.type == TokenType::Identifier) {
+        if (Peek(1).type == TokenType::OpenParen) {
+            return ParseVariableUsage();
+        }
         Consume();
         return std::make_shared<StringLiteralNode>(token.value);
     }
@@ -70,6 +75,33 @@ ExpressionNodePtr CHTLParser::ParsePrefixExpression() {
     }
 
     throw std::runtime_error("Could not parse prefix expression for token: " + token.value);
+}
+
+ExpressionNodePtr CHTLParser::ParseVariableUsage() {
+    Token groupName = Expect(TokenType::Identifier);
+    Expect(TokenType::OpenParen);
+
+    if (Peek().type == TokenType::CloseParen) {
+        throw std::runtime_error("Empty variable group usage is not allowed.");
+    }
+
+    // Check for specialization: Var(key = val) vs simple usage Var(key)
+    if (Peek(1).type == TokenType::Equals) {
+        std::map<std::string, ExpressionNodePtr> specializations;
+        while(Peek().type != TokenType::CloseParen) {
+            Token varName = Expect(TokenType::Identifier);
+            Expect(TokenType::Equals);
+            ExpressionNodePtr value = ParseExpression(LOWEST);
+            specializations[varName.value] = value;
+            if (Peek().type == TokenType::Comma) Consume();
+        }
+        Expect(TokenType::CloseParen);
+        return std::make_shared<VariableUsageNode>(groupName.value, specializations);
+    } else {
+        Token varName = Expect(TokenType::Identifier);
+        Expect(TokenType::CloseParen);
+        return std::make_shared<VariableUsageNode>(groupName.value, varName.value);
+    }
 }
 
 
@@ -159,7 +191,7 @@ NodePtr CHTLParser::ParseNode() {
         return ParseTextBlock();
     }
     if (current.type == TokenType::Style) {
-        return ParseStyleBlock();
+        return ParseStyleBlock(true); // Global style block
     }
     if (current.type == TokenType::At) {
         // This must be an element template usage at the root level
@@ -187,7 +219,7 @@ NodePtr CHTLParser::ParseElement() {
         if (token.type == TokenType::Identifier) {
             if (Peek(1).type == TokenType::Colon || Peek(1).type == TokenType::Equals) {
                 Token propName = Consume();
-                Consume(); // The ':' or '='
+                Consume();
                 ExpressionNodePtr propValue = ParseExpression(LOWEST);
                 element->AddProperty({propName.value, propValue});
                 Expect(TokenType::Semicolon);
@@ -199,7 +231,7 @@ NodePtr CHTLParser::ParseElement() {
             NodePtr child = ParseTextBlock();
             if (child) element->AddChild(child);
         } else if (token.type == TokenType::Style) {
-            NodePtr child = ParseStyleBlock();
+            NodePtr child = ParseStyleBlock(false); // Local style block
             if (child) element->AddChild(child);
         } else if (token.type == TokenType::At) {
             NodePtr child = ParseElementTemplateUsage();
@@ -240,7 +272,7 @@ NodePtr CHTLParser::ParseTextBlock() {
     return std::make_shared<TextNode>(textContent);
 }
 
-NodePtr CHTLParser::ParseStyleBlock() {
+NodePtr CHTLParser::ParseStyleBlock(bool isGlobal) {
     Expect(TokenType::Style);
     Expect(TokenType::OpenBrace);
 
@@ -252,23 +284,56 @@ NodePtr CHTLParser::ParseStyleBlock() {
 
         Token token1 = Peek();
 
-        if (token1.type == TokenType::At) {
-            // Style template usage: @Style MyTheme;
+        if (token1.type == TokenType::Delete) {
+            Consume(); // consume 'delete'
+            std::string deletedItems;
+            while(Peek().type != TokenType::Semicolon) {
+                deletedItems += Consume().value;
+                 if (Peek().type == TokenType::Comma) {
+                     deletedItems += Consume().value; // Add comma to string
+                 }
+            }
+            Expect(TokenType::Semicolon);
+            styleNode->AddProperty({"__DELETE__", std::make_shared<StringLiteralNode>(deletedItems)});
+        }
+        else if (token1.type == TokenType::At) {
             Consume(); // @
             Expect(TokenType::Style);
             Token templateName = Expect(TokenType::Identifier);
-            Expect(TokenType::Semicolon);
-            styleNode->AddProperty({"__TEMPLATE_USAGE__", std::make_shared<TemplateUsageNode>(templateName.value)});
+
+            std::shared_ptr<StyleNode> specialization = nullptr;
+            if (Peek().type == TokenType::OpenBrace) {
+                // This is a specialization block, parse it as a style block
+                specialization = std::static_pointer_cast<StyleNode>(ParseStyleBlock(isGlobal));
+            } else {
+                // No specialization block, just a semicolon
+                Expect(TokenType::Semicolon);
+            }
+            styleNode->AddProperty({"__TEMPLATE_USAGE__", std::make_shared<TemplateUsageNode>(templateName.value, specialization)});
         }
         else if (token1.type == TokenType::Identifier) {
-            // Direct property for inline style
-            Token propName = Consume();
-            Expect(TokenType::Colon);
-            ExpressionNodePtr propValue = ParseExpression(LOWEST);
-            styleNode->AddProperty({propName.value, propValue});
-            Expect(TokenType::Semicolon);
+            if (Peek(1).type == TokenType::Colon) {
+                // This is a normal, valued property
+                Token propName = Consume();
+                Consume(); // Consume ':'
+                ExpressionNodePtr propValue = ParseExpression(LOWEST);
+                styleNode->AddProperty({propName.value, propValue});
+                Expect(TokenType::Semicolon);
+            } else {
+                // This is a valueless property, e.g., `color;` or `color, font-size;`
+                while (Peek().type != TokenType::Semicolon && Peek().type != TokenType::EndOfFile) {
+                    Token propName = Expect(TokenType::Identifier);
+                    styleNode->AddProperty({propName.value, nullptr});
+                    if (Peek().type == TokenType::Comma) {
+                        Consume();
+                    } else {
+                        break; // Exit loop if it's not a comma
+                    }
+                }
+                Expect(TokenType::Semicolon);
+            }
         } else {
-            // This is a nested style rule (e.g., .class, #id, &:pseudo)
+            // Nested style rule
             std::string selector;
             if (token1.type == TokenType::Dot || token1.type == TokenType::Hash) {
                 selector += Consume().value;
@@ -307,8 +372,11 @@ NodePtr CHTLParser::ParseStyleBlock() {
 
 NodePtr CHTLParser::ParseTemplateDefinition() {
     Expect(TokenType::OpenBracket);
-    // For now, we assume the identifier is always "Template" as per the spec
-    Expect(TokenType::Identifier);
+    Token definitionType = Expect(TokenType::Identifier); // Should be "Template" or "Custom"
+    bool isCustom = (definitionType.value == "Custom");
+    if (!isCustom && definitionType.value != "Template") {
+        throw std::runtime_error("Expected '[Template]' or '[Custom]' but got '[" + definitionType.value + "]'");
+    }
     Expect(TokenType::CloseBracket);
     Expect(TokenType::At);
 
@@ -323,15 +391,18 @@ NodePtr CHTLParser::ParseTemplateDefinition() {
 
     NodeList content;
     Expect(TokenType::OpenBrace);
-    while(Peek().type != TokenType::CloseBrace && Peek().type != TokenType::EndOfFile) {
-        NodePtr node = (type == TemplateType::Element) ? ParseNode() : ParseStyleBlock();
-        if (node) content.push_back(node);
-        // For Style/Var templates, there's only one style block
-        if (type != TemplateType::Element) break;
+    if (type == TemplateType::Element) {
+        while(Peek().type != TokenType::CloseBrace && Peek().type != TokenType::EndOfFile) {
+            NodePtr node = ParseNode();
+            if (node) content.push_back(node);
+        }
+    } else { // Style or Var
+        // The body of a style/var template is a style block
+        content.push_back(ParseStyleBlock(true));
     }
     Expect(TokenType::CloseBrace);
 
-    return std::make_shared<TemplateDefinitionNode>(nameToken.value, type, content);
+    return std::make_shared<TemplateDefinitionNode>(nameToken.value, type, content, isCustom);
 }
 
 NodePtr CHTLParser::ParseElementTemplateUsage() {
