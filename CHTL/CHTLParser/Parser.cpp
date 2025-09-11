@@ -7,10 +7,14 @@
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
 #include "../CHTLNode/CallExpressionNode.h"
+#include "../CHTLNode/ImportNode.h"
+#include "../CHTLNode/NamespaceNode.h"
+#include "../CHTLLoader/CHTLLoader.h"
 #include <sstream>
+#include <iostream>
 
-Parser::Parser(std::vector<Token> tokens, TemplateStore& templateStore)
-    : m_tokens(std::move(tokens)), m_position(0), m_templateStore(templateStore) {
+Parser::Parser(std::vector<Token> tokens, TemplateStore& templateStore, CHTLLoader& loader, const std::string& initialNamespace)
+    : m_tokens(std::move(tokens)), m_position(0), m_templateStore(templateStore), m_loader(loader), m_currentNamespace(initialNamespace) {
     // Initialize current and peek tokens
     nextToken();
     nextToken();
@@ -103,16 +107,9 @@ void Parser::registerInfix(TokenType tokenType, InfixParseFn fn) {
 std::vector<std::unique_ptr<BaseNode>> Parser::parseProgram() {
     std::vector<std::unique_ptr<BaseNode>> program;
     while (!currentTokenIs(TokenType::END_OF_FILE)) {
-        if (currentTokenIs(TokenType::KEYWORD_TEMPLATE)) {
-            auto templateDef = parseTemplateDefinition();
-            if (templateDef) {
-                m_templateStore.add(templateDef);
-            }
-        } else {
-            auto stmt = parseStatement();
-            if (stmt) {
-                program.push_back(std::move(stmt));
-            }
+        auto stmt = parseStatement();
+        if (stmt) {
+            program.push_back(std::move(stmt));
         }
         nextToken();
     }
@@ -120,7 +117,21 @@ std::vector<std::unique_ptr<BaseNode>> Parser::parseProgram() {
 }
 
 std::unique_ptr<BaseNode> Parser::parseStatement() {
-    if (currentTokenIs(TokenType::AT)) {
+    if (currentTokenIs(TokenType::KEYWORD_TEMPLATE)) {
+        auto templateDef = parseTemplateDefinition();
+        if (templateDef) {
+            m_templateStore.add(m_currentNamespace, templateDef);
+        }
+        return nullptr; // Definitions don't go into the AST directly
+    } else if (currentTokenIs(TokenType::KEYWORD_IMPORT)) {
+        auto importNode = parseImportStatement();
+        if (importNode) {
+            m_loader.load(importNode.get());
+        }
+        return nullptr; // Imports are processed immediately, not added to AST
+    } else if (currentTokenIs(TokenType::KEYWORD_NAMESPACE)) {
+        return parseNamespaceStatement();
+    } else if (currentTokenIs(TokenType::AT)) {
         return parseTemplateUsage();
     } else if (currentTokenIs(TokenType::KEYWORD_TEXT)) {
         return parseTextElement();
@@ -362,6 +373,75 @@ std::unique_ptr<TemplateUsageNode> Parser::parseTemplateUsage() {
     else { return nullptr; }
     if (!expectPeek(TokenType::IDENTIFIER)) return nullptr;
     std::string name = m_currentToken.lexeme;
+
+    std::string from_ns = "";
+    if (peekTokenIs(TokenType::KEYWORD_FROM)) {
+        nextToken(); // consume 'from'
+        if (!expectPeek(TokenType::IDENTIFIER)) return nullptr;
+        from_ns = m_currentToken.lexeme;
+    }
+
     if (!expectPeek(TokenType::SEMICOLON)) return nullptr;
-    return std::make_unique<TemplateUsageNode>(atToken, type, name);
+    return std::make_unique<TemplateUsageNode>(atToken, type, name, from_ns);
+}
+
+std::unique_ptr<ImportNode> Parser::parseImportStatement() {
+    Token importToken = m_currentToken;
+    nextToken(); // consume [Import]
+
+    std::string typeStr;
+    if (currentTokenIs(TokenType::AT)) {
+        typeStr = m_currentToken.lexeme; // "@"
+        nextToken(); // consume "@"
+        typeStr += m_currentToken.lexeme; // append "Chtl", typeStr is "@Chtl"
+    } else {
+        // Handle other import types like [Custom] @Element later
+        return nullptr;
+    }
+    nextToken(); // consume "Chtl"
+
+    if (!currentTokenIs(TokenType::KEYWORD_FROM)) {
+        peekError(TokenType::KEYWORD_FROM);
+        return nullptr;
+    }
+    nextToken(); // consume "from"
+
+    std::string path = m_currentToken.lexeme;
+
+    // For now, we don't parse item names or aliases
+    return std::make_unique<ImportNode>(importToken, typeStr, path, "", "");
+}
+
+std::unique_ptr<NamespaceNode> Parser::parseNamespaceStatement() {
+    Token nsToken = m_currentToken;
+    if (!expectPeek(TokenType::IDENTIFIER)) return nullptr;
+
+    std::string name = m_currentToken.lexeme;
+    auto nsNode = std::make_unique<NamespaceNode>(nsToken, name);
+
+    // Set the context for parsing inside this namespace
+    std::string oldNamespace = m_currentNamespace;
+    m_currentNamespace = name;
+
+    if (!peekTokenIs(TokenType::LEFT_BRACE)) {
+        // Namespace without a body, just sets the context for the rest of the file
+        m_currentNamespace = name; // Set state and return
+        return nullptr;
+    }
+    nextToken(); // Consume '{'
+
+    while(!currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
+        auto stmt = parseStatement();
+        if (stmt) {
+            nsNode->addNode(std::move(stmt));
+        }
+        nextToken();
+    }
+
+    if (!currentTokenIs(TokenType::RIGHT_BRACE)) return nullptr;
+
+    // Restore the old namespace context
+    m_currentNamespace = oldNamespace;
+
+    return nsNode;
 }

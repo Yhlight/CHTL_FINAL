@@ -10,10 +10,11 @@ class TemplateUsageNode : public BaseNode {
 public:
     TemplateType type;
     std::string name;
+    std::string fromNamespace;
 
     // Constructor
-    TemplateUsageNode(const Token& token, TemplateType type, std::string name)
-        : type(type), name(std::move(name)) {
+    TemplateUsageNode(const Token& token, TemplateType type, std::string name, std::string from_ns = "")
+        : type(type), name(std::move(name)), fromNamespace(std::move(from_ns)) {
         this->token = token; // The '@Style', '@Element' etc. token
     }
 
@@ -28,7 +29,11 @@ public:
 
     std::string debugString(int indent = 0) const override {
         std::stringstream ss;
-        ss << indentString(indent) << "TemplateUsageNode: @" << typeToString() << " " << name << "\n";
+        ss << indentString(indent) << "TemplateUsageNode: @" << typeToString() << " " << name;
+        if (!fromNamespace.empty()) {
+            ss << " from " << fromNamespace;
+        }
+        ss << "\n";
         return ss.str();
     }
 

@@ -198,8 +198,13 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
  /app/CHTL/CHTLParser/../CHTLNode/TemplateDefinitionNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/StyleBlockNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/CSSRuleNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/ImportNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/NamespaceNode.h \
  /app/CHTL/CHTLParser/../CHTLStore/TemplateStore.h \
  /app/CHTL/CHTLParser/../CHTLStore/../CHTLNode/TemplateDefinitionNode.h \
+ /app/CHTL/CHTLParser/../CHTLLoader/CHTLLoader.h \
+ /app/CHTL/CHTLParser/../CHTLLoader/../CHTLNode/ImportNode.h \
+ /app/CHTL/CHTLParser/../CHTLLoader/../CHTLStore/TemplateStore.h \
  /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
  /usr/include/c++/13/unordered_map \
  /usr/include/c++/13/bits/unordered_map.h \
@@ -221,4 +226,4 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
  /usr/include/c++/13/bits/stl_multiset.h \
  /app/CHTL/CHTLGenerator/../CHTLStore/TemplateStore.h \
  /app/CHTL/CHTLGenerator/../CHTLNode/TemplateUsageNode.h \
- /app/CHTL/CHTLStore/TemplateStore.h
+ /app/CHTL/CHTLStore/TemplateStore.h /app/CHTL/CHTLLoader/CHTLLoader.h

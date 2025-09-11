@@ -1,26 +1,7 @@
-[Template] @Var Theme {
-    brand-color: "rgb(255, 100, 100)";
-    text-color: "black";
-}
-
-[Template] @Style BaseText {
-    font-family: "Arial";
-    color: Theme(text-color);
-}
-
-[Template] @Element MyComponent {
-    div {
-        style {
-            @Style BaseText; // Test inheritance
-            background-color: Theme(brand-color);
-            border: "1px solid black";
-        }
-        text { "This component uses variables and inheritance." }
-    }
-}
+[Import] @Chtl from "my-lib.chtl";
 
 html {
     body {
-        @Element MyComponent;
+        @Element MyButton from MyLib;
     }
 }

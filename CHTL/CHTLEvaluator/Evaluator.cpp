@@ -3,7 +3,8 @@
 #include <stdexcept>
 #include <sstream>
 
-Evaluator::Evaluator(const TemplateStore& templateStore) : m_templateStore(templateStore) {}
+Evaluator::Evaluator(const TemplateStore& templateStore, const std::string& current_ns)
+    : m_templateStore(templateStore), m_currentNamespace(current_ns) {}
 
 std::string Evaluator::evaluate(ExpressionNode* node) {
     if (!node) {
@@ -65,7 +66,7 @@ std::string Evaluator::evaluateCallExpression(const CallExpressionNode* node) {
     }
 
     std::string templateName = funcNameNode->token.lexeme;
-    auto templateDef = m_templateStore.get(templateName);
+    auto templateDef = m_templateStore.get(m_currentNamespace, templateName);
 
     if (!templateDef || templateDef->type != TemplateType::VAR || node->arguments.size() != 1) {
         return "";

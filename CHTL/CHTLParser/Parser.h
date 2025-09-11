@@ -13,7 +13,10 @@
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
 #include "../CHTLNode/StyleBlockNode.h"
+#include "../CHTLNode/ImportNode.h"
+#include "../CHTLNode/NamespaceNode.h"
 #include "../CHTLStore/TemplateStore.h"
+#include "../CHTLLoader/CHTLLoader.h"
 #include <vector>
 #include <string>
 #include <memory>
@@ -22,8 +25,7 @@
 
 // Forward declare to be used in function pointers
 class Parser;
-
-// Define function pointer types for our Pratt parser
+class CHTLLoader;
 using PrefixParseFn = std::function<std::unique_ptr<ExpressionNode>(Parser*)>;
 using InfixParseFn = std::function<std::unique_ptr<ExpressionNode>(Parser*, std::unique_ptr<ExpressionNode>)>;
 
@@ -40,8 +42,8 @@ enum Precedence {
 
 class Parser {
 public:
-    // Constructor takes the output of the lexer and a reference to the template store
-    explicit Parser(std::vector<Token> tokens, TemplateStore& templateStore);
+    // Constructor
+    explicit Parser(std::vector<Token> tokens, TemplateStore& templateStore, CHTLLoader& loader, const std::string& initialNamespace = "");
 
     // Main entry point for parsing. Returns the root of the AST.
     std::vector<std::unique_ptr<BaseNode>> parseProgram();
@@ -56,6 +58,8 @@ private:
     Token m_peekToken;
     std::vector<std::string> m_errors;
     TemplateStore& m_templateStore;
+    CHTLLoader& m_loader;
+    std::string m_currentNamespace;
 
     // --- Pratt Parser Members ---
     std::map<TokenType, PrefixParseFn> m_prefixParseFns;
@@ -87,6 +91,8 @@ private:
     std::unique_ptr<CSSRuleNode> parseCSSRule();
     std::shared_ptr<TemplateDefinitionNode> parseTemplateDefinition();
     std::unique_ptr<TemplateUsageNode> parseTemplateUsage();
+    std::unique_ptr<ImportNode> parseImportStatement();
+    std::unique_ptr<NamespaceNode> parseNamespaceStatement();
 
     // --- Expression Parsing Methods ---
     std::unique_ptr<ExpressionNode> parseExpression(Precedence precedence);

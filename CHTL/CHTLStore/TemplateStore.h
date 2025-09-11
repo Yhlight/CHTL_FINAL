@@ -8,15 +8,15 @@
 
 class TemplateStore {
 public:
-    // Adds a template definition to the store.
-    // Returns false if a template with the same name already exists.
-    bool add(std::shared_ptr<TemplateDefinitionNode> templateNode);
+    // Adds a template definition to the store under a given namespace.
+    // The key will be stored as "namespace.name".
+    bool add(const std::string& ns, std::shared_ptr<TemplateDefinitionNode> templateNode);
 
-    // Retrieves a template definition by name.
-    // Returns nullptr if the template is not found.
-    std::shared_ptr<TemplateDefinitionNode> get(const std::string& name) const;
+    // Retrieves a template definition by name, searching in the given namespace and the global scope.
+    std::shared_ptr<TemplateDefinitionNode> get(const std::string& ns, const std::string& name) const;
 
 private:
+    std::string getQualifiedName(const std::string& ns, const std::string& name) const;
     std::map<std::string, std::shared_ptr<TemplateDefinitionNode>> m_store;
 };
 

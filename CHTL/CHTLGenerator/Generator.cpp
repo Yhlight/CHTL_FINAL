@@ -2,6 +2,7 @@
 #include "../CHTLEvaluator/Evaluator.h"
 #include "../CHTLNode/StyleBlockNode.h"
 #include "../CHTLNode/TemplateUsageNode.h"
+#include "../CHTLNode/NamespaceNode.h"
 #include <sstream>
 #include <algorithm>
 
@@ -11,7 +12,7 @@ const std::set<std::string> Generator::s_selfClosingTags = {
     "link", "meta", "param", "source", "track", "wbr"
 };
 
-Generator::Generator(const TemplateStore& templateStore) : m_templateStore(templateStore) {}
+Generator::Generator(const TemplateStore& templateStore) : m_templateStore(templateStore), m_currentNamespace("") {}
 
 std::string Generator::generate(const std::vector<std::unique_ptr<BaseNode>>& program) {
     m_global_styles.str(""); // Clear global styles at the start
@@ -59,6 +60,18 @@ std::string Generator::generateNode(const BaseNode* node) {
     if (auto templateUsageNode = dynamic_cast<const TemplateUsageNode*>(node)) {
         return generateTemplateUsage(templateUsageNode);
     }
+    if (auto nsNode = dynamic_cast<const NamespaceNode*>(node)) {
+        std::string old_ns = m_currentNamespace;
+        m_currentNamespace = nsNode->name;
+
+        std::stringstream ss;
+        for(const auto& bodyNode : nsNode->body) {
+            ss << generateNode(bodyNode.get());
+        }
+
+        m_currentNamespace = old_ns; // Restore namespace
+        return ss.str();
+    }
 
     // If we have an unknown node type, we return an empty string.
     return "";
@@ -66,7 +79,7 @@ std::string Generator::generateNode(const BaseNode* node) {
 
 // Helper function to process the body of a style block or style template
 void Generator::processStyleBody(const std::vector<std::unique_ptr<BaseNode>>& body, ElementNode* parent, std::stringstream& inline_style_stream) {
-    Evaluator evaluator(m_templateStore);
+    Evaluator evaluator(m_templateStore, m_currentNamespace);
     for (const auto& node : body) {
         if (auto prop = dynamic_cast<const CSSPropertyNode*>(node.get())) {
             inline_style_stream << prop->propertyName << ":" << evaluator.evaluate(prop->value.get()) << ";";
@@ -79,7 +92,8 @@ void Generator::processStyleBody(const std::vector<std::unique_ptr<BaseNode>>& b
             m_global_styles << "}\n";
         } else if (auto usage = dynamic_cast<const TemplateUsageNode*>(node.get())) {
             if (usage->type == TemplateType::STYLE) {
-                auto templateDef = m_templateStore.get(usage->name);
+                std::string ns_to_use = usage->fromNamespace.empty() ? m_currentNamespace : usage->fromNamespace;
+                auto templateDef = m_templateStore.get(ns_to_use, usage->name);
                 if (templateDef) {
                     // Clone the body before recursive processing to ensure isolation.
                     std::vector<std::unique_ptr<BaseNode>> clonedBody;
@@ -164,7 +178,8 @@ std::string Generator::generateTemplateUsage(const TemplateUsageNode* node) {
         return "";
     }
 
-    auto templateDef = m_templateStore.get(node->name);
+    std::string ns_to_use = node->fromNamespace.empty() ? m_currentNamespace : node->fromNamespace;
+    auto templateDef = m_templateStore.get(ns_to_use, node->name);
     if (!templateDef) {
         return "<!-- Template not found: " + node->name + " -->";
     }

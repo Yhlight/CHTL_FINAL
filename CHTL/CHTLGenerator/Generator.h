@@ -24,6 +24,7 @@ public:
 
 private:
     const TemplateStore& m_templateStore;
+    std::string m_currentNamespace;
     // Buffer for collecting CSS rules for the global stylesheet
     std::stringstream m_global_styles;
 

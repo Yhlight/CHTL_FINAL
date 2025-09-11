@@ -225,6 +225,30 @@ CHTL/CHTLLexer/Token.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CHTLLexer/Token.cpp.s
 .PHONY : CHTL/CHTLLexer/Token.cpp.s
 
+CHTL/CHTLLoader/CHTLLoader.o: CHTL/CHTLLoader/CHTLLoader.cpp.o
+.PHONY : CHTL/CHTLLoader/CHTLLoader.o
+
+# target to build an object file
+CHTL/CHTLLoader/CHTLLoader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CHTLLoader/CHTLLoader.cpp.o
+.PHONY : CHTL/CHTLLoader/CHTLLoader.cpp.o
+
+CHTL/CHTLLoader/CHTLLoader.i: CHTL/CHTLLoader/CHTLLoader.cpp.i
+.PHONY : CHTL/CHTLLoader/CHTLLoader.i
+
+# target to preprocess a source file
+CHTL/CHTLLoader/CHTLLoader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CHTLLoader/CHTLLoader.cpp.i
+.PHONY : CHTL/CHTLLoader/CHTLLoader.cpp.i
+
+CHTL/CHTLLoader/CHTLLoader.s: CHTL/CHTLLoader/CHTLLoader.cpp.s
+.PHONY : CHTL/CHTLLoader/CHTLLoader.s
+
+# target to generate assembly for a file
+CHTL/CHTLLoader/CHTLLoader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CHTLLoader/CHTLLoader.cpp.s
+.PHONY : CHTL/CHTLLoader/CHTLLoader.cpp.s
+
 CHTL/CHTLParser/Parser.o: CHTL/CHTLParser/Parser.cpp.o
 .PHONY : CHTL/CHTLParser/Parser.o
 
@@ -366,6 +390,9 @@ help:
 	@echo "... CHTL/CHTLLexer/Token.o"
 	@echo "... CHTL/CHTLLexer/Token.i"
 	@echo "... CHTL/CHTLLexer/Token.s"
+	@echo "... CHTL/CHTLLoader/CHTLLoader.o"
+	@echo "... CHTL/CHTLLoader/CHTLLoader.i"
+	@echo "... CHTL/CHTLLoader/CHTLLoader.s"
 	@echo "... CHTL/CHTLParser/Parser.o"
 	@echo "... CHTL/CHTLParser/Parser.i"
 	@echo "... CHTL/CHTLParser/Parser.s"

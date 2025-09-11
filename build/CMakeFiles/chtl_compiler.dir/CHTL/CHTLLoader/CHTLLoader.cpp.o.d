@@ -1,8 +1,9 @@
-CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o: \
- /app/CHTL/CHTLGenerator/Generator.cpp /usr/include/stdc-predef.h \
- /app/CHTL/CHTLGenerator/Generator.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/BaseNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/../CHTLLexer/Token.h \
+CMakeFiles/chtl_compiler.dir/CHTL/CHTLLoader/CHTLLoader.cpp.o: \
+ /app/CHTL/CHTLLoader/CHTLLoader.cpp /usr/include/stdc-predef.h \
+ /app/CHTL/CHTLLoader/CHTLLoader.h \
+ /app/CHTL/CHTLLoader/../CHTLNode/ImportNode.h \
+ /app/CHTL/CHTLLoader/../CHTLNode/BaseNode.h \
+ /app/CHTL/CHTLLoader/../CHTLNode/../CHTLLexer/Token.h \
  /usr/include/c++/13/string /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -157,12 +158,9 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o: \
  /usr/include/c++/13/bits/atomic_lockfree_defines.h \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
- /usr/include/c++/13/pstl/execution_defs.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/ElementNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/BaseNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/AttributeNode.h \
- /usr/include/c++/13/sstream /usr/include/c++/13/istream \
- /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
+ /usr/include/c++/13/pstl/execution_defs.h /usr/include/c++/13/sstream \
+ /usr/include/c++/13/istream /usr/include/c++/13/ios \
+ /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \
  /usr/include/c++/13/bits/locale_classes.tcc \
  /usr/include/c++/13/system_error \
@@ -180,35 +178,48 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o: \
  /usr/include/c++/13/bits/ostream.tcc \
  /usr/include/c++/13/bits/istream.tcc \
  /usr/include/c++/13/bits/sstream.tcc \
- /app/CHTL/CHTLGenerator/../CHTLNode/TextNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/CommentNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/CSSRuleNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/CSSPropertyNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/ExpressionNode.h \
- /usr/include/c++/13/set /usr/include/c++/13/bits/stl_tree.h \
+ /app/CHTL/CHTLLoader/../CHTLStore/TemplateStore.h \
+ /app/CHTL/CHTLLoader/../CHTLStore/../CHTLNode/TemplateDefinitionNode.h \
+ /app/CHTL/CHTLLoader/../CHTLStore/../CHTLNode/BaseNode.h \
+ /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \
  /usr/include/c++/13/bits/node_handle.h \
- /usr/include/c++/13/bits/stl_set.h \
- /usr/include/c++/13/bits/stl_multiset.h \
- /usr/include/c++/13/bits/erase_if.h \
- /app/CHTL/CHTLGenerator/../CHTLStore/TemplateStore.h \
- /app/CHTL/CHTLGenerator/../CHTLStore/../CHTLNode/TemplateDefinitionNode.h \
- /app/CHTL/CHTLGenerator/../CHTLStore/../CHTLNode/BaseNode.h \
- /usr/include/c++/13/map /usr/include/c++/13/bits/stl_map.h \
+ /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/TemplateUsageNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/TemplateDefinitionNode.h \
- /app/CHTL/CHTLGenerator/../CHTLEvaluator/Evaluator.h \
- /app/CHTL/CHTLGenerator/../CHTLEvaluator/../CHTLNode/ExpressionNode.h \
- /app/CHTL/CHTLGenerator/../CHTLEvaluator/../CHTLNode/LiteralNode.h \
- /app/CHTL/CHTLGenerator/../CHTLEvaluator/../CHTLNode/ExpressionNode.h \
- /app/CHTL/CHTLGenerator/../CHTLEvaluator/../CHTLNode/BinaryOpNode.h \
- /app/CHTL/CHTLGenerator/../CHTLEvaluator/../CHTLNode/CallExpressionNode.h \
- /app/CHTL/CHTLGenerator/../CHTLEvaluator/../CHTLStore/TemplateStore.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/StyleBlockNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/CSSRuleNode.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/NamespaceNode.h \
- /usr/include/c++/13/algorithm /usr/include/c++/13/bits/stl_algo.h \
+ /usr/include/c++/13/bits/erase_if.h \
+ /app/CHTL/CHTLLoader/../../Util/FileSystem/FileSystemUtil.h \
+ /app/CHTL/CHTLLoader/../CHTLLexer/Lexer.h \
+ /app/CHTL/CHTLLoader/../CHTLLexer/Token.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/Parser.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLLexer/Lexer.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/BaseNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/ElementNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/BaseNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/AttributeNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/TextNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/AttributeNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/CommentNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/ExpressionNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/CSSPropertyNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/ExpressionNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/CSSRuleNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/CSSPropertyNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/TemplateDefinitionNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/TemplateUsageNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/TemplateDefinitionNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/StyleBlockNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/CSSRuleNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/ImportNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/NamespaceNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLStore/TemplateStore.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLLoader/CHTLLoader.h \
+ /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
+ /usr/include/c++/13/unordered_map \
+ /usr/include/c++/13/bits/unordered_map.h \
+ /usr/include/c++/13/bits/hashtable.h \
+ /usr/include/c++/13/bits/hashtable_policy.h \
+ /usr/include/c++/13/bits/enable_special_members.h \
+ /usr/include/c++/13/array /usr/include/c++/13/compare \
+ /usr/include/c++/13/bits/stl_algo.h \
  /usr/include/c++/13/bits/algorithmfwd.h \
  /usr/include/c++/13/bits/stl_heap.h \
- /usr/include/c++/13/bits/uniform_int_dist.h \
- /usr/include/c++/13/pstl/glue_algorithm_defs.h
+ /usr/include/c++/13/bits/uniform_int_dist.h /usr/include/c++/13/iostream

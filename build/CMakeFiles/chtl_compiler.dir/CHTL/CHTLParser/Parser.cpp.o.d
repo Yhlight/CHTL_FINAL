@@ -199,8 +199,13 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o: \
  /app/CHTL/CHTLParser/../CHTLNode/TemplateDefinitionNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/StyleBlockNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/CSSRuleNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/ImportNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/NamespaceNode.h \
  /app/CHTL/CHTLParser/../CHTLStore/TemplateStore.h \
  /app/CHTL/CHTLParser/../CHTLStore/../CHTLNode/TemplateDefinitionNode.h \
+ /app/CHTL/CHTLParser/../CHTLLoader/CHTLLoader.h \
+ /app/CHTL/CHTLParser/../CHTLLoader/../CHTLNode/ImportNode.h \
+ /app/CHTL/CHTLParser/../CHTLLoader/../CHTLStore/TemplateStore.h \
  /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
  /usr/include/c++/13/unordered_map \
  /usr/include/c++/13/bits/unordered_map.h \
@@ -214,4 +219,5 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o: \
  /usr/include/c++/13/bits/uniform_int_dist.h \
  /app/CHTL/CHTLParser/../CHTLNode/LiteralNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/BinaryOpNode.h \
- /app/CHTL/CHTLParser/../CHTLNode/CallExpressionNode.h
+ /app/CHTL/CHTLParser/../CHTLNode/CallExpressionNode.h \
+ /usr/include/c++/13/iostream

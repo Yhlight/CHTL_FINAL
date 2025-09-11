@@ -19,6 +19,7 @@ set(COMPILER_SOURCES
     CHTL/CHTLGenerator/Generator.cpp
     CHTL/CHTLEvaluator/Evaluator.cpp
     CHTL/CHTLStore/TemplateStore.cpp
+    CHTL/CHTLLoader/CHTLLoader.cpp
 )
 
 # Add an executable target
@@ -31,4 +32,5 @@ target_include_directories(chtl_compiler PUBLIC
     "${PROJECT_SOURCE_DIR}/Util"
     "${PROJECT_SOURCE_DIR}/CHTL/CHTLEvaluator"
     "${PROJECT_SOURCE_DIR}/CHTL/CHTLStore"
+    "${PROJECT_SOURCE_DIR}/CHTL/CHTLLoader"
 )

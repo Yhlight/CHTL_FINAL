@@ -8,6 +8,7 @@
 #include "CHTL/CHTLParser/Parser.h"
 #include "CHTL/CHTLGenerator/Generator.h"
 #include "CHTL/CHTLStore/TemplateStore.h"
+#include "CHTL/CHTLLoader/CHTLLoader.h"
 
 int main() {
     const std::string filename = "test.chtl";
@@ -19,11 +20,14 @@ int main() {
         return 1;
     }
 
+    // --- Setup ---
+    TemplateStore templateStore;
+    CHTLLoader loader(templateStore);
+
     // --- Parsing ---
     Lexer lexer(source);
     auto tokens = lexer.tokenize();
-    TemplateStore templateStore;
-    Parser parser(tokens, templateStore);
+    Parser parser(tokens, templateStore, loader);
     auto program = parser.parseProgram();
 
     // --- Error Checking ---
