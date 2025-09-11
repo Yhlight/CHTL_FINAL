@@ -31,6 +31,7 @@ private:
     // 脚本处理
     std::vector<std::shared_ptr<ScriptNode>> localScripts;
     std::string globalScript;
+    mutable std::string collectedLocalCSS;
     
     // 模板和自定义
     std::map<std::string, std::shared_ptr<BaseNode>> templates;
