@@ -5,7 +5,7 @@ from CHTL.ast.nodes import (
     DocumentNode, ElementNode, AttributeNode, TextNode, StyleNode, StyleUsageNode,
     TemplateDefinitionNode, CustomDefinitionNode,
     UsageNode, ElementUsageNode, VarUsageNode,
-    SpecializationNode, InsertStatementNode, DeleteStatementNode
+    SpecializationNode, InsertStatementNode, DeleteStatementNode, ScriptNode
 )
 from CHTL.symbol_table import SymbolTable
 
@@ -74,6 +74,8 @@ class AstBuilder(CHTLVisitor):
                         children.append(style_node)
                 elif isinstance(child_ctx, CHTLParser.ElementUsageContext):
                     children.append(self.visit(child_ctx))
+                elif isinstance(child_ctx, CHTLParser.ScriptPlaceholderContext):
+                    children.append(self.visit(child_ctx))
         return ElementNode(tag_name=tag_name, attributes=attributes, children=children)
 
     def visitElementUsage(self, ctx:CHTLParser.ElementUsageContext):
@@ -117,6 +119,10 @@ class AstBuilder(CHTLVisitor):
             style_usages=style_data.get('usages', []),
             deleted_properties=style_data.get('deleted', [])
         )
+
+    def visitScriptPlaceholder(self, ctx:CHTLParser.ScriptPlaceholderContext):
+        script_id = ctx.STRING().getText()[1:-1]
+        return ScriptNode(script_id=script_id)
 
     def visitValue(self, ctx:CHTLParser.ValueContext):
         parts = [self.visit(child) for child in ctx.children]

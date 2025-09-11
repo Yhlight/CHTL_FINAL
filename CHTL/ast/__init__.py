@@ -3,5 +3,6 @@ from .nodes import (
     DocumentNode, ElementNode, AttributeNode, TextNode, StyleNode, StyleUsageNode,
     DefinitionNode, TemplateDefinitionNode, CustomDefinitionNode,
     UsageNode, ElementUsageNode, VarUsageNode,
-    SpecializationNode, InsertStatementNode, DeleteStatementNode
+    SpecializationNode, InsertStatementNode, DeleteStatementNode,
+    ScriptNode
 )

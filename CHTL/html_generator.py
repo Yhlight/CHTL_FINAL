@@ -1,4 +1,4 @@
-from CHTL.ast.nodes import DocumentNode, ElementNode, AttributeNode, TextNode, StyleNode
+from CHTL.ast.nodes import DocumentNode, ElementNode, AttributeNode, TextNode, StyleNode, ScriptNode
 
 class HtmlGenerator:
     def visit(self, node):
@@ -11,11 +11,14 @@ class HtmlGenerator:
 
         head_content = ""
         if node.global_rules:
-            # Join all global rules into one block
             global_styles = "\n".join(node.global_rules)
             head_content += f"    <style>\n{global_styles}\n    </style>"
 
-        # Using a simple template for the final HTML document
+        script_content = ""
+        if node.scripts:
+            all_js = "\n".join(node.scripts.values())
+            script_content = f"<script>\n{all_js}\n</script>"
+
         return f"""<!DOCTYPE html>
 <html>
 <head>
@@ -23,6 +26,7 @@ class HtmlGenerator:
 </head>
 <body>
 {body_content}
+{script_content}
 </body>
 </html>"""
 
@@ -50,6 +54,10 @@ class HtmlGenerator:
 
     def visit_stylenode(self, node: StyleNode):
         """Visits a style node. For now, this does nothing as styles will be handled separately."""
+        return ""
+
+    def visit_scriptnode(self, node: ScriptNode):
+        """Visits a script node. This does nothing, as scripts are collected and rendered at the document level."""
         return ""
 
     def visit_default(self, node):

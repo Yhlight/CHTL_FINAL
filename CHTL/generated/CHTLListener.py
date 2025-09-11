@@ -125,6 +125,15 @@ class CHTLListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CHTLParser#scriptPlaceholder.
+    def enterScriptPlaceholder(self, ctx:CHTLParser.ScriptPlaceholderContext):
+        pass
+
+    # Exit a parse tree produced by CHTLParser#scriptPlaceholder.
+    def exitScriptPlaceholder(self, ctx:CHTLParser.ScriptPlaceholderContext):
+        pass
+
+
     # Enter a parse tree produced by CHTLParser#styleContent.
     def enterStyleContent(self, ctx:CHTLParser.StyleContentContext):
         pass

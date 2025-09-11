@@ -72,9 +72,10 @@ class DocumentNode(AstNode):
     def __init__(self, children: List[Union['ElementNode', 'DefinitionNode']]):
         self.children = children
         self.global_rules: List[str] = []
+        self.scripts: Dict[str, str] = {} # Maps script_id to generated JS code
 
     def __repr__(self):
-        return f"DocumentNode(children={len(self.children)}, global_rules={len(self.global_rules)})"
+        return f"DocumentNode(children={len(self.children)}, global_rules={len(self.global_rules)}, scripts={len(self.scripts)})"
 
 class ElementNode(AstNode):
     """Represents an HTML element."""
@@ -123,5 +124,12 @@ class StyleNode(AstNode):
     def __repr__(self):
         return f"StyleNode(inline='{self.inline_styles}', global_rules={len(self.global_rules)}, usages={len(self.style_usages)}, deleted={len(self.deleted_properties)})"
 
+class ScriptNode(AstNode):
+    """Represents a script block placeholder."""
+    def __init__(self, script_id: str):
+        self.script_id = script_id
+    def __repr__(self):
+        return f"ScriptNode(id='{self.script_id}')"
+
 # A type hint for any node that can be a child of an element
-ElementChild = Union[ElementNode, TextNode, StyleNode]
+ElementChild = Union[ElementNode, TextNode, StyleNode, ScriptNode]

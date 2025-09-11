@@ -74,6 +74,11 @@ class CHTLVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CHTLParser#scriptPlaceholder.
+    def visitScriptPlaceholder(self, ctx:CHTLParser.ScriptPlaceholderContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CHTLParser#styleContent.
     def visitStyleContent(self, ctx:CHTLParser.StyleContentContext):
         return self.visitChildren(ctx)

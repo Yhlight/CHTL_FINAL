@@ -1,0 +1,12 @@
+T__0=1
+LDBLACE=2
+RDBLACE=3
+DOT=4
+HASH=5
+IDENTIFIER=6
+WS=7
+';'=1
+'{'=2
+'}'=3
+'.'=4
+'#'=5

@@ -13,9 +13,8 @@ elementTemplate: AT_ELEMENT IDENTIFIER LBRACE element* RBRACE;
 varTemplate: AT_VAR IDENTIFIER LBRACE attribute* RBRACE;
 
 
-element: IDENTIFIER LBRACE (attribute | element | textNode | stylePlaceholder | elementUsage)* RBRACE;
-elementUsage: AT_ELEMENT IDENTIFIER SEMI;
-
+element: IDENTIFIER LBRACE (attribute | element | textNode | stylePlaceholder | scriptPlaceholder | elementUsage)* RBRACE;
+elementUsage: AT_ELEMENT IDENTIFIER ( (LBRACE specializationBody* RBRACE) | SEMI );
 specializationBody: insertStatement | deleteStatement;
 insertStatement: INSERT LBRACE element+ RBRACE;
 deleteStatement: DELETE IDENTIFIER SEMI;
@@ -26,6 +25,7 @@ attribute: IDENTIFIER (COLON | EQ) value SEMI;
 textNode: TEXT LBRACE value RBRACE;
 
 stylePlaceholder: STYLE_REF LPAR STRING RPAR SEMI;
+scriptPlaceholder: SCRIPT_REF LPAR STRING RPAR SEMI;
 
 styleContent
     : IDENTIFIER | STRING | COLON | SEMI | TEXT | LBRACE | EQ | NUMBER | DOT | varUsage
@@ -47,6 +47,7 @@ INSERT: 'insert';
 DELETE: 'delete';
 
 STYLE_REF: '__style_ref__';
+SCRIPT_REF: '__script_ref__';
 STYLE: 'style';
 TEXT: 'text';
 NUMBER: [0-9]+;

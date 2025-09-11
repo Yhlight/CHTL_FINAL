@@ -3,40 +3,35 @@ from CHTL.css_parser import parse_style_content
 import re
 
 class UnifiedScanner:
-    """
-    Pre-processes raw CHTL source code to separate different language fragments
-    (like style blocks) before the main ANTLR parser runs.
-    """
     def __init__(self):
-        """
-        Initializes the scanner.
-        """
         self.registry: Dict[str, Any] = {}
         self._next_id = 0
 
     def _generate_id(self) -> str:
-        """Generates a unique ID for a replaced block."""
         self._next_id += 1
         return f"__chtl_ref_{self._next_id}"
 
     def scan(self, source_text: str) -> Tuple[str, Dict[str, Any]]:
-        """
-        Scans the source text, extracts complex blocks (like style blocks),
-        replaces them with placeholders, and returns the modified source
-        along with a registry of the extracted data.
-        """
+        # This regex will find either 'style' or 'script' as a whole word
+        # followed by an opening brace.
+        block_pattern = re.compile(r'\b(style|script)\s*{')
+
         modified_source = ""
         last_index = 0
 
-        i = 0
-        while i < len(source_text):
-            match = re.search(r'\bstyle\s*{', source_text[i:])
+        while True:
+            match = block_pattern.search(source_text, last_index)
             if not match:
                 break
 
-            start_index = i + match.start()
-            brace_index = i + match.end() - 1
+            block_type = match.group(1)
+            start_index = match.start()
+            brace_index = match.end() - 1
 
+            # Append the text before the block
+            modified_source += source_text[last_index:start_index]
+
+            # Find the matching closing brace
             brace_depth = 1
             content_start = brace_index + 1
             content_end = -1
@@ -50,27 +45,32 @@ class UnifiedScanner:
                         break
 
             if content_end != -1:
-                modified_source += source_text[last_index:start_index]
-
                 block_content = source_text[content_start:content_end]
                 block_id = self._generate_id()
 
-                inline_styles, global_rules, style_usages, deleted_properties = parse_style_content(block_content)
+                if block_type == 'style':
+                    inline, global_rules, usages, deleted = parse_style_content(block_content)
+                    self.registry[block_id] = {
+                        'type': 'style',
+                        'inline': inline,
+                        'global': global_rules,
+                        'usages': usages,
+                        'deleted': deleted
+                    }
+                    modified_source += f'__style_ref__("{block_id}");'
 
-                self.registry[block_id] = {
-                    'type': 'style',
-                    'inline': inline_styles,
-                    'global': global_rules,
-                    'usages': style_usages,
-                    'deleted': deleted_properties
-                }
+                elif block_type == 'script':
+                    self.registry[block_id] = {
+                        'type': 'script',
+                        'content': block_content
+                    }
+                    modified_source += f'__script_ref__("{block_id}");'
 
-                modified_source += f'__style_ref__("{block_id}");'
-
-                i = content_end + 1
-                last_index = i
+                last_index = content_end + 1
             else:
-                i = brace_index + 1
+                # Unterminated block, just append the keyword and move on
+                modified_source += source_text[last_index:brace_index + 1]
+                last_index = brace_index + 1
 
         modified_source += source_text[last_index:]
 
