@@ -212,9 +212,6 @@ func (l *Lexer) GetReadPosition() int {
 }
 
 func (l *Lexer) ReadRawBlock() (string, error) {
-	// Calling this assumes the parser has just consumed a token and the lexer's
-	// current char `l.ch` is the character right after that token.
-	// We skip any whitespace to find the opening brace.
 	l.skipWhitespace()
 	if l.ch != '{' {
 		return "", fmt.Errorf("expected '{' to start raw block, got %q", string(l.ch))
@@ -242,6 +239,6 @@ func (l *Lexer) ReadRawBlock() (string, error) {
 	}
 
 	content := l.input[startPos:i]
-	l.SetReadPosition(i) // Position lexer to read the final '}'
+	l.SetReadPosition(i)
 	return content, nil
 }

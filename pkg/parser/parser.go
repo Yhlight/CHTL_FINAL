@@ -259,7 +259,8 @@ func (p *Parser) parseTemplateDefinitionStatement() ast.Statement {
 	if !p.expectPeek(lexer.LBRACE) {
 		return nil
 	}
-	stmt.Body = p.parseBlockStatement(true, nil)
+	inStyleBlock := stmt.TemplateType == "Style"
+	stmt.Body = p.parseBlockStatement(inStyleBlock, nil)
 	return stmt
 }
 
