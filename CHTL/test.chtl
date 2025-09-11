@@ -1,0 +1,32 @@
+// 这是一个CHTL测试文件
+html
+{
+    head
+    {
+        title
+        {
+            "CHTL测试页面"
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            id: main;
+            class: container;
+            
+            text
+            {
+                "欢迎使用CHTL！"
+            }
+            
+            style
+            {
+                width: 100px;
+                height: 200px;
+                background-color: red;
+            }
+        }
+    }
+}

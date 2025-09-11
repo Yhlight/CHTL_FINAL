@@ -1,0 +1,3 @@
+/workspace/CHTL/build_test/CMakeFiles/test_responsive_values.dir
+/workspace/CHTL/build_test/CMakeFiles/edit_cache.dir
+/workspace/CHTL/build_test/CMakeFiles/rebuild_cache.dir

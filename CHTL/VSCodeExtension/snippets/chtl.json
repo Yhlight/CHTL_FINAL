@@ -1,0 +1,218 @@
+{
+  "CHTL Basic Structure": {
+    "prefix": "chtl-basic",
+    "body": [
+      "use html5",
+      "",
+      "div: Hello World"
+    ],
+    "description": "Basic CHTL structure"
+  },
+  "CHTL Element": {
+    "prefix": "element",
+    "body": [
+      "${1:div}: ${2:content}"
+    ],
+    "description": "CHTL element"
+  },
+  "CHTL Element with Attributes": {
+    "prefix": "element-attr",
+    "body": [
+      "${1:div} {",
+      "    ${2:class}: ${3:container}",
+      "    ${4:id}: ${5:main}",
+      "    ${6:style}: ${7:color: red;}",
+      "}: ${8:content}"
+    ],
+    "description": "CHTL element with attributes"
+  },
+  "CHTL Template": {
+    "prefix": "template",
+    "body": [
+      "[Template] ${1:MyTemplate} {",
+      "    ${2:div}: ${3:Template content}",
+      "    ${4:p}: ${5:Template paragraph}",
+      "}"
+    ],
+    "description": "CHTL template"
+  },
+  "CHTL Custom": {
+    "prefix": "custom",
+    "body": [
+      "[Custom] ${1:MyCustom} {",
+      "    ${2:div}: ${3:Custom content}",
+      "    style: .${1:MyCustom} { ${4:color: blue;} }",
+      "}"
+    ],
+    "description": "CHTL custom element"
+  },
+  "CHTL Origin": {
+    "prefix": "origin",
+    "body": [
+      "[Origin] @${1|Html,Style,JavaScript|} ${2:<div>Raw content</div>}"
+    ],
+    "description": "CHTL origin embedding"
+  },
+  "CHTL Import": {
+    "prefix": "import",
+    "body": [
+      "[Import] ${1:MyModule} from '${2:path/to/module}'"
+    ],
+    "description": "CHTL import"
+  },
+  "CHTL Namespace": {
+    "prefix": "namespace",
+    "body": [
+      "[Namespace] ${1:MyNamespace} {",
+      "    ${2:div}: ${3:Namespaced content}",
+      "}"
+    ],
+    "description": "CHTL namespace"
+  },
+  "CHTL Configuration": {
+    "prefix": "config",
+    "body": [
+      "[Configuration] ${1:MyConfig} {",
+      "    INDEX_INITIAL_COUNT: ${2:10}",
+      "    DEBUG_MODE: ${3|true,false|}",
+      "    MINIFY_OUTPUT: ${4|true,false|}",
+      "}"
+    ],
+    "description": "CHTL configuration"
+  },
+  "CHTL Use Statement": {
+    "prefix": "use",
+    "body": [
+      "use ${1|html5,xhtml,html4|}"
+    ],
+    "description": "CHTL use statement"
+  },
+  "CHTL Style Block": {
+    "prefix": "style",
+    "body": [
+      "style: ${1:body { margin: 0; padding: 0; }}"
+    ],
+    "description": "CHTL style block"
+  },
+  "CHTL Script Block": {
+    "prefix": "script",
+    "body": [
+      "script: ${1:console.log('Hello World');}"
+    ],
+    "description": "CHTL script block"
+  },
+  "CHTL Text Block": {
+    "prefix": "text",
+    "body": [
+      "text: ${1:Plain text content}"
+    ],
+    "description": "CHTL text block"
+  },
+  "CHTL Conditional": {
+    "prefix": "conditional",
+    "body": [
+      "${1:div} {",
+      "    ${2:class}: ${3:container} ${4:? 'active' : 'inactive'}",
+      "}: ${5:content}"
+    ],
+    "description": "CHTL conditional attribute"
+  },
+  "CHTL Loop": {
+    "prefix": "loop",
+    "body": [
+      "${1:div} {",
+      "    ${2:class}: ${3:item}",
+      "}: ${4:${5:item} in ${6:items}}"
+    ],
+    "description": "CHTL loop"
+  },
+  "CHTL Function": {
+    "prefix": "function",
+    "body": [
+      "${1:functionName}(${2:param1}, ${3:param2}) {",
+      "    ${4:// function body}",
+      "}"
+    ],
+    "description": "CHTL function"
+  },
+  "CHTL Comment": {
+    "prefix": "comment",
+    "body": [
+      "// ${1:comment}"
+    ],
+    "description": "CHTL comment"
+  },
+  "CHTL Block Comment": {
+    "prefix": "block-comment",
+    "body": [
+      "/*",
+      " * ${1:comment}",
+      " */"
+    ],
+    "description": "CHTL block comment"
+  },
+  "CHTL HTML5 Document": {
+    "prefix": "html5-doc",
+    "body": [
+      "use html5",
+      "",
+      "html {",
+      "    head {",
+      "        title: ${1:Page Title}",
+      "        meta: charset=\"UTF-8\"",
+      "        meta: name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"",
+      "    }",
+      "    body {",
+      "        ${2:div}: ${3:Hello World}",
+      "    }",
+      "}"
+    ],
+    "description": "Complete HTML5 document structure"
+  },
+  "CHTL Form": {
+    "prefix": "form",
+    "body": [
+      "form {",
+      "    action: \"${1:/submit}\"",
+      "    method: \"${2|get,post|}\"",
+      "    ${3:div} {",
+      "        label {",
+      "            for: \"${4:input1}\"",
+      "        }: ${5:Label Text}",
+      "        input {",
+      "            type: \"${6|text,email,password,number|}\"",
+      "            id: \"${4:input1}\"",
+      "            name: \"${7:input1}\"",
+      "            placeholder: \"${8:Enter text}\"",
+      "        }",
+      "    }",
+      "    button {",
+      "        type: \"${9|submit,button|}\"",
+      "    }: ${10:Submit}",
+      "}"
+    ],
+    "description": "CHTL form structure"
+  },
+  "CHTL Table": {
+    "prefix": "table",
+    "body": [
+      "table {",
+      "    thead {",
+      "        tr {",
+      "            th: ${1:Header 1}",
+      "            th: ${2:Header 2}",
+      "            th: ${3:Header 3}",
+      "        }",
+      "    }",
+      "    tbody {",
+      "        tr {",
+      "            td: ${4:Cell 1}",
+      "            td: ${5:Cell 2}",
+      "            td: ${6:Cell 3}",
+      "        }",
+      "    }",
+      "}"
+    ],
+    "description": "CHTL table structure"
+  }
+}
