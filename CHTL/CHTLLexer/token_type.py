@@ -7,6 +7,7 @@ class TokenType(Enum):
     LBRACKET = auto()       # [
     RBRACKET = auto()       # ]
     AT = auto()             # @
+    COMMA = auto()          # ,
     COLON = auto()          # :
     EQUALS = auto()         # =
     SEMICOLON = auto()      # ;

@@ -74,9 +74,10 @@ class TemplateDefinitionNode(BaseNode):
 
 @dataclass
 class TemplateUsageNode(BaseNode):
-    """Represents @Style MyStyles;"""
+    """Represents @Style MyStyles; or @Style MyStyles { ... }"""
     template_type: str
     name: str
+    specialization_body: List[BaseNode] = None
 
 @dataclass
 class ImportNode(BaseNode):
@@ -84,3 +85,31 @@ class ImportNode(BaseNode):
     import_type: str # e.g., Chtl, Style
     path: str
     alias: str = None
+
+# --- Customization and Origin Nodes ---
+
+@dataclass
+class CustomDefinitionNode(BaseNode):
+    """Represents [Custom] @Style MyStyles { ... }"""
+    custom_type: str # e.g., "Style", "Element"
+    name: str
+    body: List[BaseNode] = field(default_factory=list)
+
+@dataclass
+class OriginNode(BaseNode):
+    """Represents an [Origin] block with raw content."""
+    origin_type: str # e.g., "Html", "Style"
+    name: str = None # Optional name for the block
+    content: str = ""
+
+@dataclass
+class DeleteNode(BaseNode):
+    """Represents a 'delete' operation inside a [Custom] block."""
+    targets: List[str] = field(default_factory=list)
+
+@dataclass
+class InsertNode(BaseNode):
+    """Represents an 'insert' operation inside a [Custom] block."""
+    position: str # e.g., "after", "before"
+    target_selector: str
+    body: List[BaseNode] = field(default_factory=list)
