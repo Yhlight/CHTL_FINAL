@@ -42,8 +42,11 @@ private:
     // Forward declare visitors for expression nodes
     class BinaryOpNode;
     class ConditionalExprNode;
+    class VariableUsageNode;
     EvaluatedValue VisitBinaryOp(const BinaryOpNode* node, const ElementNode* context);
     EvaluatedValue VisitConditionalExpr(const ConditionalExprNode* node, const ElementNode* context);
+    EvaluatedValue VisitVariableUsage(const VariableUsageNode* node, const ElementNode* context);
+    std::vector<Property> ExpandStyleTemplate(const std::string& templateName, const std::shared_ptr<StyleNode>& specialization);
 
     std::string escapeHTML(const std::string& data);
 

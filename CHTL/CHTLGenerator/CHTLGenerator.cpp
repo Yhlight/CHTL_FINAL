@@ -162,17 +162,28 @@ EvaluatedValue CHTLGenerator::VisitSelfPropertyReference(const SelfPropertyRefer
 }
 
 EvaluatedValue CHTLGenerator::VisitVariableUsage(const VariableUsageNode* node) {
+    if (node->IsSpecialized()) {
+        // In a specialization like `ThemeColor(primary = "blue")`, we just evaluate the specialized expression.
+        // This logic currently only supports one specialization at a time, which matches the parser.
+        auto const& [varName, varValue] = *node->GetSpecializations().begin();
+        return EvaluateExpression(varValue, nullptr);
+    }
+
+    // This is for simple usage like `ThemeColor(primary)`
     auto it = m_template_repo.find(node->GetGroupName());
     if (it == m_template_repo.end()) throw std::runtime_error("Undefined variable group used: " + node->GetGroupName());
+
     const auto* templateDef = it->second;
     if (templateDef->GetTemplateType() != TemplateType::Var) throw std::runtime_error("Template is not a variable group: " + node->GetGroupName());
+
     const auto* styleNode = static_cast<const StyleNode*>(templateDef->GetContent().front().get());
+
     for (const auto& prop : styleNode->GetProperties()) {
         if (prop.name == node->GetVariableName()) {
-            // Self-references inside a var template don't make sense, so context is null
             return EvaluateExpression(prop.value, nullptr);
         }
     }
+
     throw std::runtime_error("Undefined variable '" + node->GetVariableName() + "' in group '" + node->GetGroupName() + "'");
 }
 
@@ -187,41 +198,67 @@ void WriteEvaluatedValue(std::stringstream& ss, const EvaluatedValue& val) {
     else if (val.type == ValueType::String) ss << std::get<std::string>(val.value);
 }
 
-std::vector<Property> CHTLGenerator::ExpandStyleTemplate(const std::string& templateName) {
+std::vector<Property> CHTLGenerator::ExpandStyleTemplate(const std::string& templateName, const std::shared_ptr<StyleNode>& specialization) {
     auto it = m_template_repo.find(templateName);
-    if (it == m_template_repo.end()) {
-        throw std::runtime_error("Undefined style template used: " + templateName);
-    }
+    if (it == m_template_repo.end()) throw std::runtime_error("Undefined style template used: " + templateName);
+
     const auto* templateDef = it->second;
-    if (templateDef->GetTemplateType() != TemplateType::Style) {
-        throw std::runtime_error("Template is not a style template: " + templateName);
+    if (templateDef->GetTemplateType() != TemplateType::Style && templateDef->GetTemplateType() != TemplateType::Var) {
+        throw std::runtime_error("Template '" + templateName + "' is not a @Style or @Var template.");
     }
 
-    std::map<std::string, Property> final_properties;
     const auto* styleNode = static_cast<const StyleNode*>(templateDef->GetContent().front().get());
+    std::map<std::string, Property> final_properties;
 
-    // Process inherited templates first (base styles)
+    // Process inherited templates first
     for (const auto& prop : styleNode->GetProperties()) {
         if (prop.name == "__TEMPLATE_USAGE__") {
             const auto* usageNode = static_cast<const TemplateUsageNode*>(prop.value.get());
-            std::vector<Property> inherited_props = ExpandStyleTemplate(usageNode->GetTemplateName());
+            std::vector<Property> inherited_props = ExpandStyleTemplate(usageNode->GetTemplateName(), usageNode->GetSpecialization());
             for (const auto& inherited_prop : inherited_props) {
                 final_properties[inherited_prop.name] = inherited_prop;
             }
         }
     }
 
-    // Then, process the current template's properties, allowing them to override the base.
+    // Then add the template's own properties
     for (const auto& prop : styleNode->GetProperties()) {
         if (prop.name != "__TEMPLATE_USAGE__") {
             final_properties[prop.name] = prop;
         }
     }
 
-    std::vector<Property> result;
-    for (const auto& pair : final_properties) {
-        result.push_back(pair.second);
+    std::set<std::string> deleted_items;
+    // Now, apply specializations from the current usage site and check for deletions
+    if (specialization) {
+        for (const auto& spec_prop : specialization->GetProperties()) {
+            if (spec_prop.name == "__DELETE__") {
+                auto valueNode = std::dynamic_pointer_cast<StringLiteralNode>(spec_prop.value);
+                if (valueNode) {
+                    std::stringstream ss(valueNode->GetValue());
+                    std::string item;
+                    while(std::getline(ss, item, ',')) {
+                        deleted_items.insert(item);
+                    }
+                }
+            } else {
+                final_properties[spec_prop.name] = spec_prop;
+            }
+        }
     }
+
+    std::vector<Property> result;
+    for (auto const& [name, prop] : final_properties) {
+        if (deleted_items.count(name)) continue;
+        if (prop.value == nullptr) {
+            if (templateDef->IsCustom()) {
+                 throw std::runtime_error("Valueless property '" + name + "' from custom template '" + templateName + "' was not provided a value.");
+            }
+        } else {
+            result.push_back(prop);
+        }
+    }
+
     return result;
 }
 
@@ -233,7 +270,7 @@ void CHTLGenerator::ProcessStyleNodes(const ElementNode* node, StyleProcessingRe
             for (const auto& prop : styleNode->GetProperties()) {
                 if (prop.name == "__TEMPLATE_USAGE__") {
                     const auto* usageNode = static_cast<const TemplateUsageNode*>(prop.value.get());
-                    std::vector<Property> expanded_props = ExpandStyleTemplate(usageNode->GetTemplateName());
+                    std::vector<Property> expanded_props = ExpandStyleTemplate(usageNode->GetTemplateName(), usageNode->GetSpecialization());
                     result.inline_styles.insert(result.inline_styles.end(), expanded_props.begin(), expanded_props.end());
                 } else {
                     result.inline_styles.push_back(prop);

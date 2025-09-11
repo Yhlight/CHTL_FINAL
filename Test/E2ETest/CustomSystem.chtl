@@ -1,0 +1,39 @@
+// Test for the [Custom] System - Valueless Properties
+
+[Custom] @Style Button {
+    border: "1px solid black";
+    padding: 10px;
+    background-color, // valueless property
+    color;            // valueless property
+}
+
+// --- Now use the custom template ---
+
+div {
+    // Use the custom style, providing values
+    style {
+        @Style Button {
+            background-color: "green";
+            color: "white";
+        }
+    }
+    text { Button 1 }
+}
+
+div {
+    // Use the custom style again, but delete a property
+    style {
+        @Style Button {
+            background-color: "blue";
+            color: "white";
+            delete border;
+        }
+    }
+    text { Button 2 (No Border) }
+}
+
+p {
+    // Use a variable with specialization
+    color: Colors(primary = "red");
+    text { This text should be red. }
+}
