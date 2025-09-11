@@ -1,2 +1,2 @@
-/usr/bin/ar qc libdispatcher.a CMakeFiles/dispatcher.dir/CompilerDispatcher.cpp.o
+/usr/bin/ar qc libdispatcher.a CMakeFiles/dispatcher.dir/CompilerDispatcher.cpp.o CMakeFiles/dispatcher.dir/ImportVisitor.cpp.o
 /usr/bin/ranlib libdispatcher.a

@@ -1,7 +1,7 @@
-[Import] @Style from "./styles.css";
+[Import] @Style from "styles.css";
 
 [Configuration] {
-    DEBUG_MODE = true;
+    KEYWORD_DELETE = remove;
 }
 
 style {
@@ -39,7 +39,7 @@ html {
         }
 
         @Element Box {
-            delete div;
+            remove div;
         }
     }
 }

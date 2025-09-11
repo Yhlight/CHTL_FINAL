@@ -48,7 +48,20 @@ NodePtr Parser::parseConfiguration() {
     while(!check(TokenType::CloseBrace) && !isAtEnd()) {
         skipComments();
         if(check(TokenType::CloseBrace)) break;
-        node->settings.push_back(std::unique_ptr<PropertyNode>(static_cast<PropertyNode*>(parseProperty().release())));
+
+        const Token& key = consume(TokenType::Identifier, "Expect configuration key.");
+        consume(TokenType::Equals, "Expect '=' in configuration setting.");
+        const Token& value_token = advance();
+        // The value can be an identifier, or a keyword that is being used as a value.
+        // We'll just check that it's not a symbol.
+        if (value_token.type < TokenType::Identifier || value_token.type > TokenType::ConfigurationKeyword) {
+             throw error(value_token, "Configuration value must be an identifier-like token or a string literal.");
+        }
+        auto value_expr = std::make_unique<LiteralExprNode>(value_token);
+        auto prop_node = std::make_unique<PropertyNode>(key.value, std::move(value_expr));
+        node->settings.push_back(std::move(prop_node));
+
+        consume(TokenType::Semicolon, "Expect ';' after configuration setting.");
     }
     consume(TokenType::CloseBrace, "Expect '}' after configuration block.");
     return node;

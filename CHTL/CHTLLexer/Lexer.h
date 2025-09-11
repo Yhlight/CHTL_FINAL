@@ -3,13 +3,15 @@
 #include "Token.h"
 #include <string>
 #include <vector>
+#include "Context/ConfigurationContext.h"
 
 class Lexer {
 public:
-    Lexer(const std::string& source);
+    Lexer(const std::string& source, const ConfigurationContext& config);
     std::vector<Token> tokenize();
 
 private:
+    void buildKeywordMap();
     Token nextToken();
     char peek();
     char advance();
@@ -35,4 +37,7 @@ private:
     size_t current = 0;
     int line = 1;
     int column = 1;
+
+    const ConfigurationContext& config;
+    std::map<std::string, TokenType> keyword_map;
 };

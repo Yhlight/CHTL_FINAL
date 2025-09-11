@@ -130,6 +130,58 @@ chtl_compiler/fast:
 .PHONY : chtl_compiler/fast
 
 #=============================================================================
+# Target rules for targets named scanner
+
+# Build rule for target.
+scanner: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 scanner
+.PHONY : scanner
+
+# fast build rule for target.
+scanner/fast:
+	$(MAKE) $(MAKESILENT) -f Scanner/CMakeFiles/scanner.dir/build.make Scanner/CMakeFiles/scanner.dir/build
+.PHONY : scanner/fast
+
+#=============================================================================
+# Target rules for targets named loader
+
+# Build rule for target.
+loader: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 loader
+.PHONY : loader
+
+# fast build rule for target.
+loader/fast:
+	$(MAKE) $(MAKESILENT) -f Loader/CMakeFiles/loader.dir/build.make Loader/CMakeFiles/loader.dir/build
+.PHONY : loader/fast
+
+#=============================================================================
+# Target rules for targets named context
+
+# Build rule for target.
+context: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 context
+.PHONY : context
+
+# fast build rule for target.
+context/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/context.dir/build.make CHTL/CMakeFiles/context.dir/build
+.PHONY : context/fast
+
+#=============================================================================
+# Target rules for targets named chtl_util
+
+# Build rule for target.
+chtl_util: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 chtl_util
+.PHONY : chtl_util
+
+# fast build rule for target.
+chtl_util/fast:
+	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_util.dir/build.make CHTL/CMakeFiles/chtl_util.dir/build
+.PHONY : chtl_util/fast
+
+#=============================================================================
 # Target rules for targets named chtl_lexer
 
 # Build rule for target.
@@ -167,19 +219,6 @@ chtl_generator: cmake_check_build_system
 chtl_generator/fast:
 	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_generator.dir/build.make CHTL/CMakeFiles/chtl_generator.dir/build
 .PHONY : chtl_generator/fast
-
-#=============================================================================
-# Target rules for targets named chtl_util
-
-# Build rule for target.
-chtl_util: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 chtl_util
-.PHONY : chtl_util
-
-# fast build rule for target.
-chtl_util/fast:
-	$(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_util.dir/build.make CHTL/CMakeFiles/chtl_util.dir/build
-.PHONY : chtl_util/fast
 
 #=============================================================================
 # Target rules for targets named chtl_js_lexer
@@ -221,17 +260,17 @@ chtl_js_generator/fast:
 .PHONY : chtl_js_generator/fast
 
 #=============================================================================
-# Target rules for targets named scanner
+# Target rules for targets named dispatcher
 
 # Build rule for target.
-scanner: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 scanner
-.PHONY : scanner
+dispatcher: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 dispatcher
+.PHONY : dispatcher
 
 # fast build rule for target.
-scanner/fast:
-	$(MAKE) $(MAKESILENT) -f Scanner/CMakeFiles/scanner.dir/build.make Scanner/CMakeFiles/scanner.dir/build
-.PHONY : scanner/fast
+dispatcher/fast:
+	$(MAKE) $(MAKESILENT) -f CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make CompilerDispatcher/CMakeFiles/dispatcher.dir/build
+.PHONY : dispatcher/fast
 
 #=============================================================================
 # Target rules for targets named merger
@@ -245,19 +284,6 @@ merger: cmake_check_build_system
 merger/fast:
 	$(MAKE) $(MAKESILENT) -f CodeMerger/CMakeFiles/merger.dir/build.make CodeMerger/CMakeFiles/merger.dir/build
 .PHONY : merger/fast
-
-#=============================================================================
-# Target rules for targets named dispatcher
-
-# Build rule for target.
-dispatcher: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 dispatcher
-.PHONY : dispatcher
-
-# fast build rule for target.
-dispatcher/fast:
-	$(MAKE) $(MAKESILENT) -f CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make CompilerDispatcher/CMakeFiles/dispatcher.dir/build
-.PHONY : dispatcher/fast
 
 main.o: main.cpp.o
 .PHONY : main.o
@@ -299,7 +325,9 @@ help:
 	@echo "... chtl_lexer"
 	@echo "... chtl_parser"
 	@echo "... chtl_util"
+	@echo "... context"
 	@echo "... dispatcher"
+	@echo "... loader"
 	@echo "... merger"
 	@echo "... scanner"
 	@echo "... main.o"

@@ -117,6 +117,34 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+CHTL/CMakeFiles/context.dir/rule:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL/CMakeFiles/context.dir/rule
+.PHONY : CHTL/CMakeFiles/context.dir/rule
+
+# Convenience name for target.
+context: CHTL/CMakeFiles/context.dir/rule
+.PHONY : context
+
+# fast build rule for target.
+context/fast:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/context.dir/build.make CHTL/CMakeFiles/context.dir/build
+.PHONY : context/fast
+
+# Convenience name for target.
+CHTL/CMakeFiles/chtl_util.dir/rule:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL/CMakeFiles/chtl_util.dir/rule
+.PHONY : CHTL/CMakeFiles/chtl_util.dir/rule
+
+# Convenience name for target.
+chtl_util: CHTL/CMakeFiles/chtl_util.dir/rule
+.PHONY : chtl_util
+
+# fast build rule for target.
+chtl_util/fast:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_util.dir/build.make CHTL/CMakeFiles/chtl_util.dir/build
+.PHONY : chtl_util/fast
+
+# Convenience name for target.
 CHTL/CMakeFiles/chtl_lexer.dir/rule:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL/CMakeFiles/chtl_lexer.dir/rule
 .PHONY : CHTL/CMakeFiles/chtl_lexer.dir/rule
@@ -157,20 +185,6 @@ chtl_generator: CHTL/CMakeFiles/chtl_generator.dir/rule
 chtl_generator/fast:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_generator.dir/build.make CHTL/CMakeFiles/chtl_generator.dir/build
 .PHONY : chtl_generator/fast
-
-# Convenience name for target.
-CHTL/CMakeFiles/chtl_util.dir/rule:
-	cd /app/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CHTL/CMakeFiles/chtl_util.dir/rule
-.PHONY : CHTL/CMakeFiles/chtl_util.dir/rule
-
-# Convenience name for target.
-chtl_util: CHTL/CMakeFiles/chtl_util.dir/rule
-.PHONY : chtl_util
-
-# fast build rule for target.
-chtl_util/fast:
-	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_util.dir/build.make CHTL/CMakeFiles/chtl_util.dir/build
-.PHONY : chtl_util/fast
 
 CHTLGenerator/ExprGenerator.o: CHTLGenerator/ExprGenerator.cpp.o
 .PHONY : CHTLGenerator/ExprGenerator.o
@@ -316,6 +330,54 @@ CHTLUtil/ASTCloner.cpp.s:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/chtl_util.dir/build.make CHTL/CMakeFiles/chtl_util.dir/CHTLUtil/ASTCloner.cpp.s
 .PHONY : CHTLUtil/ASTCloner.cpp.s
 
+Context/ConfigurationContext.o: Context/ConfigurationContext.cpp.o
+.PHONY : Context/ConfigurationContext.o
+
+# target to build an object file
+Context/ConfigurationContext.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/context.dir/build.make CHTL/CMakeFiles/context.dir/Context/ConfigurationContext.cpp.o
+.PHONY : Context/ConfigurationContext.cpp.o
+
+Context/ConfigurationContext.i: Context/ConfigurationContext.cpp.i
+.PHONY : Context/ConfigurationContext.i
+
+# target to preprocess a source file
+Context/ConfigurationContext.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/context.dir/build.make CHTL/CMakeFiles/context.dir/Context/ConfigurationContext.cpp.i
+.PHONY : Context/ConfigurationContext.cpp.i
+
+Context/ConfigurationContext.s: Context/ConfigurationContext.cpp.s
+.PHONY : Context/ConfigurationContext.s
+
+# target to generate assembly for a file
+Context/ConfigurationContext.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/context.dir/build.make CHTL/CMakeFiles/context.dir/Context/ConfigurationContext.cpp.s
+.PHONY : Context/ConfigurationContext.cpp.s
+
+Context/ConfigurationVisitor.o: Context/ConfigurationVisitor.cpp.o
+.PHONY : Context/ConfigurationVisitor.o
+
+# target to build an object file
+Context/ConfigurationVisitor.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/context.dir/build.make CHTL/CMakeFiles/context.dir/Context/ConfigurationVisitor.cpp.o
+.PHONY : Context/ConfigurationVisitor.cpp.o
+
+Context/ConfigurationVisitor.i: Context/ConfigurationVisitor.cpp.i
+.PHONY : Context/ConfigurationVisitor.i
+
+# target to preprocess a source file
+Context/ConfigurationVisitor.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/context.dir/build.make CHTL/CMakeFiles/context.dir/Context/ConfigurationVisitor.cpp.i
+.PHONY : Context/ConfigurationVisitor.cpp.i
+
+Context/ConfigurationVisitor.s: Context/ConfigurationVisitor.cpp.s
+.PHONY : Context/ConfigurationVisitor.s
+
+# target to generate assembly for a file
+Context/ConfigurationVisitor.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CHTL/CMakeFiles/context.dir/build.make CHTL/CMakeFiles/context.dir/Context/ConfigurationVisitor.cpp.s
+.PHONY : Context/ConfigurationVisitor.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -328,6 +390,7 @@ help:
 	@echo "... chtl_lexer"
 	@echo "... chtl_parser"
 	@echo "... chtl_util"
+	@echo "... context"
 	@echo "... CHTLGenerator/ExprGenerator.o"
 	@echo "... CHTLGenerator/ExprGenerator.i"
 	@echo "... CHTLGenerator/ExprGenerator.s"
@@ -346,6 +409,12 @@ help:
 	@echo "... CHTLUtil/ASTCloner.o"
 	@echo "... CHTLUtil/ASTCloner.i"
 	@echo "... CHTLUtil/ASTCloner.s"
+	@echo "... Context/ConfigurationContext.o"
+	@echo "... Context/ConfigurationContext.i"
+	@echo "... Context/ConfigurationContext.s"
+	@echo "... Context/ConfigurationVisitor.o"
+	@echo "... Context/ConfigurationVisitor.i"
+	@echo "... Context/ConfigurationVisitor.s"
 .PHONY : help
 
 

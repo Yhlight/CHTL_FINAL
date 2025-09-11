@@ -18,22 +18,58 @@ CHTLJSNodePtr CHTLJSParser::parseStatement() {
     if (peek().type == CHTLJSTokenType::FileLoader) {
         return parseFileLoaderBlock();
     }
-    throw error(peek(), "Expect a statement (e.g., 'vir', 'fileloader').");
+    // Default to an expression statement
+    return parseExpressionStatement();
 }
+
+CHTLJSNodePtr CHTLJSParser::parseExpressionStatement() {
+    CHTLJSNodePtr expr = parseExpression();
+    consume(CHTLJSTokenType::Semicolon, "Expect ';' after expression.");
+    return expr;
+}
+
+CHTLJSNodePtr CHTLJSParser::parseExpression() {
+    CHTLJSNodePtr expr = parsePrimary();
+
+    while (match({CHTLJSTokenType::Dot})) {
+        expr = parseMethodCall(std::move(expr));
+    }
+
+    return expr;
+}
+
+CHTLJSNodePtr CHTLJSParser::parsePrimary() {
+    if (match({CHTLJSTokenType::DoubleCurlyOpen})) {
+        std::string selector_str;
+        while (peek().type != CHTLJSTokenType::DoubleCurlyClose && !isAtEnd()) {
+            selector_str += advance().value;
+        }
+        consume(CHTLJSTokenType::DoubleCurlyClose, "Expect '}}' after selector.");
+        return std::make_unique<EnhancedSelectorNode>(selector_str);
+    }
+    throw error(peek(), "Expect expression.");
+}
+
+CHTLJSNodePtr CHTLJSParser::parseMethodCall(CHTLJSNodePtr callee) {
+    const CHTLJSToken& methodName = consume(CHTLJSTokenType::Identifier, "Expect method name after '->'.");
+
+    CHTLJSNodePtr arguments;
+    if (methodName.value == "listen") {
+        arguments = parseListenBlock();
+    } else {
+        throw error(methodName, "Unsupported method call.");
+    }
+
+    return std::make_unique<MethodCallNode>(std::move(callee), methodName.value, std::move(arguments));
+}
+
 
 CHTLJSNodePtr CHTLJSParser::parseVirDeclaration() {
     consume(CHTLJSTokenType::Vir, "Expect 'vir' keyword.");
     const CHTLJSToken& name = consume(CHTLJSTokenType::Identifier, "Expect variable name.");
     consume(CHTLJSTokenType::Equals, "Expect '=' after variable name.");
 
-    CHTLJSNodePtr value;
-    if (peek().type == CHTLJSTokenType::Listen) {
-        value = parseListenBlock();
-    } else if (peek().type == CHTLJSTokenType::Animate) {
-        value = parseAnimateBlock();
-    } else {
-        throw error(peek(), "Unsupported value for 'vir' declaration.");
-    }
+    CHTLJSNodePtr value = parseExpression();
 
     consume(CHTLJSTokenType::Semicolon, "Expect ';' after variable declaration.");
     return std::make_unique<VirDeclNode>(name.value, std::move(value));

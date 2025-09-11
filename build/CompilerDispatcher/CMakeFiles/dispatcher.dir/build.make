@@ -83,17 +83,33 @@ CompilerDispatcher/CMakeFiles/dispatcher.dir/CompilerDispatcher.cpp.s: cmake_for
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/dispatcher.dir/CompilerDispatcher.cpp.s"
 	cd /app/build/CompilerDispatcher && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/CompilerDispatcher/CompilerDispatcher.cpp -o CMakeFiles/dispatcher.dir/CompilerDispatcher.cpp.s
 
+CompilerDispatcher/CMakeFiles/dispatcher.dir/ImportVisitor.cpp.o: CompilerDispatcher/CMakeFiles/dispatcher.dir/flags.make
+CompilerDispatcher/CMakeFiles/dispatcher.dir/ImportVisitor.cpp.o: /app/CompilerDispatcher/ImportVisitor.cpp
+CompilerDispatcher/CMakeFiles/dispatcher.dir/ImportVisitor.cpp.o: CompilerDispatcher/CMakeFiles/dispatcher.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CompilerDispatcher/CMakeFiles/dispatcher.dir/ImportVisitor.cpp.o"
+	cd /app/build/CompilerDispatcher && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CompilerDispatcher/CMakeFiles/dispatcher.dir/ImportVisitor.cpp.o -MF CMakeFiles/dispatcher.dir/ImportVisitor.cpp.o.d -o CMakeFiles/dispatcher.dir/ImportVisitor.cpp.o -c /app/CompilerDispatcher/ImportVisitor.cpp
+
+CompilerDispatcher/CMakeFiles/dispatcher.dir/ImportVisitor.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/dispatcher.dir/ImportVisitor.cpp.i"
+	cd /app/build/CompilerDispatcher && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/CompilerDispatcher/ImportVisitor.cpp > CMakeFiles/dispatcher.dir/ImportVisitor.cpp.i
+
+CompilerDispatcher/CMakeFiles/dispatcher.dir/ImportVisitor.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/dispatcher.dir/ImportVisitor.cpp.s"
+	cd /app/build/CompilerDispatcher && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/CompilerDispatcher/ImportVisitor.cpp -o CMakeFiles/dispatcher.dir/ImportVisitor.cpp.s
+
 # Object files for target dispatcher
 dispatcher_OBJECTS = \
-"CMakeFiles/dispatcher.dir/CompilerDispatcher.cpp.o"
+"CMakeFiles/dispatcher.dir/CompilerDispatcher.cpp.o" \
+"CMakeFiles/dispatcher.dir/ImportVisitor.cpp.o"
 
 # External object files for target dispatcher
 dispatcher_EXTERNAL_OBJECTS =
 
 CompilerDispatcher/libdispatcher.a: CompilerDispatcher/CMakeFiles/dispatcher.dir/CompilerDispatcher.cpp.o
+CompilerDispatcher/libdispatcher.a: CompilerDispatcher/CMakeFiles/dispatcher.dir/ImportVisitor.cpp.o
 CompilerDispatcher/libdispatcher.a: CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make
 CompilerDispatcher/libdispatcher.a: CompilerDispatcher/CMakeFiles/dispatcher.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX static library libdispatcher.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libdispatcher.a"
 	cd /app/build/CompilerDispatcher && $(CMAKE_COMMAND) -P CMakeFiles/dispatcher.dir/cmake_clean_target.cmake
 	cd /app/build/CompilerDispatcher && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/dispatcher.dir/link.txt --verbose=$(VERBOSE)
 

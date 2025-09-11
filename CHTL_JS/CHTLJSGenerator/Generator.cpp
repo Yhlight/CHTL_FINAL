@@ -101,3 +101,15 @@ void CHTLJSGenerator::visit(EnhancedSelectorNode* node) {
 void CHTLJSGenerator::visit(CHTLJSPropertyNode* node) {
     output << "  " << node->key << ": " << trim(node->value);
 }
+
+void CHTLJSGenerator::visit(MethodCallNode* node) {
+    if (node->methodName == "listen") {
+        if (auto* listenBlock = dynamic_cast<ListenNode*>(node->arguments.get())) {
+            for (const auto& handler : listenBlock->eventHandlers) {
+                // Generate `callee.addEventListener('event', callback);`
+                node->callee->accept(*this); // This will generate the selector
+                output << ".addEventListener('" << handler->key << "', " << trim(handler->value) << ");\n";
+            }
+        }
+    }
+}

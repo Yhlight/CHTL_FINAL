@@ -4,6 +4,6 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES =
 
-CXX_INCLUDES = -I/app/CompilerDispatcher -I/app/Scanner -I/app/CHTL -I/app/CHTL_JS
+CXX_INCLUDES = -I/app/CompilerDispatcher -I/app/Scanner -I/app/CHTL -I/app/CHTL_JS -I/app/Loader
 
 CXX_FLAGS = -std=gnu++17

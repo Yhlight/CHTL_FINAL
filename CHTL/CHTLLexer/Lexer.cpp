@@ -1,7 +1,36 @@
 #include "Lexer.h"
 #include <iostream>
 
-Lexer::Lexer(const std::string& source) : source(source) {}
+#include <iostream> // For debugging
+
+#include <iostream> // For debugging
+
+Lexer::Lexer(const std::string& source, const ConfigurationContext& config)
+    : source(source), config(config) {
+    buildKeywordMap();
+    // --- Debug Print ---
+    std::cout << "--- Lexer Keyword Map ---" << std::endl;
+    for(const auto& pair : keyword_map) {
+        std::cout << pair.first << " -> " << static_cast<int>(pair.second) << std::endl;
+    }
+    std::cout << "-------------------------" << std::endl;
+}
+
+void Lexer::buildKeywordMap() {
+    // This is tedious, but necessary for dynamic keywords.
+    // A more advanced solution might use reflection or a macro-based system.
+    keyword_map.clear(); // Clear any previous (e.g. default) config.
+    for (const auto& kw : config.getKeyword("KEYWORD_DELETE")) keyword_map[kw] = TokenType::DeleteKeyword;
+    for (const auto& kw : config.getKeyword("KEYWORD_INSERT")) keyword_map[kw] = TokenType::InsertKeyword;
+    for (const auto& kw : config.getKeyword("KEYWORD_FROM")) keyword_map[kw] = TokenType::FromKeyword;
+
+    // Bracketed keywords
+    for (const auto& kw : config.getKeyword("KEYWORD_TEMPLATE")) keyword_map[kw] = TokenType::TemplateKeyword;
+    for (const auto& kw : config.getKeyword("KEYWORD_CUSTOM")) keyword_map[kw] = TokenType::CustomKeyword;
+    for (const auto& kw : config.getKeyword("KEYWORD_IMPORT")) keyword_map[kw] = TokenType::ImportKeyword;
+    for (const auto& kw : config.getKeyword("KEYWORD_CONFIGURATION")) keyword_map[kw] = TokenType::ConfigurationKeyword;
+}
+
 
 std::vector<Token> Lexer::tokenize() {
     std::vector<Token> tokens;
@@ -25,8 +54,6 @@ Token Lexer::nextToken() {
 
     if (isAlpha(c)) return identifier();
     if (isDigit(c)) {
-        // For now, treat numbers as part of an identifier, e.g., "100px"
-        // The parser will handle validation.
         return identifier();
     }
 
@@ -36,21 +63,16 @@ Token Lexer::nextToken() {
         case '(': return makeToken(TokenType::OpenParen);
         case ')': return makeToken(TokenType::CloseParen);
         case '[':
-            if (source.compare(current, 9, "Template]") == 0) {
-                current += 9;
-                return makeToken(TokenType::TemplateKeyword);
-            }
-            if (source.compare(current, 7, "Custom]") == 0) {
-                current += 7;
-                return makeToken(TokenType::CustomKeyword);
-            }
-            if (source.compare(current, 7, "Import]") == 0) {
-                current += 7;
-                return makeToken(TokenType::ImportKeyword);
-            }
-            if (source.compare(current, 14, "Configuration]") == 0) {
-                current += 14;
-                return makeToken(TokenType::ConfigurationKeyword);
+            // Check for all configured bracketed keywords
+            for (const auto& pair : keyword_map) {
+                const std::string& kw = pair.first;
+                if (kw.front() == '[' && kw.back() == ']') {
+                    std::string inner = kw.substr(1, kw.length() - 2);
+                    if (source.compare(current, inner.length(), inner) == 0 && source[current + inner.length()] == ']') {
+                        current += inner.length() + 1;
+                        return makeToken(pair.second);
+                    }
+                }
             }
             return makeToken(TokenType::OpenBracket);
         case ']': return makeToken(TokenType::CloseBracket);
@@ -79,8 +101,6 @@ Token Lexer::nextToken() {
         case '-':
             if (peek() == '-') {
                 advance();
-                // It's a generator comment, but we'll treat it as a comment to be skipped for now.
-                // The parser can decide what to do with it. For now, we'll just create a token.
                 while(peek() != '\n' && !isAtEnd()) advance();
                 return makeToken(TokenType::GeneratorComment);
             }
@@ -101,8 +121,8 @@ Token Lexer::nextToken() {
                     advance();
                 }
                 if(isAtEnd()) return errorToken("Unterminated multi-line comment.");
-                advance(); // consume '*'
-                advance(); // consume '/'
+                advance();
+                advance();
                 return makeToken(TokenType::MultiLineComment);
             }
             return makeToken(TokenType::Slash);
@@ -112,7 +132,6 @@ Token Lexer::nextToken() {
             return stringLiteral(c);
 
         default:
-            // For unquoted literals that might not start with a letter
             if (!isspace(c)) return identifier();
             return errorToken("Unexpected character.");
     }
@@ -144,9 +163,10 @@ Token Lexer::identifier() {
     }
     std::string value = source.substr(start, current - start);
 
-    if (value == "delete") return makeToken(TokenType::DeleteKeyword, value);
-    if (value == "insert") return makeToken(TokenType::InsertKeyword, value);
-    if (value == "from") return makeToken(TokenType::FromKeyword, value);
+    auto it = keyword_map.find(value);
+    if (it != keyword_map.end()) {
+        return makeToken(it->second, value);
+    }
 
     return makeToken(TokenType::Identifier, value);
 }
@@ -164,9 +184,8 @@ Token Lexer::stringLiteral(char quote_type) {
         return errorToken("Unterminated string.");
     }
 
-    advance(); // The closing quote.
+    advance();
 
-    // Trim the surrounding quotes.
     std::string value = source.substr(start + 1, current - start - 2);
     return makeToken(TokenType::StringLiteral, value);
 }
@@ -198,9 +217,6 @@ bool Lexer::isDigit(char c) const {
 }
 
 bool Lexer::isIdentifierChar(char c) const {
-    // This is a broad definition to support things like `100px`, `my-class`, etc.
-    // It allows anything that is not a whitespace or a special symbol.
-    // We allow '-' in identifiers.
     return c != '\0' && !isspace(c) &&
            std::string("}{[]():;=@#.,+*/%&|?").find(c) == std::string::npos;
 }

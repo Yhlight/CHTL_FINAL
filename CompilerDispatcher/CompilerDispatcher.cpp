@@ -1,43 +1,43 @@
 #include "CompilerDispatcher.h"
-#include "UnifiedScanner.h"
-#include "CHTLLexer/Lexer.h"
-#include "CHTLParser/Parser.h"
+#include "ImportVisitor.h"
+#include "Loader.h"
 #include "CHTLGenerator/Generator.h"
-#include "CHTLJSLexer/Lexer.h"
-#include "CHTLJSParser/Parser.h"
 #include "CHTLJSGenerator/Generator.h"
 #include <sstream>
 
-CompilerDispatcher::CompilerDispatcher(const ScannedContent& content) : content(content) {}
+CompilerDispatcher::CompilerDispatcher(const NodeList& ast, const ConfigurationContext& config)
+    : ast(ast), config(config) {}
 
 CompilationResult CompilerDispatcher::dispatch() {
     CompilationResult result;
+    Loader loader;
 
-    // 1. Compile CHTL content
+    // 1. Find and process all imports
+    ImportVisitor import_visitor;
+    import_visitor.run(ast);
+    const auto& imports = import_visitor.getImports();
+
+    std::stringstream css_ss;
+    std::stringstream js_ss;
+
+    for (const auto* importNode : imports) {
+        if (importNode->import_type == "Style") {
+            css_ss << loader.readTextFile(importNode->path) << "\n";
+        } else if (importNode->import_type == "JavaScript") {
+            js_ss << loader.readTextFile(importNode->path) << "\n";
+        }
+    }
+    result.compiled_css = css_ss.str();
+    result.compiled_js = js_ss.str();
+
+
+    // 2. Generate the base HTML from the AST
     try {
-        Lexer chtl_lexer(content.chtl_content);
-        auto chtl_tokens = chtl_lexer.tokenize();
-        Parser chtl_parser(chtl_tokens);
-        auto chtl_ast = chtl_parser.parse();
         Generator chtl_generator;
-        result.base_html = chtl_generator.generate(chtl_ast);
+        result.base_html = chtl_generator.generate(ast);
     } catch (const std::exception& e) {
         result.base_html = "<!-- CHTL Compilation Failed: " + std::string(e.what()) + " -->";
     }
-
-    // 2. "Compile" CSS content
-    std::stringstream css_ss;
-    for (const auto& pair : content.css_blocks) {
-        css_ss << pair.second << "\n";
-    }
-    result.compiled_css = css_ss.str();
-
-    // 3. "Compile" JS content (for now, just concatenate)
-    std::stringstream js_ss;
-    for (const auto& pair : content.script_blocks) {
-        js_ss << pair.second << "\n";
-    }
-    result.compiled_js = js_ss.str();
 
     return result;
 }

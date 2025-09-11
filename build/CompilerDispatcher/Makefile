@@ -154,6 +154,30 @@ CompilerDispatcher.cpp.s:
 	cd /app/build && $(MAKE) $(MAKESILENT) -f CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make CompilerDispatcher/CMakeFiles/dispatcher.dir/CompilerDispatcher.cpp.s
 .PHONY : CompilerDispatcher.cpp.s
 
+ImportVisitor.o: ImportVisitor.cpp.o
+.PHONY : ImportVisitor.o
+
+# target to build an object file
+ImportVisitor.cpp.o:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make CompilerDispatcher/CMakeFiles/dispatcher.dir/ImportVisitor.cpp.o
+.PHONY : ImportVisitor.cpp.o
+
+ImportVisitor.i: ImportVisitor.cpp.i
+.PHONY : ImportVisitor.i
+
+# target to preprocess a source file
+ImportVisitor.cpp.i:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make CompilerDispatcher/CMakeFiles/dispatcher.dir/ImportVisitor.cpp.i
+.PHONY : ImportVisitor.cpp.i
+
+ImportVisitor.s: ImportVisitor.cpp.s
+.PHONY : ImportVisitor.s
+
+# target to generate assembly for a file
+ImportVisitor.cpp.s:
+	cd /app/build && $(MAKE) $(MAKESILENT) -f CompilerDispatcher/CMakeFiles/dispatcher.dir/build.make CompilerDispatcher/CMakeFiles/dispatcher.dir/ImportVisitor.cpp.s
+.PHONY : ImportVisitor.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -166,6 +190,9 @@ help:
 	@echo "... CompilerDispatcher.o"
 	@echo "... CompilerDispatcher.i"
 	@echo "... CompilerDispatcher.s"
+	@echo "... ImportVisitor.o"
+	@echo "... ImportVisitor.i"
+	@echo "... ImportVisitor.s"
 .PHONY : help
 
 

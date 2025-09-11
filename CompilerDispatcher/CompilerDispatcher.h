@@ -1,6 +1,7 @@
 #pragma once
 
-#include "UnifiedScanner.h"
+#include "Context/ConfigurationContext.h"
+#include "CHTLNode/Node.h"
 #include <string>
 #include <map>
 
@@ -12,9 +13,10 @@ struct CompilationResult {
 
 class CompilerDispatcher {
 public:
-    CompilerDispatcher(const ScannedContent& content);
+    CompilerDispatcher(const NodeList& ast, const ConfigurationContext& config);
     CompilationResult dispatch();
 
 private:
-    const ScannedContent& content;
+    const NodeList& ast;
+    const ConfigurationContext& config;
 };

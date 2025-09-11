@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcontext.a CMakeFiles/context.dir/Context/ConfigurationContext.cpp.o CMakeFiles/context.dir/Context/ConfigurationVisitor.cpp.o
+/usr/bin/ranlib libcontext.a

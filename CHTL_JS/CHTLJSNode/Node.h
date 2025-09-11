@@ -13,6 +13,7 @@ class AnimateNode;
 class VirDeclNode;
 class EnhancedSelectorNode;
 class CHTLJSPropertyNode;
+class MethodCallNode;
 class CHTLJSVisitor;
 
 // Base class for all CHTL JS AST nodes
@@ -35,6 +36,20 @@ public:
     virtual void visit(VirDeclNode* node) = 0;
     virtual void visit(EnhancedSelectorNode* node) = 0;
     virtual void visit(CHTLJSPropertyNode* node) = 0;
+    virtual void visit(MethodCallNode* node) = 0;
+};
+
+// Represents a method call like `{{box}}->listen { ... }`
+class MethodCallNode : public CHTLJSNode {
+public:
+    MethodCallNode(CHTLJSNodePtr callee, const std::string& methodName, CHTLJSNodePtr arguments)
+        : callee(std::move(callee)), methodName(methodName), arguments(std::move(arguments)) {}
+
+    void accept(CHTLJSVisitor& visitor) override { visitor.visit(this); }
+
+    CHTLJSNodePtr callee;
+    std::string methodName;
+    CHTLJSNodePtr arguments; // For now, a single argument which is the block
 };
 
 

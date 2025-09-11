@@ -92,25 +92,18 @@ chtl_compiler_EXTERNAL_OBJECTS =
 
 chtl_compiler: CMakeFiles/chtl_compiler.dir/main.cpp.o
 chtl_compiler: CMakeFiles/chtl_compiler.dir/build.make
-chtl_compiler: CHTL/libchtl_lexer.a
-chtl_compiler: CHTL/libchtl_parser.a
-chtl_compiler: CHTL/libchtl_generator.a
-chtl_compiler: CHTL/libchtl_util.a
-chtl_compiler: CHTL_JS/libchtl_js_lexer.a
-chtl_compiler: CHTL_JS/libchtl_js_parser.a
-chtl_compiler: CHTL_JS/libchtl_js_generator.a
-chtl_compiler: Scanner/libscanner.a
-chtl_compiler: CompilerDispatcher/libdispatcher.a
 chtl_compiler: CodeMerger/libmerger.a
 chtl_compiler: CompilerDispatcher/libdispatcher.a
+chtl_compiler: Scanner/libscanner.a
 chtl_compiler: CHTL/libchtl_parser.a
 chtl_compiler: CHTL/libchtl_lexer.a
+chtl_compiler: CHTL/libcontext.a
 chtl_compiler: CHTL/libchtl_generator.a
 chtl_compiler: CHTL/libchtl_util.a
 chtl_compiler: CHTL_JS/libchtl_js_parser.a
 chtl_compiler: CHTL_JS/libchtl_js_lexer.a
 chtl_compiler: CHTL_JS/libchtl_js_generator.a
-chtl_compiler: Scanner/libscanner.a
+chtl_compiler: Loader/libloader.a
 chtl_compiler: CMakeFiles/chtl_compiler.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable chtl_compiler"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/chtl_compiler.dir/link.txt --verbose=$(VERBOSE)

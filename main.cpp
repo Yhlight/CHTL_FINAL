@@ -3,9 +3,43 @@
 #include <fstream>
 #include <sstream>
 #include "Scanner/UnifiedScanner.h"
-#include "CHTLLexer/Lexer.h"
-#include "CHTLParser/Parser.h"
-#include "CHTLParser/ASTPrinter.h"
+#include "CHTL/CHTLLexer/Lexer.h"
+#include "CHTL/CHTLParser/Parser.h"
+#include "Context/ConfigurationContext.h"
+#include "CompilerDispatcher/CompilerDispatcher.h"
+#include "CodeMerger/CodeMerger.h"
+#include "CHTL_JS/CHTLJSLexer/Lexer.h"
+#include "CHTL_JS/CHTLJSParser/Parser.h"
+#include "CHTL_JS/CHTLJSGenerator/Generator.h"
+
+void testCHTLJS() {
+    std::cout << "\n--- Testing CHTL JS Generator ---\n";
+    std::string source = R"~(
+        {{my_button}}.listen {
+            click: () => { console.log("Button clicked!"); },
+            mouseenter: onMouseEnter
+        };
+    )~";
+
+    CHTLJSLexer lexer(source);
+    std::vector<CHTLJSToken> tokens = lexer.tokenize();
+
+    CHTLJSNodeList ast;
+    try {
+        CHTLJSParser parser(tokens);
+        ast = parser.parse();
+    } catch (const CHTLJSParser::ParseError& e) {
+        std::cerr << "Parser Error: " << e.what() << std::endl;
+        return;
+    }
+
+    CHTLJSGenerator generator;
+    std::string js_output = generator.generate(ast);
+    std::cout << js_output << std::endl;
+
+    std::cout << "-------------------------------\n";
+}
+
 
 std::string readFile(const std::string& path) {
     std::ifstream file(path);
@@ -18,35 +52,73 @@ std::string readFile(const std::string& path) {
     return buffer.str();
 }
 
+void populateConfigFromTokens(ConfigurationContext& config, const std::string& source) {
+    Lexer lexer_for_config(source, config);
+    auto tokens_for_config = lexer_for_config.tokenize();
+    for (size_t i = 0; i < tokens_for_config.size(); ++i) {
+        if (tokens_for_config[i].type == TokenType::ConfigurationKeyword) {
+            if (i + 1 < tokens_for_config.size() && tokens_for_config[i+1].type == TokenType::OpenBrace) {
+                i += 2;
+                while (i < tokens_for_config.size() && tokens_for_config[i].type != TokenType::CloseBrace) {
+                    if (tokens_for_config[i].type == TokenType::Identifier && i + 2 < tokens_for_config.size() && (tokens_for_config[i+1].type == TokenType::Equals)) {
+                        const std::string& key = tokens_for_config[i].value;
+                        const Token& valueToken = tokens_for_config[i+2];
+                        if (valueToken.type >= TokenType::Identifier && valueToken.type <= TokenType::ConfigurationKeyword) {
+                             if (key.rfind("KEYWORD_", 0) == 0) {
+                                config.clearKeyword(key);
+                                config.addKeyword(key, valueToken.value);
+                            } else {
+                                config.setString(key, valueToken.value);
+                            }
+                        }
+                        i += 3;
+                        if (i < tokens_for_config.size() && tokens_for_config[i].type == TokenType::Semicolon) i++;
+                    } else { i++; }
+                }
+            }
+        }
+    }
+}
+
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " <file>" << std::endl;
+        testCHTLJS();
         return 1;
     }
 
     std::string source = readFile(argv[1]);
 
-    // 1. Scan
+    // 1. Configuration Pass
+    ConfigurationContext config;
+    populateConfigFromTokens(config, source);
+
+    // 2. Main Compilation
     UnifiedScanner scanner(source);
     ScannedContent scanned_content = scanner.scan();
 
-    // 2. Lexing the CHTL part
-    Lexer lexer(scanned_content.chtl_content);
-    std::vector<Token> tokens = lexer.tokenize();
+    Lexer lexer(scanned_content.chtl_content, config);
+    auto tokens = lexer.tokenize();
 
-    // 3. Parsing
-    try {
-        Parser parser(tokens);
-        NodeList ast = parser.parse();
+    Parser parser(tokens);
+    NodeList ast = parser.parse();
 
-        // 4. Print AST for verification
-        ASTPrinter printer;
-        printer.print(ast);
+    // 3. Dispatch and Generate
+    CompilerDispatcher dispatcher(ast, config);
+    CompilationResult compilation_result = dispatcher.dispatch();
 
-    } catch (const Parser::ParseError& e) {
-        std::cerr << e.what() << std::endl;
-        return 1;
+    // 4. Add global blocks
+    for(const auto& pair : scanned_content.css_blocks) {
+        compilation_result.compiled_css += pair.second;
     }
+    for(const auto& pair : scanned_content.script_blocks) {
+        compilation_result.compiled_js += pair.second;
+    }
+
+    // 5. Merge
+    CodeMerger merger(compilation_result);
+    std::string final_html = merger.merge();
+
+    std::cout << final_html << std::endl;
 
     return 0;
 }

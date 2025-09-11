@@ -205,10 +205,13 @@ chtl_generator_LIB_DEPENDS:STATIC=general;chtl_util;
 chtl_js_parser_LIB_DEPENDS:STATIC=general;chtl_js_lexer;
 
 //Dependencies for the target
+chtl_lexer_LIB_DEPENDS:STATIC=general;context;
+
+//Dependencies for the target
 chtl_parser_LIB_DEPENDS:STATIC=general;chtl_lexer;
 
 //Dependencies for the target
-dispatcher_LIB_DEPENDS:STATIC=general;scanner;general;chtl_lexer;general;chtl_parser;general;chtl_generator;general;chtl_js_lexer;general;chtl_js_parser;general;chtl_js_generator;
+dispatcher_LIB_DEPENDS:STATIC=general;scanner;general;chtl_parser;general;chtl_generator;general;chtl_js_parser;general;chtl_js_generator;general;loader;
 
 //Dependencies for the target
 merger_LIB_DEPENDS:STATIC=general;dispatcher;
@@ -302,7 +305,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=7
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=8
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

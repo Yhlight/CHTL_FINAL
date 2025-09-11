@@ -24,7 +24,6 @@ enum class CHTLJSTokenType {
     Semicolon,          // ;
     Comma,              // ,
     Dot,                // .
-    Arrow,              // ->
     DoubleCurlyOpen,    // {{
     DoubleCurlyClose,   // }}
     Equals,             // =

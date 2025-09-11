@@ -18,6 +18,10 @@ public:
 
 private:
     CHTLJSNodePtr parseStatement();
+    CHTLJSNodePtr parseExpressionStatement();
+    CHTLJSNodePtr parseExpression();
+    CHTLJSNodePtr parsePrimary();
+    CHTLJSNodePtr parseMethodCall(CHTLJSNodePtr callee);
     CHTLJSNodePtr parseVirDeclaration();
     CHTLJSNodePtr parseListenBlock();
     CHTLJSNodePtr parseAnimateBlock();

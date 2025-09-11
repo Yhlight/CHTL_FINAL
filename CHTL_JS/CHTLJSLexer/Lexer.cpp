@@ -1,4 +1,5 @@
 #include "Lexer.h"
+#include <iostream>
 
 const std::map<std::string, CHTLJSTokenType> CHTLJSLexer::keywords = {
     {"fileloader", CHTLJSTokenType::FileLoader},
@@ -17,21 +18,21 @@ CHTLJSLexer::CHTLJSLexer(const std::string& source) : source(source) {}
 
 std::vector<CHTLJSToken> CHTLJSLexer::tokenize() {
     std::vector<CHTLJSToken> tokens;
-    CHTLJSToken token;
-    do {
-        token = nextToken();
-        tokens.push_back(token);
-    } while (token.type != CHTLJSTokenType::EndOfFile);
+    while (!isAtEnd()) {
+        tokens.push_back(nextToken());
+    }
+    tokens.push_back(makeToken(CHTLJSTokenType::EndOfFile, ""));
     return tokens;
 }
 
 CHTLJSToken CHTLJSLexer::nextToken() {
     skipWhitespace();
     start = current;
-
-    if (isAtEnd()) return makeToken(CHTLJSTokenType::EndOfFile);
+    if (isAtEnd()) return makeToken(CHTLJSTokenType::EndOfFile, "");
 
     char c = advance();
+
+    if (isDigit(c)) return number();
 
     switch (c) {
         case '{':
@@ -47,44 +48,28 @@ CHTLJSToken CHTLJSLexer::nextToken() {
         case ':': return makeToken(CHTLJSTokenType::Colon);
         case ';': return makeToken(CHTLJSTokenType::Semicolon);
         case ',': return makeToken(CHTLJSTokenType::Comma);
-        // case '.': return makeToken(CHTLJSTokenType::Dot); // Dot is part of identifiers now
+        case '.': return makeToken(CHTLJSTokenType::Dot);
         case '=':
             if (peek() == '>') { advance(); return makeToken(CHTLJSTokenType::FatArrow); }
             return makeToken(CHTLJSTokenType::Equals);
-        case '-':
-            if (peek() == '>') { advance(); return makeToken(CHTLJSTokenType::Arrow); }
-            break; // Fall through to handle as unexpected
         case '"':
         case '\'':
             return stringLiteral(c);
-        default:
-            if (isAlpha(c)) return identifier();
-            if (isDigit(c)) return number();
-            // Check for identifiers that don't start with alpha, like ./path
-            if (isIdentifierChar(c)) return identifier();
-            break;
+    }
+
+    if (isIdentifierChar(c)) {
+        // Backtrack to include the character we just read.
+        current--;
+        return identifier();
     }
 
     return errorToken("Unexpected character.");
 }
 
 void CHTLJSLexer::skipWhitespace() {
-    while (true) {
-        char c = peek();
-        switch (c) {
-            case ' ':
-            case '\r':
-            case '\t':
-                advance();
-                break;
-            case '\n':
-                line++;
-                column = 1;
-                advance();
-                break;
-            default:
-                return;
-        }
+    while (!isAtEnd() && isspace(peek())) {
+        if (peek() == '\n') line++;
+        advance();
     }
 }
 
@@ -101,15 +86,10 @@ CHTLJSToken CHTLJSLexer::identifier() {
 }
 
 CHTLJSToken CHTLJSLexer::number() {
-    while (isDigit(peek())) {
-        advance();
-    }
-    // Handle floating point
+    while (isDigit(peek())) advance();
     if (peek() == '.' && isDigit(source[current + 1])) {
-        advance(); // consume '.'
-        while (isDigit(peek())) {
-            advance();
-        }
+        advance();
+        while (isDigit(peek())) advance();
     }
     return makeToken(CHTLJSTokenType::NumberLiteral);
 }
@@ -120,10 +100,10 @@ CHTLJSToken CHTLJSLexer::stringLiteral(char opening_quote) {
         advance();
     }
     if (isAtEnd()) return errorToken("Unterminated string.");
-    advance(); // Closing quote
-    return makeToken(CHTLJSTokenType::StringLiteral);
+    advance();
+    std::string value = source.substr(start + 1, current - start - 2);
+    return makeToken(CHTLJSTokenType::StringLiteral, value);
 }
-
 
 CHTLJSToken CHTLJSLexer::makeToken(CHTLJSTokenType type) const {
     return makeToken(type, source.substr(start, current - start));
@@ -163,20 +143,6 @@ bool CHTLJSLexer::isDigit(char c) const {
 }
 
 bool CHTLJSLexer::isIdentifierChar(char c) const {
-    switch (c) {
-        case '{':
-        case '}':
-        case '(':
-        case ')':
-        case '[':
-        case ']':
-        case ':':
-        case ';':
-        case ',':
-        case '=':
-        case '\0':
-            return false;
-        default:
-            return !isspace(c);
-    }
+    return c != '\0' && !isspace(c) &&
+           std::string("}{()[]:;,=").find(c) == std::string::npos;
 }
