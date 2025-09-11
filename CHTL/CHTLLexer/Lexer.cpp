@@ -3,7 +3,8 @@
 
 // A map to check for keywords
 static std::map<std::string, TokenType> keywords = {
-    {"text", TokenType::TOKEN_TEXT}
+    {"text", TokenType::TOKEN_TEXT},
+    {"style", TokenType::TOKEN_STYLE}
 };
 
 Lexer::Lexer(const std::string& source) : source(source) {}
@@ -112,11 +113,11 @@ void Lexer::skipWhitespaceAndComments() {
 }
 
 Token Lexer::makeToken(TokenType type) {
-    return {type, source.substr(start, current - start), line};
+    return {type, source.substr(start, current - start), line, start};
 }
 
 Token Lexer::errorToken(const std::string& message) {
-    return {TokenType::TOKEN_ERROR, message, line};
+    return {TokenType::TOKEN_ERROR, message, line, start};
 }
 
 Token Lexer::stringLiteral() {

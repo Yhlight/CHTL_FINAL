@@ -27,6 +27,15 @@ void Generator::visit(ElementNode& node) {
         output += " " + attr.first + "=\"" + attr.second + "\"";
     }
 
+    // Append processed inline styles
+    if (!node.processedStyles.empty()) {
+        output += " style=\"";
+        for (const auto& style : node.processedStyles) {
+            output += style.first + ": " + style.second + ";";
+        }
+        output += "\"";
+    }
+
     if (node.children.empty()) {
         // Self-closing tag for simplicity, though not all tags work this way.
         // A more robust implementation would have a list of void elements.
@@ -51,4 +60,9 @@ void Generator::visit(TextNode& node) {
 void Generator::visit(CommentNode& node) {
     indent();
     output += "<!-- " + node.comment + " -->\n";
+}
+
+void Generator::visit(StyleNode& node) {
+    // StyleNodes should be processed and removed from the AST before generation.
+    // If one gets here, we simply ignore it.
 }

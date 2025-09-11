@@ -7,6 +7,7 @@
 enum class TokenType {
     // Keywords recognized by the parser
     TOKEN_TEXT,
+    TOKEN_STYLE,
 
     // Any other word-like sequence. The parser will determine if it's a
     // tag name, attribute name, or unquoted literal value.
@@ -34,12 +35,14 @@ struct Token {
     TokenType type;
     std::string lexeme;
     int line;
+    size_t offset; // The starting character offset in the source string
 };
 
 // Helper function for debugging
 inline std::string tokenTypeToString(TokenType type) {
     switch (type) {
         case TokenType::TOKEN_TEXT: return "TEXT";
+        case TokenType::TOKEN_STYLE: return "STYLE";
         case TokenType::TOKEN_IDENTIFIER: return "IDENTIFIER";
         case TokenType::TOKEN_LBRACE: return "LBRACE";
         case TokenType::TOKEN_RBRACE: return "RBRACE";

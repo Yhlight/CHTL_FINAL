@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o"
+  "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o.d"
   "CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o"
   "CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o.d"
   "CMakeFiles/chtl_compiler.dir/CHTL/CHTLLexer/Lexer.cpp.o"
@@ -7,6 +9,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o.d"
   "CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o"
   "CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o.d"
+  "CMakeFiles/chtl_compiler.dir/CHTL/LocalStyleParser/LocalStyleParser.cpp.o"
+  "CMakeFiles/chtl_compiler.dir/CHTL/LocalStyleParser/LocalStyleParser.cpp.o.d"
   "CMakeFiles/chtl_compiler.dir/CompilerDispatcher/CompilerDispatcher.cpp.o"
   "CMakeFiles/chtl_compiler.dir/CompilerDispatcher/CompilerDispatcher.cpp.o.d"
   "CMakeFiles/chtl_compiler.dir/Scanner/CHTLUnifiedScanner.cpp.o"

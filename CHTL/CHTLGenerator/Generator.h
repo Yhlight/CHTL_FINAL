@@ -14,6 +14,7 @@ public:
     void visit(class ElementNode& node) override;
     void visit(class TextNode& node) override;
     void visit(class CommentNode& node) override;
+    void visit(class StyleNode& node) override;
 
 private:
     std::string output;

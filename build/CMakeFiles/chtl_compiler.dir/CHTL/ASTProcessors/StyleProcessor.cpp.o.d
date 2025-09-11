@@ -1,6 +1,7 @@
-CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o: \
- /app/CHTL/CHTLNode/AstNodes.cpp /usr/include/stdc-predef.h \
- /app/CHTL/CHTLNode/ElementNode.h /app/CHTL/CHTLNode/BaseNode.h \
+CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o: \
+ /app/CHTL/ASTProcessors/StyleProcessor.cpp /usr/include/stdc-predef.h \
+ /app/CHTL/ASTProcessors/StyleProcessor.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/AstVisitor.h \
  /usr/include/c++/13/memory /usr/include/c++/13/bits/memoryfwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -114,8 +115,10 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o: \
  /usr/include/c++/13/bits/atomic_lockfree_defines.h \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
- /usr/include/c++/13/pstl/execution_defs.h /usr/include/c++/13/string \
- /usr/include/c++/13/bits/char_traits.h \
+ /usr/include/c++/13/pstl/execution_defs.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/ElementNode.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/BaseNode.h \
+ /usr/include/c++/13/string /usr/include/c++/13/bits/char_traits.h \
  /usr/include/c++/13/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
  /usr/include/c++/13/clocale /usr/include/locale.h \
@@ -158,6 +161,13 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o: \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h /app/CHTL/CHTLNode/TextNode.h \
- /app/CHTL/CHTLNode/CommentNode.h /app/CHTL/CHTLNode/StyleNode.h \
- /app/CHTL/CHTLNode/AstVisitor.h
+ /usr/include/c++/13/bits/erase_if.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/TextNode.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/CommentNode.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/StyleNode.h \
+ /app/CHTL/ASTProcessors/../LocalStyleParser/LocalStyleParser.h \
+ /usr/include/c++/13/algorithm /usr/include/c++/13/bits/stl_algo.h \
+ /usr/include/c++/13/bits/algorithmfwd.h \
+ /usr/include/c++/13/bits/stl_heap.h \
+ /usr/include/c++/13/bits/uniform_int_dist.h \
+ /usr/include/c++/13/pstl/glue_algorithm_defs.h

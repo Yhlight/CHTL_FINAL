@@ -5,6 +5,7 @@
 #include "CHTLLexer/Lexer.h"
 #include "CHTLParser/Parser.h"
 #include "CHTLGenerator/Generator.h"
+#include "ASTProcessors/StyleProcessor.h"
 
 // --- CHTL Compiler Invocation ---
 void invoke_chtl_compiler(const std::string& code) {
@@ -20,7 +21,7 @@ void invoke_chtl_compiler(const std::string& code) {
     // }
 
     // 2. Parser
-    Parser parser(tokens);
+    Parser parser(code, tokens);
     std::shared_ptr<BaseNode> ast_root = parser.parse();
 
     if (parser.hasError() || !ast_root) {
@@ -29,7 +30,11 @@ void invoke_chtl_compiler(const std::string& code) {
         return;
     }
 
-    // 3. Generator
+    // 3. AST Processing
+    StyleProcessor styleProcessor;
+    styleProcessor.process(ast_root);
+
+    // 4. Generator
     Generator generator;
     std::string html_output = generator.generate(ast_root);
 

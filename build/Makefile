@@ -142,6 +142,30 @@ run_compiler/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_compiler.dir/build.make CMakeFiles/run_compiler.dir/build
 .PHONY : run_compiler/fast
 
+CHTL/ASTProcessors/StyleProcessor.o: CHTL/ASTProcessors/StyleProcessor.cpp.o
+.PHONY : CHTL/ASTProcessors/StyleProcessor.o
+
+# target to build an object file
+CHTL/ASTProcessors/StyleProcessor.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o
+.PHONY : CHTL/ASTProcessors/StyleProcessor.cpp.o
+
+CHTL/ASTProcessors/StyleProcessor.i: CHTL/ASTProcessors/StyleProcessor.cpp.i
+.PHONY : CHTL/ASTProcessors/StyleProcessor.i
+
+# target to preprocess a source file
+CHTL/ASTProcessors/StyleProcessor.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.i
+.PHONY : CHTL/ASTProcessors/StyleProcessor.cpp.i
+
+CHTL/ASTProcessors/StyleProcessor.s: CHTL/ASTProcessors/StyleProcessor.cpp.s
+.PHONY : CHTL/ASTProcessors/StyleProcessor.s
+
+# target to generate assembly for a file
+CHTL/ASTProcessors/StyleProcessor.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.s
+.PHONY : CHTL/ASTProcessors/StyleProcessor.cpp.s
+
 CHTL/CHTLGenerator/Generator.o: CHTL/CHTLGenerator/Generator.cpp.o
 .PHONY : CHTL/CHTLGenerator/Generator.o
 
@@ -238,6 +262,30 @@ CHTL/CHTLParser/Parser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.s
 .PHONY : CHTL/CHTLParser/Parser.cpp.s
 
+CHTL/LocalStyleParser/LocalStyleParser.o: CHTL/LocalStyleParser/LocalStyleParser.cpp.o
+.PHONY : CHTL/LocalStyleParser/LocalStyleParser.o
+
+# target to build an object file
+CHTL/LocalStyleParser/LocalStyleParser.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/LocalStyleParser/LocalStyleParser.cpp.o
+.PHONY : CHTL/LocalStyleParser/LocalStyleParser.cpp.o
+
+CHTL/LocalStyleParser/LocalStyleParser.i: CHTL/LocalStyleParser/LocalStyleParser.cpp.i
+.PHONY : CHTL/LocalStyleParser/LocalStyleParser.i
+
+# target to preprocess a source file
+CHTL/LocalStyleParser/LocalStyleParser.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/LocalStyleParser/LocalStyleParser.cpp.i
+.PHONY : CHTL/LocalStyleParser/LocalStyleParser.cpp.i
+
+CHTL/LocalStyleParser/LocalStyleParser.s: CHTL/LocalStyleParser/LocalStyleParser.cpp.s
+.PHONY : CHTL/LocalStyleParser/LocalStyleParser.s
+
+# target to generate assembly for a file
+CHTL/LocalStyleParser/LocalStyleParser.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/LocalStyleParser/LocalStyleParser.cpp.s
+.PHONY : CHTL/LocalStyleParser/LocalStyleParser.cpp.s
+
 CompilerDispatcher/CompilerDispatcher.o: CompilerDispatcher/CompilerDispatcher.cpp.o
 .PHONY : CompilerDispatcher/CompilerDispatcher.o
 
@@ -320,6 +368,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... run_compiler"
 	@echo "... chtl_compiler"
+	@echo "... CHTL/ASTProcessors/StyleProcessor.o"
+	@echo "... CHTL/ASTProcessors/StyleProcessor.i"
+	@echo "... CHTL/ASTProcessors/StyleProcessor.s"
 	@echo "... CHTL/CHTLGenerator/Generator.o"
 	@echo "... CHTL/CHTLGenerator/Generator.i"
 	@echo "... CHTL/CHTLGenerator/Generator.s"
@@ -332,6 +383,9 @@ help:
 	@echo "... CHTL/CHTLParser/Parser.o"
 	@echo "... CHTL/CHTLParser/Parser.i"
 	@echo "... CHTL/CHTLParser/Parser.s"
+	@echo "... CHTL/LocalStyleParser/LocalStyleParser.o"
+	@echo "... CHTL/LocalStyleParser/LocalStyleParser.i"
+	@echo "... CHTL/LocalStyleParser/LocalStyleParser.s"
 	@echo "... CompilerDispatcher/CompilerDispatcher.o"
 	@echo "... CompilerDispatcher/CompilerDispatcher.i"
 	@echo "... CompilerDispatcher/CompilerDispatcher.s"

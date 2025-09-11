@@ -1,25 +1,25 @@
-// This is the main CHTL body
 html
 {
     head
     {
-        // Text nodes must be in a text block.
-        title {
-            text { "My CHTL Page" }
-        }
+        title { text { "Local Style Test" } }
     }
 
     body
     {
         div
         {
-            id: "main-container";
+            id: "styled-div";
 
-            // A nested text block.
-            text { "Hello, World!" }
+            style {
+                color: red;
+                font-size: 16px;
+                border: 1px solid black;
+            }
+
+            text { "This text should be styled." }
         }
 
-        // A generator comment.
-        -- This should appear as an HTML comment.
+        -- A comment for testing
     }
 }

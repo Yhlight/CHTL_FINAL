@@ -32,19 +32,18 @@ std::vector<CodeFragment> CHTLUnifiedScanner::scan(const std::string& source) {
     size_t pos = 0;
 
     while (pos < source.length()) {
-        size_t style_brace_pos, script_brace_pos;
-        size_t style_keyword_pos = find_valid_block(source, "style", pos, style_brace_pos);
+        size_t script_brace_pos;
+        // Temporarily disable style block splitting. The CHTL parser now handles local style blocks.
+        // size_t style_keyword_pos = find_valid_block(source, "style", pos, style_brace_pos);
+        size_t style_keyword_pos = std::string::npos;
         size_t script_keyword_pos = find_valid_block(source, "script", pos, script_brace_pos);
 
         size_t next_keyword_pos = std::string::npos;
         size_t next_brace_pos = std::string::npos;
         FragmentType block_type = FragmentType::CHTL;
 
-        if (style_keyword_pos != std::string::npos && (script_keyword_pos == std::string::npos || style_keyword_pos < script_keyword_pos)) {
-            next_keyword_pos = style_keyword_pos;
-            next_brace_pos = style_brace_pos;
-            block_type = FragmentType::CSS;
-        } else if (script_keyword_pos != std::string::npos) {
+        // The style block splitting is disabled, so we only check for script blocks.
+        if (script_keyword_pos != std::string::npos) {
             next_keyword_pos = script_keyword_pos;
             next_brace_pos = script_brace_pos;
             block_type = FragmentType::JS;

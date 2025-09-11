@@ -11,6 +11,7 @@ class ElementNode : public BaseNode {
 public:
     std::string tagName;
     std::map<std::string, std::string> attributes;
+    std::map<std::string, std::string> processedStyles;
     std::vector<std::shared_ptr<BaseNode>> children;
 
     void accept(AstVisitor& visitor) override;

@@ -178,4 +178,6 @@ CMakeFiles/chtl_compiler.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h \
  /app/CHTL/CHTLGenerator/Generator.h \
- /app/CHTL/CHTLGenerator/../CHTLNode/AstVisitor.h
+ /app/CHTL/CHTLGenerator/../CHTLNode/AstVisitor.h \
+ /app/CHTL/ASTProcessors/StyleProcessor.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/AstVisitor.h

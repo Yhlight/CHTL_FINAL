@@ -8,10 +8,12 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/app/CHTL/ASTProcessors/StyleProcessor.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o.d"
   "/app/CHTL/CHTLGenerator/Generator.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o.d"
   "/app/CHTL/CHTLLexer/Lexer.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLLexer/Lexer.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLLexer/Lexer.cpp.o.d"
   "/app/CHTL/CHTLNode/AstNodes.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o.d"
   "/app/CHTL/CHTLParser/Parser.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o.d"
+  "/app/CHTL/LocalStyleParser/LocalStyleParser.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/LocalStyleParser/LocalStyleParser.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/LocalStyleParser/LocalStyleParser.cpp.o.d"
   "/app/CompilerDispatcher/CompilerDispatcher.cpp" "CMakeFiles/chtl_compiler.dir/CompilerDispatcher/CompilerDispatcher.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CompilerDispatcher/CompilerDispatcher.cpp.o.d"
   "/app/Scanner/CHTLUnifiedScanner.cpp" "CMakeFiles/chtl_compiler.dir/Scanner/CHTLUnifiedScanner.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/Scanner/CHTLUnifiedScanner.cpp.o.d"
   "/app/main.cpp" "CMakeFiles/chtl_compiler.dir/main.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/main.cpp.o.d"

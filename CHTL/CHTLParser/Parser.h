@@ -5,10 +5,11 @@
 #include "../CHTLNode/BaseNode.h"
 #include <vector>
 #include <memory>
+#include <string>
 
 class Parser {
 public:
-    Parser(const std::vector<Token>& tokens);
+    Parser(const std::string& source, const std::vector<Token>& tokens);
 
     // The main entry point for parsing. Returns the root of the AST.
     std::shared_ptr<BaseNode> parse();
@@ -19,6 +20,7 @@ private:
     std::shared_ptr<BaseNode> declaration();
     std::shared_ptr<BaseNode> element();
     std::shared_ptr<BaseNode> textBlock();
+    std::shared_ptr<BaseNode> styleBlock();
     void attributes(std::shared_ptr<class ElementNode> node);
 
     // Token stream helper methods
@@ -31,6 +33,7 @@ private:
     Token consume(TokenType type, const std::string& message);
     void synchronize();
 
+    const std::string& source;
     const std::vector<Token>& tokens;
     size_t current = 0;
     bool hadError = false;

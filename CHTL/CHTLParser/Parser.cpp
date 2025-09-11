@@ -2,9 +2,10 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
+#include "../CHTLNode/StyleNode.h"
 #include <iostream>
 
-Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
+Parser::Parser(const std::string& source, const std::vector<Token>& tokens) : source(source), tokens(tokens) {}
 
 // The main entry point for parsing.
 // A CHTL fragment can be a list of declarations, so we'll wrap them in a root node.
@@ -34,6 +35,9 @@ std::shared_ptr<BaseNode> Parser::declaration() {
     }
     if (match({TokenType::TOKEN_TEXT})) {
         return textBlock();
+    }
+    if (match({TokenType::TOKEN_STYLE})) {
+        return styleBlock();
     }
     if (match({TokenType::TOKEN_GENERATOR_COMMENT})) {
         auto node = std::make_shared<CommentNode>();
@@ -112,6 +116,41 @@ std::shared_ptr<BaseNode> Parser::textBlock() {
     }
 
     consume(TokenType::TOKEN_RBRACE, "Expect '}' after text block.");
+    return node;
+}
+
+std::shared_ptr<BaseNode> Parser::styleBlock() {
+    Token lbrace = consume(TokenType::TOKEN_LBRACE, "Expect '{' after 'style' keyword.");
+
+    auto node = std::make_shared<StyleNode>();
+
+    // Find the matching RBRACE to determine the end of the block
+    int brace_count = 1;
+    size_t content_end_token_idx = current;
+    while(content_end_token_idx < tokens.size() && brace_count > 0) {
+        if(tokens[content_end_token_idx].type == TokenType::TOKEN_LBRACE) brace_count++;
+        if(tokens[content_end_token_idx].type == TokenType::TOKEN_RBRACE) brace_count--;
+        if (brace_count > 0) content_end_token_idx++;
+    }
+
+    if (brace_count > 0) {
+        std::cerr << "Parse Error on line " << peek().line << ": Unterminated style block." << std::endl;
+        hadError = true;
+        return nullptr;
+    }
+
+    // Capture the raw content using offsets from the original source string
+    size_t content_start_offset = lbrace.offset + 1;
+    size_t content_end_offset = tokens[content_end_token_idx].offset;
+
+    if (content_end_offset > content_start_offset) {
+        node->rawContent = source.substr(content_start_offset, content_end_offset - content_start_offset);
+    }
+
+    // Advance the parser state past the style block content
+    current = content_end_token_idx;
+
+    consume(TokenType::TOKEN_RBRACE, "Expect '}' after style block.");
     return node;
 }
 
