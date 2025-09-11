@@ -1,4 +1,5 @@
 #include "ExpressionParser.h"
+#include <stdexcept>
 
 ExpressionParser::ExpressionParser(const std::vector<Token>& tokens) : tokens(tokens) {}
 
@@ -6,9 +7,13 @@ ExpressionParser::ExpressionParser(const std::vector<Token>& tokens) : tokens(to
 
 int ExpressionParser::getPrecedence(TokenType type) {
     switch (type) {
+        case TokenType::GREATER:
+        case TokenType::LESS:
+            // TODO: Add >=, <=, ==, !=
+            return 1;
         case TokenType::PLUS:
         case TokenType::MINUS:
-            return 1;
+            return 2;
         case TokenType::STAR:
         case TokenType::SLASH:
         case TokenType::PERCENT:
@@ -63,10 +68,19 @@ std::unique_ptr<ExprNode> ExpressionParser::parseExpression(int precedence) {
     while (precedence < getPrecedence(peek().type)) {
         Token op = advance();
         int nextPrecedence = getPrecedence(op.type);
-        // For right-associative operators like power (**), we'd use `<` instead of `<=`
-        // For simplicity, we'll treat all as left-associative for now.
         std::unique_ptr<ExprNode> right = parseExpression(nextPrecedence);
         left = std::make_unique<BinaryOpExprNode>(std::move(left), op, std::move(right));
+    }
+
+    if (peek().type == TokenType::QUESTION) {
+        advance(); // consume '?'
+        auto thenBranch = parseExpression();
+        if (peek().type != TokenType::COLON) {
+            throw std::runtime_error("Expected ':' in conditional expression.");
+        }
+        advance(); // consume ':'
+        auto elseBranch = parseExpression();
+        left = std::make_unique<ConditionalExprNode>(std::move(left), std::move(thenBranch), std::move(elseBranch));
     }
 
     return left;

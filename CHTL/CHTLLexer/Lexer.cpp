@@ -5,6 +5,13 @@ const std::unordered_map<std::string, TokenType> Lexer::keywords = {
     {"text", TokenType::TEXT},
     {"style", TokenType::STYLE},
     {"script", TokenType::SCRIPT},
+    {"delete", TokenType::KEYWORD_DELETE},
+    {"insert", TokenType::KEYWORD_INSERT},
+    {"after", TokenType::KEYWORD_AFTER},
+    {"before", TokenType::KEYWORD_BEFORE},
+    {"replace", TokenType::KEYWORD_REPLACE},
+    {"from", TokenType::KEYWORD_FROM},
+    {"as", TokenType::KEYWORD_AS},
 };
 
 Lexer::Lexer(const std::string& source) : source(source) {}
@@ -109,7 +116,20 @@ void Lexer::scanToken() {
     switch (c) {
         case '{': addToken(TokenType::LEFT_BRACE); break;
         case '}': addToken(TokenType::RIGHT_BRACE); break;
-        case '[': addToken(TokenType::LEFT_BRACKET); break;
+
+        case '[': {
+            if (match('T') && match('e') && match('m') && match('p') && match('l') && match('a') && match('t') && match('e') && match(']')) {
+                addToken(TokenType::KEYWORD_TEMPLATE);
+            } else if (match('C') && match('u') && match('s') && match('t') && match('o') && match('m') && match(']')) {
+                addToken(TokenType::KEYWORD_CUSTOM);
+            } else {
+                // It was a false alarm, just a normal bracket.
+                // We need to reset the current pointer because match() advanced it.
+                current = start + 1;
+                addToken(TokenType::LEFT_BRACKET);
+            }
+            break;
+        }
         case ']': addToken(TokenType::RIGHT_BRACKET); break;
         case ':': addToken(TokenType::COLON); break;
         case ';': addToken(TokenType::SEMICOLON); break;

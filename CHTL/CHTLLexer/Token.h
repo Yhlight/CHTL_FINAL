@@ -44,6 +44,15 @@ enum class TokenType {
     TEXT,
     STYLE,
     SCRIPT,
+    KEYWORD_TEMPLATE,
+    KEYWORD_CUSTOM,
+    KEYWORD_DELETE,
+    KEYWORD_INSERT,
+    KEYWORD_AFTER,
+    KEYWORD_BEFORE,
+    KEYWORD_REPLACE,
+    KEYWORD_FROM,
+    KEYWORD_AS,
 
     // Special
     UNKNOWN,

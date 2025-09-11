@@ -6,6 +6,7 @@
 #include "../CHTLExpression/LiteralExprNode.h"
 #include "../CHTLExpression/BinaryOpExprNode.h"
 #include "../CHTLExpression/UnaryOpExprNode.h"
+#include "../CHTLExpression/ConditionalExprNode.h"
 #include <vector>
 #include <memory>
 #include <unordered_map>

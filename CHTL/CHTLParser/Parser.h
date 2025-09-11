@@ -5,16 +5,20 @@
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/StyleNode.h"
+#include "../CHTLNode/TemplateNode.h"
+#include "../CHTLNode/TemplateUsageNode.h"
+#include "../CHTLContext.h"
 #include <vector>
 #include <memory>
 
 class Parser {
 public:
-    explicit Parser(const std::vector<Token>& tokens);
-    std::unique_ptr<ElementNode> parse();
+    explicit Parser(const std::vector<Token>& tokens, CHTLContext& context);
+    std::vector<std::unique_ptr<BaseNode>> parse();
 
 private:
     const std::vector<Token>& tokens;
+    CHTLContext& context;
     int current = 0;
 
     // --- Parser Helper Methods ---
@@ -34,6 +38,8 @@ private:
     std::unique_ptr<TextNode> parseTextNode();
     std::unique_ptr<CommentNode> parseCommentNode();
     std::unique_ptr<StyleNode> parseStyleNode(ElementNode* parent);
+    std::unique_ptr<TemplateNode> parseTemplateDefinition();
+    std::unique_ptr<TemplateUsageNode> parseTemplateUsage();
 };
 
 #endif // CHTL_PARSER_H

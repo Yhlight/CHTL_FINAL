@@ -34,6 +34,15 @@ std::string Token::toString() const {
         case TokenType::TEXT: typeStr = "TEXT"; break;
         case TokenType::STYLE: typeStr = "STYLE"; break;
         case TokenType::SCRIPT: typeStr = "SCRIPT"; break;
+        case TokenType::KEYWORD_TEMPLATE: typeStr = "KEYWORD_TEMPLATE"; break;
+        case TokenType::KEYWORD_CUSTOM: typeStr = "KEYWORD_CUSTOM"; break;
+        case TokenType::KEYWORD_DELETE: typeStr = "KEYWORD_DELETE"; break;
+        case TokenType::KEYWORD_INSERT: typeStr = "KEYWORD_INSERT"; break;
+        case TokenType::KEYWORD_AFTER: typeStr = "KEYWORD_AFTER"; break;
+        case TokenType::KEYWORD_BEFORE: typeStr = "KEYWORD_BEFORE"; break;
+        case TokenType::KEYWORD_REPLACE: typeStr = "KEYWORD_REPLACE"; break;
+        case TokenType::KEYWORD_FROM: typeStr = "KEYWORD_FROM"; break;
+        case TokenType::KEYWORD_AS: typeStr = "KEYWORD_AS"; break;
         case TokenType::UNKNOWN: typeStr = "UNKNOWN"; break;
         case TokenType::END_OF_FILE: typeStr = "END_OF_FILE"; break;
         default: typeStr = "ERROR_UNKNOWN_TOKEN"; break;

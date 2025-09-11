@@ -1,0 +1,29 @@
+[Template] @Element Box
+{
+    div {
+        class: box;
+        text: "This is from a template.";
+    }
+}
+
+[Template] @Style DefaultText
+{
+    color: black;
+    font-size: 16px;
+}
+
+html {
+    body {
+        // Use the element template
+        @Element Box;
+
+        p {
+            style {
+                // Use the style template
+                @Style DefaultText;
+                font-weight: bold;
+            }
+            text: "This text uses a style template.";
+        }
+    }
+}

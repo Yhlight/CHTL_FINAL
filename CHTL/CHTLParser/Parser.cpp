@@ -7,16 +7,22 @@
 #include <iostream>
 #include <stdexcept>
 
-Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
+Parser::Parser(const std::vector<Token>& tokens, CHTLContext& context) : tokens(tokens), context(context) {}
 
 // --- Main Parsing Method ---
-std::unique_ptr<ElementNode> Parser::parse() {
-    // For now, we assume the file starts with a single root element, e.g. `html`.
-    if (peek().type == TokenType::IDENTIFIER) {
-        return parseElement();
+std::vector<std::unique_ptr<BaseNode>> Parser::parse() {
+    std::vector<std::unique_ptr<BaseNode>> topLevelNodes;
+    while (!isAtEnd()) {
+        if (peek().type == TokenType::KEYWORD_TEMPLATE) {
+            topLevelNodes.push_back(parseTemplateDefinition());
+        } else if (peek().type == TokenType::IDENTIFIER) {
+            topLevelNodes.push_back(parseElement());
+        } else {
+            // Skip unknown top-level tokens for now
+            advance();
+        }
     }
-    // A more robust parser might handle multiple top-level nodes or fragments.
-    return nullptr;
+    return topLevelNodes;
 }
 
 // --- Grammar Parsing Methods ---
@@ -49,6 +55,8 @@ std::unique_ptr<ElementNode> Parser::parseElement() {
             element->addChild(parseStyleNode(element.get()));
         } else if (peek().type == TokenType::IDENTIFIER && (peekNext().type == TokenType::COLON || peekNext().type == TokenType::EQUAL)) {
             parseAttribute(element.get());
+        } else if (peek().type == TokenType::AT) {
+            element->addChild(parseTemplateUsage());
         } else if (peek().type == TokenType::GEN_COMMENT) {
             element->addChild(parseCommentNode());
         } else {
@@ -136,6 +144,86 @@ std::unique_ptr<CommentNode> Parser::parseCommentNode() {
     return std::make_unique<CommentNode>(commentContent);
 }
 
+std::unique_ptr<TemplateUsageNode> Parser::parseTemplateUsage() {
+    advance(); // consume '@'
+    Token typeToken = advance(); // e.g., 'Style', 'Element'
+    Token nameToken = advance(); // e.g., 'DefaultText'
+
+    TemplateType type;
+    if (typeToken.lexeme == "Style") type = TemplateType::STYLE;
+    else if (typeToken.lexeme == "Element") type = TemplateType::ELEMENT;
+    else if (typeToken.lexeme == "Var") type = TemplateType::VAR;
+    else throw std::runtime_error("Unknown template type: " + typeToken.lexeme);
+
+    auto usageNode = std::make_unique<TemplateUsageNode>(type, nameToken.lexeme);
+
+    // TODO: Parse specializations like { delete ... }
+
+    match({TokenType::SEMICOLON});
+    return usageNode;
+}
+
+std::unique_ptr<TemplateNode> Parser::parseTemplateDefinition() {
+    advance(); // consume '[Template]'
+    if (!match({TokenType::AT})) throw std::runtime_error("Expected '@' after [Template]");
+
+    Token typeToken = advance();
+    Token nameToken = advance();
+
+    TemplateType type;
+    if (typeToken.lexeme == "Style") type = TemplateType::STYLE;
+    else if (typeToken.lexeme == "Element") type = TemplateType::ELEMENT;
+    else if (typeToken.lexeme == "Var") type = TemplateType::VAR;
+    else throw std::runtime_error("Unknown template type: " + typeToken.lexeme);
+
+    auto templateNode = std::make_unique<TemplateNode>(type, nameToken.lexeme);
+
+    if (!match({TokenType::LEFT_BRACE})) throw std::runtime_error("Expected '{' for template definition");
+
+    // The body parsing depends on the template type.
+    if (type == TemplateType::ELEMENT) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            templateNode->addChild(parseElement());
+        }
+    } else if (type == TemplateType::STYLE) {
+        // A style template contains declarations and rules, just like a style block.
+        // We can't call parseStyleNode because that expects a `{` which we already consumed.
+        // So we replicate the inner logic of parseStyleNode here.
+        // This is a simplification. A better refactoring would be to have a
+        // `parseStyleBody` method that both can call.
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            // Simplified: for now, only parsing declarations in style templates
+            auto declNode = std::make_unique<DeclarationNode>(advance().lexeme); // property
+            match({TokenType::COLON});
+            while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                declNode->valueTokens.push_back(advance());
+            }
+            match({TokenType::SEMICOLON});
+            templateNode->addChild(std::move(declNode));
+        }
+    } else if (type == TemplateType::VAR) {
+        // Var templates contain key-value pairs, which are like declarations.
+         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            auto declNode = std::make_unique<DeclarationNode>(advance().lexeme); // var name
+            match({TokenType::COLON});
+            while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                declNode->valueTokens.push_back(advance());
+            }
+            match({TokenType::SEMICOLON});
+            templateNode->addChild(std::move(declNode));
+        }
+    }
+
+    if (!match({TokenType::RIGHT_BRACE})) throw std::runtime_error("Expected '}' to close template definition");
+
+    // Add to context
+    if (type == TemplateType::STYLE) context.styleTemplates[templateNode->name] = templateNode.get();
+    else if (type == TemplateType::ELEMENT) context.elementTemplates[templateNode->name] = templateNode.get();
+    else if (type == TemplateType::VAR) context.varTemplates[templateNode->name] = templateNode.get();
+
+    return templateNode;
+}
+
 std::unique_ptr<StyleNode> Parser::parseStyleNode(ElementNode* parent) {
     auto styleNode = std::make_unique<StyleNode>();
     if (!match({TokenType::LEFT_BRACE})) {
@@ -183,6 +271,8 @@ std::unique_ptr<StyleNode> Parser::parseStyleNode(ElementNode* parent) {
             }
             match({TokenType::RIGHT_BRACE});
             styleNode->addChild(std::move(ruleNode));
+        } else if (peek().type == TokenType::AT) {
+            styleNode->addChild(parseTemplateUsage());
         } else {
             // It's a DeclarationNode
             auto declNode = std::make_unique<DeclarationNode>(advance().lexeme); // property
