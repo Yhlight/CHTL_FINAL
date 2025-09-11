@@ -335,8 +335,35 @@ std::string CHTLJSGenerator::generateTryStatement(std::shared_ptr<CHTLJSBaseNode
 std::string CHTLJSGenerator::generateCatchStatement(std::shared_ptr<CHTLJSBaseNode> statement) { return ""; }
 std::string CHTLJSGenerator::generateFinallyStatement(std::shared_ptr<CHTLJSBaseNode> statement) { return ""; }
 std::string CHTLJSGenerator::generateTernaryExpression(std::shared_ptr<CHTLJSBaseNode> expression) { return ""; }
-std::string CHTLJSGenerator::generateCallExpression(std::shared_ptr<CHTLJSBaseNode> expression) { return ""; }
-std::string CHTLJSGenerator::generateMemberExpression(std::shared_ptr<CHTLJSBaseNode> expression) { return ""; }
+std::string CHTLJSGenerator::generateCallExpression(std::shared_ptr<CHTLJSBaseNode> expression) {
+    auto children = expression->getChildren();
+    if (children.empty()) return "";
+    std::string callee = generateExpression(children[0]);
+    std::ostringstream oss;
+    oss << callee << "(";
+    bool first = true;
+    for (size_t i = 1; i < children.size(); ++i) {
+        if (!first) oss << ", ";
+        oss << generateExpression(children[i]);
+        first = false;
+    }
+    oss << ")";
+    return oss.str();
+}
+std::string CHTLJSGenerator::generateMemberExpression(std::shared_ptr<CHTLJSBaseNode> expression) {
+    auto children = expression->getChildren();
+    if (children.size() != 2) return "";
+    std::string object = generateExpression(children[0]);
+    std::string property = generateExpression(children[1]);
+    // 去掉可能的引号
+    if (!property.empty() && property.front()=='"' && property.back()=='"') {
+        property = property.substr(1, property.size()-2);
+    }
+    if (!property.empty() && property.front()=='\'' && property.back()=='\'') {
+        property = property.substr(1, property.size()-2);
+    }
+    return object + "." + property;
+}
 std::string CHTLJSGenerator::generateArrayExpression(std::shared_ptr<CHTLJSBaseNode> expression) { return ""; }
 std::string CHTLJSGenerator::generateObjectExpression(std::shared_ptr<CHTLJSBaseNode> expression) { return ""; }
 std::string CHTLJSGenerator::generateFunctionExpression(std::shared_ptr<CHTLJSBaseNode> expression) { return ""; }
@@ -350,10 +377,58 @@ std::string CHTLJSGenerator::generateNamespaceDeclaration(std::shared_ptr<CHTLJS
 std::string CHTLJSGenerator::generateModuleDeclaration(std::shared_ptr<CHTLJSBaseNode> declaration) { return ""; }
 std::string CHTLJSGenerator::generateImportDeclaration(std::shared_ptr<CHTLJSBaseNode> declaration) { return ""; }
 std::string CHTLJSGenerator::generateExportDeclaration(std::shared_ptr<CHTLJSBaseNode> declaration) { return ""; }
-std::string CHTLJSGenerator::generateDelegateExpression(std::shared_ptr<CHTLJSBaseNode> delegate) { return ""; }
-std::string CHTLJSGenerator::generateAnimateExpression(std::shared_ptr<CHTLJSBaseNode> animate) { return ""; }
-std::string CHTLJSGenerator::generateRouterExpression(std::shared_ptr<CHTLJSBaseNode> router) { return ""; }
-std::string CHTLJSGenerator::generateFileloaderExpression(std::shared_ptr<CHTLJSBaseNode> fileloader) { return ""; }
+std::string CHTLJSGenerator::generateDelegateExpression(std::shared_ptr<CHTLJSBaseNode> delegate) {
+    // 期望children为若干个对象: attr selector,event; child[0] 为handler表达式
+    std::ostringstream oss;
+    auto children = delegate->getChildren();
+    for (const auto& item : children) {
+        if (!item) continue;
+        std::string selector = item->getAttribute("selector");
+        std::string event = item->getAttribute("event");
+        std::string handler = item->getChildren().empty() ? "" : generateExpression(item->getChildren()[0]);
+        if (selector.empty() || event.empty() || handler.empty()) continue;
+        // selector 格式来自lexer原始 {{...}}，这里简单替换花括号
+        selector = std::regex_replace(selector, std::regex("^\\{\\{"), "");
+        selector = std::regex_replace(selector, std::regex("\\}\\}$"), "");
+        oss << "document.addEventListener('" << event << "', function(e){ if (e.target && e.target.matches('" << selector
+            << "')) { (" << handler << ")(e); }});\n";
+    }
+    return oss.str();
+}
+std::string CHTLJSGenerator::generateAnimateExpression(std::shared_ptr<CHTLJSBaseNode> animate) {
+    // 简化输出：生成一个requestAnimationFrame包装，开发者自定义begin/when/end在配置里，这里直接注释占位
+    std::ostringstream oss;
+    oss << "// animate block\n";
+    auto children = animate->getChildren();
+    for (const auto& anim : children) {
+        std::string target = anim->getAttribute("target");
+        target = std::regex_replace(target, std::regex("^\\{\\{"), "");
+        target = std::regex_replace(target, std::regex("\\}\\}$"), "");
+        oss << "// target: " << target << "\n";
+    }
+    return oss.str();
+}
+std::string CHTLJSGenerator::generateRouterExpression(std::shared_ptr<CHTLJSBaseNode> router) {
+    std::ostringstream oss;
+    oss << "// router configuration\n";
+    auto routes = router->getChildren();
+    for (const auto& route : routes) {
+        std::string path = route->getAttribute("path");
+        std::string handler = route->getChildren().empty() ? "" : generateExpression(route->getChildren()[0]);
+        if (!path.empty() && !handler.empty()) {
+            // 去掉可能的引号
+            if (path.size()>=2 && ((path.front()=='"' && path.back()=='"') || (path.front()=='\'' && path.back()=='\''))) {
+                path = path.substr(1, path.size()-2);
+            }
+            oss << "// route " << path << " -> " << handler << "\n";
+        }
+    }
+    return oss.str();
+}
+std::string CHTLJSGenerator::generateFileloaderExpression(std::shared_ptr<CHTLJSBaseNode> fileloader) {
+    // 以函数调用形式输出
+    return generateCallExpression(fileloader) + ";";
+}
 std::string CHTLJSGenerator::generateDeclarationSyntax(std::shared_ptr<CHTLJSBaseNode> declaration) { return ""; }
 std::string CHTLJSGenerator::generateKeyValuePairs(std::shared_ptr<CHTLJSBaseNode> pairs) { return ""; }
 std::string CHTLJSGenerator::generateUnorderedPairs(std::shared_ptr<CHTLJSBaseNode> pairs) { return ""; }
