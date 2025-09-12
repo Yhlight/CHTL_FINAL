@@ -1,0 +1,22 @@
+#ifndef CHTL_PARSER_CONTEXT_H
+#define CHTL_PARSER_CONTEXT_H
+
+#include "../CHTLNode/StyleTemplateNode.h"
+#include "../CHTLNode/ElementTemplateNode.h"
+#include "../CHTLNode/VarTemplateNode.h"
+#include <string>
+#include <memory>
+#include <unordered_map>
+
+namespace CHTL {
+
+// Holds the shared state between parsers when handling imports.
+struct ParserContext {
+    std::unordered_map<std::string, std::shared_ptr<StyleTemplateNode>> style_templates_;
+    std::unordered_map<std::string, std::shared_ptr<ElementTemplateNode>> element_templates_;
+    std::unordered_map<std::string, std::shared_ptr<VarTemplateNode>> var_templates_;
+};
+
+} // namespace CHTL
+
+#endif // CHTL_PARSER_CONTEXT_H

@@ -23,18 +23,16 @@ int main(int argc, char* argv[]) {
     buffer << file.rdbuf();
     std::string source = buffer.str();
 
-    // 1. Loader and initial Lexer
+    // 1. Setup compilation context
     CHTL::CHTLLoader loader;
+    auto context = std::make_shared<CHTL::ParserContext>();
+
+    // 2. Lex initial file
     CHTL::CHTLLexer lexer(source);
     std::vector<CHTL::Token> tokens = lexer.scanTokens();
 
-    // Optional: Print tokens for debugging
-    // for (const auto& token : tokens) {
-    //     std::cout << "Token Type: " << static_cast<int>(token.type) << "\tLexeme: '" << token.lexeme << "'\tLine: " << token.line << std::endl;
-    // }
-
-    // 2. Parser
-    CHTL::CHTLParser parser(tokens, loader, argv[1]);
+    // 3. Parse all files (starting with the main one)
+    CHTL::CHTLParser parser(tokens, loader, argv[1], context);
     std::unique_ptr<CHTL::RootNode> ast = parser.parse();
 
     // 3. Generator

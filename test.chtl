@@ -1,7 +1,15 @@
-[Import] @Chtl from "definitions.chtl";
+[Import] @Chtl from "components.chtl";
+[Import] @Chtl from "defaults.chtl";
 
 html {
     body {
-        @Element MyCard;
+        @Element Card from components;
+
+        p {
+            style {
+                @Style DefaultText from defaults;
+            }
+            text { "Hello, Namespaces!" }
+        }
     }
 }
