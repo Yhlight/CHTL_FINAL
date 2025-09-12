@@ -1,0 +1,51 @@
+Start testing: Sep 12 16:05 UTC
+----------------------------------------------------------
+Unable to find executable: /workspace/build/bin/chtl_test
+1/3 Testing: UnifiedScannerTest
+1/3 Test: UnifiedScannerTest
+Command: "" "--gtest_filter=UnifiedScannerTest.*"
+Directory: /workspace/build/test
+"UnifiedScannerTest" start time: 
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"UnifiedScannerTest" end time: Sep 12 16:05 UTC
+"UnifiedScannerTest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+Unable to find executable: /workspace/build/bin/chtl_test
+2/3 Testing: CHTLLexerTest
+2/3 Test: CHTLLexerTest
+Command: "" "--gtest_filter=CHTLLexerTest.*"
+Directory: /workspace/build/test
+"CHTLLexerTest" start time: 
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"CHTLLexerTest" end time: Sep 12 16:05 UTC
+"CHTLLexerTest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+Unable to find executable: /workspace/build/bin/chtl_test
+3/3 Testing: CHTLParserTest
+3/3 Test: CHTLParserTest
+Command: "" "--gtest_filter=CHTLParserTest.*"
+Directory: /workspace/build/test
+"CHTLParserTest" start time: 
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"CHTLParserTest" end time: Sep 12 16:05 UTC
+"CHTLParserTest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 12 16:05 UTC
