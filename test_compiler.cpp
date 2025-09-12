@@ -16,6 +16,8 @@
 #include "CHTL/ProjectWorkflow.h"
 #include "CHTL/SyntaxBoundaries.h"
 #include "CHTL/CJMODAPI.h"
+#include "CHTL/OfficialModules.h"
+#include "CHTL/WildcardImport.h"
 #include "Scanner/UnifiedScanner.h"
 #include "CHTLJS/CJMODSystem.h"
 
@@ -975,6 +977,239 @@ void testCJMODAPI() {
     std::cout << "CJMOD API test completed." << std::endl;
 }
 
+void testOfficialModules() {
+    std::cout << "Testing Official Modules..." << std::endl;
+    
+    // 测试官方模块管理器
+    OfficialModuleManager moduleManager;
+    
+    // 测试Chtholly珂朵莉模块CMOD组件
+    std::cout << "Testing Chtholly CMOD components..." << std::endl;
+    
+    auto accordionComponent = moduleManager.getComponent(OfficialModuleType::CHTHOLLY_CMOD, "accordion");
+    if (accordionComponent) {
+        std::string accordionHTML = accordionComponent->generateHTML();
+        std::string accordionCSS = accordionComponent->generateCSS();
+        std::string accordionJS = accordionComponent->generateJS();
+        
+        std::cout << "Accordion component HTML: " << (accordionHTML.length() > 0 ? "GENERATED" : "EMPTY") << std::endl;
+        std::cout << "Accordion component CSS: " << (accordionCSS.length() > 0 ? "GENERATED" : "EMPTY") << std::endl;
+        std::cout << "Accordion component JS: " << (accordionJS.length() > 0 ? "GENERATED" : "EMPTY") << std::endl;
+    }
+    
+    auto galleryComponent = moduleManager.getComponent(OfficialModuleType::CHTHOLLY_CMOD, "fourLeafGallery");
+    if (galleryComponent) {
+        std::string galleryCode = galleryComponent->generateCode();
+        std::cout << "Four leaf gallery code: " << (galleryCode.length() > 0 ? "GENERATED" : "EMPTY") << std::endl;
+    }
+    
+    auto memoComponent = moduleManager.getComponent(OfficialModuleType::CHTHOLLY_CMOD, "memo");
+    if (memoComponent) {
+        std::string memoCode = memoComponent->generateCode();
+        std::cout << "Memo component code: " << (memoCode.length() > 0 ? "GENERATED" : "EMPTY") << std::endl;
+    }
+    
+    // 测试Chtholly珂朵莉模块CJMOD组件
+    std::cout << "Testing Chtholly CJMOD components..." << std::endl;
+    
+    auto printMyloveComponent = moduleManager.getComponent(OfficialModuleType::CHTHOLLY_CJMOD, "printMylove");
+    if (printMyloveComponent) {
+        std::string printMyloveJS = printMyloveComponent->generateJS();
+        std::cout << "printMylove JS: " << (printMyloveJS.find("printMylove") != std::string::npos ? "FOUND" : "NOT_FOUND") << std::endl;
+    }
+    
+    auto iNeverAwayComponent = moduleManager.getComponent(OfficialModuleType::CHTHOLLY_CJMOD, "iNeverAway");
+    if (iNeverAwayComponent) {
+        std::string iNeverAwayJS = iNeverAwayComponent->generateJS();
+        std::cout << "iNeverAway JS: " << (iNeverAwayJS.find("INeverAway") != std::string::npos ? "FOUND" : "NOT_FOUND") << std::endl;
+    }
+    
+    auto utilThenComponent = moduleManager.getComponent(OfficialModuleType::CHTHOLLY_CJMOD, "utilThen");
+    if (utilThenComponent) {
+        std::string utilThenJS = utilThenComponent->generateJS();
+        std::cout << "util...then JS: " << (utilThenJS.find("UtilThenExpression") != std::string::npos ? "FOUND" : "NOT_FOUND") << std::endl;
+    }
+    
+    // 测试模块信息
+    std::string chthollyDescription = moduleManager.getModuleDescription(OfficialModuleType::CHTHOLLY_CMOD);
+    std::cout << "Chtholly CMOD description: " << chthollyDescription << std::endl;
+    
+    auto chthollyFeatures = moduleManager.getModuleFeatures(OfficialModuleType::CHTHOLLY_CMOD);
+    std::cout << "Chtholly CMOD features: " << chthollyFeatures.size() << std::endl;
+    
+    auto chthollyJSFeatures = moduleManager.getModuleFeatures(OfficialModuleType::CHTHOLLY_CJMOD);
+    std::cout << "Chtholly CJMOD features: " << chthollyJSFeatures.size() << std::endl;
+    
+    // 测试组件名称列表
+    auto chtlollyCMODNames = moduleManager.getComponentNames(OfficialModuleType::CHTHOLLY_CMOD);
+    std::cout << "Chtholly CMOD components: " << chtlollyCMODNames.size() << std::endl;
+    
+    auto chtlollyCJMODNames = moduleManager.getComponentNames(OfficialModuleType::CHTHOLLY_CJMOD);
+    std::cout << "Chtholly CJMOD components: " << chtlollyCJMODNames.size() << std::endl;
+    
+    // 测试模块检查
+    bool hasAccordion = moduleManager.hasComponent(OfficialModuleType::CHTHOLLY_CMOD, "accordion");
+    std::cout << "Has accordion component: " << (hasAccordion ? "YES" : "NO") << std::endl;
+    
+    bool hasPrintMylove = moduleManager.hasComponent(OfficialModuleType::CHTHOLLY_CJMOD, "printMylove");
+    std::cout << "Has printMylove component: " << (hasPrintMylove ? "YES" : "NO") << std::endl;
+    
+    // 测试组件生成
+    std::string accordionModuleCode = moduleManager.generateModuleCode(OfficialModuleType::CHTHOLLY_CMOD, "accordion");
+    std::cout << "Accordion module code generated: " << (accordionModuleCode.length() > 0 ? "YES" : "NO") << std::endl;
+    
+    std::string printMyloveModuleCode = moduleManager.generateModuleCode(OfficialModuleType::CHTHOLLY_CJMOD, "printMylove");
+    std::cout << "printMylove module code generated: " << (printMyloveModuleCode.length() > 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试组件配置
+    std::map<std::string, std::any> testConfig;
+    testConfig["width"] = std::string("400px");
+    testConfig["height"] = std::string("300px");
+    
+    if (accordionComponent) {
+        accordionComponent->setConfiguration(testConfig);
+        auto config = accordionComponent->getConfiguration();
+        std::cout << "Accordion configuration set: " << (config.size() > 0 ? "YES" : "NO") << std::endl;
+        
+        bool configValid = accordionComponent->validateConfiguration();
+        std::cout << "Accordion configuration valid: " << (configValid ? "YES" : "NO") << std::endl;
+    }
+    
+    std::cout << "Official Modules test completed." << std::endl;
+}
+
+void testWildcardImport() {
+    std::cout << "Testing Wildcard Import..." << std::endl;
+    
+    // 测试通配符导入解析器
+    WildcardImportParser parser;
+    
+    // 测试不同类型的通配符模式
+    std::vector<std::string> testPatterns = {
+        "path.*",           // 所有文件
+        "path/*.cmod",      // CMOD文件
+        "path/*.chtl",      // CHTL文件
+        "Chtholly.*",       // 子模块
+        "Chtholly.Space"    // 特定子模块
+    };
+    
+    std::cout << "Testing pattern parsing..." << std::endl;
+    for (const auto& pattern : testPatterns) {
+        auto wildcardPattern = parser.parsePattern(pattern);
+        std::cout << "Pattern: " << pattern << " -> Type: " << static_cast<int>(wildcardPattern.type) << std::endl;
+        
+        bool isValid = parser.isValidPattern(pattern);
+        std::cout << "  Valid: " << (isValid ? "YES" : "NO") << std::endl;
+        
+        bool isWildcard = parser.isWildcardPattern(pattern);
+        std::cout << "  Is wildcard: " << (isWildcard ? "YES" : "NO") << std::endl;
+        
+        bool isSubmodule = parser.isSubmodulePattern(pattern);
+        std::cout << "  Is submodule: " << (isSubmodule ? "YES" : "NO") << std::endl;
+    }
+    
+    // 测试通配符导入解析器
+    WildcardImportResolver resolver;
+    
+    std::cout << "Testing resolver configuration..." << std::endl;
+    auto searchPaths = resolver.getSearchPaths();
+    std::cout << "Default search paths: " << searchPaths.size() << std::endl;
+    
+    resolver.addSearchPath("./test_modules");
+    resolver.addSearchPath("./examples");
+    
+    auto newSearchPaths = resolver.getSearchPaths();
+    std::cout << "Updated search paths: " << newSearchPaths.size() << std::endl;
+    
+    // 测试路径解析
+    std::string resolvedPath = resolver.resolvePath("test.chtl");
+    std::cout << "Resolved path: " << resolvedPath << std::endl;
+    
+    // 测试通配符导入管理器
+    WildcardImportManager manager;
+    
+    std::cout << "Testing import manager..." << std::endl;
+    
+    // 测试缓存
+    bool cacheEnabled = manager.isCacheEnabled();
+    std::cout << "Cache enabled: " << (cacheEnabled ? "YES" : "NO") << std::endl;
+    
+    manager.enableCache(false);
+    std::cout << "Cache disabled: " << (!manager.isCacheEnabled() ? "YES" : "NO") << std::endl;
+    
+    manager.enableCache(true);
+    std::cout << "Cache re-enabled: " << (manager.isCacheEnabled() ? "YES" : "NO") << std::endl;
+    
+    // 测试导入模式（这些可能会失败，因为文件不存在，但测试逻辑）
+    auto importResults = manager.importPattern("test.*");
+    std::cout << "Import results: " << importResults.size() << std::endl;
+    
+    // 测试统计信息
+    size_t totalImports = manager.getTotalImportsCount();
+    size_t successfulImports = manager.getSuccessfulImportsCount();
+    size_t failedImports = manager.getFailedImportsCount();
+    
+    std::cout << "Total imports: " << totalImports << std::endl;
+    std::cout << "Successful imports: " << successfulImports << std::endl;
+    std::cout << "Failed imports: " << failedImports << std::endl;
+    
+    auto importStats = manager.getImportStatsByType();
+    std::cout << "Import stats by type: " << importStats.size() << std::endl;
+    
+    // 测试子模块导入器
+    SubmoduleImporter submoduleImporter;
+    
+    std::cout << "Testing submodule importer..." << std::endl;
+    
+    std::string moduleBasePath = submoduleImporter.getModuleBasePath();
+    std::cout << "Module base path: " << moduleBasePath << std::endl;
+    
+    std::string separator = submoduleImporter.getSubmoduleSeparator();
+    std::cout << "Submodule separator: " << separator << std::endl;
+    
+    // 测试子模块查找（可能为空，因为模块不存在）
+    auto allSubmodules = submoduleImporter.findAllSubmodules("TestModule");
+    std::cout << "All submodules found: " << allSubmodules.size() << std::endl;
+    
+    // 测试子模块验证
+    bool isValidSubmodule = submoduleImporter.isValidSubmodule("TestModule", "TestSubmodule");
+    std::cout << "Is valid submodule: " << (isValidSubmodule ? "YES" : "NO") << std::endl;
+    
+    auto validationErrors = submoduleImporter.getSubmoduleValidationErrors("", "");
+    std::cout << "Validation errors for empty names: " << validationErrors.size() << std::endl;
+    
+    // 测试路径等价系统
+    PathEquivalenceSystem pathSystem;
+    
+    std::cout << "Testing path equivalence system..." << std::endl;
+    
+    std::string normalizedPath = pathSystem.normalizePath("./test/../path/./file.txt");
+    std::cout << "Normalized path: " << normalizedPath << std::endl;
+    
+    bool pathsEquivalent = pathSystem.arePathsEquivalent("./test/../path", "path");
+    std::cout << "Paths equivalent: " << (pathsEquivalent ? "YES" : "NO") << std::endl;
+    
+    std::string dotToSlash = pathSystem.convertDotToSlash("test.path.file");
+    std::cout << "Dot to slash: " << dotToSlash << std::endl;
+    
+    std::string slashToDot = pathSystem.convertSlashToDot("test/path/file");
+    std::cout << "Slash to dot: " << slashToDot << std::endl;
+    
+    bool validPath = pathSystem.isValidPath("valid/path/file.txt");
+    std::cout << "Valid path: " << (validPath ? "YES" : "NO") << std::endl;
+    
+    bool invalidPath = pathSystem.isValidPath("invalid|path");
+    std::cout << "Invalid path: " << (!invalidPath ? "CORRECTLY_INVALID" : "INCORRECTLY_VALID") << std::endl;
+    
+    auto pathParts = pathSystem.splitPath("path/to/file.txt");
+    std::cout << "Path parts: " << pathParts.size() << std::endl;
+    
+    std::string joinedPath = pathSystem.joinPath({"path", "to", "file.txt"});
+    std::cout << "Joined path: " << joinedPath << std::endl;
+    
+    std::cout << "Wildcard Import test completed." << std::endl;
+}
+
 int main() {
     std::cout << "CHTL Compiler Test Suite" << std::endl;
     std::cout << "========================" << std::endl;
@@ -1035,6 +1270,12 @@ int main() {
         std::cout << std::endl;
         
         testCJMODAPI();
+        std::cout << std::endl;
+        
+        testOfficialModules();
+        std::cout << std::endl;
+        
+        testWildcardImport();
         std::cout << std::endl;
         
         std::cout << "All tests completed successfully!" << std::endl;

@@ -44,6 +44,8 @@ set(CHTL_SOURCES
     src/CHTL/ProjectWorkflow.cpp
     src/CHTL/SyntaxBoundaries.cpp
     src/CHTL/CJMODAPI.cpp
+    src/CHTL/OfficialModules.cpp
+    src/CHTL/WildcardImport.cpp
     
     src/CHTLJS/CHTLJSContext.cpp
     src/CHTLJS/CHTLJSGenerator.cpp
