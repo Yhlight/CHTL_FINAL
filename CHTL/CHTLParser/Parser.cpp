@@ -243,7 +243,19 @@ NodePtr Parser::styleBlock() {
             }
             usage->type = template_type;
             usage->name = consume(TokenType::IDENTIFIER, "Expect template name after type.").lexeme;
-            consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+
+            if (match({TokenType::LEFT_BRACE})) {
+                while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                    if (match({TokenType::DELETE})) {
+                        usage->specializationBody.push_back(deleteStatement());
+                    } else {
+                        throw std::runtime_error("Unexpected token in @Style specialization body.");
+                    }
+                }
+                consume(TokenType::RIGHT_BRACE, "Expect '}' after specialization body.");
+            } else {
+                consume(TokenType::SEMICOLON, "Expect ';' after template usage without a body.");
+            }
             node->children.push_back(usage);
         } else {
             auto ruleNode = std::make_shared<StyleRuleNode>();
@@ -347,9 +359,15 @@ NodePtr Parser::deleteStatement() {
     auto node = std::make_shared<DeleteNode>();
     node->line = previous().line; // line of the 'delete' keyword
 
-    while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
-        node->targets.push_back(advance());
-    }
+    // Parse a comma-separated list of targets
+    do {
+        if (peek().type == TokenType::IDENTIFIER) {
+            node->targets.push_back(consume(TokenType::IDENTIFIER, "Expect target after 'delete' or ','"));
+        } else {
+            throw std::runtime_error("Unexpected token in delete statement.");
+        }
+    } while (match({TokenType::COMMA}));
+
     consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
     return node;
 }

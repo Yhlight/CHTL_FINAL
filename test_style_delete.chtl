@@ -1,0 +1,15 @@
+[Template] @Style BaseStyle
+{
+    color: red;
+    font-size: 16px;
+    border: 1px solid black;
+}
+
+div {
+    style {
+        @Style BaseStyle {
+            delete font-size, border;
+        }
+        background-color: blue;
+    }
+}

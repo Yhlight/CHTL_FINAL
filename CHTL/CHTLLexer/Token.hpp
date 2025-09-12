@@ -12,6 +12,7 @@ enum class TokenType {
     AT, // @
     COLON, EQUAL, SEMICOLON,
     LEFT_PAREN, RIGHT_PAREN,
+    COMMA, // ,
 
     // One or two character tokens.
     MINUS, PLUS, SLASH, STAR, PERCENT, STAR_STAR,

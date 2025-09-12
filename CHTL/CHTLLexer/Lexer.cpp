@@ -50,6 +50,7 @@ void Lexer::scanToken() {
         case ')': addToken(TokenType::RIGHT_PAREN); break;
         case '{': addToken(TokenType::LEFT_BRACE); break;
         case '}': addToken(TokenType::RIGHT_BRACE); break;
+        case ',': addToken(TokenType::COMMA); break;
         case ':': addToken(TokenType::COLON); break;
         case '=': addToken(TokenType::EQUAL); break;
         case ';': addToken(TokenType::SEMICOLON); break;

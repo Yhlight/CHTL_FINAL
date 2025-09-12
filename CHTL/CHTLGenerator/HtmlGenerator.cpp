@@ -94,7 +94,31 @@ void HtmlGenerator::visit(ElementNode& node) {
                 } else if (auto usage_node = std::dynamic_pointer_cast<TemplateUsageNode>(style_content_node)) {
                     if (m_styleTemplates.count(usage_node->name)) {
                         auto def = m_styleTemplates[usage_node->name];
-                        for (const auto& rule_tokens : def->styleRules) {
+                        auto finalRules = def->styleRules; // Make a copy
+
+                        // Process specializations
+                        for (const auto& specNode : usage_node->specializationBody) {
+                            if (auto deleteNode = std::dynamic_pointer_cast<DeleteNode>(specNode)) {
+                                std::vector<std::string> targets_to_delete;
+                                for(const auto& token : deleteNode->targets) {
+                                    targets_to_delete.push_back(token.lexeme);
+                                }
+                                finalRules.erase(
+                                    std::remove_if(finalRules.begin(), finalRules.end(),
+                                        [&](const StyleRule& rule){
+                                            if (!rule.empty()) {
+                                                for (const auto& target : targets_to_delete) {
+                                                    if (rule[0].lexeme == target) return true;
+                                                }
+                                            }
+                                            return false;
+                                        }),
+                                    finalRules.end());
+                            }
+                        }
+
+                        // Process the final list of rules
+                        for (const auto& rule_tokens : finalRules) {
                             processStyleRule(rule_tokens, inline_style);
                         }
                     }
