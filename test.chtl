@@ -1,9 +1,13 @@
-html {
-    head {}
-    body {
-        div {
-            p {}
-        }
-        span {}
+div {
+    id: main;
+
+    style {
+        width: 100px;
+        height: 200px;
+        background-color: red;
+    }
+
+    p {
+        text: "Styled content";
     }
 }

@@ -21,8 +21,14 @@ private:
     void addToken(TokenType type, const std::string& literal);
 
     char peek() const;
+    char peekNext() const;
+    bool match(char expected);
 
     void handleIdentifier();
+    void handleString();
+    void handleBlockComment();
+    void handleChtlComment();
+    void handleNumber();
 
     const std::string& source;
     std::vector<Token> tokens;

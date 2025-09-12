@@ -1,4 +1,6 @@
 #include "CHTLParser.h"
+#include "CHTL/CHTLNode/TextNode.h"
+#include "CHTL/CHTLNode/CommentNode.h"
 #include <stdexcept>
 
 namespace CHTL {
@@ -23,8 +25,63 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
 
 void CHTLParser::parseBlock(ElementNode* element) {
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        element->addChild(parseElement());
+        if (peek().type == TokenType::CHTL_COMMENT) {
+            Token commentToken = advance();
+            element->addChild(std::make_unique<CommentNode>(commentToken.lexeme));
+        } else if (peek().type == TokenType::KEYWORD_STYLE) {
+            parseStyleBlock(element);
+        }
+        else if (peek().type == TokenType::UNQUOTED_LITERAL || peek().type == TokenType::KEYWORD_TEXT) {
+            if (peekNext().type == TokenType::COLON) {
+                parseProperty(element);
+            } else {
+                element->addChild(parseElement());
+            }
+        } else {
+            element->addChild(parseElement());
+        }
     }
+}
+
+void CHTLParser::parseProperty(ElementNode* element) {
+    Token key = advance();
+
+    consume(TokenType::COLON, "Expect ':' after property key.");
+
+    Token value = advance();
+    if (value.type != TokenType::STRING && value.type != TokenType::UNQUOTED_LITERAL && value.type != TokenType::NUMBER) {
+        throw std::runtime_error("Property value must be a string, number, or unquoted literal.");
+    }
+
+    consume(TokenType::SEMICOLON, "Expect ';' after property value.");
+
+    if (key.type == TokenType::KEYWORD_TEXT) {
+        element->addChild(std::make_unique<TextNode>(value.lexeme));
+    } else {
+        element->addAttribute(key.lexeme, value.lexeme);
+    }
+}
+
+void CHTLParser::parseStyleBlock(ElementNode* element) {
+    consume(TokenType::KEYWORD_STYLE, "Expect 'style' keyword.");
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'style'.");
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        Token key = consume(TokenType::UNQUOTED_LITERAL, "Expect style property name.");
+        consume(TokenType::COLON, "Expect ':' after style property name.");
+
+        // Style values can be more complex, but for now we take a single token.
+        Token value = advance();
+        if (value.type != TokenType::STRING && value.type != TokenType::UNQUOTED_LITERAL && value.type != TokenType::NUMBER) {
+            throw std::runtime_error("Style value must be a string, number, or unquoted literal.");
+        }
+
+        element->addInlineStyle(key.lexeme, value.lexeme);
+
+        consume(TokenType::SEMICOLON, "Expect ';' after style value.");
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after style block.");
 }
 
 // --- Parser Helpers ---
@@ -36,6 +93,11 @@ bool CHTLParser::isAtEnd() const {
 Token CHTLParser::peek() const {
     if (current >= tokens.size()) return tokens.back(); // EOF
     return tokens[current];
+}
+
+Token CHTLParser::peekNext() const {
+    if (current + 1 >= tokens.size()) return tokens.back(); // EOF
+    return tokens[current + 1];
 }
 
 Token CHTLParser::advance() {

@@ -19,9 +19,15 @@ public:
         attributes[key] = value;
     }
 
+    const std::map<std::string, std::string>& getInlineStyles() const { return inlineStyles; }
+    void addInlineStyle(const std::string& key, const std::string& value) {
+        inlineStyles[key] = value;
+    }
+
 private:
     std::string tagName;
     std::map<std::string, std::string> attributes;
+    std::map<std::string, std::string> inlineStyles;
 };
 
 } // namespace CHTL

@@ -17,10 +17,13 @@ public:
 private:
     std::unique_ptr<ElementNode> parseElement();
     void parseBlock(ElementNode* element);
+    void parseProperty(ElementNode* element);
+    void parseStyleBlock(ElementNode* element);
 
     bool isAtEnd() const;
     Token advance();
     Token peek() const;
+    Token peekNext() const;
     Token consume(TokenType type, const std::string& message);
     bool check(TokenType type) const;
 
