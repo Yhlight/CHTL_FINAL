@@ -55,29 +55,25 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
 
 void CHTLParser::parseElementBody(ElementNode& element) {
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        // Check for attributes first
+        // If it's an identifier followed by a colon, it's an attribute.
         if (peek().type == TokenType::Identifier && peekNext().type == TokenType::Colon) {
-            parseAttributes(element);
-        } else {
+            const Token& key = consume(TokenType::Identifier, "Expected attribute name.");
+            consume(TokenType::Colon, "Expected ':' after attribute name.");
+
+            std::string value;
+            if (match({TokenType::StringLiteral, TokenType::UnquotedLiteral, TokenType::Identifier})) {
+                value = previous().lexeme;
+            } else {
+                throw std::runtime_error("Expected attribute value.");
+            }
+
+            consume(TokenType::Semicolon, "Expected ';' after attribute value.");
+            element.attributes_.push_back(std::make_unique<AttributeNode>(key.lexeme, value));
+        }
+        // Otherwise, it must be a declaration (like a child element or style block).
+        else {
             element.children_.push_back(parseDeclaration());
         }
-    }
-}
-
-void CHTLParser::parseAttributes(ElementNode& element) {
-    while (peek().type == TokenType::Identifier && peekNext().type == TokenType::Colon) {
-        const Token& key = consume(TokenType::Identifier, "Expected attribute name.");
-        consume(TokenType::Colon, "Expected ':' after attribute name.");
-
-        std::string value;
-        if (match({TokenType::StringLiteral, TokenType::UnquotedLiteral, TokenType::Identifier})) {
-            value = previous().lexeme;
-        } else {
-            throw std::runtime_error("Expected attribute value.");
-        }
-
-        consume(TokenType::Semicolon, "Expected ';' after attribute value.");
-        element.attributes_.push_back(std::make_unique<AttributeNode>(key.lexeme, value));
     }
 }
 
@@ -99,20 +95,49 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
     consume(TokenType::OpenBrace, "Expected '{' after 'style' keyword.");
 
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        const Token& key = consume(TokenType::Identifier, "Expected CSS property name.");
-        consume(TokenType::Colon, "Expected ':' after CSS property name.");
+        // If it's an identifier followed by a colon, it's an inline property.
+        if (peek().type == TokenType::Identifier && peekNext().type == TokenType::Colon) {
+            const Token& key = consume(TokenType::Identifier, "Expected CSS property name.");
+            consume(TokenType::Colon, "Expected ':' after CSS property name.");
 
-        // For now, we assume the value is a single unquoted literal token.
-        // This will need to be made more robust for multi-token values.
-        std::string value;
-        if (match({TokenType::UnquotedLiteral, TokenType::Identifier, TokenType::StringLiteral})) {
-            value = previous().lexeme;
-        } else {
-            throw std::runtime_error("Expected CSS property value.");
+            std::string value;
+            if (match({TokenType::UnquotedLiteral, TokenType::Identifier, TokenType::StringLiteral})) {
+                value = previous().lexeme;
+            } else {
+                throw std::runtime_error("Expected CSS property value.");
+            }
+
+            consume(TokenType::Semicolon, "Expected ';' after CSS property value.");
+            styleNode->inline_properties_.emplace_back(key.lexeme, value);
         }
+        // Otherwise, assume it's a CSS rule (e.g., .class, #id, &)
+        else if (peek().type == TokenType::Identifier || peek().type == TokenType::Ampersand) {
+            const Token& selector = consume(TokenType::Identifier, "Expected a CSS selector.");
+            auto ruleNode = std::make_unique<CssRuleNode>(selector.lexeme);
 
-        consume(TokenType::Semicolon, "Expected ';' after CSS property value.");
-        styleNode->properties_.emplace_back(key.lexeme, value);
+            consume(TokenType::OpenBrace, "Expected '{' after selector.");
+
+            while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+                const Token& key = consume(TokenType::Identifier, "Expected CSS property name inside rule.");
+                consume(TokenType::Colon, "Expected ':' after CSS property name.");
+
+                std::string value;
+                if (match({TokenType::UnquotedLiteral, TokenType::Identifier, TokenType::StringLiteral})) {
+                    value = previous().lexeme;
+                } else {
+                    throw std::runtime_error("Expected CSS property value inside rule.");
+                }
+
+                consume(TokenType::Semicolon, "Expected ';' after CSS property value.");
+                ruleNode->properties_.emplace_back(key.lexeme, value);
+            }
+
+            consume(TokenType::CloseBrace, "Expected '}' after CSS rule block.");
+            styleNode->rules_.push_back(std::move(ruleNode));
+        }
+        else {
+            throw std::runtime_error("Unexpected token inside style block.");
+        }
     }
 
     consume(TokenType::CloseBrace, "Expected '}' after style block.");

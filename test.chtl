@@ -7,21 +7,31 @@ html {
     body {
         div {
             id: "main-content";
-            class: "container";
 
             style {
-                width: 100px;
-                height: 200px;
-                background-color: red;
+                // This should become an inline style
+                border: 1px solid black;
+
+                // This rule should be extracted
+                .box {
+                    width: 100px;
+                    height: 100px;
+                }
+
+                // This should also be extracted
+                #main-content {
+                    background-color: #f0f0f0;
+                }
             }
 
             h1 {
+                class: "title";
+                style {
+                    .title {
+                        color: blue;
+                    }
+                }
                 text { "Welcome to CHTL!" }
-            }
-
-            -- This is a comment that should appear in the HTML
-            p {
-                text { "This is a paragraph." }
             }
         }
     }

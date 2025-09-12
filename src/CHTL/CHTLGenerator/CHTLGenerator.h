@@ -28,6 +28,7 @@ private:
     void indent();
 
     std::stringstream output_;
+    std::stringstream global_styles_;
     int indentLevel_ = 0;
 };
 

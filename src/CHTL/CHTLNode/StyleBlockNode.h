@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 #include <utility> // For std::pair
+#include <memory>
+#include "CssRuleNode.h"
 
 namespace CHTL {
 
@@ -14,9 +16,11 @@ public:
 
     NodeType getType() const override { return NodeType::StyleBlock; }
 
-    // Using a simple vector of pairs for now.
-    // Key is the CSS property, Value is the CSS value.
-    std::vector<std::pair<std::string, std::string>> properties_;
+    // For inline styles directly on the parent element
+    std::vector<std::pair<std::string, std::string>> inline_properties_;
+
+    // For full CSS rules to be extracted to a global style tag
+    std::vector<std::unique_ptr<CssRuleNode>> rules_;
 };
 
 } // namespace CHTL
