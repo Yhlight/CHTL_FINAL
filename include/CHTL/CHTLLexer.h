@@ -36,6 +36,16 @@ enum class TokenType {
     KEYWORD_NAMESPACE,      // [Namespace]
     KEYWORD_CONFIGURATION,  // [Configuration]
     
+    // 特例化操作关键字
+    KEYWORD_DELETE,         // delete
+    KEYWORD_INSERT,         // insert
+    KEYWORD_AFTER,          // after
+    KEYWORD_BEFORE,         // before
+    KEYWORD_REPLACE,        // replace
+    KEYWORD_AT,             // at
+    KEYWORD_TOP,            // top
+    KEYWORD_BOTTOM,         // bottom
+    
     // 操作符
     LEFT_BRACE,             // {
     RIGHT_BRACE,            // }

@@ -280,9 +280,146 @@ std::shared_ptr<CHTLNode> CHTLParser::parseTemplate() {
         return nullptr;
     }
     
-    // 模板解析逻辑
-    // 这里应该实现完整的模板解析
+    // 解析模板类型
+    if (match(TokenType::AT)) {
+        if (current_token_.type == TokenType::KEYWORD_STYLE) {
+            advance();
+            return parseStyleTemplate();
+        } else if (current_token_.type == TokenType::KEYWORD_ELEMENT) {
+            advance();
+            return parseElementTemplate();
+        } else if (current_token_.type == TokenType::KEYWORD_VAR) {
+            advance();
+            return parseVarTemplate();
+        }
+    }
+    
+    reportError("Expected template type (@Style, @Element, or @Var)");
     return nullptr;
+}
+
+std::shared_ptr<CHTLNode> CHTLParser::parseStyleTemplate() {
+    if (current_token_.type != TokenType::IDENTIFIER) {
+        reportError("Expected template name");
+        return nullptr;
+    }
+    
+    std::string templateName = current_token_.value;
+    advance();
+    
+    auto templateNode = std::make_shared<StyleTemplateNode>(templateName);
+    
+    if (match(TokenType::LEFT_BRACE)) {
+        // 解析CSS属性
+        while (!match(TokenType::RIGHT_BRACE)) {
+            if (current_token_.type == TokenType::IDENTIFIER) {
+                std::string property = current_token_.value;
+                advance();
+                
+                if (match(TokenType::COLON)) {
+                    std::string value;
+                    
+                    while (!check(TokenType::SEMICOLON) && !check(TokenType::RIGHT_BRACE) && lexer_.hasMoreTokens()) {
+                        if (current_token_.type == TokenType::STRING_LITERAL) {
+                            value += current_token_.value;
+                            advance();
+                        } else if (current_token_.type == TokenType::UNQUOTED_LITERAL) {
+                            value += current_token_.value;
+                            advance();
+                        } else if (current_token_.type == TokenType::IDENTIFIER) {
+                            value += current_token_.value;
+                            advance();
+                        } else {
+                            value += current_token_.value;
+                            advance();
+                        }
+                    }
+                    
+                    templateNode->addCSSProperty(property, value);
+                    
+                    if (match(TokenType::SEMICOLON)) {
+                        // 跳过分号
+                    }
+                }
+            } else {
+                advance();
+            }
+        }
+    }
+    
+    return templateNode;
+}
+
+std::shared_ptr<CHTLNode> CHTLParser::parseElementTemplate() {
+    if (current_token_.type != TokenType::IDENTIFIER) {
+        reportError("Expected template name");
+        return nullptr;
+    }
+    
+    std::string templateName = current_token_.value;
+    advance();
+    
+    auto templateNode = std::make_shared<ElementTemplateNode>(templateName);
+    
+    if (match(TokenType::LEFT_BRACE)) {
+        // 解析子元素
+        while (!match(TokenType::RIGHT_BRACE)) {
+            if (lexer_.hasMoreTokens()) {
+                auto child = parse();
+                if (child) {
+                    templateNode->addChild(child);
+                }
+            } else {
+                reportError("Expected '}' to close element template");
+                break;
+            }
+        }
+    }
+    
+    return templateNode;
+}
+
+std::shared_ptr<CHTLNode> CHTLParser::parseVarTemplate() {
+    if (current_token_.type != TokenType::IDENTIFIER) {
+        reportError("Expected template name");
+        return nullptr;
+    }
+    
+    std::string templateName = current_token_.value;
+    advance();
+    
+    auto templateNode = std::make_shared<VarTemplateNode>(templateName);
+    
+    if (match(TokenType::LEFT_BRACE)) {
+        // 解析变量
+        while (!match(TokenType::RIGHT_BRACE)) {
+            if (current_token_.type == TokenType::IDENTIFIER) {
+                std::string varName = current_token_.value;
+                advance();
+                
+                if (match(TokenType::COLON) || match(TokenType::EQUALS)) {
+                    std::string varValue;
+                    
+                    if (current_token_.type == TokenType::STRING_LITERAL) {
+                        varValue = current_token_.value;
+                        advance();
+                    } else if (current_token_.type == TokenType::UNQUOTED_LITERAL) {
+                        varValue = current_token_.value;
+                        advance();
+                    } else if (current_token_.type == TokenType::IDENTIFIER) {
+                        varValue = current_token_.value;
+                        advance();
+                    }
+                    
+                    templateNode->addVariable(varName, varValue);
+                }
+            } else {
+                advance();
+            }
+        }
+    }
+    
+    return templateNode;
 }
 
 std::shared_ptr<CHTLNode> CHTLParser::parseCustom() {

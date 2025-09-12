@@ -177,6 +177,21 @@ void CHTLLexer::initializeKeywords() {
     keywords_["[Import]"] = TokenType::KEYWORD_IMPORT;
     keywords_["[Namespace]"] = TokenType::KEYWORD_NAMESPACE;
     keywords_["[Configuration]"] = TokenType::KEYWORD_CONFIGURATION;
+    
+    // 模板类型关键字
+    keywords_["@Style"] = TokenType::KEYWORD_STYLE;
+    keywords_["@Element"] = TokenType::KEYWORD_ELEMENT;
+    keywords_["@Var"] = TokenType::KEYWORD_VAR;
+    
+    // 特例化操作关键字
+    keywords_["delete"] = TokenType::KEYWORD_DELETE;
+    keywords_["insert"] = TokenType::KEYWORD_INSERT;
+    keywords_["after"] = TokenType::KEYWORD_AFTER;
+    keywords_["before"] = TokenType::KEYWORD_BEFORE;
+    keywords_["replace"] = TokenType::KEYWORD_REPLACE;
+    keywords_["at"] = TokenType::KEYWORD_AT;
+    keywords_["top"] = TokenType::KEYWORD_TOP;
+    keywords_["bottom"] = TokenType::KEYWORD_BOTTOM;
 }
 
 char CHTLLexer::currentChar() const {

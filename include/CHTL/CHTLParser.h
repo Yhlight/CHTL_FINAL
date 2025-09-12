@@ -69,6 +69,9 @@ private:
     std::shared_ptr<CHTLNode> parseStyle();
     std::shared_ptr<CHTLNode> parseScript();
     std::shared_ptr<CHTLNode> parseTemplate();
+    std::shared_ptr<CHTLNode> parseStyleTemplate();
+    std::shared_ptr<CHTLNode> parseElementTemplate();
+    std::shared_ptr<CHTLNode> parseVarTemplate();
     std::shared_ptr<CHTLNode> parseCustom();
     std::shared_ptr<CHTLNode> parseOrigin();
     std::shared_ptr<CHTLNode> parseImport();

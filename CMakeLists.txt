@@ -32,6 +32,9 @@ set(CHTL_SOURCES
     src/CHTL/CHTLIOStream.cpp
     src/CHTL/CMODSystem.cpp
     src/CHTL/CHTLNode.cpp
+    src/CHTL/TemplateNode.cpp
+    src/CHTL/CustomNode.cpp
+    src/CHTL/ImportNode.cpp
     
     src/CHTLJS/CHTLJSContext.cpp
     src/CHTLJS/CHTLJSGenerator.cpp
