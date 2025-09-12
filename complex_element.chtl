@@ -1,0 +1,3 @@
+[Template] @Element Card {
+    style: "padding: 20px; margin: 10px;";
+}

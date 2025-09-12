@@ -1,12 +1,15 @@
-div {
-    @Style MyButton {
-        background-color: blue;
-        color: white;
-        padding: 10px;
-    }
-    
-    @Style MyButton {
-        background-color: red;
-        delete background-color;
-    }
+[Custom] @Style MyButton {
+    color: red;
+    background-color: blue;
+    border: 1px solid black;
+}
+
+[Custom] @Element Card {
+    class: "card";
+    id: "main-card";
+}
+
+[Custom] @Var Theme {
+    primary-color: "#007bff";
+    secondary-color: "#6c757d";
 }
