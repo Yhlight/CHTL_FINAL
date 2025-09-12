@@ -12,3 +12,5 @@ from .PropertyReferenceNode import PropertyReferenceNode
 from .ScriptNode import ScriptNode
 from .TemplateNode import TemplateNode
 from .TemplateUsageNode import TemplateUsageNode
+from .VarGroupNode import VarGroupNode
+from .FunctionCallNode import FunctionCallNode

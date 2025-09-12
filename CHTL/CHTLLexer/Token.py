@@ -19,6 +19,8 @@ class TokenType(Enum):
     RBRACE = "}"
     LBRACKET = "["
     RBRACKET = "]"
+    LPAREN = "("
+    RPAREN = ")"
 
     # Punctuation
     COLON = ":"

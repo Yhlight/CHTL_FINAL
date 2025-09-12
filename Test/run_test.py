@@ -163,6 +163,7 @@ def run_template_test():
     expected_element_template = '<div class="box-title">This is a box</div><div class="box-content"></div>'
     if expected_element_template not in output_html:
         print("❌ Template test FAILED on element template expansion.")
+        print(f"DEBUG: Output HTML:\n{output_html}")
         return False
 
     # Check for style template usage
@@ -170,7 +171,11 @@ def run_template_test():
         print("❌ Template test FAILED on div structure.")
         return False
 
-    if 'color: black' not in output_html or 'font-size: 16px' not in output_html or 'line-height: 20px' not in output_html:
+    if ('color: black' not in output_html or
+        'font-size: 16px' not in output_html or
+        'line-height: 20px' not in output_html or
+        'background-color: blue' not in output_html or
+        'padding: 20px' not in output_html):
         print("❌ Template test FAILED on div styles.")
         return False
 

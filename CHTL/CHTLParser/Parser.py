@@ -1,7 +1,7 @@
 from typing import Union, Tuple
 from CHTL.CHTLLexer import Lexer, Token, TokenType
 from CHTL.CHTLNode import (BaseNode, ElementNode, TextNode, StyleNode, CssRule, ScriptNode,
-                           TemplateNode, TemplateUsageNode,
+                           TemplateNode, TemplateUsageNode, FunctionCallNode,
                            ExpressionNode, InfixExpressionNode, NumericLiteralNode, PropertyReferenceNode)
 from enum import IntEnum
 
@@ -13,6 +13,7 @@ class Precedence(IntEnum):
     POWER = 4
     PREFIX = 5
     MEMBER_ACCESS = 6 # .
+    CALL = 7 # my_func(X)
 
 PRECEDENCES = {
     TokenType.PLUS: Precedence.SUM,
@@ -22,6 +23,7 @@ PRECEDENCES = {
     TokenType.PERCENT: Precedence.PRODUCT,
     TokenType.DOUBLE_ASTERISK: Precedence.POWER,
     TokenType.DOT: Precedence.MEMBER_ACCESS,
+    TokenType.LPAREN: Precedence.CALL,
 }
 
 class Parser:
@@ -48,6 +50,7 @@ class Parser:
         self.register_infix(TokenType.PERCENT, self._parse_infix_expression)
         self.register_infix(TokenType.DOUBLE_ASTERISK, self._parse_infix_expression)
         self.register_infix(TokenType.DOT, self._parse_property_reference_expression)
+        self.register_infix(TokenType.LPAREN, self._parse_function_call)
 
         self._next_token()
         self._next_token()
@@ -157,6 +160,9 @@ class Parser:
     def parse_statement(self) -> Union[BaseNode, None]:
         if self.current_token.type == TokenType.LBRACKET:
             return self._parse_template_definition()
+
+        if self.current_token.type == TokenType.AT:
+            return self._parse_template_usage()
 
         if self.current_token.type in (TokenType.IDENTIFIER, TokenType.DOT, TokenType.HASH, TokenType.AMPERSAND):
             # Check if it is a block statement
@@ -464,6 +470,28 @@ class Parser:
                     self.errors.append(f"Unexpected token in template element block: {self.current_token.literal}")
                     self._next_token() # Advance past the bad token
             content = children
+        elif template_type == 'Var':
+            variables = {}
+            while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
+                if self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type == TokenType.COLON:
+                    var_name = self.current_token.literal
+                    self._next_token()
+                    self._next_token()
+                    if self.current_token.type in (TokenType.STRING, TokenType.IDENTIFIER, TokenType.HEX_LITERAL):
+                        variables[var_name] = self.current_token.literal
+                        self._next_token()
+                    else:
+                        self.errors.append(f"Expected variable value for '{var_name}'")
+
+                    if self.current_token.type == TokenType.SEMICOLON:
+                        self._next_token()
+                    else:
+                        self.errors.append(f"Missing semicolon for variable '{var_name}'")
+                else:
+                    self.errors.append(f"Unexpected token in var group: {self.current_token.literal}")
+                    self._skip_to_next_statement()
+            print(f"DEBUG: Parsed vars: {variables}")
+            content = variables
         else:
             self.errors.append(f"Unknown template type: {template_type}")
             # Skip the body
@@ -476,3 +504,28 @@ class Parser:
             self._next_token() # Consume '}'
 
         return TemplateNode(template_type=template_type, template_name=template_name, content=content)
+
+    def _parse_function_call(self, function_node: ExpressionNode) -> FunctionCallNode:
+        arguments = self._parse_call_arguments()
+        return FunctionCallNode(function=function_node, arguments=arguments)
+
+    def _parse_call_arguments(self) -> list[ExpressionNode]:
+        args = []
+
+        if self.peek_token.type == TokenType.RPAREN:
+            self._next_token() # Consume ')'
+            return args
+
+        self._next_token() # Move to first argument
+        args.append(self.parse_expression(Precedence.LOWEST))
+
+        # The spec does not currently support multiple arguments for var groups.
+        # while self.peek_token.type == TokenType.COMMA:
+        #     self._next_token()
+        #     self._next_token()
+        #     args.append(self.parse_expression(Precedence.LOWEST))
+
+        if not self._expect_peek(TokenType.RPAREN):
+            return None
+
+        return args

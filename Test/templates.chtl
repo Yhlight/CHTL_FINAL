@@ -18,14 +18,21 @@
     }
 }
 
-body {
-    // Usage of Element Template
-    @Element Box;
+[Template] @Var Theme
+{
+    main-color: blue;
+    accent-color: #ff00ff;
+    default-padding: 10px;
+}
 
-    div {
-        id: "p1";
-        style {
-            @Style DefaultText;
-        }
+// Usage of Element Template
+@Element Box;
+
+div {
+    id: "p1";
+    style {
+        @Style DefaultText;
+        background-color: Theme(main-color);
+        padding: Theme(default-padding) * 2;
     }
 }

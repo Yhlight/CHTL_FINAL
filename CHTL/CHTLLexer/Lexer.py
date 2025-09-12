@@ -125,6 +125,8 @@ class Lexer:
                 '}': TokenType.RBRACE,
                 '[': TokenType.LBRACKET,
                 ']': TokenType.RBRACKET,
+                '(': TokenType.LPAREN,
+                ')': TokenType.RPAREN,
                 ':': TokenType.COLON,
                 '=': TokenType.EQUALS,
                 ';': TokenType.SEMICOLON,

@@ -23,6 +23,9 @@ class TemplateNode(BaseNode):
         elif self.template_type == 'Element':
             # For elements, content is a list of child nodes
             content_dict = [child.to_dict() for child in self.content]
+        elif self.template_type == 'Var':
+            # For vars, content is a dict of strings
+            content_dict = self.content
 
         return {
             "type": "TemplateNode",

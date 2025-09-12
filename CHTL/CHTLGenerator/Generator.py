@@ -10,6 +10,7 @@ from CHTL.CHTLNode.PropertyReferenceNode import PropertyReferenceNode
 from CHTL.CHTLNode.ScriptNode import ScriptNode
 from CHTL.CHTLNode.TemplateNode import TemplateNode
 from CHTL.CHTLNode.TemplateUsageNode import TemplateUsageNode
+from CHTL.CHTLNode.FunctionCallNode import FunctionCallNode
 import html
 import re
 
@@ -24,6 +25,7 @@ class Generator:
         self.evaluated_styles: dict[str, dict[str, str]] = {}
         self.style_templates: dict[str, dict] = {}
         self.element_templates: dict[str, list] = {}
+        self.var_groups: dict[str, dict] = {}
 
     def generate(self, ast_root: ElementNode) -> str:
         if not isinstance(ast_root, ElementNode) or ast_root.tag_name != "root":
@@ -31,15 +33,13 @@ class Generator:
 
         self.global_css_rules, self.element_map, self.dependency_graph, self.errors = [], {}, {}, []
         self.evaluation_order, self.evaluated_styles, self.style_templates = [], {}, {}
-        self.element_templates = {}
+        self.element_templates, self.var_groups = {}, {}
 
         self._collect_templates(ast_root)
         self._expand_element_templates(ast_root)
 
-        # DEBUG
-        # import json
-        # print("--- AST after template expansion ---")
-        # print(json.dumps(ast_root.to_dict(), indent=2))
+        # Filter out TemplateNode definitions from the root so they are not processed further
+        ast_root.children = [child for child in ast_root.children if not isinstance(child, TemplateNode)]
 
         self._populate_element_map(ast_root)
         self._build_dependency_graph(ast_root)
@@ -50,6 +50,10 @@ class Generator:
 
         self._evaluate_all_styles()
         self._collect_global_styles(ast_root, parent=None)
+
+        print("--- Children before final generation ---")
+        for child in ast_root.children:
+            print(child)
 
         body_html = "".join(self._generate_node(child) for child in ast_root.children)
         css_string = self._generate_global_css_string()
@@ -210,6 +214,32 @@ class Generator:
             value_str, unit_str = match.groups()
             return NumericLiteralNode(value=float(value_str), unit=unit_str.strip() or None)
 
+        if isinstance(node, FunctionCallNode):
+            # Assuming function is an identifier (TextNode) for now
+            if not isinstance(node.function, TextNode):
+                return TextNode("/* invalid-var-group-name */")
+            group_name = node.function.value
+
+            if group_name not in self.var_groups:
+                return TextNode(f"/* undefined-var-group:{group_name} */")
+
+            if len(node.arguments) != 1 or not isinstance(node.arguments[0], TextNode):
+                return TextNode("/* invalid-var-argument */")
+            var_name = node.arguments[0].value
+
+            var_group = self.var_groups[group_name]
+            if var_name not in var_group:
+                return TextNode(f"/* undefined-var:{var_name} */")
+
+            value_str = var_group[var_name]
+
+            match = re.match(r"(-?\d+\.?\d*|-?\.\d+)(.*)", value_str.strip())
+            if not match:
+                return TextNode(value=value_str)
+
+            num_str, unit = match.groups()
+            return NumericLiteralNode(value=float(num_str), unit=unit.strip() or None)
+
         if not isinstance(node, InfixExpressionNode): return TextNode("/* invalid-expression */")
 
         left = self._evaluate_expression(node.left)
@@ -257,6 +287,11 @@ class Generator:
                     self.errors.append(f"Duplicate element template name found: {node.template_name}")
                 else:
                     self.element_templates[node.template_name] = node.content
+            elif node.template_type == 'Var':
+                if node.template_name in self.var_groups:
+                    self.errors.append(f"Duplicate var group name found: {node.template_name}")
+                else:
+                    self.var_groups[node.template_name] = node.content
 
         # Recurse, but not into the content of a template definition
         if hasattr(node, 'children') and not isinstance(node, TemplateNode):
@@ -349,21 +384,28 @@ class Generator:
         return html.escape(node.value)
 
     def _expand_element_templates(self, node: BaseNode):
-        if not hasattr(node, 'children'):
+        if not hasattr(node, 'children') or not node.children:
             return
 
-        new_children = []
-        for child in node.children:
+        i = 0
+        while i < len(node.children):
+            child = node.children[i]
+
             if isinstance(child, TemplateUsageNode) and child.template_type == 'Element':
                 if child.template_name in self.element_templates:
                     import copy
                     template_content = self.element_templates[child.template_name]
-                    new_children.extend(copy.deepcopy(template_content))
+
+                    # Replace the usage node with the content of the template
+                    node.children[i:i+1] = copy.deepcopy(template_content)
+
+                    # Adjust index to re-scan the newly inserted nodes
+                    i += len(template_content)
+                    continue # Continue loop without incrementing i again
                 else:
                     self.errors.append(f"Undefined element template used: {child.template_name}")
-                    new_children.append(child)
             else:
+                # Recurse into the child
                 self._expand_element_templates(child)
-                new_children.append(child)
 
-        node.children = new_children
+            i += 1
