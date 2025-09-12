@@ -393,6 +393,7 @@ private:
     
     // 表达式解析
     std::string parseExpression();
+    std::string parseFunctionCall();
     std::string parseConditionalExpression();
     std::string parseArithmeticExpression();
     std::string parseLogicalExpression();
