@@ -1,0 +1,153 @@
+{
+  "CJMOD Function": {
+    "prefix": "cjmod",
+    "body": [
+      "[CJMOD] ${1:name} {",
+      "\tfunction ${1:name}() {",
+      "\t\t${2:// function body}",
+      "\t}",
+      "}"
+    ],
+    "description": "Create a CJMOD function"
+  },
+  "CJMOD with Namespace": {
+    "prefix": "cjmod-namespace",
+    "body": [
+      "[CJMOD] ${1:name} namespace ${2:namespace} {",
+      "\tfunction ${1:name}() {",
+      "\t\t${3:// function body}",
+      "\t}",
+      "}"
+    ],
+    "description": "Create a CJMOD function with namespace"
+  },
+  "Animation": {
+    "prefix": "animation",
+    "body": [
+      "[Animation] ${1:name} {",
+      "\tduration: ${2:1s}",
+      "\teasing: ${3:ease-in-out}",
+      "\tdirection: ${4:normal}",
+      "\tloop: ${5:1}",
+      "\tdelay: ${6:0s}",
+      "\tkeyframes: ${7:0%: {opacity: 0}, 100%: {opacity: 1}}",
+      "}"
+    ],
+    "description": "Create a CHTL JS animation"
+  },
+  "Route": {
+    "prefix": "route",
+    "body": [
+      "[Route] ${1:path} {",
+      "\tcomponent: ${2:ComponentName}",
+      "\tparams: ${3:{}}",
+      "}"
+    ],
+    "description": "Create a CHTL JS route"
+  },
+  "Reactive Variable": {
+    "prefix": "var",
+    "body": [
+      "\\$${1:variableName}\\$ = ${2:value}"
+    ],
+    "description": "Create a reactive variable"
+  },
+  "Selector": {
+    "prefix": "selector",
+    "body": [
+      "{{${1:.class}}}"
+    ],
+    "description": "Create a CSS selector"
+  },
+  "Event Listener": {
+    "prefix": "event",
+    "body": [
+      "${1:element} -> ${2:click}: ${3:handler}"
+    ],
+    "description": "Create an event listener"
+  },
+  "Function": {
+    "prefix": "function",
+    "body": [
+      "function ${1:name}(${2:params}) {",
+      "\t${3:// function body}",
+      "}"
+    ],
+    "description": "Create a JavaScript function"
+  },
+  "Arrow Function": {
+    "prefix": "arrow",
+    "body": [
+      "const ${1:name} = (${2:params}) => {",
+      "\t${3:// function body}",
+      "}"
+    ],
+    "description": "Create an arrow function"
+  },
+  "Variable Declaration": {
+    "prefix": "const",
+    "body": [
+      "const ${1:name} = ${2:value};"
+    ],
+    "description": "Create a const variable"
+  },
+  "Let Declaration": {
+    "prefix": "let",
+    "body": [
+      "let ${1:name} = ${2:value};"
+    ],
+    "description": "Create a let variable"
+  },
+  "If Statement": {
+    "prefix": "if",
+    "body": [
+      "if (${1:condition}) {",
+      "\t${2:// code}",
+      "}"
+    ],
+    "description": "Create an if statement"
+  },
+  "For Loop": {
+    "prefix": "for",
+    "body": [
+      "for (let ${1:i} = 0; ${1:i} < ${2:length}; ${1:i}++) {",
+      "\t${3:// code}",
+      "}"
+    ],
+    "description": "Create a for loop"
+  },
+  "For Each Loop": {
+    "prefix": "foreach",
+    "body": [
+      "for (const ${1:item} of ${2:array}) {",
+      "\t${3:// code}",
+      "}"
+    ],
+    "description": "Create a for each loop"
+  },
+  "Try Catch": {
+    "prefix": "try",
+    "body": [
+      "try {",
+      "\t${1:// code}",
+      "} catch (${2:error}) {",
+      "\t${3:// error handling}",
+      "}"
+    ],
+    "description": "Create a try catch block"
+  },
+  "Console Log": {
+    "prefix": "log",
+    "body": [
+      "console.log(${1:message});"
+    ],
+    "description": "Create a console.log statement"
+  },
+  "Return Statement": {
+    "prefix": "return",
+    "body": [
+      "return ${1:value};"
+    ],
+    "description": "Create a return statement"
+  }
+}

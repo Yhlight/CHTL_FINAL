@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -Wextra -O2 -Xlinker --dependency-file=CMakeFiles/improved_chtl_compiler.dir/link.d CMakeFiles/improved_chtl_compiler.dir/src/improved_chtl_compiler.cpp.o -o improved_chtl_compiler

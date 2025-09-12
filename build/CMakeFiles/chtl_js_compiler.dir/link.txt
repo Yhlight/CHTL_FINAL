@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -Wextra -O2 -Xlinker --dependency-file=CMakeFiles/chtl_js_compiler.dir/link.d CMakeFiles/chtl_js_compiler.dir/src/chtl_js_compiler.cpp.o -o chtl_js_compiler

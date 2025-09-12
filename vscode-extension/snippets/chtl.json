@@ -1,0 +1,127 @@
+{
+  "Template Style": {
+    "prefix": "template-style",
+    "body": [
+      "[Template] @Style ${1:name} {",
+      "\t${2:property}: ${3:value};",
+      "}"
+    ],
+    "description": "Create a CHTL style template"
+  },
+  "Template Element": {
+    "prefix": "template-element",
+    "body": [
+      "[Template] @Element ${1:name} {",
+      "\t<${2:div}>${3:content}</${2:div}>",
+      "}"
+    ],
+    "description": "Create a CHTL element template"
+  },
+  "Template Variable": {
+    "prefix": "template-var",
+    "body": [
+      "[Template] @Var ${1:name} {",
+      "\t${2:value}",
+      "}"
+    ],
+    "description": "Create a CHTL variable template"
+  },
+  "Template with Inheritance": {
+    "prefix": "template-inherit",
+    "body": [
+      "[Template] @${1|Style,Element,Var|} ${2:name} inherit ${3:parent} {",
+      "\t${4:content}",
+      "}"
+    ],
+    "description": "Create a CHTL template with inheritance"
+  },
+  "Custom Style": {
+    "prefix": "custom-style",
+    "body": [
+      "[Custom] ${1:group} Style ${2:name} {",
+      "\t${3:property}: ${4:value};",
+      "}"
+    ],
+    "description": "Create a CHTL custom style"
+  },
+  "Custom Element": {
+    "prefix": "custom-element",
+    "body": [
+      "[Custom] ${1:group} Element ${2:name} {",
+      "\t<${3:div}>${4:content}</${3:div}>",
+      "}"
+    ],
+    "description": "Create a CHTL custom element"
+  },
+  "Custom Variable": {
+    "prefix": "custom-var",
+    "body": [
+      "[Custom] ${1:group} Var ${2:name} {",
+      "\t${3:value}",
+      "}"
+    ],
+    "description": "Create a CHTL custom variable"
+  },
+  "Import": {
+    "prefix": "import",
+    "body": [
+      "[Import] ${1:path}"
+    ],
+    "description": "Import a CHTL module"
+  },
+  "Namespace": {
+    "prefix": "namespace",
+    "body": [
+      "[Namespace] ${1:name}"
+    ],
+    "description": "Define a namespace"
+  },
+  "Origin HTML": {
+    "prefix": "origin-html",
+    "body": [
+      "[Origin] @Html {",
+      "\t${1:<div>content</div>}",
+      "}"
+    ],
+    "description": "Embed raw HTML"
+  },
+  "Origin CSS": {
+    "prefix": "origin-css",
+    "body": [
+      "[Origin] @Style {",
+      "\t${1:.class { property: value; }}",
+      "}"
+    ],
+    "description": "Embed raw CSS"
+  },
+  "Origin JavaScript": {
+    "prefix": "origin-js",
+    "body": [
+      "[Origin] @JavaScript {",
+      "\t${1:function() { return true; }}",
+      "}"
+    ],
+    "description": "Embed raw JavaScript"
+  },
+  "Configuration": {
+    "prefix": "config",
+    "body": [
+      "[Configuration] ${1:key} = ${2:value}"
+    ],
+    "description": "Set configuration"
+  },
+  "HTML Element": {
+    "prefix": "html",
+    "body": [
+      "<${1:div}${2: class=\"${3:class}\"}>${4:content}</${1:div}>"
+    ],
+    "description": "Create an HTML element"
+  },
+  "CSS Property": {
+    "prefix": "css",
+    "body": [
+      "${1:property}: ${2:value};"
+    ],
+    "description": "Create a CSS property"
+  }
+}

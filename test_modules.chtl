@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CHTL Module System Test</title>
+</head>
+<body>
+    <h1>CHTL Module System Test</h1>
+    
+    <!-- 命名空间定义 -->
+    [Namespace] MyApp
+    
+    <!-- CMOD模块定义 -->
+    [CMOD] MyApp style Button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: #007bff;
+        color: white;
+    }
+    
+    [CMOD] MyApp element Card {
+        <div class="card">
+            <div class="card-header">Card Header</div>
+            <div class="card-body">Card Body</div>
+            <div class="card-footer">Card Footer</div>
+        </div>
+    }
+    
+    [CMOD] MyApp var Theme {
+        primary-color: #007bff;
+        secondary-color: #6c757d;
+        success-color: #28a745;
+        danger-color: #dc3545;
+    }
+    
+    <!-- CJMOD模块定义 -->
+    [CJMOD] printMylove namespace MyApp {
+        function printMylove() {
+            console.log("I love CHTL!");
+        }
+    }
+    
+    [CJMOD] iNeverAway namespace MyApp {
+        function iNeverAway() {
+            return "I will never be away from you!";
+        }
+    }
+    
+    [CJMOD] util namespace MyApp {
+        function util() {
+            return {
+                then: function(callback) {
+                    return callback();
+                }
+            };
+        }
+    }
+    
+    <!-- 模块导入 -->
+    [Import] CMOD Button from ./modules/button.cmod
+    [Import] CJMOD printMylove from ./modules/printMylove.cjmod
+    [Import] CJMOD * from ./modules/utils.cjmod
+    
+    <!-- 通配符导入 -->
+    [Import] CMOD * from ./modules/components.cmod
+    [Import] CJMOD * from ./modules/helpers.cjmod
+    
+    <!-- 使用模块 -->
+    [Origin] @Html {
+        <div class="container">
+            <h2>Module System Demo</h2>
+            
+            <!-- 使用CMOD样式 -->
+            <button class="Button">Click Me</button>
+            
+            <!-- 使用CMOD元素 -->
+            <div class="Card"></div>
+            
+            <!-- 使用CJMOD函数 -->
+            <script>
+                printMylove();
+                console.log(iNeverAway());
+                util().then(() => console.log("Util function called"));
+            </script>
+            
+            <h3>Theme Variables</h3>
+            <p>Using theme variables from CMOD var module</p>
+        </div>
+    }
+    
+    <!-- 配置 -->
+    [Configuration] ENABLE_MODULE_SYSTEM = true
+    [Configuration] ENABLE_NAMESPACE = true
+    [Configuration] DEBUG_MODE = true
+</body>
+</html>

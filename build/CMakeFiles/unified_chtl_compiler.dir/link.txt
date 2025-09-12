@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -Wextra -O2 -Xlinker --dependency-file=CMakeFiles/unified_chtl_compiler.dir/link.d CMakeFiles/unified_chtl_compiler.dir/src/unified_chtl_compiler.cpp.o -o unified_chtl_compiler  libchtl_lib.a

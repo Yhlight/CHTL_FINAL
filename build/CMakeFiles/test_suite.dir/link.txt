@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -Wextra -O2 -Xlinker --dependency-file=CMakeFiles/test_suite.dir/link.d CMakeFiles/test_suite.dir/test/test_suite.cpp.o -o test_suite

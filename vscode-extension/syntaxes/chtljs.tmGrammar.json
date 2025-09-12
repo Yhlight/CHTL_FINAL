@@ -1,0 +1,189 @@
+{
+  "scopeName": "source.chtljs",
+  "fileTypes": ["chtljs", "cjjs"],
+  "patterns": [
+    {
+      "include": "#javascript"
+    },
+    {
+      "include": "#chtljs-directives"
+    },
+    {
+      "include": "#chtljs-cjmod"
+    },
+    {
+      "include": "#chtljs-animation"
+    },
+    {
+      "include": "#chtljs-route"
+    },
+    {
+      "include": "#chtljs-variables"
+    },
+    {
+      "include": "#chtljs-selectors"
+    },
+    {
+      "include": "#chtljs-events"
+    }
+  ],
+  "repository": {
+    "javascript": {
+      "patterns": [
+        {
+          "name": "keyword.control.js",
+          "match": "\\b(function|var|let|const|if|else|for|while|do|switch|case|default|break|continue|return|try|catch|finally|throw|new|this|typeof|instanceof|in|of|with|delete|void|debugger)\\b"
+        },
+        {
+          "name": "storage.type.js",
+          "match": "\\b(boolean|number|string|object|undefined|null|true|false)\\b"
+        },
+        {
+          "name": "string.quoted.double.js",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.js",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.js",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.js",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "comment.line.js",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.js",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "chtljs-directives": {
+      "patterns": [
+        {
+          "name": "keyword.control.chtljs",
+          "match": "\\[CJMOD\\]|\\[Animation\\]|\\[Route\\]"
+        }
+      ]
+    },
+    "chtljs-cjmod": {
+      "patterns": [
+        {
+          "name": "meta.cjmod.chtljs",
+          "begin": "\\[CJMOD\\]\\s+(\\w+)(?:\\s+namespace\\s+(\\w+))?",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.function.chtljs"
+            },
+            "2": {
+              "name": "entity.name.namespace.chtljs"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#javascript"
+            }
+          ]
+        }
+      ]
+    },
+    "chtljs-animation": {
+      "patterns": [
+        {
+          "name": "meta.animation.chtljs",
+          "begin": "\\[Animation\\]\\s+(\\w+)",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.function.chtljs"
+            }
+          },
+          "patterns": [
+            {
+              "name": "entity.other.attribute-name.chtljs",
+              "match": "\\b(duration|easing|direction|loop|delay|keyframes)\\b"
+            },
+            {
+              "name": "string.quoted.double.chtljs",
+              "begin": "\"",
+              "end": "\""
+            },
+            {
+              "name": "string.quoted.single.chtljs",
+              "begin": "'",
+              "end": "'"
+            }
+          ]
+        }
+      ]
+    },
+    "chtljs-route": {
+      "patterns": [
+        {
+          "name": "meta.route.chtljs",
+          "begin": "\\[Route\\]\\s+(\\w+)",
+          "end": "\\}",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.function.chtljs"
+            }
+          },
+          "patterns": [
+            {
+              "name": "entity.other.attribute-name.chtljs",
+              "match": "\\b(component|params)\\b"
+            },
+            {
+              "name": "string.quoted.double.chtljs",
+              "begin": "\"",
+              "end": "\""
+            },
+            {
+              "name": "string.quoted.single.chtljs",
+              "begin": "'",
+              "end": "'"
+            }
+          ]
+        }
+      ]
+    },
+    "chtljs-variables": {
+      "patterns": [
+        {
+          "name": "variable.other.chtljs",
+          "match": "\\$\\w+\\$"
+        }
+      ]
+    },
+    "chtljs-selectors": {
+      "patterns": [
+        {
+          "name": "entity.other.attribute-value.chtljs",
+          "match": "\\{\\{[^}]+\\}\\}"
+        }
+      ]
+    },
+    "chtljs-events": {
+      "patterns": [
+        {
+          "name": "keyword.control.event.chtljs",
+          "match": "\\b\\w+\\s*->\\s*\\w+\\s*:\\s*\\w+"
+        }
+      ]
+    }
+  ]
+}

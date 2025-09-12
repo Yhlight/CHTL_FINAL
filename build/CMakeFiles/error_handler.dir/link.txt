@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -Wextra -O2 -Xlinker --dependency-file=CMakeFiles/error_handler.dir/link.d CMakeFiles/error_handler.dir/src/error_handler.cpp.o -o error_handler
