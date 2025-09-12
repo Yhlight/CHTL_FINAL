@@ -1,0 +1,15 @@
+# Build artifacts
+/build/
+*.o
+*.a
+*.so
+*.dll
+*.exe
+
+# User-specific files
+.vscode/
+*.suo
+*.user
+
+# Other
+.DS_Store
