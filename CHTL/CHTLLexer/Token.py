@@ -12,6 +12,7 @@ class TokenType(Enum):
     # Literals
     IDENTIFIER = "IDENTIFIER"  # e.g., div, my_variable, color, red
     STRING = "STRING"        # "anything in quotes"
+    HEX_LITERAL = "HEX_LITERAL" # e.g., #ff0000
 
     # Delimiters
     LBRACE = "{"

@@ -165,24 +165,32 @@ class Parser:
         auto_ids = []
 
         while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
-            if self.current_token.type not in (TokenType.IDENTIFIER, TokenType.DOT, TokenType.HASH, TokenType.AMPERSAND):
+            # First, check for statements that unambiguously start a CSS rule.
+            if self.current_token.type in (TokenType.DOT, TokenType.HASH, TokenType.AMPERSAND):
+                rule, auto_class, auto_id = self._parse_css_rule()
+                if rule: css_rules.append(rule)
+                if auto_class: auto_classes.append(auto_class)
+                if auto_id: auto_ids.append(auto_id)
+            # Next, check for statements that start with an IDENTIFIER.
+            elif self.current_token.type == TokenType.IDENTIFIER:
+                # If it's followed by a colon, it's an inline property.
+                if self.peek_token.type == TokenType.COLON:
+                    prop_name, prop_value = self._parse_inline_css_property()
+                    if prop_name:
+                        inline_properties[prop_name] = prop_value
+                # If it's followed by a brace, it's a tag selector rule (e.g., `p { ... }`)
+                elif self.peek_token.type == TokenType.LBRACE:
+                    rule, auto_class, auto_id = self._parse_css_rule()
+                    if rule: css_rules.append(rule)
+                    if auto_class: auto_classes.append(auto_class)
+                    if auto_id: auto_ids.append(auto_id)
+                else:
+                    self.errors.append(f"Unexpected token after identifier in style block: {self.peek_token.literal}")
+                    self._skip_to_next_statement()
+            # If it's none of the above, it's an error.
+            else:
                 self.errors.append(f"Unexpected token in style block: {self.current_token.literal}")
                 self._skip_to_next_statement()
-                continue
-
-            if self.peek_token.type == TokenType.COLON:
-                prop_name, prop_value = self._parse_inline_css_property()
-                if prop_name:
-                    inline_properties[prop_name] = prop_value
-            # If it's not an inline property, it must be a full CSS rule.
-            else:
-                rule, auto_class, auto_id = self._parse_css_rule()
-                if rule:
-                    css_rules.append(rule)
-                if auto_class:
-                    auto_classes.append(auto_class)
-                if auto_id:
-                    auto_ids.append(auto_id)
 
         return StyleNode(properties=inline_properties, rules=css_rules,
                          auto_classes=auto_classes, auto_ids=auto_ids)
@@ -196,6 +204,9 @@ class Parser:
 
         value_parts = []
         while self.current_token.type not in (TokenType.SEMICOLON, TokenType.RBRACE, TokenType.EOF):
+            # Since the lexer now creates a single token for hex values, we don't need
+            # special joining logic here anymore. The " " join is correct for multi-part
+            # values like `1px solid black`.
             value_parts.append(self.current_token.literal)
             self._next_token()
 

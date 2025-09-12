@@ -62,6 +62,15 @@ class Lexer:
             self._advance()
         return Token(TokenType.IDENTIFIER, result)
 
+    def _hex_literal(self) -> Token:
+        """Parses a hex color code literal, e.g., #ff0000."""
+        start_pos = self.pos
+        self._advance() # Consume '#'
+        while self.current_char is not None and self.current_char.isalnum():
+            self._advance()
+        literal = self.text[start_pos:self.pos]
+        return Token(TokenType.HEX_LITERAL, literal)
+
     def _string(self, quote_type: str) -> Token:
         """Parses a quoted string literal."""
         self._advance()  # Consume the opening quote
@@ -93,6 +102,12 @@ class Lexer:
 
             if self.current_char in ('"', "'"):
                 return self._string(self.current_char)
+
+            if self.current_char == '#':
+                # Check if it's a hex color code or just a HASH token
+                if self._peek() and self._peek().isalnum():
+                    return self._hex_literal()
+                # Fallthrough to the token_map if it's just a standalone '#'
 
             token_map = {
                 '{': TokenType.LBRACE,

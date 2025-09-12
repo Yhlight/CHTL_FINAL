@@ -84,6 +84,9 @@ if __name__ == "__main__":
     .auto-class {
         border: 1px solid black;
     }
+    .auto-class:hover {
+        background-color: #f0f0f0;
+    }
     </style>
 </head>
 <body>

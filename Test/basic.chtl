@@ -35,11 +35,14 @@ img {
     alt: "A test image";
 }
 
-// Test for auto-attribute generation
+// Test for auto-attribute generation and contextual selectors
 div {
     style {
         .auto-class {
             border: 1px solid black;
+        }
+        &:hover {
+            background-color: #f0f0f0;
         }
     }
     text { "This div should have a class." }

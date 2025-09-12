@@ -1,4 +1,4 @@
-from CHTL.CHTLNode import BaseNode, ElementNode, TextNode, StyleNode
+from CHTL.CHTLNode import BaseNode, ElementNode, TextNode, StyleNode, CssRule
 import html
 
 class Generator:
@@ -20,9 +20,9 @@ class Generator:
         if not isinstance(ast_root, ElementNode) or ast_root.tag_name != "root":
             raise ValueError("AST root must be a root ElementNode.")
 
-        # 1. Clear state from any previous runs and collect styles from the new AST.
+        # 1. Clear state and perform a context-aware traversal to collect and process global styles.
         self.global_css_rules = []
-        self._collect_global_styles(ast_root)
+        self._collect_global_styles(ast_root, parent=None)
 
         # 2. Generate the body HTML from the AST's children.
         body_html = "".join(self._generate_node(child) for child in ast_root.children)
@@ -57,18 +57,47 @@ class Generator:
 
         return "\n".join(rule_strings)
 
-    def _collect_global_styles(self, node: BaseNode):
+    def _get_parent_selector(self, parent_node: ElementNode) -> str:
         """
-        Performs a depth-first traversal of the AST to find all StyleNodes
-        and collect their CSS rules into the generator's state.
+        Gets the primary selector for a parent element. This is used to replace
+        the '&' in contextual selectors. It respects CHTL's precedence:
+        1. Explicit class/id. 2. Auto-generated class/id. 3. Tag name.
         """
-        if isinstance(node, StyleNode):
-            self.global_css_rules.extend(node.rules)
+        # 1. Check for explicit class or id attributes.
+        if "class" in parent_node.attributes:
+            first_class = parent_node.attributes["class"].split()[0]
+            return f".{first_class}"
+        if "id" in parent_node.attributes:
+            return f"#{parent_node.attributes['id']}"
 
-        # Recursively traverse children, if any.
-        if hasattr(node, 'children'):
-            for child in node.children:
-                self._collect_global_styles(child)
+        # 2. If no explicit attributes, check for auto-generation signals from children.
+        for child in parent_node.children:
+            if isinstance(child, StyleNode):
+                if child.auto_classes_to_add:
+                    return f".{child.auto_classes_to_add[0]}"
+                if child.auto_ids_to_add:
+                    return f"#{child.auto_ids_to_add[0]}"
+
+        # 3. Fallback to the tag name.
+        return parent_node.tag_name.lower()
+
+    def _collect_global_styles(self, current_node: BaseNode, parent: ElementNode | None):
+        """
+        Performs a depth-first traversal of the AST, collecting and processing
+        global CSS rules with parent context.
+        """
+        if isinstance(current_node, StyleNode) and parent:
+            parent_selector = self._get_parent_selector(parent)
+            for rule in current_node.rules:
+                # Replace '&' with the parent's selector string
+                new_selector = rule.selector.replace('&', parent_selector)
+                self.global_css_rules.append(CssRule(selector=new_selector, properties=rule.properties))
+
+        # Recursively traverse children, passing the current node as the new parent if it's an element
+        if hasattr(current_node, 'children'):
+            new_parent = current_node if isinstance(current_node, ElementNode) else parent
+            for child in current_node.children:
+                self._collect_global_styles(child, parent=new_parent)
 
     def _generate_node(self, node: BaseNode) -> str:
         """Dispatches to the correct generation method based on node type."""
