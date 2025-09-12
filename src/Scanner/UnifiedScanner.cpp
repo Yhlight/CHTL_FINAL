@@ -181,6 +181,81 @@ std::vector<std::pair<size_t, CodeFragmentType>> UnifiedScanner::preScan(const s
             continue;
         }
         
+        // 检查方括号关键字 [Template], [Custom], [Origin], [Import], [Namespace], [Configuration], [Module]
+        if (sourceCode[pos] == '[') {
+            size_t startPos = pos;
+            size_t bracketStart = pos;
+            pos++; // 跳过 [
+            
+            // 查找匹配的 ]
+            size_t endPos = pos;
+            while (endPos < sourceCode.length() && sourceCode[endPos] != ']') {
+                endPos++;
+            }
+            
+            if (endPos < sourceCode.length()) {
+                std::string keyword = sourceCode.substr(pos, endPos - pos);
+                
+                // 检查是否为已知的方括号关键字
+                if (keyword == "Template" || keyword == "Custom" || keyword == "Origin" || 
+                    keyword == "Import" || keyword == "Namespace" || keyword == "Configuration" || 
+                    keyword == "Module") {
+                    
+                    pos = endPos + 1; // 跳过 ]
+                    
+                    // 跳过空格
+                    size_t checkPos = pos;
+                    while (checkPos < sourceCode.length() && std::isspace(sourceCode[checkPos])) {
+                        checkPos++;
+                    }
+                    
+                    // 检查后面是否有 { 或 @
+                    if (checkPos < sourceCode.length() && 
+                        (sourceCode[checkPos] == '{' || sourceCode[checkPos] == '@')) {
+                        boundaries.emplace_back(bracketStart, CodeFragmentType::CHTL);
+                        pos = checkPos;
+                        continue;
+                    }
+                    
+                    // 对于命名空间和配置，检查是否有标识符后跟 {
+                    if (keyword == "Namespace" || keyword == "Configuration") {
+                        // 跳过第一个标识符（类型）
+                        while (checkPos < sourceCode.length() && 
+                               (std::isalnum(sourceCode[checkPos]) || sourceCode[checkPos] == '-')) {
+                            checkPos++;
+                        }
+                        
+                        // 跳过空格
+                        while (checkPos < sourceCode.length() && std::isspace(sourceCode[checkPos])) {
+                            checkPos++;
+                        }
+                        
+                        // 对于配置，还需要跳过第二个标识符（名称）
+                        if (keyword == "Configuration") {
+                            // 跳过第二个标识符（名称）
+                            while (checkPos < sourceCode.length() && 
+                                   (std::isalnum(sourceCode[checkPos]) || sourceCode[checkPos] == '-')) {
+                                checkPos++;
+                            }
+                            
+                            // 跳过空格
+                            while (checkPos < sourceCode.length() && std::isspace(sourceCode[checkPos])) {
+                                checkPos++;
+                            }
+                        }
+                        
+                        // 检查是否有 {
+                        if (checkPos < sourceCode.length() && sourceCode[checkPos] == '{') {
+                            boundaries.emplace_back(bracketStart, CodeFragmentType::CHTL);
+                            pos = checkPos;
+                            continue;
+                        }
+                    }
+                }
+            }
+            pos = bracketStart; // 回退到 [
+        }
+        
         // 检查CHTL关键字
         if (std::isalpha(sourceCode[pos])) {
             size_t startPos = pos;

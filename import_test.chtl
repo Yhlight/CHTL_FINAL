@@ -1,50 +1,16 @@
-// 导入系统测试文件
+[Import] CHTL "components/button.chtl"
 
-[Import] CSS "test.css"
-[Import] JS "test.js"
+[Import] CSS "styles/main.css"
 
-html
-{
-    head
-    {
-        title
-        {
-            text
-            {
-                CHTL导入系统测试
-            }
-        }
-    }
-    
-    body
-    {
-        div
-        {
-            class: "container";
-            
-            h1
-            {
-                text
-                {
-                    欢迎使用CHTL导入系统！
-                }
-            }
-            
-            p
-            {
-                text
-                {
-                    这个页面演示了CHTL的导入功能，包括CSS和JavaScript文件的导入。
-                }
-            }
-            
-            button
-            {
-                text
-                {
-                    点击我
-                }
-            }
-        }
-    }
+[Import] JS "scripts/app.js"
+
+[Import] CMOD "modules/ui.chtl" {
+    Button
+    Card
+    Modal
+}
+
+[Import] CJMOD "modules/interactions.chtl" {
+    Animation
+    Router
 }

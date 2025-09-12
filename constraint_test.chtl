@@ -1,0 +1,15 @@
+[Template] @Style Button {
+    color: blue;
+    background: white;
+    except mobile {
+        color: red;
+        background: yellow;
+    }
+}
+
+[Custom] @Element Card {
+    class: "card";
+    except tablet {
+        class: "card-tablet";
+    }
+}

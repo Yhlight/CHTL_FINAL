@@ -44,6 +44,10 @@ std::shared_ptr<BaseNode> CHTLParser::parse(const std::string& sourceCode) {
     TokenList tokens;
     size_t pos = 0;
     
+    if (m_debugMode) {
+        std::cout << "[CHTLParser] Parsing source code: " << sourceCode.substr(0, 100) << "..." << std::endl;
+    }
+    
     while (pos < sourceCode.length()) {
         // 跳过空白字符
         while (pos < sourceCode.length() && std::isspace(sourceCode[pos])) {
@@ -80,10 +84,23 @@ std::shared_ptr<BaseNode> CHTLParser::parse(const std::string& sourceCode) {
             } else if (value == "Configuration") {
                 tokens.addToken(TokenType::CONFIGURATION, value, 1, 1);
             } else if (value == "Module") {
-                tokens.addToken(TokenType::MODULE, value, 1, 1);
+                // Only treat as MODULE token if it's at the start of a line or after [Module]
+                // For configuration syntax like "Module Dependencies", treat as IDENTIFIER
+                tokens.addToken(TokenType::IDENTIFIER, value, 1, 1);
+            } else if (value == "except") {
+                tokens.addToken(TokenType::EXCEPT, value, 1, 1);
             } else {
                 tokens.addToken(TokenType::IDENTIFIER, value, 1, 1);
             }
+        }
+        // 识别数字
+        else if (std::isdigit(sourceCode[pos])) {
+            size_t start = pos;
+            while (pos < sourceCode.length() && (std::isdigit(sourceCode[pos]) || sourceCode[pos] == '.')) {
+                pos++;
+            }
+            std::string value = sourceCode.substr(start, pos - start);
+            tokens.addToken(TokenType::NUMBER, value, 1, 1);
         }
         // 识别@符号
         else if (sourceCode[pos] == '@') {
@@ -228,6 +245,15 @@ std::shared_ptr<BaseNode> CHTLParser::parse(const std::string& sourceCode) {
         // 其他字符
         else {
             pos++;
+        }
+    }
+    
+    if (m_debugMode) {
+        std::cout << "[CHTLParser] Generated " << tokens.size() << " tokens:" << std::endl;
+        for (size_t i = 0; i < tokens.size(); ++i) {
+            const auto& token = tokens[i];
+            std::cout << "  Token " << i << ": " << static_cast<int>(token.getType()) 
+                      << " = \"" << token.getValue() << "\"" << std::endl;
         }
     }
     
@@ -923,20 +949,38 @@ std::shared_ptr<BaseNode> CHTLParser::parseConfiguration() {
                         nextToken(); // 消费 : 或 =
                         skipWhitespace();
                         
-                        // 解析配置值
+                        // 解析配置值（支持复合值）
                         std::string value;
-                        if (currentToken().getType() == TokenType::STRING) {
-                            value = currentToken().getValue();
+                        while (!isAtEnd() && !checkToken(TokenType::SEMICOLON) && !checkToken(TokenType::RIGHT_BRACE)) {
+                            if (currentToken().getType() == TokenType::STRING) {
+                                value += currentToken().getValue();
+                                nextToken();
+                            } else if (currentToken().getType() == TokenType::IDENTIFIER) {
+                                value += currentToken().getValue();
+                                nextToken();
+                            } else if (currentToken().getType() == TokenType::NUMBER) {
+                                value += currentToken().getValue();
+                                nextToken();
+                            } else if (currentToken().getType() == TokenType::HASH) {
+                                value += currentToken().getValue();
+                                nextToken();
+                            } else if (currentToken().getType() == TokenType::COLON || 
+                                       currentToken().getType() == TokenType::EQUALS) {
+                                // 跳过意外的冒号或等号
+                                nextToken();
+                            } else {
+                                // 添加其他字符（如空格、连字符等）
+                                value += currentToken().getValue();
+                                nextToken();
+                            }
+                            
+                            // 跳过空格
+                            skipWhitespace();
+                        }
+                        
+                        // 跳过分号（如果存在）
+                        if (checkToken(TokenType::SEMICOLON)) {
                             nextToken();
-                        } else if (currentToken().getType() == TokenType::IDENTIFIER) {
-                            value = currentToken().getValue();
-                            nextToken();
-                        } else if (currentToken().getType() == TokenType::NUMBER) {
-                            value = currentToken().getValue();
-                            nextToken();
-                        } else {
-                            addError("Expected value after configuration key");
-                            break;
                         }
                         
                         configurationNode->addConfigurationItem(key, value);

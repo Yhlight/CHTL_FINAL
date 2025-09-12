@@ -1,64 +1,16 @@
-// 配置系统测试文件
-
-[Configuration] Keyword CustomKeywords
-{
-    button: "btn";
-    card: "card";
-    container: "container";
-    text: "txt";
+[Configuration] Compiler Settings {
+    target: "html5";
+    minify: true;
+    debug: false;
 }
 
-[Configuration] Module UIComponents
-{
-    path: "./modules/ui";
-    version: "1.0.0";
-    enabled: "true";
+[Configuration] Output Options {
+    format: "html";
+    encoding: "utf-8";
+    indent: 2;
 }
 
-[Configuration] Compiler Optimizations
-{
-    minify: "true";
-    compress: "true";
-    optimize: "true";
-}
-
-[Configuration] Output HTML5
-{
-    doctype: "html5";
-    encoding: "UTF-8";
-    indent: "2";
-}
-
-[Configuration] Debug Verbose
-{
-    level: "verbose";
-    warnings: "true";
-    errors: "true";
-}
-
-html
-{
-    body
-    {
-        div
-        {
-            class: "container";
-            
-            h1
-            {
-                text
-                {
-                    CHTL配置系统测试
-                }
-            }
-            
-            p
-            {
-                text
-                {
-                    这个页面演示了CHTL的配置功能，包括关键字、模块、编译器、输出和调试配置。
-                }
-            }
-        }
-    }
+[Configuration] Module Dependencies {
+    ui: "1.0.0";
+    utils: "2.1.0";
 }

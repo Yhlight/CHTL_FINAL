@@ -1,0 +1,5 @@
+[Namespace] UI {
+    [Template] @Style Button {
+        color: blue;
+    }
+}

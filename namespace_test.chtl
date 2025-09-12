@@ -1,68 +1,23 @@
-// 命名空间系统测试文件
-
-[Namespace] UI
-{
-    [Template] @Style Button
-    {
-        background-color: blue;
-        color: white;
-        padding: 10px;
-        border: none;
-        border-radius: 4px;
+[Namespace] UI {
+    [Template] @Style Button {
+        color: blue;
+        background: white;
     }
     
-    [Template] @Element Card
-    {
-        div
-        {
-            class: "card";
-            style
-            {
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                padding: 20px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-        }
+    [Custom] @Element Card {
+        class: "ui-card";
     }
 }
 
-[Namespace] Utils
-{
-    [Template] @Style TextCenter
-    {
-        text-align: center;
+[Namespace] Utils {
+    [Template] @Var Colors {
+        primary: "#007bff";
+        secondary: "#6c757d";
     }
     
-    [Template] @Style MarginTop
-    {
-        margin-top: 20px;
-    }
-}
-
-html
-{
-    body
-    {
-        div
-        {
-            class: "container";
-            
-            h1
-            {
-                text
-                {
-                    CHTL命名空间系统测试
-                }
-            }
-            
-            p
-            {
-                text
-                {
-                    这个页面演示了CHTL的命名空间功能，包括UI和Utils命名空间。
-                }
-            }
+    [Origin] @JavaScript {
+        function formatDate(date) {
+            return date.toLocaleDateString();
         }
     }
 }
