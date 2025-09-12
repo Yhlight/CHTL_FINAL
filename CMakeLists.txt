@@ -28,6 +28,9 @@ set(CHTL_SOURCES
     src/CHTL/CHTLNode.cpp
     src/CHTL/CHTLParser.cpp
     src/Scanner/UnifiedScanner.cpp
+    src/CHTL_JS/CHTLJSLexer.cpp
+    src/CHTL_JS/CHTLJSParser.cpp
+    src/CHTL_JS/CHTLJSGenerator.cpp
 )
 
 # 头文件
@@ -38,6 +41,9 @@ set(CHTL_HEADERS
     include/CHTL/CHTLNode.h
     include/CHTL/CHTLParser.h
     include/Scanner/UnifiedScanner.h
+    include/CHTL_JS/CHTLJSLexer.h
+    include/CHTL_JS/CHTLJSParser.h
+    include/CHTL_JS/CHTLJSGenerator.h
 )
 
 # 创建库
