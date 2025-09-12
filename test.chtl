@@ -1,15 +1,19 @@
-[Import] @Chtl from "components.chtl";
-[Import] @Chtl from "defaults.chtl";
+[Custom] @Style BoxStyle {
+    border: 1px solid black;
+    padding: 10px;
+    margin: 15px;
+    background-color: #eee;
+}
 
 html {
     body {
-        @Element Card from components;
-
-        p {
+        div {
             style {
-                @Style DefaultText from defaults;
+                @Style BoxStyle {
+                    delete border, margin;
+                }
             }
-            text { "Hello, Namespaces!" }
+            text { "This box should have padding and a background, but no border or margin." }
         }
     }
 }

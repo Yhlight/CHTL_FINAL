@@ -2,6 +2,7 @@
 #include "../CHTLLexer/CHTLLexer.h" // For recursive parsing
 #include <iostream>
 #include <stdexcept>
+#include <unordered_set>
 
 namespace CHTL {
 
@@ -273,23 +274,37 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
             if (templateNode->is_custom_) {
                 consume(TokenType::OpenBrace, "Expected '{' for custom style usage.");
                 std::unordered_map<std::string, std::vector<Token>> provided_values;
+                std::unordered_set<std::string> deleted_properties;
+
                 while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-                    const Token& key = consume(TokenType::Identifier, "Expected property name in custom style usage.");
-                    consume(TokenType::Colon, "Expected ':' after property name.");
-                    provided_values[key.lexeme] = parsePropertyValue();
-                    consume(TokenType::Semicolon, "Expected ';' after property value.");
+                    if (match({TokenType::Delete})) {
+                        do {
+                            deleted_properties.insert(consume(TokenType::Identifier, "Expected property name after 'delete'.").lexeme);
+                        } while (match({TokenType::Comma}));
+                        consume(TokenType::Semicolon, "Expected ';' after delete statement.");
+                    } else {
+                        const Token& key = consume(TokenType::Identifier, "Expected property name in custom style usage.");
+                        consume(TokenType::Colon, "Expected ':' after property name.");
+                        provided_values[key.lexeme] = parsePropertyValue();
+                        consume(TokenType::Semicolon, "Expected ';' after property value.");
+                    }
                 }
                 consume(TokenType::CloseBrace, "Expected '}' after custom style block.");
 
                 // Expand the template with the provided values
                 for (const auto& prop : templateNode->properties_) {
                     const std::string& prop_name = prop.first;
+                    // Skip deleted properties
+                    if (deleted_properties.count(prop_name)) {
+                        continue;
+                    }
+
                     const auto& prop_value = prop.second;
                     if (prop_value.empty()) { // It's a placeholder
                         if (provided_values.count(prop_name)) {
                             styleNode->inline_properties_.emplace_back(prop_name, provided_values.at(prop_name));
                         } else {
-                            throw std::runtime_error("Value for placeholder '" + prop_name + "' not provided.");
+                            throw std::runtime_error("Value for placeholder '" + prop_name + "' not provided for '" + prop_name + "'.");
                         }
                     } else { // It's a regular property from the template
                         styleNode->inline_properties_.push_back(prop);
