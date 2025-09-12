@@ -154,11 +154,6 @@ void CHTLJSLexer::initializeKeywords() {
     keywords["animate"] = CHTLJSTokenType::ANIMATE;
     keywords["fileloader"] = CHTLJSTokenType::FILELOADER;
     keywords["router"] = CHTLJSTokenType::ROUTER;
-    keywords["iNeverAway"] = CHTLJSTokenType::INEVERAWAY;
-    keywords["printMylove"] = CHTLJSTokenType::PRINTMYLOVE;
-    keywords["util"] = CHTLJSTokenType::UTIL;
-    keywords["then"] = CHTLJSTokenType::THEN;
-    keywords["change"] = CHTLJSTokenType::CHANGE;
     keywords["delegate"] = CHTLJSTokenType::DELEGATE;
     keywords["target"] = CHTLJSTokenType::TARGET;
     keywords["duration"] = CHTLJSTokenType::DURATION;

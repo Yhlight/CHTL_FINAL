@@ -40,12 +40,24 @@
 - ✅ 动画系统 (animate)
 - ✅ 路由系统 (router)
 - ✅ 文件加载器 (fileloader)
-- ✅ iNeverAway支持
-- ✅ printMylove支持
-- ✅ util...then表达式支持
 - ✅ 响应式值支持 ($变量名$)
 
-### 6. 模板系统
+### 6. CJMOD系统
+- ✅ CJMOD API实现 (CJMODSystem)
+- ✅ 语法分析 (Syntax)
+- ✅ 参数处理 (Arg, AtomArg)
+- ✅ 扫描器 (CJMODScanner)
+- ✅ 生成器 (CJMODGenerator)
+- ✅ CHTL JS函数支持 (CHTLJSFunction)
+- ✅ 模块管理 (CJMODModule)
+
+### 7. 珂朵莉模块 (官方模块)
+- ✅ CMOD部分 (样式组、元素模板、变量组)
+- ✅ CJMOD部分 (printMylove, iNeverAway, util...then)
+- ✅ 模块信息文件
+- ✅ 导出配置
+
+### 8. 模板系统
 - ✅ 模板解析和展开 (TemplateSystem)
 - ✅ 自定义元素处理 (Custom)
 - ✅ 导入系统 (Import)
@@ -55,7 +67,7 @@
 - ✅ 继承支持
 - ✅ 删除和插入操作
 
-### 7. 项目结构
+### 9. 项目结构
 - ✅ 完整的CMake构建系统
 - ✅ 模块化的代码组织
 - ✅ 测试框架

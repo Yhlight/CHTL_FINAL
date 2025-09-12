@@ -58,11 +58,6 @@ enum class CHTLJSTokenType {
     ANIMATE,        // animate
     FILELOADER,     // fileloader
     ROUTER,         // router
-    INEVERAWAY,     // iNeverAway
-    PRINTMYLOVE,    // printMylove
-    UTIL,           // util
-    THEN,           // then
-    CHANGE,         // change
     DELEGATE,       // delegate
     TARGET,         // target
     DURATION,       // duration
