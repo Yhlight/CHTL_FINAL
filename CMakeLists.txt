@@ -42,6 +42,7 @@ set(CHTL_SOURCES
     src/CHTL/CHTLState.cpp
     src/CHTL/CHTLIOStream.cpp
     src/CHTL/CMODSystem.cpp
+    src/CHTL/TemplateSystem.cpp
     src/CHTL_JS/CHTLJSContext.cpp
     src/CHTL_JS/CHTLJSGenerator.cpp
     src/CHTL_JS/CHTLJSLexer.cpp

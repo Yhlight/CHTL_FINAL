@@ -1,0 +1,135 @@
+// CHTL JS测试文件
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                CHTL JS测试页面
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            id: main-container;
+            class: container;
+            
+            style
+            {
+                width: 100%;
+                height: 100vh;
+                background-color: #f0f0f0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            h1
+            {
+                text
+                {
+                    欢迎使用CHTL JS！
+                }
+            }
+            
+            button
+            {
+                id: test-button;
+                class: btn;
+                
+                style
+                {
+                    padding: 10px 20px;
+                    background-color: #007bff;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }
+                
+                text
+                {
+                    点击测试
+                }
+            }
+            
+            script
+            {
+                // 虚对象测试
+                vir testObject = listen {
+                    click: () => {
+                        console.log('Button clicked!');
+                    },
+                    mouseenter: () => {
+                        console.log('Mouse entered!');
+                    }
+                };
+                
+                // 增强选择器测试
+                {{test-button}}->addEventListener('click', () => {
+                    console.log('Enhanced selector clicked!');
+                });
+                
+                // 动画测试
+                const anim = animate {
+                    target: {{test-button}},
+                    duration: 1000,
+                    easing: ease-in-out,
+                    begin: {
+                        opacity: 1,
+                        transform: scale(1)
+                    },
+                    when: [
+                        {
+                            at: 0.5,
+                            opacity: 0.5,
+                            transform: scale(1.1)
+                        }
+                    ],
+                    end: {
+                        opacity: 1,
+                        transform: scale(1)
+                    },
+                    loop: 1,
+                    direction: normal,
+                    delay: 0,
+                    callback: () => {
+                        console.log('Animation completed!');
+                    }
+                };
+                
+                // 文件加载器测试
+                fileloader {
+                    load: ./module1.js,
+                    load: ./module2.js,
+                    load: ./module3.js
+                };
+                
+                // 路由测试
+                router {
+                    url: "/home",
+                    page: {{main-container}},
+                    root: "/",
+                    mode: "history"
+                };
+                
+                // printMylove测试
+                const result = printMylove {
+                    url: "https://example.com/image.jpg",
+                    mode: "ASCII",
+                    width: 80,
+                    height: 40,
+                    scale: 1.0
+                };
+                
+                // util...then表达式测试
+                util 1 > 0 -> change console.log("条件变化") -> then console.log("条件满足");
+            }
+        }
+    }
+}
