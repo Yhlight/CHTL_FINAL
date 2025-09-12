@@ -74,7 +74,41 @@ void CHTLParser::parseStyleBlock(std::shared_ptr<ElementNode> currentNode, std::
     consume(TokenType::LEFT_BRACE, "Expect '{' after 'style'.");
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        if (peek().type == TokenType::CLASS_SELECTOR || peek().type == TokenType::ID_SELECTOR) {
+        if (peek().type == TokenType::AMPERSAND) {
+            advance(); // consume '&'
+
+            // Find parent class or id
+            std::string parent_selector;
+            for(const auto& attr : currentNode->attributes) {
+                if (attr->key == "class") {
+                    parent_selector = "." + attr->value;
+                    break;
+                }
+            }
+            if (parent_selector.empty()) {
+                for(const auto& attr : currentNode->attributes) {
+                    if (attr->key == "id") {
+                        parent_selector = "#" + attr->value;
+                        break;
+                    }
+                }
+            }
+
+            if (parent_selector.empty()) {
+                throw error(previous(), "Found '&' but parent element has no class or id.");
+            }
+
+            // Consume the rest of the selector (e.g., :hover)
+            std::stringstream pseudo_selector;
+            while(!check(TokenType::LEFT_BRACE) && !isAtEnd()) {
+                pseudo_selector << advance().lexeme;
+            }
+
+            std::string full_selector = parent_selector + pseudo_selector.str();
+            std::string css_rules = parseCssRuleBlock();
+            rootNode->global_styles[full_selector] += css_rules;
+
+        } else if (peek().type == TokenType::CLASS_SELECTOR || peek().type == TokenType::ID_SELECTOR) {
             Token selector = advance();
 
             if (selector.type == TokenType::CLASS_SELECTOR) {
@@ -83,22 +117,8 @@ void CHTLParser::parseStyleBlock(std::shared_ptr<ElementNode> currentNode, std::
                 currentNode->addAttribute(std::make_shared<AttributeNode>("id", selector.lexeme.substr(1)));
             }
 
-            consume(TokenType::LEFT_BRACE, "Expect '{' after selector.");
-            std::stringstream css_rules;
-            while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-                Token key = consume(TokenType::IDENTIFIER, "Expect property name.");
-                consume(TokenType::COLON, "Expect ':' after property name.");
-                std::stringstream value_ss;
-                while(!check(TokenType::SEMICOLON) && !isAtEnd()) {
-                    if (!value_ss.str().empty()) value_ss << " ";
-                    value_ss << advance().lexeme;
-                }
-                consume(TokenType::SEMICOLON, "Expect ';' after property value.");
-                css_rules << "  " << key.lexeme << ": " << value_ss.str() << ";\n";
-            }
-            consume(TokenType::RIGHT_BRACE, "Expect '}' after rule block.");
-
-            rootNode->global_styles[selector.lexeme] += css_rules.str();
+            std::string css_rules = parseCssRuleBlock();
+            rootNode->global_styles[selector.lexeme] += css_rules;
 
         } else if (peek().type == TokenType::IDENTIFIER) {
             Token key = consume(TokenType::IDENTIFIER, "Expect property name.");
@@ -115,6 +135,24 @@ void CHTLParser::parseStyleBlock(std::shared_ptr<ElementNode> currentNode, std::
         }
     }
     consume(TokenType::RIGHT_BRACE, "Expect '}' after style block.");
+}
+
+std::string CHTLParser::parseCssRuleBlock() {
+    consume(TokenType::LEFT_BRACE, "Expect '{' after selector.");
+    std::stringstream css_rules;
+    while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        Token key = consume(TokenType::IDENTIFIER, "Expect property name.");
+        consume(TokenType::COLON, "Expect ':' after property name.");
+        std::stringstream value_ss;
+        while(!check(TokenType::SEMICOLON) && !isAtEnd()) {
+            if (!value_ss.str().empty()) value_ss << " ";
+            value_ss << advance().lexeme;
+        }
+        consume(TokenType::SEMICOLON, "Expect ';' after property value.");
+        css_rules << "  " << key.lexeme << ": " << value_ss.str() << ";\n";
+    }
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after rule block.");
+    return css_rules.str();
 }
 
 

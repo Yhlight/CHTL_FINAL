@@ -60,4 +60,12 @@ set_tests_properties(ChtlGlobalStyleTest PROPERTIES
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
+# --- Test: Context Selector (&) ---
+add_executable(context_selector_test tests/context_selector_test.cpp)
+target_link_libraries(context_selector_test chthl_lib)
+add_test(NAME ChtlContextSelectorTest COMMAND context_selector_test)
+set_tests_properties(ChtlContextSelectorTest PROPERTIES
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
 message(STATUS "CHTL Compiler project configured for testing")

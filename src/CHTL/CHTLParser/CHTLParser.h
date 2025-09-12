@@ -33,6 +33,7 @@ private:
     std::shared_ptr<ElementNode> element(std::shared_ptr<ElementNode> rootNode);
     std::shared_ptr<TextNode> textElement();
     void parseStyleBlock(std::shared_ptr<ElementNode> currentNode, std::shared_ptr<ElementNode> rootNode);
+    std::string parseCssRuleBlock();
 
     // Token-handling utility methods
     bool isAtEnd();

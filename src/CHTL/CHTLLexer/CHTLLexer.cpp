@@ -92,6 +92,7 @@ void CHTLLexer::scanToken() {
         case ':': addToken(TokenType::COLON); break;
         case ';': addToken(TokenType::SEMICOLON); break;
         case '=': addToken(TokenType::EQUAL); break;
+        case '&': addToken(TokenType::AMPERSAND); break;
 
         // Ignore whitespace
         case ' ':

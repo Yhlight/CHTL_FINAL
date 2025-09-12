@@ -16,6 +16,7 @@ enum class TokenType {
     COLON,          // :
     SEMICOLON,      // ;
     EQUAL,          // =
+    AMPERSAND,      // &
 
     // Literals
     IDENTIFIER,     // e.g., div, id, my_class

@@ -1,0 +1,13 @@
+html {
+    head {}
+    body {
+        div {
+            class: "button";
+            style {
+                &:hover {
+                    background-color: #ddd;
+                }
+            }
+        }
+    }
+}

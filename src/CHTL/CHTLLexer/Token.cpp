@@ -11,6 +11,7 @@ std::string Token::typeToString(TokenType type) {
         case TokenType::COLON:           return "COLON";
         case TokenType::SEMICOLON:       return "SEMICOLON";
         case TokenType::EQUAL:           return "EQUAL";
+        case TokenType::AMPERSAND:       return "AMPERSAND";
         case TokenType::IDENTIFIER:      return "IDENTIFIER";
         case TokenType::STRING:          return "STRING";
         case TokenType::KEYWORD_TEXT:    return "KEYWORD_TEXT";
