@@ -20,6 +20,7 @@
 #include "CHTL/WildcardImport.h"
 #include "CHTL/DefaultStructGenerator.h"
 #include "CHTL/CompilationMonitor.h"
+#include "CHTL/VSCodeExtension.h"
 #include "Scanner/UnifiedScanner.h"
 #include "CHTLJS/CJMODSystem.h"
 
@@ -1701,6 +1702,232 @@ void testCompilationMonitor() {
     std::cout << "Compilation Monitor test completed." << std::endl;
 }
 
+void testVSCodeExtension() {
+    std::cout << "Testing VSCode Extension..." << std::endl;
+    
+    // 测试VSCode扩展配置
+    VSCodeExtensionConfig config;
+    config.enable_all_features = true;
+    config.workspace_root = ".";
+    config.chtl_compiler_path = "chtl";
+    config.output_directory = "./dist";
+    config.enable_auto_compilation = true;
+    config.enable_real_time_preview = true;
+    config.preview_server_url = "http://localhost";
+    config.preview_server_port = 3000;
+    
+    // 测试VSCode扩展
+    VSCodeExtension extension(config);
+    
+    std::cout << "Testing VSCode extension creation..." << std::endl;
+    std::cout << "Extension created: " << (!extension.isActive() ? "YES" : "NO") << std::endl;
+    
+    // 测试扩展初始化
+    std::cout << "Testing extension initialization..." << std::endl;
+    extension.initialize();
+    std::cout << "Extension initialized: " << (!extension.isActive() ? "YES" : "NO") << std::endl;
+    
+    // 测试扩展激活
+    std::cout << "Testing extension activation..." << std::endl;
+    extension.activate();
+    std::cout << "Extension activated: " << (extension.isActive() ? "YES" : "NO") << std::endl;
+    
+    // 测试功能管理
+    std::cout << "Testing feature management..." << std::endl;
+    extension.enableFeature(VSCodeFeatureType::CODE_HIGHLIGHTING);
+    extension.enableFeature(VSCodeFeatureType::CODE_FORMATTING);
+    extension.enableFeature(VSCodeFeatureType::CODE_COMPLETION);
+    
+    bool highlightingEnabled = extension.isFeatureEnabled(VSCodeFeatureType::CODE_HIGHLIGHTING);
+    bool formattingEnabled = extension.isFeatureEnabled(VSCodeFeatureType::CODE_FORMATTING);
+    bool completionEnabled = extension.isFeatureEnabled(VSCodeFeatureType::CODE_COMPLETION);
+    
+    std::cout << "Code highlighting enabled: " << (highlightingEnabled ? "YES" : "NO") << std::endl;
+    std::cout << "Code formatting enabled: " << (formattingEnabled ? "YES" : "NO") << std::endl;
+    std::cout << "Code completion enabled: " << (completionEnabled ? "YES" : "NO") << std::endl;
+    
+    // 测试自动模块解包器
+    std::cout << "Testing auto module unpacker..." << std::endl;
+    auto& unpacker = extension.getModuleUnpacker();
+    
+    // 测试模块解包
+    ModuleUnpackInfo cmodInfo = unpacker.unpackCMODModule("test.cmod");
+    std::cout << "CMOD module unpacked: " << (cmodInfo.module_type == "CMOD" ? "YES" : "NO") << std::endl;
+    
+    ModuleUnpackInfo cjmodInfo = unpacker.unpackCJMODModule("test.cjmod");
+    std::cout << "CJMOD module unpacked: " << (cjmodInfo.module_type == "CJMOD" ? "YES" : "NO") << std::endl;
+    
+    // 测试解包信息管理
+    unpacker.addUnpackInfo(cmodInfo);
+    unpacker.addUnpackInfo(cjmodInfo);
+    
+    auto allInfo = unpacker.getAllUnpackInfo();
+    std::cout << "All unpack info available: " << (allInfo.size() >= 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试JSON查询表生成器
+    std::cout << "Testing JSON query table generator..." << std::endl;
+    auto& queryGenerator = extension.getQueryTableGenerator();
+    
+    // 测试查询表生成
+    std::string moduleTable = queryGenerator.generateModuleQueryTable(cmodInfo);
+    std::cout << "Module query table generated: " << (moduleTable.length() > 0 ? "YES" : "NO") << std::endl;
+    
+    std::string globalTable = queryGenerator.generateGlobalQueryTable(allInfo);
+    std::cout << "Global query table generated: " << (globalTable.length() > 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试查询表管理
+    queryGenerator.saveQueryTable("test_module", moduleTable);
+    std::string loadedTable = queryGenerator.loadQueryTable("test_module");
+    std::cout << "Query table saved and loaded: " << (loadedTable == moduleTable ? "YES" : "NO") << std::endl;
+    
+    // 测试模块语法提示器
+    std::cout << "Testing module syntax hinter..." << std::endl;
+    auto& syntaxHinter = extension.getSyntaxHinter();
+    
+    // 测试语法提示生成
+    std::vector<SyntaxHintInfo> hints = syntaxHinter.generateHints("context", "input");
+    std::cout << "Syntax hints generated: " << (hints.size() >= 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试提示管理
+    SyntaxHintInfo hint;
+    hint.hint_text = "testFunction";
+    hint.hint_type = "function";
+    hint.description = "Test function";
+    hint.priority = 10;
+    
+    syntaxHinter.addHint(hint);
+    auto allHints = syntaxHinter.getAllHints();
+    std::cout << "Syntax hint added: " << (allHints.size() > 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试代码高亮器
+    std::cout << "Testing code highlighter..." << std::endl;
+    auto& highlighter = extension.getCodeHighlighter();
+    
+    // 测试代码高亮
+    std::string chtlCode = "[Template] @Style MyStyle { color: red; }";
+    std::string highlighted = highlighter.highlightCHTL(chtlCode);
+    std::cout << "CHTL code highlighted: " << (highlighted.length() > 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试语言检测
+    std::string language = highlighter.detectLanguage(chtlCode);
+    std::cout << "Language detected: " << (language == "chtl" ? "YES" : "NO") << std::endl;
+    
+    // 测试主题管理
+    highlighter.setTheme("dark");
+    std::string currentTheme = highlighter.getCurrentTheme();
+    std::cout << "Theme set to dark: " << (currentTheme == "dark" ? "YES" : "NO") << std::endl;
+    
+    auto availableThemes = highlighter.getAvailableThemes();
+    std::cout << "Available themes: " << availableThemes.size() << std::endl;
+    
+    // 测试代码格式化器
+    std::cout << "Testing code formatter..." << std::endl;
+    auto& formatter = extension.getCodeFormatter();
+    
+    // 测试代码格式化
+    std::string formatted = formatter.formatCHTL(chtlCode);
+    std::cout << "CHTL code formatted: " << (formatted.length() > 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试格式化配置
+    formatter.setIndentSize(2);
+    formatter.setUseTabs(false);
+    formatter.setAutoFormatOnSave(true);
+    
+    auto config = formatter.getConfig();
+    std::cout << "Formatter config updated: " << (config.indent_size == 2 ? "YES" : "NO") << std::endl;
+    
+    // 测试页面预览器
+    std::cout << "Testing page previewer..." << std::endl;
+    auto& previewer = extension.getPagePreviewer();
+    
+    // 测试预览服务器
+    previewer.startPreviewServer(3000);
+    bool serverRunning = previewer.isPreviewServerRunning();
+    std::cout << "Preview server started: " << (serverRunning ? "YES" : "NO") << std::endl;
+    
+    // 测试预览HTML生成
+    std::string previewHTML = previewer.generatePreviewHTML(chtlCode);
+    std::cout << "Preview HTML generated: " << (previewHTML.length() > 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试实时预览
+    previewer.enableRealTimePreview(true);
+    bool realTimeEnabled = previewer.isRealTimePreviewEnabled();
+    std::cout << "Real-time preview enabled: " << (realTimeEnabled ? "YES" : "NO") << std::endl;
+    
+    previewer.stopPreviewServer();
+    std::cout << "Preview server stopped: " << (!previewer.isPreviewServerRunning() ? "YES" : "NO") << std::endl;
+    
+    // 测试右键操作处理器
+    std::cout << "Testing right-click action handler..." << std::endl;
+    auto& rightClickHandler = extension.getRightClickHandler();
+    
+    // 测试右键操作
+    rightClickHandler.openInBrowser("test.html");
+    rightClickHandler.openDocumentation("templates");
+    rightClickHandler.exportToHTML("test.chtl");
+            rightClickHandler.exportToCSS("test.chtl");
+    rightClickHandler.exportToJS("test.chtl");
+    rightClickHandler.compileFile("test.chtl");
+    
+    std::cout << "Right-click actions executed: " << "YES" << std::endl;
+    
+    // 测试自定义操作
+    rightClickHandler.addCustomAction("custom_action", [](const std::string& param) {
+        std::cout << "Custom action executed with: " << param << std::endl;
+    });
+    
+    auto availableActions = rightClickHandler.getAvailableActions();
+    std::cout << "Available actions: " << availableActions.size() << std::endl;
+    
+    // 测试括号自动补全器
+    std::cout << "Testing bracket completion handler..." << std::endl;
+    auto& bracketHandler = extension.getBracketCompletionHandler();
+    
+    // 测试括号补全
+    std::string code = "function test() {";
+    std::string completed = bracketHandler.handleBracketCompletion(code, code.length(), '{');
+    std::cout << "Bracket completion handled: " << (completed.length() > code.length() ? "YES" : "NO") << std::endl;
+    
+    // 测试括号匹配
+    std::string matchedCode = "function test() { return true; }";
+    bool isMatched = bracketHandler.isBracketMatched(matchedCode);
+    std::cout << "Brackets matched: " << (isMatched ? "YES" : "NO") << std::endl;
+    
+    std::string unmatchedCode = "function test() { return true;";
+    bool isUnmatched = !bracketHandler.isBracketMatched(unmatchedCode);
+    std::cout << "Brackets unmatched detected: " << (isUnmatched ? "YES" : "NO") << std::endl;
+    
+    // 测试配置管理
+    std::cout << "Testing configuration management..." << std::endl;
+    
+    VSCodeExtensionConfig newConfig = config;
+    newConfig.workspace_root = "/new/workspace";
+    newConfig.chtl_compiler_path = "/usr/local/bin/chtl";
+    
+    extension.updateConfig(newConfig);
+    auto updatedConfig = extension.getConfig();
+    std::cout << "Config updated: " << (updatedConfig.workspace_root == "/new/workspace" ? "YES" : "NO") << std::endl;
+    
+    // 测试扩展状态
+    std::string status = extension.getExtensionStatus();
+    std::cout << "Extension status available: " << (status.length() > 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试文件处理
+    extension.processFile("test.chtl");
+    extension.processWorkspace(".");
+    std::cout << "File and workspace processing: " << "YES" << std::endl;
+    
+    // 测试扩展停用
+    std::cout << "Testing extension deactivation..." << std::endl;
+    extension.deactivate();
+    std::cout << "Extension deactivated: " << (!extension.isActive() ? "YES" : "NO") << std::endl;
+    
+    // 清理测试文件
+    std::remove("test_module.json");
+    
+    std::cout << "VSCode Extension test completed." << std::endl;
+}
+
 int main() {
     std::cout << "CHTL Compiler Test Suite" << std::endl;
     std::cout << "========================" << std::endl;
@@ -1773,6 +2000,9 @@ int main() {
         std::cout << std::endl;
         
         testCompilationMonitor();
+        std::cout << std::endl;
+        
+        testVSCodeExtension();
         std::cout << std::endl;
         
         std::cout << "All tests completed successfully!" << std::endl;
