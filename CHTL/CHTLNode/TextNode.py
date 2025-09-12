@@ -1,9 +1,9 @@
-from .BaseNode import BaseNode
+from .ExpressionNode import ExpressionNode
 
-class TextNode(BaseNode):
+class TextNode(ExpressionNode):
     """
     Represents a text node in CHTL.
-    e.g., text { "some value" }
+    It can also represent a literal value within a CSS expression (e.g., 'solid').
     """
     def __init__(self, value: str):
         self.value = value

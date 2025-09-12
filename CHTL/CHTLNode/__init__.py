@@ -8,3 +8,4 @@ from .StyleNode import StyleNode, CssRule
 from .ExpressionNode import ExpressionNode
 from .NumericLiteralNode import NumericLiteralNode
 from .InfixExpressionNode import InfixExpressionNode
+from .PropertyReferenceNode import PropertyReferenceNode

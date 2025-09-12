@@ -1,0 +1,16 @@
+// Test file for property references
+
+div {
+    id: "box1";
+    style {
+        width: 100px;
+    }
+}
+
+div {
+    id: "box2";
+    style {
+        // Reference the width of box1 and add 50px
+        width: box1.width + 50px;
+    }
+}

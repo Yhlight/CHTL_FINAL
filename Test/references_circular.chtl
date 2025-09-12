@@ -1,0 +1,13 @@
+// Test a circular dependency, which should cause an error
+div {
+    id: "a";
+    style {
+        width: b.width;
+    }
+}
+div {
+    id: "b";
+    style {
+        width: a.width;
+    }
+}

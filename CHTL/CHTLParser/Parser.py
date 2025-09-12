@@ -1,7 +1,7 @@
 from typing import Union, Tuple
 from CHTL.CHTLLexer import Lexer, Token, TokenType
 from CHTL.CHTLNode import (BaseNode, ElementNode, TextNode, StyleNode, CssRule,
-                           ExpressionNode, InfixExpressionNode, NumericLiteralNode)
+                           ExpressionNode, InfixExpressionNode, NumericLiteralNode, PropertyReferenceNode)
 from enum import IntEnum
 
 # --- Expression Parsing Infrastructure ---
@@ -11,6 +11,7 @@ class Precedence(IntEnum):
     PRODUCT = 3
     POWER = 4
     PREFIX = 5
+    MEMBER_ACCESS = 6 # .
 
 PRECEDENCES = {
     TokenType.PLUS: Precedence.SUM,
@@ -19,6 +20,7 @@ PRECEDENCES = {
     TokenType.ASTERISK: Precedence.PRODUCT,
     TokenType.PERCENT: Precedence.PRODUCT,
     TokenType.DOUBLE_ASTERISK: Precedence.POWER,
+    TokenType.DOT: Precedence.MEMBER_ACCESS,
 }
 
 class Parser:
@@ -44,6 +46,7 @@ class Parser:
         self.register_infix(TokenType.ASTERISK, self._parse_infix_expression)
         self.register_infix(TokenType.PERCENT, self._parse_infix_expression)
         self.register_infix(TokenType.DOUBLE_ASTERISK, self._parse_infix_expression)
+        self.register_infix(TokenType.DOT, self._parse_property_reference_expression)
 
         self._next_token()
         self._next_token()
@@ -89,6 +92,34 @@ class Parser:
 
     def _parse_text_literal(self) -> TextNode:
         return TextNode(self.current_token.literal)
+
+    def _parse_property_reference_expression(self, left: BaseNode) -> ExpressionNode:
+        """Parses a property reference like `selector.property`."""
+        # The 'left' side is the selector part. The Pratt parser has already parsed it
+        # into a node (e.g., a TextNode for 'box'). We need to convert this back
+        # to the raw tokens for the generator. This is a limitation of this approach.
+        # For now, we'll assume the selector is simple and its literal value is enough.
+        # A more robust solution might require a dedicated selector parser.
+
+        # We can't easily get the raw tokens of the `left` node.
+        # Let's simplify and assume the selector is a single identifier.
+        if not isinstance(left, TextNode):
+            self.errors.append(f"Invalid selector on left side of '.': {left}")
+            return None
+
+        # The current token is the DOT. The next token should be the property name.
+        if self.peek_token.type != TokenType.IDENTIFIER:
+            self.errors.append(f"Expected property name after '.', got {self.peek_token.type}")
+            return None
+
+        self._next_token() # Consume the DOT
+        property_name = self.current_token.literal
+
+        # We need to store the selector tokens. We will have to reconstruct them.
+        # This is hacky but will work for simple selectors.
+        selector_token = Token(TokenType.IDENTIFIER, left.value)
+
+        return PropertyReferenceNode(selector_tokens=[selector_token], property_name=property_name)
 
     def _parse_infix_expression(self, left: ExpressionNode) -> ExpressionNode:
         op = self.current_token.literal
