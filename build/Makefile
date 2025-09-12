@@ -262,6 +262,78 @@ CHTL/CHTLParser/Parser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.s
 .PHONY : CHTL/CHTLParser/Parser.cpp.s
 
+CHTL/CssValueParser/Evaluator.o: CHTL/CssValueParser/Evaluator.cpp.o
+.PHONY : CHTL/CssValueParser/Evaluator.o
+
+# target to build an object file
+CHTL/CssValueParser/Evaluator.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/Evaluator.cpp.o
+.PHONY : CHTL/CssValueParser/Evaluator.cpp.o
+
+CHTL/CssValueParser/Evaluator.i: CHTL/CssValueParser/Evaluator.cpp.i
+.PHONY : CHTL/CssValueParser/Evaluator.i
+
+# target to preprocess a source file
+CHTL/CssValueParser/Evaluator.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/Evaluator.cpp.i
+.PHONY : CHTL/CssValueParser/Evaluator.cpp.i
+
+CHTL/CssValueParser/Evaluator.s: CHTL/CssValueParser/Evaluator.cpp.s
+.PHONY : CHTL/CssValueParser/Evaluator.s
+
+# target to generate assembly for a file
+CHTL/CssValueParser/Evaluator.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/Evaluator.cpp.s
+.PHONY : CHTL/CssValueParser/Evaluator.cpp.s
+
+CHTL/CssValueParser/ValueParser.o: CHTL/CssValueParser/ValueParser.cpp.o
+.PHONY : CHTL/CssValueParser/ValueParser.o
+
+# target to build an object file
+CHTL/CssValueParser/ValueParser.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.o
+.PHONY : CHTL/CssValueParser/ValueParser.cpp.o
+
+CHTL/CssValueParser/ValueParser.i: CHTL/CssValueParser/ValueParser.cpp.i
+.PHONY : CHTL/CssValueParser/ValueParser.i
+
+# target to preprocess a source file
+CHTL/CssValueParser/ValueParser.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.i
+.PHONY : CHTL/CssValueParser/ValueParser.cpp.i
+
+CHTL/CssValueParser/ValueParser.s: CHTL/CssValueParser/ValueParser.cpp.s
+.PHONY : CHTL/CssValueParser/ValueParser.s
+
+# target to generate assembly for a file
+CHTL/CssValueParser/ValueParser.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.s
+.PHONY : CHTL/CssValueParser/ValueParser.cpp.s
+
+CHTL/CssValueParser/ValueTokenizer.o: CHTL/CssValueParser/ValueTokenizer.cpp.o
+.PHONY : CHTL/CssValueParser/ValueTokenizer.o
+
+# target to build an object file
+CHTL/CssValueParser/ValueTokenizer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.o
+.PHONY : CHTL/CssValueParser/ValueTokenizer.cpp.o
+
+CHTL/CssValueParser/ValueTokenizer.i: CHTL/CssValueParser/ValueTokenizer.cpp.i
+.PHONY : CHTL/CssValueParser/ValueTokenizer.i
+
+# target to preprocess a source file
+CHTL/CssValueParser/ValueTokenizer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.i
+.PHONY : CHTL/CssValueParser/ValueTokenizer.cpp.i
+
+CHTL/CssValueParser/ValueTokenizer.s: CHTL/CssValueParser/ValueTokenizer.cpp.s
+.PHONY : CHTL/CssValueParser/ValueTokenizer.s
+
+# target to generate assembly for a file
+CHTL/CssValueParser/ValueTokenizer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.s
+.PHONY : CHTL/CssValueParser/ValueTokenizer.cpp.s
+
 CHTL/LocalStyleParser/LocalStyleParser.o: CHTL/LocalStyleParser/LocalStyleParser.cpp.o
 .PHONY : CHTL/LocalStyleParser/LocalStyleParser.o
 
@@ -407,6 +479,15 @@ help:
 	@echo "... CHTL/CHTLParser/Parser.o"
 	@echo "... CHTL/CHTLParser/Parser.i"
 	@echo "... CHTL/CHTLParser/Parser.s"
+	@echo "... CHTL/CssValueParser/Evaluator.o"
+	@echo "... CHTL/CssValueParser/Evaluator.i"
+	@echo "... CHTL/CssValueParser/Evaluator.s"
+	@echo "... CHTL/CssValueParser/ValueParser.o"
+	@echo "... CHTL/CssValueParser/ValueParser.i"
+	@echo "... CHTL/CssValueParser/ValueParser.s"
+	@echo "... CHTL/CssValueParser/ValueTokenizer.o"
+	@echo "... CHTL/CssValueParser/ValueTokenizer.i"
+	@echo "... CHTL/CssValueParser/ValueTokenizer.s"
 	@echo "... CHTL/LocalStyleParser/LocalStyleParser.o"
 	@echo "... CHTL/LocalStyleParser/LocalStyleParser.i"
 	@echo "... CHTL/LocalStyleParser/LocalStyleParser.s"

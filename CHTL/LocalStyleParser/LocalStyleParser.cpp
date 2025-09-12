@@ -1,6 +1,11 @@
 #include "LocalStyleParser.h"
 #include "../../Util/StringUtil/StringUtil.h"
+#include "../CssValueParser/ValueTokenizer.h"
+#include "../CssValueParser/ValueParser.h"
+#include "../CssValueParser/Evaluator.h"
 #include <algorithm>
+#include <iostream>
+#include <sstream>
 
 // Pre-processes the style block content to remove comments.
 static std::string removeComments(const std::string& input) {
@@ -26,6 +31,37 @@ static std::string removeComments(const std::string& input) {
     return output;
 }
 
+// Takes a raw value string (e.g., "100px + 50px") and returns the computed value string (e.g., "150px")
+static std::string computeValue(const std::string& rawValue) {
+    // Updated to not check for '%' as an operator
+    if (rawValue.find_first_of("+-*/()") == std::string::npos) {
+        return rawValue;
+    }
+    try {
+        ValueTokenizer tokenizer(rawValue);
+        std::vector<ValueToken> tokens = tokenizer.tokenize();
+
+        ValueParser parser(tokens);
+        std::shared_ptr<ExprNode> expr = parser.parse();
+
+        Evaluator evaluator;
+        EvaluatedValue evaluated = evaluator.evaluate(expr);
+
+        if (evaluated.hasError) {
+            std::cerr << "Warning: Could not evaluate style expression '" << rawValue << "'. Error: " << evaluated.errorMessage << std::endl;
+            return rawValue;
+        }
+
+        std::stringstream ss;
+        ss << evaluated.value << evaluated.unit;
+        return ss.str();
+
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Warning: Could not parse style expression '" << rawValue << "'. Error: " << e.what() << std::endl;
+        return rawValue;
+    }
+}
+
 ParsedStyleBlock LocalStyleParser::parse(const std::string& rawContent) {
     ParsedStyleBlock result;
     std::string content = removeComments(rawContent);
@@ -38,7 +74,6 @@ ParsedStyleBlock LocalStyleParser::parse(const std::string& rawContent) {
         }
         pos = start_of_meaningful_content;
 
-        // Find the end of the current declaration or rule
         size_t semi_pos = content.find(';', pos);
         size_t brace_pos = content.find('{', pos);
 
@@ -53,15 +88,32 @@ ParsedStyleBlock LocalStyleParser::parse(const std::string& rawContent) {
                 content_end_pos++;
             }
 
-            std::string rule_content;
+            std::string raw_rule_content;
             if (brace_count == 0) {
-                 rule_content = trim(std::string_view(content).substr(brace_pos + 1, content_end_pos - brace_pos - 2));
-            } else {
-                content_end_pos = content.length();
+                 raw_rule_content = trim(std::string_view(content).substr(brace_pos + 1, content_end_pos - brace_pos - 2));
             }
 
-            if (!selector.empty() && !rule_content.empty()) {
-                result.globalRules.push_back({selector, rule_content});
+            if (!selector.empty() && !raw_rule_content.empty()) {
+                // Manually parse the properties inside the rule's content
+                std::string computed_rule_content;
+                size_t inner_pos = 0;
+                while (inner_pos < raw_rule_content.length()) {
+                    size_t next_semi = raw_rule_content.find(';', inner_pos);
+                    if (next_semi == std::string::npos) next_semi = raw_rule_content.length();
+
+                    std::string decl = raw_rule_content.substr(inner_pos, next_semi - inner_pos);
+                    size_t next_colon = decl.find(':');
+
+                    if (next_colon != std::string::npos) {
+                        std::string key = trim(std::string_view(decl).substr(0, next_colon));
+                        std::string val = trim(std::string_view(decl).substr(next_colon + 1));
+                        if (!key.empty() && !val.empty()) {
+                            computed_rule_content += key + ": " + computeValue(val) + "; ";
+                        }
+                    }
+                    inner_pos = next_semi + 1;
+                }
+                result.globalRules.push_back({selector, computed_rule_content});
             }
             pos = content_end_pos;
 
@@ -72,15 +124,14 @@ ParsedStyleBlock LocalStyleParser::parse(const std::string& rawContent) {
 
             if (colon_pos != std::string::npos) {
                 std::string key = trim(std::string_view(declaration).substr(0, colon_pos));
-                std::string value = trim(std::string_view(declaration).substr(colon_pos + 1));
+                std::string raw_value = trim(std::string_view(declaration).substr(colon_pos + 1));
 
-                if (!key.empty() && !value.empty()) {
-                    result.inlineStyles[key] = value;
+                if (!key.empty() && !raw_value.empty()) {
+                    result.inlineStyles[key] = computeValue(raw_value);
                 }
             }
             pos = semi_pos + 1;
         } else {
-            // No more semicolons or braces, we're done
             break;
         }
     }

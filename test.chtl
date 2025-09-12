@@ -2,26 +2,51 @@ html
 {
     head
     {
-        title { text { "Context Deduction Test" } }
+        title { text { "Attribute Arithmetic Test" } }
     }
 
     body
     {
-        // This div should get class="box" and have a hover effect.
+        // Test basic arithmetic and hoisting
         div
         {
+            id: "test1";
             style {
-                .box {
-                    color: blue;
-                }
-
-                &:hover {
-                    color: red;
-                    text-decoration: underline;
+                .test1-style {
+                    width: 100px + 50px; // Expected: 150px
+                    height: 10 * 2px;     // Expected: 20px
+                    margin-left: (100% / 5) - 2%; // Expected: 18%
                 }
             }
+        }
 
-            text { "This text should turn red on hover." }
+        // Test operator precedence
+        div
+        {
+            id: "test2";
+            style {
+                // This should be an inline style
+                padding: 10px + 2 * 5; // Expected: 20px
+            }
+        }
+
+        // Test power operator
+        div
+        {
+            id: "test3";
+            style {
+                font-size: 2px ** 3;    // Expected: 8px
+            }
+        }
+
+        // Test invalid operation for error handling
+        div
+        {
+            id: "test4";
+            style {
+                // This should produce a warning and use the raw value
+                left: 10px + 5%;
+            }
         }
     }
 }
