@@ -61,6 +61,17 @@ void CHTLLexer::scanToken() {
         case '.': addToken(TokenType::DOT); break;
         case '#': addToken(TokenType::HASH); break;
         case '&': addToken(TokenType::AMPERSAND); break;
+        case '(': addToken(TokenType::LEFT_PAREN); break;
+        case ')': addToken(TokenType::RIGHT_PAREN); break;
+        case '+': addToken(TokenType::PLUS); break;
+        case '%': addToken(TokenType::PERCENT); break;
+        case '*':
+            if (match('*')) {
+                addToken(TokenType::STAR_STAR);
+            } else {
+                addToken(TokenType::STAR);
+            }
+            break;
         case '{': addToken(TokenType::LEFT_BRACE); break;
         case '}': addToken(TokenType::RIGHT_BRACE); break;
         case ':': addToken(TokenType::COLON); break;

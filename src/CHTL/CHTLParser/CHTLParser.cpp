@@ -111,12 +111,26 @@ void CHTLParser::parseStyleBlock(ElementNode* element) {
             Token key = consume(TokenType::UNQUOTED_LITERAL, "Expect style property name.");
             consume(TokenType::COLON, "Expect ':' after style property name.");
 
-            Token value = advance();
-            if (value.type != TokenType::STRING && value.type != TokenType::UNQUOTED_LITERAL && value.type != TokenType::NUMBER) {
-                throw std::runtime_error("Style value must be a string, number, or unquoted literal.");
+            // --- Expression Parsing for Style Values ---
+            std::string valueStr = "";
+            bool isExpression = false;
+            while(peek().type != TokenType::SEMICOLON && !isAtEnd()) {
+                if (peek().type == TokenType::PLUS || peek().type == TokenType::MINUS ||
+                    peek().type == TokenType::STAR || peek().type == TokenType::SLASH) {
+                    isExpression = true;
+                    valueStr += " ";
+                    valueStr += advance().lexeme;
+                    valueStr += " ";
+                } else {
+                    valueStr += advance().lexeme;
+                }
             }
 
-            element->addInlineStyle(key.lexeme, value.lexeme);
+            if (isExpression) {
+                element->addInlineStyle(key.lexeme, "calc(" + valueStr + ")");
+            } else {
+                element->addInlineStyle(key.lexeme, valueStr);
+            }
 
             consume(TokenType::SEMICOLON, "Expect ';' after style value.");
         }
