@@ -8,26 +8,52 @@
 #include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/StyleBlockNode.h"
 #include "../CHTLNode/OriginNode.h"
+#include "../CHTLNode/PropertyReferenceNode.h"
+#include "../CHTLNode/PropertyValue.h"
 #include <string>
 #include <sstream>
 #include <memory>
+#include <map>
+#include <vector>
 
 namespace CHTL {
+
+// Forward declaration
+class ElementNode;
+
+// Struct to hold info about a property that needs late resolution
+struct UnresolvedProperty {
+    ElementNode* element; // Pointer to the element node
+    std::string property_name;
+    std::vector<PropertyValue> value_parts;
+};
 
 class CHTLGenerator {
 public:
     CHTLGenerator() = default;
-    std::string generate(const RootNode& root);
+    std::string generate(RootNode& root);
 
 private:
-    void visit(const Node* node);
-    void visitElement(const ElementNode* node);
-    void visitText(const TextNode* node);
-    void visitComment(const CommentNode* node);
-    void visitOrigin(const OriginNode* node);
-    // Style blocks are handled within visitElement, so no separate visitStyleBlock is needed
+    // Two-pass methods
+    void firstPass(Node* node);
+    void firstPassVisitElement(ElementNode* node);
 
+    void secondPass();
+
+    // Final rendering methods
+    void render(const Node* node);
+    void renderElement(const ElementNode* node);
+    void renderText(const TextNode* node);
+    void renderComment(const CommentNode* node);
+    void renderOrigin(const OriginNode* node);
+
+    std::string getElementUniqueId(const ElementNode* node);
     void indent();
+
+    // Data structures for two-pass generation
+    std::vector<ElementNode*> all_elements_;
+    std::map<std::string, std::map<std::string, Value>> symbol_table_;
+    std::vector<UnresolvedProperty> unresolved_properties_;
 
     std::stringstream output_;
     std::stringstream global_styles_;

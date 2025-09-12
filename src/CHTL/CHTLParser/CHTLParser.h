@@ -13,6 +13,7 @@
 #include "../CHTLNode/VarTemplateNode.h"
 #include "../CHTLLoader/CHTLLoader.h"
 #include "../CHTLNode/OriginNode.h"
+#include "../CHTLNode/PropertyValue.h"
 #include "ParserContext.h"
 #include <vector>
 #include <memory>
@@ -35,7 +36,7 @@ private:
     std::unique_ptr<ElementNode> parseElement();
     void parseElementBody(ElementNode& element);
     void parseAttributes(ElementNode& element);
-    std::vector<Token> parsePropertyValue();
+    std::vector<PropertyValue> parsePropertyValue();
     std::unique_ptr<TextNode> parseText();
     std::unique_ptr<StyleBlockNode> parseStyleBlock();
     std::unique_ptr<CommentNode> parseGeneratorComment();

@@ -1,0 +1,20 @@
+#ifndef CHTL_PROPERTY_VALUE_H
+#define CHTL_PROPERTY_VALUE_H
+
+#include <variant>
+#include <string>
+#include "../CHTLLexer/Token.h"
+#include "PropertyReferenceNode.h"
+
+namespace CHTL {
+
+struct Value {
+    double Dvalue;
+    std::string Svalue;
+};
+
+using PropertyValue = std::variant<Token, PropertyReferenceNode>;
+
+} // namespace CHTL
+
+#endif // CHTL_PROPERTY_VALUE_H

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include "../CHTLLexer/Token.h"
+#include "PropertyValue.h"
 
 namespace CHTL {
 
@@ -14,7 +14,7 @@ public:
     explicit VarTemplateNode(const std::string& name) : name_(name) {}
 
     std::string name_;
-    std::unordered_map<std::string, std::vector<Token>> variables_;
+    std::unordered_map<std::string, std::vector<PropertyValue>> variables_;
 };
 
 } // namespace CHTL

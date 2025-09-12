@@ -20,6 +20,7 @@ enum class NodeType {
     // CHTL specific constructs
     StyleBlock,
     CssRule,
+    PropertyReference,
     ScriptBlock,
     Template,
     Custom,

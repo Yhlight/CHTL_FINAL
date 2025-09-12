@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include "../CHTLLexer/Token.h" // For Token
+#include "PropertyValue.h"
 
 namespace CHTL {
 
@@ -22,7 +22,7 @@ public:
     }
 
     std::string selector_;
-    std::vector<std::pair<std::string, std::vector<Token>>> properties_;
+    std::vector<std::pair<std::string, std::vector<PropertyValue>>> properties_;
 };
 
 } // namespace CHTL

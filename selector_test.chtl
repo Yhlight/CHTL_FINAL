@@ -1,0 +1,12 @@
+div {
+    class: box;
+    style {
+        width: 100px;
+    }
+}
+
+p {
+    style {
+        width: .box.width + 50px; // 150px
+    }
+}

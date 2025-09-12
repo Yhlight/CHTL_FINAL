@@ -9,11 +9,9 @@
 
 namespace CHTL {
 
-// Represents a CSS value with a numeric part and a unit.
-struct Value {
-    double Dvalue;
-    std::string Svalue;
-};
+Value evaluateCssExpressionToValue(const std::vector<PropertyValue>& parts);
+std::string evaluateCssExpression(const std::vector<PropertyValue>& parts);
+ElementNode* findElementBySelector(const std::string& selector, const std::vector<ElementNode*>& elements);
 
 // Returns the precedence of an operator.
 int getPrecedence(TokenType type) {
@@ -81,10 +79,18 @@ Value applyOp(TokenType op, Value b, Value a) {
     return val;
 }
 
-// Evaluates a CSS expression from a vector of tokens.
-std::string evaluateCssExpression(const std::vector<Token>& tokens) {
-    if (tokens.empty()) {
-        return "";
+Value evaluateCssExpressionToValue(const std::vector<PropertyValue>& parts) {
+    if (parts.empty()) {
+        throw std::runtime_error("Cannot evaluate empty expression.");
+    }
+
+    std::vector<Token> tokens;
+    for(const auto& part : parts) {
+        if(std::holds_alternative<Token>(part)) {
+            tokens.push_back(std::get<Token>(part));
+        } else {
+            throw std::runtime_error("Cannot evaluate property with unresolved reference.");
+        }
     }
 
     std::stack<Value> values;
@@ -145,9 +151,10 @@ std::string evaluateCssExpression(const std::vector<Token>& tokens) {
             ops.push(token);
             expect_operand = true;
         } else {
-             if (values.empty() && ops.empty()) {
-                if (tokens.size() == 1) return token.lexeme;
-            }
+             if (values.size() != 1) {
+                // This is not an expression, just a literal like 'red'
+                throw std::runtime_error("Expression cannot be evaluated to a single value.");
+             }
         }
         i++;
     }
@@ -166,44 +173,76 @@ std::string evaluateCssExpression(const std::vector<Token>& tokens) {
     }
 
     if (values.size() != 1) {
-        std::stringstream ss;
-        for(const auto& token : tokens) {
-            ss << token.lexeme << " ";
-        }
-        return ss.str();
+        throw std::runtime_error("Invalid expression.");
     }
 
-    Value result = values.top();
-    std::stringstream result_ss;
-    result_ss << result.Dvalue << result.Svalue;
-    return result_ss.str();
+    return values.top();
 }
 
-
-// Helper to render a property value, which might be a simple literal or a complex expression.
-std::string renderCssValue(const std::vector<Token>& tokens) {
+std::string evaluateCssExpression(const std::vector<PropertyValue>& parts) {
     try {
-        return evaluateCssExpression(tokens);
-    } catch (const std::runtime_error& e) {
-        // In case of an error (e.g., unit mismatch), fallback to calc().
-        // This provides a graceful fallback and helps in debugging.
+        Value result = evaluateCssExpressionToValue(parts);
         std::stringstream ss;
-        ss << "calc(";
-        for (size_t i = 0; i < tokens.size(); ++i) {
-            ss << tokens[i].lexeme;
-            if (i < tokens.size() - 1) {
-                ss << " ";
+        ss << result.Dvalue << result.Svalue;
+        return ss.str();
+    } catch (const std::runtime_error& e) {
+        std::stringstream ss;
+        for (const auto& part : parts) {
+            if(std::holds_alternative<Token>(part)) {
+                ss << std::get<Token>(part).lexeme;
+            } else {
+                const auto& ref_node = std::get<PropertyReferenceNode>(part);
+                ss << ref_node.selector_.lexeme << "." << ref_node.property_.lexeme;
             }
         }
-        ss << ")";
         return ss.str();
     }
 }
 
+ElementNode* findElementBySelector(const std::string& selector, const std::vector<ElementNode*>& elements) {
+    if (selector.empty()) return nullptr;
 
-std::string CHTLGenerator::generate(const RootNode& root) {
+    if (selector[0] == '#') {
+        std::string id = selector.substr(1);
+        for (auto* elem : elements) {
+            for (const auto& attr : elem->attributes_) {
+                if (attr->key_ == "id" && attr->value_ == id) {
+                    return elem;
+                }
+            }
+        }
+    } else if (selector[0] == '.') {
+        std::string className = selector.substr(1);
+        for (auto* elem : elements) {
+            for (const auto& attr : elem->attributes_) {
+                if (attr->key_ == "class") {
+                    if (attr->value_ == className) {
+                        return elem;
+                    }
+                }
+            }
+        }
+    } else {
+        for (auto* elem : elements) {
+            if (elem->tagName_ == selector) {
+                return elem;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+
+std::string CHTLGenerator::generate(RootNode& root) {
+    for (auto& child : root.children_) {
+        firstPass(child.get());
+    }
+
+    secondPass();
+
     for (const auto& child : root.children_) {
-        visit(child.get());
+        render(child.get());
     }
 
     std::string html = output_.str();
@@ -215,8 +254,6 @@ std::string CHTLGenerator::generate(const RootNode& root) {
         if (head_pos != std::string::npos) {
             html.insert(head_pos, style_tag);
         } else {
-            // If no head, maybe prepend to body or just wrap everything?
-            // For now, we'll just prepend it to the whole document if no head is found.
             html = style_tag + html;
         }
     }
@@ -224,98 +261,117 @@ std::string CHTLGenerator::generate(const RootNode& root) {
     return html;
 }
 
-void CHTLGenerator::visit(const Node* node) {
+void CHTLGenerator::firstPass(Node* node) {
+    if (!node) return;
+    if (node->getType() == NodeType::Element) {
+        firstPassVisitElement(static_cast<ElementNode*>(node));
+    }
+}
+
+void CHTLGenerator::firstPassVisitElement(ElementNode* node) {
+    all_elements_.push_back(node);
+    std::string element_id = getElementUniqueId(node);
+
+    for (auto& child : node->children_) {
+        if (child->getType() == NodeType::StyleBlock) {
+            auto* styleNode = static_cast<StyleBlockNode*>(child.get());
+            for (const auto& prop : styleNode->inline_properties_) {
+                bool has_reference = false;
+                for (const auto& part : prop.second) {
+                    if (std::holds_alternative<PropertyReferenceNode>(part)) {
+                        has_reference = true;
+                        break;
+                    }
+                }
+
+                if (has_reference) {
+                    unresolved_properties_.push_back({node, prop.first, prop.second});
+                } else {
+                    node->computed_styles_[prop.first] = evaluateCssExpression(prop.second);
+                    if (!element_id.empty()) {
+                        try {
+                           symbol_table_[element_id][prop.first] = evaluateCssExpressionToValue(prop.second);
+                        } catch (const std::runtime_error& e) {
+                        }
+                    }
+                }
+            }
+        }
+        firstPass(child.get());
+    }
+}
+
+void CHTLGenerator::secondPass() {
+    for (auto& unresolved : unresolved_properties_) {
+        std::vector<PropertyValue> resolved_parts;
+        for (const auto& part : unresolved.value_parts) {
+            if (std::holds_alternative<PropertyReferenceNode>(part)) {
+                const auto& ref_node = std::get<PropertyReferenceNode>(part);
+                ElementNode* target_element = findElementBySelector(ref_node.selector_.lexeme, all_elements_);
+
+                if (target_element) {
+                    std::string unique_id = getElementUniqueId(target_element);
+                    if(symbol_table_.count(unique_id) && symbol_table_.at(unique_id).count(ref_node.property_.lexeme)) {
+                        Value resolved_value = symbol_table_.at(unique_id).at(ref_node.property_.lexeme);
+                        resolved_parts.emplace_back(Token{TokenType::Number, std::to_string(resolved_value.Dvalue), 0, 0});
+                        if (!resolved_value.Svalue.empty()) {
+                            if (resolved_value.Svalue == "%") {
+                                 resolved_parts.emplace_back(Token{TokenType::Percent, "%", 0, 0});
+                            } else {
+                                 resolved_parts.emplace_back(Token{TokenType::Identifier, resolved_value.Svalue, 0, 0});
+                            }
+                        }
+                    } else {
+                        throw std::runtime_error("Could not resolve property reference: " + ref_node.selector_.lexeme + "." + ref_node.property_.lexeme);
+                    }
+                }
+                else {
+                    throw std::runtime_error("Could not find element for selector: " + ref_node.selector_.lexeme);
+                }
+            } else {
+                resolved_parts.push_back(part);
+            }
+        }
+        unresolved.element->computed_styles_[unresolved.property_name] = evaluateCssExpression(resolved_parts);
+    }
+}
+
+void CHTLGenerator::render(const Node* node) {
     if (!node) return;
     switch (node->getType()) {
         case NodeType::Element:
-            visitElement(static_cast<const ElementNode*>(node));
+            renderElement(static_cast<const ElementNode*>(node));
             break;
         case NodeType::Text:
-            visitText(static_cast<const TextNode*>(node));
+            renderText(static_cast<const TextNode*>(node));
             break;
         case NodeType::Comment:
-            visitComment(static_cast<const CommentNode*>(node));
+            renderComment(static_cast<const CommentNode*>(node));
             break;
         case NodeType::Origin:
-            visitOrigin(static_cast<const OriginNode*>(node));
+            renderOrigin(static_cast<const OriginNode*>(node));
             break;
         case NodeType::StyleBlock:
-            // Style blocks are handled by their parent element, so we do nothing here.
             break;
         default:
-            // Handle other node types or throw an error
             break;
     }
 }
 
-void CHTLGenerator::visitElement(const ElementNode* node) {
-    // --- Attribute and Style Processing Pass ---
-    std::map<std::string, std::string> attributes;
-    // Copy existing attributes
-    for (const auto& attr : node->attributes_) {
-        attributes[attr->key_] = attr->value_;
-    }
-
-    std::stringstream inline_style_ss;
-    for (const auto& child : node->children_) {
-        if (child->getType() == NodeType::StyleBlock) {
-            const auto* styleNode = static_cast<const StyleBlockNode*>(child.get());
-            // Process inline properties
-            for (const auto& prop : styleNode->inline_properties_) {
-                inline_style_ss << prop.first << ": " << renderCssValue(prop.second) << "; ";
-            }
-            // Process rules
-            for (const auto& rule : styleNode->rules_) {
-                std::string final_selector = rule->selector_;
-                // Resolve '&' context selector
-                if (rule->selector_[0] == '&') {
-                    std::string context_selector;
-                    if (attributes.count("id")) {
-                        context_selector = "#" + attributes["id"];
-                    } else if (attributes.count("class")) {
-                        // Use the first class name as the context
-                        context_selector = "." + attributes["class"].substr(0, attributes["class"].find(" "));
-                    }
-                    if (!context_selector.empty()) {
-                        final_selector.replace(0, 1, context_selector);
-                    }
-                }
-
-                // 1. Add rule to global styles
-                global_styles_ << "      " << final_selector << " {\n";
-                for (const auto& prop : rule->properties_) {
-                    global_styles_ << "        " << prop.first << ": " << renderCssValue(prop.second) << ";\n";
-                }
-                global_styles_ << "      }\n";
-
-                // 2. Inject class/id attribute
-                if (rule->selector_[0] == '.') {
-                    std::string className = rule->selector_.substr(1);
-                    if (attributes.count("class")) {
-                        // Prevent adding duplicate class names
-                        if ((" " + attributes["class"] + " ").find(" " + className + " ") == std::string::npos) {
-                            attributes["class"] += " " + className;
-                        }
-                    } else {
-                        attributes["class"] = className;
-                    }
-                } else if (rule->selector_[0] == '#') {
-                    attributes["id"] = rule->selector_.substr(1);
-                }
-            }
-        }
-    }
-
-    std::string inline_style_attr = inline_style_ss.str();
-    if (!inline_style_attr.empty()) {
-        attributes["style"] = inline_style_attr;
-    }
-
-    // --- Rendering Pass ---
+void CHTLGenerator::renderElement(const ElementNode* node) {
     indent();
     output_ << "<" << node->tagName_;
-    for(const auto& attr_pair : attributes) {
-        output_ << " " << attr_pair.first << "=\"" << attr_pair.second << "\"";
+
+    for(const auto& attr_pair : node->attributes_) {
+        output_ << " " << attr_pair->key_ << "=\"" << attr_pair->value_ << "\"";
+    }
+
+    if (!node->computed_styles_.empty()) {
+        output_ << " style=\"";
+        for (const auto& style : node->computed_styles_) {
+            output_ << style.first << ": " << style.second << "; ";
+        }
+        output_ << "\"";
     }
 
     bool hasNonStyleChildren = false;
@@ -332,7 +388,7 @@ void CHTLGenerator::visitElement(const ElementNode* node) {
         output_ << ">\n";
         indentLevel_++;
         for (const auto& child : node->children_) {
-            visit(child.get());
+            render(child.get());
         }
         indentLevel_--;
         indent();
@@ -340,25 +396,37 @@ void CHTLGenerator::visitElement(const ElementNode* node) {
     }
 }
 
-void CHTLGenerator::visitText(const TextNode* node) {
+void CHTLGenerator::renderText(const TextNode* node) {
     indent();
     output_ << node->text_ << "\n";
 }
 
-void CHTLGenerator::visitComment(const CommentNode* node) {
+void CHTLGenerator::renderComment(const CommentNode* node) {
     indent();
-    // CHTL generator comments '--' are converted to HTML comments
     output_ << "<!-- " << node->comment_ << " -->\n";
 }
 
-void CHTLGenerator::visitOrigin(const OriginNode* node) {
-    // Simply append the raw content, no processing or indentation.
+void CHTLGenerator::renderOrigin(const OriginNode* node) {
     output_ << node->content_;
+}
+
+std::string CHTLGenerator::getElementUniqueId(const ElementNode* node) {
+    for (const auto& attr : node->attributes_) {
+        if (attr->key_ == "id") {
+            return "#" + attr->value_;
+        }
+    }
+    for (const auto& attr : node->attributes_) {
+        if (attr->key_ == "class") {
+            return "." + attr->value_;
+        }
+    }
+    return "";
 }
 
 void CHTLGenerator::indent() {
     for (int i = 0; i < indentLevel_; ++i) {
-        output_ << "  "; // 2 spaces for indentation
+        output_ << "  ";
     }
 }
 
