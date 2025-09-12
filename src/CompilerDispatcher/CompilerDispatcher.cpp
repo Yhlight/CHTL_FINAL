@@ -48,6 +48,11 @@ std::string CompilerDispatcher::compile(const std::string& sourceCode, const std
             // 根据片段类型确定处理方式
             type = fragment.type;
             
+            if (m_debugMode) {
+                std::cout << "[CompilerDispatcher] Processing fragment: type=" << static_cast<int>(type) 
+                          << ", content=\"" << fragment.content.substr(0, 50) << "...\", line=" << fragment.line << std::endl;
+            }
+            
             // 添加片段到代码合并器
             m_codeMerger->addFragment(type, fragment.content, fragment.line, fragment.column, sourceFile);
         }
@@ -55,9 +60,22 @@ std::string CompilerDispatcher::compile(const std::string& sourceCode, const std
         // 3. 处理CHTL片段
         auto chtlFragments = m_codeMerger->getFragmentCount(CodeFragmentType::CHTL);
         for (size_t i = 0; i < chtlFragments; ++i) {
-            // 这里应该从代码合并器中获取CHTL片段进行处理
-            // 简化实现，直接处理所有CHTL片段
-            m_chtlFragmentsProcessed++;
+            // 获取CHTL片段
+            auto fragment = m_codeMerger->getFragment(CodeFragmentType::CHTL, i);
+            if (fragment) {
+                // 解析CHTL片段
+                auto document = m_chtlParser->parse(fragment->content);
+                if (document) {
+                    // 生成HTML
+                    std::string html = m_chtlGenerator->generateHTML(document);
+                    if (m_debugMode) {
+                        std::cout << "[CompilerDispatcher] Generated HTML from CHTL: " << html.substr(0, 100) << "..." << std::endl;
+                    }
+                    // 将生成的HTML添加到代码合并器
+                    m_codeMerger->addFragment(CodeFragmentType::HTML, html, fragment->line, fragment->column, fragment->sourceFile);
+                }
+                m_chtlFragmentsProcessed++;
+            }
         }
         
         // 4. 处理CHTL JS片段

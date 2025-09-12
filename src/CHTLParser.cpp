@@ -39,6 +39,75 @@ std::shared_ptr<BaseNode> CHTLParser::parse(const TokenList& tokens) {
     }
 }
 
+std::shared_ptr<BaseNode> CHTLParser::parse(const std::string& sourceCode) {
+    // 简单的扫描器实现
+    TokenList tokens;
+    size_t pos = 0;
+    
+    while (pos < sourceCode.length()) {
+        // 跳过空白字符
+        while (pos < sourceCode.length() && std::isspace(sourceCode[pos])) {
+            pos++;
+        }
+        
+        if (pos >= sourceCode.length()) break;
+        
+        // 识别标识符
+        if (std::isalpha(sourceCode[pos])) {
+            size_t start = pos;
+            while (pos < sourceCode.length() && (std::isalnum(sourceCode[pos]) || sourceCode[pos] == '-' || sourceCode[pos] == '_')) {
+                pos++;
+            }
+            std::string value = sourceCode.substr(start, pos - start);
+            tokens.addToken(TokenType::IDENTIFIER, value, 1, 1);
+        }
+        // 识别@符号
+        else if (sourceCode[pos] == '@') {
+            tokens.addToken(TokenType::AT, "@", 1, 1);
+            pos++;
+        }
+        // 识别左大括号
+        else if (sourceCode[pos] == '{') {
+            tokens.addToken(TokenType::LEFT_BRACE, "{", 1, 1);
+            pos++;
+        }
+        // 识别右大括号
+        else if (sourceCode[pos] == '}') {
+            tokens.addToken(TokenType::RIGHT_BRACE, "}", 1, 1);
+            pos++;
+        }
+        // 识别冒号
+        else if (sourceCode[pos] == ':') {
+            tokens.addToken(TokenType::COLON, ":", 1, 1);
+            pos++;
+        }
+        // 识别分号
+        else if (sourceCode[pos] == ';') {
+            tokens.addToken(TokenType::SEMICOLON, ";", 1, 1);
+            pos++;
+        }
+        // 识别字符串
+        else if (sourceCode[pos] == '"') {
+            size_t start = pos;
+            pos++;
+            while (pos < sourceCode.length() && sourceCode[pos] != '"') {
+                pos++;
+            }
+            if (pos < sourceCode.length()) {
+                pos++;
+                std::string value = sourceCode.substr(start + 1, pos - start - 2);
+                tokens.addToken(TokenType::STRING, value, 1, 1);
+            }
+        }
+        // 其他字符
+        else {
+            pos++;
+        }
+    }
+    
+    return parse(tokens);
+}
+
 void CHTLParser::reset() {
     m_currentIndex = 0;
 }
@@ -117,6 +186,11 @@ std::shared_ptr<BaseNode> CHTLParser::parseDocument() {
 
 std::shared_ptr<BaseNode> CHTLParser::parseElement() {
     if (isAtEnd()) return nullptr;
+    
+    // 检查是否为自定义语法
+    if (checkToken(TokenType::AT)) {
+        return parseCustom();
+    }
     
     // 检查是否为HTML元素
     if (currentToken().getType() == TokenType::IDENTIFIER) {
@@ -336,86 +410,82 @@ std::shared_ptr<BaseNode> CHTLParser::parseTemplate() {
 std::shared_ptr<BaseNode> CHTLParser::parseCustom() {
     if (isAtEnd()) return nullptr;
     
-    if (checkToken(TokenType::CUSTOM)) {
-        nextToken(); // 消费 [Custom]
+    // 检查是否是自定义语法：@Style, @Element, @Var
+    if (checkToken(TokenType::AT)) {
+        nextToken(); // 消费 @
         
-        // 解析自定义类型和名称
-        if (checkToken(TokenType::AT)) {
-            nextToken(); // 消费 @
+        std::string customType;
+        std::string customName;
+        
+        // 解析自定义类型
+        if (currentToken().getType() == TokenType::IDENTIFIER) {
+            customType = currentToken().getValue();
+            nextToken();
+        } else {
+            addError("Expected custom type after @");
+            return nullptr;
+        }
+        
+        // 解析自定义名称
+        if (currentToken().getType() == TokenType::IDENTIFIER) {
+            customName = currentToken().getValue();
+            nextToken();
+        } else {
+            addError("Expected custom name");
+            return nullptr;
+        }
+        
+        // 创建自定义节点
+        CustomType type = CustomType::UNKNOWN;
+        if (customType == "Style") {
+            type = CustomType::STYLE;
+        } else if (customType == "Element") {
+            type = CustomType::ELEMENT;
+        } else if (customType == "Var") {
+            type = CustomType::VAR;
+        }
+        
+        auto customNode = std::make_shared<CustomNode>(type, customName);
+        customNode->setPosition(currentToken().getLine(), currentToken().getColumn());
+        
+        // 解析自定义内容
+        if (checkToken(TokenType::LEFT_BRACE)) {
+            nextToken(); // 消费 {
             
-            std::string customType;
-            std::string customName;
-            
-            // 解析自定义类型
-            if (currentToken().getType() == TokenType::IDENTIFIER) {
-                customType = currentToken().getValue();
-                nextToken();
-            } else {
-                addError("Expected custom type after @");
-                return nullptr;
-            }
-            
-            // 解析自定义名称
-            if (currentToken().getType() == TokenType::IDENTIFIER) {
-                customName = currentToken().getValue();
-                nextToken();
-            } else {
-                addError("Expected custom name");
-                return nullptr;
-            }
-            
-            // 创建自定义节点
-            CustomType type = CustomType::UNKNOWN;
-            if (customType == "Style") {
-                type = CustomType::STYLE;
-            } else if (customType == "Element") {
-                type = CustomType::ELEMENT;
-            } else if (customType == "Var") {
-                type = CustomType::VAR;
-            }
-            
-            auto customNode = std::make_shared<CustomNode>(type, customName);
-            customNode->setPosition(currentToken().getLine(), currentToken().getColumn());
+            skipWhitespace();
             
             // 解析自定义内容
-            if (checkToken(TokenType::LEFT_BRACE)) {
-                nextToken(); // 消费 {
-                
-                skipWhitespace();
-                
-                // 解析自定义内容
-                while (!checkToken(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-                    auto child = parseElement();
-                    if (child) {
-                        customNode->addChild(child);
-                    } else {
-                        // 尝试解析其他类型的节点
-                        if (checkToken(TokenType::TEXT)) {
-                            child = parseText();
-                            if (child) {
-                                customNode->addChild(child);
-                            }
-                        } else if (checkToken(TokenType::STYLE)) {
-                            child = parseStyle();
-                            if (child) {
-                                customNode->addChild(child);
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-                    skipWhitespace();
-                }
-                
-                if (checkToken(TokenType::RIGHT_BRACE)) {
-                    nextToken(); // 消费 }
+            while (!checkToken(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                auto child = parseElement();
+                if (child) {
+                    customNode->addChild(child);
                 } else {
-                    addError("Expected '}' after custom content");
+                    // 尝试解析其他类型的节点
+                    if (checkToken(TokenType::TEXT)) {
+                        child = parseText();
+                        if (child) {
+                            customNode->addChild(child);
+                        }
+                    } else if (checkToken(TokenType::STYLE)) {
+                        child = parseStyle();
+                        if (child) {
+                            customNode->addChild(child);
+                        }
+                    } else {
+                        break;
+                    }
                 }
+                skipWhitespace();
             }
             
-            return customNode;
+            if (checkToken(TokenType::RIGHT_BRACE)) {
+                nextToken(); // 消费 }
+            } else {
+                addError("Expected '}' after custom content");
+            }
         }
+        
+        return customNode;
     }
     
     return nullptr;

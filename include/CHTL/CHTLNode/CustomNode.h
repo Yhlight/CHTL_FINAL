@@ -103,6 +103,61 @@ public:
     const std::string& getCustomContent() const;
     
     /**
+     * @brief 设置无值属性列表
+     * @param valuelessProps 无值属性列表
+     */
+    void setValuelessProperties(const std::vector<std::string>& valuelessProps);
+    
+    /**
+     * @brief 获取无值属性列表
+     * @return 无值属性列表
+     */
+    const std::vector<std::string>& getValuelessProperties() const;
+    
+    /**
+     * @brief 检查是否为无值样式组
+     * @return 是否为无值样式组
+     */
+    bool isValuelessStyle() const;
+    
+    /**
+     * @brief 添加子元素
+     * @param element 子元素
+     */
+    void addChildElement(std::shared_ptr<BaseNode> element);
+    
+    /**
+     * @brief 获取子元素数量
+     * @return 子元素数量
+     */
+    size_t getChildElementCount() const;
+    
+    /**
+     * @brief 获取指定索引的子元素
+     * @param index 索引
+     * @return 子元素
+     */
+    std::shared_ptr<BaseNode> getChildElement(size_t index) const;
+    
+    /**
+     * @brief 设置特例化内容
+     * @param content 特例化内容
+     */
+    void setSpecializedContent(const std::string& content);
+    
+    /**
+     * @brief 获取特例化内容
+     * @return 特例化内容
+     */
+    const std::string& getSpecializedContent() const;
+    
+    /**
+     * @brief 检查是否已特例化
+     * @return 是否已特例化
+     */
+    bool isSpecialized() const;
+    
+    /**
      * @brief 克隆节点
      * @return 克隆的节点
      */
@@ -126,6 +181,10 @@ private:
     std::vector<std::pair<std::string, std::string>> m_specializations;
     std::string m_parentTemplate;
     std::string m_customContent;
+    std::vector<std::string> m_valuelessProperties;
+    std::vector<std::shared_ptr<BaseNode>> m_childElements;
+    std::string m_specializedContent;
+    bool m_isSpecialized;
     
     /**
      * @brief 获取自定义类型名称

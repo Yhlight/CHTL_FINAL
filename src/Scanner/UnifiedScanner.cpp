@@ -57,11 +57,14 @@ std::vector<CodeFragment> UnifiedScanner::scan(const std::string& sourceCode) {
         return fragments;
     }
     
-    // 根据边界信息分离代码片段
-    size_t lastPos = 0;
-    for (const auto& boundary : boundaries) {
-        size_t startPos = boundary.first;
-        CodeFragmentType type = boundary.second;
+        // 根据边界信息分离代码片段
+        size_t lastPos = 0;
+        for (const auto& boundary : boundaries) {
+            size_t startPos = boundary.first;
+            CodeFragmentType type = boundary.second;
+            
+            std::cout << "[UnifiedScanner] Processing boundary: startPos=" << startPos 
+                      << ", type=" << static_cast<int>(type) << std::endl;
         
         // 添加边界前的代码（如果有）
         if (startPos > lastPos) {
@@ -78,6 +81,7 @@ std::vector<CodeFragment> UnifiedScanner::scan(const std::string& sourceCode) {
         switch (type) {
             case CodeFragmentType::CHTL:
                 endPos = identifyCHTLBoundary(sourceCode, startPos);
+                std::cout << "[UnifiedScanner] CHTL boundary: startPos=" << startPos << ", endPos=" << endPos << std::endl;
                 break;
             case CodeFragmentType::CHTL_JS:
                 endPos = identifyCHTLJSBoundary(sourceCode, startPos);
@@ -87,6 +91,9 @@ std::vector<CodeFragment> UnifiedScanner::scan(const std::string& sourceCode) {
                 break;
             case CodeFragmentType::JS:
                 endPos = identifyJSBoundary(sourceCode, startPos);
+                break;
+            case CodeFragmentType::HTML:
+                endPos = identifyHTMLBoundary(sourceCode, startPos);
                 break;
             default:
                 break;
@@ -99,6 +106,8 @@ std::vector<CodeFragment> UnifiedScanner::scan(const std::string& sourceCode) {
             
             CodeFragment fragment(type, content, startLine, startCol);
             // placeholder functionality removed for compatibility
+            std::cout << "[UnifiedScanner] Creating fragment: type=" << static_cast<int>(type) 
+                      << ", content=\"" << content.substr(0, 50) << "...\", line=" << startLine << std::endl;
             fragments.push_back(fragment);
             
             lastPos = endPos;
@@ -160,7 +169,7 @@ std::vector<std::pair<size_t, CodeFragmentType>> UnifiedScanner::preScan(const s
             continue;
         }
         
-        // 检查CHTL语法 - 检查HTML元素
+        // 检查HTML元素（可能包含CHTL语法）
         if (std::isalpha(sourceCode[pos])) {
             // 检查是否为HTML元素名
             size_t startPos = pos;
@@ -168,9 +177,36 @@ std::vector<std::pair<size_t, CodeFragmentType>> UnifiedScanner::preScan(const s
                 pos++;
             }
             
+            // 跳过空格
+            size_t checkPos = pos;
+            while (checkPos < sourceCode.length() && std::isspace(sourceCode[checkPos])) {
+                checkPos++;
+            }
+            
             // 检查后面是否有 {
-            if (pos < sourceCode.length() && sourceCode[pos] == '{') {
-                boundaries.emplace_back(startPos, CodeFragmentType::CHTL);
+            if (checkPos < sourceCode.length() && sourceCode[checkPos] == '{') {
+                // 检查元素内部是否包含CHTL语法
+                bool hasCHTLSyntax = false;
+                size_t searchPos = checkPos + 1;
+                while (searchPos < sourceCode.length() && sourceCode[searchPos] != '}') {
+                    if (sourceCode[searchPos] == '@' || sourceCode[searchPos] == '[') {
+                        hasCHTLSyntax = true;
+                        break;
+                    }
+                    searchPos++;
+                }
+                
+                std::cout << "[UnifiedScanner] Element " << sourceCode.substr(startPos, pos - startPos) 
+                          << " hasCHTLSyntax=" << (hasCHTLSyntax ? "true" : "false") << std::endl;
+                
+                if (hasCHTLSyntax) {
+                    std::cout << "[UnifiedScanner] Adding CHTL boundary at " << startPos << std::endl;
+                    boundaries.emplace_back(startPos, CodeFragmentType::CHTL);
+                } else {
+                    std::cout << "[UnifiedScanner] Adding HTML boundary at " << startPos << std::endl;
+                    boundaries.emplace_back(startPos, CodeFragmentType::HTML);
+                }
+                pos = checkPos;
                 continue;
             }
             pos = startPos; // 回退
@@ -193,6 +229,39 @@ std::vector<std::pair<size_t, CodeFragmentType>> UnifiedScanner::preScan(const s
                 }
             }
         }
+        
+        // 检查CHTL自定义语法 @Style, @Element, @Var
+        if (sourceCode[pos] == '@') {
+            size_t startPos = pos;
+            pos++; // 跳过 @
+            
+            // 检查后面是否有标识符
+            if (pos < sourceCode.length() && std::isalpha(sourceCode[pos])) {
+                // 跳过标识符
+                while (pos < sourceCode.length() && (std::isalnum(sourceCode[pos]) || sourceCode[pos] == '_')) {
+                    pos++;
+                }
+                
+                // 检查后面是否有空格和另一个标识符
+                if (pos < sourceCode.length() && sourceCode[pos] == ' ') {
+                    pos = skipWhitespace(sourceCode, pos);
+                    if (pos < sourceCode.length() && std::isalpha(sourceCode[pos])) {
+                        // 跳过第二个标识符
+                        while (pos < sourceCode.length() && (std::isalnum(sourceCode[pos]) || sourceCode[pos] == '_')) {
+                            pos++;
+                        }
+                        
+                        // 检查后面是否有 {
+                        if (pos < sourceCode.length() && sourceCode[pos] == '{') {
+                            boundaries.emplace_back(startPos, CodeFragmentType::CHTL);
+                            continue;
+                        }
+                    }
+                }
+            }
+            pos = startPos; // 回退
+        }
+        
         
         // 检查CHTL JS语法
         if (sourceCode[pos] == '{' && pos + 1 < sourceCode.length() && sourceCode[pos + 1] == '{') {
@@ -229,8 +298,13 @@ int UnifiedScanner::identifyCHTLBoundary(const std::string& sourceCode, size_t s
     
     size_t pos = startPos;
     
-    // 跳过关键字
-    while (pos < sourceCode.length() && sourceCode[pos] != '{' && sourceCode[pos] != ' ') {
+    // 跳过标识符（HTML元素名或CHTL关键字）
+    while (pos < sourceCode.length() && (std::isalnum(sourceCode[pos]) || sourceCode[pos] == '-' || sourceCode[pos] == '_')) {
+        pos++;
+    }
+    
+    // 跳过空格
+    while (pos < sourceCode.length() && std::isspace(sourceCode[pos])) {
         pos++;
     }
     
@@ -476,6 +550,35 @@ std::pair<size_t, size_t> UnifiedScanner::getLineColumn(const std::string& sourc
     }
     
     return {line, column};
+}
+
+int UnifiedScanner::identifyHTMLBoundary(const std::string& sourceCode, size_t startPos) {
+    // HTML元素通常以块形式存在，需要找到匹配的右括号
+    if (startPos >= sourceCode.length()) return -1;
+    
+    size_t pos = startPos;
+    
+    // 跳过标识符（HTML元素名）
+    while (pos < sourceCode.length() && (std::isalnum(sourceCode[pos]) || sourceCode[pos] == '-' || sourceCode[pos] == '_')) {
+        pos++;
+    }
+    
+    // 跳过空格
+    while (pos < sourceCode.length() && std::isspace(sourceCode[pos])) {
+        pos++;
+    }
+    
+    if (pos >= sourceCode.length() || sourceCode[pos] != '{') {
+        return -1;
+    }
+    
+    // 查找匹配的右括号
+    int endPos = findMatchingBracket(sourceCode, pos, '{', '}');
+    if (endPos > 0) {
+        return endPos + 1; // 包含右括号
+    }
+    
+    return -1;
 }
 
 } // namespace CHTL

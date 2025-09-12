@@ -22,8 +22,8 @@ CodeMerger::~CodeMerger() {
 
 void CodeMerger::addFragment(const CodeFragment& fragment) {
     if (m_debugMode) {
-        std::cout << "[CodeMerger] Adding fragment: " << getFragmentTypeName(fragment.type) 
-                  << " from " << fragment.sourceFile << ":" << fragment.line << std::endl;
+        std::cout << "[CodeMerger] Adding fragment: type=" << static_cast<int>(fragment.type) 
+                  << " (" << getFragmentTypeName(fragment.type) << ") from " << fragment.sourceFile << ":" << fragment.line << std::endl;
     }
     
     m_fragments.push_back(fragment);
@@ -46,7 +46,7 @@ std::string CodeMerger::merge() {
         std::ostringstream result;
         
         // 按类型合并代码片段
-        std::vector<CodeFragmentType> types = {CodeFragmentType::CHTL, CodeFragmentType::CHTL_JS, CodeFragmentType::CSS, CodeFragmentType::JS};
+        std::vector<CodeFragmentType> types = {CodeFragmentType::CHTL, CodeFragmentType::CHTL_JS, CodeFragmentType::CSS, CodeFragmentType::JS, CodeFragmentType::HTML};
         
         for (auto type : types) {
             auto it = m_fragmentsByType.find(type);
@@ -78,7 +78,16 @@ std::string CodeMerger::mergeByType(CodeFragmentType type) {
     for (auto* fragment : it->second) {
         if (!fragment->processed) {
             std::string content = processPlaceholders(fragment->content);
-            result << content << "\n";
+            
+            // 如果是HTML片段，需要解析并转换为HTML
+            if (type == CodeFragmentType::HTML) {
+                // 这里应该调用CHTLParser来解析HTML片段
+                // 简化实现，直接输出内容
+                result << content << "\n";
+            } else {
+                result << content << "\n";
+            }
+            
             fragment->processed = true;
             m_processedFragments++;
         }
@@ -140,6 +149,14 @@ size_t CodeMerger::getFragmentCount() const {
 size_t CodeMerger::getFragmentCount(CodeFragmentType type) const {
     auto it = m_fragmentsByType.find(type);
     return it != m_fragmentsByType.end() ? it->second.size() : 0;
+}
+
+const CodeFragment* CodeMerger::getFragment(CodeFragmentType type, size_t index) const {
+    auto it = m_fragmentsByType.find(type);
+    if (it != m_fragmentsByType.end() && index < it->second.size()) {
+        return it->second[index];
+    }
+    return nullptr;
 }
 
 void CodeMerger::setDebugMode(bool debug) {

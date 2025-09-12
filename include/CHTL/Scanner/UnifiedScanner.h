@@ -99,6 +99,14 @@ private:
     int identifyJSBoundary(const std::string& sourceCode, size_t startPos);
     
     /**
+     * @brief 识别HTML边界
+     * @param sourceCode 源代码
+     * @param startPos 开始位置
+     * @return 结束位置，-1表示未找到
+     */
+    int identifyHTMLBoundary(const std::string& sourceCode, size_t startPos);
+    
+    /**
      * @brief 使用占位符替换代码片段
      * @param sourceCode 源代码
      * @param fragments 代码片段列表

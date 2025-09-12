@@ -120,6 +120,14 @@ public:
     size_t getFragmentCount(CodeFragmentType type) const;
     
     /**
+     * @brief 获取指定类型的片段
+     * @param type 片段类型
+     * @param index 片段索引
+     * @return 片段指针，如果不存在则返回nullptr
+     */
+    const CodeFragment* getFragment(CodeFragmentType type, size_t index) const;
+    
+    /**
      * @brief 设置调试模式
      * @param debug 是否启用调试模式
      */

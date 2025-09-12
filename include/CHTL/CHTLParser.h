@@ -34,6 +34,13 @@ public:
     std::shared_ptr<BaseNode> parse(const TokenList& tokens);
     
     /**
+     * @brief 解析字符串
+     * @param sourceCode 源代码字符串
+     * @return AST根节点
+     */
+    std::shared_ptr<BaseNode> parse(const std::string& sourceCode);
+    
+    /**
      * @brief 重置解析器状态
      */
     void reset();
