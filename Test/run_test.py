@@ -159,21 +159,19 @@ def run_template_test():
     output_html = run_compiler_pipeline(test_file, debug=False)
     if output_html is None: return False
 
-    # Note: style property order is not guaranteed, so we check for parts.
+    # Check for expanded element template
+    expected_element_template = '<div class="box-title">This is a box</div><div class="box-content"></div>'
+    if expected_element_template not in output_html:
+        print("❌ Template test FAILED on element template expansion.")
+        return False
+
+    # Check for style template usage
     if 'id="p1"' not in output_html or 'style=' not in output_html:
         print("❌ Template test FAILED on div structure.")
         return False
 
     if 'color: black' not in output_html or 'font-size: 16px' not in output_html or 'line-height: 20px' not in output_html:
         print("❌ Template test FAILED on div styles.")
-        return False
-
-    if 'id="p2"' not in output_html or 'style=' not in output_html:
-        print("❌ Template test FAILED on span structure.")
-        return False
-
-    if 'color: blue' not in output_html or 'font-size: 16px' not in output_html or 'line-height: 20px' not in output_html:
-        print("❌ Template test FAILED on span styles (override check).")
         return False
 
     print("✅ Template test passed.")

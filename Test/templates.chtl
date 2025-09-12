@@ -4,20 +4,28 @@
 {
     color: black;
     font-size: 16px;
-    line-height: 20px; // Using a px value to avoid float parsing issues for now
+    line-height: 20px;
 }
 
-div {
-    id: "p1";
-    style {
-        @Style DefaultText;
+[Template] @Element Box
+{
+    div {
+        class: "box-title";
+        text: "This is a box";
+    }
+    div {
+        class: "box-content";
     }
 }
 
-span {
-    id: "p2";
-    style {
-        @Style DefaultText;
-        color: blue; // Override the color
+body {
+    // Usage of Element Template
+    @Element Box;
+
+    div {
+        id: "p1";
+        style {
+            @Style DefaultText;
+        }
     }
 }

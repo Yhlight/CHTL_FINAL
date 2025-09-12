@@ -181,7 +181,11 @@ class Parser:
     def _parse_element_body(self, tag_name: str) -> ElementNode:
         node = ElementNode(tag_name=tag_name)
         while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
-            if self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type in (TokenType.COLON, TokenType.EQUALS):
+            if self.current_token.type == TokenType.AT:
+                usage = self._parse_template_usage()
+                if usage:
+                    node.children.append(usage)
+            elif self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type in (TokenType.COLON, TokenType.EQUALS):
                 self._parse_attribute_statement(node)
             elif self.peek_token.type == TokenType.LBRACE:
                 child_node = self.parse_block_statement()
@@ -437,20 +441,38 @@ class Parser:
             return None
         self._next_token() # Consume {
 
-        # Parse body
-        properties = {}
-        while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
-            if self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type == TokenType.COLON:
-                prop_name, prop_value = self._parse_inline_css_property()
-                if prop_name:
-                    properties[prop_name] = prop_value
-            else:
-                self.errors.append(f"Unexpected token in template style block: {self.current_token.literal}")
-                self._skip_to_next_statement()
+        # Parse body based on type
+        content = None
+        if template_type == 'Style':
+            properties = {}
+            while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
+                if self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type == TokenType.COLON:
+                    prop_name, prop_value = self._parse_inline_css_property()
+                    if prop_name:
+                        properties[prop_name] = prop_value
+                else:
+                    self.errors.append(f"Unexpected token in template style block: {self.current_token.literal}")
+                    self._skip_to_next_statement()
+            content = properties
+        elif template_type == 'Element':
+            children = []
+            while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
+                statement = self.parse_statement()
+                if statement:
+                    children.append(statement)
+                else:
+                    self.errors.append(f"Unexpected token in template element block: {self.current_token.literal}")
+                    self._next_token() # Advance past the bad token
+            content = children
+        else:
+            self.errors.append(f"Unknown template type: {template_type}")
+            # Skip the body
+            while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
+                self._next_token()
 
         if self.current_token.type != TokenType.RBRACE:
             self.errors.append("Expected '}' to close template body.")
         else:
             self._next_token() # Consume '}'
 
-        return TemplateNode(template_type=template_type, template_name=template_name, content=properties)
+        return TemplateNode(template_type=template_type, template_name=template_name, content=content)

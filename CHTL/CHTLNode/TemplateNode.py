@@ -16,12 +16,19 @@ class TemplateNode(BaseNode):
 
     def to_dict(self) -> dict:
         """Converts the node to a dictionary for debugging."""
+        content_dict = {}
+        if self.template_type == 'Style':
+            # For styles, content is a dict of properties
+            content_dict = {k: [node.to_dict() for node in v_list] for k, v_list in self.content.items()}
+        elif self.template_type == 'Element':
+            # For elements, content is a list of child nodes
+            content_dict = [child.to_dict() for child in self.content]
+
         return {
             "type": "TemplateNode",
             "template_type": self.template_type,
             "template_name": self.template_name,
-            # Content serialization will depend on the template type
-            "content": {k: [node.to_dict() for node in v_list] for k, v_list in self.content.items()}
+            "content": content_dict,
         }
 
     def __repr__(self) -> str:

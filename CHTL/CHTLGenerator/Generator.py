@@ -23,6 +23,7 @@ class Generator:
         self.evaluation_order: List[str] = []
         self.evaluated_styles: dict[str, dict[str, str]] = {}
         self.style_templates: dict[str, dict] = {}
+        self.element_templates: dict[str, list] = {}
 
     def generate(self, ast_root: ElementNode) -> str:
         if not isinstance(ast_root, ElementNode) or ast_root.tag_name != "root":
@@ -30,8 +31,16 @@ class Generator:
 
         self.global_css_rules, self.element_map, self.dependency_graph, self.errors = [], {}, {}, []
         self.evaluation_order, self.evaluated_styles, self.style_templates = [], {}, {}
+        self.element_templates = {}
 
         self._collect_templates(ast_root)
+        self._expand_element_templates(ast_root)
+
+        # DEBUG
+        # import json
+        # print("--- AST after template expansion ---")
+        # print(json.dumps(ast_root.to_dict(), indent=2))
+
         self._populate_element_map(ast_root)
         self._build_dependency_graph(ast_root)
 
@@ -243,6 +252,11 @@ class Generator:
                     self.errors.append(f"Duplicate style template name found: {node.template_name}")
                 else:
                     self.style_templates[node.template_name] = node.content
+            elif node.template_type == 'Element':
+                if node.template_name in self.element_templates:
+                    self.errors.append(f"Duplicate element template name found: {node.template_name}")
+                else:
+                    self.element_templates[node.template_name] = node.content
 
         # Recurse, but not into the content of a template definition
         if hasattr(node, 'children') and not isinstance(node, TemplateNode):
@@ -316,12 +330,40 @@ class Generator:
                 if existing_style and not existing_style.strip().endswith(';'): existing_style += ";"
                 current_attributes["style"] = f"{existing_style} {style_string}".strip()
 
+        # The 'text' attribute is a special case and should be rendered as a child, not an attribute
+        text_content = ""
+        if 'text' in current_attributes:
+            text_content = html.escape(str(current_attributes['text']))
+            del current_attributes['text']
+
         attr_parts = [f'{k}="{html.escape(str(v), quote=True)}"' for k, v in current_attributes.items()]
         attr_string = " " + " ".join(attr_parts) if attr_parts else ""
 
         if tag_name in self.self_closing_tags: return f"<{tag_name}{attr_string}>"
+
         children_html = "".join(self._generate_node(child) for child in node.children if not isinstance(child, StyleNode))
-        return f"<{tag_name}{attr_string}>{children_html}</{tag_name}>"
+
+        return f"<{tag_name}{attr_string}>{text_content}{children_html}</{tag_name}>"
 
     def _generate_text_node(self, node: TextNode) -> str:
         return html.escape(node.value)
+
+    def _expand_element_templates(self, node: BaseNode):
+        if not hasattr(node, 'children'):
+            return
+
+        new_children = []
+        for child in node.children:
+            if isinstance(child, TemplateUsageNode) and child.template_type == 'Element':
+                if child.template_name in self.element_templates:
+                    import copy
+                    template_content = self.element_templates[child.template_name]
+                    new_children.extend(copy.deepcopy(template_content))
+                else:
+                    self.errors.append(f"Undefined element template used: {child.template_name}")
+                    new_children.append(child)
+            else:
+                self._expand_element_templates(child)
+                new_children.append(child)
+
+        node.children = new_children
