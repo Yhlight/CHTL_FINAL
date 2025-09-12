@@ -149,8 +149,19 @@ std::shared_ptr<CHTLNode> CHTLParser::parseElement() {
     // 普通元素
     if (current_token.type == TokenType::IDENTIFIER) {
         std::string tag_name = consume().value;
+        
+        // 检查是否是text关键字
+        if (tag_name == "text") {
+            return parseTextElement();
+        }
+        
         auto element = std::make_shared<ElementNode>(tag_name);
         element->setPosition(current_token.line, current_token.column);
+        
+        // 跳过空白字符和换行符
+        while (!isAtEnd() && (current().type == TokenType::NEWLINE || current().type == TokenType::WHITESPACE)) {
+            consume();
+        }
         
         // 检查是否有子节点（以{开始）
         if (check(TokenType::LBRACE)) {
@@ -212,12 +223,23 @@ std::shared_ptr<CHTLNode> CHTLParser::parseElement() {
             
             // 然后解析子节点
             while (!isAtEnd() && !check(TokenType::RBRACE)) {
+                if (debug_mode_) {
+                    std::cout << "Parsing child, current token type: " << static_cast<int>(current().type) 
+                              << ", value: '" << current().value << "'" << std::endl;
+                }
+                
                 auto child = parseElement();
                 if (child) {
                     element->addChild(child);
+                    if (debug_mode_) {
+                        std::cout << "Added child: " << child->getName() << std::endl;
+                    }
                 } else {
                     // 如果无法解析子节点，推进到下一个token
                     if (!isAtEnd()) {
+                        if (debug_mode_) {
+                            std::cout << "Cannot parse child, consuming token" << std::endl;
+                        }
                         consume();
                     }
                 }
@@ -285,58 +307,53 @@ std::shared_ptr<CHTLNode> CHTLParser::parseText() {
     return text_node;
 }
 
+std::shared_ptr<CHTLNode> CHTLParser::parseTextElement() {
+    // text关键字已经被消费了，直接解析内容
+    
+    auto text_node = std::make_shared<TextNode>("");
+    text_node->setPosition(current().line, current().column);
+    
+    if (check(TokenType::LBRACE)) {
+        consume(); // 消费 {
+        
+        std::string content;
+        while (!isAtEnd() && !check(TokenType::RBRACE)) {
+            // 跳过空白字符和换行符
+            if (current().type == TokenType::NEWLINE || current().type == TokenType::WHITESPACE) {
+                consume();
+                continue;
+            }
+            
+            // 收集所有非空白字符作为文本内容
+            if (current().type != TokenType::RBRACE) {
+                content += current().value;
+                if (current().type == TokenType::IDENTIFIER && !content.empty() && content.back() != ' ') {
+                    content += " ";
+                }
+            }
+            consume();
+        }
+        
+        // 清理文本内容
+        while (!content.empty() && content.back() == ' ') {
+            content.pop_back();
+        }
+        
+        if (check(TokenType::RBRACE)) {
+            consume(); // 消费 }
+        }
+        
+        text_node->setTextContent(content);
+    }
+    
+    return text_node;
+}
+
 std::shared_ptr<CHTLNode> CHTLParser::parseComment() {
     // 注释在词法分析阶段已经被处理
     return nullptr;
 }
 
-std::shared_ptr<CHTLNode> CHTLParser::parseTemplate() {
-    if (!check(TokenType::TEMPLATE)) return nullptr;
-    
-    consume(); // 消费 [Template]
-    
-    // 解析模板类型
-    TokenType template_type = current().type;
-    if (template_type != TokenType::STYLE_TEMPLATE && 
-        template_type != TokenType::ELEMENT_TEMPLATE && 
-        template_type != TokenType::VAR_TEMPLATE) {
-        reportError("Expected template type (@Style, @Element, or @Var)");
-        return nullptr;
-    }
-    
-    std::string type_name = consume().value;
-    
-    // 解析模板名称
-    if (!check(TokenType::IDENTIFIER)) {
-        reportError("Expected template name");
-        return nullptr;
-    }
-    
-    std::string template_name = consume().value;
-    
-    auto template_node = std::make_shared<TemplateNode>(template_name, type_name);
-    template_node->setPosition(current().line, current().column);
-    
-    // 解析模板体
-    if (check(TokenType::LBRACE)) {
-        consume(); // 消费 {
-        
-        while (!isAtEnd() && !check(TokenType::RBRACE)) {
-            auto child = parseElement();
-            if (child) {
-                template_node->addChild(child);
-            }
-        }
-        
-        if (check(TokenType::RBRACE)) {
-            consume(); // 消费 }
-        } else {
-            reportError("Expected '}' after template body");
-        }
-    }
-    
-    return template_node;
-}
 
 std::shared_ptr<CHTLNode> CHTLParser::parseCustom() {
     if (!check(TokenType::CUSTOM)) return nullptr;
@@ -764,6 +781,209 @@ void CHTLParser::error(const std::string& message) {
 void CHTLParser::error(const Token& token, const std::string& message) {
     reportError(token, message);
     throw std::runtime_error(message);
+}
+
+std::shared_ptr<CHTLNode> CHTLParser::parseTemplate() {
+    if (!check(TokenType::TEMPLATE)) return nullptr;
+    
+    consume(); // 消费 [Template]
+    
+    // 跳过空白字符
+    while (!isAtEnd() && (current().type == TokenType::NEWLINE || current().type == TokenType::WHITESPACE)) {
+        consume();
+    }
+    
+    // 检查模板类型
+    if (current().type == TokenType::STYLE_TEMPLATE) {
+        return parseStyleTemplate();
+    } else if (current().type == TokenType::ELEMENT_TEMPLATE) {
+        return parseElementTemplate();
+    } else if (current().type == TokenType::VAR_TEMPLATE) {
+        return parseVarTemplate();
+    }
+    
+    reportError("Expected @Style, @Element, or @Var after [Template]");
+    return nullptr;
+}
+
+std::shared_ptr<CHTLNode> CHTLParser::parseStyleTemplate() {
+    if (!check(TokenType::STYLE_TEMPLATE)) return nullptr;
+    
+    consume(); // 消费 @Style
+    
+    // 跳过空白字符
+    while (!isAtEnd() && (current().type == TokenType::NEWLINE || current().type == TokenType::WHITESPACE)) {
+        consume();
+    }
+    
+    // 获取模板名称
+    if (current().type != TokenType::IDENTIFIER) {
+        reportError("Expected template name after @Style");
+        return nullptr;
+    }
+    
+    std::string template_name = consume().value;
+    auto template_node = std::make_shared<TemplateNode>(template_name, "Style");
+    template_node->setPosition(current().line, current().column);
+    
+    // 解析模板体
+    if (check(TokenType::LBRACE)) {
+        consume(); // 消费 {
+        
+        // 解析样式属性
+        while (!isAtEnd() && !check(TokenType::RBRACE)) {
+            // 跳过空白字符和换行符
+            if (current().type == TokenType::NEWLINE || current().type == TokenType::WHITESPACE) {
+                consume();
+                continue;
+            }
+            
+            if (current().type == TokenType::IDENTIFIER) {
+                std::string attr_name = consume().value;
+                
+                // 跳过空白字符
+                while (!isAtEnd() && (current().type == TokenType::NEWLINE || current().type == TokenType::WHITESPACE)) {
+                    consume();
+                }
+                
+                if (check(TokenType::COLON) || check(TokenType::EQUAL)) {
+                    consume(); // 消费 : 或 =
+                    
+                    AttributeValue attr_value = parseAttributeValue();
+                    template_node->setAttribute(attr_name, attr_value);
+                    
+                    if (check(TokenType::SEMICOLON)) {
+                        consume(); // 消费 ;
+                    }
+                    
+                    // 跳过空白字符
+                    while (!isAtEnd() && (current().type == TokenType::NEWLINE || current().type == TokenType::WHITESPACE)) {
+                        consume();
+                    }
+                }
+            } else {
+                consume(); // 跳过其他token
+            }
+        }
+        
+        if (check(TokenType::RBRACE)) {
+            consume(); // 消费 }
+        }
+    }
+    
+    return template_node;
+}
+
+std::shared_ptr<CHTLNode> CHTLParser::parseElementTemplate() {
+    if (!check(TokenType::ELEMENT_TEMPLATE)) return nullptr;
+    
+    consume(); // 消费 @Element
+    
+    // 跳过空白字符
+    while (!isAtEnd() && (current().type == TokenType::NEWLINE || current().type == TokenType::WHITESPACE)) {
+        consume();
+    }
+    
+    // 获取模板名称
+    if (current().type != TokenType::IDENTIFIER) {
+        reportError("Expected template name after @Element");
+        return nullptr;
+    }
+    
+    std::string template_name = consume().value;
+    auto template_node = std::make_shared<TemplateNode>(template_name, "Element");
+    template_node->setPosition(current().line, current().column);
+    
+    // 解析模板体
+    if (check(TokenType::LBRACE)) {
+        consume(); // 消费 {
+        
+        // 解析子元素
+        while (!isAtEnd() && !check(TokenType::RBRACE)) {
+            auto child = parseElement();
+            if (child) {
+                template_node->addChild(child);
+            } else {
+                if (!isAtEnd()) {
+                    consume();
+                }
+            }
+        }
+        
+        if (check(TokenType::RBRACE)) {
+            consume(); // 消费 }
+        }
+    }
+    
+    return template_node;
+}
+
+std::shared_ptr<CHTLNode> CHTLParser::parseVarTemplate() {
+    if (!check(TokenType::VAR_TEMPLATE)) return nullptr;
+    
+    consume(); // 消费 @Var
+    
+    // 跳过空白字符
+    while (!isAtEnd() && (current().type == TokenType::NEWLINE || current().type == TokenType::WHITESPACE)) {
+        consume();
+    }
+    
+    // 获取模板名称
+    if (current().type != TokenType::IDENTIFIER) {
+        reportError("Expected template name after @Var");
+        return nullptr;
+    }
+    
+    std::string template_name = consume().value;
+    auto template_node = std::make_shared<TemplateNode>(template_name, "Var");
+    template_node->setPosition(current().line, current().column);
+    
+    // 解析模板体
+    if (check(TokenType::LBRACE)) {
+        consume(); // 消费 {
+        
+        // 解析变量
+        while (!isAtEnd() && !check(TokenType::RBRACE)) {
+            // 跳过空白字符和换行符
+            if (current().type == TokenType::NEWLINE || current().type == TokenType::WHITESPACE) {
+                consume();
+                continue;
+            }
+            
+            if (current().type == TokenType::IDENTIFIER) {
+                std::string var_name = consume().value;
+                
+                // 跳过空白字符
+                while (!isAtEnd() && (current().type == TokenType::NEWLINE || current().type == TokenType::WHITESPACE)) {
+                    consume();
+                }
+                
+                if (check(TokenType::COLON) || check(TokenType::EQUAL)) {
+                    consume(); // 消费 : 或 =
+                    
+                    AttributeValue var_value = parseAttributeValue();
+                    template_node->setAttribute(var_name, var_value);
+                    
+                    if (check(TokenType::SEMICOLON)) {
+                        consume(); // 消费 ;
+                    }
+                    
+                    // 跳过空白字符
+                    while (!isAtEnd() && (current().type == TokenType::NEWLINE || current().type == TokenType::WHITESPACE)) {
+                        consume();
+                    }
+                }
+            } else {
+                consume(); // 跳过其他token
+            }
+        }
+        
+        if (check(TokenType::RBRACE)) {
+            consume(); // 消费 }
+        }
+    }
+    
+    return template_node;
 }
 
 } // namespace CHTL

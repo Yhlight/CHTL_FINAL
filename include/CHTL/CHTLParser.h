@@ -65,22 +65,46 @@ private:
     std::shared_ptr<CHTLNode> parseText();
     
     /**
+     * @brief 解析文本元素（text关键字已被消费）
+     * @return 文本节点
+     */
+    std::shared_ptr<CHTLNode> parseTextElement();
+    
+    /**
      * @brief 解析样式节点
      * @return 样式节点
      */
     std::shared_ptr<CHTLNode> parseStyle();
+    
+    /**
+     * @brief 解析模板
+     * @return 模板节点
+     */
+    std::shared_ptr<CHTLNode> parseTemplate();
+    
+    /**
+     * @brief 解析样式模板
+     * @return 样式模板节点
+     */
+    std::shared_ptr<CHTLNode> parseStyleTemplate();
+    
+    /**
+     * @brief 解析元素模板
+     * @return 元素模板节点
+     */
+    std::shared_ptr<CHTLNode> parseElementTemplate();
+    
+    /**
+     * @brief 解析变量模板
+     * @return 变量模板节点
+     */
+    std::shared_ptr<CHTLNode> parseVarTemplate();
 
     /**
      * @brief 解析注释
      * @return 注释节点
      */
     std::shared_ptr<CHTLNode> parseComment();
-
-    /**
-     * @brief 解析模板
-     * @return 模板节点
-     */
-    std::shared_ptr<CHTLNode> parseTemplate();
 
     /**
      * @brief 解析自定义

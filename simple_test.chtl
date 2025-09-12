@@ -1,3 +1,8 @@
 div {
-    text { "Hello" }
+    id: "container";
+    class: "main-container";
+    
+    text {
+        Welcome to CHTL!
+    }
 }

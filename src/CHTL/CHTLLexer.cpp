@@ -109,6 +109,45 @@ std::vector<Token> CHTLLexer::tokenize(const std::string& source_code) {
             tokens.push_back(readIdentifier());
         } else if (isDigit(ch)) {
             tokens.push_back(readNumber());
+        } else if (ch == '[') {
+            // 检查是否是[Template]关键字
+            std::string peek_result = peek(9);
+            if (peek_result == "[Template]") {
+                consume(); // 消费 [
+                for (int i = 0; i < 8; ++i) {
+                    consume(); // 消费 Template
+                }
+                consume(); // 消费 ]
+                tokens.push_back(Token(TokenType::TEMPLATE, "[Template]", current_line_, current_column_ - 10, current_pos_ - 10));
+            } else {
+                tokens.push_back(Token(TokenType::LBRACKET, "[", current_line_, current_column_, current_pos_));
+                consume();
+            }
+        } else if (ch == '@') {
+            // 检查是否是@Style, @Element, @Var等关键字
+            std::string next_word = peek(6); // 最多6个字符
+            if (next_word == "Style") {
+                consume(); // 消费 @
+                for (int i = 0; i < 5; ++i) {
+                    consume(); // 消费 Style
+                }
+                tokens.push_back(Token(TokenType::STYLE_TEMPLATE, "@Style", current_line_, current_column_ - 6, current_pos_ - 6));
+            } else if (next_word == "Element") {
+                consume(); // 消费 @
+                for (int i = 0; i < 7; ++i) {
+                    consume(); // 消费 Element
+                }
+                tokens.push_back(Token(TokenType::ELEMENT_TEMPLATE, "@Element", current_line_, current_column_ - 8, current_pos_ - 8));
+            } else if (next_word == "Var") {
+                consume(); // 消费 @
+                for (int i = 0; i < 3; ++i) {
+                    consume(); // 消费 Var
+                }
+                tokens.push_back(Token(TokenType::VAR_TEMPLATE, "@Var", current_line_, current_column_ - 4, current_pos_ - 4));
+            } else {
+                tokens.push_back(Token(TokenType::AT, "@", current_line_, current_column_, current_pos_));
+                consume();
+            }
         } else if (isOperator(ch)) {
             tokens.push_back(readOperator());
         } else if (ch == '\n') {
