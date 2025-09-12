@@ -1,0 +1,17 @@
+// Test file for attribute arithmetic
+
+div {
+    id: "test-box";
+    style {
+        // Simple expression
+        width: 100px + 50px;
+        // Operator precedence
+        height: 100px + 20px * 2;
+        // Mixed simple and expression values
+        border: 1px + 1px solid black;
+        // Non-expression value
+        font-weight: bold;
+        // Power operator
+        padding: 2**4px;
+    }
+}

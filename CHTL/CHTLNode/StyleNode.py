@@ -1,17 +1,17 @@
 from .BaseNode import BaseNode
-from typing import NamedTuple, List
+from typing import NamedTuple, List, Dict
 
 class CssRule(NamedTuple):
     """A simple structure to hold a CSS rule (selector and properties)."""
     selector: str
-    properties: dict[str, str]
+    properties: Dict[str, List[BaseNode]]
 
 class StyleNode(BaseNode):
     """
     Represents a style {} block in CHTL.
     It holds inline properties, global rules, and signals for auto-generation of attributes.
     """
-    def __init__(self, properties: dict[str, str] = None, rules: List[CssRule] = None,
+    def __init__(self, properties: Dict[str, List[BaseNode]] = None, rules: List[CssRule] = None,
                  auto_classes: List[str] = None, auto_ids: List[str] = None):
         # For inline styles, e.g., { width: 100px; }
         self.properties = properties if properties is not None else {}
@@ -24,10 +24,14 @@ class StyleNode(BaseNode):
 
     def to_dict(self) -> dict:
         """Converts the style node to a dictionary for debugging."""
+        def props_to_dict(props: Dict[str, List[BaseNode]]):
+            # The value is now a list of nodes
+            return {k: [node.to_dict() for node in v_list] for k, v_list in props.items()}
+
         return {
             "type": "StyleNode",
-            "properties": self.properties,
-            "rules": [rule._asdict() for rule in self.rules],
+            "properties": props_to_dict(self.properties),
+            "rules": [{'selector': r.selector, 'properties': props_to_dict(r.properties)} for r in self.rules],
             "auto_classes": self.auto_classes_to_add,
             "auto_ids": self.auto_ids_to_add,
         }

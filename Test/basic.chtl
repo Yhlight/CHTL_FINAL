@@ -19,9 +19,10 @@ div {
     id = "container"; // Test '=' as well as ':'
     class: content-box; // Test unquoted attribute value
     style {
-        width: 100px;
-        height: 200px;
+        width: 100px + 20px * 2;
+        height: 300px - 50px;
         background-color: red;
+        padding: 2**8px;
     }
 }
 

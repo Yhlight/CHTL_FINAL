@@ -109,6 +109,13 @@ class Lexer:
                     return self._hex_literal()
                 # Fallthrough to the token_map if it's just a standalone '#'
 
+            if self.current_char == '*':
+                if self._peek() == '*':
+                    self._advance()
+                    self._advance()
+                    return Token(TokenType.DOUBLE_ASTERISK, "**")
+                # Fallthrough to the token_map for a single '*'
+
             token_map = {
                 '{': TokenType.LBRACE,
                 '}': TokenType.RBRACE,
@@ -119,6 +126,11 @@ class Lexer:
                 '#': TokenType.HASH,
                 '&': TokenType.AMPERSAND,
                 '>': TokenType.GT,
+                '+': TokenType.PLUS,
+                '-': TokenType.MINUS,
+                '*': TokenType.ASTERISK,
+                '/': TokenType.SLASH,
+                '%': TokenType.PERCENT,
             }
             if self.current_char in token_map:
                 token_type = token_map[self.current_char]

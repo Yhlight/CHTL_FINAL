@@ -30,6 +30,14 @@ class TokenType(Enum):
     AMPERSAND = "&"
     GT = ">"
 
+    # Operators
+    PLUS = "+"
+    MINUS = "-"
+    ASTERISK = "*"
+    SLASH = "/"
+    PERCENT = "%"
+    DOUBLE_ASTERISK = "**"
+
     # Comments - The lexer will likely skip these, but the types are here for completeness
     COMMENT_LINE = "//"
     COMMENT_BLOCK = "/**/"
