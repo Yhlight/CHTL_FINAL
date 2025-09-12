@@ -4,6 +4,8 @@
 #include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/StyleTemplateNode.h"
+#include "../CHTLNode/ElementTemplateNode.h"
+#include "../CHTLNode/ElementTemplateUsageNode.h"
 #include "../CHTLContext.h"
 #include "../CssValueParser/ValueTokenizer.h"
 #include "../CssValueParser/ValueParser.h"
@@ -33,62 +35,66 @@ std::shared_ptr<BaseNode> Parser::parse() {
 void Parser::templateDefinition() {
     consume(TokenType::TOKEN_LBRACKET, "Expect '['.");
     Token keyword = consume(TokenType::TOKEN_IDENTIFIER, "Expect 'Template'.");
-    if (keyword.lexeme != "Template") { hadError = true; /* ... error ... */ return; }
+    if (keyword.lexeme != "Template") { hadError = true; return; }
     consume(TokenType::TOKEN_RBRACKET, "Expect ']'.");
     consume(TokenType::TOKEN_AT, "Expect '@'.");
 
-    // For now, we only support Style templates.
-    consume(TokenType::TOKEN_STYLE, "Expect 'Style' keyword for template type.");
-
-    Token name = consume(TokenType::TOKEN_IDENTIFIER, "Expect template name.");
-    auto templateNode = std::make_shared<StyleTemplateNode>();
-    templateNode->name = name.lexeme;
-
-    consume(TokenType::TOKEN_LBRACE, "Expect '{' for template body.");
-
-    while (!check(TokenType::TOKEN_RBRACE) && !isAtEnd()) {
-        if (peek().type == TokenType::TOKEN_AT) {
-            // Inheritance: @Style OtherTemplate;
-            advance(); // consume @
-            consume(TokenType::TOKEN_STYLE, "Expect 'Style' keyword for inheritance.");
-            Token baseName = consume(TokenType::TOKEN_IDENTIFIER, "Expect base template name.");
-            templateNode->baseTemplates.push_back(baseName.lexeme);
-            consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after template inheritance.");
-        } else if (peek().type == TokenType::TOKEN_IDENTIFIER) {
-            // Property declaration: key: value;
-            Token key = advance();
-            consume(TokenType::TOKEN_COLON, "Expect ':' after property name.");
-
-            size_t value_start_token = current;
-            while(!check(TokenType::TOKEN_SEMICOLON) && !isAtEnd()) {
+    if (peek().type == TokenType::TOKEN_STYLE) {
+        advance(); // consume Style
+        Token name = consume(TokenType::TOKEN_IDENTIFIER, "Expect template name.");
+        auto templateNode = std::make_shared<StyleTemplateNode>();
+        templateNode->name = name.lexeme;
+        consume(TokenType::TOKEN_LBRACE, "Expect '{' for template body.");
+        while (!check(TokenType::TOKEN_RBRACE) && !isAtEnd()) {
+            if (peek().type == TokenType::TOKEN_AT) {
                 advance();
-            }
-            size_t value_end_token = current;
-
-            // Extract the raw string for the value part
-            size_t start_offset = tokens[value_start_token].offset;
-            size_t end_offset = tokens[value_end_token-1].offset + tokens[value_end_token-1].lexeme.length();
-            std::string raw_value = source.substr(start_offset, end_offset - start_offset);
-
-            // Parse the value into an expression tree
-            try {
-                ValueTokenizer tokenizer(raw_value);
-                std::vector<ValueToken> v_tokens = tokenizer.tokenize();
-                ValueParser valueParser(v_tokens);
-                templateNode->properties[key.lexeme] = valueParser.parse();
-            } catch(const std::runtime_error& e) {
-                hadError = true;
-                std::cerr << "Error parsing property value in template '" << name.lexeme << "': " << e.what() << std::endl;
-            }
-
-            consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after property value.");
-        } else {
-            // Unexpected token
-            advance();
+                consume(TokenType::TOKEN_STYLE, "Expect 'Style' keyword for inheritance.");
+                Token baseName = consume(TokenType::TOKEN_IDENTIFIER, "Expect base template name.");
+                templateNode->baseTemplates.push_back(baseName.lexeme);
+                consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after template inheritance.");
+            } else if (peek().type == TokenType::TOKEN_IDENTIFIER) {
+                Token key = advance();
+                consume(TokenType::TOKEN_COLON, "Expect ':' after property name.");
+                size_t value_start_token = current;
+                while(!check(TokenType::TOKEN_SEMICOLON) && !isAtEnd()) { advance(); }
+                size_t value_end_token = current;
+                size_t start_offset = tokens[value_start_token].offset;
+                size_t end_offset = tokens[value_end_token-1].offset + tokens[value_end_token-1].lexeme.length();
+                std::string raw_value = source.substr(start_offset, end_offset - start_offset);
+                try {
+                    ValueTokenizer tokenizer(raw_value);
+                    std::vector<ValueToken> v_tokens = tokenizer.tokenize();
+                    ValueParser valueParser(v_tokens);
+                    templateNode->properties[key.lexeme] = valueParser.parse();
+                } catch(const std::runtime_error& e) {
+                    hadError = true;
+                    std::cerr << "Error parsing property value in template '" << name.lexeme << "': " << e.what() << std::endl;
+                }
+                consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after property value.");
+            } else { advance(); }
         }
+        consume(TokenType::TOKEN_RBRACE, "Expect '}' to end template body.");
+        context.styleTemplates[name.lexeme] = templateNode;
+
+    } else if (peek().type == TokenType::TOKEN_ELEMENT) {
+        advance(); // consume Element
+        Token name = consume(TokenType::TOKEN_IDENTIFIER, "Expect template name.");
+        auto templateNode = std::make_shared<ElementTemplateNode>();
+        templateNode->name = name.lexeme;
+        consume(TokenType::TOKEN_LBRACE, "Expect '{' for template body.");
+        while (!check(TokenType::TOKEN_RBRACE) && !isAtEnd()) {
+            auto child = declaration();
+            if (child) {
+                templateNode->children.push_back(child);
+            }
+        }
+        consume(TokenType::TOKEN_RBRACE, "Expect '}' to end template body.");
+        context.elementTemplates[name.lexeme] = templateNode;
+    } else {
+        hadError = true;
+        std::cerr << "Unsupported template type '" << peek().lexeme << "'." << std::endl;
+        advance();
     }
-    consume(TokenType::TOKEN_RBRACE, "Expect '}' to end template body.");
-    context.styleTemplates[name.lexeme] = templateNode;
 }
 
 std::shared_ptr<BaseNode> Parser::declaration() {
@@ -102,6 +108,17 @@ std::shared_ptr<BaseNode> Parser::declaration() {
     }
     if (match({TokenType::TOKEN_STYLE})) {
         return styleBlock();
+    }
+    if (peek().type == TokenType::TOKEN_AT) {
+        advance(); // consume @
+        if (peek().type == TokenType::TOKEN_ELEMENT) {
+            advance(); // consume Element
+            Token name = consume(TokenType::TOKEN_IDENTIFIER, "Expect template name.");
+            consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after element template usage.");
+            auto node = std::make_shared<ElementTemplateUsageNode>();
+            node->name = name.lexeme;
+            return node;
+        }
     }
     if (match({TokenType::TOKEN_GENERATOR_COMMENT})) {
         auto node = std::make_shared<CommentNode>();
@@ -117,20 +134,17 @@ std::shared_ptr<BaseNode> Parser::declaration() {
     return nullptr;
 }
 
-// ... rest of the file is unchanged ...
 std::shared_ptr<BaseNode> Parser::element() {
-    Token identifier = previous(); // Assumes IDENTIFIER was matched before calling
+    Token identifier = previous();
     auto node = std::make_shared<ElementNode>();
     node->tagName = identifier.lexeme;
 
     consume(TokenType::TOKEN_LBRACE, "Expect '{' after element name.");
 
     while (!check(TokenType::TOKEN_RBRACE) && !isAtEnd()) {
-        // Is it an attribute? (IDENTIFIER followed by : or =)
         if (peek().type == TokenType::TOKEN_IDENTIFIER && (tokens[current + 1].type == TokenType::TOKEN_COLON || tokens[current + 1].type == TokenType::TOKEN_EQUAL)) {
             attributes(node);
         } else {
-            // It must be a child node
             auto child = declaration();
             if (child) {
                 node->children.push_back(child);
@@ -143,52 +157,35 @@ std::shared_ptr<BaseNode> Parser::element() {
 }
 
 void Parser::attributes(std::shared_ptr<ElementNode> node) {
-    Token name = advance(); // Consume attribute name
-
-    // FIX: Match either colon or equals
+    Token name = advance();
     if (!match({TokenType::TOKEN_COLON, TokenType::TOKEN_EQUAL})) {
-        std::cerr << "Parse Error on line " << peek().line << ": Expect ':' or '=' after attribute name." << std::endl;
-        hadError = true;
-        synchronize(); // Attempt to recover
-        return;
+        hadError = true; synchronize(); return;
     }
-
     if (match({TokenType::TOKEN_STRING_LITERAL, TokenType::TOKEN_IDENTIFIER})) {
         node->attributes[name.lexeme] = previous().lexeme;
     } else {
-        std::cerr << "Parse Error on line " << peek().line << ": Expect attribute value." << std::endl;
         hadError = true;
     }
-
     if (!match({TokenType::TOKEN_SEMICOLON})) {
-        std::cerr << "Parse Error on line " << peek().line << ": Expect ';' after attribute." << std::endl;
-        hadError = true;
-        synchronize(); // Attempt to recover
+        hadError = true; synchronize();
     }
 }
 
 std::shared_ptr<BaseNode> Parser::textBlock() {
     consume(TokenType::TOKEN_LBRACE, "Expect '{' after 'text' keyword.");
-
     auto node = std::make_shared<TextNode>();
-
     if (match({TokenType::TOKEN_STRING_LITERAL, TokenType::TOKEN_IDENTIFIER})) {
         node->text = previous().lexeme;
     } else {
-        std::cerr << "Parse Error on line " << peek().line << ": Expect text content inside text block." << std::endl;
         hadError = true;
     }
-
     consume(TokenType::TOKEN_RBRACE, "Expect '}' after text block.");
     return node;
 }
 
 std::shared_ptr<BaseNode> Parser::styleBlock() {
     Token lbrace = consume(TokenType::TOKEN_LBRACE, "Expect '{' after 'style' keyword.");
-
     auto node = std::make_shared<StyleNode>();
-
-    // Find the matching RBRACE to determine the end of the block
     int brace_count = 1;
     size_t content_end_token_idx = current;
     while(content_end_token_idx < tokens.size() && brace_count > 0) {
@@ -198,50 +195,23 @@ std::shared_ptr<BaseNode> Parser::styleBlock() {
     }
 
     if (brace_count > 0) {
-        std::cerr << "Parse Error on line " << peek().line << ": Unterminated style block." << std::endl;
-        hadError = true;
-        return nullptr;
+        hadError = true; return nullptr;
     }
-
-    // Capture the raw content using offsets from the original source string
     size_t content_start_offset = lbrace.offset + 1;
     size_t content_end_offset = tokens[content_end_token_idx].offset;
-
     if (content_end_offset > content_start_offset) {
         node->rawContent = source.substr(content_start_offset, content_end_offset - content_start_offset);
     }
-
-    // Advance the parser state past the style block content
     current = content_end_token_idx;
-
     consume(TokenType::TOKEN_RBRACE, "Expect '}' after style block.");
     return node;
 }
 
-
-// --- Helper Methods ---
-
-bool Parser::isAtEnd() {
-    return peek().type == TokenType::TOKEN_EOF;
-}
-
-Token Parser::advance() {
-    if (!isAtEnd()) current++;
-    return previous();
-}
-
-Token Parser::peek() {
-    return tokens[current];
-}
-
-Token Parser::previous() {
-    return tokens[current - 1];
-}
-
-bool Parser::check(TokenType type) {
-    if (isAtEnd()) return false;
-    return peek().type == type;
-}
+bool Parser::isAtEnd() { return peek().type == TokenType::TOKEN_EOF; }
+Token Parser::advance() { if (!isAtEnd()) current++; return previous(); }
+Token Parser::peek() { return tokens[current]; }
+Token Parser::previous() { return tokens[current - 1]; }
+bool Parser::check(TokenType type) { if (isAtEnd()) return false; return peek().type == type; }
 
 bool Parser::match(const std::vector<TokenType>& types) {
     for (TokenType type : types) {
@@ -257,21 +227,20 @@ Token Parser::consume(TokenType type, const std::string& message) {
     if (check(type)) return advance();
     std::cerr << "Parse Error on line " << peek().line << ": " << message << std::endl;
     hadError = true;
-    return peek(); // Return the bogus token but don't throw
+    return peek();
 }
 
-// Basic error recovery: advance until we find something that can start a new declaration.
 void Parser::synchronize() {
     advance();
     while (!isAtEnd()) {
-        if (previous().type == TokenType::TOKEN_SEMICOLON) return; // Previous declaration likely ended.
+        if (previous().type == TokenType::TOKEN_SEMICOLON) return;
         switch (peek().type) {
             case TokenType::TOKEN_TEXT:
             case TokenType::TOKEN_STYLE:
-            case TokenType::TOKEN_IDENTIFIER: // Could be a new element
+            case TokenType::TOKEN_ELEMENT:
+            case TokenType::TOKEN_IDENTIFIER:
                 return;
-            default:
-                break;
+            default: break;
         }
         advance();
     }

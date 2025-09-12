@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/app/CHTL/ASTProcessors/StyleEvaluator.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o.d"
   "/app/CHTL/ASTProcessors/StyleProcessor.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o.d"
+  "/app/CHTL/ASTProcessors/TemplateProcessor.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/TemplateProcessor.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/TemplateProcessor.cpp.o.d"
   "/app/CHTL/CHTLGenerator/Generator.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o.d"
   "/app/CHTL/CHTLLexer/Lexer.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLLexer/Lexer.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLLexer/Lexer.cpp.o.d"
   "/app/CHTL/CHTLNode/AstNodes.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o.d"

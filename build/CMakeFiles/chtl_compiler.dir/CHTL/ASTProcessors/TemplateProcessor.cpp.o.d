@@ -1,6 +1,7 @@
-CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o: \
- /app/CHTL/CHTLNode/AstNodes.cpp /usr/include/stdc-predef.h \
- /app/CHTL/CHTLNode/ElementNode.h /app/CHTL/CHTLNode/BaseNode.h \
+CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/TemplateProcessor.cpp.o: \
+ /app/CHTL/ASTProcessors/TemplateProcessor.cpp /usr/include/stdc-predef.h \
+ /app/CHTL/ASTProcessors/TemplateProcessor.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/AstVisitor.h \
  /usr/include/c++/13/memory /usr/include/c++/13/bits/memoryfwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -115,8 +116,10 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o: \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h \
- /app/CHTL/CHTLNode/../CssValueParser/ValueAst.h \
- /app/CHTL/CHTLNode/../CssValueParser/ValueToken.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/ElementNode.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/BaseNode.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/../CssValueParser/ValueAst.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/../CssValueParser/ValueToken.h \
  /usr/include/c++/13/string /usr/include/c++/13/bits/char_traits.h \
  /usr/include/c++/13/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
@@ -160,9 +163,29 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o: \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h /app/CHTL/CHTLNode/TextNode.h \
- /app/CHTL/CHTLNode/CommentNode.h /app/CHTL/CHTLNode/StyleNode.h \
- /app/CHTL/CHTLNode/StyleTemplateNode.h \
- /app/CHTL/CHTLNode/ElementTemplateNode.h \
- /app/CHTL/CHTLNode/ElementTemplateUsageNode.h \
- /app/CHTL/CHTLNode/AstVisitor.h
+ /usr/include/c++/13/bits/erase_if.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/TextNode.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/CommentNode.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/StyleNode.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/StyleTemplateNode.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/ElementTemplateNode.h \
+ /app/CHTL/ASTProcessors/../CHTLNode/ElementTemplateUsageNode.h \
+ /app/CHTL/ASTProcessors/../CHTLContext.h /usr/include/c++/13/iostream \
+ /usr/include/c++/13/ostream /usr/include/c++/13/ios \
+ /usr/include/c++/13/bits/ios_base.h \
+ /usr/include/c++/13/bits/locale_classes.h \
+ /usr/include/c++/13/bits/locale_classes.tcc \
+ /usr/include/c++/13/system_error \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/error_constants.h \
+ /usr/include/c++/13/stdexcept /usr/include/c++/13/streambuf \
+ /usr/include/c++/13/bits/streambuf.tcc \
+ /usr/include/c++/13/bits/basic_ios.h \
+ /usr/include/c++/13/bits/locale_facets.h /usr/include/c++/13/cwctype \
+ /usr/include/wctype.h /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h \
+ /usr/include/c++/13/bits/streambuf_iterator.h \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h \
+ /usr/include/c++/13/bits/locale_facets.tcc \
+ /usr/include/c++/13/bits/basic_ios.tcc \
+ /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
+ /usr/include/c++/13/bits/istream.tcc

@@ -1,13 +1,13 @@
-#ifndef CHTL_STYLE_EVALUATOR_H
-#define CHTL_STYLE_EVALUATOR_H
+#ifndef CHTL_TEMPLATE_PROCESSOR_H
+#define CHTL_TEMPLATE_PROCESSOR_H
 
 #include "../CHTLNode/AstVisitor.h"
 #include <memory>
 
-class StyleEvaluator : public AstVisitor {
+class TemplateProcessor : public AstVisitor {
 public:
     // The main entry point. Traverses and modifies the AST.
-    void process(std::shared_ptr<class BaseNode> root);
+    void process(std::shared_ptr<class BaseNode> root, class CHTLContext& context);
 
     // Visitor methods
     void visit(class ElementNode& node) override;
@@ -19,7 +19,7 @@ public:
     void visit(class ElementTemplateUsageNode& node) override;
 
 private:
-    std::shared_ptr<BaseNode> astRoot;
+    class CHTLContext* context = nullptr;
 };
 
-#endif // CHTL_STYLE_EVALUATOR_H
+#endif // CHTL_TEMPLATE_PROCESSOR_H

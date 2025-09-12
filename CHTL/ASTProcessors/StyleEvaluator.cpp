@@ -66,3 +66,6 @@ void StyleEvaluator::visit(StyleNode& node) {
 void StyleEvaluator::visit(StyleTemplateNode& node) {
     // Should not exist at this stage.
 }
+
+void StyleEvaluator::visit(ElementTemplateNode& node) {}
+void StyleEvaluator::visit(ElementTemplateUsageNode& node) {}

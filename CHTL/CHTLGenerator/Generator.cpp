@@ -85,3 +85,12 @@ void Generator::visit(StyleNode& node) {
 void Generator::visit(StyleTemplateNode& node) {
     // Template definitions are not rendered in the final output.
 }
+
+void Generator::visit(ElementTemplateNode& node) {
+    // Template definitions are not rendered in the final output.
+}
+
+void Generator::visit(ElementTemplateUsageNode& node) {
+    // These should be replaced by the TemplateProcessor before generation.
+    // If one gets here, it's an error, but we'll just ignore it.
+}

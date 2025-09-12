@@ -3,6 +3,8 @@
 #include "CommentNode.h"
 #include "StyleNode.h"
 #include "StyleTemplateNode.h"
+#include "ElementTemplateNode.h"
+#include "ElementTemplateUsageNode.h"
 #include "AstVisitor.h"
 
 void ElementNode::accept(AstVisitor& visitor) {
@@ -22,5 +24,13 @@ void StyleNode::accept(AstVisitor& visitor) {
 }
 
 void StyleTemplateNode::accept(AstVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void ElementTemplateNode::accept(AstVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void ElementTemplateUsageNode::accept(AstVisitor& visitor) {
     visitor.visit(*this);
 }

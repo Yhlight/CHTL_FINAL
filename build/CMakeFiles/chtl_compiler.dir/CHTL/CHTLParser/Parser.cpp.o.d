@@ -170,6 +170,8 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o: \
  /app/CHTL/CHTLParser/../CHTLNode/CommentNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/StyleNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/StyleTemplateNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/ElementTemplateNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/ElementTemplateUsageNode.h \
  /app/CHTL/CHTLParser/../CHTLContext.h \
  /app/CHTL/CHTLParser/../CssValueParser/ValueTokenizer.h \
  /app/CHTL/CHTLParser/../CssValueParser/ValueToken.h \

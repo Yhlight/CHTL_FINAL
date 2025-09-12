@@ -1,39 +1,30 @@
-// Define a base template for text
-[Template] @Style BaseText
+// Define an element template
+[Template] @Element Card
 {
-    font-family: sans-serif;
-    font-size: 16px;
-    color: black;
-}
-
-// Define a more specific template that inherits from the base
-[Template] @Style TitleText
-{
-    @Style BaseText; // Inherit from BaseText
-    font-size: 32px; // Override the font-size
-    font-weight: bold; // Add a new property
+    div {
+        class: "card";
+        h2 { text { "Card Title" } }
+        p { text { "This is the content of the card." } }
+    }
 }
 
 html
 {
     head
     {
-        title { text { "Template Test" } }
+        title { text { "Element Template Test" } }
     }
 
     body
     {
-        // This div should get all styles from TitleText,
-        // including the inherited ones from BaseText,
-        // with the override applied.
-        div
-        {
-            style {
-                @Style TitleText;
-                border: 1px solid grey; // Also add a local property
-            }
+        h1 { text { "My Page" } }
 
-            text { "This is a title" }
-        }
+        // Use the element template
+        @Element Card;
+
+        hr {}
+
+        // Use it again
+        @Element Card;
     }
 }

@@ -18,6 +18,8 @@ public:
     void visit(class CommentNode& node) override;
     void visit(class StyleNode& node) override;
     void visit(class StyleTemplateNode& node) override;
+    void visit(class ElementTemplateNode& node) override;
+    void visit(class ElementTemplateUsageNode& node) override;
 
 private:
     // A pointer to the current element being processed.

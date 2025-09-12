@@ -16,6 +16,7 @@ add_executable(chtl_compiler main.cpp
     CHTL/LocalStyleParser/LocalStyleParser.cpp
     CHTL/ASTProcessors/StyleProcessor.cpp
     CHTL/ASTProcessors/StyleEvaluator.cpp
+    CHTL/ASTProcessors/TemplateProcessor.cpp
     Util/StringUtil/StringUtil.cpp
     CHTL/CssValueParser/ValueTokenizer.cpp
     CHTL/CssValueParser/ValueParser.cpp

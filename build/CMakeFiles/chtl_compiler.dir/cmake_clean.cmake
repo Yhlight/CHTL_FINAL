@@ -3,6 +3,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o.d"
   "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o"
   "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o.d"
+  "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/TemplateProcessor.cpp.o"
+  "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/TemplateProcessor.cpp.o.d"
   "CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o"
   "CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o.d"
   "CMakeFiles/chtl_compiler.dir/CHTL/CHTLLexer/Lexer.cpp.o"

@@ -7,6 +7,8 @@ class TextNode;
 class CommentNode;
 class StyleNode;
 class StyleTemplateNode;
+class ElementTemplateNode;
+class ElementTemplateUsageNode;
 
 class AstVisitor {
 public:
@@ -18,6 +20,8 @@ public:
     virtual void visit(CommentNode& node) = 0;
     virtual void visit(StyleNode& node) = 0;
     virtual void visit(StyleTemplateNode& node) = 0;
+    virtual void visit(ElementTemplateNode& node) = 0;
+    virtual void visit(ElementTemplateUsageNode& node) = 0;
 };
 
 #endif // CHTL_AST_VISITOR_H

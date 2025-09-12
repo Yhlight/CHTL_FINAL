@@ -8,6 +8,7 @@
 
 // Forward declarations
 class StyleTemplateNode;
+class ElementTemplateNode;
 
 /**
  * @brief Holds compilation-wide data that needs to be passed through the pipeline.
@@ -22,6 +23,8 @@ public:
 
     // A map to store parsed style templates by name.
     std::map<std::string, std::shared_ptr<StyleTemplateNode>> styleTemplates;
+    // A map to store parsed element templates by name.
+    std::map<std::string, std::shared_ptr<ElementTemplateNode>> elementTemplates;
 };
 
 #endif // CHTL_CONTEXT_H

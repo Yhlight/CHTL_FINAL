@@ -5,7 +5,8 @@
 static std::map<std::string, TokenType> keywords = {
     {"text", TokenType::TOKEN_TEXT},
     {"style", TokenType::TOKEN_STYLE},
-    {"Style", TokenType::TOKEN_STYLE} // For @Style
+    {"Style", TokenType::TOKEN_STYLE}, // For @Style
+    {"Element", TokenType::TOKEN_ELEMENT} // For @Element
 };
 
 Lexer::Lexer(const std::string& source) : source(source) {}

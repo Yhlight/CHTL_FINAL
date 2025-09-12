@@ -190,6 +190,30 @@ CHTL/ASTProcessors/StyleProcessor.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.s
 .PHONY : CHTL/ASTProcessors/StyleProcessor.cpp.s
 
+CHTL/ASTProcessors/TemplateProcessor.o: CHTL/ASTProcessors/TemplateProcessor.cpp.o
+.PHONY : CHTL/ASTProcessors/TemplateProcessor.o
+
+# target to build an object file
+CHTL/ASTProcessors/TemplateProcessor.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/TemplateProcessor.cpp.o
+.PHONY : CHTL/ASTProcessors/TemplateProcessor.cpp.o
+
+CHTL/ASTProcessors/TemplateProcessor.i: CHTL/ASTProcessors/TemplateProcessor.cpp.i
+.PHONY : CHTL/ASTProcessors/TemplateProcessor.i
+
+# target to preprocess a source file
+CHTL/ASTProcessors/TemplateProcessor.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/TemplateProcessor.cpp.i
+.PHONY : CHTL/ASTProcessors/TemplateProcessor.cpp.i
+
+CHTL/ASTProcessors/TemplateProcessor.s: CHTL/ASTProcessors/TemplateProcessor.cpp.s
+.PHONY : CHTL/ASTProcessors/TemplateProcessor.s
+
+# target to generate assembly for a file
+CHTL/ASTProcessors/TemplateProcessor.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/TemplateProcessor.cpp.s
+.PHONY : CHTL/ASTProcessors/TemplateProcessor.cpp.s
+
 CHTL/CHTLGenerator/Generator.o: CHTL/CHTLGenerator/Generator.cpp.o
 .PHONY : CHTL/CHTLGenerator/Generator.o
 
@@ -494,6 +518,9 @@ help:
 	@echo "... CHTL/ASTProcessors/StyleProcessor.o"
 	@echo "... CHTL/ASTProcessors/StyleProcessor.i"
 	@echo "... CHTL/ASTProcessors/StyleProcessor.s"
+	@echo "... CHTL/ASTProcessors/TemplateProcessor.o"
+	@echo "... CHTL/ASTProcessors/TemplateProcessor.i"
+	@echo "... CHTL/ASTProcessors/TemplateProcessor.s"
 	@echo "... CHTL/CHTLGenerator/Generator.o"
 	@echo "... CHTL/CHTLGenerator/Generator.i"
 	@echo "... CHTL/CHTLGenerator/Generator.s"

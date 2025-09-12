@@ -101,3 +101,5 @@ void StyleProcessor::visit(TextNode& node) {}
 void StyleProcessor::visit(CommentNode& node) {}
 void StyleProcessor::visit(StyleNode& node) {}
 void StyleProcessor::visit(StyleTemplateNode& node) {}
+void StyleProcessor::visit(ElementTemplateNode& node) {}
+void StyleProcessor::visit(ElementTemplateUsageNode& node) {}
