@@ -487,6 +487,54 @@ CHTLParser.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.s
 .PHONY : CHTLParser.cpp.s
 
+CJMOD/CJMODAPI.o: CJMOD/CJMODAPI.cpp.o
+.PHONY : CJMOD/CJMODAPI.o
+
+# target to build an object file
+CJMOD/CJMODAPI.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CJMOD/CJMODAPI.cpp.o
+.PHONY : CJMOD/CJMODAPI.cpp.o
+
+CJMOD/CJMODAPI.i: CJMOD/CJMODAPI.cpp.i
+.PHONY : CJMOD/CJMODAPI.i
+
+# target to preprocess a source file
+CJMOD/CJMODAPI.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CJMOD/CJMODAPI.cpp.i
+.PHONY : CJMOD/CJMODAPI.cpp.i
+
+CJMOD/CJMODAPI.s: CJMOD/CJMODAPI.cpp.s
+.PHONY : CJMOD/CJMODAPI.s
+
+# target to generate assembly for a file
+CJMOD/CJMODAPI.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CJMOD/CJMODAPI.cpp.s
+.PHONY : CJMOD/CJMODAPI.cpp.s
+
+CJMOD/CJMODCompiler.o: CJMOD/CJMODCompiler.cpp.o
+.PHONY : CJMOD/CJMODCompiler.o
+
+# target to build an object file
+CJMOD/CJMODCompiler.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CJMOD/CJMODCompiler.cpp.o
+.PHONY : CJMOD/CJMODCompiler.cpp.o
+
+CJMOD/CJMODCompiler.i: CJMOD/CJMODCompiler.cpp.i
+.PHONY : CJMOD/CJMODCompiler.i
+
+# target to preprocess a source file
+CJMOD/CJMODCompiler.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CJMOD/CJMODCompiler.cpp.i
+.PHONY : CJMOD/CJMODCompiler.cpp.i
+
+CJMOD/CJMODCompiler.s: CJMOD/CJMODCompiler.cpp.s
+.PHONY : CJMOD/CJMODCompiler.s
+
+# target to generate assembly for a file
+CJMOD/CJMODCompiler.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CJMOD/CJMODCompiler.cpp.s
+.PHONY : CJMOD/CJMODCompiler.cpp.s
+
 ConfigurationManager.o: ConfigurationManager.cpp.o
 .PHONY : ConfigurationManager.o
 
@@ -683,6 +731,12 @@ help:
 	@echo "... CHTLParser.o"
 	@echo "... CHTLParser.i"
 	@echo "... CHTLParser.s"
+	@echo "... CJMOD/CJMODAPI.o"
+	@echo "... CJMOD/CJMODAPI.i"
+	@echo "... CJMOD/CJMODAPI.s"
+	@echo "... CJMOD/CJMODCompiler.o"
+	@echo "... CJMOD/CJMODCompiler.i"
+	@echo "... CJMOD/CJMODCompiler.s"
 	@echo "... ConfigurationManager.o"
 	@echo "... ConfigurationManager.i"
 	@echo "... ConfigurationManager.s"

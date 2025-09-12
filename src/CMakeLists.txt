@@ -30,6 +30,10 @@ add_library(CHTLCore STATIC
     # 模块系统
     ModuleManager.cpp
     
+    # CJMOD系统
+    CJMOD/CJMODAPI.cpp
+    CJMOD/CJMODCompiler.cpp
+    
     # 扫描器
     Scanner/UnifiedScanner.cpp
 )
