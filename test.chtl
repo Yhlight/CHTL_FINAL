@@ -1,0 +1,11 @@
+// test.chtl
+// A simple file to test the command-line compiler driver.
+
+div {
+    h1 {
+        text { "Welcome to CHTL" }
+    }
+    p {
+        text { "This is generated from a .chtl file." }
+    }
+}
