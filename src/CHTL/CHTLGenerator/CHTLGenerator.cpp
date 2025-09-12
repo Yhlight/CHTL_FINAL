@@ -1,4 +1,5 @@
 #include "CHTLGenerator.h"
+#include "ExpressionEvaluator.h"
 #include "CHTL/CHTLNode/ElementNode.h"
 #include "CHTL/CHTLNode/TextNode.h"
 #include "CHTL/CHTLNode/CommentNode.h"
@@ -23,8 +24,10 @@ void CHTLGenerator::visit(ElementNode& node) {
 
     if (!node.getInlineStyles().empty()) {
         output << " style=\"";
+        ExpressionEvaluator evaluator;
         for (const auto& style : node.getInlineStyles()) {
-            output << style.first << ":" << style.second << ";";
+            ComputedValue val = evaluator.evaluate(style.second.get());
+            output << style.first << ":" << val.value << val.unit << ";";
         }
         output << "\"";
     }

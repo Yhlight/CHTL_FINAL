@@ -1,6 +1,9 @@
 #include "CHTLParser.h"
 #include "CHTL/CHTLNode/TextNode.h"
 #include "CHTL/CHTLNode/CommentNode.h"
+#include "CHTL/CHTLNode/BinaryExpr.h"
+#include "CHTL/CHTLNode/NumberLiteralExpr.h"
+#include "CHTL/CHTLNode/GroupingExpr.h"
 #include <stdexcept>
 
 namespace CHTL {
@@ -71,7 +74,7 @@ void CHTLParser::parseStyleBlock(ElementNode* element) {
         if (peek().type == TokenType::CHTL_COMMENT) {
             Token commentToken = advance();
             element->addChild(std::make_unique<CommentNode>(commentToken.lexeme));
-        } else if (peek().type == TokenType::DOT) { // Class selector
+        } else if (peek().type == TokenType::DOT) {
             consume(TokenType::DOT, "Expect '.' for class selector.");
             Token name = consume(TokenType::UNQUOTED_LITERAL, "Expect class name.");
             element->addAttribute("class", name.lexeme);
@@ -82,7 +85,7 @@ void CHTLParser::parseStyleBlock(ElementNode* element) {
             context.addCssRule("." + name.lexeme, ruleBody);
             consume(TokenType::RIGHT_BRACE, "Expect '}' for style rule block.");
 
-        } else if (peek().type == TokenType::HASH) { // ID selector
+        } else if (peek().type == TokenType::HASH) {
             consume(TokenType::HASH, "Expect '#' for id selector.");
             Token name = consume(TokenType::UNQUOTED_LITERAL, "Expect id name.");
             element->addAttribute("id", name.lexeme);
@@ -92,10 +95,8 @@ void CHTLParser::parseStyleBlock(ElementNode* element) {
             std::string ruleBody = parseCssBlock();
             context.addCssRule("#" + name.lexeme, ruleBody);
             consume(TokenType::RIGHT_BRACE, "Expect '}' for style rule block.");
-        } else if (peek().type == TokenType::AMPERSAND) { // Context selector
+        } else if (peek().type == TokenType::AMPERSAND) {
             consume(TokenType::AMPERSAND, "Expect '&'.");
-            // The rest of the selector (e.g., :hover) is tokenized as other things.
-            // We'll consume until the `{`. This is a simplification.
             std::string restOfSelector = "";
             while(peek().type != TokenType::LEFT_BRACE && !isAtEnd()) {
                 restOfSelector += advance().lexeme;
@@ -111,26 +112,7 @@ void CHTLParser::parseStyleBlock(ElementNode* element) {
             Token key = consume(TokenType::UNQUOTED_LITERAL, "Expect style property name.");
             consume(TokenType::COLON, "Expect ':' after style property name.");
 
-            // --- Expression Parsing for Style Values ---
-            std::string valueStr = "";
-            bool isExpression = false;
-            while(peek().type != TokenType::SEMICOLON && !isAtEnd()) {
-                if (peek().type == TokenType::PLUS || peek().type == TokenType::MINUS ||
-                    peek().type == TokenType::STAR || peek().type == TokenType::SLASH) {
-                    isExpression = true;
-                    valueStr += " ";
-                    valueStr += advance().lexeme;
-                    valueStr += " ";
-                } else {
-                    valueStr += advance().lexeme;
-                }
-            }
-
-            if (isExpression) {
-                element->addInlineStyle(key.lexeme, "calc(" + valueStr + ")");
-            } else {
-                element->addInlineStyle(key.lexeme, valueStr);
-            }
+            element->addInlineStyle(key.lexeme, parseExpression());
 
             consume(TokenType::SEMICOLON, "Expect ';' after style value.");
         }
@@ -140,27 +122,17 @@ void CHTLParser::parseStyleBlock(ElementNode* element) {
 }
 
 std::string CHTLParser::parseCssBlock() {
-    // This is a simple approach that captures the raw string content inside the braces.
-    // It assumes the lexer doesn't tokenize anything inside the CSS block, which is not
-    // currently true. A better approach is needed.
-    // For now, let's just consume tokens until the matching brace.
     int start_pos = current;
     int brace_level = 1;
     while (brace_level > 0 && !isAtEnd()) {
         if (peek().type == TokenType::LEFT_BRACE) brace_level++;
         else if (peek().type == TokenType::RIGHT_BRACE) brace_level--;
 
-        if (brace_level == 0) break; // found matching brace
+        if (brace_level == 0) break;
         advance();
     }
     int end_pos = current;
 
-    // This part is tricky because the lexemes don't contain whitespace.
-    // Reconstructing from source is better.
-    // Let's find the character position of the start and end tokens.
-    // This requires more info on the Token or a different approach.
-
-    // Let's stick to the simple token-by-token concatenation for now, it's a known limitation.
     std::string body = "";
     for (int i = start_pos; i < end_pos; ++i) {
         body += tokens[i].lexeme;
@@ -170,6 +142,56 @@ std::string CHTLParser::parseCssBlock() {
     }
     return body;
 }
+
+// --- Expression Parsing (Recursive Descent) ---
+
+// expression -> term
+std::unique_ptr<ExprNode> CHTLParser::parseExpression() {
+    return parseTerm();
+}
+
+// term -> factor ( ( "-" | "+" ) factor )*
+std::unique_ptr<ExprNode> CHTLParser::parseTerm() {
+    auto expr = parseFactor();
+
+    while (peek().type == TokenType::PLUS || peek().type == TokenType::MINUS) {
+        Token op = advance();
+        auto right = parseFactor();
+        expr = std::make_unique<BinaryExpr>(std::move(expr), op, std::move(right));
+    }
+
+    return expr;
+}
+
+// factor -> primary ( ( "/" | "*" ) primary )*
+std::unique_ptr<ExprNode> CHTLParser::parseFactor() {
+    auto expr = parsePrimary();
+
+    while (peek().type == TokenType::STAR || peek().type == TokenType::SLASH) {
+        Token op = advance();
+        auto right = parsePrimary();
+        expr = std::make_unique<BinaryExpr>(std::move(expr), op, std::move(right));
+    }
+
+    return expr;
+}
+
+// primary -> NUMBER | "(" expression ")"
+std::unique_ptr<ExprNode> CHTLParser::parsePrimary() {
+    if (peek().type == TokenType::NUMBER) {
+        return std::make_unique<NumberLiteralExpr>(advance().lexeme);
+    }
+
+    if (peek().type == TokenType::LEFT_PAREN) {
+        advance(); // consume '('
+        auto expr = parseExpression();
+        consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
+        return std::make_unique<GroupingExpr>(std::move(expr));
+    }
+
+    throw std::runtime_error("Expect expression, but got " + peek().toString());
+}
+
 
 // --- Parser Helpers ---
 

@@ -22,6 +22,12 @@ private:
     void parseStyleBlock(ElementNode* element);
     std::string parseCssBlock();
 
+    // Expression parsing
+    std::unique_ptr<ExprNode> parseExpression();
+    std::unique_ptr<ExprNode> parseTerm();
+    std::unique_ptr<ExprNode> parseFactor();
+    std::unique_ptr<ExprNode> parsePrimary();
+
     bool isAtEnd() const;
     Token advance();
     Token peek() const;

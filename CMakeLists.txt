@@ -31,6 +31,11 @@ add_executable(chtl_compiler
     src/CHTL/CHTLLexer/CHTLLexer.cpp
     src/CHTL/CHTLParser/CHTLParser.cpp
     src/CHTL/CHTLGenerator/CHTLGenerator.cpp
+    src/CHTL/CHTLNode/BinaryExpr.cpp
+    src/CHTL/CHTLNode/NumberLiteralExpr.cpp
+    src/CHTL/CHTLNode/GroupingExpr.cpp
+    src/Test/AstTest/ExprPrinter.cpp
+    src/CHTL/CHTLGenerator/ExpressionEvaluator.cpp
 )
 
 # We will add more source files and include directories as we build them.

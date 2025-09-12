@@ -17,18 +17,18 @@ void runFile(const std::string& path) {
     }
 
     try {
-        // 0. Create a context for the compilation.
+        // 1. Create a context for the compilation.
         CHTL::CHTLContext context;
 
-        // 1. Lexer
+        // 2. Lexer
         CHTL::CHTLLexer lexer(content);
         std::vector<CHTL::Token> tokens = lexer.scanTokens();
 
-        // 2. Parser
+        // 3. Parser
         CHTL::CHTLParser parser(std::move(tokens), context);
         std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
 
-        // 3. Generator
+        // 4. Generator
         if (ast) {
             CHTL::CHTLGenerator generator;
             std::string html = generator.generate(ast.get(), context);

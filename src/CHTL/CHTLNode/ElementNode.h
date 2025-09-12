@@ -4,6 +4,7 @@
 #include "BaseNode.h"
 #include <string>
 #include <map>
+#include "ExprNode.h"
 
 namespace CHTL {
 
@@ -19,9 +20,9 @@ public:
         attributes[key] = value;
     }
 
-    const std::map<std::string, std::string>& getInlineStyles() const { return inlineStyles; }
-    void addInlineStyle(const std::string& key, const std::string& value) {
-        inlineStyles[key] = value;
+    const std::map<std::string, std::unique_ptr<ExprNode>>& getInlineStyles() const { return inlineStyles; }
+    void addInlineStyle(const std::string& key, std::unique_ptr<ExprNode> value) {
+        inlineStyles[key] = std::move(value);
     }
 
     const std::string& getPrimarySelector() const { return primarySelector; }
@@ -32,7 +33,7 @@ public:
 private:
     std::string tagName;
     std::map<std::string, std::string> attributes;
-    std::map<std::string, std::string> inlineStyles;
+    std::map<std::string, std::unique_ptr<ExprNode>> inlineStyles;
     std::string primarySelector;
 };
 
