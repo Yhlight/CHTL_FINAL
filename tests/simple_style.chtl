@@ -1,0 +1,7 @@
+div {
+    id: "styled-div";
+    style {
+        color: red;
+        font-size: 16px;
+    }
+}

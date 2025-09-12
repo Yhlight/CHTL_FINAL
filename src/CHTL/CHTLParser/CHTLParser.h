@@ -32,6 +32,7 @@ private:
     std::shared_ptr<BaseNode> declaration();
     std::shared_ptr<ElementNode> element();
     std::shared_ptr<TextNode> textElement();
+    std::map<std::string, std::string> parseStyleBlock();
 
     // Token-handling utility methods
     bool isAtEnd();

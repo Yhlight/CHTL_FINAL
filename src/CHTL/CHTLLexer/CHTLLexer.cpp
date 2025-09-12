@@ -6,7 +6,8 @@
 namespace CHTL {
 
 static std::map<std::string, TokenType> keywords = {
-    {"text", TokenType::KEYWORD_TEXT}
+    {"text", TokenType::KEYWORD_TEXT},
+    {"style", TokenType::KEYWORD_STYLE}
 };
 
 CHTLLexer::CHTLLexer(const std::string& source) : source(source) {}
@@ -32,6 +33,11 @@ char CHTLLexer::advance() {
 char CHTLLexer::peek() {
     if (isAtEnd()) return '\0';
     return source[current];
+}
+
+char CHTLLexer::peekNext() {
+    if (current + 1 >= source.length()) return '\0';
+    return source[current + 1];
 }
 
 void CHTLLexer::addToken(TokenType type) {
@@ -65,7 +71,7 @@ void CHTLLexer::stringLiteral() {
 }
 
 void CHTLLexer::identifier() {
-    while (isalnum(peek()) || peek() == '_') {
+    while (isalnum(peek()) || peek() == '_' || peek() == '-') {
         advance();
     }
 
@@ -113,7 +119,9 @@ void CHTLLexer::scanToken() {
             break;
 
         default:
-            if (isalpha(c) || c == '_') {
+            if (isdigit(c)) {
+                numberLiteral();
+            } else if (isalpha(c) || c == '_') {
                 identifier();
             } else {
                 std::cerr << "Line " << line << ": Unexpected character '" << c << "'." << std::endl;
@@ -121,6 +129,29 @@ void CHTLLexer::scanToken() {
             }
             break;
     }
+}
+
+void CHTLLexer::numberLiteral() {
+    while (isdigit(peek())) {
+        advance();
+    }
+
+    // Look for a fractional part.
+    if (peek() == '.' && isdigit(peekNext())) {
+        // Consume the "."
+        advance();
+
+        while (isdigit(peek())) {
+            advance();
+        }
+    }
+
+    // Also consume an attached unit (e.g., px, em, %)
+    while (isalpha(peek()) || peek() == '%') {
+        advance();
+    }
+
+    addToken(TokenType::NUMBER);
 }
 
 } // namespace CHTL

@@ -1,5 +1,6 @@
 #include "CHTLParser.h"
 #include <iostream>
+#include <sstream>
 
 namespace CHTL {
 
@@ -32,7 +33,9 @@ std::shared_ptr<ElementNode> CHTLParser::element() {
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
         Token currentToken = peek();
 
-        if (currentToken.type == TokenType::KEYWORD_TEXT) {
+        if (currentToken.type == TokenType::KEYWORD_STYLE) {
+            node->styles = parseStyleBlock();
+        } else if (currentToken.type == TokenType::KEYWORD_TEXT) {
             // text: "..." ;
              advance(); // consume 'text'
              consume(TokenType::COLON, "Expect ':' after 'text' attribute.");
@@ -68,6 +71,33 @@ std::shared_ptr<TextNode> CHTLParser::textElement() {
     Token content = consume(TokenType::STRING, "Expect string literal inside text block.");
     consume(TokenType::RIGHT_BRACE, "Expect '}' after text block.");
     return std::make_shared<TextNode>(content.lexeme);
+}
+
+std::map<std::string, std::string> CHTLParser::parseStyleBlock() {
+    consume(TokenType::KEYWORD_STYLE, "Expect 'style' keyword.");
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'style'.");
+
+    std::map<std::string, std::string> styles;
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        Token key = consume(TokenType::IDENTIFIER, "Expect style property name.");
+        consume(TokenType::COLON, "Expect ':' after property name.");
+
+        std::stringstream value_ss;
+        while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
+            if (!value_ss.str().empty()) {
+                value_ss << " ";
+            }
+            value_ss << advance().lexeme;
+        }
+
+        consume(TokenType::SEMICOLON, "Expect ';' after property value.");
+
+        styles[key.lexeme] = value_ss.str();
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after style block.");
+    return styles;
 }
 
 

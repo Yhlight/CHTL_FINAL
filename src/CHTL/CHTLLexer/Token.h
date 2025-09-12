@@ -21,8 +21,12 @@ enum class TokenType {
     IDENTIFIER,     // e.g., div, id, my_class
     STRING,         // e.g., "hello world"
 
-    // Keywords (will add more later)
-    KEYWORD_TEXT
+    // Keywords
+    KEYWORD_TEXT,
+    KEYWORD_STYLE,
+
+    // Data Types
+    NUMBER
 };
 
 struct Token {

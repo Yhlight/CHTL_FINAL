@@ -23,12 +23,14 @@ private:
     void scanToken();
     char advance();
     char peek();
+    char peekNext();
 
     void addToken(TokenType type);
     // Overload for tokens with a different literal value than their lexeme (e.g., string content)
     void addToken(TokenType type, const std::string& literal);
 
     void stringLiteral();
+    void numberLiteral();
     void identifier();
 };
 

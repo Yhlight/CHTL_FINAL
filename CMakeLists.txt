@@ -36,16 +36,19 @@ target_link_libraries(chtl chthl_lib)
 # --- Testing ---
 enable_testing()
 
-# Add the test executable
+# --- Test: Basic Compilation ---
 add_executable(compiler_test tests/compiler_test.cpp)
-
-# Link the test executable against the compiler library
 target_link_libraries(compiler_test chthl_lib)
-
-# Add the test to CTest
 add_test(NAME ChtlCompilerTest COMMAND compiler_test)
-
 set_tests_properties(ChtlCompilerTest PROPERTIES
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+# --- Test: Style Blocks ---
+add_executable(style_test tests/style_test.cpp)
+target_link_libraries(style_test chthl_lib)
+add_test(NAME ChtlStyleTest COMMAND style_test)
+set_tests_properties(ChtlStyleTest PROPERTIES
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 

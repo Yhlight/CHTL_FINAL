@@ -34,8 +34,23 @@ void CHTLGenerator::generateElement(const std::shared_ptr<ElementNode>& node) {
     indent();
     output << "<" << node->tagName;
 
+    // Add regular attributes
     for (const auto& attr : node->attributes) {
         output << " " << attr->key << "=\"" << attr->value << "\"";
+    }
+
+    // Add style attribute from parsed styles
+    if (!node->styles.empty()) {
+        output << " style=\"";
+        bool first = true;
+        for (const auto& style_pair : node->styles) {
+            if (!first) {
+                output << " ";
+            }
+            output << style_pair.first << ": " << style_pair.second << ";";
+            first = false;
+        }
+        output << "\"";
     }
 
     if (node->children.empty()) {
