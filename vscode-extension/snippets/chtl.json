@@ -1,0 +1,185 @@
+{
+  "HTML Structure": {
+    "prefix": "html",
+    "body": [
+      "html {",
+      "    head {",
+      "        title { text { \"${1:Page Title}\" } }",
+      "    }",
+      "    body {",
+      "        ${2:content}",
+      "    }",
+      "}"
+    ],
+    "description": "Basic HTML structure"
+  },
+  "Div Element": {
+    "prefix": "div",
+    "body": [
+      "div {",
+      "    ${1:content}",
+      "}"
+    ],
+    "description": "Div element"
+  },
+  "Text Element": {
+    "prefix": "text",
+    "body": [
+      "text { \"${1:Hello World}\" }"
+    ],
+    "description": "Text element"
+  },
+  "Style Block": {
+    "prefix": "style",
+    "body": [
+      "style {",
+      "    ${1:property}: ${2:value};",
+      "}"
+    ],
+    "description": "Style block"
+  },
+  "Script Block": {
+    "prefix": "script",
+    "body": [
+      "script {",
+      "    ${1:// JavaScript code}",
+      "}"
+    ],
+    "description": "Script block"
+  },
+  "Template": {
+    "prefix": "template",
+    "body": [
+      "[Template] ${1:TemplateName} {",
+      "    ${2:content}",
+      "}"
+    ],
+    "description": "Template declaration"
+  },
+  "Custom": {
+    "prefix": "custom",
+    "body": [
+      "[Custom] ${1:CustomName} {",
+      "    ${2:content}",
+      "}"
+    ],
+    "description": "Custom declaration"
+  },
+  "Import": {
+    "prefix": "import",
+    "body": [
+      "[Import] @Chtl from ${1:module_name}"
+    ],
+    "description": "Import statement"
+  },
+  "Namespace": {
+    "prefix": "namespace",
+    "body": [
+      "[Namespace] ${1:namespace_name}"
+    ],
+    "description": "Namespace declaration"
+  },
+  "Configuration": {
+    "prefix": "config",
+    "body": [
+      "[Configuration] {",
+      "    ${1:key}: ${2:value};",
+      "}"
+    ],
+    "description": "Configuration block"
+  },
+  "Info": {
+    "prefix": "info",
+    "body": [
+      "[Info] {",
+      "    name = \"${1:module_name}\";",
+      "    version = \"${2:1.0.0}\";",
+      "    description = \"${3:Module description}\";",
+      "    author = \"${4:Author}\";",
+      "    license = \"${5:MIT}\";",
+      "    dependencies = \"${6:}\";",
+      "    category = \"${7:theme}\";",
+      "    minCHTLVersion = \"${8:1.0.0}\";",
+      "}"
+    ],
+    "description": "Info block for modules"
+  },
+  "Export": {
+    "prefix": "export",
+    "body": [
+      "[Export] {",
+      "    ${1:key}: \"${2:value}\";",
+      "}"
+    ],
+    "description": "Export block for modules"
+  },
+  "Button": {
+    "prefix": "button",
+    "body": [
+      "button {",
+      "    text { \"${1:Click Me}\" }",
+      "    style {",
+      "        ${2:background-color}: ${3:blue};",
+      "        ${4:color}: ${5:white};",
+      "        ${6:padding}: ${7:10px 20px};",
+      "    }",
+      "}"
+    ],
+    "description": "Button element with styling"
+  },
+  "Link": {
+    "prefix": "a",
+    "body": [
+      "a {",
+      "    href: \"${1:#}\";",
+      "    text { \"${2:Link Text}\" }",
+      "    style {",
+      "        ${3:color}: ${4:blue};",
+      "        ${5:text-decoration}: ${6:none};",
+      "    }",
+      "}"
+    ],
+    "description": "Link element"
+  },
+  "Image": {
+    "prefix": "img",
+    "body": [
+      "img {",
+      "    src: \"${1:image.jpg}\";",
+      "    alt: \"${2:Image description}\";",
+      "    style {",
+      "        ${3:width}: ${4:100px};",
+      "        ${5:height}: ${6:100px};",
+      "    }",
+      "}"
+    ],
+    "description": "Image element"
+  },
+  "List": {
+    "prefix": "ul",
+    "body": [
+      "ul {",
+      "    li { text { \"${1:Item 1}\" } }",
+      "    li { text { \"${2:Item 2}\" } }",
+      "    li { text { \"${3:Item 3}\" } }",
+      "}"
+    ],
+    "description": "Unordered list"
+  },
+  "Table": {
+    "prefix": "table",
+    "body": [
+      "table {",
+      "    tr {",
+      "        th { text { \"${1:Header 1}\" } }",
+      "        th { text { \"${2:Header 2}\" } }",
+      "    }",
+      "    tr {",
+      "        td { text { \"${3:Data 1}\" } }",
+      "        td { text { \"${4:Data 2}\" } }",
+      "    }",
+      "}"
+    ],
+    "description": "Table element"
+  }
+}

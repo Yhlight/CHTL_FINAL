@@ -1,0 +1,185 @@
+{
+  "Listen Function": {
+    "prefix": "listen",
+    "body": [
+      "listen {",
+      "    ${1:click}: function() {",
+      "        ${2:// Handle click event}",
+      "    }",
+      "}"
+    ],
+    "description": "Listen function for event handling"
+  },
+  "Animate Function": {
+    "prefix": "animate",
+    "body": [
+      "animate {",
+      "    duration: ${1:1000},",
+      "    easing: \"${2:ease-in-out}\"",
+      "}"
+    ],
+    "description": "Animate function for animations"
+  },
+  "Delegate Function": {
+    "prefix": "delegate",
+    "body": [
+      "delegate {",
+      "    ${1:selector}: \"${2:.my-class}\",",
+      "    ${3:event}: \"${4:click}\",",
+      "    ${5:handler}: function() {",
+      "        ${6:// Handle delegated event}",
+      "    }",
+      "}"
+    ],
+    "description": "Delegate function for event delegation"
+  },
+  "Router Function": {
+    "prefix": "router",
+    "body": [
+      "router {",
+      "    ${1:path}: \"${2:/home}\",",
+      "    ${3:component}: \"${4:HomeComponent}\"",
+      "}"
+    ],
+    "description": "Router function for routing"
+  },
+  "File Loader": {
+    "prefix": "fileloader",
+    "body": [
+      "fileloader {",
+      "    ${1:path}: \"${2:./data.json}\",",
+      "    ${3:callback}: function(data) {",
+      "        ${4:// Handle loaded data}",
+      "    }",
+      "}"
+    ],
+    "description": "File loader function"
+  },
+  "Virtual Object": {
+    "prefix": "vir",
+    "body": [
+      "vir ${1:objectName} {",
+      "    ${2:property}: ${3:value}",
+      "}"
+    ],
+    "description": "Virtual object declaration"
+  },
+  "Utility Function": {
+    "prefix": "util",
+    "body": [
+      "util ${1:functionName} {",
+      "    ${2:parameter}: ${3:value} -> ${4:action}",
+      "}"
+    ],
+    "description": "Utility function"
+  },
+  "Script Block": {
+    "prefix": "script",
+    "body": [
+      "script {",
+      "    ${1:// JavaScript code}",
+      "}"
+    ],
+    "description": "Script block"
+  },
+  "Function Declaration": {
+    "prefix": "function",
+    "body": [
+      "function ${1:functionName}(${2:parameters}) {",
+      "    ${3:// Function body}",
+      "    return ${4:value};",
+      "}"
+    ],
+    "description": "Function declaration"
+  },
+  "If Statement": {
+    "prefix": "if",
+    "body": [
+      "if (${1:condition}) {",
+      "    ${2:// Code to execute}",
+      "}"
+    ],
+    "description": "If statement"
+  },
+  "For Loop": {
+    "prefix": "for",
+    "body": [
+      "for (${1:let i = 0}; ${2:i < length}; ${3:i++}) {",
+      "    ${4:// Loop body}",
+      "}"
+    ],
+    "description": "For loop"
+  },
+  "While Loop": {
+    "prefix": "while",
+    "body": [
+      "while (${1:condition}) {",
+      "    ${2:// Loop body}",
+      "}"
+    ],
+    "description": "While loop"
+  },
+  "Variable Declaration": {
+    "prefix": "var",
+    "body": [
+      "var ${1:variableName} = ${2:value};"
+    ],
+    "description": "Variable declaration"
+  },
+  "Const Declaration": {
+    "prefix": "const",
+    "body": [
+      "const ${1:variableName} = ${2:value};"
+    ],
+    "description": "Constant declaration"
+  },
+  "Let Declaration": {
+    "prefix": "let",
+    "body": [
+      "let ${1:variableName} = ${2:value};"
+    ],
+    "description": "Let declaration"
+  },
+  "Console Log": {
+    "prefix": "console",
+    "body": [
+      "console.log(${1:message});"
+    ],
+    "description": "Console log statement"
+  },
+  "Return Statement": {
+    "prefix": "return",
+    "body": [
+      "return ${1:value};"
+    ],
+    "description": "Return statement"
+  },
+  "Arrow Function": {
+    "prefix": "arrow",
+    "body": [
+      "(${1:parameters}) => {",
+      "    ${2:// Function body}",
+      "}"
+    ],
+    "description": "Arrow function"
+  },
+  "Object Literal": {
+    "prefix": "object",
+    "body": [
+      "{",
+      "    ${1:property}: ${2:value},",
+      "    ${3:method}: function() {",
+      "        ${4:// Method body}",
+      "    }",
+      "}"
+    ],
+    "description": "Object literal"
+  },
+  "Array Literal": {
+    "prefix": "array",
+    "body": [
+      "[${1:item1}, ${2:item2}, ${3:item3}]"
+    ],
+    "description": "Array literal"
+  }
+}

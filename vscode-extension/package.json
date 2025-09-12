@@ -1,0 +1,264 @@
+{
+  "name": "chtl-language",
+  "displayName": "CHTL Language",
+  "description": "CHTL Language support for Visual Studio Code",
+  "version": "1.0.0",
+  "publisher": "chtl-team",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "chtl",
+    "html",
+    "css",
+    "javascript",
+    "template",
+    "compiler"
+  ],
+  "activationEvents": [
+    "onLanguage:chtl",
+    "onLanguage:chtljs",
+    "onCommand:chtl.compile",
+    "onCommand:chtl.preview",
+    "onCommand:chtl.export.html",
+    "onCommand:chtl.export.css",
+    "onCommand:chtl.export.js"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "chtl",
+        "aliases": [
+          "CHTL",
+          "chtl"
+        ],
+        "extensions": [
+          ".chtl",
+          ".cmod"
+        ],
+        "configuration": "./language-configurations/chtl.json"
+      },
+      {
+        "id": "chtljs",
+        "aliases": [
+          "CHTL JS",
+          "chtljs"
+        ],
+        "extensions": [
+          ".cjjs",
+          ".cjmod"
+        ],
+        "configuration": "./language-configurations/chtljs.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "chtl",
+        "scopeName": "source.chtl",
+        "path": "./syntaxes/chtl.tmGrammar.json"
+      },
+      {
+        "language": "chtljs",
+        "scopeName": "source.chtljs",
+        "path": "./syntaxes/chtljs.tmGrammar.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "chtl",
+        "path": "./snippets/chtl.json"
+      },
+      {
+        "language": "chtljs",
+        "path": "./snippets/chtljs.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "chtl.compile",
+        "title": "Compile CHTL",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.preview",
+        "title": "Preview in Browser",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.export.html",
+        "title": "Export HTML",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.export.css",
+        "title": "Export CSS",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.export.js",
+        "title": "Export JavaScript",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.watch",
+        "title": "Watch for Changes",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.init",
+        "title": "Initialize CHTL Project",
+        "category": "CHTL"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "chtl.compile",
+          "when": "resourceExtname == '.chtl' || resourceExtname == '.cmod'",
+          "group": "chtl"
+        },
+        {
+          "command": "chtl.preview",
+          "when": "resourceExtname == '.chtl' || resourceExtname == '.cmod'",
+          "group": "chtl"
+        },
+        {
+          "command": "chtl.export.html",
+          "when": "resourceExtname == '.chtl' || resourceExtname == '.cmod'",
+          "group": "chtl"
+        },
+        {
+          "command": "chtl.export.css",
+          "when": "resourceExtname == '.chtl' || resourceExtname == '.cmod'",
+          "group": "chtl"
+        },
+        {
+          "command": "chtl.export.js",
+          "when": "resourceExtname == '.chtl' || resourceExtname == '.cmod'",
+          "group": "chtl"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "chtl.compile",
+          "when": "resourceExtname == '.chtl' || resourceExtname == '.cmod'",
+          "group": "chtl"
+        },
+        {
+          "command": "chtl.preview",
+          "when": "resourceExtname == '.chtl' || resourceExtname == '.cmod'",
+          "group": "chtl"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "chtl.compile",
+        "key": "ctrl+shift+c",
+        "mac": "cmd+shift+c",
+        "when": "editorTextFocus && resourceExtname == '.chtl'"
+      },
+      {
+        "command": "chtl.preview",
+        "key": "ctrl+shift+p",
+        "mac": "cmd+shift+p",
+        "when": "editorTextFocus && resourceExtname == '.chtl'"
+      }
+    ],
+    "configuration": {
+      "title": "CHTL",
+      "properties": {
+        "chtl.compilerPath": {
+          "type": "string",
+          "default": "chtl",
+          "description": "Path to the CHTL compiler executable"
+        },
+        "chtl.outputDirectory": {
+          "type": "string",
+          "default": "dist",
+          "description": "Output directory for compiled files"
+        },
+        "chtl.watchMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable watch mode for automatic compilation"
+        },
+        "chtl.minify": {
+          "type": "boolean",
+          "default": false,
+          "description": "Minify output files"
+        },
+        "chtl.debug": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable debug mode"
+        },
+        "chtl.autoCompile": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically compile files on save"
+        },
+        "chtl.previewPort": {
+          "type": "number",
+          "default": 8080,
+          "description": "Port for preview server"
+        }
+      }
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "chtlModules",
+          "name": "CHTL Modules",
+          "when": "workspaceHasChtlFiles"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "chtl",
+          "title": "CHTL",
+          "icon": "$(file-code)"
+        }
+      ],
+      "panel": [
+        {
+          "id": "chtl-output",
+          "title": "CHTL Output",
+          "icon": "$(output)"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "glob": "^8.0.3",
+    "mocha": "^10.1.0",
+    "typescript": "^4.9.4",
+    "@vscode/test-electron": "^2.2.0"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^8.1.0",
+    "vscode-languageserver": "^8.1.0"
+  }
+}
