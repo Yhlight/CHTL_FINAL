@@ -3,6 +3,31 @@
 
 namespace CHTL {
 
+// Helper to render a property value, which might be a simple literal or a complex expression.
+std::string renderCssValue(const std::vector<Token>& tokens) {
+    if (tokens.empty()) {
+        return "";
+    }
+
+    // If it's just a single token, return its lexeme directly.
+    if (tokens.size() == 1) {
+        return tokens[0].lexeme;
+    }
+
+    // If there are multiple tokens, it's an expression that needs calc().
+    std::stringstream ss;
+    ss << "calc(";
+    for (size_t i = 0; i < tokens.size(); ++i) {
+        ss << tokens[i].lexeme;
+        if (i < tokens.size() - 1) {
+            ss << " ";
+        }
+    }
+    ss << ")";
+    return ss.str();
+}
+
+
 std::string CHTLGenerator::generate(const RootNode& root) {
     for (const auto& child : root.children_) {
         visit(child.get());
@@ -61,7 +86,7 @@ void CHTLGenerator::visitElement(const ElementNode* node) {
             const auto* styleNode = static_cast<const StyleBlockNode*>(child.get());
             // Process inline properties
             for (const auto& prop : styleNode->inline_properties_) {
-                inline_style_ss << prop.first << ": " << prop.second << "; ";
+                inline_style_ss << prop.first << ": " << renderCssValue(prop.second) << "; ";
             }
             // Process rules
             for (const auto& rule : styleNode->rules_) {
@@ -83,7 +108,7 @@ void CHTLGenerator::visitElement(const ElementNode* node) {
                 // 1. Add rule to global styles
                 global_styles_ << "      " << final_selector << " {\n";
                 for (const auto& prop : rule->properties_) {
-                    global_styles_ << "        " << prop.first << ": " << prop.second << ";\n";
+                    global_styles_ << "        " << prop.first << ": " << renderCssValue(prop.second) << ";\n";
                 }
                 global_styles_ << "      }\n";
 

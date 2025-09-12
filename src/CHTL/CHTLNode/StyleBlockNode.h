@@ -6,6 +6,7 @@
 #include <vector>
 #include <utility> // For std::pair
 #include <memory>
+#include "../CHTLLexer/Token.h" // For Token
 #include "CssRuleNode.h"
 
 namespace CHTL {
@@ -17,7 +18,7 @@ public:
     NodeType getType() const override { return NodeType::StyleBlock; }
 
     // For inline styles directly on the parent element
-    std::vector<std::pair<std::string, std::string>> inline_properties_;
+    std::vector<std::pair<std::string, std::vector<Token>>> inline_properties_;
 
     // For full CSS rules to be extracted to a global style tag
     std::vector<std::unique_ptr<CssRuleNode>> rules_;

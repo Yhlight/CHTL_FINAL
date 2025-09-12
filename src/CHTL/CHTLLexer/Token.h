@@ -15,6 +15,7 @@ enum class TokenType {
     Identifier,
     StringLiteral,
     UnquotedLiteral,
+    Number,
 
     // Punctuation
     OpenBrace,      // {

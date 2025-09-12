@@ -18,6 +18,7 @@ private:
     void identifier();
     void stringLiteral(char quote);
     void unquotedLiteral();
+    void number();
     void handleSpecialSyntax();
 
     void addToken(TokenType type);

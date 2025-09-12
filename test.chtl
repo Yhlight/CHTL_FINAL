@@ -1,23 +1,10 @@
 html {
-    head {
-        title {
-            text { "My CHTL Page" }
-        }
-    }
     body {
         div {
-            class: "box";
             style {
-                .box {
-                    width: 100px;
-                    height: 100px;
-                    background-color: blue;
-                }
-
-                // This should be resolved to .box:hover
-                &:hover {
-                    background-color: red;
-                }
+                width: 100px + 50px;
+                height: 100%;
+                margin-left: 10px * 2;
             }
         }
     }

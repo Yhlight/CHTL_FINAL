@@ -122,7 +122,9 @@ void CHTLLexer::scanToken() {
             break;
 
         default:
-            if (isAlpha(c) || c == '.' || c == '#') {
+            if (isDigit(c)) {
+                number();
+            } else if (isAlpha(c) || c == '.' || c == '#' || c == '_') {
                 identifier();
             } else {
                 unquotedLiteral();
@@ -190,6 +192,19 @@ void CHTLLexer::identifier() {
         type = TokenType::Identifier;
     }
     addToken(type, text);
+}
+
+void CHTLLexer::number() {
+    while (isDigit(peek())) advance();
+
+    // Look for a fractional part.
+    if (peek() == '.' && isDigit(peekNext())) {
+        // Consume the "."
+        advance();
+        while (isDigit(peek())) advance();
+    }
+
+    addToken(TokenType::Number, source_.substr(start_, current_ - start_));
 }
 
 void CHTLLexer::stringLiteral(char quote) {

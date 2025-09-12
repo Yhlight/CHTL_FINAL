@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include "../CHTLLexer/Token.h" // For Token
 
 namespace CHTL {
 
@@ -15,7 +16,7 @@ public:
     NodeType getType() const override { return NodeType::CssRule; }
 
     std::string selector_;
-    std::vector<std::pair<std::string, std::string>> properties_;
+    std::vector<std::pair<std::string, std::vector<Token>>> properties_;
 };
 
 } // namespace CHTL

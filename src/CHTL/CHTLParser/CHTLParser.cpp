@@ -100,15 +100,16 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
             const Token& key = consume(TokenType::Identifier, "Expected CSS property name.");
             consume(TokenType::Colon, "Expected ':' after CSS property name.");
 
-            std::string value;
-            if (match({TokenType::UnquotedLiteral, TokenType::Identifier, TokenType::StringLiteral})) {
-                value = previous().lexeme;
-            } else {
+            std::vector<Token> value_tokens;
+            while(peek().type != TokenType::Semicolon && !isAtEnd()) {
+                value_tokens.push_back(advance());
+            }
+            if (value_tokens.empty()) {
                 throw std::runtime_error("Expected CSS property value.");
             }
 
             consume(TokenType::Semicolon, "Expected ';' after CSS property value.");
-            styleNode->inline_properties_.emplace_back(key.lexeme, value);
+            styleNode->inline_properties_.emplace_back(key.lexeme, value_tokens);
         }
         // Otherwise, assume it's a CSS rule (e.g., .class, #id, &)
         else if (peek().type == TokenType::Identifier || peek().type == TokenType::Ampersand) {
@@ -121,15 +122,16 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
                 const Token& key = consume(TokenType::Identifier, "Expected CSS property name inside rule.");
                 consume(TokenType::Colon, "Expected ':' after CSS property name.");
 
-                std::string value;
-                if (match({TokenType::UnquotedLiteral, TokenType::Identifier, TokenType::StringLiteral})) {
-                    value = previous().lexeme;
-                } else {
+                std::vector<Token> value_tokens;
+                while(peek().type != TokenType::Semicolon && !isAtEnd()) {
+                    value_tokens.push_back(advance());
+                }
+                if (value_tokens.empty()) {
                     throw std::runtime_error("Expected CSS property value inside rule.");
                 }
 
                 consume(TokenType::Semicolon, "Expected ';' after CSS property value.");
-                ruleNode->properties_.emplace_back(key.lexeme, value);
+                ruleNode->properties_.emplace_back(key.lexeme, value_tokens);
             }
 
             consume(TokenType::CloseBrace, "Expected '}' after CSS rule block.");
