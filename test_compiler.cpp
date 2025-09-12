@@ -14,6 +14,8 @@
 #include "CHTL/UseStatement.h"
 #include "CHTL/CHTLJSCompiler.h"
 #include "CHTL/ProjectWorkflow.h"
+#include "CHTL/SyntaxBoundaries.h"
+#include "CHTL/CJMODAPI.h"
 #include "Scanner/UnifiedScanner.h"
 #include "CHTLJS/CJMODSystem.h"
 
@@ -837,6 +839,142 @@ void testProjectWorkflow() {
     std::cout << "Project Workflow test completed." << std::endl;
 }
 
+void testSyntaxBoundaries() {
+    std::cout << "Testing Syntax Boundaries..." << std::endl;
+    
+    // 测试语法边界检测器
+    SyntaxBoundaryDetector detector;
+    
+    std::string testContent = "<style>body { margin: 0; }</style><script>console.log('Hello');</script>";
+    auto boundaries = detector.findBoundaries(testContent);
+    
+    std::cout << "Boundaries found: " << boundaries.size() << std::endl;
+    
+    for (const auto& boundary : boundaries) {
+        std::string content = testContent.substr(boundary.first, boundary.second - boundary.first + 1);
+        std::cout << "Boundary content: " << content.substr(0, 50) << "..." << std::endl;
+    }
+    
+    // 测试语法验证
+    bool isValid = detector.validateSyntax(testContent, SyntaxBoundaryType::GLOBAL_STYLE);
+    std::cout << "Global style validation: " << (isValid ? "PASS" : "FAIL") << std::endl;
+    
+    // 测试宽判严判处理器
+    WideStrictProcessor processor;
+    processor.setWideMode(true);
+    
+    std::string wideProcessed = processor.processWide(testContent);
+    std::cout << "Wide processing: " << (wideProcessed.length() > 0 ? "SUCCESS" : "FAIL") << std::endl;
+    
+    processor.setStrictMode(true);
+    processor.setWideMode(false);
+    
+    std::string strictProcessed = processor.processStrict(testContent);
+    std::cout << "Strict processing: " << (strictProcessed.length() > 0 ? "SUCCESS" : "FAIL") << std::endl;
+    
+    // 测试语法边界管理器
+    SyntaxBoundaryManager manager;
+    manager.addBoundary(SyntaxBoundaryType::GLOBAL_STYLE, 0, 20);
+    manager.addBoundary(SyntaxBoundaryType::GLOBAL_SCRIPT, 21, 50);
+    
+    std::cout << "Boundaries added: " << manager.getAllBoundaries().size() << std::endl;
+    
+    // 测试语法边界解析器
+    SyntaxBoundaryParser parser;
+    parser.setDetector(std::make_shared<SyntaxBoundaryDetector>(detector));
+    
+    auto parsedBoundaries = parser.parseBoundaries(testContent);
+    std::cout << "Parsed boundaries: " << parsedBoundaries.size() << std::endl;
+    
+    // 测试语法边界验证器
+    SyntaxBoundaryValidator validator;
+    validator.setDetector(std::make_shared<SyntaxBoundaryDetector>(detector));
+    
+    bool allValid = validator.validateAllBoundaries(testContent);
+    std::cout << "All boundaries valid: " << (allValid ? "YES" : "NO") << std::endl;
+    
+    std::cout << "Syntax Boundaries test completed." << std::endl;
+}
+
+void testCJMODAPI() {
+    std::cout << "Testing CJMOD API..." << std::endl;
+    
+    // 测试语法分析
+    Arg args = Syntax::analyze("$ ** $");
+    std::cout << "Syntax analyzed: " << args.toString() << std::endl;
+    
+    // 测试参数绑定
+    args.bind("$", [](const std::string& value) {
+        return value;
+    });
+    
+    args.bind("**", [](const std::string& value) {
+        return value;
+    });
+    
+    // 测试CJMOD扫描器
+    CJMODScanner scanner;
+    Arg scanned = CJMODScanner::scan(args, "**");
+    std::cout << "Scanned result: " << scanned.toString() << std::endl;
+    
+    // 测试双指针扫描
+    Arg dualScan = CJMODScanner::dualPointerScan("3 ** 4", "**");
+    std::cout << "Dual pointer scan: " << dualScan.toString() << std::endl;
+    
+    // 测试前置截取
+    Arg preTruncate = CJMODScanner::preTruncateScan("arg ** arg2", "**");
+    std::cout << "Pre-truncate scan: " << preTruncate.toString() << std::endl;
+    
+    // 测试CJMOD生成器
+    CJMODGenerator generator;
+    std::string generated = CJMODGenerator::exportResult(args);
+    std::cout << "Generated result: " << generated << std::endl;
+    
+    // 测试函数生成
+    std::string function = CJMODGenerator::generateFunction(args, "testFunction");
+    std::cout << "Generated function: " << function.substr(0, 50) << "..." << std::endl;
+    
+    // 测试CHTL JS函数
+    CHTLJSFunction jsFunction("myFunction", "return 'Hello World';");
+    jsFunction.addParameter("param1");
+    jsFunction.addParameter("param2");
+    
+    std::cout << "Function name: " << jsFunction.getName() << std::endl;
+    std::cout << "Function parameters: " << jsFunction.getParameters().size() << std::endl;
+    
+    std::string generatedFunction = jsFunction.generateFunction();
+    std::cout << "Generated JS function: " << generatedFunction.substr(0, 50) << "..." << std::endl;
+    
+    // 测试CJMOD API管理器
+    CJMODAPIManager apiManager;
+    apiManager.registerFunction("testFunc", std::make_shared<CHTLJSFunction>("testFunc", "console.log('test');"));
+    
+    std::cout << "Registered functions: " << apiManager.getFunctionNames().size() << std::endl;
+    
+    // 测试扫描和生成
+    Arg scanResult = apiManager.scanAndGenerate("test content", "test pattern");
+    std::cout << "Scan and generate: " << scanResult.toString() << std::endl;
+    
+    // 测试代码生成
+    std::string generatedCode = apiManager.generateCode("test content", "function test() { return '${value}'; }");
+    std::cout << "Generated code: " << generatedCode.substr(0, 50) << "..." << std::endl;
+    
+    // 测试原子参数
+    AtomArg atomArg("42", "number");
+    std::cout << "Atom value: " << atomArg.getAtomValue() << std::endl;
+    std::cout << "Atom type: " << atomArg.getType() << std::endl;
+    std::cout << "Is atom: " << (atomArg.isAtom() ? "YES" : "NO") << std::endl;
+    
+    // 测试语法匹配
+    bool matches = Syntax::matches("hello world", "hello.*");
+    std::cout << "Pattern matches: " << (matches ? "YES" : "NO") << std::endl;
+    
+    auto matches2 = Syntax::extractMatches("hello world hello", "hello");
+    std::cout << "Extracted matches: " << matches2.size() << std::endl;
+    
+    std::cout << "CJMOD API test completed." << std::endl;
+}
+
 int main() {
     std::cout << "CHTL Compiler Test Suite" << std::endl;
     std::cout << "========================" << std::endl;
@@ -891,6 +1029,12 @@ int main() {
         std::cout << std::endl;
         
         testProjectWorkflow();
+        std::cout << std::endl;
+        
+        testSyntaxBoundaries();
+        std::cout << std::endl;
+        
+        testCJMODAPI();
         std::cout << std::endl;
         
         std::cout << "All tests completed successfully!" << std::endl;
