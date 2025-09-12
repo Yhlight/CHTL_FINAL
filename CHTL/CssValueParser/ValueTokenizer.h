@@ -18,6 +18,7 @@ private:
 
     ValueToken number();
     ValueToken identifier();
+    ValueToken stringLiteral();
 
     const std::string& source;
     size_t start = 0;

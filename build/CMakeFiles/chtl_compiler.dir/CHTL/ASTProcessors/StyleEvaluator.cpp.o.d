@@ -170,8 +170,13 @@ CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o: \
  /app/CHTL/ASTProcessors/../CssValueParser/Evaluator.h \
  /app/CHTL/ASTProcessors/../CssValueParser/ValueAst.h \
  /app/CHTL/ASTProcessors/../CssValueParser/../CHTLNode/BaseNode.h \
- /usr/include/c++/13/iostream /usr/include/c++/13/ostream \
- /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
+ /usr/include/c++/13/variant \
+ /usr/include/c++/13/bits/enable_special_members.h \
+ /usr/include/c++/13/bits/parse_numbers.h /usr/include/c++/13/set \
+ /usr/include/c++/13/bits/stl_set.h \
+ /usr/include/c++/13/bits/stl_multiset.h /usr/include/c++/13/iostream \
+ /usr/include/c++/13/ostream /usr/include/c++/13/ios \
+ /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \
  /usr/include/c++/13/bits/locale_classes.tcc \
  /usr/include/c++/13/system_error \

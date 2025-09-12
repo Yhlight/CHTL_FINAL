@@ -9,44 +9,48 @@ std::shared_ptr<ExprNode> ValueParser::parse() {
 
 int ValueParser::getPrecedence(ValueTokenType type) {
     switch (type) {
+        case ValueTokenType::TOKEN_QUESTION: return 1;
+        case ValueTokenType::TOKEN_LOGICAL_OR: return 2;
+        case ValueTokenType::TOKEN_LOGICAL_AND: return 3;
+        case ValueTokenType::TOKEN_EQUAL_EQUAL:
+        case ValueTokenType::TOKEN_NOT_EQUAL: return 4;
+        case ValueTokenType::TOKEN_GREATER:
+        case ValueTokenType::TOKEN_GREATER_EQUAL:
+        case ValueTokenType::TOKEN_LESS:
+        case ValueTokenType::TOKEN_LESS_EQUAL: return 5;
         case ValueTokenType::TOKEN_PLUS:
-        case ValueTokenType::TOKEN_MINUS:
-            return 1;
+        case ValueTokenType::TOKEN_MINUS: return 6;
         case ValueTokenType::TOKEN_STAR:
-        case ValueTokenType::TOKEN_SLASH:
-            return 2;
-        case ValueTokenType::TOKEN_POWER:
-            return 3;
-        default:
-            return 0;
+        case ValueTokenType::TOKEN_SLASH: return 7;
+        case ValueTokenType::TOKEN_POWER: return 8;
+        default: return 0;
     }
 }
 
 std::shared_ptr<ExprNode> ValueParser::parsePrefix() {
     ValueToken token = advance();
+
+    if (token.type == ValueTokenType::TOKEN_STRING) {
+        auto node = std::make_shared<StringLiteralNode>();
+        node->value = token.text;
+        return node;
+    }
+
     if (token.type == ValueTokenType::TOKEN_IDENTIFIER) {
-        // This could be a property reference
+        auto node = std::make_shared<PropertyReferenceNode>();
         if (peek().type == ValueTokenType::TOKEN_DOT) {
-            advance(); // consume '.'
-            ValueToken property = advance();
-            if (property.type == ValueTokenType::TOKEN_IDENTIFIER) {
-                auto node = std::make_shared<PropertyReferenceNode>();
-                node->selector = token.text;
-                node->propertyName = property.text;
-                return node;
-            } else {
-                throw std::runtime_error("Expected property name after '.'.");
-            }
+            node->selector = token.text;
+            advance();
+            node->propertyName = advance().text;
+        } else {
+            node->selector = "";
+            node->propertyName = token.text;
         }
-        // If it's just an identifier, it might be a variable or keyword later.
-        // For now, it's an error in an arithmetic expression.
-        throw std::runtime_error("Unexpected identifier in expression.");
+        return node;
     }
 
     if (token.type == ValueTokenType::TOKEN_NUMBER) {
         auto node = std::make_shared<NumericLiteralNode>();
-
-        // Find the split point between number and unit
         size_t unit_start = std::string::npos;
         for (size_t i = 0; i < token.text.length(); ++i) {
             if (isalpha(token.text[i]) || token.text[i] == '%') {
@@ -54,7 +58,6 @@ std::shared_ptr<ExprNode> ValueParser::parsePrefix() {
                 break;
             }
         }
-
         if (unit_start == std::string::npos) {
             node->value = std::stod(token.text);
             node->unit = "";
@@ -70,14 +73,26 @@ std::shared_ptr<ExprNode> ValueParser::parsePrefix() {
         if (peek().type != ValueTokenType::TOKEN_RPAREN) {
             throw std::runtime_error("Expected ')' after expression.");
         }
-        advance(); // Consume ')'
+        advance();
         return expr;
     }
 
-    throw std::runtime_error("Expected a number or '(' for a prefix expression.");
+    throw std::runtime_error("Expected a value, identifier, or '(' for a prefix expression.");
 }
 
 std::shared_ptr<ExprNode> ValueParser::parseInfix(std::shared_ptr<ExprNode> left, ValueToken opToken) {
+    if (opToken.type == ValueTokenType::TOKEN_QUESTION) {
+        auto node = std::make_shared<ConditionalExprNode>();
+        node->condition = left;
+        node->trueBranch = parseExpression();
+        if (peek().type != ValueTokenType::TOKEN_COLON) {
+            throw std::runtime_error("Expected ':' in conditional expression.");
+        }
+        advance();
+        node->falseBranch = parseExpression(getPrecedence(opToken.type));
+        return node;
+    }
+
     auto node = std::make_shared<BinaryOpNode>();
     node->left = left;
     node->op = opToken;

@@ -4,9 +4,10 @@
 #include <string>
 
 enum class ValueTokenType {
-    // A literal value, like "100px" or "5.5"
-    TOKEN_NUMBER,
-    TOKEN_IDENTIFIER, // e.g. a selector like 'box'
+    // Literals
+    TOKEN_NUMBER,       // e.g., "100px"
+    TOKEN_IDENTIFIER,   // e.g., a selector like 'box' or a property name like 'width'
+    TOKEN_STRING,       // e.g., 'red', 'solid'
 
     // Operators
     TOKEN_PLUS,
@@ -15,6 +16,18 @@ enum class ValueTokenType {
     TOKEN_SLASH,
     TOKEN_POWER,
     TOKEN_DOT,      // .
+
+    // Conditional and Logical Operators
+    TOKEN_QUESTION, // ?
+    TOKEN_COLON,    // :
+    TOKEN_GREATER,  // >
+    TOKEN_GREATER_EQUAL, // >=
+    TOKEN_LESS,     // <
+    TOKEN_LESS_EQUAL,    // <=
+    TOKEN_EQUAL_EQUAL,   // ==
+    TOKEN_NOT_EQUAL,   // !=
+    TOKEN_LOGICAL_AND, // &&
+    TOKEN_LOGICAL_OR,  // ||
 
     // Parentheses
     TOKEN_LPAREN,

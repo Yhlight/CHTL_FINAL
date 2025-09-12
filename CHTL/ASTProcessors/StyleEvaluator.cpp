@@ -19,15 +19,28 @@ void StyleEvaluator::visit(ElementNode& node) {
     for (auto const& [key, exprTree] : node.unevaluatedStyles) {
         if (exprTree) {
             Evaluator evaluator;
+            std::set<std::string> evaluationStack; // For circular dependency detection
             // The evaluator needs the AST root to resolve property references.
-            EvaluatedValue evaluated = evaluator.evaluate(exprTree, this->astRoot);
+            EvaluatedValue evaluated = evaluator.evaluate(exprTree, this->astRoot, &node, evaluationStack);
 
             if (evaluated.hasError) {
                 std::cerr << "Warning: Could not evaluate style property '" << key << "'. Error: " << evaluated.errorMessage << std::endl;
             } else {
-                std::stringstream ss;
-                ss << evaluated.value << evaluated.unit;
-                node.processedStyles[key] = ss.str();
+                // Convert the variant result to a string
+                std::string finalValue;
+                if (const auto* numWithUnit = std::get_if<NumberWithUnit>(&evaluated.value)) {
+                    std::stringstream ss;
+                    ss << numWithUnit->value << numWithUnit->unit;
+                    finalValue = ss.str();
+                } else if (const auto* str = std::get_if<std::string>(&evaluated.value)) {
+                    finalValue = *str;
+                } else {
+                    // It's a boolean or something else that can't be a CSS value.
+                    std::cerr << "Warning: Expression for property '" << key << "' evaluated to a non-CSS value." << std::endl;
+                }
+                if (!finalValue.empty()) {
+                    node.processedStyles[key] = finalValue;
+                }
             }
         }
     }

@@ -15,24 +15,44 @@ std::vector<ValueToken> ValueTokenizer::tokenize() {
             case '+': tokens.push_back(makeToken(ValueTokenType::TOKEN_PLUS, "+")); break;
             case '-': tokens.push_back(makeToken(ValueTokenType::TOKEN_MINUS, "-")); break;
             case '/': tokens.push_back(makeToken(ValueTokenType::TOKEN_SLASH, "/")); break;
-            case '*':
-                if (peek() == '*') {
-                    advance();
-                    tokens.push_back(makeToken(ValueTokenType::TOKEN_POWER, "**"));
-                } else {
-                    tokens.push_back(makeToken(ValueTokenType::TOKEN_STAR, "*"));
-                }
-                break;
+            case '?': tokens.push_back(makeToken(ValueTokenType::TOKEN_QUESTION, "?")); break;
+            case ':': tokens.push_back(makeToken(ValueTokenType::TOKEN_COLON, ":")); break;
             case '.': tokens.push_back(makeToken(ValueTokenType::TOKEN_DOT, ".")); break;
+            case '*':
+                if (peek() == '*') { advance(); tokens.push_back(makeToken(ValueTokenType::TOKEN_POWER, "**")); }
+                else { tokens.push_back(makeToken(ValueTokenType::TOKEN_STAR, "*")); }
+                break;
+            case '>':
+                if (peek() == '=') { advance(); tokens.push_back(makeToken(ValueTokenType::TOKEN_GREATER_EQUAL, ">=")); }
+                else { tokens.push_back(makeToken(ValueTokenType::TOKEN_GREATER, ">")); }
+                break;
+            case '<':
+                if (peek() == '=') { advance(); tokens.push_back(makeToken(ValueTokenType::TOKEN_LESS_EQUAL, "<=")); }
+                else { tokens.push_back(makeToken(ValueTokenType::TOKEN_LESS, "<")); }
+                break;
+            case '=':
+                if (peek() == '=') { advance(); tokens.push_back(makeToken(ValueTokenType::TOKEN_EQUAL_EQUAL, "==")); }
+                break;
+            case '!':
+                if (peek() == '=') { advance(); tokens.push_back(makeToken(ValueTokenType::TOKEN_NOT_EQUAL, "!=")); }
+                break;
+            case '&':
+                if (peek() == '&') { advance(); tokens.push_back(makeToken(ValueTokenType::TOKEN_LOGICAL_AND, "&&")); }
+                break;
+            case '|':
+                if (peek() == '|') { advance(); tokens.push_back(makeToken(ValueTokenType::TOKEN_LOGICAL_OR, "||")); }
+                break;
+            case '\'':
+                tokens.push_back(stringLiteral());
+                break;
             default:
-                if (isdigit(c) || c == '.') {
-                    current--; // Go back to parse the full number and its unit
+                if (isdigit(c) || (c == '.' && isdigit(peek()))) {
+                    current--;
                     tokens.push_back(number());
-                } else if (isalpha(c) || c == '#' || c == '.') { // Selectors can start with # or .
+                } else if (isalpha(c) || c == '#' || c == '.') {
                     current--;
                     tokens.push_back(identifier());
-                }
-                else {
+                } else {
                     tokens.push_back(makeToken(ValueTokenType::TOKEN_ERROR, std::string(1, c)));
                 }
                 break;
@@ -59,14 +79,11 @@ ValueToken ValueTokenizer::makeToken(ValueTokenType type, const std::string& tex
     return {type, text};
 }
 
-// Parses a number and its optional immediately following unit (e.g., "100px", "5.5em", "20%")
 ValueToken ValueTokenizer::number() {
     start = current;
-    // Consume digits
     while (isdigit(peek()) || peek() == '.') {
         advance();
     }
-    // Consume optional unit (letters or %)
     while (isalpha(peek()) || peek() == '%') {
         advance();
     }
@@ -75,10 +92,22 @@ ValueToken ValueTokenizer::number() {
 
 ValueToken ValueTokenizer::identifier() {
     start = current;
-    // An identifier can be a selector, so it can contain letters, numbers, -, #
-    // The dot must be its own token.
     while (isalnum(peek()) || peek() == '_' || peek() == '-' || peek() == '#') {
         advance();
     }
     return makeToken(ValueTokenType::TOKEN_IDENTIFIER, source.substr(start, current - start));
+}
+
+ValueToken ValueTokenizer::stringLiteral() {
+    start = current; // Start after the opening '
+    while (peek() != '\'' && !isAtEnd()) {
+        advance();
+    }
+
+    if (isAtEnd()) return makeToken(ValueTokenType::TOKEN_ERROR, "Unterminated string.");
+
+    std::string value = source.substr(start, current - start);
+    advance(); // Consume the closing '
+
+    return makeToken(ValueTokenType::TOKEN_STRING, value);
 }
