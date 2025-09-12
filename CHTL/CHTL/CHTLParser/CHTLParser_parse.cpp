@@ -82,6 +82,9 @@ std::shared_ptr<CHTLNode> CHTLParser::parseDocument() {
         
         if (node) {
             root->addChild(node);
+        } else {
+            // 如果解析失败，前进到下一个token以避免无限循环
+            advance();
         }
     }
     
@@ -206,6 +209,10 @@ std::shared_ptr<CHTLNode> CHTLParser::parseText() {
             if (current().type == CHTLTokenType::STRING || 
                 current().type == CHTLTokenType::UNQUOTED_LITERAL ||
                 current().type == CHTLTokenType::IDENTIFIER) {
+                // 如果不是第一个token，添加空格
+                if (!content.empty()) {
+                    content += " ";
+                }
                 content += current().value;
             }
             advance();
@@ -264,10 +271,27 @@ std::shared_ptr<CHTLNode> CHTLParser::parseStyle() {
                 break;
             }
             
-            // 解析样式属性
-            auto properties = parseStyleProperties();
-            for (const auto& prop : properties) {
-                style->addInlineStyle(prop.first, prop.second);
+            // 检查是否是模板使用（@Style, @Element, @Var）
+            if (current().type == CHTLTokenType::TEMPLATE_STYLE ||
+                current().type == CHTLTokenType::TEMPLATE_ELEMENT ||
+                current().type == CHTLTokenType::TEMPLATE_VAR) {
+                
+                // 解析模板使用
+                parseTemplateUsage(style);
+            }
+            // 检查是否是CSS选择器（.class, #id, &:pseudo）
+            else if (current().type == CHTLTokenType::DOT || 
+                current().type == CHTLTokenType::HASH ||
+                (current().type == CHTLTokenType::AMPERSAND)) {
+                
+                // 解析CSS选择器规则
+                parseCSSRule(style);
+            } else {
+                // 解析内联样式属性
+                auto properties = parseStyleProperties();
+                for (const auto& prop : properties) {
+                    style->addInlineStyle(prop.first, prop.second);
+                }
             }
         }
         
@@ -348,13 +372,17 @@ std::shared_ptr<CHTLNode> CHTLParser::parseTemplate() {
                             advance();
                             
                             if (current().type == CHTLTokenType::STRING || 
-                                current().type == CHTLTokenType::UNQUOTED_LITERAL) {
+                                current().type == CHTLTokenType::UNQUOTED_LITERAL ||
+                                current().type == CHTLTokenType::NUMBER ||
+                                current().type == CHTLTokenType::IDENTIFIER) {
                                 templateNode->addProperty(propName, current().value);
                                 advance();
                             }
                         }
                         
                         consume(CHTLTokenType::SEMICOLON, "期望 ';'");
+                    } else {
+                        advance(); // 跳过无法识别的token
                     }
                     break;
                 case TemplateNode::TemplateType::ELEMENT:
@@ -364,6 +392,8 @@ std::shared_ptr<CHTLNode> CHTLParser::parseTemplate() {
                         if (child) {
                             templateNode->addChild(child);
                         }
+                    } else {
+                        advance(); // 跳过无法识别的token
                     }
                     break;
                 case TemplateNode::TemplateType::VAR:
@@ -376,13 +406,17 @@ std::shared_ptr<CHTLNode> CHTLParser::parseTemplate() {
                             advance();
                             
                             if (current().type == CHTLTokenType::STRING || 
-                                current().type == CHTLTokenType::UNQUOTED_LITERAL) {
+                                current().type == CHTLTokenType::UNQUOTED_LITERAL ||
+                                current().type == CHTLTokenType::NUMBER ||
+                                current().type == CHTLTokenType::IDENTIFIER) {
                                 templateNode->addProperty(varName, current().value);
                                 advance();
                             }
                         }
                         
                         consume(CHTLTokenType::SEMICOLON, "期望 ';'");
+                    } else {
+                        advance(); // 跳过无法识别的token
                     }
                     break;
             }

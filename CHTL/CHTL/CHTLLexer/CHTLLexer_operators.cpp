@@ -29,7 +29,24 @@ CHTLToken CHTLLexer::scanSymbol() {
         case '&': return CHTLToken(CHTLTokenType::AMPERSAND, "&", startLine, startColumn, start);
         case '?': return CHTLToken(CHTLTokenType::QUESTION, "?", startLine, startColumn, start);
         case '|': return CHTLToken(CHTLTokenType::PIPE, "|", startLine, startColumn, start);
-        case '@': return CHTLToken(CHTLTokenType::AT, "@", startLine, startColumn, start);
+        case '@': {
+            // 检查是否是模板关键字
+            if (peek() == 'S' && peek(1) == 't' && peek(2) == 'y' && peek(3) == 'l' && peek(4) == 'e') {
+                // 检查是否是 @Style
+                advance(); advance(); advance(); advance(); advance(); // 跳过 "Style"
+                return CHTLToken(CHTLTokenType::TEMPLATE_STYLE, "@Style", startLine, startColumn, start);
+            } else if (peek() == 'E' && peek(1) == 'l' && peek(2) == 'e' && peek(3) == 'm' && peek(4) == 'e' && peek(5) == 'n' && peek(6) == 't') {
+                // 检查是否是 @Element
+                advance(); advance(); advance(); advance(); advance(); advance(); advance(); // 跳过 "Element"
+                return CHTLToken(CHTLTokenType::TEMPLATE_ELEMENT, "@Element", startLine, startColumn, start);
+            } else if (peek() == 'V' && peek(1) == 'a' && peek(2) == 'r') {
+                // 检查是否是 @Var
+                advance(); advance(); advance(); // 跳过 "Var"
+                return CHTLToken(CHTLTokenType::TEMPLATE_VAR, "@Var", startLine, startColumn, start);
+            } else {
+                return CHTLToken(CHTLTokenType::AT, "@", startLine, startColumn, start);
+            }
+        }
         case '#': return CHTLToken(CHTLTokenType::HASH, "#", startLine, startColumn, start);
         case '$': return CHTLToken(CHTLTokenType::DOLLAR, "$", startLine, startColumn, start);
         case '~': return CHTLToken(CHTLTokenType::TILDE, "~", startLine, startColumn, start);
@@ -146,7 +163,11 @@ CHTLToken CHTLLexer::scanOriginKeyword() {
         if (keyword == "Html") {
             return CHTLToken(CHTLTokenType::ORIGIN, "@Html", startLine, startColumn, start);
         } else if (keyword == "Style") {
-            return CHTLToken(CHTLTokenType::ORIGIN, "@Style", startLine, startColumn, start);
+            return CHTLToken(CHTLTokenType::TEMPLATE_STYLE, "@Style", startLine, startColumn, start);
+        } else if (keyword == "Element") {
+            return CHTLToken(CHTLTokenType::TEMPLATE_ELEMENT, "@Element", startLine, startColumn, start);
+        } else if (keyword == "Var") {
+            return CHTLToken(CHTLTokenType::TEMPLATE_VAR, "@Var", startLine, startColumn, start);
         } else if (keyword == "JavaScript") {
             return CHTLToken(CHTLTokenType::ORIGIN, "@JavaScript", startLine, startColumn, start);
         }

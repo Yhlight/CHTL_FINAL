@@ -95,6 +95,10 @@ void StyleNode::addIdSelector(const std::string& id) {
     idSelectors.push_back(id);
 }
 
+void StyleNode::addCSSRule(const std::string& selector, const std::string& property, const std::string& value) {
+    cssRules[selector][property] = value;
+}
+
 std::string StyleNode::toString() const {
     std::ostringstream oss;
     oss << "StyleNode(" << (isLocal ? "local" : "global") << ", " << inlineStyles.size() << " inline styles)";

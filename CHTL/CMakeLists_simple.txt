@@ -35,12 +35,19 @@ target_link_libraries(simple_test chtl_core_simple)
 add_executable(debug_peek debug_peek.cpp)
 target_link_libraries(debug_peek chtl_core_simple)
 
+add_executable(debug_template_simple debug_template_simple.cpp)
+target_link_libraries(debug_template_simple chtl_core_simple)
+
 # 设置输出目录
 set_target_properties(simple_test PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 
 set_target_properties(debug_peek PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+)
+
+set_target_properties(debug_template_simple PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 

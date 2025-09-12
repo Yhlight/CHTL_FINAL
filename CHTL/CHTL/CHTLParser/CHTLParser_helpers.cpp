@@ -103,19 +103,121 @@ std::string CHTLParser::parseStylePropertyValue() {
          peek().type == CHTLTokenType::GREATER || 
          peek().type == CHTLTokenType::LESS)) {
         value = parseConditionalExpression();
-    } else if (current().type == CHTLTokenType::STRING || 
-               current().type == CHTLTokenType::UNQUOTED_LITERAL) {
-        value = current().value;
-        advance();
-    } else if (current().type == CHTLTokenType::NUMBER) {
-        value = current().value;
-        advance();
     } else {
-        addError("期望样式属性值");
-        return "";
+        // 解析复合CSS值（如 100px, 50%, 1.5em等）
+        while (currentToken < tokens.size() && 
+               current().type != CHTLTokenType::SEMICOLON && 
+               current().type != CHTLTokenType::RIGHT_BRACE && 
+               current().type != CHTLTokenType::EOF_TOKEN) {
+            
+            // 添加当前token的值
+            if (current().type == CHTLTokenType::STRING || 
+                current().type == CHTLTokenType::UNQUOTED_LITERAL ||
+                current().type == CHTLTokenType::IDENTIFIER ||
+                current().type == CHTLTokenType::NUMBER) {
+                value += current().value;
+                advance();
+            } else {
+                break;
+            }
+        }
+        
+        if (value.empty()) {
+            addError("期望样式属性值");
+            return "";
+        }
     }
     
     return value;
+}
+
+void CHTLParser::parseCSSRule(std::shared_ptr<StyleNode> style) {
+    std::cout << "[DEBUG] 开始解析CSS规则: " << current().toString() << std::endl;
+    std::string selector;
+    
+    // 解析选择器
+    if (current().type == CHTLTokenType::DOT) {
+        // 类选择器 .class
+        advance(); // 跳过 .
+        if (current().type == CHTLTokenType::IDENTIFIER) {
+            selector = "." + current().value;
+            advance();
+        } else {
+            addError("期望类名");
+            return;
+        }
+    } else if (current().type == CHTLTokenType::HASH) {
+        // ID选择器 #id
+        advance(); // 跳过 #
+        if (current().type == CHTLTokenType::IDENTIFIER) {
+            selector = "#" + current().value;
+            advance();
+        } else {
+            addError("期望ID名");
+            return;
+        }
+    } else if (current().type == CHTLTokenType::AMPERSAND) {
+        // 上下文推导 &:hover, &::before
+        advance(); // 跳过 &
+        if (current().type == CHTLTokenType::COLON) {
+            advance(); // 跳过 :
+            if (current().type == CHTLTokenType::IDENTIFIER) {
+                selector = "&:" + current().value;
+                advance();
+            } else {
+                addError("期望伪类名");
+                return;
+            }
+        } else if (current().type == CHTLTokenType::COLON && peek().type == CHTLTokenType::COLON) {
+            // 伪元素选择器 &::before
+            advance(); // 跳过第一个 :
+            advance(); // 跳过第二个 :
+            if (current().type == CHTLTokenType::IDENTIFIER) {
+                selector = "&::" + current().value;
+                advance();
+            } else {
+                addError("期望伪元素名");
+                return;
+            }
+        } else {
+            addError("期望 : 或 ::");
+            return;
+        }
+    }
+    
+    // 解析选择器规则块
+    if (match(CHTLTokenType::LEFT_BRACE)) {
+        advance(); // 跳过 {
+        
+        // 解析规则内容
+        auto properties = parseStyleProperties();
+        
+        // 将规则添加到样式中
+        std::cout << "[DEBUG] 添加CSS规则: " << selector << std::endl;
+        for (const auto& prop : properties) {
+            std::cout << "[DEBUG]   属性: " << prop.first << " = " << prop.second << std::endl;
+            style->addCSSRule(selector, prop.first, prop.second);
+        }
+        
+        // 自动化类名/ID生成
+        if (selector.length() > 0 && selector[0] == '.') {
+            std::string className = selector.substr(1); // 去掉开头的 .
+            std::cout << "[DEBUG] 自动添加类名: " << className << std::endl;
+            style->addClassSelector(className);
+        } else if (selector.length() > 0 && selector[0] == '#') {
+            std::string idName = selector.substr(1); // 去掉开头的 #
+            std::cout << "[DEBUG] 自动添加ID: " << idName << std::endl;
+            style->addIdSelector(idName);
+        }
+        
+        if (match(CHTLTokenType::RIGHT_BRACE)) {
+            advance(); // 跳过 }
+        } else {
+            addError("期望 '}'");
+        }
+    } else {
+        addError("期望 '{'");
+    }
 }
 
 std::string CHTLParser::parseConditionalExpression() {
@@ -304,6 +406,40 @@ ConstraintNode::ConstraintType CHTLParser::parseConstraintType() {
     
     addError("期望约束类型");
     return ConstraintNode::ConstraintType::PRECISE;
+}
+
+void CHTLParser::parseTemplateUsage(std::shared_ptr<StyleNode> style) {
+    // 解析模板使用，如 @Style DefaultText;
+    if (current().type == CHTLTokenType::TEMPLATE_STYLE ||
+        current().type == CHTLTokenType::TEMPLATE_ELEMENT ||
+        current().type == CHTLTokenType::TEMPLATE_VAR) {
+        
+        std::string templateType = current().value;
+        advance();
+        
+        if (current().type == CHTLTokenType::IDENTIFIER) {
+            std::string templateName = current().value;
+            advance();
+            
+            // 添加到样式的模板使用列表
+            style->addTemplateUsage(templateType, templateName);
+            
+            // 期望分号
+            if (match(CHTLTokenType::SEMICOLON)) {
+                advance();
+            } else {
+                addError("期望 ';'");
+            }
+        } else {
+            addError("期望模板名称");
+        }
+    } else {
+        addError("期望模板使用");
+    }
+}
+
+void StyleNode::addTemplateUsage(const std::string& templateType, const std::string& templateName) {
+    templateUsages.push_back({templateType, templateName});
 }
 
 } // namespace CHTL
