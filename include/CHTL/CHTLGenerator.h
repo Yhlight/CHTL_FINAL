@@ -126,6 +126,22 @@ private:
     std::string generateScript(std::shared_ptr<BaseNode> node, int indent = 0);
     
     /**
+     * @brief 生成模板节点
+     * @param node 模板节点
+     * @param indent 缩进级别
+     * @return 生成的代码
+     */
+    std::string generateTemplate(std::shared_ptr<BaseNode> node, int indent = 0);
+    
+    /**
+     * @brief 生成自定义节点
+     * @param node 自定义节点
+     * @param indent 缩进级别
+     * @return 生成的代码
+     */
+    std::string generateCustom(std::shared_ptr<BaseNode> node, int indent = 0);
+    
+    /**
      * @brief 生成节点（通用方法）
      * @param node 节点
      * @param indent 缩进级别

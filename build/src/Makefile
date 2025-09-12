@@ -271,6 +271,30 @@ CHTLNode/BaseNode.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/BaseNode.cpp.s
 .PHONY : CHTLNode/BaseNode.cpp.s
 
+CHTLNode/CustomNode.o: CHTLNode/CustomNode.cpp.o
+.PHONY : CHTLNode/CustomNode.o
+
+# target to build an object file
+CHTLNode/CustomNode.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/CustomNode.cpp.o
+.PHONY : CHTLNode/CustomNode.cpp.o
+
+CHTLNode/CustomNode.i: CHTLNode/CustomNode.cpp.i
+.PHONY : CHTLNode/CustomNode.i
+
+# target to preprocess a source file
+CHTLNode/CustomNode.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/CustomNode.cpp.i
+.PHONY : CHTLNode/CustomNode.cpp.i
+
+CHTLNode/CustomNode.s: CHTLNode/CustomNode.cpp.s
+.PHONY : CHTLNode/CustomNode.s
+
+# target to generate assembly for a file
+CHTLNode/CustomNode.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/CustomNode.cpp.s
+.PHONY : CHTLNode/CustomNode.cpp.s
+
 CHTLNode/ElementNode.o: CHTLNode/ElementNode.cpp.o
 .PHONY : CHTLNode/ElementNode.o
 
@@ -294,6 +318,30 @@ CHTLNode/ElementNode.s: CHTLNode/ElementNode.cpp.s
 CHTLNode/ElementNode.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/ElementNode.cpp.s
 .PHONY : CHTLNode/ElementNode.cpp.s
+
+CHTLNode/TemplateNode.o: CHTLNode/TemplateNode.cpp.o
+.PHONY : CHTLNode/TemplateNode.o
+
+# target to build an object file
+CHTLNode/TemplateNode.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/TemplateNode.cpp.o
+.PHONY : CHTLNode/TemplateNode.cpp.o
+
+CHTLNode/TemplateNode.i: CHTLNode/TemplateNode.cpp.i
+.PHONY : CHTLNode/TemplateNode.i
+
+# target to preprocess a source file
+CHTLNode/TemplateNode.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/TemplateNode.cpp.i
+.PHONY : CHTLNode/TemplateNode.cpp.i
+
+CHTLNode/TemplateNode.s: CHTLNode/TemplateNode.cpp.s
+.PHONY : CHTLNode/TemplateNode.s
+
+# target to generate assembly for a file
+CHTLNode/TemplateNode.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/TemplateNode.cpp.s
+.PHONY : CHTLNode/TemplateNode.cpp.s
 
 CHTLNode/TextNode.o: CHTLNode/TextNode.cpp.o
 .PHONY : CHTLNode/TextNode.o
@@ -416,9 +464,15 @@ help:
 	@echo "... CHTLNode/BaseNode.o"
 	@echo "... CHTLNode/BaseNode.i"
 	@echo "... CHTLNode/BaseNode.s"
+	@echo "... CHTLNode/CustomNode.o"
+	@echo "... CHTLNode/CustomNode.i"
+	@echo "... CHTLNode/CustomNode.s"
 	@echo "... CHTLNode/ElementNode.o"
 	@echo "... CHTLNode/ElementNode.i"
 	@echo "... CHTLNode/ElementNode.s"
+	@echo "... CHTLNode/TemplateNode.o"
+	@echo "... CHTLNode/TemplateNode.i"
+	@echo "... CHTLNode/TemplateNode.s"
 	@echo "... CHTLNode/TextNode.o"
 	@echo "... CHTLNode/TextNode.i"
 	@echo "... CHTLNode/TextNode.s"

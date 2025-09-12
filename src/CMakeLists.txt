@@ -11,6 +11,8 @@ add_library(CHTLCore STATIC
     CHTLNode/BaseNode.cpp
     CHTLNode/ElementNode.cpp
     CHTLNode/TextNode.cpp
+    CHTLNode/TemplateNode.cpp
+    CHTLNode/CustomNode.cpp
     
     # 扫描器
     Scanner/UnifiedScanner.cpp

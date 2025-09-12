@@ -1,6 +1,8 @@
 #include "CHTL/CHTLGenerator.h"
 #include "CHTL/CHTLNode/ElementNode.h"
 #include "CHTL/CHTLNode/TextNode.h"
+#include "CHTL/CHTLNode/TemplateNode.h"
+#include "CHTL/CHTLNode/CustomNode.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -163,6 +165,10 @@ std::string CHTLGenerator::generateNode(std::shared_ptr<BaseNode> node, int inde
             return generateStyle(node, indent);
         case NodeType::SCRIPT:
             return generateScript(node, indent);
+        case NodeType::TEMPLATE:
+            return generateTemplate(node, indent);
+        case NodeType::CUSTOM:
+            return generateCustom(node, indent);
         default:
             return "";
     }
@@ -272,6 +278,52 @@ std::string CHTLGenerator::generateScript(std::shared_ptr<BaseNode> node, int in
     std::string script = node->getValue();
     if (!script.empty()) {
         oss << indentStr << script << "\n";
+    }
+    
+    return oss.str();
+}
+
+std::string CHTLGenerator::generateTemplate(std::shared_ptr<BaseNode> node, int indent) {
+    if (!node) return "";
+    
+    auto templateNode = std::dynamic_pointer_cast<TemplateNode>(node);
+    if (!templateNode) return "";
+    
+    std::ostringstream oss;
+    std::string indentStr = generateIndent(indent);
+    
+    // 生成模板注释
+    oss << indentStr << "<!-- Template: " << templateNode->getTemplateName() << " -->\n";
+    
+    // 生成模板内容
+    for (size_t i = 0; i < templateNode->getChildCount(); ++i) {
+        auto child = templateNode->getChild(i);
+        if (child) {
+            oss << generateNode(child, indent);
+        }
+    }
+    
+    return oss.str();
+}
+
+std::string CHTLGenerator::generateCustom(std::shared_ptr<BaseNode> node, int indent) {
+    if (!node) return "";
+    
+    auto customNode = std::dynamic_pointer_cast<CustomNode>(node);
+    if (!customNode) return "";
+    
+    std::ostringstream oss;
+    std::string indentStr = generateIndent(indent);
+    
+    // 生成自定义注释
+    oss << indentStr << "<!-- Custom: " << customNode->getCustomName() << " -->\n";
+    
+    // 生成自定义内容
+    for (size_t i = 0; i < customNode->getChildCount(); ++i) {
+        auto child = customNode->getChild(i);
+        if (child) {
+            oss << generateNode(child, indent);
+        }
     }
     
     return oss.str();
