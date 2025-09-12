@@ -1,8 +1,8 @@
 #ifndef CHTL_CONFIGURATION_PROCESSOR_H
 #define CHTL_CONFIGURATION_PROCESSOR_H
 
-#include "CHTLNode/ConfigurationNode.h"
-#include "CHTLNode/BaseNode.h"
+#include "../CHTLNode/ConfigurationNode.h"
+#include "../CHTLNode/BaseNode.h"
 #include <string>
 #include <map>
 #include <vector>

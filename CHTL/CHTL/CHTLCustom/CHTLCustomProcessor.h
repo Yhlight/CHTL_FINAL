@@ -1,7 +1,7 @@
 #ifndef CHTL_CUSTOM_PROCESSOR_H
 #define CHTL_CUSTOM_PROCESSOR_H
 
-#include "CHTLNode/CustomNode.h"
+#include "../CHTLNode/CustomNode.h"
 #include <string>
 #include <map>
 #include <vector>
@@ -65,8 +65,8 @@ public:
     bool validateCustomParameters(const std::string& name, const std::map<std::string, std::string>& args) const;
     bool validateCustomConstraints(const std::string& name) const;
 
-    const std::vector<std::string>& getErrors() const { return errors; }
-    const std::vector<std::string>& getWarnings() const { return warnings; }
+    const std::vector<std::string>& getErrors() const;
+    const std::vector<std::string>& getWarnings() const;
     void clearMessages();
     void reset();
     std::string getDebugInfo() const;

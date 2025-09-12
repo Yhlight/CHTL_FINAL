@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iomanip>
 #include <fstream>
+#include <algorithm>
 
 namespace CHTL {
 namespace Test {
@@ -391,13 +392,6 @@ void TestFramework::printSummary() const {
     std::cout << std::endl;
 }
 
-// 测试发现方法
-void TestFramework::discoverTests(const std::string& directory) {
-    // 根据CHTL.md规范，实现测试发现功能
-    // 这里可以扫描目录中的测试文件并自动加载
-    std::cout << "发现测试目录: " << directory << std::endl;
-    // 实现细节可以根据需要添加
-}
 
 void TestFramework::loadTestConfig(const std::string& configFile) {
     // 根据CHTL.md规范，实现测试配置加载功能

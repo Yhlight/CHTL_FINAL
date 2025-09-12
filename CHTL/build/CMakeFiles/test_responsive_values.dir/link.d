@@ -9,6 +9,34 @@ test_responsive_values: \
   CMakeFiles/test_responsive_values.dir/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o \
   CMakeFiles/test_responsive_values.dir/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o \
   CMakeFiles/test_responsive_values.dir/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLCustom/CHTLCustomProcessor.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLTemplate/CHTLTemplateProcessor.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLOrigin/CHTLOriginProcessor.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLImport/CHTLImportProcessor.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNamespace/CHTLNamespaceProcessor.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLConstraint/CHTLConstraintProcessor.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLConfiguration/CHTLConfigurationProcessor.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLUse/CHTLUseProcessor.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLJS/CHTLJSAdvancedProcessor.cpp.o \
+  CMakeFiles/test_responsive_values.dir/Module/CMODModule.cpp.o \
+  CMakeFiles/test_responsive_values.dir/Module/CMODModuleManager.cpp.o \
+  CMakeFiles/test_responsive_values.dir/Module/CJMODModule.cpp.o \
+  CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.o \
+  CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TemplateNode.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/BaseNode.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ElementNode.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TextNode.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CommentNode.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/StyleNode.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ScriptNode.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/OriginNode.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ImportNode.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/NamespaceNode.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConstraintNode.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/UseNode.cpp.o \
   /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so \
   /lib/x86_64-linux-gnu/libm.so \
   /lib/x86_64-linux-gnu/libm.so \
@@ -56,6 +84,62 @@ CMakeFiles/test_responsive_values.dir/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o:
 CMakeFiles/test_responsive_values.dir/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o:
 
 CMakeFiles/test_responsive_values.dir/CHTL_JS/CHTLJSNode/CHTLJSBaseNode.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLCustom/CHTLCustomProcessor.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLTemplate/CHTLTemplateProcessor.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLOrigin/CHTLOriginProcessor.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLImport/CHTLImportProcessor.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNamespace/CHTLNamespaceProcessor.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLConstraint/CHTLConstraintProcessor.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLConfiguration/CHTLConfigurationProcessor.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLUse/CHTLUseProcessor.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLJS/CHTLJSAdvancedProcessor.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/Module/CMODModule.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/Module/CMODModuleManager.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/Module/CJMODModule.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TemplateNode.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/BaseNode.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ElementNode.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TextNode.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CommentNode.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/StyleNode.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ScriptNode.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/OriginNode.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ImportNode.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/NamespaceNode.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConstraintNode.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/UseNode.cpp.o:
 
 /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so:
 

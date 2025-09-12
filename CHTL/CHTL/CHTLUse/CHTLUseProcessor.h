@@ -1,8 +1,8 @@
 #ifndef CHTL_USE_PROCESSOR_H
 #define CHTL_USE_PROCESSOR_H
 
-#include "CHTLNode/UseNode.h"
-#include "CHTLNode/BaseNode.h"
+#include "../CHTLNode/UseNode.h"
+#include "../CHTLNode/BaseNode.h"
 #include <string>
 #include <map>
 #include <vector>

@@ -156,7 +156,6 @@ public:
     void printSummary() const;
     
     // 测试发现
-    void discoverTests(const std::string& directory);
     void loadTestConfig(const std::string& configFile);
     void saveTestConfig(const std::string& configFile) const;
 };

@@ -1,9 +1,9 @@
 #ifndef CHTL_CONSTRAINT_PROCESSOR_H
 #define CHTL_CONSTRAINT_PROCESSOR_H
 
-#include "CHTLNode/ConstraintNode.h"
-#include "CHTLNode/ElementNode.h"
-#include "CHTLNode/BaseNode.h"
+#include "../CHTLNode/ConstraintNode.h"
+#include "../CHTLNode/ElementNode.h"
+#include "../CHTLNode/BaseNode.h"
 #include <string>
 #include <map>
 #include <vector>
