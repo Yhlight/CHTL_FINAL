@@ -142,6 +142,30 @@ run_compiler/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_compiler.dir/build.make CMakeFiles/run_compiler.dir/build
 .PHONY : run_compiler/fast
 
+CHTL/ASTProcessors/StyleEvaluator.o: CHTL/ASTProcessors/StyleEvaluator.cpp.o
+.PHONY : CHTL/ASTProcessors/StyleEvaluator.o
+
+# target to build an object file
+CHTL/ASTProcessors/StyleEvaluator.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o
+.PHONY : CHTL/ASTProcessors/StyleEvaluator.cpp.o
+
+CHTL/ASTProcessors/StyleEvaluator.i: CHTL/ASTProcessors/StyleEvaluator.cpp.i
+.PHONY : CHTL/ASTProcessors/StyleEvaluator.i
+
+# target to preprocess a source file
+CHTL/ASTProcessors/StyleEvaluator.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.i
+.PHONY : CHTL/ASTProcessors/StyleEvaluator.cpp.i
+
+CHTL/ASTProcessors/StyleEvaluator.s: CHTL/ASTProcessors/StyleEvaluator.cpp.s
+.PHONY : CHTL/ASTProcessors/StyleEvaluator.s
+
+# target to generate assembly for a file
+CHTL/ASTProcessors/StyleEvaluator.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.s
+.PHONY : CHTL/ASTProcessors/StyleEvaluator.cpp.s
+
 CHTL/ASTProcessors/StyleProcessor.o: CHTL/ASTProcessors/StyleProcessor.cpp.o
 .PHONY : CHTL/ASTProcessors/StyleProcessor.o
 
@@ -464,6 +488,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... run_compiler"
 	@echo "... chtl_compiler"
+	@echo "... CHTL/ASTProcessors/StyleEvaluator.o"
+	@echo "... CHTL/ASTProcessors/StyleEvaluator.i"
+	@echo "... CHTL/ASTProcessors/StyleEvaluator.s"
 	@echo "... CHTL/ASTProcessors/StyleProcessor.o"
 	@echo "... CHTL/ASTProcessors/StyleProcessor.i"
 	@echo "... CHTL/ASTProcessors/StyleProcessor.s"

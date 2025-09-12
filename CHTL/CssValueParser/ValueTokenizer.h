@@ -17,7 +17,7 @@ private:
     ValueToken makeToken(ValueTokenType type, const std::string& text);
 
     ValueToken number();
-    ValueToken unit();
+    ValueToken identifier();
 
     const std::string& source;
     size_t start = 0;

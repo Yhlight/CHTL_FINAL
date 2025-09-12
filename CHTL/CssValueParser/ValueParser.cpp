@@ -24,6 +24,25 @@ int ValueParser::getPrecedence(ValueTokenType type) {
 
 std::shared_ptr<ExprNode> ValueParser::parsePrefix() {
     ValueToken token = advance();
+    if (token.type == ValueTokenType::TOKEN_IDENTIFIER) {
+        // This could be a property reference
+        if (peek().type == ValueTokenType::TOKEN_DOT) {
+            advance(); // consume '.'
+            ValueToken property = advance();
+            if (property.type == ValueTokenType::TOKEN_IDENTIFIER) {
+                auto node = std::make_shared<PropertyReferenceNode>();
+                node->selector = token.text;
+                node->propertyName = property.text;
+                return node;
+            } else {
+                throw std::runtime_error("Expected property name after '.'.");
+            }
+        }
+        // If it's just an identifier, it might be a variable or keyword later.
+        // For now, it's an error in an arithmetic expression.
+        throw std::runtime_error("Unexpected identifier in expression.");
+    }
+
     if (token.type == ValueTokenType::TOKEN_NUMBER) {
         auto node = std::make_shared<NumericLiteralNode>();
 

@@ -1,6 +1,6 @@
-CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o: \
- /app/CHTL/ASTProcessors/StyleProcessor.cpp /usr/include/stdc-predef.h \
- /app/CHTL/ASTProcessors/StyleProcessor.h \
+CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o: \
+ /app/CHTL/ASTProcessors/StyleEvaluator.cpp /usr/include/stdc-predef.h \
+ /app/CHTL/ASTProcessors/StyleEvaluator.h \
  /app/CHTL/ASTProcessors/../CHTLNode/AstVisitor.h \
  /usr/include/c++/13/memory /usr/include/c++/13/bits/memoryfwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
@@ -167,16 +167,9 @@ CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o: \
  /app/CHTL/ASTProcessors/../CHTLNode/TextNode.h \
  /app/CHTL/ASTProcessors/../CHTLNode/CommentNode.h \
  /app/CHTL/ASTProcessors/../CHTLNode/StyleNode.h \
- /app/CHTL/ASTProcessors/../LocalStyleParser/LocalStyleParser.h \
- /app/CHTL/ASTProcessors/../LocalStyleParser/ParsedStyleBlock.h \
- /app/CHTL/ASTProcessors/../LocalStyleParser/../CssValueParser/ValueAst.h \
- /app/CHTL/ASTProcessors/../CHTLContext.h \
- /app/CHTL/ASTProcessors/../../Util/StringUtil/StringUtil.h \
- /usr/include/c++/13/algorithm /usr/include/c++/13/bits/stl_algo.h \
- /usr/include/c++/13/bits/algorithmfwd.h \
- /usr/include/c++/13/bits/stl_heap.h \
- /usr/include/c++/13/bits/uniform_int_dist.h \
- /usr/include/c++/13/pstl/glue_algorithm_defs.h \
+ /app/CHTL/ASTProcessors/../CssValueParser/Evaluator.h \
+ /app/CHTL/ASTProcessors/../CssValueParser/ValueAst.h \
+ /app/CHTL/ASTProcessors/../CssValueParser/../CHTLNode/BaseNode.h \
  /usr/include/c++/13/iostream /usr/include/c++/13/ostream \
  /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \
@@ -194,4 +187,5 @@ CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o: \
  /usr/include/c++/13/bits/locale_facets.tcc \
  /usr/include/c++/13/bits/basic_ios.tcc \
  /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
- /usr/include/c++/13/bits/istream.tcc
+ /usr/include/c++/13/bits/istream.tcc /usr/include/c++/13/sstream \
+ /usr/include/c++/13/bits/sstream.tcc

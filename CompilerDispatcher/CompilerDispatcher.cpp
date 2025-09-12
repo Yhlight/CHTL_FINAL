@@ -6,6 +6,7 @@
 #include "CHTLParser/Parser.h"
 #include "CHTLGenerator/Generator.h"
 #include "ASTProcessors/StyleProcessor.h"
+#include "ASTProcessors/StyleEvaluator.h"
 #include "CHTLContext.h"
 
 // --- CHTL Compiler Invocation ---
@@ -31,11 +32,15 @@ void invoke_chtl_compiler(const std::string& code, CHTLContext& context) {
         return;
     }
 
-    // 3. AST Processing
+    // 3. AST Processing (Pass 1: Parse styles into expression trees)
     StyleProcessor styleProcessor;
     styleProcessor.process(ast_root, context);
 
-    // 4. Generator
+    // 4. AST Processing (Pass 2: Evaluate expression trees)
+    StyleEvaluator styleEvaluator;
+    styleEvaluator.process(ast_root);
+
+    // 5. Generator
     Generator generator;
     std::string html_output = generator.generate(ast_root, context);
 

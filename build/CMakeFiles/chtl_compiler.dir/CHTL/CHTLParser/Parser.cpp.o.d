@@ -158,8 +158,10 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o: \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h \
  /app/CHTL/CHTLParser/../CHTLNode/ElementNode.h \
- /app/CHTL/CHTLParser/../CHTLNode/BaseNode.h /usr/include/c++/13/map \
- /usr/include/c++/13/bits/stl_tree.h \
+ /app/CHTL/CHTLParser/../CHTLNode/BaseNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/../CssValueParser/ValueAst.h \
+ /app/CHTL/CHTLParser/../CHTLNode/../CssValueParser/ValueToken.h \
+ /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \

@@ -8,12 +8,14 @@
 // Forward declare nodes and visitor
 struct NumericLiteralNode;
 struct BinaryOpNode;
+struct PropertyReferenceNode;
 
 class ExprVisitor {
 public:
     virtual ~ExprVisitor() = default;
     virtual void visit(NumericLiteralNode& node) = 0;
     virtual void visit(BinaryOpNode& node) = 0;
+    virtual void visit(PropertyReferenceNode& node) = 0;
 };
 
 // Base class for all expression nodes
@@ -34,6 +36,13 @@ struct BinaryOpNode : ExprNode {
     std::shared_ptr<ExprNode> left;
     ValueToken op;
     std::shared_ptr<ExprNode> right;
+    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
+};
+
+// Represents a reference to another property (e.g., #box.width)
+struct PropertyReferenceNode : ExprNode {
+    std::string selector;
+    std::string propertyName;
     void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
 };
 

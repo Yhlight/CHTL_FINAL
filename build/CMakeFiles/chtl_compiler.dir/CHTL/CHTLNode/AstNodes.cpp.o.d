@@ -114,8 +114,10 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o: \
  /usr/include/c++/13/bits/atomic_lockfree_defines.h \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
- /usr/include/c++/13/pstl/execution_defs.h /usr/include/c++/13/string \
- /usr/include/c++/13/bits/char_traits.h \
+ /usr/include/c++/13/pstl/execution_defs.h \
+ /app/CHTL/CHTLNode/../CssValueParser/ValueAst.h \
+ /app/CHTL/CHTLNode/../CssValueParser/ValueToken.h \
+ /usr/include/c++/13/string /usr/include/c++/13/bits/char_traits.h \
  /usr/include/c++/13/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
  /usr/include/c++/13/clocale /usr/include/locale.h \

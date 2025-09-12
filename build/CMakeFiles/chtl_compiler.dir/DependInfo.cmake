@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/app/CHTL/ASTProcessors/StyleEvaluator.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o.d"
   "/app/CHTL/ASTProcessors/StyleProcessor.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o.d"
   "/app/CHTL/CHTLGenerator/Generator.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o.d"
   "/app/CHTL/CHTLLexer/Lexer.cpp" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLLexer/Lexer.cpp.o" "gcc" "CMakeFiles/chtl_compiler.dir/CHTL/CHTLLexer/Lexer.cpp.o.d"

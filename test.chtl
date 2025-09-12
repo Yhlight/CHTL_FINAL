@@ -2,50 +2,36 @@ html
 {
     head
     {
-        title { text { "Attribute Arithmetic Test" } }
+        title { text { "Attribute Referencing Test" } }
     }
 
     body
     {
-        // Test basic arithmetic and hoisting
         div
         {
-            id: "test1";
+            id: "box1";
             style {
-                .test1-style {
-                    width: 100px + 50px; // Expected: 150px
-                    height: 10 * 2px;     // Expected: 20px
-                    margin-left: (100% / 5) - 2%; // Expected: 18%
-                }
+                width: 100px;
+                height: 200px;
             }
         }
 
-        // Test operator precedence
+        // This div should get its width from #box1
         div
         {
-            id: "test2";
+            id: "box2";
             style {
-                // This should be an inline style
-                padding: 10px + 2 * 5; // Expected: 20px
+                // Reference the width of #box1 and divide by 2
+                width: #box1.width / 2; // Expected: 50px
             }
         }
 
-        // Test power operator
+        // This div should get its height from #box1 as well
         div
         {
-            id: "test3";
+            id: "box3";
             style {
-                font-size: 2px ** 3;    // Expected: 8px
-            }
-        }
-
-        // Test invalid operation for error handling
-        div
-        {
-            id: "test4";
-            style {
-                // This should produce a warning and use the raw value
-                left: 10px + 5%;
+                height: #box1.height + 20px; // Expected: 220px
             }
         }
     }

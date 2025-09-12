@@ -2,10 +2,8 @@
 #include "../../Util/StringUtil/StringUtil.h"
 #include "../CssValueParser/ValueTokenizer.h"
 #include "../CssValueParser/ValueParser.h"
-#include "../CssValueParser/Evaluator.h"
 #include <algorithm>
 #include <iostream>
-#include <sstream>
 
 // Pre-processes the style block content to remove comments.
 static std::string removeComments(const std::string& input) {
@@ -31,36 +29,7 @@ static std::string removeComments(const std::string& input) {
     return output;
 }
 
-// Takes a raw value string (e.g., "100px + 50px") and returns the computed value string (e.g., "150px")
-static std::string computeValue(const std::string& rawValue) {
-    // Updated to not check for '%' as an operator
-    if (rawValue.find_first_of("+-*/()") == std::string::npos) {
-        return rawValue;
-    }
-    try {
-        ValueTokenizer tokenizer(rawValue);
-        std::vector<ValueToken> tokens = tokenizer.tokenize();
-
-        ValueParser parser(tokens);
-        std::shared_ptr<ExprNode> expr = parser.parse();
-
-        Evaluator evaluator;
-        EvaluatedValue evaluated = evaluator.evaluate(expr);
-
-        if (evaluated.hasError) {
-            std::cerr << "Warning: Could not evaluate style expression '" << rawValue << "'. Error: " << evaluated.errorMessage << std::endl;
-            return rawValue;
-        }
-
-        std::stringstream ss;
-        ss << evaluated.value << evaluated.unit;
-        return ss.str();
-
-    } catch (const std::runtime_error& e) {
-        std::cerr << "Warning: Could not parse style expression '" << rawValue << "'. Error: " << e.what() << std::endl;
-        return rawValue;
-    }
-}
+// The computeValue helper is no longer needed here, it will be part of the new StyleEvaluator pass.
 
 ParsedStyleBlock LocalStyleParser::parse(const std::string& rawContent) {
     ParsedStyleBlock result;
@@ -94,26 +63,8 @@ ParsedStyleBlock LocalStyleParser::parse(const std::string& rawContent) {
             }
 
             if (!selector.empty() && !raw_rule_content.empty()) {
-                // Manually parse the properties inside the rule's content
-                std::string computed_rule_content;
-                size_t inner_pos = 0;
-                while (inner_pos < raw_rule_content.length()) {
-                    size_t next_semi = raw_rule_content.find(';', inner_pos);
-                    if (next_semi == std::string::npos) next_semi = raw_rule_content.length();
-
-                    std::string decl = raw_rule_content.substr(inner_pos, next_semi - inner_pos);
-                    size_t next_colon = decl.find(':');
-
-                    if (next_colon != std::string::npos) {
-                        std::string key = trim(std::string_view(decl).substr(0, next_colon));
-                        std::string val = trim(std::string_view(decl).substr(next_colon + 1));
-                        if (!key.empty() && !val.empty()) {
-                            computed_rule_content += key + ": " + computeValue(val) + "; ";
-                        }
-                    }
-                    inner_pos = next_semi + 1;
-                }
-                result.globalRules.push_back({selector, computed_rule_content});
+                // For now, we pass the raw content. Evaluation will happen later.
+                result.globalRules.push_back({selector, raw_rule_content});
             }
             pos = content_end_pos;
 
@@ -127,7 +78,17 @@ ParsedStyleBlock LocalStyleParser::parse(const std::string& rawContent) {
                 std::string raw_value = trim(std::string_view(declaration).substr(colon_pos + 1));
 
                 if (!key.empty() && !raw_value.empty()) {
-                    result.inlineStyles[key] = computeValue(raw_value);
+                    // Tokenize and parse the value into an expression tree, but do not evaluate it.
+                    try {
+                        ValueTokenizer tokenizer(raw_value);
+                        std::vector<ValueToken> tokens = tokenizer.tokenize();
+                        ValueParser valueParser(tokens);
+                        result.inlineStyleTrees[key] = valueParser.parse();
+                    } catch (const std::runtime_error& e) {
+                        std::cerr << "Warning: Could not parse style expression '" << raw_value << "'. Error: " << e.what() << std::endl;
+                        // Store a null ptr to signify a parse failure.
+                        result.inlineStyleTrees[key] = nullptr;
+                    }
                 }
             }
             pos = semi_pos + 1;

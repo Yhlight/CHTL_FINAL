@@ -195,10 +195,24 @@ CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.s: cmake_forc
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/CHTL/ASTProcessors/StyleProcessor.cpp -o CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.s
 
+CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o: CMakeFiles/chtl_compiler.dir/flags.make
+CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o: /app/CHTL/ASTProcessors/StyleEvaluator.cpp
+CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o: CMakeFiles/chtl_compiler.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o -MF CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o.d -o CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o -c /app/CHTL/ASTProcessors/StyleEvaluator.cpp
+
+CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/CHTL/ASTProcessors/StyleEvaluator.cpp > CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.i
+
+CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/CHTL/ASTProcessors/StyleEvaluator.cpp -o CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.s
+
 CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.o: CMakeFiles/chtl_compiler.dir/flags.make
 CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.o: /app/Util/StringUtil/StringUtil.cpp
 CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.o: CMakeFiles/chtl_compiler.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.o -MF CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.o.d -o CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.o -c /app/Util/StringUtil/StringUtil.cpp
 
 CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.i: cmake_force
@@ -212,7 +226,7 @@ CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.s: cmake_force
 CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.o: CMakeFiles/chtl_compiler.dir/flags.make
 CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.o: /app/CHTL/CssValueParser/ValueTokenizer.cpp
 CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.o: CMakeFiles/chtl_compiler.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.o -MF CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.o.d -o CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.o -c /app/CHTL/CssValueParser/ValueTokenizer.cpp
 
 CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.i: cmake_force
@@ -226,7 +240,7 @@ CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.s: cmake_for
 CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.o: CMakeFiles/chtl_compiler.dir/flags.make
 CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.o: /app/CHTL/CssValueParser/ValueParser.cpp
 CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.o: CMakeFiles/chtl_compiler.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.o -MF CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.o.d -o CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.o -c /app/CHTL/CssValueParser/ValueParser.cpp
 
 CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.i: cmake_force
@@ -240,7 +254,7 @@ CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.s: cmake_force
 CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/Evaluator.cpp.o: CMakeFiles/chtl_compiler.dir/flags.make
 CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/Evaluator.cpp.o: /app/CHTL/CssValueParser/Evaluator.cpp
 CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/Evaluator.cpp.o: CMakeFiles/chtl_compiler.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/Evaluator.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/Evaluator.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/Evaluator.cpp.o -MF CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/Evaluator.cpp.o.d -o CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/Evaluator.cpp.o -c /app/CHTL/CssValueParser/Evaluator.cpp
 
 CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/Evaluator.cpp.i: cmake_force
@@ -262,6 +276,7 @@ chtl_compiler_OBJECTS = \
 "CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o" \
 "CMakeFiles/chtl_compiler.dir/CHTL/LocalStyleParser/LocalStyleParser.cpp.o" \
 "CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o" \
+"CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o" \
 "CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.o" \
 "CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.o" \
 "CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.o" \
@@ -279,13 +294,14 @@ chtl_compiler: CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o
 chtl_compiler: CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o
 chtl_compiler: CMakeFiles/chtl_compiler.dir/CHTL/LocalStyleParser/LocalStyleParser.cpp.o
 chtl_compiler: CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o
+chtl_compiler: CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleEvaluator.cpp.o
 chtl_compiler: CMakeFiles/chtl_compiler.dir/Util/StringUtil/StringUtil.cpp.o
 chtl_compiler: CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueTokenizer.cpp.o
 chtl_compiler: CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/ValueParser.cpp.o
 chtl_compiler: CMakeFiles/chtl_compiler.dir/CHTL/CssValueParser/Evaluator.cpp.o
 chtl_compiler: CMakeFiles/chtl_compiler.dir/build.make
 chtl_compiler: CMakeFiles/chtl_compiler.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable chtl_compiler"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Linking CXX executable chtl_compiler"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/chtl_compiler.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

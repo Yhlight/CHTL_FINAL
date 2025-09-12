@@ -23,11 +23,16 @@ std::vector<ValueToken> ValueTokenizer::tokenize() {
                     tokens.push_back(makeToken(ValueTokenType::TOKEN_STAR, "*"));
                 }
                 break;
+            case '.': tokens.push_back(makeToken(ValueTokenType::TOKEN_DOT, ".")); break;
             default:
                 if (isdigit(c) || c == '.') {
                     current--; // Go back to parse the full number and its unit
                     tokens.push_back(number());
-                } else {
+                } else if (isalpha(c) || c == '#' || c == '.') { // Selectors can start with # or .
+                    current--;
+                    tokens.push_back(identifier());
+                }
+                else {
                     tokens.push_back(makeToken(ValueTokenType::TOKEN_ERROR, std::string(1, c)));
                 }
                 break;
@@ -68,5 +73,12 @@ ValueToken ValueTokenizer::number() {
     return makeToken(ValueTokenType::TOKEN_NUMBER, source.substr(start, current - start));
 }
 
-// unit() helper is no longer needed
-// ValueToken ValueTokenizer::unit() { ... }
+ValueToken ValueTokenizer::identifier() {
+    start = current;
+    // An identifier can be a selector, so it can contain letters, numbers, -, #
+    // The dot must be its own token.
+    while (isalnum(peek()) || peek() == '_' || peek() == '-' || peek() == '#') {
+        advance();
+    }
+    return makeToken(ValueTokenType::TOKEN_IDENTIFIER, source.substr(start, current - start));
+}

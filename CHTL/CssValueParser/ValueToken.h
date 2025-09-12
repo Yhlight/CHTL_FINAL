@@ -6,6 +6,7 @@
 enum class ValueTokenType {
     // A literal value, like "100px" or "5.5"
     TOKEN_NUMBER,
+    TOKEN_IDENTIFIER, // e.g. a selector like 'box'
 
     // Operators
     TOKEN_PLUS,
@@ -13,6 +14,7 @@ enum class ValueTokenType {
     TOKEN_STAR,
     TOKEN_SLASH,
     TOKEN_POWER,
+    TOKEN_DOT,      // .
 
     // Parentheses
     TOKEN_LPAREN,
