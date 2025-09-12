@@ -10,7 +10,6 @@ CHTLParser::CHTLParser(std::vector<Token>& tokens, CHTLLoader& loader, const std
     : tokens_(tokens), loader_(loader), current_path_(initial_path), context_(context) {
     // Check for a namespace declaration at the beginning of the file.
     if (!tokens_.empty() && tokens_[0].type == TokenType::Namespace) {
-        // This is a simplified check. A full implementation would parse this properly.
         if (tokens_.size() > 1 && tokens_[1].type == TokenType::Identifier) {
             current_namespace_ = tokens_[1].lexeme;
         }
@@ -38,7 +37,6 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     std::vector<std::unique_ptr<Node>> nodes;
     if (match({TokenType::Namespace})) {
         current_namespace_ = consume(TokenType::Identifier, "Expected namespace name.").lexeme;
-        // Namespaces don't produce a node, so we just continue parsing declarations.
         return nodes;
     }
 
@@ -64,7 +62,6 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
             std::vector<Token> imported_tokens = imported_lexer.scanTokens();
             CHTLParser imported_parser(imported_tokens, loader_, imported_file_canonical_path, context_);
 
-            // Handle default namespace
             if (imported_parser.current_namespace_.empty()) {
                 imported_parser.current_namespace_ = default_namespace;
             }
@@ -72,12 +69,12 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
             imported_parser.parse();
         }
 
-        return nodes; // Imports don't produce direct nodes
+        return nodes;
     }
     if (match({TokenType::Template, TokenType::Custom})) {
         bool is_custom = previous().type == TokenType::Custom;
         parseTemplateDefinition(is_custom);
-        return nodes; // Return empty vector for definitions
+        return nodes;
     }
     if (match({TokenType::AtElement})) {
         const Token& name = consume(TokenType::Identifier, "Expected template name after '@Element'.");
@@ -91,13 +88,11 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
             throw std::runtime_error("Use of undefined element template '" + qualified_name + "'.");
         }
 
-        // Clone the base template nodes
         const auto& templateNode = context_->element_templates_.at(qualified_name);
         for (const auto& child : templateNode->children_) {
             nodes.push_back(child->clone());
         }
 
-        // Check for a specialization block
         if (match({TokenType::OpenBrace})) {
             applySpecializations(nodes);
             consume(TokenType::CloseBrace, "Expected '}' to close specialization block.");
@@ -108,13 +103,16 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
         return nodes;
     }
 
-    // For single-node declarations, wrap them in a vector
     std::unique_ptr<Node> singleNode = nullptr;
     if (match({TokenType::Style})) {
         singleNode = parseStyleBlock();
     } else if (match({TokenType::Identifier})) {
         if (peek().type == TokenType::OpenBrace) {
             singleNode = parseElement();
+        } else if (check(TokenType::Semicolon)) {
+            const Token& name = previous();
+            consume(TokenType::Semicolon, "Expected ';' after empty element.");
+            singleNode = std::make_unique<ElementNode>(name.lexeme);
         }
     } else if (match({TokenType::Text})) {
         singleNode = parseText();
@@ -127,83 +125,146 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
         return nodes;
     }
 
-    // If no declaration matches, advance and report error.
     advance();
     throw std::runtime_error("Expected a declaration (element, text, etc.).");
 }
 
 void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes) {
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        // Manually parse the modifier: TagName[index] { ... }
-        const Token& tagName = consume(TokenType::Identifier, "Expected tag name for specialization.");
-        size_t index = 0; // Default to the first element
-        if (match({TokenType::OpenBracket})) {
-            const Token& indexToken = consume(TokenType::Number, "Expected index number in brackets.");
-            index = std::stoul(indexToken.lexeme);
-            consume(TokenType::CloseBracket, "Expected ']' after index.");
-        }
+        if (match({TokenType::Insert})) {
+            if (match({TokenType::After, TokenType::Before, TokenType::Replace, TokenType::AtTop, TokenType::AtBottom})) {
+                const Token& position = previous();
 
-        auto modifier_element = std::make_unique<ElementNode>(tagName.lexeme);
-        consume(TokenType::OpenBrace, "Expected '{' for specialization body.");
-        parseElementBody(*modifier_element);
-        consume(TokenType::CloseBrace, "Expected '}' to close specialization body.");
-
-        // Find the Nth target node with the matching tag name
-        Node* target_node = nullptr;
-        size_t current_index = 0;
-        for (auto& target : target_nodes) {
-            if (target->getType() == NodeType::Element) {
-                ElementNode* target_element = static_cast<ElementNode*>(target.get());
-                if (target_element->tagName_ == tagName.lexeme) {
-                    if (current_index == index) {
-                        target_node = target_element;
-                        break;
-                    }
-                    current_index++;
+                const Token& tagName = consume(TokenType::Identifier, "Expected tag name for insert target.");
+                size_t index = 0;
+                if (match({TokenType::OpenBracket})) {
+                    const Token& indexToken = consume(TokenType::Number, "Expected index number in brackets.");
+                    index = std::stoul(indexToken.lexeme);
+                    consume(TokenType::CloseBracket, "Expected ']' after index.");
                 }
-            }
-        }
 
-        if (target_node) {
-            // Find the style block in the modifier
-            StyleBlockNode* modifier_style_block = nullptr;
-            for (const auto& child : modifier_element->children_) {
-                if (child->getType() == NodeType::StyleBlock) {
-                    modifier_style_block = static_cast<StyleBlockNode*>(child.get());
-                    break;
-                }
-            }
-
-            if (modifier_style_block) {
-                // Find or create the style block in the target
-                StyleBlockNode* target_style_block = nullptr;
-                ElementNode* target_element_node = static_cast<ElementNode*>(target_node);
-                for (const auto& child : target_element_node->children_) {
-                    if (child->getType() == NodeType::StyleBlock) {
-                        target_style_block = static_cast<StyleBlockNode*>(child.get());
-                        break;
+                consume(TokenType::OpenBrace, "Expected '{' for insert body.");
+                std::vector<std::unique_ptr<Node>> new_nodes;
+                while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+                    auto parsed_nodes = parseDeclaration();
+                    for(auto& node : parsed_nodes) {
+                        new_nodes.push_back(std::move(node));
                     }
                 }
-                if (!target_style_block) {
-                    auto new_style_block = std::make_unique<StyleBlockNode>();
-                    target_style_block = new_style_block.get();
-                    target_element_node->children_.push_back(std::move(new_style_block));
+                consume(TokenType::CloseBrace, "Expected '}' to close insert body.");
+
+                auto target_it = target_nodes.begin();
+                bool found = false;
+                if (position.type != TokenType::AtTop && position.type != TokenType::AtBottom) {
+                    size_t current_index = 0;
+                    for (auto it = target_nodes.begin(); it != target_nodes.end(); ++it) {
+                        if ((*it)->getType() == NodeType::Element) {
+                            ElementNode* target_element = static_cast<ElementNode*>((*it).get());
+                            if (target_element->tagName_ == tagName.lexeme) {
+                                if (current_index == index) {
+                                    target_it = it;
+                                    found = true;
+                                    break;
+                                }
+                                current_index++;
+                            }
+                        }
+                    }
+                    if (!found) {
+                        throw std::runtime_error("Could not find element '" + tagName.lexeme + "' at index " + std::to_string(index) + " for insert operation.");
+                    }
                 }
 
-                // Merge properties
-                target_style_block->inline_properties_.insert(
-                    target_style_block->inline_properties_.end(),
-                    modifier_style_block->inline_properties_.begin(),
-                    modifier_style_block->inline_properties_.end()
-                );
-                target_style_block->rules_.insert(
-                    target_style_block->rules_.end(),
-                    std::make_move_iterator(modifier_style_block->rules_.begin()),
-                    std::make_move_iterator(modifier_style_block->rules_.end())
-                );
+                switch (position.type) {
+                    case TokenType::Before:
+                        target_nodes.insert(target_it, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+                        break;
+                    case TokenType::After:
+                        target_nodes.insert(std::next(target_it), std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+                        break;
+                    case TokenType::Replace:
+                        target_it = target_nodes.erase(target_it);
+                        target_nodes.insert(target_it, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+                        break;
+                    case TokenType::AtTop:
+                        target_nodes.insert(target_nodes.begin(), std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+                        break;
+                    case TokenType::AtBottom:
+                        target_nodes.insert(target_nodes.end(), std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                throw std::runtime_error("Expected a position keyword (after, before, etc.) after 'insert'.");
             }
         } else {
-            throw std::runtime_error("Could not find element '" + tagName.lexeme + "' at index " + std::to_string(index) + " to specialize.");
+            const Token& tagName = consume(TokenType::Identifier, "Expected tag name for specialization.");
+            size_t index = 0;
+            if (match({TokenType::OpenBracket})) {
+                const Token& indexToken = consume(TokenType::Number, "Expected index number in brackets.");
+                index = std::stoul(indexToken.lexeme);
+                consume(TokenType::CloseBracket, "Expected ']' after index.");
+            }
+
+            auto modifier_element = std::make_unique<ElementNode>(tagName.lexeme);
+            consume(TokenType::OpenBrace, "Expected '{' for specialization body.");
+            parseElementBody(*modifier_element);
+            consume(TokenType::CloseBrace, "Expected '}' to close specialization body.");
+
+            Node* target_node = nullptr;
+            size_t current_index = 0;
+            for (auto& target : target_nodes) {
+                if (target->getType() == NodeType::Element) {
+                    ElementNode* target_element = static_cast<ElementNode*>(target.get());
+                    if (target_element->tagName_ == tagName.lexeme) {
+                        if (current_index == index) {
+                            target_node = target_element;
+                            break;
+                        }
+                        current_index++;
+                    }
+                }
+            }
+
+            if (target_node) {
+                StyleBlockNode* modifier_style_block = nullptr;
+                for (const auto& child : modifier_element->children_) {
+                    if (child->getType() == NodeType::StyleBlock) {
+                        modifier_style_block = static_cast<StyleBlockNode*>(child.get());
+                        break;
+                    }
+                }
+
+                if (modifier_style_block) {
+                    StyleBlockNode* target_style_block = nullptr;
+                    ElementNode* target_element_node = static_cast<ElementNode*>(target_node);
+                    for (const auto& child : target_element_node->children_) {
+                        if (child->getType() == NodeType::StyleBlock) {
+                            target_style_block = static_cast<StyleBlockNode*>(child.get());
+                            break;
+                        }
+                    }
+                    if (!target_style_block) {
+                        auto new_style_block = std::make_unique<StyleBlockNode>();
+                        target_style_block = new_style_block.get();
+                        target_element_node->children_.push_back(std::move(new_style_block));
+                    }
+
+                    target_style_block->inline_properties_.insert(
+                        target_style_block->inline_properties_.end(),
+                        modifier_style_block->inline_properties_.begin(),
+                        modifier_style_block->inline_properties_.end()
+                    );
+                    target_style_block->rules_.insert(
+                        target_style_block->rules_.end(),
+                        std::make_move_iterator(modifier_style_block->rules_.begin()),
+                        std::make_move_iterator(modifier_style_block->rules_.end())
+                    );
+                }
+            } else {
+                throw std::runtime_error("Could not find element '" + tagName.lexeme + "' at index " + std::to_string(index) + " to specialize.");
+            }
         }
     }
 }
@@ -221,7 +282,6 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
 
 void CHTLParser::parseElementBody(ElementNode& element) {
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        // If it's an identifier followed by a colon, it's an attribute.
         if (peek().type == TokenType::Identifier && peekNext().type == TokenType::Colon) {
             const Token& key = consume(TokenType::Identifier, "Expected attribute name.");
             consume(TokenType::Colon, "Expected ':' after attribute name.");
