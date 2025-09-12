@@ -8,6 +8,8 @@ from CHTL.CHTLNode.InfixExpressionNode import InfixExpressionNode
 from CHTL.CHTLNode.NumericLiteralNode import NumericLiteralNode
 from CHTL.CHTLNode.PropertyReferenceNode import PropertyReferenceNode
 from CHTL.CHTLNode.ScriptNode import ScriptNode
+from CHTL.CHTLNode.TemplateNode import TemplateNode
+from CHTL.CHTLNode.TemplateUsageNode import TemplateUsageNode
 import html
 import re
 
@@ -20,14 +22,16 @@ class Generator:
         self.errors: List[str] = []
         self.evaluation_order: List[str] = []
         self.evaluated_styles: dict[str, dict[str, str]] = {}
+        self.style_templates: dict[str, dict] = {}
 
     def generate(self, ast_root: ElementNode) -> str:
         if not isinstance(ast_root, ElementNode) or ast_root.tag_name != "root":
             raise ValueError("AST root must be a root ElementNode.")
 
         self.global_css_rules, self.element_map, self.dependency_graph, self.errors = [], {}, {}, []
-        self.evaluation_order, self.evaluated_styles = [], {}
+        self.evaluation_order, self.evaluated_styles, self.style_templates = [], {}, {}
 
+        self._collect_templates(ast_root)
         self._populate_element_map(ast_root)
         self._build_dependency_graph(ast_root)
 
@@ -138,12 +142,25 @@ class Generator:
             element_node = self.element_map.get(selector)
             if not element_node: continue
 
-            self.evaluated_styles[selector] = {}
+            # Start with an empty dict for this element's combined styles
+            final_properties = {}
+
             for child in element_node.children:
                 if isinstance(child, StyleNode):
-                    for prop_name, prop_value_list in child.properties.items():
-                        evaluated_value = self._process_property_value(prop_value_list)
-                        self.evaluated_styles[selector][prop_name] = evaluated_value
+                    # 1. Apply templates first (in order of appearance)
+                    for usage in child.template_usages:
+                        if usage.template_type == 'Style' and usage.template_name in self.style_templates:
+                            template_props = self.style_templates[usage.template_name]
+                            final_properties.update(template_props)
+
+                    # 2. Apply the element's own properties, overriding any from templates
+                    final_properties.update(child.properties)
+
+            # Now evaluate the combined properties
+            self.evaluated_styles[selector] = {}
+            for prop_name, prop_value_list in final_properties.items():
+                evaluated_value = self._process_property_value(prop_value_list)
+                self.evaluated_styles[selector][prop_name] = evaluated_value
 
     def _get_element_primary_selector(self, node: ElementNode) -> str:
         if "id" in node.attributes: return f"#{node.attributes['id']}"
@@ -219,6 +236,19 @@ class Generator:
                 if child.auto_ids_to_add: return f"#{child.auto_ids_to_add[0]}"
         return parent_node.tag_name.lower()
 
+    def _collect_templates(self, node: BaseNode):
+        if isinstance(node, TemplateNode):
+            if node.template_type == 'Style':
+                if node.template_name in self.style_templates:
+                    self.errors.append(f"Duplicate style template name found: {node.template_name}")
+                else:
+                    self.style_templates[node.template_name] = node.content
+
+        # Recurse, but not into the content of a template definition
+        if hasattr(node, 'children') and not isinstance(node, TemplateNode):
+            for child in node.children:
+                self._collect_templates(child)
+
     def _collect_global_styles(self, current_node: BaseNode, parent: Union[ElementNode, None]):
         if isinstance(current_node, StyleNode) and parent:
             parent_selector = self._get_parent_selector(parent)
@@ -235,6 +265,7 @@ class Generator:
         elif isinstance(node, TextNode): return self._generate_text_node(node)
         elif isinstance(node, StyleNode): return ""
         elif isinstance(node, ScriptNode): return self._generate_script_node(node)
+        elif isinstance(node, TemplateNode): return "" # Don't render template definitions
         return ""
 
     def _generate_script_node(self, node: ScriptNode) -> str:

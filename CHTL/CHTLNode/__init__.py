@@ -10,3 +10,5 @@ from .NumericLiteralNode import NumericLiteralNode
 from .InfixExpressionNode import InfixExpressionNode
 from .PropertyReferenceNode import PropertyReferenceNode
 from .ScriptNode import ScriptNode
+from .TemplateNode import TemplateNode
+from .TemplateUsageNode import TemplateUsageNode

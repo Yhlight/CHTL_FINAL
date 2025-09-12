@@ -1,6 +1,7 @@
 from typing import Union, Tuple
 from CHTL.CHTLLexer import Lexer, Token, TokenType
 from CHTL.CHTLNode import (BaseNode, ElementNode, TextNode, StyleNode, CssRule, ScriptNode,
+                           TemplateNode, TemplateUsageNode,
                            ExpressionNode, InfixExpressionNode, NumericLiteralNode, PropertyReferenceNode)
 from enum import IntEnum
 
@@ -147,9 +148,16 @@ class Parser:
             statement = self.parse_statement()
             if statement:
                 root.children.append(statement)
+            else:
+                # If no statement was parsed, we must advance to the next token
+                # to avoid an infinite loop on unrecognized tokens.
+                self._next_token()
         return root
 
     def parse_statement(self) -> Union[BaseNode, None]:
+        if self.current_token.type == TokenType.LBRACKET:
+            return self._parse_template_definition()
+
         if self.current_token.type in (TokenType.IDENTIFIER, TokenType.DOT, TokenType.HASH, TokenType.AMPERSAND):
             # Check if it is a block statement
             if self.peek_token.type == TokenType.LBRACE:
@@ -212,8 +220,13 @@ class Parser:
         css_rules = []
         auto_classes = []
         auto_ids = []
+        template_usages = []
         while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
-            if self.current_token.type in (TokenType.DOT, TokenType.HASH, TokenType.AMPERSAND) or \
+            if self.current_token.type == TokenType.AT:
+                usage = self._parse_template_usage()
+                if usage:
+                    template_usages.append(usage)
+            elif self.current_token.type in (TokenType.DOT, TokenType.HASH, TokenType.AMPERSAND) or \
                (self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type == TokenType.LBRACE):
                 rule, auto_class, auto_id = self._parse_css_rule()
                 if rule: css_rules.append(rule)
@@ -227,7 +240,9 @@ class Parser:
                 self.errors.append(f"Unexpected token in style block: {self.current_token.literal}")
                 self._skip_to_next_statement()
         self._next_token() # Consume '}'
-        return StyleNode(properties=inline_properties, rules=css_rules, auto_classes=auto_classes, auto_ids=auto_ids)
+        return StyleNode(properties=inline_properties, rules=css_rules,
+                         auto_classes=auto_classes, auto_ids=auto_ids,
+                         template_usages=template_usages)
 
     def _parse_inline_css_property(self) -> Union[Tuple[str, list[BaseNode]], Tuple[None, None]]:
         prop_name = self.current_token.literal
@@ -356,3 +371,86 @@ class Parser:
             self.errors.append("Expected '}' to close script block.")
 
         return ScriptNode(attributes=attributes, content=content)
+
+    def _parse_template_usage(self) -> TemplateUsageNode:
+        # Expect @Style MyStyles;
+        self._next_token() # Consume @
+
+        if not self.current_token.type == TokenType.IDENTIFIER:
+            self.errors.append("Expected template type (e.g., Style) after '@'.")
+            return None
+        template_type = self.current_token.literal
+        self._next_token() # Consume type
+
+        if not self.current_token.type == TokenType.IDENTIFIER:
+            self.errors.append("Expected template name after type.")
+            return None
+        template_name = self.current_token.literal
+        self._next_token() # Consume name
+
+        if not self.current_token.type == TokenType.SEMICOLON:
+            self.errors.append("Expected ';' after template usage.")
+        else:
+            self._next_token() # Consume ;
+
+        return TemplateUsageNode(template_type=template_type, template_name=template_name)
+
+    def _parse_template_definition(self) -> TemplateNode:
+        # Current token is LBRACKET
+        self._next_token() # Consume [
+
+        if not (self.current_token.type == TokenType.IDENTIFIER and self.current_token.literal == 'Template'):
+            self.errors.append("Expected 'Template' keyword after '['.")
+            self._skip_to_next_statement()
+            return None
+        self._next_token() # Consume Template
+
+        if self.current_token.type != TokenType.RBRACKET:
+            self.errors.append("Expected ']' after Template keyword.")
+            self._skip_to_next_statement()
+            return None
+        self._next_token() # Consume ]
+
+        if self.current_token.type != TokenType.AT:
+            self.errors.append("Expected '@' after [Template].")
+            self._skip_to_next_statement()
+            return None
+        self._next_token() # Consume @
+
+        if self.current_token.type != TokenType.IDENTIFIER:
+            self.errors.append("Expected template type (e.g., Style) after '@'.")
+            self._skip_to_next_statement()
+            return None
+        template_type = self.current_token.literal
+        self._next_token() # Consume type
+
+        if self.current_token.type != TokenType.IDENTIFIER:
+            self.errors.append("Expected template name after type.")
+            self._skip_to_next_statement()
+            return None
+        template_name = self.current_token.literal
+        self._next_token() # Consume name
+
+        if self.current_token.type != TokenType.LBRACE:
+            self.errors.append("Expected '{' to start template body.")
+            self._skip_to_next_statement()
+            return None
+        self._next_token() # Consume {
+
+        # Parse body
+        properties = {}
+        while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
+            if self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type == TokenType.COLON:
+                prop_name, prop_value = self._parse_inline_css_property()
+                if prop_name:
+                    properties[prop_name] = prop_value
+            else:
+                self.errors.append(f"Unexpected token in template style block: {self.current_token.literal}")
+                self._skip_to_next_statement()
+
+        if self.current_token.type != TokenType.RBRACE:
+            self.errors.append("Expected '}' to close template body.")
+        else:
+            self._next_token() # Consume '}'
+
+        return TemplateNode(template_type=template_type, template_name=template_name, content=properties)

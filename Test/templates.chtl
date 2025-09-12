@@ -1,0 +1,23 @@
+// Test/templates.chtl
+
+[Template] @Style DefaultText
+{
+    color: black;
+    font-size: 16px;
+    line-height: 20px; // Using a px value to avoid float parsing issues for now
+}
+
+div {
+    id: "p1";
+    style {
+        @Style DefaultText;
+    }
+}
+
+span {
+    id: "p2";
+    style {
+        @Style DefaultText;
+        color: blue; // Override the color
+    }
+}

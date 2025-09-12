@@ -123,9 +123,12 @@ class Lexer:
             token_map = {
                 '{': TokenType.LBRACE,
                 '}': TokenType.RBRACE,
+                '[': TokenType.LBRACKET,
+                ']': TokenType.RBRACKET,
                 ':': TokenType.COLON,
                 '=': TokenType.EQUALS,
                 ';': TokenType.SEMICOLON,
+                '@': TokenType.AT,
                 '.': TokenType.DOT,
                 '#': TokenType.HASH,
                 '&': TokenType.AMPERSAND,

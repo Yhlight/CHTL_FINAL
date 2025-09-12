@@ -153,6 +153,32 @@ def run_script_test():
     print("✅ Script test passed.")
     return True
 
+def run_template_test():
+    print("\n--- Running Template Test ---")
+    test_file = os.path.join(os.path.dirname(__file__), 'templates.chtl')
+    output_html = run_compiler_pipeline(test_file, debug=False)
+    if output_html is None: return False
+
+    # Note: style property order is not guaranteed, so we check for parts.
+    if 'id="p1"' not in output_html or 'style=' not in output_html:
+        print("❌ Template test FAILED on div structure.")
+        return False
+
+    if 'color: black' not in output_html or 'font-size: 16px' not in output_html or 'line-height: 20px' not in output_html:
+        print("❌ Template test FAILED on div styles.")
+        return False
+
+    if 'id="p2"' not in output_html or 'style=' not in output_html:
+        print("❌ Template test FAILED on span structure.")
+        return False
+
+    if 'color: blue' not in output_html or 'font-size: 16px' not in output_html or 'line-height: 20px' not in output_html:
+        print("❌ Template test FAILED on span styles (override check).")
+        return False
+
+    print("✅ Template test passed.")
+    return True
+
 if __name__ == "__main__":
     test_results = []
     # Re-enable the basic test now that it's fixed.
@@ -163,6 +189,7 @@ if __name__ == "__main__":
     test_results.append(run_references_test())
     test_results.append(run_circular_reference_test())
     test_results.append(run_script_test())
+    test_results.append(run_template_test())
 
     if all(test_results):
         print("\n✅ All tests passed!")
