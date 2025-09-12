@@ -11,6 +11,7 @@ namespace CHTL {
 struct Value {
     double Dvalue;
     std::string Svalue;
+    std::string stringValue;
 };
 
 using PropertyValue = std::variant<Token, PropertyReferenceNode>;

@@ -93,6 +93,11 @@ Value evaluateCssExpressionToValue(const std::vector<PropertyValue>& parts) {
         }
     }
 
+    // Check for non-expression values
+    if (tokens.size() == 1 && tokens[0].type != TokenType::Number) {
+        return {0, "", tokens[0].lexeme};
+    }
+
     std::stack<Value> values;
     std::stack<Token> ops;
     bool expect_operand = true;
@@ -112,7 +117,7 @@ Value evaluateCssExpressionToValue(const std::vector<PropertyValue>& parts) {
                 unit = "%";
                 i++;
             }
-            values.push({val, unit});
+            values.push({val, unit, ""});
             expect_operand = false;
         } else if (token.type == TokenType::Minus && expect_operand) {
             // Unary minus
@@ -129,7 +134,7 @@ Value evaluateCssExpressionToValue(const std::vector<PropertyValue>& parts) {
                     unit = "%";
                     i++;
                 }
-                values.push({val, unit});
+                values.push({val, unit, ""});
                 expect_operand = false;
             }
         }
@@ -151,10 +156,7 @@ Value evaluateCssExpressionToValue(const std::vector<PropertyValue>& parts) {
             ops.push(token);
             expect_operand = true;
         } else {
-             if (values.size() != 1) {
-                // This is not an expression, just a literal like 'red'
-                throw std::runtime_error("Expression cannot be evaluated to a single value.");
-             }
+             throw std::runtime_error("Invalid token in expression.");
         }
         i++;
     }
@@ -182,6 +184,9 @@ Value evaluateCssExpressionToValue(const std::vector<PropertyValue>& parts) {
 std::string evaluateCssExpression(const std::vector<PropertyValue>& parts) {
     try {
         Value result = evaluateCssExpressionToValue(parts);
+        if (!result.stringValue.empty()) {
+            return result.stringValue;
+        }
         std::stringstream ss;
         ss << result.Dvalue << result.Svalue;
         return ss.str();
@@ -223,9 +228,27 @@ ElementNode* findElementBySelector(const std::string& selector, const std::vecto
             }
         }
     } else {
+        // Automatic inference: tag -> id -> class
+        // Tag
         for (auto* elem : elements) {
             if (elem->tagName_ == selector) {
                 return elem;
+            }
+        }
+        // ID
+        for (auto* elem : elements) {
+            for (const auto& attr : elem->attributes_) {
+                if (attr->key_ == "id" && attr->value_ == selector) {
+                    return elem;
+                }
+            }
+        }
+        // Class
+        for (auto* elem : elements) {
+            for (const auto& attr : elem->attributes_) {
+                if (attr->key_ == "class" && attr->value_ == selector) {
+                    return elem;
+                }
             }
         }
     }
@@ -287,12 +310,10 @@ void CHTLGenerator::firstPassVisitElement(ElementNode* node) {
                 if (has_reference) {
                     unresolved_properties_.push_back({node, prop.first, prop.second});
                 } else {
+                    Value value = evaluateCssExpressionToValue(prop.second);
                     node->computed_styles_[prop.first] = evaluateCssExpression(prop.second);
                     if (!element_id.empty()) {
-                        try {
-                           symbol_table_[element_id][prop.first] = evaluateCssExpressionToValue(prop.second);
-                        } catch (const std::runtime_error& e) {
-                        }
+                       symbol_table_[element_id][prop.first] = value;
                     }
                 }
             }
@@ -313,12 +334,16 @@ void CHTLGenerator::secondPass() {
                     std::string unique_id = getElementUniqueId(target_element);
                     if(symbol_table_.count(unique_id) && symbol_table_.at(unique_id).count(ref_node.property_.lexeme)) {
                         Value resolved_value = symbol_table_.at(unique_id).at(ref_node.property_.lexeme);
-                        resolved_parts.emplace_back(Token{TokenType::Number, std::to_string(resolved_value.Dvalue), 0, 0});
-                        if (!resolved_value.Svalue.empty()) {
-                            if (resolved_value.Svalue == "%") {
-                                 resolved_parts.emplace_back(Token{TokenType::Percent, "%", 0, 0});
-                            } else {
-                                 resolved_parts.emplace_back(Token{TokenType::Identifier, resolved_value.Svalue, 0, 0});
+                        if (!resolved_value.stringValue.empty()) {
+                            resolved_parts.emplace_back(Token{TokenType::UnquotedLiteral, resolved_value.stringValue, 0, 0});
+                        } else {
+                            resolved_parts.emplace_back(Token{TokenType::Number, std::to_string(resolved_value.Dvalue), 0, 0});
+                            if (!resolved_value.Svalue.empty()) {
+                                if (resolved_value.Svalue == "%") {
+                                     resolved_parts.emplace_back(Token{TokenType::Percent, "%", 0, 0});
+                                } else {
+                                     resolved_parts.emplace_back(Token{TokenType::Identifier, resolved_value.Svalue, 0, 0});
+                                }
                             }
                         }
                     } else {
