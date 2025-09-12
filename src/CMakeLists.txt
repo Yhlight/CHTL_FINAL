@@ -4,6 +4,8 @@ add_library(CHTLCore STATIC
     CHTLContext.cpp
     Token.cpp
     CHTLLexer.cpp
+    CHTLParser.cpp
+    CHTLGenerator.cpp
     
     # 节点系统
     CHTLNode/BaseNode.cpp

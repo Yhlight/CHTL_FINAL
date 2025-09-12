@@ -199,6 +199,30 @@ CHTLContext.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLContext.cpp.s
 .PHONY : CHTLContext.cpp.s
 
+CHTLGenerator.o: CHTLGenerator.cpp.o
+.PHONY : CHTLGenerator.o
+
+# target to build an object file
+CHTLGenerator.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLGenerator.cpp.o
+.PHONY : CHTLGenerator.cpp.o
+
+CHTLGenerator.i: CHTLGenerator.cpp.i
+.PHONY : CHTLGenerator.i
+
+# target to preprocess a source file
+CHTLGenerator.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLGenerator.cpp.i
+.PHONY : CHTLGenerator.cpp.i
+
+CHTLGenerator.s: CHTLGenerator.cpp.s
+.PHONY : CHTLGenerator.s
+
+# target to generate assembly for a file
+CHTLGenerator.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLGenerator.cpp.s
+.PHONY : CHTLGenerator.cpp.s
+
 CHTLLexer.o: CHTLLexer.cpp.o
 .PHONY : CHTLLexer.o
 
@@ -295,6 +319,30 @@ CHTLNode/TextNode.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/TextNode.cpp.s
 .PHONY : CHTLNode/TextNode.cpp.s
 
+CHTLParser.o: CHTLParser.cpp.o
+.PHONY : CHTLParser.o
+
+# target to build an object file
+CHTLParser.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.o
+.PHONY : CHTLParser.cpp.o
+
+CHTLParser.i: CHTLParser.cpp.i
+.PHONY : CHTLParser.i
+
+# target to preprocess a source file
+CHTLParser.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.i
+.PHONY : CHTLParser.cpp.i
+
+CHTLParser.s: CHTLParser.cpp.s
+.PHONY : CHTLParser.s
+
+# target to generate assembly for a file
+CHTLParser.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.s
+.PHONY : CHTLParser.cpp.s
+
 Scanner/UnifiedScanner.o: Scanner/UnifiedScanner.cpp.o
 .PHONY : Scanner/UnifiedScanner.o
 
@@ -359,6 +407,9 @@ help:
 	@echo "... CHTLContext.o"
 	@echo "... CHTLContext.i"
 	@echo "... CHTLContext.s"
+	@echo "... CHTLGenerator.o"
+	@echo "... CHTLGenerator.i"
+	@echo "... CHTLGenerator.s"
 	@echo "... CHTLLexer.o"
 	@echo "... CHTLLexer.i"
 	@echo "... CHTLLexer.s"
@@ -371,6 +422,9 @@ help:
 	@echo "... CHTLNode/TextNode.o"
 	@echo "... CHTLNode/TextNode.i"
 	@echo "... CHTLNode/TextNode.s"
+	@echo "... CHTLParser.o"
+	@echo "... CHTLParser.i"
+	@echo "... CHTLParser.s"
 	@echo "... Scanner/UnifiedScanner.o"
 	@echo "... Scanner/UnifiedScanner.i"
 	@echo "... Scanner/UnifiedScanner.s"

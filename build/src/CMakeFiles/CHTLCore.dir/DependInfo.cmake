@@ -9,10 +9,12 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspace/src/CHTLContext.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLContext.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLContext.cpp.o.d"
+  "/workspace/src/CHTLGenerator.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLGenerator.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLGenerator.cpp.o.d"
   "/workspace/src/CHTLLexer.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLLexer.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLLexer.cpp.o.d"
   "/workspace/src/CHTLNode/BaseNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLNode/BaseNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLNode/BaseNode.cpp.o.d"
   "/workspace/src/CHTLNode/ElementNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLNode/ElementNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLNode/ElementNode.cpp.o.d"
   "/workspace/src/CHTLNode/TextNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLNode/TextNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLNode/TextNode.cpp.o.d"
+  "/workspace/src/CHTLParser.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.o.d"
   "/workspace/src/Scanner/UnifiedScanner.cpp" "src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o.d"
   "/workspace/src/Token.cpp" "src/CMakeFiles/CHTLCore.dir/Token.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/Token.cpp.o.d"
   )

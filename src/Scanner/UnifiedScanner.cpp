@@ -160,7 +160,23 @@ std::vector<std::pair<size_t, CodeFragmentType>> UnifiedScanner::preScan(const s
             continue;
         }
         
-        // 检查CHTL语法
+        // 检查CHTL语法 - 检查HTML元素
+        if (std::isalpha(sourceCode[pos])) {
+            // 检查是否为HTML元素名
+            size_t startPos = pos;
+            while (pos < sourceCode.length() && (std::isalnum(sourceCode[pos]) || sourceCode[pos] == '-')) {
+                pos++;
+            }
+            
+            // 检查后面是否有 {
+            if (pos < sourceCode.length() && sourceCode[pos] == '{') {
+                boundaries.emplace_back(startPos, CodeFragmentType::CHTL);
+                continue;
+            }
+            pos = startPos; // 回退
+        }
+        
+        // 检查CHTL关键字语法
         if (sourceCode[pos] == '[') {
             // 检查是否为CHTL关键字
             size_t endPos = pos;

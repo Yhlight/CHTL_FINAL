@@ -125,7 +125,7 @@ public:
      * @brief 接受访问者
      * @param visitor 访问者
      */
-    void accept(NodeVisitor& visitor) override;
+    void accept(NodeVisitor& visitor) override {}
 
 private:
     std::string m_tagName;
