@@ -13,7 +13,7 @@ ImportNode::ImportNode(ImportType type, const std::string& path)
       import_mode_(ImportMode::EXACT) {
 }
 
-ImportNode::ImportType ImportNode::getImportType() const {
+ImportType ImportNode::getImportType() const {
     return import_type_;
 }
 
@@ -29,7 +29,7 @@ void ImportNode::setImportPath(const std::string& path) {
     import_path_ = path;
 }
 
-ImportNode::ImportMode ImportNode::getImportMode() const {
+ImportMode ImportNode::getImportMode() const {
     return import_mode_;
 }
 

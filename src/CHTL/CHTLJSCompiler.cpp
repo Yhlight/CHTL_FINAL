@@ -117,7 +117,7 @@ CHTLJSEnhancedSelector::CHTLJSEnhancedSelector() = default;
 
 CHTLJSEnhancedSelector::~CHTLJSEnhancedSelector() = default;
 
-CHTLJSEnhancedSelector::SelectorType CHTLJSEnhancedSelector::parseSelector(const std::string& selector) {
+CHTLJSEnhancedSelector::SelectorType CHTLJSEnhancedSelector::parseSelector(const std::string& selector) const {
     if (selector.empty()) {
         return SelectorType::TAG;
     }
@@ -949,19 +949,19 @@ std::string CHTLJSCompiler::parseEnhancedSelector(const std::string& content) co
 }
 
 std::string CHTLJSCompiler::parseAnimationBlock(const std::string& content) const {
-    AnimationSystem::AnimationConfig config;
+    CHTLJSAnimationSystem::AnimationConfig config;
     // 解析动画配置
     return animation_system_.generateAnimation(config);
 }
 
 std::string CHTLJSCompiler::parseRouteBlock(const std::string& content) const {
-    RoutingSystem::RouteConfig config;
+    CHTLJSRoutingSystem::RouteConfig config;
     // 解析路由配置
     return routing_system_.generateRouteHandler(config);
 }
 
 std::string CHTLJSCompiler::parseReactiveValue(const std::string& content) const {
-    ReactiveSystem::ReactiveValue value;
+    CHTLJSReactiveSystem::ReactiveValue value;
     // 解析响应式值
     return reactive_system_.generateReactiveValue(value);
 }
@@ -982,7 +982,7 @@ std::string CHTLJSCompiler::generateEnhancedSelectorCode(const std::string& sele
 }
 
 std::string CHTLJSCompiler::generateAnimationCode(const std::string& animation) const {
-    return animation_system_.generateAnimationFunction(AnimationSystem::AnimationConfig());
+    return animation_system_.generateAnimationFunction(CHTLJSAnimationSystem::AnimationConfig());
 }
 
 std::string CHTLJSCompiler::generateRouteCode(const std::string& route) const {

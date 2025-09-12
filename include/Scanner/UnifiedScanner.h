@@ -29,6 +29,12 @@ struct CodeFragment {
         : type(t), content(c), line(l), column(col), position(pos) {}
 };
 
+struct ScanResult {
+    bool success;
+    std::vector<CodeFragment> fragments;
+    std::vector<std::string> errors;
+};
+
 class UnifiedScanner {
 public:
     UnifiedScanner();
@@ -38,7 +44,7 @@ public:
     void setInput(std::istream& input);
     void setInput(const std::string& file_path, bool is_file = true);
     
-    std::vector<CodeFragment> scan();
+    ScanResult scan(const std::string& code);
     CodeFragment scanNextFragment();
     
     bool hasMoreTokens() const;
@@ -84,8 +90,19 @@ private:
     bool debug_mode_;
     std::vector<std::string> errors_;
     std::map<std::string, std::vector<std::string>> boundaries_;
+    std::map<FragmentType, int> placeholder_counters_;
     
     void initializeBoundaries();
+    
+    // 边界查找方法
+    size_t findCHTLBoundary(const std::string& code, size_t start_pos);
+    size_t findCHTLJSBoundary(const std::string& code, size_t start_pos);
+    size_t findCSSBoundary(const std::string& code, size_t start_pos);
+    size_t findJSBoundary(const std::string& code, size_t start_pos);
+    
+    // 验证和工具方法
+    bool validateCodeFragment(const std::string& content, FragmentType type);
+    std::string getFragmentTypeName(FragmentType type);
     
     CodeFragment scanCHTLFragment();
     CodeFragment scanCHTLJSFragment();

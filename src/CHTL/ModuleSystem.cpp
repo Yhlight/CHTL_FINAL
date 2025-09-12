@@ -192,35 +192,35 @@ bool CMODModule::parseInfoBlock(const std::string& content) {
         std::string infoContent = match[1].str();
         
         // 解析名称
-        std::regex nameRegex(R"(name\s*:\s*"([^"]+)")");
+        std::regex nameRegex("name\\s*:\\s*\"([^\"]+)\"");
         std::smatch nameMatch;
         if (std::regex_search(infoContent, nameMatch, nameRegex)) {
             info_.name = nameMatch[1].str();
         }
         
         // 解析版本
-        std::regex versionRegex(R"(version\s*:\s*"([^"]+)")");
+        std::regex versionRegex("version\\s*:\\s*\"([^\"]+)\"");
         std::smatch versionMatch;
         if (std::regex_search(infoContent, versionMatch, versionRegex)) {
             info_.version = versionMatch[1].str();
         }
         
         // 解析描述
-        std::regex descRegex(R"(description\s*:\s*"([^"]+)")");
+        std::regex descRegex("description\\s*:\\s*\"([^\"]+)\"");
         std::smatch descMatch;
         if (std::regex_search(infoContent, descMatch, descRegex)) {
             info_.description = descMatch[1].str();
         }
         
         // 解析作者
-        std::regex authorRegex(R"(author\s*:\s*"([^"]+)")");
+        std::regex authorRegex("author\\s*:\\s*\"([^\"]+)\"");
         std::smatch authorMatch;
         if (std::regex_search(infoContent, authorMatch, authorRegex)) {
             info_.author = authorMatch[1].str();
         }
         
         // 解析许可证
-        std::regex licenseRegex(R"(license\s*:\s*"([^"]+)")");
+        std::regex licenseRegex("license\\s*:\\s*\"([^\"]+)\"");
         std::smatch licenseMatch;
         if (std::regex_search(infoContent, licenseMatch, licenseRegex)) {
             info_.license = licenseMatch[1].str();
@@ -240,17 +240,17 @@ bool CMODModule::parseExportBlock(const std::string& content) {
         std::string exportContent = match[1].str();
         
         // 解析导出项
-        std::regex itemRegex(R"((\w+)\s*:\s*"([^"]+)")");
-        std::sregex_iterator next(exportContent.begin(), exportContent.end(), itemRegex);
+        std::regex itemRegex("(\\w+)\\s*:\\s*\"([^\"]+)\"");
+        std::sregex_iterator iter(exportContent.begin(), exportContent.end(), itemRegex);
         std::sregex_iterator end;
         
-        while (next != end) {
-            std::smatch itemMatch = *next;
+        while (iter != end) {
+            std::smatch itemMatch = *iter;
             std::string name = itemMatch[1].str();
             std::string type = itemMatch[2].str();
             
             exports_.emplace_back(name, type, nullptr);
-            next++;
+            ++iter;
         }
         
         return true;
@@ -583,14 +583,14 @@ bool CJMODModule::parseInfoBlock(const std::string& content) {
         std::string infoContent = match[1].str();
         
         // 解析名称
-        std::regex nameRegex(R"(name\s*:\s*"([^"]+)")");
+        std::regex nameRegex("name\\s*:\\s*\"([^\"]+)\"");
         std::smatch nameMatch;
         if (std::regex_search(infoContent, nameMatch, nameRegex)) {
             info_.name = nameMatch[1].str();
         }
         
         // 解析版本
-        std::regex versionRegex(R"(version\s*:\s*"([^"]+)")");
+        std::regex versionRegex("version\\s*:\\s*\"([^\"]+)\"");
         std::smatch versionMatch;
         if (std::regex_search(infoContent, versionMatch, versionRegex)) {
             info_.version = versionMatch[1].str();
@@ -613,8 +613,8 @@ bool CJMODModule::parseFunctionBlock(const std::string& content) {
         std::string body = match[2].str();
         
         // 解析语法和实现
-        std::regex syntaxRegex(R"(syntax\s*:\s*"([^"]+)")");
-        std::regex implRegex(R"(implementation\s*:\s*"([^"]+)")");
+        std::regex syntaxRegex("syntax\\s*:\\s*\"([^\"]+)\"");
+        std::regex implRegex("implementation\\s*:\\s*\"([^\"]+)\"");
         
         std::smatch syntaxMatch, implMatch;
         std::string syntax, implementation;
@@ -1138,7 +1138,7 @@ ModuleInfo ModulePackager::getPackageInfo(const std::string& packagePath) const 
             std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
             
             // 解析包信息
-            std::regex nameRegex(R"(name\s*:\s*"([^"]+)")");
+            std::regex nameRegex("name\\s*:\\s*\"([^\"]+)\"");
             std::smatch match;
             if (std::regex_search(content, match, nameRegex)) {
                 info.name = match[1].str();

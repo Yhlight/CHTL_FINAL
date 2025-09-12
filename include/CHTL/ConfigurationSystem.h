@@ -247,7 +247,7 @@ public:
     std::string generateConfigurationString() const;
     
     // 验证
-    bool validate() const;
+    bool validate() const override;
     std::vector<std::string> getValidationErrors() const;
     
 private:

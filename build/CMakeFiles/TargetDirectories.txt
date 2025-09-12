@@ -10,6 +10,7 @@
 /workspace/build/CMakeFiles/module_system_compiler.dir
 /workspace/build/CMakeFiles/error_handler.dir
 /workspace/build/CMakeFiles/test_suite.dir
+/workspace/build/CMakeFiles/unified_chtl_compiler.dir
 /workspace/build/CMakeFiles/test_compiler.dir
 /workspace/build/CMakeFiles/test.dir
 /workspace/build/CMakeFiles/edit_cache.dir

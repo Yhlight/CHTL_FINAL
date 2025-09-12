@@ -328,6 +328,19 @@ test_suite/fast:
 .PHONY : test_suite/fast
 
 #=============================================================================
+# Target rules for targets named unified_chtl_compiler
+
+# Build rule for target.
+unified_chtl_compiler: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 unified_chtl_compiler
+.PHONY : unified_chtl_compiler
+
+# fast build rule for target.
+unified_chtl_compiler/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/unified_chtl_compiler.dir/build.make CMakeFiles/unified_chtl_compiler.dir/build
+.PHONY : unified_chtl_compiler/fast
+
+#=============================================================================
 # Target rules for targets named test_compiler
 
 # Build rule for target.
@@ -531,6 +544,30 @@ src/CHTL/CompilationMonitor.s: src/CHTL/CompilationMonitor.cpp.s
 src/CHTL/CompilationMonitor.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL/CompilationMonitor.cpp.s
 .PHONY : src/CHTL/CompilationMonitor.cpp.s
+
+src/CHTL/CompilerDispatcher.o: src/CHTL/CompilerDispatcher.cpp.o
+.PHONY : src/CHTL/CompilerDispatcher.o
+
+# target to build an object file
+src/CHTL/CompilerDispatcher.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL/CompilerDispatcher.cpp.o
+.PHONY : src/CHTL/CompilerDispatcher.cpp.o
+
+src/CHTL/CompilerDispatcher.i: src/CHTL/CompilerDispatcher.cpp.i
+.PHONY : src/CHTL/CompilerDispatcher.i
+
+# target to preprocess a source file
+src/CHTL/CompilerDispatcher.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL/CompilerDispatcher.cpp.i
+.PHONY : src/CHTL/CompilerDispatcher.cpp.i
+
+src/CHTL/CompilerDispatcher.s: src/CHTL/CompilerDispatcher.cpp.s
+.PHONY : src/CHTL/CompilerDispatcher.s
+
+# target to generate assembly for a file
+src/CHTL/CompilerDispatcher.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL/CompilerDispatcher.cpp.s
+.PHONY : src/CHTL/CompilerDispatcher.cpp.s
 
 src/CHTL/ConcreteNodes.o: src/CHTL/ConcreteNodes.cpp.o
 .PHONY : src/CHTL/ConcreteNodes.o
@@ -1108,6 +1145,30 @@ src/simple_chtl_compiler.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/simple_chtl_compiler.dir/build.make CMakeFiles/simple_chtl_compiler.dir/src/simple_chtl_compiler.cpp.s
 .PHONY : src/simple_chtl_compiler.cpp.s
 
+src/unified_chtl_compiler.o: src/unified_chtl_compiler.cpp.o
+.PHONY : src/unified_chtl_compiler.o
+
+# target to build an object file
+src/unified_chtl_compiler.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/unified_chtl_compiler.dir/build.make CMakeFiles/unified_chtl_compiler.dir/src/unified_chtl_compiler.cpp.o
+.PHONY : src/unified_chtl_compiler.cpp.o
+
+src/unified_chtl_compiler.i: src/unified_chtl_compiler.cpp.i
+.PHONY : src/unified_chtl_compiler.i
+
+# target to preprocess a source file
+src/unified_chtl_compiler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/unified_chtl_compiler.dir/build.make CMakeFiles/unified_chtl_compiler.dir/src/unified_chtl_compiler.cpp.i
+.PHONY : src/unified_chtl_compiler.cpp.i
+
+src/unified_chtl_compiler.s: src/unified_chtl_compiler.cpp.s
+.PHONY : src/unified_chtl_compiler.s
+
+# target to generate assembly for a file
+src/unified_chtl_compiler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/unified_chtl_compiler.dir/build.make CMakeFiles/unified_chtl_compiler.dir/src/unified_chtl_compiler.cpp.s
+.PHONY : src/unified_chtl_compiler.cpp.s
+
 src/working_chtl_compiler.o: src/working_chtl_compiler.cpp.o
 .PHONY : src/working_chtl_compiler.o
 
@@ -1205,6 +1266,7 @@ help:
 	@echo "... simple_chtl_compiler"
 	@echo "... test_compiler"
 	@echo "... test_suite"
+	@echo "... unified_chtl_compiler"
 	@echo "... working_chtl_compiler"
 	@echo "... src/CHTL/CHTLContext.o"
 	@echo "... src/CHTL/CHTLContext.i"
@@ -1230,6 +1292,9 @@ help:
 	@echo "... src/CHTL/CompilationMonitor.o"
 	@echo "... src/CHTL/CompilationMonitor.i"
 	@echo "... src/CHTL/CompilationMonitor.s"
+	@echo "... src/CHTL/CompilerDispatcher.o"
+	@echo "... src/CHTL/CompilerDispatcher.i"
+	@echo "... src/CHTL/CompilerDispatcher.s"
 	@echo "... src/CHTL/ConcreteNodes.o"
 	@echo "... src/CHTL/ConcreteNodes.i"
 	@echo "... src/CHTL/ConcreteNodes.s"
@@ -1302,6 +1367,9 @@ help:
 	@echo "... src/simple_chtl_compiler.o"
 	@echo "... src/simple_chtl_compiler.i"
 	@echo "... src/simple_chtl_compiler.s"
+	@echo "... src/unified_chtl_compiler.o"
+	@echo "... src/unified_chtl_compiler.i"
+	@echo "... src/unified_chtl_compiler.s"
 	@echo "... src/working_chtl_compiler.o"
 	@echo "... src/working_chtl_compiler.i"
 	@echo "... src/working_chtl_compiler.s"

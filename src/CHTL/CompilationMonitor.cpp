@@ -101,12 +101,12 @@ bool MemoryMonitor::isMemoryUsageExceeded() const {
 }
 
 void MemoryMonitor::updateConfig(const MemoryMonitorConfig& config) {
-    std::lock_guard<std::mutex> lock(config_mutex_);
+    std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(config_mutex_));
     config_ = config;
 }
 
 MemoryMonitorConfig MemoryMonitor::getConfig() const {
-    std::lock_guard<std::mutex> lock(config_mutex_);
+    std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(config_mutex_));
     return config_;
 }
 
@@ -311,12 +311,12 @@ bool TimeMonitor::isTimeExceeded() const {
 }
 
 void TimeMonitor::updateConfig(const TimeMonitorConfig& config) {
-    std::lock_guard<std::mutex> lock(config_mutex_);
+    std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(config_mutex_));
     config_ = config;
 }
 
 TimeMonitorConfig TimeMonitor::getConfig() const {
-    std::lock_guard<std::mutex> lock(config_mutex_);
+    std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(config_mutex_));
     return config_;
 }
 
@@ -520,14 +520,14 @@ void CompilationMonitor::resetStats() {
 }
 
 void CompilationMonitor::updateConfig(const CompilationMonitorConfig& config) {
-    std::lock_guard<std::mutex> lock(config_mutex_);
+    std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(config_mutex_));
     config_ = config;
     memory_monitor_->updateConfig(config.memory_config);
     time_monitor_->updateConfig(config.time_config);
 }
 
 CompilationMonitorConfig CompilationMonitor::getConfig() const {
-    std::lock_guard<std::mutex> lock(config_mutex_);
+    std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(config_mutex_));
     return config_;
 }
 

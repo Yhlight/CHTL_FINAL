@@ -10,7 +10,7 @@ TemplateNode::TemplateNode(TemplateType type, const std::string& name)
     : CHTLNode(NodeType::TEMPLATE), template_type_(type), template_name_(name) {
 }
 
-TemplateNode::TemplateType TemplateNode::getTemplateType() const {
+TemplateType TemplateNode::getTemplateType() const {
     return template_type_;
 }
 
@@ -97,6 +97,10 @@ bool StyleTemplateNode::hasCSSProperty(const std::string& property) const {
 
 void StyleTemplateNode::removeCSSProperty(const std::string& property) {
     css_properties_.erase(property);
+}
+
+std::unordered_map<std::string, std::string> StyleTemplateNode::getCSSProperties() const {
+    return css_properties_;
 }
 
 void StyleTemplateNode::addSelector(const std::string& selector) {
@@ -467,7 +471,8 @@ void TemplateManager::mergeTemplateProperties(std::shared_ptr<TemplateNode> base
         
         if (baseStyle && derivedStyle) {
             // 合并CSS属性（derived覆盖base）
-            for (const auto& prop : baseStyle->css_properties_) {
+            auto baseProps = baseStyle->getCSSProperties();
+            for (const auto& prop : baseProps) {
                 if (!derivedStyle->hasCSSProperty(prop.first)) {
                     derivedStyle->addCSSProperty(prop.first, prop.second);
                 }

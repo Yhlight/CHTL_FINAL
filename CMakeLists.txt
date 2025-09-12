@@ -45,6 +45,7 @@ set(CHTL_SOURCES
     src/CHTL/CompilationMonitor.cpp
     src/CHTL/VSCodeExtension.cpp
     src/CHTL/ConcreteNodes.cpp
+    src/CHTL/CompilerDispatcher.cpp
     
     src/CHTLJS/CJMODSystem.cpp
     
@@ -74,6 +75,7 @@ set(CHTL_HEADERS
     include/CHTL/WildcardImport.h
     include/CHTL/CJMODAPI.h
     include/CHTL/ConcreteNodes.h
+    include/CHTL/CompilerDispatcher.h
     include/CHTLJS/CHTLJSContext.h
     include/CHTLJS/CJMODSystem.h
     include/Scanner/UnifiedScanner.h
@@ -111,6 +113,9 @@ add_executable(module_system_compiler src/module_system_compiler.cpp)
 add_executable(error_handler src/error_handler.cpp)
 
 add_executable(test_suite test/test_suite.cpp)
+
+add_executable(unified_chtl_compiler src/unified_chtl_compiler.cpp)
+target_link_libraries(unified_chtl_compiler chtl_lib)
 
 # 创建测试程序
 add_executable(test_compiler test_compiler.cpp)

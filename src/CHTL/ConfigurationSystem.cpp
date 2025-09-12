@@ -272,7 +272,7 @@ bool ConfigurationGroup::validateGroupOptions() const {
 }
 
 // ConfigurationNode 实现
-ConfigurationNode::ConfigurationNode(const std::string& name) : configuration_name_(name), has_name_configuration_(false) {
+ConfigurationNode::ConfigurationNode(const std::string& name) : CHTLNode(NodeType::CONFIG), configuration_name_(name), has_name_configuration_(false) {
 }
 
 ConfigurationNode::~ConfigurationNode() = default;

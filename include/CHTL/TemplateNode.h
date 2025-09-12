@@ -63,6 +63,7 @@ public:
     std::string getCSSProperty(const std::string& property) const;
     bool hasCSSProperty(const std::string& property) const;
     void removeCSSProperty(const std::string& property);
+    std::unordered_map<std::string, std::string> getCSSProperties() const;
     
     // 选择器管理
     void addSelector(const std::string& selector);

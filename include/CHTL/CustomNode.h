@@ -150,6 +150,9 @@ public:
     // 应用自定义到元素节点
     void applyToElementNode(std::shared_ptr<ElementNode> elementNode) const;
     
+    // 应用特例化
+    void applySpecializations();
+    
     std::shared_ptr<CHTLNode> clone() const override;
     bool validate() const override;
     std::string generateHTML() const override;
@@ -159,7 +162,6 @@ private:
     
     // 辅助函数
     size_t findElementIndex(const std::string& selector) const;
-    void applySpecializations();
 };
 
 /**

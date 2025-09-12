@@ -34,9 +34,10 @@ public:
     // 节点功能
     std::string generateHTML() const override;
     std::string generateUseStatement() const;
+    std::shared_ptr<CHTLNode> clone() const override;
     
     // 验证
-    bool validate() const;
+    bool validate() const override;
     std::vector<std::string> getValidationErrors() const;
     
 private:

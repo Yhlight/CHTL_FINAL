@@ -10,7 +10,7 @@ CustomNode::CustomNode(CustomType type, const std::string& name)
     : CHTLNode(NodeType::CUSTOM), custom_type_(type), custom_name_(name) {
 }
 
-CustomNode::CustomType CustomNode::getCustomType() const {
+CustomType CustomNode::getCustomType() const {
     return custom_type_;
 }
 
@@ -475,11 +475,6 @@ std::shared_ptr<CHTLNode> CustomVarNode::clone() const {
     // 复制特例化
     for (const auto& spec : specializations_) {
         cloned->specializeVariable(spec.first, spec.second);
-    }
-    
-    // 复制特例化操作
-    for (const auto& spec : specializations_) {
-        cloned->addSpecialization(spec);
     }
     
     // 复制继承关系

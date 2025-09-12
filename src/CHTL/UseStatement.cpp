@@ -8,10 +8,14 @@ namespace CHTL {
 
 // UseStatement 实现
 UseStatement::UseStatement(UseStatementType type, const std::string& value) 
-    : type_(type), value_(value) {
+    : CHTLNode(NodeType::CONFIG), type_(type), value_(value) {
 }
 
 UseStatement::~UseStatement() = default;
+
+std::shared_ptr<CHTLNode> UseStatement::clone() const {
+    return std::make_shared<UseStatement>(type_, value_);
+}
 
 UseStatementType UseStatement::getType() const {
     return type_;

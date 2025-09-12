@@ -64,7 +64,7 @@ public:
     };
     
     // 选择器解析
-    SelectorType parseSelector(const std::string& selector);
+    SelectorType parseSelector(const std::string& selector) const;
     std::string generateJavaScript(const std::string& selector) const;
     
     // 选择器验证

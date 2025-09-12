@@ -99,6 +99,14 @@ public:
     
     // 清理
     void clear();
+    
+    // 文件生成
+    std::string generateInfoBlock() const;
+    std::string generateExportBlock() const;
+    std::string generateTemplateBlock() const;
+    std::string generateCustomBlock() const;
+    std::string generateOriginBlock() const;
+    std::string generateConfigurationBlock() const;
 
 private:
     ModuleInfo info_;
@@ -115,14 +123,6 @@ private:
     bool parseCustomBlock(const std::string& content);
     bool parseOriginBlock(const std::string& content);
     bool parseConfigurationBlock(const std::string& content);
-    
-    // 文件生成
-    std::string generateInfoBlock() const;
-    std::string generateExportBlock() const;
-    std::string generateTemplateBlock() const;
-    std::string generateCustomBlock() const;
-    std::string generateOriginBlock() const;
-    std::string generateConfigurationBlock() const;
 };
 
 /**
@@ -160,6 +160,11 @@ public:
     
     // 清理
     void clear();
+    
+    // 文件生成
+    std::string generateInfoBlock() const;
+    std::string generateFunctionBlock() const;
+    std::string generateVirtualObjectBlock() const;
 
 private:
     ModuleInfo info_;
@@ -170,11 +175,6 @@ private:
     bool parseInfoBlock(const std::string& content);
     bool parseFunctionBlock(const std::string& content);
     bool parseVirtualObjectBlock(const std::string& content);
-    
-    // 文件生成
-    std::string generateInfoBlock() const;
-    std::string generateFunctionBlock() const;
-    std::string generateVirtualObjectBlock() const;
 };
 
 /**

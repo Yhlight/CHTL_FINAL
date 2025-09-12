@@ -245,7 +245,7 @@ std::string WideStrictProcessor::processWide(const std::string& content) const {
     }
     
     std::string result = content;
-    auto boundaries = detector_.findBoundaries();
+    auto boundaries = detector_.findBoundaries(content);
     
     for (const auto& boundary : boundaries) {
         std::string block = content.substr(boundary.first, boundary.second - boundary.first + 1);
@@ -258,7 +258,7 @@ std::string WideStrictProcessor::processWide(const std::string& content) const {
 
 std::vector<std::string> WideStrictProcessor::extractWideBlocks(const std::string& content) const {
     std::vector<std::string> blocks;
-    auto boundaries = detector_.findBoundaries();
+    auto boundaries = detector_.findBoundaries(content);
     
     for (const auto& boundary : boundaries) {
         std::string block = content.substr(boundary.first, boundary.second - boundary.first + 1);
@@ -274,7 +274,7 @@ std::string WideStrictProcessor::processStrict(const std::string& content) const
     }
     
     std::string result = content;
-    auto boundaries = detector_.findBoundaries();
+    auto boundaries = detector_.findBoundaries(content);
     
     for (const auto& boundary : boundaries) {
         std::string block = content.substr(boundary.first, boundary.second - boundary.first + 1);
@@ -287,7 +287,7 @@ std::string WideStrictProcessor::processStrict(const std::string& content) const
 
 std::vector<std::string> WideStrictProcessor::extractStrictBlocks(const std::string& content) const {
     std::vector<std::string> blocks;
-    auto boundaries = detector_.findBoundaries();
+    auto boundaries = detector_.findBoundaries(content);
     
     for (const auto& boundary : boundaries) {
         std::string block = content.substr(boundary.first, boundary.second - boundary.first + 1);

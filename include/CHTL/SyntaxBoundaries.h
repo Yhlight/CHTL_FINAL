@@ -58,6 +58,7 @@ public:
     void addRule(const SyntaxBoundaryRule& rule);
     void removeRule(SyntaxBoundaryType type);
     const SyntaxBoundaryRule& getRule(SyntaxBoundaryType type) const;
+    const std::map<SyntaxBoundaryType, SyntaxBoundaryRule>& getRules() const;
     
     // 清理
     void clear();

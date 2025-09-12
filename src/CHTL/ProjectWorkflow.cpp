@@ -24,8 +24,8 @@ void CompilerDispatcher::registerCSSCompiler(const std::string& name, std::funct
     css_compilers_[name] = compiler;
 }
 
-void CompilerDispatcher::registerJSCompiler(const std::string& name, std::function<std::string(const std::string&)> compiler) {
-    js_compilers_[name] = compiler;
+void CompilerDispatcher::registerJSFunctionCompiler(const std::string& name, std::function<std::string(const std::string&)> compiler) {
+    js_function_compilers_[name] = compiler;
 }
 
 std::shared_ptr<CHTLCompiler> CompilerDispatcher::getCompiler(const std::string& name) const {
@@ -52,9 +52,9 @@ std::function<std::string(const std::string&)> CompilerDispatcher::getCSSCompile
     return nullptr;
 }
 
-std::function<std::string(const std::string&)> CompilerDispatcher::getJSCompiler(const std::string& name) const {
-    auto it = js_compilers_.find(name);
-    if (it != js_compilers_.end()) {
+std::function<std::string(const std::string&)> CompilerDispatcher::getJSFunctionCompiler(const std::string& name) const {
+    auto it = js_function_compilers_.find(name);
+    if (it != js_function_compilers_.end()) {
         return it->second;
     }
     return nullptr;
@@ -77,7 +77,7 @@ std::string CompilerDispatcher::dispatchCompilation(const std::string& content, 
             return compiler(content);
         }
     } else if (type == "js") {
-        auto compiler = getJSCompiler("default");
+        auto compiler = getJSFunctionCompiler("default");
         if (compiler) {
             return compiler(content);
         }
@@ -121,9 +121,9 @@ std::vector<std::string> CompilerDispatcher::getCSSCompilerNames() const {
     return names;
 }
 
-std::vector<std::string> CompilerDispatcher::getJSCompilerNames() const {
+std::vector<std::string> CompilerDispatcher::getJSFunctionCompilerNames() const {
     std::vector<std::string> names;
-    for (const auto& pair : js_compilers_) {
+    for (const auto& pair : js_function_compilers_) {
         names.push_back(pair.first);
     }
     return names;
@@ -133,7 +133,7 @@ void CompilerDispatcher::clear() {
     clearCompilers();
     clearJSCompilers();
     clearCSSCompilers();
-    clearJSCompilers();
+    clearJSFunctionCompilers();
 }
 
 void CompilerDispatcher::clearCompilers() {
@@ -148,8 +148,8 @@ void CompilerDispatcher::clearCSSCompilers() {
     css_compilers_.clear();
 }
 
-void CompilerDispatcher::clearJSCompilers() {
-    js_compilers_.clear();
+void CompilerDispatcher::clearJSFunctionCompilers() {
+    js_function_compilers_.clear();
 }
 
 std::string CompilerDispatcher::determineCompilerType(const std::string& content) const {
@@ -430,7 +430,8 @@ std::string ProjectWorkflow::scanCode(const std::string& content) {
         return content;
     }
     
-    return scanner_->scan(content);
+    auto result = scanner_->scan(content);
+    return result.success ? "Scan successful" : "Scan failed";
 }
 
 std::string ProjectWorkflow::compileCode(const std::string& content, const std::string& type) {
@@ -539,7 +540,8 @@ std::string ProjectWorkflow::processScanning(const std::string& content) const {
         return content;
     }
     
-    return scanner_->scan(content);
+    auto result = scanner_->scan(content);
+    return result.success ? "Scan successful" : "Scan failed";
 }
 
 std::string ProjectWorkflow::processCompilation(const std::string& content, const std::string& type) const {
