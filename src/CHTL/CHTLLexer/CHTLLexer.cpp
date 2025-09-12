@@ -208,6 +208,11 @@ void CHTLLexer::number() {
         while (isDigit(peek())) advance();
     }
 
+    // Look for a unit part (e.g., px, em, %)
+    while (isAlpha(peek()) || peek() == '%') {
+        advance();
+    }
+
     addToken(TokenType::Number, source_.substr(start_, current_ - start_));
 }
 

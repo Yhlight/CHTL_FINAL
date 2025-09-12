@@ -1,0 +1,64 @@
+html {
+    head {
+        title {
+            text: "CHTL CSS Calculation Test";
+        }
+    }
+    body {
+        -- Simple addition
+        div {
+            style {
+                width: 100px + 50px; -- Should be 150px
+            }
+        }
+
+        -- Subtraction
+        div {
+            style {
+                height: 20em - 5em; -- Should be 15em
+            }
+        }
+
+        -- Multiplication with unitless number
+        div {
+            style {
+                margin: 10% * 2; -- Should be 20%
+            }
+        }
+
+        -- Division with unitless number
+        div {
+            style {
+                padding: 100px / 4; -- Should be 25px
+            }
+        }
+
+        -- Operator precedence
+        div {
+            style {
+                border-width: 2px + 3px * 4; -- Should be 14px
+            }
+        }
+
+        -- Parentheses
+        div {
+            style {
+                font-size: (2px + 3px) * 4; -- Should be 20px
+            }
+        }
+
+        -- Power operator
+        div {
+            style {
+                left: 2px ** 3; -- Should be 8px
+            }
+        }
+
+        -- Fallback case (mixed units)
+        div {
+            style {
+                top: 10px + 5em; -- Should fall back to calc(10px + 5em)
+            }
+        }
+    }
+}

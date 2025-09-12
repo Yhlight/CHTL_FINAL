@@ -1,49 +1,36 @@
 #include "CHTLGenerator.h"
+#include "CssValueEvaluator.h"
 #include <map>
 
 namespace CHTL {
 
-// Helper to render a property value, which might be a simple literal or a complex expression.
+// Helper to render a property value. It now uses CssValueEvaluator for expressions.
 std::string renderCssValue(const std::vector<Token>& tokens) {
     if (tokens.empty()) {
         return "";
     }
 
+    // Check if there are any operators that would trigger evaluation.
     bool has_operator = false;
     for (const auto& token : tokens) {
-        switch (token.type) {
-            case TokenType::Plus:
-            case TokenType::Minus:
-            case TokenType::Asterisk:
-            case TokenType::Slash:
-            case TokenType::Percent:
-            case TokenType::DoubleAsterisk:
-                has_operator = true;
-                break;
-            default:
-                break;
-        }
-        if (has_operator) break;
-    }
-
-    std::stringstream ss;
-    if (has_operator) {
-        ss << "calc(";
-    }
-
-    for (size_t i = 0; i < tokens.size(); ++i) {
-        ss << tokens[i].lexeme;
-        // Add space between tokens, except for the last one.
-        if (i < tokens.size() - 1) {
-            ss << " ";
+        if (token.type >= TokenType::Plus && token.type <= TokenType::DoubleAsterisk) {
+            has_operator = true;
+            break;
         }
     }
 
-    if (has_operator) {
-        ss << ")";
+    // If there are no operators, just concatenate the lexemes.
+    if (!has_operator) {
+        std::stringstream ss;
+        for (const auto& token : tokens) {
+            ss << token.lexeme;
+        }
+        return ss.str();
     }
 
-    return ss.str();
+    // If there are operators, use the evaluator.
+    CssValueEvaluator evaluator;
+    return evaluator.evaluate(tokens);
 }
 
 

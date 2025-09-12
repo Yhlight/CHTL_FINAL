@@ -1,0 +1,8 @@
+Evaluated result: 150px
+Evaluated result: 15em
+Evaluated result: 20%
+Evaluated result: 25px
+Evaluated result: 14px
+Evaluated result: 20px
+Evaluated result: 8px
+CSS evaluation error: Addition units must be the same.. Falling back to calc().
