@@ -23,7 +23,7 @@ void invoke_chtl_compiler(const std::string& code, CHTLContext& context) {
     // }
 
     // 2. Parser
-    Parser parser(code, tokens);
+    Parser parser(code, tokens, context);
     std::shared_ptr<BaseNode> ast_root = parser.parse();
 
     if (parser.hasError() || !ast_root) {

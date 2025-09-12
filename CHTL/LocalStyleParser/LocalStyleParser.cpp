@@ -43,6 +43,22 @@ ParsedStyleBlock LocalStyleParser::parse(const std::string& rawContent) {
         }
         pos = start_of_meaningful_content;
 
+        // Check for template usage: @Style ... ;
+        if (content[pos] == '@') {
+            size_t semi_pos = content.find(';', pos);
+            if (semi_pos != std::string::npos) {
+                // We expect "@Style TemplateName"
+                std::string usage_str = trim(std::string_view(content).substr(pos, semi_pos - pos));
+                size_t space_pos = usage_str.find(' ');
+                if (space_pos != std::string::npos) {
+                    std::string template_name = trim(usage_str.substr(space_pos + 1));
+                    result.templateUsages.push_back(template_name);
+                }
+                pos = semi_pos + 1;
+                continue;
+            }
+        }
+
         size_t semi_pos = content.find(';', pos);
         size_t brace_pos = content.find('{', pos);
 

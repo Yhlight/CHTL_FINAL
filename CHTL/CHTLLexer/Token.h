@@ -16,6 +16,9 @@ enum class TokenType {
     // Symbols
     TOKEN_LBRACE,   // {
     TOKEN_RBRACE,   // }
+    TOKEN_LBRACKET, // [
+    TOKEN_RBRACKET, // ]
+    TOKEN_AT,       // @
     TOKEN_COLON,    // :
     TOKEN_EQUAL,    // =
     TOKEN_SEMICOLON, // ;
@@ -46,6 +49,9 @@ inline std::string tokenTypeToString(TokenType type) {
         case TokenType::TOKEN_IDENTIFIER: return "IDENTIFIER";
         case TokenType::TOKEN_LBRACE: return "LBRACE";
         case TokenType::TOKEN_RBRACE: return "RBRACE";
+        case TokenType::TOKEN_LBRACKET: return "LBRACKET";
+        case TokenType::TOKEN_RBRACKET: return "RBRACKET";
+        case TokenType::TOKEN_AT: return "AT";
         case TokenType::TOKEN_COLON: return "COLON";
         case TokenType::TOKEN_EQUAL: return "EQUAL";
         case TokenType::TOKEN_SEMICOLON: return "SEMICOLON";

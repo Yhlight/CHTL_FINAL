@@ -14,6 +14,7 @@ public:
     void visit(class TextNode& node) override;
     void visit(class CommentNode& node) override;
     void visit(class StyleNode& node) override;
+    void visit(class StyleTemplateNode& node) override;
 
 private:
     std::shared_ptr<BaseNode> astRoot;

@@ -7,9 +7,12 @@
 #include <memory>
 #include <string>
 
+// Forward declarations
+class CHTLContext;
+
 class Parser {
 public:
-    Parser(const std::string& source, const std::vector<Token>& tokens);
+    Parser(const std::string& source, const std::vector<Token>& tokens, CHTLContext& context);
 
     // The main entry point for parsing. Returns the root of the AST.
     std::shared_ptr<BaseNode> parse();
@@ -17,6 +20,7 @@ public:
 
 private:
     // Recursive descent parsing methods
+    void templateDefinition();
     std::shared_ptr<BaseNode> declaration();
     std::shared_ptr<BaseNode> element();
     std::shared_ptr<BaseNode> textBlock();
@@ -34,6 +38,7 @@ private:
     void synchronize();
 
     const std::string& source;
+    CHTLContext& context;
     const std::vector<Token>& tokens;
     size_t current = 0;
     bool hadError = false;

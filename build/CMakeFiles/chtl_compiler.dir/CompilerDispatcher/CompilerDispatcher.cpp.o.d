@@ -181,4 +181,9 @@ CMakeFiles/chtl_compiler.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /app/CHTL/CHTLGenerator/../CHTLNode/AstVisitor.h \
  /app/CHTL/ASTProcessors/StyleProcessor.h \
  /app/CHTL/ASTProcessors/../CHTLNode/AstVisitor.h \
- /app/CHTL/ASTProcessors/StyleEvaluator.h /app/CHTL/CHTLContext.h
+ /app/CHTL/ASTProcessors/StyleEvaluator.h /app/CHTL/CHTLContext.h \
+ /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \
+ /usr/include/c++/13/bits/node_handle.h \
+ /usr/include/c++/13/bits/stl_map.h \
+ /usr/include/c++/13/bits/stl_multimap.h \
+ /usr/include/c++/13/bits/erase_if.h

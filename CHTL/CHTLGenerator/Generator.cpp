@@ -81,3 +81,7 @@ void Generator::visit(StyleNode& node) {
     // StyleNodes should be processed and removed from the AST before generation.
     // If one gets here, we simply ignore it.
 }
+
+void Generator::visit(StyleTemplateNode& node) {
+    // Template definitions are not rendered in the final output.
+}

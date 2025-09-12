@@ -169,6 +169,12 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o: \
  /app/CHTL/CHTLParser/../CHTLNode/TextNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/CommentNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/StyleNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/StyleTemplateNode.h \
+ /app/CHTL/CHTLParser/../CHTLContext.h \
+ /app/CHTL/CHTLParser/../CssValueParser/ValueTokenizer.h \
+ /app/CHTL/CHTLParser/../CssValueParser/ValueToken.h \
+ /app/CHTL/CHTLParser/../CssValueParser/ValueParser.h \
+ /app/CHTL/CHTLParser/../CssValueParser/ValueAst.h \
  /usr/include/c++/13/iostream /usr/include/c++/13/ostream \
  /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \

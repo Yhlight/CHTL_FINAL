@@ -3,32 +3,96 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/StyleNode.h"
+#include "../CHTLNode/StyleTemplateNode.h"
+#include "../CHTLContext.h"
+#include "../CssValueParser/ValueTokenizer.h"
+#include "../CssValueParser/ValueParser.h"
 #include <iostream>
 
-Parser::Parser(const std::string& source, const std::vector<Token>& tokens) : source(source), tokens(tokens) {}
+Parser::Parser(const std::string& source, const std::vector<Token>& tokens, CHTLContext& context) : source(source), tokens(tokens), context(context) {}
 
-// The main entry point for parsing.
-// A CHTL fragment can be a list of declarations, so we'll wrap them in a root node.
 std::shared_ptr<BaseNode> Parser::parse() {
     auto root = std::make_shared<ElementNode>();
-    root->tagName = "fragment_root"; // A virtual root for the fragment
+    root->tagName = "fragment_root";
 
     while (!isAtEnd()) {
-        auto decl = declaration();
-        if (decl) {
-            root->children.push_back(decl);
-        } else if (hadError) {
-            // If declaration returned null due to an error, stop.
-            return nullptr;
+        if (peek().type == TokenType::TOKEN_LBRACKET) {
+            templateDefinition();
+        } else {
+            auto decl = declaration();
+            if (decl) {
+                root->children.push_back(decl);
+            } else if (hadError) {
+                return nullptr;
+            }
         }
     }
     return root;
 }
 
+void Parser::templateDefinition() {
+    consume(TokenType::TOKEN_LBRACKET, "Expect '['.");
+    Token keyword = consume(TokenType::TOKEN_IDENTIFIER, "Expect 'Template'.");
+    if (keyword.lexeme != "Template") { hadError = true; /* ... error ... */ return; }
+    consume(TokenType::TOKEN_RBRACKET, "Expect ']'.");
+    consume(TokenType::TOKEN_AT, "Expect '@'.");
+
+    // For now, we only support Style templates.
+    consume(TokenType::TOKEN_STYLE, "Expect 'Style' keyword for template type.");
+
+    Token name = consume(TokenType::TOKEN_IDENTIFIER, "Expect template name.");
+    auto templateNode = std::make_shared<StyleTemplateNode>();
+    templateNode->name = name.lexeme;
+
+    consume(TokenType::TOKEN_LBRACE, "Expect '{' for template body.");
+
+    while (!check(TokenType::TOKEN_RBRACE) && !isAtEnd()) {
+        if (peek().type == TokenType::TOKEN_AT) {
+            // Inheritance: @Style OtherTemplate;
+            advance(); // consume @
+            consume(TokenType::TOKEN_STYLE, "Expect 'Style' keyword for inheritance.");
+            Token baseName = consume(TokenType::TOKEN_IDENTIFIER, "Expect base template name.");
+            templateNode->baseTemplates.push_back(baseName.lexeme);
+            consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after template inheritance.");
+        } else if (peek().type == TokenType::TOKEN_IDENTIFIER) {
+            // Property declaration: key: value;
+            Token key = advance();
+            consume(TokenType::TOKEN_COLON, "Expect ':' after property name.");
+
+            size_t value_start_token = current;
+            while(!check(TokenType::TOKEN_SEMICOLON) && !isAtEnd()) {
+                advance();
+            }
+            size_t value_end_token = current;
+
+            // Extract the raw string for the value part
+            size_t start_offset = tokens[value_start_token].offset;
+            size_t end_offset = tokens[value_end_token-1].offset + tokens[value_end_token-1].lexeme.length();
+            std::string raw_value = source.substr(start_offset, end_offset - start_offset);
+
+            // Parse the value into an expression tree
+            try {
+                ValueTokenizer tokenizer(raw_value);
+                std::vector<ValueToken> v_tokens = tokenizer.tokenize();
+                ValueParser valueParser(v_tokens);
+                templateNode->properties[key.lexeme] = valueParser.parse();
+            } catch(const std::runtime_error& e) {
+                hadError = true;
+                std::cerr << "Error parsing property value in template '" << name.lexeme << "': " << e.what() << std::endl;
+            }
+
+            consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after property value.");
+        } else {
+            // Unexpected token
+            advance();
+        }
+    }
+    consume(TokenType::TOKEN_RBRACE, "Expect '}' to end template body.");
+    context.styleTemplates[name.lexeme] = templateNode;
+}
+
 std::shared_ptr<BaseNode> Parser::declaration() {
     if (peek().type == TokenType::TOKEN_IDENTIFIER && (tokens[current + 1].type == TokenType::TOKEN_LBRACE || tokens[current + 1].type == TokenType::TOKEN_COLON || tokens[current + 1].type == TokenType::TOKEN_EQUAL)) {
-        // This is likely an element or a top-level attribute which is not valid CHTL.
-        // For now, we assume it's an element.
         if (match({TokenType::TOKEN_IDENTIFIER})) {
              return element();
         }
@@ -45,7 +109,6 @@ std::shared_ptr<BaseNode> Parser::declaration() {
         return node;
     }
 
-    // If we don't know what this is, advance and report error to avoid loops.
     if (!isAtEnd()) {
         std::cerr << "Parse Error: Unexpected token '" << peek().lexeme << "' of type " << tokenTypeToString(peek().type) << std::endl;
         hadError = true;
@@ -54,6 +117,7 @@ std::shared_ptr<BaseNode> Parser::declaration() {
     return nullptr;
 }
 
+// ... rest of the file is unchanged ...
 std::shared_ptr<BaseNode> Parser::element() {
     Token identifier = previous(); // Assumes IDENTIFIER was matched before calling
     auto node = std::make_shared<ElementNode>();
@@ -154,6 +218,7 @@ std::shared_ptr<BaseNode> Parser::styleBlock() {
     return node;
 }
 
+
 // --- Helper Methods ---
 
 bool Parser::isAtEnd() {
@@ -202,6 +267,7 @@ void Parser::synchronize() {
         if (previous().type == TokenType::TOKEN_SEMICOLON) return; // Previous declaration likely ended.
         switch (peek().type) {
             case TokenType::TOKEN_TEXT:
+            case TokenType::TOKEN_STYLE:
             case TokenType::TOKEN_IDENTIFIER: // Could be a new element
                 return;
             default:

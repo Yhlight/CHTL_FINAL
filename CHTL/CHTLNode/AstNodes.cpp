@@ -2,6 +2,7 @@
 #include "TextNode.h"
 #include "CommentNode.h"
 #include "StyleNode.h"
+#include "StyleTemplateNode.h"
 #include "AstVisitor.h"
 
 void ElementNode::accept(AstVisitor& visitor) {
@@ -17,5 +18,9 @@ void CommentNode::accept(AstVisitor& visitor) {
 }
 
 void StyleNode::accept(AstVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void StyleTemplateNode::accept(AstVisitor& visitor) {
     visitor.visit(*this);
 }

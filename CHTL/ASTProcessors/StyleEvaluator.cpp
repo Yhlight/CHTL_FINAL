@@ -62,3 +62,7 @@ void StyleEvaluator::visit(CommentNode& node) {
 void StyleEvaluator::visit(StyleNode& node) {
     // Should not exist at this stage.
 }
+
+void StyleEvaluator::visit(StyleTemplateNode& node) {
+    // Should not exist at this stage.
+}

@@ -4,7 +4,8 @@
 // A map to check for keywords
 static std::map<std::string, TokenType> keywords = {
     {"text", TokenType::TOKEN_TEXT},
-    {"style", TokenType::TOKEN_STYLE}
+    {"style", TokenType::TOKEN_STYLE},
+    {"Style", TokenType::TOKEN_STYLE} // For @Style
 };
 
 Lexer::Lexer(const std::string& source) : source(source) {}
@@ -38,6 +39,9 @@ Token Lexer::scanToken() {
     switch (c) {
         case '{': return makeToken(TokenType::TOKEN_LBRACE);
         case '}': return makeToken(TokenType::TOKEN_RBRACE);
+        case '[': return makeToken(TokenType::TOKEN_LBRACKET);
+        case ']': return makeToken(TokenType::TOKEN_RBRACKET);
+        case '@': return makeToken(TokenType::TOKEN_AT);
         case ':': return makeToken(TokenType::TOKEN_COLON);
         case '=': return makeToken(TokenType::TOKEN_EQUAL);
         case ';': return makeToken(TokenType::TOKEN_SEMICOLON);
@@ -137,7 +141,7 @@ Token Lexer::stringLiteral() {
 }
 
 Token Lexer::identifier() {
-    while (isalnum(peek()) || peek() == '_') advance();
+    while (isalnum(peek()) || peek() == '_' || peek() == '-') advance();
 
     std::string text = source.substr(start, current - start);
     TokenType type = TokenType::TOKEN_IDENTIFIER;

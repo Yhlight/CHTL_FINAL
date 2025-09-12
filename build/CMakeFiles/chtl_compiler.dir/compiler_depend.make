@@ -249,6 +249,7 @@ CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o: /app/CHTL/
   /app/CHTL/CHTLNode/CommentNode.h \
   /app/CHTL/CHTLNode/ElementNode.h \
   /app/CHTL/CHTLNode/StyleNode.h \
+  /app/CHTL/CHTLNode/StyleTemplateNode.h \
   /app/CHTL/CHTLNode/TextNode.h \
   /app/CHTL/CssValueParser/ValueAst.h \
   /app/CHTL/LocalStyleParser/LocalStyleParser.h \
@@ -322,8 +323,10 @@ CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o: /app/CHTL/
   /usr/include/c++/13/bits/stl_iterator_base_types.h \
   /usr/include/c++/13/bits/stl_map.h \
   /usr/include/c++/13/bits/stl_multimap.h \
+  /usr/include/c++/13/bits/stl_multiset.h \
   /usr/include/c++/13/bits/stl_pair.h \
   /usr/include/c++/13/bits/stl_raw_storage_iter.h \
+  /usr/include/c++/13/bits/stl_set.h \
   /usr/include/c++/13/bits/stl_tempbuf.h \
   /usr/include/c++/13/bits/stl_tree.h \
   /usr/include/c++/13/bits/stl_uninitialized.h \
@@ -369,6 +372,7 @@ CMakeFiles/chtl_compiler.dir/CHTL/ASTProcessors/StyleProcessor.cpp.o: /app/CHTL/
   /usr/include/c++/13/pstl/glue_algorithm_defs.h \
   /usr/include/c++/13/pstl/glue_memory_defs.h \
   /usr/include/c++/13/pstl/pstl_config.h \
+  /usr/include/c++/13/set \
   /usr/include/c++/13/stdexcept \
   /usr/include/c++/13/streambuf \
   /usr/include/c++/13/string \
@@ -842,6 +846,7 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o: /app/CHTL/CHTLNode/As
   /app/CHTL/CHTLNode/CommentNode.h \
   /app/CHTL/CHTLNode/ElementNode.h \
   /app/CHTL/CHTLNode/StyleNode.h \
+  /app/CHTL/CHTLNode/StyleTemplateNode.h \
   /app/CHTL/CHTLNode/TextNode.h \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
@@ -1037,6 +1042,7 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o: /app/CHTL/CHTLNode/As
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h
 
 CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o: /app/CHTL/CHTLParser/Parser.cpp \
+  /app/CHTL/CHTLContext.h \
   /app/CHTL/CHTLLexer/Token.h \
   /app/CHTL/CssValueParser/ValueAst.h \
   /app/CHTL/CssValueParser/ValueToken.h \
@@ -1044,7 +1050,12 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o: /app/CHTL/CHTLParser/
   /app/CHTL/CHTLNode/CommentNode.h \
   /app/CHTL/CHTLNode/ElementNode.h \
   /app/CHTL/CHTLNode/StyleNode.h \
+  /app/CHTL/CHTLNode/StyleTemplateNode.h \
   /app/CHTL/CHTLNode/TextNode.h \
+  /app/CHTL/CssValueParser/ValueAst.h \
+  /app/CHTL/CssValueParser/ValueParser.h \
+  /app/CHTL/CssValueParser/ValueToken.h \
+  /app/CHTL/CssValueParser/ValueTokenizer.h \
   /app/CHTL/CHTLParser/Parser.h \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
@@ -2126,6 +2137,7 @@ CMakeFiles/chtl_compiler.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: /app/C
   /usr/include/c++/13/bits/cpp_type_traits.h \
   /usr/include/c++/13/bits/cxxabi_forced.h \
   /usr/include/c++/13/bits/cxxabi_init_exception.h \
+  /usr/include/c++/13/bits/erase_if.h \
   /usr/include/c++/13/bits/exception.h \
   /usr/include/c++/13/bits/exception_defines.h \
   /usr/include/c++/13/bits/exception_ptr.h \
@@ -2145,6 +2157,7 @@ CMakeFiles/chtl_compiler.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: /app/C
   /usr/include/c++/13/bits/move.h \
   /usr/include/c++/13/bits/nested_exception.h \
   /usr/include/c++/13/bits/new_allocator.h \
+  /usr/include/c++/13/bits/node_handle.h \
   /usr/include/c++/13/bits/ostream.tcc \
   /usr/include/c++/13/bits/ostream_insert.h \
   /usr/include/c++/13/bits/postypes.h \
@@ -2164,9 +2177,12 @@ CMakeFiles/chtl_compiler.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: /app/C
   /usr/include/c++/13/bits/stl_iterator.h \
   /usr/include/c++/13/bits/stl_iterator_base_funcs.h \
   /usr/include/c++/13/bits/stl_iterator_base_types.h \
+  /usr/include/c++/13/bits/stl_map.h \
+  /usr/include/c++/13/bits/stl_multimap.h \
   /usr/include/c++/13/bits/stl_pair.h \
   /usr/include/c++/13/bits/stl_raw_storage_iter.h \
   /usr/include/c++/13/bits/stl_tempbuf.h \
+  /usr/include/c++/13/bits/stl_tree.h \
   /usr/include/c++/13/bits/stl_uninitialized.h \
   /usr/include/c++/13/bits/stl_vector.h \
   /usr/include/c++/13/bits/streambuf.tcc \
@@ -2201,6 +2217,7 @@ CMakeFiles/chtl_compiler.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: /app/C
   /usr/include/c++/13/iosfwd \
   /usr/include/c++/13/iostream \
   /usr/include/c++/13/istream \
+  /usr/include/c++/13/map \
   /usr/include/c++/13/memory \
   /usr/include/c++/13/new \
   /usr/include/c++/13/ostream \
@@ -2878,8 +2895,6 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
 
 /app/CHTL/CssValueParser/ValueTokenizer.cpp:
 
-/app/CHTL/CssValueParser/ValueParser.h:
-
 /app/CHTL/CssValueParser/ValueParser.cpp:
 
 /usr/include/x86_64-linux-gnu/bits/mathcalls.h:
@@ -2915,6 +2930,10 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
 /usr/include/c++/13/tr1/ell_integral.tcc:
 
 /usr/include/c++/13/cmath:
+
+/app/CHTL/CssValueParser/Evaluator.cpp:
+
+/app/CHTL/CHTLParser/Parser.h:
 
 /usr/include/c++/13/pstl/pstl_config.h:
 
@@ -2986,6 +3005,10 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
 
 /usr/include/c++/13/bits/postypes.h:
 
+/usr/include/c++/13/bits/specfun.h:
+
+/usr/include/c++/13/bits/streambuf.tcc:
+
 /usr/include/c++/13/memory:
 
 /usr/include/x86_64-linux-gnu/bits/floatn.h:
@@ -3051,6 +3074,8 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
 /app/CHTL/CssValueParser/ValueTokenizer.h:
 
 /usr/include/x86_64-linux-gnu/bits/endianness.h:
+
+/app/CHTL/CssValueParser/ValueParser.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
 
@@ -3440,6 +3465,8 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
 
 /app/CHTL/LocalStyleParser/ParsedStyleBlock.h:
 
+/app/CHTL/CHTLNode/StyleTemplateNode.h:
+
 /usr/include/c++/13/algorithm:
 
 /usr/include/x86_64-linux-gnu/bits/long-double.h:
@@ -3449,11 +3476,3 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
 /usr/include/c++/13/bits/stl_heap.h:
 
 /app/CHTL/CHTLLexer/Lexer.h:
-
-/app/CHTL/CHTLParser/Parser.h:
-
-/app/CHTL/CssValueParser/Evaluator.cpp:
-
-/usr/include/c++/13/bits/streambuf.tcc:
-
-/usr/include/c++/13/bits/specfun.h:

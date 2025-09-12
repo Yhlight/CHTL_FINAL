@@ -162,4 +162,4 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLNode/AstNodes.cpp.o: \
  /usr/include/c++/13/bits/stl_multimap.h \
  /usr/include/c++/13/bits/erase_if.h /app/CHTL/CHTLNode/TextNode.h \
  /app/CHTL/CHTLNode/CommentNode.h /app/CHTL/CHTLNode/StyleNode.h \
- /app/CHTL/CHTLNode/AstVisitor.h
+ /app/CHTL/CHTLNode/StyleTemplateNode.h /app/CHTL/CHTLNode/AstVisitor.h

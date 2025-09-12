@@ -58,7 +58,9 @@ void Evaluator::visit(PropertyReferenceNode& node) {
     }
 
     if (!targetNode) {
-        result = {{}, true, "Could not find element with selector: " + node.selector}; return;
+        // If we can't find the node, it might be an unadorned literal like 'sans-serif'
+        result = {{node.propertyName}, false, ""};
+        return;
     }
 
     // Check for circular dependencies
@@ -69,9 +71,11 @@ void Evaluator::visit(PropertyReferenceNode& node) {
     this->evaluationStack->insert(propertyIdentifier);
 
     if (targetNode->unevaluatedStyles.count(node.propertyName)) {
-        result = evaluate(targetNode->unevaluatedStyles[node.propertyName], this->chtlAstRoot, targetNode, *this->evaluationStack);
+        result = evaluate(targetNode->unevaluatedStyles.at(node.propertyName), this->chtlAstRoot, targetNode, *this->evaluationStack);
     } else {
-        result = {{}, true, "Property '" + node.propertyName + "' not found on element '" + node.selector + "'."};
+        // If the property doesn't exist on the target node, assume it's an unadorned literal.
+        // This handles cases like `color: black;` where `black` is parsed as a property ref.
+        result = {{node.propertyName}, false, ""};
     }
 
     this->evaluationStack->erase(propertyIdentifier); // Pop from stack
