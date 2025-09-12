@@ -1,0 +1,19 @@
+// This is a simple test file for the CHTL compiler.
+// It checks for basic element nesting and text nodes.
+
+html {
+    body {
+        h1 {
+            text { "Welcome to CHTL" }
+        }
+
+        /* A multi-line comment */
+        div {
+            // An empty div for testing.
+        }
+
+        p {
+            text { This is an unquoted test }
+        }
+    }
+}
