@@ -342,11 +342,32 @@ CompilerDispatcher::CompilationResult CompilerDispatcher::mergeResults(const std
 }
 
 std::string CompilerDispatcher::applyTemplates(const std::string& content) {
-    // 简化的模板应用
     std::string result = content;
     
-    // 这里应该实现完整的模板应用逻辑
-    // 包括模板查找、参数替换、继承处理等
+    // 解析模板定义
+    auto templates = template_parser_->parseTemplates(content);
+    
+    // 创建模板映射
+    std::map<std::string, TemplateInfo> template_map;
+    for (const auto& template_def : templates) {
+        template_map[template_def.name] = template_def;
+    }
+    
+    // 移除模板定义，只保留应用部分
+    std::regex template_def_regex(R"(\[Template\][^}]+})");
+    result = std::regex_replace(result, template_def_regex, "");
+    
+    // 应用样式模板
+    for (const auto& template_pair : template_map) {
+        const auto& template_info = template_pair.second;
+        if (template_info.type == CHTLNode::TemplateType::STYLE) {
+            result = applyStyleTemplate(result, template_info);
+        } else if (template_info.type == CHTLNode::TemplateType::ELEMENT) {
+            result = applyElementTemplate(result, template_info);
+        } else if (template_info.type == CHTLNode::TemplateType::VARIABLE) {
+            result = applyVariableTemplate(result, template_info);
+        }
+    }
     
     return result;
 }
@@ -400,33 +421,79 @@ void CompilerDispatcher::applyTemplatesToFragments(const std::vector<TemplateInf
             // 查找并应用模板
             std::string processed_content = fragment.content;
             
-            // 查找模板应用语法: @TemplateName
-            std::regex template_regex(R"(@(\w+))");
-            std::smatch match;
-            
-            while (std::regex_search(processed_content, match, template_regex)) {
-                std::string template_name = match[1].str();
-                auto it = template_map.find(template_name);
-                
-                if (it != template_map.end()) {
-                    // 应用模板
-                    std::string template_content = it->second.content;
-                    
-                    // 简单的模板变量替换
-                    // 这里可以实现更复杂的模板变量系统
-                    processed_content = std::regex_replace(
-                        processed_content, 
-                        std::regex("@" + template_name), 
-                        template_content
-                    );
+            // 应用样式模板
+            for (const auto& template_pair : template_map) {
+                const auto& template_info = template_pair.second;
+                if (template_info.type == CHTLNode::TemplateType::STYLE) {
+                    processed_content = applyStyleTemplate(processed_content, template_info);
+                } else if (template_info.type == CHTLNode::TemplateType::ELEMENT) {
+                    processed_content = applyElementTemplate(processed_content, template_info);
+                } else if (template_info.type == CHTLNode::TemplateType::VARIABLE) {
+                    processed_content = applyVariableTemplate(processed_content, template_info);
                 }
-                
-                processed_content = match.suffix().str();
             }
             
             fragment.content = processed_content;
         }
     }
+}
+
+std::string CompilerDispatcher::applyStyleTemplate(const std::string& content, const TemplateInfo& template_info) {
+    std::string result = content;
+    
+    // 查找样式模板引用: @TemplateName
+    std::regex style_regex("@" + template_info.name);
+    std::smatch match;
+    
+    if (std::regex_search(result, match, style_regex)) {
+        // 生成CSS样式
+        std::string css_style = "style=\"";
+        for (const auto& prop : template_info.properties) {
+            css_style += prop.first + ": " + prop.second + "; ";
+        }
+        css_style += "\"";
+        
+        // 替换引用
+        result = std::regex_replace(result, style_regex, css_style);
+    }
+    
+    return result;
+}
+
+std::string CompilerDispatcher::applyElementTemplate(const std::string& content, const TemplateInfo& template_info) {
+    std::string result = content;
+    
+    // 查找元素模板引用: @TemplateName
+    std::regex element_regex("@" + template_info.name);
+    std::smatch match;
+    
+    if (std::regex_search(result, match, element_regex)) {
+        // 替换为模板内容
+        result = std::regex_replace(result, element_regex, template_info.content);
+    }
+    
+    return result;
+}
+
+std::string CompilerDispatcher::applyVariableTemplate(const std::string& content, const TemplateInfo& template_info) {
+    std::string result = content;
+    
+    // 查找变量模板引用: @TemplateName.property
+    std::regex var_regex("@" + template_info.name + "\\.(\\w+)");
+    std::sregex_iterator iter(result.begin(), result.end(), var_regex);
+    std::sregex_iterator end;
+    
+    for (; iter != end; ++iter) {
+        std::smatch match = *iter;
+        std::string property_name = match[1].str();
+        
+        auto it = template_info.properties.find(property_name);
+        if (it != template_info.properties.end()) {
+            result = std::regex_replace(result, std::regex(match[0].str()), it->second);
+        }
+    }
+    
+    return result;
 }
 
 } // namespace CHTL

@@ -23,6 +23,9 @@ struct TemplateInfo {
     TemplateInfo() = default;
     TemplateInfo(CHTLNode::TemplateType t, const std::string& n, const std::string& c)
         : type(t), name(n), content(c) {}
+    
+    // 添加赋值操作符
+    TemplateInfo& operator=(const TemplateInfo& other) = default;
 };
 
 /**

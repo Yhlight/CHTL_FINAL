@@ -196,6 +196,11 @@ private:
      */
     std::string processConfiguration(const std::string& content);
     void applyTemplatesToFragments(const std::vector<TemplateInfo>& templates);
+    
+    // 模板应用方法
+    std::string applyStyleTemplate(const std::string& content, const TemplateInfo& template_info);
+    std::string applyElementTemplate(const std::string& content, const TemplateInfo& template_info);
+    std::string applyVariableTemplate(const std::string& content, const TemplateInfo& template_info);
 };
 
 } // namespace CHTL

@@ -6,15 +6,15 @@
 namespace CHTL {
 
 // TemplateNode 实现
-TemplateNode::TemplateNode(TemplateType type, const std::string& name)
+TemplateNode::TemplateNode(CHTLNode::TemplateType type, const std::string& name)
     : CHTLNode(NodeType::TEMPLATE), template_type_(type), template_name_(name) {
 }
 
-TemplateType TemplateNode::getTemplateType() const {
+CHTLNode::TemplateType TemplateNode::getTemplateType() const {
     return template_type_;
 }
 
-void TemplateNode::setTemplateType(TemplateType type) {
+void TemplateNode::setTemplateType(CHTLNode::TemplateType type) {
     template_type_ = type;
 }
 
@@ -76,7 +76,7 @@ std::string TemplateNode::generateHTML() const {
 
 // StyleTemplateNode 实现
 StyleTemplateNode::StyleTemplateNode(const std::string& name)
-    : TemplateNode(TemplateType::STYLE, name) {
+    : TemplateNode(CHTLNode::TemplateType::STYLE, name) {
 }
 
 void StyleTemplateNode::addCSSProperty(const std::string& property, const std::string& value) {
@@ -186,7 +186,7 @@ std::string StyleTemplateNode::generateHTML() const {
 
 // ElementTemplateNode 实现
 ElementTemplateNode::ElementTemplateNode(const std::string& name)
-    : TemplateNode(TemplateType::ELEMENT, name) {
+    : TemplateNode(CHTLNode::TemplateType::ELEMENT, name) {
 }
 
 void ElementTemplateNode::applyToElementNode(std::shared_ptr<ElementNode> elementNode) const {
@@ -255,7 +255,7 @@ std::string ElementTemplateNode::generateHTML() const {
 
 // VarTemplateNode 实现
 VarTemplateNode::VarTemplateNode(const std::string& name)
-    : TemplateNode(TemplateType::VAR, name) {
+    : TemplateNode(CHTLNode::TemplateType::VARIABLE, name) {
 }
 
 void VarTemplateNode::addVariable(const std::string& name, const std::string& value) {
@@ -347,49 +347,49 @@ void TemplateManager::registerTemplate(std::shared_ptr<TemplateNode> templateNod
     if (!templateNode) return;
     
     switch (templateNode->getTemplateType()) {
-        case TemplateType::STYLE:
+        case CHTLNode::TemplateType::STYLE:
             style_templates_[templateNode->getTemplateName()] = templateNode;
             break;
-        case TemplateType::ELEMENT:
+        case CHTLNode::TemplateType::ELEMENT:
             element_templates_[templateNode->getTemplateName()] = templateNode;
             break;
-        case TemplateType::VAR:
+        case CHTLNode::TemplateType::VARIABLE:
             var_templates_[templateNode->getTemplateName()] = templateNode;
             break;
     }
 }
 
-void TemplateManager::unregisterTemplate(TemplateType type, const std::string& name) {
+void TemplateManager::unregisterTemplate(CHTLNode::TemplateType type, const std::string& name) {
     switch (type) {
-        case TemplateType::STYLE:
+        case CHTLNode::TemplateType::STYLE:
             style_templates_.erase(name);
             break;
-        case TemplateType::ELEMENT:
+        case CHTLNode::TemplateType::ELEMENT:
             element_templates_.erase(name);
             break;
-        case TemplateType::VAR:
+        case CHTLNode::TemplateType::VARIABLE:
             var_templates_.erase(name);
             break;
     }
 }
 
-std::shared_ptr<TemplateNode> TemplateManager::getTemplate(TemplateType type, const std::string& name) const {
+std::shared_ptr<TemplateNode> TemplateManager::getTemplate(CHTLNode::TemplateType type, const std::string& name) const {
     switch (type) {
-        case TemplateType::STYLE: {
+        case CHTLNode::TemplateType::STYLE: {
             auto it = style_templates_.find(name);
             if (it != style_templates_.end()) {
                 return it->second;
             }
             break;
         }
-        case TemplateType::ELEMENT: {
+        case CHTLNode::TemplateType::ELEMENT: {
             auto it = element_templates_.find(name);
             if (it != element_templates_.end()) {
                 return it->second;
             }
             break;
         }
-        case TemplateType::VAR: {
+        case CHTLNode::TemplateType::VARIABLE: {
             auto it = var_templates_.find(name);
             if (it != var_templates_.end()) {
                 return it->second;
@@ -400,26 +400,26 @@ std::shared_ptr<TemplateNode> TemplateManager::getTemplate(TemplateType type, co
     return nullptr;
 }
 
-bool TemplateManager::hasTemplate(TemplateType type, const std::string& name) const {
+bool TemplateManager::hasTemplate(CHTLNode::TemplateType type, const std::string& name) const {
     return getTemplate(type, name) != nullptr;
 }
 
 void TemplateManager::applyStyleTemplate(const std::string& name, std::shared_ptr<StyleNode> styleNode) const {
-    auto templateNode = std::dynamic_pointer_cast<StyleTemplateNode>(getTemplate(TemplateType::STYLE, name));
+    auto templateNode = std::dynamic_pointer_cast<StyleTemplateNode>(getTemplate(CHTLNode::TemplateType::STYLE, name));
     if (templateNode) {
         templateNode->applyToStyleNode(styleNode);
     }
 }
 
 void TemplateManager::applyElementTemplate(const std::string& name, std::shared_ptr<ElementNode> elementNode) const {
-    auto templateNode = std::dynamic_pointer_cast<ElementTemplateNode>(getTemplate(TemplateType::ELEMENT, name));
+    auto templateNode = std::dynamic_pointer_cast<ElementTemplateNode>(getTemplate(CHTLNode::TemplateType::ELEMENT, name));
     if (templateNode) {
         templateNode->applyToElementNode(elementNode);
     }
 }
 
 std::string TemplateManager::applyVarTemplate(const std::string& name, const std::string& content) const {
-    auto templateNode = std::dynamic_pointer_cast<VarTemplateNode>(getTemplate(TemplateType::VAR, name));
+    auto templateNode = std::dynamic_pointer_cast<VarTemplateNode>(getTemplate(CHTLNode::TemplateType::VARIABLE, name));
     if (templateNode) {
         return templateNode->applyVariables(content);
     }
@@ -465,7 +465,7 @@ void TemplateManager::mergeTemplateProperties(std::shared_ptr<TemplateNode> base
     if (!base || !derived) return;
     
     // 根据模板类型进行不同的合并
-    if (base->getTemplateType() == TemplateType::STYLE && derived->getTemplateType() == TemplateType::STYLE) {
+    if (base->getTemplateType() == CHTLNode::TemplateType::STYLE && derived->getTemplateType() == CHTLNode::TemplateType::STYLE) {
         auto baseStyle = std::dynamic_pointer_cast<StyleTemplateNode>(base);
         auto derivedStyle = std::dynamic_pointer_cast<StyleTemplateNode>(derived);
         

@@ -259,8 +259,9 @@ std::string ProjectWorkflow::compileCode(const std::string& content, const std::
         return content;
     }
     
-    // 简化实现，直接返回内容
-    return content;
+    // 使用CompilerDispatcher进行编译
+    auto result = dispatcher_->compileCode(content);
+    return result.success ? result.output : content;
 }
 
 std::string ProjectWorkflow::mergeCode(const std::string& html, const std::string& css, const std::string& js) {

@@ -8,25 +8,18 @@
 
 namespace CHTL {
 
-/**
- * 模板类型
- */
-enum class TemplateType {
-    STYLE,          // 样式组模板
-    ELEMENT,        // 元素模板
-    VAR             // 变量组模板
-};
+// 使用CHTLNode.h中定义的TemplateType
 
 /**
  * 模板节点基类
  */
 class TemplateNode : public CHTLNode {
 public:
-    TemplateNode(TemplateType type, const std::string& name);
+    TemplateNode(CHTLNode::TemplateType type, const std::string& name);
     
     // 模板类型
-    TemplateType getTemplateType() const;
-    void setTemplateType(TemplateType type);
+    CHTLNode::TemplateType getTemplateType() const;
+    void setTemplateType(CHTLNode::TemplateType type);
     
     // 模板名称
     std::string getTemplateName() const;
@@ -130,11 +123,11 @@ public:
     
     // 模板注册
     void registerTemplate(std::shared_ptr<TemplateNode> templateNode);
-    void unregisterTemplate(TemplateType type, const std::string& name);
+    void unregisterTemplate(CHTLNode::TemplateType type, const std::string& name);
     
     // 模板查询
-    std::shared_ptr<TemplateNode> getTemplate(TemplateType type, const std::string& name) const;
-    bool hasTemplate(TemplateType type, const std::string& name) const;
+    std::shared_ptr<TemplateNode> getTemplate(CHTLNode::TemplateType type, const std::string& name) const;
+    bool hasTemplate(CHTLNode::TemplateType type, const std::string& name) const;
     
     // 模板应用
     void applyStyleTemplate(const std::string& name, std::shared_ptr<StyleNode> styleNode) const;

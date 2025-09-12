@@ -25,11 +25,11 @@ std::vector<TemplateInfo> TemplateParser::parseTemplates(const std::string& cont
         
         CHTLNode::TemplateType type;
         if (type_str == "Style") {
-            type = TemplateType::STYLE;
+            type = CHTLNode::TemplateType::STYLE;
         } else if (type_str == "Element") {
-            type = TemplateType::ELEMENT;
+            type = CHTLNode::TemplateType::ELEMENT;
         } else if (type_str == "Var") {
-            type = TemplateType::VARIABLE;
+            type = CHTLNode::TemplateType::VARIABLE;
         } else {
             continue; // 跳过未知类型
         }
@@ -37,11 +37,11 @@ std::vector<TemplateInfo> TemplateParser::parseTemplates(const std::string& cont
         TemplateInfo template_info(type, name, template_content);
         
         // 解析模板内容
-        if (type == TemplateType::STYLE) {
+        if (type == CHTLNode::TemplateType::STYLE) {
             template_info.properties = parseStyleProperties(template_content);
-        } else if (type == TemplateType::ELEMENT) {
+        } else if (type == CHTLNode::TemplateType::ELEMENT) {
             template_info.children = parseElementChildren(template_content);
-        } else if (type == TemplateType::VARIABLE) {
+        } else if (type == CHTLNode::TemplateType::VARIABLE) {
             template_info.properties = parseVariableProperties(template_content);
         }
         
@@ -65,11 +65,11 @@ TemplateInfo TemplateParser::parseTemplate(const std::string& template_content) 
         
         CHTLNode::TemplateType type;
         if (type_str == "Style") {
-            type = TemplateType::STYLE;
+            type = CHTLNode::TemplateType::STYLE;
         } else if (type_str == "Element") {
-            type = TemplateType::ELEMENT;
+            type = CHTLNode::TemplateType::ELEMENT;
         } else if (type_str == "Var") {
-            type = TemplateType::VARIABLE;
+            type = CHTLNode::TemplateType::VARIABLE;
         } else {
             return template_info; // 返回空的模板信息
         }
@@ -84,11 +84,11 @@ TemplateInfo TemplateParser::parseTemplate(const std::string& template_content) 
         if (std::regex_search(template_content, content_match, content_regex)) {
             std::string inner_content = content_match[1].str();
             
-            if (type == TemplateType::STYLE) {
+            if (type == CHTLNode::TemplateType::STYLE) {
                 template_info.properties = parseStyleProperties(inner_content);
-            } else if (type == TemplateType::ELEMENT) {
+            } else if (type == CHTLNode::TemplateType::ELEMENT) {
                 template_info.children = parseElementChildren(inner_content);
-            } else if (type == TemplateType::VARIABLE) {
+            } else if (type == CHTLNode::TemplateType::VARIABLE) {
                 template_info.properties = parseVariableProperties(inner_content);
             }
         }
@@ -99,7 +99,7 @@ TemplateInfo TemplateParser::parseTemplate(const std::string& template_content) 
 
 std::string TemplateParser::applyStyleTemplate(const std::string& content, const std::string& template_name) {
     auto it = templates_.find(template_name);
-    if (it == templates_.end() || it->second.type != TemplateType::STYLE) {
+    if (it == templates_.end() || it->second.type != CHTLNode::TemplateType::STYLE) {
         return content;
     }
     
@@ -108,7 +108,7 @@ std::string TemplateParser::applyStyleTemplate(const std::string& content, const
 
 std::string TemplateParser::applyElementTemplate(const std::string& content, const std::string& template_name) {
     auto it = templates_.find(template_name);
-    if (it == templates_.end() || it->second.type != TemplateType::ELEMENT) {
+    if (it == templates_.end() || it->second.type != CHTLNode::TemplateType::ELEMENT) {
         return content;
     }
     
@@ -117,7 +117,7 @@ std::string TemplateParser::applyElementTemplate(const std::string& content, con
 
 std::string TemplateParser::applyVariableTemplate(const std::string& content, const std::string& template_name) {
     auto it = templates_.find(template_name);
-    if (it == templates_.end() || it->second.type != TemplateType::VARIABLE) {
+    if (it == templates_.end() || it->second.type != CHTLNode::TemplateType::VARIABLE) {
         return content;
     }
     
@@ -154,13 +154,13 @@ void TemplateParser::clear() {
 
 CHTLNode::TemplateType TemplateParser::parseTemplateType(const std::string& content) {
     if (content.find("@Style") != std::string::npos) {
-        return CHTLNode::TemplateType::STYLE;
+        return CHTLNode::CHTLNode::TemplateType::STYLE;
     } else if (content.find("@Element") != std::string::npos) {
-        return CHTLNode::TemplateType::ELEMENT;
+        return CHTLNode::CHTLNode::TemplateType::ELEMENT;
     } else if (content.find("@Var") != std::string::npos) {
-        return CHTLNode::TemplateType::VARIABLE;
+        return CHTLNode::CHTLNode::TemplateType::VARIABLE;
     }
-    return CHTLNode::TemplateType::STYLE; // 默认
+    return CHTLNode::CHTLNode::TemplateType::STYLE; // 默认
 }
 
 std::string TemplateParser::extractTemplateName(const std::string& content) {

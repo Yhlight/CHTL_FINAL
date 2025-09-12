@@ -276,6 +276,7 @@ CMakeFiles/unified_chtl_compiler.dir/src/unified_chtl_compiler.cpp.o: /workspace
   /workspace/include/CHTL/CHTLContext.h \
   /workspace/include/CHTL/CHTLNode.h \
   /workspace/include/CHTL/CompilerDispatcher.h \
+  /workspace/include/CHTL/TemplateParser.h \
   /workspace/include/Scanner/UnifiedScanner.h
 
 unified_chtl_compiler: /lib/x86_64-linux-gnu/Scrt1.o \
@@ -317,6 +318,8 @@ libchtl_lib.a:
 /lib/x86_64-linux-gnu/crtn.o:
 
 /lib/x86_64-linux-gnu/crti.o:
+
+/workspace/include/CHTL/TemplateParser.h:
 
 /workspace/include/CHTL/CompilerDispatcher.h:
 

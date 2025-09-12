@@ -1,0 +1,22 @@
+[Template] @Style ButtonStyle {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+}
+
+[Template] @Element ButtonElement {
+    <button class="ButtonStyle">Click me</button>
+}
+
+[Template] @Var ButtonText {
+    text: "Default Button";
+    color: "white";
+}
+
+div {
+    @ButtonElement
+    @ButtonStyle
+    text: @ButtonText.text;
+}

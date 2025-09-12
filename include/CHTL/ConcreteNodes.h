@@ -195,6 +195,7 @@ public:
     void addConfigValue(const std::string& key, const std::string& value);
     std::string getConfigValue(const std::string& key) const;
     bool hasConfigValue(const std::string& key) const;
+    bool validate() const override;
 
 private:
     std::string config_name_;

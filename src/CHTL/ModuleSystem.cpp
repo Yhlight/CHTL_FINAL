@@ -388,11 +388,11 @@ std::string CMODModule::generateTemplateBlock() const {
     std::ostringstream oss;
     for (const auto& templateNode : template_exports_) {
         oss << "[Template] @";
-        if (templateNode->getTemplateType() == TemplateType::STYLE) {
+        if (templateNode->getTemplateType() == CHTLNode::TemplateType::STYLE) {
             oss << "Style ";
-        } else if (templateNode->getTemplateType() == TemplateType::ELEMENT) {
+        } else if (templateNode->getTemplateType() == CHTLNode::TemplateType::ELEMENT) {
             oss << "Element ";
-        } else if (templateNode->getTemplateType() == TemplateType::VAR) {
+        } else if (templateNode->getTemplateType() == CHTLNode::TemplateType::VARIABLE) {
             oss << "Var ";
         }
         oss << templateNode->getTemplateName() << " {" << std::endl;
