@@ -104,6 +104,12 @@ add_executable(chtl_js_compiler src/chtl_js_compiler.cpp)
 
 add_executable(chtl_cli src/chtl_cli.cpp)
 
+add_executable(enhanced_template_compiler src/enhanced_template_compiler.cpp)
+
+add_executable(module_system_compiler src/module_system_compiler.cpp)
+
+add_executable(error_handler src/error_handler.cpp)
+
 # 创建测试程序
 add_executable(test_compiler test_compiler.cpp)
 target_link_libraries(test_compiler chtl_lib)

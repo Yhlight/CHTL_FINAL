@@ -1,0 +1,20 @@
+CHTL Diagnostic Report
+Generated: 2025-09-12 16:38:37
+
+ERRORS (1):
+  HIGH Syntax error: Unexpected token '}' at end of template (test.chtl:15:25)
+    Code: [Template] @Style MyButton {
+    Suggestion: Check for missing closing brace or semicolon
+
+
+WARNINGS (1):
+  LOW Warning: Unused variable 'temp' (test.chtl:23:10)
+    Code: var temp = 'unused';
+    Suggestion: Remove unused variable or use it
+
+
+INFO (1):
+  LOW Information: Template 'MyButton' compiled successfully (test.chtl:15:1)
+
+
+Summary: 1 errors, 1 warnings, 1 info messages

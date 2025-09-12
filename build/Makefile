@@ -276,6 +276,45 @@ chtl_cli/fast:
 .PHONY : chtl_cli/fast
 
 #=============================================================================
+# Target rules for targets named enhanced_template_compiler
+
+# Build rule for target.
+enhanced_template_compiler: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 enhanced_template_compiler
+.PHONY : enhanced_template_compiler
+
+# fast build rule for target.
+enhanced_template_compiler/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/enhanced_template_compiler.dir/build.make CMakeFiles/enhanced_template_compiler.dir/build
+.PHONY : enhanced_template_compiler/fast
+
+#=============================================================================
+# Target rules for targets named module_system_compiler
+
+# Build rule for target.
+module_system_compiler: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 module_system_compiler
+.PHONY : module_system_compiler
+
+# fast build rule for target.
+module_system_compiler/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/module_system_compiler.dir/build.make CMakeFiles/module_system_compiler.dir/build
+.PHONY : module_system_compiler/fast
+
+#=============================================================================
+# Target rules for targets named error_handler
+
+# Build rule for target.
+error_handler: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 error_handler
+.PHONY : error_handler
+
+# fast build rule for target.
+error_handler/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/error_handler.dir/build.make CMakeFiles/error_handler.dir/build
+.PHONY : error_handler/fast
+
+#=============================================================================
 # Target rules for targets named test_compiler
 
 # Build rule for target.
@@ -912,6 +951,54 @@ src/chtl_js_compiler.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_js_compiler.dir/build.make CMakeFiles/chtl_js_compiler.dir/src/chtl_js_compiler.cpp.s
 .PHONY : src/chtl_js_compiler.cpp.s
 
+src/enhanced_template_compiler.o: src/enhanced_template_compiler.cpp.o
+.PHONY : src/enhanced_template_compiler.o
+
+# target to build an object file
+src/enhanced_template_compiler.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/enhanced_template_compiler.dir/build.make CMakeFiles/enhanced_template_compiler.dir/src/enhanced_template_compiler.cpp.o
+.PHONY : src/enhanced_template_compiler.cpp.o
+
+src/enhanced_template_compiler.i: src/enhanced_template_compiler.cpp.i
+.PHONY : src/enhanced_template_compiler.i
+
+# target to preprocess a source file
+src/enhanced_template_compiler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/enhanced_template_compiler.dir/build.make CMakeFiles/enhanced_template_compiler.dir/src/enhanced_template_compiler.cpp.i
+.PHONY : src/enhanced_template_compiler.cpp.i
+
+src/enhanced_template_compiler.s: src/enhanced_template_compiler.cpp.s
+.PHONY : src/enhanced_template_compiler.s
+
+# target to generate assembly for a file
+src/enhanced_template_compiler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/enhanced_template_compiler.dir/build.make CMakeFiles/enhanced_template_compiler.dir/src/enhanced_template_compiler.cpp.s
+.PHONY : src/enhanced_template_compiler.cpp.s
+
+src/error_handler.o: src/error_handler.cpp.o
+.PHONY : src/error_handler.o
+
+# target to build an object file
+src/error_handler.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/error_handler.dir/build.make CMakeFiles/error_handler.dir/src/error_handler.cpp.o
+.PHONY : src/error_handler.cpp.o
+
+src/error_handler.i: src/error_handler.cpp.i
+.PHONY : src/error_handler.i
+
+# target to preprocess a source file
+src/error_handler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/error_handler.dir/build.make CMakeFiles/error_handler.dir/src/error_handler.cpp.i
+.PHONY : src/error_handler.cpp.i
+
+src/error_handler.s: src/error_handler.cpp.s
+.PHONY : src/error_handler.s
+
+# target to generate assembly for a file
+src/error_handler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/error_handler.dir/build.make CMakeFiles/error_handler.dir/src/error_handler.cpp.s
+.PHONY : src/error_handler.cpp.s
+
 src/improved_chtl_compiler.o: src/improved_chtl_compiler.cpp.o
 .PHONY : src/improved_chtl_compiler.o
 
@@ -959,6 +1046,30 @@ src/main.s: src/main.cpp.s
 src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
+
+src/module_system_compiler.o: src/module_system_compiler.cpp.o
+.PHONY : src/module_system_compiler.o
+
+# target to build an object file
+src/module_system_compiler.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/module_system_compiler.dir/build.make CMakeFiles/module_system_compiler.dir/src/module_system_compiler.cpp.o
+.PHONY : src/module_system_compiler.cpp.o
+
+src/module_system_compiler.i: src/module_system_compiler.cpp.i
+.PHONY : src/module_system_compiler.i
+
+# target to preprocess a source file
+src/module_system_compiler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/module_system_compiler.dir/build.make CMakeFiles/module_system_compiler.dir/src/module_system_compiler.cpp.i
+.PHONY : src/module_system_compiler.cpp.i
+
+src/module_system_compiler.s: src/module_system_compiler.cpp.s
+.PHONY : src/module_system_compiler.s
+
+# target to generate assembly for a file
+src/module_system_compiler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/module_system_compiler.dir/build.make CMakeFiles/module_system_compiler.dir/src/module_system_compiler.cpp.s
+.PHONY : src/module_system_compiler.cpp.s
 
 src/simple_chtl_compiler.o: src/simple_chtl_compiler.cpp.o
 .PHONY : src/simple_chtl_compiler.o
@@ -1050,7 +1161,10 @@ help:
 	@echo "... chtl_compiler"
 	@echo "... chtl_js_compiler"
 	@echo "... chtl_lib"
+	@echo "... enhanced_template_compiler"
+	@echo "... error_handler"
 	@echo "... improved_chtl_compiler"
+	@echo "... module_system_compiler"
 	@echo "... simple_chtl_compiler"
 	@echo "... test_compiler"
 	@echo "... working_chtl_compiler"
@@ -1132,12 +1246,21 @@ help:
 	@echo "... src/chtl_js_compiler.o"
 	@echo "... src/chtl_js_compiler.i"
 	@echo "... src/chtl_js_compiler.s"
+	@echo "... src/enhanced_template_compiler.o"
+	@echo "... src/enhanced_template_compiler.i"
+	@echo "... src/enhanced_template_compiler.s"
+	@echo "... src/error_handler.o"
+	@echo "... src/error_handler.i"
+	@echo "... src/error_handler.s"
 	@echo "... src/improved_chtl_compiler.o"
 	@echo "... src/improved_chtl_compiler.i"
 	@echo "... src/improved_chtl_compiler.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/module_system_compiler.o"
+	@echo "... src/module_system_compiler.i"
+	@echo "... src/module_system_compiler.s"
 	@echo "... src/simple_chtl_compiler.o"
 	@echo "... src/simple_chtl_compiler.i"
 	@echo "... src/simple_chtl_compiler.s"

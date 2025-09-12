@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -Wextra -O2 -Xlinker --dependency-file=CMakeFiles/module_system_compiler.dir/link.d CMakeFiles/module_system_compiler.dir/src/module_system_compiler.cpp.o -o module_system_compiler
