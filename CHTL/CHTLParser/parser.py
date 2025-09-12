@@ -17,10 +17,13 @@ class Parser:
         return program
 
     def _declaration(self):
-        if self._check(TokenType.IDENTIFIER):
+        if self._peek().type == TokenType.IDENTIFIER:
             return self._element_statement()
-        if self._check(TokenType.EOF): return None
-        raise self._error(self._peek(), "Expected an element.")
+        if self._peek().type == TokenType.EOF:
+            return None
+        # Basic error recovery
+        self._advance()
+        return None
 
     def _element_statement(self):
         tag_name = self._consume(TokenType.IDENTIFIER, "element tag name").lexeme
@@ -33,14 +36,13 @@ class Parser:
         while not self._check(TokenType.RBRACE) and not self._is_at_end():
             if self._check(TokenType.TEXT):
                 element.children.append(self._text_statement())
-            elif self._check(TokenType.STYLE):
-                element.children.append(self._style_statement())
             elif self._is_attribute():
                 element.attributes.append(self._attribute())
             elif self._check(TokenType.IDENTIFIER):
                 element.children.append(self._element_statement())
             else:
-                raise self._error(self._peek(), "Unexpected token inside element block.")
+                self._error(self._peek(), "Unexpected token inside element block.")
+                self._advance() # Skip unexpected token
 
         self._consume(TokenType.RBRACE, "}")
         return element
@@ -53,67 +55,12 @@ class Parser:
         self._consume(TokenType.RBRACE, "}")
         return nodes.TextNode(value=value)
 
-    def _style_statement(self):
-        self._consume(TokenType.STYLE, "'style'")
-        self._consume(TokenType.LBRACE, "{")
-        style_node = nodes.StyleNode()
-        while not self._check(TokenType.RBRACE) and not self._is_at_end():
-            # Lookahead to see if it's a selector rule or a property
-            i = 0
-            is_selector = False
-            while not self._is_at_end(offset=i):
-                token_type = self._peek(i).type
-                if token_type == TokenType.LBRACE:
-                    is_selector = True
-                    break
-                if token_type == TokenType.SEMICOLON:
-                    is_selector = False
-                    break
-                i += 1
-
-            if is_selector:
-                style_node.children.append(self._style_selector_rule())
-            else:
-                style_node.children.append(self._style_property())
-        self._consume(TokenType.RBRACE, "}")
-        return style_node
-
-    def _style_property(self):
-        from CHTL.CHTLParser.expression_parser import ExpressionParser
-        name = self._consume(TokenType.IDENTIFIER, "property name").lexeme
-        self._consume(TokenType.COLON, "':'")
-
-        value_tokens = []
-        while not self._check(TokenType.SEMICOLON) and not self._is_at_end():
-            value_tokens.append(self._advance())
-
-        # Always use the expression parser to handle all value types
-        expression_ast = ExpressionParser(value_tokens).parse()
-
-        self._consume(TokenType.SEMICOLON, "';'")
-        return nodes.StylePropertyNode(name=name, value_expression=expression_ast)
-
-    def _style_selector_rule(self):
-        selector_tokens = []
-        while not self._check(TokenType.LBRACE) and not self._is_at_end():
-            selector_tokens.append(self._advance())
-
-        self._consume(TokenType.LBRACE, "{")
-        properties = []
-        while not self._check(TokenType.RBRACE) and not self._is_at_end():
-            properties.append(self._style_property())
-        self._consume(TokenType.RBRACE, "}")
-
-        return nodes.StyleSelectorRuleNode(selector_tokens=selector_tokens, properties=properties)
-
     def _attribute(self):
         name = self._consume(TokenType.IDENTIFIER, "attribute name").lexeme
         if not self._match(TokenType.EQUALS, TokenType.COLON):
             raise self._error(self._peek(), "Expect '=' or ':' for attribute assignment.")
 
-        if self._match(TokenType.STRING):
-            value = self._previous().lexeme
-        elif self._match(TokenType.IDENTIFIER):
+        if self._match(TokenType.STRING, TokenType.IDENTIFIER):
             value = self._previous().lexeme
         else:
             raise self._error(self._peek(), "Expect string or identifier for attribute value.")
@@ -133,7 +80,7 @@ class Parser:
         return self._peek().type == ttype
 
     def _is_at_end(self, offset=0) -> bool:
-        return self.current + offset >= len(self.tokens) -1
+        return self.tokens[self.current + offset].type == TokenType.EOF
 
     def _peek(self, offset=0) -> Token:
         return self.tokens[self.current + offset]
@@ -153,4 +100,6 @@ class Parser:
         return False
 
     def _error(self, token: Token, message: str) -> ParseError:
-        return ParseError(f"[Line {token.line}] Error at '{token.lexeme}': {message}")
+        # For now, just print the error and allow parsing to continue
+        print(f"[Line {token.line}] Error at '{token.lexeme}': {message}")
+        return ParseError()

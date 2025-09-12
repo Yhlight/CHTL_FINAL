@@ -3,7 +3,6 @@ import sys
 import os
 import re
 
-# Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from CHTL.CHTLLexer.lexer import Lexer
@@ -15,6 +14,11 @@ class TestCorePipeline(unittest.TestCase):
     def normalize(self, text: str) -> str:
         """Removes all whitespace for resilient comparison."""
         return re.sub(r'\s', '', text)
+
+    def compile_chtl(self, source: str) -> str:
+        tokens = Lexer(source).scan_tokens()
+        ast = Parser(tokens).parse()
+        return Generator().generate(ast)
 
     def test_basic_pipeline(self):
         source = """
@@ -49,12 +53,8 @@ class TestCorePipeline(unittest.TestCase):
         </html>
         """
 
-        # Run the full pipeline
-        tokens = Lexer(source).scan_tokens()
-        ast = Parser(tokens).parse()
-        generated_html = Generator().generate(ast)
+        generated_html = self.compile_chtl(source)
 
-        # Compare the normalized versions
         self.assertEqual(
             self.normalize(generated_html),
             self.normalize(expected_html)
