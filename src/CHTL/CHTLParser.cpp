@@ -1,4 +1,5 @@
 #include "CHTL/CHTLParser.h"
+#include "CHTL/ConcreteNodes.h"
 #include <iostream>
 #include <algorithm>
 
@@ -307,7 +308,7 @@ std::shared_ptr<CHTLNode> CHTLParser::parseStyleTemplate() {
     std::string templateName = current_token_.value;
     advance();
     
-    auto templateNode = std::make_shared<CHTLNode>(CHTLNode::NodeType::TEMPLATE);
+    auto templateNode = std::make_shared<TemplateNode>(templateName, TemplateNode::TemplateType::STYLE);
     
     if (match(TokenType::LEFT_BRACE)) {
         // 解析CSS属性
@@ -359,7 +360,7 @@ std::shared_ptr<CHTLNode> CHTLParser::parseElementTemplate() {
     std::string templateName = current_token_.value;
     advance();
     
-    auto templateNode = std::make_shared<CHTLNode>(CHTLNode::NodeType::TEMPLATE);
+    auto templateNode = std::make_shared<TemplateNode>(templateName, TemplateNode::TemplateType::ELEMENT);
     
     if (match(TokenType::LEFT_BRACE)) {
         // 解析子元素
@@ -388,7 +389,7 @@ std::shared_ptr<CHTLNode> CHTLParser::parseVarTemplate() {
     std::string templateName = current_token_.value;
     advance();
     
-    auto templateNode = std::make_shared<CHTLNode>(CHTLNode::NodeType::TEMPLATE);
+    auto templateNode = std::make_shared<TemplateNode>(templateName, TemplateNode::TemplateType::VAR);
     
     if (match(TokenType::LEFT_BRACE)) {
         // 解析变量

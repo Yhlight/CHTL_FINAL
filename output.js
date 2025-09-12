@@ -1,0 +1,81 @@
+// CHTL JS Test File
+
+// CJMOD声明
+[CJMOD] printMylove {
+    function printMylove() {
+        console.log("I love CHTL!");
+    }
+}
+
+[CJMOD] iNeverAway {
+    function iNeverAway() {
+        return "I will never be away from you!";
+    }
+}
+
+// 动画声明
+[Animation] fadeIn {
+    duration: 1s
+    easing: ease-in-out
+    direction: normal
+    loop: infinite
+    delay: 0s
+    keyframes: 0%: {opacity: 0}, 100%: {opacity: 1}
+}
+
+[Animation] slideUp {
+    duration: 0.5s
+    easing: ease-out
+    direction: normal
+    loop: 1
+    delay: 0.2s
+    keyframes: 0%: {transform: translateY(100px)}, 100%: {transform: translateY(0)}
+}
+
+// 路由声明
+[Route] home {
+    component: HomePage
+    params: title: "Welcome", subtitle: "CHTL JS Router"
+}
+
+[Route] about {
+    component: AboutPage
+    params: title: "About CHTL", description: "A powerful template language"
+}
+
+// 变量声明
+{{userName}} = "Chtholly"
+{{userAge}} = 17
+{{isLoggedIn}} = true
+
+// 选择器使用
+const button = document.querySelector('.my-button')
+const container = document.querySelector('#main-container')
+const items = document.querySelector('.item')
+
+// 事件监听器
+button.addEventListener('click', handleClick)
+container.addEventListener('mouseover', handleMouseOver)
+items.addEventListener('click', handleItemClick)
+
+// 响应式变量
+console.log("Hello, {{userName}}!")
+console.log("Age: {{userAge}}")
+console.log("Logged in: {{isLoggedIn}}")
+
+// 工具函数
+function util() {
+    return {
+        then: function(callback) {
+            return callback();
+        }
+    };
+}
+
+// 动画使用
+fadeIn.applyTo(document.querySelector('.fade-element'))
+slideUp.applyTo(document.querySelector('.slide-element'))
+
+// 路由使用
+router.addRoute(route_home)
+router.addRoute(route_about)

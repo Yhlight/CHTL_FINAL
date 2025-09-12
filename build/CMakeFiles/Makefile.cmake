@@ -57,5 +57,8 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/chtl_compiler.dir/DependInfo.cmake"
   "CMakeFiles/simple_chtl_compiler.dir/DependInfo.cmake"
   "CMakeFiles/improved_chtl_compiler.dir/DependInfo.cmake"
+  "CMakeFiles/working_chtl_compiler.dir/DependInfo.cmake"
+  "CMakeFiles/chtl_js_compiler.dir/DependInfo.cmake"
+  "CMakeFiles/chtl_cli.dir/DependInfo.cmake"
   "CMakeFiles/test_compiler.dir/DependInfo.cmake"
   )

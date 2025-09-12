@@ -44,6 +44,7 @@ set(CHTL_SOURCES
     src/CHTL/DefaultStructGenerator.cpp
     src/CHTL/CompilationMonitor.cpp
     src/CHTL/VSCodeExtension.cpp
+    src/CHTL/ConcreteNodes.cpp
     
     src/CHTLJS/CJMODSystem.cpp
     
@@ -72,6 +73,7 @@ set(CHTL_HEADERS
     include/CHTL/VSCodeExtension.h
     include/CHTL/WildcardImport.h
     include/CHTL/CJMODAPI.h
+    include/CHTL/ConcreteNodes.h
     include/CHTLJS/CHTLJSContext.h
     include/CHTLJS/CJMODSystem.h
     include/Scanner/UnifiedScanner.h
@@ -95,6 +97,12 @@ target_link_libraries(chtl_compiler chtl_lib)
 add_executable(simple_chtl_compiler src/simple_chtl_compiler.cpp)
 
 add_executable(improved_chtl_compiler src/improved_chtl_compiler.cpp)
+
+add_executable(working_chtl_compiler src/working_chtl_compiler.cpp)
+
+add_executable(chtl_js_compiler src/chtl_js_compiler.cpp)
+
+add_executable(chtl_cli src/chtl_cli.cpp)
 
 # 创建测试程序
 add_executable(test_compiler test_compiler.cpp)

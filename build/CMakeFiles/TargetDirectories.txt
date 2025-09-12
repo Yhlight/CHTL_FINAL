@@ -3,6 +3,9 @@
 /workspace/build/CMakeFiles/chtl_compiler.dir
 /workspace/build/CMakeFiles/simple_chtl_compiler.dir
 /workspace/build/CMakeFiles/improved_chtl_compiler.dir
+/workspace/build/CMakeFiles/working_chtl_compiler.dir
+/workspace/build/CMakeFiles/chtl_js_compiler.dir
+/workspace/build/CMakeFiles/chtl_cli.dir
 /workspace/build/CMakeFiles/test_compiler.dir
 /workspace/build/CMakeFiles/test.dir
 /workspace/build/CMakeFiles/edit_cache.dir

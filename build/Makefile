@@ -237,6 +237,45 @@ improved_chtl_compiler/fast:
 .PHONY : improved_chtl_compiler/fast
 
 #=============================================================================
+# Target rules for targets named working_chtl_compiler
+
+# Build rule for target.
+working_chtl_compiler: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 working_chtl_compiler
+.PHONY : working_chtl_compiler
+
+# fast build rule for target.
+working_chtl_compiler/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/working_chtl_compiler.dir/build.make CMakeFiles/working_chtl_compiler.dir/build
+.PHONY : working_chtl_compiler/fast
+
+#=============================================================================
+# Target rules for targets named chtl_js_compiler
+
+# Build rule for target.
+chtl_js_compiler: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 chtl_js_compiler
+.PHONY : chtl_js_compiler
+
+# fast build rule for target.
+chtl_js_compiler/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_js_compiler.dir/build.make CMakeFiles/chtl_js_compiler.dir/build
+.PHONY : chtl_js_compiler/fast
+
+#=============================================================================
+# Target rules for targets named chtl_cli
+
+# Build rule for target.
+chtl_cli: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 chtl_cli
+.PHONY : chtl_cli
+
+# fast build rule for target.
+chtl_cli/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_cli.dir/build.make CMakeFiles/chtl_cli.dir/build
+.PHONY : chtl_cli/fast
+
+#=============================================================================
 # Target rules for targets named test_compiler
 
 # Build rule for target.
@@ -440,6 +479,30 @@ src/CHTL/CompilationMonitor.s: src/CHTL/CompilationMonitor.cpp.s
 src/CHTL/CompilationMonitor.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL/CompilationMonitor.cpp.s
 .PHONY : src/CHTL/CompilationMonitor.cpp.s
+
+src/CHTL/ConcreteNodes.o: src/CHTL/ConcreteNodes.cpp.o
+.PHONY : src/CHTL/ConcreteNodes.o
+
+# target to build an object file
+src/CHTL/ConcreteNodes.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL/ConcreteNodes.cpp.o
+.PHONY : src/CHTL/ConcreteNodes.cpp.o
+
+src/CHTL/ConcreteNodes.i: src/CHTL/ConcreteNodes.cpp.i
+.PHONY : src/CHTL/ConcreteNodes.i
+
+# target to preprocess a source file
+src/CHTL/ConcreteNodes.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL/ConcreteNodes.cpp.i
+.PHONY : src/CHTL/ConcreteNodes.cpp.i
+
+src/CHTL/ConcreteNodes.s: src/CHTL/ConcreteNodes.cpp.s
+.PHONY : src/CHTL/ConcreteNodes.s
+
+# target to generate assembly for a file
+src/CHTL/ConcreteNodes.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL/ConcreteNodes.cpp.s
+.PHONY : src/CHTL/ConcreteNodes.cpp.s
 
 src/CHTL/ConfigurationSystem.o: src/CHTL/ConfigurationSystem.cpp.o
 .PHONY : src/CHTL/ConfigurationSystem.o
@@ -777,6 +840,30 @@ src/Scanner/UnifiedScanner.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Scanner/UnifiedScanner.cpp.s
 .PHONY : src/Scanner/UnifiedScanner.cpp.s
 
+src/chtl_cli.o: src/chtl_cli.cpp.o
+.PHONY : src/chtl_cli.o
+
+# target to build an object file
+src/chtl_cli.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_cli.dir/build.make CMakeFiles/chtl_cli.dir/src/chtl_cli.cpp.o
+.PHONY : src/chtl_cli.cpp.o
+
+src/chtl_cli.i: src/chtl_cli.cpp.i
+.PHONY : src/chtl_cli.i
+
+# target to preprocess a source file
+src/chtl_cli.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_cli.dir/build.make CMakeFiles/chtl_cli.dir/src/chtl_cli.cpp.i
+.PHONY : src/chtl_cli.cpp.i
+
+src/chtl_cli.s: src/chtl_cli.cpp.s
+.PHONY : src/chtl_cli.s
+
+# target to generate assembly for a file
+src/chtl_cli.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_cli.dir/build.make CMakeFiles/chtl_cli.dir/src/chtl_cli.cpp.s
+.PHONY : src/chtl_cli.cpp.s
+
 src/chtl_compiler.o: src/chtl_compiler.cpp.o
 .PHONY : src/chtl_compiler.o
 
@@ -800,6 +887,30 @@ src/chtl_compiler.s: src/chtl_compiler.cpp.s
 src/chtl_compiler.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/src/chtl_compiler.cpp.s
 .PHONY : src/chtl_compiler.cpp.s
+
+src/chtl_js_compiler.o: src/chtl_js_compiler.cpp.o
+.PHONY : src/chtl_js_compiler.o
+
+# target to build an object file
+src/chtl_js_compiler.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_js_compiler.dir/build.make CMakeFiles/chtl_js_compiler.dir/src/chtl_js_compiler.cpp.o
+.PHONY : src/chtl_js_compiler.cpp.o
+
+src/chtl_js_compiler.i: src/chtl_js_compiler.cpp.i
+.PHONY : src/chtl_js_compiler.i
+
+# target to preprocess a source file
+src/chtl_js_compiler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_js_compiler.dir/build.make CMakeFiles/chtl_js_compiler.dir/src/chtl_js_compiler.cpp.i
+.PHONY : src/chtl_js_compiler.cpp.i
+
+src/chtl_js_compiler.s: src/chtl_js_compiler.cpp.s
+.PHONY : src/chtl_js_compiler.s
+
+# target to generate assembly for a file
+src/chtl_js_compiler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_js_compiler.dir/build.make CMakeFiles/chtl_js_compiler.dir/src/chtl_js_compiler.cpp.s
+.PHONY : src/chtl_js_compiler.cpp.s
 
 src/improved_chtl_compiler.o: src/improved_chtl_compiler.cpp.o
 .PHONY : src/improved_chtl_compiler.o
@@ -873,6 +984,30 @@ src/simple_chtl_compiler.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/simple_chtl_compiler.dir/build.make CMakeFiles/simple_chtl_compiler.dir/src/simple_chtl_compiler.cpp.s
 .PHONY : src/simple_chtl_compiler.cpp.s
 
+src/working_chtl_compiler.o: src/working_chtl_compiler.cpp.o
+.PHONY : src/working_chtl_compiler.o
+
+# target to build an object file
+src/working_chtl_compiler.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/working_chtl_compiler.dir/build.make CMakeFiles/working_chtl_compiler.dir/src/working_chtl_compiler.cpp.o
+.PHONY : src/working_chtl_compiler.cpp.o
+
+src/working_chtl_compiler.i: src/working_chtl_compiler.cpp.i
+.PHONY : src/working_chtl_compiler.i
+
+# target to preprocess a source file
+src/working_chtl_compiler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/working_chtl_compiler.dir/build.make CMakeFiles/working_chtl_compiler.dir/src/working_chtl_compiler.cpp.i
+.PHONY : src/working_chtl_compiler.cpp.i
+
+src/working_chtl_compiler.s: src/working_chtl_compiler.cpp.s
+.PHONY : src/working_chtl_compiler.s
+
+# target to generate assembly for a file
+src/working_chtl_compiler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/working_chtl_compiler.dir/build.make CMakeFiles/working_chtl_compiler.dir/src/working_chtl_compiler.cpp.s
+.PHONY : src/working_chtl_compiler.cpp.s
+
 test_compiler.o: test_compiler.cpp.o
 .PHONY : test_compiler.o
 
@@ -911,11 +1046,14 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... chtl"
+	@echo "... chtl_cli"
 	@echo "... chtl_compiler"
+	@echo "... chtl_js_compiler"
 	@echo "... chtl_lib"
 	@echo "... improved_chtl_compiler"
 	@echo "... simple_chtl_compiler"
 	@echo "... test_compiler"
+	@echo "... working_chtl_compiler"
 	@echo "... src/CHTL/CHTLContext.o"
 	@echo "... src/CHTL/CHTLContext.i"
 	@echo "... src/CHTL/CHTLContext.s"
@@ -940,6 +1078,9 @@ help:
 	@echo "... src/CHTL/CompilationMonitor.o"
 	@echo "... src/CHTL/CompilationMonitor.i"
 	@echo "... src/CHTL/CompilationMonitor.s"
+	@echo "... src/CHTL/ConcreteNodes.o"
+	@echo "... src/CHTL/ConcreteNodes.i"
+	@echo "... src/CHTL/ConcreteNodes.s"
 	@echo "... src/CHTL/ConfigurationSystem.o"
 	@echo "... src/CHTL/ConfigurationSystem.i"
 	@echo "... src/CHTL/ConfigurationSystem.s"
@@ -982,9 +1123,15 @@ help:
 	@echo "... src/Scanner/UnifiedScanner.o"
 	@echo "... src/Scanner/UnifiedScanner.i"
 	@echo "... src/Scanner/UnifiedScanner.s"
+	@echo "... src/chtl_cli.o"
+	@echo "... src/chtl_cli.i"
+	@echo "... src/chtl_cli.s"
 	@echo "... src/chtl_compiler.o"
 	@echo "... src/chtl_compiler.i"
 	@echo "... src/chtl_compiler.s"
+	@echo "... src/chtl_js_compiler.o"
+	@echo "... src/chtl_js_compiler.i"
+	@echo "... src/chtl_js_compiler.s"
 	@echo "... src/improved_chtl_compiler.o"
 	@echo "... src/improved_chtl_compiler.i"
 	@echo "... src/improved_chtl_compiler.s"
@@ -994,6 +1141,9 @@ help:
 	@echo "... src/simple_chtl_compiler.o"
 	@echo "... src/simple_chtl_compiler.i"
 	@echo "... src/simple_chtl_compiler.s"
+	@echo "... src/working_chtl_compiler.o"
+	@echo "... src/working_chtl_compiler.i"
+	@echo "... src/working_chtl_compiler.s"
 	@echo "... test_compiler.o"
 	@echo "... test_compiler.i"
 	@echo "... test_compiler.s"
