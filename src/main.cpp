@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
     std::vector<CHTL::Token> tokens = lexer.scanTokens();
 
     // 3. Parse all files (starting with the main one)
-    CHTL::CHTLParser parser(tokens, loader, argv[1], context);
+    CHTL::CHTLParser parser(source, tokens, loader, argv[1], context);
     std::unique_ptr<CHTL::RootNode> ast = parser.parse();
 
     // 3. Generator

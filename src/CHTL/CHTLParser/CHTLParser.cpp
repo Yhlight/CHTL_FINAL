@@ -6,8 +6,8 @@
 
 namespace CHTL {
 
-CHTLParser::CHTLParser(std::vector<Token>& tokens, CHTLLoader& loader, const std::string& initial_path, std::shared_ptr<ParserContext> context)
-    : tokens_(tokens), loader_(loader), current_path_(initial_path), context_(context) {
+CHTLParser::CHTLParser(const std::string& source, std::vector<Token>& tokens, CHTLLoader& loader, const std::string& initial_path, std::shared_ptr<ParserContext> context)
+    : source_(source), tokens_(tokens), loader_(loader), current_path_(initial_path), context_(context) {
     // Check for a namespace declaration at the beginning of the file.
     if (!tokens_.empty() && tokens_[0].type == TokenType::Namespace) {
         if (tokens_.size() > 1 && tokens_[1].type == TokenType::Identifier) {
@@ -63,7 +63,7 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
 
             CHTLLexer imported_lexer(*content);
             std::vector<Token> imported_tokens = imported_lexer.scanTokens();
-            CHTLParser imported_parser(imported_tokens, loader_, imported_file_canonical_path, context_);
+            CHTLParser imported_parser(*content, imported_tokens, loader_, imported_file_canonical_path, context_);
 
             if (imported_parser.current_namespace_.empty()) {
                 imported_parser.current_namespace_ = default_namespace;
@@ -121,6 +121,8 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
         singleNode = parseText();
     } else if (match({TokenType::GeneratorComment})) {
         singleNode = parseGeneratorComment();
+    } else if (match({TokenType::Origin})) {
+        singleNode = parseOriginBlock();
     }
 
     if(singleNode) {
@@ -130,6 +132,28 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
 
     advance();
     throw std::runtime_error("Expected a declaration (element, text, etc.).");
+}
+
+std::unique_ptr<OriginNode> CHTLParser::parseOriginBlock() {
+    const Token& type = consume(TokenType::Identifier, "Expected origin type (e.g., @Html).");
+    consume(TokenType::OpenBrace, "Expected '{' to open origin block.");
+
+    std::stringstream content_ss;
+    int brace_level = 1;
+    while (brace_level > 0 && !isAtEnd()) {
+        if (peek().type == TokenType::OpenBrace) brace_level++;
+        else if (peek().type == TokenType::CloseBrace) brace_level--;
+
+        if (brace_level == 0) break;
+
+        content_ss << advance().lexeme << " ";
+    }
+
+    if (brace_level > 0) {
+        throw std::runtime_error("Unterminated origin block.");
+    }
+
+    return std::make_unique<OriginNode>(type.lexeme, content_ss.str());
 }
 
 void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes) {
@@ -190,7 +214,7 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
                 auto target_it = target_nodes.begin();
                 bool found = false;
                 if (position.type != TokenType::AtTop && position.type != TokenType::AtBottom) {
-                    size_t current_index = 0;
+                    size_t current_index = context_->config_.INDEX_INITIAL_COUNT;
                     for (auto it = target_nodes.begin(); it != target_nodes.end(); ++it) {
                         if ((*it)->getType() == NodeType::Element) {
                             ElementNode* target_element = static_cast<ElementNode*>((*it).get());

@@ -82,6 +82,9 @@ void CHTLGenerator::visit(const Node* node) {
         case NodeType::Comment:
             visitComment(static_cast<const CommentNode*>(node));
             break;
+        case NodeType::Origin:
+            visitOrigin(static_cast<const OriginNode*>(node));
+            break;
         case NodeType::StyleBlock:
             // Style blocks are handled by their parent element, so we do nothing here.
             break;
@@ -192,6 +195,11 @@ void CHTLGenerator::visitComment(const CommentNode* node) {
     indent();
     // CHTL generator comments '--' are converted to HTML comments
     output_ << "<!-- " << node->comment_ << " -->\n";
+}
+
+void CHTLGenerator::visitOrigin(const OriginNode* node) {
+    // Simply append the raw content, no processing or indentation.
+    output_ << node->content_;
 }
 
 void CHTLGenerator::indent() {

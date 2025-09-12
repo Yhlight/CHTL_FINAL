@@ -4,6 +4,8 @@ project(CHTL_Compiler CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+enable_testing()
+
 # Define the executable
 add_executable(chtl_compiler src/main.cpp)
 
@@ -25,8 +27,12 @@ target_link_libraries(chtl_compiler PRIVATE chtl_lib)
 target_include_directories(chtl_compiler PUBLIC src)
 target_include_directories(chtl_lib PUBLIC src)
 
-# Optional: Add a custom test command
+# Optional: Add custom test commands
 add_test(
-    NAME run_compiler_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/test.chtl
+    NAME run_delete_test
+    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/delete_test.chtl
+)
+add_test(
+    NAME run_insert_test
+    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/insert_test.chtl
 )
