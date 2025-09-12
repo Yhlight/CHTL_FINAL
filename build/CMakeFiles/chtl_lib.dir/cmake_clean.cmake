@@ -37,6 +37,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/chtl_lib.dir/src/CHTL/SyntaxBoundaries.cpp.o.d"
   "CMakeFiles/chtl_lib.dir/src/CHTL/TemplateNode.cpp.o"
   "CMakeFiles/chtl_lib.dir/src/CHTL/TemplateNode.cpp.o.d"
+  "CMakeFiles/chtl_lib.dir/src/CHTL/TemplateParser.cpp.o"
+  "CMakeFiles/chtl_lib.dir/src/CHTL/TemplateParser.cpp.o.d"
   "CMakeFiles/chtl_lib.dir/src/CHTL/UseStatement.cpp.o"
   "CMakeFiles/chtl_lib.dir/src/CHTL/UseStatement.cpp.o.d"
   "CMakeFiles/chtl_lib.dir/src/CHTL/VSCodeExtension.cpp.o"

@@ -27,6 +27,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspace/src/CHTL/ProjectWorkflow.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL/ProjectWorkflow.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL/ProjectWorkflow.cpp.o.d"
   "/workspace/src/CHTL/SyntaxBoundaries.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL/SyntaxBoundaries.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL/SyntaxBoundaries.cpp.o.d"
   "/workspace/src/CHTL/TemplateNode.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL/TemplateNode.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL/TemplateNode.cpp.o.d"
+  "/workspace/src/CHTL/TemplateParser.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL/TemplateParser.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL/TemplateParser.cpp.o.d"
   "/workspace/src/CHTL/UseStatement.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL/UseStatement.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL/UseStatement.cpp.o.d"
   "/workspace/src/CHTL/VSCodeExtension.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL/VSCodeExtension.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL/VSCodeExtension.cpp.o.d"
   "/workspace/src/CHTL/WildcardImport.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL/WildcardImport.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL/WildcardImport.cpp.o.d"

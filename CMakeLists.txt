@@ -46,6 +46,7 @@ set(CHTL_SOURCES
     src/CHTL/VSCodeExtension.cpp
     src/CHTL/ConcreteNodes.cpp
     src/CHTL/CompilerDispatcher.cpp
+    src/CHTL/TemplateParser.cpp
     
     src/CHTLJS/CJMODSystem.cpp
     
@@ -76,6 +77,7 @@ set(CHTL_HEADERS
     include/CHTL/CJMODAPI.h
     include/CHTL/ConcreteNodes.h
     include/CHTL/CompilerDispatcher.h
+    include/CHTL/TemplateParser.h
     include/CHTLJS/CHTLJSContext.h
     include/CHTLJS/CJMODSystem.h
     include/Scanner/UnifiedScanner.h

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "CHTL/CHTLNode.h"
-#include "CHTL/UnifiedScanner.h"
+#include "Scanner/UnifiedScanner.h"
 #include "CHTL/CHTLContext.h"
+#include "CHTL/TemplateParser.h"
 #include <string>
 #include <memory>
 #include <vector>
@@ -54,6 +55,7 @@ public:
         std::vector<std::string> errors;
         std::vector<std::string> warnings;
         std::map<std::string, std::string> metadata;
+        std::vector<TemplateInfo> templates;
     };
 
     CompilerDispatcher();
@@ -107,6 +109,7 @@ private:
     std::shared_ptr<CHTLContext> context_;
     std::vector<CodeFragment> fragments_;
     std::unique_ptr<UnifiedScanner> scanner_;
+    std::unique_ptr<TemplateParser> template_parser_;
 
     /**
      * @brief 识别代码片段类型
@@ -192,6 +195,7 @@ private:
      * @return 处理后的内容
      */
     std::string processConfiguration(const std::string& content);
+    void applyTemplatesToFragments(const std::vector<TemplateInfo>& templates);
 };
 
 } // namespace CHTL

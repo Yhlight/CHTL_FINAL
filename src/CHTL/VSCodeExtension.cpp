@@ -6,6 +6,36 @@
 #include <thread>
 #include <chrono>
 
+// 简化的JSON替代实现
+namespace SimpleJSON {
+    class Value {
+    public:
+        Value() = default;
+        Value(const std::string& str) : value_(str) {}
+        
+        std::string toString() const {
+            return value_;
+        }
+        
+    private:
+        std::string value_;
+    };
+    
+    class StreamWriter {
+    public:
+        std::string write(const Value& value) {
+            return value.toString();
+        }
+    };
+    
+    class StreamWriterBuilder {
+    public:
+        std::unique_ptr<StreamWriter> newStreamWriter() {
+            return std::make_unique<StreamWriter>();
+        }
+    };
+}
+
 #ifdef _WIN32
 #include <windows.h>
 #include <shellapi.h>
@@ -239,28 +269,26 @@ bool AutoModuleUnpacker::isCJMODFile(const std::string& file_path) const {
 }
 
 std::string AutoModuleUnpacker::generateJSONTable(const ModuleUnpackInfo& info) const {
-    Json::Value root;
-    root["module_name"] = info.module_name;
-    root["module_type"] = info.module_type;
-    root["module_path"] = info.module_path;
-    
-    Json::Value exported_items(Json::arrayValue);
-    for (const auto& item : info.exported_items) {
-        Json::Value item_obj;
-        item_obj["name"] = item;
-        item_obj["description"] = info.item_descriptions[item];
-        item_obj["type"] = info.item_types[item];
-        exported_items.append(item_obj);
-    }
-    root["exported_items"] = exported_items;
-    
-    Json::StreamWriterBuilder builder;
-    builder["indentation"] = "  ";
-    std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
-    
     std::ostringstream oss;
-    writer->write(root, &oss);
+    oss << "{\n";
+    oss << "  \"module_name\": \"" << info.module_name << "\",\n";
+    oss << "  \"module_type\": \"" << info.module_type << "\",\n";
+    oss << "  \"module_path\": \"" << info.module_path << "\",\n";
+    oss << "  \"exported_items\": [\n";
     
+    for (size_t i = 0; i < info.exported_items.size(); ++i) {
+        const auto& item = info.exported_items[i];
+        oss << "    {\n";
+        oss << "      \"name\": \"" << item << "\",\n";
+        oss << "      \"description\": \"" << info.item_descriptions.at(item) << "\",\n";
+        oss << "      \"type\": \"" << info.item_types.at(item) << "\"\n";
+        oss << "    }";
+        if (i < info.exported_items.size() - 1) oss << ",";
+        oss << "\n";
+    }
+    
+    oss << "  ]\n";
+    oss << "}";
     return oss.str();
 }
 
@@ -289,28 +317,26 @@ std::string JSONQueryTableGenerator::generateModuleQueryTable(const ModuleUnpack
 }
 
 std::string JSONQueryTableGenerator::generateGlobalQueryTable(const std::vector<ModuleUnpackInfo>& modules) const {
-    Json::Value root;
-    root["type"] = "global_query_table";
-    root["total_modules"] = static_cast<int>(modules.size());
-    
-    Json::Value modules_array(Json::arrayValue);
-    for (const auto& module : modules) {
-        Json::Value module_obj;
-        module_obj["name"] = module.module_name;
-        module_obj["type"] = module.module_type;
-        module_obj["path"] = module.module_path;
-        module_obj["exported_items_count"] = static_cast<int>(module.exported_items.size());
-        modules_array.append(module_obj);
-    }
-    root["modules"] = modules_array;
-    
-    Json::StreamWriterBuilder builder;
-    builder["indentation"] = "  ";
-    std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
-    
     std::ostringstream oss;
-    writer->write(root, &oss);
+    oss << "{\n";
+    oss << "  \"type\": \"global_query_table\",\n";
+    oss << "  \"total_modules\": " << modules.size() << ",\n";
+    oss << "  \"modules\": [\n";
     
+    for (size_t i = 0; i < modules.size(); ++i) {
+        const auto& module = modules[i];
+        oss << "    {\n";
+        oss << "      \"name\": \"" << module.module_name << "\",\n";
+        oss << "      \"type\": \"" << module.module_type << "\",\n";
+        oss << "      \"path\": \"" << module.module_path << "\",\n";
+        oss << "      \"exported_items_count\": " << module.exported_items.size() << "\n";
+        oss << "    }";
+        if (i < modules.size() - 1) oss << ",";
+        oss << "\n";
+    }
+    
+    oss << "  ]\n";
+    oss << "}";
     return oss.str();
 }
 
@@ -318,7 +344,7 @@ std::string JSONQueryTableGenerator::generateSyntaxQueryTable(const std::vector<
     return createSyntaxJSON(hints);
 }
 
-void JSONQueryTableGenerator::saveQueryTable(const std::string& table_name, const std::string& content) const {
+void JSONQueryTableGenerator::saveQueryTable(const std::string& table_name, const std::string& content) {
     if (caching_enabled_) {
         query_tables_[table_name] = content;
     }
@@ -351,7 +377,7 @@ std::string JSONQueryTableGenerator::loadQueryTable(const std::string& table_nam
     return "";
 }
 
-void JSONQueryTableGenerator::deleteQueryTable(const std::string& table_name) const {
+void JSONQueryTableGenerator::deleteQueryTable(const std::string& table_name) {
     query_tables_.erase(table_name);
     
     std::string filename = table_name + ".json";
@@ -440,62 +466,59 @@ void JSONQueryTableGenerator::clearCache() {
 }
 
 std::string JSONQueryTableGenerator::createModuleJSON(const ModuleUnpackInfo& info) const {
-    Json::Value root;
-    root["module_name"] = info.module_name;
-    root["module_type"] = info.module_type;
-    root["module_path"] = info.module_path;
-    
-    Json::Value exported_items(Json::arrayValue);
-    for (const auto& item : info.exported_items) {
-        Json::Value item_obj;
-        item_obj["name"] = item;
-        item_obj["description"] = info.item_descriptions[item];
-        item_obj["type"] = info.item_types[item];
-        exported_items.append(item_obj);
-    }
-    root["exported_items"] = exported_items;
-    
-    Json::StreamWriterBuilder builder;
-    builder["indentation"] = "  ";
-    std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
-    
     std::ostringstream oss;
-    writer->write(root, &oss);
+    oss << "{\n";
+    oss << "  \"module_name\": \"" << info.module_name << "\",\n";
+    oss << "  \"module_type\": \"" << info.module_type << "\",\n";
+    oss << "  \"module_path\": \"" << info.module_path << "\",\n";
+    oss << "  \"exported_items\": [\n";
     
+    for (size_t i = 0; i < info.exported_items.size(); ++i) {
+        const auto& item = info.exported_items[i];
+        oss << "    {\n";
+        oss << "      \"name\": \"" << item << "\",\n";
+        oss << "      \"description\": \"" << info.item_descriptions.at(item) << "\",\n";
+        oss << "      \"type\": \"" << info.item_types.at(item) << "\"\n";
+        oss << "    }";
+        if (i < info.exported_items.size() - 1) oss << ",";
+        oss << "\n";
+    }
+    
+    oss << "  ]\n";
+    oss << "}";
     return oss.str();
 }
 
 std::string JSONQueryTableGenerator::createSyntaxJSON(const std::vector<SyntaxHintInfo>& hints) const {
-    Json::Value root;
-    root["type"] = "syntax_query_table";
-    root["total_hints"] = static_cast<int>(hints.size());
-    
-    Json::Value hints_array(Json::arrayValue);
-    for (const auto& hint : hints) {
-        Json::Value hint_obj;
-        hint_obj["text"] = hint.hint_text;
-        hint_obj["type"] = hint.hint_type;
-        hint_obj["description"] = hint.description;
-        hint_obj["return_type"] = hint.return_type;
-        hint_obj["priority"] = hint.priority;
-        
-        Json::Value params(Json::arrayValue);
-        for (const auto& param : hint.parameters) {
-            params.append(param);
-        }
-        hint_obj["parameters"] = params;
-        
-        hints_array.append(hint_obj);
-    }
-    root["hints"] = hints_array;
-    
-    Json::StreamWriterBuilder builder;
-    builder["indentation"] = "  ";
-    std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
-    
     std::ostringstream oss;
-    writer->write(root, &oss);
+    oss << "{\n";
+    oss << "  \"type\": \"syntax_query_table\",\n";
+    oss << "  \"total_hints\": " << hints.size() << ",\n";
+    oss << "  \"hints\": [\n";
     
+    for (size_t i = 0; i < hints.size(); ++i) {
+        const auto& hint = hints[i];
+        oss << "    {\n";
+        oss << "      \"text\": \"" << hint.hint_text << "\",\n";
+        oss << "      \"type\": \"" << hint.hint_type << "\",\n";
+        oss << "      \"description\": \"" << hint.description << "\",\n";
+        oss << "      \"return_type\": \"" << hint.return_type << "\",\n";
+        oss << "      \"priority\": " << hint.priority << ",\n";
+        oss << "      \"parameters\": [";
+        
+        for (size_t j = 0; j < hint.parameters.size(); ++j) {
+            oss << "\"" << hint.parameters[j] << "\"";
+            if (j < hint.parameters.size() - 1) oss << ",";
+        }
+        
+        oss << "]\n";
+        oss << "    }";
+        if (i < hints.size() - 1) oss << ",";
+        oss << "\n";
+    }
+    
+    oss << "  ]\n";
+    oss << "}";
     return oss.str();
 }
 
@@ -1029,7 +1052,11 @@ std::string PagePreviewer::generatePreviewHTML(const std::string& chtl_code) con
 }
 
 std::string PagePreviewer::generatePreviewURL(const std::string& file_path) const {
-    return preview_config_["base_url"] + "/preview?file=" + file_path;
+    auto it = preview_config_.find("base_url");
+    if (it != preview_config_.end()) {
+        return it->second + "/preview?file=" + file_path;
+    }
+    return "http://localhost:8080/preview?file=" + file_path;
 }
 
 void PagePreviewer::openInBrowser(const std::string& url) const {

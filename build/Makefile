@@ -809,6 +809,30 @@ src/CHTL/TemplateNode.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL/TemplateNode.cpp.s
 .PHONY : src/CHTL/TemplateNode.cpp.s
 
+src/CHTL/TemplateParser.o: src/CHTL/TemplateParser.cpp.o
+.PHONY : src/CHTL/TemplateParser.o
+
+# target to build an object file
+src/CHTL/TemplateParser.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL/TemplateParser.cpp.o
+.PHONY : src/CHTL/TemplateParser.cpp.o
+
+src/CHTL/TemplateParser.i: src/CHTL/TemplateParser.cpp.i
+.PHONY : src/CHTL/TemplateParser.i
+
+# target to preprocess a source file
+src/CHTL/TemplateParser.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL/TemplateParser.cpp.i
+.PHONY : src/CHTL/TemplateParser.cpp.i
+
+src/CHTL/TemplateParser.s: src/CHTL/TemplateParser.cpp.s
+.PHONY : src/CHTL/TemplateParser.s
+
+# target to generate assembly for a file
+src/CHTL/TemplateParser.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL/TemplateParser.cpp.s
+.PHONY : src/CHTL/TemplateParser.cpp.s
+
 src/CHTL/UseStatement.o: src/CHTL/UseStatement.cpp.o
 .PHONY : src/CHTL/UseStatement.o
 
@@ -1325,6 +1349,9 @@ help:
 	@echo "... src/CHTL/TemplateNode.o"
 	@echo "... src/CHTL/TemplateNode.i"
 	@echo "... src/CHTL/TemplateNode.s"
+	@echo "... src/CHTL/TemplateParser.o"
+	@echo "... src/CHTL/TemplateParser.i"
+	@echo "... src/CHTL/TemplateParser.s"
 	@echo "... src/CHTL/UseStatement.o"
 	@echo "... src/CHTL/UseStatement.i"
 	@echo "... src/CHTL/UseStatement.s"

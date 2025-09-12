@@ -123,18 +123,18 @@ bool AtomArg::isAtom() const {
 
 std::string AtomArg::getAtomValue() const {
     if (is_atom_) {
-        return extractAtomValue(value_);
+        return extractAtomValue(getValue());
     }
-    return value_;
+    return getValue();
 }
 
 void AtomArg::setAtomValue(const std::string& value) {
-    value_ = value;
+    setValue(value);
     is_atom_ = isAtomicValue(value);
 }
 
 bool AtomArg::validateAtom() const {
-    return is_atom_ && !value_.empty();
+    return is_atom_ && !getValue().empty();
 }
 
 std::vector<std::string> AtomArg::getAtomValidationErrors() const {
@@ -144,7 +144,7 @@ std::vector<std::string> AtomArg::getAtomValidationErrors() const {
         errors.push_back("Not an atomic value");
     }
     
-    if (value_.empty()) {
+    if (getValue().empty()) {
         errors.push_back("Atom value cannot be empty");
     }
     

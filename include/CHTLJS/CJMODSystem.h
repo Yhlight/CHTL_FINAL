@@ -40,9 +40,9 @@ public:
     static bool isFunction(const std::string& code);
     static bool isArray(const std::string& code);
     static bool isCHTLJSFunction(const std::string& code);
+    static std::vector<std::string> tokenize(const std::string& syntax);
     
 private:
-    static std::vector<std::string> tokenize(const std::string& syntax);
     static bool isPlaceholder(const std::string& token);
     static std::string extractPlaceholderType(const std::string& token);
 };

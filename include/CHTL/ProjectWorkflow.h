@@ -5,6 +5,7 @@
 #include "CHTL/CHTLJSCompiler.h"
 #include "CHTL/ConfigurationSystem.h"
 #include "CHTL/UseStatement.h"
+#include "CHTL/CompilerDispatcher.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -13,53 +14,7 @@
 
 namespace CHTL {
 
-/**
- * 编译器调度器
- */
-class CompilerDispatcher {
-public:
-    CompilerDispatcher();
-    ~CompilerDispatcher();
-    
-    // 编译器注册
-    void registerCompiler(const std::string& name, std::shared_ptr<CHTLCompiler> compiler);
-    void registerJSCompiler(const std::string& name, std::shared_ptr<CHTLJSCompiler> compiler);
-    void registerCSSCompiler(const std::string& name, std::function<std::string(const std::string&)> compiler);
-    void registerJSFunctionCompiler(const std::string& name, std::function<std::string(const std::string&)> compiler);
-    
-    // 编译器查询
-    std::shared_ptr<CHTLCompiler> getCompiler(const std::string& name) const;
-    std::shared_ptr<CHTLJSCompiler> getJSCompiler(const std::string& name) const;
-    std::function<std::string(const std::string&)> getCSSCompiler(const std::string& name) const;
-    std::function<std::string(const std::string&)> getJSFunctionCompiler(const std::string& name) const;
-    
-    // 编译调度
-    std::string dispatchCompilation(const std::string& content, const std::string& type);
-    std::string dispatchFileCompilation(const std::string& filePath, const std::string& type);
-    
-    // 编译器列表
-    std::vector<std::string> getCompilerNames() const;
-    std::vector<std::string> getJSCompilerNames() const;
-    std::vector<std::string> getCSSCompilerNames() const;
-    std::vector<std::string> getJSFunctionCompilerNames() const;
-    
-    // 清理
-    void clear();
-    void clearCompilers();
-    void clearJSCompilers();
-    void clearCSSCompilers();
-    void clearJSFunctionCompilers();
-    
-private:
-    std::map<std::string, std::shared_ptr<CHTLCompiler>> compilers_;
-    std::map<std::string, std::shared_ptr<CHTLJSCompiler>> js_compilers_;
-    std::map<std::string, std::function<std::string(const std::string&)>> css_compilers_;
-    std::map<std::string, std::function<std::string(const std::string&)>> js_function_compilers_;
-    
-    // 调度辅助函数
-    std::string determineCompilerType(const std::string& content) const;
-    std::string determineFileType(const std::string& filePath) const;
-};
+// CompilerDispatcher 类定义在 CompilerDispatcher.h 中
 
 /**
  * 代码合并器

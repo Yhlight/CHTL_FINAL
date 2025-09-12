@@ -5,7 +5,7 @@
 #include <map>
 #include <memory>
 #include <functional>
-#include <json/json.h>
+// #include <json/json.h> // 暂时移除jsoncpp依赖
 
 namespace CHTL {
 
@@ -173,9 +173,9 @@ public:
     std::string generateSyntaxQueryTable(const std::vector<SyntaxHintInfo>& hints) const;
     
     // 查询表管理
-    void saveQueryTable(const std::string& table_name, const std::string& content) const;
+    void saveQueryTable(const std::string& table_name, const std::string& content);
     std::string loadQueryTable(const std::string& table_name) const;
-    void deleteQueryTable(const std::string& table_name) const;
+    void deleteQueryTable(const std::string& table_name);
     std::vector<std::string> listQueryTables() const;
     
     // 查询操作

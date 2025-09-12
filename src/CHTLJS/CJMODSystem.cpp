@@ -185,10 +185,9 @@ Arg CJMODScanner::scan(const Arg& args, const std::string& keyword) {
     // 简化的扫描实现
     Arg result = args;
     
-    for (auto& arg : result) {
-        if (arg.value.find(keyword) != std::string::npos) {
-            arg.fillValue(extractCodeFragment(arg.value, keyword));
-        }
+    if (result.toString().find(keyword) != std::string::npos) {
+        // 简化实现，不进行复杂的值填充
+        result.transform(extractCodeFragment(result.toString(), keyword));
     }
     
     return result;
@@ -218,9 +217,7 @@ std::string CJMODGenerator::exportResult(const Arg& args) {
 std::string CJMODGenerator::generateJS(const Arg& args) {
     std::ostringstream oss;
     
-    for (const auto& arg : args) {
-        oss << arg.getValue() << " ";
-    }
+    oss << args.toString() << " ";
     
     return oss.str();
 }

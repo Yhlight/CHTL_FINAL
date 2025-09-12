@@ -245,6 +245,9 @@ CMakeFiles/chtl_lib.dir/src/CHTL/ProjectWorkflow.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/array \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/compare \
   /workspace/include/CHTL/UseStatement.h \
+  /workspace/include/CHTL/CompilerDispatcher.h \
+  /workspace/include/CHTL/CHTLContext.h \
+  /workspace/include/CHTL/TemplateParser.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/fstream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/codecvt.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/basic_file.h \

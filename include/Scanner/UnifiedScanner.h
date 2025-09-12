@@ -23,10 +23,14 @@ struct CodeFragment {
     int line;
     int column;
     int position;
+    std::string language_hint;
+    int start_line;
+    int end_line;
+    std::map<std::string, std::string> metadata;
     
-    CodeFragment() : type(FragmentType::UNKNOWN), line(0), column(0), position(0) {}
+    CodeFragment() : type(FragmentType::UNKNOWN), line(0), column(0), position(0), start_line(0), end_line(0) {}
     CodeFragment(FragmentType t, const std::string& c, int l, int col, int pos) 
-        : type(t), content(c), line(l), column(col), position(pos) {}
+        : type(t), content(c), line(l), column(col), position(pos), start_line(l), end_line(l) {}
 };
 
 struct ScanResult {

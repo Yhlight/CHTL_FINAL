@@ -4,40 +4,23 @@
     <title>CHTL Test</title>
 </head>
 <body>
-    <h1>CHTL Compiler Test</h1>
+    <h1>Hello CHTL!</h1>
+    <p>This is a test of the CHTL compiler.</p>
     
-    [Template] @Style MyButton {
-        background-color: #007bff;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
+    <!-- CHTL Template Test -->
+    [Template] @Style MyStyle
+    .my-class {
+        color: blue;
+        font-size: 16px;
     }
     
-    [Template] @Element ButtonContainer {
-        <button class="MyButton">Click Me</button>
-    }
+    <!-- CHTL Custom Test -->
+    [Custom] @Element MyButton
+    <button class="my-button">Click me</button>
     
-    [Template] @Var UserName {
-        John Doe
-    }
-    
-    [Custom] SpecialDiv {
-        <p>This is a special div with custom styling</p>
-    }
-    
-    [Import] ./styles.css
-    
-    [Namespace] MyApp
-    
-    [Origin] @Html {
-        <div class="container">
-            <h2>Welcome, {{UserName}}!</h2>
-            <div class="ButtonContainer"></div>
-            <div class="SpecialDiv"></div>
-        </div>
-    }
-    
-    [Configuration] DEBUG_MODE = true
+    <!-- CHTL JS Test -->
+    <script>
+        {{console.log("Hello from CHTL JS!")}}
+    </script>
 </body>
 </html>

@@ -29,6 +29,12 @@ public:
         OPERATOR        // 操作符节点
     };
 
+    enum class TemplateType {
+        STYLE,      // 样式组模板
+        ELEMENT,    // 元素模板
+        VARIABLE    // 变量组模板
+    };
+
     CHTLNode(NodeType type);
     virtual ~CHTLNode() = default;
 

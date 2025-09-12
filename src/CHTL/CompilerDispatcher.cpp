@@ -1,6 +1,7 @@
 #include "CHTL/CompilerDispatcher.h"
 #include "CHTL/CHTLLexer.h"
 #include "CHTL/CHTLParser.h"
+#include "CHTL/TemplateParser.h"
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -10,7 +11,8 @@ namespace CHTL {
 
 CompilerDispatcher::CompilerDispatcher() 
     : context_(std::make_shared<CHTLContext>())
-    , scanner_(std::make_unique<UnifiedScanner>()) {
+    , scanner_(std::make_unique<UnifiedScanner>())
+    , template_parser_(std::make_unique<TemplateParser>()) {
 }
 
 CompilerDispatcher::CompilationResult CompilerDispatcher::compileFile(const std::string& input_file, const std::string& output_file) {
@@ -53,6 +55,9 @@ CompilerDispatcher::CompilationResult CompilerDispatcher::compileCode(const std:
         // 清空之前的片段
         clearFragments();
         
+        // 解析模板
+        auto templates = template_parser_->parseTemplates(code);
+        
         // 使用统一扫描器扫描代码
         auto scan_result = scanner_->scan(code);
         if (!scan_result.success) {
@@ -73,7 +78,13 @@ CompilerDispatcher::CompilationResult CompilerDispatcher::compileCode(const std:
             
             addFragment(code_fragment);
         }
+        
+        // 存储模板信息
+        result.templates = templates;
 
+        // 应用模板到代码片段
+        applyTemplatesToFragments(templates);
+        
         // 编译所有片段
         std::vector<CompilationResult> fragment_results;
         for (const auto& fragment : fragments_) {
@@ -212,7 +223,8 @@ CompilerDispatcher::CompilationResult CompilerDispatcher::compileCHTLFragment(co
     
     try {
         // 创建词法分析器
-        CHTLLexer lexer(fragment.content);
+        CHTLLexer lexer;
+        lexer.setInput(fragment.content);
         auto tokens = lexer.tokenize();
         
         if (tokens.empty()) {
@@ -222,7 +234,8 @@ CompilerDispatcher::CompilationResult CompilerDispatcher::compileCHTLFragment(co
         }
         
         // 创建解析器
-        CHTLParser parser(tokens, context_);
+        CHTLParser parser;
+        parser.setInput(fragment.content);
         auto ast = parser.parse();
         
         if (!ast) {
@@ -372,6 +385,48 @@ std::string CompilerDispatcher::processConfiguration(const std::string& content)
     // 这里应该实现完整的配置处理逻辑
     
     return result;
+}
+
+void CompilerDispatcher::applyTemplatesToFragments(const std::vector<TemplateInfo>& templates) {
+    // 创建模板映射
+    std::map<std::string, TemplateInfo> template_map;
+    for (const auto& template_def : templates) {
+        template_map[template_def.name] = template_def;
+    }
+    
+    // 对每个代码片段应用模板
+    for (auto& fragment : fragments_) {
+        if (fragment.type == FragmentType::CHTL) {
+            // 查找并应用模板
+            std::string processed_content = fragment.content;
+            
+            // 查找模板应用语法: @TemplateName
+            std::regex template_regex(R"(@(\w+))");
+            std::smatch match;
+            
+            while (std::regex_search(processed_content, match, template_regex)) {
+                std::string template_name = match[1].str();
+                auto it = template_map.find(template_name);
+                
+                if (it != template_map.end()) {
+                    // 应用模板
+                    std::string template_content = it->second.content;
+                    
+                    // 简单的模板变量替换
+                    // 这里可以实现更复杂的模板变量系统
+                    processed_content = std::regex_replace(
+                        processed_content, 
+                        std::regex("@" + template_name), 
+                        template_content
+                    );
+                }
+                
+                processed_content = match.suffix().str();
+            }
+            
+            fragment.content = processed_content;
+        }
+    }
 }
 
 } // namespace CHTL

@@ -348,7 +348,7 @@ class ChthollyMemo {
     renderMemos() {
         const list = document.querySelector('.memo-list');
         list.innerHTML = this.memos.map((memo, index) => 
-            `<div class="memo-item" onclick="chthollyMemo.loadMemo(${index})">
+            `<div class=\"memo-item\" onclick=\"chthollyMemo.loadMemo(${index})\">
                 <strong>${memo.title}</strong>
                 <p>${memo.content.substring(0, 50)}...</p>
             </div>`
@@ -367,23 +367,23 @@ const chthollyMemo = new ChthollyMemo();
 }
 
 // 其他组件的简化实现
-std::string ChthollyCMODComponentImpl::generateWarmNote() const {
+std::string CHTL::ChthollyCMODComponentImpl::generateWarmNote() const {
     return "<div class=\"chtholly-warm-note\">暖色笔记组件</div>";
 }
 
-std::string ChthollyCMODComponentImpl::generateCherryBlossomRain() const {
+std::string CHTL::ChthollyCMODComponentImpl::generateCherryBlossomRain() const {
     return "<div class=\"chtholly-cherry-rain\">樱花雨组件</div>";
 }
 
-std::string ChthollyCMODComponentImpl::generateMouseEffect() const {
+std::string CHTL::ChthollyCMODComponentImpl::generateMouseEffect() const {
     return "<div class=\"chtholly-mouse-effect\">鼠标特效组件</div>";
 }
 
-std::string ChthollyCMODComponentImpl::generateMouseTrail() const {
+std::string CHTL::ChthollyCMODComponentImpl::generateMouseTrail() const {
     return "<div class=\"chtholly-mouse-trail\">鼠标拖尾组件</div>";
 }
 
-std::string ChthollyCMODComponentImpl::generateParallaxBackground() const {
+std::string CHTL::ChthollyCMODComponentImpl::generateParallaxBackground() const {
     return "<div class=\"chtholly-parallax\">视差滚动背景组件</div>";
 }
 

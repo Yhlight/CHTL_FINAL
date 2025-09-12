@@ -134,6 +134,10 @@ const SyntaxBoundaryRule& SyntaxBoundaryDetector::getRule(SyntaxBoundaryType typ
     return defaultRule;
 }
 
+const std::map<SyntaxBoundaryType, SyntaxBoundaryRule>& SyntaxBoundaryDetector::getRules() const {
+    return rules_;
+}
+
 void SyntaxBoundaryDetector::clear() {
     rules_.clear();
 }
@@ -322,7 +326,7 @@ std::string WideStrictProcessor::processMixed(const std::string& content) const 
 std::map<SyntaxBoundaryType, std::vector<std::string>> WideStrictProcessor::extractMixedBlocks(const std::string& content) const {
     std::map<SyntaxBoundaryType, std::vector<std::string>> blocks;
     
-    for (const auto& pair : detector_.rules_) {
+    for (const auto& pair : detector_.getRules()) {
         auto typeBlocks = detector_.findBoundariesByType(content, pair.first);
         for (const auto& boundary : typeBlocks) {
             std::string block = content.substr(boundary.first, boundary.second - boundary.first + 1);
@@ -576,7 +580,7 @@ std::vector<std::pair<SyntaxBoundaryType, std::pair<size_t, size_t>>> SyntaxBoun
         return boundaries;
     }
     
-    for (const auto& pair : detector_->rules_) {
+    for (const auto& pair : detector_->getRules()) {
         auto typeBoundaries = detector_->findBoundariesByType(content, pair.first);
         for (const auto& boundary : typeBoundaries) {
             boundaries.push_back({pair.first, boundary});
@@ -593,7 +597,7 @@ std::vector<std::pair<SyntaxBoundaryType, std::string>> SyntaxBoundaryParser::pa
         return contents;
     }
     
-    for (const auto& pair : detector_->rules_) {
+    for (const auto& pair : detector_->getRules()) {
         auto typeBoundaries = detector_->findBoundariesByType(content, pair.first);
         for (const auto& boundary : typeBoundaries) {
             std::string boundaryContent = extractBoundaryContent(content, boundary.first, boundary.second);
@@ -688,7 +692,7 @@ bool SyntaxBoundaryValidator::validateAllBoundaries(const std::string& content) 
         return true;
     }
     
-    for (const auto& pair : detector_->rules_) {
+    for (const auto& pair : detector_->getRules()) {
         if (!detector_->validateSyntax(content, pair.first)) {
             return false;
         }

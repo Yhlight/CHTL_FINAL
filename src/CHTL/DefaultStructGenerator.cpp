@@ -203,7 +203,7 @@ bool DefaultStructGenerator::hasBodyTag(const std::string& content) const {
 }
 
 std::string DefaultStructGenerator::extractBodyContent(const std::string& content) const {
-    std::regex bodyRegex(R"(<body[^>]*>(.*?)</body>)", std::regex_constants::icase | std::regex_constants::dotall);
+    std::regex bodyRegex(R"(<body[^>]*>(.*?)</body>)", std::regex_constants::icase | std::regex_constants::multiline);
     std::smatch match;
     
     if (std::regex_search(content, match, bodyRegex)) {
@@ -214,7 +214,7 @@ std::string DefaultStructGenerator::extractBodyContent(const std::string& conten
 }
 
 std::string DefaultStructGenerator::extractHeadContent(const std::string& content) const {
-    std::regex headRegex(R"(<head[^>]*>(.*?)</head>)", std::regex_constants::icase | std::regex_constants::dotall);
+    std::regex headRegex(R"(<head[^>]*>(.*?)</head>)", std::regex_constants::icase | std::regex_constants::multiline);
     std::smatch match;
     
     if (std::regex_search(content, match, headRegex)) {
@@ -225,7 +225,7 @@ std::string DefaultStructGenerator::extractHeadContent(const std::string& conten
 }
 
 std::string DefaultStructGenerator::extractTitle(const std::string& content) const {
-    std::regex titleRegex(R"(<title[^>]*>(.*?)</title>)", std::regex_constants::icase | std::regex_constants::dotall);
+    std::regex titleRegex(R"(<title[^>]*>(.*?)</title>)", std::regex_constants::icase | std::regex_constants::multiline);
     std::smatch match;
     
     if (std::regex_search(content, match, titleRegex)) {
@@ -423,7 +423,7 @@ std::string DefaultStructGenerator::generateJSScripts(const DefaultStructConfig&
 
 std::string DefaultStructGenerator::findTagContent(const std::string& content, const std::string& tagName) const {
     std::string pattern = "<" + tagName + "[^>]*>(.*?)</" + tagName + ">";
-    std::regex tagRegex(pattern, std::regex_constants::icase | std::regex_constants::dotall);
+    std::regex tagRegex(pattern, std::regex_constants::icase | std::regex_constants::multiline);
     std::smatch match;
     
     if (std::regex_search(content, match, tagRegex)) {
@@ -436,7 +436,7 @@ std::string DefaultStructGenerator::findTagContent(const std::string& content, c
 std::vector<std::string> DefaultStructGenerator::findAllTagContent(const std::string& content, const std::string& tagName) const {
     std::vector<std::string> results;
     std::string pattern = "<" + tagName + "[^>]*>.*?</" + tagName + ">";
-    std::regex tagRegex(pattern, std::regex_constants::icase | std::regex_constants::dotall);
+    std::regex tagRegex(pattern, std::regex_constants::icase | std::regex_constants::multiline);
     std::sregex_iterator begin(content.begin(), content.end(), tagRegex);
     std::sregex_iterator end;
     
