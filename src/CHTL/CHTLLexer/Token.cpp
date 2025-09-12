@@ -9,7 +9,7 @@ static const std::map<TokenType, std::string> tokenTypeToStringMap = {
     {TokenType::LEFT_PAREN, "LEFT_PAREN"}, {TokenType::RIGHT_PAREN, "RIGHT_PAREN"},
     {TokenType::LEFT_BRACKET, "LEFT_BRACKET"}, {TokenType::RIGHT_BRACKET, "RIGHT_BRACKET"},
     {TokenType::COMMA, "COMMA"}, {TokenType::DOT, "DOT"}, {TokenType::MINUS, "MINUS"},
-    {TokenType::PLUS, "PLUS"}, {TokenType::STAR, "STAR"}, {TokenType::SEMICOLON, "SEMICOLON"},
+    {TokenType::PLUS, "PLUS"}, {TokenType::STAR, "STAR"}, {TokenType::HASH, "HASH"}, {TokenType::SEMICOLON, "SEMICOLON"},
     {TokenType::SLASH, "SLASH"}, {TokenType::PERCENT, "PERCENT"}, {TokenType::COLON, "COLON"},
     {TokenType::EQUAL, "EQUAL"}, {TokenType::QUESTION_MARK, "QUESTION_MARK"},
     {TokenType::BANG, "BANG"}, {TokenType::BANG_EQUAL, "BANG_EQUAL"},

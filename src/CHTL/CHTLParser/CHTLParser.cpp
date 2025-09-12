@@ -67,18 +67,39 @@ void CHTLParser::parseStyleBlock(ElementNode* element) {
     consume(TokenType::LEFT_BRACE, "Expect '{' after 'style'.");
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        Token key = consume(TokenType::UNQUOTED_LITERAL, "Expect style property name.");
-        consume(TokenType::COLON, "Expect ':' after style property name.");
-
-        // Style values can be more complex, but for now we take a single token.
-        Token value = advance();
-        if (value.type != TokenType::STRING && value.type != TokenType::UNQUOTED_LITERAL && value.type != TokenType::NUMBER) {
-            throw std::runtime_error("Style value must be a string, number, or unquoted literal.");
+        if (peek().type == TokenType::CHTL_COMMENT) {
+            Token commentToken = advance();
+            element->addChild(std::make_unique<CommentNode>(commentToken.lexeme));
+        } else if (peek().type == TokenType::DOT) { // Class selector
+            consume(TokenType::DOT, "Expect '.' for class selector.");
+            Token name = consume(TokenType::UNQUOTED_LITERAL, "Expect class name.");
+            element->addAttribute("class", name.lexeme);
+            // For now, consume and ignore the rule block
+            consume(TokenType::LEFT_BRACE, "Expect '{' for style rule block.");
+            while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) advance();
+            consume(TokenType::RIGHT_BRACE, "Expect '}' for style rule block.");
+        } else if (peek().type == TokenType::HASH) { // ID selector
+            consume(TokenType::HASH, "Expect '#' for id selector.");
+            Token name = consume(TokenType::UNQUOTED_LITERAL, "Expect id name.");
+            element->addAttribute("id", name.lexeme);
+            // For now, consume and ignore the rule block
+            consume(TokenType::LEFT_BRACE, "Expect '{' for style rule block.");
+            while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) advance();
+            consume(TokenType::RIGHT_BRACE, "Expect '}' for style rule block.");
         }
+        else { // Inline style property
+            Token key = consume(TokenType::UNQUOTED_LITERAL, "Expect style property name.");
+            consume(TokenType::COLON, "Expect ':' after style property name.");
 
-        element->addInlineStyle(key.lexeme, value.lexeme);
+            Token value = advance();
+            if (value.type != TokenType::STRING && value.type != TokenType::UNQUOTED_LITERAL && value.type != TokenType::NUMBER) {
+                throw std::runtime_error("Style value must be a string, number, or unquoted literal.");
+            }
 
-        consume(TokenType::SEMICOLON, "Expect ';' after style value.");
+            element->addInlineStyle(key.lexeme, value.lexeme);
+
+            consume(TokenType::SEMICOLON, "Expect ';' after style value.");
+        }
     }
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' after style block.");

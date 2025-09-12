@@ -58,6 +58,8 @@ bool CHTLLexer::match(char expected) {
 void CHTLLexer::scanToken() {
     char c = advance();
     switch (c) {
+        case '.': addToken(TokenType::DOT); break;
+        case '#': addToken(TokenType::HASH); break;
         case '{': addToken(TokenType::LEFT_BRACE); break;
         case '}': addToken(TokenType::RIGHT_BRACE); break;
         case ':': addToken(TokenType::COLON); break;

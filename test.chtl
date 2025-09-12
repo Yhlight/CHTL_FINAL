@@ -1,13 +1,11 @@
 div {
-    id: main;
-
+    -- This div should get class="widget" and id="main-widget"
+    -- from its style block.
     style {
-        width: 100px;
-        height: 200px;
-        background-color: red;
-    }
+        .widget {}
+        #main-widget {}
 
-    p {
-        text: "Styled content";
+        -- We can mix selectors and inline styles.
+        color: blue;
     }
 }
