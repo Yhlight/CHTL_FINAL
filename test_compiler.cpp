@@ -18,6 +18,7 @@
 #include "CHTL/CJMODAPI.h"
 #include "CHTL/OfficialModules.h"
 #include "CHTL/WildcardImport.h"
+#include "CHTL/DefaultStructGenerator.h"
 #include "Scanner/UnifiedScanner.h"
 #include "CHTLJS/CJMODSystem.h"
 
@@ -1210,6 +1211,160 @@ void testWildcardImport() {
     std::cout << "Wildcard Import test completed." << std::endl;
 }
 
+void testDefaultStructGenerator() {
+    std::cout << "Testing Default Struct Generator..." << std::endl;
+    
+    // 测试默认结构生成器
+    DefaultStructGenerator generator;
+    
+    std::string testContent = R"(
+<div>
+    <h1>Hello World</h1>
+    <p>This is a test document.</p>
+</div>
+)";
+    
+    // 测试最小结构
+    std::cout << "Testing minimal structure..." << std::endl;
+    std::string minimalStruct = generator.generateMinimalStruct(testContent);
+    std::cout << "Minimal structure generated: " << (minimalStruct.find("<!DOCTYPE html>") != std::string::npos ? "YES" : "NO") << std::endl;
+    
+    // 测试标准结构
+    std::cout << "Testing standard structure..." << std::endl;
+    std::string standardStruct = generator.generateStandardStruct(testContent);
+    std::cout << "Standard structure generated: " << (standardStruct.find("viewport") != std::string::npos ? "YES" : "NO") << std::endl;
+    
+    // 测试SPA结构
+    std::cout << "Testing SPA structure..." << std::endl;
+    std::string spaStruct = generator.generateSPAStruct(testContent);
+    std::cout << "SPA structure generated: " << (spaStruct.find("id=\"app\"") != std::string::npos ? "YES" : "NO") << std::endl;
+    
+    // 测试文档结构
+    std::cout << "Testing document structure..." << std::endl;
+    std::string documentStruct = generator.generateDocumentStruct(testContent);
+    std::cout << "Document structure generated: " << (documentStruct.find("<header>") != std::string::npos ? "YES" : "NO") << std::endl;
+    
+    // 测试应用结构
+    std::cout << "Testing application structure..." << std::endl;
+    std::string applicationStruct = generator.generateApplicationStruct(testContent);
+    std::cout << "Application structure generated: " << (applicationStruct.find("app-container") != std::string::npos ? "YES" : "NO") << std::endl;
+    
+    // 测试结构检测
+    std::cout << "Testing structure detection..." << std::endl;
+    std::string htmlWithStructure = "<!DOCTYPE html><html><head><title>Test</title></head><body><p>Content</p></body></html>";
+    std::string htmlWithoutStructure = "<p>Just content</p>";
+    
+    bool hasStructure1 = generator.hasHTMLStructure(htmlWithStructure);
+    bool hasStructure2 = generator.hasHTMLStructure(htmlWithoutStructure);
+    std::cout << "HTML with structure detected: " << (hasStructure1 ? "YES" : "NO") << std::endl;
+    std::cout << "HTML without structure detected: " << (!hasStructure2 ? "YES" : "NO") << std::endl;
+    
+    // 测试内容提取
+    std::cout << "Testing content extraction..." << std::endl;
+    std::string bodyContent = generator.extractBodyContent(htmlWithStructure);
+    std::string headContent = generator.extractHeadContent(htmlWithStructure);
+    std::string title = generator.extractTitle(htmlWithStructure);
+    
+    std::cout << "Body content extracted: " << (bodyContent.find("<p>Content</p>") != std::string::npos ? "YES" : "NO") << std::endl;
+    std::cout << "Head content extracted: " << (headContent.find("<title>Test</title>") != std::string::npos ? "YES" : "NO") << std::endl;
+    std::cout << "Title extracted: " << (title == "Test" ? "YES" : "NO") << std::endl;
+    
+    // 测试默认结构管理器
+    DefaultStructManager manager;
+    
+    std::cout << "Testing default struct manager..." << std::endl;
+    
+    // 测试启用/禁用
+    manager.enableDefaultStruct(true);
+    bool enabled = manager.isDefaultStructEnabled();
+    std::cout << "Default struct enabled: " << (enabled ? "YES" : "NO") << std::endl;
+    
+    manager.enableDefaultStruct(false);
+    bool disabled = !manager.isDefaultStructEnabled();
+    std::cout << "Default struct disabled: " << (disabled ? "YES" : "NO") << std::endl;
+    
+    manager.enableDefaultStruct(true);
+    
+    // 测试结构类型设置
+    manager.setStructType(DefaultStructType::SPA);
+    DefaultStructType type = manager.getStructType();
+    std::cout << "SPA structure type set: " << (type == DefaultStructType::SPA ? "YES" : "NO") << std::endl;
+    
+    // 测试内容处理
+    std::string processedContent = manager.processContent(testContent);
+    std::cout << "Content processed: " << (processedContent.length() > testContent.length() ? "YES" : "NO") << std::endl;
+    
+    // 测试预设管理
+    auto presets = manager.getAvailablePresets();
+    std::cout << "Available presets: " << presets.size() << std::endl;
+    
+    manager.loadPreset("spa");
+    std::cout << "SPA preset loaded: " << (manager.getStructType() == DefaultStructType::SPA ? "YES" : "NO") << std::endl;
+    
+    // 测试配置验证
+    DefaultStructConfig validConfig;
+    validConfig.title = "Test Document";
+    validConfig.charset = "UTF-8";
+    
+    bool configValid = manager.validateConfig(validConfig);
+    std::cout << "Valid config validated: " << (configValid ? "YES" : "NO") << std::endl;
+    
+    DefaultStructConfig invalidConfig;
+    invalidConfig.title = ""; // 空标题
+    invalidConfig.charset = ""; // 空字符集
+    
+    bool configInvalid = !manager.validateConfig(invalidConfig);
+    std::cout << "Invalid config rejected: " << (configInvalid ? "YES" : "NO") << std::endl;
+    
+    // 测试编译器选项处理器
+    CompilerOptionProcessor optionProcessor;
+    
+    std::cout << "Testing compiler option processor..." << std::endl;
+    
+    // 测试选项解析
+    std::string validOption = "--default-struct --type=spa --title=\"My SPA\"";
+    std::string invalidOption = "--invalid-option";
+    
+    bool option1Valid = optionProcessor.parseDefaultStructOption(validOption);
+    bool option2Valid = optionProcessor.parseDefaultStructOption(invalidOption);
+    
+    std::cout << "Valid option parsed: " << (option1Valid ? "YES" : "NO") << std::endl;
+    std::cout << "Invalid option rejected: " << (!option2Valid ? "YES" : "NO") << std::endl;
+    
+    // 测试选项验证
+    bool optionValid = optionProcessor.isValidDefaultStructOption(validOption);
+    bool optionInvalid = !optionProcessor.isValidDefaultStructOption(invalidOption);
+    
+    std::cout << "Valid option validated: " << (optionValid ? "YES" : "NO") << std::endl;
+    std::cout << "Invalid option rejected: " << (optionInvalid ? "YES" : "NO") << std::endl;
+    
+    // 测试选项处理
+    std::string processedWithOption = optionProcessor.processDefaultStructOption(testContent, validOption);
+    std::cout << "Content processed with option: " << (processedWithOption.length() > testContent.length() ? "YES" : "NO") << std::endl;
+    
+    // 测试帮助信息
+    std::string help = optionProcessor.getDefaultStructOptionHelp();
+    std::cout << "Help information available: " << (help.length() > 0 ? "YES" : "NO") << std::endl;
+    
+    auto examples = optionProcessor.getDefaultStructOptionExamples();
+    std::cout << "Option examples available: " << examples.size() << std::endl;
+    
+    // 测试自定义配置
+    DefaultStructConfig customConfig;
+    customConfig.type = DefaultStructType::APPLICATION;
+    customConfig.title = "Custom CHTL App";
+    customConfig.charset = "UTF-8";
+    customConfig.html_lang = "zh-CN";
+    customConfig.body_class = "custom-app";
+    
+    std::string customStruct = generator.generateDefaultStruct(testContent, customConfig);
+    std::cout << "Custom structure generated: " << (customStruct.find("Custom CHTL App") != std::string::npos ? "YES" : "NO") << std::endl;
+    std::cout << "Custom language set: " << (customStruct.find("lang=\"zh-CN\"") != std::string::npos ? "YES" : "NO") << std::endl;
+    std::cout << "Custom body class set: " << (customStruct.find("class=\"custom-app\"") != std::string::npos ? "YES" : "NO") << std::endl;
+    
+    std::cout << "Default Struct Generator test completed." << std::endl;
+}
+
 int main() {
     std::cout << "CHTL Compiler Test Suite" << std::endl;
     std::cout << "========================" << std::endl;
@@ -1276,6 +1431,9 @@ int main() {
         std::cout << std::endl;
         
         testWildcardImport();
+        std::cout << std::endl;
+        
+        testDefaultStructGenerator();
         std::cout << std::endl;
         
         std::cout << "All tests completed successfully!" << std::endl;
