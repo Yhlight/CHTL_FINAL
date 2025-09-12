@@ -6,12 +6,13 @@
 #include "CHTL/CHTLNode/ElementNode.h"
 #include <vector>
 #include <memory>
+#include "CHTL/CHTLContext/CHTLContext.h"
 
 namespace CHTL {
 
 class CHTLParser {
 public:
-    explicit CHTLParser(std::vector<Token>&& tokens);
+    explicit CHTLParser(std::vector<Token>&& tokens, CHTLContext& context);
     std::unique_ptr<BaseNode> parse();
 
 private:
@@ -19,6 +20,7 @@ private:
     void parseBlock(ElementNode* element);
     void parseProperty(ElementNode* element);
     void parseStyleBlock(ElementNode* element);
+    std::string parseCssBlock();
 
     bool isAtEnd() const;
     Token advance();
@@ -27,6 +29,7 @@ private:
     Token consume(TokenType type, const std::string& message);
     bool check(TokenType type) const;
 
+    CHTLContext& context;
     const std::vector<Token> tokens;
     int current = 0;
 };

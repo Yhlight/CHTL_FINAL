@@ -1,11 +1,15 @@
-div {
-    -- This div should get class="widget" and id="main-widget"
-    -- from its style block.
-    style {
-        .widget {}
-        #main-widget {}
-
-        -- We can mix selectors and inline styles.
-        color: blue;
+html {
+    head {}
+    body {
+        div {
+            style {
+                .widget {
+                    color: blue;
+                }
+                &:hover {
+                    color: red;
+                }
+            }
+        }
     }
 }

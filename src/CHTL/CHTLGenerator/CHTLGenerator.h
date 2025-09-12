@@ -5,13 +5,14 @@
 #include "CHTL/CHTLNode/BaseNode.h"
 #include <string>
 #include <sstream>
+#include "CHTL/CHTLContext/CHTLContext.h"
 
 namespace CHTL {
 
 // The Generator implements the NodeVisitor interface to traverse the AST.
 class CHTLGenerator : public NodeVisitor {
 public:
-    std::string generate(BaseNode* root);
+    std::string generate(BaseNode* root, CHTLContext& context);
 
     // We only need to implement the visitors for the nodes our MVP parser can create.
     void visit(ElementNode& node) override;
@@ -28,6 +29,7 @@ public:
     void visit(OperatorNode& node) override;
 
 private:
+    CHTLContext* context = nullptr;
     std::stringstream output;
 };
 

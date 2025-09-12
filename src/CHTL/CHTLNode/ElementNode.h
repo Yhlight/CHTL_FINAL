@@ -24,10 +24,16 @@ public:
         inlineStyles[key] = value;
     }
 
+    const std::string& getPrimarySelector() const { return primarySelector; }
+    void setPrimarySelector(const std::string& selector) {
+        primarySelector = selector;
+    }
+
 private:
     std::string tagName;
     std::map<std::string, std::string> attributes;
     std::map<std::string, std::string> inlineStyles;
+    std::string primarySelector;
 };
 
 } // namespace CHTL

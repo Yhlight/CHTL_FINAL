@@ -2,19 +2,12 @@
 #include "CHTL/CHTLNode/ElementNode.h"
 #include "CHTL/CHTLNode/TextNode.h"
 #include "CHTL/CHTLNode/CommentNode.h"
-#include "CHTL/CHTLNode/TemplateNode.h"
-#include "CHTL/CHTLNode/CustomNode.h"
-#include "CHTL/CHTLNode/StyleNode.h"
-#include "CHTL/CHTLNode/ScriptNode.h"
-#include "CHTL/CHTLNode/OriginNode.h"
-#include "CHTL/CHTLNode/ImportNode.h"
-#include "CHTL/CHTLNode/ConfigNode.h"
-#include "CHTL/CHTLNode/NamespaceNode.h"
-#include "CHTL/CHTLNode/OperatorNode.h"
+// ... include all other node headers ...
 
 namespace CHTL {
 
-std::string CHTLGenerator::generate(BaseNode* root) {
+std::string CHTLGenerator::generate(BaseNode* root, CHTLContext& context) {
+    this->context = &context;
     if (root) {
         root->accept(*this);
     }
@@ -24,12 +17,10 @@ std::string CHTLGenerator::generate(BaseNode* root) {
 void CHTLGenerator::visit(ElementNode& node) {
     output << "<" << node.getTagName();
 
-    // Append attributes
     for (const auto& attr : node.getAttributes()) {
         output << " " << attr.first << "=\"" << attr.second << "\"";
     }
 
-    // Append inline styles
     if (!node.getInlineStyles().empty()) {
         output << " style=\"";
         for (const auto& style : node.getInlineStyles()) {
@@ -40,7 +31,15 @@ void CHTLGenerator::visit(ElementNode& node) {
 
     output << ">";
 
-    // Recursively visit children
+    // If this is the head tag, inject the collected CSS
+    if (node.getTagName() == "head" && context && !context->getCssRules().empty()) {
+        output << "<style>";
+        for (const auto& rule : context->getCssRules()) {
+            output << rule.selector << "{" << rule.body << "}";
+        }
+        output << "</style>";
+    }
+
     for (const auto& child : node.getChildren()) {
         child->accept(*this);
     }
@@ -49,14 +48,14 @@ void CHTLGenerator::visit(ElementNode& node) {
 }
 
 void CHTLGenerator::visit(TextNode& node) {
-    // In a real implementation, we would escape HTML entities here.
     output << node.getText();
 }
 
-// Add empty implementations for other node types to make the class concrete
 void CHTLGenerator::visit(CommentNode& node) {
     output << "<!--" << node.getComment() << "-->";
 }
+
+// Add empty implementations for other node types
 void CHTLGenerator::visit(TemplateNode& node) {}
 void CHTLGenerator::visit(CustomNode& node) {}
 void CHTLGenerator::visit(StyleNode& node) {}
@@ -66,6 +65,5 @@ void CHTLGenerator::visit(ImportNode& node) {}
 void CHTLGenerator::visit(ConfigNode& node) {}
 void CHTLGenerator::visit(NamespaceNode& node) {}
 void CHTLGenerator::visit(OperatorNode& node) {}
-
 
 } // namespace CHTL

@@ -17,6 +17,7 @@ static const std::map<TokenType, std::string> tokenTypeToStringMap = {
     {TokenType::GREATER_EQUAL, "GREATER_EQUAL"}, {TokenType::LESS, "LESS"},
     {TokenType::LESS_EQUAL, "LESS_EQUAL"}, {TokenType::STAR_STAR, "STAR_STAR"},
     {TokenType::CHTL_COMMENT, "CHTL_COMMENT"}, {TokenType::ARROW, "ARROW"},
+    {TokenType::AMPERSAND, "AMPERSAND"},
     {TokenType::IDENTIFIER, "IDENTIFIER"}, {TokenType::STRING, "STRING"},
     {TokenType::NUMBER, "NUMBER"}, {TokenType::UNQUOTED_LITERAL, "UNQUOTED_LITERAL"},
     {TokenType::KEYWORD_TEXT, "KEYWORD_TEXT"}, {TokenType::KEYWORD_STYLE, "KEYWORD_STYLE"},

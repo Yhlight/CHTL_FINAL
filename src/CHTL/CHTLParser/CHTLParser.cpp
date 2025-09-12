@@ -5,7 +5,8 @@
 
 namespace CHTL {
 
-CHTLParser::CHTLParser(std::vector<Token>&& tokens) : tokens(std::move(tokens)) {}
+CHTLParser::CHTLParser(std::vector<Token>&& tokens, CHTLContext& context)
+    : tokens(std::move(tokens)), context(context) {}
 
 std::unique_ptr<BaseNode> CHTLParser::parse() {
     if (isAtEnd()) return nullptr;
@@ -74,17 +75,36 @@ void CHTLParser::parseStyleBlock(ElementNode* element) {
             consume(TokenType::DOT, "Expect '.' for class selector.");
             Token name = consume(TokenType::UNQUOTED_LITERAL, "Expect class name.");
             element->addAttribute("class", name.lexeme);
-            // For now, consume and ignore the rule block
+            element->setPrimarySelector("." + name.lexeme);
+
             consume(TokenType::LEFT_BRACE, "Expect '{' for style rule block.");
-            while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) advance();
+            std::string ruleBody = parseCssBlock();
+            context.addCssRule("." + name.lexeme, ruleBody);
             consume(TokenType::RIGHT_BRACE, "Expect '}' for style rule block.");
+
         } else if (peek().type == TokenType::HASH) { // ID selector
             consume(TokenType::HASH, "Expect '#' for id selector.");
             Token name = consume(TokenType::UNQUOTED_LITERAL, "Expect id name.");
             element->addAttribute("id", name.lexeme);
-            // For now, consume and ignore the rule block
+            element->setPrimarySelector("#" + name.lexeme);
+
             consume(TokenType::LEFT_BRACE, "Expect '{' for style rule block.");
-            while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) advance();
+            std::string ruleBody = parseCssBlock();
+            context.addCssRule("#" + name.lexeme, ruleBody);
+            consume(TokenType::RIGHT_BRACE, "Expect '}' for style rule block.");
+        } else if (peek().type == TokenType::AMPERSAND) { // Context selector
+            consume(TokenType::AMPERSAND, "Expect '&'.");
+            // The rest of the selector (e.g., :hover) is tokenized as other things.
+            // We'll consume until the `{`. This is a simplification.
+            std::string restOfSelector = "";
+            while(peek().type != TokenType::LEFT_BRACE && !isAtEnd()) {
+                restOfSelector += advance().lexeme;
+            }
+            std::string fullSelector = element->getPrimarySelector() + restOfSelector;
+
+            consume(TokenType::LEFT_BRACE, "Expect '{' for style rule block.");
+            std::string ruleBody = parseCssBlock();
+            context.addCssRule(fullSelector, ruleBody);
             consume(TokenType::RIGHT_BRACE, "Expect '}' for style rule block.");
         }
         else { // Inline style property
@@ -103,6 +123,38 @@ void CHTLParser::parseStyleBlock(ElementNode* element) {
     }
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' after style block.");
+}
+
+std::string CHTLParser::parseCssBlock() {
+    // This is a simple approach that captures the raw string content inside the braces.
+    // It assumes the lexer doesn't tokenize anything inside the CSS block, which is not
+    // currently true. A better approach is needed.
+    // For now, let's just consume tokens until the matching brace.
+    int start_pos = current;
+    int brace_level = 1;
+    while (brace_level > 0 && !isAtEnd()) {
+        if (peek().type == TokenType::LEFT_BRACE) brace_level++;
+        else if (peek().type == TokenType::RIGHT_BRACE) brace_level--;
+
+        if (brace_level == 0) break; // found matching brace
+        advance();
+    }
+    int end_pos = current;
+
+    // This part is tricky because the lexemes don't contain whitespace.
+    // Reconstructing from source is better.
+    // Let's find the character position of the start and end tokens.
+    // This requires more info on the Token or a different approach.
+
+    // Let's stick to the simple token-by-token concatenation for now, it's a known limitation.
+    std::string body = "";
+    for (int i = start_pos; i < end_pos; ++i) {
+        body += tokens[i].lexeme;
+        if (tokens[i].type == TokenType::COLON || tokens[i].type == TokenType::SEMICOLON) {
+            body += " ";
+        }
+    }
+    return body;
 }
 
 // --- Parser Helpers ---

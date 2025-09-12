@@ -60,6 +60,7 @@ void CHTLLexer::scanToken() {
     switch (c) {
         case '.': addToken(TokenType::DOT); break;
         case '#': addToken(TokenType::HASH); break;
+        case '&': addToken(TokenType::AMPERSAND); break;
         case '{': addToken(TokenType::LEFT_BRACE); break;
         case '}': addToken(TokenType::RIGHT_BRACE); break;
         case ':': addToken(TokenType::COLON); break;

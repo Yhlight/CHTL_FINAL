@@ -24,6 +24,7 @@ enum class TokenType {
     STAR_STAR, // Power `**`
     CHTL_COMMENT, // `--`
     ARROW, // `->`
+    AMPERSAND, // &
 
     // Literals
     IDENTIFIER,

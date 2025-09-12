@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include "Util/FileSystem/FileSystem.h"
+#include "CHTL/CHTLContext/CHTLContext.h"
 #include "CHTL/CHTLLexer/CHTLLexer.h"
 #include "CHTL/CHTLParser/CHTLParser.h"
 #include "CHTL/CHTLGenerator/CHTLGenerator.h"
@@ -16,18 +17,21 @@ void runFile(const std::string& path) {
     }
 
     try {
+        // 0. Create a context for the compilation.
+        CHTL::CHTLContext context;
+
         // 1. Lexer
         CHTL::CHTLLexer lexer(content);
         std::vector<CHTL::Token> tokens = lexer.scanTokens();
 
         // 2. Parser
-        CHTL::CHTLParser parser(std::move(tokens));
+        CHTL::CHTLParser parser(std::move(tokens), context);
         std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
 
         // 3. Generator
         if (ast) {
             CHTL::CHTLGenerator generator;
-            std::string html = generator.generate(ast.get());
+            std::string html = generator.generate(ast.get(), context);
             std::cout << html << std::endl;
         }
     } catch (const std::runtime_error& e) {
@@ -42,7 +46,6 @@ int main(int argc, char* argv[]) {
     } else if (argc == 2) {
         runFile(argv[1]);
     } else {
-        // Default to test.chtl if no file is provided
         runFile("test.chtl");
     }
 
