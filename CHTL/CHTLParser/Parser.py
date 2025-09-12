@@ -1,5 +1,6 @@
+from typing import Union, Tuple
 from CHTL.CHTLLexer import Lexer, Token, TokenType
-from CHTL.CHTLNode import BaseNode, ElementNode, TextNode, StyleNode
+from CHTL.CHTLNode import BaseNode, ElementNode, TextNode, StyleNode, CssRule
 
 class Parser:
     """
@@ -52,7 +53,7 @@ class Parser:
 
         return root
 
-    def parse_statement(self) -> BaseNode | None:
+    def parse_statement(self) -> Union[BaseNode, None]:
         """
         Parses a single statement. For now, a statement is an element
         declaration.
@@ -61,7 +62,7 @@ class Parser:
             return self.parse_element_or_text_statement()
         return None
 
-    def parse_element_or_text_statement(self) -> ElementNode | TextNode | StyleNode | None:
+    def parse_element_or_text_statement(self) -> Union[ElementNode, TextNode, StyleNode, None]:
         """
         Parses an element (e.g., `div {}`), a text node (`text {}`), or a style node (`style {}`).
         """
@@ -152,42 +153,110 @@ class Parser:
             self._next_token()
 
     def _parse_style_body(self) -> StyleNode:
-        """Parses the block content of a style node, e.g., `{ width: 100px; }`."""
-        # Assumes current_token is '{'
+        """
+        Parses the body of a style block, which can contain a mix of inline
+        properties and full CSS rules. It also collects signals for auto-attribute generation.
+        """
+        self._next_token() # Consume '{'
+
+        inline_properties = {}
+        css_rules = []
+        auto_classes = []
+        auto_ids = []
+
+        while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
+            if self.current_token.type not in (TokenType.IDENTIFIER, TokenType.DOT, TokenType.HASH, TokenType.AMPERSAND):
+                self.errors.append(f"Unexpected token in style block: {self.current_token.literal}")
+                self._skip_to_next_statement()
+                continue
+
+            if self.peek_token.type == TokenType.COLON:
+                prop_name, prop_value = self._parse_inline_css_property()
+                if prop_name:
+                    inline_properties[prop_name] = prop_value
+            # If it's not an inline property, it must be a full CSS rule.
+            else:
+                rule, auto_class, auto_id = self._parse_css_rule()
+                if rule:
+                    css_rules.append(rule)
+                if auto_class:
+                    auto_classes.append(auto_class)
+                if auto_id:
+                    auto_ids.append(auto_id)
+
+        return StyleNode(properties=inline_properties, rules=css_rules,
+                         auto_classes=auto_classes, auto_ids=auto_ids)
+
+    def _parse_inline_css_property(self) -> Union[Tuple[str, str], Tuple[None, None]]:
+        """Parses a single `key: value;` and returns the key and value."""
+        prop_name = self.current_token.literal
+
+        self._next_token() # consume property name
+        self._next_token() # consume colon
+
+        value_parts = []
+        while self.current_token.type not in (TokenType.SEMICOLON, TokenType.RBRACE, TokenType.EOF):
+            value_parts.append(self.current_token.literal)
+            self._next_token()
+
+        if not value_parts:
+            self.errors.append(f"Missing value for CSS property '{prop_name}'")
+            return None, None
+
+        prop_value = " ".join(value_parts)
+
+        if self.current_token.type == TokenType.SEMICOLON:
+            self._next_token() # Consume semicolon
+        else:
+            self.errors.append(f"Missing semicolon for CSS property '{prop_name}'")
+
+        return prop_name, prop_value
+
+    def _parse_css_rule(self) -> Union[Tuple[CssRule, str, str], Tuple[None, None, None]]:
+        """
+        Parses a full CSS rule. Also checks if the selector is a simple
+        class/id selector to flag it for auto-attribute generation.
+        Returns (CssRule, auto_class_name, auto_id_name)
+        """
+        selector_tokens = []
+        while self.current_token.type not in (TokenType.LBRACE, TokenType.EOF):
+             selector_tokens.append(self.current_token)
+             self._next_token()
+
+        selector_string = "".join(t.literal for t in selector_tokens)
+        auto_class = None
+        auto_id = None
+
+        # Check for simple selector: .class or #id
+        if len(selector_tokens) == 2:
+            if selector_tokens[0].type == TokenType.DOT and selector_tokens[1].type == TokenType.IDENTIFIER:
+                auto_class = selector_tokens[1].literal
+            elif selector_tokens[0].type == TokenType.HASH and selector_tokens[1].type == TokenType.IDENTIFIER:
+                auto_id = selector_tokens[1].literal
+
+        if self.current_token.type != TokenType.LBRACE:
+            self.errors.append(f"Expected '{{' for selector rule '{selector_string}'")
+            return None, None, None
+
         self._next_token() # Consume '{'
 
         properties = {}
         while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
-            if self.current_token.type != TokenType.IDENTIFIER:
-                self.errors.append(f"Expected CSS property name, got {self.current_token.type}")
-                self._skip_to_next_statement()
-                continue
-
-            prop_name = self.current_token.literal
-
-            if not self._expect_peek(TokenType.COLON):
-                self._skip_to_next_statement()
-                continue
-
-            self._next_token() # consume colon, current_token is now the start of the value
-
-            value_parts = []
-            while self.current_token.type not in (TokenType.SEMICOLON, TokenType.RBRACE, TokenType.EOF):
-                value_parts.append(self.current_token.literal)
-                self._next_token()
-
-            if not value_parts:
-                self.errors.append(f"Missing value for CSS property '{prop_name}'")
-
-            properties[prop_name] = " ".join(value_parts)
-
-            if self.current_token.type == TokenType.SEMICOLON:
-                self._next_token() # Consume semicolon to start the next property
+            if self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type == TokenType.COLON:
+                prop_name, prop_value = self._parse_inline_css_property()
+                if prop_name:
+                    properties[prop_name] = prop_value
             else:
-                self.errors.append(f"Missing semicolon for CSS property '{prop_name}'")
+                self.errors.append(f"Unexpected token in CSS rule body: {self.current_token.literal}")
+                self._skip_to_next_statement()
 
-        # The loop terminates when current_token is RBRACE. The calling loop will consume it.
-        return StyleNode(properties=properties)
+        if self.current_token.type != TokenType.RBRACE:
+            self.errors.append(f"Expected '}}' to close selector rule '{selector_string}'")
+
+        self._next_token() # Consume '}' to finish the rule.
+
+        rule = CssRule(selector=selector_string, properties=properties)
+        return rule, auto_class, auto_id
 
     def _parse_text_body(self) -> TextNode | None:
         """

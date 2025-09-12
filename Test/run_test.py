@@ -6,7 +6,7 @@ import json
 # from the 'CHTL' package. This is a common pattern for simple test runners.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from CHTL.CHTLLexer import Lexer
+from CHTL.CHTLLexer import Lexer, TokenType
 from CHTL.CHTLParser import Parser
 from CHTL.CHTLGenerator import Generator
 
@@ -71,7 +71,25 @@ if __name__ == "__main__":
         print(output_html)
 
         # Verification
-        expected_html = '<html><body><h1 class="main-title">Welcome to CHTL</h1><div id="container" class="content-box" style="width: 100px; height: 200px; background-color: red"></div><p>This is an unquoted test</p><img src="image.jpg" alt="A test image"></body></html>'
+        # Note: The expected string needs to match the generator's output exactly, including whitespace.
+        expected_html = """<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>CHTL Document</title>
+    <style>
+    .main-title {
+        text-decoration: underline;
+    }
+    .auto-class {
+        border: 1px solid black;
+    }
+    </style>
+</head>
+<body>
+<h1 class="main-title" style="color: blue">Welcome to CHTL</h1><div id="container" class="content-box" style="width: 100px; height: 200px; background-color: red"></div><p>This is an unquoted test</p><img src="image.jpg" alt="A test image"><div class="auto-class">This div should have a class.</div>
+</body>
+</html>"""
 
         print("\n--- Verification ---")
         if output_html == expected_html:

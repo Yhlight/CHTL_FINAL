@@ -1,32 +1,46 @@
 // This is a simple test file for the CHTL compiler.
-// It checks for basic element nesting, text nodes, and now attributes.
+// The generator should wrap this content in <html> and <body> tags.
 
-html {
-    body {
-        h1 {
-            class: "main-title";
-            text { "Welcome to CHTL" }
-        }
-
-        /* A multi-line comment */
-        div {
-            id = "container"; // Test '=' as well as ':'
-            class: content-box; // Test unquoted attribute value
-            style {
-                width: 100px;
-                height: 200px;
-                background-color: red;
-            }
-        }
-
-        p {
-            text { This is an unquoted test }
-        }
-
-        // Test a self-closing tag with attributes
-        img {
-            src: "image.jpg";
-            alt: "A test image";
+h1 {
+    class: "main-title";
+    style {
+        // This will become an inline style
+        color: blue;
+        // This will be extracted to the global stylesheet
+        .main-title {
+            text-decoration: underline;
         }
     }
+    text { "Welcome to CHTL" }
+}
+
+/* A multi-line comment */
+div {
+    id = "container"; // Test '=' as well as ':'
+    class: content-box; // Test unquoted attribute value
+    style {
+        width: 100px;
+        height: 200px;
+        background-color: red;
+    }
+}
+
+p {
+    text { This is an unquoted test }
+}
+
+// Test a self-closing tag with attributes
+img {
+    src: "image.jpg";
+    alt: "A test image";
+}
+
+// Test for auto-attribute generation
+div {
+    style {
+        .auto-class {
+            border: 1px solid black;
+        }
+    }
+    text { "This div should have a class." }
 }

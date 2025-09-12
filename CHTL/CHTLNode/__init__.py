@@ -4,4 +4,4 @@
 from .BaseNode import BaseNode
 from .ElementNode import ElementNode
 from .TextNode import TextNode
-from .StyleNode import StyleNode
+from .StyleNode import StyleNode, CssRule

@@ -100,6 +100,10 @@ class Lexer:
                 ':': TokenType.COLON,
                 '=': TokenType.EQUALS,
                 ';': TokenType.SEMICOLON,
+                '.': TokenType.DOT,
+                '#': TokenType.HASH,
+                '&': TokenType.AMPERSAND,
+                '>': TokenType.GT,
             }
             if self.current_char in token_map:
                 token_type = token_map[self.current_char]

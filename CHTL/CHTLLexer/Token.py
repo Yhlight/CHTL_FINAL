@@ -24,6 +24,10 @@ class TokenType(Enum):
     EQUALS = "="
     SEMICOLON = ";"
     AT = "@"
+    DOT = "."
+    HASH = "#"
+    AMPERSAND = "&"
+    GT = ">"
 
     # Comments - The lexer will likely skip these, but the types are here for completeness
     COMMENT_LINE = "//"
