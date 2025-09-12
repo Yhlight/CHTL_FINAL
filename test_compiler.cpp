@@ -10,6 +10,10 @@
 #include "CHTL/ModuleSystem.h"
 #include "CHTL/CLITools.h"
 #include "CHTL/CompilationMonitor.h"
+#include "CHTL/ConfigurationSystem.h"
+#include "CHTL/UseStatement.h"
+#include "CHTL/CHTLJSCompiler.h"
+#include "CHTL/ProjectWorkflow.h"
 #include "Scanner/UnifiedScanner.h"
 #include "CHTLJS/CJMODSystem.h"
 
@@ -607,6 +611,232 @@ void testCompilationMonitor() {
     std::cout << "Compilation Monitor test completed." << std::endl;
 }
 
+void testConfigurationSystem() {
+    std::cout << "Testing Configuration System..." << std::endl;
+    
+    // 测试配置值
+    ConfigurationValue boolValue(true);
+    ConfigurationValue intValue(42);
+    ConfigurationValue stringValue("test");
+    ConfigurationValue arrayValue({"item1", "item2", "item3"});
+    
+    std::cout << "Boolean value: " << boolValue.toString() << std::endl;
+    std::cout << "Integer value: " << intValue.toString() << std::endl;
+    std::cout << "String value: " << stringValue.toString() << std::endl;
+    std::cout << "Array value: " << arrayValue.toString() << std::endl;
+    
+    // 测试Name配置
+    NameConfiguration nameConfig;
+    nameConfig.setDefaultValues();
+    std::cout << "CUSTOM_STYLE: " << nameConfig.CUSTOM_STYLE << std::endl;
+    std::cout << "CUSTOM_ELEMENT: " << nameConfig.CUSTOM_ELEMENT << std::endl;
+    std::cout << "CUSTOM_VAR: " << nameConfig.CUSTOM_VAR << std::endl;
+    
+    // 测试配置组
+    auto configGroup = std::make_shared<ConfigurationGroup>("TestGroup");
+    configGroup->setConfiguration("DEBUG_MODE", ConfigurationValue(true));
+    configGroup->setConfiguration("INDEX_INITIAL_COUNT", ConfigurationValue(0));
+    configGroup->setNameConfiguration(nameConfig);
+    
+    std::cout << "Configuration group created: " << configGroup->getName() << std::endl;
+    std::cout << "Has name configuration: " << (configGroup->hasNameConfiguration() ? "YES" : "NO") << std::endl;
+    
+    // 测试配置管理器
+    ConfigurationManager configManager;
+    configManager.addConfigurationGroup(configGroup);
+    
+    auto retrievedGroup = configManager.getConfigurationGroup("TestGroup");
+    std::cout << "Retrieved group: " << (retrievedGroup ? "YES" : "NO") << std::endl;
+    
+    // 测试配置节点
+    auto configNode = std::make_shared<ConfigurationNode>("TestNode");
+    configNode->addConfiguration("TEST_VALUE", ConfigurationValue("test"));
+    configNode->setNameConfiguration(nameConfig);
+    
+    std::cout << "Configuration node created: " << configNode->getConfigurationName() << std::endl;
+    std::cout << "Configuration string: " << configNode->generateConfigurationString() << std::endl;
+    
+    // 测试配置解析器
+    ConfigurationParser parser;
+    std::string configContent = "[Configuration]\n{\n    DEBUG_MODE = true;\n    INDEX_INITIAL_COUNT = 0;\n}";
+    auto parsedNode = parser.parseConfiguration(configContent);
+    
+    std::cout << "Configuration parsed: " << (parsedNode ? "YES" : "NO") << std::endl;
+    
+    // 测试配置应用器
+    ConfigurationApplicator applicator;
+    applicator.applyConfiguration(*configGroup);
+    
+    std::string keyword = applicator.getKeyword("CUSTOM_STYLE");
+    std::cout << "Applied keyword CUSTOM_STYLE: " << keyword << std::endl;
+    
+    std::cout << "Configuration System test completed." << std::endl;
+}
+
+void testUseStatement() {
+    std::cout << "Testing Use Statement..." << std::endl;
+    
+    // 测试HTML5 Use语句
+    auto html5Use = std::make_shared<UseStatement>(UseStatementType::HTML5, "html5");
+    std::cout << "HTML5 Use statement: " << html5Use->generateUseStatement() << std::endl;
+    std::cout << "HTML5 Use statement valid: " << (html5Use->validate() ? "YES" : "NO") << std::endl;
+    
+    // 测试Config Use语句
+    auto configUse = std::make_shared<UseStatement>(UseStatementType::CONFIG, "MyConfig");
+    std::cout << "Config Use statement: " << configUse->generateUseStatement() << std::endl;
+    std::cout << "Config Use statement valid: " << (configUse->validate() ? "YES" : "NO") << std::endl;
+    
+    // 测试Use语句管理器
+    UseStatementManager useManager;
+    useManager.addUseStatement(html5Use);
+    useManager.addUseStatement(configUse);
+    
+    std::cout << "Use statements added: " << useManager.getUseStatements().size() << std::endl;
+    std::cout << "Has HTML5 Use statement: " << (useManager.hasHTML5UseStatement() ? "YES" : "NO") << std::endl;
+    std::cout << "Has Config Use statement: " << (useManager.hasConfigUseStatement("MyConfig") ? "YES" : "NO") << std::endl;
+    
+    // 测试Use语句解析器
+    UseStatementParser useParser;
+    std::string useContent = "use html5;\nuse @Config MyConfig;";
+    auto parsedStatements = useParser.parseUseStatements(useContent);
+    
+    std::cout << "Use statements parsed: " << parsedStatements.size() << std::endl;
+    
+    std::cout << "Use Statement test completed." << std::endl;
+}
+
+void testCHTLJSCompiler() {
+    std::cout << "Testing CHTL JS Compiler..." << std::endl;
+    
+    // 测试文件载入器
+    CHTLJSFileLoader fileLoader;
+    fileLoader.addFile("./test1.cjjs");
+    fileLoader.addFile("./test2.cjjs");
+    fileLoader.addFiles({"./test3.cjjs", "./test4.cjjs"});
+    
+    std::cout << "Files added: " << fileLoader.getFiles().size() << std::endl;
+    std::cout << "Has file test1.cjjs: " << (fileLoader.hasFile("./test1.cjjs") ? "YES" : "NO") << std::endl;
+    
+    // 测试增强选择器
+    CHTLJSEnhancedSelector selector;
+    std::string tagSelector = "{{button}}";
+    std::string classSelector = "{{.box}}";
+    std::string idSelector = "{{#box}}";
+    std::string descendantSelector = "{{.box button}}";
+    std::string indexedSelector = "{{button[0]}}";
+    
+    std::cout << "Tag selector JS: " << selector.generateJavaScript(tagSelector) << std::endl;
+    std::cout << "Class selector JS: " << selector.generateJavaScript(classSelector) << std::endl;
+    std::cout << "ID selector JS: " << selector.generateJavaScript(idSelector) << std::endl;
+    std::cout << "Descendant selector JS: " << selector.generateJavaScript(descendantSelector) << std::endl;
+    std::cout << "Indexed selector JS: " << selector.generateJavaScript(indexedSelector) << std::endl;
+    
+    // 测试动画系统
+    CHTLJSAnimationSystem animationSystem;
+    CHTLJSAnimationSystem::AnimationConfig animConfig;
+    animConfig.target = "{{button}}";
+    animConfig.duration = 1000;
+    animConfig.easing = "ease-in-out";
+    animConfig.begin["opacity"] = "0";
+    animConfig.end["opacity"] = "1";
+    animConfig.loop = -1;
+    animConfig.direction = "normal";
+    animConfig.delay = 0;
+    animConfig.callback = "() => console.log('Animation complete')";
+    
+    std::cout << "Animation generated: " << (animationSystem.generateAnimation(animConfig).length() > 0 ? "YES" : "NO") << std::endl;
+    std::cout << "Animation valid: " << (animationSystem.validateAnimation(animConfig) ? "YES" : "NO") << std::endl;
+    
+    // 测试路由系统
+    CHTLJSRoutingSystem routingSystem;
+    CHTLJSRoutingSystem::RouteConfig routeConfig;
+    routeConfig.path = "/home";
+    routeConfig.component = "HomeComponent";
+    routeConfig.params["id"] = "123";
+    routeConfig.children = {"child1", "child2"};
+    
+    routingSystem.addRoute(routeConfig);
+    std::cout << "Route added: " << (routingSystem.hasRoute("/home") ? "YES" : "NO") << std::endl;
+    std::cout << "Router generated: " << (routingSystem.generateRouter().length() > 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试响应式系统
+    CHTLJSReactiveSystem reactiveSystem;
+    CHTLJSReactiveSystem::ReactiveValue reactiveValue;
+    reactiveValue.name = "count";
+    reactiveValue.initialValue = "0";
+    reactiveValue.type = "number";
+    reactiveValue.dependencies = {"value1", "value2"};
+    
+    reactiveSystem.addReactiveValue(reactiveValue);
+    std::cout << "Reactive value added: " << (reactiveSystem.hasReactiveValue("count") ? "YES" : "NO") << std::endl;
+    std::cout << "Reactive system generated: " << (reactiveSystem.generateReactiveSystem().length() > 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试CHTL JS编译器
+    CHTLJSCompiler compiler;
+    compiler.addComponent("TestComponent", "console.log('Test component');");
+    compiler.addModule("TestModule", "export const test = 'test';");
+    
+    std::cout << "Component added: " << (compiler.hasComponent("TestComponent") ? "YES" : "NO") << std::endl;
+    std::cout << "Module added: " << (compiler.hasModule("TestModule") ? "YES" : "NO") << std::endl;
+    
+    std::string testContent = "{{button}}.addEventListener('click', () => { console.log('clicked'); });";
+    std::string compiledContent = compiler.compile(testContent);
+    std::cout << "Content compiled: " << (compiledContent.length() > 0 ? "YES" : "NO") << std::endl;
+    
+    std::cout << "CHTL JS Compiler test completed." << std::endl;
+}
+
+void testProjectWorkflow() {
+    std::cout << "Testing Project Workflow..." << std::endl;
+    
+    // 测试编译器调度器
+    CompilerDispatcher dispatcher;
+    auto chtlCompiler = std::make_shared<CHTLCompiler>();
+    auto chtlJSCompiler = std::make_shared<CHTLJSCompiler>();
+    
+    dispatcher.registerCompiler("default", chtlCompiler);
+    dispatcher.registerJSCompiler("default", chtlJSCompiler);
+    
+    std::cout << "Compilers registered: " << dispatcher.getCompilerNames().size() << std::endl;
+    std::cout << "JS Compilers registered: " << dispatcher.getJSCompilerNames().size() << std::endl;
+    
+    // 测试代码合并器
+    CodeMerger merger;
+    merger.addCodeFragment("html1", "<div>Hello</div>", "html");
+    merger.addCodeFragment("css1", "body { margin: 0; }", "css");
+    merger.addCodeFragment("js1", "console.log('Hello');", "js");
+    
+    std::cout << "Code fragments added: " << merger.getCodeFragmentNames().size() << std::endl;
+    std::cout << "HTML fragments: " << merger.getCodeFragmentNamesByType("html").size() << std::endl;
+    std::cout << "CSS fragments: " << merger.getCodeFragmentNamesByType("css").size() << std::endl;
+    std::cout << "JS fragments: " << merger.getCodeFragmentNamesByType("js").size() << std::endl;
+    
+    std::string mergedCode = merger.mergeCodeFragments();
+    std::cout << "Code merged: " << (mergedCode.length() > 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试项目工作流
+    ProjectWorkflow workflow;
+    workflow.setCompilerDispatcher(std::make_shared<CompilerDispatcher>(dispatcher));
+    workflow.setCodeMerger(std::make_shared<CodeMerger>(merger));
+    
+    std::cout << "Workflow configured: " << (workflow.validateWorkflow() ? "YES" : "NO") << std::endl;
+    
+    std::string testContent = "div { text: 'Hello World'; }";
+    std::string processedContent = workflow.processContent(testContent);
+    std::cout << "Content processed: " << (processedContent.length() > 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试项目工作流管理器
+    ProjectWorkflowManager workflowManager;
+    workflowManager.addWorkflow("test", std::make_shared<ProjectWorkflow>(workflow));
+    
+    std::cout << "Workflows added: " << workflowManager.getWorkflowNames().size() << std::endl;
+    
+    std::string executedContent = workflowManager.executeWorkflow("test", testContent);
+    std::cout << "Workflow executed: " << (executedContent.length() > 0 ? "YES" : "NO") << std::endl;
+    
+    std::cout << "Project Workflow test completed." << std::endl;
+}
+
 int main() {
     std::cout << "CHTL Compiler Test Suite" << std::endl;
     std::cout << "========================" << std::endl;
@@ -649,6 +879,18 @@ int main() {
         std::cout << std::endl;
         
         testCompilationMonitor();
+        std::cout << std::endl;
+        
+        testConfigurationSystem();
+        std::cout << std::endl;
+        
+        testUseStatement();
+        std::cout << std::endl;
+        
+        testCHTLJSCompiler();
+        std::cout << std::endl;
+        
+        testProjectWorkflow();
         std::cout << std::endl;
         
         std::cout << "All tests completed successfully!" << std::endl;

@@ -38,6 +38,10 @@ set(CHTL_SOURCES
     src/CHTL/ModuleSystem.cpp
     src/CHTL/CLITools.cpp
     src/CHTL/CompilationMonitor.cpp
+    src/CHTL/ConfigurationSystem.cpp
+    src/CHTL/UseStatement.cpp
+    src/CHTL/CHTLJSCompiler.cpp
+    src/CHTL/ProjectWorkflow.cpp
     
     src/CHTLJS/CHTLJSContext.cpp
     src/CHTLJS/CHTLJSGenerator.cpp
