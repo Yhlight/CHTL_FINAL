@@ -1,40 +1,17 @@
 #include "CHTLGenerator.h"
-#include "CssValueEvaluator.h"
 #include <map>
+#include <iostream>
 
 namespace CHTL {
 
-// Helper to render a property value. It now uses CssValueEvaluator for expressions.
-std::string renderCssValue(const std::vector<Token>& tokens) {
-    if (tokens.empty()) {
-        return "";
-    }
-
-    // Check if there are any operators that would trigger evaluation.
-    bool has_operator = false;
-    for (const auto& token : tokens) {
-        if (token.type >= TokenType::Plus && token.type <= TokenType::DoubleAsterisk) {
-            has_operator = true;
-            break;
-        }
-    }
-
-    // If there are no operators, just concatenate the lexemes.
-    if (!has_operator) {
-        std::stringstream ss;
-        for (const auto& token : tokens) {
-            ss << token.lexeme;
-        }
-        return ss.str();
-    }
-
-    // If there are operators, use the evaluator.
-    CssValueEvaluator evaluator;
-    return evaluator.evaluate(tokens);
-}
-
-
+// The main entry point for generation.
 std::string CHTLGenerator::generate(const RootNode& root) {
+    // Pass 1: Collect all static properties for referencing.
+    for (const auto& child : root.children_) {
+        collectProperties(child.get());
+    }
+
+    // Pass 2: Generate the HTML and CSS.
     for (const auto& child : root.children_) {
         visit(child.get());
     }
@@ -48,8 +25,6 @@ std::string CHTLGenerator::generate(const RootNode& root) {
         if (head_pos != std::string::npos) {
             html.insert(head_pos, style_tag);
         } else {
-            // If no head, maybe prepend to body or just wrap everything?
-            // For now, we'll just prepend it to the whole document if no head is found.
             html = style_tag + html;
         }
     }
@@ -57,6 +32,58 @@ std::string CHTLGenerator::generate(const RootNode& root) {
     return html;
 }
 
+// Pass 1: Recursively traverses the AST to find elements with IDs/classes
+// and statically-defined properties, storing them in the registry.
+void CHTLGenerator::collectProperties(const Node* node) {
+    if (!node || node->getType() != NodeType::Element) {
+        return;
+    }
+
+    const auto* elementNode = static_cast<const ElementNode*>(node);
+
+    std::string id_selector;
+    std::string class_selector;
+
+    for (const auto& attr : elementNode->attributes_) {
+        if (attr->key_ == "id") {
+            id_selector = "#" + attr->value_;
+        } else if (attr->key_ == "class") {
+            // For simplicity, we'll only use the first class for the registry key.
+            class_selector = "." + attr->value_.substr(0, attr->value_.find(" "));
+        }
+    }
+
+    // Recurse for children first, so nested properties are collected.
+    for (const auto& child : elementNode->children_) {
+        collectProperties(child.get());
+    }
+
+    // Now process this node's style block.
+    for (const auto& child : elementNode->children_) {
+        if (child->getType() == NodeType::StyleBlock) {
+            const auto* styleNode = static_cast<const StyleBlockNode*>(child.get());
+            for (const auto& prop : styleNode->inline_properties_) {
+                // A property is "static" if it has only one token of type Number.
+                if (prop.second.size() == 1 && prop.second[0].type == TokenType::Number) {
+                    try {
+                        auto value_unit = CssValueEvaluator::parseValueUnit(prop.second[0].lexeme);
+                        if (!id_selector.empty()) {
+                            property_registry_[id_selector][prop.first] = value_unit;
+                        }
+                        if (!class_selector.empty()) {
+                             property_registry_[class_selector][prop.first] = value_unit;
+                        }
+                    } catch (const std::exception& e) {
+                        // Ignore properties that can't be parsed into a simple value.
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+// Pass 2: Main recursive visitor for generating the output.
 void CHTLGenerator::visit(const Node* node) {
     if (!node) return;
     switch (node->getType()) {
@@ -76,15 +103,12 @@ void CHTLGenerator::visit(const Node* node) {
             // Style blocks are handled by their parent element, so we do nothing here.
             break;
         default:
-            // Handle other node types or throw an error
             break;
     }
 }
 
 void CHTLGenerator::visitElement(const ElementNode* node) {
-    // --- Attribute and Style Processing Pass ---
     std::map<std::string, std::string> attributes;
-    // Copy existing attributes
     for (const auto& attr : node->attributes_) {
         attributes[attr->key_] = attr->value_;
     }
@@ -93,20 +117,57 @@ void CHTLGenerator::visitElement(const ElementNode* node) {
     for (const auto& child : node->children_) {
         if (child->getType() == NodeType::StyleBlock) {
             const auto* styleNode = static_cast<const StyleBlockNode*>(child.get());
-            // Process inline properties
+
+            // Build a local context for this element's style block
+            CssValueEvaluator::LocalContext local_context;
             for (const auto& prop : styleNode->inline_properties_) {
-                inline_style_ss << prop.first << ": " << renderCssValue(prop.second) << "; ";
+                if (prop.second.size() == 1 && prop.second[0].type == TokenType::Number) {
+                    try {
+                        local_context[prop.first] = CssValueEvaluator::parseValueUnit(prop.second[0].lexeme);
+                    } catch (...) { /* ignore */ }
+                }
             }
-            // Process rules
+
+            // Render inline styles using the local context
+            for (const auto& prop : styleNode->inline_properties_) {
+                const auto& tokens = prop.second;
+                if (tokens.empty()) continue;
+
+                bool has_expression = false;
+                for (size_t i = 0; i < tokens.size(); ++i) {
+                    if ((tokens[i].type >= TokenType::Plus && tokens[i].type <= TokenType::DoubleAsterisk) || tokens[i].type == TokenType::QuestionMark) {
+                        has_expression = true;
+                        break;
+                    }
+                    if (tokens[i].type == TokenType::Identifier && (i + 1) < tokens.size() &&
+                        tokens[i+1].type == TokenType::Identifier && !tokens[i+1].lexeme.empty() &&
+                        tokens[i+1].lexeme[0] == '.') {
+                        has_expression = true;
+                        break;
+                    }
+                }
+
+                inline_style_ss << prop.first << ": ";
+                if (has_expression) {
+                    CssValueEvaluator evaluator;
+                    inline_style_ss << evaluator.evaluate(tokens, property_registry_, local_context);
+                } else {
+                    for (size_t i = 0; i < tokens.size(); ++i) {
+                        inline_style_ss << tokens[i].lexeme << (i < tokens.size() - 1 ? " " : "");
+                    }
+                }
+                inline_style_ss << "; ";
+            }
+
+            // Render rules (they don't have a local context)
+            CssValueEvaluator::LocalContext empty_local_context;
             for (const auto& rule : styleNode->rules_) {
                 std::string final_selector = rule->selector_;
-                // Resolve '&' context selector
                 if (rule->selector_[0] == '&') {
                     std::string context_selector;
                     if (attributes.count("id")) {
                         context_selector = "#" + attributes["id"];
                     } else if (attributes.count("class")) {
-                        // Use the first class name as the context
                         context_selector = "." + attributes["class"].substr(0, attributes["class"].find(" "));
                     }
                     if (!context_selector.empty()) {
@@ -114,18 +175,41 @@ void CHTLGenerator::visitElement(const ElementNode* node) {
                     }
                 }
 
-                // 1. Add rule to global styles
                 global_styles_ << "      " << final_selector << " {\n";
                 for (const auto& prop : rule->properties_) {
-                    global_styles_ << "        " << prop.first << ": " << renderCssValue(prop.second) << ";\n";
+                     const auto& tokens = prop.second;
+                    if (tokens.empty()) continue;
+
+                    bool has_expression = false;
+                    for (size_t i = 0; i < tokens.size(); ++i) {
+                        if ((tokens[i].type >= TokenType::Plus && tokens[i].type <= TokenType::DoubleAsterisk) || tokens[i].type == TokenType::QuestionMark) {
+                            has_expression = true;
+                            break;
+                        }
+                        if (tokens[i].type == TokenType::Identifier && (i + 1) < tokens.size() &&
+                            tokens[i+1].type == TokenType::Identifier && !tokens[i+1].lexeme.empty() &&
+                            tokens[i+1].lexeme[0] == '.') {
+                            has_expression = true;
+                            break;
+                        }
+                    }
+
+                    global_styles_ << "        " << prop.first << ": ";
+                    if (has_expression) {
+                        CssValueEvaluator evaluator;
+                        global_styles_ << evaluator.evaluate(tokens, property_registry_, empty_local_context);
+                    } else {
+                        for (size_t i = 0; i < tokens.size(); ++i) {
+                            global_styles_ << tokens[i].lexeme << (i < tokens.size() - 1 ? " " : "");
+                        }
+                    }
+                    global_styles_ << ";\n";
                 }
                 global_styles_ << "      }\n";
 
-                // 2. Inject class/id attribute
                 if (rule->selector_[0] == '.') {
                     std::string className = rule->selector_.substr(1);
                     if (attributes.count("class")) {
-                        // Prevent adding duplicate class names
                         if ((" " + attributes["class"] + " ").find(" " + className + " ") == std::string::npos) {
                             attributes["class"] += " " + className;
                         }
@@ -144,7 +228,6 @@ void CHTLGenerator::visitElement(const ElementNode* node) {
         attributes["style"] = inline_style_attr;
     }
 
-    // --- Rendering Pass ---
     indent();
     output_ << "<" << node->tagName_;
     for(const auto& attr_pair : attributes) {
@@ -165,7 +248,9 @@ void CHTLGenerator::visitElement(const ElementNode* node) {
         output_ << ">\n";
         indentLevel_++;
         for (const auto& child : node->children_) {
-            visit(child.get());
+            if (child->getType() != NodeType::StyleBlock) {
+                 visit(child.get());
+            }
         }
         indentLevel_--;
         indent();
@@ -180,18 +265,16 @@ void CHTLGenerator::visitText(const TextNode* node) {
 
 void CHTLGenerator::visitComment(const CommentNode* node) {
     indent();
-    // CHTL generator comments '--' are converted to HTML comments
     output_ << "<!-- " << node->comment_ << " -->\n";
 }
 
 void CHTLGenerator::visitOrigin(const OriginNode* node) {
-    // Simply append the raw content, no processing or indentation.
     output_ << node->content_;
 }
 
 void CHTLGenerator::indent() {
     for (int i = 0; i < indentLevel_; ++i) {
-        output_ << "  "; // 2 spaces for indentation
+        output_ << "  ";
     }
 }
 

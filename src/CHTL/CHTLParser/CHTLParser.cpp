@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <unordered_set>
+#include <map>
 
 namespace CHTL {
 
@@ -408,17 +409,32 @@ void CHTLParser::parseTemplateDefinition(bool is_custom) {
 
         consume(TokenType::OpenBrace, "Expected '{' after template name.");
         while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+            if (match({TokenType::GeneratorComment})) {
+                continue;
+            }
+            // Handle inheritance: @Style OtherTemplate;
+            if (match({TokenType::AtStyle})) {
+                const Token& inheritedName = consume(TokenType::Identifier, "Expected inherited template name.");
+                consume(TokenType::Semicolon, "Expected ';' after inherited template name.");
+                if (context_->style_templates_.count(inheritedName.lexeme)) {
+                    const auto& parentTemplate = context_->style_templates_.at(inheritedName.lexeme);
+                    templateNode->inherited_templates_.push_back(parentTemplate);
+                } else {
+                    throw std::runtime_error("Attempted to inherit from undefined style template '" + inheritedName.lexeme + "'.");
+                }
+                continue;
+            }
+
             const Token& key = consume(TokenType::Identifier, "Expected CSS property name in template.");
 
             std::vector<Token> value_tokens;
-            if (!match({TokenType::Colon})) {
-                if (!match({TokenType::Comma, TokenType::Semicolon})) {
+            if (is_custom && !check(TokenType::Colon)) {
+                 if (!match({TokenType::Comma, TokenType::Semicolon})) {
                     throw std::runtime_error("Expected ',' or ';' after placeholder property.");
                 }
             } else {
-                while(peek().type != TokenType::Semicolon && !isAtEnd()) {
-                    value_tokens.push_back(advance());
-                }
+                consume(TokenType::Colon, "Expected ':' after property name.");
+                value_tokens = parsePropertyValue();
                 if (value_tokens.empty()) {
                     throw std::runtime_error("Expected CSS property value in template.");
                 }
@@ -454,10 +470,7 @@ void CHTLParser::parseTemplateDefinition(bool is_custom) {
             const Token& key = consume(TokenType::Identifier, "Expected variable name in template.");
             consume(TokenType::Colon, "Expected ':' after variable name.");
 
-            std::vector<Token> value_tokens;
-            while(peek().type != TokenType::Semicolon && !isAtEnd()) {
-                value_tokens.push_back(advance());
-            }
+            std::vector<Token> value_tokens = parsePropertyValue();
             if (value_tokens.empty()) {
                 throw std::runtime_error("Expected variable value in template.");
             }
@@ -473,11 +486,30 @@ void CHTLParser::parseTemplateDefinition(bool is_custom) {
     }
 }
 
+
+// Helper function to recursively expand style templates and their inherited properties.
+void expandStyleTemplate(
+    const std::shared_ptr<StyleTemplateNode>& tpl,
+    std::vector<std::pair<std::string, std::vector<Token>>>& props)
+{
+    // First, add properties from inherited templates (parent properties).
+    for (const auto& inherited_tpl : tpl->inherited_templates_) {
+        expandStyleTemplate(inherited_tpl, props);
+    }
+    // Then, add the properties from the current template (child properties, will override).
+    props.insert(props.end(), tpl->properties_.begin(), tpl->properties_.end());
+}
+
 std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
     auto styleNode = std::make_unique<StyleBlockNode>();
     consume(TokenType::OpenBrace, "Expected '{' after 'style' keyword.");
 
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+        // Skip over comments
+        if (match({TokenType::GeneratorComment})) {
+            continue;
+        }
+
         if (match({TokenType::AtStyle})) {
             const Token& name = consume(TokenType::Identifier, "Expected template name after '@Style'.");
             std::string qualified_name = name.lexeme;
@@ -533,8 +565,18 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
 
             } else {
                 consume(TokenType::Semicolon, "Expected ';' after template usage.");
-                for (const auto& prop : templateNode->properties_) {
-                    styleNode->inline_properties_.push_back(prop);
+                std::vector<std::pair<std::string, std::vector<Token>>> expanded_props;
+                expandStyleTemplate(templateNode, expanded_props);
+
+                // To handle overrides correctly, we convert to a map and back.
+                // This ensures that properties defined later in the hierarchy (more specific) override earlier ones.
+                std::map<std::string, std::vector<Token>> final_props_map;
+                for(const auto& prop : expanded_props) {
+                    final_props_map[prop.first] = prop.second;
+                }
+
+                for(const auto& pair : final_props_map) {
+                    styleNode->inline_properties_.emplace_back(pair.first, pair.second);
                 }
             }
         }
@@ -579,14 +621,16 @@ std::vector<Token> CHTLParser::parsePropertyValue() {
     std::vector<Token> final_tokens;
     while (peek().type != TokenType::Semicolon && !isAtEnd()) {
         if (peek().type == TokenType::Identifier && peekNext().type == TokenType::OpenParen) {
-            const Token& groupName = advance();
+            const Token& groupName = advance(); // Consume group name
             consume(TokenType::OpenParen, "Expected '(' after variable group name.");
             const Token& varName = consume(TokenType::Identifier, "Expected variable name inside parentheses.");
             consume(TokenType::CloseParen, "Expected ')' after variable name.");
 
+            // Look up the var template. Note: We don't support namespaces for this yet.
             if (context_->var_templates_.count(groupName.lexeme)) {
                 const auto& templateNode = context_->var_templates_.at(groupName.lexeme);
                 if (templateNode->variables_.count(varName.lexeme)) {
+                    // If found, insert the substituted tokens into the stream.
                     const auto& substituted_tokens = templateNode->variables_.at(varName.lexeme);
                     final_tokens.insert(final_tokens.end(), substituted_tokens.begin(), substituted_tokens.end());
                 } else {
@@ -600,9 +644,6 @@ std::vector<Token> CHTLParser::parsePropertyValue() {
         }
     }
 
-    if (final_tokens.empty()) {
-        throw std::runtime_error("Expected CSS property value.");
-    }
     return final_tokens;
 }
 

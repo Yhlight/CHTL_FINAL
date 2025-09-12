@@ -1,0 +1,27 @@
+html {
+    body {
+        div {
+            id: main-box;
+            style {
+                width: 100px;
+            }
+        }
+        div {
+            class: secondary-box;
+            style {
+                width: #main-box.width / 2;
+            }
+        }
+        div {
+            class: another-box;
+            style {
+                padding: .secondary-box.width;
+            }
+        }
+        div {
+            style {
+                height: .non-existent.height + 10px;
+            }
+        }
+    }
+}

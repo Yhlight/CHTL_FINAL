@@ -1,0 +1,24 @@
+[Template] @Style Base
+{
+    font-size: 16px;
+    color: "black";
+    padding: 10px;
+}
+
+[Template] @Style SpecialText
+{
+    @Style Base;
+    color: "purple"; -- Override the color
+    font-weight: "bold";
+}
+
+html {
+    body {
+        div {
+            style {
+                @Style SpecialText;
+                border: 1px solid black;
+            }
+        }
+    }
+}

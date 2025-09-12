@@ -1,0 +1,32 @@
+html {
+    body {
+        div {
+            style {
+                width: 100px;
+                height: 200px;
+
+                -- Simple ternary
+                background-color: width > 50px ? "red" : "blue";
+
+                -- Ternary with logical AND
+                color: width > 50px && height > 150px ? "white" : "black";
+
+                -- Ternary with logical OR
+                border: width > 200px || height > 150px ? "1px solid green" : "none";
+
+                -- Ternary with expression in result
+                padding: width > 200px ? 10px : width / 10;
+
+                -- Ternary with property reference in result
+                margin: height > 100px ? #main-box.width : 0px;
+            }
+        }
+
+        div {
+            id: main-box;
+            style {
+                width: 20px;
+            }
+        }
+    }
+}

@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <memory>
+#include "CssValueEvaluator.h" // For PropertyRegistry and ValueUnit
 
 namespace CHTL {
 
@@ -20,15 +21,18 @@ public:
     std::string generate(const RootNode& root);
 
 private:
+    void collectProperties(const Node* node);
     void visit(const Node* node);
     void visitElement(const ElementNode* node);
     void visitText(const TextNode* node);
     void visitComment(const CommentNode* node);
     void visitOrigin(const OriginNode* node);
-    // Style blocks are handled within visitElement, so no separate visitStyleBlock is needed
 
     void indent();
 
+    std::string renderCssValue(const std::vector<Token>& tokens);
+
+    CssValueEvaluator::PropertyRegistry property_registry_;
     std::stringstream output_;
     std::stringstream global_styles_;
     int indentLevel_ = 0;

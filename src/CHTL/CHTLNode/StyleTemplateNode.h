@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <memory>
 #include "../CHTLLexer/Token.h"
 
 namespace CHTL {
@@ -17,6 +18,7 @@ public:
     std::string name_;
     bool is_custom_;
     std::vector<std::pair<std::string, std::vector<Token>>> properties_;
+    std::vector<std::shared_ptr<StyleTemplateNode>> inherited_templates_;
 };
 
 } // namespace CHTL
