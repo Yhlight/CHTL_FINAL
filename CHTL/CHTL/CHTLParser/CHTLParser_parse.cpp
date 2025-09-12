@@ -131,6 +131,12 @@ std::shared_ptr<CHTLNode> CHTLParser::parseElement() {
                 case CHTLTokenType::SCRIPT:
                     child = parseScript();
                     break;
+                case CHTLTokenType::TEMPLATE_STYLE:
+                case CHTLTokenType::TEMPLATE_ELEMENT:
+                case CHTLTokenType::TEMPLATE_VAR:
+                    // 解析模板使用
+                    child = parseTemplateUsage();
+                    break;
                 case CHTLTokenType::IDENTIFIER:
                     // 检查是否是属性（后面跟着冒号或等号）
                     std::cout << "[DEBUG] 处理IDENTIFIER: " << current().value 

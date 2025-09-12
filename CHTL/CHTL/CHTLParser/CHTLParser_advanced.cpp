@@ -189,6 +189,13 @@ std::shared_ptr<CHTLNode> CHTLParser::parseImport() {
         consume(CHTLTokenType::RIGHT_BRACE, "期望 '}'");
     }
     
+    // 期望分号
+    if (match(CHTLTokenType::SEMICOLON)) {
+        advance();
+    } else {
+        addError("期望 ';'");
+    }
+    
     return importNode;
 }
 

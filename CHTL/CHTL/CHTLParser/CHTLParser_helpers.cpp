@@ -114,7 +114,8 @@ std::string CHTLParser::parseStylePropertyValue() {
             if (current().type == CHTLTokenType::STRING || 
                 current().type == CHTLTokenType::UNQUOTED_LITERAL ||
                 current().type == CHTLTokenType::IDENTIFIER ||
-                current().type == CHTLTokenType::NUMBER) {
+                current().type == CHTLTokenType::NUMBER ||
+                current().type == CHTLTokenType::HASH) {
                 value += current().value;
                 advance();
             } else {
@@ -440,6 +441,42 @@ void CHTLParser::parseTemplateUsage(std::shared_ptr<StyleNode> style) {
 
 void StyleNode::addTemplateUsage(const std::string& templateType, const std::string& templateName) {
     templateUsages.push_back({templateType, templateName});
+}
+
+std::shared_ptr<CHTLNode> CHTLParser::parseTemplateUsage() {
+    // 解析模板使用，如 @Style DefaultText; 或 @Element Button;
+    if (current().type == CHTLTokenType::TEMPLATE_STYLE ||
+        current().type == CHTLTokenType::TEMPLATE_ELEMENT ||
+        current().type == CHTLTokenType::TEMPLATE_VAR) {
+        
+        std::string templateType = current().value;
+        advance();
+        
+        if (current().type == CHTLTokenType::IDENTIFIER) {
+            std::string templateName = current().value;
+            advance();
+            
+            // 创建一个模板使用节点
+            auto templateUsage = std::make_shared<ElementNode>("template-usage");
+            templateUsage->addAttribute("type", templateType);
+            templateUsage->addAttribute("name", templateName);
+            
+            // 期望分号
+            if (match(CHTLTokenType::SEMICOLON)) {
+                advance();
+            } else {
+                addError("期望 ';'");
+            }
+            
+            return templateUsage;
+        } else {
+            addError("期望模板名称");
+            return nullptr;
+        }
+    } else {
+        addError("期望模板使用");
+        return nullptr;
+    }
 }
 
 } // namespace CHTL

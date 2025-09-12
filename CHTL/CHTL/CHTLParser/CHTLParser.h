@@ -358,6 +358,7 @@ private:
     std::string parseStylePropertyValue();
     void parseCSSRule(std::shared_ptr<StyleNode> style);
     void parseTemplateUsage(std::shared_ptr<StyleNode> style);
+    std::shared_ptr<CHTLNode> parseTemplateUsage();
     
     // 模板解析
     TemplateNode::TemplateType parseTemplateType();
