@@ -1,0 +1,11 @@
+[Info]
+{
+    name = "test_module";
+    version = "1.0.0";
+    description = "Test CMOD module for CHTL";
+    author = "CHTL Team";
+    license = "MIT";
+    dependencies = "";
+    category = "test";
+    minCHTLVersion = "1.0.0";
+}

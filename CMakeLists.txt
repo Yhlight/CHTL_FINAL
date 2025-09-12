@@ -33,6 +33,9 @@ set(CHTL_SOURCES
     src/CHTL_JS/CHTLJSGenerator.cpp
     src/Compiler/CompilerDispatcher.cpp
     src/Compiler/CodeMerger.cpp
+    src/Module/CMODSystem.cpp
+    src/Module/CJMODSystem.cpp
+    src/CLI/CHTLCli.cpp
 )
 
 # 头文件
@@ -48,6 +51,9 @@ set(CHTL_HEADERS
     include/CHTL_JS/CHTLJSGenerator.h
     include/Compiler/CompilerDispatcher.h
     include/Compiler/CodeMerger.h
+    include/Module/CMODSystem.h
+    include/Module/CJMODSystem.h
+    include/CLI/CHTLCli.h
 )
 
 # 创建库
@@ -56,6 +62,10 @@ add_library(chtl_lib STATIC ${CHTL_SOURCES} ${CHTL_HEADERS})
 # 创建可执行文件
 add_executable(chtl src/main.cpp)
 target_link_libraries(chtl chtl_lib)
+
+# 创建CLI可执行文件
+add_executable(chtl_cli src/cli_main.cpp)
+target_link_libraries(chtl_cli chtl_lib)
 
 # 创建测试可执行文件
 add_executable(test_compiler test_compiler.cpp)

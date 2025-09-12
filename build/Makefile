@@ -198,6 +198,19 @@ chtl/fast:
 .PHONY : chtl/fast
 
 #=============================================================================
+# Target rules for targets named chtl_cli
+
+# Build rule for target.
+chtl_cli: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 chtl_cli
+.PHONY : chtl_cli
+
+# fast build rule for target.
+chtl_cli/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_cli.dir/build.make CMakeFiles/chtl_cli.dir/build
+.PHONY : chtl_cli/fast
+
+#=============================================================================
 # Target rules for targets named test_compiler
 
 # Build rule for target.
@@ -415,6 +428,30 @@ src/CHTL_JS/CHTLJSParser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSParser.cpp.s
 .PHONY : src/CHTL_JS/CHTLJSParser.cpp.s
 
+src/CLI/CHTLCli.o: src/CLI/CHTLCli.cpp.o
+.PHONY : src/CLI/CHTLCli.o
+
+# target to build an object file
+src/CLI/CHTLCli.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.o
+.PHONY : src/CLI/CHTLCli.cpp.o
+
+src/CLI/CHTLCli.i: src/CLI/CHTLCli.cpp.i
+.PHONY : src/CLI/CHTLCli.i
+
+# target to preprocess a source file
+src/CLI/CHTLCli.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.i
+.PHONY : src/CLI/CHTLCli.cpp.i
+
+src/CLI/CHTLCli.s: src/CLI/CHTLCli.cpp.s
+.PHONY : src/CLI/CHTLCli.s
+
+# target to generate assembly for a file
+src/CLI/CHTLCli.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.s
+.PHONY : src/CLI/CHTLCli.cpp.s
+
 src/Compiler/CodeMerger.o: src/Compiler/CodeMerger.cpp.o
 .PHONY : src/Compiler/CodeMerger.o
 
@@ -463,6 +500,54 @@ src/Compiler/CompilerDispatcher.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Compiler/CompilerDispatcher.cpp.s
 .PHONY : src/Compiler/CompilerDispatcher.cpp.s
 
+src/Module/CJMODSystem.o: src/Module/CJMODSystem.cpp.o
+.PHONY : src/Module/CJMODSystem.o
+
+# target to build an object file
+src/Module/CJMODSystem.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.o
+.PHONY : src/Module/CJMODSystem.cpp.o
+
+src/Module/CJMODSystem.i: src/Module/CJMODSystem.cpp.i
+.PHONY : src/Module/CJMODSystem.i
+
+# target to preprocess a source file
+src/Module/CJMODSystem.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.i
+.PHONY : src/Module/CJMODSystem.cpp.i
+
+src/Module/CJMODSystem.s: src/Module/CJMODSystem.cpp.s
+.PHONY : src/Module/CJMODSystem.s
+
+# target to generate assembly for a file
+src/Module/CJMODSystem.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.s
+.PHONY : src/Module/CJMODSystem.cpp.s
+
+src/Module/CMODSystem.o: src/Module/CMODSystem.cpp.o
+.PHONY : src/Module/CMODSystem.o
+
+# target to build an object file
+src/Module/CMODSystem.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.o
+.PHONY : src/Module/CMODSystem.cpp.o
+
+src/Module/CMODSystem.i: src/Module/CMODSystem.cpp.i
+.PHONY : src/Module/CMODSystem.i
+
+# target to preprocess a source file
+src/Module/CMODSystem.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.i
+.PHONY : src/Module/CMODSystem.cpp.i
+
+src/Module/CMODSystem.s: src/Module/CMODSystem.cpp.s
+.PHONY : src/Module/CMODSystem.s
+
+# target to generate assembly for a file
+src/Module/CMODSystem.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.s
+.PHONY : src/Module/CMODSystem.cpp.s
+
 src/Scanner/UnifiedScanner.o: src/Scanner/UnifiedScanner.cpp.o
 .PHONY : src/Scanner/UnifiedScanner.o
 
@@ -486,6 +571,30 @@ src/Scanner/UnifiedScanner.s: src/Scanner/UnifiedScanner.cpp.s
 src/Scanner/UnifiedScanner.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Scanner/UnifiedScanner.cpp.s
 .PHONY : src/Scanner/UnifiedScanner.cpp.s
+
+src/cli_main.o: src/cli_main.cpp.o
+.PHONY : src/cli_main.o
+
+# target to build an object file
+src/cli_main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_cli.dir/build.make CMakeFiles/chtl_cli.dir/src/cli_main.cpp.o
+.PHONY : src/cli_main.cpp.o
+
+src/cli_main.i: src/cli_main.cpp.i
+.PHONY : src/cli_main.i
+
+# target to preprocess a source file
+src/cli_main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_cli.dir/build.make CMakeFiles/chtl_cli.dir/src/cli_main.cpp.i
+.PHONY : src/cli_main.cpp.i
+
+src/cli_main.s: src/cli_main.cpp.s
+.PHONY : src/cli_main.s
+
+# target to generate assembly for a file
+src/cli_main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_cli.dir/build.make CMakeFiles/chtl_cli.dir/src/cli_main.cpp.s
+.PHONY : src/cli_main.cpp.s
 
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
@@ -549,6 +658,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... chtl"
+	@echo "... chtl_cli"
 	@echo "... chtl_lib"
 	@echo "... chtl_test"
 	@echo "... test_compiler"
@@ -576,15 +686,27 @@ help:
 	@echo "... src/CHTL_JS/CHTLJSParser.o"
 	@echo "... src/CHTL_JS/CHTLJSParser.i"
 	@echo "... src/CHTL_JS/CHTLJSParser.s"
+	@echo "... src/CLI/CHTLCli.o"
+	@echo "... src/CLI/CHTLCli.i"
+	@echo "... src/CLI/CHTLCli.s"
 	@echo "... src/Compiler/CodeMerger.o"
 	@echo "... src/Compiler/CodeMerger.i"
 	@echo "... src/Compiler/CodeMerger.s"
 	@echo "... src/Compiler/CompilerDispatcher.o"
 	@echo "... src/Compiler/CompilerDispatcher.i"
 	@echo "... src/Compiler/CompilerDispatcher.s"
+	@echo "... src/Module/CJMODSystem.o"
+	@echo "... src/Module/CJMODSystem.i"
+	@echo "... src/Module/CJMODSystem.s"
+	@echo "... src/Module/CMODSystem.o"
+	@echo "... src/Module/CMODSystem.i"
+	@echo "... src/Module/CMODSystem.s"
 	@echo "... src/Scanner/UnifiedScanner.o"
 	@echo "... src/Scanner/UnifiedScanner.i"
 	@echo "... src/Scanner/UnifiedScanner.s"
+	@echo "... src/cli_main.o"
+	@echo "... src/cli_main.i"
+	@echo "... src/cli_main.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

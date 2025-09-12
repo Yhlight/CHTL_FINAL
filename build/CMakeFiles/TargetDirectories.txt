@@ -1,5 +1,6 @@
 /workspace/build/CMakeFiles/chtl_lib.dir
 /workspace/build/CMakeFiles/chtl.dir
+/workspace/build/CMakeFiles/chtl_cli.dir
 /workspace/build/CMakeFiles/test_compiler.dir
 /workspace/build/CMakeFiles/test.dir
 /workspace/build/CMakeFiles/edit_cache.dir

@@ -53,6 +53,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/chtl_lib.dir/DependInfo.cmake"
   "CMakeFiles/chtl.dir/DependInfo.cmake"
+  "CMakeFiles/chtl_cli.dir/DependInfo.cmake"
   "CMakeFiles/test_compiler.dir/DependInfo.cmake"
   "test/CMakeFiles/chtl_test.dir/DependInfo.cmake"
   )

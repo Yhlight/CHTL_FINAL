@@ -16,8 +16,11 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspace/src/CHTL_JS/CHTLJSGenerator.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSGenerator.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSGenerator.cpp.o.d"
   "/workspace/src/CHTL_JS/CHTLJSLexer.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSLexer.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSLexer.cpp.o.d"
   "/workspace/src/CHTL_JS/CHTLJSParser.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSParser.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSParser.cpp.o.d"
+  "/workspace/src/CLI/CHTLCli.cpp" "CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.o.d"
   "/workspace/src/Compiler/CodeMerger.cpp" "CMakeFiles/chtl_lib.dir/src/Compiler/CodeMerger.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/Compiler/CodeMerger.cpp.o.d"
   "/workspace/src/Compiler/CompilerDispatcher.cpp" "CMakeFiles/chtl_lib.dir/src/Compiler/CompilerDispatcher.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/Compiler/CompilerDispatcher.cpp.o.d"
+  "/workspace/src/Module/CJMODSystem.cpp" "CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.o.d"
+  "/workspace/src/Module/CMODSystem.cpp" "CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.o.d"
   "/workspace/src/Scanner/UnifiedScanner.cpp" "CMakeFiles/chtl_lib.dir/src/Scanner/UnifiedScanner.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/Scanner/UnifiedScanner.cpp.o.d"
   )
 

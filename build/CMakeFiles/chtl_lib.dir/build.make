@@ -226,6 +226,48 @@ CMakeFiles/chtl_lib.dir/src/Compiler/CodeMerger.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/Compiler/CodeMerger.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/Compiler/CodeMerger.cpp -o CMakeFiles/chtl_lib.dir/src/Compiler/CodeMerger.cpp.s
 
+CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
+CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.o: /workspace/src/Module/CMODSystem.cpp
+CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.o -MF CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.o -c /workspace/src/Module/CMODSystem.cpp
+
+CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/src/Module/CMODSystem.cpp > CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.i
+
+CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/Module/CMODSystem.cpp -o CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.s
+
+CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
+CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.o: /workspace/src/Module/CJMODSystem.cpp
+CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.o -MF CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.o -c /workspace/src/Module/CJMODSystem.cpp
+
+CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/src/Module/CJMODSystem.cpp > CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.i
+
+CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/Module/CJMODSystem.cpp -o CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.s
+
+CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
+CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.o: /workspace/src/CLI/CHTLCli.cpp
+CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.o -c /workspace/src/CLI/CHTLCli.cpp
+
+CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/src/CLI/CHTLCli.cpp > CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.i
+
+CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/CLI/CHTLCli.cpp -o CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.s
+
 # Object files for target chtl_lib
 chtl_lib_OBJECTS = \
 "CMakeFiles/chtl_lib.dir/src/CHTL/CHTLContext.cpp.o" \
@@ -238,7 +280,10 @@ chtl_lib_OBJECTS = \
 "CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSParser.cpp.o" \
 "CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSGenerator.cpp.o" \
 "CMakeFiles/chtl_lib.dir/src/Compiler/CompilerDispatcher.cpp.o" \
-"CMakeFiles/chtl_lib.dir/src/Compiler/CodeMerger.cpp.o"
+"CMakeFiles/chtl_lib.dir/src/Compiler/CodeMerger.cpp.o" \
+"CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.o" \
+"CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.o" \
+"CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.o"
 
 # External object files for target chtl_lib
 chtl_lib_EXTERNAL_OBJECTS =
@@ -254,9 +299,12 @@ lib/libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSParser.cpp.o
 lib/libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSGenerator.cpp.o
 lib/libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/Compiler/CompilerDispatcher.cpp.o
 lib/libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/Compiler/CodeMerger.cpp.o
+lib/libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/Module/CMODSystem.cpp.o
+lib/libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/Module/CJMODSystem.cpp.o
+lib/libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CLI/CHTLCli.cpp.o
 lib/libchtl_lib.a: CMakeFiles/chtl_lib.dir/build.make
 lib/libchtl_lib.a: CMakeFiles/chtl_lib.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX static library lib/libchtl_lib.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Linking CXX static library lib/libchtl_lib.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/chtl_lib.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/chtl_lib.dir/link.txt --verbose=$(VERBOSE)
 
