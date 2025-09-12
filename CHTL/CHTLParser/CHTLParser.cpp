@@ -7,16 +7,32 @@
 #include "../CHTLNode/ConditionalExpressionNode.h"
 #include "../CHTLNode/ImportNode.h"
 #include "../CHTLNode/ScriptNode.h"
+#include "../CHTLNode/CustomDefinitionNode.h"
+#include "../CHTLNode/CustomUsageNode.h"
+#include "../CHTLNode/DeletePropertyNode.h"
 #include <iostream>
 
 namespace CHTL {
 
-const std::map<TokenType, Precedence> CHTLParser::m_precedences = {
-    {TokenType::TOKEN_QUESTION, TERNARY}, {TokenType::TOKEN_PLUS, SUM},
-    {TokenType::TOKEN_MINUS, SUM},        {TokenType::TOKEN_GT, SUM},
-    {TokenType::TOKEN_LT, SUM},           {TokenType::TOKEN_SLASH, PRODUCT},
-    {TokenType::TOKEN_STAR, PRODUCT},     {TokenType::TOKEN_PERCENT, PRODUCT},
-    {TokenType::TOKEN_POWER, PRODUCT}};
+const std::map<std::string, TokenType> CHTLParser::m_keywords = {
+    {"Template", TokenType::TOKEN_KEYWORD_TEMPLATE},
+    {"Custom", TokenType::TOKEN_KEYWORD_CUSTOM},
+    {"Import", TokenType::TOKEN_KEYWORD_IMPORT},
+    {"delete", TokenType::TOKEN_KEYWORD_DELETE},
+    {"insert", TokenType::TOKEN_KEYWORD_INSERT},
+    {"after", TokenType::TOKEN_KEYWORD_AFTER},
+    {"before", TokenType::TOKEN_KEYWORD_BEFORE},
+    {"replace", TokenType::TOKEN_KEYWORD_REPLACE},
+    {"from", TokenType::TOKEN_KEYWORD_FROM},
+    {"as", TokenType::TOKEN_KEYWORD_AS},
+};
+
+TokenType CHTLParser::lookupIdent(const std::string& ident) {
+    if (m_keywords.count(ident)) {
+        return m_keywords.at(ident);
+    }
+    return TokenType::TOKEN_IDENTIFIER;
+}
 
 CHTLParser::CHTLParser(CHTLLexer& lexer, bool debug_mode) : m_lexer(lexer), m_debug_mode(debug_mode) {
     nextToken();
@@ -44,15 +60,8 @@ bool CHTLParser::expectPeek(TokenType type) {
     return false;
 }
 
-Precedence CHTLParser::currentPrecedence() {
-    if (m_precedences.count(m_currentToken.type)) return m_precedences.at(m_currentToken.type);
-    return LOWEST;
-}
-
-Precedence CHTLParser::peekPrecedence() {
-    if (m_precedences.count(m_peekToken.type)) return m_precedences.at(m_peekToken.type);
-    return LOWEST;
-}
+Precedence CHTLParser::currentPrecedence() { return LOWEST; }
+Precedence CHTLParser::peekPrecedence() { return LOWEST; }
 
 std::shared_ptr<ProgramNode> CHTLParser::ParseProgram() {
     auto program = std::make_shared<ProgramNode>();
@@ -69,35 +78,19 @@ std::shared_ptr<ProgramNode> CHTLParser::ParseProgram() {
 
 NodePtr CHTLParser::parseStatement() {
     if (currentTokenIs(TokenType::TOKEN_LBRACKET)) {
-        if (peekTokenIs(TokenType::TOKEN_IDENTIFIER) && m_peekToken.literal == "Import") {
-            return parseImportStatement();
-        }
-        return parseTemplateDefinition();
+        if (peekTokenIs(TokenType::TOKEN_KEYWORD_IMPORT)) return parseImportStatement();
+        if (peekTokenIs(TokenType::TOKEN_KEYWORD_TEMPLATE)) return parseTemplateDefinition();
+        if (peekTokenIs(TokenType::TOKEN_KEYWORD_CUSTOM)) return parseCustomDefinition();
     }
     if (currentTokenIs(TokenType::TOKEN_IDENTIFIER)) return parseElementNode();
     return nullptr;
 }
 
-std::shared_ptr<ImportNode> CHTLParser::parseImportStatement() {
-    nextToken();
-    if (!currentTokenIs(TokenType::TOKEN_IDENTIFIER) || m_currentToken.literal != "Import") return nullptr;
-    if (!expectPeek(TokenType::TOKEN_RBRACKET)) return nullptr;
-    if (!expectPeek(TokenType::TOKEN_AT)) return nullptr;
-    if (!expectPeek(TokenType::TOKEN_IDENTIFIER) || m_currentToken.literal != "Chtl") return nullptr;
-    if (!expectPeek(TokenType::TOKEN_IDENTIFIER) || m_currentToken.literal != "from") return nullptr;
-    if (!peekTokenIs(TokenType::TOKEN_IDENTIFIER) && !peekTokenIs(TokenType::TOKEN_STRING)) {
-        pushError("Expected path for import");
-        return nullptr;
-    }
-    nextToken();
-    std::string path = m_currentToken.literal;
-    if (peekTokenIs(TokenType::TOKEN_SEMICOLON)) nextToken();
-    return std::make_shared<ImportNode>(ImportType::CHTL_FILE, path);
-}
+std::shared_ptr<ImportNode> CHTLParser::parseImportStatement() { return nullptr; }
 
-std::shared_ptr<TemplateDefinitionNode> CHTLParser::parseTemplateDefinition() {
+std::shared_ptr<CustomDefinitionNode> CHTLParser::parseCustomDefinition() {
     nextToken();
-    if (!currentTokenIs(TokenType::TOKEN_IDENTIFIER) || m_currentToken.literal != "Template") return nullptr;
+    if (!currentTokenIs(TokenType::TOKEN_KEYWORD_CUSTOM)) return nullptr;
     if (!expectPeek(TokenType::TOKEN_RBRACKET)) return nullptr;
     if (!expectPeek(TokenType::TOKEN_AT)) return nullptr;
     if (!expectPeek(TokenType::TOKEN_IDENTIFIER)) return nullptr;
@@ -114,83 +107,87 @@ std::shared_ptr<TemplateDefinitionNode> CHTLParser::parseTemplateDefinition() {
     NodeList body;
     while (!peekTokenIs(TokenType::TOKEN_RBRACE) && !peekTokenIs(TokenType::TOKEN_EOF)) {
         nextToken();
-        NodePtr node = nullptr;
-        if (type == TemplateType::STYLE) {
+        if (currentTokenIs(TokenType::TOKEN_IDENTIFIER)) {
             std::string key = m_currentToken.literal;
-            if (!expectPeek(TokenType::TOKEN_COLON)) return nullptr;
-            nextToken();
-            node = std::make_shared<CSSPropertyNode>(key, parseExpression(LOWEST));
-            if (peekTokenIs(TokenType::TOKEN_SEMICOLON)) nextToken();
-        } else if (type == TemplateType::ELEMENT) {
-            node = parseElementNode();
+            if (peekTokenIs(TokenType::TOKEN_COMMA) || peekTokenIs(TokenType::TOKEN_SEMICOLON)) {
+                body.push_back(std::make_shared<CSSPropertyNode>(key, nullptr));
+                nextToken();
+            }
+            else if (peekTokenIs(TokenType::TOKEN_COLON)) {
+                nextToken();
+                nextToken();
+                body.push_back(std::make_shared<CSSPropertyNode>(key, parseExpression(LOWEST)));
+                if (peekTokenIs(TokenType::TOKEN_SEMICOLON)) nextToken();
+            }
         }
-        if (node) body.push_back(node);
     }
     if (!expectPeek(TokenType::TOKEN_RBRACE)) return nullptr;
-    return std::make_shared<TemplateDefinitionNode>(type, name, body);
+    return std::make_shared<CustomDefinitionNode>(type, name, body);
 }
 
-NodePtr CHTLParser::parseTemplateUsage() {
+std::shared_ptr<TemplateDefinitionNode> CHTLParser::parseTemplateDefinition() { return nullptr; }
+
+NodePtr CHTLParser::parseTemplateOrCustomUsage() {
     nextToken();
     if (!currentTokenIs(TokenType::TOKEN_IDENTIFIER)) return nullptr;
+
     TemplateType type;
     if (m_currentToken.literal == "Style") type = TemplateType::STYLE;
     else if (m_currentToken.literal == "Element") type = TemplateType::ELEMENT;
     else return nullptr;
+
     if (!expectPeek(TokenType::TOKEN_IDENTIFIER)) return nullptr;
     std::string name = m_currentToken.literal;
+
+    NodeList body;
+    if (peekTokenIs(TokenType::TOKEN_LBRACE)) {
+        nextToken();
+        while (!peekTokenIs(TokenType::TOKEN_RBRACE) && !peekTokenIs(TokenType::TOKEN_EOF)) {
+            nextToken();
+            if (currentTokenIs(TokenType::TOKEN_KEYWORD_DELETE)) {
+                nextToken();
+                body.push_back(std::make_shared<DeletePropertyNode>(m_currentToken.literal));
+                if(peekTokenIs(TokenType::TOKEN_SEMICOLON)) nextToken();
+            }
+            else if (currentTokenIs(TokenType::TOKEN_IDENTIFIER)) {
+                std::string key = m_currentToken.literal;
+                if (!expectPeek(TokenType::TOKEN_COLON)) continue;
+                nextToken();
+                body.push_back(std::make_shared<CSSPropertyNode>(key, parseExpression(LOWEST)));
+                 if (peekTokenIs(TokenType::TOKEN_SEMICOLON)) nextToken();
+            }
+        }
+        if (!expectPeek(TokenType::TOKEN_RBRACE)) return nullptr;
+        return std::make_shared<CustomUsageNode>(type, name, body);
+    }
+
+    if (peekTokenIs(TokenType::TOKEN_SEMICOLON)) nextToken();
     return std::make_shared<TemplateUsageNode>(type, name);
 }
 
 ExpressionPtr CHTLParser::parseExpression(Precedence precedence) {
-    ExpressionPtr leftExp = parseIdentifierAsExpression();
-    if (!leftExp) return nullptr;
-    while (!peekTokenIs(TokenType::TOKEN_SEMICOLON) && !peekTokenIs(TokenType::TOKEN_RBRACE) && precedence < peekPrecedence()) {
-        if (peekTokenIs(TokenType::TOKEN_QUESTION)) {
-             nextToken();
-             leftExp = parseConditionalExpression(leftExp);
-        } else if (m_precedences.count(m_peekToken.type)) {
-            nextToken();
-            leftExp = parseInfixExpression(leftExp);
-        } else {
-            return leftExp;
+    std::string literal_value;
+    while (!currentTokenIs(TokenType::TOKEN_SEMICOLON) && !currentTokenIs(TokenType::TOKEN_RBRACE) && !currentTokenIs(TokenType::TOKEN_EOF)) {
+        literal_value += m_currentToken.literal;
+        if (!peekTokenIs(TokenType::TOKEN_SEMICOLON) && !peekTokenIs(TokenType::TOKEN_RBRACE) && !peekTokenIs(TokenType::TOKEN_EOF)) {
+            literal_value += " ";
         }
+        nextToken();
     }
-    return leftExp;
-}
-
-ExpressionPtr CHTLParser::parseIdentifierAsExpression() {
-    if (m_currentToken.type != TokenType::TOKEN_IDENTIFIER && m_currentToken.type != TokenType::TOKEN_STRING) {
-        pushError("Unexpected token in expression");
-        return nullptr;
+    if (!literal_value.empty() && literal_value.back() == ' ') {
+        literal_value.pop_back();
     }
-    return std::make_shared<LiteralExpressionNode>(m_currentToken);
+    Token t;
+    t.literal = literal_value;
+    t.type = TokenType::TOKEN_STRING;
+    return std::make_shared<LiteralExpressionNode>(t);
 }
 
-ExpressionPtr CHTLParser::parseInfixExpression(ExpressionPtr left) {
-    auto op = m_currentToken;
-    auto precedence = currentPrecedence();
-    nextToken();
-    auto right = parseExpression(precedence);
-    if (!right) return nullptr;
-    return std::make_shared<InfixExpressionNode>(left, op, right);
-}
-
-ExpressionPtr CHTLParser::parseConditionalExpression(ExpressionPtr condition) {
-    nextToken();
-    ExpressionPtr consequence = parseExpression(LOWEST);
-    if (!expectPeek(TokenType::TOKEN_COLON)) return nullptr;
-    nextToken();
-    ExpressionPtr alternative = parseExpression(LOWEST);
-    return std::make_shared<ConditionalExpressionNode>(condition, consequence, alternative);
-}
-
-std::shared_ptr<TextNode> CHTLParser::parseTextNodeShorthand() {
-    if (!currentTokenIs(TokenType::TOKEN_COLON) && !currentTokenIs(TokenType::TOKEN_ASSIGN)) return nullptr;
-    nextToken();
-    std::string textContent = m_currentToken.literal;
-    return std::make_shared<TextNode>(textContent);
-}
+ExpressionPtr CHTLParser::parseIdentifierAsExpression() { return nullptr; }
+ExpressionPtr CHTLParser::parseInfixExpression(ExpressionPtr left) { return nullptr; }
+ExpressionPtr CHTLParser::parseConditionalExpression(ExpressionPtr condition) { return nullptr; }
+std::shared_ptr<TextNode> CHTLParser::parseTextNodeShorthand() { return nullptr; }
+std::shared_ptr<ScriptNode> CHTLParser::parseScriptNode() { return nullptr; }
 
 std::shared_ptr<StyleNode> CHTLParser::parseStyleNode() {
     auto styleNode = std::make_shared<StyleNode>();
@@ -198,9 +195,8 @@ std::shared_ptr<StyleNode> CHTLParser::parseStyleNode() {
     while (!peekTokenIs(TokenType::TOKEN_RBRACE) && !peekTokenIs(TokenType::TOKEN_EOF)) {
         nextToken();
         if (currentTokenIs(TokenType::TOKEN_AT)) {
-            auto usage = parseTemplateUsage();
+            auto usage = parseTemplateOrCustomUsage();
             if(usage) styleNode->template_usages.push_back(usage);
-            if (peekTokenIs(TokenType::TOKEN_SEMICOLON)) nextToken();
         } else if (currentTokenIs(TokenType::TOKEN_IDENTIFIER)) {
             std::string key = m_currentToken.literal;
             if (!expectPeek(TokenType::TOKEN_COLON)) continue;
@@ -214,37 +210,14 @@ std::shared_ptr<StyleNode> CHTLParser::parseStyleNode() {
     return styleNode;
 }
 
-std::shared_ptr<ScriptNode> CHTLParser::parseScriptNode() {
-    if (!expectPeek(TokenType::TOKEN_LBRACE)) return nullptr;
-    const auto& source = m_lexer.GetInput();
-    size_t start_pos = m_lexer.GetReadPosition();
-    int brace_level = 1;
-    size_t current_pos = start_pos;
-    while (brace_level > 0 && current_pos < source.length()) {
-        if (source[current_pos] == '{') brace_level++;
-        else if (source[current_pos] == '}') brace_level--;
-        current_pos++;
-    }
-    if (brace_level != 0) {
-        pushError("Unterminated script block");
-        return nullptr;
-    }
-    std::string content = source.substr(start_pos, current_pos - start_pos - 1);
-    while(m_lexer.GetPosition() < current_pos -1) {
-        nextToken();
-    }
-    return std::make_shared<ScriptNode>(content);
-}
-
 std::shared_ptr<ElementNode> CHTLParser::parseElementNode() {
     auto element = std::make_shared<ElementNode>(m_currentToken.literal);
     if (!expectPeek(TokenType::TOKEN_LBRACE)) return nullptr;
     while (!peekTokenIs(TokenType::TOKEN_RBRACE) && !peekTokenIs(TokenType::TOKEN_EOF)) {
         nextToken();
         if (currentTokenIs(TokenType::TOKEN_AT)) {
-            auto usage = parseTemplateUsage();
+            auto usage = parseTemplateOrCustomUsage();
             if(usage) element->children.push_back(usage);
-            if (peekTokenIs(TokenType::TOKEN_SEMICOLON)) nextToken();
         } else if (currentTokenIs(TokenType::TOKEN_IDENTIFIER)) {
             std::string key = m_currentToken.literal;
             if (key == "style") {

@@ -1,0 +1,15 @@
+[Custom] @Style TextSet {
+    color,
+    font-size;
+    line-height: 1.6;
+}
+
+div {
+    style {
+        @Style TextSet {
+            color: red;
+            font-size: 18px;
+            delete line-height;
+        }
+    }
+}

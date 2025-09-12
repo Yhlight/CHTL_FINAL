@@ -4,28 +4,38 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
+#include <sstream>
 
-int main() {
+// Helper function to read a file into a string
+static std::string readFile(const std::string& filepath) {
+    std::ifstream file(filepath);
+    if (!file.is_open()) {
+        std::cerr << "Could not open test file: " << filepath << std::endl;
+        return "";
+    }
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
+
+int main(int argc, char* argv[]) {
     std::cout << "--- Parser Debug Test ---" << std::endl;
 
-    std::string source = R"([Template] @Style MyTestStyle {
-    color: red;
-}
-
-div {
-    style {
-        @Style MyTestStyle;
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <filename.chtl>" << std::endl;
+        return 1;
     }
-}
-)";
+    std::string filepath = argv[1];
+    std::string source = readFile(filepath);
+    if (source.empty()) return 1;
 
-    std::cout << "--- Source ---" << std::endl;
+    std::cout << "--- Source: " << filepath << " ---" << std::endl;
     std::cout << source << std::endl;
     std::cout << "--------------" << std::endl;
 
     CHTL::CHTLLexer lexer(source);
-    // Enable debug mode
-    CHTL::CHTLParser parser(lexer, true);
+    CHTL::CHTLParser parser(lexer, false); // Disable debug logging for cleaner output
 
     auto program = parser.ParseProgram();
 

@@ -120,7 +120,13 @@ CHTL/CMakeFiles/chtl_lib.dir/CHTLParser/CHTLParser.cpp.o: \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/stl_uninitialized.h \
  /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc \
+ /usr/include/c++/13/bits/vector.tcc /usr/include/c++/13/map \
+ /usr/include/c++/13/bits/stl_tree.h \
+ /usr/include/c++/13/ext/aligned_buffer.h \
+ /usr/include/c++/13/bits/node_handle.h \
+ /usr/include/c++/13/bits/stl_map.h \
+ /usr/include/c++/13/bits/stl_multimap.h \
+ /usr/include/c++/13/bits/erase_if.h \
  /app/CHTL/CHTLParser/../CHTLNode/Node.h /usr/include/c++/13/memory \
  /usr/include/c++/13/bits/stl_tempbuf.h \
  /usr/include/c++/13/bits/stl_raw_storage_iter.h \
@@ -132,7 +138,6 @@ CHTL/CMakeFiles/chtl_lib.dir/CHTLParser/CHTLParser.cpp.o: \
  /usr/include/c++/13/bits/shared_ptr.h \
  /usr/include/c++/13/bits/shared_ptr_base.h /usr/include/c++/13/typeinfo \
  /usr/include/c++/13/bits/allocated_ptr.h \
- /usr/include/c++/13/ext/aligned_buffer.h \
  /usr/include/c++/13/ext/atomicity.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/gthr.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/gthr-default.h \
@@ -190,13 +195,10 @@ CHTL/CMakeFiles/chtl_lib.dir/CHTLParser/CHTLParser.cpp.o: \
  /app/CHTL/CHTLParser/../CHTLNode/TemplateUsageNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/TemplateDefinitionNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/ImportNode.h \
- /app/CHTL/CHTLParser/../CHTLNode/ScriptNode.h /usr/include/c++/13/map \
- /usr/include/c++/13/bits/stl_tree.h \
- /usr/include/c++/13/bits/node_handle.h \
- /usr/include/c++/13/bits/stl_map.h \
- /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h /usr/include/c++/13/functional \
- /usr/include/c++/13/bits/std_function.h \
+ /app/CHTL/CHTLParser/../CHTLNode/ScriptNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/CustomDefinitionNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/CustomUsageNode.h \
+ /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
  /usr/include/c++/13/unordered_map \
  /usr/include/c++/13/bits/unordered_map.h \
  /usr/include/c++/13/bits/hashtable.h \
@@ -210,4 +212,5 @@ CHTL/CMakeFiles/chtl_lib.dir/CHTLParser/CHTLParser.cpp.o: \
  /app/CHTL/CHTLParser/../CHTLNode/LiteralExpressionNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/InfixExpressionNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/ConditionalExpressionNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/DeletePropertyNode.h \
  /usr/include/c++/13/iostream

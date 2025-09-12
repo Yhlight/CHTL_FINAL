@@ -183,7 +183,9 @@ CHTL/CMakeFiles/chtl_lib.dir/CHTLLoader/CHTLLoader.cpp.o: \
  /usr/include/c++/13/bits/stl_multiset.h \
  /usr/include/c++/13/bits/erase_if.h \
  /app/CHTL/CHTLLoader/../CHTLLexer/CHTLLexer.h \
- /app/CHTL/CHTLLoader/../CHTLLexer/Token.h \
+ /app/CHTL/CHTLLoader/../CHTLLexer/Token.h /usr/include/c++/13/map \
+ /usr/include/c++/13/bits/stl_map.h \
+ /usr/include/c++/13/bits/stl_multimap.h \
  /app/CHTL/CHTLLoader/../CHTLParser/CHTLParser.h \
  /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/ElementNode.h \
  /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/AttributeNode.h \
@@ -197,9 +199,9 @@ CHTL/CMakeFiles/chtl_lib.dir/CHTLLoader/CHTLLoader.cpp.o: \
  /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/TemplateDefinitionNode.h \
  /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/ImportNode.h \
  /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/ScriptNode.h \
- /usr/include/c++/13/map /usr/include/c++/13/bits/stl_map.h \
- /usr/include/c++/13/bits/stl_multimap.h /usr/include/c++/13/functional \
- /usr/include/c++/13/bits/std_function.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/CustomDefinitionNode.h \
+ /app/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/CustomUsageNode.h \
+ /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
  /usr/include/c++/13/unordered_map \
  /usr/include/c++/13/bits/unordered_map.h \
  /usr/include/c++/13/bits/hashtable.h \

@@ -11,6 +11,8 @@
 #include "../CHTLNode/TemplateUsageNode.h"
 #include "../CHTLNode/ImportNode.h"
 #include "../CHTLNode/ScriptNode.h"
+#include "../CHTLNode/CustomDefinitionNode.h"
+#include "../CHTLNode/CustomUsageNode.h"
 #include <vector>
 #include <map>
 #include <functional>
@@ -42,12 +44,14 @@ private:
     bool expectPeek(TokenType type);
     Precedence currentPrecedence();
     Precedence peekPrecedence();
+    TokenType lookupIdent(const std::string& ident);
 
     // Statement-level parsing
     NodePtr parseStatement();
-    std::shared_ptr<TemplateDefinitionNode> parseTemplateDefinition();
-    NodePtr parseTemplateUsage();
     std::shared_ptr<ImportNode> parseImportStatement();
+    std::shared_ptr<TemplateDefinitionNode> parseTemplateDefinition();
+    std::shared_ptr<CustomDefinitionNode> parseCustomDefinition();
+    NodePtr parseTemplateOrCustomUsage();
 
     // Node-specific parsing functions
     std::shared_ptr<ElementNode> parseElementNode();
@@ -69,7 +73,7 @@ private:
     Token m_currentToken;
     Token m_peekToken;
 
-    static const std::map<TokenType, Precedence> m_precedences;
+    static const std::map<std::string, TokenType> m_keywords;
 };
 
 } // namespace CHTL

@@ -16,14 +16,17 @@ public:
 
     std::string ToString(int indent = 0) const override {
         std::stringstream ss;
-        ss << std::string(indent, ' ') << "CSSProperty( " << key << " ) [\n";
-        ss << value->ToString(indent + 2) << "\n";
-        ss << std::string(indent, ' ') << "]";
+        ss << std::string(indent, ' ') << "CSSProperty( " << key << " )";
+        if (value) {
+            ss << " [\n";
+            ss << value->ToString(indent + 2) << "\n";
+            ss << std::string(indent, ' ') << "]";
+        }
         return ss.str();
     }
 
     NodePtr clone() const override {
-        auto value_clone = std::dynamic_pointer_cast<ExpressionNode>(value->clone());
+        auto value_clone = value ? std::dynamic_pointer_cast<ExpressionNode>(value->clone()) : nullptr;
         return std::make_shared<CSSPropertyNode>(key, value_clone);
     }
 

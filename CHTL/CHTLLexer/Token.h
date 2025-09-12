@@ -43,8 +43,19 @@ enum class TokenType {
     TOKEN_OR,         // ||
     TOKEN_AT,         // @
 
-    // Keywords will be handled as identifiers for now and distinguished by the parser
-    // e.g., text, style, div, span, etc.
+    // Keywords
+    TOKEN_KEYWORD_TEMPLATE, // [Template]
+    TOKEN_KEYWORD_CUSTOM,   // [Custom]
+    TOKEN_KEYWORD_IMPORT,   // [Import]
+    TOKEN_KEYWORD_DELETE,
+    TOKEN_KEYWORD_INSERT,
+    TOKEN_KEYWORD_AFTER,
+    TOKEN_KEYWORD_BEFORE,
+    TOKEN_KEYWORD_REPLACE,
+    TOKEN_KEYWORD_ATTOP,
+    TOKEN_KEYWORD_ATBOTTOM,
+    TOKEN_KEYWORD_FROM,
+    TOKEN_KEYWORD_AS,
 
     // Comments (might be filtered out by the lexer directly)
     TOKEN_COMMENT,    // // or /* */
