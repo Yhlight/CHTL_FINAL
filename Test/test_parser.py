@@ -9,67 +9,65 @@ from CHTL.CHTLLexer.lexer import Lexer
 from CHTL.CHTLLexer.token import TokenType
 from CHTL.parser import Parser
 from CHTL.CHTLNode.nodes import (
-    RootNode, ElementNode, AttributeNode, TextNode, CommentNode,
-    StyleNode, StylePropertyNode, BinaryOpNode, DimensionNode, ConditionalNode,
-    IdentifierNode, AttributeReferenceNode, SelectorBlockNode,
-    TemplateDefinitionNode, TemplateUsageNode
+    RootNode, ElementNode, StyleNode, SelectorBlockNode,
+    TemplateDefinitionNode, TemplateUsageNode, CustomDefinitionNode,
+    CustomUsageNode, DeleteNode, InsertNode, StylePropertyNode
 )
 
 class TestParser(unittest.TestCase):
 
-    def test_parser_structure(self):
-        source = "div { id: 'a'; }"
+    def test_template_and_custom_definitions(self):
+        source = "[Template] @Style T {} [Custom] @Element C {}"
         lexer = Lexer(source)
         tokens = lexer.scan_tokens()
         parser = Parser(tokens)
         ast = parser.parse()
         self.assertIsInstance(ast, RootNode)
-
-    def test_style_block_parsing(self):
-        source = "div { style { width: 100px; } }"
-        lexer = Lexer(source)
-        tokens = lexer.scan_tokens()
-        parser = Parser(tokens)
-        ast = parser.parse()
-        style_node = ast.children[0].children[0]
-        self.assertIsInstance(style_node, StyleNode)
-
-    def test_selector_block_parsing(self):
-        source = 'div { style { .my-class { color: red; } } }'
-        lexer = Lexer(source)
-        tokens = lexer.scan_tokens()
-        parser = Parser(tokens)
-        ast = parser.parse()
-        style_node = ast.children[0].children[0]
-        self.assertIsInstance(style_node.rules[0], SelectorBlockNode)
-
-    def test_template_definition_parsing(self):
-        source = "[Template] @Style MyStyles { color: red; }"
-        lexer = Lexer(source)
-        tokens = lexer.scan_tokens()
-        parser = Parser(tokens)
-        ast = parser.parse()
+        self.assertEqual(len(ast.children), 2)
         self.assertIsInstance(ast.children[0], TemplateDefinitionNode)
-        self.assertEqual(ast.children[0].name, "MyStyles")
+        self.assertIsInstance(ast.children[1], CustomDefinitionNode)
 
-    def test_template_usage_parsing(self):
-        source = "div { @Element MyElement; }"
+    def test_custom_usage_and_delete(self):
+        source = "div { style { @Style MyCustom { delete prop1; } } }"
         lexer = Lexer(source)
         tokens = lexer.scan_tokens()
         parser = Parser(tokens)
         ast = parser.parse()
-        usage_node = ast.children[0].children[0]
-        self.assertIsInstance(usage_node, TemplateUsageNode)
-        self.assertEqual(usage_node.name, "MyElement")
 
-    def test_template_inheritance_parsing(self):
-        source = "div { style { inherit @Style MyStyles; } }"
+        style_node = ast.children[0].children[0]
+        custom_usage = style_node.rules[0]
+        self.assertIsInstance(custom_usage, CustomUsageNode)
+
+        delete_node = custom_usage.body[0]
+        self.assertIsInstance(delete_node, DeleteNode)
+        self.assertEqual(delete_node.targets, ["prop1"])
+
+    def test_insert_statement(self):
+        source = 'div { insert after p { span {} } }'
         lexer = Lexer(source)
         tokens = lexer.scan_tokens()
         parser = Parser(tokens)
         ast = parser.parse()
-        usage_node = ast.children[0].children[0].rules[0]
-        self.assertIsInstance(usage_node, TemplateUsageNode)
+
+        insert_node = ast.children[0].children[0]
+        self.assertIsInstance(insert_node, InsertNode)
+        self.assertEqual(insert_node.position, "after")
+        self.assertEqual(insert_node.target_selector, "p")
+        self.assertIsInstance(insert_node.body[0], ElementNode)
+
+    def test_valueless_property(self):
+        source = "[Custom] @Style S { color; }"
+        lexer = Lexer(source)
+        tokens = lexer.scan_tokens()
+        parser = Parser(tokens)
+        ast = parser.parse()
+
+        custom_def = ast.children[0]
+        prop_node = custom_def.body[0]
+        self.assertIsInstance(prop_node, StylePropertyNode)
+        self.assertEqual(prop_node.property_name, "color")
+        self.assertIsNone(prop_node.value)
+
 
 if __name__ == '__main__':
     unittest.main()

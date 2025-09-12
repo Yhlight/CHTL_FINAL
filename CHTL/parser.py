@@ -6,7 +6,7 @@ from .CHTLNode.nodes import (
     StyleNode, StylePropertyNode, SelectorBlockNode,
     ExprNode, BinaryOpNode, DimensionNode, IdentifierNode, ConditionalNode,
     AttributeReferenceNode, TemplateDefinitionNode, TemplateUsageNode, VarUsageNode,
-    VarDefinitionNode
+    VarDefinitionNode, CustomDefinitionNode, CustomUsageNode, DeleteNode, InsertNode
 )
 
 class Parser:
@@ -21,10 +21,13 @@ class Parser:
 
     def _declaration(self) -> Node:
         if self._match(TokenType.TEMPLATE_KEYWORD): return self._parse_template_definition()
+        if self._match(TokenType.CUSTOM_KEYWORD): return self._parse_custom_definition()
         if self._match(TokenType.GEN_COMMENT): return self._comment_node()
         return self._element_declaration()
 
     def _statement(self) -> Node:
+        if self._peek().type == TokenType.INSERT: return self._parse_insert_statement()
+        if self._peek().type == TokenType.DELETE: return self._parse_delete_statement()
         if self._peek().type in [TokenType.AT, TokenType.INHERIT]: return self._parse_template_usage()
         if self._peek().type == TokenType.IDENTIFIER and self._peek().value == 'style' and self._peek_next().type == TokenType.LBRACE: return self._parse_style_block()
         if self._peek().type == TokenType.IDENTIFIER and self._peek_next().type in [TokenType.COLON, TokenType.EQUALS]: return self._attribute_or_text_statement()
@@ -34,18 +37,18 @@ class Parser:
     def _element_declaration(self) -> ElementNode:
         tag_token = self._consume(TokenType.IDENTIFIER, "Expect element name.")
         if tag_token.value == 'text':
-            self._consume(TokenType.LBRACE, "Expect '{' after 'text' keyword.")
+            self._consume(TokenType.LBRACE, "Expect '{'.")
             if self._match(TokenType.STRING): content_token = self._previous()
-            else: content_token = self._consume(TokenType.UNQUOTED_LITERAL, "Expect literal inside text block.")
-            self._consume(TokenType.RBRACE, "Expect '}' after text block.")
+            else: content_token = self._consume(TokenType.UNQUOTED_LITERAL, "Expect literal.")
+            self._consume(TokenType.RBRACE, "Expect '}'.")
             return TextNode(content=content_token.value)
-        self._consume(TokenType.LBRACE, "Expect '{' after element name.")
+        self._consume(TokenType.LBRACE, "Expect '{'.")
         attributes, children = [], []
         while not self._check(TokenType.RBRACE) and not self._is_at_end():
             node = self._statement()
             if isinstance(node, AttributeNode): attributes.append(node)
             else: children.append(node)
-        self._consume(TokenType.RBRACE, "Expect '}' after element block.")
+        self._consume(TokenType.RBRACE, "Expect '}'.")
         return ElementNode(tag_name=tag_token.value, attributes=attributes, children=children)
 
     def _attribute_or_text_statement(self) -> Union[AttributeNode, TextNode]:
@@ -67,7 +70,7 @@ class Parser:
         name_token = self._consume(TokenType.IDENTIFIER, "Expect template name.")
         self._consume(TokenType.LBRACE, "Expect '{'.")
         body = []
-        while not self._check(TokenType.RBRACE) and not self._is_at_end():
+        while not self._check(TokenType.RBRACE):
             if type_token.value == "Style":
                 if self._peek().type in [TokenType.AT, TokenType.INHERIT]: body.append(self._parse_template_usage())
                 else: body.append(self._parse_style_property())
@@ -76,26 +79,65 @@ class Parser:
         self._consume(TokenType.RBRACE, "Expect '}'.")
         return TemplateDefinitionNode(template_type=type_token.value, name=name_token.value, body=body)
 
-    def _parse_var_definition(self) -> VarDefinitionNode:
-        name_token = self._consume(TokenType.IDENTIFIER, "Expect var name.")
-        self._consume(TokenType.COLON, "Expect ':'.")
-        value_expr = self._parse_expression()
-        self._consume(TokenType.SEMICOLON, "Expect ';'.")
-        return VarDefinitionNode(name=name_token.value, value=value_expr)
+    def _parse_custom_definition(self) -> CustomDefinitionNode:
+        self._consume(TokenType.AT, "Expect '@'.")
+        type_token = self._consume(TokenType.IDENTIFIER, "Expect custom type.")
+        name_token = self._consume(TokenType.IDENTIFIER, "Expect custom name.")
+        self._consume(TokenType.LBRACE, "Expect '{'.")
+        body = [] # Parsing body same as template for now
+        while not self._check(TokenType.RBRACE):
+            if type_token.value == "Style": body.append(self._parse_style_property(allow_valueless=True))
+            else: body.append(self._statement())
+        self._consume(TokenType.RBRACE, "Expect '}'.")
+        return CustomDefinitionNode(template_type=type_token.value, name=name_token.value, body=body)
 
-    def _parse_template_usage(self) -> TemplateUsageNode:
+    def _parse_var_definition(self) -> VarDefinitionNode:
+        name, _ = self._consume(TokenType.IDENTIFIER, "Expect var name."), self._consume(TokenType.COLON, "Expect ':'.")
+        value = self._parse_expression()
+        self._consume(TokenType.SEMICOLON, "Expect ';'.")
+        return VarDefinitionNode(name.value, value)
+
+    def _parse_template_usage(self) -> Union[TemplateUsageNode, CustomUsageNode]:
         self._match(TokenType.INHERIT)
         self._consume(TokenType.AT, "Expect '@'.")
-        type_token = self._consume(TokenType.IDENTIFIER, "Expect template type.")
-        name_token = self._consume(TokenType.IDENTIFIER, "Expect template name.")
+        type_token = self._consume(TokenType.IDENTIFIER, "Expect type.")
+        name_token = self._consume(TokenType.IDENTIFIER, "Expect name.")
+        if self._match(TokenType.LBRACE):
+            body = []
+            while not self._check(TokenType.RBRACE):
+                if self._peek().type == TokenType.DELETE: body.append(self._parse_delete_statement())
+                elif self._peek().type == TokenType.INSERT: body.append(self._parse_insert_statement())
+                else: body.append(self._statement())
+            self._consume(TokenType.RBRACE, "Expect '}'.")
+            return CustomUsageNode(type_token.value, name_token.value, body)
+        else:
+            self._consume(TokenType.SEMICOLON, "Expect ';'.")
+            return TemplateUsageNode(type_token.value, name_token.value)
+
+    def _parse_delete_statement(self) -> DeleteNode:
+        self._consume(TokenType.DELETE, "Expect 'delete'.")
+        targets = [self._consume(TokenType.IDENTIFIER, "Expect target.").value]
+        while self._match(TokenType.COMMA):
+            targets.append(self._consume(TokenType.IDENTIFIER, "Expect target.").value)
         self._consume(TokenType.SEMICOLON, "Expect ';'.")
-        return TemplateUsageNode(template_type=type_token.value, name=name_token.value)
+        return DeleteNode(targets)
+
+    def _parse_insert_statement(self) -> InsertNode:
+        self._consume(TokenType.INSERT, "Expect 'insert'.")
+        pos = self._consume_any([TokenType.AFTER, TokenType.BEFORE, TokenType.REPLACE, TokenType.AT_TOP, TokenType.AT_BOTTOM], "Expect position.").value
+        # Simplified selector parsing for now
+        target = self._consume(TokenType.IDENTIFIER, "Expect target selector.").value
+        self._consume(TokenType.LBRACE, "Expect '{'.")
+        body = []
+        while not self._check(TokenType.RBRACE): body.append(self._statement())
+        self._consume(TokenType.RBRACE, "Expect '}'.")
+        return InsertNode(pos, target, body)
 
     def _parse_style_block(self) -> StyleNode:
         self._consume(TokenType.IDENTIFIER, "Expect 'style'.")
         self._consume(TokenType.LBRACE, "Expect '{'.")
         rules = []
-        while not self._check(TokenType.RBRACE) and not self._is_at_end():
+        while not self._check(TokenType.RBRACE):
             if self._peek().type in [TokenType.AT, TokenType.INHERIT]: rules.append(self._parse_template_usage())
             elif self._peek().type == TokenType.IDENTIFIER and self._peek_next().type == TokenType.COLON: rules.append(self._parse_style_property())
             else: rules.append(self._parse_selector_block())
@@ -103,21 +145,24 @@ class Parser:
         return StyleNode(rules=rules)
 
     def _parse_selector_block(self) -> SelectorBlockNode:
-        selector_tokens = []
-        while not self._check(TokenType.LBRACE): selector_tokens.append(self._advance())
-        selector = "".join(t.value for t in selector_tokens)
+        tokens = []
+        while not self._check(TokenType.LBRACE): tokens.append(self._advance())
+        selector = "".join(t.value for t in tokens) # Simplified
         self._consume(TokenType.LBRACE, "Expect '{'.")
         properties = []
         while not self._check(TokenType.RBRACE): properties.append(self._parse_style_property())
         self._consume(TokenType.RBRACE, "Expect '}'.")
-        return SelectorBlockNode(selector=selector, properties=properties)
+        return SelectorBlockNode(selector, properties)
 
-    def _parse_style_property(self) -> StylePropertyNode:
-        name_token = self._consume(TokenType.IDENTIFIER, "Expect property name.")
+    def _parse_style_property(self, allow_valueless=False) -> StylePropertyNode:
+        name = self._consume(TokenType.IDENTIFIER, "Expect property name.")
+        if allow_valueless and self._peek().type == TokenType.SEMICOLON:
+            self._advance()
+            return StylePropertyNode(name.value, None)
         self._consume(TokenType.COLON, "Expect ':'.")
-        value_expr = self._parse_expression()
+        value = self._parse_expression()
         self._consume(TokenType.SEMICOLON, "Expect ';'.")
-        return StylePropertyNode(property_name=name_token.value, value=value_expr)
+        return StylePropertyNode(name.value, value)
 
     def _parse_expression(self) -> ExprNode: return self._parse_ternary()
     def _parse_ternary(self) -> ExprNode:

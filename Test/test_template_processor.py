@@ -58,5 +58,33 @@ class TestTemplateProcessor(unittest.TestCase):
         self.assertIsInstance(p1, ElementNode)
         self.assertEqual(p1.tag_name, "p")
 
+    def test_custom_style_delete_processing(self):
+        source = textwrap.dedent("""
+            [Custom] @Style MyCustom {
+                color: red;
+                font-size: 16px;
+            }
+            div {
+                style {
+                    @Style MyCustom {
+                        delete font-size;
+                    }
+                }
+            }
+        """)
+        lexer = Lexer(source)
+        tokens = lexer.scan_tokens()
+        parser = Parser(tokens)
+        ast = parser.parse()
+        registry = TemplateRegistry(ast)
+        processor = TemplateProcessor(ast, registry)
+        processed_ast = processor.process()
+
+        # Verify the processed AST
+        style_node = processed_ast.children[1].children[0]
+        self.assertEqual(len(style_node.rules), 1)
+        self.assertEqual(style_node.rules[0].property_name, "color")
+
+
 if __name__ == '__main__':
     unittest.main()

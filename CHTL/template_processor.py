@@ -1,6 +1,7 @@
 import copy
 from .CHTLNode.nodes import (
-    BaseNode, RootNode, ElementNode, StyleNode, TemplateUsageNode
+    BaseNode, RootNode, ElementNode, StyleNode, TemplateUsageNode,
+    CustomUsageNode, DeleteNode, StylePropertyNode
 )
 from .template_registry import TemplateRegistry
 
@@ -31,7 +32,12 @@ class TemplateProcessor:
     def _visit_ElementNode(self, node: ElementNode) -> ElementNode:
         new_children = []
         for child in node.children:
-            result = self._visit(child)
+            # Handle CustomUsageNode which might not be in a list context
+            if isinstance(child, CustomUsageNode):
+                result = self._visit_CustomUsageNode(child)
+            else:
+                result = self._visit(child)
+
             if isinstance(result, list): new_children.extend(result)
             else: new_children.append(result)
         return ElementNode(tag_name=node.tag_name, attributes=node.attributes, children=new_children)
@@ -39,7 +45,11 @@ class TemplateProcessor:
     def _visit_StyleNode(self, node: StyleNode) -> StyleNode:
         new_rules = []
         for rule in node.rules:
-            result = self._visit(rule)
+            if isinstance(rule, CustomUsageNode):
+                result = self._visit_CustomUsageNode(rule)
+            else:
+                result = self._visit(rule)
+
             if isinstance(result, list): new_rules.extend(result)
             else: new_rules.append(result)
         return StyleNode(rules=new_rules)
@@ -54,3 +64,33 @@ class TemplateProcessor:
             if isinstance(result, list): processed_body.extend(result)
             else: processed_body.append(result)
         return processed_body
+
+    def _visit_CustomUsageNode(self, node: CustomUsageNode) -> list:
+        # 1. Expand the base template/custom definition
+        template = self.registry.find(node.template_type, node.name)
+        if not template:
+            raise Exception(f"Custom definition '{node.name}' not found.")
+
+        expanded_body = []
+        for body_node in template.body:
+            result = self._visit(copy.deepcopy(body_node))
+            if isinstance(result, list):
+                expanded_body.extend(result)
+            else:
+                expanded_body.append(result)
+
+        # 2. Apply specializations from the usage body
+        delete_targets = set()
+        for rule in node.body:
+            if isinstance(rule, DeleteNode):
+                delete_targets.update(rule.targets)
+
+        # Filter out deleted properties
+        final_body = [
+            item for item in expanded_body
+            if not (isinstance(item, StylePropertyNode) and item.property_name in delete_targets)
+        ]
+
+        # TODO: Handle other specializations like insert, property filling, etc.
+
+        return final_body

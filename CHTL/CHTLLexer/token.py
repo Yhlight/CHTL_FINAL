@@ -13,10 +13,19 @@ class TokenType(Enum):
     DOT = '.'
     HASH = '#'
     AT = '@'
+    COMMA = ','
 
     # Keywords
     TEMPLATE_KEYWORD = '[Template]'
+    CUSTOM_KEYWORD = '[Custom]'
     INHERIT = 'inherit'
+    DELETE = 'delete'
+    INSERT = 'insert'
+    AFTER = 'after'
+    BEFORE = 'before'
+    REPLACE = 'replace'
+    AT_TOP = 'at top'
+    AT_BOTTOM = 'at bottom'
 
     # Operators
     QUESTION = '?'

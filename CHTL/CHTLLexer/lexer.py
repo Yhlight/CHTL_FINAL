@@ -3,52 +3,37 @@ from .token import Token, TokenType
 class Lexer:
     keywords = {
         "inherit": TokenType.INHERIT,
+        "delete": TokenType.DELETE,
+        "insert": TokenType.INSERT,
+        "after": TokenType.AFTER,
+        "before": TokenType.BEFORE,
+        "replace": TokenType.REPLACE,
     }
 
     def __init__(self, source: str):
         self.source = source
         self.tokens = []
-        self.start = 0
-        self.current = 0
-        self.line = 1
-        self.column = 1
+        self.start, self.current, self.line, self.column = 0, 0, 1, 1
 
     def scan_tokens(self) -> list[Token]:
         while not self._is_at_end():
             self.start = self.current
             self._scan_token()
-
         self.tokens.append(Token(TokenType.EOF, "", self.line, self.column))
         return self.tokens
 
-    def _is_at_end(self) -> bool:
-        return self.current >= len(self.source)
-
+    def _is_at_end(self) -> bool: return self.current >= len(self.source)
     def _advance(self) -> str:
         self.current += 1
         self.column += 1
         return self.source[self.current - 1]
-
     def _add_token(self, type: TokenType, value: str = None):
-        if value is None:
-            value = self.source[self.start:self.current]
+        if value is None: value = self.source[self.start:self.current]
         self.tokens.append(Token(type, value, self.line, self.start_column))
-
-    def _peek(self) -> str:
-        if self._is_at_end():
-            return '\0'
-        return self.source[self.current]
-
-    def _peek_next(self) -> str:
-        if self.current + 1 >= len(self.source):
-            return '\0'
-        return self.source[self.current + 1]
-
+    def _peek(self) -> str: return '\0' if self._is_at_end() else self.source[self.current]
+    def _peek_next(self) -> str: return '\0' if self.current + 1 >= len(self.source) else self.source[self.current + 1]
     def _match(self, expected: str) -> bool:
-        if self._is_at_end():
-            return False
-        if self.source[self.current] != expected:
-            return False
+        if self._is_at_end() or self.source[self.current] != expected: return False
         self.current += 1
         self.column += 1
         return True
@@ -56,37 +41,30 @@ class Lexer:
     def _scan_token(self):
         self.start_column = self.column
         char = self._advance()
-
         if char in ' \r\t': pass
-        elif char == '\n':
-            self.line += 1
-            self.column = 1
+        elif char == '\n': self.line += 1; self.column = 1
         elif char == '{': self._add_token(TokenType.LBRACE)
         elif char == '}': self._add_token(TokenType.RBRACE)
         elif char == ':': self._add_token(TokenType.COLON)
         elif char == '=': self._add_token(TokenType.EQUAL_EQUAL if self._match('=') else TokenType.EQUALS)
-        elif char == '!':
-            if self._match('='): self._add_token(TokenType.BANG_EQUAL)
-            else: self._error("Unexpected character '!'")
+        elif char == '!': self._add_token(TokenType.BANG_EQUAL if self._match('=') else self._error("Unexpected '!'"))
         elif char == '<': self._add_token(TokenType.LESS_EQUAL if self._match('=') else TokenType.LESS)
         elif char == '>': self._add_token(TokenType.GREATER_EQUAL if self._match('=') else TokenType.GREATER)
-        elif char == '&':
-            if self._match('&'): self._add_token(TokenType.AMPERSAND_AMPERSAND)
-            else: self._error("Unexpected character '&'")
-        elif char == '|':
-            if self._match('|'): self._add_token(TokenType.PIPE_PIPE)
-            else: self._error("Unexpected character '|'")
+        elif char == '&': self._add_token(TokenType.AMPERSAND_AMPERSAND if self._match('&') else self._error("Unexpected '&'"))
+        elif char == '|': self._add_token(TokenType.PIPE_PIPE if self._match('|') else self._error("Unexpected '|'"))
         elif char == '?': self._add_token(TokenType.QUESTION)
         elif char == '.': self._add_token(TokenType.DOT)
         elif char == '#': self._add_token(TokenType.HASH)
         elif char == '@': self._add_token(TokenType.AT)
+        elif char == ',': self._add_token(TokenType.COMMA)
         elif char == '[':
             if self.source.startswith('Template]', self.current):
-                self.current += len('Template]')
-                self.column += len('Template]')
+                self.current += len('Template]'); self.column += len('Template]')
                 self._add_token(TokenType.TEMPLATE_KEYWORD)
-            else:
-                self._error("Unexpected character '['. Did you mean '[Template]'?")
+            elif self.source.startswith('Custom]', self.current):
+                self.current += len('Custom]'); self.column += len('Custom]')
+                self._add_token(TokenType.CUSTOM_KEYWORD)
+            else: self._error("Unexpected '['. Did you mean '[Template]' or '[Custom]'?")
         elif char == ';': self._add_token(TokenType.SEMICOLON)
         elif char == '(': self._add_token(TokenType.LPAREN)
         elif char == ')': self._add_token(TokenType.RPAREN)
@@ -116,25 +94,19 @@ class Lexer:
 
     def _scan_string(self, quote_char: str):
         while self._peek() != quote_char and not self._is_at_end():
-            if self._peek() == '\n':
-                self.line += 1
-                self.column = 0
+            if self._peek() == '\n': self.line += 1; self.column = 0
             self._advance()
         if self._is_at_end(): self._error("Unterminated string.")
         else:
             self._advance()
-            value = self.source[self.start + 1:self.current - 1]
-            self._add_token(TokenType.STRING, value)
+            self._add_token(TokenType.STRING, self.source[self.start + 1:self.current - 1])
 
     def _scan_multiline_comment(self):
         while not (self._peek() == '*' and self._peek_next() == '/') and not self._is_at_end():
-            if self._peek() == '\n':
-                self.line += 1
-                self.column = 0
+            if self._peek() == '\n': self.line += 1; self.column = 0
             self._advance()
         if self._is_at_end(): self._error("Unterminated multi-line comment.")
-        else:
-            self._advance(); self._advance()
+        else: self._advance(); self._advance()
 
     def _scan_generator_comment(self):
         while self._peek() != '\n' and not self._is_at_end(): self._advance()
@@ -150,10 +122,9 @@ class Lexer:
         self._add_token(self.keywords.get(text, TokenType.IDENTIFIER), text)
 
     def _scan_unquoted_literal(self):
-        stop_chars = ['{', '}', ';', ':', '=', '\n']
+        stop_chars = ['{', '}', ';', ':', '=', '\n', ',']
         while self._peek() not in stop_chars and not self._is_at_end(): self._advance()
         value = self.source[self.start:self.current].strip()
         if value: self._add_token(TokenType.UNQUOTED_LITERAL, value)
 
-    def _error(self, message: str):
-        raise Exception(f"[Line {self.line}, Column {self.start_column}] Error: {message}")
+    def _error(self, message: str): raise Exception(f"[Line {self.line}] Error: {message}")
