@@ -59,6 +59,7 @@ void CHTLLexer::scanToken() {
         case '+': addToken(TokenType::Plus); break;
         case '>': addToken(TokenType::GreaterThan); break;
         case '<': addToken(TokenType::LessThan); break;
+        case '%': addToken(TokenType::Percent); break;
 
         case '-':
             if (match('-')) {

@@ -1,49 +1,203 @@
 #include "CHTLGenerator.h"
 #include <map>
+#include <stack>
+#include <vector>
+#include <string>
+#include <stdexcept>
+#include <cmath>
+#include <algorithm>
 
 namespace CHTL {
 
-// Helper to render a property value, which might be a simple literal or a complex expression.
-std::string renderCssValue(const std::vector<Token>& tokens) {
+// Represents a CSS value with a numeric part and a unit.
+struct Value {
+    double Dvalue;
+    std::string Svalue;
+};
+
+// Returns the precedence of an operator.
+int getPrecedence(TokenType type) {
+    switch (type) {
+        case TokenType::Plus:
+        case TokenType::Minus:
+            return 1;
+        case TokenType::Asterisk:
+        case TokenType::Slash:
+        case TokenType::Percent:
+            return 2;
+        case TokenType::DoubleAsterisk:
+            return 3;
+        default:
+            return 0;
+    }
+}
+
+// Applies an operator to two values.
+Value applyOp(TokenType op, Value b, Value a) {
+    Value val;
+
+    if (op == TokenType::Asterisk || op == TokenType::Slash) {
+        if (op == TokenType::Slash && !a.Svalue.empty() && a.Svalue == b.Svalue) {
+            val.Svalue = ""; // Units cancel out
+        } else if (a.Svalue.empty() && !b.Svalue.empty()) {
+            val.Svalue = b.Svalue;
+        } else if (!a.Svalue.empty() && b.Svalue.empty()) {
+            val.Svalue = a.Svalue;
+        } else if (a.Svalue.empty() && b.Svalue.empty()) {
+            val.Svalue = "";
+        } else {
+            throw std::runtime_error("Invalid unit operation for '*' or '/'.");
+        }
+    } else { // For +, -, %, **
+        if (a.Svalue != b.Svalue) {
+            throw std::runtime_error("Unit mismatch in operation: " + a.Svalue + " and " + b.Svalue);
+        }
+        val.Svalue = a.Svalue;
+    }
+
+    switch (op) {
+        case TokenType::Plus:
+            val.Dvalue = a.Dvalue + b.Dvalue;
+            break;
+        case TokenType::Minus:
+            val.Dvalue = a.Dvalue - b.Dvalue;
+            break;
+        case TokenType::Asterisk:
+            val.Dvalue = a.Dvalue * b.Dvalue;
+            break;
+        case TokenType::Slash:
+            if (b.Dvalue == 0) throw std::runtime_error("Division by zero.");
+            val.Dvalue = a.Dvalue / b.Dvalue;
+            break;
+        case TokenType::Percent:
+            val.Dvalue = fmod(a.Dvalue, b.Dvalue);
+            break;
+        case TokenType::DoubleAsterisk:
+            val.Dvalue = pow(a.Dvalue, b.Dvalue);
+            break;
+        default:
+            throw std::runtime_error("Unknown operator.");
+    }
+    return val;
+}
+
+// Evaluates a CSS expression from a vector of tokens.
+std::string evaluateCssExpression(const std::vector<Token>& tokens) {
     if (tokens.empty()) {
         return "";
     }
 
-    bool has_operator = false;
-    for (const auto& token : tokens) {
-        switch (token.type) {
-            case TokenType::Plus:
-            case TokenType::Minus:
-            case TokenType::Asterisk:
-            case TokenType::Slash:
-            case TokenType::Percent:
-            case TokenType::DoubleAsterisk:
-                has_operator = true;
-                break;
-            default:
-                break;
+    std::stack<Value> values;
+    std::stack<Token> ops;
+    bool expect_operand = true;
+
+    size_t i = 0;
+    while (i < tokens.size()) {
+        const auto& token = tokens[i];
+
+        if (token.type == TokenType::Number) {
+            double val = std::stod(token.lexeme);
+            std::string unit = "";
+            if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Identifier) {
+                unit = tokens[i+1].lexeme;
+                i++; // Consume the unit token
+            }
+             else if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Percent) {
+                unit = "%";
+                i++;
+            }
+            values.push({val, unit});
+            expect_operand = false;
+        } else if (token.type == TokenType::Minus && expect_operand) {
+            // Unary minus
+            if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Number) {
+                const auto& next_token = tokens[i+1];
+                double val = -std::stod(next_token.lexeme);
+                std::string unit = "";
+                i++; // consume number token
+                if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Identifier) {
+                    unit = tokens[i+1].lexeme;
+                    i++; // consume unit token
+                }
+                 else if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Percent) {
+                    unit = "%";
+                    i++;
+                }
+                values.push({val, unit});
+                expect_operand = false;
+            }
         }
-        if (has_operator) break;
+        else if (token.type == TokenType::Plus || token.type == TokenType::Minus ||
+                   token.type == TokenType::Asterisk || token.type == TokenType::Slash ||
+                   token.type == TokenType::Percent || token.type == TokenType::DoubleAsterisk) {
+            while (!ops.empty() && getPrecedence(ops.top().type) >= getPrecedence(token.type)) {
+                Token op = ops.top();
+                ops.pop();
+
+                if (values.size() < 2) throw std::runtime_error("Invalid expression: not enough values for an operator.");
+                Value val2 = values.top();
+                values.pop();
+                Value val1 = values.top();
+                values.pop();
+
+                values.push(applyOp(op.type, val2, val1));
+            }
+            ops.push(token);
+            expect_operand = true;
+        } else {
+             if (values.empty() && ops.empty()) {
+                if (tokens.size() == 1) return token.lexeme;
+            }
+        }
+        i++;
     }
 
-    std::stringstream ss;
-    if (has_operator) {
+    while (!ops.empty()) {
+        Token op = ops.top();
+        ops.pop();
+
+        if (values.size() < 2) throw std::runtime_error("Invalid expression: not enough values for an operator.");
+        Value val2 = values.top();
+        values.pop();
+        Value val1 = values.top();
+        values.pop();
+
+        values.push(applyOp(op.type, val2, val1));
+    }
+
+    if (values.size() != 1) {
+        std::stringstream ss;
+        for(const auto& token : tokens) {
+            ss << token.lexeme << " ";
+        }
+        return ss.str();
+    }
+
+    Value result = values.top();
+    std::stringstream result_ss;
+    result_ss << result.Dvalue << result.Svalue;
+    return result_ss.str();
+}
+
+
+// Helper to render a property value, which might be a simple literal or a complex expression.
+std::string renderCssValue(const std::vector<Token>& tokens) {
+    try {
+        return evaluateCssExpression(tokens);
+    } catch (const std::runtime_error& e) {
+        // In case of an error (e.g., unit mismatch), fallback to calc().
+        // This provides a graceful fallback and helps in debugging.
+        std::stringstream ss;
         ss << "calc(";
-    }
-
-    for (size_t i = 0; i < tokens.size(); ++i) {
-        ss << tokens[i].lexeme;
-        // Add space between tokens, except for the last one.
-        if (i < tokens.size() - 1) {
-            ss << " ";
+        for (size_t i = 0; i < tokens.size(); ++i) {
+            ss << tokens[i].lexeme;
+            if (i < tokens.size() - 1) {
+                ss << " ";
+            }
         }
-    }
-
-    if (has_operator) {
         ss << ")";
+        return ss.str();
     }
-
-    return ss.str();
 }
 
 
