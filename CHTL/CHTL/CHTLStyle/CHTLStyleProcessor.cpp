@@ -714,6 +714,15 @@ std::string CHTLStyleProcessor::processPropertyValue(const std::string& value) c
     // 处理属性引用 (selector.property)
     result = processPropertyReferences(result);
     
+    // 处理链式调用
+    result = processChainedCalls(result);
+    
+    // 处理可选链式调用
+    result = processOptionalChaining(result);
+    
+    // 处理函数调用
+    result = processFunctionCalls(result);
+    
     // 处理算术表达式
     result = processArithmeticExpressions(result);
     
@@ -722,6 +731,18 @@ std::string CHTLStyleProcessor::processPropertyValue(const std::string& value) c
     
     // 处理逻辑表达式
     result = processLogicalExpressions(result);
+    
+    // 处理属性条件表达式
+    result = processAttributeConditionalExpressions(result);
+    
+    // 处理引用属性条件表达式
+    result = processReferencePropertyConditionalExpressions(result);
+    
+    // 处理单位转换
+    result = processUnitConversions(result);
+    
+    // 处理颜色转换
+    result = processColorConversions(result);
     
     return result;
 }
@@ -924,6 +945,346 @@ bool CHTLStyleProcessor::evaluateCondition(const std::string& condition) const {
     
     // 默认返回false
     return false;
+}
+
+// 增强的局部样式块功能实现
+std::string CHTLStyleProcessor::processChainedCalls(const std::string& value) const {
+    std::string result = value;
+    
+    // 处理链式调用 (element.property.method())
+    std::regex chainedCallRegex(R"(([a-zA-Z_][a-zA-Z0-9_]*\.[a-zA-Z_][a-zA-Z0-9_]*\.[a-zA-Z_][a-zA-Z0-9_]*\([^)]*\)))");
+    std::smatch match;
+    
+    while (std::regex_search(result, match, chainedCallRegex)) {
+        std::string fullMatch = match[0].str();
+        std::string processedCall = processChainedCall(fullMatch);
+        result.replace(match.position(), match.length(), processedCall);
+    }
+    
+    return result;
+}
+
+std::string CHTLStyleProcessor::processOptionalChaining(const std::string& value) const {
+    std::string result = value;
+    
+    // 处理可选链式调用 (element?.property?.method())
+    std::regex optionalChainingRegex(R"(([a-zA-Z_][a-zA-Z0-9_]*\?\.([a-zA-Z_][a-zA-Z0-9_]*\?\.)*[a-zA-Z_][a-zA-Z0-9_]*))");
+    std::smatch match;
+    
+    while (std::regex_search(result, match, optionalChainingRegex)) {
+        std::string fullMatch = match[0].str();
+        std::string processedCall = processOptionalChaining(fullMatch);
+        result.replace(match.position(), match.length(), processedCall);
+    }
+    
+    return result;
+}
+
+std::string CHTLStyleProcessor::processFunctionCalls(const std::string& value) const {
+    std::string result = value;
+    
+    // 处理函数调用 (function(args))
+    std::regex functionCallRegex(R"(([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\))");
+    std::smatch match;
+    
+    while (std::regex_search(result, match, functionCallRegex)) {
+        std::string functionName = match[1].str();
+        std::string args = match[2].str();
+        
+        // 解析参数
+        std::vector<std::string> arguments = parseFunctionCall(args);
+        
+        // 处理不同类型的函数
+        std::string processedCall;
+        if (functionName.find("math.") == 0) {
+            processedCall = processMathFunction(functionName.substr(5), arguments);
+        } else if (functionName.find("string.") == 0) {
+            processedCall = processStringFunction(functionName.substr(7), arguments);
+        } else if (functionName.find("color.") == 0) {
+            processedCall = processColorFunction(functionName.substr(6), arguments);
+        } else if (functionName.find("unit.") == 0) {
+            processedCall = processUnitFunction(functionName.substr(5), arguments);
+        } else {
+            // 默认函数处理
+            processedCall = fullMatch;
+        }
+        
+        result.replace(match.position(), match.length(), processedCall);
+    }
+    
+    return result;
+}
+
+std::string CHTLStyleProcessor::processUnitConversions(const std::string& value) const {
+    std::string result = value;
+    
+    // 处理单位转换 (value unit -> targetUnit)
+    std::regex unitConversionRegex(R"((\d+(?:\.\d+)?)\s*([a-zA-Z%]+)\s*->\s*([a-zA-Z%]+))");
+    std::smatch match;
+    
+    while (std::regex_search(result, match, unitConversionRegex)) {
+        double value = std::stod(match[1].str());
+        std::string fromUnit = match[2].str();
+        std::string toUnit = match[3].str();
+        
+        std::string convertedValue = convertUnit(std::to_string(value), fromUnit, toUnit);
+        result.replace(match.position(), match.length(), convertedValue);
+    }
+    
+    return result;
+}
+
+std::string CHTLStyleProcessor::processColorConversions(const std::string& value) const {
+    std::string result = value;
+    
+    // 处理颜色转换 (color -> format)
+    std::regex colorConversionRegex(R"((#[0-9a-fA-F]{3,6}|rgb\([^)]+\)|hsl\([^)]+\))\s*->\s*([a-zA-Z]+))");
+    std::smatch match;
+    
+    while (std::regex_search(result, match, colorConversionRegex)) {
+        std::string color = match[1].str();
+        std::string format = match[2].str();
+        
+        std::string convertedColor = convertColorFormat(color);
+        result.replace(match.position(), match.length(), convertedColor);
+    }
+    
+    return result;
+}
+
+std::string CHTLStyleProcessor::processAttributeConditionalExpressions(const std::string& value) const {
+    std::string result = value;
+    
+    // 处理属性条件表达式 (attr == value ? trueValue : falseValue)
+    std::regex attributeConditionalRegex(R"(([a-zA-Z_][a-zA-Z0-9_]*)\s*(==|!=|<|>|<=|>=)\s*([^?]+)\s*\?\s*([^:]+)\s*:\s*([^?]+))");
+    std::smatch match;
+    
+    while (std::regex_search(result, match, attributeConditionalRegex)) {
+        std::string attribute = match[1].str();
+        std::string operator_ = match[2].str();
+        std::string compareValue = match[3].str();
+        std::string trueValue = match[4].str();
+        std::string falseValue = match[5].str();
+        
+        // 获取属性值
+        std::string attributeValue = elementProperties.count(attribute) ? elementProperties.at(attribute) : "";
+        
+        // 比较属性值
+        bool conditionResult = false;
+        if (operator_ == "==") {
+            conditionResult = (attributeValue == compareValue);
+        } else if (operator_ == "!=") {
+            conditionResult = (attributeValue != compareValue);
+        } else if (operator_ == "<") {
+            conditionResult = (std::stod(attributeValue) < std::stod(compareValue));
+        } else if (operator_ == ">") {
+            conditionResult = (std::stod(attributeValue) > std::stod(compareValue));
+        } else if (operator_ == "<=") {
+            conditionResult = (std::stod(attributeValue) <= std::stod(compareValue));
+        } else if (operator_ == ">=") {
+            conditionResult = (std::stod(attributeValue) >= std::stod(compareValue));
+        }
+        
+        std::string selectedValue = conditionResult ? trueValue : falseValue;
+        result.replace(match.position(), match.length(), selectedValue);
+    }
+    
+    return result;
+}
+
+std::string CHTLStyleProcessor::processReferencePropertyConditionalExpressions(const std::string& value) const {
+    std::string result = value;
+    
+    // 处理引用属性条件表达式 (selector.property == value ? trueValue : falseValue)
+    std::regex referencePropertyConditionalRegex(R"(([a-zA-Z_][a-zA-Z0-9_]*\.[a-zA-Z_][a-zA-Z0-9_]*)\s*(==|!=|<|>|<=|>=)\s*([^?]+)\s*\?\s*([^:]+)\s*:\s*([^?]+))");
+    std::smatch match;
+    
+    while (std::regex_search(result, match, referencePropertyConditionalRegex)) {
+        std::string reference = match[1].str();
+        std::string operator_ = match[2].str();
+        std::string compareValue = match[3].str();
+        std::string trueValue = match[4].str();
+        std::string falseValue = match[5].str();
+        
+        // 解析引用
+        std::string propertyValue = resolvePropertyReference(reference);
+        
+        // 比较属性值
+        bool conditionResult = false;
+        if (operator_ == "==") {
+            conditionResult = (propertyValue == compareValue);
+        } else if (operator_ == "!=") {
+            conditionResult = (propertyValue != compareValue);
+        } else if (operator_ == "<") {
+            conditionResult = (std::stod(propertyValue) < std::stod(compareValue));
+        } else if (operator_ == ">") {
+            conditionResult = (std::stod(propertyValue) > std::stod(compareValue));
+        } else if (operator_ == "<=") {
+            conditionResult = (std::stod(propertyValue) <= std::stod(compareValue));
+        } else if (operator_ == ">=") {
+            conditionResult = (std::stod(propertyValue) >= std::stod(compareValue));
+        }
+        
+        std::string selectedValue = conditionResult ? trueValue : falseValue;
+        result.replace(match.position(), match.length(), selectedValue);
+    }
+    
+    return result;
+}
+
+// 函数处理实现
+std::string CHTLStyleProcessor::processMathFunction(const std::string& function, const std::vector<std::string>& args) const {
+    if (args.empty()) {
+        return "0";
+    }
+    
+    if (function == "abs") {
+        return std::to_string(std::abs(std::stod(args[0])));
+    } else if (function == "ceil") {
+        return std::to_string(std::ceil(std::stod(args[0])));
+    } else if (function == "floor") {
+        return std::to_string(std::floor(std::stod(args[0])));
+    } else if (function == "round") {
+        return std::to_string(std::round(std::stod(args[0])));
+    } else if (function == "max" && args.size() >= 2) {
+        return std::to_string(std::max(std::stod(args[0]), std::stod(args[1])));
+    } else if (function == "min" && args.size() >= 2) {
+        return std::to_string(std::min(std::stod(args[0]), std::stod(args[1])));
+    } else if (function == "pow" && args.size() >= 2) {
+        return std::to_string(std::pow(std::stod(args[0]), std::stod(args[1])));
+    } else if (function == "sqrt") {
+        return std::to_string(std::sqrt(std::stod(args[0])));
+    }
+    
+    return "0";
+}
+
+std::string CHTLStyleProcessor::processStringFunction(const std::string& function, const std::vector<std::string>& args) const {
+    if (args.empty()) {
+        return "";
+    }
+    
+    if (function == "upper") {
+        std::string result = args[0];
+        std::transform(result.begin(), result.end(), result.begin(), ::toupper);
+        return result;
+    } else if (function == "lower") {
+        std::string result = args[0];
+        std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+        return result;
+    } else if (function == "length") {
+        return std::to_string(args[0].length());
+    } else if (function == "substr" && args.size() >= 2) {
+        size_t start = std::stoul(args[1]);
+        if (args.size() >= 3) {
+            size_t length = std::stoul(args[2]);
+            return args[0].substr(start, length);
+        } else {
+            return args[0].substr(start);
+        }
+    }
+    
+    return args[0];
+}
+
+std::string CHTLStyleProcessor::processColorFunction(const std::string& function, const std::vector<std::string>& args) const {
+    if (args.empty()) {
+        return "#000000";
+    }
+    
+    if (function == "rgb" && args.size() >= 3) {
+        int r = std::stoi(args[0]);
+        int g = std::stoi(args[1]);
+        int b = std::stoi(args[2]);
+        std::ostringstream oss;
+        oss << "rgb(" << r << "," << g << "," << b << ")";
+        return oss.str();
+    } else if (function == "hsl" && args.size() >= 3) {
+        int h = std::stoi(args[0]);
+        int s = std::stoi(args[1]);
+        int l = std::stoi(args[2]);
+        std::ostringstream oss;
+        oss << "hsl(" << h << "," << s << "%," << l << "%)";
+        return oss.str();
+    } else if (function == "hex") {
+        return args[0];
+    }
+    
+    return args[0];
+}
+
+std::string CHTLStyleProcessor::processUnitFunction(const std::string& function, const std::vector<std::string>& args) const {
+    if (args.empty()) {
+        return "0px";
+    }
+    
+    if (function == "px" && args.size() >= 2) {
+        double value = std::stod(args[0]);
+        std::string fromUnit = args[1];
+        return convertUnit(std::to_string(value), fromUnit, "px");
+    } else if (function == "em" && args.size() >= 2) {
+        double value = std::stod(args[0]);
+        std::string fromUnit = args[1];
+        return convertUnit(std::to_string(value), fromUnit, "em");
+    } else if (function == "rem" && args.size() >= 2) {
+        double value = std::stod(args[0]);
+        std::string fromUnit = args[1];
+        return convertUnit(std::to_string(value), fromUnit, "rem");
+    } else if (function == "percent" && args.size() >= 2) {
+        double value = std::stod(args[0]);
+        std::string fromUnit = args[1];
+        return convertUnit(std::to_string(value), fromUnit, "%");
+    }
+    
+    return args[0];
+}
+
+// 表达式解析增强
+std::vector<std::string> CHTLStyleProcessor::parseFunctionCall(const std::string& expression) const {
+    std::vector<std::string> args;
+    std::istringstream iss(expression);
+    std::string arg;
+    
+    while (std::getline(iss, arg, ',')) {
+        // 去除空白
+        arg.erase(0, arg.find_first_not_of(" \t"));
+        arg.erase(arg.find_last_not_of(" \t") + 1);
+        args.push_back(arg);
+    }
+    
+    return args;
+}
+
+std::vector<std::string> CHTLStyleProcessor::parseChainedCall(const std::string& expression) const {
+    std::vector<std::string> chain;
+    std::istringstream iss(expression);
+    std::string part;
+    
+    while (std::getline(iss, part, '.')) {
+        // 去除空白
+        part.erase(0, part.find_first_not_of(" \t"));
+        part.erase(part.find_last_not_of(" \t") + 1);
+        chain.push_back(part);
+    }
+    
+    return chain;
+}
+
+std::vector<std::string> CHTLStyleProcessor::parseOptionalChaining(const std::string& expression) const {
+    std::vector<std::string> chain;
+    std::istringstream iss(expression);
+    std::string part;
+    
+    while (std::getline(iss, part, '?')) {
+        // 去除空白和点
+        part.erase(0, part.find_first_not_of(" \t."));
+        part.erase(part.find_last_not_of(" \t.") + 1);
+        if (!part.empty()) {
+            chain.push_back(part);
+        }
+    }
+    
+    return chain;
 }
 
 } // namespace CHTL

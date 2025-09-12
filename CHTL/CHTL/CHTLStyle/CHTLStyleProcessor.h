@@ -130,6 +130,26 @@ public:
     std::string processConditionalExpressions(const std::string& value) const;
     std::string processLogicalExpressions(const std::string& value) const;
     bool evaluateCondition(const std::string& condition) const;
+    
+    // 增强的局部样式块功能
+    std::string processChainedCalls(const std::string& value) const;
+    std::string processOptionalChaining(const std::string& value) const;
+    std::string processFunctionCalls(const std::string& value) const;
+    std::string processUnitConversions(const std::string& value) const;
+    std::string processColorConversions(const std::string& value) const;
+    std::string processAttributeConditionalExpressions(const std::string& value) const;
+    std::string processReferencePropertyConditionalExpressions(const std::string& value) const;
+    
+    // 函数处理
+    std::string processMathFunction(const std::string& function, const std::vector<std::string>& args) const;
+    std::string processStringFunction(const std::string& function, const std::vector<std::string>& args) const;
+    std::string processColorFunction(const std::string& function, const std::vector<std::string>& args) const;
+    std::string processUnitFunction(const std::string& function, const std::vector<std::string>& args) const;
+    
+    // 表达式解析增强
+    std::vector<std::string> parseFunctionCall(const std::string& expression) const;
+    std::vector<std::string> parseChainedCall(const std::string& expression) const;
+    std::vector<std::string> parseOptionalChaining(const std::string& expression) const;
 };
 
 } // namespace CHTL
