@@ -1,0 +1,6 @@
+/workspace/CHTL/build_simple/CMakeFiles/chtl_core_simple.dir
+/workspace/CHTL/build_simple/CMakeFiles/simple_test.dir
+/workspace/CHTL/build_simple/CMakeFiles/debug_test.dir
+/workspace/CHTL/build_simple/CMakeFiles/detailed_debug.dir
+/workspace/CHTL/build_simple/CMakeFiles/edit_cache.dir
+/workspace/CHTL/build_simple/CMakeFiles/rebuild_cache.dir

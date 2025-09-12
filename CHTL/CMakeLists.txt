@@ -1,60 +1,56 @@
 cmake_minimum_required(VERSION 3.10)
-project(CHTL)
+project(CHTL_Simple)
 
+# 设置C++标准
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# 包含目录
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+# 设置编译选项
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O2")
 
-# 源文件
-set(SOURCES
-    main.cpp
-    CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp
-    CHTL_JS/CHTLJSLexer/CHTLJSToken.cpp
-    CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.cpp
-    CHTL_JS/CHTLJSParser/CHTLJSParser.cpp
-    CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp
-    CHTL_JS/CHTLJSNode/CHTLJSBaseNode.cpp
-    CHTL/CHTLCustom/CHTLCustomProcessor.cpp
-    CHTL/CHTLTemplate/CHTLTemplateProcessor.cpp
-    CHTL/CHTLOrigin/CHTLOriginProcessor.cpp
-    CHTL/CHTLImport/CHTLImportProcessor.cpp
-    CHTL/CHTLNamespace/CHTLNamespaceProcessor.cpp
-    CHTL/CHTLConstraint/CHTLConstraintProcessor.cpp
-    CHTL/CHTLConfiguration/CHTLConfigurationProcessor.cpp
-    CHTL/CHTLUse/CHTLUseProcessor.cpp
-    CHTL/CHTLJS/CHTLJSAdvancedProcessor.cpp
-    Module/CMODModule.cpp
-    Module/CMODModuleManager.cpp
-    Module/CJMODModule.cpp
-    Module/OfficialModules/ChthollyModule.cpp
-    Module/OfficialModules/YuigahamaModule.cpp
-    Compiler/CompilerDispatcher.cpp
-    Compiler/CodeMerger.cpp
-    CLI/CLITool.cpp
-    CLI/CLITool_impl.cpp
-    CLI/CLITool_main.cpp
-    Scanner/CHTLUnifiedScanner.cpp
-    Test/TestFramework.cpp
-    CHTL/CHTLNode/CustomNode.cpp
-    CHTL/CHTLNode/TemplateNode.cpp
-    CHTL/CHTLNode/BaseNode.cpp
-    CHTL/CHTLNode/ElementNode.cpp
-    CHTL/CHTLNode/TextNode.cpp
-    CHTL/CHTLNode/CommentNode.cpp
-    CHTL/CHTLNode/StyleNode.cpp
-    CHTL/CHTLNode/ScriptNode.cpp
-    CHTL/CHTLNode/OriginNode.cpp
-    CHTL/CHTLNode/ImportNode.cpp
-    CHTL/CHTLNode/NamespaceNode.cpp
-    CHTL/CHTLNode/ConstraintNode.cpp
-    CHTL/CHTLNode/ConfigurationNode.cpp
-    CHTL/CHTLNode/UseNode.cpp
+# 包含目录
+include_directories(${CMAKE_SOURCE_DIR})
+
+# CHTL核心源文件
+set(CHTL_CORE_SOURCES
+    CHTL/CHTLLexer/CHTLLexer_impl.cpp
+    CHTL/CHTLLexer/CHTLLexer_scanner.cpp
+    CHTL/CHTLLexer/CHTLLexer_operators.cpp
+    CHTL/CHTLLexer/CHTLLexer_main.cpp
+    CHTL/CHTLParser/CHTLParser_impl.cpp
+    CHTL/CHTLParser/CHTLParser_parse.cpp
+    CHTL/CHTLParser/CHTLParser_helpers.cpp
+    CHTL/CHTLParser/CHTLParser_advanced.cpp
+    CHTL/CHTLParser/CHTLParser_management.cpp
+    CHTL/CHTLGenerator/CHTLGenerator.cpp
 )
 
-# 创建可执行文件
-add_executable(chtl ${SOURCES})
+# 创建CHTL核心库
+add_library(chtl_core_simple ${CHTL_CORE_SOURCES})
 
-# 链接库
-target_link_libraries(chtl)
+# 创建简单测试程序
+add_executable(simple_test simple_test.cpp)
+target_link_libraries(simple_test chtl_core_simple)
+
+# 创建调试测试程序
+add_executable(debug_test debug_test.cpp)
+target_link_libraries(debug_test chtl_core_simple)
+
+# 创建详细调试测试程序
+add_executable(detailed_debug detailed_debug.cpp)
+target_link_libraries(detailed_debug chtl_core_simple)
+
+# 设置输出目录
+set_target_properties(simple_test debug_test detailed_debug PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+)
+
+# 创建输出目录
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# 打印配置信息
+message(STATUS "CHTL简单项目配置:")
+message(STATUS "  C++标准: ${CMAKE_CXX_STANDARD}")
+message(STATUS "  编译选项: ${CMAKE_CXX_FLAGS}")
+message(STATUS "  核心源文件数量: ${CMAKE_CURRENT_LIST_LENGTH} ${CHTL_CORE_SOURCES}")
+message(STATUS "  输出目录: ${CMAKE_BINARY_DIR}/bin")
