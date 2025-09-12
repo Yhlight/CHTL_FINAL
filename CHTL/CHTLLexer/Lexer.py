@@ -130,6 +130,7 @@ class Lexer:
                 ':': TokenType.COLON,
                 '=': TokenType.EQUALS,
                 ';': TokenType.SEMICOLON,
+                ',': TokenType.COMMA,
                 '@': TokenType.AT,
                 '.': TokenType.DOT,
                 '#': TokenType.HASH,

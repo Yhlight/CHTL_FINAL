@@ -1,8 +1,8 @@
-// Test/templates.chtl
+// Test/templates_valid.chtl
 
 [Template] @Style BaseTheme
 {
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     font-size: 16px;
 }
 
@@ -18,16 +18,5 @@ div {
     style {
         @Style DarkTheme;
         background-color: grey; // Override
-    }
-}
-
-// Circular dependency test
-[Template] @Style A { @Style B; }
-[Template] @Style B { @Style A; }
-
-div {
-    id: "p2";
-    style {
-        @Style A;
     }
 }

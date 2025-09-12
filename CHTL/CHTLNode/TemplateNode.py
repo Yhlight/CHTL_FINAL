@@ -1,18 +1,21 @@
 from .BaseNode import BaseNode
-from typing import Dict, List
+from .TemplateUsageNode import TemplateUsageNode
+from typing import Dict, List, Union
 
 class TemplateNode(BaseNode):
     """
     Represents a [Template] definition block.
     e.g., [Template] @Style MyStyles { ... }
     """
-    def __init__(self, template_type: str, template_name: str, content: Dict[str, List[BaseNode]]):
+    def __init__(self, template_type: str, template_name: str, content: Union[dict, list], usages: List[TemplateUsageNode] = None):
         # The type of template, e.g., "Style", "Element", "Var"
         self.template_type = template_type
         # The name given to the template
         self.template_name = template_name
-        # The content of the template. For a Style template, this is a dictionary of properties.
+        # The content of the template (properties, child nodes, or variables)
         self.content = content
+        # A list of other templates this template inherits from
+        self.template_usages = usages if usages is not None else []
 
     def to_dict(self) -> dict:
         """Converts the node to a dictionary for debugging."""
@@ -32,8 +35,9 @@ class TemplateNode(BaseNode):
             "template_type": self.template_type,
             "template_name": self.template_name,
             "content": content_dict,
+            "template_usages": [usage.to_dict() for usage in self.template_usages],
         }
 
     def __repr__(self) -> str:
         """Provides a simple string representation of the node."""
-        return f"<TemplateNode type='{self.template_type}' name='{self.template_name}'>"
+        return f"<TemplateNode type='{self.template_type}' name='{self.template_name}' usages={len(self.template_usages)}>"

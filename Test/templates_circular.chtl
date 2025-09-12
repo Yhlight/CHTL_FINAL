@@ -1,0 +1,12 @@
+// Test/templates_circular.chtl
+
+// Circular dependency test
+[Template] @Style A { @Style B; }
+[Template] @Style B { @Style A; }
+
+div {
+    id: "p2";
+    style {
+        @Style A;
+    }
+}

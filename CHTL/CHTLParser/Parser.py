@@ -449,10 +449,15 @@ class Parser:
 
         # Parse body based on type
         content = None
+        usages = []
         if template_type == 'Style':
             properties = {}
             while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
-                if self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type == TokenType.COLON:
+                if self.current_token.type == TokenType.AT:
+                    usage = self._parse_template_usage()
+                    if usage:
+                        usages.append(usage)
+                elif self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type == TokenType.COLON:
                     prop_name, prop_value = self._parse_inline_css_property()
                     if prop_name:
                         properties[prop_name] = prop_value
@@ -503,7 +508,7 @@ class Parser:
         else:
             self._next_token() # Consume '}'
 
-        return TemplateNode(template_type=template_type, template_name=template_name, content=content)
+        return TemplateNode(template_type=template_type, template_name=template_name, content=content, usages=usages)
 
     def _parse_function_call(self, function_node: ExpressionNode) -> FunctionCallNode:
         arguments = self._parse_call_arguments()

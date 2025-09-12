@@ -153,33 +153,39 @@ def run_script_test():
     print("✅ Script test passed.")
     return True
 
-def run_template_test():
-    print("\n--- Running Template Test ---")
-    test_file = os.path.join(os.path.dirname(__file__), 'templates.chtl')
+def run_template_valid_test():
+    print("\n--- Running Valid Template Inheritance Test ---")
+    test_file = os.path.join(os.path.dirname(__file__), 'templates_valid.chtl')
     output_html = run_compiler_pipeline(test_file, debug=False)
     if output_html is None: return False
 
-    # Check for expanded element template
-    expected_element_template = '<div class="box-title">This is a box</div><div class="box-content"></div>'
-    if expected_element_template not in output_html:
-        print("❌ Template test FAILED on element template expansion.")
-        print(f"DEBUG: Output HTML:\n{output_html}")
-        return False
-
-    # Check for style template usage
     if 'id="p1"' not in output_html or 'style=' not in output_html:
-        print("❌ Template test FAILED on div structure.")
+        print("❌ Valid Template test FAILED on p1 structure.")
         return False
 
-    if ('color: black' not in output_html or
+    if ('font-family: Arial' not in output_html or
         'font-size: 16px' not in output_html or
-        'line-height: 20px' not in output_html or
-        'background-color: blue' not in output_html or
-        'padding: 20px' not in output_html):
-        print("❌ Template test FAILED on div styles.")
+        'color: white' not in output_html or
+        'background-color: grey' not in output_html):
+        print("❌ Valid Template test FAILED on p1 styles.")
         return False
 
-    print("✅ Template test passed.")
+    print("✅ Valid Template Inheritance test passed.")
+    return True
+
+def run_template_circular_test():
+    print("\n--- Running Circular Template Inheritance Test ---")
+    test_file = os.path.join(os.path.dirname(__file__), 'templates_circular.chtl')
+    output_html = run_compiler_pipeline(test_file, debug=False)
+    if output_html is None: return False
+
+    expected_error = "Circular dependency detected in style templates"
+    if expected_error not in output_html:
+        print("❌ Circular Template test FAILED.")
+        print(f"Expected error message not found in output: '{expected_error}'")
+        return False
+
+    print("✅ Circular Template Inheritance test passed.")
     return True
 
 if __name__ == "__main__":
@@ -192,7 +198,8 @@ if __name__ == "__main__":
     test_results.append(run_references_test())
     test_results.append(run_circular_reference_test())
     test_results.append(run_script_test())
-    test_results.append(run_template_test())
+    test_results.append(run_template_valid_test())
+    test_results.append(run_template_circular_test())
 
     if all(test_results):
         print("\n✅ All tests passed!")

@@ -26,6 +26,7 @@ class Generator:
         self.style_templates: dict[str, dict] = {}
         self.element_templates: dict[str, list] = {}
         self.var_groups: dict[str, dict] = {}
+        self.template_dependency_graph: dict[str, set] = {}
 
     def generate(self, ast_root: ElementNode) -> str:
         if not isinstance(ast_root, ElementNode) or ast_root.tag_name != "root":
@@ -33,9 +34,12 @@ class Generator:
 
         self.global_css_rules, self.element_map, self.dependency_graph, self.errors = [], {}, {}, []
         self.evaluation_order, self.evaluated_styles, self.style_templates = [], {}, {}
-        self.element_templates, self.var_groups = {}, {}
+        self.element_templates, self.var_groups, self.template_dependency_graph = {}, {}, {}
 
         self._collect_templates(ast_root)
+        if self.errors:
+            return f"<h1>Error: {self.errors[0]}</h1>"
+
         self._expand_element_templates(ast_root)
 
         # Filter out TemplateNode definitions from the root so they are not processed further
@@ -50,10 +54,6 @@ class Generator:
 
         self._evaluate_all_styles()
         self._collect_global_styles(ast_root, parent=None)
-
-        print("--- Children before final generation ---")
-        for child in ast_root.children:
-            print(child)
 
         body_html = "".join(self._generate_node(child) for child in ast_root.children)
         css_string = self._generate_global_css_string()
@@ -163,7 +163,8 @@ class Generator:
                     # 1. Apply templates first (in order of appearance)
                     for usage in child.template_usages:
                         if usage.template_type == 'Style' and usage.template_name in self.style_templates:
-                            template_props = self.style_templates[usage.template_name]
+                            # The content of a style template is a dictionary of properties
+                            template_props = self.style_templates[usage.template_name].content
                             final_properties.update(template_props)
 
                     # 2. Apply the element's own properties, overriding any from templates
@@ -276,27 +277,90 @@ class Generator:
         return parent_node.tag_name.lower()
 
     def _collect_templates(self, node: BaseNode):
-        if isinstance(node, TemplateNode):
-            if node.template_type == 'Style':
-                if node.template_name in self.style_templates:
-                    self.errors.append(f"Duplicate style template name found: {node.template_name}")
-                else:
-                    self.style_templates[node.template_name] = node.content
-            elif node.template_type == 'Element':
-                if node.template_name in self.element_templates:
-                    self.errors.append(f"Duplicate element template name found: {node.template_name}")
-                else:
-                    self.element_templates[node.template_name] = node.content
-            elif node.template_type == 'Var':
-                if node.template_name in self.var_groups:
-                    self.errors.append(f"Duplicate var group name found: {node.template_name}")
-                else:
-                    self.var_groups[node.template_name] = node.content
+        # This method is now responsible for the entire template setup process.
 
-        # Recurse, but not into the content of a template definition
+        # 1. Find all template definitions and build the dependency graph
+        all_templates = self._find_all_templates(node)
+        self._build_template_dependency_graph(all_templates)
+
+        # 2. Store the raw templates before expansion
+        for name, node in all_templates.items():
+            if node.template_type == 'Style':
+                self.style_templates[name] = node # Store the whole node
+            elif node.template_type == 'Element':
+                self.element_templates[name] = node
+            elif node.template_type == 'Var':
+                self.var_groups[name] = node
+
+        # 3. Expand/flatten the templates
+        self._expand_style_templates()
+
+    def _find_all_templates(self, node: BaseNode, found_templates: dict = None) -> dict:
+        if found_templates is None:
+            found_templates = {}
+
+        if isinstance(node, TemplateNode):
+            if node.template_name in found_templates:
+                self.errors.append(f"Duplicate template name found: {node.template_name}")
+            else:
+                found_templates[node.template_name] = node
+
         if hasattr(node, 'children') and not isinstance(node, TemplateNode):
             for child in node.children:
-                self._collect_templates(child)
+                self._find_all_templates(child, found_templates)
+
+        return found_templates
+
+    def _build_template_dependency_graph(self, all_templates: dict):
+        for name, node in all_templates.items():
+            for usage in node.template_usages:
+                if usage.template_type == node.template_type:
+                    if name not in self.template_dependency_graph:
+                        self.template_dependency_graph[name] = set()
+                    self.template_dependency_graph[name].add(usage.template_name)
+
+    def _expand_style_templates(self):
+        sorted_templates = []
+        path = set()
+        visited = set()
+
+        for name in list(self.style_templates.keys()):
+            if name not in visited:
+                if not self._template_dfs_sort(name, path, visited, sorted_templates):
+                    self.errors.append(f"Circular dependency detected in style templates involving '{name}'")
+                    return
+
+        for name in sorted_templates:
+            template_node = self.style_templates[name]
+
+            # This check is important because the content is now the node itself
+            if not isinstance(template_node, TemplateNode): continue
+
+            final_props = {}
+            for usage in template_node.template_usages:
+                if usage.template_name in self.style_templates:
+                    parent_node = self.style_templates[usage.template_name]
+                    # The parent's content should already be flattened because of the sort order
+                    final_props.update(parent_node.content)
+
+            final_props.update(template_node.content)
+            template_node.content = final_props
+
+    def _template_dfs_sort(self, name, path, visited, sorted_list):
+        path.add(name)
+        visited.add(name)
+
+        if name in self.template_dependency_graph:
+            for neighbor in self.template_dependency_graph[name]:
+                if neighbor in path:
+                    return False
+                if neighbor not in visited:
+                    if not self._template_dfs_sort(neighbor, path, visited, sorted_list):
+                        return False
+
+        path.remove(name)
+        sorted_list.append(name)
+        return True
 
     def _collect_global_styles(self, current_node: BaseNode, parent: Union[ElementNode, None]):
         if isinstance(current_node, StyleNode) and parent:

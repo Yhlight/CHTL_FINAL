@@ -26,6 +26,7 @@ class TokenType(Enum):
     COLON = ":"
     EQUALS = "="
     SEMICOLON = ";"
+    COMMA = ","
     AT = "@"
     DOT = "."
     HASH = "#"
