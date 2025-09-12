@@ -107,6 +107,10 @@ std::string CHTLParser::parseStylePropertyValue() {
                peek().type == CHTLTokenType::LEFT_PAREN) {
         // 处理函数调用，如 ThemeColor(primaryColor)
         value = parseFunctionCall();
+    } else if (current().type == CHTLTokenType::IDENTIFIER && 
+               peek().type == CHTLTokenType::DOT) {
+        // 处理引用属性，如 box.width
+        value = parsePropertyReference();
     } else {
         // 解析复合CSS值（如 100px, 50%, 1.5em等）
         while (currentToken < tokens.size() && 
@@ -114,8 +118,11 @@ std::string CHTLParser::parseStylePropertyValue() {
                current().type != CHTLTokenType::RIGHT_BRACE && 
                current().type != CHTLTokenType::EOF_TOKEN) {
             
-            // 添加当前token的值
-            if (current().type == CHTLTokenType::STRING || 
+            // 检查是否是引用属性
+            if (current().type == CHTLTokenType::IDENTIFIER && 
+                peek().type == CHTLTokenType::DOT) {
+                value += parsePropertyReference();
+            } else if (current().type == CHTLTokenType::STRING || 
                 current().type == CHTLTokenType::UNQUOTED_LITERAL ||
                 current().type == CHTLTokenType::IDENTIFIER ||
                 current().type == CHTLTokenType::NUMBER ||
@@ -234,6 +241,30 @@ void CHTLParser::parseCSSRule(std::shared_ptr<StyleNode> style) {
     }
 }
 
+std::string CHTLParser::parsePropertyReference() {
+    std::string reference;
+    
+    // 解析选择器部分
+    if (current().type == CHTLTokenType::IDENTIFIER) {
+        reference += current().value;
+        advance();
+        
+        // 解析点号
+        if (current().type == CHTLTokenType::DOT) {
+            reference += current().value;
+            advance();
+            
+            // 解析属性名
+            if (current().type == CHTLTokenType::IDENTIFIER) {
+                reference += current().value;
+                advance();
+            }
+        }
+    }
+    
+    return reference;
+}
+
 std::string CHTLParser::parseFunctionCall() {
     std::string functionCall;
     
@@ -312,6 +343,39 @@ std::string CHTLParser::parseConditionalExpression() {
             }
         }
         
+        // 处理逻辑运算符
+        while (current().type == CHTLTokenType::AND || 
+               current().type == CHTLTokenType::OR) {
+            expression += " " + current().value + " ";
+            advance();
+            
+            // 解析下一个条件
+            if (current().type == CHTLTokenType::IDENTIFIER) {
+                expression += current().value;
+                advance();
+                
+                // 解析比较操作符
+                if (current().type == CHTLTokenType::GREATER || 
+                    current().type == CHTLTokenType::LESS || 
+                    current().type == CHTLTokenType::GREATER_EQUAL || 
+                    current().type == CHTLTokenType::LESS_EQUAL || 
+                    current().type == CHTLTokenType::EQUAL_EQUAL || 
+                    current().type == CHTLTokenType::NOT_EQUAL) {
+                    expression += " " + current().value + " ";
+                    advance();
+                    
+                    // 解析右侧值（复合值，如 50px）
+                    while (current().type == CHTLTokenType::NUMBER || 
+                           current().type == CHTLTokenType::STRING || 
+                           current().type == CHTLTokenType::UNQUOTED_LITERAL ||
+                           current().type == CHTLTokenType::IDENTIFIER) {
+                        expression += current().value;
+                        advance();
+                    }
+                }
+            }
+        }
+        
         // 解析 ? 操作符
         if (current().type == CHTLTokenType::QUESTION) {
             expression += " ? ";
@@ -365,6 +429,39 @@ std::string CHTLParser::parseConditionalExpression() {
                            current().type == CHTLTokenType::IDENTIFIER) {
                         expression += current().value;
                         advance();
+                    }
+                }
+                
+                // 处理逻辑运算符
+                while (current().type == CHTLTokenType::AND || 
+                       current().type == CHTLTokenType::OR) {
+                    expression += " " + current().value + " ";
+                    advance();
+                    
+                    // 解析下一个条件
+                    if (current().type == CHTLTokenType::IDENTIFIER) {
+                        expression += current().value;
+                        advance();
+                        
+                        // 解析比较操作符
+                        if (current().type == CHTLTokenType::GREATER || 
+                            current().type == CHTLTokenType::LESS || 
+                            current().type == CHTLTokenType::GREATER_EQUAL || 
+                            current().type == CHTLTokenType::LESS_EQUAL || 
+                            current().type == CHTLTokenType::EQUAL_EQUAL || 
+                            current().type == CHTLTokenType::NOT_EQUAL) {
+                            expression += " " + current().value + " ";
+                            advance();
+                            
+                            // 解析右侧值（复合值，如 50px）
+                            while (current().type == CHTLTokenType::NUMBER || 
+                                   current().type == CHTLTokenType::STRING || 
+                                   current().type == CHTLTokenType::UNQUOTED_LITERAL ||
+                                   current().type == CHTLTokenType::IDENTIFIER) {
+                                expression += current().value;
+                                advance();
+                            }
+                        }
                     }
                 }
                 
