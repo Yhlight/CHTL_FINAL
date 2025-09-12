@@ -2,6 +2,7 @@
 #include <sstream>
 #include <regex>
 #include <algorithm>
+#include <iostream>
 
 namespace CHTL {
 
@@ -62,7 +63,7 @@ void Arg::fillValue(const Arg& result) {
     }
 }
 
-void Arg::transform(const std::string& template) {
+void Arg::transform(const std::string& templatePattern) {
     // 转换模板为最终代码
     // 这里需要根据具体的转换规则来实现
 }
@@ -333,8 +334,8 @@ std::map<std::string, std::string> CJMODSystem::parseModuleInfo(const std::strin
     std::sregex_iterator iter(info.begin(), info.end(), infoRegex);
     std::sregex_iterator end;
     
-    for (; iter != end; ++iter) {
-        result[iter->str(1)] = iter->str(2);
+    for (auto it = iter; it != end; ++it) {
+        result[it->str(1)] = it->str(2);
     }
     
     return result;

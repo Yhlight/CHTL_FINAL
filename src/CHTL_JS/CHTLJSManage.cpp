@@ -2,7 +2,9 @@
 #include "CHTLJSLoader.h"
 #include "CHTLJSGenerator.h"
 #include <iostream>
+#include <fstream>
 #include <filesystem>
+#include <sstream>
 
 namespace CHTL {
 
@@ -100,7 +102,7 @@ bool CHTLJSManage::processCompilation(CHTLJSBaseNode* rootNode, const std::strin
         CHTLJSGenerator generator;
         
         // 生成JavaScript
-        std::string js = generator.generateJavaScript(rootNode);
+        std::string js = generator.generateJavaScript(dynamic_cast<CHTLJSNode*>(rootNode));
         if (js.empty()) {
             addError("Failed to generate JavaScript");
             return false;

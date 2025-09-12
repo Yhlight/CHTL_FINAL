@@ -19,6 +19,10 @@ std::string CHTLJSBaseNode::getName() const {
     return name;
 }
 
+std::string CHTLJSBaseNode::toString() const {
+    return "CHTLJSNode(" + name + ")";
+}
+
 void CHTLJSBaseNode::setValue(const std::string& nodeValue) {
     value = nodeValue;
 }

@@ -316,7 +316,12 @@ std::string LocalStyleProcessor::process(const StyleNode* styleNode,
     std::stringstream css;
     
     // 处理内联样式
-    std::string inlineStyles = processInlineStyles(parseStyleProperties(styleNode));
+    // 转换map到vector<StyleProperty>
+    std::vector<StyleProperty> properties;
+    for (const auto& prop : styleNode->getProperties()) {
+        properties.push_back({prop.first, prop.second});
+    }
+    std::string inlineStyles = processInlineStyles(properties);
     if (!inlineStyles.empty()) {
         css << "style=\"" << inlineStyles << "\"";
     }

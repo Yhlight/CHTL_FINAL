@@ -41,7 +41,7 @@ CHTLJSParser::~CHTLJSParser() {}
 
 void CHTLJSParser::setLexer(std::unique_ptr<CHTLJSLexer> lex) {
     lexer = std::move(lex);
-    tokens = lexer->tokenize(lexer->getSource());
+    tokens = lexer->tokenize();
     currentTokenIndex = 0;
 }
 
@@ -99,7 +99,7 @@ std::unique_ptr<VirtualObjectNode> CHTLJSParser::parseVirtualObject() {
                         consume(); // 消费 }
                     }
                     
-                    virtualObject->properties[propName] = propValue;
+                    virtualObject->properties[propName] = std::make_unique<CHTLJSNode>(CHTLJSNode::NodeType::LITERAL, propValue);
                 }
             } else {
                 consume(); // 跳过未知token
@@ -282,7 +282,7 @@ std::unique_ptr<INeverAwayNode> CHTLJSParser::parseINeverAway() {
     if (isEOF()) return nullptr;
     
     const CHTLJSToken* token = currentToken();
-    if (token->type != CHTLJSTokenType::INEVERAWAY) {
+    if (token->type != CHTLJSTokenType::IDENTIFIER) {
         return nullptr;
     }
     
@@ -318,7 +318,7 @@ std::unique_ptr<PrintMyloveNode> CHTLJSParser::parsePrintMylove() {
     if (isEOF()) return nullptr;
     
     const CHTLJSToken* token = currentToken();
-    if (token->type != CHTLJSTokenType::PRINTMYLOVE) {
+    if (token->type != CHTLJSTokenType::IDENTIFIER) {
         return nullptr;
     }
     
@@ -365,7 +365,7 @@ std::unique_ptr<UtilThenNode> CHTLJSParser::parseUtilThen() {
     if (isEOF()) return nullptr;
     
     const CHTLJSToken* token = currentToken();
-    if (token->type != CHTLJSTokenType::UTIL) {
+    if (token->type != CHTLJSTokenType::IDENTIFIER) {
         return nullptr;
     }
     
@@ -380,7 +380,7 @@ std::unique_ptr<UtilThenNode> CHTLJSParser::parseUtilThen() {
     if (match(CHTLJSTokenType::ARROW)) {
         consume(); // 消费 ->
         
-        if (match(CHTLJSTokenType::CHANGE)) {
+        if (match(CHTLJSTokenType::IDENTIFIER)) {
             consume(); // 消费 change
             utilThenNode->changeAction = parseValue();
         }
@@ -388,7 +388,7 @@ std::unique_ptr<UtilThenNode> CHTLJSParser::parseUtilThen() {
         if (match(CHTLJSTokenType::ARROW)) {
             consume(); // 消费 ->
             
-            if (match(CHTLJSTokenType::THEN)) {
+            if (match(CHTLJSTokenType::IDENTIFIER)) {
                 consume(); // 消费 then
                 utilThenNode->thenAction = parseValue();
             }
@@ -448,12 +448,16 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseExpression() {
             return parseFileLoader();
         case CHTLJSTokenType::ROUTER:
             return parseRouter();
-        case CHTLJSTokenType::INEVERAWAY:
-            return parseINeverAway();
-        case CHTLJSTokenType::PRINTMYLOVE:
-            return parsePrintMylove();
-        case CHTLJSTokenType::UTIL:
-            return parseUtilThen();
+        case CHTLJSTokenType::IDENTIFIER:
+            // 根据具体的标识符名称来决定解析哪个函数
+            if (currentToken()->value == "iNeverAway") {
+                return parseINeverAway();
+            } else if (currentToken()->value == "printMylove") {
+                return parsePrintMylove();
+            } else if (currentToken()->value == "util") {
+                return parseUtilThen();
+            }
+            break;
         case CHTLJSTokenType::ENHANCED_SELECTOR:
             return parseEnhancedSelector();
         case CHTLJSTokenType::REACTIVE_VALUE:

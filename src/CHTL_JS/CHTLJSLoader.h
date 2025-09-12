@@ -43,6 +43,13 @@ public:
     bool fileExists(const std::string& filePath) const;
     
     /**
+     * 处理节点
+     * @param node 节点
+     * @param context 编译上下文
+     */
+    void processNode(CHTLJSBaseNode* node, CHTLJSContext& context);
+    
+    /**
      * 获取文件内容
      * @param filePath 文件路径
      * @return 文件内容

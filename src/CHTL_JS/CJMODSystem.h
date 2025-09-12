@@ -55,7 +55,7 @@ public:
     void bind(const std::string& pattern, std::function<std::string(const std::string&)> func);
     std::string match(const std::string& pattern, std::function<std::string(const std::string&)> func);
     void fillValue(const Arg& result);
-    void transform(const std::string& template);
+    void transform(const std::string& templatePattern);
     void print() const;
     
     AtomArg& operator[](size_t index);

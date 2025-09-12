@@ -12,22 +12,30 @@ CMODSystem::CMODSystem() {
 CMODInfo CMODSystem::parseModuleInfo(const std::string& info) {
     CMODInfo moduleInfo;
     
-    // 解析模块信息
-    std::regex infoRegex(R"((\w+)\s*=\s*"([^"]*)")");
-    std::sregex_iterator iter(info.begin(), info.end(), infoRegex);
-    std::sregex_iterator end;
+    // 解析模块信息 - 使用简单的字符串分割而不是正则表达式
+    std::istringstream iss(info);
+    std::string line;
     
-    for (; iter != end; ++iter) {
-        std::string key = iter->str(1);
-        std::string value = iter->str(2);
-        
-        if (key == "name") moduleInfo.name = value;
-        else if (key == "version") moduleInfo.version = value;
-        else if (key == "description") moduleInfo.description = value;
-        else if (key == "author") moduleInfo.author = value;
-        else if (key == "license") moduleInfo.license = value;
-        else if (key == "category") moduleInfo.category = value;
-        else if (key == "chtl_version") moduleInfo.minCHTLVersion = value;
+    while (std::getline(iss, line)) {
+        size_t pos = line.find('=');
+        if (pos != std::string::npos) {
+            std::string key = line.substr(0, pos);
+            std::string value = line.substr(pos + 1);
+            
+            // 去除空格和引号
+            key.erase(0, key.find_first_not_of(" \t"));
+            key.erase(key.find_last_not_of(" \t") + 1);
+            value.erase(0, value.find_first_not_of(" \t\""));
+            value.erase(value.find_last_not_of(" \t\"") + 1);
+            
+            if (key == "name") moduleInfo.name = value;
+            else if (key == "version") moduleInfo.version = value;
+            else if (key == "description") moduleInfo.description = value;
+            else if (key == "author") moduleInfo.author = value;
+            else if (key == "license") moduleInfo.license = value;
+            else if (key == "category") moduleInfo.category = value;
+            else if (key == "chtl_version") moduleInfo.minCHTLVersion = value;
+        }
     }
     
     return moduleInfo;
@@ -52,6 +60,10 @@ std::string CMODSystem::processImport(const std::string& moduleName) {
         return "// Imported module: " + moduleName;
     }
     return "";
+}
+
+void CMODSystem::clear() {
+    modules.clear();
 }
 
 } // namespace CHTL

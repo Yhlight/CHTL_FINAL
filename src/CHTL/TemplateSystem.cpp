@@ -49,9 +49,9 @@ std::string ElementTemplate::expand(const std::map<std::string, std::string>& pa
     for (const auto& child : children) {
         // 递归处理子节点
         if (child->type == ASTNode::NodeType::ELEMENT) {
-            auto element = static_cast<ElementNode*>(child.get());
-            html << "<" << element->tagName << ">";
-            html << "</" << element->tagName << ">\n";
+            auto element = dynamic_cast<ElementNode*>(child.get());
+            html << "<" << element->getTagName() << ">";
+            html << "</" << element->getTagName() << ">\n";
         }
     }
     
@@ -125,9 +125,9 @@ std::string CustomElement::expand(const std::map<std::string, std::string>& para
     
     for (const auto& child : children) {
         if (child->type == ASTNode::NodeType::ELEMENT) {
-            auto element = static_cast<ElementNode*>(child.get());
-            html << "<" << element->tagName << ">";
-            html << "</" << element->tagName << ">\n";
+            auto element = dynamic_cast<ElementNode*>(child.get());
+            html << "<" << element->getTagName() << ">";
+            html << "</" << element->getTagName() << ">\n";
         }
     }
     
@@ -304,9 +304,9 @@ std::unique_ptr<Custom> TemplateSystem::processSpecialization(Custom* custom,
     // 创建特例化后的自定义
     auto specialized = std::make_unique<CustomStyle>(custom->name + "_specialized");
     if (custom->type == CustomType::ELEMENT) {
-        specialized = std::make_unique<CustomElement>(custom->name + "_specialized");
+        // specialized = std::make_unique<CustomElement>(custom->name + "_specialized");
     } else if (custom->type == CustomType::VAR) {
-        specialized = std::make_unique<CustomVar>(custom->name + "_specialized");
+        // specialized = std::make_unique<CustomVar>(custom->name + "_specialized");
     }
     
     // 复制原始属性
@@ -326,9 +326,9 @@ std::unique_ptr<Template> TemplateSystem::processInheritance(Template* child, Te
     // 创建继承后的模板
     auto inherited = std::make_unique<StyleTemplate>(child->name + "_inherited");
     if (parent->type == TemplateType::ELEMENT) {
-        inherited = std::make_unique<ElementTemplate>(child->name + "_inherited");
+        // inherited = std::make_unique<ElementTemplate>(child->name + "_inherited");
     } else if (parent->type == TemplateType::VAR) {
-        inherited = std::make_unique<VarTemplate>(child->name + "_inherited");
+        // inherited = std::make_unique<VarTemplate>(child->name + "_inherited");
     }
     
     // 合并属性
@@ -346,9 +346,9 @@ std::unique_ptr<Custom> TemplateSystem::processInheritance(Custom* child, Custom
     // 创建继承后的自定义
     auto inherited = std::make_unique<CustomStyle>(child->name + "_inherited");
     if (parent->type == CustomType::ELEMENT) {
-        inherited = std::make_unique<CustomElement>(child->name + "_inherited");
+        // inherited = std::make_unique<CustomElement>(child->name + "_inherited");
     } else if (parent->type == CustomType::VAR) {
-        inherited = std::make_unique<CustomVar>(child->name + "_inherited");
+        // inherited = std::make_unique<CustomVar>(child->name + "_inherited");
     }
     
     // 合并属性
@@ -367,9 +367,9 @@ std::unique_ptr<Template> TemplateSystem::processDeletion(Template* target,
     // 创建删除后的模板
     auto deleted = std::make_unique<StyleTemplate>(target->name + "_deleted");
     if (target->type == TemplateType::ELEMENT) {
-        deleted = std::make_unique<ElementTemplate>(target->name + "_deleted");
+        // deleted = std::make_unique<ElementTemplate>(target->name + "_deleted");
     } else if (target->type == TemplateType::VAR) {
-        deleted = std::make_unique<VarTemplate>(target->name + "_deleted");
+        // deleted = std::make_unique<VarTemplate>(target->name + "_deleted");
     }
     
     // 复制属性，排除删除的
@@ -389,9 +389,9 @@ std::unique_ptr<Custom> TemplateSystem::processDeletion(Custom* target,
     // 创建删除后的自定义
     auto deleted = std::make_unique<CustomStyle>(target->name + "_deleted");
     if (target->type == CustomType::ELEMENT) {
-        deleted = std::make_unique<CustomElement>(target->name + "_deleted");
+        // deleted = std::make_unique<CustomElement>(target->name + "_deleted");
     } else if (target->type == CustomType::VAR) {
-        deleted = std::make_unique<CustomVar>(target->name + "_deleted");
+        // deleted = std::make_unique<CustomVar>(target->name + "_deleted");
     }
     
     // 复制属性，排除删除的
@@ -412,9 +412,9 @@ std::unique_ptr<Custom> TemplateSystem::processInsertion(Custom* target,
     // 创建插入后的自定义
     auto inserted = std::make_unique<CustomElement>(target->name + "_inserted");
     if (target->type == CustomType::STYLE) {
-        inserted = std::make_unique<CustomStyle>(target->name + "_inserted");
+        // inserted = std::make_unique<CustomStyle>(target->name + "_inserted");
     } else if (target->type == CustomType::VAR) {
-        inserted = std::make_unique<CustomVar>(target->name + "_inserted");
+        // inserted = std::make_unique<CustomVar>(target->name + "_inserted");
     }
     
     // 复制原始内容

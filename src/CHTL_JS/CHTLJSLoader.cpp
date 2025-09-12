@@ -61,7 +61,8 @@ std::unique_ptr<CHTLJSBaseNode> CHTLJSLoader::parseContent(const std::string& co
     
     // 创建语法分析器
     CHTLJSParser parser;
-    auto rootNode = parser.parse(tokens);
+    parser.setTokens(tokens);
+    auto rootNode = parser.parse();
     
     if (!rootNode) {
         std::cerr << "Error: Failed to parse content" << std::endl;
@@ -71,7 +72,7 @@ std::unique_ptr<CHTLJSBaseNode> CHTLJSLoader::parseContent(const std::string& co
     // 处理导入、模板、自定义等
     processNode(rootNode.get(), context);
     
-    return rootNode;
+    return std::unique_ptr<CHTLJSBaseNode>(rootNode.release());
 }
 
 void CHTLJSLoader::processNode(CHTLJSBaseNode* node, CHTLJSContext& context) {
