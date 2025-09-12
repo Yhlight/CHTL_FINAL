@@ -141,10 +141,10 @@ struct ImportInfo {
     ImportType type;
     std::string path;
     std::string alias;
-    std::string namespace;
+    std::string namespaceName;
     
     ImportInfo(ImportType t, const std::string& p, const std::string& a = "", const std::string& ns = "")
-        : type(t), path(p), alias(a), namespace(ns) {}
+        : type(t), path(p), alias(a), namespaceName(ns) {}
 };
 
 /**
@@ -159,7 +159,7 @@ public:
     
     Namespace(const std::string& n) : name(n) {}
     
-    void addTemplate(std::unique_ptr<Template> template);
+    void addTemplate(std::unique_ptr<Template> templateNode);
     void addCustom(std::unique_ptr<Custom> custom);
     void addImport(std::unique_ptr<ImportInfo> import);
     
@@ -180,7 +180,7 @@ public:
      * 注册模板
      * @param template 模板
      */
-    void registerTemplate(std::unique_ptr<Template> template);
+    void registerTemplate(std::unique_ptr<Template> templateNode);
     
     /**
      * 注册自定义
@@ -198,7 +198,7 @@ public:
      * 注册命名空间
      * @param namespace 命名空间
      */
-    void registerNamespace(std::unique_ptr<Namespace> namespace);
+    void registerNamespace(std::unique_ptr<Namespace> namespaceNode);
     
     /**
      * 获取模板
@@ -206,7 +206,7 @@ public:
      * @param namespace 命名空间（可选）
      * @return 模板指针
      */
-    Template* getTemplate(const std::string& name, const std::string& namespace = "");
+    Template* getTemplate(const std::string& name, const std::string& namespaceName = "");
     
     /**
      * 获取自定义
@@ -214,7 +214,7 @@ public:
      * @param namespace 命名空间（可选）
      * @return 自定义指针
      */
-    Custom* getCustom(const std::string& name, const std::string& namespace = "");
+    Custom* getCustom(const std::string& name, const std::string& namespaceName = "");
     
     /**
      * 获取导入信息
@@ -222,7 +222,7 @@ public:
      * @param namespace 命名空间（可选）
      * @return 导入信息指针
      */
-    ImportInfo* getImport(const std::string& name, const std::string& namespace = "");
+    ImportInfo* getImport(const std::string& name, const std::string& namespaceName = "");
     
     /**
      * 获取命名空间
@@ -240,7 +240,7 @@ public:
      */
     std::string expandTemplate(const std::string& name, 
                               const std::map<std::string, std::string>& params = {},
-                              const std::string& namespace = "");
+                              const std::string& namespaceName = "");
     
     /**
      * 展开自定义
@@ -251,7 +251,7 @@ public:
      */
     std::string expandCustom(const std::string& name, 
                             const std::map<std::string, std::string>& params = {},
-                            const std::string& namespace = "");
+                            const std::string& namespaceName = "");
     
     /**
      * 处理导入

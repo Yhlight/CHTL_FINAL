@@ -2,6 +2,7 @@
 #define CHTL_PARSER_H
 
 #include "CHTLLexer.h"
+#include "CHTLNode.h"
 #include <memory>
 #include <vector>
 #include <string>
@@ -33,7 +34,7 @@ public:
     std::string value;
     size_t line;
     size_t column;
-    std::vector<std::unique_ptr<ASTNode>> children;
+    std::vector<std::unique_ptr<BaseNode>> children;
     std::map<std::string, std::string> attributes;
     
     ASTNode(NodeType t, const std::string& v = "", size_t l = 0, size_t c = 0)
@@ -41,149 +42,11 @@ public:
     
     virtual ~ASTNode() = default;
     
-    void addChild(std::unique_ptr<ASTNode> child);
+    void addChild(std::unique_ptr<BaseNode> child);
     std::string toString(int indent = 0) const;
 };
 
-/**
- * 元素节点
- */
-class ElementNode : public ASTNode {
-public:
-    std::string tagName;
-    std::map<std::string, std::string> attributes;
-    std::vector<std::unique_ptr<ASTNode>> children;
-    
-    ElementNode(const std::string& tag, size_t l = 0, size_t c = 0)
-        : ASTNode(NodeType::ELEMENT, tag, l, c), tagName(tag) {}
-};
-
-/**
- * 文本节点
- */
-class TextNode : public ASTNode {
-public:
-    std::string content;
-    
-    TextNode(const std::string& text, size_t l = 0, size_t c = 0)
-        : ASTNode(NodeType::TEXT, text, l, c), content(text) {}
-};
-
-/**
- * 样式节点
- */
-class StyleNode : public ASTNode {
-public:
-    std::map<std::string, std::string> properties;
-    bool isLocal;
-    
-    StyleNode(bool local = false, size_t l = 0, size_t c = 0)
-        : ASTNode(NodeType::STYLE, "", l, c), isLocal(local) {}
-};
-
-/**
- * 脚本节点
- */
-class ScriptNode : public ASTNode {
-public:
-    std::string content;
-    bool isLocal;
-    
-    ScriptNode(const std::string& script = "", bool local = false, size_t l = 0, size_t c = 0)
-        : ASTNode(NodeType::SCRIPT, script, l, c), content(script), isLocal(local) {}
-};
-
-/**
- * 模板节点
- */
-class TemplateNode : public ASTNode {
-public:
-    enum class TemplateType {
-        STYLE,
-        ELEMENT,
-        VAR
-    };
-    
-    TemplateType templateType;
-    std::string name;
-    std::map<std::string, std::string> properties;
-    std::vector<std::unique_ptr<ASTNode>> children;
-    
-    TemplateNode(TemplateType type, const std::string& n, size_t l = 0, size_t c = 0)
-        : ASTNode(NodeType::TEMPLATE, n, l, c), templateType(type), name(n) {}
-};
-
-/**
- * 自定义节点
- */
-class CustomNode : public ASTNode {
-public:
-    enum class CustomType {
-        STYLE,
-        ELEMENT,
-        VAR
-    };
-    
-    CustomType customType;
-    std::string name;
-    std::map<std::string, std::string> properties;
-    std::vector<std::unique_ptr<ASTNode>> children;
-    
-    CustomNode(CustomType type, const std::string& n, size_t l = 0, size_t c = 0)
-        : ASTNode(NodeType::CUSTOM, n, l, c), customType(type), name(n) {}
-};
-
-/**
- * 导入节点
- */
-class ImportNode : public ASTNode {
-public:
-    enum class ImportType {
-        HTML,
-        STYLE,
-        JAVASCRIPT,
-        CHTL,
-        CJMOD
-    };
-    
-    ImportType importType;
-    std::string path;
-    std::string alias;
-    
-    ImportNode(ImportType type, const std::string& p, const std::string& a = "", size_t l = 0, size_t c = 0)
-        : ASTNode(NodeType::IMPORT, p, l, c), importType(type), path(p), alias(a) {}
-};
-
-/**
- * 命名空间节点
- */
-class NamespaceNode : public ASTNode {
-public:
-    std::string name;
-    std::vector<std::unique_ptr<ASTNode>> children;
-    
-    NamespaceNode(const std::string& n, size_t l = 0, size_t c = 0)
-        : ASTNode(NodeType::NAMESPACE, n, l, c), name(n) {}
-};
-
-/**
- * 原始嵌入节点
- */
-class OriginNode : public ASTNode {
-public:
-    enum class OriginType {
-        HTML,
-        STYLE,
-        JAVASCRIPT
-    };
-    
-    OriginType originType;
-    std::string name;
-    std::string content;
-    
-    OriginNode(OriginType type, const std::string& n, const std::string& c = "", size_t l = 0, size_t c_pos = 0)
-        : ASTNode(NodeType::ORIGIN, n, l, c_pos), originType(type), name(n), content(c) {}
-};
+// 节点类定义已移至CHTLNode.h
 
 /**
  * 配置节点

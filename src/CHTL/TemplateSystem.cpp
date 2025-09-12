@@ -158,8 +158,8 @@ std::string CustomVar::expand(const std::map<std::string, std::string>& params) 
 }
 
 // Namespace方法实现
-void Namespace::addTemplate(std::unique_ptr<Template> template) {
-    templates[template->name] = std::move(template);
+void Namespace::addTemplate(std::unique_ptr<Template> templateNode) {
+    templates[templateNode->name] = std::move(templateNode);
 }
 
 void Namespace::addCustom(std::unique_ptr<Custom> custom) {
@@ -190,8 +190,8 @@ TemplateSystem::TemplateSystem() {}
 
 TemplateSystem::~TemplateSystem() {}
 
-void TemplateSystem::registerTemplate(std::unique_ptr<Template> template) {
-    templates[template->name] = std::move(template);
+void TemplateSystem::registerTemplate(std::unique_ptr<Template> templateNode) {
+    templates[templateNode->name] = std::move(templateNode);
 }
 
 void TemplateSystem::registerCustom(std::unique_ptr<Custom> custom) {
@@ -202,36 +202,36 @@ void TemplateSystem::registerImport(std::unique_ptr<ImportInfo> import) {
     imports[import->alias.empty() ? import->path : import->alias] = std::move(import);
 }
 
-void TemplateSystem::registerNamespace(std::unique_ptr<Namespace> namespace) {
-    namespaces[namespace->name] = std::move(namespace);
+void TemplateSystem::registerNamespace(std::unique_ptr<Namespace> namespaceNode) {
+    namespaces[namespaceNode->name] = std::move(namespaceNode);
 }
 
-Template* TemplateSystem::getTemplate(const std::string& name, const std::string& namespace) {
-    if (namespace.empty()) {
+Template* TemplateSystem::getTemplate(const std::string& name, const std::string& namespaceName) {
+    if (namespaceName.empty()) {
         auto it = templates.find(name);
         return it != templates.end() ? it->second.get() : nullptr;
     } else {
-        auto ns = getNamespace(namespace);
+        auto ns = getNamespace(namespaceName);
         return ns ? ns->getTemplate(name) : nullptr;
     }
 }
 
-Custom* TemplateSystem::getCustom(const std::string& name, const std::string& namespace) {
-    if (namespace.empty()) {
+Custom* TemplateSystem::getCustom(const std::string& name, const std::string& namespaceName) {
+    if (namespaceName.empty()) {
         auto it = customs.find(name);
         return it != customs.end() ? it->second.get() : nullptr;
     } else {
-        auto ns = getNamespace(namespace);
+        auto ns = getNamespace(namespaceName);
         return ns ? ns->getCustom(name) : nullptr;
     }
 }
 
-ImportInfo* TemplateSystem::getImport(const std::string& name, const std::string& namespace) {
-    if (namespace.empty()) {
+ImportInfo* TemplateSystem::getImport(const std::string& name, const std::string& namespaceName) {
+    if (namespaceName.empty()) {
         auto it = imports.find(name);
         return it != imports.end() ? it->second.get() : nullptr;
     } else {
-        auto ns = getNamespace(namespace);
+        auto ns = getNamespace(namespaceName);
         return ns ? ns->getImport(name) : nullptr;
     }
 }
@@ -243,18 +243,18 @@ Namespace* TemplateSystem::getNamespace(const std::string& name) {
 
 std::string TemplateSystem::expandTemplate(const std::string& name, 
                                           const std::map<std::string, std::string>& params,
-                                          const std::string& namespace) {
-    auto template = getTemplate(name, namespace);
-    if (template) {
-        return template->expand(params);
+                                          const std::string& namespaceName) {
+    auto templateNode = getTemplate(name, namespaceName);
+    if (templateNode) {
+        return templateNode->expand(params);
     }
     return "";
 }
 
 std::string TemplateSystem::expandCustom(const std::string& name, 
                                         const std::map<std::string, std::string>& params,
-                                        const std::string& namespace) {
-    auto custom = getCustom(name, namespace);
+                                        const std::string& namespaceName) {
+    auto custom = getCustom(name, namespaceName);
     if (custom) {
         return custom->expand(params);
     }

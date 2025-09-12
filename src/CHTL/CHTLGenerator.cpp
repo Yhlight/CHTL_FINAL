@@ -11,7 +11,7 @@ std::string CHTLGenerator::generateHTML(const ASTNode* ast) {
     std::stringstream html;
     
     for (const auto& child : ast->children) {
-        if (child->type == ASTNode::NodeType::ELEMENT) {
+        if (child->getType() == NodeType::ELEMENT) {
             html << generateElement(static_cast<const ElementNode*>(child.get()));
         }
     }
@@ -52,25 +52,25 @@ std::string CHTLGenerator::generateCompleteHTML(const ASTNode* ast) {
 std::string CHTLGenerator::generateElement(const ElementNode* element) {
     std::stringstream html;
     
-    html << "<" << element->tagName;
+    html << "<" << element->getTagName();
     
     // 生成属性
-    for (const auto& attr : element->attributes) {
+    for (const auto& attr : element->getAttributes()) {
         html << " " << attr.first << "=\"" << attr.second << "\"";
     }
     
     html << ">";
     
     // 生成子元素
-    for (const auto& child : element->children) {
-        if (child->type == ASTNode::NodeType::ELEMENT) {
+    for (const auto& child : element->getChildren()) {
+        if (child->getType() == NodeType::ELEMENT) {
             html << generateElement(static_cast<const ElementNode*>(child.get()));
-        } else if (child->type == ASTNode::NodeType::TEXT) {
-            html << static_cast<const TextNode*>(child.get())->content;
+        } else if (child->getType() == NodeType::TEXT) {
+            html << static_cast<const TextNode*>(child.get())->getText();
         }
     }
     
-    html << "</" << element->tagName << ">";
+    html << "</" << element->getTagName() << ">";
     
     return html.str();
 }
@@ -78,7 +78,7 @@ std::string CHTLGenerator::generateElement(const ElementNode* element) {
 std::string CHTLGenerator::generateStyle(const StyleNode* style) {
     std::stringstream css;
     
-    for (const auto& prop : style->properties) {
+    for (const auto& prop : style->getProperties()) {
         css << prop.first << ": " << prop.second << ";\n";
     }
     
@@ -86,31 +86,31 @@ std::string CHTLGenerator::generateStyle(const StyleNode* style) {
 }
 
 std::string CHTLGenerator::generateScript(const ScriptNode* script) {
-    return script->content;
+    return script->getScript();
 }
 
-std::string CHTLGenerator::generateTemplate(const TemplateNode* template) {
+std::string CHTLGenerator::generateTemplate(const TemplateNode* templateNode) {
     // 模板处理逻辑
     return "";
 }
 
-std::string CHTLGenerator::generateCustom(const CustomNode* custom) {
+std::string CHTLGenerator::generateCustom(const CustomNode* customNode) {
     // 自定义处理逻辑
     return "";
 }
 
-std::string CHTLGenerator::generateImport(const ImportNode* import) {
+std::string CHTLGenerator::generateImport(const ImportNode* importNode) {
     // 导入处理逻辑
     return "";
 }
 
-std::string CHTLGenerator::generateNamespace(const NamespaceNode* namespace) {
+std::string CHTLGenerator::generateNamespace(const NamespaceNode* namespaceNode) {
     // 命名空间处理逻辑
     return "";
 }
 
 std::string CHTLGenerator::generateOrigin(const OriginNode* origin) {
-    return origin->content;
+    return origin->getOriginContent();
 }
 
 std::string CHTLGenerator::generateConfiguration(const ConfigurationNode* config) {

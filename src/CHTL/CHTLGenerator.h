@@ -53,10 +53,10 @@ private:
     std::string generateElement(const ElementNode* element);
     std::string generateStyle(const StyleNode* style);
     std::string generateScript(const ScriptNode* script);
-    std::string generateTemplate(const TemplateNode* template);
-    std::string generateCustom(const CustomNode* custom);
-    std::string generateImport(const ImportNode* import);
-    std::string generateNamespace(const NamespaceNode* namespace);
+    std::string generateTemplate(const TemplateNode* templateNode);
+    std::string generateCustom(const CustomNode* customNode);
+    std::string generateImport(const ImportNode* importNode);
+    std::string generateNamespace(const NamespaceNode* namespaceNode);
     std::string generateOrigin(const OriginNode* origin);
     std::string generateConfiguration(const ConfigurationNode* config);
 };

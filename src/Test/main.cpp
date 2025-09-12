@@ -8,6 +8,7 @@
 #include "CHTL_JS/CHTLJSParser.h"
 #include "CHTL_JS/CHTLJSGenerator.h"
 #include "CHTL/TemplateSystem.h"
+#include "CHTL/StyleSystem.h"
 #include "Scanner/UnifiedScanner.h"
 
 using namespace CHTL;
@@ -167,6 +168,48 @@ void testTemplateSystem() {
     std::cout << "Template System test completed." << std::endl << std::endl;
 }
 
+void testStyleSystem() {
+    std::cout << "Testing Style System..." << std::endl;
+
+    StyleSystem styleSystem;
+
+    // 测试属性运算
+    std::map<std::string, std::string> context;
+    context["width"] = "100px";
+    context["height"] = "200px";
+
+    std::string result1 = styleSystem.processPropertyCalculation("100px + 50px", context);
+    std::cout << "Property Calculation (100px + 50px): " << result1 << std::endl;
+
+    std::string result2 = styleSystem.processPropertyCalculation("200px * 2", context);
+    std::cout << "Property Calculation (200px * 2): " << result2 << std::endl;
+
+    // 测试条件表达式
+    std::string result3 = styleSystem.processConditionalExpression("width > 50px ? \"red\" : \"blue\"", context);
+    std::cout << "Conditional Expression: " << result3 << std::endl;
+
+    // 测试属性引用
+    context["box.width"] = "100px";
+    std::string result4 = styleSystem.processPropertyReference("box.width", context);
+    std::cout << "Property Reference (box.width): " << result4 << std::endl;
+
+    // 测试响应式值
+    context["boxClass"] = "responsive-box";
+    context["boxWidth"] = "100";
+    std::string result5 = styleSystem.processReactiveValue("$boxClass$", context);
+    std::cout << "Reactive Value ($boxClass$): " << result5 << std::endl;
+
+    // 测试全局样式
+    styleSystem.addGlobalStyle(".test-class { color: red; }");
+    styleSystem.addGlobalStyle("#test-id { background: blue; }");
+    
+    std::string globalStyles = styleSystem.getGlobalStyles();
+    std::cout << "Global Styles:" << std::endl;
+    std::cout << globalStyles << std::endl;
+
+    std::cout << "Style System test completed." << std::endl << std::endl;
+}
+
 int main() {
     std::cout << "CHTL Test Suite" << std::endl;
     std::cout << "===============" << std::endl << std::endl;
@@ -177,6 +220,7 @@ int main() {
     testCHTLJSLexer();
     testCHTLJSGenerator();
     testTemplateSystem();
+    testStyleSystem();
     
     std::cout << "All tests completed!" << std::endl;
     

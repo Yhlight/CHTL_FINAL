@@ -24,8 +24,8 @@ include_directories(${CMAKE_SOURCE_DIR}/third_party)
 # 查找依赖
 find_package(PkgConfig REQUIRED)
 
-# 查找ANTLR4 (用于CSS和JS编译器)
-find_package(antlr4-runtime REQUIRED)
+# 查找ANTLR4 (用于CSS和JS编译器) - 暂时注释掉
+# find_package(antlr4-runtime REQUIRED)
 
 # 查找其他依赖
 find_package(Threads REQUIRED)
@@ -43,6 +43,7 @@ set(CHTL_SOURCES
     src/CHTL/CHTLIOStream.cpp
     src/CHTL/CMODSystem.cpp
     src/CHTL/TemplateSystem.cpp
+    src/CHTL/StyleSystem.cpp
     src/CHTL_JS/CHTLJSContext.cpp
     src/CHTL_JS/CHTLJSGenerator.cpp
     src/CHTL_JS/CHTLJSLexer.cpp
@@ -73,6 +74,8 @@ set(CHTL_HEADERS
     src/CHTL/CHTLState.h
     src/CHTL/CHTLIOStream.h
     src/CHTL/CMODSystem.h
+    src/CHTL/TemplateSystem.h
+    src/CHTL/StyleSystem.h
     src/CHTL_JS/CHTLJSContext.h
     src/CHTL_JS/CHTLJSGenerator.h
     src/CHTL_JS/CHTLJSLexer.h
@@ -94,7 +97,7 @@ set(CHTL_HEADERS
 # 创建CHTL库
 add_library(chtl_lib STATIC ${CHTL_SOURCES} ${CHTL_HEADERS})
 target_link_libraries(chtl_lib 
-    antlr4-runtime 
+    # antlr4-runtime 
     Threads::Threads
 )
 
