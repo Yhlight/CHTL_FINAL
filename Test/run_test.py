@@ -188,6 +188,24 @@ def run_template_circular_test():
     print("✅ Circular Template Inheritance test passed.")
     return True
 
+def run_custom_test():
+    print("\n--- Running Customization Test ---")
+    test_file = os.path.join(os.path.dirname(__file__), 'customs.chtl')
+    output_html = run_compiler_pipeline(test_file, debug=False)
+    if output_html is None: return False
+
+    if 'id="p1"' not in output_html or 'style=' not in output_html:
+        print("❌ Custom test FAILED on p1 structure.")
+        return False
+
+    if ('color: red' not in output_html or
+        'font-size: 20px' not in output_html):
+        print("❌ Custom test FAILED on p1 styles.")
+        return False
+
+    print("✅ Custom test passed.")
+    return True
+
 if __name__ == "__main__":
     test_results = []
     # Re-enable the basic test now that it's fixed.
@@ -200,6 +218,7 @@ if __name__ == "__main__":
     test_results.append(run_script_test())
     test_results.append(run_template_valid_test())
     test_results.append(run_template_circular_test())
+    test_results.append(run_custom_test())
 
     if all(test_results):
         print("\n✅ All tests passed!")

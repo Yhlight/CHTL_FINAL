@@ -2,6 +2,7 @@ from typing import Union, Tuple
 from CHTL.CHTLLexer import Lexer, Token, TokenType
 from CHTL.CHTLNode import (BaseNode, ElementNode, TextNode, StyleNode, CssRule, ScriptNode,
                            TemplateNode, TemplateUsageNode, FunctionCallNode,
+                           CustomNode, CustomUsageNode,
                            ExpressionNode, InfixExpressionNode, NumericLiteralNode, PropertyReferenceNode)
 from enum import IntEnum
 
@@ -159,10 +160,10 @@ class Parser:
 
     def parse_statement(self) -> Union[BaseNode, None]:
         if self.current_token.type == TokenType.LBRACKET:
-            return self._parse_template_definition()
+            return self._parse_meta_block_definition()
 
         if self.current_token.type == TokenType.AT:
-            return self._parse_template_usage()
+            return self._parse_at_usage()
 
         if self.current_token.type in (TokenType.IDENTIFIER, TokenType.DOT, TokenType.HASH, TokenType.AMPERSAND):
             # Check if it is a block statement
@@ -188,7 +189,7 @@ class Parser:
         node = ElementNode(tag_name=tag_name)
         while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
             if self.current_token.type == TokenType.AT:
-                usage = self._parse_template_usage()
+                usage = self._parse_at_usage()
                 if usage:
                     node.children.append(usage)
             elif self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type in (TokenType.COLON, TokenType.EQUALS):
@@ -233,7 +234,7 @@ class Parser:
         template_usages = []
         while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
             if self.current_token.type == TokenType.AT:
-                usage = self._parse_template_usage()
+                usage = self._parse_at_usage()
                 if usage:
                     template_usages.append(usage)
             elif self.current_token.type in (TokenType.DOT, TokenType.HASH, TokenType.AMPERSAND) or \
@@ -275,6 +276,18 @@ class Parser:
             self.errors.append(f"Missing semicolon for CSS property '{prop_name}'")
 
         return prop_name, value_nodes
+
+    def _parse_property_block(self) -> dict:
+        properties = {}
+        while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
+            if self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type == TokenType.COLON:
+                prop_name, prop_value = self._parse_inline_css_property()
+                if prop_name:
+                    properties[prop_name] = prop_value
+            else:
+                self.errors.append(f"Unexpected token in property block: {self.current_token.literal}")
+                self._skip_to_next_statement()
+        return properties
 
     def _parse_css_rule(self) -> Union[Tuple[CssRule, str, str], Tuple[None, None, None]]:
         selector_tokens = []
@@ -382,38 +395,55 @@ class Parser:
 
         return ScriptNode(attributes=attributes, content=content)
 
-    def _parse_template_usage(self) -> TemplateUsageNode:
-        # Expect @Style MyStyles;
+    def _parse_at_usage(self) -> Union[TemplateUsageNode, CustomUsageNode, None]:
+        # Expect @Style MyStyles; or @Style MyStyles { ... }
         self._next_token() # Consume @
 
         if not self.current_token.type == TokenType.IDENTIFIER:
             self.errors.append("Expected template type (e.g., Style) after '@'.")
             return None
-        template_type = self.current_token.literal
+        type_name = self.current_token.literal
         self._next_token() # Consume type
 
         if not self.current_token.type == TokenType.IDENTIFIER:
             self.errors.append("Expected template name after type.")
             return None
-        template_name = self.current_token.literal
+        usage_name = self.current_token.literal
         self._next_token() # Consume name
 
-        if not self.current_token.type == TokenType.SEMICOLON:
-            self.errors.append("Expected ';' after template usage.")
+        # Check for an optional specialization block
+        if self.current_token.type == TokenType.LBRACE:
+            self._next_token() # Consume {
+            specializations = self._parse_property_block()
+            if self.current_token.type != TokenType.RBRACE:
+                self.errors.append("Expected '}' to close specialization block.")
+            else:
+                self._next_token() # Consume }
+
+            return CustomUsageNode(custom_type=type_name, custom_name=usage_name, specializations=specializations)
         else:
-            self._next_token() # Consume ;
+            # No block, so it's a simple TemplateUsageNode
+            if self.current_token.type != TokenType.SEMICOLON:
+                self.errors.append("Expected ';' after template usage.")
+            else:
+                self._next_token() # Consume ;
+            return TemplateUsageNode(template_type=type_name, template_name=usage_name)
 
-        return TemplateUsageNode(template_type=template_type, template_name=template_name)
-
-    def _parse_template_definition(self) -> TemplateNode:
+    def _parse_meta_block_definition(self) -> Union[TemplateNode, CustomNode, None]:
         # Current token is LBRACKET
         self._next_token() # Consume [
 
-        if not (self.current_token.type == TokenType.IDENTIFIER and self.current_token.literal == 'Template'):
-            self.errors.append("Expected 'Template' keyword after '['.")
+        if not self.current_token.type == TokenType.IDENTIFIER:
+            self.errors.append("Expected 'Template' or 'Custom' keyword after '['.")
             self._skip_to_next_statement()
             return None
-        self._next_token() # Consume Template
+        meta_type = self.current_token.literal
+        self._next_token() # Consume meta type
+
+        if meta_type not in ('Template', 'Custom'):
+            self.errors.append(f"Unknown meta block type: '{meta_type}'")
+            self._skip_to_next_statement()
+            return None
 
         if self.current_token.type != TokenType.RBRACKET:
             self.errors.append("Expected ']' after Template keyword.")
@@ -450,11 +480,26 @@ class Parser:
         # Parse body based on type
         content = None
         usages = []
-        if template_type == 'Style':
+        if meta_type == 'Custom' and template_type == 'Style':
+            valueless_props = []
+            while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
+                if self.current_token.type == TokenType.IDENTIFIER:
+                    valueless_props.append(self.current_token.literal)
+                    self._next_token()
+                    if self.current_token.type == TokenType.COMMA:
+                        self._next_token()
+                    elif self.current_token.type == TokenType.SEMICOLON:
+                        self._next_token()
+                        break
+                else:
+                    self.errors.append(f"Unexpected token in valueless style group: {self.current_token.type}")
+                    self._skip_to_next_statement()
+            content = valueless_props
+        elif template_type == 'Style':
             properties = {}
             while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
                 if self.current_token.type == TokenType.AT:
-                    usage = self._parse_template_usage()
+                    usage = self._parse_at_usage()
                     if usage:
                         usages.append(usage)
                 elif self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type == TokenType.COLON:
@@ -495,7 +540,6 @@ class Parser:
                 else:
                     self.errors.append(f"Unexpected token in var group: {self.current_token.literal}")
                     self._skip_to_next_statement()
-            print(f"DEBUG: Parsed vars: {variables}")
             content = variables
         else:
             self.errors.append(f"Unknown template type: {template_type}")
@@ -504,11 +548,18 @@ class Parser:
                 self._next_token()
 
         if self.current_token.type != TokenType.RBRACE:
-            self.errors.append("Expected '}' to close template body.")
+            self.errors.append("Expected '}' to close meta block body.")
         else:
             self._next_token() # Consume '}'
 
-        return TemplateNode(template_type=template_type, template_name=template_name, content=content, usages=usages)
+        if meta_type == 'Template':
+            return TemplateNode(template_type=template_type, template_name=template_name, content=content, usages=usages)
+        elif meta_type == 'Custom':
+            # For now, CustomNode has a simpler structure. This will need to be updated
+            # when we handle custom specializations.
+            return CustomNode(custom_type=template_type, custom_name=template_name, content=content)
+
+        return None # Should not be reached
 
     def _parse_function_call(self, function_node: ExpressionNode) -> FunctionCallNode:
         arguments = self._parse_call_arguments()

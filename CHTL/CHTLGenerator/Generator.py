@@ -11,6 +11,8 @@ from CHTL.CHTLNode.ScriptNode import ScriptNode
 from CHTL.CHTLNode.TemplateNode import TemplateNode
 from CHTL.CHTLNode.TemplateUsageNode import TemplateUsageNode
 from CHTL.CHTLNode.FunctionCallNode import FunctionCallNode
+from CHTL.CHTLNode.CustomNode import CustomNode
+from CHTL.CHTLNode.CustomUsageNode import CustomUsageNode
 import html
 import re
 
@@ -27,6 +29,7 @@ class Generator:
         self.element_templates: dict[str, list] = {}
         self.var_groups: dict[str, dict] = {}
         self.template_dependency_graph: dict[str, set] = {}
+        self.custom_style_templates: dict[str, dict] = {}
 
     def generate(self, ast_root: ElementNode) -> str:
         if not isinstance(ast_root, ElementNode) or ast_root.tag_name != "root":
@@ -35,8 +38,9 @@ class Generator:
         self.global_css_rules, self.element_map, self.dependency_graph, self.errors = [], {}, {}, []
         self.evaluation_order, self.evaluated_styles, self.style_templates = [], {}, {}
         self.element_templates, self.var_groups, self.template_dependency_graph = {}, {}, {}
+        self.custom_style_templates = {}
 
-        self._collect_templates(ast_root)
+        self._collect_meta_blocks(ast_root)
         if self.errors:
             return f"<h1>Error: {self.errors[0]}</h1>"
 
@@ -160,12 +164,20 @@ class Generator:
 
             for child in element_node.children:
                 if isinstance(child, StyleNode):
-                    # 1. Apply templates first (in order of appearance)
+                    # 1. Apply templates and customs first (in order of appearance)
                     for usage in child.template_usages:
-                        if usage.template_type == 'Style' and usage.template_name in self.style_templates:
-                            # The content of a style template is a dictionary of properties
-                            template_props = self.style_templates[usage.template_name].content
-                            final_properties.update(template_props)
+                        if isinstance(usage, TemplateUsageNode):
+                            if usage.template_type == 'Style' and usage.template_name in self.style_templates:
+                                template_props = self.style_templates[usage.template_name].content
+                                final_properties.update(template_props)
+                        elif isinstance(usage, CustomUsageNode):
+                            if usage.custom_type == 'Style' and usage.custom_name in self.custom_style_templates:
+                                custom_template = self.custom_style_templates[usage.custom_name]
+                                for prop_name in custom_template.content:
+                                    if prop_name in usage.specializations:
+                                        final_properties[prop_name] = usage.specializations[prop_name]
+                                    else:
+                                        self.errors.append(f"Valueless property '{prop_name}' not provided for custom style '{usage.custom_name}'")
 
                     # 2. Apply the element's own properties, overriding any from templates
                     final_properties.update(child.properties)
@@ -276,40 +288,50 @@ class Generator:
                 if child.auto_ids_to_add: return f"#{child.auto_ids_to_add[0]}"
         return parent_node.tag_name.lower()
 
-    def _collect_templates(self, node: BaseNode):
-        # This method is now responsible for the entire template setup process.
+    def _collect_meta_blocks(self, node: BaseNode):
+        # This method is now responsible for the entire template and custom setup process.
 
-        # 1. Find all template definitions and build the dependency graph
-        all_templates = self._find_all_templates(node)
-        self._build_template_dependency_graph(all_templates)
+        # 1. Find all meta block definitions
+        all_meta_blocks = self._find_all_meta_blocks(node)
 
-        # 2. Store the raw templates before expansion
-        for name, node in all_templates.items():
+        # 2. Separate them and build dependency graphs
+        templates = {k: v for k, v in all_meta_blocks.items() if isinstance(v, TemplateNode)}
+        customs = {k: v for k, v in all_meta_blocks.items() if isinstance(v, CustomNode)}
+
+        self._build_template_dependency_graph(templates)
+
+        # 3. Store the raw blocks before expansion
+        for name, node in templates.items():
             if node.template_type == 'Style':
-                self.style_templates[name] = node # Store the whole node
+                self.style_templates[name] = node
             elif node.template_type == 'Element':
                 self.element_templates[name] = node
             elif node.template_type == 'Var':
                 self.var_groups[name] = node
 
-        # 3. Expand/flatten the templates
+        for name, node in customs.items():
+            if node.custom_type == 'Style':
+                self.custom_style_templates[name] = node
+
+        # 4. Expand/flatten the templates
         self._expand_style_templates()
 
-    def _find_all_templates(self, node: BaseNode, found_templates: dict = None) -> dict:
-        if found_templates is None:
-            found_templates = {}
+    def _find_all_meta_blocks(self, node: BaseNode, found_blocks: dict = None) -> dict:
+        if found_blocks is None:
+            found_blocks = {}
 
-        if isinstance(node, TemplateNode):
-            if node.template_name in found_templates:
-                self.errors.append(f"Duplicate template name found: {node.template_name}")
+        if isinstance(node, (TemplateNode, CustomNode)):
+            name = node.template_name if isinstance(node, TemplateNode) else node.custom_name
+            if name in found_blocks:
+                self.errors.append(f"Duplicate meta block name found: {name}")
             else:
-                found_templates[node.template_name] = node
+                found_blocks[name] = node
 
-        if hasattr(node, 'children') and not isinstance(node, TemplateNode):
+        if hasattr(node, 'children') and not isinstance(node, (TemplateNode, CustomNode)):
             for child in node.children:
-                self._find_all_templates(child, found_templates)
+                self._find_all_meta_blocks(child, found_blocks)
 
-        return found_templates
+        return found_blocks
 
     def _build_template_dependency_graph(self, all_templates: dict):
         for name, node in all_templates.items():

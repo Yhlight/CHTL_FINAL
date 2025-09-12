@@ -14,3 +14,5 @@ from .TemplateNode import TemplateNode
 from .TemplateUsageNode import TemplateUsageNode
 from .VarGroupNode import VarGroupNode
 from .FunctionCallNode import FunctionCallNode
+from .CustomNode import CustomNode
+from .CustomUsageNode import CustomUsageNode

@@ -1,0 +1,17 @@
+// Test/customs.chtl
+
+[Custom] @Style TextSet
+{
+    color,
+    font-size;
+}
+
+div {
+    id: "p1";
+    style {
+        @Style TextSet {
+            color: red;
+            font-size: 20px;
+        }
+    }
+}
