@@ -4,46 +4,8 @@
 namespace CHTL {
 
 // Helper to render a property value, which might be a simple literal or a complex expression.
-std::string renderCssValue(const std::vector<Token>& tokens) {
-    if (tokens.empty()) {
-        return "";
-    }
-
-    bool has_operator = false;
-    for (const auto& token : tokens) {
-        switch (token.type) {
-            case TokenType::Plus:
-            case TokenType::Minus:
-            case TokenType::Asterisk:
-            case TokenType::Slash:
-            case TokenType::Percent:
-            case TokenType::DoubleAsterisk:
-                has_operator = true;
-                break;
-            default:
-                break;
-        }
-        if (has_operator) break;
-    }
-
-    std::stringstream ss;
-    if (has_operator) {
-        ss << "calc(";
-    }
-
-    for (size_t i = 0; i < tokens.size(); ++i) {
-        ss << tokens[i].lexeme;
-        // Add space between tokens, except for the last one.
-        if (i < tokens.size() - 1) {
-            ss << " ";
-        }
-    }
-
-    if (has_operator) {
-        ss << ")";
-    }
-
-    return ss.str();
+std::string renderCssValue(CssExpressionEvaluator& evaluator, const std::vector<Token>& tokens) {
+    return evaluator.evaluate(tokens);
 }
 
 
@@ -108,7 +70,7 @@ void CHTLGenerator::visitElement(const ElementNode* node) {
             const auto* styleNode = static_cast<const StyleBlockNode*>(child.get());
             // Process inline properties
             for (const auto& prop : styleNode->inline_properties_) {
-                inline_style_ss << prop.first << ": " << renderCssValue(prop.second) << "; ";
+                inline_style_ss << prop.first << ": " << renderCssValue(css_evaluator_, prop.second) << "; ";
             }
             // Process rules
             for (const auto& rule : styleNode->rules_) {
@@ -130,7 +92,7 @@ void CHTLGenerator::visitElement(const ElementNode* node) {
                 // 1. Add rule to global styles
                 global_styles_ << "      " << final_selector << " {\n";
                 for (const auto& prop : rule->properties_) {
-                    global_styles_ << "        " << prop.first << ": " << renderCssValue(prop.second) << ";\n";
+                    global_styles_ << "        " << prop.first << ": " << renderCssValue(css_evaluator_, prop.second) << ";\n";
                 }
                 global_styles_ << "      }\n";
 

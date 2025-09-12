@@ -8,6 +8,7 @@
 #include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/StyleBlockNode.h"
 #include "../CHTLNode/OriginNode.h"
+#include "CssExpressionEvaluator.h"
 #include <string>
 #include <sstream>
 #include <memory>
@@ -32,6 +33,7 @@ private:
     std::stringstream output_;
     std::stringstream global_styles_;
     int indentLevel_ = 0;
+    CssExpressionEvaluator css_evaluator_;
 };
 
 } // namespace CHTL

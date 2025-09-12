@@ -14,6 +14,7 @@ set(CHTL_LIB_SOURCES
     src/CHTL/CHTLLexer/CHTLLexer.cpp
     src/CHTL/CHTLParser/CHTLParser.cpp
     src/CHTL/CHTLGenerator/CHTLGenerator.cpp
+    src/CHTL/CHTLGenerator/CssExpressionEvaluator.cpp
     src/CHTL/CHTLLoader/CHTLLoader.cpp
 )
 
