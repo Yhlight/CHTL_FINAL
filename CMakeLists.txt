@@ -12,6 +12,7 @@ set(CHTL_LIB_SOURCES
     src/CHTL/CHTLLexer/CHTLLexer.cpp
     src/CHTL/CHTLParser/CHTLParser.cpp
     src/CHTL/CHTLGenerator/CHTLGenerator.cpp
+    src/CHTL/CHTLLoader/CHTLLoader.cpp
 )
 
 # Create a static library for our compiler components

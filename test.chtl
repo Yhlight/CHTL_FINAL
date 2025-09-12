@@ -1,19 +1,7 @@
-[Custom] @Style TextSet {
-    color,
-    font-size;
-    font-weight: bold; // A regular property
-}
+[Import] @Chtl from "definitions.chtl";
 
 html {
     body {
-        p {
-            style {
-                @Style TextSet {
-                    color: red;
-                    font-size: 20px;
-                }
-            }
-            text { "This text uses the custom style." }
-        }
+        @Element MyCard;
     }
 }

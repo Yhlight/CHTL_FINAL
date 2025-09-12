@@ -11,6 +11,7 @@
 #include "../CHTLNode/StyleTemplateNode.h"
 #include "../CHTLNode/ElementTemplateNode.h"
 #include "../CHTLNode/VarTemplateNode.h"
+#include "../CHTLLoader/CHTLLoader.h"
 #include <vector>
 #include <memory>
 #include <unordered_map>
@@ -19,7 +20,7 @@ namespace CHTL {
 
 class CHTLParser {
 public:
-    explicit CHTLParser(const std::vector<Token>& tokens);
+    CHTLParser(std::vector<Token>& tokens, CHTLLoader& loader, const std::string& initial_path);
     std::unique_ptr<RootNode> parse();
 
 private:
@@ -44,7 +45,9 @@ private:
     const Token& consume(TokenType type, const std::string& message);
     void synchronize();
 
-    const std::vector<Token>& tokens_;
+    std::vector<Token>& tokens_; // Now non-const so we can splice
+    CHTLLoader& loader_;
+    std::string current_path_;
     std::unordered_map<std::string, std::shared_ptr<StyleTemplateNode>> style_templates_;
     std::unordered_map<std::string, std::shared_ptr<ElementTemplateNode>> element_templates_;
     std::unordered_map<std::string, std::shared_ptr<VarTemplateNode>> var_templates_;

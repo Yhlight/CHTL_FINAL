@@ -1,10 +1,12 @@
 #include "CHTLParser.h"
+#include "../CHTLLexer/CHTLLexer.h" // For recursive parsing
 #include <iostream>
 #include <stdexcept>
 
 namespace CHTL {
 
-CHTLParser::CHTLParser(const std::vector<Token>& tokens) : tokens_(tokens) {}
+CHTLParser::CHTLParser(std::vector<Token>& tokens, CHTLLoader& loader, const std::string& initial_path)
+    : tokens_(tokens), loader_(loader), current_path_(initial_path) {}
 
 std::unique_ptr<RootNode> CHTLParser::parse() {
     auto root = std::make_unique<RootNode>();
@@ -25,6 +27,35 @@ std::unique_ptr<RootNode> CHTLParser::parse() {
 
 std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     std::vector<std::unique_ptr<Node>> nodes;
+    if (match({TokenType::Import})) {
+        consume(TokenType::AtChtl, "Expected '@Chtl' for file import.");
+        consume(TokenType::From, "Expected 'from' keyword in import statement.");
+        const Token& pathToken = consume(TokenType::StringLiteral, "Expected file path string.");
+        consume(TokenType::Semicolon, "Expected ';' after import statement.");
+
+        std::string import_path = pathToken.lexeme;
+        if(auto content = loader_.loadFile(import_path, current_path_)) {
+            // When we import a file, we need to update the current path context for any nested imports
+            std::string previous_path = current_path_;
+            current_path_ = std::filesystem::canonical(std::filesystem::path(current_path_).parent_path() / import_path);
+
+            CHTLLexer imported_lexer(*content);
+            std::vector<Token> imported_tokens = imported_lexer.scanTokens();
+
+            // Remove the EOF token from the imported list before splicing.
+            if (!imported_tokens.empty() && imported_tokens.back().type == TokenType::EndOfFile) {
+                imported_tokens.pop_back();
+            }
+
+            // Splice the imported tokens into the current stream.
+            tokens_.insert(tokens_.begin() + current_, imported_tokens.begin(), imported_tokens.end());
+
+            // Restore the previous path context
+            current_path_ = previous_path;
+        }
+
+        return nodes; // Imports don't produce direct nodes
+    }
     if (match({TokenType::Template, TokenType::Custom})) {
         bool is_custom = previous().type == TokenType::Custom;
         parseTemplateDefinition(is_custom);
