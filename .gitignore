@@ -1,0 +1,10 @@
+# Ignore the build directory, which contains local build artifacts
+build/
+
+# Ignore other common files
+*.o
+*.out
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
