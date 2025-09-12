@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -Wextra -Wpedantic -Xlinker --dependency-file=CMakeFiles/test_compiler.dir/link.d CMakeFiles/test_compiler.dir/test_compiler.cpp.o -o bin/test_compiler  lib/libchtl_lib.a
