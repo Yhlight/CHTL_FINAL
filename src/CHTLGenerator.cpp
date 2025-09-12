@@ -5,6 +5,7 @@
 #include "CHTL/CHTLNode/CustomNode.h"
 #include "CHTL/CHTLNode/ImportNode.h"
 #include "CHTL/CHTLNode/NamespaceNode.h"
+#include "CHTL/CHTLNode/ConfigurationNode.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -175,6 +176,8 @@ std::string CHTLGenerator::generateNode(std::shared_ptr<BaseNode> node, int inde
             return generateImport(node, indent);
         case NodeType::NAMESPACE:
             return generateNamespace(node, indent);
+        case NodeType::CONFIG:
+            return generateConfiguration(node, indent);
         default:
             return "";
     }
@@ -398,6 +401,30 @@ std::string CHTLGenerator::generateNamespace(std::shared_ptr<BaseNode> node, int
         auto child = namespaceNode->getChild(i);
         if (child) {
             oss << generateNode(child, indent);
+        }
+    }
+    
+    return oss.str();
+}
+
+std::string CHTLGenerator::generateConfiguration(std::shared_ptr<BaseNode> node, int indent) {
+    if (!node) return "";
+    
+    auto configurationNode = std::dynamic_pointer_cast<ConfigurationNode>(node);
+    if (!configurationNode) return "";
+    
+    std::ostringstream oss;
+    std::string indentStr = generateIndent(indent);
+    
+    // 生成配置注释
+    oss << indentStr << "<!-- Configuration: " << configurationNode->getConfigurationName() << " -->\n";
+    
+    // 生成配置内容
+    const auto& items = configurationNode->getConfigurationItems();
+    if (!items.empty()) {
+        oss << indentStr << "<!-- Configuration Items -->\n";
+        for (const auto& item : items) {
+            oss << indentStr << "<!-- " << item.first << ": " << item.second << " -->\n";
         }
     }
     

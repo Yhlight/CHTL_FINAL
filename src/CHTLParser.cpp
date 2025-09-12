@@ -5,6 +5,7 @@
 #include "CHTL/CHTLNode/CustomNode.h"
 #include "CHTL/CHTLNode/ImportNode.h"
 #include "CHTL/CHTLNode/NamespaceNode.h"
+#include "CHTL/CHTLNode/ConfigurationNode.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -518,8 +519,99 @@ std::shared_ptr<BaseNode> CHTLParser::parseImport() {
 }
 
 std::shared_ptr<BaseNode> CHTLParser::parseConfiguration() {
-    // TODO: 实现配置解析
-    addWarning("Configuration parsing not yet implemented");
+    if (isAtEnd()) return nullptr;
+    
+    if (checkToken(TokenType::CONFIGURATION)) {
+        nextToken(); // 消费 [Configuration]
+        
+        // 解析配置类型
+        ConfigurationType configurationType = ConfigurationType::UNKNOWN;
+        if (checkToken(TokenType::IDENTIFIER)) {
+            std::string typeStr = currentToken().getValue();
+            nextToken();
+            
+            if (typeStr == "Keyword") {
+                configurationType = ConfigurationType::KEYWORD;
+            } else if (typeStr == "Module") {
+                configurationType = ConfigurationType::MODULE;
+            } else if (typeStr == "Compiler") {
+                configurationType = ConfigurationType::COMPILER;
+            } else if (typeStr == "Output") {
+                configurationType = ConfigurationType::OUTPUT;
+            } else if (typeStr == "Debug") {
+                configurationType = ConfigurationType::DEBUG;
+            }
+        }
+        
+        // 解析配置名称
+        std::string configurationName;
+        if (currentToken().getType() == TokenType::IDENTIFIER) {
+            configurationName = currentToken().getValue();
+            nextToken();
+        } else {
+            addError("Expected configuration name after configuration type");
+            return nullptr;
+        }
+        
+        // 创建配置节点
+        auto configurationNode = std::make_shared<ConfigurationNode>(configurationType, configurationName);
+        configurationNode->setPosition(currentToken().getLine(), currentToken().getColumn());
+        
+        // 解析配置内容
+        if (checkToken(TokenType::LEFT_BRACE)) {
+            nextToken(); // 消费 {
+            
+            skipWhitespace();
+            
+            // 解析配置项
+            while (!checkToken(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                if (currentToken().getType() == TokenType::IDENTIFIER) {
+                    std::string key = currentToken().getValue();
+                    nextToken();
+                    
+                    // 检查是否有值
+                    if (checkToken(TokenType::COLON) || checkToken(TokenType::EQUALS)) {
+                        nextToken(); // 消费 : 或 =
+                        skipWhitespace();
+                        
+                        // 解析配置值
+                        std::string value;
+                        if (currentToken().getType() == TokenType::STRING) {
+                            value = currentToken().getValue();
+                            nextToken();
+                        } else if (currentToken().getType() == TokenType::IDENTIFIER) {
+                            value = currentToken().getValue();
+                            nextToken();
+                        } else if (currentToken().getType() == TokenType::NUMBER) {
+                            value = currentToken().getValue();
+                            nextToken();
+                        } else {
+                            addError("Expected value after configuration key");
+                            break;
+                        }
+                        
+                        configurationNode->addConfigurationItem(key, value);
+                    } else {
+                        addError("Expected ':' or '=' after configuration key");
+                        break;
+                    }
+                } else {
+                    break;
+                }
+                
+                skipWhitespace();
+            }
+            
+            if (checkToken(TokenType::RIGHT_BRACE)) {
+                nextToken(); // 消费 }
+            } else {
+                addError("Expected '}' after configuration content");
+            }
+        }
+        
+        return configurationNode;
+    }
+    
     return nullptr;
 }
 

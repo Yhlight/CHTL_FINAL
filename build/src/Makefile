@@ -271,6 +271,30 @@ CHTLNode/BaseNode.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/BaseNode.cpp.s
 .PHONY : CHTLNode/BaseNode.cpp.s
 
+CHTLNode/ConfigurationNode.o: CHTLNode/ConfigurationNode.cpp.o
+.PHONY : CHTLNode/ConfigurationNode.o
+
+# target to build an object file
+CHTLNode/ConfigurationNode.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.o
+.PHONY : CHTLNode/ConfigurationNode.cpp.o
+
+CHTLNode/ConfigurationNode.i: CHTLNode/ConfigurationNode.cpp.i
+.PHONY : CHTLNode/ConfigurationNode.i
+
+# target to preprocess a source file
+CHTLNode/ConfigurationNode.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.i
+.PHONY : CHTLNode/ConfigurationNode.cpp.i
+
+CHTLNode/ConfigurationNode.s: CHTLNode/ConfigurationNode.cpp.s
+.PHONY : CHTLNode/ConfigurationNode.s
+
+# target to generate assembly for a file
+CHTLNode/ConfigurationNode.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.s
+.PHONY : CHTLNode/ConfigurationNode.cpp.s
+
 CHTLNode/CustomNode.o: CHTLNode/CustomNode.cpp.o
 .PHONY : CHTLNode/CustomNode.o
 
@@ -439,6 +463,30 @@ CHTLParser.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.s
 .PHONY : CHTLParser.cpp.s
 
+ConfigurationManager.o: ConfigurationManager.cpp.o
+.PHONY : ConfigurationManager.o
+
+# target to build an object file
+ConfigurationManager.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.o
+.PHONY : ConfigurationManager.cpp.o
+
+ConfigurationManager.i: ConfigurationManager.cpp.i
+.PHONY : ConfigurationManager.i
+
+# target to preprocess a source file
+ConfigurationManager.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.i
+.PHONY : ConfigurationManager.cpp.i
+
+ConfigurationManager.s: ConfigurationManager.cpp.s
+.PHONY : ConfigurationManager.s
+
+# target to generate assembly for a file
+ConfigurationManager.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.s
+.PHONY : ConfigurationManager.cpp.s
+
 ImportManager.o: ImportManager.cpp.o
 .PHONY : ImportManager.o
 
@@ -560,6 +608,9 @@ help:
 	@echo "... CHTLNode/BaseNode.o"
 	@echo "... CHTLNode/BaseNode.i"
 	@echo "... CHTLNode/BaseNode.s"
+	@echo "... CHTLNode/ConfigurationNode.o"
+	@echo "... CHTLNode/ConfigurationNode.i"
+	@echo "... CHTLNode/ConfigurationNode.s"
 	@echo "... CHTLNode/CustomNode.o"
 	@echo "... CHTLNode/CustomNode.i"
 	@echo "... CHTLNode/CustomNode.s"
@@ -581,6 +632,9 @@ help:
 	@echo "... CHTLParser.o"
 	@echo "... CHTLParser.i"
 	@echo "... CHTLParser.s"
+	@echo "... ConfigurationManager.o"
+	@echo "... ConfigurationManager.i"
+	@echo "... ConfigurationManager.s"
 	@echo "... ImportManager.o"
 	@echo "... ImportManager.i"
 	@echo "... ImportManager.s"

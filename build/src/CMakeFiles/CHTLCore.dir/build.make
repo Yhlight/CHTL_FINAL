@@ -240,10 +240,24 @@ src/CMakeFiles/CHTLCore.dir/CHTLNode/NamespaceNode.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLCore.dir/CHTLNode/NamespaceNode.cpp.s"
 	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/CHTLNode/NamespaceNode.cpp -o CMakeFiles/CHTLCore.dir/CHTLNode/NamespaceNode.cpp.s
 
+src/CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.o: src/CMakeFiles/CHTLCore.dir/flags.make
+src/CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.o: /workspace/src/CHTLNode/ConfigurationNode.cpp
+src/CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.o: src/CMakeFiles/CHTLCore.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object src/CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.o"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.o -MF CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.o.d -o CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.o -c /workspace/src/CHTLNode/ConfigurationNode.cpp
+
+src/CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.i"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/src/CHTLNode/ConfigurationNode.cpp > CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.i
+
+src/CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.s"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/CHTLNode/ConfigurationNode.cpp -o CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.s
+
 src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.o: src/CMakeFiles/CHTLCore.dir/flags.make
 src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.o: /workspace/src/ImportManager.cpp
 src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.o: src/CMakeFiles/CHTLCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.o"
 	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.o -MF CMakeFiles/CHTLCore.dir/ImportManager.cpp.o.d -o CMakeFiles/CHTLCore.dir/ImportManager.cpp.o -c /workspace/src/ImportManager.cpp
 
 src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.i: cmake_force
@@ -257,7 +271,7 @@ src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.s: cmake_force
 src/CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.o: src/CMakeFiles/CHTLCore.dir/flags.make
 src/CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.o: /workspace/src/NamespaceManager.cpp
 src/CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.o: src/CMakeFiles/CHTLCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object src/CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object src/CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.o"
 	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.o -MF CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.o.d -o CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.o -c /workspace/src/NamespaceManager.cpp
 
 src/CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.i: cmake_force
@@ -268,10 +282,24 @@ src/CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.s"
 	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/NamespaceManager.cpp -o CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.s
 
+src/CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.o: src/CMakeFiles/CHTLCore.dir/flags.make
+src/CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.o: /workspace/src/ConfigurationManager.cpp
+src/CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.o: src/CMakeFiles/CHTLCore.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object src/CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.o"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.o -MF CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.o.d -o CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.o -c /workspace/src/ConfigurationManager.cpp
+
+src/CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.i"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/src/ConfigurationManager.cpp > CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.i
+
+src/CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.s"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/ConfigurationManager.cpp -o CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.s
+
 src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o: src/CMakeFiles/CHTLCore.dir/flags.make
 src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o: /workspace/src/Scanner/UnifiedScanner.cpp
 src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o: src/CMakeFiles/CHTLCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o"
 	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o -MF CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o.d -o CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o -c /workspace/src/Scanner/UnifiedScanner.cpp
 
 src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.i: cmake_force
@@ -296,8 +324,10 @@ CHTLCore_OBJECTS = \
 "CMakeFiles/CHTLCore.dir/CHTLNode/CustomNode.cpp.o" \
 "CMakeFiles/CHTLCore.dir/CHTLNode/ImportNode.cpp.o" \
 "CMakeFiles/CHTLCore.dir/CHTLNode/NamespaceNode.cpp.o" \
+"CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.o" \
 "CMakeFiles/CHTLCore.dir/ImportManager.cpp.o" \
 "CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.o" \
+"CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.o" \
 "CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o"
 
 # External object files for target CHTLCore
@@ -315,12 +345,14 @@ lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/CHTLNode/TemplateNode.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/CHTLNode/CustomNode.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/CHTLNode/ImportNode.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/CHTLNode/NamespaceNode.cpp.o
+lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/CHTLNode/ConfigurationNode.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.o
+lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/build.make
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Linking CXX static library ../lib/libCHTLCore.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Linking CXX static library ../lib/libCHTLCore.a"
 	cd /workspace/build/src && $(CMAKE_COMMAND) -P CMakeFiles/CHTLCore.dir/cmake_clean_target.cmake
 	cd /workspace/build/src && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/CHTLCore.dir/link.txt --verbose=$(VERBOSE)
 

@@ -158,6 +158,14 @@ private:
     std::string generateNamespace(std::shared_ptr<BaseNode> node, int indent = 0);
     
     /**
+     * @brief 生成配置节点
+     * @param node 配置节点
+     * @param indent 缩进级别
+     * @return 生成的代码
+     */
+    std::string generateConfiguration(std::shared_ptr<BaseNode> node, int indent = 0);
+    
+    /**
      * @brief 生成节点（通用方法）
      * @param node 节点
      * @param indent 缩进级别
