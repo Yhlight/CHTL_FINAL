@@ -169,14 +169,32 @@ std::vector<std::pair<size_t, CodeFragmentType>> UnifiedScanner::preScan(const s
             continue;
         }
         
-        // 检查HTML元素（可能包含CHTL语法）
+        // 检查CHTL关键字
         if (std::isalpha(sourceCode[pos])) {
-            // 检查是否为HTML元素名
             size_t startPos = pos;
             while (pos < sourceCode.length() && (std::isalnum(sourceCode[pos]) || sourceCode[pos] == '-')) {
                 pos++;
             }
             
+            std::string identifier = sourceCode.substr(startPos, pos - startPos);
+            
+            // 检查是否为CHTL关键字
+            if (m_chtlKeywords.find(identifier) != m_chtlKeywords.end()) {
+                // 跳过空格
+                size_t checkPos = pos;
+                while (checkPos < sourceCode.length() && std::isspace(sourceCode[checkPos])) {
+                    checkPos++;
+                }
+                
+                // 检查后面是否有 {
+                if (checkPos < sourceCode.length() && sourceCode[checkPos] == '{') {
+                    boundaries.emplace_back(startPos, CodeFragmentType::CHTL);
+                    pos = checkPos;
+                    continue;
+                }
+            }
+            
+            // 检查是否为HTML元素（只有在不是CHTL关键字的情况下）
             // 跳过空格
             size_t checkPos = pos;
             while (checkPos < sourceCode.length() && std::isspace(sourceCode[checkPos])) {
@@ -196,7 +214,58 @@ std::vector<std::pair<size_t, CodeFragmentType>> UnifiedScanner::preScan(const s
                     searchPos++;
                 }
                 
-                std::cout << "[UnifiedScanner] Element " << sourceCode.substr(startPos, pos - startPos) 
+                // 如果包含CHTL语法，检查是否有嵌套的@Style语法
+                if (hasCHTLSyntax) {
+                    std::cout << "[UnifiedScanner] Checking for nested @Style syntax in " << identifier << std::endl;
+                    searchPos = checkPos + 1;
+                    while (searchPos < sourceCode.length() && sourceCode[searchPos] != '}') {
+                        if (sourceCode[searchPos] == '@') {
+                            std::cout << "[UnifiedScanner] Found @ at position " << searchPos << std::endl;
+                            // 检查是否为@Style语法
+                            size_t atPos = searchPos;
+                            atPos++; // 跳过 @
+                            
+                            // 检查后面是否有标识符
+                            if (atPos < sourceCode.length() && std::isalpha(sourceCode[atPos])) {
+                                // 跳过标识符
+                                while (atPos < sourceCode.length() && (std::isalnum(sourceCode[atPos]) || sourceCode[atPos] == '_')) {
+                                    atPos++;
+                                }
+                                
+                                std::string firstIdentifier = sourceCode.substr(searchPos + 1, atPos - searchPos - 1);
+                                std::cout << "[UnifiedScanner] First identifier: " << firstIdentifier << std::endl;
+                                
+                                // 检查后面是否有空格和另一个标识符
+                                if (atPos < sourceCode.length() && sourceCode[atPos] == ' ') {
+                                    atPos = skipWhitespace(sourceCode, atPos);
+                                    if (atPos < sourceCode.length() && std::isalpha(sourceCode[atPos])) {
+                                        size_t secondStart = atPos;
+                                        // 跳过第二个标识符
+                                        while (atPos < sourceCode.length() && (std::isalnum(sourceCode[atPos]) || sourceCode[atPos] == '_')) {
+                                            atPos++;
+                                        }
+                                        
+                                        std::string secondIdentifier = sourceCode.substr(secondStart, atPos - secondStart);
+                                        std::cout << "[UnifiedScanner] Second identifier: " << secondIdentifier << std::endl;
+                                        
+                                        // 跳过空格，然后检查后面是否有 {
+                                        atPos = skipWhitespace(sourceCode, atPos);
+                                        std::cout << "[UnifiedScanner] Checking for { at position " << atPos << ", char: " << (atPos < sourceCode.length() ? sourceCode[atPos] : '?') << std::endl;
+                                        if (atPos < sourceCode.length() && sourceCode[atPos] == '{') {
+                                            std::cout << "[UnifiedScanner] Found nested @Style syntax at " << searchPos << std::endl;
+                                            // 这里不需要添加边界，因为整个div已经被识别为CHTL片段
+                                        } else {
+                                            std::cout << "[UnifiedScanner] No { found after @Style" << std::endl;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        searchPos++;
+                    }
+                }
+                
+                std::cout << "[UnifiedScanner] Element " << identifier 
                           << " hasCHTLSyntax=" << (hasCHTLSyntax ? "true" : "false") << std::endl;
                 
                 if (hasCHTLSyntax) {
@@ -253,6 +322,7 @@ std::vector<std::pair<size_t, CodeFragmentType>> UnifiedScanner::preScan(const s
                         
                         // 检查后面是否有 {
                         if (pos < sourceCode.length() && sourceCode[pos] == '{') {
+                            std::cout << "[UnifiedScanner] Found @Style syntax at " << startPos << std::endl;
                             boundaries.emplace_back(startPos, CodeFragmentType::CHTL);
                             continue;
                         }

@@ -52,14 +52,24 @@ std::shared_ptr<BaseNode> CHTLParser::parse(const std::string& sourceCode) {
         
         if (pos >= sourceCode.length()) break;
         
-        // 识别标识符
+        // 识别标识符和关键字
         if (std::isalpha(sourceCode[pos])) {
             size_t start = pos;
             while (pos < sourceCode.length() && (std::isalnum(sourceCode[pos]) || sourceCode[pos] == '-' || sourceCode[pos] == '_')) {
                 pos++;
             }
             std::string value = sourceCode.substr(start, pos - start);
-            tokens.addToken(TokenType::IDENTIFIER, value, 1, 1);
+            
+            // 检查是否为关键字
+            if (value == "text") {
+                tokens.addToken(TokenType::TEXT, value, 1, 1);
+            } else if (value == "style") {
+                tokens.addToken(TokenType::STYLE, value, 1, 1);
+            } else if (value == "script") {
+                tokens.addToken(TokenType::SCRIPT, value, 1, 1);
+            } else {
+                tokens.addToken(TokenType::IDENTIFIER, value, 1, 1);
+            }
         }
         // 识别@符号
         else if (sourceCode[pos] == '@') {
