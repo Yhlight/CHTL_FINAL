@@ -1,0 +1,20 @@
+[Origin] @Html {
+    <div class="custom-html">
+        <h1>Original HTML Content</h1>
+        <p>This is embedded HTML code.</p>
+    </div>
+}
+
+[Origin] @Style {
+    .custom-style {
+        color: red;
+        background: blue;
+    }
+}
+
+[Origin] @JavaScript {
+    function customFunction() {
+        console.log("This is embedded JavaScript");
+        return true;
+    }
+}

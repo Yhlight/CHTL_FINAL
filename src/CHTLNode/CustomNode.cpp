@@ -1,0 +1,155 @@
+#include "CHTL/CHTLNode/CustomNode.h"
+#include <sstream>
+
+namespace CHTL {
+
+CustomNode::CustomNode(CustomType type, const std::string& name)
+    : BaseNode(NodeType::CUSTOM)
+    , m_customType(type)
+    , m_customName(name)
+    , m_isSpecialized(false)
+{
+}
+
+CustomNode::~CustomNode() {
+}
+
+void CustomNode::setCustomType(CustomType type) {
+    m_customType = type;
+}
+
+CustomType CustomNode::getCustomType() const {
+    return m_customType;
+}
+
+void CustomNode::setCustomName(const std::string& name) {
+    m_customName = name;
+}
+
+const std::string& CustomNode::getCustomName() const {
+    return m_customName;
+}
+
+void CustomNode::addSpecialization(const std::string& operation, const std::string& target) {
+    m_specializations.emplace_back(operation, target);
+}
+
+const std::vector<std::pair<std::string, std::string>>& CustomNode::getSpecializations() const {
+    return m_specializations;
+}
+
+void CustomNode::setParentTemplate(const std::string& parentTemplate) {
+    m_parentTemplate = parentTemplate;
+}
+
+const std::string& CustomNode::getParentTemplate() const {
+    return m_parentTemplate;
+}
+
+bool CustomNode::hasParentTemplate() const {
+    return !m_parentTemplate.empty();
+}
+
+void CustomNode::setCustomContent(const std::string& content) {
+    m_customContent = content;
+}
+
+const std::string& CustomNode::getCustomContent() const {
+    return m_customContent;
+}
+
+void CustomNode::setValuelessProperties(const std::vector<std::string>& valuelessProps) {
+    m_valuelessProperties = valuelessProps;
+}
+
+const std::vector<std::string>& CustomNode::getValuelessProperties() const {
+    return m_valuelessProperties;
+}
+
+bool CustomNode::isValuelessStyle() const {
+    return !m_valuelessProperties.empty();
+}
+
+void CustomNode::addChildElement(std::shared_ptr<BaseNode> element) {
+    if (element) {
+        m_childElements.push_back(element);
+    }
+}
+
+size_t CustomNode::getChildElementCount() const {
+    return m_childElements.size();
+}
+
+std::shared_ptr<BaseNode> CustomNode::getChildElement(size_t index) const {
+    if (index < m_childElements.size()) {
+        return m_childElements[index];
+    }
+    return nullptr;
+}
+
+void CustomNode::setSpecializedContent(const std::string& content) {
+    m_specializedContent = content;
+    m_isSpecialized = true;
+}
+
+const std::string& CustomNode::getSpecializedContent() const {
+    return m_specializedContent;
+}
+
+bool CustomNode::isSpecialized() const {
+    return m_isSpecialized;
+}
+
+std::shared_ptr<BaseNode> CustomNode::clone() const {
+    auto cloned = std::make_shared<CustomNode>(m_customType, m_customName);
+    cloned->m_specializations = m_specializations;
+    cloned->m_parentTemplate = m_parentTemplate;
+    cloned->m_customContent = m_customContent;
+    cloned->m_valuelessProperties = m_valuelessProperties;
+    cloned->m_childElements = m_childElements;
+    cloned->m_specializedContent = m_specializedContent;
+    cloned->m_isSpecialized = m_isSpecialized;
+    cloned->m_line = m_line;
+    cloned->m_column = m_column;
+    
+    // 克隆子节点
+    for (const auto& child : m_children) {
+        if (child) {
+            cloned->addChild(child->clone());
+        }
+    }
+    
+    return cloned;
+}
+
+std::string CustomNode::toString() const {
+    std::ostringstream oss;
+    oss << "CustomNode(type=" << getCustomTypeName(m_customType)
+        << ", name=\"" << m_customName << "\""
+        << ", specializations=" << m_specializations.size()
+        << ", parent=\"" << m_parentTemplate << "\""
+        << ", customContent=\"" << m_customContent << "\""
+        << ", valuelessProperties=" << m_valuelessProperties.size()
+        << ", childElements=" << m_childElements.size()
+        << ", specializedContent=\"" << m_specializedContent << "\""
+        << ", isSpecialized=" << (m_isSpecialized ? "true" : "false")
+        << ", children=" << m_children.size()
+        << ", line=" << m_line << ", column=" << m_column << ")";
+    return oss.str();
+}
+
+std::string CustomNode::getCustomTypeName(CustomType type) {
+    switch (type) {
+        case CustomType::STYLE:
+            return "STYLE";
+        case CustomType::ELEMENT:
+            return "ELEMENT";
+        case CustomType::VAR:
+            return "VAR";
+        case CustomType::UNKNOWN:
+        default:
+            return "UNKNOWN";
+    }
+}
+
+} // namespace CHTL

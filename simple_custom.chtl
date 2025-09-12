@@ -1,0 +1,4 @@
+[Custom] @Style MyButton {
+    color: red;
+    background-color: blue;
+}

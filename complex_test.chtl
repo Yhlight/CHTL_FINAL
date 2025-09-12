@@ -1,0 +1,16 @@
+text { "Welcome to CHTL" }
+
+div {
+    @Style MyButton {
+        background-color: blue;
+        color: white;
+        padding: 10px;
+    }
+    
+    text: "Click me";
+}
+
+@Style MyButton {
+    background-color: red;
+    delete background-color;
+}

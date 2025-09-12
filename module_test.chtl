@@ -1,0 +1,83 @@
+// 模块系统测试文件
+
+[Module] CMOD UIComponents
+{
+    version: "1.0.0";
+    path: "./modules/ui.chtl";
+    description: "UI组件模块";
+    dependency: "BaseStyles";
+    export: "Button";
+    export: "Card";
+    export: "Modal";
+}
+
+[Module] CJMOD AnimationModule
+{
+    version: "2.1.0";
+    path: "./modules/animations.chtl";
+    description: "动画效果模块";
+    dependency: "UIComponents";
+    export: "fadeIn";
+    export: "slideUp";
+    export: "bounce";
+}
+
+[Module] HTML LayoutModule
+{
+    version: "1.5.0";
+    path: "./modules/layout.html";
+    description: "布局模块";
+    dependency: "UIComponents";
+    export: "Header";
+    export: "Footer";
+    export: "Sidebar";
+}
+
+[Module] CSS ThemeModule
+{
+    version: "3.0.0";
+    path: "./modules/theme.css";
+    description: "主题样式模块";
+    dependency: "BaseStyles";
+    export: "darkTheme";
+    export: "lightTheme";
+    export: "colorScheme";
+}
+
+[Module] JS UtilsModule
+{
+    version: "1.2.0";
+    path: "./modules/utils.js";
+    description: "工具函数模块";
+    dependency: "AnimationModule";
+    export: "debounce";
+    export: "throttle";
+    export: "formatDate";
+}
+
+html
+{
+    body
+    {
+        div
+        {
+            class: "container";
+            
+            h1
+            {
+                text
+                {
+                    CHTL模块系统测试
+                }
+            }
+            
+            p
+            {
+                text
+                {
+                    这个页面演示了CHTL的模块功能，包括CMOD、CJMOD、HTML、CSS和JS模块。
+                }
+            }
+        }
+    }
+}

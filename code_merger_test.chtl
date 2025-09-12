@@ -1,0 +1,61 @@
+// 代码合并器测试文件
+
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                代码合并器测试
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: "container";
+            
+            h1
+            {
+                text
+                {
+                    CHTL 代码合并器测试
+                }
+            }
+            
+            p
+            {
+                text
+                {
+                    这个页面测试代码合并器和编译器调度器的功能。
+                }
+            }
+            
+            style
+            {
+                .container
+                {
+                    max-width: 800px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+                
+                h1
+                {
+                    color: #333;
+                    text-align: center;
+                }
+                
+                p
+                {
+                    line-height: 1.6;
+                    color: #666;
+                }
+            }
+        }
+    }
+}

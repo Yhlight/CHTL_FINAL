@@ -1,0 +1,22 @@
+// 这是单行注释
+div {
+    class: "container";
+    // 这是另一个单行注释
+    id = "main-content";
+}
+
+/* 这是多行注释
+   可以跨越多行
+   包含各种内容 */
+span {
+    class = "highlight";
+    /* 这是内联多行注释 */
+    id: "text-span";
+}
+
+-- 这是HTML注释
+button {
+    type: "submit";
+    -- 这是另一个HTML注释
+    disabled = false;
+}
