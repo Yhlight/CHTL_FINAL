@@ -67,6 +67,20 @@ std::shared_ptr<BaseNode> CHTLParser::parse(const std::string& sourceCode) {
                 tokens.addToken(TokenType::STYLE, value, 1, 1);
             } else if (value == "script") {
                 tokens.addToken(TokenType::SCRIPT, value, 1, 1);
+            } else if (value == "Template") {
+                tokens.addToken(TokenType::TEMPLATE, value, 1, 1);
+            } else if (value == "Custom") {
+                tokens.addToken(TokenType::CUSTOM, value, 1, 1);
+            } else if (value == "Origin") {
+                tokens.addToken(TokenType::ORIGIN, value, 1, 1);
+            } else if (value == "Import") {
+                tokens.addToken(TokenType::IMPORT, value, 1, 1);
+            } else if (value == "Namespace") {
+                tokens.addToken(TokenType::NAMESPACE, value, 1, 1);
+            } else if (value == "Configuration") {
+                tokens.addToken(TokenType::CONFIGURATION, value, 1, 1);
+            } else if (value == "Module") {
+                tokens.addToken(TokenType::MODULE, value, 1, 1);
             } else {
                 tokens.addToken(TokenType::IDENTIFIER, value, 1, 1);
             }
@@ -91,6 +105,21 @@ std::shared_ptr<BaseNode> CHTLParser::parse(const std::string& sourceCode) {
             tokens.addToken(TokenType::COLON, ":", 1, 1);
             pos++;
         }
+        // 识别等号
+        else if (sourceCode[pos] == '=') {
+            tokens.addToken(TokenType::EQUALS, "=", 1, 1);
+            pos++;
+        }
+        // 识别左方括号
+        else if (sourceCode[pos] == '[') {
+            tokens.addToken(TokenType::LEFT_BRACKET, "[", 1, 1);
+            pos++;
+        }
+        // 识别右方括号
+        else if (sourceCode[pos] == ']') {
+            tokens.addToken(TokenType::RIGHT_BRACKET, "]", 1, 1);
+            pos++;
+        }
         // 识别分号
         else if (sourceCode[pos] == ';') {
             tokens.addToken(TokenType::SEMICOLON, ";", 1, 1);
@@ -107,6 +136,55 @@ std::shared_ptr<BaseNode> CHTLParser::parse(const std::string& sourceCode) {
                 pos++;
                 std::string value = sourceCode.substr(start + 1, pos - start - 2);
                 tokens.addToken(TokenType::STRING, value, 1, 1);
+            }
+        }
+        // 识别单引号字符串
+        else if (sourceCode[pos] == '\'') {
+            size_t start = pos;
+            pos++;
+            while (pos < sourceCode.length() && sourceCode[pos] != '\'') {
+                pos++;
+            }
+            if (pos < sourceCode.length()) {
+                pos++;
+                std::string value = sourceCode.substr(start + 1, pos - start - 2);
+                tokens.addToken(TokenType::STRING, value, 1, 1);
+            }
+        }
+        // 识别单行注释 //
+        else if (pos + 1 < sourceCode.length() && sourceCode[pos] == '/' && sourceCode[pos + 1] == '/') {
+            size_t start = pos;
+            pos += 2; // 跳过 //
+            while (pos < sourceCode.length() && sourceCode[pos] != '\n') {
+                pos++;
+            }
+            std::string value = sourceCode.substr(start + 2, pos - start - 2);
+            tokens.addToken(TokenType::COMMENT, value, 1, 1);
+        }
+        // 识别多行注释 /* */
+        else if (pos + 1 < sourceCode.length() && sourceCode[pos] == '/' && sourceCode[pos + 1] == '*') {
+            size_t start = pos;
+            pos += 2; // 跳过 /*
+            while (pos + 1 < sourceCode.length() && !(sourceCode[pos] == '*' && sourceCode[pos + 1] == '/')) {
+                pos++;
+            }
+            if (pos + 1 < sourceCode.length()) {
+                pos += 2; // 跳过 */
+                std::string value = sourceCode.substr(start + 2, pos - start - 4);
+                tokens.addToken(TokenType::COMMENT, value, 1, 1);
+            }
+        }
+        // 识别HTML注释 --
+        else if (pos + 1 < sourceCode.length() && sourceCode[pos] == '-' && sourceCode[pos + 1] == '-') {
+            size_t start = pos;
+            pos += 2; // 跳过 --
+            while (pos + 1 < sourceCode.length() && !(sourceCode[pos] == '-' && sourceCode[pos + 1] == '-')) {
+                pos++;
+            }
+            if (pos + 1 < sourceCode.length()) {
+                pos += 2; // 跳过 --
+                std::string value = sourceCode.substr(start + 2, pos - start - 4);
+                tokens.addToken(TokenType::COMMENT, value, 1, 1);
             }
         }
         // 其他字符
@@ -464,28 +542,42 @@ std::shared_ptr<BaseNode> CHTLParser::parseCustom() {
             
             skipWhitespace();
             
-            // 解析自定义内容
-            while (!checkToken(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-                auto child = parseElement();
-                if (child) {
-                    customNode->addChild(child);
-                } else {
-                    // 尝试解析其他类型的节点
-                    if (checkToken(TokenType::TEXT)) {
-                        child = parseText();
-                        if (child) {
-                            customNode->addChild(child);
-                        }
-                    } else if (checkToken(TokenType::STYLE)) {
-                        child = parseStyle();
-                        if (child) {
-                            customNode->addChild(child);
-                        }
+            // 根据自定义类型解析内容
+            if (type == CustomType::STYLE) {
+                // 对于@Style，直接解析CSS属性
+                while (!checkToken(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                    auto prop = parseStyleProperty();
+                    if (!prop.first.empty()) {
+                        customNode->setAttribute(prop.first, prop.second);
                     } else {
                         break;
                     }
+                    skipWhitespace();
                 }
-                skipWhitespace();
+            } else {
+                // 对于其他类型，解析子元素
+                while (!checkToken(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                    auto child = parseElement();
+                    if (child) {
+                        customNode->addChild(child);
+                    } else {
+                        // 尝试解析其他类型的节点
+                        if (checkToken(TokenType::TEXT)) {
+                            child = parseText();
+                            if (child) {
+                                customNode->addChild(child);
+                            }
+                        } else if (checkToken(TokenType::STYLE)) {
+                            child = parseStyle();
+                            if (child) {
+                                customNode->addChild(child);
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                    skipWhitespace();
+                }
             }
             
             if (checkToken(TokenType::RIGHT_BRACE)) {
@@ -1031,18 +1123,34 @@ std::pair<std::string, std::string> CHTLParser::parseStyleProperty() {
             nextToken(); // 消费 : 或 =
             skipWhitespace();
             
-            // 解析属性值
-            if (currentToken().getType() == TokenType::STRING) {
-                value = currentToken().getValue();
+            // 解析属性值（支持复合值）
+            while (!isAtEnd() && !checkToken(TokenType::SEMICOLON) && !checkToken(TokenType::RIGHT_BRACE)) {
+                if (currentToken().getType() == TokenType::STRING) {
+                    value += currentToken().getValue();
+                    nextToken();
+                } else if (currentToken().getType() == TokenType::IDENTIFIER) {
+                    value += currentToken().getValue();
+                    nextToken();
+                } else if (currentToken().getType() == TokenType::NUMBER) {
+                    value += currentToken().getValue();
+                    nextToken();
+                } else if (currentToken().getType() == TokenType::COLON || 
+                           currentToken().getType() == TokenType::EQUALS) {
+                    // 跳过意外的冒号或等号
+                    nextToken();
+                } else {
+                    // 添加其他字符（如空格、连字符等）
+                    value += currentToken().getValue();
+                    nextToken();
+                }
+                
+                // 跳过空格
+                skipWhitespace();
+            }
+            
+            // 跳过分号（如果存在）
+            if (checkToken(TokenType::SEMICOLON)) {
                 nextToken();
-            } else if (currentToken().getType() == TokenType::IDENTIFIER) {
-                value = currentToken().getValue();
-                nextToken();
-            } else if (currentToken().getType() == TokenType::NUMBER) {
-                value = currentToken().getValue();
-                nextToken();
-            } else {
-                addError("Expected value after style property name");
             }
         }
     }

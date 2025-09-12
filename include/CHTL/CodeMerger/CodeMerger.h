@@ -200,7 +200,7 @@ private:
 private:
     std::shared_ptr<CHTLContext> m_context;
     std::vector<CodeFragment> m_fragments;
-    std::unordered_map<CodeFragmentType, std::vector<CodeFragment*>> m_fragmentsByType;
+    std::unordered_map<CodeFragmentType, std::vector<size_t>> m_fragmentsByType;
     bool m_debugMode;
     
     // 统计信息

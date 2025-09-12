@@ -27,7 +27,8 @@ void CodeMerger::addFragment(const CodeFragment& fragment) {
     }
     
     m_fragments.push_back(fragment);
-    m_fragmentsByType[fragment.type].push_back(&m_fragments.back());
+    // 使用索引而不是指针，避免指针失效问题
+    m_fragmentsByType[fragment.type].push_back(m_fragments.size() - 1);
     m_totalFragments++;
 }
 
@@ -75,21 +76,24 @@ std::string CodeMerger::mergeByType(CodeFragmentType type) {
     
     std::ostringstream result;
     
-    for (auto* fragment : it->second) {
-        if (!fragment->processed) {
-            std::string content = processPlaceholders(fragment->content);
-            
-            // 如果是HTML片段，需要解析并转换为HTML
-            if (type == CodeFragmentType::HTML) {
-                // 这里应该调用CHTLParser来解析HTML片段
-                // 简化实现，直接输出内容
-                result << content << "\n";
-            } else {
-                result << content << "\n";
+    for (size_t fragmentIndex : it->second) {
+        if (fragmentIndex < m_fragments.size()) {
+            auto& fragment = m_fragments[fragmentIndex];
+            if (!fragment.processed) {
+                std::string content = processPlaceholders(fragment.content);
+                
+                // 如果是HTML片段，需要解析并转换为HTML
+                if (type == CodeFragmentType::HTML) {
+                    // 这里应该调用CHTLParser来解析HTML片段
+                    // 简化实现，直接输出内容
+                    result << content << "\n";
+                } else {
+                    result << content << "\n";
+                }
+                
+                fragment.processed = true;
+                m_processedFragments++;
             }
-            
-            fragment->processed = true;
-            m_processedFragments++;
         }
     }
     
@@ -152,9 +156,23 @@ size_t CodeMerger::getFragmentCount(CodeFragmentType type) const {
 }
 
 const CodeFragment* CodeMerger::getFragment(CodeFragmentType type, size_t index) const {
+    std::cout << "[CodeMerger] getFragment called with type=" << static_cast<int>(type) << ", index=" << index << std::endl;
     auto it = m_fragmentsByType.find(type);
-    if (it != m_fragmentsByType.end() && index < it->second.size()) {
-        return it->second[index];
+    if (it != m_fragmentsByType.end()) {
+        std::cout << "[CodeMerger] Found type, size=" << it->second.size() << std::endl;
+        if (index < it->second.size()) {
+            size_t fragmentIndex = it->second[index];
+            std::cout << "[CodeMerger] Returning fragment at index " << fragmentIndex << std::endl;
+            if (fragmentIndex < m_fragments.size()) {
+                return &m_fragments[fragmentIndex];
+            } else {
+                std::cout << "[CodeMerger] Fragment index out of range" << std::endl;
+            }
+        } else {
+            std::cout << "[CodeMerger] Index out of range" << std::endl;
+        }
+    } else {
+        std::cout << "[CodeMerger] Type not found" << std::endl;
     }
     return nullptr;
 }

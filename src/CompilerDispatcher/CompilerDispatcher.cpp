@@ -59,13 +59,22 @@ std::string CompilerDispatcher::compile(const std::string& sourceCode, const std
         
         // 3. 处理CHTL片段
         auto chtlFragments = m_codeMerger->getFragmentCount(CodeFragmentType::CHTL);
+        std::cout << "[CompilerDispatcher] Processing " << chtlFragments << " CHTL fragments" << std::endl;
         for (size_t i = 0; i < chtlFragments; ++i) {
+            std::cout << "[CompilerDispatcher] Processing CHTL fragment " << i << std::endl;
             // 获取CHTL片段
             auto fragment = m_codeMerger->getFragment(CodeFragmentType::CHTL, i);
             if (fragment) {
+                std::cout << "[CompilerDispatcher] Fragment content length: " << fragment->content.length() << std::endl;
+                if (fragment->content.length() > 100) {
+                    std::cout << "[CompilerDispatcher] Fragment content: " << fragment->content.substr(0, 100) << "..." << std::endl;
+                } else {
+                    std::cout << "[CompilerDispatcher] Fragment content: " << fragment->content << std::endl;
+                }
                 // 解析CHTL片段
                 auto document = m_chtlParser->parse(fragment->content);
                 if (document) {
+                    std::cout << "[CompilerDispatcher] Successfully parsed CHTL fragment" << std::endl;
                     // 生成HTML
                     std::string html = m_chtlGenerator->generateHTML(document);
                     if (m_debugMode) {
@@ -73,8 +82,12 @@ std::string CompilerDispatcher::compile(const std::string& sourceCode, const std
                     }
                     // 将生成的HTML添加到代码合并器
                     m_codeMerger->addFragment(CodeFragmentType::HTML, html, fragment->line, fragment->column, fragment->sourceFile);
+                } else {
+                    std::cout << "[CompilerDispatcher] Failed to parse CHTL fragment" << std::endl;
                 }
                 m_chtlFragmentsProcessed++;
+            } else {
+                std::cout << "[CompilerDispatcher] Fragment is null" << std::endl;
             }
         }
         

@@ -327,14 +327,27 @@ std::string CHTLGenerator::generateCustom(std::shared_ptr<BaseNode> node, int in
     std::ostringstream oss;
     std::string indentStr = generateIndent(indent);
     
-    // 生成自定义注释
-    oss << indentStr << "<!-- Custom: " << customNode->getCustomName() << " -->\n";
-    
-    // 生成自定义内容
-    for (size_t i = 0; i < customNode->getChildCount(); ++i) {
-        auto child = customNode->getChild(i);
-        if (child) {
-            oss << generateNode(child, indent);
+    // 根据自定义类型生成不同的内容
+    if (customNode->getCustomType() == CustomType::STYLE) {
+        // 对于@Style，生成CSS代码
+        oss << indentStr << "." << customNode->getCustomName() << " {\n";
+        
+        // 生成CSS属性
+        for (const auto& attr : customNode->getAttributes()) {
+            oss << indentStr << "  " << attr.first << ": " << attr.second << ";\n";
+        }
+        
+        oss << indentStr << "}\n";
+    } else {
+        // 对于其他类型，生成自定义注释
+        oss << indentStr << "<!-- Custom: " << customNode->getCustomName() << " -->\n";
+        
+        // 生成自定义内容
+        for (size_t i = 0; i < customNode->getChildCount(); ++i) {
+            auto child = customNode->getChild(i);
+            if (child) {
+                oss << generateNode(child, indent);
+            }
         }
     }
     
