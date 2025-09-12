@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(CHTLResponsiveValueTest)
+project(CHTL)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -9,7 +9,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # 源文件
 set(SOURCES
-    test_responsive_values.cpp
+    main.cpp
     CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp
     CHTL_JS/CHTLJSLexer/CHTLJSToken.cpp
     CHTL_JS/CHTLJSLexer/CHTLJSGlobalMap.cpp
@@ -30,6 +30,11 @@ set(SOURCES
     Module/CJMODModule.cpp
     Module/OfficialModules/ChthollyModule.cpp
     Module/OfficialModules/YuigahamaModule.cpp
+    Compiler/CompilerDispatcher.cpp
+    Compiler/CodeMerger.cpp
+    CLI/CLITool.cpp
+    CLI/CLITool_impl.cpp
+    CLI/CLITool_main.cpp
     Scanner/CHTLUnifiedScanner.cpp
     Test/TestFramework.cpp
     CHTL/CHTLNode/CustomNode.cpp
@@ -49,7 +54,7 @@ set(SOURCES
 )
 
 # 创建可执行文件
-add_executable(test_responsive_values ${SOURCES})
+add_executable(chtl ${SOURCES})
 
 # 链接库
-target_link_libraries(test_responsive_values)
+target_link_libraries(chtl)

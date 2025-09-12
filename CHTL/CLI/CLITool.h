@@ -1,230 +1,289 @@
-#ifndef CHTL_CLI_TOOL_H
-#define CHTL_CLI_TOOL_H
+#ifndef CLI_TOOL_H
+#define CLI_TOOL_H
 
 #include <string>
 #include <vector>
 #include <map>
 #include <memory>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <algorithm>
-#include <cctype>
-#include <filesystem>
 #include <functional>
+#include <iostream>
+#include <ctime>
+#include <fstream>
 
 namespace CHTL {
+namespace CLI {
 
-// 命令行参数解析器
-class CLIParser {
-public:
-    struct Option {
-        std::string name;
-        std::string shortName;
-        std::string description;
-        bool hasValue;
-        std::string defaultValue;
-        bool required;
-    };
+// 命令类型枚举
+enum class CommandType {
+    COMPILE,        // 编译命令
+    BUILD,          // 构建命令
+    WATCH,          // 监听命令
+    SERVE,          // 服务命令
+    INIT,           // 初始化命令
+    CLEAN,          // 清理命令
+    TEST,           // 测试命令
+    HELP,           // 帮助命令
+    VERSION,        // 版本命令
+    CONFIG          // 配置命令
+};
 
-    CLIParser();
-    ~CLIParser() = default;
+// 命令参数
+struct CommandArgument {
+    std::string name;
+    std::string description;
+    std::string defaultValue;
+    bool required;
+    bool hasValue;
+    
+    CommandArgument() : required(false), hasValue(true) {}
+    CommandArgument(const std::string& n, const std::string& desc, bool req = false, bool hasVal = true)
+        : name(n), description(desc), required(req), hasValue(hasVal) {}
+};
 
-    void addOption(const Option& option);
-    bool parse(int argc, char* argv[]);
-    std::string getValue(const std::string& name) const;
-    bool hasOption(const std::string& name) const;
-    void printHelp() const;
-    void printVersion() const;
+// 命令定义
+struct Command {
+    CommandType type;
+    std::string name;
+    std::string description;
+    std::vector<CommandArgument> arguments;
+    std::function<int(const std::vector<std::string>&)> handler;
+    
+    Command() : type(CommandType::HELP) {}
+    Command(CommandType t, const std::string& n, const std::string& desc)
+        : type(t), name(n), description(desc) {}
+};
 
-private:
-    std::vector<Option> options;
-    std::map<std::string, std::string> values;
+// CLI配置
+struct CLIConfig {
     std::string programName;
     std::string version;
     std::string description;
+    std::string usage;
+    bool enableColors;
+    bool enableVerbose;
+    std::string logLevel;
+    std::map<std::string, std::string> defaultOptions;
+    
+    CLIConfig() : enableColors(true), enableVerbose(false), logLevel("info") {}
 };
 
-// 颜色输出支持
+// 颜色输出
 class ColorOutput {
 public:
     enum Color {
-        RED = 31,
-        GREEN = 32,
-        YELLOW = 33,
-        BLUE = 34,
-        MAGENTA = 35,
-        CYAN = 36,
-        WHITE = 37,
-        RESET = 0
+        RED,
+        GREEN,
+        YELLOW,
+        BLUE,
+        MAGENTA,
+        CYAN,
+        WHITE,
+        RESET
     };
+    
+    static std::string colorize(const std::string& text, Color color);
+    static void printColored(const std::string& text, Color color, std::ostream& os = std::cout);
+    static void printError(const std::string& text, std::ostream& os = std::cerr);
+    static void printSuccess(const std::string& text, std::ostream& os = std::cout);
+    static void printWarning(const std::string& text, std::ostream& os = std::cout);
+    static void printInfo(const std::string& text, std::ostream& os = std::cout);
+};
 
-    static void setColor(std::ostream& os, Color color);
-    static void resetColor(std::ostream& os);
-    static void printColored(std::ostream& os, const std::string& text, Color color);
-    static void printError(const std::string& message);
-    static void printSuccess(const std::string& message);
-    static void printWarning(const std::string& message);
-    static void printInfo(const std::string& message);
+// 进度条
+class ProgressBar {
+private:
+    int total;
+    int current;
+    int width;
+    std::string prefix;
+    std::string suffix;
+    char fill;
+    char empty;
+    
+public:
+    ProgressBar(int total, int width = 50, const std::string& prefix = "", const std::string& suffix = "");
+    
+    void update(int current);
+    void setTotal(int total);
+    void setPrefix(const std::string& prefix);
+    void setSuffix(const std::string& suffix);
+    void setFill(char fill);
+    void setEmpty(char empty);
+    
+    void display() const;
+    void finish();
+    
+private:
+    void updateDisplay() const;
 };
 
 // 文件处理器
 class FileProcessor {
 public:
+    struct FileInfo {
+        std::string path;
+        std::string name;
+        std::string extension;
+        size_t size;
+        time_t lastModified;
+        bool exists;
+        
+        FileInfo() : size(0), lastModified(0), exists(false) {}
+    };
+    
+    static FileInfo getFileInfo(const std::string& path);
     static bool fileExists(const std::string& path);
+    static bool directoryExists(const std::string& path);
+    static std::vector<std::string> listFiles(const std::string& directory, const std::string& pattern = "*");
+    static std::vector<std::string> listDirectories(const std::string& directory);
+    static bool createDirectory(const std::string& path);
+    static bool removeFile(const std::string& path);
+    static bool removeDirectory(const std::string& path);
     static std::string readFile(const std::string& path);
     static bool writeFile(const std::string& path, const std::string& content);
-    static std::string getFileExtension(const std::string& path);
-    static std::string getFileName(const std::string& path);
-    static std::string getDirectory(const std::string& path);
-    static bool createDirectory(const std::string& path);
-    static std::vector<std::string> listFiles(const std::string& directory, const std::string& extension = "");
+    static std::string getRelativePath(const std::string& path, const std::string& base);
+    static std::string getAbsolutePath(const std::string& path);
+    static std::string normalizePath(const std::string& path);
 };
 
-// 进度条显示
-class ProgressBar {
-public:
-    ProgressBar(int total, int width = 50);
-    void update(int current);
-    void finish();
-    void reset();
-
+// CLI解析器
+class CLIParser {
 private:
-    int total;
-    int width;
-    int current;
-    bool finished;
+    std::vector<std::string> args;
+    std::map<std::string, std::string> options;
+    std::vector<std::string> positionalArgs;
+    std::vector<std::string> errors;
+    
+    void parseArguments();
+public:
+    void validateArguments(const Command& command);
+    
+public:
+    CLIParser(int argc, char* argv[]);
+    CLIParser(const std::vector<std::string>& args);
+    
+    std::map<std::string, std::string> getOptions() const;
+    std::vector<std::string> getPositionalArgs() const;
+    std::vector<std::string> getErrors() const;
+    
+    bool hasOption(const std::string& name) const;
+    std::string getOption(const std::string& name, const std::string& defaultValue = "") const;
+    int getIntOption(const std::string& name, int defaultValue = 0) const;
+    bool getBoolOption(const std::string& name, bool defaultValue = false) const;
+    
+    std::string getPositionalArg(int index, const std::string& defaultValue = "") const;
+    int getPositionalArgCount() const;
+    
+    void printUsage(const Command& command) const;
+    void printHelp(const std::vector<Command>& commands) const;
 };
 
-// 渲染程序
+// 渲染器
 class Renderer {
 public:
     enum RenderMode {
-        TEXT,           // 文本模式
-        HTML,           // HTML模式
-        MARKDOWN,       // Markdown模式
-        JSON,           // JSON模式
-        XML,            // XML模式
-        YAML            // YAML模式
+        TEXT,
+        HTML,
+        JSON,
+        XML
     };
-
-    Renderer();
-    ~Renderer() = default;
-
-    void setMode(RenderMode mode);
-    void setTheme(const std::string& theme);
-    void setWidth(int width);
-    void setHeight(int height);
     
-    std::string render(const std::string& content);
-    std::string renderFile(const std::string& filePath);
-    std::string renderDirectory(const std::string& dirPath);
+    static std::string renderText(const std::string& content);
+    static std::string renderHTML(const std::string& content);
+    static std::string renderJSON(const std::string& content);
+    static std::string renderXML(const std::string& content);
     
-    // 交互式渲染
-    void startInteractive();
-    void stopInteractive();
-    bool isInteractive() const;
+    static void setRenderMode(RenderMode mode);
+    static RenderMode getRenderMode();
     
-    // 渲染配置
-    void setConfig(const std::map<std::string, std::string>& config);
-    std::map<std::string, std::string> getConfig() const;
-    
-    // 渲染统计
-    std::map<std::string, int> getStatistics() const;
-    std::string getReport() const;
-
 private:
-    RenderMode mode;
-    std::string theme;
-    int width;
-    int height;
-    bool interactive;
-    std::map<std::string, std::string> config;
-    std::map<std::string, int> statistics;
-    
-    std::string renderText(const std::string& content);
-    std::string renderHTML(const std::string& content);
-    std::string renderMarkdown(const std::string& content);
-    std::string renderJSON(const std::string& content);
-    std::string renderXML(const std::string& content);
-    std::string renderYAML(const std::string& content);
+    static RenderMode currentMode;
 };
 
-// 主CLI工具类
+// CLI工具主类
 class CLITool {
+private:
+    CLIConfig config;
+    std::vector<Command> commands;
+    std::map<std::string, std::string> globalOptions;
+    std::vector<std::string> globalErrors;
+    std::vector<std::string> globalWarnings;
+    
+    // 命令处理
+    int handleCompileCommand(const std::vector<std::string>& args);
+    int handleBuildCommand(const std::vector<std::string>& args);
+    int handleWatchCommand(const std::vector<std::string>& args);
+    int handleServeCommand(const std::vector<std::string>& args);
+    int handleInitCommand(const std::vector<std::string>& args);
+    int handleCleanCommand(const std::vector<std::string>& args);
+    int handleTestCommand(const std::vector<std::string>& args);
+    int handleHelpCommand(const std::vector<std::string>& args);
+    int handleVersionCommand(const std::vector<std::string>& args);
+    int handleConfigCommand(const std::vector<std::string>& args);
+    
+    // 辅助方法
+    void initializeCommands();
+    void printBanner();
+    void printVersion();
+    void printHelp();
+    void printUsage();
+    
 public:
     CLITool();
-    ~CLITool() = default;
-
-    int run(int argc, char* argv[]);
-    void setVersion(const std::string& version);
-    void setDescription(const std::string& description);
-
-private:
-    void initializeParser();
-    void processFile(const std::string& inputFile, const std::string& outputFile);
-    void processDirectory(const std::string& inputDir, const std::string& outputDir);
-    void processBatch(const std::vector<std::string>& files);
-    void showHelp();
-    void showVersion();
-    void showStatus();
-    void showConfig();
-    void showInfo();
-    void showExamples();
-    void showLicense();
-    void showCredits();
-    
-    // 高级功能
-    void watchMode();
-    void serverMode();
-    void interactiveMode();
-    void benchmarkMode();
-    void validateMode();
-    void formatMode();
-    void minifyMode();
-    void beautifyMode();
-    
-    // 渲染功能
-    void renderMode();
-    void renderFile(const std::string& filePath);
-    void renderDirectory(const std::string& dirPath);
-    void startInteractiveRenderer();
-    void stopInteractiveRenderer();
+    CLITool(const CLIConfig& config);
+    ~CLITool();
     
     // 配置管理
-    void loadConfig(const std::string& configFile);
-    void saveConfig(const std::string& configFile);
-    void resetConfig();
-    void showConfigHelp();
+    void setConfig(const CLIConfig& config);
+    CLIConfig getConfig() const;
     
-    // 输出管理
-    void setupOutput();
-    void cleanupOutput();
-    void redirectOutput();
+    // 命令管理
+    void addCommand(const Command& command);
+    void removeCommand(CommandType type);
+    std::vector<Command> getCommands() const;
+    Command getCommand(CommandType type) const;
     
-    std::unique_ptr<CLIParser> parser;
-    std::unique_ptr<Renderer> renderer;
-    std::string version;
-    std::string description;
-    bool verbose;
-    bool debug;
-    bool force;
-    bool watch;
-    bool server;
-    bool interactive;
-    bool benchmark;
-    bool validate;
-    bool format;
-    bool minify;
-    bool beautify;
-    std::string configFile;
-    std::string outputFormat;
-    std::string outputDir;
-    int serverPort;
-    std::string logFile;
-    std::string errorFile;
+    // 选项管理
+    void setGlobalOption(const std::string& name, const std::string& value);
+    std::string getGlobalOption(const std::string& name, const std::string& defaultValue = "") const;
+    std::map<std::string, std::string> getGlobalOptions() const;
+    
+    // 执行
+    int execute(int argc, char* argv[]);
+    int execute(const std::vector<std::string>& args);
+    
+    // 错误和警告管理
+    std::vector<std::string> getGlobalErrors() const;
+    std::vector<std::string> getGlobalWarnings() const;
+    void clearGlobalErrors();
+    void clearGlobalWarnings();
+    
+    // 调试和诊断
+    void enableDebugMode(bool enable);
+    bool isDebugMode() const;
+    void setLogLevel(const std::string& level);
+    std::string getLogLevel() const;
+    
+    // 回调函数
+    void setErrorCallback(std::function<void(const std::string&)> callback);
+    void setWarningCallback(std::function<void(const std::string&)> callback);
+    void setInfoCallback(std::function<void(const std::string&)> callback);
+    
+private:
+    std::function<void(const std::string&)> errorCallback;
+    std::function<void(const std::string&)> warningCallback;
+    std::function<void(const std::string&)> infoCallback;
+    bool debugMode;
+    std::string logLevel;
+    
+    // 内部辅助方法
+    void notifyError(const std::string& error);
+    void notifyWarning(const std::string& warning);
+    void notifyInfo(const std::string& info);
+    void log(const std::string& message, const std::string& level = "info");
 };
 
+} // namespace CLI
 } // namespace CHTL
 
-#endif // CHTL_CLI_TOOL_H
+#endif // CLI_TOOL_H

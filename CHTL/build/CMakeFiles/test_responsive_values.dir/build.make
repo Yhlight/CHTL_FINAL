@@ -366,10 +366,94 @@ CMakeFiles/test_responsive_values.dir/Module/OfficialModules/YuigahamaModule.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/test_responsive_values.dir/Module/OfficialModules/YuigahamaModule.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/Module/OfficialModules/YuigahamaModule.cpp -o CMakeFiles/test_responsive_values.dir/Module/OfficialModules/YuigahamaModule.cpp.s
 
+CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
+CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.o: /workspace/CHTL/Compiler/CompilerDispatcher.cpp
+CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.o -MF CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.o.d -o CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.o -c /workspace/CHTL/Compiler/CompilerDispatcher.cpp
+
+CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/CHTL/Compiler/CompilerDispatcher.cpp > CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.i
+
+CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/Compiler/CompilerDispatcher.cpp -o CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.s
+
+CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
+CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.o: /workspace/CHTL/Compiler/CodeMerger.cpp
+CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.o -MF CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.o.d -o CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.o -c /workspace/CHTL/Compiler/CodeMerger.cpp
+
+CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/CHTL/Compiler/CodeMerger.cpp > CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.i
+
+CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/Compiler/CodeMerger.cpp -o CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.s
+
+CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
+CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.o: /workspace/CHTL/CLI/CLITool.cpp
+CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.o -MF CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.o -c /workspace/CHTL/CLI/CLITool.cpp
+
+CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/CHTL/CLI/CLITool.cpp > CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.i
+
+CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CLI/CLITool.cpp -o CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.s
+
+CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
+CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.o: /workspace/CHTL/CLI/CLITool_impl.cpp
+CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.o -MF CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.o -c /workspace/CHTL/CLI/CLITool_impl.cpp
+
+CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/CHTL/CLI/CLITool_impl.cpp > CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.i
+
+CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CLI/CLITool_impl.cpp -o CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.s
+
+CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
+CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.o: /workspace/CHTL/CLI/CLITool_main.cpp
+CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.o -MF CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.o -c /workspace/CHTL/CLI/CLITool_main.cpp
+
+CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/CHTL/CLI/CLITool_main.cpp > CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.i
+
+CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/CLI/CLITool_main.cpp -o CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.s
+
+CMakeFiles/test_responsive_values.dir/main.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
+CMakeFiles/test_responsive_values.dir/main.cpp.o: /workspace/CHTL/main.cpp
+CMakeFiles/test_responsive_values.dir/main.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object CMakeFiles/test_responsive_values.dir/main.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/main.cpp.o -MF CMakeFiles/test_responsive_values.dir/main.cpp.o.d -o CMakeFiles/test_responsive_values.dir/main.cpp.o -c /workspace/CHTL/main.cpp
+
+CMakeFiles/test_responsive_values.dir/main.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/test_responsive_values.dir/main.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/CHTL/main.cpp > CMakeFiles/test_responsive_values.dir/main.cpp.i
+
+CMakeFiles/test_responsive_values.dir/main.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/test_responsive_values.dir/main.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/CHTL/main.cpp -o CMakeFiles/test_responsive_values.dir/main.cpp.s
+
 CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.o: /workspace/CHTL/Scanner/CHTLUnifiedScanner.cpp
 CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building CXX object CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.o -MF CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.o.d -o CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.o -c /workspace/CHTL/Scanner/CHTLUnifiedScanner.cpp
 
 CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.i: cmake_force
@@ -383,7 +467,7 @@ CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.s: cmake_fo
 CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.o: /workspace/CHTL/Test/TestFramework.cpp
 CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building CXX object CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.o -MF CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.o.d -o CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.o -c /workspace/CHTL/Test/TestFramework.cpp
 
 CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.i: cmake_force
@@ -397,7 +481,7 @@ CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.s: cmake_force
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/CustomNode.cpp
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.o -MF CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/CustomNode.cpp
 
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.i: cmake_force
@@ -411,7 +495,7 @@ CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.s: cmake_forc
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TemplateNode.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TemplateNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/TemplateNode.cpp
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TemplateNode.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TemplateNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TemplateNode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TemplateNode.cpp.o -MF CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TemplateNode.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TemplateNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/TemplateNode.cpp
 
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TemplateNode.cpp.i: cmake_force
@@ -425,7 +509,7 @@ CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TemplateNode.cpp.s: cmake_fo
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/BaseNode.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/BaseNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/BaseNode.cpp
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/BaseNode.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/BaseNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/BaseNode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/BaseNode.cpp.o -MF CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/BaseNode.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/BaseNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/BaseNode.cpp
 
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/BaseNode.cpp.i: cmake_force
@@ -439,7 +523,7 @@ CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/BaseNode.cpp.s: cmake_force
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ElementNode.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ElementNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/ElementNode.cpp
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ElementNode.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ElementNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ElementNode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ElementNode.cpp.o -MF CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ElementNode.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ElementNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/ElementNode.cpp
 
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ElementNode.cpp.i: cmake_force
@@ -453,7 +537,7 @@ CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ElementNode.cpp.s: cmake_for
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TextNode.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TextNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/TextNode.cpp
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TextNode.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TextNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TextNode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TextNode.cpp.o -MF CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TextNode.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TextNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/TextNode.cpp
 
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TextNode.cpp.i: cmake_force
@@ -467,7 +551,7 @@ CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/TextNode.cpp.s: cmake_force
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CommentNode.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CommentNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/CommentNode.cpp
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CommentNode.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CommentNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CommentNode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CommentNode.cpp.o -MF CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CommentNode.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CommentNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/CommentNode.cpp
 
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CommentNode.cpp.i: cmake_force
@@ -481,7 +565,7 @@ CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CommentNode.cpp.s: cmake_for
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/StyleNode.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/StyleNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/StyleNode.cpp
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/StyleNode.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/StyleNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/StyleNode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/StyleNode.cpp.o -MF CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/StyleNode.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/StyleNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/StyleNode.cpp
 
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/StyleNode.cpp.i: cmake_force
@@ -495,7 +579,7 @@ CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/StyleNode.cpp.s: cmake_force
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ScriptNode.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ScriptNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/ScriptNode.cpp
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ScriptNode.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ScriptNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ScriptNode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ScriptNode.cpp.o -MF CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ScriptNode.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ScriptNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/ScriptNode.cpp
 
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ScriptNode.cpp.i: cmake_force
@@ -509,7 +593,7 @@ CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ScriptNode.cpp.s: cmake_forc
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/OriginNode.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/OriginNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/OriginNode.cpp
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/OriginNode.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/OriginNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/OriginNode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/OriginNode.cpp.o -MF CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/OriginNode.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/OriginNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/OriginNode.cpp
 
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/OriginNode.cpp.i: cmake_force
@@ -523,7 +607,7 @@ CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/OriginNode.cpp.s: cmake_forc
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ImportNode.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ImportNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/ImportNode.cpp
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ImportNode.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ImportNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_39) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ImportNode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ImportNode.cpp.o -MF CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ImportNode.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ImportNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/ImportNode.cpp
 
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ImportNode.cpp.i: cmake_force
@@ -537,7 +621,7 @@ CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ImportNode.cpp.s: cmake_forc
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/NamespaceNode.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/NamespaceNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/NamespaceNode.cpp
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/NamespaceNode.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/NamespaceNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_40) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/NamespaceNode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/NamespaceNode.cpp.o -MF CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/NamespaceNode.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/NamespaceNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/NamespaceNode.cpp
 
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/NamespaceNode.cpp.i: cmake_force
@@ -551,7 +635,7 @@ CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/NamespaceNode.cpp.s: cmake_f
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConstraintNode.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConstraintNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/ConstraintNode.cpp
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConstraintNode.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConstraintNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_41) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConstraintNode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConstraintNode.cpp.o -MF CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConstraintNode.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConstraintNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/ConstraintNode.cpp
 
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConstraintNode.cpp.i: cmake_force
@@ -565,7 +649,7 @@ CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConstraintNode.cpp.s: cmake_
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/ConfigurationNode.cpp
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_42) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o -MF CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConfigurationNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/ConfigurationNode.cpp
 
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConfigurationNode.cpp.i: cmake_force
@@ -579,7 +663,7 @@ CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/ConfigurationNode.cpp.s: cma
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/UseNode.cpp.o: CMakeFiles/test_responsive_values.dir/flags.make
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/UseNode.cpp.o: /workspace/CHTL/CHTL/CHTLNode/UseNode.cpp
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/UseNode.cpp.o: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/UseNode.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_43) "Building CXX object CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/UseNode.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/UseNode.cpp.o -MF CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/UseNode.cpp.o.d -o CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/UseNode.cpp.o -c /workspace/CHTL/CHTL/CHTLNode/UseNode.cpp
 
 CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/UseNode.cpp.i: cmake_force
@@ -613,6 +697,12 @@ test_responsive_values_OBJECTS = \
 "CMakeFiles/test_responsive_values.dir/Module/CJMODModule.cpp.o" \
 "CMakeFiles/test_responsive_values.dir/Module/OfficialModules/ChthollyModule.cpp.o" \
 "CMakeFiles/test_responsive_values.dir/Module/OfficialModules/YuigahamaModule.cpp.o" \
+"CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.o" \
+"CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.o" \
+"CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.o" \
+"CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.o" \
+"CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.o" \
+"CMakeFiles/test_responsive_values.dir/main.cpp.o" \
 "CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.o" \
 "CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.o" \
 "CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.o" \
@@ -654,6 +744,12 @@ test_responsive_values: CMakeFiles/test_responsive_values.dir/Module/CMODModuleM
 test_responsive_values: CMakeFiles/test_responsive_values.dir/Module/CJMODModule.cpp.o
 test_responsive_values: CMakeFiles/test_responsive_values.dir/Module/OfficialModules/ChthollyModule.cpp.o
 test_responsive_values: CMakeFiles/test_responsive_values.dir/Module/OfficialModules/YuigahamaModule.cpp.o
+test_responsive_values: CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.o
+test_responsive_values: CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.o
+test_responsive_values: CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.o
+test_responsive_values: CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.o
+test_responsive_values: CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.o
+test_responsive_values: CMakeFiles/test_responsive_values.dir/main.cpp.o
 test_responsive_values: CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.o
 test_responsive_values: CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.o
 test_responsive_values: CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.o
@@ -673,7 +769,7 @@ test_responsive_values: CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/UseN
 test_responsive_values: CMakeFiles/test_responsive_values.dir/build.make
 test_responsive_values: CMakeFiles/test_responsive_values.dir/compiler_depend.ts
 test_responsive_values: CMakeFiles/test_responsive_values.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Linking CXX executable test_responsive_values"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/CHTL/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_44) "Linking CXX executable test_responsive_values"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/test_responsive_values.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

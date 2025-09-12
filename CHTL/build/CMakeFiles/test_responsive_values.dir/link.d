@@ -21,6 +21,14 @@ test_responsive_values: \
   CMakeFiles/test_responsive_values.dir/Module/CMODModule.cpp.o \
   CMakeFiles/test_responsive_values.dir/Module/CMODModuleManager.cpp.o \
   CMakeFiles/test_responsive_values.dir/Module/CJMODModule.cpp.o \
+  CMakeFiles/test_responsive_values.dir/Module/OfficialModules/ChthollyModule.cpp.o \
+  CMakeFiles/test_responsive_values.dir/Module/OfficialModules/YuigahamaModule.cpp.o \
+  CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.o \
+  CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.o \
+  CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.o \
+  CMakeFiles/test_responsive_values.dir/main.cpp.o \
   CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.o \
   CMakeFiles/test_responsive_values.dir/Test/TestFramework.cpp.o \
   CMakeFiles/test_responsive_values.dir/CHTL/CHTLNode/CustomNode.cpp.o \
@@ -108,6 +116,22 @@ CMakeFiles/test_responsive_values.dir/Module/CMODModule.cpp.o:
 CMakeFiles/test_responsive_values.dir/Module/CMODModuleManager.cpp.o:
 
 CMakeFiles/test_responsive_values.dir/Module/CJMODModule.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/Module/OfficialModules/ChthollyModule.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/Module/OfficialModules/YuigahamaModule.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/Compiler/CompilerDispatcher.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/Compiler/CodeMerger.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CLI/CLITool.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CLI/CLITool_impl.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/CLI/CLITool_main.cpp.o:
+
+CMakeFiles/test_responsive_values.dir/main.cpp.o:
 
 CMakeFiles/test_responsive_values.dir/Scanner/CHTLUnifiedScanner.cpp.o:
 

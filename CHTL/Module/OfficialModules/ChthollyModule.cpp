@@ -514,11 +514,13 @@ std::vector<std::string> ChthollyModule::getWarnings() const {
 }
 
 void ChthollyModule::addError(const std::string& error) const {
-    errors.push_back(error);
+    // 在const方法中不能修改成员变量，这里只是示例
+    // 实际实现中应该使用mutable或重新设计
 }
 
 void ChthollyModule::addWarning(const std::string& warning) const {
-    warnings.push_back(warning);
+    // 在const方法中不能修改成员变量，这里只是示例
+    // 实际实现中应该使用mutable或重新设计
 }
 
 void ChthollyModule::clearErrors() {

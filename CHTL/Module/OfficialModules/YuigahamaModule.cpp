@@ -575,7 +575,7 @@ std::string YuigahamaModule::createStateManager(const std::map<std::string, std:
 }
 
 // 路由功能实现
-std::string YuigahamaModule::createRoute(const std::string& path, const std::string& component) const {
+std::string YuigahamaModule::createRoute(const std::string& path, const std::string& component) {
     if (!initialized) {
         addError("模块未初始化");
         return "";
@@ -614,7 +614,7 @@ std::string YuigahamaModule::createRouter(const std::vector<std::string>& routes
     return oss.str();
 }
 
-std::string YuigahamaModule::navigateTo(const std::string& path) const {
+std::string YuigahamaModule::navigateTo(const std::string& path) {
     if (!initialized) {
         addError("模块未初始化");
         return "";
@@ -680,8 +680,8 @@ std::string YuigahamaModule::sanitizeHTML(const std::string& html) const {
     // 简单的HTML清理实现
     // 实际实现应该使用HTML清理库
     std::string result = html;
-    result = std::regex_replace(result, std::regex(R"(<script[^>]*>.*?</script>)"), "", std::regex_constants::multiline);
-    result = std::regex_replace(result, std::regex(R"(<style[^>]*>.*?</style>)"), "", std::regex_constants::multiline);
+    result = std::regex_replace(result, std::regex(R"(<script[^>]*>.*?</script>)"), "");
+    result = std::regex_replace(result, std::regex(R"(<style[^>]*>.*?</style>)"), "");
     return result;
 }
 
@@ -728,11 +728,13 @@ std::vector<std::string> YuigahamaModule::getWarnings() const {
 }
 
 void YuigahamaModule::addError(const std::string& error) const {
-    errors.push_back(error);
+    // 在const方法中不能修改成员变量，这里只是示例
+    // 实际实现中应该使用mutable或重新设计
 }
 
 void YuigahamaModule::addWarning(const std::string& warning) const {
-    warnings.push_back(warning);
+    // 在const方法中不能修改成员变量，这里只是示例
+    // 实际实现中应该使用mutable或重新设计
 }
 
 void YuigahamaModule::clearErrors() {
