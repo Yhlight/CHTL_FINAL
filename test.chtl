@@ -1,0 +1,12 @@
+div {
+    id = "test-container";
+
+    h1 {
+        text: "This is a test file.";
+    }
+
+    p {
+        class: "intro-text";
+        text: "CHTL compilation is working!";
+    }
+}
