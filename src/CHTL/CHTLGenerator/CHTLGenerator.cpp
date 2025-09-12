@@ -65,8 +65,23 @@ void CHTLGenerator::visitElement(const ElementNode* node) {
             }
             // Process rules
             for (const auto& rule : styleNode->rules_) {
+                std::string final_selector = rule->selector_;
+                // Resolve '&' context selector
+                if (rule->selector_[0] == '&') {
+                    std::string context_selector;
+                    if (attributes.count("id")) {
+                        context_selector = "#" + attributes["id"];
+                    } else if (attributes.count("class")) {
+                        // Use the first class name as the context
+                        context_selector = "." + attributes["class"].substr(0, attributes["class"].find(" "));
+                    }
+                    if (!context_selector.empty()) {
+                        final_selector.replace(0, 1, context_selector);
+                    }
+                }
+
                 // 1. Add rule to global styles
-                global_styles_ << "      " << rule->selector_ << " {\n";
+                global_styles_ << "      " << final_selector << " {\n";
                 for (const auto& prop : rule->properties_) {
                     global_styles_ << "        " << prop.first << ": " << prop.second << ";\n";
                 }

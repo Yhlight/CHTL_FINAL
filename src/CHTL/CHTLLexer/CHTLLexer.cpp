@@ -43,7 +43,13 @@ void CHTLLexer::scanToken() {
         case ';': addToken(TokenType::Semicolon); break;
         case ',': addToken(TokenType::Comma); break;
         case '?': addToken(TokenType::QuestionMark); break;
-        case '&': addToken(match('&') ? TokenType::DoubleAmpersand : TokenType::Ampersand); break;
+        case '&':
+            if (match('&')) {
+                addToken(TokenType::DoubleAmpersand);
+            } else {
+                identifier(); // Assume context selector like &:hover
+            }
+            break;
         case '|': addToken(match('|') ? TokenType::DoublePipe : TokenType::Pipe); break;
         case '=': addToken(TokenType::Equals); break;
         case '+': addToken(TokenType::Plus); break;
@@ -153,8 +159,9 @@ void CHTLLexer::handleSpecialSyntax() {
 }
 
 void CHTLLexer::identifier() {
-    if (source_[start_] == '@' || source_[start_] == '.' || source_[start_] == '#') {
-        while (isAlphaNumeric(peek()) || peek() == '-') advance();
+    if (source_[start_] == '@' || source_[start_] == '.' || source_[start_] == '#' || source_[start_] == '&') {
+        // Selectors can contain colons for pseudo-classes
+        while (isAlphaNumeric(peek()) || peek() == '-' || peek() == ':') advance();
     } else {
         while (isAlphaNumeric(peek()) || peek() == '_' || peek() == '-') advance();
     }
