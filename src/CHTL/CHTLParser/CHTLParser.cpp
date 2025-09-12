@@ -9,8 +9,11 @@ namespace CHTL {
 CHTLParser::CHTLParser(std::vector<Token>& tokens, CHTLLoader& loader, const std::string& initial_path, std::shared_ptr<ParserContext> context)
     : tokens_(tokens), loader_(loader), current_path_(initial_path), context_(context) {
     // Check for a namespace declaration at the beginning of the file.
-    if (tokens_.size() > 2 && tokens_[0].type == TokenType::Namespace && tokens_[1].type == TokenType::Identifier) {
-        current_namespace_ = tokens_[1].lexeme;
+    if (!tokens_.empty() && tokens_[0].type == TokenType::Namespace) {
+        // This is a simplified check. A full implementation would parse this properly.
+        if (tokens_.size() > 1 && tokens_[1].type == TokenType::Identifier) {
+            current_namespace_ = tokens_[1].lexeme;
+        }
     }
 }
 
@@ -36,6 +39,7 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     if (match({TokenType::Namespace})) {
         current_namespace_ = consume(TokenType::Identifier, "Expected namespace name.").lexeme;
         // Namespaces don't produce a node, so we just continue parsing declarations.
+        return nodes;
     }
 
     if (match({TokenType::Import})) {
@@ -130,68 +134,76 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
 
 void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes) {
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        // For now, we assume a specialization is an element declaration
-        auto modifier_nodes = parseDeclaration();
-        if (modifier_nodes.empty()) continue;
+        // Manually parse the modifier: TagName[index] { ... }
+        const Token& tagName = consume(TokenType::Identifier, "Expected tag name for specialization.");
+        size_t index = 0; // Default to the first element
+        if (match({TokenType::OpenBracket})) {
+            const Token& indexToken = consume(TokenType::Number, "Expected index number in brackets.");
+            index = std::stoul(indexToken.lexeme);
+            consume(TokenType::CloseBracket, "Expected ']' after index.");
+        }
 
-        // This simplified logic only handles one modifier node and assumes it's an element.
-        // It also only finds the first matching target node.
-        if (modifier_nodes[0]->getType() == NodeType::Element) {
-            ElementNode* modifier_element = static_cast<ElementNode*>(modifier_nodes[0].get());
+        auto modifier_element = std::make_unique<ElementNode>(tagName.lexeme);
+        consume(TokenType::OpenBrace, "Expected '{' for specialization body.");
+        parseElementBody(*modifier_element);
+        consume(TokenType::CloseBrace, "Expected '}' to close specialization body.");
 
-            Node* target_node = nullptr;
-            for (auto& target : target_nodes) {
-                if (target->getType() == NodeType::Element) {
-                    ElementNode* target_element = static_cast<ElementNode*>(target.get());
-                    if (target_element->tagName_ == modifier_element->tagName_) {
+        // Find the Nth target node with the matching tag name
+        Node* target_node = nullptr;
+        size_t current_index = 0;
+        for (auto& target : target_nodes) {
+            if (target->getType() == NodeType::Element) {
+                ElementNode* target_element = static_cast<ElementNode*>(target.get());
+                if (target_element->tagName_ == tagName.lexeme) {
+                    if (current_index == index) {
                         target_node = target_element;
                         break;
                     }
+                    current_index++;
+                }
+            }
+        }
+
+        if (target_node) {
+            // Find the style block in the modifier
+            StyleBlockNode* modifier_style_block = nullptr;
+            for (const auto& child : modifier_element->children_) {
+                if (child->getType() == NodeType::StyleBlock) {
+                    modifier_style_block = static_cast<StyleBlockNode*>(child.get());
+                    break;
                 }
             }
 
-            if (target_node) {
-                // Find the style block in the modifier
-                StyleBlockNode* modifier_style_block = nullptr;
-                for (const auto& child : modifier_element->children_) {
+            if (modifier_style_block) {
+                // Find or create the style block in the target
+                StyleBlockNode* target_style_block = nullptr;
+                ElementNode* target_element_node = static_cast<ElementNode*>(target_node);
+                for (const auto& child : target_element_node->children_) {
                     if (child->getType() == NodeType::StyleBlock) {
-                        modifier_style_block = static_cast<StyleBlockNode*>(child.get());
+                        target_style_block = static_cast<StyleBlockNode*>(child.get());
                         break;
                     }
                 }
-
-                if (modifier_style_block) {
-                    // Find or create the style block in the target
-                    StyleBlockNode* target_style_block = nullptr;
-                    ElementNode* target_element_node = static_cast<ElementNode*>(target_node);
-                    for (const auto& child : target_element_node->children_) {
-                        if (child->getType() == NodeType::StyleBlock) {
-                            target_style_block = static_cast<StyleBlockNode*>(child.get());
-                            break;
-                        }
-                    }
-                    if (!target_style_block) {
-                        auto new_style_block = std::make_unique<StyleBlockNode>();
-                        target_style_block = new_style_block.get();
-                        target_element_node->children_.push_back(std::move(new_style_block));
-                    }
-
-                    // Merge properties
-                    target_style_block->inline_properties_.insert(
-                        target_style_block->inline_properties_.end(),
-                        modifier_style_block->inline_properties_.begin(),
-                        modifier_style_block->inline_properties_.end()
-                    );
-                    target_style_block->rules_.insert(
-                        target_style_block->rules_.end(),
-                        std::make_move_iterator(modifier_style_block->rules_.begin()),
-                        std::make_move_iterator(modifier_style_block->rules_.end())
-                    );
+                if (!target_style_block) {
+                    auto new_style_block = std::make_unique<StyleBlockNode>();
+                    target_style_block = new_style_block.get();
+                    target_element_node->children_.push_back(std::move(new_style_block));
                 }
 
-            } else {
-                throw std::runtime_error("Could not find element '" + modifier_element->tagName_ + "' to specialize.");
+                // Merge properties
+                target_style_block->inline_properties_.insert(
+                    target_style_block->inline_properties_.end(),
+                    modifier_style_block->inline_properties_.begin(),
+                    modifier_style_block->inline_properties_.end()
+                );
+                target_style_block->rules_.insert(
+                    target_style_block->rules_.end(),
+                    std::make_move_iterator(modifier_style_block->rules_.begin()),
+                    std::make_move_iterator(modifier_style_block->rules_.end())
+                );
             }
+        } else {
+            throw std::runtime_error("Could not find element '" + tagName.lexeme + "' at index " + std::to_string(index) + " to specialize.");
         }
     }
 }
@@ -214,8 +226,6 @@ void CHTLParser::parseElementBody(ElementNode& element) {
             const Token& key = consume(TokenType::Identifier, "Expected attribute name.");
             consume(TokenType::Colon, "Expected ':' after attribute name.");
 
-            // This logic for parsing a single value is now incorrect, as values can be expressions.
-            // However, for attributes, they are typically single values. This might need a revisit.
             std::string value;
             if (match({TokenType::StringLiteral, TokenType::UnquotedLiteral, TokenType::Identifier})) {
                 value = previous().lexeme;
@@ -226,7 +236,6 @@ void CHTLParser::parseElementBody(ElementNode& element) {
             consume(TokenType::Semicolon, "Expected ';' after attribute value.");
             element.attributes_.push_back(std::make_unique<AttributeNode>(key.lexeme, value));
         }
-        // Otherwise, it must be a declaration (like a child element or style block).
         else {
             auto nodes = parseDeclaration();
             for (auto& node : nodes) {
@@ -238,14 +247,12 @@ void CHTLParser::parseElementBody(ElementNode& element) {
 
 std::unique_ptr<TextNode> CHTLParser::parseText() {
     consume(TokenType::OpenBrace, "Expected '{' after 'text' keyword.");
-    // For now, we only support a single string literal inside text {}
     const Token& content = consume(TokenType::StringLiteral, "Expected a string literal inside text block.");
     consume(TokenType::CloseBrace, "Expected '}' after text content.");
     return std::make_unique<TextNode>(content.lexeme);
 }
 
 std::unique_ptr<CommentNode> CHTLParser::parseGeneratorComment() {
-    // The lexeme of the GeneratorComment token now holds the content.
     return std::make_unique<CommentNode>(previous().lexeme);
 }
 
@@ -260,14 +267,11 @@ void CHTLParser::parseTemplateDefinition(bool is_custom) {
             const Token& key = consume(TokenType::Identifier, "Expected CSS property name in template.");
 
             std::vector<Token> value_tokens;
-            // If it's a placeholder (no colon), the value is empty.
             if (!match({TokenType::Colon})) {
-                // It's a placeholder, just consume the comma or semicolon
                 if (!match({TokenType::Comma, TokenType::Semicolon})) {
                     throw std::runtime_error("Expected ',' or ';' after placeholder property.");
                 }
             } else {
-                // It has a value, parse it.
                 while(peek().type != TokenType::Semicolon && !isAtEnd()) {
                     value_tokens.push_back(advance());
                 }
@@ -330,13 +334,11 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
     consume(TokenType::OpenBrace, "Expected '{' after 'style' keyword.");
 
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        // Check for template usage
         if (match({TokenType::AtStyle})) {
             const Token& name = consume(TokenType::Identifier, "Expected template name after '@Style'.");
             std::string qualified_name = name.lexeme;
             bool is_custom_usage = check(TokenType::OpenBrace);
 
-            // Only look for 'from' if it's NOT a custom style usage with a block
             if (!is_custom_usage && match({TokenType::From})) {
                  const Token& ns = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
                  qualified_name = ns.lexeme + "::" + name.lexeme;
@@ -347,7 +349,6 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
             }
             const auto& templateNode = context_->style_templates_.at(qualified_name);
 
-            // If it's a custom style, it must be used with a block
             if (templateNode->is_custom_) {
                 consume(TokenType::OpenBrace, "Expected '{' for custom style usage.");
                 std::unordered_map<std::string, std::vector<Token>> provided_values;
@@ -368,34 +369,31 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
                 }
                 consume(TokenType::CloseBrace, "Expected '}' after custom style block.");
 
-                // Expand the template with the provided values
                 for (const auto& prop : templateNode->properties_) {
                     const std::string& prop_name = prop.first;
-                    // Skip deleted properties
                     if (deleted_properties.count(prop_name)) {
                         continue;
                     }
 
                     const auto& prop_value = prop.second;
-                    if (prop_value.empty()) { // It's a placeholder
+                    if (prop_value.empty()) {
                         if (provided_values.count(prop_name)) {
                             styleNode->inline_properties_.emplace_back(prop_name, provided_values.at(prop_name));
                         } else {
                             throw std::runtime_error("Value for placeholder '" + prop_name + "' not provided for '" + prop_name + "'.");
                         }
-                    } else { // It's a regular property from the template
+                    } else {
                         styleNode->inline_properties_.push_back(prop);
                     }
                 }
 
-            } else { // It's a regular template
+            } else {
                 consume(TokenType::Semicolon, "Expected ';' after template usage.");
                 for (const auto& prop : templateNode->properties_) {
                     styleNode->inline_properties_.push_back(prop);
                 }
             }
         }
-        // If it's an identifier followed by a colon, it's an inline property.
         else if (peek().type == TokenType::Identifier && peekNext().type == TokenType::Colon) {
             const Token& key = consume(TokenType::Identifier, "Expected CSS property name.");
             consume(TokenType::Colon, "Expected ':' after CSS property name.");
@@ -405,7 +403,6 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
             consume(TokenType::Semicolon, "Expected ';' after CSS property value.");
             styleNode->inline_properties_.emplace_back(key.lexeme, value_tokens);
         }
-        // Otherwise, assume it's a CSS rule (e.g., .class, #id, &)
         else if (peek().type == TokenType::Identifier || peek().type == TokenType::Ampersand) {
             const Token& selector = consume(TokenType::Identifier, "Expected a CSS selector.");
             auto ruleNode = std::make_unique<CssRuleNode>(selector.lexeme);
@@ -437,7 +434,6 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
 std::vector<Token> CHTLParser::parsePropertyValue() {
     std::vector<Token> final_tokens;
     while (peek().type != TokenType::Semicolon && !isAtEnd()) {
-        // Check for variable usage: GroupName(VarName)
         if (peek().type == TokenType::Identifier && peekNext().type == TokenType::OpenParen) {
             const Token& groupName = advance();
             consume(TokenType::OpenParen, "Expected '(' after variable group name.");
@@ -456,7 +452,6 @@ std::vector<Token> CHTLParser::parsePropertyValue() {
                 throw std::runtime_error("Use of undefined variable group '" + groupName.lexeme + "'.");
             }
         } else {
-            // It's a regular token, just add it to the list.
             final_tokens.push_back(advance());
         }
     }
@@ -467,11 +462,8 @@ std::vector<Token> CHTLParser::parsePropertyValue() {
     return final_tokens;
 }
 
-// --- Helper Methods ---
-
 const Token& CHTLParser::peekNext() const {
     if (current_ + 1 >= tokens_.size()) {
-        // Return the EOF token if we are at the end
         return tokens_.back();
     }
     return tokens_[current_ + 1];

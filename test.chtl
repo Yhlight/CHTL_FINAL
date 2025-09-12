@@ -1,25 +1,21 @@
-[Template] @Element Card {
+[Template] @Element TwoBoxes {
     div {
-        class: "card";
-        style {
-            padding: 10px;
-        }
-        h3 {
-            text { "Default Title" }
-        }
+        class: "box";
+        text { "First box" }
+    }
+    div {
+        class: "box";
+        text { "Second box" }
     }
 }
 
 html {
     body {
-        // Use the template with specialization
-        @Element Card {
-            div {
+        @Element TwoBoxes {
+            // This should target the *second* div (index 1)
+            div[1] {
                 style {
-                    background-color: #f0f0f0;
-                    .card {
-                        border-radius: 5px;
-                    }
+                    border: 2px solid red;
                 }
             }
         }
