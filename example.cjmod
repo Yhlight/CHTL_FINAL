@@ -1,0 +1,38 @@
+[Info] {
+    name: "ExampleCJMOD";
+    version: "1.0.0";
+    description: "An example CHTL JS module";
+    author: "CHTL Team";
+    license: "MIT";
+}
+
+[Function] printMylove
+{
+    syntax: "printMylove $ $";
+    implementation: "console.log('My love: ' + $1 + ' - ' + $2);";
+}
+
+[Function] iNeverAway
+{
+    syntax: "iNeverAway $ $";
+    implementation: "function neverAway() { return 'I never away from ' + $1 + ' and ' + $2; }";
+}
+
+[Function] utilThen
+{
+    syntax: "util $ then $";
+    implementation: "function utilThen(value, callback) { return callback(value); }";
+}
+
+[VirtualObject] vir
+{
+    function createVirtualObject(name, properties) {
+        return {
+            name: name,
+            properties: properties,
+            toString: function() {
+                return 'VirtualObject: ' + this.name;
+            }
+        };
+    }
+}

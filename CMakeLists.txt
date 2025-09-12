@@ -35,6 +35,8 @@ set(CHTL_SOURCES
     src/CHTL/TemplateNode.cpp
     src/CHTL/CustomNode.cpp
     src/CHTL/ImportNode.cpp
+    src/CHTL/ModuleSystem.cpp
+    src/CHTL/CLITools.cpp
     
     src/CHTLJS/CHTLJSContext.cpp
     src/CHTLJS/CHTLJSGenerator.cpp

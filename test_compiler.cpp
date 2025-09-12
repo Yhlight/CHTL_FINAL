@@ -7,6 +7,8 @@
 #include "CHTL/TemplateNode.h"
 #include "CHTL/CustomNode.h"
 #include "CHTL/ImportNode.h"
+#include "CHTL/ModuleSystem.h"
+#include "CHTL/CLITools.h"
 #include "Scanner/UnifiedScanner.h"
 #include "CHTLJS/CJMODSystem.h"
 
@@ -311,6 +313,143 @@ void testImportSystem() {
     std::cout << "Import System test completed." << std::endl;
 }
 
+void testModuleSystem() {
+    std::cout << "Testing Module System..." << std::endl;
+    
+    // 测试CMOD模块
+    auto cmodModule = std::make_shared<CMODModule>("TestCMOD");
+    ModuleInfo info;
+    info.name = "TestCMOD";
+    info.version = "1.0.0";
+    info.description = "Test CMOD module";
+    info.author = "Test Author";
+    info.license = "MIT";
+    cmodModule->setInfo(info);
+    
+    // 添加模板导出
+    auto styleTemplate = std::make_shared<StyleTemplateNode>("TestStyle");
+    styleTemplate->addCSSProperty("color", "red");
+    styleTemplate->addCSSProperty("font-size", "14px");
+    cmodModule->addTemplateExport(styleTemplate);
+    
+    // 添加自定义导出
+    auto customElement = std::make_shared<CustomElementNode>("TestCustom");
+    cmodModule->addCustomExport(customElement);
+    
+    // 添加原始嵌入导出
+    cmodModule->addOriginExport("TestHeader", "<header>Test Header</header>", "Html");
+    
+    // 添加配置导出
+    cmodModule->addConfigurationExport("TestConfig", "DEBUG_MODE: true;");
+    
+    std::cout << "CMOD module created: " << cmodModule->getInfo().name << std::endl;
+    std::cout << "Exports: " << cmodModule->getExports().size() << std::endl;
+    
+    // 测试CJMOD模块
+    auto cjmodModule = std::make_shared<CJMODModule>("TestCJMOD");
+    ModuleInfo cjmodInfo;
+    cjmodInfo.name = "TestCJMOD";
+    cjmodInfo.version = "1.0.0";
+    cjmodInfo.description = "Test CJMOD module";
+    cjmodModule->setInfo(cjmodInfo);
+    
+    // 添加函数导出
+    cjmodModule->addFunctionExport("testFunc", "testFunc $ $", "console.log($1 + $2);");
+    cjmodModule->addVirtualObjectExport("testVir", "function testVir() { return 'test'; }");
+    
+    std::cout << "CJMOD module created: " << cjmodModule->getInfo().name << std::endl;
+    std::cout << "Functions: " << cjmodModule->getFunctionExports().size() << std::endl;
+    
+    // 测试混合模块
+    auto hybridModule = std::make_shared<HybridModule>("TestHybrid");
+    ModuleInfo hybridInfo;
+    hybridInfo.name = "TestHybrid";
+    hybridInfo.version = "1.0.0";
+    hybridInfo.description = "Test Hybrid module";
+    hybridModule->setInfo(hybridInfo);
+    
+    std::cout << "Hybrid module created: " << hybridModule->getInfo().name << std::endl;
+    
+    // 测试模块管理器
+    ModuleManager moduleManager;
+    moduleManager.registerModule(cmodModule);
+    moduleManager.registerModule(cjmodModule);
+    moduleManager.registerModule(hybridModule);
+    
+    std::cout << "Modules registered in manager" << std::endl;
+    
+    // 测试模块查询
+    auto foundCMOD = moduleManager.getCMODModule("TestCMOD");
+    auto foundCJMOD = moduleManager.getCJMODModule("TestCJMOD");
+    auto foundHybrid = moduleManager.getHybridModule("TestHybrid");
+    
+    std::cout << "CMOD module found: " << (foundCMOD ? "YES" : "NO") << std::endl;
+    std::cout << "CJMOD module found: " << (foundCJMOD ? "YES" : "NO") << std::endl;
+    std::cout << "Hybrid module found: " << (foundHybrid ? "YES" : "NO") << std::endl;
+    
+    // 测试模块验证
+    bool cmodValid = moduleManager.validateModule("TestCMOD");
+    bool cjmodValid = moduleManager.validateModule("TestCJMOD");
+    bool hybridValid = moduleManager.validateModule("TestHybrid");
+    
+    std::cout << "CMOD module valid: " << (cmodValid ? "YES" : "NO") << std::endl;
+    std::cout << "CJMOD module valid: " << (cjmodValid ? "YES" : "NO") << std::endl;
+    std::cout << "Hybrid module valid: " << (hybridValid ? "YES" : "NO") << std::endl;
+    
+    // 测试模块打包器
+    ModulePackager packager;
+    bool packaged = packager.packageCMODModule(*cmodModule, "test_package.cmod");
+    std::cout << "Module packaged: " << (packaged ? "YES" : "NO") << std::endl;
+    
+    std::cout << "Module System test completed." << std::endl;
+}
+
+void testCLITools() {
+    std::cout << "Testing CLI Tools..." << std::endl;
+    
+    // 测试CLI解析器
+    CLIParser parser;
+    std::vector<std::string> args = {"compile", "test.chtl", "--output", "test.html", "--verbose"};
+    
+    if (parser.parse(args)) {
+        std::cout << "CLI parsing successful" << std::endl;
+        std::cout << "Command: " << parser.getCommandName() << std::endl;
+        std::cout << "Output option: " << parser.getOptionValue("output") << std::endl;
+        std::cout << "Verbose option: " << (parser.hasOption("verbose") ? "YES" : "NO") << std::endl;
+    } else {
+        std::cout << "CLI parsing failed" << std::endl;
+        for (const auto& error : parser.getErrors()) {
+            std::cout << "Error: " << error << std::endl;
+        }
+    }
+    
+    // 测试CLI编译器
+    CHTLCompilerCLI cli;
+    cli.setVerbose(true);
+    cli.setDebug(true);
+    cli.setInputFile("test.chtl");
+    cli.setOutputDirectory("test.html");
+    
+    std::cout << "CLI compiler configured" << std::endl;
+    std::cout << "Verbose: " << (cli.isVerbose() ? "YES" : "NO") << std::endl;
+    std::cout << "Debug: " << (cli.isDebug() ? "YES" : "NO") << std::endl;
+    std::cout << "Input file: " << cli.getInputFile() << std::endl;
+    std::cout << "Output directory: " << cli.getOutputDirectory() << std::endl;
+    
+    // 测试命令行程序
+    CHTLCommandLineProgram program;
+    program.enableRendering(true);
+    program.enablePreview(true);
+    program.enableLiveCompilation(true);
+    
+    std::cout << "Command line program configured" << std::endl;
+    std::cout << "Rendering enabled: " << (program.isRenderingEnabled() ? "YES" : "NO") << std::endl;
+    std::cout << "Preview enabled: " << (program.isPreviewEnabled() ? "YES" : "NO") << std::endl;
+    std::cout << "Live compilation enabled: " << (program.isLiveCompilationEnabled() ? "YES" : "NO") << std::endl;
+    
+    std::cout << "CLI Tools test completed." << std::endl;
+}
+
 int main() {
     std::cout << "CHTL Compiler Test Suite" << std::endl;
     std::cout << "========================" << std::endl;
@@ -341,6 +480,12 @@ int main() {
         std::cout << std::endl;
         
         testImportSystem();
+        std::cout << std::endl;
+        
+        testModuleSystem();
+        std::cout << std::endl;
+        
+        testCLITools();
         std::cout << std::endl;
         
         std::cout << "All tests completed successfully!" << std::endl;
