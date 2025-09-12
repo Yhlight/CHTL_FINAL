@@ -9,6 +9,7 @@
 #include "CHTL/ImportNode.h"
 #include "CHTL/ModuleSystem.h"
 #include "CHTL/CLITools.h"
+#include "CHTL/CompilationMonitor.h"
 #include "Scanner/UnifiedScanner.h"
 #include "CHTLJS/CJMODSystem.h"
 
@@ -507,6 +508,105 @@ void testVSCodeExtension() {
     std::cout << "VSCode Extension test completed." << std::endl;
 }
 
+void testCompilationMonitor() {
+    std::cout << "Testing Compilation Monitor..." << std::endl;
+    
+    // 测试编译监视器管理器
+    auto& manager = CompilationMonitorManager::getInstance();
+    
+    // 测试配置
+    MonitorConfig config;
+    config.max_compilation_time = std::chrono::seconds(10);
+    config.max_memory_usage_mb = 100;
+    config.enable_memory_monitoring = true;
+    config.enable_time_monitoring = true;
+    config.auto_kill_on_limit = false;
+    manager.setGlobalConfig(config);
+    
+    std::cout << "Monitor configuration set" << std::endl;
+    
+    // 测试回调
+    auto callback = std::make_shared<DefaultCompilationMonitorCallback>();
+    callback->setVerbose(true);
+    callback->setShowProgress(true);
+    callback->setShowWarnings(true);
+    manager.setGlobalCallback(callback);
+    
+    std::cout << "Monitor callback set" << std::endl;
+    
+    // 测试任务启动
+    std::string task_id = manager.startTask("Test Task");
+    std::cout << "Task started: " << task_id << std::endl;
+    
+    // 测试状态查询
+    bool is_monitoring = manager.getMonitor().isMonitoring(task_id);
+    std::cout << "Task is monitoring: " << (is_monitoring ? "YES" : "NO") << std::endl;
+    
+    // 测试统计信息
+    CompilationStats stats = manager.getTaskStats(task_id);
+    std::cout << "Task duration: " << stats.getDurationSeconds() << "s" << std::endl;
+    std::cout << "Task memory: " << stats.getCurrentMemoryMB() << "MB" << std::endl;
+    
+    // 模拟一些工作
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    
+    // 测试任务停止
+    manager.stopTask(task_id);
+    std::cout << "Task stopped" << std::endl;
+    
+    // 测试最终统计
+    stats = manager.getTaskStats(task_id);
+    std::cout << "Final duration: " << stats.getDurationSeconds() << "s" << std::endl;
+    std::cout << "Final memory: " << stats.getPeakMemoryMB() << "MB" << std::endl;
+    
+    // 测试作用域监视器
+    {
+        ScopedCompilationMonitor scoped_monitor("Scoped Task");
+        std::cout << "Scoped task started: " << scoped_monitor.getTaskId() << std::endl;
+        
+        // 模拟一些工作
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        
+        // 获取统计信息
+        CompilationStats scoped_stats = scoped_monitor.getStats();
+        std::cout << "Scoped task duration: " << scoped_stats.getDurationSeconds() << "s" << std::endl;
+        
+        // 作用域结束时会自动停止
+    }
+    std::cout << "Scoped task completed" << std::endl;
+    
+    // 测试多个任务
+    std::vector<std::string> task_ids;
+    for (int i = 0; i < 3; ++i) {
+        std::string id = manager.startTask("Multi Task " + std::to_string(i));
+        task_ids.push_back(id);
+    }
+    
+    std::cout << "Multiple tasks started: " << task_ids.size() << std::endl;
+    
+    // 测试活动任务列表
+    auto active_tasks = manager.getMonitor().getActiveTasks();
+    std::cout << "Active tasks count: " << active_tasks.size() << std::endl;
+    
+    // 停止所有任务
+    manager.stopAllTasks();
+    std::cout << "All tasks stopped" << std::endl;
+    
+    // 测试清理
+    manager.clearCompletedTasks();
+    std::cout << "Completed tasks cleared" << std::endl;
+    
+    // 测试内存使用获取
+    size_t current_memory = CompilationMonitor::getCurrentMemoryUsage();
+    std::cout << "Current memory usage: " << (current_memory / (1024.0 * 1024.0)) << "MB" << std::endl;
+    
+    // 测试时间获取
+    auto current_time = CompilationMonitor::getCurrentTime();
+    std::cout << "Current time: " << current_time.time_since_epoch().count() << std::endl;
+    
+    std::cout << "Compilation Monitor test completed." << std::endl;
+}
+
 int main() {
     std::cout << "CHTL Compiler Test Suite" << std::endl;
     std::cout << "========================" << std::endl;
@@ -546,6 +646,9 @@ int main() {
         std::cout << std::endl;
         
         testVSCodeExtension();
+        std::cout << std::endl;
+        
+        testCompilationMonitor();
         std::cout << std::endl;
         
         std::cout << "All tests completed successfully!" << std::endl;
