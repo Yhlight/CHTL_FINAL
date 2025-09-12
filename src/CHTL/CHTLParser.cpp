@@ -285,10 +285,10 @@ std::shared_ptr<CHTLNode> CHTLParser::parseTemplate() {
         if (current_token_.type == TokenType::KEYWORD_STYLE) {
             advance();
             return parseStyleTemplate();
-        } else if (current_token_.type == TokenType::KEYWORD_ELEMENT) {
+        } else if (current_token_.type == TokenType::KEYWORD_AT) {
             advance();
             return parseElementTemplate();
-        } else if (current_token_.type == TokenType::KEYWORD_VAR) {
+        } else if (current_token_.type == TokenType::KEYWORD_AT) {
             advance();
             return parseVarTemplate();
         }
@@ -307,7 +307,7 @@ std::shared_ptr<CHTLNode> CHTLParser::parseStyleTemplate() {
     std::string templateName = current_token_.value;
     advance();
     
-    auto templateNode = std::make_shared<StyleTemplateNode>(templateName);
+    auto templateNode = std::make_shared<CHTLNode>(CHTLNode::NodeType::TEMPLATE);
     
     if (match(TokenType::LEFT_BRACE)) {
         // 解析CSS属性
@@ -359,7 +359,7 @@ std::shared_ptr<CHTLNode> CHTLParser::parseElementTemplate() {
     std::string templateName = current_token_.value;
     advance();
     
-    auto templateNode = std::make_shared<ElementTemplateNode>(templateName);
+    auto templateNode = std::make_shared<CHTLNode>(CHTLNode::NodeType::TEMPLATE);
     
     if (match(TokenType::LEFT_BRACE)) {
         // 解析子元素
@@ -388,7 +388,7 @@ std::shared_ptr<CHTLNode> CHTLParser::parseVarTemplate() {
     std::string templateName = current_token_.value;
     advance();
     
-    auto templateNode = std::make_shared<VarTemplateNode>(templateName);
+    auto templateNode = std::make_shared<CHTLNode>(CHTLNode::NodeType::TEMPLATE);
     
     if (match(TokenType::LEFT_BRACE)) {
         // 解析变量

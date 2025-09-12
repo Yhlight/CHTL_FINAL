@@ -180,8 +180,8 @@ void CHTLLexer::initializeKeywords() {
     
     // 模板类型关键字
     keywords_["@Style"] = TokenType::KEYWORD_STYLE;
-    keywords_["@Element"] = TokenType::KEYWORD_ELEMENT;
-    keywords_["@Var"] = TokenType::KEYWORD_VAR;
+    keywords_["@Element"] = TokenType::KEYWORD_AT;
+    keywords_["@Var"] = TokenType::KEYWORD_AT;
     
     // 特例化操作关键字
     keywords_["delete"] = TokenType::KEYWORD_DELETE;
@@ -523,7 +523,7 @@ Token CHTLLexer::createErrorToken(const std::string& message) {
 std::string Token::toString() const {
     std::ostringstream oss;
     oss << "Token(" << static_cast<int>(type) << ", \"" << value << "\", " 
-        << line_ << ":" << column_ << ")";
+        << line << ":" << column << ")";
     return oss.str();
 }
 

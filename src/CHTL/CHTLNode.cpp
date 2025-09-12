@@ -1,6 +1,7 @@
 #include "CHTL/CHTLNode.h"
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 namespace CHTL {
 
@@ -35,7 +36,7 @@ void CHTLNode::removeAttribute(const std::string& key) {
 
 void CHTLNode::addChild(std::shared_ptr<CHTLNode> child) {
     if (child) {
-        child->setParent(shared_from_this());
+        child->setParent(std::static_pointer_cast<CHTLNode>(shared_from_this()));
         children_.push_back(child);
     }
 }

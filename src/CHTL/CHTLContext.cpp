@@ -1,5 +1,6 @@
 #include "CHTL/CHTLContext.h"
 #include <iostream>
+#include <algorithm>
 
 namespace CHTL {
 

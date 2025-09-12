@@ -6,38 +6,38 @@
 <body>
     <h1>CHTL Compiler Test</h1>
     
-    [Template] @Style MyButton {
+    <style class="MyButton">
         background-color: #007bff;
         color: white;
         padding: 10px 20px;
         border: none;
         border-radius: 5px;
-    }
+    </style>
     
-    [Template] @Element ButtonContainer {
+    <div class="ButtonContainer">
         <button class="MyButton">Click Me</button>
-    }
+    </div>
     
-    [Template] @Var UserName {
+    <!-- Variable: UserName = 
         John Doe
-    }
+     -->
     
-    [Custom] SpecialDiv {
+    <div class="custom-SpecialDiv">
         <p>This is a special div with custom styling</p>
-    }
+    </div>
     
-    [Import] ./styles.css
+    <!-- Import: ./styles.css
     
-    [Namespace] MyApp
+    [Namespace -->] MyApp
     
-    [Origin] @Html {
+    
         <div class="container">
-            <h2>Welcome, {{UserName}}!</h2>
+            <h2>Welcome, {{UserName}!</h2>
             <div class="ButtonContainer"></div>
             <div class="SpecialDiv"></div>
         </div>
     }
     
-    [Configuration] DEBUG_MODE = true
+    <!-- Configuration: DEBUG_MODE = true
 </body>
-</html>
+</html> -->

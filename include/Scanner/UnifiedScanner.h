@@ -2,101 +2,97 @@
 
 #include <string>
 #include <vector>
-#include <memory>
-#include <unordered_map>
 #include <map>
+#include <iostream>
 
 namespace CHTL {
 
-/**
- * 统一扫描器
- * 负责分离CHTL、CHTL JS、CSS、JS代码片段
- */
+enum class FragmentType {
+    UNKNOWN,
+    CHTL,
+    CHTL_JS,
+    CSS,
+    HTML,
+    JAVASCRIPT,
+    TEXT
+};
+
+struct CodeFragment {
+    FragmentType type;
+    std::string content;
+    int line;
+    int column;
+    int position;
+    
+    CodeFragment() : type(FragmentType::UNKNOWN), line(0), column(0), position(0) {}
+    CodeFragment(FragmentType t, const std::string& c, int l, int col, int pos) 
+        : type(t), content(c), line(l), column(col), position(pos) {}
+};
+
 class UnifiedScanner {
 public:
-    enum class CodeType {
-        CHTL,           // CHTL代码
-        CHTL_JS,        // CHTL JS代码
-        CSS,            // CSS代码
-        JS,             // JavaScript代码
-        UNKNOWN         // 未知类型
-    };
-
-    struct CodeFragment {
-        CodeType type;
-        std::string content;
-        size_t start_pos;
-        size_t end_pos;
-        std::string placeholder;  // 占位符
-    };
-
     UnifiedScanner();
     ~UnifiedScanner();
-
-    // 扫描代码，分离不同类型的代码片段
-    std::vector<CodeFragment> scan(const std::string& code);
     
-    // 恢复占位符
-    std::string restorePlaceholders(const std::string& code, 
-                                   const std::vector<CodeFragment>& fragments);
+    void setInput(const std::string& input);
+    void setInput(std::istream& input);
+    void setInput(const std::string& file_path, bool is_file = true);
     
-    // 设置配置
-    void setConfiguration(const std::string& key, const std::string& value);
+    std::vector<CodeFragment> scan();
+    CodeFragment scanNextFragment();
     
-    // 启用/禁用调试模式
+    bool hasMoreTokens() const;
+    char currentChar() const;
+    char peekChar() const;
+    void advance();
+    void skipWhitespace();
+    
+    bool isCHTLStart(char c) const;
+    bool isCHTLEnd(char c) const;
+    bool isCHTLJSStart(char c) const;
+    bool isCHTLJSEnd(char c) const;
+    bool isCSSStart(char c) const;
+    bool isCSSEnd(char c) const;
+    bool isHTMLStart(char c) const;
+    bool isHTMLEnd(char c) const;
+    bool isJavaScriptStart(char c) const;
+    bool isJavaScriptEnd(char c) const;
+    
     void setDebugMode(bool enabled);
+    bool isDebugMode() const;
+    
+    void reportError(const std::string& message);
+    void clearErrors();
+    std::vector<std::string> getErrors() const;
+    bool hasErrors() const;
+    
+    void reset();
+    std::string getCurrentFilePath() const;
+    int getCurrentLine() const;
+    int getCurrentColumn() const;
+    int getCurrentPosition() const;
+    
+    std::map<std::string, std::vector<std::string>> getBoundaries() const;
+    void setBoundaries(const std::map<std::string, std::vector<std::string>>& boundaries);
 
 private:
-    // 扫描CHTL代码
-    std::vector<CodeFragment> scanCHTL(const std::string& code, size_t start_pos);
-    
-    // 扫描CHTL JS代码
-    std::vector<CodeFragment> scanCHTLJS(const std::string& code, size_t start_pos);
-    
-    // 扫描CSS代码
-    std::vector<CodeFragment> scanCSS(const std::string& code, size_t start_pos);
-    
-    // 扫描JS代码
-    std::vector<CodeFragment> scanJS(const std::string& code, size_t start_pos);
-    
-    // 查找语法边界
-    size_t findSyntaxBoundary(const std::string& code, size_t start_pos, 
-                             const std::string& open, const std::string& close);
-    
-    // 查找CHTL语法边界
-    size_t findCHTLBoundary(const std::string& code, size_t start_pos);
-    
-    // 查找CHTL JS语法边界
-    size_t findCHTLJSBoundary(const std::string& code, size_t start_pos);
-    
-    // 查找CSS语法边界
-    size_t findCSSBoundary(const std::string& code, size_t start_pos);
-    
-    // 查找JS语法边界
-    size_t findJSBoundary(const std::string& code, size_t start_pos);
-    
-    // 生成占位符
-    std::string generatePlaceholder(CodeType type, size_t index);
-    
-    // 验证代码完整性
-    bool validateCodeFragment(const std::string& code, CodeType type);
-    
-    // 处理嵌套结构
-    std::string processNestedStructures(const std::string& code, CodeType type);
-    
-    // 处理占位符替换
-    std::string replaceWithPlaceholders(const std::string& code, 
-                                       const std::vector<CodeFragment>& fragments);
-    
-    // 配置
-    std::unordered_map<std::string, std::string> configurations_;
+    std::string input_;
+    std::string file_path_;
+    int position_;
+    int line_;
+    int column_;
     bool debug_mode_;
+    std::vector<std::string> errors_;
+    std::map<std::string, std::vector<std::string>> boundaries_;
     
-    // 占位符计数器
-    std::map<CodeType, size_t> placeholder_counters_;
+    void initializeBoundaries();
     
-    // 占位符映射
-    std::unordered_map<std::string, CodeFragment> placeholder_map_;
+    CodeFragment scanCHTLFragment();
+    CodeFragment scanCHTLJSFragment();
+    CodeFragment scanCSSFragment();
+    CodeFragment scanHTMLFragment();
+    CodeFragment scanJavaScriptFragment();
+    CodeFragment scanTextFragment();
 };
 
 } // namespace CHTL

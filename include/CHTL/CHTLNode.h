@@ -12,7 +12,7 @@ namespace CHTL {
  * CHTL节点基类
  * 所有CHTL语法元素的基类
  */
-class CHTLNode {
+class CHTLNode : public std::enable_shared_from_this<CHTLNode> {
 public:
     enum class NodeType {
         ELEMENT,        // HTML元素
