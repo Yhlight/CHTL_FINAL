@@ -28,6 +28,25 @@ class AttributeReferenceNode(ExprNode):
     def __init__(self, selector: str, property_name: str):
         self.selector = selector
         self.property_name = property_name
+class VarUsageNode(ExprNode):
+    def __init__(self, group_name: str, var_name: str):
+        self.group_name = group_name
+        self.var_name = var_name
+
+# Template Nodes
+class VarDefinitionNode(BaseNode):
+    def __init__(self, name: str, value: 'ExprNode'):
+        self.name = name
+        self.value = value
+class TemplateUsageNode(BaseNode):
+    def __init__(self, template_type: str, name: str):
+        self.template_type = template_type
+        self.name = name
+class TemplateDefinitionNode(BaseNode):
+    def __init__(self, template_type: str, name: str, body: list):
+        self.template_type = template_type
+        self.name = name
+        self.body = body
 
 # Core Nodes
 class AttributeNode(BaseNode):
@@ -49,15 +68,15 @@ class SelectorBlockNode(BaseNode):
         self.selector = selector
         self.properties = properties
 class StyleNode(BaseNode):
-    def __init__(self, rules: List[Union['StylePropertyNode', 'SelectorBlockNode']]):
+    def __init__(self, rules: List[Union['StylePropertyNode', 'SelectorBlockNode', 'TemplateUsageNode']]):
         self.rules = rules
 class ElementNode(BaseNode):
-    def __init__(self, tag_name: str, attributes: List[AttributeNode], children: List['Node']):
+    def __init__(self, tag_name: str, attributes: List[AttributeNode], children: List[Union['Node', 'TemplateUsageNode']]):
         self.tag_name = tag_name
         self.attributes = attributes
         self.children = children
 class RootNode(BaseNode):
-    def __init__(self, children: List['Node']):
+    def __init__(self, children: List[Union['Node', 'TemplateDefinitionNode']]):
         self.children = children
 
 Node = Union[ElementNode, TextNode, CommentNode, StyleNode, SelectorBlockNode]

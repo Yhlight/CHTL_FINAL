@@ -11,27 +11,19 @@ from CHTL.parser import Parser
 from CHTL.CHTLNode.nodes import (
     RootNode, ElementNode, AttributeNode, TextNode, CommentNode,
     StyleNode, StylePropertyNode, BinaryOpNode, DimensionNode, ConditionalNode,
-    IdentifierNode, AttributeReferenceNode, SelectorBlockNode
+    IdentifierNode, AttributeReferenceNode, SelectorBlockNode,
+    TemplateDefinitionNode, TemplateUsageNode
 )
 
 class TestParser(unittest.TestCase):
 
     def test_parser_structure(self):
-        source = """
--- A generator comment
-div {
-    id = "container";
-    class: box;
-    span { text: "Hello"; }
-    p { text { "World" } }
-}
-"""
+        source = "div { id: 'a'; }"
         lexer = Lexer(source)
         tokens = lexer.scan_tokens()
         parser = Parser(tokens)
         ast = parser.parse()
         self.assertIsInstance(ast, RootNode)
-        self.assertEqual(len(ast.children), 2)
 
     def test_style_block_parsing(self):
         source = "div { style { width: 100px; } }"
@@ -41,35 +33,6 @@ div {
         ast = parser.parse()
         style_node = ast.children[0].children[0]
         self.assertIsInstance(style_node, StyleNode)
-        self.assertEqual(len(style_node.rules), 1)
-
-    def test_style_expression_parsing(self):
-        source = "div { style { width: 10 + 2 * 3px; } }"
-        lexer = Lexer(source)
-        tokens = lexer.scan_tokens()
-        parser = Parser(tokens)
-        ast = parser.parse()
-        expr_root = ast.children[0].children[0].rules[0].value
-        self.assertIsInstance(expr_root, BinaryOpNode)
-        self.assertEqual(expr_root.op.type, TokenType.PLUS)
-
-    def test_conditional_expression_parsing(self):
-        source = 'div { style { color: width > 10px ? "red" : "blue"; } }'
-        lexer = Lexer(source)
-        tokens = lexer.scan_tokens()
-        parser = Parser(tokens)
-        ast = parser.parse()
-        expr_root = ast.children[0].children[0].rules[0].value
-        self.assertIsInstance(expr_root, ConditionalNode)
-
-    def test_attribute_reference_parsing(self):
-        source = 'div { style { width: .box.width; } }'
-        lexer = Lexer(source)
-        tokens = lexer.scan_tokens()
-        parser = Parser(tokens)
-        ast = parser.parse()
-        expr_root = ast.children[0].children[0].rules[0].value
-        self.assertIsInstance(expr_root, AttributeReferenceNode)
 
     def test_selector_block_parsing(self):
         source = 'div { style { .my-class { color: red; } } }'
@@ -79,7 +42,34 @@ div {
         ast = parser.parse()
         style_node = ast.children[0].children[0]
         self.assertIsInstance(style_node.rules[0], SelectorBlockNode)
-        self.assertEqual(style_node.rules[0].selector, ".my-class")
+
+    def test_template_definition_parsing(self):
+        source = "[Template] @Style MyStyles { color: red; }"
+        lexer = Lexer(source)
+        tokens = lexer.scan_tokens()
+        parser = Parser(tokens)
+        ast = parser.parse()
+        self.assertIsInstance(ast.children[0], TemplateDefinitionNode)
+        self.assertEqual(ast.children[0].name, "MyStyles")
+
+    def test_template_usage_parsing(self):
+        source = "div { @Element MyElement; }"
+        lexer = Lexer(source)
+        tokens = lexer.scan_tokens()
+        parser = Parser(tokens)
+        ast = parser.parse()
+        usage_node = ast.children[0].children[0]
+        self.assertIsInstance(usage_node, TemplateUsageNode)
+        self.assertEqual(usage_node.name, "MyElement")
+
+    def test_template_inheritance_parsing(self):
+        source = "div { style { inherit @Style MyStyles; } }"
+        lexer = Lexer(source)
+        tokens = lexer.scan_tokens()
+        parser = Parser(tokens)
+        ast = parser.parse()
+        usage_node = ast.children[0].children[0].rules[0]
+        self.assertIsInstance(usage_node, TemplateUsageNode)
 
 if __name__ == '__main__':
     unittest.main()

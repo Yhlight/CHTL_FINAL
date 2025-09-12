@@ -1,7 +1,9 @@
 from .token import Token, TokenType
 
 class Lexer:
-    keywords = {}
+    keywords = {
+        "inherit": TokenType.INHERIT,
+    }
 
     def __init__(self, source: str):
         self.source = source
@@ -77,6 +79,14 @@ class Lexer:
         elif char == '?': self._add_token(TokenType.QUESTION)
         elif char == '.': self._add_token(TokenType.DOT)
         elif char == '#': self._add_token(TokenType.HASH)
+        elif char == '@': self._add_token(TokenType.AT)
+        elif char == '[':
+            if self.source.startswith('Template]', self.current):
+                self.current += len('Template]')
+                self.column += len('Template]')
+                self._add_token(TokenType.TEMPLATE_KEYWORD)
+            else:
+                self._error("Unexpected character '['. Did you mean '[Template]'?")
         elif char == ';': self._add_token(TokenType.SEMICOLON)
         elif char == '(': self._add_token(TokenType.LPAREN)
         elif char == ')': self._add_token(TokenType.RPAREN)

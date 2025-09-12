@@ -12,6 +12,11 @@ class TokenType(Enum):
     RPAREN = ')'
     DOT = '.'
     HASH = '#'
+    AT = '@'
+
+    # Keywords
+    TEMPLATE_KEYWORD = '[Template]'
+    INHERIT = 'inherit'
 
     # Operators
     QUESTION = '?'
