@@ -47,6 +47,7 @@ set(CHTL_SOURCES
     src/CHTL/OfficialModules.cpp
     src/CHTL/WildcardImport.cpp
     src/CHTL/DefaultStructGenerator.cpp
+    src/CHTL/CompilationMonitor.cpp
     
     src/CHTLJS/CHTLJSContext.cpp
     src/CHTLJS/CHTLJSGenerator.cpp

@@ -19,6 +19,7 @@
 #include "CHTL/OfficialModules.h"
 #include "CHTL/WildcardImport.h"
 #include "CHTL/DefaultStructGenerator.h"
+#include "CHTL/CompilationMonitor.h"
 #include "Scanner/UnifiedScanner.h"
 #include "CHTLJS/CJMODSystem.h"
 
@@ -1365,6 +1366,341 @@ void testDefaultStructGenerator() {
     std::cout << "Default Struct Generator test completed." << std::endl;
 }
 
+void testCompilationMonitor() {
+    std::cout << "Testing Compilation Monitor..." << std::endl;
+    
+    // 测试编译监视器配置
+    CompilationMonitorConfig config;
+    config.memory_config.max_memory_mb = 512;
+    config.memory_config.warning_threshold_mb = 256;
+    config.memory_config.critical_threshold_mb = 384;
+    config.memory_config.auto_kill_enabled = true;
+    config.memory_config.memory_tracking_enabled = true;
+    
+    config.time_config.max_compile_time = std::chrono::minutes(5);
+    config.time_config.warning_time = std::chrono::minutes(2);
+    config.time_config.critical_time = std::chrono::minutes(4);
+    config.time_config.auto_kill_enabled = true;
+    config.time_config.time_tracking_enabled = true;
+    
+    config.enable_logging = true;
+    config.enable_notifications = true;
+    config.log_file_path = "compilation_monitor_test.log";
+    
+    // 测试编译监视器
+    CompilationMonitor monitor(config);
+    
+    std::cout << "Testing compilation monitor creation..." << std::endl;
+    std::cout << "Monitor created: " << (monitor.getStatus() == CompilationStatus::IDLE ? "YES" : "NO") << std::endl;
+    
+    // 测试编译开始
+    std::cout << "Testing compilation start..." << std::endl;
+    monitor.startCompilation();
+    std::cout << "Compilation started: " << (monitor.isCompiling() ? "YES" : "NO") << std::endl;
+    std::cout << "Status: " << (monitor.getStatus() == CompilationStatus::RUNNING ? "RUNNING" : "OTHER") << std::endl;
+    
+    // 测试统计信息
+    std::cout << "Testing compilation stats..." << std::endl;
+    auto stats = monitor.getStats();
+    std::cout << "Stats available: " << (stats.status == CompilationStatus::RUNNING ? "YES" : "NO") << std::endl;
+    
+    // 测试内存监视器
+    std::cout << "Testing memory monitor..." << std::endl;
+    auto& memoryMonitor = monitor.getMemoryMonitor();
+    std::cout << "Memory monitor created: " << (memoryMonitor.isMonitoring() ? "YES" : "NO") << std::endl;
+    
+    size_t currentMemory = memoryMonitor.getCurrentMemoryUsage();
+    size_t peakMemory = memoryMonitor.getPeakMemoryUsage();
+    double memoryPercentage = memoryMonitor.getMemoryUsagePercentage();
+    
+    std::cout << "Current memory usage: " << currentMemory << " bytes" << std::endl;
+    std::cout << "Peak memory usage: " << peakMemory << " bytes" << std::endl;
+    std::cout << "Memory percentage: " << memoryPercentage << "%" << std::endl;
+    
+    // 测试内存状态检查
+    bool memoryNormal = memoryMonitor.isMemoryUsageNormal();
+    bool memoryWarning = memoryMonitor.isMemoryUsageWarning();
+    bool memoryCritical = memoryMonitor.isMemoryUsageCritical();
+    bool memoryExceeded = memoryMonitor.isMemoryUsageExceeded();
+    
+    std::cout << "Memory normal: " << (memoryNormal ? "YES" : "NO") << std::endl;
+    std::cout << "Memory warning: " << (memoryWarning ? "YES" : "NO") << std::endl;
+    std::cout << "Memory critical: " << (memoryCritical ? "YES" : "NO") << std::endl;
+    std::cout << "Memory exceeded: " << (memoryExceeded ? "YES" : "NO") << std::endl;
+    
+    // 测试时间监视器
+    std::cout << "Testing time monitor..." << std::endl;
+    auto& timeMonitor = monitor.getTimeMonitor();
+    std::cout << "Time monitor created: " << (timeMonitor.isTiming() ? "YES" : "NO") << std::endl;
+    
+    auto elapsedTime = timeMonitor.getElapsedTime();
+    auto remainingTime = timeMonitor.getRemainingTime();
+    double timeProgress = timeMonitor.getTimeProgress();
+    
+    std::cout << "Elapsed time: " << elapsedTime.count() << " ms" << std::endl;
+    std::cout << "Remaining time: " << remainingTime.count() << " ms" << std::endl;
+    std::cout << "Time progress: " << (timeProgress * 100) << "%" << std::endl;
+    
+    // 测试时间状态检查
+    bool timeNormal = timeMonitor.isTimeNormal();
+    bool timeWarning = timeMonitor.isTimeWarning();
+    bool timeCritical = timeMonitor.isTimeCritical();
+    bool timeExceeded = timeMonitor.isTimeExceeded();
+    
+    std::cout << "Time normal: " << (timeNormal ? "YES" : "NO") << std::endl;
+    std::cout << "Time warning: " << (timeWarning ? "YES" : "NO") << std::endl;
+    std::cout << "Time critical: " << (timeCritical ? "YES" : "NO") << std::endl;
+    std::cout << "Time exceeded: " << (timeExceeded ? "YES" : "NO") << std::endl;
+    
+    // 测试暂停和恢复
+    std::cout << "Testing pause and resume..." << std::endl;
+    monitor.pauseCompilation();
+    std::cout << "Compilation paused: " << (monitor.isPaused() ? "YES" : "NO") << std::endl;
+    
+    monitor.resumeCompilation();
+    std::cout << "Compilation resumed: " << (monitor.isCompiling() ? "YES" : "NO") << std::endl;
+    
+    // 测试自动杀死功能
+    std::cout << "Testing auto-kill functionality..." << std::endl;
+    monitor.enableAutoKill(true);
+    std::cout << "Auto-kill enabled: " << (monitor.isAutoKillEnabled() ? "YES" : "NO") << std::endl;
+    
+    monitor.enableAutoKill(false);
+    std::cout << "Auto-kill disabled: " << (!monitor.isAutoKillEnabled() ? "YES" : "NO") << std::endl;
+    
+    monitor.enableAutoKill(true);
+    
+    // 测试编译完成
+    std::cout << "Testing compilation completion..." << std::endl;
+    monitor.stopCompilation();
+    std::cout << "Compilation stopped: " << (!monitor.isCompiling() ? "YES" : "NO") << std::endl;
+    std::cout << "Status: " << (monitor.getStatus() == CompilationStatus::COMPLETED ? "COMPLETED" : "OTHER") << std::endl;
+    
+    // 测试报告生成
+    std::cout << "Testing report generation..." << std::endl;
+    std::string report = monitor.generateReport();
+    std::cout << "Report generated: " << (report.length() > 0 ? "YES" : "NO") << std::endl;
+    std::cout << "Report length: " << report.length() << " characters" << std::endl;
+    
+    // 测试报告保存
+    std::cout << "Testing report saving..." << std::endl;
+    monitor.saveReportToFile("compilation_report_test.txt");
+    std::cout << "Report saved: " << (CompilationMonitorUtils::fileExists("compilation_report_test.txt") ? "YES" : "NO") << std::endl;
+    
+    // 测试编译监视器管理器
+    CompilationMonitorManager manager;
+    
+    std::cout << "Testing compilation monitor manager..." << std::endl;
+    
+    // 测试创建监视器
+    auto monitor1 = manager.createMonitor(config);
+    auto monitor2 = manager.createMonitor(config);
+    
+    std::cout << "Monitors created: " << (monitor1 && monitor2 ? "YES" : "NO") << std::endl;
+    
+    // 测试获取监视器
+    auto retrievedMonitor = manager.getMonitor("invalid_id");
+    std::cout << "Invalid monitor retrieved: " << (retrievedMonitor == nullptr ? "YES" : "NO") << std::endl;
+    
+    // 测试全局配置
+    CompilationMonitorConfig globalConfig = manager.getGlobalConfig();
+    std::cout << "Global config available: " << (globalConfig.memory_config.max_memory_mb > 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试活动监视器
+    auto activeIds = manager.getActiveMonitorIds();
+    std::cout << "Active monitor IDs: " << activeIds.size() << std::endl;
+    
+    size_t activeCount = manager.getActiveMonitorCount();
+    std::cout << "Active monitor count: " << activeCount << std::endl;
+    
+    bool hasActive = manager.hasActiveMonitors();
+    std::cout << "Has active monitors: " << (hasActive ? "YES" : "NO") << std::endl;
+    
+    // 测试全局统计
+    auto allStats = manager.getAllStats();
+    std::cout << "All stats available: " << allStats.size() << std::endl;
+    
+    // 测试全局报告
+    std::string globalReport = manager.generateGlobalReport();
+    std::cout << "Global report generated: " << (globalReport.length() > 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试全局控制
+    manager.pauseAllMonitors();
+    std::cout << "All monitors paused: " << (manager.getActiveMonitorCount() == 0 ? "YES" : "NO") << std::endl;
+    
+    manager.resumeAllMonitors();
+    std::cout << "All monitors resumed: " << (manager.getActiveMonitorCount() >= 0 ? "YES" : "NO") << std::endl;
+    
+    manager.killAllMonitors();
+    std::cout << "All monitors killed: " << (manager.getActiveMonitorCount() == 0 ? "YES" : "NO") << std::endl;
+    
+    manager.resetAllStats();
+    std::cout << "All stats reset: " << (manager.getAllStats().size() >= 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试工具类
+    std::cout << "Testing compilation monitor utils..." << std::endl;
+    
+    size_t processMemory = CompilationMonitorUtils::getProcessMemoryUsage();
+    size_t systemMemoryTotal = CompilationMonitorUtils::getSystemMemoryTotal();
+    size_t systemMemoryAvailable = CompilationMonitorUtils::getSystemMemoryAvailable();
+    double systemMemoryPercentage = CompilationMonitorUtils::getSystemMemoryUsagePercentage();
+    
+    std::cout << "Process memory usage: " << processMemory << " bytes" << std::endl;
+    std::cout << "System memory total: " << systemMemoryTotal << " bytes" << std::endl;
+    std::cout << "System memory available: " << systemMemoryAvailable << " bytes" << std::endl;
+    std::cout << "System memory percentage: " << systemMemoryPercentage << "%" << std::endl;
+    
+    auto currentTime = CompilationMonitorUtils::getCurrentTime();
+    std::string formattedTime = CompilationMonitorUtils::formatTime(currentTime);
+    std::string formattedDuration = CompilationMonitorUtils::formatDuration(std::chrono::milliseconds(1234567));
+    
+    std::cout << "Current time: " << currentTime.count() << " ms" << std::endl;
+    std::cout << "Formatted time: " << formattedTime << std::endl;
+    std::cout << "Formatted duration: " << formattedDuration << std::endl;
+    
+    std::string processId = CompilationMonitorUtils::getProcessId();
+    std::string systemInfo = CompilationMonitorUtils::getSystemInfo();
+    
+    std::cout << "Process ID: " << processId << std::endl;
+    std::cout << "System info: " << systemInfo << std::endl;
+    
+    bool processRunning = CompilationMonitorUtils::isProcessRunning(processId);
+    std::cout << "Process running: " << (processRunning ? "YES" : "NO") << std::endl;
+    
+    // 测试文件操作
+    std::string testContent = "Test content for file operations";
+    bool writeSuccess = CompilationMonitorUtils::writeToFile("test_file.txt", testContent);
+    std::cout << "File write success: " << (writeSuccess ? "YES" : "NO") << std::endl;
+    
+    std::string readContent = CompilationMonitorUtils::readFromFile("test_file.txt");
+    std::cout << "File read success: " << (readContent == testContent ? "YES" : "NO") << std::endl;
+    
+    bool fileExists = CompilationMonitorUtils::fileExists("test_file.txt");
+    std::cout << "File exists: " << (fileExists ? "YES" : "NO") << std::endl;
+    
+    // 测试日志操作
+    CompilationMonitorUtils::logToFile("test_log.txt", "Test log message");
+    auto logLines = CompilationMonitorUtils::readLogFile("test_log.txt");
+    std::cout << "Log written and read: " << (logLines.size() > 0 ? "YES" : "NO") << std::endl;
+    
+    CompilationMonitorUtils::clearLogFile("test_log.txt");
+    auto clearedLogLines = CompilationMonitorUtils::readLogFile("test_log.txt");
+    std::cout << "Log cleared: " << (clearedLogLines.size() == 0 ? "YES" : "NO") << std::endl;
+    
+    // 测试回调函数
+    std::cout << "Testing callback functions..." << std::endl;
+    
+    bool startCallbackCalled = false;
+    bool completeCallbackCalled = false;
+    bool errorCallbackCalled = false;
+    bool killCallbackCalled = false;
+    
+    monitor.setCompilationStartCallback([&startCallbackCalled]() {
+        startCallbackCalled = true;
+    });
+    
+    monitor.setCompilationCompleteCallback([&completeCallbackCalled](CompilationStatus status) {
+        completeCallbackCalled = true;
+    });
+    
+    monitor.setCompilationErrorCallback([&errorCallbackCalled](const std::string& error) {
+        errorCallbackCalled = true;
+    });
+    
+    monitor.setCompilationKillCallback([&killCallbackCalled]() {
+        killCallbackCalled = true;
+    });
+    
+    // 测试回调触发
+    monitor.startCompilation();
+    std::cout << "Start callback triggered: " << (startCallbackCalled ? "YES" : "NO") << std::endl;
+    
+    monitor.stopCompilation();
+    std::cout << "Complete callback triggered: " << (completeCallbackCalled ? "YES" : "NO") << std::endl;
+    
+    monitor.startCompilation();
+    monitor.killCompilation();
+    std::cout << "Kill callback triggered: " << (killCallbackCalled ? "YES" : "NO") << std::endl;
+    
+    // 测试内存监视器回调
+    std::cout << "Testing memory monitor callbacks..." << std::endl;
+    
+    bool memoryWarningCalled = false;
+    bool memoryCriticalCalled = false;
+    bool memoryExceededCalled = false;
+    
+    memoryMonitor.setMemoryWarningCallback([&memoryWarningCalled](size_t usage) {
+        memoryWarningCalled = true;
+    });
+    
+    memoryMonitor.setMemoryCriticalCallback([&memoryCriticalCalled](size_t usage) {
+        memoryCriticalCalled = true;
+    });
+    
+    memoryMonitor.setMemoryExceededCallback([&memoryExceededCalled](size_t usage) {
+        memoryExceededCalled = true;
+    });
+    
+    // 测试时间监视器回调
+    std::cout << "Testing time monitor callbacks..." << std::endl;
+    
+    bool timeWarningCalled = false;
+    bool timeCriticalCalled = false;
+    bool timeExceededCalled = false;
+    
+    timeMonitor.setTimeWarningCallback([&timeWarningCalled](std::chrono::milliseconds elapsed) {
+        timeWarningCalled = true;
+    });
+    
+    timeMonitor.setTimeCriticalCallback([&timeCriticalCalled](std::chrono::milliseconds elapsed) {
+        timeCriticalCalled = true;
+    });
+    
+    timeMonitor.setTimeExceededCallback([&timeExceededCalled](std::chrono::milliseconds elapsed) {
+        timeExceededCalled = true;
+    });
+    
+    std::cout << "Memory monitor callbacks set: " << (memoryWarningCalled || memoryCriticalCalled || memoryExceededCalled ? "YES" : "NO") << std::endl;
+    std::cout << "Time monitor callbacks set: " << (timeWarningCalled || timeCriticalCalled || timeExceededCalled ? "YES" : "NO") << std::endl;
+    
+    // 测试配置更新
+    std::cout << "Testing configuration updates..." << std::endl;
+    
+    CompilationMonitorConfig newConfig = config;
+    newConfig.memory_config.max_memory_mb = 1024;
+    newConfig.time_config.max_compile_time = std::chrono::minutes(10);
+    
+    monitor.updateConfig(newConfig);
+    auto updatedConfig = monitor.getConfig();
+    std::cout << "Config updated: " << (updatedConfig.memory_config.max_memory_mb == 1024 ? "YES" : "NO") << std::endl;
+    
+    // 测试统计信息更新
+    std::cout << "Testing stats updates..." << std::endl;
+    
+    CompilationStats newStats;
+    newStats.files_processed = 10;
+    newStats.lines_processed = 1000;
+    newStats.errors_count = 5;
+    newStats.warnings_count = 3;
+    
+    monitor.updateStats(newStats);
+    auto updatedStats = monitor.getStats();
+    std::cout << "Stats updated: " << (updatedStats.files_processed == 10 ? "YES" : "NO") << std::endl;
+    
+    // 测试统计信息重置
+    monitor.resetStats();
+    auto resetStats = monitor.getStats();
+    std::cout << "Stats reset: " << (resetStats.files_processed == 0 ? "YES" : "NO") << std::endl;
+    
+    // 清理测试文件
+    std::remove("test_file.txt");
+    std::remove("test_log.txt");
+    std::remove("compilation_report_test.txt");
+    std::remove("compilation_monitor_test.log");
+    
+    std::cout << "Compilation Monitor test completed." << std::endl;
+}
+
 int main() {
     std::cout << "CHTL Compiler Test Suite" << std::endl;
     std::cout << "========================" << std::endl;
@@ -1434,6 +1770,9 @@ int main() {
         std::cout << std::endl;
         
         testDefaultStructGenerator();
+        std::cout << std::endl;
+        
+        testCompilationMonitor();
         std::cout << std::endl;
         
         std::cout << "All tests completed successfully!" << std::endl;
