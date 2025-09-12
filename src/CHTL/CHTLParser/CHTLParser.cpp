@@ -25,8 +25,9 @@ std::unique_ptr<RootNode> CHTLParser::parse() {
 
 std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     std::vector<std::unique_ptr<Node>> nodes;
-    if (match({TokenType::Template})) {
-        parseTemplateDefinition();
+    if (match({TokenType::Template, TokenType::Custom})) {
+        bool is_custom = previous().type == TokenType::Custom;
+        parseTemplateDefinition(is_custom);
         return nodes; // Return empty vector for definitions
     }
     if (match({TokenType::AtElement})) {
@@ -120,25 +121,33 @@ std::unique_ptr<CommentNode> CHTLParser::parseGeneratorComment() {
     return std::make_unique<CommentNode>(previous().lexeme);
 }
 
-void CHTLParser::parseTemplateDefinition() {
+void CHTLParser::parseTemplateDefinition(bool is_custom) {
     if (match({TokenType::AtStyle})) {
         const Token& name = consume(TokenType::Identifier, "Expected template name.");
-        auto templateNode = std::make_shared<StyleTemplateNode>(name.lexeme);
+        auto templateNode = std::make_shared<StyleTemplateNode>(name.lexeme, is_custom);
 
         consume(TokenType::OpenBrace, "Expected '{' after template name.");
         while (!check(TokenType::CloseBrace) && !isAtEnd()) {
             const Token& key = consume(TokenType::Identifier, "Expected CSS property name in template.");
-            consume(TokenType::Colon, "Expected ':' after property name.");
 
             std::vector<Token> value_tokens;
-            while(peek().type != TokenType::Semicolon && !isAtEnd()) {
-                value_tokens.push_back(advance());
-            }
-            if (value_tokens.empty()) {
-                throw std::runtime_error("Expected CSS property value in template.");
+            // If it's a placeholder (no colon), the value is empty.
+            if (!match({TokenType::Colon})) {
+                // It's a placeholder, just consume the comma or semicolon
+                if (!match({TokenType::Comma, TokenType::Semicolon})) {
+                    throw std::runtime_error("Expected ',' or ';' after placeholder property.");
+                }
+            } else {
+                // It has a value, parse it.
+                while(peek().type != TokenType::Semicolon && !isAtEnd()) {
+                    value_tokens.push_back(advance());
+                }
+                if (value_tokens.empty()) {
+                    throw std::runtime_error("Expected CSS property value in template.");
+                }
+                consume(TokenType::Semicolon, "Expected ';' after property value.");
             }
 
-            consume(TokenType::Semicolon, "Expected ';' after property value.");
             templateNode->properties_.emplace_back(key.lexeme, value_tokens);
         }
         consume(TokenType::CloseBrace, "Expected '}' after template body.");
@@ -193,16 +202,44 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
         // Check for template usage
         if (match({TokenType::AtStyle})) {
             const Token& name = consume(TokenType::Identifier, "Expected template name after '@Style'.");
-            consume(TokenType::Semicolon, "Expected ';' after template usage.");
 
-            if (style_templates_.count(name.lexeme)) {
-                const auto& templateNode = style_templates_[name.lexeme];
-                // Copy properties from template to current style block
+            if (!style_templates_.count(name.lexeme)) {
+                throw std::runtime_error("Use of undefined style template '" + name.lexeme + "'.");
+            }
+            const auto& templateNode = style_templates_.at(name.lexeme);
+
+            // If it's a custom style, it must be used with a block
+            if (templateNode->is_custom_) {
+                consume(TokenType::OpenBrace, "Expected '{' for custom style usage.");
+                std::unordered_map<std::string, std::vector<Token>> provided_values;
+                while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+                    const Token& key = consume(TokenType::Identifier, "Expected property name in custom style usage.");
+                    consume(TokenType::Colon, "Expected ':' after property name.");
+                    provided_values[key.lexeme] = parsePropertyValue();
+                    consume(TokenType::Semicolon, "Expected ';' after property value.");
+                }
+                consume(TokenType::CloseBrace, "Expected '}' after custom style block.");
+
+                // Expand the template with the provided values
+                for (const auto& prop : templateNode->properties_) {
+                    const std::string& prop_name = prop.first;
+                    const auto& prop_value = prop.second;
+                    if (prop_value.empty()) { // It's a placeholder
+                        if (provided_values.count(prop_name)) {
+                            styleNode->inline_properties_.emplace_back(prop_name, provided_values.at(prop_name));
+                        } else {
+                            throw std::runtime_error("Value for placeholder '" + prop_name + "' not provided.");
+                        }
+                    } else { // It's a regular property from the template
+                        styleNode->inline_properties_.push_back(prop);
+                    }
+                }
+
+            } else { // It's a regular template
+                consume(TokenType::Semicolon, "Expected ';' after template usage.");
                 for (const auto& prop : templateNode->properties_) {
                     styleNode->inline_properties_.push_back(prop);
                 }
-            } else {
-                throw std::runtime_error("Use of undefined style template '" + name.lexeme + "'.");
             }
         }
         // If it's an identifier followed by a colon, it's an inline property.

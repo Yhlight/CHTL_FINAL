@@ -11,9 +11,11 @@ namespace CHTL {
 // This is a storage class for the parser, not a part of the main AST tree.
 class StyleTemplateNode {
 public:
-    explicit StyleTemplateNode(const std::string& name) : name_(name) {}
+    explicit StyleTemplateNode(const std::string& name, bool is_custom = false)
+        : name_(name), is_custom_(is_custom) {}
 
     std::string name_;
+    bool is_custom_;
     std::vector<std::pair<std::string, std::vector<Token>>> properties_;
 };
 

@@ -1,17 +1,19 @@
-[Template] @Var Theme {
-    primaryColor: #007bff;
-    secondaryColor: #6c757d;
-    baseFontSize: 16px;
+[Custom] @Style TextSet {
+    color,
+    font-size;
+    font-weight: bold; // A regular property
 }
 
 html {
     body {
-        div {
+        p {
             style {
-                color: Theme(primaryColor);
-                font-size: Theme(baseFontSize);
-                border: 1px solid Theme(secondaryColor);
+                @Style TextSet {
+                    color: red;
+                    font-size: 20px;
+                }
             }
+            text { "This text uses the custom style." }
         }
     }
 }

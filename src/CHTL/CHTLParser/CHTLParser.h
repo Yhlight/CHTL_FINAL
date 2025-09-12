@@ -24,7 +24,7 @@ public:
 
 private:
     std::vector<std::unique_ptr<Node>> parseDeclaration();
-    void parseTemplateDefinition();
+    void parseTemplateDefinition(bool is_custom);
     std::unique_ptr<ElementNode> parseElement();
     void parseElementBody(ElementNode& element);
     void parseAttributes(ElementNode& element);
