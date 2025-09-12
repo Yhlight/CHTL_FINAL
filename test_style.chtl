@@ -1,0 +1,109 @@
+// 样式系统测试文件
+
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                样式系统测试
+            }
+        }
+    }
+    
+    body
+    {
+        // 测试内联样式
+        div
+        {
+            style
+            {
+                width: 100px;
+                height: 200px;
+                background-color: red;
+            }
+        }
+        
+        // 测试类选择器
+        div
+        {
+            style
+            {
+                .box
+                {
+                    width: 300px;
+                    height: 300px;
+                    border: 1px solid black;
+                }
+                
+                &:hover
+                {
+                    background-color: blue;
+                }
+            }
+        }
+        
+        // 测试属性运算
+        div
+        {
+            style
+            {
+                width: 100px + 50px;
+                height: 200px * 2;
+                margin: 10px * 3;
+            }
+        }
+        
+        // 测试条件表达式
+        div
+        {
+            style
+            {
+                width: 100px;
+                height: 100px;
+                background-color: width > 50px ? "red" : "blue";
+            }
+        }
+        
+        // 测试属性引用
+        div
+        {
+            id: box;
+            style
+            {
+                width: 100px;
+            }
+        }
+        
+        div
+        {
+            style
+            {
+                width: 100px + box.width;
+                height: box.width * 2;
+            }
+        }
+        
+        // 测试响应式值
+        div
+        {
+            class: $boxClass$;
+            style
+            {
+                width: $boxWidth$ + 20px;
+                height: $boxHeight$;
+            }
+            
+            script
+            {
+                let boxClass = "responsive-box";
+                let boxWidth = 100;
+                let boxHeight = 200;
+                
+                {{boxClass}}.textContent = "响应式盒子";
+            }
+        }
+    }
+}

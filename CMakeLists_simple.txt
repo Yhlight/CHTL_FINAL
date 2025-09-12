@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.10)
+project(CHTL_Simple_Test)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# 包含目录
+include_directories(src)
+
+# 样式系统源文件
+set(STYLE_SOURCES
+    src/CHTL/StyleSystem.cpp
+)
+
+# 创建可执行文件
+add_executable(style_test test_style_system.cpp ${STYLE_SOURCES})
+
+# 链接线程库
+target_link_libraries(style_test Threads::Threads)

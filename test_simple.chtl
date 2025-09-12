@@ -1,0 +1,32 @@
+// 简单的CHTL测试文件
+div {
+    class: test-container;
+    style {
+        width: 100px + 50px;
+        height: 200px * 2;
+        background-color: width > 120px ? "red" : "blue";
+        margin-top: .another-box.height;
+        border: 1px solid $borderColor$;
+        
+        .inner-box {
+            padding: 10px;
+        }
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+    script {
+        let borderColor = "black";
+        // 模拟动态变化
+        setTimeout(() => {
+            borderColor = "green";
+        }, 1000);
+    }
+}
+
+div {
+    class: another-box;
+    style {
+        height: 300px;
+    }
+}

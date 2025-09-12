@@ -1,0 +1,259 @@
+// 珂朵莉模块 - CMOD部分
+
+// 主题颜色变量组
+[Template] @Var ChthollyColors
+{
+    primary: "rgb(255, 192, 203)";
+    secondary: "rgb(253, 144, 162)";
+    accent: "rgb(255, 105, 180)";
+    background: "rgb(255, 250, 250)";
+    text: "rgb(64, 64, 64)";
+    border: "rgb(255, 182, 193)";
+}
+
+// 字体变量组
+[Template] @Var ChthollyFonts
+{
+    primary: "Georgia, serif";
+    secondary: "Arial, sans-serif";
+    heading: "Times New Roman, serif";
+    code: "Courier New, monospace";
+}
+
+// 间距变量组
+[Template] @Var ChthollySpacing
+{
+    xs: "4px";
+    sm: "8px";
+    md: "16px";
+    lg: "24px";
+    xl: "32px";
+    xxl: "48px";
+}
+
+// 断点变量组
+[Template] @Var ChthollyBreakpoints
+{
+    mobile: "480px";
+    tablet: "768px";
+    desktop: "1024px";
+    wide: "1200px";
+}
+
+// 动画变量组
+[Template] @Var ChthollyAnimations
+{
+    fadeIn: "fadeIn 0.5s ease-in-out";
+    slideUp: "slideUp 0.3s ease-out";
+    bounce: "bounce 0.6s ease-in-out";
+    pulse: "pulse 2s infinite";
+}
+
+// 基础样式组
+[Template] @Style ChthollyStyle
+{
+    font-family: ChthollyFonts(primary);
+    color: ChthollyColors(text);
+    background-color: ChthollyColors(background);
+    line-height: 1.6;
+}
+
+// 卡片样式组
+[Template] @Style ChthollyCard
+{
+    background-color: white;
+    border: 1px solid ChthollyColors(border);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(255, 192, 203, 0.1);
+    padding: ChthollySpacing(lg);
+    margin: ChthollySpacing(md);
+}
+
+// 按钮样式组
+[Template] @Style ChthollyButton
+{
+    background-color: ChthollyColors(primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: ChthollySpacing(sm) ChthollySpacing(md);
+    cursor: pointer;
+    font-family: ChthollyFonts(primary);
+    transition: all 0.3s ease;
+}
+
+// 头部样式组
+[Template] @Style ChthollyHeader
+{
+    background-color: ChthollyColors(primary);
+    color: white;
+    padding: ChthollySpacing(md) 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+// 页脚样式组
+[Template] @Style ChthollyFooter
+{
+    background-color: ChthollyColors(secondary);
+    color: white;
+    padding: ChthollySpacing(md) 0;
+    text-align: center;
+    margin-top: auto;
+}
+
+// 页面元素模板
+[Template] @Element ChthollyPage
+{
+    html
+    {
+        style
+        {
+            @Style ChthollyStyle;
+        }
+        
+        head
+        {
+            title
+            {
+                text
+                {
+                    珂朵莉主题页面
+                }
+            }
+        }
+        
+        body
+        {
+            style
+            {
+                margin: 0;
+                padding: 0;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+        }
+    }
+}
+
+// 导航元素模板
+[Template] @Element ChthollyNav
+{
+    nav
+    {
+        style
+        {
+            @Style ChthollyHeader;
+        }
+        
+        ul
+        {
+            style
+            {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                gap: ChthollySpacing(lg);
+            }
+            
+            li
+            {
+                a
+                {
+                    style
+                    {
+                        color: white;
+                        text-decoration: none;
+                        padding: ChthollySpacing(sm) ChthollySpacing(md);
+                        border-radius: 4px;
+                        transition: background-color 0.3s ease;
+                    }
+                    
+                    text
+                    {
+                        导航链接
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 模态框元素模板
+[Template] @Element ChthollyModal
+{
+    div
+    {
+        class: modal;
+        style
+        {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        div
+        {
+            class: modal-content;
+            style
+            {
+                @Style ChthollyCard;
+                max-width: 500px;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+            
+            text
+            {
+                模态框内容
+            }
+        }
+    }
+}
+
+// 画廊元素模板
+[Template] @Element ChthollyGallery
+{
+    div
+    {
+        class: gallery;
+        style
+        {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: ChthollySpacing(md);
+            padding: ChthollySpacing(md);
+        }
+        
+        div
+        {
+            class: gallery-item;
+            style
+            {
+                @Style ChthollyCard;
+                text-align: center;
+            }
+            
+            img
+            {
+                style
+                {
+                    width: 100%;
+                    height: 200px;
+                    object-fit: cover;
+                    border-radius: 4px;
+                }
+            }
+        }
+    }
+}
