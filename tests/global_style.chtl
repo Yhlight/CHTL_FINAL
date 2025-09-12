@@ -1,0 +1,16 @@
+html {
+    head {
+        title { text: "Global Style Test"; }
+    }
+    body {
+        div {
+            id: "main-content";
+            style {
+                .card {
+                    padding: 16px;
+                }
+                border: 1px solid #ccc;
+            }
+        }
+    }
+}

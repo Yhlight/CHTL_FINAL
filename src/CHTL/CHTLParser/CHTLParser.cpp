@@ -9,12 +9,12 @@ CHTLParser::CHTLParser(const std::vector<Token>& tokens) : tokens(tokens) {}
 std::shared_ptr<ElementNode> CHTLParser::parse() {
     auto root = std::make_shared<ElementNode>("root");
     while (!isAtEnd()) {
-        root->addChild(declaration());
+        root->addChild(declaration(root));
     }
     return root;
 }
 
-std::shared_ptr<BaseNode> CHTLParser::declaration() {
+std::shared_ptr<BaseNode> CHTLParser::declaration(std::shared_ptr<ElementNode> rootNode) {
     if (check(TokenType::KEYWORD_TEXT)) {
         // Lookahead to see if it's text: "..." or text { ... }
         if (tokens[current + 1].type == TokenType::LEFT_BRACE) {
@@ -22,10 +22,10 @@ std::shared_ptr<BaseNode> CHTLParser::declaration() {
         }
     }
     // Default to parsing an element
-    return element();
+    return element(rootNode);
 }
 
-std::shared_ptr<ElementNode> CHTLParser::element() {
+std::shared_ptr<ElementNode> CHTLParser::element(std::shared_ptr<ElementNode> rootNode) {
     Token identifier = consume(TokenType::IDENTIFIER, "Expect element name.");
     auto node = std::make_shared<ElementNode>(identifier.lexeme);
     consume(TokenType::LEFT_BRACE, "Expect '{' after element name.");
@@ -34,9 +34,8 @@ std::shared_ptr<ElementNode> CHTLParser::element() {
         Token currentToken = peek();
 
         if (currentToken.type == TokenType::KEYWORD_STYLE) {
-            node->styles = parseStyleBlock();
+            parseStyleBlock(node, rootNode);
         } else if (currentToken.type == TokenType::KEYWORD_TEXT) {
-            // text: "..." ;
              advance(); // consume 'text'
              consume(TokenType::COLON, "Expect ':' after 'text' attribute.");
              Token value = consume(TokenType::STRING, "Expect string value for 'text' attribute.");
@@ -44,17 +43,14 @@ std::shared_ptr<ElementNode> CHTLParser::element() {
              node->addChild(std::make_shared<TextNode>(value.lexeme));
 
         } else if (currentToken.type == TokenType::IDENTIFIER) {
-            // Lookahead to see if it's an attribute or a nested element.
             if (tokens[current + 1].type == TokenType::COLON || tokens[current + 1].type == TokenType::EQUAL) {
-                // Attribute
                 Token key = advance();
                 match({TokenType::COLON, TokenType::EQUAL});
                 Token value = consume(TokenType::STRING, "Expect attribute value.");
                 consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
                 node->addAttribute(std::make_shared<AttributeNode>(key.lexeme, value.lexeme));
             } else {
-                // Nested Element
-                node->addChild(element());
+                node->addChild(element(rootNode));
             }
         } else {
             throw error(peek(), "Unexpected token inside element block.");
@@ -73,31 +69,52 @@ std::shared_ptr<TextNode> CHTLParser::textElement() {
     return std::make_shared<TextNode>(content.lexeme);
 }
 
-std::map<std::string, std::string> CHTLParser::parseStyleBlock() {
+void CHTLParser::parseStyleBlock(std::shared_ptr<ElementNode> currentNode, std::shared_ptr<ElementNode> rootNode) {
     consume(TokenType::KEYWORD_STYLE, "Expect 'style' keyword.");
     consume(TokenType::LEFT_BRACE, "Expect '{' after 'style'.");
 
-    std::map<std::string, std::string> styles;
-
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        Token key = consume(TokenType::IDENTIFIER, "Expect style property name.");
-        consume(TokenType::COLON, "Expect ':' after property name.");
+        if (peek().type == TokenType::CLASS_SELECTOR || peek().type == TokenType::ID_SELECTOR) {
+            Token selector = advance();
 
-        std::stringstream value_ss;
-        while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
-            if (!value_ss.str().empty()) {
-                value_ss << " ";
+            if (selector.type == TokenType::CLASS_SELECTOR) {
+                currentNode->addAttribute(std::make_shared<AttributeNode>("class", selector.lexeme.substr(1)));
+            } else {
+                currentNode->addAttribute(std::make_shared<AttributeNode>("id", selector.lexeme.substr(1)));
             }
-            value_ss << advance().lexeme;
+
+            consume(TokenType::LEFT_BRACE, "Expect '{' after selector.");
+            std::stringstream css_rules;
+            while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                Token key = consume(TokenType::IDENTIFIER, "Expect property name.");
+                consume(TokenType::COLON, "Expect ':' after property name.");
+                std::stringstream value_ss;
+                while(!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                    if (!value_ss.str().empty()) value_ss << " ";
+                    value_ss << advance().lexeme;
+                }
+                consume(TokenType::SEMICOLON, "Expect ';' after property value.");
+                css_rules << "  " << key.lexeme << ": " << value_ss.str() << ";\n";
+            }
+            consume(TokenType::RIGHT_BRACE, "Expect '}' after rule block.");
+
+            rootNode->global_styles[selector.lexeme] += css_rules.str();
+
+        } else if (peek().type == TokenType::IDENTIFIER) {
+            Token key = consume(TokenType::IDENTIFIER, "Expect property name.");
+            consume(TokenType::COLON, "Expect ':' after property name.");
+            std::stringstream value_ss;
+            while(!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                if (!value_ss.str().empty()) value_ss << " ";
+                value_ss << advance().lexeme;
+            }
+            consume(TokenType::SEMICOLON, "Expect ';' after property value.");
+            currentNode->styles[key.lexeme] = value_ss.str();
+        } else {
+            throw error(peek(), "Unexpected token in style block.");
         }
-
-        consume(TokenType::SEMICOLON, "Expect ';' after property value.");
-
-        styles[key.lexeme] = value_ss.str();
     }
-
     consume(TokenType::RIGHT_BRACE, "Expect '}' after style block.");
-    return styles;
 }
 
 
@@ -141,7 +158,6 @@ Token CHTLParser::consume(TokenType type, const std::string& message) {
 }
 
 CHTLParser::ParseError CHTLParser::error(const Token& token, const std::string& message) {
-    // In a real compiler, you might have a more sophisticated error reporter.
     std::cerr << "Parse Error at line " << token.line << " near '" << token.lexeme << "': " << message << std::endl;
     return ParseError(message);
 }

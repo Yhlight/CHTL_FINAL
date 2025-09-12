@@ -52,4 +52,12 @@ set_tests_properties(ChtlStyleTest PROPERTIES
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
+# --- Test: Global Styles ---
+add_executable(global_style_test tests/global_style_test.cpp)
+target_link_libraries(global_style_test chthl_lib)
+add_test(NAME ChtlGlobalStyleTest COMMAND global_style_test)
+set_tests_properties(ChtlGlobalStyleTest PROPERTIES
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
 message(STATUS "CHTL Compiler project configured for testing")

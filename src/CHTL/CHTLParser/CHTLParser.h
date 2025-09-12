@@ -29,10 +29,10 @@ private:
     int current = 0;
 
     // Parsing methods for different grammar rules
-    std::shared_ptr<BaseNode> declaration();
-    std::shared_ptr<ElementNode> element();
+    std::shared_ptr<BaseNode> declaration(std::shared_ptr<ElementNode> rootNode);
+    std::shared_ptr<ElementNode> element(std::shared_ptr<ElementNode> rootNode);
     std::shared_ptr<TextNode> textElement();
-    std::map<std::string, std::string> parseStyleBlock();
+    void parseStyleBlock(std::shared_ptr<ElementNode> currentNode, std::shared_ptr<ElementNode> rootNode);
 
     // Token-handling utility methods
     bool isAtEnd();

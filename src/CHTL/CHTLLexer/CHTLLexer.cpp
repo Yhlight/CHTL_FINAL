@@ -118,6 +118,19 @@ void CHTLLexer::scanToken() {
             stringLiteral();
             break;
 
+        case '.':
+        case '#': {
+            char startChar = source[start];
+            // Consume the identifier part of the selector
+            while (isalnum(peek()) || peek() == '_' || peek() == '-') {
+                advance();
+            }
+            // If we only consumed the '.' or '#', it's an error, but for now, we'll tokenize it.
+            // A better parser would validate this.
+            addToken(startChar == '.' ? TokenType::CLASS_SELECTOR : TokenType::ID_SELECTOR);
+            break;
+        }
+
         default:
             if (isdigit(c)) {
                 numberLiteral();

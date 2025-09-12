@@ -26,7 +26,11 @@ enum class TokenType {
     KEYWORD_STYLE,
 
     // Data Types
-    NUMBER
+    NUMBER,
+
+    // Selectors
+    CLASS_SELECTOR, // .class
+    ID_SELECTOR     // #id
 };
 
 struct Token {

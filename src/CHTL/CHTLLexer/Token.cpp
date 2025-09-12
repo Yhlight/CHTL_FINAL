@@ -16,6 +16,8 @@ std::string Token::typeToString(TokenType type) {
         case TokenType::KEYWORD_TEXT:    return "KEYWORD_TEXT";
         case TokenType::KEYWORD_STYLE:   return "KEYWORD_STYLE";
         case TokenType::NUMBER:          return "NUMBER";
+        case TokenType::CLASS_SELECTOR:  return "CLASS_SELECTOR";
+        case TokenType::ID_SELECTOR:     return "ID_SELECTOR";
         default:                         return "UNSPECIFIED";
     }
 }

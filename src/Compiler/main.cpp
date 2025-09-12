@@ -7,12 +7,19 @@
 
 int main() {
     std::string source = R"(
-        div {
-            id = "main-box";
-            style {
-                width: 100px;
-                height: 200.5px;
-                border: 1px solid black;
+        html {
+            head {
+                title { text: "My Site"; }
+            }
+            body {
+                div {
+                    style {
+                        .box {
+                            color: blue;
+                            font-size: 14px;
+                        }
+                    }
+                }
             }
         }
     )";

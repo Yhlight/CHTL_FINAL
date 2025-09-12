@@ -16,6 +16,9 @@ public:
     std::vector<std::shared_ptr<BaseNode>> children;
     std::map<std::string, std::string> styles;
 
+    // For the synthetic root node to collect global styles
+    std::map<std::string, std::string> global_styles;
+
     explicit ElementNode(const std::string& tagName) : tagName(tagName) {}
 
     void addAttribute(std::shared_ptr<AttributeNode> attribute) {

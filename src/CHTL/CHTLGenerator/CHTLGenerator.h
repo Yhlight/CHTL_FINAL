@@ -25,6 +25,10 @@ private:
     void generateText(const std::shared_ptr<TextNode>& node);
 
     void indent();
+
+    // New methods for handling global styles
+    void injectGlobalStyles();
+    std::shared_ptr<ElementNode> findFirstNodeByTag(const std::string& tagName, std::shared_ptr<ElementNode> startNode);
 };
 
 } // namespace CHTL
