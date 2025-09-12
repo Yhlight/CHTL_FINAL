@@ -1,6 +1,7 @@
 #include "CHTL/CHTLParser.h"
 #include "CHTL/CHTLNode.h"
 #include <stdexcept>
+#include <iostream>
 
 namespace CHTL {
 
@@ -46,11 +47,23 @@ std::shared_ptr<CHTLNode> CHTLParser::parseRoot() {
     auto root = std::make_shared<ElementNode>("root");
     root->setName("root");
     
+    int iteration_count = 0;
     while (!isAtEnd() && current().type != TokenType::EOF_TOKEN) {
+        iteration_count++;
+        if (iteration_count > 1000) {
+            reportError("Infinite loop detected in parseRoot");
+            break;
+        }
+        
         try {
             auto node = parseElement();
             if (node) {
                 root->addChild(node);
+            } else {
+                // 如果无法解析节点，推进到下一个token
+                if (!isAtEnd()) {
+                    consume();
+                }
             }
         } catch (const std::exception& e) {
             reportError(e.what());
@@ -117,17 +130,74 @@ std::shared_ptr<CHTLNode> CHTLParser::parseElement() {
         auto element = std::make_shared<ElementNode>(tag_name);
         element->setPosition(current_token.line, current_token.column);
         
-        // 解析属性
-        parseAttributes(element);
-        
         // 解析子节点
         if (check(TokenType::LBRACE)) {
             consume(); // 消费 {
             
+            // 首先解析属性
+            if (debug_mode_) {
+                std::cout << "After consuming {, current token type: " << static_cast<int>(current().type) << ", value: '" << current().value << "'" << std::endl;
+            }
+            
+            // 跳过空白字符
+            while (!isAtEnd() && (current().type == TokenType::NEWLINE || current().type == TokenType::WHITESPACE)) {
+                consume();
+            }
+            
+            if (debug_mode_) {
+                std::cout << "After skipping whitespace, current token type: " << static_cast<int>(current().type) << ", value: '" << current().value << "'" << std::endl;
+            }
+            
+            while (!isAtEnd() && current().type == TokenType::IDENTIFIER && !check(TokenType::RBRACE)) {
+                std::string attr_name = consume().value;
+                
+                if (debug_mode_) {
+                    std::cout << "Parsing attribute: " << attr_name << std::endl;
+                }
+                
+                if (check(TokenType::COLON) || check(TokenType::EQUAL)) {
+                    consume(); // 消费 : 或 =
+                    
+                    AttributeValue attr_value = parseAttributeValue();
+                    element->setAttribute(attr_name, attr_value);
+                    
+                    if (debug_mode_) {
+                        std::cout << "Set attribute: " << attr_name << " = ";
+                        if (std::holds_alternative<std::string>(attr_value)) {
+                            std::cout << std::get<std::string>(attr_value);
+                        } else if (std::holds_alternative<int>(attr_value)) {
+                            std::cout << std::get<int>(attr_value);
+                        } else if (std::holds_alternative<double>(attr_value)) {
+                            std::cout << std::get<double>(attr_value);
+                        }
+                        std::cout << std::endl;
+                    }
+                    
+                    if (check(TokenType::SEMICOLON)) {
+                        consume(); // 消费 ;
+                    }
+                    
+                    // 跳过空白字符
+                    while (!isAtEnd() && (current().type == TokenType::NEWLINE || current().type == TokenType::WHITESPACE)) {
+                        consume();
+                    }
+                } else {
+                    // 如果没有找到属性分隔符，回退
+                    current_token_--;
+                    break;
+                }
+            }
+            
+            // 然后解析子节点
             while (!isAtEnd() && !check(TokenType::RBRACE)) {
                 auto child = parseElement();
                 if (child) {
                     element->addChild(child);
+                } else {
+                    // 如果无法解析子节点，推进到下一个token
+                    if (!isAtEnd()) {
+                        consume();
+                    }
                 }
             }
             
@@ -478,7 +548,7 @@ std::shared_ptr<CHTLNode> CHTLParser::parseScript() {
 }
 
 void CHTLParser::parseAttributes(std::shared_ptr<CHTLNode> node) {
-    while (!isAtEnd() && current().type == TokenType::IDENTIFIER) {
+    while (!isAtEnd() && current().type == TokenType::IDENTIFIER && !check(TokenType::LBRACE)) {
         std::string attr_name = consume().value;
         
         if (check(TokenType::COLON) || check(TokenType::EQUAL)) {
@@ -490,6 +560,10 @@ void CHTLParser::parseAttributes(std::shared_ptr<CHTLNode> node) {
             if (check(TokenType::SEMICOLON)) {
                 consume(); // 消费 ;
             }
+        } else {
+            // 如果没有找到属性分隔符，回退
+            current_token_--;
+            break;
         }
     }
 }
@@ -498,12 +572,14 @@ AttributeValue CHTLParser::parseAttributeValue() {
     Token current_token = current();
     
     if (current_token.type == TokenType::STRING) {
+        std::string value = current_token.value;
         consume();
-        return current_token.value;
+        return value;
     } else if (current_token.type == TokenType::NUMBER) {
+        std::string value = current_token.value;
         consume();
         try {
-            return std::stod(current_token.value);
+            return std::stod(value);
         } catch (const std::exception& e) {
             return 0.0;
         }

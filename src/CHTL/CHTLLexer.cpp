@@ -1,6 +1,7 @@
 #include "CHTL/CHTLLexer.h"
 #include <cctype>
 #include <algorithm>
+#include <iostream>
 
 namespace CHTL {
 
@@ -97,10 +98,10 @@ std::vector<Token> CHTLLexer::tokenize(const std::string& source_code) {
         
         char ch = peek();
         
-        if (isAlpha(ch) || ch == '_') {
-            tokens.push_back(readIdentifier());
-        } else if (ch == '"' || ch == '\'') {
+        if (ch == '"' || ch == '\'') {
             tokens.push_back(readString());
+        } else if (isAlpha(ch) || ch == '_') {
+            tokens.push_back(readIdentifier());
         } else if (isDigit(ch)) {
             tokens.push_back(readNumber());
         } else if (isOperator(ch)) {
@@ -214,6 +215,9 @@ Token CHTLLexer::readString() {
     }
     
     std::string value = source_code_.substr(start, current_pos_ - start - 1);
+    if (debug_mode_) {
+        std::cout << "Read string: '" << value << "'" << std::endl;
+    }
     return Token(TokenType::STRING, value, current_line_, current_column_ - value.length() - 2, start - 1);
 }
 

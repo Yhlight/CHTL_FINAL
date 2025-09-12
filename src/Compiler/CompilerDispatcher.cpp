@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <iostream>
 
 namespace CHTL {
 
@@ -195,17 +196,37 @@ CompileResult CompilerDispatcher::compileCHTL(const std::string& source_code) {
     CompileResult result;
     
     try {
+        if (debug_mode_) {
+            std::cout << "Compiler: Starting CHTL compilation, source length: " << source_code.length() << std::endl;
+        }
+        
         // 使用统一扫描器分离代码
         auto fragments = scanner_->scan(source_code);
+        
+        if (debug_mode_) {
+            std::cout << "Compiler: Found " << fragments.size() << " code fragments" << std::endl;
+        }
         
         // 编译CHTL片段
         for (const auto& fragment : fragments) {
             if (fragment.type == UnifiedScanner::CodeType::CHTL) {
+                if (debug_mode_) {
+                    std::cout << "Compiler: Processing CHTL fragment, length: " << fragment.content.length() << std::endl;
+                }
+                
                 // 词法分析
                 auto tokens = chtl_lexer_->tokenize(fragment.content);
                 
+                if (debug_mode_) {
+                    std::cout << "Compiler: Generated " << tokens.size() << " tokens" << std::endl;
+                }
+                
                 // 语法分析
                 auto ast = chtl_parser_->parse(tokens);
+                
+                if (debug_mode_) {
+                    std::cout << "Compiler: Parsing completed, AST: " << (ast ? "success" : "failed") << std::endl;
+                }
                 
                 if (ast) {
                     // 代码生成

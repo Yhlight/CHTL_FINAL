@@ -47,13 +47,13 @@ CommandType CHTLCli::parseArguments(int argc, char* argv[]) {
         return cmd->type;
     }
     
-    // 如果没有找到命令，可能是文件路径
-    if (validateFilePath(command)) {
+    // 检查是否是编译命令但没有指定文件
+    if (command == "compile" || command == "c") {
         return CommandType::COMPILE;
     }
     
-    // 检查是否是编译命令但没有指定文件
-    if (command == "compile" || command == "c") {
+    // 如果没有找到命令，可能是文件路径
+    if (validateFilePath(command)) {
         return CommandType::COMPILE;
     }
     
@@ -155,6 +155,10 @@ int CHTLCli::executeCommand(CommandType command_type) {
 }
 
 int CHTLCli::compileFile(const std::string& input_file, const std::string& output_file) {
+    if (debug_mode_) {
+        std::cout << "CLI: Starting compilation of " << input_file << std::endl;
+    }
+    
     if (!validateFilePath(input_file)) {
         addError("Input file does not exist: " + input_file);
         return 1;
@@ -172,11 +176,23 @@ int CHTLCli::compileFile(const std::string& input_file, const std::string& outpu
     std::string source_code = buffer.str();
     file.close();
     
+    if (debug_mode_) {
+        std::cout << "CLI: Source code loaded, length: " << source_code.length() << std::endl;
+    }
+    
     // 设置编译器选项
     compiler_->setDebugMode(options_.debug);
     
+    if (debug_mode_) {
+        std::cout << "CLI: Starting compiler..." << std::endl;
+    }
+    
     // 编译代码
     auto result = compiler_->compile(source_code);
+    
+    if (debug_mode_) {
+        std::cout << "CLI: Compilation completed, success: " << result.success << std::endl;
+    }
     
     if (!result.success) {
         std::cerr << "Compilation failed:" << std::endl;
