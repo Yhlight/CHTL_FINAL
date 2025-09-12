@@ -4,9 +4,6 @@ AGENTS.jules.md v0.0.1
 
 This document contains repository-specific operational instructions for the Jules persona.
 
-- [Back to main AGENTS.md](../AGENTS.md)
-- [Jules's Human Instructions](../humans/HUMANS.jules.md)
-
 ## Core Operational Loop
 
 1.  **Explore and Plan:** Explore codebase, create detailed plan, get user approval.
