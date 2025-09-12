@@ -1,17 +1,17 @@
-[Template] @Style DefaultText {
-    font-family: Arial, sans-serif;
-    font-size: 16px;
-    line-height: 1.6;
+[Template] @Var Theme {
+    primaryColor: #007bff;
+    secondaryColor: #6c757d;
+    baseFontSize: 16px;
 }
 
 html {
     body {
-        p {
+        div {
             style {
-                @Style DefaultText;
-                color: #333;
+                color: Theme(primaryColor);
+                font-size: Theme(baseFontSize);
+                border: 1px solid Theme(secondaryColor);
             }
-            text { "This paragraph uses the default text style." }
         }
     }
 }

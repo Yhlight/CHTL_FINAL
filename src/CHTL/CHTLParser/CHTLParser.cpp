@@ -10,8 +10,8 @@ std::unique_ptr<RootNode> CHTLParser::parse() {
     auto root = std::make_unique<RootNode>();
     while (!isAtEnd()) {
         try {
-            auto node = parseDeclaration();
-            if (node) { // Only add non-null nodes to the tree
+            auto nodes = parseDeclaration();
+            for (auto& node : nodes) {
                 root->children_.push_back(std::move(node));
             }
         } catch (const std::runtime_error& e) {
@@ -23,25 +23,43 @@ std::unique_ptr<RootNode> CHTLParser::parse() {
     return root;
 }
 
-std::unique_ptr<Node> CHTLParser::parseDeclaration() {
+std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
+    std::vector<std::unique_ptr<Node>> nodes;
     if (match({TokenType::Template})) {
         parseTemplateDefinition();
-        return nullptr; // Definitions don't produce a node in the main tree
+        return nodes; // Return empty vector for definitions
     }
-    if (match({TokenType::Style})) {
-        return parseStyleBlock();
-    }
-    if (match({TokenType::Identifier})) {
-        // It's an element if it's an identifier followed by a brace
-        if (peek().type == TokenType::OpenBrace) {
-            return parseElement();
+    if (match({TokenType::AtElement})) {
+        const Token& name = consume(TokenType::Identifier, "Expected template name after '@Element'.");
+        consume(TokenType::Semicolon, "Expected ';' after element template usage.");
+        if (element_templates_.count(name.lexeme)) {
+            const auto& templateNode = element_templates_[name.lexeme];
+            for (const auto& child : templateNode->children_) {
+                nodes.push_back(child->clone());
+            }
+            return nodes;
+        } else {
+            throw std::runtime_error("Use of undefined element template '" + name.lexeme + "'.");
         }
     }
-    if (match({TokenType::Text})) {
-        return parseText();
+
+    // For single-node declarations, wrap them in a vector
+    std::unique_ptr<Node> singleNode = nullptr;
+    if (match({TokenType::Style})) {
+        singleNode = parseStyleBlock();
+    } else if (match({TokenType::Identifier})) {
+        if (peek().type == TokenType::OpenBrace) {
+            singleNode = parseElement();
+        }
+    } else if (match({TokenType::Text})) {
+        singleNode = parseText();
+    } else if (match({TokenType::GeneratorComment})) {
+        singleNode = parseGeneratorComment();
     }
-    if (match({TokenType::GeneratorComment})) {
-        return parseGeneratorComment();
+
+    if(singleNode) {
+        nodes.push_back(std::move(singleNode));
+        return nodes;
     }
 
     // If no declaration matches, advance and report error.
@@ -67,6 +85,8 @@ void CHTLParser::parseElementBody(ElementNode& element) {
             const Token& key = consume(TokenType::Identifier, "Expected attribute name.");
             consume(TokenType::Colon, "Expected ':' after attribute name.");
 
+            // This logic for parsing a single value is now incorrect, as values can be expressions.
+            // However, for attributes, they are typically single values. This might need a revisit.
             std::string value;
             if (match({TokenType::StringLiteral, TokenType::UnquotedLiteral, TokenType::Identifier})) {
                 value = previous().lexeme;
@@ -79,7 +99,10 @@ void CHTLParser::parseElementBody(ElementNode& element) {
         }
         // Otherwise, it must be a declaration (like a child element or style block).
         else {
-            element.children_.push_back(parseDeclaration());
+            auto nodes = parseDeclaration();
+            for (auto& node : nodes) {
+                element.children_.push_back(std::move(node));
+            }
         }
     }
 }
@@ -98,30 +121,68 @@ std::unique_ptr<CommentNode> CHTLParser::parseGeneratorComment() {
 }
 
 void CHTLParser::parseTemplateDefinition() {
-    consume(TokenType::AtStyle, "Expected '@Style' after '[Template]'.");
-    const Token& name = consume(TokenType::Identifier, "Expected template name.");
+    if (match({TokenType::AtStyle})) {
+        const Token& name = consume(TokenType::Identifier, "Expected template name.");
+        auto templateNode = std::make_shared<StyleTemplateNode>(name.lexeme);
 
-    auto templateNode = std::make_shared<StyleTemplateNode>(name.lexeme);
+        consume(TokenType::OpenBrace, "Expected '{' after template name.");
+        while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+            const Token& key = consume(TokenType::Identifier, "Expected CSS property name in template.");
+            consume(TokenType::Colon, "Expected ':' after property name.");
 
-    consume(TokenType::OpenBrace, "Expected '{' after template name.");
-    while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        const Token& key = consume(TokenType::Identifier, "Expected CSS property name in template.");
-        consume(TokenType::Colon, "Expected ':' after property name.");
+            std::vector<Token> value_tokens;
+            while(peek().type != TokenType::Semicolon && !isAtEnd()) {
+                value_tokens.push_back(advance());
+            }
+            if (value_tokens.empty()) {
+                throw std::runtime_error("Expected CSS property value in template.");
+            }
 
-        std::vector<Token> value_tokens;
-        while(peek().type != TokenType::Semicolon && !isAtEnd()) {
-            value_tokens.push_back(advance());
+            consume(TokenType::Semicolon, "Expected ';' after property value.");
+            templateNode->properties_.emplace_back(key.lexeme, value_tokens);
         }
-        if (value_tokens.empty()) {
-            throw std::runtime_error("Expected CSS property value in template.");
-        }
+        consume(TokenType::CloseBrace, "Expected '}' after template body.");
+        style_templates_[name.lexeme] = templateNode;
 
-        consume(TokenType::Semicolon, "Expected ';' after property value.");
-        templateNode->properties_.emplace_back(key.lexeme, value_tokens);
+    } else if (match({TokenType::AtElement})) {
+        const Token& name = consume(TokenType::Identifier, "Expected template name.");
+        auto templateNode = std::make_shared<ElementTemplateNode>(name.lexeme);
+
+        consume(TokenType::OpenBrace, "Expected '{' after template name.");
+        while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+            auto nodes = parseDeclaration();
+            for (auto& node : nodes) {
+                templateNode->children_.push_back(std::move(node));
+            }
+        }
+        consume(TokenType::CloseBrace, "Expected '}' after template body.");
+        element_templates_[name.lexeme] = templateNode;
+    } else if (match({TokenType::AtVar})) {
+        const Token& name = consume(TokenType::Identifier, "Expected template name.");
+        auto templateNode = std::make_shared<VarTemplateNode>(name.lexeme);
+
+        consume(TokenType::OpenBrace, "Expected '{' after template name.");
+        while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+            const Token& key = consume(TokenType::Identifier, "Expected variable name in template.");
+            consume(TokenType::Colon, "Expected ':' after variable name.");
+
+            std::vector<Token> value_tokens;
+            while(peek().type != TokenType::Semicolon && !isAtEnd()) {
+                value_tokens.push_back(advance());
+            }
+            if (value_tokens.empty()) {
+                throw std::runtime_error("Expected variable value in template.");
+            }
+
+            consume(TokenType::Semicolon, "Expected ';' after variable value.");
+            templateNode->variables_[key.lexeme] = value_tokens;
+        }
+        consume(TokenType::CloseBrace, "Expected '}' after template body.");
+        var_templates_[name.lexeme] = templateNode;
     }
-    consume(TokenType::CloseBrace, "Expected '}' after template body.");
-
-    style_templates_[name.lexeme] = templateNode;
+    else {
+        throw std::runtime_error("Expected '@Style', '@Element', or '@Var' after '[Template]'.");
+    }
 }
 
 std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
@@ -149,13 +210,7 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
             const Token& key = consume(TokenType::Identifier, "Expected CSS property name.");
             consume(TokenType::Colon, "Expected ':' after CSS property name.");
 
-            std::vector<Token> value_tokens;
-            while(peek().type != TokenType::Semicolon && !isAtEnd()) {
-                value_tokens.push_back(advance());
-            }
-            if (value_tokens.empty()) {
-                throw std::runtime_error("Expected CSS property value.");
-            }
+            std::vector<Token> value_tokens = parsePropertyValue();
 
             consume(TokenType::Semicolon, "Expected ';' after CSS property value.");
             styleNode->inline_properties_.emplace_back(key.lexeme, value_tokens);
@@ -171,13 +226,7 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
                 const Token& key = consume(TokenType::Identifier, "Expected CSS property name inside rule.");
                 consume(TokenType::Colon, "Expected ':' after CSS property name.");
 
-                std::vector<Token> value_tokens;
-                while(peek().type != TokenType::Semicolon && !isAtEnd()) {
-                    value_tokens.push_back(advance());
-                }
-                if (value_tokens.empty()) {
-                    throw std::runtime_error("Expected CSS property value inside rule.");
-                }
+                std::vector<Token> value_tokens = parsePropertyValue();
 
                 consume(TokenType::Semicolon, "Expected ';' after CSS property value.");
                 ruleNode->properties_.emplace_back(key.lexeme, value_tokens);
@@ -193,6 +242,39 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
 
     consume(TokenType::CloseBrace, "Expected '}' after style block.");
     return styleNode;
+}
+
+std::vector<Token> CHTLParser::parsePropertyValue() {
+    std::vector<Token> final_tokens;
+    while (peek().type != TokenType::Semicolon && !isAtEnd()) {
+        // Check for variable usage: GroupName(VarName)
+        if (peek().type == TokenType::Identifier && peekNext().type == TokenType::OpenParen) {
+            const Token& groupName = advance();
+            consume(TokenType::OpenParen, "Expected '(' after variable group name.");
+            const Token& varName = consume(TokenType::Identifier, "Expected variable name inside parentheses.");
+            consume(TokenType::CloseParen, "Expected ')' after variable name.");
+
+            if (var_templates_.count(groupName.lexeme)) {
+                const auto& templateNode = var_templates_.at(groupName.lexeme);
+                if (templateNode->variables_.count(varName.lexeme)) {
+                    const auto& substituted_tokens = templateNode->variables_.at(varName.lexeme);
+                    final_tokens.insert(final_tokens.end(), substituted_tokens.begin(), substituted_tokens.end());
+                } else {
+                    throw std::runtime_error("Undefined variable '" + varName.lexeme + "' in group '" + groupName.lexeme + "'.");
+                }
+            } else {
+                throw std::runtime_error("Use of undefined variable group '" + groupName.lexeme + "'.");
+            }
+        } else {
+            // It's a regular token, just add it to the list.
+            final_tokens.push_back(advance());
+        }
+    }
+
+    if (final_tokens.empty()) {
+        throw std::runtime_error("Expected CSS property value.");
+    }
+    return final_tokens;
 }
 
 // --- Helper Methods ---

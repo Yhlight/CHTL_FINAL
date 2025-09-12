@@ -22,6 +22,16 @@ public:
 
     // For full CSS rules to be extracted to a global style tag
     std::vector<std::unique_ptr<CssRuleNode>> rules_;
+
+    std::unique_ptr<Node> clone() const override {
+        auto new_node = std::make_unique<StyleBlockNode>();
+        new_node->inline_properties_ = this->inline_properties_;
+        for (const auto& rule : this->rules_) {
+            // CssRuleNode inherits from Node, but we need to downcast from the result of clone()
+            new_node->rules_.push_back(std::unique_ptr<CssRuleNode>(static_cast<CssRuleNode*>(rule->clone().release())));
+        }
+        return new_node;
+    }
 };
 
 } // namespace CHTL

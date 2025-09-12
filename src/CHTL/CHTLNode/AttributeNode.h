@@ -10,6 +10,10 @@ class AttributeNode { // Does not need to inherit from Node, as it's not a child
 public:
     AttributeNode(const std::string& key, const std::string& value) : key_(key), value_(value) {}
 
+    std::unique_ptr<AttributeNode> clone() const {
+        return std::make_unique<AttributeNode>(key_, value_);
+    }
+
     std::string key_;
     std::string value_;
 };

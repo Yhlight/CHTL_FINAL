@@ -14,6 +14,14 @@ public:
 
     NodeType getType() const override { return NodeType::Root; }
 
+    std::unique_ptr<Node> clone() const override {
+        auto new_node = std::make_unique<RootNode>();
+        for (const auto& child : this->children_) {
+            new_node->children_.push_back(child->clone());
+        }
+        return new_node;
+    }
+
     std::vector<std::unique_ptr<Node>> children_;
 };
 

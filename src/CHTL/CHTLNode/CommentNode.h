@@ -12,6 +12,10 @@ public:
 
     NodeType getType() const override { return NodeType::Comment; }
 
+    std::unique_ptr<Node> clone() const override {
+        return std::make_unique<CommentNode>(comment_);
+    }
+
     std::string comment_;
 };
 

@@ -9,6 +9,8 @@
 #include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/StyleBlockNode.h"
 #include "../CHTLNode/StyleTemplateNode.h"
+#include "../CHTLNode/ElementTemplateNode.h"
+#include "../CHTLNode/VarTemplateNode.h"
 #include <vector>
 #include <memory>
 #include <unordered_map>
@@ -21,11 +23,12 @@ public:
     std::unique_ptr<RootNode> parse();
 
 private:
-    std::unique_ptr<Node> parseDeclaration();
+    std::vector<std::unique_ptr<Node>> parseDeclaration();
     void parseTemplateDefinition();
     std::unique_ptr<ElementNode> parseElement();
     void parseElementBody(ElementNode& element);
     void parseAttributes(ElementNode& element);
+    std::vector<Token> parsePropertyValue();
     std::unique_ptr<TextNode> parseText();
     std::unique_ptr<StyleBlockNode> parseStyleBlock();
     std::unique_ptr<CommentNode> parseGeneratorComment();
@@ -43,6 +46,8 @@ private:
 
     const std::vector<Token>& tokens_;
     std::unordered_map<std::string, std::shared_ptr<StyleTemplateNode>> style_templates_;
+    std::unordered_map<std::string, std::shared_ptr<ElementTemplateNode>> element_templates_;
+    std::unordered_map<std::string, std::shared_ptr<VarTemplateNode>> var_templates_;
     size_t current_ = 0;
     bool hadError_ = false;
 };

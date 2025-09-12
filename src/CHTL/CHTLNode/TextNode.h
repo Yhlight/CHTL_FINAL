@@ -12,6 +12,10 @@ public:
 
     NodeType getType() const override { return NodeType::Text; }
 
+    std::unique_ptr<Node> clone() const override {
+        return std::make_unique<TextNode>(text_);
+    }
+
     std::string text_;
 };
 
