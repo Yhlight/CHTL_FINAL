@@ -130,6 +130,29 @@ def run_circular_reference_test():
     print("✅ Circular References test passed.")
     return True
 
+def run_script_test():
+    print("\n--- Running Script Tag Test ---")
+    test_file = os.path.join(os.path.dirname(__file__), 'script.chtl')
+    output_html = run_compiler_pipeline(test_file, debug=False)
+    if output_html is None: return False
+
+    expected_external = '<script src="/static/js/app.js" async></script>'
+    if expected_external not in output_html:
+        print("❌ Script test FAILED on external script.")
+        print(f"Expected: {expected_external}")
+        print(f"Got HTML: {output_html}")
+        return False
+
+    expected_inline_content = 'const message = "Hello from inline CHTL script!";'
+    if expected_inline_content not in output_html:
+        print("❌ Script test FAILED on inline script content.")
+        print(f"Expected content not found: {expected_inline_content}")
+        print(f"Got HTML: {output_html}")
+        return False
+
+    print("✅ Script test passed.")
+    return True
+
 if __name__ == "__main__":
     test_results = []
     # Re-enable the basic test now that it's fixed.
@@ -139,6 +162,7 @@ if __name__ == "__main__":
     test_results.append(run_arithmetic_test())
     test_results.append(run_references_test())
     test_results.append(run_circular_reference_test())
+    test_results.append(run_script_test())
 
     if all(test_results):
         print("\n✅ All tests passed!")

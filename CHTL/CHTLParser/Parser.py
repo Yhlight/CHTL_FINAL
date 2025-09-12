@@ -1,6 +1,6 @@
 from typing import Union, Tuple
 from CHTL.CHTLLexer import Lexer, Token, TokenType
-from CHTL.CHTLNode import (BaseNode, ElementNode, TextNode, StyleNode, CssRule,
+from CHTL.CHTLNode import (BaseNode, ElementNode, TextNode, StyleNode, CssRule, ScriptNode,
                            ExpressionNode, InfixExpressionNode, NumericLiteralNode, PropertyReferenceNode)
 from enum import IntEnum
 
@@ -117,7 +117,8 @@ class Parser:
 
         # We need to store the selector tokens. We will have to reconstruct them.
         # This is hacky but will work for simple selectors.
-        selector_token = Token(TokenType.IDENTIFIER, left.value)
+        # Providing dummy positions as we don't have them here.
+        selector_token = Token(TokenType.IDENTIFIER, left.value, -1, -1)
 
         return PropertyReferenceNode(selector_tokens=[selector_token], property_name=property_name)
 
@@ -164,6 +165,8 @@ class Parser:
             return self._parse_text_body()
         elif identifier.lower() == 'style':
             return self._parse_style_body()
+        elif identifier.lower() == 'script':
+            return self._parse_script_body()
         else:
             return self._parse_element_body(identifier)
 
@@ -286,3 +289,70 @@ class Parser:
         value = " ".join(value_parts)
         self._next_token() # Consume '}'
         return TextNode(value=value)
+
+    def _parse_script_body(self) -> ScriptNode:
+        attributes = {}
+        content = ""
+
+        if self.current_token.type == TokenType.RBRACE: # Empty script block
+            self._next_token() # Consume '}'
+            return ScriptNode()
+
+        # Check if the block contains attributes (like src) or inline code
+        if self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type in (TokenType.COLON, TokenType.EQUALS):
+            # Parsing attributes
+            while self.current_token.type != TokenType.RBRACE and self.current_token.type != TokenType.EOF:
+                if self.current_token.type == TokenType.IDENTIFIER and self.peek_token.type in (TokenType.COLON, TokenType.EQUALS):
+                    attr_name = self.current_token.literal
+                    self._next_token()  # consume name
+                    self._next_token()  # consume colon/equals
+                    if self.current_token.type in (TokenType.STRING, TokenType.IDENTIFIER):
+                        literal = self.current_token.literal
+                        if literal == 'true':
+                            attributes[attr_name] = True
+                        elif literal == 'false':
+                            attributes[attr_name] = False
+                        else:
+                            attributes[attr_name] = literal
+                        self._next_token()  # consume value
+                    else:
+                        self.errors.append(f"Expected script attribute value for '{attr_name}'")
+
+                    if self.current_token.type == TokenType.SEMICOLON:
+                        self._next_token()
+                    else:
+                        self.errors.append(f"Missing semicolon for script attribute '{attr_name}'")
+                else:
+                    self.errors.append(f"Unexpected token in script attribute block: {self.current_token.literal}")
+                    self._next_token()
+        else:
+            # Parsing inline content
+            start_pos = self.current_token.start_pos
+            # Scan forward to find the end position without consuming the '}'
+            temp_pos = self.lexer.pos
+            temp_curr = self.lexer.current_char
+
+            end_pos = start_pos
+            # This is inefficient, as it re-lexes, but it's the simplest way
+            # without a more complex parser lookahead buffer.
+            temp_lexer = Lexer(self.lexer.text)
+            temp_lexer.pos = self.current_token.start_pos
+            temp_lexer.current_char = temp_lexer.text[temp_lexer.pos]
+
+            temp_tok = self.current_token
+            while temp_tok.type not in (TokenType.RBRACE, TokenType.EOF):
+                end_pos = temp_tok.end_pos
+                temp_tok = temp_lexer.get_next_token()
+
+            content = self.lexer.text[start_pos:end_pos]
+
+            # Now, advance the main lexer to the correct position
+            while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
+                self._next_token()
+
+        if self.current_token.type == TokenType.RBRACE:
+            self._next_token()  # Consume '}'
+        else:
+            self.errors.append("Expected '}' to close script block.")
+
+        return ScriptNode(attributes=attributes, content=content)

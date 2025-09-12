@@ -1,0 +1,11 @@
+// Test an external script
+script {
+    src: "/static/js/app.js";
+    async: true;
+}
+
+// Test an inline script
+script {
+    const message = "Hello from inline CHTL script!";
+    console.log(message);
+}

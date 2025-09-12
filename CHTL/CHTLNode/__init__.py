@@ -9,3 +9,4 @@ from .ExpressionNode import ExpressionNode
 from .NumericLiteralNode import NumericLiteralNode
 from .InfixExpressionNode import InfixExpressionNode
 from .PropertyReferenceNode import PropertyReferenceNode
+from .ScriptNode import ScriptNode

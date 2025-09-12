@@ -7,6 +7,7 @@ from CHTL.CHTLNode.ExpressionNode import ExpressionNode
 from CHTL.CHTLNode.InfixExpressionNode import InfixExpressionNode
 from CHTL.CHTLNode.NumericLiteralNode import NumericLiteralNode
 from CHTL.CHTLNode.PropertyReferenceNode import PropertyReferenceNode
+from CHTL.CHTLNode.ScriptNode import ScriptNode
 import html
 import re
 
@@ -233,7 +234,29 @@ class Generator:
         if isinstance(node, ElementNode): return self._generate_element_node(node)
         elif isinstance(node, TextNode): return self._generate_text_node(node)
         elif isinstance(node, StyleNode): return ""
+        elif isinstance(node, ScriptNode): return self._generate_script_node(node)
         return ""
+
+    def _generate_script_node(self, node: ScriptNode) -> str:
+        """Generates a <script> tag from a ScriptNode."""
+        # Note: The 'html' library is not used for attributes here because script attributes
+        # are often boolean and don't need escaping in the same way. This is a simplification.
+        attr_parts = []
+        for key, value in node.attributes.items():
+            if value is True: # For boolean attributes like 'async'
+                attr_parts.append(key)
+            else:
+                attr_parts.append(f'{key}="{html.escape(str(value), quote=True)}"')
+
+        attr_string = " " + " ".join(attr_parts) if attr_parts else ""
+
+        # Inline script vs. external script
+        if node.content:
+            # The content is pre-formatted, raw JS. No escaping needed.
+            return f"<script{attr_string}>\n{node.content}\n</script>"
+        else:
+            # External script, e.g., <script src="..."></script>
+            return f"<script{attr_string}></script>"
 
     def _generate_element_node(self, node: ElementNode) -> str:
         tag_name = node.tag_name.lower()

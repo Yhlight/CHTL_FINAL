@@ -44,6 +44,8 @@ class TokenType(Enum):
     COMMENT_GENERATOR = "--"
 
 
-# A Token is a named tuple with a type and a literal value.
-# The type is from the TokenType enum, and the literal is the original string.
-Token = collections.namedtuple('Token', ['type', 'literal'])
+# A Token is a named tuple that includes its type, literal value, and position in the source.
+# The type is from the TokenType enum.
+# The literal is the original string from the source code.
+# start_pos and end_pos are the character indices in the source text.
+Token = collections.namedtuple('Token', ['type', 'literal', 'start_pos', 'end_pos'])

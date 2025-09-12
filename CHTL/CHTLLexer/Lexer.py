@@ -55,12 +55,13 @@ class Lexer:
         Parses an identifier or an unquoted literal. Allows for hyphens,
         which are common in CSS class names and attributes.
         """
+        start_pos = self.pos
         result = ''
         # This will also tokenize unquoted literals like `red` or `content-box`.
         while self.current_char is not None and (self.current_char.isalnum() or self.current_char == '-'):
             result += self.current_char
             self._advance()
-        return Token(TokenType.IDENTIFIER, result)
+        return Token(TokenType.IDENTIFIER, result, start_pos, self.pos)
 
     def _hex_literal(self) -> Token:
         """Parses a hex color code literal, e.g., #ff0000."""
@@ -69,21 +70,22 @@ class Lexer:
         while self.current_char is not None and self.current_char.isalnum():
             self._advance()
         literal = self.text[start_pos:self.pos]
-        return Token(TokenType.HEX_LITERAL, literal)
+        return Token(TokenType.HEX_LITERAL, literal, start_pos, self.pos)
 
     def _string(self, quote_type: str) -> Token:
         """Parses a quoted string literal."""
-        self._advance()  # Consume the opening quote
         start_pos = self.pos
+        self._advance()  # Consume the opening quote
+        str_start_pos = self.pos
         while self.current_char is not None and self.current_char != quote_type:
             self._advance()
 
         if self.current_char is None:
-            return Token(TokenType.ILLEGAL, self.text[start_pos - 1:])
+            return Token(TokenType.ILLEGAL, self.text[start_pos:], start_pos, self.pos)
 
-        literal = self.text[start_pos:self.pos]
+        literal = self.text[str_start_pos:self.pos]
         self._advance()  # Consume the closing quote
-        return Token(TokenType.STRING, literal)
+        return Token(TokenType.STRING, literal, start_pos, self.pos)
 
     def get_next_token(self) -> Token:
         """
@@ -96,6 +98,8 @@ class Lexer:
 
             if self.current_char is None:
                 break
+
+            start_pos = self.pos
 
             if self.current_char.isalpha() or self.current_char.isdigit():
                 return self._identifier()
@@ -113,7 +117,7 @@ class Lexer:
                 if self._peek() == '*':
                     self._advance()
                     self._advance()
-                    return Token(TokenType.DOUBLE_ASTERISK, "**")
+                    return Token(TokenType.DOUBLE_ASTERISK, "**", start_pos, self.pos)
                 # Fallthrough to the token_map for a single '*'
 
             token_map = {
@@ -136,11 +140,11 @@ class Lexer:
                 token_type = token_map[self.current_char]
                 char = self.current_char
                 self._advance()
-                return Token(token_type, char)
+                return Token(token_type, char, start_pos, self.pos)
 
             # If we haven't matched anything, it's an illegal character.
             char = self.current_char
             self._advance()
-            return Token(TokenType.ILLEGAL, char)
+            return Token(TokenType.ILLEGAL, char, start_pos, self.pos)
 
-        return Token(TokenType.EOF, "")
+        return Token(TokenType.EOF, "", self.pos, self.pos)
