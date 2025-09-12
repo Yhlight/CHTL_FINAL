@@ -1,5 +1,5 @@
 from CHTL.CHTLLexer import Lexer, Token, TokenType
-from CHTL.CHTLNode import BaseNode, ElementNode, TextNode
+from CHTL.CHTLNode import BaseNode, ElementNode, TextNode, StyleNode
 
 class Parser:
     """
@@ -61,21 +61,28 @@ class Parser:
             return self.parse_element_or_text_statement()
         return None
 
-    def parse_element_or_text_statement(self) -> ElementNode | TextNode | None:
+    def parse_element_or_text_statement(self) -> ElementNode | TextNode | StyleNode | None:
         """
-        Parses an element (e.g., `div {}`) or a text node (`text {}`).
+        Parses an element (e.g., `div {}`), a text node (`text {}`), or a style node (`style {}`).
         """
         identifier = self.current_token.literal
 
         if self.peek_token.type != TokenType.LBRACE:
-            # This could be an unquoted literal later, but for now it's an element
+            # This could be an attribute or a syntax error, but it's not a block statement.
             return None
 
-        self._next_token() # Consume identifier, current_token is now LBRACE
+        # Don't advance tokens here. Let the sub-parsers do it.
+        # This allows _parse_element_body to get the tag_name correctly.
 
         if identifier.lower() == 'text':
+            self._next_token()  # Consume the 'text' identifier
             return self._parse_text_body()
+        elif identifier.lower() == 'style':
+            self._next_token()  # Consume the 'style' identifier
+            return self._parse_style_body()
         else:
+            # It's a standard element.
+            # We don't consume the identifier here because _parse_element_body needs it.
             return self._parse_element_body(identifier)
 
     def _parse_element_body(self, tag_name: str) -> ElementNode:
@@ -135,6 +142,52 @@ class Parser:
             self.errors.append(f"Missing semicolon ';' after attribute value for '{attr_name}'")
         else:
             self._next_token() # Consume the value token, leaving the semicolon as current
+
+    def _skip_to_next_statement(self):
+        """Helper for error recovery, skips tokens until a sensible recovery point."""
+        while self.current_token.type not in (TokenType.SEMICOLON, TokenType.RBRACE, TokenType.EOF):
+            self._next_token()
+        # Consume the recovery token itself to start fresh on the next one
+        if self.current_token.type == TokenType.SEMICOLON:
+            self._next_token()
+
+    def _parse_style_body(self) -> StyleNode:
+        """Parses the block content of a style node, e.g., `{ width: 100px; }`."""
+        # Assumes current_token is '{'
+        self._next_token() # Consume '{'
+
+        properties = {}
+        while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
+            if self.current_token.type != TokenType.IDENTIFIER:
+                self.errors.append(f"Expected CSS property name, got {self.current_token.type}")
+                self._skip_to_next_statement()
+                continue
+
+            prop_name = self.current_token.literal
+
+            if not self._expect_peek(TokenType.COLON):
+                self._skip_to_next_statement()
+                continue
+
+            self._next_token() # consume colon, current_token is now the start of the value
+
+            value_parts = []
+            while self.current_token.type not in (TokenType.SEMICOLON, TokenType.RBRACE, TokenType.EOF):
+                value_parts.append(self.current_token.literal)
+                self._next_token()
+
+            if not value_parts:
+                self.errors.append(f"Missing value for CSS property '{prop_name}'")
+
+            properties[prop_name] = " ".join(value_parts)
+
+            if self.current_token.type == TokenType.SEMICOLON:
+                self._next_token() # Consume semicolon to start the next property
+            else:
+                self.errors.append(f"Missing semicolon for CSS property '{prop_name}'")
+
+        # The loop terminates when current_token is RBRACE. The calling loop will consume it.
+        return StyleNode(properties=properties)
 
     def _parse_text_body(self) -> TextNode | None:
         """

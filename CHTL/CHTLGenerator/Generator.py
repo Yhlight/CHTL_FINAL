@@ -1,4 +1,4 @@
-from CHTL.CHTLNode import BaseNode, ElementNode, TextNode
+from CHTL.CHTLNode import BaseNode, ElementNode, TextNode, StyleNode
 import html
 
 class Generator:
@@ -45,16 +45,37 @@ class Generator:
         return " " + " ".join(parts)
 
     def _generate_element_node(self, node: ElementNode) -> str:
-        """Generates an HTML element from an ElementNode, including its attributes."""
+        """Generates an HTML element from an ElementNode, processing inline styles and attributes."""
         tag_name = node.tag_name.lower()
+
+        # Find any StyleNode children and process them into an inline style attribute.
+        inline_styles = {}
+        for child in node.children:
+            if isinstance(child, StyleNode):
+                inline_styles.update(child.properties)
+
+        if inline_styles:
+            # Format the collected styles into a string: "key: value; key2: value2"
+            style_string = "; ".join(f"{key}: {value}" for key, value in inline_styles.items())
+
+            # Safely merge with any existing style attribute.
+            existing_style = node.attributes.get("style", "")
+            if existing_style and not existing_style.strip().endswith(';'):
+                existing_style += ";"
+
+            final_style = f"{existing_style} {style_string}".strip()
+            node.attributes["style"] = final_style
+
+        # Generate the attribute string now that styles have been merged.
         attr_string = self._generate_attributes(node)
 
         if tag_name in self.self_closing_tags:
-            # Self-closing tags have no children content.
             return f"<{tag_name}{attr_string}>"
 
-        # Generate children's HTML recursively.
-        children_html = "".join(self._generate_node(child) for child in node.children)
+        # Generate children's HTML, excluding StyleNodes which have already been processed.
+        children_html = "".join(
+            self._generate_node(child) for child in node.children if not isinstance(child, StyleNode)
+        )
 
         return f"<{tag_name}{attr_string}>{children_html}</{tag_name}>"
 

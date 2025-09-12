@@ -71,7 +71,7 @@ if __name__ == "__main__":
         print(output_html)
 
         # Verification
-        expected_html = '<html><body><h1 class="main-title">Welcome to CHTL</h1><div id="container" class="content-box"></div><p>This is an unquoted test</p><img src="image.jpg" alt="A test image"></body></html>'
+        expected_html = '<html><body><h1 class="main-title">Welcome to CHTL</h1><div id="container" class="content-box" style="width: 100px; height: 200px; background-color: red"></div><p>This is an unquoted test</p><img src="image.jpg" alt="A test image"></body></html>'
 
         print("\n--- Verification ---")
         if output_html == expected_html:

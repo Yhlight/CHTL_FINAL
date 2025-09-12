@@ -88,7 +88,7 @@ class Lexer:
             if self.current_char is None:
                 break
 
-            if self.current_char.isalpha():
+            if self.current_char.isalpha() or self.current_char.isdigit():
                 return self._identifier()
 
             if self.current_char in ('"', "'"):

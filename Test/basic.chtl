@@ -12,6 +12,11 @@ html {
         div {
             id = "container"; // Test '=' as well as ':'
             class: content-box; // Test unquoted attribute value
+            style {
+                width: 100px;
+                height: 200px;
+                background-color: red;
+            }
         }
 
         p {
