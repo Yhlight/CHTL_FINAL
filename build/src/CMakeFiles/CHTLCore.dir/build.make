@@ -352,10 +352,38 @@ src/CMakeFiles/CHTLCore.dir/CJMOD/CJMODCompiler.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLCore.dir/CJMOD/CJMODCompiler.cpp.s"
 	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/CJMOD/CJMODCompiler.cpp -o CMakeFiles/CHTLCore.dir/CJMOD/CJMODCompiler.cpp.s
 
+src/CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.o: src/CMakeFiles/CHTLCore.dir/flags.make
+src/CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.o: /workspace/src/CodeMerger/CodeMerger.cpp
+src/CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.o: src/CMakeFiles/CHTLCore.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object src/CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.o"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.o -MF CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.o.d -o CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.o -c /workspace/src/CodeMerger/CodeMerger.cpp
+
+src/CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.i"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/src/CodeMerger/CodeMerger.cpp > CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.i
+
+src/CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.s"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/CodeMerger/CodeMerger.cpp -o CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.s
+
+src/CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: src/CMakeFiles/CHTLCore.dir/flags.make
+src/CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: /workspace/src/CompilerDispatcher/CompilerDispatcher.cpp
+src/CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: src/CMakeFiles/CHTLCore.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object src/CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.o"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.o -MF CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.o.d -o CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.o -c /workspace/src/CompilerDispatcher/CompilerDispatcher.cpp
+
+src/CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.i"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/src/CompilerDispatcher/CompilerDispatcher.cpp > CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.i
+
+src/CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.s"
+	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/CompilerDispatcher/CompilerDispatcher.cpp -o CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.s
+
 src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o: src/CMakeFiles/CHTLCore.dir/flags.make
 src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o: /workspace/src/Scanner/UnifiedScanner.cpp
 src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o: src/CMakeFiles/CHTLCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o"
 	cd /workspace/build/src && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o -MF CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o.d -o CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o -c /workspace/src/Scanner/UnifiedScanner.cpp
 
 src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.i: cmake_force
@@ -388,6 +416,8 @@ CHTLCore_OBJECTS = \
 "CMakeFiles/CHTLCore.dir/ModuleManager.cpp.o" \
 "CMakeFiles/CHTLCore.dir/CJMOD/CJMODAPI.cpp.o" \
 "CMakeFiles/CHTLCore.dir/CJMOD/CJMODCompiler.cpp.o" \
+"CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.o" \
+"CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.o" \
 "CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o"
 
 # External object files for target CHTLCore
@@ -413,10 +443,12 @@ lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/ModuleManager.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/CJMOD/CJMODAPI.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/CJMOD/CJMODCompiler.cpp.o
+lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.o
+lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/build.make
 lib/libCHTLCore.a: src/CMakeFiles/CHTLCore.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Linking CXX static library ../lib/libCHTLCore.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Linking CXX static library ../lib/libCHTLCore.a"
 	cd /workspace/build/src && $(CMAKE_COMMAND) -P CMakeFiles/CHTLCore.dir/cmake_clean_target.cmake
 	cd /workspace/build/src && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/CHTLCore.dir/link.txt --verbose=$(VERBOSE)
 

@@ -23,6 +23,8 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspace/src/CHTLParser.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.o.d"
   "/workspace/src/CJMOD/CJMODAPI.cpp" "src/CMakeFiles/CHTLCore.dir/CJMOD/CJMODAPI.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CJMOD/CJMODAPI.cpp.o.d"
   "/workspace/src/CJMOD/CJMODCompiler.cpp" "src/CMakeFiles/CHTLCore.dir/CJMOD/CJMODCompiler.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CJMOD/CJMODCompiler.cpp.o.d"
+  "/workspace/src/CodeMerger/CodeMerger.cpp" "src/CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.o.d"
+  "/workspace/src/CompilerDispatcher/CompilerDispatcher.cpp" "src/CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.o.d"
   "/workspace/src/ConfigurationManager.cpp" "src/CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/ConfigurationManager.cpp.o.d"
   "/workspace/src/ImportManager.cpp" "src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.o.d"
   "/workspace/src/ModuleManager.cpp" "src/CMakeFiles/CHTLCore.dir/ModuleManager.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/ModuleManager.cpp.o.d"

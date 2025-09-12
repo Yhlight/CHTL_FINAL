@@ -535,6 +535,54 @@ CJMOD/CJMODCompiler.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CJMOD/CJMODCompiler.cpp.s
 .PHONY : CJMOD/CJMODCompiler.cpp.s
 
+CodeMerger/CodeMerger.o: CodeMerger/CodeMerger.cpp.o
+.PHONY : CodeMerger/CodeMerger.o
+
+# target to build an object file
+CodeMerger/CodeMerger.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.o
+.PHONY : CodeMerger/CodeMerger.cpp.o
+
+CodeMerger/CodeMerger.i: CodeMerger/CodeMerger.cpp.i
+.PHONY : CodeMerger/CodeMerger.i
+
+# target to preprocess a source file
+CodeMerger/CodeMerger.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.i
+.PHONY : CodeMerger/CodeMerger.cpp.i
+
+CodeMerger/CodeMerger.s: CodeMerger/CodeMerger.cpp.s
+.PHONY : CodeMerger/CodeMerger.s
+
+# target to generate assembly for a file
+CodeMerger/CodeMerger.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CodeMerger/CodeMerger.cpp.s
+.PHONY : CodeMerger/CodeMerger.cpp.s
+
+CompilerDispatcher/CompilerDispatcher.o: CompilerDispatcher/CompilerDispatcher.cpp.o
+.PHONY : CompilerDispatcher/CompilerDispatcher.o
+
+# target to build an object file
+CompilerDispatcher/CompilerDispatcher.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.o
+.PHONY : CompilerDispatcher/CompilerDispatcher.cpp.o
+
+CompilerDispatcher/CompilerDispatcher.i: CompilerDispatcher/CompilerDispatcher.cpp.i
+.PHONY : CompilerDispatcher/CompilerDispatcher.i
+
+# target to preprocess a source file
+CompilerDispatcher/CompilerDispatcher.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.i
+.PHONY : CompilerDispatcher/CompilerDispatcher.cpp.i
+
+CompilerDispatcher/CompilerDispatcher.s: CompilerDispatcher/CompilerDispatcher.cpp.s
+.PHONY : CompilerDispatcher/CompilerDispatcher.s
+
+# target to generate assembly for a file
+CompilerDispatcher/CompilerDispatcher.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CompilerDispatcher/CompilerDispatcher.cpp.s
+.PHONY : CompilerDispatcher/CompilerDispatcher.cpp.s
+
 ConfigurationManager.o: ConfigurationManager.cpp.o
 .PHONY : ConfigurationManager.o
 
@@ -737,6 +785,12 @@ help:
 	@echo "... CJMOD/CJMODCompiler.o"
 	@echo "... CJMOD/CJMODCompiler.i"
 	@echo "... CJMOD/CJMODCompiler.s"
+	@echo "... CodeMerger/CodeMerger.o"
+	@echo "... CodeMerger/CodeMerger.i"
+	@echo "... CodeMerger/CodeMerger.s"
+	@echo "... CompilerDispatcher/CompilerDispatcher.o"
+	@echo "... CompilerDispatcher/CompilerDispatcher.i"
+	@echo "... CompilerDispatcher/CompilerDispatcher.s"
 	@echo "... ConfigurationManager.o"
 	@echo "... ConfigurationManager.i"
 	@echo "... ConfigurationManager.s"

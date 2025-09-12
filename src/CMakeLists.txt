@@ -34,6 +34,12 @@ add_library(CHTLCore STATIC
     CJMOD/CJMODAPI.cpp
     CJMOD/CJMODCompiler.cpp
     
+    # 代码合并器
+    CodeMerger/CodeMerger.cpp
+    
+    # 编译器调度器
+    CompilerDispatcher/CompilerDispatcher.cpp
+    
     # 扫描器
     Scanner/UnifiedScanner.cpp
 )

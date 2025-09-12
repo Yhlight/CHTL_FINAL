@@ -4,37 +4,9 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include "CHTL/CodeMerger/CodeMerger.h"
 
 namespace CHTL {
-
-/**
- * @brief 代码片段类型
- */
-enum class CodeFragmentType {
-    CHTL,           // CHTL代码
-    CHTL_JS,        // CHTL JS代码
-    CSS,            // CSS代码
-    JS,             // JavaScript代码
-    HTML,           // HTML代码
-    UNKNOWN         // 未知类型
-};
-
-/**
- * @brief 代码片段结构
- */
-struct CodeFragment {
-    CodeFragmentType type;
-    std::string content;
-    size_t startLine;
-    size_t startColumn;
-    size_t endLine;
-    size_t endColumn;
-    std::string placeholder;  // 占位符，用于替换原始代码
-    
-    CodeFragment(CodeFragmentType t, const std::string& c, 
-                size_t sl = 0, size_t sc = 0, size_t el = 0, size_t ec = 0)
-        : type(t), content(c), startLine(sl), startColumn(sc), endLine(el), endColumn(ec) {}
-};
 
 /**
  * @brief 统一扫描器类
@@ -46,8 +18,9 @@ class UnifiedScanner {
 public:
     /**
      * @brief 构造函数
+     * @param context CHTL上下文
      */
-    UnifiedScanner();
+    explicit UnifiedScanner(std::shared_ptr<CHTLContext> context = nullptr);
     
     /**
      * @brief 析构函数
