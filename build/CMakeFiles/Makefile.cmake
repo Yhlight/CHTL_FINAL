@@ -63,5 +63,6 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/enhanced_template_compiler.dir/DependInfo.cmake"
   "CMakeFiles/module_system_compiler.dir/DependInfo.cmake"
   "CMakeFiles/error_handler.dir/DependInfo.cmake"
+  "CMakeFiles/test_suite.dir/DependInfo.cmake"
   "CMakeFiles/test_compiler.dir/DependInfo.cmake"
   )

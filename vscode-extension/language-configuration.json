@@ -1,7 +1,7 @@
 {
   "comments": {
-    "lineComment": "//",
-    "blockComment": ["/*", "*/"]
+    "blockComment": ["<!--", "-->"],
+    "lineComment": "//"
   },
   "brackets": [
     ["{", "}"],
@@ -27,13 +27,13 @@
   ],
   "folding": {
     "markers": {
-      "start": "^\\s*//\\s*#?region\\b",
-      "end": "^\\s*//\\s*#?endregion\\b"
+      "start": "^\\s*<!--\\s*#?region\\b.*-->",
+      "end": "^\\s*<!--\\s*#?endregion\\b.*-->"
     }
   },
   "wordPattern": "(-?\\d*\\.\\d\\w*)|([^\\`\\~\\!\\@\\#\\%\\^\\&\\*\\(\\)\\-\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>\\/\\?\\s]+)",
   "indentationRules": {
-    "increaseIndentPattern": "^\\s*\\{[^}]*$",
-    "decreaseIndentPattern": "^\\s*\\}"
+    "increaseIndentPattern": "^\\s*\\[Template\\]\\s+@\\w+\\s+\\w+\\s*\\{.*$|^\\s*\\[Custom\\]\\s+\\w+\\s+\\w+\\s+\\w+\\s*\\{.*$|^\\s*\\[Origin\\]\\s+@\\w+\\s*\\{.*$|^\\s*\\{.*$",
+    "decreaseIndentPattern": "^\\s*\\}.*$"
   }
 }

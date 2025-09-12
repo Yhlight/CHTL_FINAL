@@ -1,94 +1,166 @@
 # CHTL Language Support for VS Code
 
-This extension provides language support for CHTL (C++ HyperText Language) in Visual Studio Code.
+This extension provides comprehensive language support for the CHTL template language in Visual Studio Code.
 
 ## Features
 
-- **Syntax Highlighting**: Full syntax highlighting for CHTL files
-- **Code Completion**: IntelliSense for CHTL elements, attributes, and functions
-- **Code Formatting**: Automatic code formatting for CHTL files
-- **Linting**: Real-time error detection and warnings
-- **Hover Information**: Detailed information on hover
-- **Go to Definition**: Navigate to definitions
-- **Find References**: Find all references to symbols
-- **Document Symbols**: Outline view for CHTL files
-- **Workspace Symbols**: Search symbols across workspace
-- **Code Actions**: Quick fixes and refactoring
-- **Diagnostics**: Real-time error and warning reporting
-- **Templates View**: Browse and manage templates
-- **Customs View**: Browse and manage customs
-- **Imports View**: Browse and manage imports
-- **Modules View**: Browse and manage modules
-- **Commands**: Various CHTL commands accessible via Command Palette
-- **Context Menu**: Right-click context menu for CHTL files
-- **Keybindings**: Keyboard shortcuts for common operations
-- **Configuration**: Customizable settings
+### 🎨 Syntax Highlighting
+- Full syntax highlighting for CHTL files (`.chtl`)
+- Full syntax highlighting for CHTL JS files (`.chtljs`, `.cjjs`)
+- Support for all CHTL directives and constructs
+- Support for HTML, CSS, and JavaScript within CHTL files
 
-## Commands
+### 🔧 Language Features
+- **IntelliSense**: Auto-completion for CHTL syntax
+- **Hover Information**: Detailed information about CHTL constructs
+- **Symbol Navigation**: Navigate to templates, custom elements, and functions
+- **Error Detection**: Real-time syntax and semantic error checking
+- **Code Actions**: Quick fixes for common issues
 
-- `CHTL: Compile CHTL` - Compile current CHTL file
-- `CHTL: Parse CHTL` - Parse current CHTL file
-- `CHTL: Format Document` - Format current CHTL file
-- `CHTL: Lint Document` - Lint current CHTL file
-- `CHTL: Preview HTML` - Preview compiled HTML
-- `CHTL: Export HTML` - Export compiled HTML
-- `CHTL: Build Project` - Build entire project
-- `CHTL: Clean Project` - Clean project files
-- `CHTL: Run Tests` - Run project tests
-- `CHTL: Start Server` - Start development server
-- `CHTL: Watch Files` - Watch files for changes
+### 🚀 Commands
+- **Compile CHTL**: Compile current CHTL file to HTML
+- **Compile CHTL JS**: Compile current CHTL JS file to JavaScript
+- **Preview CHTL**: Preview compiled CHTL output
+- **Build Project**: Build entire CHTL project
+- **Watch Files**: Watch for changes and auto-compile
+- **Clean Build**: Clean build artifacts
+- **Initialize Project**: Initialize new CHTL project
 
-## Keybindings
+### 📝 Code Snippets
+- Template snippets for `[Template] @Style`, `@Element`, `@Var`
+- Custom element snippets for `[Custom]`
+- Import, namespace, and configuration snippets
+- HTML, CSS, and JavaScript snippets
+- CHTL JS snippets for CJMOD, animations, routes, and more
 
-- `Ctrl+Shift+C` - Compile CHTL
-- `Ctrl+Shift+F` - Format Document
-- `Ctrl+Shift+P` - Preview HTML
-
-## Configuration
-
-- `chtl.compiler.path` - Path to the CHTL compiler executable
-- `chtl.compiler.options` - Additional options to pass to the CHTL compiler
-- `chtl.format.enable` - Enable CHTL formatting
-- `chtl.lint.enable` - Enable CHTL linting
-- `chtl.preview.autoOpen` - Automatically open preview when compiling
-- `chtl.preview.port` - Port for the preview server
-- `chtl.watch.enable` - Enable file watching
-- `chtl.watch.pattern` - File pattern to watch
-
-## Requirements
-
-- CHTL compiler must be installed and available in PATH
-- VS Code 1.74.0 or higher
+### 🎯 Keybindings
+- `Ctrl+Shift+C`: Compile CHTL file
+- `Ctrl+Shift+J`: Compile CHTL JS file
+- `Ctrl+Shift+P`: Preview CHTL output
+- `Ctrl+Shift+B`: Build CHTL project
 
 ## Installation
 
-1. Install the CHTL compiler
-2. Install this extension from the VS Code marketplace
-3. Open a CHTL file (.chtl extension)
-4. The extension will automatically activate
+1. Install the extension from the VS Code marketplace
+2. Open a CHTL file (`.chtl` or `.chtljs`)
+3. The extension will automatically activate
+
+## Configuration
+
+The extension can be configured through VS Code settings:
+
+```json
+{
+  "chtl.compilerPath": "./build/working_chtl_compiler",
+  "chtl.jsCompilerPath": "./build/chtl_js_compiler",
+  "chtl.autoCompile": true,
+  "chtl.autoPreview": false,
+  "chtl.outputDirectory": "./build",
+  "chtl.watchMode": false,
+  "chtl.enableLinting": true,
+  "chtl.enableIntelliSense": true
+}
+```
 
 ## Usage
 
-1. Open a CHTL file
-2. Use the Command Palette (Ctrl+Shift+P) to access CHTL commands
-3. Right-click on CHTL files for context menu options
-4. Use the CHTL views in the Activity Bar to browse templates, customs, imports, and modules
-5. Configure settings in VS Code preferences
+### Basic CHTL File
+```chtl
+[Template] @Style MyButton {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+}
 
-## Development
+[Template] @Element ButtonContainer {
+    <button class="MyButton">Click Me</button>
+}
 
-To contribute to this extension:
+[Origin] @Html {
+    <div class="container">
+        <div class="ButtonContainer"></div>
+    </div>
+}
+```
 
-1. Clone the repository
-2. Run `npm install`
-3. Open in VS Code
-4. Press F5 to run the extension in a new window
-5. Make changes and reload the window
+### CHTL JS File
+```chtljs
+[CJMOD] printMylove {
+    function printMylove() {
+        console.log("I love CHTL!");
+    }
+}
+
+[Animation] fadeIn {
+    duration: 1s
+    easing: ease-in-out
+    keyframes: 0%: {opacity: 0}, 100%: {opacity: 1}
+}
+
+$userName$ = "CHTL User"
+const button = {{.my-button}}
+button -> click: handleClick
+```
+
+## Commands
+
+### Compile Commands
+- `CHTL: Compile CHTL` - Compile current CHTL file
+- `CHTL: Compile CHTL JS` - Compile current CHTL JS file
+- `CHTL: Preview CHTL` - Preview compiled output
+
+### Project Commands
+- `CHTL: Build CHTL Project` - Build entire project
+- `CHTL: Watch CHTL Files` - Watch for changes
+- `CHTL: Clean CHTL Build` - Clean build artifacts
+- `CHTL: Initialize CHTL Project` - Initialize new project
+
+## Features in Detail
+
+### Syntax Highlighting
+- **Directives**: `[Template]`, `[Custom]`, `[Import]`, etc.
+- **Types**: `@Style`, `@Element`, `@Var`, `Style`, `Element`, `Var`
+- **Keywords**: `inherit`, `namespace`, `@Html`, `@Style`, `@JavaScript`
+- **Variables**: `$variable$`, `{{selector}}`
+- **Events**: `element -> event: handler`
+
+### IntelliSense
+- Auto-completion for all CHTL constructs
+- Parameter hints for functions
+- Quick info on hover
+- Symbol navigation
+
+### Error Detection
+- Syntax error detection
+- Semantic error checking
+- Real-time validation
+- Quick fixes for common issues
+
+### Code Snippets
+- Template snippets with placeholders
+- Custom element snippets
+- Import and configuration snippets
+- HTML, CSS, and JavaScript snippets
+
+## Requirements
+
+- VS Code 1.74.0 or higher
+- CHTL compiler (configured in settings)
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues and pull requests.
 
 ## License
 
-MIT License - see LICENSE file for details
+This extension is licensed under the MIT License.
 
-## Support
+## Changelog
 
-For issues and feature requests, please visit the GitHub repository.
+### 1.0.0
+- Initial release
+- Full CHTL syntax support
+- CHTL JS syntax support
+- IntelliSense and error detection
+- Code snippets and commands
+- Project management features

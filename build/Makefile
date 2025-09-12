@@ -315,6 +315,19 @@ error_handler/fast:
 .PHONY : error_handler/fast
 
 #=============================================================================
+# Target rules for targets named test_suite
+
+# Build rule for target.
+test_suite: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_suite
+.PHONY : test_suite
+
+# fast build rule for target.
+test_suite/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/build
+.PHONY : test_suite/fast
+
+#=============================================================================
 # Target rules for targets named test_compiler
 
 # Build rule for target.
@@ -1119,6 +1132,30 @@ src/working_chtl_compiler.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/working_chtl_compiler.dir/build.make CMakeFiles/working_chtl_compiler.dir/src/working_chtl_compiler.cpp.s
 .PHONY : src/working_chtl_compiler.cpp.s
 
+test/test_suite.o: test/test_suite.cpp.o
+.PHONY : test/test_suite.o
+
+# target to build an object file
+test/test_suite.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/test/test_suite.cpp.o
+.PHONY : test/test_suite.cpp.o
+
+test/test_suite.i: test/test_suite.cpp.i
+.PHONY : test/test_suite.i
+
+# target to preprocess a source file
+test/test_suite.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/test/test_suite.cpp.i
+.PHONY : test/test_suite.cpp.i
+
+test/test_suite.s: test/test_suite.cpp.s
+.PHONY : test/test_suite.s
+
+# target to generate assembly for a file
+test/test_suite.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/test/test_suite.cpp.s
+.PHONY : test/test_suite.cpp.s
+
 test_compiler.o: test_compiler.cpp.o
 .PHONY : test_compiler.o
 
@@ -1167,6 +1204,7 @@ help:
 	@echo "... module_system_compiler"
 	@echo "... simple_chtl_compiler"
 	@echo "... test_compiler"
+	@echo "... test_suite"
 	@echo "... working_chtl_compiler"
 	@echo "... src/CHTL/CHTLContext.o"
 	@echo "... src/CHTL/CHTLContext.i"
@@ -1267,6 +1305,9 @@ help:
 	@echo "... src/working_chtl_compiler.o"
 	@echo "... src/working_chtl_compiler.i"
 	@echo "... src/working_chtl_compiler.s"
+	@echo "... test/test_suite.o"
+	@echo "... test/test_suite.i"
+	@echo "... test/test_suite.s"
 	@echo "... test_compiler.o"
 	@echo "... test_compiler.i"
 	@echo "... test_compiler.s"

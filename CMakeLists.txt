@@ -110,6 +110,8 @@ add_executable(module_system_compiler src/module_system_compiler.cpp)
 
 add_executable(error_handler src/error_handler.cpp)
 
+add_executable(test_suite test/test_suite.cpp)
+
 # 创建测试程序
 add_executable(test_compiler test_compiler.cpp)
 target_link_libraries(test_compiler chtl_lib)

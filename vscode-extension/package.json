@@ -1,42 +1,41 @@
 {
-  "name": "chtl-language",
+  "name": "chtl-language-support",
   "displayName": "CHTL Language Support",
-  "description": "Language support for CHTL (C++ HyperText Language)",
+  "description": "Complete language support for CHTL template language",
   "version": "1.0.0",
-  "publisher": "chtl-team",
+  "publisher": "chtl-dev",
   "engines": {
     "vscode": "^1.74.0"
   },
   "categories": [
     "Programming Languages",
     "Snippets",
-    "Linters",
-    "Formatters"
+    "Linters"
   ],
   "keywords": [
     "chtl",
-    "hypertext",
+    "template",
     "html",
     "css",
-    "javascript",
-    "template",
-    "custom"
+    "javascript"
   ],
   "activationEvents": [
-    "onLanguage:chtl"
+    "onLanguage:chtl",
+    "onLanguage:chtljs"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "languages": [
       {
         "id": "chtl",
-        "aliases": [
-          "CHTL",
-          "chtl"
-        ],
-        "extensions": [
-          ".chtl"
-        ],
+        "aliases": ["CHTL", "chtl"],
+        "extensions": [".chtl"],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "chtljs",
+        "aliases": ["CHTL JS", "chtljs"],
+        "extensions": [".chtljs", ".cjjs"],
         "configuration": "./language-configuration.json"
       }
     ],
@@ -44,13 +43,22 @@
       {
         "language": "chtl",
         "scopeName": "source.chtl",
-        "path": "./syntaxes/chtl.tmLanguage.json"
+        "path": "./syntaxes/chtl.tmGrammar.json"
+      },
+      {
+        "language": "chtljs",
+        "scopeName": "source.chtljs",
+        "path": "./syntaxes/chtljs.tmGrammar.json"
       }
     ],
     "snippets": [
       {
         "language": "chtl",
         "path": "./snippets/chtl.json"
+      },
+      {
+        "language": "chtljs",
+        "path": "./snippets/chtljs.json"
       }
     ],
     "commands": [
@@ -60,57 +68,54 @@
         "category": "CHTL"
       },
       {
-        "command": "chtl.parse",
-        "title": "Parse CHTL",
-        "category": "CHTL"
-      },
-      {
-        "command": "chtl.format",
-        "title": "Format Document",
-        "category": "CHTL"
-      },
-      {
-        "command": "chtl.lint",
-        "title": "Lint Document",
+        "command": "chtl.compileJS",
+        "title": "Compile CHTL JS",
         "category": "CHTL"
       },
       {
         "command": "chtl.preview",
-        "title": "Preview HTML",
-        "category": "CHTL"
-      },
-      {
-        "command": "chtl.export",
-        "title": "Export HTML",
+        "title": "Preview CHTL",
         "category": "CHTL"
       },
       {
         "command": "chtl.build",
-        "title": "Build Project",
-        "category": "CHTL"
-      },
-      {
-        "command": "chtl.clean",
-        "title": "Clean Project",
-        "category": "CHTL"
-      },
-      {
-        "command": "chtl.test",
-        "title": "Run Tests",
-        "category": "CHTL"
-      },
-      {
-        "command": "chtl.serve",
-        "title": "Start Server",
+        "title": "Build CHTL Project",
         "category": "CHTL"
       },
       {
         "command": "chtl.watch",
-        "title": "Watch Files",
+        "title": "Watch CHTL Files",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.clean",
+        "title": "Clean CHTL Build",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.init",
+        "title": "Initialize CHTL Project",
         "category": "CHTL"
       }
     ],
     "menus": {
+      "explorer/context": [
+        {
+          "command": "chtl.compile",
+          "when": "resourceExtname == .chtl",
+          "group": "chtl"
+        },
+        {
+          "command": "chtl.compileJS",
+          "when": "resourceExtname == .chtljs",
+          "group": "chtl"
+        },
+        {
+          "command": "chtl.preview",
+          "when": "resourceExtname == .chtl",
+          "group": "chtl"
+        }
+      ],
       "editor/context": [
         {
           "command": "chtl.compile",
@@ -118,54 +123,12 @@
           "group": "chtl"
         },
         {
-          "command": "chtl.parse",
-          "when": "resourceExtname == .chtl",
-          "group": "chtl"
-        },
-        {
-          "command": "chtl.format",
-          "when": "resourceExtname == .chtl",
-          "group": "chtl"
-        },
-        {
-          "command": "chtl.lint",
-          "when": "resourceExtname == .chtl",
+          "command": "chtl.compileJS",
+          "when": "resourceExtname == .chtljs",
           "group": "chtl"
         },
         {
           "command": "chtl.preview",
-          "when": "resourceExtname == .chtl",
-          "group": "chtl"
-        },
-        {
-          "command": "chtl.export",
-          "when": "resourceExtname == .chtl",
-          "group": "chtl"
-        }
-      ],
-      "explorer/context": [
-        {
-          "command": "chtl.build",
-          "when": "resourceExtname == .chtl",
-          "group": "chtl"
-        },
-        {
-          "command": "chtl.clean",
-          "when": "resourceExtname == .chtl",
-          "group": "chtl"
-        },
-        {
-          "command": "chtl.test",
-          "when": "resourceExtname == .chtl",
-          "group": "chtl"
-        },
-        {
-          "command": "chtl.serve",
-          "when": "resourceExtname == .chtl",
-          "group": "chtl"
-        },
-        {
-          "command": "chtl.watch",
           "when": "resourceExtname == .chtl",
           "group": "chtl"
         }
@@ -176,44 +139,24 @@
           "when": "resourceExtname == .chtl"
         },
         {
-          "command": "chtl.parse",
-          "when": "resourceExtname == .chtl"
-        },
-        {
-          "command": "chtl.format",
-          "when": "resourceExtname == .chtl"
-        },
-        {
-          "command": "chtl.lint",
-          "when": "resourceExtname == .chtl"
+          "command": "chtl.compileJS",
+          "when": "resourceExtname == .chtljs"
         },
         {
           "command": "chtl.preview",
           "when": "resourceExtname == .chtl"
         },
         {
-          "command": "chtl.export",
-          "when": "resourceExtname == .chtl"
+          "command": "chtl.build"
         },
         {
-          "command": "chtl.build",
-          "when": "resourceExtname == .chtl"
+          "command": "chtl.watch"
         },
         {
-          "command": "chtl.clean",
-          "when": "resourceExtname == .chtl"
+          "command": "chtl.clean"
         },
         {
-          "command": "chtl.test",
-          "when": "resourceExtname == .chtl"
-        },
-        {
-          "command": "chtl.serve",
-          "when": "resourceExtname == .chtl"
-        },
-        {
-          "command": "chtl.watch",
-          "when": "resourceExtname == .chtl"
+          "command": "chtl.init"
         }
       ]
     },
@@ -221,85 +164,74 @@
       {
         "command": "chtl.compile",
         "key": "ctrl+shift+c",
-        "when": "editorTextFocus && resourceExtname == .chtl"
+        "when": "resourceExtname == .chtl"
       },
       {
-        "command": "chtl.format",
-        "key": "ctrl+shift+f",
-        "when": "editorTextFocus && resourceExtname == .chtl"
+        "command": "chtl.compileJS",
+        "key": "ctrl+shift+j",
+        "when": "resourceExtname == .chtljs"
       },
       {
         "command": "chtl.preview",
         "key": "ctrl+shift+p",
-        "when": "editorTextFocus && resourceExtname == .chtl"
+        "when": "resourceExtname == .chtl"
+      },
+      {
+        "command": "chtl.build",
+        "key": "ctrl+shift+b"
       }
     ],
     "configuration": {
       "title": "CHTL",
       "properties": {
-        "chtl.compiler.path": {
+        "chtl.compilerPath": {
           "type": "string",
-          "default": "chtl",
-          "description": "Path to the CHTL compiler executable"
+          "default": "./build/working_chtl_compiler",
+          "description": "Path to CHTL compiler executable"
         },
-        "chtl.compiler.options": {
-          "type": "array",
-          "default": [],
-          "description": "Additional options to pass to the CHTL compiler"
+        "chtl.jsCompilerPath": {
+          "type": "string",
+          "default": "./build/chtl_js_compiler",
+          "description": "Path to CHTL JS compiler executable"
         },
-        "chtl.format.enable": {
+        "chtl.autoCompile": {
           "type": "boolean",
           "default": true,
-          "description": "Enable CHTL formatting"
+          "description": "Automatically compile CHTL files on save"
         },
-        "chtl.lint.enable": {
+        "chtl.autoPreview": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically preview CHTL files after compilation"
+        },
+        "chtl.outputDirectory": {
+          "type": "string",
+          "default": "./build",
+          "description": "Directory for compiled output files"
+        },
+        "chtl.watchMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable watch mode for automatic recompilation"
+        },
+        "chtl.enableLinting": {
           "type": "boolean",
           "default": true,
-          "description": "Enable CHTL linting"
+          "description": "Enable CHTL linting and error checking"
         },
-        "chtl.preview.autoOpen": {
+        "chtl.enableIntelliSense": {
           "type": "boolean",
-          "default": false,
-          "description": "Automatically open preview when compiling"
-        },
-        "chtl.preview.port": {
-          "type": "number",
-          "default": 3000,
-          "description": "Port for the preview server"
-        },
-        "chtl.watch.enable": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable file watching"
-        },
-        "chtl.watch.pattern": {
-          "type": "string",
-          "default": "**/*.chtl",
-          "description": "File pattern to watch"
+          "default": true,
+          "description": "Enable IntelliSense for CHTL files"
         }
       }
     },
     "views": {
-      "chtl": [
+      "explorer": [
         {
-          "id": "chtl.templates",
-          "name": "Templates",
-          "when": "resourceExtname == .chtl"
-        },
-        {
-          "id": "chtl.customs",
-          "name": "Customs",
-          "when": "resourceExtname == .chtl"
-        },
-        {
-          "id": "chtl.imports",
-          "name": "Imports",
-          "when": "resourceExtname == .chtl"
-        },
-        {
-          "id": "chtl.modules",
-          "name": "Modules",
-          "when": "resourceExtname == .chtl"
+          "id": "chtlExplorer",
+          "name": "CHTL Explorer",
+          "when": "workspaceHasChtlFiles"
         }
       ]
     },
@@ -308,7 +240,7 @@
         {
           "id": "chtl",
           "title": "CHTL",
-          "icon": "resources/icon.svg"
+          "icon": "$(file-code)"
         }
       ]
     }
@@ -323,8 +255,8 @@
   },
   "devDependencies": {
     "@types/vscode": "^1.74.0",
-    "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
+    "@types/mocha": "^10.0.1",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
     "eslint": "^8.28.0",
@@ -332,8 +264,5 @@
     "mocha": "^10.1.0",
     "typescript": "^4.9.4",
     "@vscode/test-electron": "^2.2.0"
-  },
-  "dependencies": {
-    "vscode-languageclient": "^8.1.0"
   }
 }

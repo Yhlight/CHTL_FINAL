@@ -1,230 +1,127 @@
 {
-  "CHTL Basic Element": {
-    "prefix": "div",
-    "body": [
-      "div {",
-      "    $1",
-      "}"
-    ],
-    "description": "Create a basic div element"
-  },
-  "CHTL Element with ID": {
-    "prefix": "div-id",
-    "body": [
-      "div {",
-      "    id: \"$1\";",
-      "    $2",
-      "}"
-    ],
-    "description": "Create a div element with ID"
-  },
-  "CHTL Element with Class": {
-    "prefix": "div-class",
-    "body": [
-      "div {",
-      "    class: $1;",
-      "    $2",
-      "}"
-    ],
-    "description": "Create a div element with class"
-  },
-  "CHTL Element with Style": {
-    "prefix": "div-style",
-    "body": [
-      "div {",
-      "    style {",
-      "        $1",
-      "    }",
-      "    $2",
-      "}"
-    ],
-    "description": "Create a div element with inline style"
-  },
-  "CHTL Text Element": {
-    "prefix": "text",
-    "body": [
-      "text {",
-      "    \"$1\"",
-      "}"
-    ],
-    "description": "Create a text element"
-  },
-  "CHTL Style Template": {
+  "Template Style": {
     "prefix": "template-style",
     "body": [
-      "[Template] @Style $1",
-      "{",
-      "    $2",
+      "[Template] @Style ${1:name} {",
+      "\t${2:property}: ${3:value};",
       "}"
     ],
-    "description": "Create a style template"
+    "description": "Create a CHTL style template"
   },
-  "CHTL Element Template": {
+  "Template Element": {
     "prefix": "template-element",
     "body": [
-      "[Template] @Element $1",
-      "{",
-      "    $2",
+      "[Template] @Element ${1:name} {",
+      "\t<${2:div}>${3:content}</${2:div}>",
       "}"
     ],
-    "description": "Create an element template"
+    "description": "Create a CHTL element template"
   },
-  "CHTL Variable Template": {
+  "Template Variable": {
     "prefix": "template-var",
     "body": [
-      "[Template] @Var $1",
-      "{",
-      "    $2: \"$3\";",
-      "    $4",
+      "[Template] @Var ${1:name} {",
+      "\t${2:value}",
       "}"
     ],
-    "description": "Create a variable template"
+    "description": "Create a CHTL variable template"
   },
-  "CHTL Custom Style": {
+  "Template with Inheritance": {
+    "prefix": "template-inherit",
+    "body": [
+      "[Template] @${1|Style,Element,Var|} ${2:name} inherit ${3:parent} {",
+      "\t${4:content}",
+      "}"
+    ],
+    "description": "Create a CHTL template with inheritance"
+  },
+  "Custom Style": {
     "prefix": "custom-style",
     "body": [
-      "[Custom] @Style $1",
-      "{",
-      "    $2",
+      "[Custom] ${1:group} Style ${2:name} {",
+      "\t${3:property}: ${4:value};",
       "}"
     ],
-    "description": "Create a custom style"
+    "description": "Create a CHTL custom style"
   },
-  "CHTL Custom Element": {
+  "Custom Element": {
     "prefix": "custom-element",
     "body": [
-      "[Custom] @Element $1",
-      "{",
-      "    $2",
+      "[Custom] ${1:group} Element ${2:name} {",
+      "\t<${3:div}>${4:content}</${3:div}>",
       "}"
     ],
-    "description": "Create a custom element"
+    "description": "Create a CHTL custom element"
   },
-  "CHTL Custom Variable": {
+  "Custom Variable": {
     "prefix": "custom-var",
     "body": [
-      "[Custom] @Var $1",
-      "{",
-      "    $2: \"$3\";",
-      "    $4",
+      "[Custom] ${1:group} Var ${2:name} {",
+      "\t${3:value}",
       "}"
     ],
-    "description": "Create a custom variable"
+    "description": "Create a CHTL custom variable"
   },
-  "CHTL Import File": {
-    "prefix": "import-file",
+  "Import": {
+    "prefix": "import",
     "body": [
-      "[Import] @$1 from \"$2\" as $3;"
+      "[Import] ${1:path}"
     ],
-    "description": "Import a file"
+    "description": "Import a CHTL module"
   },
-  "CHTL Import Template": {
-    "prefix": "import-template",
+  "Namespace": {
+    "prefix": "namespace",
     "body": [
-      "[Import] [Template] @$1 $2 from \"$3\" as $4;"
+      "[Namespace] ${1:name}"
     ],
-    "description": "Import a template"
+    "description": "Define a namespace"
   },
-  "CHTL Import Custom": {
-    "prefix": "import-custom",
+  "Origin HTML": {
+    "prefix": "origin-html",
     "body": [
-      "[Import] [Custom] @$1 $2 from \"$3\" as $4;"
-    ],
-    "description": "Import a custom"
-  },
-  "CHTL Module": {
-    "prefix": "module",
-    "body": [
-      "[Module] @$1 $2",
-      "{",
-      "    $3",
+      "[Origin] @Html {",
+      "\t${1:<div>content</div>}",
       "}"
     ],
-    "description": "Create a module"
+    "description": "Embed raw HTML"
   },
-  "CHTL HTML Structure": {
+  "Origin CSS": {
+    "prefix": "origin-css",
+    "body": [
+      "[Origin] @Style {",
+      "\t${1:.class { property: value; }}",
+      "}"
+    ],
+    "description": "Embed raw CSS"
+  },
+  "Origin JavaScript": {
+    "prefix": "origin-js",
+    "body": [
+      "[Origin] @JavaScript {",
+      "\t${1:function() { return true; }}",
+      "}"
+    ],
+    "description": "Embed raw JavaScript"
+  },
+  "Configuration": {
+    "prefix": "config",
+    "body": [
+      "[Configuration] ${1:key} = ${2:value}"
+    ],
+    "description": "Set configuration"
+  },
+  "HTML Element": {
     "prefix": "html",
     "body": [
-      "html {",
-      "    head {",
-      "        title {",
-      "            text {",
-      "                \"$1\"",
-      "            }",
-      "        }",
-      "    }",
-      "    body {",
-      "        $2",
-      "    }",
-      "}"
+      "<${1:div}${2: class=\"${3:class}\"}>${4:content}</${1:div}>"
     ],
-    "description": "Create a basic HTML structure"
+    "description": "Create an HTML element"
   },
-  "CHTL CSS Property": {
-    "prefix": "css-prop",
+  "CSS Property": {
+    "prefix": "css",
     "body": [
-      "$1: $2;"
+      "${1:property}: ${2:value};"
     ],
     "description": "Create a CSS property"
-  },
-  "CHTL JavaScript Function": {
-    "prefix": "js-func",
-    "body": [
-      "function $1($2) {",
-      "    $3",
-      "}"
-    ],
-    "description": "Create a JavaScript function"
-  },
-  "CHTL Conditional Expression": {
-    "prefix": "ternary",
-    "body": [
-      "$1 ? $2 : $3"
-    ],
-    "description": "Create a conditional expression"
-  },
-  "CHTL Arithmetic Expression": {
-    "prefix": "arithmetic",
-    "body": [
-      "$1 $2 $3"
-    ],
-    "description": "Create an arithmetic expression"
-  },
-  "CHTL Logical Expression": {
-    "prefix": "logical",
-    "body": [
-      "$1 $2 $3"
-    ],
-    "description": "Create a logical expression"
-  },
-  "CHTL Comparison Expression": {
-    "prefix": "comparison",
-    "body": [
-      "$1 $2 $3"
-    ],
-    "description": "Create a comparison expression"
-  },
-  "CHTL Comment": {
-    "prefix": "comment",
-    "body": [
-      "// $1"
-    ],
-    "description": "Create a comment"
-  },
-  "CHTL Block Comment": {
-    "prefix": "block-comment",
-    "body": [
-      "/*",
-      " * $1",
-      " */"
-    ],
-    "description": "Create a block comment"
-  },
-  "CHTL Generator Comment": {
-    "prefix": "gen-comment",
-    "body": [
-      "-- $1"
-    ],
-    "description": "Create a generator comment"
   }
 }
