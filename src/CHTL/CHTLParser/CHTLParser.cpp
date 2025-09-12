@@ -82,17 +82,26 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
             const Token& ns = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
             qualified_name = ns.lexeme + "::" + name.lexeme;
         }
-        consume(TokenType::Semicolon, "Expected ';' after element template usage.");
 
-        if (context_->element_templates_.count(qualified_name)) {
-            const auto& templateNode = context_->element_templates_.at(qualified_name);
-            for (const auto& child : templateNode->children_) {
-                nodes.push_back(child->clone());
-            }
-            return nodes;
-        } else {
-            throw std::runtime_error("Use of undefined element template '" + name.lexeme + "'.");
+        if (!context_->element_templates_.count(qualified_name)) {
+            throw std::runtime_error("Use of undefined element template '" + qualified_name + "'.");
         }
+
+        // Clone the base template nodes
+        const auto& templateNode = context_->element_templates_.at(qualified_name);
+        for (const auto& child : templateNode->children_) {
+            nodes.push_back(child->clone());
+        }
+
+        // Check for a specialization block
+        if (match({TokenType::OpenBrace})) {
+            applySpecializations(nodes);
+            consume(TokenType::CloseBrace, "Expected '}' to close specialization block.");
+        } else {
+            consume(TokenType::Semicolon, "Expected ';' after element template usage.");
+        }
+
+        return nodes;
     }
 
     // For single-node declarations, wrap them in a vector
@@ -117,6 +126,74 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     // If no declaration matches, advance and report error.
     advance();
     throw std::runtime_error("Expected a declaration (element, text, etc.).");
+}
+
+void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes) {
+    while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+        // For now, we assume a specialization is an element declaration
+        auto modifier_nodes = parseDeclaration();
+        if (modifier_nodes.empty()) continue;
+
+        // This simplified logic only handles one modifier node and assumes it's an element.
+        // It also only finds the first matching target node.
+        if (modifier_nodes[0]->getType() == NodeType::Element) {
+            ElementNode* modifier_element = static_cast<ElementNode*>(modifier_nodes[0].get());
+
+            Node* target_node = nullptr;
+            for (auto& target : target_nodes) {
+                if (target->getType() == NodeType::Element) {
+                    ElementNode* target_element = static_cast<ElementNode*>(target.get());
+                    if (target_element->tagName_ == modifier_element->tagName_) {
+                        target_node = target_element;
+                        break;
+                    }
+                }
+            }
+
+            if (target_node) {
+                // Find the style block in the modifier
+                StyleBlockNode* modifier_style_block = nullptr;
+                for (const auto& child : modifier_element->children_) {
+                    if (child->getType() == NodeType::StyleBlock) {
+                        modifier_style_block = static_cast<StyleBlockNode*>(child.get());
+                        break;
+                    }
+                }
+
+                if (modifier_style_block) {
+                    // Find or create the style block in the target
+                    StyleBlockNode* target_style_block = nullptr;
+                    ElementNode* target_element_node = static_cast<ElementNode*>(target_node);
+                    for (const auto& child : target_element_node->children_) {
+                        if (child->getType() == NodeType::StyleBlock) {
+                            target_style_block = static_cast<StyleBlockNode*>(child.get());
+                            break;
+                        }
+                    }
+                    if (!target_style_block) {
+                        auto new_style_block = std::make_unique<StyleBlockNode>();
+                        target_style_block = new_style_block.get();
+                        target_element_node->children_.push_back(std::move(new_style_block));
+                    }
+
+                    // Merge properties
+                    target_style_block->inline_properties_.insert(
+                        target_style_block->inline_properties_.end(),
+                        modifier_style_block->inline_properties_.begin(),
+                        modifier_style_block->inline_properties_.end()
+                    );
+                    target_style_block->rules_.insert(
+                        target_style_block->rules_.end(),
+                        std::make_move_iterator(modifier_style_block->rules_.begin()),
+                        std::make_move_iterator(modifier_style_block->rules_.end())
+                    );
+                }
+
+            } else {
+                throw std::runtime_error("Could not find element '" + modifier_element->tagName_ + "' to specialize.");
+            }
+        }
+    }
 }
 
 std::unique_ptr<ElementNode> CHTLParser::parseElement() {

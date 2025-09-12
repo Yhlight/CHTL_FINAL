@@ -1,19 +1,27 @@
-[Custom] @Style BoxStyle {
-    border: 1px solid black;
-    padding: 10px;
-    margin: 15px;
-    background-color: #eee;
+[Template] @Element Card {
+    div {
+        class: "card";
+        style {
+            padding: 10px;
+        }
+        h3 {
+            text { "Default Title" }
+        }
+    }
 }
 
 html {
     body {
-        div {
-            style {
-                @Style BoxStyle {
-                    delete border, margin;
+        // Use the template with specialization
+        @Element Card {
+            div {
+                style {
+                    background-color: #f0f0f0;
+                    .card {
+                        border-radius: 5px;
+                    }
                 }
             }
-            text { "This box should have padding and a background, but no border or margin." }
         }
     }
 }

@@ -25,6 +25,7 @@ public:
     std::unique_ptr<RootNode> parse();
 
 private:
+    void applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes);
     std::vector<std::unique_ptr<Node>> parseDeclaration();
     void parseTemplateDefinition(bool is_custom);
     std::unique_ptr<ElementNode> parseElement();
