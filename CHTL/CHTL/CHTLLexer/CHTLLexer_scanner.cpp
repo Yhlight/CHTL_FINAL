@@ -116,7 +116,19 @@ CHTLToken CHTLLexer::scanUnquotedLiteral() {
            current() != '{' && 
            current() != '}' &&
            current() != ',' &&
-           current() != '\n') {
+           current() != '\n' &&
+           current() != '+' &&
+           current() != '*' &&
+           current() != '/' &&
+           current() != '%' &&
+           current() != '&' &&
+           current() != '|' &&
+           current() != '!' &&
+           current() != '<' &&
+           current() != '>' &&
+           current() != '?' &&
+           current() != '^' &&
+           current() != '~') {
         value += current();
         advance();
     }

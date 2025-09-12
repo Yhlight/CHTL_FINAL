@@ -408,7 +408,10 @@ std::shared_ptr<CHTLNode> CHTLParser::parseTemplate() {
                                     current().type == CHTLTokenType::UNQUOTED_LITERAL ||
                                     current().type == CHTLTokenType::NUMBER ||
                                     current().type == CHTLTokenType::IDENTIFIER ||
-                                    current().type == CHTLTokenType::HASH) {
+                                    current().type == CHTLTokenType::HASH ||
+                                    current().type == CHTLTokenType::LEFT_PAREN ||
+                                    current().type == CHTLTokenType::RIGHT_PAREN ||
+                                    current().type == CHTLTokenType::COMMA) {
                                     propValue += current().value;
                                     advance();
                                 } else {

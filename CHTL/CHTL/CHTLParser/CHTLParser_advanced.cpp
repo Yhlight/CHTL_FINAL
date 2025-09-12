@@ -49,10 +49,30 @@ std::shared_ptr<CHTLNode> CHTLParser::parseCustom() {
                         if (match(CHTLTokenType::COLON) || match(CHTLTokenType::EQUAL)) {
                             advance();
                             
-                            if (current().type == CHTLTokenType::STRING || 
-                                current().type == CHTLTokenType::UNQUOTED_LITERAL) {
-                                customNode->addProperty(propName, current().value);
-                                advance();
+                            // 解析复合CSS值（如 10px, 1px solid black等）
+                            std::string propValue;
+                            while (currentToken < tokens.size() && 
+                                   current().type != CHTLTokenType::SEMICOLON && 
+                                   current().type != CHTLTokenType::RIGHT_BRACE && 
+                                   current().type != CHTLTokenType::EOF_TOKEN) {
+                                
+                                if (current().type == CHTLTokenType::STRING || 
+                                    current().type == CHTLTokenType::UNQUOTED_LITERAL ||
+                                    current().type == CHTLTokenType::NUMBER ||
+                                    current().type == CHTLTokenType::IDENTIFIER ||
+                                    current().type == CHTLTokenType::HASH ||
+                                    current().type == CHTLTokenType::LEFT_PAREN ||
+                                    current().type == CHTLTokenType::RIGHT_PAREN ||
+                                    current().type == CHTLTokenType::COMMA) {
+                                    propValue += current().value;
+                                    advance();
+                                } else {
+                                    break;
+                                }
+                            }
+                            
+                            if (!propValue.empty()) {
+                                customNode->addProperty(propName, propValue);
                             }
                         }
                         

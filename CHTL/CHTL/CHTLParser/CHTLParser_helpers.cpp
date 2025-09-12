@@ -115,7 +115,13 @@ std::string CHTLParser::parseStylePropertyValue() {
                 current().type == CHTLTokenType::UNQUOTED_LITERAL ||
                 current().type == CHTLTokenType::IDENTIFIER ||
                 current().type == CHTLTokenType::NUMBER ||
-                current().type == CHTLTokenType::HASH) {
+                current().type == CHTLTokenType::HASH ||
+                current().type == CHTLTokenType::PLUS ||
+                current().type == CHTLTokenType::MINUS ||
+                current().type == CHTLTokenType::MULTIPLY ||
+                current().type == CHTLTokenType::DIVIDE ||
+                current().type == CHTLTokenType::MODULO ||
+                current().type == CHTLTokenType::POWER) {
                 value += current().value;
                 advance();
             } else {
@@ -239,10 +245,11 @@ std::string CHTLParser::parseConditionalExpression() {
             expression += " " + current().value + " ";
             advance();
             
-            // 解析右侧值
-            if (current().type == CHTLTokenType::NUMBER || 
-                current().type == CHTLTokenType::STRING || 
-                current().type == CHTLTokenType::UNQUOTED_LITERAL) {
+            // 解析右侧值（复合值，如 50px）
+            while (current().type == CHTLTokenType::NUMBER || 
+                   current().type == CHTLTokenType::STRING || 
+                   current().type == CHTLTokenType::UNQUOTED_LITERAL ||
+                   current().type == CHTLTokenType::IDENTIFIER) {
                 expression += current().value;
                 advance();
             }

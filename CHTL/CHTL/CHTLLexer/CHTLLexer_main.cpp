@@ -45,8 +45,11 @@ std::vector<CHTLToken> CHTLLexer::tokenize() {
             tokens.push_back(scanTemplateKeyword());
         } else if (c == '@') {
             tokens.push_back(scanOriginKeyword());
-        } else if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || 
+        } else if (c == '+' || c == '*' || c == '/' || c == '%' || 
                    c == '&' || c == '|' || c == '!' || c == '<' || c == '>' || c == '=') {
+            tokens.push_back(scanOperator());
+        } else if (c == '-' && !isAlpha(peek())) {
+            // 只有当 - 后面不是字母时才当作运算符处理
             tokens.push_back(scanOperator());
         } else if (c == '{' || c == '}' || c == '(' || c == ')' || c == '[' || c == ']' ||
                    c == ';' || c == ':' || c == '=' || c == ',' || c == '.' || c == '&' ||
