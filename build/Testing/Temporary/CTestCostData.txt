@@ -1,0 +1,7 @@
+UnifiedScannerTest 0 0
+CHTLLexerTest 0 0
+CHTLParserTest 0 0
+---
+UnifiedScannerTest
+CHTLLexerTest
+CHTLParserTest

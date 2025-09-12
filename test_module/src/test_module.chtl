@@ -1,0 +1,14 @@
+div {
+    text { "Hello from test module!" }
+    style {
+        color: blue;
+        font-size: 18px;
+    }
+}
+
+[Export]
+{
+    hello: "Hello from test module!";
+    version: "1.0.0";
+    author: "CHTL Team";
+}

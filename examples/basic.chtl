@@ -1,0 +1,103 @@
+// 基本CHTL示例
+div
+{
+    id: "container";
+    class: "main-container";
+    
+    text
+    {
+        Welcome to CHTL!
+    }
+    
+    div
+    {
+        class: "content";
+        
+        style
+        {
+            .content
+            {
+                padding: 20px;
+                background-color: #f0f0f0;
+                border-radius: 8px;
+            }
+            
+            &:hover
+            {
+                background-color: #e0e0e0;
+            }
+        }
+        
+        text
+        {
+            This is a content area with local styling.
+        }
+    }
+}
+
+// 模板示例
+[Template] @Style ButtonStyle
+{
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button
+{
+    @Style ButtonStyle;
+    
+    text
+    {
+        Click Me
+    }
+}
+
+// 自定义元素示例
+[Custom] @Element Card
+{
+    div
+    {
+        class: "card";
+        
+        style
+        {
+            .card
+            {
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 16px;
+                margin: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+        }
+        
+        div
+        {
+            class: "card-header";
+            
+            text
+            {
+                Card Title
+            }
+        }
+        
+        div
+        {
+            class: "card-body";
+            
+            text
+            {
+                This is the card content.
+            }
+        }
+    }
+}
+
+body
+{
+    @Element Card;
+}
