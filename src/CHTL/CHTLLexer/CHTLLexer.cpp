@@ -1,0 +1,292 @@
+#include "CHTLLexer.h"
+#include <iostream>
+
+namespace CHTL {
+
+const std::unordered_map<std::string, TokenType> CHTLLexer::keywords = {
+    {"text", TokenType::Text},
+    {"style", TokenType::Style},
+    {"script", TokenType::Script},
+    {"inherit", TokenType::Inherit},
+    {"delete", TokenType::Delete},
+    {"insert", TokenType::Insert},
+    {"after", TokenType::After},
+    {"before", TokenType::Before},
+    {"replace", TokenType::Replace},
+    {"from", TokenType::From},
+    {"as", TokenType::As},
+    {"except", TokenType::Except},
+    {"use", TokenType::Use},
+    {"html5", TokenType::Html5},
+    // Note: Keywords with special characters like '[Template]' or '@Style' are handled separately.
+};
+
+CHTLLexer::CHTLLexer(const std::string& source) : source_(source) {}
+
+std::vector<Token> CHTLLexer::scanTokens() {
+    while (!isAtEnd()) {
+        start_ = current_;
+        scanToken();
+    }
+    tokens_.push_back({TokenType::EndOfFile, "", line_, current_ - line_start_ + 1});
+    return tokens_;
+}
+
+void CHTLLexer::scanToken() {
+    char c = advance();
+    switch (c) {
+        case '{': addToken(TokenType::OpenBrace); break;
+        case '}': addToken(TokenType::CloseBrace); break;
+        case '(': addToken(TokenType::OpenParen); break;
+        case ')': addToken(TokenType::CloseParen); break;
+        case ']': addToken(TokenType::CloseBracket); break;
+        case ':': addToken(TokenType::Colon); break;
+        case ';': addToken(TokenType::Semicolon); break;
+        case ',': addToken(TokenType::Comma); break;
+        case '.': addToken(TokenType::Dot); break;
+        case '?': addToken(TokenType::QuestionMark); break;
+        case '&': addToken(match('&') ? TokenType::DoubleAmpersand : TokenType::Ampersand); break;
+        case '|': addToken(match('|') ? TokenType::DoublePipe : TokenType::Pipe); break;
+        case '=': addToken(TokenType::Equals); break;
+        case '+': addToken(TokenType::Plus); break;
+        case '>': addToken(TokenType::GreaterThan); break;
+        case '<': addToken(TokenType::LessThan); break;
+
+        case '-':
+            if (match('-')) {
+                // A generator comment goes until the end of the line.
+                while (peek() != '\n' && !isAtEnd()) {
+                    advance();
+                }
+                // We don't include the '--' in the lexeme.
+                std::string comment = source_.substr(start_ + 2, current_ - (start_ + 2));
+                // Trim leading/trailing whitespace from comment
+                size_t first = comment.find_first_not_of(" \t");
+                if (std::string::npos != first) {
+                    size_t last = comment.find_last_not_of(" \t");
+                    comment = comment.substr(first, (last - first + 1));
+                }
+                addToken(TokenType::GeneratorComment, comment);
+            } else if (match('>')) {
+                addToken(TokenType::Arrow);
+            } else {
+                addToken(TokenType::Minus);
+            }
+            break;
+
+        case '*':
+            if (match('*')) {
+                addToken(TokenType::DoubleAsterisk);
+            } else {
+                addToken(TokenType::Asterisk);
+            }
+            break;
+
+        case '/':
+            if (match('/')) { // Single-line comment
+                while (peek() != '\n' && !isAtEnd()) advance();
+            } else if (match('*')) { // Multi-line comment
+                while (!(peek() == '*' && peekNext() == '/') && !isAtEnd()) {
+                    if (peek() == '\n') line_++;
+                    advance();
+                }
+                if (!isAtEnd()) {
+                    advance(); // consume '*'
+                    advance(); // consume '/'
+                }
+            } else {
+                addToken(TokenType::Slash);
+            }
+            break;
+
+        case '[':
+            handleSpecialSyntax();
+            break;
+
+        case '@':
+            identifier(); // Let identifier handle '@' prefixed tokens
+            break;
+
+        case '"':
+        case '\'':
+            stringLiteral(c);
+            break;
+
+        case ' ':
+        case '\r':
+        case '\t':
+            // Ignore whitespace.
+            break;
+
+        case '\n':
+            line_++;
+            line_start_ = current_;
+            break;
+
+        default:
+            if (isAlpha(c)) { // Identifiers must start with a letter or '_'
+                identifier();
+            } else {
+                // If it's not a recognized token, and not whitespace,
+                // treat it as the start of an unquoted literal.
+                // This is a broad catch-all.
+                unquotedLiteral();
+            }
+            break;
+    }
+}
+
+void CHTLLexer::handleSpecialSyntax() {
+    while (peek() != ']' && !isAtEnd()) {
+        advance();
+    }
+    if (isAtEnd()) {
+        addToken(TokenType::Unexpected, "Unterminated special syntax starting with '['.");
+        return;
+    }
+    advance(); // Consume the ']'
+
+    std::string text = source_.substr(start_, current_ - start_);
+    if (text == "[Template]") addToken(TokenType::Template);
+    else if (text == "[Custom]") addToken(TokenType::Custom);
+    else if (text == "[Origin]") addToken(TokenType::Origin);
+    else if (text == "[Import]") addToken(TokenType::Import);
+    else if (text == "[Namespace]") addToken(TokenType::Namespace);
+    else if (text == "[Configuration]") addToken(TokenType::Configuration);
+    else if (text == "[Info]") addToken(TokenType::Info);
+    else if (text == "[Export]") addToken(TokenType::Export);
+    else if (text == "[Name]") addToken(TokenType::Name);
+    else if (text == "[OriginType]") addToken(TokenType::OriginType);
+    else {
+        // Not a recognized special keyword, treat as individual tokens.
+        // Backtrack and just add the open bracket. The content will be tokenized on the next pass.
+        current_ = start_ + 1;
+        addToken(TokenType::OpenBracket);
+    }
+}
+
+void CHTLLexer::identifier() {
+    // Handles plain identifiers, '@' prefixed identifiers, and spaced keywords like 'at top'
+    if (source_[start_] == '@') {
+        while (isAlphaNumeric(peek())) advance();
+    } else {
+        while (isAlphaNumeric(peek()) || peek() == '_') advance();
+    }
+
+    std::string text = source_.substr(start_, current_ - start_);
+
+    // Check for multi-word keywords
+    if (text == "at" && isspace(peek())) {
+        size_t temp_current = current_;
+        while(isspace(source_[temp_current])) temp_current++;
+
+        if (source_.substr(temp_current, 3) == "top") {
+            current_ = temp_current + 3;
+            addToken(TokenType::AtTop, "at top");
+            return;
+        } else if (source_.substr(temp_current, 6) == "bottom") {
+            current_ = temp_current + 6;
+            addToken(TokenType::AtBottom, "at bottom");
+            return;
+        }
+    }
+
+    TokenType type;
+    if (text == "@Style") type = TokenType::AtStyle;
+    else if (text == "@Element") type = TokenType::AtElement;
+    else if (text == "@Var") type = TokenType::AtVar;
+    else if (text == "@Html") type = TokenType::AtHtml;
+    else if (text == "@JavaScript") type = TokenType::AtJavaScript;
+    else if (text == "@Chtl") type = TokenType::AtChtl;
+    else if (text == "@CJmod") type = TokenType::AtCJmod;
+    else if (text == "@Config") type = TokenType::AtConfig;
+    else {
+        auto it = keywords.find(text);
+        if (it != keywords.end()) {
+            type = it->second;
+        } else {
+            type = TokenType::Identifier;
+        }
+    }
+    addToken(type, text);
+}
+
+void CHTLLexer::stringLiteral(char quote) {
+    while (peek() != quote && !isAtEnd()) {
+        if (peek() == '\n') line_++;
+        advance();
+    }
+
+    if (isAtEnd()) {
+        addToken(TokenType::Unexpected, "Unterminated string.");
+        return;
+    }
+    advance(); // The closing quote.
+
+    std::string value = source_.substr(start_ + 1, current_ - start_ - 2);
+    addToken(TokenType::StringLiteral, value);
+}
+
+void CHTLLexer::unquotedLiteral() {
+    // Consume until a character that definitively ends a literal.
+    while (peek() != ';' && peek() != '{' && peek() != '}' && peek() != '\n' && !isAtEnd()) {
+        advance();
+    }
+
+    std::string value = source_.substr(start_, current_ - start_);
+    // Trim trailing whitespace from the value
+    size_t last = value.find_last_not_of(" \t\r\n");
+    if (std::string::npos != last) {
+        value = value.substr(0, last + 1);
+    }
+
+    addToken(TokenType::UnquotedLiteral, value);
+}
+
+char CHTLLexer::peek() const {
+    if (isAtEnd()) return '\0';
+    return source_[current_];
+}
+
+char CHTLLexer::peekNext() const {
+    if (current_ + 1 >= source_.length()) return '\0';
+    return source_[current_ + 1];
+}
+
+char CHTLLexer::advance() {
+    current_++;
+    return source_[current_ - 1];
+}
+
+bool CHTLLexer::isAtEnd() const {
+    return current_ >= source_.length();
+}
+
+bool CHTLLexer::match(char expected) {
+    if (isAtEnd()) return false;
+    if (source_[current_] != expected) return false;
+    current_++;
+    return true;
+}
+
+bool CHTLLexer::isAlpha(char c) {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+}
+
+bool CHTLLexer::isAlphaNumeric(char c) {
+    return isAlpha(c) || isDigit(c);
+}
+
+bool CHTLLexer::isDigit(char c) {
+    return c >= '0' && c <= '9';
+}
+
+void CHTLLexer::addToken(TokenType type) {
+    addToken(type, source_.substr(start_, current_ - start_));
+}
+
+void CHTLLexer::addToken(TokenType type, const std::string& lexeme) {
+    tokens_.push_back({type, lexeme, line_, start_ - line_start_ + 1});
+}
+
+} // namespace CHTL
