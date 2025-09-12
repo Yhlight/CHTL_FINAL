@@ -21,6 +21,9 @@ std::unique_ptr<RootNode> CHTLParser::parse() {
 }
 
 std::unique_ptr<Node> CHTLParser::parseDeclaration() {
+    if (match({TokenType::Style})) {
+        return parseStyleBlock();
+    }
     if (match({TokenType::Identifier})) {
         // It's an element if it's an identifier followed by a brace
         if (peek().type == TokenType::OpenBrace) {
@@ -87,9 +90,33 @@ std::unique_ptr<TextNode> CHTLParser::parseText() {
 }
 
 std::unique_ptr<CommentNode> CHTLParser::parseGeneratorComment() {
-     // The '--' token itself is the comment content for now.
-     // CHTL.md implies content might follow, but this is a start.
+    // The lexeme of the GeneratorComment token now holds the content.
     return std::make_unique<CommentNode>(previous().lexeme);
+}
+
+std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
+    auto styleNode = std::make_unique<StyleBlockNode>();
+    consume(TokenType::OpenBrace, "Expected '{' after 'style' keyword.");
+
+    while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+        const Token& key = consume(TokenType::Identifier, "Expected CSS property name.");
+        consume(TokenType::Colon, "Expected ':' after CSS property name.");
+
+        // For now, we assume the value is a single unquoted literal token.
+        // This will need to be made more robust for multi-token values.
+        std::string value;
+        if (match({TokenType::UnquotedLiteral, TokenType::Identifier, TokenType::StringLiteral})) {
+            value = previous().lexeme;
+        } else {
+            throw std::runtime_error("Expected CSS property value.");
+        }
+
+        consume(TokenType::Semicolon, "Expected ';' after CSS property value.");
+        styleNode->properties_.emplace_back(key.lexeme, value);
+    }
+
+    consume(TokenType::CloseBrace, "Expected '}' after style block.");
+    return styleNode;
 }
 
 // --- Helper Methods ---

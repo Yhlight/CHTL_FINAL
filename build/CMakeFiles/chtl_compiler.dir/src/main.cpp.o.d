@@ -194,9 +194,12 @@ CMakeFiles/chtl_compiler.dir/src/main.cpp.o: /app/src/main.cpp \
  /app/src/CHTL/CHTLParser/../CHTLNode/AttributeNode.h \
  /app/src/CHTL/CHTLParser/../CHTLNode/TextNode.h \
  /app/src/CHTL/CHTLParser/../CHTLNode/CommentNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/StyleBlockNode.h \
+ /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
  /app/src/CHTL/CHTLGenerator/CHTLGenerator.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/BaseNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/RootNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/ElementNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/TextNode.h \
- /app/src/CHTL/CHTLGenerator/../CHTLNode/CommentNode.h
+ /app/src/CHTL/CHTLGenerator/../CHTLNode/CommentNode.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLNode/StyleBlockNode.h

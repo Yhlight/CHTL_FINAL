@@ -167,6 +167,8 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o: \
  /app/src/CHTL/CHTLParser/../CHTLNode/AttributeNode.h \
  /app/src/CHTL/CHTLParser/../CHTLNode/TextNode.h \
  /app/src/CHTL/CHTLParser/../CHTLNode/CommentNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/StyleBlockNode.h \
+ /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
  /usr/include/c++/13/iostream /usr/include/c++/13/ostream \
  /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \

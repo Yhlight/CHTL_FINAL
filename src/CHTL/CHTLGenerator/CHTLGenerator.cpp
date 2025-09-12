@@ -21,6 +21,9 @@ void CHTLGenerator::visit(const Node* node) {
         case NodeType::Comment:
             visitComment(static_cast<const CommentNode*>(node));
             break;
+        case NodeType::StyleBlock:
+            // Style blocks are handled by their parent element, so we do nothing here.
+            break;
         default:
             // Handle other node types or throw an error
             break;
@@ -35,8 +38,31 @@ void CHTLGenerator::visitElement(const ElementNode* node) {
         output_ << " " << attr->key_ << "=\"" << attr->value_ << "\"";
     }
 
-    if (node->children_.empty()) {
-        // Self-closing tag for simplicity, though not all tags work this way in HTML
+    // Find style blocks and generate the inline style attribute
+    std::stringstream style_ss;
+    for (const auto& child : node->children_) {
+        if (child->getType() == NodeType::StyleBlock) {
+            const auto* styleNode = static_cast<const StyleBlockNode*>(child.get());
+            for (const auto& prop : styleNode->properties_) {
+                style_ss << prop.first << ": " << prop.second << "; ";
+            }
+        }
+    }
+
+    std::string style_attr = style_ss.str();
+    if (!style_attr.empty()) {
+        output_ << " style=\"" << style_attr << "\"";
+    }
+
+    bool hasNonStyleChildren = false;
+    for (const auto& child : node->children_) {
+        if (child->getType() != NodeType::StyleBlock) {
+            hasNonStyleChildren = true;
+            break;
+        }
+    }
+
+    if (!hasNonStyleChildren) {
         output_ << " />\n";
     } else {
         output_ << ">\n";

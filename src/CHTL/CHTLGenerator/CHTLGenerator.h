@@ -6,6 +6,7 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
+#include "../CHTLNode/StyleBlockNode.h"
 #include <string>
 #include <sstream>
 #include <memory>
@@ -22,6 +23,7 @@ private:
     void visitElement(const ElementNode* node);
     void visitText(const TextNode* node);
     void visitComment(const CommentNode* node);
+    // Style blocks are handled within visitElement, so no separate visitStyleBlock is needed
 
     void indent();
 

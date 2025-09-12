@@ -7,6 +7,7 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
+#include "../CHTLNode/StyleBlockNode.h"
 #include <vector>
 #include <memory>
 
@@ -23,6 +24,7 @@ private:
     void parseElementBody(ElementNode& element);
     void parseAttributes(ElementNode& element);
     std::unique_ptr<TextNode> parseText();
+    std::unique_ptr<StyleBlockNode> parseStyleBlock();
     std::unique_ptr<CommentNode> parseGeneratorComment();
 
 

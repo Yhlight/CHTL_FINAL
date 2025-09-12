@@ -170,7 +170,8 @@ void CHTLLexer::identifier() {
     if (source_[start_] == '@') {
         while (isAlphaNumeric(peek())) advance();
     } else {
-        while (isAlphaNumeric(peek()) || peek() == '_') advance();
+        // Allow hyphens in identifiers for things like CSS properties
+        while (isAlphaNumeric(peek()) || peek() == '_' || peek() == '-') advance();
     }
 
     std::string text = source_.substr(start_, current_ - start_);

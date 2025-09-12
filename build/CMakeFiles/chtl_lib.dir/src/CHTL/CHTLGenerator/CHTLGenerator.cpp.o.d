@@ -161,6 +161,8 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/AttributeNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/TextNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/CommentNode.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLNode/StyleBlockNode.h \
+ /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
  /usr/include/c++/13/sstream /usr/include/c++/13/istream \
  /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \

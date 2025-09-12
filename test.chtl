@@ -9,6 +9,12 @@ html {
             id: "main-content";
             class: "container";
 
+            style {
+                width: 100px;
+                height: 200px;
+                background-color: red;
+            }
+
             h1 {
                 text { "Welcome to CHTL!" }
             }
