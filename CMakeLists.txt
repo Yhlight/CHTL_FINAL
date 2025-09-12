@@ -31,6 +31,8 @@ set(CHTL_SOURCES
     src/CHTL_JS/CHTLJSLexer.cpp
     src/CHTL_JS/CHTLJSParser.cpp
     src/CHTL_JS/CHTLJSGenerator.cpp
+    src/Compiler/CompilerDispatcher.cpp
+    src/Compiler/CodeMerger.cpp
 )
 
 # 头文件
@@ -44,6 +46,8 @@ set(CHTL_HEADERS
     include/CHTL_JS/CHTLJSLexer.h
     include/CHTL_JS/CHTLJSParser.h
     include/CHTL_JS/CHTLJSGenerator.h
+    include/Compiler/CompilerDispatcher.h
+    include/Compiler/CodeMerger.h
 )
 
 # 创建库

@@ -59,12 +59,6 @@ private:
     std::shared_ptr<CHTLNode> parseRoot();
 
     /**
-     * @brief 解析元素
-     * @return 元素节点
-     */
-    std::shared_ptr<CHTLNode> parseElement();
-
-    /**
      * @brief 解析文本节点
      * @return 文本节点
      */
@@ -248,22 +242,10 @@ private:
     Token consume(TokenType type);
 
     /**
-     * @brief 获取当前词法单元
-     * @return 当前词法单元
-     */
-    const Token& current() const;
-
-    /**
      * @brief 获取前一个词法单元
      * @return 前一个词法单元
      */
     const Token& previous() const;
-
-    /**
-     * @brief 检查是否到达末尾
-     * @return 是否到达末尾
-     */
-    bool isAtEnd() const;
 
     /**
      * @brief 同步到下一个语句
@@ -296,9 +278,29 @@ private:
      */
     void error(const Token& token, const std::string& message);
 
-private:
+public:
     std::vector<Token> tokens_;
     size_t current_token_;
+    
+    /**
+     * @brief 获取当前词法单元
+     * @return 当前词法单元
+     */
+    const Token& current() const;
+
+    /**
+     * @brief 检查是否到达末尾
+     * @return 是否到达末尾
+     */
+    bool isAtEnd() const;
+    
+    /**
+     * @brief 解析元素
+     * @return 元素节点
+     */
+    std::shared_ptr<CHTLNode> parseElement();
+    
+private:
     bool debug_mode_;
     std::vector<std::string> errors_;
 };

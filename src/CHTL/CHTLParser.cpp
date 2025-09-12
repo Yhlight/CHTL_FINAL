@@ -502,7 +502,11 @@ AttributeValue CHTLParser::parseAttributeValue() {
         return current_token.value;
     } else if (current_token.type == TokenType::NUMBER) {
         consume();
-        return std::stod(current_token.value);
+        try {
+            return std::stod(current_token.value);
+        } catch (const std::exception& e) {
+            return 0.0;
+        }
     } else if (current_token.type == TokenType::IDENTIFIER) {
         consume();
         return current_token.value;
@@ -602,7 +606,7 @@ const Token& CHTLParser::previous() const {
 }
 
 bool CHTLParser::isAtEnd() const {
-    return current_token_ >= tokens_.size() || current().type == TokenType::EOF_TOKEN;
+    return current_token_ >= tokens_.size() || (current_token_ < tokens_.size() && tokens_[current_token_].type == TokenType::EOF_TOKEN);
 }
 
 void CHTLParser::synchronize() {

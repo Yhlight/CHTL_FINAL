@@ -997,7 +997,7 @@ const CHTLJSToken& CHTLJSParser::previous() const {
 }
 
 bool CHTLJSParser::isAtEnd() const {
-    return current_token_ >= tokens_.size() || current().type == CHTLJSTokenType::EOF_TOKEN;
+    return current_token_ >= tokens_.size() || (current_token_ < tokens_.size() && tokens_[current_token_].type == CHTLJSTokenType::EOF_TOKEN);
 }
 
 void CHTLJSParser::synchronize() {

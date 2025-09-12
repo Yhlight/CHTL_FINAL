@@ -277,12 +277,6 @@ private:
     bool match(CHTLJSTokenType type);
 
     /**
-     * @brief 消费当前词法单元
-     * @return 当前词法单元
-     */
-    CHTLJSToken consume();
-
-    /**
      * @brief 消费指定类型的词法单元
      * @param type 期望的类型
      * @return 词法单元
@@ -347,6 +341,12 @@ public:
      * @return 语句节点
      */
     std::shared_ptr<CHTLNode> parseStatement();
+    
+    /**
+     * @brief 消费当前词法单元
+     * @return 当前词法单元
+     */
+    CHTLJSToken consume();
 
 private:
     bool debug_mode_;

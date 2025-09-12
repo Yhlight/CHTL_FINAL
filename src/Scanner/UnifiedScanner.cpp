@@ -8,7 +8,9 @@ namespace CHTL {
 // 静态成员初始化
 const std::vector<std::string> UnifiedScanner::CHTL_BOUNDARIES = {
     "[Template]", "[Custom]", "[Origin]", "[Import]", "[Namespace]", 
-    "[Configuration]", "[Info]", "[Export]", "use", "text", "style", "script"
+    "[Configuration]", "[Info]", "[Export]", "use", "text", "style", "script",
+    "html", "head", "body", "div", "span", "p", "h1", "h2", "h3", "h4", "h5", "h6",
+    "a", "img", "ul", "ol", "li", "table", "tr", "td", "th", "form", "input", "button"
 };
 
 const std::vector<std::string> UnifiedScanner::CHTL_JS_BOUNDARIES = {
@@ -33,20 +35,34 @@ std::vector<UnifiedScanner::CodeFragment> UnifiedScanner::scan(const std::string
     
     std::vector<CodeFragment> fragments;
     
-    // 首先进行宽判处理，识别大块的CHTL代码
-    auto wide_fragments = wideJudgment(source_code);
-    fragments.insert(fragments.end(), wide_fragments.begin(), wide_fragments.end());
+    // 简单的代码类型识别
+    CodeType type = identifyCodeType(source_code);
     
-    // 对剩余的代码进行严判处理
-    std::string remaining_code = source_code;
-    for (const auto& fragment : wide_fragments) {
-        // 移除已处理的代码片段
-        remaining_code.erase(fragment.start_pos, fragment.end_pos - fragment.start_pos);
-    }
-    
-    if (!remaining_code.empty()) {
-        auto strict_fragments = strictJudgment(remaining_code);
-        fragments.insert(fragments.end(), strict_fragments.begin(), strict_fragments.end());
+    if (type != CodeType::UNKNOWN) {
+        // 整个代码被识别为一种类型
+        CodeFragment fragment;
+        fragment.type = type;
+        fragment.content = source_code;
+        fragment.start_pos = 0;
+        fragment.end_pos = source_code.length();
+        fragment.placeholder = "";
+        fragments.push_back(fragment);
+    } else {
+        // 如果无法识别，尝试分离代码
+        auto wide_fragments = wideJudgment(source_code);
+        fragments.insert(fragments.end(), wide_fragments.begin(), wide_fragments.end());
+        
+        // 对剩余的代码进行严判处理
+        std::string remaining_code = source_code;
+        for (const auto& fragment : wide_fragments) {
+            // 移除已处理的代码片段
+            remaining_code.erase(fragment.start_pos, fragment.end_pos - fragment.start_pos);
+        }
+        
+        if (!remaining_code.empty()) {
+            auto strict_fragments = strictJudgment(remaining_code);
+            fragments.insert(fragments.end(), strict_fragments.begin(), strict_fragments.end());
+        }
     }
     
     return fragments;

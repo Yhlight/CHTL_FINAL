@@ -415,6 +415,54 @@ src/CHTL_JS/CHTLJSParser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSParser.cpp.s
 .PHONY : src/CHTL_JS/CHTLJSParser.cpp.s
 
+src/Compiler/CodeMerger.o: src/Compiler/CodeMerger.cpp.o
+.PHONY : src/Compiler/CodeMerger.o
+
+# target to build an object file
+src/Compiler/CodeMerger.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Compiler/CodeMerger.cpp.o
+.PHONY : src/Compiler/CodeMerger.cpp.o
+
+src/Compiler/CodeMerger.i: src/Compiler/CodeMerger.cpp.i
+.PHONY : src/Compiler/CodeMerger.i
+
+# target to preprocess a source file
+src/Compiler/CodeMerger.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Compiler/CodeMerger.cpp.i
+.PHONY : src/Compiler/CodeMerger.cpp.i
+
+src/Compiler/CodeMerger.s: src/Compiler/CodeMerger.cpp.s
+.PHONY : src/Compiler/CodeMerger.s
+
+# target to generate assembly for a file
+src/Compiler/CodeMerger.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Compiler/CodeMerger.cpp.s
+.PHONY : src/Compiler/CodeMerger.cpp.s
+
+src/Compiler/CompilerDispatcher.o: src/Compiler/CompilerDispatcher.cpp.o
+.PHONY : src/Compiler/CompilerDispatcher.o
+
+# target to build an object file
+src/Compiler/CompilerDispatcher.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Compiler/CompilerDispatcher.cpp.o
+.PHONY : src/Compiler/CompilerDispatcher.cpp.o
+
+src/Compiler/CompilerDispatcher.i: src/Compiler/CompilerDispatcher.cpp.i
+.PHONY : src/Compiler/CompilerDispatcher.i
+
+# target to preprocess a source file
+src/Compiler/CompilerDispatcher.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Compiler/CompilerDispatcher.cpp.i
+.PHONY : src/Compiler/CompilerDispatcher.cpp.i
+
+src/Compiler/CompilerDispatcher.s: src/Compiler/CompilerDispatcher.cpp.s
+.PHONY : src/Compiler/CompilerDispatcher.s
+
+# target to generate assembly for a file
+src/Compiler/CompilerDispatcher.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/Compiler/CompilerDispatcher.cpp.s
+.PHONY : src/Compiler/CompilerDispatcher.cpp.s
+
 src/Scanner/UnifiedScanner.o: src/Scanner/UnifiedScanner.cpp.o
 .PHONY : src/Scanner/UnifiedScanner.o
 
@@ -528,6 +576,12 @@ help:
 	@echo "... src/CHTL_JS/CHTLJSParser.o"
 	@echo "... src/CHTL_JS/CHTLJSParser.i"
 	@echo "... src/CHTL_JS/CHTLJSParser.s"
+	@echo "... src/Compiler/CodeMerger.o"
+	@echo "... src/Compiler/CodeMerger.i"
+	@echo "... src/Compiler/CodeMerger.s"
+	@echo "... src/Compiler/CompilerDispatcher.o"
+	@echo "... src/Compiler/CompilerDispatcher.i"
+	@echo "... src/Compiler/CompilerDispatcher.s"
 	@echo "... src/Scanner/UnifiedScanner.o"
 	@echo "... src/Scanner/UnifiedScanner.i"
 	@echo "... src/Scanner/UnifiedScanner.s"
