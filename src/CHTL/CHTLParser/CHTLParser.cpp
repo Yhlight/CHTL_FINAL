@@ -131,7 +131,44 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
 
 void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes) {
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        if (match({TokenType::Insert})) {
+        if (match({TokenType::Delete})) {
+            // Parse the delete statement: delete TagName[index];
+            const Token& tagName = consume(TokenType::Identifier, "Expected tag name for delete target.");
+            size_t index = 0;
+            bool is_indexed = false;
+            if (match({TokenType::OpenBracket})) {
+                is_indexed = true;
+                const Token& indexToken = consume(TokenType::Number, "Expected index number in brackets.");
+                index = std::stoul(indexToken.lexeme);
+                consume(TokenType::CloseBracket, "Expected ']' after index.");
+            }
+            consume(TokenType::Semicolon, "Expected ';' after delete statement.");
+
+            // Find and erase the target node
+            auto target_it = target_nodes.begin();
+            bool found = false;
+            size_t current_index = 0;
+            for (auto it = target_nodes.begin(); it != target_nodes.end(); ++it) {
+                if ((*it)->getType() == NodeType::Element) {
+                    ElementNode* target_element = static_cast<ElementNode*>((*it).get());
+                    if (target_element->tagName_ == tagName.lexeme) {
+                        if (current_index == index) {
+                            target_it = it;
+                            found = true;
+                            break;
+                        }
+                        current_index++;
+                    }
+                }
+            }
+
+            if (found) {
+                target_nodes.erase(target_it);
+            } else {
+                throw std::runtime_error("Could not find element '" + tagName.lexeme + "' at index " + std::to_string(index) + " to delete.");
+            }
+
+        } else if (match({TokenType::Insert})) {
             if (match({TokenType::After, TokenType::Before, TokenType::Replace, TokenType::AtTop, TokenType::AtBottom})) {
                 const Token& position = previous();
 

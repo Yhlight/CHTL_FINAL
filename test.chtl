@@ -1,19 +1,17 @@
 [Template] @Element MyContent {
-    h2 { text { "Original Title" } }
-    p { text { "Original paragraph." } }
+    h1 { text { "Title" } }
+    p { text { "First paragraph." } }
+    hr;
+    p { text { "Second paragraph." } }
 }
 
 html {
     body {
         @Element MyContent {
-            insert before h2[0] {
-                h1 { text { "New Main Title" } }
-            }
-
-            insert after p[0] {
-                hr;
-                p { text { "An inserted paragraph." } }
-            }
+            // Delete the horizontal rule
+            delete hr;
+            // Delete the second paragraph (index 1)
+            delete p[1];
         }
     }
 }
