@@ -4,6 +4,7 @@
 #include "CHTL/CHTLNode/TemplateNode.h"
 #include "CHTL/CHTLNode/CustomNode.h"
 #include "CHTL/CHTLNode/ImportNode.h"
+#include "CHTL/CHTLNode/NamespaceNode.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -523,8 +524,80 @@ std::shared_ptr<BaseNode> CHTLParser::parseConfiguration() {
 }
 
 std::shared_ptr<BaseNode> CHTLParser::parseNamespace() {
-    // TODO: 实现命名空间解析
-    addWarning("Namespace parsing not yet implemented");
+    if (isAtEnd()) return nullptr;
+    
+    if (checkToken(TokenType::NAMESPACE)) {
+        nextToken(); // 消费 [Namespace]
+        
+        // 解析命名空间名称
+        std::string namespaceName;
+        if (currentToken().getType() == TokenType::IDENTIFIER) {
+            namespaceName = currentToken().getValue();
+            nextToken();
+        } else {
+            addError("Expected namespace name after [Namespace]");
+            return nullptr;
+        }
+        
+        // 创建命名空间节点
+        auto namespaceNode = std::make_shared<NamespaceNode>(namespaceName);
+        namespaceNode->setPosition(currentToken().getLine(), currentToken().getColumn());
+        
+        // 解析命名空间内容
+        if (checkToken(TokenType::LEFT_BRACE)) {
+            nextToken(); // 消费 {
+            
+            skipWhitespace();
+            
+            // 解析命名空间内容
+            while (!checkToken(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                auto child = parseElement();
+                if (child) {
+                    namespaceNode->addChild(child);
+                } else {
+                    // 尝试解析其他类型的节点
+                    if (checkToken(TokenType::TEXT)) {
+                        child = parseText();
+                        if (child) {
+                            namespaceNode->addChild(child);
+                        }
+                    } else if (checkToken(TokenType::STYLE)) {
+                        child = parseStyle();
+                        if (child) {
+                            namespaceNode->addChild(child);
+                        }
+                    } else if (checkToken(TokenType::TEMPLATE)) {
+                        child = parseTemplate();
+                        if (child) {
+                            namespaceNode->addChild(child);
+                        }
+                    } else if (checkToken(TokenType::CUSTOM)) {
+                        child = parseCustom();
+                        if (child) {
+                            namespaceNode->addChild(child);
+                        }
+                    } else if (checkToken(TokenType::IMPORT)) {
+                        child = parseImport();
+                        if (child) {
+                            namespaceNode->addChild(child);
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                skipWhitespace();
+            }
+            
+            if (checkToken(TokenType::RIGHT_BRACE)) {
+                nextToken(); // 消费 }
+            } else {
+                addError("Expected '}' after namespace content");
+            }
+        }
+        
+        return namespaceNode;
+    }
+    
     return nullptr;
 }
 

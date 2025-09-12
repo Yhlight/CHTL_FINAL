@@ -150,6 +150,14 @@ private:
     std::string generateImport(std::shared_ptr<BaseNode> node, int indent = 0);
     
     /**
+     * @brief 生成命名空间节点
+     * @param node 命名空间节点
+     * @param indent 缩进级别
+     * @return 生成的代码
+     */
+    std::string generateNamespace(std::shared_ptr<BaseNode> node, int indent = 0);
+    
+    /**
      * @brief 生成节点（通用方法）
      * @param node 节点
      * @param indent 缩进级别

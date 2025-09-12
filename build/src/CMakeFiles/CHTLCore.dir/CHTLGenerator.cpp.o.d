@@ -241,6 +241,7 @@ src/CMakeFiles/CHTLCore.dir/CHTLGenerator.cpp.o: \
   /workspace/include/CHTL/CHTLNode/TemplateNode.h \
   /workspace/include/CHTL/CHTLNode/CustomNode.h \
   /workspace/include/CHTL/CHTLNode/ImportNode.h \
+  /workspace/include/CHTL/CHTLNode/NamespaceNode.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iostream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/sstream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/sstream.tcc \

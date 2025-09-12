@@ -14,9 +14,13 @@ add_library(CHTLCore STATIC
     CHTLNode/TemplateNode.cpp
     CHTLNode/CustomNode.cpp
     CHTLNode/ImportNode.cpp
+    CHTLNode/NamespaceNode.cpp
     
     # 导入系统
     ImportManager.cpp
+    
+    # 命名空间系统
+    NamespaceManager.cpp
     
     # 扫描器
     Scanner/UnifiedScanner.cpp

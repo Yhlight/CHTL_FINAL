@@ -343,6 +343,30 @@ CHTLNode/ImportNode.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/ImportNode.cpp.s
 .PHONY : CHTLNode/ImportNode.cpp.s
 
+CHTLNode/NamespaceNode.o: CHTLNode/NamespaceNode.cpp.o
+.PHONY : CHTLNode/NamespaceNode.o
+
+# target to build an object file
+CHTLNode/NamespaceNode.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/NamespaceNode.cpp.o
+.PHONY : CHTLNode/NamespaceNode.cpp.o
+
+CHTLNode/NamespaceNode.i: CHTLNode/NamespaceNode.cpp.i
+.PHONY : CHTLNode/NamespaceNode.i
+
+# target to preprocess a source file
+CHTLNode/NamespaceNode.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/NamespaceNode.cpp.i
+.PHONY : CHTLNode/NamespaceNode.cpp.i
+
+CHTLNode/NamespaceNode.s: CHTLNode/NamespaceNode.cpp.s
+.PHONY : CHTLNode/NamespaceNode.s
+
+# target to generate assembly for a file
+CHTLNode/NamespaceNode.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/NamespaceNode.cpp.s
+.PHONY : CHTLNode/NamespaceNode.cpp.s
+
 CHTLNode/TemplateNode.o: CHTLNode/TemplateNode.cpp.o
 .PHONY : CHTLNode/TemplateNode.o
 
@@ -439,6 +463,30 @@ ImportManager.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.s
 .PHONY : ImportManager.cpp.s
 
+NamespaceManager.o: NamespaceManager.cpp.o
+.PHONY : NamespaceManager.o
+
+# target to build an object file
+NamespaceManager.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.o
+.PHONY : NamespaceManager.cpp.o
+
+NamespaceManager.i: NamespaceManager.cpp.i
+.PHONY : NamespaceManager.i
+
+# target to preprocess a source file
+NamespaceManager.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.i
+.PHONY : NamespaceManager.cpp.i
+
+NamespaceManager.s: NamespaceManager.cpp.s
+.PHONY : NamespaceManager.s
+
+# target to generate assembly for a file
+NamespaceManager.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/NamespaceManager.cpp.s
+.PHONY : NamespaceManager.cpp.s
+
 Scanner/UnifiedScanner.o: Scanner/UnifiedScanner.cpp.o
 .PHONY : Scanner/UnifiedScanner.o
 
@@ -521,6 +569,9 @@ help:
 	@echo "... CHTLNode/ImportNode.o"
 	@echo "... CHTLNode/ImportNode.i"
 	@echo "... CHTLNode/ImportNode.s"
+	@echo "... CHTLNode/NamespaceNode.o"
+	@echo "... CHTLNode/NamespaceNode.i"
+	@echo "... CHTLNode/NamespaceNode.s"
 	@echo "... CHTLNode/TemplateNode.o"
 	@echo "... CHTLNode/TemplateNode.i"
 	@echo "... CHTLNode/TemplateNode.s"
@@ -533,6 +584,9 @@ help:
 	@echo "... ImportManager.o"
 	@echo "... ImportManager.i"
 	@echo "... ImportManager.s"
+	@echo "... NamespaceManager.o"
+	@echo "... NamespaceManager.i"
+	@echo "... NamespaceManager.s"
 	@echo "... Scanner/UnifiedScanner.o"
 	@echo "... Scanner/UnifiedScanner.i"
 	@echo "... Scanner/UnifiedScanner.s"

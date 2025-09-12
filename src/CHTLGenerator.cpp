@@ -4,6 +4,7 @@
 #include "CHTL/CHTLNode/TemplateNode.h"
 #include "CHTL/CHTLNode/CustomNode.h"
 #include "CHTL/CHTLNode/ImportNode.h"
+#include "CHTL/CHTLNode/NamespaceNode.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -172,6 +173,8 @@ std::string CHTLGenerator::generateNode(std::shared_ptr<BaseNode> node, int inde
             return generateCustom(node, indent);
         case NodeType::IMPORT:
             return generateImport(node, indent);
+        case NodeType::NAMESPACE:
+            return generateNamespace(node, indent);
         default:
             return "";
     }
@@ -372,6 +375,29 @@ std::string CHTLGenerator::generateImport(std::shared_ptr<BaseNode> node, int in
                 // 其他类型的内容
                 oss << indentStr << "<!-- " << content.substr(0, 100) << "... -->\n";
                 break;
+        }
+    }
+    
+    return oss.str();
+}
+
+std::string CHTLGenerator::generateNamespace(std::shared_ptr<BaseNode> node, int indent) {
+    if (!node) return "";
+    
+    auto namespaceNode = std::dynamic_pointer_cast<NamespaceNode>(node);
+    if (!namespaceNode) return "";
+    
+    std::ostringstream oss;
+    std::string indentStr = generateIndent(indent);
+    
+    // 生成命名空间注释
+    oss << indentStr << "<!-- Namespace: " << namespaceNode->getNamespaceName() << " -->\n";
+    
+    // 生成命名空间内容
+    for (size_t i = 0; i < namespaceNode->getChildCount(); ++i) {
+        auto child = namespaceNode->getChild(i);
+        if (child) {
+            oss << generateNode(child, indent);
         }
     }
     
