@@ -1,19 +1,27 @@
 // This is a simple test file for the CHTL compiler.
-// It checks for basic element nesting and text nodes.
+// It checks for basic element nesting, text nodes, and now attributes.
 
 html {
     body {
         h1 {
+            class: "main-title";
             text { "Welcome to CHTL" }
         }
 
         /* A multi-line comment */
         div {
-            // An empty div for testing.
+            id = "container"; // Test '=' as well as ':'
+            class: content-box; // Test unquoted attribute value
         }
 
         p {
             text { This is an unquoted test }
+        }
+
+        // Test a self-closing tag with attributes
+        img {
+            src: "image.jpg";
+            alt: "A test image";
         }
     }
 }

@@ -51,11 +51,13 @@ class Lexer:
         return False
 
     def _identifier(self) -> Token:
-        """Parses an identifier or an unquoted literal."""
+        """
+        Parses an identifier or an unquoted literal. Allows for hyphens,
+        which are common in CSS class names and attributes.
+        """
         result = ''
-        # CHTL identifiers are quite flexible. For now, we handle simple cases.
-        # This will also tokenize unquoted literals like `red` in `color: red;`
-        while self.current_char is not None and self.current_char.isalnum():
+        # This will also tokenize unquoted literals like `red` or `content-box`.
+        while self.current_char is not None and (self.current_char.isalnum() or self.current_char == '-'):
             result += self.current_char
             self._advance()
         return Token(TokenType.IDENTIFIER, result)

@@ -30,20 +30,33 @@ class Generator:
             # In a more robust system, this would log an error.
             return ""
 
+    def _generate_attributes(self, node: ElementNode) -> str:
+        """Generates the HTML attribute string from a node's attributes dict."""
+        if not node.attributes:
+            return ""
+
+        parts = []
+        for key, value in node.attributes.items():
+            # Escape the attribute value to handle special characters like " and >
+            escaped_value = html.escape(str(value), quote=True)
+            parts.append(f'{key}="{escaped_value}"')
+
+        # Return the parts joined by spaces, with a leading space
+        return " " + " ".join(parts)
+
     def _generate_element_node(self, node: ElementNode) -> str:
-        """Generates an HTML element from an ElementNode."""
+        """Generates an HTML element from an ElementNode, including its attributes."""
         tag_name = node.tag_name.lower()
+        attr_string = self._generate_attributes(node)
 
         if tag_name in self.self_closing_tags:
             # Self-closing tags have no children content.
-            # Attributes will be added here in a future step.
-            return f"<{tag_name}>"
+            return f"<{tag_name}{attr_string}>"
 
         # Generate children's HTML recursively.
         children_html = "".join(self._generate_node(child) for child in node.children)
 
-        # Attributes will be added to the opening tag in a future step.
-        return f"<{tag_name}>{children_html}</{tag_name}>"
+        return f"<{tag_name}{attr_string}>{children_html}</{tag_name}>"
 
     def _generate_text_node(self, node: TextNode) -> str:
         """Generates text content from a TextNode."""

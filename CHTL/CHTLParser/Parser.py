@@ -79,22 +79,62 @@ class Parser:
             return self._parse_element_body(identifier)
 
     def _parse_element_body(self, tag_name: str) -> ElementNode:
-        """Parses the block content of an element node."""
+        """Parses the block content of an element node, including attributes and nested elements."""
         node = ElementNode(tag_name=tag_name)
 
         self._next_token() # Consume '{'
 
-        # Parse nested statements
+        # Loop until we find the closing brace for the element
         while self.current_token.type not in (TokenType.RBRACE, TokenType.EOF):
-            statement = self.parse_statement()
-            if statement:
-                node.children.append(statement)
+            # Inside a block, we can have attributes or nested elements.
+            if self.current_token.type == TokenType.IDENTIFIER:
+                # If the next token is a COLON or EQUALS, it's an attribute.
+                if self.peek_token.type in (TokenType.COLON, TokenType.EQUALS):
+                    self._parse_attribute_statement(node)
+                # If the next token is a LBRACE, it's a nested element.
+                elif self.peek_token.type == TokenType.LBRACE:
+                    child_node = self.parse_element_or_text_statement()
+                    if child_node:
+                        node.children.append(child_node)
+                else:
+                    self.errors.append(f"Unexpected token after identifier '{self.current_token.literal}': {self.peek_token.type}")
+
+            # Advance to the next statement/token.
+            # If we parsed a statement that consumes tokens, this moves to the next one.
             self._next_token()
 
         if self.current_token.type != TokenType.RBRACE:
             self.errors.append("Expected '}' to close element block.")
 
         return node
+
+    def _parse_attribute_statement(self, node: ElementNode):
+        """
+        Parses a full attribute statement like `key: value;` and adds it to the node.
+        Assumes the current token is the attribute's name (IDENTIFIER).
+        """
+        attr_name = self.current_token.literal
+
+        # Advance past the name and the colon/equals
+        self._next_token() # Consume name (current_token is now ':' or '=')
+        self._next_token() # Consume ':' or '=' (current_token is now the value)
+
+        # The next token is the value. It can be a STRING or an unquoted literal (IDENTIFIER).
+        if self.current_token.type not in (TokenType.STRING, TokenType.IDENTIFIER):
+             self.errors.append(f"Expected attribute value for '{attr_name}', got {self.current_token.type}")
+             # Attempt to recover by skipping to the next semicolon
+             while self.current_token.type not in (TokenType.SEMICOLON, TokenType.RBRACE, TokenType.EOF):
+                 self._next_token()
+             return
+
+        attr_value = self.current_token.literal
+        node.attributes[attr_name] = attr_value
+
+        # Expect a semicolon to terminate the attribute statement
+        if self.peek_token.type != TokenType.SEMICOLON:
+            self.errors.append(f"Missing semicolon ';' after attribute value for '{attr_name}'")
+        else:
+            self._next_token() # Consume the value token, leaving the semicolon as current
 
     def _parse_text_body(self) -> TextNode | None:
         """

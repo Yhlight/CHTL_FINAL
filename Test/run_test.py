@@ -71,8 +71,7 @@ if __name__ == "__main__":
         print(output_html)
 
         # Verification
-        # Note: html.escape will turn " into &quot;
-        expected_html = '<html><body><h1>Welcome to CHTL</h1><div></div><p>This is an unquoted test</p></body></html>'
+        expected_html = '<html><body><h1 class="main-title">Welcome to CHTL</h1><div id="container" class="content-box"></div><p>This is an unquoted test</p><img src="image.jpg" alt="A test image"></body></html>'
 
         print("\n--- Verification ---")
         if output_html == expected_html:
