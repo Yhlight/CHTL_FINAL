@@ -63,6 +63,12 @@ private:
      * @return 文本节点
      */
     std::shared_ptr<CHTLNode> parseText();
+    
+    /**
+     * @brief 解析样式节点
+     * @return 样式节点
+     */
+    std::shared_ptr<CHTLNode> parseStyle();
 
     /**
      * @brief 解析注释
@@ -106,11 +112,6 @@ private:
      */
     std::shared_ptr<CHTLNode> parseNamespace();
 
-    /**
-     * @brief 解析样式块
-     * @return 样式节点
-     */
-    std::shared_ptr<CHTLNode> parseStyle();
 
     /**
      * @brief 解析脚本块

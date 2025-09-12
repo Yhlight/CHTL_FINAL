@@ -266,6 +266,12 @@ private:
      * @return 下一个字符
      */
     char peek() const;
+    
+    /**
+     * @brief 获取下下个字符
+     * @return 下下个字符
+     */
+    char peekNext() const;
 
     /**
      * @brief 获取下n个字符

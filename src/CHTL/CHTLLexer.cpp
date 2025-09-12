@@ -98,7 +98,12 @@ std::vector<Token> CHTLLexer::tokenize(const std::string& source_code) {
         
         char ch = peek();
         
-        if (ch == '"' || ch == '\'') {
+        if (ch == '/' && peekNext() == '/') {
+            // 单行注释，跳过到行尾
+            while (!isAtEnd() && peek() != '\n') {
+                consume();
+            }
+        } else if (ch == '"' || ch == '\'') {
             tokens.push_back(readString());
         } else if (isAlpha(ch) || ch == '_') {
             tokens.push_back(readIdentifier());
@@ -288,6 +293,11 @@ bool CHTLLexer::isAlphaNumeric(char ch) const {
 char CHTLLexer::peek() const {
     if (isAtEnd()) return '\0';
     return source_code_[current_pos_];
+}
+
+char CHTLLexer::peekNext() const {
+    if (current_pos_ + 1 >= source_code_.length()) return '\0';
+    return source_code_[current_pos_ + 1];
 }
 
 std::string CHTLLexer::peek(int n) const {
