@@ -110,6 +110,7 @@ public:
     std::vector<std::string> idSelectors;
     std::map<std::string, std::map<std::string, std::string>> cssRules; // selector -> properties
     std::vector<std::pair<std::string, std::string>> templateUsages; // template type -> template name
+    std::vector<std::string> templateInheritances; // inherited template names
     bool isLocal;
     
     StyleNode(const std::string& css, bool local = false, size_t l = 0, size_t c = 0) 
@@ -120,6 +121,7 @@ public:
     void addIdSelector(const std::string& id);
     void addCSSRule(const std::string& selector, const std::string& property, const std::string& value);
     void addTemplateUsage(const std::string& templateType, const std::string& templateName);
+    void addTemplateInheritance(const std::string& templateName);
     
     std::string toString() const override;
     std::string toHTML() const override;
@@ -359,6 +361,7 @@ private:
     void parseCSSRule(std::shared_ptr<StyleNode> style);
     void parseTemplateUsage(std::shared_ptr<StyleNode> style);
     std::shared_ptr<CHTLNode> parseTemplateUsage();
+    void parseTemplateInheritance(std::shared_ptr<StyleNode> style);
     
     // 模板解析
     TemplateNode::TemplateType parseTemplateType();

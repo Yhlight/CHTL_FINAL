@@ -443,6 +443,10 @@ void StyleNode::addTemplateUsage(const std::string& templateType, const std::str
     templateUsages.push_back({templateType, templateName});
 }
 
+void StyleNode::addTemplateInheritance(const std::string& templateName) {
+    templateInheritances.push_back(templateName);
+}
+
 std::shared_ptr<CHTLNode> CHTLParser::parseTemplateUsage() {
     // 解析模板使用，如 @Style DefaultText; 或 @Element Button;
     if (current().type == CHTLTokenType::TEMPLATE_STYLE ||
@@ -476,6 +480,32 @@ std::shared_ptr<CHTLNode> CHTLParser::parseTemplateUsage() {
     } else {
         addError("期望模板使用");
         return nullptr;
+    }
+}
+
+void CHTLParser::parseTemplateInheritance(std::shared_ptr<StyleNode> style) {
+    // 解析模板继承，如 inherit BaseText;
+    if (current().type == CHTLTokenType::INHERIT) {
+        advance(); // 跳过 inherit
+        
+        if (current().type == CHTLTokenType::IDENTIFIER) {
+            std::string templateName = current().value;
+            advance();
+            
+            // 添加到样式的模板继承列表
+            style->addTemplateInheritance(templateName);
+            
+            // 期望分号
+            if (match(CHTLTokenType::SEMICOLON)) {
+                advance();
+            } else {
+                addError("期望 ';'");
+            }
+        } else {
+            addError("期望模板名称");
+        }
+    } else {
+        addError("期望 inherit 关键字");
     }
 }
 

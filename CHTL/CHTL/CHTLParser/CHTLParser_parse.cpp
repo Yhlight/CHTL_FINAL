@@ -285,6 +285,11 @@ std::shared_ptr<CHTLNode> CHTLParser::parseStyle() {
                 // 解析模板使用
                 parseTemplateUsage(style);
             }
+            // 检查是否是模板继承（inherit）
+            else if (current().type == CHTLTokenType::INHERIT) {
+                // 解析模板继承
+                parseTemplateInheritance(style);
+            }
             // 检查是否是CSS选择器（.class, #id, &:pseudo）
             else if (current().type == CHTLTokenType::DOT || 
                 current().type == CHTLTokenType::HASH ||
@@ -292,12 +297,27 @@ std::shared_ptr<CHTLNode> CHTLParser::parseStyle() {
                 
                 // 解析CSS选择器规则
                 parseCSSRule(style);
-            } else {
-                // 解析内联样式属性
-                auto properties = parseStyleProperties();
-                for (const auto& prop : properties) {
-                    style->addInlineStyle(prop.first, prop.second);
+            } else if (current().type == CHTLTokenType::IDENTIFIER) {
+                // 解析单个内联样式属性
+                std::string propName = current().value;
+                advance();
+                
+                if (match(CHTLTokenType::COLON) || match(CHTLTokenType::EQUAL)) {
+                    advance();
+                    
+                    std::string propValue = parseStylePropertyValue();
+                    style->addInlineStyle(propName, propValue);
+                    
+                    if (match(CHTLTokenType::SEMICOLON)) {
+                        advance();
+                    }
+                } else {
+                    addError("期望 ':' 或 '='");
+                    advance(); // 避免无限循环
                 }
+            } else {
+                addError("期望样式属性名或CSS选择器");
+                advance(); // 避免无限循环
             }
         }
         
@@ -377,12 +397,27 @@ std::shared_ptr<CHTLNode> CHTLParser::parseTemplate() {
                         if (match(CHTLTokenType::COLON) || match(CHTLTokenType::EQUAL)) {
                             advance();
                             
-                            if (current().type == CHTLTokenType::STRING || 
-                                current().type == CHTLTokenType::UNQUOTED_LITERAL ||
-                                current().type == CHTLTokenType::NUMBER ||
-                                current().type == CHTLTokenType::IDENTIFIER) {
-                                templateNode->addProperty(propName, current().value);
-                                advance();
+                            // 解析复合CSS值（如 14px, 50%, 1.5em等）
+                            std::string propValue;
+                            while (currentToken < tokens.size() && 
+                                   current().type != CHTLTokenType::SEMICOLON && 
+                                   current().type != CHTLTokenType::RIGHT_BRACE && 
+                                   current().type != CHTLTokenType::EOF_TOKEN) {
+                                
+                                if (current().type == CHTLTokenType::STRING || 
+                                    current().type == CHTLTokenType::UNQUOTED_LITERAL ||
+                                    current().type == CHTLTokenType::NUMBER ||
+                                    current().type == CHTLTokenType::IDENTIFIER ||
+                                    current().type == CHTLTokenType::HASH) {
+                                    propValue += current().value;
+                                    advance();
+                                } else {
+                                    break;
+                                }
+                            }
+                            
+                            if (!propValue.empty()) {
+                                templateNode->addProperty(propName, propValue);
                             }
                         }
                         
