@@ -319,6 +319,30 @@ CHTLNode/ElementNode.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/ElementNode.cpp.s
 .PHONY : CHTLNode/ElementNode.cpp.s
 
+CHTLNode/ImportNode.o: CHTLNode/ImportNode.cpp.o
+.PHONY : CHTLNode/ImportNode.o
+
+# target to build an object file
+CHTLNode/ImportNode.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/ImportNode.cpp.o
+.PHONY : CHTLNode/ImportNode.cpp.o
+
+CHTLNode/ImportNode.i: CHTLNode/ImportNode.cpp.i
+.PHONY : CHTLNode/ImportNode.i
+
+# target to preprocess a source file
+CHTLNode/ImportNode.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/ImportNode.cpp.i
+.PHONY : CHTLNode/ImportNode.cpp.i
+
+CHTLNode/ImportNode.s: CHTLNode/ImportNode.cpp.s
+.PHONY : CHTLNode/ImportNode.s
+
+# target to generate assembly for a file
+CHTLNode/ImportNode.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/ImportNode.cpp.s
+.PHONY : CHTLNode/ImportNode.cpp.s
+
 CHTLNode/TemplateNode.o: CHTLNode/TemplateNode.cpp.o
 .PHONY : CHTLNode/TemplateNode.o
 
@@ -390,6 +414,30 @@ CHTLParser.s: CHTLParser.cpp.s
 CHTLParser.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.s
 .PHONY : CHTLParser.cpp.s
+
+ImportManager.o: ImportManager.cpp.o
+.PHONY : ImportManager.o
+
+# target to build an object file
+ImportManager.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.o
+.PHONY : ImportManager.cpp.o
+
+ImportManager.i: ImportManager.cpp.i
+.PHONY : ImportManager.i
+
+# target to preprocess a source file
+ImportManager.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.i
+.PHONY : ImportManager.cpp.i
+
+ImportManager.s: ImportManager.cpp.s
+.PHONY : ImportManager.s
+
+# target to generate assembly for a file
+ImportManager.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.s
+.PHONY : ImportManager.cpp.s
 
 Scanner/UnifiedScanner.o: Scanner/UnifiedScanner.cpp.o
 .PHONY : Scanner/UnifiedScanner.o
@@ -470,6 +518,9 @@ help:
 	@echo "... CHTLNode/ElementNode.o"
 	@echo "... CHTLNode/ElementNode.i"
 	@echo "... CHTLNode/ElementNode.s"
+	@echo "... CHTLNode/ImportNode.o"
+	@echo "... CHTLNode/ImportNode.i"
+	@echo "... CHTLNode/ImportNode.s"
 	@echo "... CHTLNode/TemplateNode.o"
 	@echo "... CHTLNode/TemplateNode.i"
 	@echo "... CHTLNode/TemplateNode.s"
@@ -479,6 +530,9 @@ help:
 	@echo "... CHTLParser.o"
 	@echo "... CHTLParser.i"
 	@echo "... CHTLParser.s"
+	@echo "... ImportManager.o"
+	@echo "... ImportManager.i"
+	@echo "... ImportManager.s"
 	@echo "... Scanner/UnifiedScanner.o"
 	@echo "... Scanner/UnifiedScanner.i"
 	@echo "... Scanner/UnifiedScanner.s"

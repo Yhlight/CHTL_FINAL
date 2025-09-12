@@ -13,6 +13,10 @@ add_library(CHTLCore STATIC
     CHTLNode/TextNode.cpp
     CHTLNode/TemplateNode.cpp
     CHTLNode/CustomNode.cpp
+    CHTLNode/ImportNode.cpp
+    
+    # 导入系统
+    ImportManager.cpp
     
     # 扫描器
     Scanner/UnifiedScanner.cpp

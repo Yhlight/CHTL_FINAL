@@ -3,6 +3,7 @@
 #include "CHTL/CHTLNode/TextNode.h"
 #include "CHTL/CHTLNode/TemplateNode.h"
 #include "CHTL/CHTLNode/CustomNode.h"
+#include "CHTL/CHTLNode/ImportNode.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -424,8 +425,94 @@ std::shared_ptr<BaseNode> CHTLParser::parseOrigin() {
 }
 
 std::shared_ptr<BaseNode> CHTLParser::parseImport() {
-    // TODO: 实现导入解析
-    addWarning("Import parsing not yet implemented");
+    if (isAtEnd()) return nullptr;
+    
+    if (checkToken(TokenType::IMPORT)) {
+        nextToken(); // 消费 [Import]
+        
+        // 解析导入类型
+        ImportType importType = ImportType::UNKNOWN;
+        if (checkToken(TokenType::IDENTIFIER)) {
+            std::string typeStr = currentToken().getValue();
+            nextToken();
+            
+            if (typeStr == "CHTL") {
+                importType = ImportType::CHTL;
+            } else if (typeStr == "HTML") {
+                importType = ImportType::HTML;
+            } else if (typeStr == "CSS") {
+                importType = ImportType::CSS;
+            } else if (typeStr == "JS") {
+                importType = ImportType::JS;
+            } else if (typeStr == "CMOD") {
+                importType = ImportType::CMOD;
+            } else if (typeStr == "CJMOD") {
+                importType = ImportType::CJMOD;
+            }
+        }
+        
+        // 解析文件路径
+        std::string filePath;
+        if (currentToken().getType() == TokenType::STRING) {
+            filePath = currentToken().getValue();
+            nextToken();
+        } else {
+            addError("Expected file path after import type");
+            return nullptr;
+        }
+        
+        // 创建导入节点
+        auto importNode = std::make_shared<ImportNode>(importType, filePath);
+        importNode->setPosition(currentToken().getLine(), currentToken().getColumn());
+        
+        // 解析导入模式和项目
+        if (checkToken(TokenType::LEFT_BRACE)) {
+            nextToken(); // 消费 {
+            
+            skipWhitespace();
+            
+            // 解析导入项目
+            while (!checkToken(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                if (currentToken().getType() == TokenType::IDENTIFIER) {
+                    std::string item = currentToken().getValue();
+                    importNode->addImportItem(item);
+                    nextToken();
+                    
+                    // 检查是否有别名
+                    if (checkToken(TokenType::AS)) {
+                        nextToken(); // 消费 as
+                        if (currentToken().getType() == TokenType::IDENTIFIER) {
+                            std::string alias = currentToken().getValue();
+                            importNode->setAlias(alias);
+                            nextToken();
+                        } else {
+                            addError("Expected alias after 'as'");
+                        }
+                    }
+                } else if (currentToken().getType() == TokenType::ASTERISK) {
+                    // 通配符导入
+                    importNode->setImportMode(ImportMode::WILDCARD);
+                    nextToken();
+                } else {
+                    break;
+                }
+                
+                skipWhitespace();
+            }
+            
+            if (checkToken(TokenType::RIGHT_BRACE)) {
+                nextToken(); // 消费 }
+            } else {
+                addError("Expected '}' after import items");
+            }
+        } else {
+            // 精确导入
+            importNode->setImportMode(ImportMode::PRECISE);
+        }
+        
+        return importNode;
+    }
+    
     return nullptr;
 }
 

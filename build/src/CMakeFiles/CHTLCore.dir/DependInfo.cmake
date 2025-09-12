@@ -14,9 +14,11 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspace/src/CHTLNode/BaseNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLNode/BaseNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLNode/BaseNode.cpp.o.d"
   "/workspace/src/CHTLNode/CustomNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLNode/CustomNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLNode/CustomNode.cpp.o.d"
   "/workspace/src/CHTLNode/ElementNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLNode/ElementNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLNode/ElementNode.cpp.o.d"
+  "/workspace/src/CHTLNode/ImportNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLNode/ImportNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLNode/ImportNode.cpp.o.d"
   "/workspace/src/CHTLNode/TemplateNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLNode/TemplateNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLNode/TemplateNode.cpp.o.d"
   "/workspace/src/CHTLNode/TextNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLNode/TextNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLNode/TextNode.cpp.o.d"
   "/workspace/src/CHTLParser.cpp" "src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.o.d"
+  "/workspace/src/ImportManager.cpp" "src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.o.d"
   "/workspace/src/Scanner/UnifiedScanner.cpp" "src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/Scanner/UnifiedScanner.cpp.o.d"
   "/workspace/src/Token.cpp" "src/CMakeFiles/CHTLCore.dir/Token.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/Token.cpp.o.d"
   )

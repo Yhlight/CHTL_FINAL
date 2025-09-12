@@ -3,6 +3,7 @@
 #include "CHTL/CHTLNode/TextNode.h"
 #include "CHTL/CHTLNode/TemplateNode.h"
 #include "CHTL/CHTLNode/CustomNode.h"
+#include "CHTL/CHTLNode/ImportNode.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -169,6 +170,8 @@ std::string CHTLGenerator::generateNode(std::shared_ptr<BaseNode> node, int inde
             return generateTemplate(node, indent);
         case NodeType::CUSTOM:
             return generateCustom(node, indent);
+        case NodeType::IMPORT:
+            return generateImport(node, indent);
         default:
             return "";
     }
@@ -323,6 +326,52 @@ std::string CHTLGenerator::generateCustom(std::shared_ptr<BaseNode> node, int in
         auto child = customNode->getChild(i);
         if (child) {
             oss << generateNode(child, indent);
+        }
+    }
+    
+    return oss.str();
+}
+
+std::string CHTLGenerator::generateImport(std::shared_ptr<BaseNode> node, int indent) {
+    if (!node) return "";
+    
+    auto importNode = std::dynamic_pointer_cast<ImportNode>(node);
+    if (!importNode) return "";
+    
+    std::ostringstream oss;
+    std::string indentStr = generateIndent(indent);
+    
+    // 生成导入注释
+    oss << indentStr << "<!-- Import: " << importNode->getFilePath() << " -->\n";
+    
+    // 根据导入类型生成内容
+    std::string content = importNode->getImportContent();
+    if (!content.empty()) {
+        switch (importNode->getImportType()) {
+            case ImportType::HTML:
+                // HTML内容直接嵌入
+                oss << content << "\n";
+                break;
+            case ImportType::CSS:
+                // CSS内容包装在style标签中
+                oss << indentStr << "<style>\n";
+                oss << content << "\n";
+                oss << indentStr << "</style>\n";
+                break;
+            case ImportType::JS:
+                // JavaScript内容包装在script标签中
+                oss << indentStr << "<script>\n";
+                oss << content << "\n";
+                oss << indentStr << "</script>\n";
+                break;
+            case ImportType::CHTL:
+                // CHTL内容需要进一步处理
+                oss << indentStr << "<!-- CHTL content: " << content.substr(0, 100) << "... -->\n";
+                break;
+            default:
+                // 其他类型的内容
+                oss << indentStr << "<!-- " << content.substr(0, 100) << "... -->\n";
+                break;
         }
     }
     
