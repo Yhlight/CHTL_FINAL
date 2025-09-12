@@ -1,17 +1,22 @@
-[Template] @Element MyContent {
-    h1 { text { "Title" } }
-    p { text { "First paragraph." } }
-    hr;
-    p { text { "Second paragraph." } }
+[Configuration] {
+    INDEX_INITIAL_COUNT = 1;
+}
+
+[Template] @Element MyList {
+    item { text { "A" } } // Index 1
+    item { text { "B" } } // Index 2
+    item { text { "C" } } // Index 3
 }
 
 html {
     body {
-        @Element MyContent {
-            // Delete the horizontal rule
-            delete hr;
-            // Delete the second paragraph (index 1)
-            delete p[1];
+        @Element MyList {
+            // With INDEX_INITIAL_COUNT = 1, this should target the first item.
+            item[1] {
+                style {
+                    font-weight: bold;
+                }
+            }
         }
     }
 }

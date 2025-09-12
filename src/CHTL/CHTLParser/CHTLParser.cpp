@@ -39,7 +39,10 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
         current_namespace_ = consume(TokenType::Identifier, "Expected namespace name.").lexeme;
         return nodes;
     }
-
+    if (match({TokenType::Configuration})) {
+        parseConfigurationBlock();
+        return nodes;
+    }
     if (match({TokenType::Import})) {
         consume(TokenType::AtChtl, "Expected '@Chtl' for file import.");
         consume(TokenType::From, "Expected 'from' keyword in import statement.");
@@ -132,22 +135,18 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
 void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes) {
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
         if (match({TokenType::Delete})) {
-            // Parse the delete statement: delete TagName[index];
             const Token& tagName = consume(TokenType::Identifier, "Expected tag name for delete target.");
             size_t index = 0;
-            bool is_indexed = false;
             if (match({TokenType::OpenBracket})) {
-                is_indexed = true;
                 const Token& indexToken = consume(TokenType::Number, "Expected index number in brackets.");
                 index = std::stoul(indexToken.lexeme);
                 consume(TokenType::CloseBracket, "Expected ']' after index.");
             }
             consume(TokenType::Semicolon, "Expected ';' after delete statement.");
 
-            // Find and erase the target node
             auto target_it = target_nodes.begin();
             bool found = false;
-            size_t current_index = 0;
+            size_t current_index = context_->config_.INDEX_INITIAL_COUNT;
             for (auto it = target_nodes.begin(); it != target_nodes.end(); ++it) {
                 if ((*it)->getType() == NodeType::Element) {
                     ElementNode* target_element = static_cast<ElementNode*>((*it).get());
@@ -167,11 +166,9 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
             } else {
                 throw std::runtime_error("Could not find element '" + tagName.lexeme + "' at index " + std::to_string(index) + " to delete.");
             }
-
         } else if (match({TokenType::Insert})) {
             if (match({TokenType::After, TokenType::Before, TokenType::Replace, TokenType::AtTop, TokenType::AtBottom})) {
                 const Token& position = previous();
-
                 const Token& tagName = consume(TokenType::Identifier, "Expected tag name for insert target.");
                 size_t index = 0;
                 if (match({TokenType::OpenBracket})) {
@@ -250,7 +247,7 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
             consume(TokenType::CloseBrace, "Expected '}' to close specialization body.");
 
             Node* target_node = nullptr;
-            size_t current_index = 0;
+            size_t current_index = context_->config_.INDEX_INITIAL_COUNT;
             for (auto& target : target_nodes) {
                 if (target->getType() == NodeType::Element) {
                     ElementNode* target_element = static_cast<ElementNode*>(target.get());
@@ -351,6 +348,32 @@ std::unique_ptr<TextNode> CHTLParser::parseText() {
 
 std::unique_ptr<CommentNode> CHTLParser::parseGeneratorComment() {
     return std::make_unique<CommentNode>(previous().lexeme);
+}
+
+void CHTLParser::parseConfigurationBlock() {
+    consume(TokenType::OpenBrace, "Expected '{' after [Configuration] keyword.");
+    while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+        const Token& key = consume(TokenType::Identifier, "Expected configuration key.");
+        consume(TokenType::Equals, "Expected '=' after configuration key.");
+
+        if (key.lexeme == "INDEX_INITIAL_COUNT") {
+            const Token& value = consume(TokenType::Number, "Expected number for INDEX_INITIAL_COUNT.");
+            context_->config_.INDEX_INITIAL_COUNT = std::stoul(value.lexeme);
+        } else if (key.lexeme == "DEBUG_MODE") {
+            const Token& value = consume(TokenType::Identifier, "Expected 'true' or 'false' for DEBUG_MODE.");
+            if (value.lexeme == "true") context_->config_.DEBUG_MODE = true;
+            else if (value.lexeme == "false") context_->config_.DEBUG_MODE = false;
+            else throw std::runtime_error("Expected 'true' or 'false' for DEBUG_MODE value.");
+        }
+        else {
+            while(peek().type != TokenType::Semicolon && !isAtEnd()) {
+                advance();
+            }
+        }
+
+        consume(TokenType::Semicolon, "Expected ';' after configuration value.");
+    }
+    consume(TokenType::CloseBrace, "Expected '}' after configuration block.");
 }
 
 void CHTLParser::parseTemplateDefinition(bool is_custom) {
