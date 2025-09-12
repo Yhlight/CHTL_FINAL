@@ -6,6 +6,7 @@
 #include "CHTL/CHTLNode/ImportNode.h"
 #include "CHTL/CHTLNode/NamespaceNode.h"
 #include "CHTL/CHTLNode/ConfigurationNode.h"
+#include "CHTL/CHTLNode/ModuleNode.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -178,6 +179,8 @@ std::string CHTLGenerator::generateNode(std::shared_ptr<BaseNode> node, int inde
             return generateNamespace(node, indent);
         case NodeType::CONFIG:
             return generateConfiguration(node, indent);
+        case NodeType::MODULE:
+            return generateModule(node, indent);
         default:
             return "";
     }
@@ -425,6 +428,95 @@ std::string CHTLGenerator::generateConfiguration(std::shared_ptr<BaseNode> node,
         oss << indentStr << "<!-- Configuration Items -->\n";
         for (const auto& item : items) {
             oss << indentStr << "<!-- " << item.first << ": " << item.second << " -->\n";
+        }
+    }
+    
+    return oss.str();
+}
+
+std::string CHTLGenerator::generateModule(std::shared_ptr<BaseNode> node, int indent) {
+    if (!node) return "";
+    
+    auto moduleNode = std::dynamic_pointer_cast<ModuleNode>(node);
+    if (!moduleNode) return "";
+    
+    std::ostringstream oss;
+    std::string indentStr = generateIndent(indent);
+    
+    // 生成模块注释
+    oss << indentStr << "<!-- Module: " << moduleNode->getModuleName() << " -->\n";
+    
+    // 生成模块信息
+    oss << indentStr << "<!-- Module Type: " << moduleNode->getModuleTypeName(moduleNode->getModuleType()) << " -->\n";
+    if (!moduleNode->getModuleVersion().empty()) {
+        oss << indentStr << "<!-- Version: " << moduleNode->getModuleVersion() << " -->\n";
+    }
+    if (!moduleNode->getModulePath().empty()) {
+        oss << indentStr << "<!-- Path: " << moduleNode->getModulePath() << " -->\n";
+    }
+    if (!moduleNode->getModuleDescription().empty()) {
+        oss << indentStr << "<!-- Description: " << moduleNode->getModuleDescription() << " -->\n";
+    }
+    
+    // 生成模块依赖
+    const auto& dependencies = moduleNode->getModuleDependencies();
+    if (!dependencies.empty()) {
+        oss << indentStr << "<!-- Dependencies -->\n";
+        for (const auto& dep : dependencies) {
+            oss << indentStr << "<!-- " << dep.first;
+            if (!dep.second.empty()) {
+                oss << " (" << dep.second << ")";
+            }
+            oss << " -->\n";
+        }
+    }
+    
+    // 生成模块导出
+    const auto& exports = moduleNode->getModuleExports();
+    if (!exports.empty()) {
+        oss << indentStr << "<!-- Exports -->\n";
+        for (const auto& exp : exports) {
+            oss << indentStr << "<!-- " << exp.first;
+            if (!exp.second.empty()) {
+                oss << ": " << exp.second;
+            }
+            oss << " -->\n";
+        }
+    }
+    
+    // 生成模块内容
+    const std::string& content = moduleNode->getModuleContent();
+    if (!content.empty()) {
+        oss << indentStr << "<!-- Module Content -->\n";
+        switch (moduleNode->getModuleType()) {
+            case ModuleType::CMOD:
+                // CHTL模块内容需要进一步处理
+                oss << indentStr << "<!-- CHTL content: " << content.substr(0, 100) << "... -->\n";
+                break;
+            case ModuleType::CJMOD:
+                // CHTL JS模块内容需要进一步处理
+                oss << indentStr << "<!-- CHTL JS content: " << content.substr(0, 100) << "... -->\n";
+                break;
+            case ModuleType::HTML:
+                // HTML内容直接嵌入
+                oss << content << "\n";
+                break;
+            case ModuleType::CSS:
+                // CSS内容包装在style标签中
+                oss << indentStr << "<style>\n";
+                oss << content << "\n";
+                oss << indentStr << "</style>\n";
+                break;
+            case ModuleType::JS:
+                // JavaScript内容包装在script标签中
+                oss << indentStr << "<script>\n";
+                oss << content << "\n";
+                oss << indentStr << "</script>\n";
+                break;
+            default:
+                // 其他类型的内容
+                oss << indentStr << "<!-- " << content.substr(0, 100) << "... -->\n";
+                break;
         }
     }
     

@@ -6,6 +6,7 @@
 #include "CHTL/CHTLNode/ImportNode.h"
 #include "CHTL/CHTLNode/NamespaceNode.h"
 #include "CHTL/CHTLNode/ConfigurationNode.h"
+#include "CHTL/CHTLNode/ModuleNode.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -688,6 +689,118 @@ std::shared_ptr<BaseNode> CHTLParser::parseNamespace() {
         }
         
         return namespaceNode;
+    }
+    
+    return nullptr;
+}
+
+std::shared_ptr<BaseNode> CHTLParser::parseModule() {
+    if (isAtEnd()) return nullptr;
+    
+    if (checkToken(TokenType::MODULE)) {
+        nextToken(); // 消费 [Module]
+        
+        // 解析模块类型
+        ModuleType moduleType = ModuleType::UNKNOWN;
+        if (checkToken(TokenType::IDENTIFIER)) {
+            std::string typeStr = currentToken().getValue();
+            nextToken();
+            
+            if (typeStr == "CMOD") {
+                moduleType = ModuleType::CMOD;
+            } else if (typeStr == "CJMOD") {
+                moduleType = ModuleType::CJMOD;
+            } else if (typeStr == "HTML") {
+                moduleType = ModuleType::HTML;
+            } else if (typeStr == "CSS") {
+                moduleType = ModuleType::CSS;
+            } else if (typeStr == "JS") {
+                moduleType = ModuleType::JS;
+            }
+        }
+        
+        // 解析模块名称
+        std::string moduleName;
+        if (currentToken().getType() == TokenType::IDENTIFIER) {
+            moduleName = currentToken().getValue();
+            nextToken();
+        } else {
+            addError("Expected module name after module type");
+            return nullptr;
+        }
+        
+        // 创建模块节点
+        auto moduleNode = std::make_shared<ModuleNode>(moduleType, moduleName);
+        moduleNode->setPosition(currentToken().getLine(), currentToken().getColumn());
+        
+        // 解析模块内容
+        if (checkToken(TokenType::LEFT_BRACE)) {
+            nextToken(); // 消费 {
+            
+            skipWhitespace();
+            
+            // 解析模块属性
+            while (!checkToken(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                if (currentToken().getType() == TokenType::IDENTIFIER) {
+                    std::string key = currentToken().getValue();
+                    nextToken();
+                    
+                    // 检查是否有值
+                    if (checkToken(TokenType::COLON) || checkToken(TokenType::EQUALS)) {
+                        nextToken(); // 消费 : 或 =
+                        skipWhitespace();
+                        
+                        // 解析模块属性值
+                        std::string value;
+                        if (currentToken().getType() == TokenType::STRING) {
+                            value = currentToken().getValue();
+                            nextToken();
+                        } else if (currentToken().getType() == TokenType::IDENTIFIER) {
+                            value = currentToken().getValue();
+                            nextToken();
+                        } else if (currentToken().getType() == TokenType::NUMBER) {
+                            value = currentToken().getValue();
+                            nextToken();
+                        } else {
+                            addError("Expected value after module attribute");
+                            break;
+                        }
+                        
+                        // 设置模块属性
+                        if (key == "version") {
+                            moduleNode->setModuleVersion(value);
+                        } else if (key == "path") {
+                            moduleNode->setModulePath(value);
+                        } else if (key == "description") {
+                            moduleNode->setModuleDescription(value);
+                        } else if (key == "dependency") {
+                            // 解析依赖
+                            moduleNode->addModuleDependency(value);
+                        } else if (key == "export") {
+                            // 解析导出
+                            moduleNode->setModuleExport(value, "");
+                        } else {
+                            addWarning("Unknown module attribute: " + key);
+                        }
+                    } else {
+                        addError("Expected ':' or '=' after module attribute");
+                        break;
+                    }
+                } else {
+                    break;
+                }
+                
+                skipWhitespace();
+            }
+            
+            if (checkToken(TokenType::RIGHT_BRACE)) {
+                nextToken(); // 消费 }
+            } else {
+                addError("Expected '}' after module content");
+            }
+        }
+        
+        return moduleNode;
     }
     
     return nullptr;

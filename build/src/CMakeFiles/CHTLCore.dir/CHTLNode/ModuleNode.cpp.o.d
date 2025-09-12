@@ -1,6 +1,7 @@
-src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.o: \
-  /workspace/src/CHTLParser.cpp /workspace/include/CHTL/CHTLParser.h \
-  /workspace/include/CHTL/Token.h \
+src/CMakeFiles/CHTLCore.dir/CHTLNode/ModuleNode.cpp.o: \
+  /workspace/src/CHTLNode/ModuleNode.cpp \
+  /workspace/include/CHTL/CHTLNode/ModuleNode.h \
+  /workspace/include/CHTL/CHTLNode/BaseNode.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/string \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/requires_hosted.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++config.h \
@@ -148,7 +149,6 @@ src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_vector.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_bvector.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/vector.tcc \
-  /workspace/include/CHTL/CHTLNode/BaseNode.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/memory \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_tempbuf.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_raw_storage_iter.h \
@@ -207,8 +207,7 @@ src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/node_handle.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/erase_if.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/any \
-  /workspace/include/CHTL/CHTLContext.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/fstream \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/sstream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/istream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ios \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/ios_base.h \
@@ -232,24 +231,4 @@ src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ostream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/ostream.tcc \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/istream.tcc \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/codecvt.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/basic_file.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++io.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fstream.tcc \
-  /workspace/include/CHTL/CHTLNode/ElementNode.h \
-  /workspace/include/CHTL/CHTLNode/TextNode.h \
-  /workspace/include/CHTL/CHTLNode/TemplateNode.h \
-  /workspace/include/CHTL/CHTLNode/CustomNode.h \
-  /workspace/include/CHTL/CHTLNode/ImportNode.h \
-  /workspace/include/CHTL/CHTLNode/NamespaceNode.h \
-  /workspace/include/CHTL/CHTLNode/ConfigurationNode.h \
-  /workspace/include/CHTL/CHTLNode/ModuleNode.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iostream \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/sstream \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/sstream.tcc \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/algorithm \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_algo.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/algorithmfwd.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_heap.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/uniform_int_dist.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/pstl/glue_algorithm_defs.h
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/sstream.tcc

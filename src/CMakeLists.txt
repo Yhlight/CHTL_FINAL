@@ -16,6 +16,7 @@ add_library(CHTLCore STATIC
     CHTLNode/ImportNode.cpp
     CHTLNode/NamespaceNode.cpp
     CHTLNode/ConfigurationNode.cpp
+    CHTLNode/ModuleNode.cpp
     
     # 导入系统
     ImportManager.cpp
@@ -25,6 +26,9 @@ add_library(CHTLCore STATIC
     
     # 配置系统
     ConfigurationManager.cpp
+    
+    # 模块系统
+    ModuleManager.cpp
     
     # 扫描器
     Scanner/UnifiedScanner.cpp

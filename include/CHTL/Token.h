@@ -55,6 +55,7 @@ enum class TokenType {
     IMPORT,         // [Import]
     NAMESPACE,      // [Namespace]
     CONFIGURATION,  // [Configuration]
+    MODULE,         // [Module]
     INFO,           // [Info]
     EXPORT,         // [Export]
     USE,            // use

@@ -166,6 +166,14 @@ private:
     std::string generateConfiguration(std::shared_ptr<BaseNode> node, int indent = 0);
     
     /**
+     * @brief 生成模块节点
+     * @param node 模块节点
+     * @param indent 缩进级别
+     * @return 生成的代码
+     */
+    std::string generateModule(std::shared_ptr<BaseNode> node, int indent = 0);
+    
+    /**
      * @brief 生成节点（通用方法）
      * @param node 节点
      * @param indent 缩进级别

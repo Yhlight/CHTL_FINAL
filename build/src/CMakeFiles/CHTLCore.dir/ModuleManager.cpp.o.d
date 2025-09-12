@@ -1,6 +1,8 @@
-src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.o: \
-  /workspace/src/CHTLParser.cpp /workspace/include/CHTL/CHTLParser.h \
-  /workspace/include/CHTL/Token.h \
+src/CMakeFiles/CHTLCore.dir/ModuleManager.cpp.o: \
+  /workspace/src/ModuleManager.cpp \
+  /workspace/include/CHTL/ModuleManager.h \
+  /workspace/include/CHTL/CHTLNode/ModuleNode.h \
+  /workspace/include/CHTL/CHTLNode/BaseNode.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/string \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/requires_hosted.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++config.h \
@@ -148,7 +150,6 @@ src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_vector.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_bvector.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/vector.tcc \
-  /workspace/include/CHTL/CHTLNode/BaseNode.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/memory \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_tempbuf.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_raw_storage_iter.h \
@@ -236,14 +237,8 @@ src/CMakeFiles/CHTLCore.dir/CHTLParser.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/basic_file.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++io.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fstream.tcc \
-  /workspace/include/CHTL/CHTLNode/ElementNode.h \
-  /workspace/include/CHTL/CHTLNode/TextNode.h \
-  /workspace/include/CHTL/CHTLNode/TemplateNode.h \
-  /workspace/include/CHTL/CHTLNode/CustomNode.h \
-  /workspace/include/CHTL/CHTLNode/ImportNode.h \
-  /workspace/include/CHTL/CHTLNode/NamespaceNode.h \
-  /workspace/include/CHTL/CHTLNode/ConfigurationNode.h \
-  /workspace/include/CHTL/CHTLNode/ModuleNode.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/unordered_set \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/unordered_set.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iostream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/sstream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/sstream.tcc \

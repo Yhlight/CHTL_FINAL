@@ -367,6 +367,30 @@ CHTLNode/ImportNode.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/ImportNode.cpp.s
 .PHONY : CHTLNode/ImportNode.cpp.s
 
+CHTLNode/ModuleNode.o: CHTLNode/ModuleNode.cpp.o
+.PHONY : CHTLNode/ModuleNode.o
+
+# target to build an object file
+CHTLNode/ModuleNode.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/ModuleNode.cpp.o
+.PHONY : CHTLNode/ModuleNode.cpp.o
+
+CHTLNode/ModuleNode.i: CHTLNode/ModuleNode.cpp.i
+.PHONY : CHTLNode/ModuleNode.i
+
+# target to preprocess a source file
+CHTLNode/ModuleNode.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/ModuleNode.cpp.i
+.PHONY : CHTLNode/ModuleNode.cpp.i
+
+CHTLNode/ModuleNode.s: CHTLNode/ModuleNode.cpp.s
+.PHONY : CHTLNode/ModuleNode.s
+
+# target to generate assembly for a file
+CHTLNode/ModuleNode.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTLNode/ModuleNode.cpp.s
+.PHONY : CHTLNode/ModuleNode.cpp.s
+
 CHTLNode/NamespaceNode.o: CHTLNode/NamespaceNode.cpp.o
 .PHONY : CHTLNode/NamespaceNode.o
 
@@ -511,6 +535,30 @@ ImportManager.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/ImportManager.cpp.s
 .PHONY : ImportManager.cpp.s
 
+ModuleManager.o: ModuleManager.cpp.o
+.PHONY : ModuleManager.o
+
+# target to build an object file
+ModuleManager.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/ModuleManager.cpp.o
+.PHONY : ModuleManager.cpp.o
+
+ModuleManager.i: ModuleManager.cpp.i
+.PHONY : ModuleManager.i
+
+# target to preprocess a source file
+ModuleManager.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/ModuleManager.cpp.i
+.PHONY : ModuleManager.cpp.i
+
+ModuleManager.s: ModuleManager.cpp.s
+.PHONY : ModuleManager.s
+
+# target to generate assembly for a file
+ModuleManager.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/ModuleManager.cpp.s
+.PHONY : ModuleManager.cpp.s
+
 NamespaceManager.o: NamespaceManager.cpp.o
 .PHONY : NamespaceManager.o
 
@@ -620,6 +668,9 @@ help:
 	@echo "... CHTLNode/ImportNode.o"
 	@echo "... CHTLNode/ImportNode.i"
 	@echo "... CHTLNode/ImportNode.s"
+	@echo "... CHTLNode/ModuleNode.o"
+	@echo "... CHTLNode/ModuleNode.i"
+	@echo "... CHTLNode/ModuleNode.s"
 	@echo "... CHTLNode/NamespaceNode.o"
 	@echo "... CHTLNode/NamespaceNode.i"
 	@echo "... CHTLNode/NamespaceNode.s"
@@ -638,6 +689,9 @@ help:
 	@echo "... ImportManager.o"
 	@echo "... ImportManager.i"
 	@echo "... ImportManager.s"
+	@echo "... ModuleManager.o"
+	@echo "... ModuleManager.i"
+	@echo "... ModuleManager.s"
 	@echo "... NamespaceManager.o"
 	@echo "... NamespaceManager.i"
 	@echo "... NamespaceManager.s"

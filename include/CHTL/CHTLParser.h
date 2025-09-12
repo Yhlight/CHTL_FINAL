@@ -112,6 +112,12 @@ private:
     std::shared_ptr<BaseNode> parseNamespace();
     
     /**
+     * @brief 解析模块节点
+     * @return 模块节点
+     */
+    std::shared_ptr<BaseNode> parseModule();
+    
+    /**
      * @brief 解析样式节点
      * @return 样式节点
      */
