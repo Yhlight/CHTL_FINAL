@@ -1,11 +1,17 @@
+[Template] @Style DefaultText {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
 html {
     body {
-        div {
+        p {
             style {
-                width: 100px + 50px;
-                height: 100%;
-                margin-left: 10px * 2;
+                @Style DefaultText;
+                color: #333;
             }
+            text { "This paragraph uses the default text style." }
         }
     }
 }

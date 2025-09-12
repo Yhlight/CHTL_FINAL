@@ -10,7 +10,10 @@ std::unique_ptr<RootNode> CHTLParser::parse() {
     auto root = std::make_unique<RootNode>();
     while (!isAtEnd()) {
         try {
-            root->children_.push_back(parseDeclaration());
+            auto node = parseDeclaration();
+            if (node) { // Only add non-null nodes to the tree
+                root->children_.push_back(std::move(node));
+            }
         } catch (const std::runtime_error& e) {
             std::cerr << "Parse Error: " << e.what() << std::endl;
             synchronize();
@@ -21,6 +24,10 @@ std::unique_ptr<RootNode> CHTLParser::parse() {
 }
 
 std::unique_ptr<Node> CHTLParser::parseDeclaration() {
+    if (match({TokenType::Template})) {
+        parseTemplateDefinition();
+        return nullptr; // Definitions don't produce a node in the main tree
+    }
     if (match({TokenType::Style})) {
         return parseStyleBlock();
     }
@@ -90,13 +97,55 @@ std::unique_ptr<CommentNode> CHTLParser::parseGeneratorComment() {
     return std::make_unique<CommentNode>(previous().lexeme);
 }
 
+void CHTLParser::parseTemplateDefinition() {
+    consume(TokenType::AtStyle, "Expected '@Style' after '[Template]'.");
+    const Token& name = consume(TokenType::Identifier, "Expected template name.");
+
+    auto templateNode = std::make_shared<StyleTemplateNode>(name.lexeme);
+
+    consume(TokenType::OpenBrace, "Expected '{' after template name.");
+    while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+        const Token& key = consume(TokenType::Identifier, "Expected CSS property name in template.");
+        consume(TokenType::Colon, "Expected ':' after property name.");
+
+        std::vector<Token> value_tokens;
+        while(peek().type != TokenType::Semicolon && !isAtEnd()) {
+            value_tokens.push_back(advance());
+        }
+        if (value_tokens.empty()) {
+            throw std::runtime_error("Expected CSS property value in template.");
+        }
+
+        consume(TokenType::Semicolon, "Expected ';' after property value.");
+        templateNode->properties_.emplace_back(key.lexeme, value_tokens);
+    }
+    consume(TokenType::CloseBrace, "Expected '}' after template body.");
+
+    style_templates_[name.lexeme] = templateNode;
+}
+
 std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
     auto styleNode = std::make_unique<StyleBlockNode>();
     consume(TokenType::OpenBrace, "Expected '{' after 'style' keyword.");
 
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+        // Check for template usage
+        if (match({TokenType::AtStyle})) {
+            const Token& name = consume(TokenType::Identifier, "Expected template name after '@Style'.");
+            consume(TokenType::Semicolon, "Expected ';' after template usage.");
+
+            if (style_templates_.count(name.lexeme)) {
+                const auto& templateNode = style_templates_[name.lexeme];
+                // Copy properties from template to current style block
+                for (const auto& prop : templateNode->properties_) {
+                    styleNode->inline_properties_.push_back(prop);
+                }
+            } else {
+                throw std::runtime_error("Use of undefined style template '" + name.lexeme + "'.");
+            }
+        }
         // If it's an identifier followed by a colon, it's an inline property.
-        if (peek().type == TokenType::Identifier && peekNext().type == TokenType::Colon) {
+        else if (peek().type == TokenType::Identifier && peekNext().type == TokenType::Colon) {
             const Token& key = consume(TokenType::Identifier, "Expected CSS property name.");
             consume(TokenType::Colon, "Expected ':' after CSS property name.");
 

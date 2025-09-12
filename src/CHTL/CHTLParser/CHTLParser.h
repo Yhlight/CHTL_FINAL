@@ -8,8 +8,10 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/StyleBlockNode.h"
+#include "../CHTLNode/StyleTemplateNode.h"
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 namespace CHTL {
 
@@ -20,6 +22,7 @@ public:
 
 private:
     std::unique_ptr<Node> parseDeclaration();
+    void parseTemplateDefinition();
     std::unique_ptr<ElementNode> parseElement();
     void parseElementBody(ElementNode& element);
     void parseAttributes(ElementNode& element);
@@ -39,6 +42,7 @@ private:
     void synchronize();
 
     const std::vector<Token>& tokens_;
+    std::unordered_map<std::string, std::shared_ptr<StyleTemplateNode>> style_templates_;
     size_t current_ = 0;
     bool hadError_ = false;
 };

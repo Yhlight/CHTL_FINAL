@@ -9,21 +9,40 @@ std::string renderCssValue(const std::vector<Token>& tokens) {
         return "";
     }
 
-    // If it's just a single token, return its lexeme directly.
-    if (tokens.size() == 1) {
-        return tokens[0].lexeme;
+    bool has_operator = false;
+    for (const auto& token : tokens) {
+        switch (token.type) {
+            case TokenType::Plus:
+            case TokenType::Minus:
+            case TokenType::Asterisk:
+            case TokenType::Slash:
+            case TokenType::Percent:
+            case TokenType::DoubleAsterisk:
+                has_operator = true;
+                break;
+            default:
+                break;
+        }
+        if (has_operator) break;
     }
 
-    // If there are multiple tokens, it's an expression that needs calc().
     std::stringstream ss;
-    ss << "calc(";
+    if (has_operator) {
+        ss << "calc(";
+    }
+
     for (size_t i = 0; i < tokens.size(); ++i) {
         ss << tokens[i].lexeme;
+        // Add space between tokens, except for the last one.
         if (i < tokens.size() - 1) {
             ss << " ";
         }
     }
-    ss << ")";
+
+    if (has_operator) {
+        ss << ")";
+    }
+
     return ss.str();
 }
 
