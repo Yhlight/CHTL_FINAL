@@ -11,8 +11,7 @@ enum class ChunkType {
     CHTL,
     JavaScript,
     Css,
-    ChtlJs,
-    Placeholder
+    ChtlJs
 };
 
 struct CodeChunk {
@@ -27,16 +26,32 @@ public:
     std::vector<CodeChunk> scan();
 
 private:
-    void process();
-    void handleScriptTag();
-    void handleStyleTag();
-    void handleChtlBlock();
+    // Main scanning loop calls this
+    void scanNextToken();
+
+    // Handlers for different block types
+    void handleScriptBlock();
+    void handleStyleBlock();
+    void handleBracketBlock(); // Handles [Origin], [Import], etc.
+    void handleGenericChtl();  // Handles regular CHTL until a special block
+
+    // CHTL JS specific parsers
+    void consumeChtlJsBlock();
+    void consumeChtlJsEnhancedSelector();
+    void consumeChtlJsResponsiveValue();
+
+    // Utility methods for scanning
+    bool isAtEnd() const;
+    char advance();
+    char peek() const;
+    bool match(const std::string& expected);
+    void skipWhitespace();
+    void addChunk(ChunkType type);
 
     const std::string& source_;
     std::vector<CodeChunk> chunks_;
-    std::map<std::string, std::string> placeholder_map_;
-    size_t current_ = 0;
-    int placeholder_id_ = 0;
+    size_t current_pos_ = 0;
+    size_t start_pos_ = 0;
 };
 
 } // namespace CHTL
