@@ -1,0 +1,15 @@
+<html>
+  <body>
+    <div id="main_content" style="width: 100%; " />
+  </body>
+</html>
+
+<style>
+
+    /* This is a global style block. It should be a CSS chunk. */
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+</style>
