@@ -54,7 +54,7 @@ void CHTLLexer::scanToken() {
             if (match('&')) {
                 addToken(TokenType::DoubleAmpersand);
             } else {
-                identifier(); // Assume context selector like &:hover
+                identifier();
             }
             break;
         case '|': addToken(match('|') ? TokenType::DoublePipe : TokenType::Pipe); break;
@@ -64,17 +64,18 @@ void CHTLLexer::scanToken() {
         case '<': addToken(TokenType::LessThan); break;
         case '%': addToken(TokenType::Percent); break;
 
-        case '-':
-            if (match('-')) {
+        case '#':
+            if (peek() == ' ') {
                 while (peek() != '\n' && !isAtEnd()) advance();
                 std::string comment = source_.substr(start_ + 2, current_ - (start_ + 2));
-                size_t first = comment.find_first_not_of(" \t");
-                if (std::string::npos != first) {
-                    size_t last = comment.find_last_not_of(" \t");
-                    comment = comment.substr(first, (last - first + 1));
-                }
                 addToken(TokenType::GeneratorComment, comment);
-            } else if (match('>')) {
+            } else {
+                identifier();
+            }
+            break;
+
+        case '-':
+            if (match('>')) {
                 addToken(TokenType::Arrow);
             } else {
                 addToken(TokenType::Minus);
@@ -132,7 +133,7 @@ void CHTLLexer::scanToken() {
         default:
             if (isDigit(c)) {
                 number();
-            } else if (isAlpha(c) || c == '#' || c == '_') {
+            } else if (isAlpha(c) || c == '_') { // Removed '#'
                 identifier();
             } else {
                 unquotedLiteral();
@@ -170,7 +171,6 @@ void CHTLLexer::handleSpecialSyntax() {
 
 void CHTLLexer::identifier() {
     if (source_[start_] == '@' || source_[start_] == '#' || source_[start_] == '&') {
-        // Selectors can contain colons for pseudo-classes
         while (isAlphaNumeric(peek()) || peek() == '-' || peek() == ':') advance();
     } else {
         while (isAlphaNumeric(peek()) || peek() == '_' || peek() == '-') advance();
@@ -205,9 +205,7 @@ void CHTLLexer::identifier() {
 void CHTLLexer::number() {
     while (isDigit(peek())) advance();
 
-    // Look for a fractional part.
     if (peek() == '.' && isDigit(peekNext())) {
-        // Consume the "."
         advance();
         while (isDigit(peek())) advance();
     }
