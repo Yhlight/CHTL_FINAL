@@ -12,6 +12,7 @@ public:
         : type_(type), content_(content) {}
 
     NodeType getType() const override { return NodeType::Origin; }
+    const char* getTypeName() const override { return "Origin"; }
 
     std::unique_ptr<Node> clone() const override {
         return std::make_unique<OriginNode>(type_, content_);

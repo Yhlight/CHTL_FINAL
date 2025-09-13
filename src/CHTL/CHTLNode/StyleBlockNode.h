@@ -16,6 +16,7 @@ public:
     StyleBlockNode() = default;
 
     NodeType getType() const override { return NodeType::StyleBlock; }
+    const char* getTypeName() const override { return "StyleBlock"; }
 
     // For inline styles directly on the parent element
     std::vector<std::pair<std::string, std::vector<Token>>> inline_properties_;

@@ -11,6 +11,7 @@ public:
     explicit CommentNode(const std::string& comment) : comment_(comment) {}
 
     NodeType getType() const override { return NodeType::Comment; }
+    const char* getTypeName() const override { return "Comment"; }
 
     std::unique_ptr<Node> clone() const override {
         return std::make_unique<CommentNode>(comment_);

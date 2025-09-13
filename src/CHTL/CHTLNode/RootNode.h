@@ -13,6 +13,7 @@ public:
     RootNode() = default;
 
     NodeType getType() const override { return NodeType::Root; }
+    const char* getTypeName() const override { return "Root"; }
 
     std::unique_ptr<Node> clone() const override {
         auto new_node = std::make_unique<RootNode>();

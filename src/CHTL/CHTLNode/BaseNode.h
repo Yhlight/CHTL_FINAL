@@ -34,6 +34,7 @@ public:
     virtual ~Node() = default;
     virtual NodeType getType() const = 0;
     virtual std::unique_ptr<Node> clone() const = 0;
+    virtual const char* getTypeName() const = 0;
 };
 
 } // namespace CHTL

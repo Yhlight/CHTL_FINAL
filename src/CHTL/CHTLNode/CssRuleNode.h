@@ -14,6 +14,7 @@ public:
     explicit CssRuleNode(const std::string& selector) : selector_(selector) {}
 
     NodeType getType() const override { return NodeType::CssRule; }
+    const char* getTypeName() const override { return "CssRule"; }
 
     std::unique_ptr<Node> clone() const override {
         auto new_node = std::make_unique<CssRuleNode>(selector_);

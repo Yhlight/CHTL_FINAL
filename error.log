@@ -1,1 +1,3 @@
-DEBUG: Entering var substitution. Known var groups: MyVars,
+Parse Error: Constraint violation: Element of type 'Element' is not allowed here.
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected a declaration (element, text, etc.).

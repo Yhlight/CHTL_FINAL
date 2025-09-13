@@ -11,6 +11,7 @@ public:
     explicit TextNode(const std::string& text) : text_(text) {}
 
     NodeType getType() const override { return NodeType::Text; }
+    const char* getTypeName() const override { return "Text"; }
 
     std::unique_ptr<Node> clone() const override {
         return std::make_unique<TextNode>(text_);

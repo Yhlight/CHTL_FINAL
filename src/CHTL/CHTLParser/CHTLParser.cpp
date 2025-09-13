@@ -8,6 +8,8 @@
 
 namespace CHTL {
 
+bool violatesConstraint(const Node* node, const Constraint& constraint);
+
 // Helper function to find a nested context.
 std::shared_ptr<ParserContext> findContextForNamespace(std::shared_ptr<ParserContext> current_context, const std::string& path) {
     std::shared_ptr<ParserContext> target_context = current_context;
@@ -394,8 +396,32 @@ void CHTLParser::parseElementBody(ElementNode& element) {
             consume(TokenType::Semicolon, "Expected ';' after attribute value.");
             element.attributes_.push_back(std::make_unique<AttributeNode>(key.lexeme, value));
         }
+        else if (match({TokenType::Except})) {
+            do {
+                Constraint constraint;
+                if (match({TokenType::AtHtml})) {
+                    constraint.type = ConstraintType::HtmlTagType;
+                } else {
+                    // For now, assume all other identifiers are tag names.
+                    // A more robust implementation would handle template types.
+                    constraint.type = ConstraintType::TagName;
+                    constraint.identifier = consume(TokenType::Identifier, "Expected constraint identifier.").lexeme;
+                }
+                element.constraints_.push_back(constraint);
+            } while (match({TokenType::Comma}));
+            consume(TokenType::Semicolon, "Expected ';' after except clause.");
+        }
         else {
             auto nodes = parseDeclaration();
+            // Validate the newly parsed nodes against the parent's constraints
+            for (const auto& constraint : element.constraints_) {
+                for (const auto& node : nodes) {
+                    if (violatesConstraint(node.get(), constraint)) {
+                        throw std::runtime_error(std::string("Constraint violation: Element of type '") + node->getTypeName() + "' is not allowed here.");
+                    }
+                }
+            }
+
             for (auto& node : nodes) {
                 element.children_.push_back(std::move(node));
             }
@@ -757,6 +783,32 @@ std::string CHTLParser::parseNamespacePath() {
         path += "." + consume(TokenType::Identifier, "Expected namespace name part after dot.").lexeme;
     }
     return path;
+}
+
+// --- Constraint Validation Helper ---
+bool violatesConstraint(const Node* node, const Constraint& constraint) {
+    switch (constraint.type) {
+        case ConstraintType::TagName:
+            if (node->getType() == NodeType::Element) {
+                const auto* elementNode = static_cast<const ElementNode*>(node);
+                if (elementNode->tagName_ == constraint.identifier) {
+                    return true;
+                }
+            }
+            break;
+        case ConstraintType::HtmlTagType:
+            // This would disallow any standard HTML element.
+            if (node->getType() == NodeType::Element) {
+                // A more robust check might involve a list of all valid HTML tags,
+                // but for now, we assume any ElementNode is an HTML tag.
+                return true;
+            }
+            break;
+        // Other constraint types not yet implemented.
+        default:
+            break;
+    }
+    return false;
 }
 
 } // namespace CHTL

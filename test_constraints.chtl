@@ -1,0 +1,21 @@
+html {
+    body {
+        -- This should fail because span is not allowed
+        div {
+            except span;
+            span { text: "I should not be here."; }
+        }
+
+        -- This should also fail because p is an Html element
+        div {
+            except @Html;
+            p { text: "I should not be here either."; }
+        }
+
+        -- This should pass
+        div {
+            except span;
+            p { text: "I am allowed."; }
+        }
+    }
+}
