@@ -33,48 +33,9 @@ target_link_libraries(chtl_compiler PRIVATE chtl_lib)
 target_include_directories(chtl_compiler PUBLIC src)
 target_include_directories(chtl_lib PUBLIC src)
 
-# Optional: Add custom test commands
-add_test(
-    NAME run_delete_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/delete_test.chtl
-)
-add_test(
-    NAME run_insert_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/insert_test.chtl
-)
-add_test(
-    NAME run_property_reference_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/property_reference_test.chtl
-)
-add_test(
-    NAME run_custom_style_groups_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/custom_style_groups_test.chtl
-)
-add_test(
-    NAME run_conditional_expressions_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/conditional_expressions_test.chtl
-)
-add_test(
-    NAME run_script_block_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/script_block_test.chtl
-)
-add_test(
-    NAME run_listen_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/listen_test.chtl
-)
-add_test(
-    NAME run_delegate_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/delegate_test.chtl
-)
-add_test(
-    NAME run_animate_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/animate_test.chtl
-)
-add_test(
-    NAME run_vir_object_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/vir_object_test.chtl
-)
-add_test(
-    NAME run_responsive_values_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/responsive_values_test.chtl
-)
+# Configuration for the new test runner
+add_executable(test_runner tests/test_runner.cpp)
+target_link_libraries(test_runner PRIVATE stdc++fs)
+
+# Add the new single test command
+add_test(NAME SnapshotTests WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} COMMAND test_runner)

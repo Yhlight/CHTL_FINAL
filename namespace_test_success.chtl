@@ -1,8 +1,0 @@
-[Import] @Chtl from "ns1.chtl";
-
-html {
-    body {
-        // This should work directly, finding "Box" in the "space1" namespace.
-        @Element Box;
-    }
-}
