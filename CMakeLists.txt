@@ -33,15 +33,29 @@ target_include_directories(chtl_compiler PUBLIC src)
 target_include_directories(chtl_lib PUBLIC src)
 
 # --- Test Suite ---
-# Add a test for each .chtl file in the root directory.
-file(GLOB CHTL_TEST_FILES "*.chtl")
+set(CHTL_TEST_FILES
+    auto_inference_test.chtl
+    components.chtl
+    custom_style_groups_test.chtl
+    debug_test.chtl
+    defaults.chtl
+    definitions.chtl
+    delete_test.chtl
+    insert_test.chtl
+    property_reference_test.chtl
+    selector_test.chtl
+    test.chtl
+    test2.chtl
+    scanner_test.chtl
+    chtljs_test.chtl
+    listen_test.chtl
+)
 
 foreach(test_file ${CHTL_TEST_FILES})
-    string(REPLACE "./" "" test_name ${test_file})
-    string(REPLACE "./" "" test_name ${test_name})
+    get_filename_component(test_name ${test_file} NAME_WE)
 
     add_test(
         NAME run_${test_name}
-        COMMAND chtl_compiler ${test_file}
+        COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/${test_file}
     )
 endforeach()

@@ -1,0 +1,15 @@
+div {
+    id: myButton;
+    text: "Click Me";
+}
+
+script {
+    {{#myButton}}->listen {
+        click: () => {
+            console.log("Button clicked!");
+        },
+        mouseenter: (e) => {
+            e.target.style.backgroundColor = 'yellow';
+        }
+    }
+}

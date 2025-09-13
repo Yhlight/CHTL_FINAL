@@ -11,6 +11,8 @@ namespace CHTLJS {
 enum class JSTokenType {
     StandardJS,
     EnhancedSelector, // {{...}}
+    ListenBlock,      // listen {...}
+    Arrow,            // ->
     EndOfFile
 };
 

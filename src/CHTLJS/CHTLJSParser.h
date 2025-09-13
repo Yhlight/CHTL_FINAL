@@ -15,6 +15,9 @@ public:
     std::vector<std::unique_ptr<JSNode>> parse();
 
 private:
+    std::unique_ptr<JSNode> parseExpression();
+    std::unique_ptr<JSNode> parseCall(std::unique_ptr<JSNode> target);
+
     const JSToken& peek() const;
     const JSToken& advance();
     bool isAtEnd() const;

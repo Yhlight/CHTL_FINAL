@@ -1,4 +1,5 @@
 #include "CHTLJSLexer.h"
+#include <algorithm>
 
 namespace CHTL {
 namespace CHTLJS {
@@ -14,10 +15,29 @@ std::vector<JSToken> CHTLJSLexer::scanTokens() {
 }
 
 void CHTLJSLexer::findNextToken() {
-    size_t start_pos = source_.find("{{", current_);
+    // Find the earliest occurrence of any special token
+    size_t selector_pos = source_.find("{{", current_);
+    size_t listen_pos = source_.find("listen", current_);
+    size_t arrow_pos = source_.find("->", current_);
+    size_t dot_pos = source_.find(".", current_);
 
-    if (start_pos == std::string::npos) {
-        // No more selectors, the rest is standard JS
+    size_t next_pos = -1;
+    JSTokenType next_type = JSTokenType::StandardJS;
+
+    auto update_next_pos = [&](size_t pos, JSTokenType type) {
+        if (pos != std::string::npos && (next_pos == -1 || pos < next_pos)) {
+            next_pos = pos;
+            next_type = type;
+        }
+    };
+
+    update_next_pos(selector_pos, JSTokenType::EnhancedSelector);
+    update_next_pos(listen_pos, JSTokenType::ListenBlock);
+    update_next_pos(arrow_pos, JSTokenType::Arrow);
+    update_next_pos(dot_pos, JSTokenType::Arrow); // Treat '.' as an arrow
+
+    if (next_pos == -1) {
+        // No more special tokens, the rest is standard JS
         if (current_ < source_.length()) {
             tokens_.push_back({JSTokenType::StandardJS, source_.substr(current_)});
         }
@@ -25,25 +45,35 @@ void CHTLJSLexer::findNextToken() {
         return;
     }
 
-    size_t end_pos = source_.find("}}", start_pos + 2);
-    if (end_pos == std::string::npos) {
-        // Unterminated selector, treat as standard JS
-        if (current_ < source_.length()) {
-            tokens_.push_back({JSTokenType::StandardJS, source_.substr(current_)});
+    // We found a special token. Anything before it is standard JS.
+    if (next_pos > current_) {
+        tokens_.push_back({JSTokenType::StandardJS, source_.substr(current_, next_pos - current_)});
+    }
+
+    if (next_type == JSTokenType::EnhancedSelector) {
+        size_t end_pos = source_.find("}}", next_pos + 2);
+        if (end_pos == std::string::npos) { tokens_.push_back({JSTokenType::StandardJS, source_.substr(next_pos)}); current_ = source_.length(); }
+        else { tokens_.push_back({JSTokenType::EnhancedSelector, source_.substr(next_pos + 2, end_pos - (next_pos + 2))}); current_ = end_pos + 2; }
+    } else if (next_type == JSTokenType::ListenBlock) {
+        size_t start_brace = source_.find('{', next_pos + 6);
+        if (start_brace == std::string::npos) { tokens_.push_back({JSTokenType::StandardJS, source_.substr(next_pos)}); current_ = source_.length(); return; }
+
+        int brace_level = 1;
+        size_t end_brace = std::string::npos;
+        for (size_t i = start_brace + 1; i < source_.length(); ++i) {
+            if (source_[i] == '{') brace_level++;
+            else if (source_[i] == '}') {
+                brace_level--;
+                if (brace_level == 0) { end_brace = i; break; }
+            }
         }
-        current_ = source_.length();
-        return;
+
+        if (end_brace == std::string::npos) { tokens_.push_back({JSTokenType::StandardJS, source_.substr(next_pos)}); current_ = source_.length(); }
+        else { tokens_.push_back({JSTokenType::ListenBlock, source_.substr(start_brace + 1, end_brace - (start_brace + 1))}); current_ = end_brace + 1; }
+    } else if (next_type == JSTokenType::Arrow) {
+        tokens_.push_back({JSTokenType::Arrow, ""});
+        current_ = (source_[next_pos] == '-') ? next_pos + 2 : next_pos + 1;
     }
-
-    // We found a selector. Anything before it is standard JS.
-    if (start_pos > current_) {
-        tokens_.push_back({JSTokenType::StandardJS, source_.substr(current_, start_pos - current_)});
-    }
-
-    // Add the selector token
-    tokens_.push_back({JSTokenType::EnhancedSelector, source_.substr(start_pos + 2, end_pos - (start_pos + 2))});
-
-    current_ = end_pos + 2;
 }
 
 } // namespace CHTLJS

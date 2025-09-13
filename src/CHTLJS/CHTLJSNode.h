@@ -6,12 +6,15 @@
 #include <vector>
 #include <variant>
 
+#include <map>
+
 namespace CHTL {
 namespace CHTLJS {
 
 enum class JSNodeType {
     Script, // Represents a block of standard JS
-    EnhancedSelector
+    EnhancedSelector,
+    Listen
 };
 
 class JSNode {
@@ -32,6 +35,15 @@ public:
     explicit EnhancedSelectorNode(std::string selector) : selector_(std::move(selector)) {}
     JSNodeType getType() const override { return JSNodeType::EnhancedSelector; }
     std::string selector_;
+};
+
+class ListenNode : public JSNode {
+public:
+    explicit ListenNode(std::unique_ptr<JSNode> target) : target_(std::move(target)) {}
+    JSNodeType getType() const override { return JSNodeType::Listen; }
+
+    std::unique_ptr<JSNode> target_;
+    std::map<std::string, std::string> events; // event name -> callback body
 };
 
 } // namespace CHTLJS
