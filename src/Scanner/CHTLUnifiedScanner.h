@@ -30,7 +30,6 @@ private:
     void process();
     void handleScriptTag();
     void handleStyleTag();
-    void handleChtlBlock();
 
     const std::string& source_;
     std::vector<CodeChunk> chunks_;
