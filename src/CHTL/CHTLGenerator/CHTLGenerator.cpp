@@ -39,9 +39,12 @@ Value applyOp(TokenType op, Value b, Value a) {
         else throw std::runtime_error("Invalid unit operation for '*' or '/'.");
     } else {
         if (a.Svalue != b.Svalue && !a.Svalue.empty() && !b.Svalue.empty()) {
-             throw std::runtime_error("Unit mismatch in operation: " + a.Svalue + " and " + b.Svalue);
+            // This case is now handled by evaluateArithmetic which generates a calc() expression.
+            // We can simply concatenate the units, but it won't be used.
+             val.Svalue = a.Svalue + b.Svalue;
+        } else {
+            val.Svalue = a.Svalue.empty() ? b.Svalue : a.Svalue;
         }
-        val.Svalue = a.Svalue.empty() ? b.Svalue : a.Svalue;
     }
 
     switch (op) {
@@ -56,12 +59,48 @@ Value applyOp(TokenType op, Value b, Value a) {
     return val;
 }
 
+// --- Core Arithmetic Evaluation Logic ---
+// This function now checks for mixed units and returns a calc() string if needed.
 Value evaluateArithmetic(const std::vector<PropertyValue>& parts) {
     std::vector<Token> tokens;
+    bool has_mixed_units = false;
+    std::string first_unit;
+    bool unit_found = false;
+
     for(const auto& part : parts) {
-        if(std::holds_alternative<Token>(part)) tokens.push_back(std::get<Token>(part));
-        else throw std::runtime_error("Cannot evaluate property with unresolved reference during arithmetic.");
+        if(std::holds_alternative<Token>(part)) {
+            Token token = std::get<Token>(part);
+            tokens.push_back(token);
+            if (token.type == TokenType::Identifier || token.type == TokenType::Percent) {
+                if (!unit_found) {
+                    first_unit = token.lexeme;
+                    unit_found = true;
+                } else if (first_unit != token.lexeme) {
+                    has_mixed_units = true;
+                }
+            }
+        } else {
+            throw std::runtime_error("Cannot evaluate property with unresolved reference during arithmetic.");
+        }
     }
+
+    if (has_mixed_units) {
+        std::stringstream ss;
+        ss << "calc(";
+        for(const auto& token : tokens) {
+            ss << token.lexeme << " ";
+        }
+        ss << ")";
+        // We remove the trailing space and then the closing parenthesis, then add it back.
+        std::string result = ss.str();
+        result.pop_back(); // remove trailing space
+        result.pop_back(); // remove trailing space
+        result += ")";
+
+
+        return {0, "", result};
+    }
+
 
     std::stack<Value> values;
     std::stack<Token> ops;

@@ -17,6 +17,7 @@ public:
 private:
     std::unique_ptr<JSNode> parseExpression();
     std::unique_ptr<JSNode> parseCall(std::unique_ptr<JSNode> target);
+    std::unique_ptr<JSNode> parseScriptLoader(const JSToken& loader_token);
 
     const JSToken& peek() const;
     const JSToken& advance();

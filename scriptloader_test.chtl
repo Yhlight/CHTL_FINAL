@@ -1,0 +1,10 @@
+// This file tests the scriptloader feature
+
+script {
+    scriptloader {
+        load: "js_modules/module1.js",
+        load: "js_modules/module2.cjjs"
+    }
+
+    console.log("Main script block after scriptloader.");
+}

@@ -30,6 +30,19 @@ std::string CompilerDispatcher::compile(const FragmentList& fragments, const std
             auto js_tokens = js_lexer.scanTokens();
             CHTLJS::CHTLJSParser js_parser(std::move(js_tokens));
             auto js_ast = js_parser.parse();
+
+            // The dispatcher needs to handle file loading from ScriptLoaderNodes
+            for (const auto& node : js_ast) {
+                if (node->getType() == CHTLJS::JSNodeType::ScriptLoader) {
+                    auto* loaderNode = static_cast<CHTLJS::ScriptLoaderNode*>(node.get());
+                    for (const auto& path : loaderNode->paths) {
+                        if (auto file_content = loader.loadFile(path, initial_path)) {
+                            final_js << *file_content << "\n";
+                        }
+                    }
+                }
+            }
+
             CHTLJS::CHTLJSGenerator js_generator;
             final_js << js_generator.generate(js_ast);
         }

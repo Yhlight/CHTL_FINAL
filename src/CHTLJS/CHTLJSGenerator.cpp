@@ -32,6 +32,11 @@ std::string generateNode(const JSNode* node) {
         for (const auto& event_pair : listenNode->events) {
             ss << target_js << ".addEventListener('" << event_pair.first << "', " << event_pair.second << ");\n";
         }
+    } else if (node->getType() == JSNodeType::ScriptLoader) {
+        // The actual loading is handled by the dispatcher.
+        // The generator's job here is minimal, perhaps a comment.
+        auto* loaderNode = static_cast<const ScriptLoaderNode*>(node);
+        ss << "// CHTL Script Loader processed " << loaderNode->paths.size() << " files.\n";
     }
     return ss.str();
 }

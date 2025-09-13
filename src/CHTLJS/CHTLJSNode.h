@@ -14,7 +14,8 @@ namespace CHTLJS {
 enum class JSNodeType {
     Script, // Represents a block of standard JS
     EnhancedSelector,
-    Listen
+    Listen,
+    ScriptLoader
 };
 
 class JSNode {
@@ -44,6 +45,13 @@ public:
 
     std::unique_ptr<JSNode> target_;
     std::map<std::string, std::string> events; // event name -> callback body
+};
+
+class ScriptLoaderNode : public JSNode {
+public:
+    ScriptLoaderNode() = default;
+    JSNodeType getType() const override { return JSNodeType::ScriptLoader; }
+    std::vector<std::string> paths;
 };
 
 } // namespace CHTLJS

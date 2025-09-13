@@ -49,6 +49,7 @@ set(CHTL_TEST_FILES
     scanner_test.chtl
     chtljs_test.chtl
     listen_test.chtl
+    scriptloader_test.chtl
 )
 
 foreach(test_file ${CHTL_TEST_FILES})
