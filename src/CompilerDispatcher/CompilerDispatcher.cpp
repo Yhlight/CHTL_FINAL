@@ -67,11 +67,44 @@ std::string CompilerDispatcher::compile(const std::string& source) {
         }
     }
 
-    // TODO: Process script_chunks and style_chunks
-    // For now, we will ignore them to get the CHTL part working.
+    // Process style_chunks
+    std::vector<std::string> css_outputs;
+    for (const auto& chunk : style_chunks) {
+        css_outputs.push_back(chunk.content);
+    }
+
+    // Process script_chunks
+    for (const auto& chunk : script_chunks) {
+        // We process the ChtlJs chunk which contains placeholders.
+        if (chunk.type == ChunkType::ChtlJs) {
+            CHTLJS::CHTLJSLexer lexer(chunk.content);
+            std::vector<CHTLJS::CHTLJSToken> tokens = lexer.scanTokens();
+            if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) continue;
+
+            CHTLJS::CHTLJSParser parser(tokens, chtljs_context_);
+            std::unique_ptr<CHTLJS::CHTLJSNode> ast = parser.parse();
+
+            if (ast) {
+                CHTLJS::CHTLJSGenerator generator;
+                js_outputs.push_back(generator.generate(*ast));
+            }
+        }
+    }
+
+    // Decode placeholders in the generated JavaScript
+    const auto& placeholder_map = unified_scanner.getPlaceholderMap();
+    for (std::string& js_output : js_outputs) {
+        for (const auto& pair : placeholder_map) {
+            size_t pos = js_output.find(pair.first);
+            while (pos != std::string::npos) {
+                js_output.replace(pos, pair.first.length(), pair.second);
+                pos = js_output.find(pair.first, pos + pair.second.length());
+            }
+        }
+    }
 
     CodeMerger merger;
-    return merger.merge(html_output, js_outputs);
+    return merger.merge(html_output, css_outputs, js_outputs);
 }
 
 } // namespace CHTL

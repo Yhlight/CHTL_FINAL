@@ -22,6 +22,10 @@ std::vector<CodeChunk> CHTLUnifiedScanner::scan() {
     return chunks_;
 }
 
+const std::map<std::string, std::string>& CHTLUnifiedScanner::getPlaceholderMap() const {
+    return placeholder_map_;
+}
+
 void CHTLUnifiedScanner::skipString(const std::string& s, size_t& pos) {
     char quote_char = s[pos];
     pos++;
