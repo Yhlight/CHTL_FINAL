@@ -1,0 +1,9 @@
+div {
+    id: myDiv;
+}
+
+script {
+    const my_div_element = {{#myDiv}};
+    const my_string = "this is a JS string";
+    console.log(my_string, my_div_element);
+}

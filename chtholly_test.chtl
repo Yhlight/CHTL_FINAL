@@ -1,0 +1,12 @@
+[Import] [Template] @Element ContextMenu from "Chtholly";
+
+html {
+    head {
+        title { text { "Chtholly Module Test" } }
+    }
+    body {
+        h1 { text { "Right click anywhere!" } }
+
+        @Element ContextMenu from Chtholly;
+    }
+}

@@ -1,0 +1,12 @@
+[Info] {
+    name = "Chtholly";
+    version = "0.1.0";
+    author = "Jules";
+    description = "Official utility and component module for CHTL.";
+    license = "MIT";
+}
+
+[Export] {
+    [Template] @Element ContextMenu;
+    [Template] @Style ContextMenuStyle;
+}

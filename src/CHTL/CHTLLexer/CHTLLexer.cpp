@@ -63,15 +63,19 @@ void CHTLLexer::scanToken() {
         case '%': addToken(TokenType::Percent); break;
 
         case '-':
-            if (match('-')) {
-                while (peek() != '\n' && !isAtEnd()) advance();
-                std::string comment = source_.substr(start_ + 2, current_ - (start_ + 2));
-                size_t first = comment.find_first_not_of(" \t");
-                if (std::string::npos != first) {
-                    size_t last = comment.find_last_not_of(" \t");
-                    comment = comment.substr(first, (last - first + 1));
+            if (match('-')) { // Could be --variable or --comment
+                if (isAlpha(peek())) { // It's a CSS variable
+                    identifier();
+                } else { // It's a generator comment
+                    while (peek() != '\n' && !isAtEnd()) advance();
+                    std::string comment = source_.substr(start_ + 2, current_ - (start_ + 2));
+                    size_t first = comment.find_first_not_of(" \t");
+                    if (std::string::npos != first) {
+                        size_t last = comment.find_last_not_of(" \t");
+                        comment = comment.substr(first, (last - first + 1));
+                    }
+                    addToken(TokenType::GeneratorComment, comment);
                 }
-                addToken(TokenType::GeneratorComment, comment);
             } else if (match('>')) {
                 addToken(TokenType::Arrow);
             } else {

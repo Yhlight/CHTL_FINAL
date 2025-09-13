@@ -1,0 +1,29 @@
+[Namespace] MyModule
+
+[Info] {
+    name = "MyModule";
+    version = "1.0.0";
+    author = "Jules";
+}
+
+[Export] {
+    [Template] @Element Card, Button;
+    [Custom] @Style PrimaryTheme;
+}
+
+[Template] @Element Card {
+    div { class: "card"; }
+}
+
+[Template] @Element Button {
+    button { class: "button"; }
+}
+
+[Custom] @Style PrimaryTheme {
+    color: blue;
+}
+
+// This template is not exported
+[Template] @Element InternalWidget {
+    span { class: "internal"; }
+}

@@ -8,6 +8,7 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/StyleBlockNode.h"
+#include "../CHTLNode/ScriptBlockNode.h"
 #include "../CHTLNode/StyleTemplateNode.h"
 #include "../CHTLNode/ElementTemplateNode.h"
 #include "../CHTLNode/VarTemplateNode.h"
@@ -32,6 +33,8 @@ private:
     std::vector<std::unique_ptr<Node>> parseDeclaration();
     std::unique_ptr<OriginNode> parseOriginBlock();
     void parseConfigurationBlock();
+    void parseInfoBlock();
+    void parseExportBlock();
     void parseTemplateDefinition(bool is_custom);
     std::unique_ptr<ElementNode> parseElement();
     void parseElementBody(ElementNode& element);
@@ -39,6 +42,7 @@ private:
     std::vector<PropertyValue> parsePropertyValue();
     std::unique_ptr<TextNode> parseText();
     std::unique_ptr<StyleBlockNode> parseStyleBlock();
+    std::unique_ptr<ScriptBlockNode> parseScriptBlock();
     std::unique_ptr<CommentNode> parseGeneratorComment();
 
 

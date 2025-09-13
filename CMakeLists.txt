@@ -15,6 +15,9 @@ set(CHTL_LIB_SOURCES
     src/CHTL/CHTLParser/CHTLParser.cpp
     src/CHTL/CHTLGenerator/CHTLGenerator.cpp
     src/CHTL/CHTLLoader/CHTLLoader.cpp
+    src/CHTL/CHTLDebug/ASTPrinter.cpp
+    src/Scanner/UnifiedScanner.cpp
+    src/CompilerDispatcher/CompilerDispatcher.cpp
 )
 
 # Create a static library for our compiler components

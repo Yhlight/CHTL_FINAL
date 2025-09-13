@@ -13,6 +13,32 @@ Value evaluateCssExpressionToValue(const std::vector<PropertyValue>& parts);
 std::string evaluateCssExpression(const std::vector<PropertyValue>& parts);
 ElementNode* findElementBySelector(const std::string& selector, const std::vector<ElementNode*>& elements);
 
+CHTLGenerator::CHTLGenerator(std::shared_ptr<CompilerDispatcher> dispatcher) : dispatcher_(dispatcher) {}
+
+std::string CHTLGenerator::resolvePlaceholders(std::string content) {
+    size_t pos = 0;
+    while(pos < content.length()) {
+        size_t next_placeholder = content.find("__", pos);
+        if (next_placeholder == std::string::npos) {
+            break; // No more placeholders
+        }
+
+        size_t end_pos = content.find("__", next_placeholder + 2);
+        if (end_pos == std::string::npos) {
+            break; // Malformed placeholder
+        }
+
+        std::string placeholder = content.substr(next_placeholder, end_pos - next_placeholder + 2);
+        std::string resolved_content = dispatcher_->getPlaceholderContent(placeholder);
+
+        // This is where a sub-compiler would be called based on prefix.
+        // For now, we just substitute the original text back.
+        content.replace(next_placeholder, placeholder.length(), resolved_content);
+        pos = next_placeholder + resolved_content.length();
+    }
+    return content;
+}
+
 // Returns the precedence of an operator.
 int getPrecedence(TokenType type) {
     switch (type) {
@@ -376,6 +402,9 @@ void CHTLGenerator::render(const Node* node) {
         case NodeType::Origin:
             renderOrigin(static_cast<const OriginNode*>(node));
             break;
+        case NodeType::ScriptBlock:
+            renderScriptBlock(static_cast<const ScriptBlockNode*>(node));
+            break;
         case NodeType::StyleBlock:
             break;
         default:
@@ -401,13 +430,13 @@ void CHTLGenerator::renderElement(const ElementNode* node) {
 
     bool hasNonStyleChildren = false;
     for (const auto& child : node->children_) {
-        if (child->getType() != NodeType::StyleBlock) {
+        if (child->getType() != NodeType::StyleBlock && child->getType() != NodeType::ScriptBlock) {
             hasNonStyleChildren = true;
             break;
         }
     }
 
-    if (!hasNonStyleChildren) {
+    if (!hasNonStyleChildren && node->children_.empty()) {
         output_ << " />\n";
     } else {
         output_ << ">\n";
@@ -432,7 +461,27 @@ void CHTLGenerator::renderComment(const CommentNode* node) {
 }
 
 void CHTLGenerator::renderOrigin(const OriginNode* node) {
-    output_ << node->content_;
+    if (dispatcher_) {
+        output_ << dispatcher_->getPlaceholderContent(node->content_);
+    } else {
+        // Fallback for when no dispatcher is provided (e.g. old tests)
+        output_ << node->content_;
+    }
+}
+
+void CHTLGenerator::renderScriptBlock(const ScriptBlockNode* node) {
+    indent();
+    output_ << "<script>\n";
+    indentLevel_++;
+    indent();
+    if (dispatcher_) {
+        std::string script_content = dispatcher_->getPlaceholderContent(node->content_);
+        output_ << resolvePlaceholders(script_content);
+    }
+    output_ << "\n";
+    indentLevel_--;
+    indent();
+    output_ << "</script>\n";
 }
 
 std::string CHTLGenerator::getElementUniqueId(const ElementNode* node) {

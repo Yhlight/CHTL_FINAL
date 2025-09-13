@@ -7,6 +7,7 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/StyleBlockNode.h"
+#include "../CHTLNode/ScriptBlockNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/PropertyReferenceNode.h"
 #include "../CHTLNode/PropertyValue.h"
@@ -15,6 +16,7 @@
 #include <memory>
 #include <map>
 #include <vector>
+#include "../../CompilerDispatcher/CompilerDispatcher.h"
 
 namespace CHTL {
 
@@ -30,10 +32,14 @@ struct UnresolvedProperty {
 
 class CHTLGenerator {
 public:
-    CHTLGenerator() = default;
+    explicit CHTLGenerator(std::shared_ptr<CompilerDispatcher> dispatcher);
     std::string generate(RootNode& root);
 
 private:
+    std::shared_ptr<CompilerDispatcher> dispatcher_;
+
+    std::string resolvePlaceholders(std::string content);
+
     // Two-pass methods
     void firstPass(Node* node);
     void firstPassVisitElement(ElementNode* node);
@@ -46,6 +52,7 @@ private:
     void renderText(const TextNode* node);
     void renderComment(const CommentNode* node);
     void renderOrigin(const OriginNode* node);
+    void renderScriptBlock(const ScriptBlockNode* node);
 
     std::string getElementUniqueId(const ElementNode* node);
     void indent();
