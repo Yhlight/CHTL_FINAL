@@ -2,10 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include "CHTL/CHTLLexer/CHTLLexer.h"
-#include "CHTL/CHTLParser/CHTLParser.h"
-#include "CHTL/CHTLGenerator/CHTLGenerator.h"
-#include "CHTL/CHTLLoader/CHTLLoader.h"
+#include "CompilerDispatcher/CompilerDispatcher.h"
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -23,23 +20,14 @@ int main(int argc, char* argv[]) {
     buffer << file.rdbuf();
     std::string source = buffer.str();
 
-    // 1. Setup compilation context
-    CHTL::CHTLLoader loader;
-    auto context = std::make_shared<CHTL::ParserContext>();
-
-    // 2. Lex initial file
-    CHTL::CHTLLexer lexer(source);
-    std::vector<CHTL::Token> tokens = lexer.scanTokens();
-
-    // 3. Parse all files (starting with the main one)
-    CHTL::CHTLParser parser(source, tokens, loader, argv[1], context);
-    std::unique_ptr<CHTL::RootNode> ast = parser.parse();
-
-    // 3. Generator
-    CHTL::CHTLGenerator generator;
-    std::string html = generator.generate(*ast);
-
-    std::cout << html << std::endl;
+    CHTL::CompilerDispatcher dispatcher;
+    try {
+        std::string html = dispatcher.compile(source);
+        std::cout << html << std::endl;
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Compilation Error: " << e.what() << std::endl;
+        return 1;
+    }
 
     return 0;
 }

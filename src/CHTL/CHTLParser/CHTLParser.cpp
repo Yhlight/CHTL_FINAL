@@ -6,6 +6,7 @@
 #include <set>
 #include <algorithm>
 #include "../CHTLNode/PropertyReferenceNode.h"
+#include "../CHTLNode/ResponsiveValueNode.h"
 
 namespace CHTL {
 
@@ -717,6 +718,9 @@ std::vector<PropertyValue> CHTLParser::parsePropertyValue() {
             advance();
             Token prop = consume(TokenType::Identifier, "Expected property name after '.'.");
             parts.emplace_back(PropertyReferenceNode(selector, prop));
+        } else if (first.type == TokenType::ResponsiveValue) {
+            Token token = advance();
+            parts.emplace_back(ResponsiveValueNode(token.lexeme));
         } else if (first.type == TokenType::Identifier && second.type == TokenType::Dot) {
             Token selector = advance();
             advance();

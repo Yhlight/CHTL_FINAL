@@ -5,6 +5,7 @@
 #include <string>
 #include "../CHTLLexer/Token.h"
 #include "PropertyReferenceNode.h"
+#include "ResponsiveValueNode.h"
 
 namespace CHTL {
 
@@ -14,7 +15,7 @@ struct Value {
     std::string stringValue;
 };
 
-using PropertyValue = std::variant<Token, PropertyReferenceNode>;
+using PropertyValue = std::variant<Token, PropertyReferenceNode, ResponsiveValueNode>;
 
 } // namespace CHTL
 

@@ -13,6 +13,7 @@ enum class TokenType {
 
     // Literals
     Identifier,
+    ResponsiveValue, // $var$
     StringLiteral,
     UnquotedLiteral,
     Number,

@@ -36,7 +36,11 @@ std::string CompilerDispatcher::compile(const std::string& source) {
             std::unique_ptr<RootNode> ast = parser.parse();
 
             CHTLGenerator generator;
-            html_output += generator.generate(*ast);
+            CompilationResult result = generator.generate(*ast);
+            html_output += result.html;
+            if (!result.js.empty()) {
+                js_outputs.push_back(result.js);
+            }
 
         } else if (chunk.type == ChunkType::ChtlJs) {
             CHTLJS::CHTLJSLexer lexer(chunk.content);

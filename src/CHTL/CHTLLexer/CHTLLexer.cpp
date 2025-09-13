@@ -73,6 +73,23 @@ void CHTLLexer::scanToken() {
         case '<': addToken(match('=') ? TokenType::LessThanEquals : TokenType::LessThan); break;
         case '%': addToken(TokenType::Percent); break;
 
+        case '$': {
+            start_++; // Skip the opening '$'
+            while (isAlphaNumeric(peek()) || peek() == '_') {
+                advance();
+            }
+            std::string varName = source_.substr(start_, current_ - start_);
+            if (peek() != '$') {
+                // This is not a valid responsive value, treat as unquoted literal
+                current_ = start_ -1; // backtrack
+                unquotedLiteral();
+            } else {
+                advance(); // consume the closing '$'
+                addToken(TokenType::ResponsiveValue, varName);
+            }
+            break;
+        }
+
         case '#':
             if (peek() == ' ') {
                 while (peek() != '\n' && !isAtEnd()) advance();

@@ -1,6 +1,6 @@
 #include "CHTLGenerator.h"
-#include "../CHTLLexer/CHTLLexer.h" // For re-tokenizing
-#include <iostream>
+#include "../CHTLLexer/CHTLLexer.h"
+#include "../CHTLNode/ResponsiveValueNode.h"
 #include <map>
 #include <stack>
 #include <vector>
@@ -12,13 +12,8 @@
 
 namespace CHTL {
 
-// Forward declarations for our new structured approach
-Value evaluateExpression(std::vector<PropertyValue>::const_iterator& it, const std::vector<PropertyValue>::const_iterator& end, int min_precedence, const std::vector<ElementNode*>& all_elements, std::map<std::string, std::map<std::string, Value>>& symbol_table);
 std::string formatValue(const Value& val);
-Value resolvePropertyValue(const std::vector<PropertyValue>& parts, const std::vector<ElementNode*>& all_elements, std::map<std::string, std::map<std::string, Value>>& symbol_table);
 ElementNode* findElementBySelector(const std::string& selector, const std::vector<ElementNode*>& elements);
-
-// --- Core Expression Evaluation Logic ---
 
 int getPrecedence(TokenType type) {
     switch (type) {
@@ -28,15 +23,14 @@ int getPrecedence(TokenType type) {
         case TokenType::GreaterThan: case TokenType::LessThan: case TokenType::GreaterThanEquals: case TokenType::LessThanEquals: return 4;
         case TokenType::Plus: case TokenType::Minus: return 5;
         case TokenType::Asterisk: case TokenType::Slash: case TokenType::Percent: return 6;
-        case TokenType::DoubleAsterisk: return 7; // Right-associative
-        default: return 0; // For non-operators like ':', ')', etc.
+        case TokenType::DoubleAsterisk: return 7;
+        default: return 0;
     }
 }
 
 Value applyOp(TokenType op, Value b, Value a) {
     Value val;
     val.Svalue = a.Svalue.empty() ? b.Svalue : a.Svalue;
-
     switch (op) {
         case TokenType::Plus: val.Dvalue = a.Dvalue + b.Dvalue; break;
         case TokenType::Minus: val.Dvalue = a.Dvalue - b.Dvalue; break;
@@ -57,16 +51,21 @@ Value applyOp(TokenType op, Value b, Value a) {
     return val;
 }
 
-Value evaluateExpression(std::vector<PropertyValue>::const_iterator& it, const std::vector<PropertyValue>::const_iterator& end, int min_precedence, const std::vector<ElementNode*>& all_elements, std::map<std::string, std::map<std::string, Value>>& symbol_table) {
+Value CHTLGenerator::evaluateExpression(std::vector<PropertyValue>::const_iterator& it, const std::vector<PropertyValue>::const_iterator& end, int min_precedence) {
     Value lhs;
     if (it == end) throw std::runtime_error("Unexpected end of expression.");
     const auto& current_part = *it;
 
-    if (std::holds_alternative<Token>(current_part)) {
+    if (std::holds_alternative<ResponsiveValueNode>(current_part)) {
+        const auto& responsive_node = std::get<ResponsiveValueNode>(current_part);
+        this->responsive_variables_.insert(responsive_node.getVariableName());
+        lhs = {0, "", "var(--" + responsive_node.getVariableName() + ")"};
+        ++it;
+    } else if (std::holds_alternative<Token>(current_part)) {
         const auto& token = std::get<Token>(current_part);
         if (token.type == TokenType::OpenParen) {
             ++it;
-            lhs = evaluateExpression(it, end, 0, all_elements, symbol_table);
+            lhs = evaluateExpression(it, end, 0);
             if (it == end || !std::holds_alternative<Token>(*it) || std::get<Token>(*it).type != TokenType::CloseParen) {
                 throw std::runtime_error("Expected ')' to close expression.");
             }
@@ -85,7 +84,7 @@ Value evaluateExpression(std::vector<PropertyValue>::const_iterator& it, const s
             lhs = {0, "", token.lexeme};
         } else if (token.type == TokenType::Minus) {
             ++it;
-            lhs = evaluateExpression(it, end, 10, all_elements, symbol_table);
+            lhs = evaluateExpression(it, end, 10);
             lhs.Dvalue = -lhs.Dvalue;
         } else {
              throw std::runtime_error("Unexpected token in expression: " + token.lexeme);
@@ -101,31 +100,24 @@ Value evaluateExpression(std::vector<PropertyValue>::const_iterator& it, const s
         if (op_type == TokenType::QuestionMark) {
             const int TERNARY_PRECEDENCE = 1;
             if (TERNARY_PRECEDENCE < min_precedence) break;
-
-            ++it; // consume '?'
-            Value true_val = evaluateExpression(it, end, 0, all_elements, symbol_table);
-
+            ++it;
+            Value true_val = evaluateExpression(it, end, 0);
             if (it == end || !std::holds_alternative<Token>(*it) || std::get<Token>(*it).type != TokenType::Colon) {
                  throw std::runtime_error("Expected ':' for ternary operator.");
             }
-            ++it; // consume ':'
-
-            Value false_val = evaluateExpression(it, end, TERNARY_PRECEDENCE, all_elements, symbol_table);
+            ++it;
+            Value false_val = evaluateExpression(it, end, TERNARY_PRECEDENCE);
             lhs = (lhs.Dvalue != 0) ? true_val : false_val;
             continue;
         }
 
         int precedence = getPrecedence(op_type);
         if (precedence == 0 || precedence < min_precedence) break;
-
-        int next_min_precedence = (op_type == TokenType::DoubleAsterisk) ? precedence : precedence;
-        if (op_type != TokenType::DoubleAsterisk) next_min_precedence++;
-
+        int next_min_precedence = (op_type == TokenType::DoubleAsterisk) ? precedence : precedence + 1;
         ++it;
-        Value rhs = evaluateExpression(it, end, next_min_precedence, all_elements, symbol_table);
+        Value rhs = evaluateExpression(it, end, next_min_precedence);
         lhs = applyOp(op_type, rhs, lhs);
     }
-
     return lhs;
 }
 
@@ -141,37 +133,32 @@ std::string formatValue(const Value& val) {
     return s + val.Svalue;
 }
 
-Value resolvePropertyValue(const std::vector<PropertyValue>& parts, const std::vector<ElementNode*>& all_elements, std::map<std::string, std::map<std::string, Value>>& symbol_table) {
+Value CHTLGenerator::resolvePropertyValue(const std::vector<PropertyValue>& parts) {
     if (parts.empty()) return {0, "", ""};
-
-    // If it's just one part, it might be a simple literal without expression
     if (parts.size() == 1) {
-        if (std::holds_alternative<Token>(parts[0])) {
-            const auto& token = std::get<Token>(parts[0]);
+        const auto& part = parts[0];
+        if (std::holds_alternative<Token>(part)) {
+            const auto& token = std::get<Token>(part);
             if (token.type == TokenType::StringLiteral || token.type == TokenType::UnquotedLiteral || token.type == TokenType::Identifier) {
                 return {0, "", token.lexeme};
             }
              if (token.type == TokenType::Number) {
                 return {std::stod(token.lexeme), "", ""};
             }
+        } else if (std::holds_alternative<ResponsiveValueNode>(part)) {
+            const auto& responsive_node = std::get<ResponsiveValueNode>(part);
+            responsive_variables_.insert(responsive_node.getVariableName());
+            return {0, "", "var(--" + responsive_node.getVariableName() + ")"};
         }
     }
-
     auto it = parts.begin();
-    return evaluateExpression(it, parts.end(), 0, all_elements, symbol_table);
+    return evaluateExpression(it, parts.end(), 0);
 }
 
-
-// --- Selector and Generator Logic ---
-
-// Helper to check if a single element matches a simple selector (no spaces)
 bool elementMatchesSimpleSelector(const ElementNode* elem, const std::string& simple_selector) {
     if (!elem || simple_selector.empty()) return false;
-
     std::string selector = simple_selector;
     int index = -1;
-
-    // Handle indexed access like `div[0]`
     size_t bracket_pos = selector.find('[');
     if (bracket_pos != std::string::npos) {
         size_t end_bracket_pos = selector.find(']');
@@ -183,7 +170,6 @@ bool elementMatchesSimpleSelector(const ElementNode* elem, const std::string& si
         }
         selector = selector.substr(0, bracket_pos);
     }
-
     bool matches = false;
     if (selector[0] == '#') {
         std::string id = selector.substr(1);
@@ -209,9 +195,7 @@ bool elementMatchesSimpleSelector(const ElementNode* elem, const std::string& si
             if (matches) break;
         }
     } else {
-        // Plain tag name or auto-detect
         if (elem->tagName_ == selector) matches = true;
-        // Fallback checks from original implementation
         if (!matches) {
             for (const auto& attr : elem->attributes_) {
                 if (attr->key_ == "id" && attr->value_ == selector) {
@@ -234,8 +218,6 @@ bool elementMatchesSimpleSelector(const ElementNode* elem, const std::string& si
     return matches;
 }
 
-
-// Finds all children (recursively) of a given element
 void findAllDescendants(const ElementNode* parent, std::vector<ElementNode*>& descendants) {
     if (!parent) return;
     for (const auto& child : parent->children_) {
@@ -254,18 +236,13 @@ ElementNode* findElementBySelector(const std::string& selector, const std::vecto
     while (ss >> segment) {
         segments.push_back(segment);
     }
-
     if (segments.empty()) return nullptr;
-
     std::vector<ElementNode*> current_search_space = elements;
     std::vector<ElementNode*> next_search_space;
     ElementNode* final_match = nullptr;
     int index_to_find = -1;
-
     for (size_t i = 0; i < segments.size(); ++i) {
         std::string current_segment = segments[i];
-
-        // Check for index on this segment
         size_t bracket_pos = current_segment.find('[');
         if (bracket_pos != std::string::npos) {
             size_t end_bracket_pos = current_segment.find(']');
@@ -275,11 +252,9 @@ ElementNode* findElementBySelector(const std::string& selector, const std::vecto
         } else {
             index_to_find = -1;
         }
-
         int current_match_count = 0;
         final_match = nullptr;
         next_search_space.clear();
-
         for (auto* elem : current_search_space) {
             if (elementMatchesSimpleSelector(elem, current_segment)) {
                  if (index_to_find == -1 || current_match_count == index_to_find) {
@@ -287,32 +262,25 @@ ElementNode* findElementBySelector(const std::string& selector, const std::vecto
                     if (i < segments.size() - 1) {
                         findAllDescendants(elem, next_search_space);
                     } else {
-                         // If it's the last segment and we found our match, we're done
                          return final_match;
                     }
                 }
                 current_match_count++;
             }
         }
-
-        if (final_match == nullptr) return nullptr; // No match found for this segment
-
-        // Prepare for the next segment
+        if (final_match == nullptr) return nullptr;
         current_search_space = next_search_space;
     }
-
     return final_match;
 }
 
-
-std::string CHTLGenerator::generate(RootNode& root) {
+CompilationResult CHTLGenerator::generate(RootNode& root) {
+    responsive_variables_.clear();
     for (auto& child : root.children_) firstPass(child.get());
     secondPass();
     for (const auto& child : root.children_) render(child.get());
-
     std::string html = output_.str();
     std::string styles = global_styles_.str();
-
     if (!styles.empty()) {
         std::string style_tag = "\n    <style>\n" + styles + "    </style>\n";
         size_t head_pos = html.find("</head>");
@@ -322,7 +290,8 @@ std::string CHTLGenerator::generate(RootNode& root) {
             html = style_tag + html;
         }
     }
-    return html;
+    std::string js = generateReactivityScript();
+    return {html, js};
 }
 
 void CHTLGenerator::firstPass(Node* node) {
@@ -335,7 +304,6 @@ void CHTLGenerator::firstPass(Node* node) {
 void CHTLGenerator::firstPassVisitElement(ElementNode* node) {
     all_elements_.push_back(node);
     std::string element_id = getElementUniqueId(node);
-
     for (auto& child : node->children_) {
         if (child->getType() == NodeType::StyleBlock) {
             auto* styleNode = static_cast<StyleBlockNode*>(child.get());
@@ -347,18 +315,16 @@ void CHTLGenerator::firstPassVisitElement(ElementNode* node) {
                         break;
                     }
                 }
-
                 if (has_reference) {
                     unresolved_properties_.push_back({node, prop.first, prop.second});
                 } else {
-                    Value value = resolvePropertyValue(prop.second, all_elements_, symbol_table_);
+                    Value value = resolvePropertyValue(prop.second);
                     node->computed_styles_[prop.first] = formatValue(value);
                     if (!element_id.empty()) {
                        symbol_table_[element_id][prop.first] = value;
                     }
                 }
             }
-
             for (const auto& rule : styleNode->rules_) {
                 const std::string& selector = rule->selector_;
                 if (selector.length() > 1 && selector[0] == '.') {
@@ -379,7 +345,6 @@ void CHTLGenerator::firstPassVisitElement(ElementNode* node) {
                     if (!idExists) node->attributes_.push_back(std::make_unique<AttributeNode>("id", idName));
                 }
             }
-
             std::string element_selector;
             for (const auto& attr : node->attributes_) {
                 if (attr->key_ == "class") {
@@ -392,7 +357,6 @@ void CHTLGenerator::firstPassVisitElement(ElementNode* node) {
                     if (attr->key_ == "id") { element_selector = "#" + attr->value_; break; }
                 }
             }
-
             for (const auto& rule : styleNode->rules_) {
                 std::string final_selector = rule->selector_;
                 if (final_selector.find('&') != std::string::npos) {
@@ -405,8 +369,7 @@ void CHTLGenerator::firstPassVisitElement(ElementNode* node) {
                 }
                 global_styles_ << "  " << final_selector << " {\n";
                 for (const auto& prop : rule->properties_) {
-                    // CSS rules in style blocks are assumed to not have cross-references for now.
-                    Value value = resolvePropertyValue(prop.second, all_elements_, symbol_table_);
+                    Value value = resolvePropertyValue(prop.second);
                     global_styles_ << "    " << prop.first << ": " << formatValue(value) << ";\n";
                 }
                 global_styles_ << "  }\n";
@@ -424,7 +387,6 @@ void CHTLGenerator::secondPass() {
                 const auto& ref_node = std::get<PropertyReferenceNode>(part);
                 ElementNode* target_element = findElementBySelector(ref_node.selector_.lexeme, all_elements_);
                 if (!target_element) throw std::runtime_error("Could not find element for selector: " + ref_node.selector_.lexeme);
-
                 std::string unique_id = getElementUniqueId(target_element);
                 if(symbol_table_.count(unique_id) && symbol_table_.at(unique_id).count(ref_node.property_.lexeme)) {
                     Value resolved_value = symbol_table_.at(unique_id).at(ref_node.property_.lexeme);
@@ -454,9 +416,30 @@ void CHTLGenerator::secondPass() {
                 resolved_parts.push_back(part);
             }
         }
-        Value final_value = resolvePropertyValue(resolved_parts, all_elements_, symbol_table_);
+        Value final_value = resolvePropertyValue(resolved_parts);
         unresolved.element->computed_styles_[unresolved.property_name] = formatValue(final_value);
     }
+}
+
+std::string CHTLGenerator::generateReactivityScript() {
+    if (responsive_variables_.empty()) {
+        return "";
+    }
+    std::stringstream ss;
+    ss << "(function() {\n";
+    ss << "  const root = document.documentElement;\n";
+    for (const auto& var_name : responsive_variables_) {
+        ss << "  let _" << var_name << ";\n";
+        ss << "  Object.defineProperty(window, '" << var_name << "', {\n";
+        ss << "    get: () => _" << var_name << ",\n";
+        ss << "    set: (newValue) => {\n";
+        ss << "      _" << var_name << " = newValue;\n";
+        ss << "      root.style.setProperty('--" << var_name << "', typeof newValue === 'string' ? newValue : newValue + 'px');\n";
+        ss << "    }\n";
+        ss << "  });\n";
+    }
+    ss << "})();";
+    return ss.str();
 }
 
 void CHTLGenerator::render(const Node* node) {
@@ -466,7 +449,7 @@ void CHTLGenerator::render(const Node* node) {
         case NodeType::Text: renderText(static_cast<const TextNode*>(node)); break;
         case NodeType::Comment: renderComment(static_cast<const CommentNode*>(node)); break;
         case NodeType::Origin: renderOrigin(static_cast<const OriginNode*>(node)); break;
-        case NodeType::StyleBlock: break; // StyleBlocks are processed, not rendered directly
+        case NodeType::StyleBlock: break;
         default: break;
     }
 }
@@ -482,10 +465,8 @@ void CHTLGenerator::renderElement(const ElementNode* node) {
         }
         output_ << "\"";
     }
-
     bool hasNonStyleChildren = false;
     for (const auto& child : node->children_) { if (child->getType() != NodeType::StyleBlock) { hasNonStyleChildren = true; break; } }
-
     if (!hasNonStyleChildren) {
         output_ << " />\n";
     } else {
@@ -522,4 +503,4 @@ void CHTLGenerator::indent() {
     for (int i = 0; i < indentLevel_; ++i) output_ << "  ";
 }
 
-} // namespace CHTL
+}

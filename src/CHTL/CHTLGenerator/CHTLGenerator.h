@@ -15,6 +15,7 @@
 #include <memory>
 #include <map>
 #include <vector>
+#include <set>
 
 namespace CHTL {
 
@@ -28,17 +29,27 @@ struct UnresolvedProperty {
     std::vector<PropertyValue> value_parts;
 };
 
+struct CompilationResult {
+    std::string html;
+    std::string js;
+};
+
 class CHTLGenerator {
 public:
     CHTLGenerator() = default;
-    std::string generate(RootNode& root);
+    CompilationResult generate(RootNode& root);
 
 private:
+    // Expression Evaluation
+    Value resolvePropertyValue(const std::vector<PropertyValue>& parts);
+    Value evaluateExpression(std::vector<PropertyValue>::const_iterator& it, const std::vector<PropertyValue>::const_iterator& end, int min_precedence);
+
     // Two-pass methods
     void firstPass(Node* node);
     void firstPassVisitElement(ElementNode* node);
 
     void secondPass();
+    std::string generateReactivityScript();
 
     // Final rendering methods
     void render(const Node* node);
@@ -54,6 +65,7 @@ private:
     std::vector<ElementNode*> all_elements_;
     std::map<std::string, std::map<std::string, Value>> symbol_table_;
     std::vector<UnresolvedProperty> unresolved_properties_;
+    std::set<std::string> responsive_variables_;
 
     std::stringstream output_;
     std::stringstream global_styles_;
