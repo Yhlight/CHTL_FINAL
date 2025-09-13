@@ -43,7 +43,7 @@ std::string CompilerDispatcher::compile(const std::string& source) {
                 js_outputs.push_back(result.js);
             }
 
-        } else if (chunk.type == ChunkType::ChtlJs) {
+        } else if (chunk.type == ChunkType::CHTL_JS) {
             CHTLJS::CHTLJSLexer lexer(chunk.content);
             std::vector<CHTLJS::CHTLJSToken> tokens = lexer.scanTokens();
             if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) continue;

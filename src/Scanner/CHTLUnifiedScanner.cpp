@@ -1,76 +1,124 @@
 #include "Scanner/CHTLUnifiedScanner.h"
+#include <iostream>
 
 namespace CHTL {
+
+// This regex is designed to find top-level script and style blocks.
+const std::regex CHTLUnifiedScanner::TAG_REGEX(R"((script|style)\s*\{)");
+// This regex finds CHTL JS specific syntax.
+// It looks for {{...}}, ->listen, ->delegate, animate {...}, or vir ...
+const std::regex CHTLUnifiedScanner::CHTL_JS_REGEX(R"(\{\{[^}]*\}\}|->listen|->delegate|animate\s*\{|vir\s+\w+)");
 
 CHTLUnifiedScanner::CHTLUnifiedScanner(const std::string& source) : source_(source) {}
 
 std::vector<CodeChunk> CHTLUnifiedScanner::scan() {
-    size_t pos = 0;
-    size_t last_pos = 0;
-    int brace_level = 0;
-
-    while (pos < source_.length()) {
-        if (source_[pos] == '{') {
-            brace_level++;
-        } else if (source_[pos] == '}') {
-            brace_level--;
-        } else if (brace_level == 1 && source_.substr(pos, 6) == "script") {
-            // Check if it's a standalone word
-            if ((pos + 6 == source_.length() || isspace(source_[pos + 6]) || source_[pos+6] == '{')) {
-                size_t script_keyword_end = pos + 6;
-                size_t brace_open_pos = source_.find('{', script_keyword_end);
-
-                if (brace_open_pos != std::string::npos) {
-                    // Check for only whitespace between keyword and brace
-                    bool only_whitespace = true;
-                    for (size_t i = script_keyword_end; i < brace_open_pos; ++i) {
-                        if (!isspace(source_[i])) {
-                            only_whitespace = false;
-                            break;
-                        }
-                    }
-
-                    if (only_whitespace) {
-                        // We found a script block. Finalize the CHTL chunk before it.
-                        if (pos > last_pos) {
-                            chunks_.push_back({ChunkType::CHTL, source_.substr(last_pos, pos - last_pos)});
-                        }
-
-                        // Find matching closing brace
-                        int script_brace_level = 1;
-                        size_t script_end_pos = brace_open_pos + 1;
-                        while(script_end_pos < source_.length() && script_brace_level > 0) {
-                            if(source_[script_end_pos] == '{') script_brace_level++;
-                            if(source_[script_end_pos] == '}') script_brace_level--;
-                            script_end_pos++;
-                        }
-
-                        if (script_brace_level == 0) {
-                            // Extract content and add as ChtlJs chunk
-                            std::string content = source_.substr(brace_open_pos + 1, script_end_pos - brace_open_pos - 2);
-                            chunks_.push_back({ChunkType::ChtlJs, content});
-                            pos = script_end_pos;
-                            last_pos = pos;
-                            continue;
-                        }
-                    }
-                }
-            }
-        }
-        pos++;
-    }
-
-    if (last_pos < source_.length()) {
-        chunks_.push_back({ChunkType::CHTL, source_.substr(last_pos)});
-    }
-
+    findAndProcessTags();
     return chunks_;
 }
 
-// Private methods will be implemented in future steps.
-void CHTLUnifiedScanner::process() {}
-void CHTLUnifiedScanner::handleScriptTag() {}
-void CHTLUnifiedScanner::handleStyleTag() {}
-void CHTLUnifiedScanner::handleChtlBlock() {}
+const std::map<std::string, std::string>& CHTLUnifiedScanner::getPlaceholders() const {
+    return placeholder_map_;
+}
+
+size_t CHTLUnifiedScanner::findMatchingBrace(size_t start_pos) {
+    int brace_level = 1;
+    size_t current_pos = start_pos;
+    while (current_pos < source_.length() && brace_level > 0) {
+        if (source_[current_pos] == '{') brace_level++;
+        if (source_[current_pos] == '}') brace_level--;
+        current_pos++;
+    }
+    return brace_level == 0 ? current_pos : std::string::npos;
+}
+
+void CHTLUnifiedScanner::findAndProcessTags() {
+    auto it = std::sregex_iterator(source_.begin(), source_.end(), TAG_REGEX);
+    auto end = std::sregex_iterator();
+    size_t last_pos = 0;
+
+    for (; it != end; ++it) {
+        std::smatch match = *it;
+        size_t tag_start_pos = match.position();
+
+        size_t brace_open_pos = source_.find('{', tag_start_pos);
+        if (brace_open_pos == std::string::npos) continue;
+
+        size_t brace_close_pos = findMatchingBrace(brace_open_pos + 1);
+
+        if (brace_close_pos != std::string::npos) {
+            processChtlContent(last_pos, tag_start_pos);
+
+            std::string block_content = source_.substr(brace_open_pos + 1, brace_close_pos - brace_open_pos - 2);
+
+            if (match.str(1) == "script") {
+                processScriptBlock(block_content);
+            } else if (match.str(1) == "style") {
+                processStyleBlock(block_content);
+            }
+
+            last_pos = brace_close_pos;
+        }
+    }
+
+    processChtlContent(last_pos, source_.length());
+}
+
+void CHTLUnifiedScanner::processChtlContent(size_t from, size_t to) {
+    if (from < to) {
+        std::string content = source_.substr(from, to - from);
+        if (!content.empty() && content.find_first_not_of(" \t\n\r") != std::string::npos) {
+            chunks_.push_back({ChunkType::CHTL, content});
+        }
+    }
+}
+
+void CHTLUnifiedScanner::processScriptBlock(const std::string& block_content) {
+    if (block_content.empty()) {
+        return;
+    }
+
+    auto it = std::sregex_iterator(block_content.begin(), block_content.end(), CHTL_JS_REGEX);
+    auto end = std::sregex_iterator();
+
+    std::string processed_content;
+    size_t last_pos = 0;
+
+    for (; it != end; ++it) {
+        std::smatch match = *it;
+        size_t match_pos = match.position();
+        size_t match_len = match.length();
+
+        // The content between the last match and this one is pure JS
+        if (match_pos > last_pos) {
+            std::string js_part = block_content.substr(last_pos, match_pos - last_pos);
+            std::string placeholder = "_JS_CODE_PLACEHOLDER_" + std::to_string(placeholder_id_++) + "_";
+            placeholder_map_[placeholder] = js_part;
+            processed_content += placeholder;
+        }
+
+        // Add the CHTL JS part itself
+        processed_content += match.str();
+        last_pos = match_pos + match_len;
+    }
+
+    // Handle any remaining pure JS at the end of the block
+    if (last_pos < block_content.length()) {
+        std::string js_part = block_content.substr(last_pos);
+        std::string placeholder = "_JS_CODE_PLACEHOLDER_" + std::to_string(placeholder_id_++) + "_";
+        placeholder_map_[placeholder] = js_part;
+        processed_content += placeholder;
+    }
+
+    if (!processed_content.empty()) {
+        chunks_.push_back({ChunkType::CHTL_JS, processed_content});
+    }
+}
+
+void CHTLUnifiedScanner::processStyleBlock(const std::string& block_content) {
+    // This is a global style block, so its content is pure CSS.
+    if (!block_content.empty()) {
+        chunks_.push_back({ChunkType::CSS, block_content});
+    }
+}
 
 } // namespace CHTL

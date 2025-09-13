@@ -1,0 +1,34 @@
+// This is a test file for the CHTLUnifiedScanner
+
+div {
+    text: "This is the CHTL part.";
+}
+
+style {
+    body {
+        background-color: #eee;
+    }
+}
+
+script {
+    // This is a script block with mixed JS and CHTL JS
+
+    const element = {{.my-element}};
+
+    function greet(name) {
+        console.log("Hello, " + name);
+    }
+
+    element->listen {
+        click: () => {
+            greet("World");
+            element.textContent = "Clicked!";
+        }
+    };
+
+    const v = vir test { a: 1 };
+}
+
+footer {
+    text: "End of CHTL file.";
+}

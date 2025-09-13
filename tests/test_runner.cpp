@@ -6,6 +6,8 @@
 #include <sstream>
 #include <stdexcept>
 #include <cstdlib>
+#include <cassert>
+#include "../src/Scanner/CHTLUnifiedScanner.h"
 
 namespace fs = std::filesystem;
 
@@ -28,8 +30,59 @@ std::string exec(const std::string& cmd_str) {
     return result;
 }
 
+void testScanner() {
+    std::cout << "Running CHTLUnifiedScanner Test..." << std::endl;
+
+    fs::path test_file_path("tests/scanner_test.chtl");
+    if (!fs::exists(test_file_path)) {
+        std::cerr << "FATAL: Scanner test file not found at " << test_file_path << std::endl;
+        exit(1);
+    }
+
+    std::ifstream file(test_file_path);
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    std::string source = buffer.str();
+
+    CHTL::CHTLUnifiedScanner scanner(source);
+    std::vector<CHTL::CodeChunk> chunks = scanner.scan();
+    auto placeholders = scanner.getPlaceholders();
+
+    // Assertions
+    assert(chunks.size() == 4);
+
+    // Chunk 1: CHTL
+    assert(chunks[0].type == CHTL::ChunkType::CHTL);
+    assert(chunks[0].content.find("div {") != std::string::npos);
+
+    // Chunk 2: CSS
+    assert(chunks[1].type == CHTL::ChunkType::CSS);
+    assert(chunks[1].content.find("background-color") != std::string::npos);
+
+    // Chunk 3: CHTL_JS (with placeholders)
+    assert(chunks[2].type == CHTL::ChunkType::CHTL_JS);
+    assert(chunks[2].content.find("_JS_CODE_PLACEHOLDER_0_") != std::string::npos);
+    assert(chunks[2].content.find("{{.my-element}}") != std::string::npos);
+    assert(chunks[2].content.find("->listen") != std::string::npos);
+    assert(chunks[2].content.find("vir test") != std::string::npos);
+
+    // Chunk 4: CHTL
+    assert(chunks[3].type == CHTL::ChunkType::CHTL);
+    assert(chunks[3].content.find("footer {") != std::string::npos);
+
+    // Check placeholders
+    assert(placeholders.size() == 4);
+    assert(placeholders.at("_JS_CODE_PLACEHOLDER_0_").find("const element = ") != std::string::npos);
+    assert(placeholders.at("_JS_CODE_PLACEHOLDER_1_").find("function greet") != std::string::npos);
+
+    std::cout << "CHTLUnifiedScanner Test PASSED" << std::endl;
+}
+
+
 int main() {
-    std::cout << "Running CHTL Snapshot Tester..." << std::endl;
+    testScanner();
+
+    std::cout << "\nRunning CHTL Snapshot Tester..." << std::endl;
     int failed_tests = 0;
 
     fs::path tests_dir("tests");
