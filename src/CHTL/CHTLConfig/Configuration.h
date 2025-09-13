@@ -3,10 +3,14 @@
 
 #include <string>
 #include <cstddef> // For size_t
+#include <map>
+#include "../CHTLLexer/Token.h"
 
 namespace CHTL {
 
 struct Configuration {
+    std::map<TokenType, std::string> keyword_map;
+
     // Default values as specified or inferred from CHTL.md
     size_t INDEX_INITIAL_COUNT = 0;
     bool DEBUG_MODE = false;

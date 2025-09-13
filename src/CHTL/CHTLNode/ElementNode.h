@@ -3,6 +3,7 @@
 
 #include "BaseNode.h"
 #include "AttributeNode.h"
+#include "ConstraintNode.h"
 #include <vector>
 #include <string>
 #include <memory>
@@ -24,6 +25,9 @@ public:
         for (const auto& child : this->children_) {
             new_node->children_.push_back(child->clone());
         }
+        for (const auto& constraint : this->constraints_) {
+            new_node->constraints_.push_back(std::unique_ptr<ConstraintNode>(static_cast<ConstraintNode*>(constraint->clone().release())));
+        }
         new_node->computed_styles_ = this->computed_styles_;
         return new_node;
     }
@@ -31,6 +35,7 @@ public:
     std::string tagName_;
     std::vector<std::unique_ptr<AttributeNode>> attributes_;
     std::vector<std::unique_ptr<Node>> children_;
+    std::vector<std::unique_ptr<ConstraintNode>> constraints_;
     std::map<std::string, std::string> computed_styles_;
 };
 

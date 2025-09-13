@@ -2,6 +2,7 @@
 #define CHTL_CSS_RULE_NODE_H
 
 #include "BaseNode.h"
+#include "ExpressionNode.h"
 #include <string>
 #include <vector>
 #include <utility>
@@ -17,7 +18,13 @@ public:
 
     std::unique_ptr<Node> clone() const override {
         auto new_node = std::make_unique<CssRuleNode>(selector_);
-        new_node->properties_ = this->properties_; // Deep copy of vector of pairs of string and vector
+        for (const auto& prop_pair : this->properties_) {
+            std::vector<PropertyValue> new_values;
+            for (const auto& value : prop_pair.second) {
+                new_values.push_back(std::visit(PropertyValueCloner{}, value));
+            }
+            new_node->properties_.emplace_back(prop_pair.first, std::move(new_values));
+        }
         return new_node;
     }
 

@@ -21,6 +21,8 @@ enum class NodeType {
     StyleBlock,
     CssRule,
     PropertyReference,
+    Expression,
+    Constraint,
     ScriptBlock,
     Template,
     Custom,

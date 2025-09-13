@@ -4,6 +4,9 @@
 #include <stdexcept>
 #include <unordered_set>
 #include "../CHTLNode/PropertyReferenceNode.h"
+#include "CHTL/CHTLNode/ExpressionNode.h"
+#include "CHTL/CHTLNode/ConstraintNode.h"
+#include <algorithm>
 
 namespace CHTL {
 
@@ -158,7 +161,43 @@ std::unique_ptr<OriginNode> CHTLParser::parseOriginBlock() {
 
 void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes) {
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        advance();
+        if (match({TokenType::Delete})) {
+            const Token& name = consume(TokenType::Identifier, "Expected element name after 'delete'.");
+            size_t index = 0;
+            bool has_index = false;
+
+            if (match({TokenType::OpenBracket})) {
+                const Token& index_token = consume(TokenType::Number, "Expected index number in brackets.");
+                consume(TokenType::CloseBracket, "Expected ']' after index.");
+                index = std::stoul(index_token.lexeme);
+                has_index = true;
+            }
+
+            size_t count = 0;
+            target_nodes.erase(std::remove_if(target_nodes.begin(), target_nodes.end(),
+                [&](const std::unique_ptr<Node>& node) {
+                    if (auto element = dynamic_cast<ElementNode*>(node.get())) {
+                        if (element->tagName_ == name.lexeme) {
+                            if (has_index) {
+                                if (count == index) {
+                                    count++;
+                                    return true;
+                                }
+                                count++;
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                }), target_nodes.end());
+
+            consume(TokenType::Semicolon, "Expected ';' after delete statement.");
+        }
+        else {
+            advance();
+        }
     }
 }
 
@@ -345,19 +384,27 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
                     const auto& prop_value = prop.second;
                     if (prop_value.empty()) {
                         if (provided_values.count(prop_name)) {
-                            styleNode->inline_properties_.emplace_back(prop_name, provided_values.at(prop_name));
+                            styleNode->inline_properties_.emplace_back(prop_name, std::move(provided_values.at(prop_name)));
                         } else {
                             throw std::runtime_error("Value for placeholder '" + prop_name + "' not provided for '" + prop_name + "'.");
                         }
                     } else {
-                        styleNode->inline_properties_.push_back(prop);
+                        std::vector<PropertyValue> cloned_values;
+                        for(const auto& v : prop_value) {
+                            cloned_values.push_back(std::visit(PropertyValueCloner{}, v));
+                        }
+                        styleNode->inline_properties_.emplace_back(prop_name, std::move(cloned_values));
                     }
                 }
 
             } else {
                 consume(TokenType::Semicolon, "Expected ';' after template usage.");
                 for (const auto& prop : templateNode->properties_) {
-                    styleNode->inline_properties_.push_back(prop);
+                    std::vector<PropertyValue> cloned_values;
+                    for(const auto& v : prop.second) {
+                        cloned_values.push_back(std::visit(PropertyValueCloner{}, v));
+                    }
+                    styleNode->inline_properties_.emplace_back(prop.first, std::move(cloned_values));
                 }
             }
         }
@@ -399,21 +446,153 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
 }
 
 std::vector<PropertyValue> CHTLParser::parsePropertyValue() {
+    return parseConditionalExpression();
+}
+
+std::vector<PropertyValue> CHTLParser::parseConditionalExpression() {
+    std::vector<PropertyValue> condition = parseLogicalOr();
+
+    if (match({TokenType::QuestionMark})) {
+        std::vector<PropertyValue> true_branch = parseExpression();
+        consume(TokenType::Colon, "Expect ':' after true branch of conditional expression.");
+        std::vector<PropertyValue> false_branch = parseExpression();
+
+        auto node = std::make_unique<ConditionalNode>();
+        node->condition = std::move(condition);
+        node->true_branch = std::move(true_branch);
+        node->false_branch = std::move(false_branch);
+
+        std::vector<PropertyValue> result;
+        result.emplace_back(std::move(node));
+        return result;
+    }
+
+    return condition;
+}
+
+std::vector<PropertyValue> CHTLParser::parseLogicalOr() {
+    std::vector<PropertyValue> left = parseLogicalAnd();
+
+    while (match({TokenType::DoublePipe})) {
+        Token op = previous();
+        std::vector<PropertyValue> right = parseLogicalAnd();
+
+        auto node = std::make_unique<ArithmeticNode>();
+        node->left = std::move(left);
+        node->op = op;
+        node->right = std::move(right);
+
+        left.clear();
+        left.emplace_back(std::move(node));
+    }
+
+    return left;
+}
+
+std::vector<PropertyValue> CHTLParser::parseLogicalAnd() {
+    std::vector<PropertyValue> left = parseComparison();
+
+    while (match({TokenType::DoubleAmpersand})) {
+        Token op = previous();
+        std::vector<PropertyValue> right = parseComparison();
+
+        auto node = std::make_unique<ArithmeticNode>();
+        node->left = std::move(left);
+        node->op = op;
+        node->right = std::move(right);
+
+        left.clear();
+        left.emplace_back(std::move(node));
+    }
+
+    return left;
+}
+
+std::vector<PropertyValue> CHTLParser::parseComparison() {
+    std::vector<PropertyValue> left = parseTerm();
+
+    while (match({TokenType::GreaterThan, TokenType::LessThan})) {
+        Token op = previous();
+        std::vector<PropertyValue> right = parseTerm();
+
+        auto node = std::make_unique<ArithmeticNode>();
+        node->left = std::move(left);
+        node->op = op;
+        node->right = std::move(right);
+
+        left.clear();
+        left.emplace_back(std::move(node));
+    }
+
+    return left;
+}
+
+std::vector<PropertyValue> CHTLParser::parseTerm() {
+    std::vector<PropertyValue> left = parseFactor();
+
+    while (match({TokenType::Plus, TokenType::Minus})) {
+        Token op = previous();
+        std::vector<PropertyValue> right = parseFactor();
+
+        auto node = std::make_unique<ArithmeticNode>();
+        node->left = std::move(left);
+        node->op = op;
+        node->right = std::move(right);
+
+        left.clear();
+        left.emplace_back(std::move(node));
+    }
+
+    return left;
+}
+
+std::vector<PropertyValue> CHTLParser::parseFactor() {
+    std::vector<PropertyValue> left = parsePrimary();
+
+    while (match({TokenType::Asterisk, TokenType::Slash, TokenType::Percent, TokenType::DoubleAsterisk})) {
+        Token op = previous();
+        std::vector<PropertyValue> right = parsePrimary();
+
+        auto node = std::make_unique<ArithmeticNode>();
+        node->left = std::move(left);
+        node->op = op;
+        node->right = std::move(right);
+
+        left.clear();
+        left.emplace_back(std::move(node));
+    }
+
+    return left;
+}
+
+std::vector<PropertyValue> CHTLParser::parsePrimary() {
     std::vector<PropertyValue> parts;
-    while (peek().type != TokenType::Semicolon && !isAtEnd()) {
+
+    if (match({TokenType::OpenParen})) {
+        parts = parseExpression();
+        consume(TokenType::CloseParen, "Expect ')' after expression.");
+        return parts;
+    }
+
+    while (peek().type != TokenType::Semicolon && peek().type != TokenType::Plus &&
+           peek().type != TokenType::Minus && peek().type != TokenType::Asterisk &&
+           peek().type != TokenType::Slash && peek().type != TokenType::Percent &&
+           peek().type != TokenType::DoubleAsterisk && peek().type != TokenType::QuestionMark &&
+           peek().type != TokenType::Colon && peek().type != TokenType::CloseParen && !isAtEnd())
+    {
         Token first = peek();
         Token second = peekNext();
 
         if (first.type == TokenType::Dot && second.type == TokenType::Identifier && tokens_[current_ + 2].type == TokenType::Dot) {
-            advance(); // consume .
-            Token class_name = advance(); // consume box
+            advance();
+            Token class_name = advance();
             Token selector = {TokenType::Identifier, "." + class_name.lexeme, first.line, first.column};
-            advance(); // consume .
+            advance();
             Token prop = consume(TokenType::Identifier, "Expected property name after '.'.");
             parts.emplace_back(PropertyReferenceNode(selector, prop));
         } else if (first.type == TokenType::Identifier && second.type == TokenType::Dot) {
             Token selector = advance();
-            advance(); // consume .
+            advance();
             Token prop = consume(TokenType::Identifier, "Expected property name after '.'.");
             parts.emplace_back(PropertyReferenceNode(selector, prop));
         } else if (first.type == TokenType::Identifier && second.type == TokenType::OpenParen) {
@@ -426,23 +605,28 @@ std::vector<PropertyValue> CHTLParser::parsePropertyValue() {
                 const auto& templateNode = context_->var_templates_.at(groupName.lexeme);
                 if (templateNode->variables_.count(varName.lexeme)) {
                     const auto& substituted_parts = templateNode->variables_.at(varName.lexeme);
-                    parts.insert(parts.end(), substituted_parts.begin(), substituted_parts.end());
+                    for (const auto& part : substituted_parts) {
+                        parts.push_back(std::visit(PropertyValueCloner{}, part));
+                    }
                 } else {
                     throw std::runtime_error("Undefined variable '" + varName.lexeme + "' in group '" + groupName.lexeme + "'.");
                 }
             } else {
                 throw std::runtime_error("Use of undefined variable group '" + groupName.lexeme + "'.");
             }
-        }
-        else {
+        } else {
             parts.emplace_back(advance());
         }
     }
 
     if (parts.empty()) {
-        throw std::runtime_error("Expected CSS property value.");
+        throw std::runtime_error("Expected expression.");
     }
     return parts;
+}
+
+std::vector<PropertyValue> CHTLParser::parseExpression() {
+    return parseConditionalExpression();
 }
 
 const Token& CHTLParser::peekNext() const {

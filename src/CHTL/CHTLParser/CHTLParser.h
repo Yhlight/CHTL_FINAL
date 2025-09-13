@@ -37,6 +37,14 @@ private:
     void parseElementBody(ElementNode& element);
     void parseAttributes(ElementNode& element);
     std::vector<PropertyValue> parsePropertyValue();
+    std::vector<PropertyValue> parseConditionalExpression();
+    std::vector<PropertyValue> parseLogicalOr();
+    std::vector<PropertyValue> parseLogicalAnd();
+    std::vector<PropertyValue> parseComparison();
+    std::vector<PropertyValue> parseTerm();
+    std::vector<PropertyValue> parseFactor();
+    std::vector<PropertyValue> parsePrimary();
+    std::vector<PropertyValue> parseExpression();
     std::unique_ptr<TextNode> parseText();
     std::unique_ptr<StyleBlockNode> parseStyleBlock();
     std::unique_ptr<CommentNode> parseGeneratorComment();
