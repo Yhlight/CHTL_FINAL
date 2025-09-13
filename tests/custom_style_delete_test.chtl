@@ -1,0 +1,38 @@
+// Test file for delete keyword in custom styles
+
+[Template] @Style BaseStyle {
+    color: "blue";
+    font-size: 16px;
+    border: "1px solid red";
+}
+
+[Custom] @Style CustomStyle {
+    @Style BaseStyle;
+    font-weight: "bold";
+    // This should override the base
+    color: "green";
+}
+
+// --- Usage ---
+
+// Test deleting a property
+div {
+    id: "delete-prop";
+    style {
+        @Style CustomStyle {
+            delete font-size;
+        }
+    }
+    // Expected style: color: green; border: 1px solid red; font-weight: bold;
+}
+
+// Test deleting an inherited template
+div {
+    id: "delete-template";
+    style {
+        @Style CustomStyle {
+            delete @Style BaseStyle;
+        }
+    }
+    // Expected style: color: green; font-weight: bold; (border and font-size from BaseStyle should be gone)
+}

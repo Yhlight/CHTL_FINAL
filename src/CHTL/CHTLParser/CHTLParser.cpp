@@ -109,10 +109,22 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
             throw std::runtime_error("Use of undefined element template '" + qualified_name + "'.");
         }
 
-        const auto& templateNode = context_->element_templates_.at(qualified_name);
-        for (const auto& child : templateNode->children_) {
-            nodes.push_back(child->clone());
-        }
+        // Helper function to recursively collect children from element templates
+        std::function<void(const std::string&, std::vector<std::unique_ptr<Node>>&)> collectChildren =
+            [&](const std::string& tpl_name, std::vector<std::unique_ptr<Node>>& collected_nodes) {
+            if (!context_->element_templates_.count(tpl_name)) return;
+            const auto& tpl = context_->element_templates_.at(tpl_name);
+            // Inherit from base templates first
+            for (const auto& inherited_name : tpl->inherits_) {
+                collectChildren(resolveUnqualifiedName(inherited_name, TemplateType::Element), collected_nodes);
+            }
+            // Add children from the current template
+            for (const auto& child : tpl->children_) {
+                collected_nodes.push_back(child->clone());
+            }
+        };
+
+        collectChildren(qualified_name, nodes);
 
         if (match({TokenType::OpenBrace})) {
             applySpecializations(nodes);
@@ -236,7 +248,14 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
                  element->children_.insert(element->children_.end(), std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
             }
             else {
-                 const Token& tagName = consume(TokenType::Identifier, "Expected tag name for insertion target.");
+                std::string selector_tag;
+                std::string selector_id;
+
+                selector_tag = consume(TokenType::Identifier, "Expected tag name for insertion target.").lexeme;
+                if(match({TokenType::Hash})) {
+                    selector_id = consume(TokenType::Identifier, "Expected id name after '#'").lexeme;
+                }
+
                 int tag_index = -1;
                 if (match({TokenType::OpenBracket})) {
                     tag_index = std::stoi(consume(TokenType::Number, "Expected index in brackets.").lexeme);
@@ -255,7 +274,18 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
                 while(it != element->children_.end()) {
                     if ((*it)->getType() == NodeType::Element) {
                         auto* child_element = static_cast<ElementNode*>((*it).get());
-                        if (child_element->tagName_ == tagName.lexeme) {
+                        bool tag_match = child_element->tagName_ == selector_tag;
+                        bool id_match = selector_id.empty();
+                        if (!selector_id.empty()) {
+                            for(const auto& attr : child_element->attributes_) {
+                                if (attr->key_ == "id" && attr->value_ == selector_id) {
+                                    id_match = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (tag_match && id_match) {
                             if (tag_index == -1 || current_tag_count == tag_index) {
                                 if (position_token.type == TokenType::Before) {
                                     element->children_.insert(it, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
@@ -263,7 +293,7 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
                                     it = element->children_.insert(it + 1, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
                                 } else if (position_token.type == TokenType::Replace) {
                                     it = element->children_.erase(it);
-                                    element->children_.insert(it, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+                                    it = element->children_.insert(it, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
                                 }
                                 found = true;
                                 break;
@@ -498,10 +528,15 @@ void CHTLParser::parseTemplateDefinition(bool is_custom) {
                     std::unordered_set<std::string> deleted_properties;
                     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
                         if (match({TokenType::Delete})) {
-                            do {
-                                deleted_properties.insert(consume(TokenType::Identifier, "Expected property name after 'delete'.").lexeme);
-                            } while (match({TokenType::Comma}));
-                            consume(TokenType::Semicolon, "Expected ';' after delete statement.");
+                            if (match({TokenType::AtStyle})) {
+                                templateNode->deleted_inherits_.insert(consume(TokenType::Identifier, "Expected template name after '@Style'.").lexeme);
+                                consume(TokenType::Semicolon, "Expected ';' after delete statement.");
+                            } else {
+                                do {
+                                    deleted_properties.insert(consume(TokenType::Identifier, "Expected property name after 'delete'.").lexeme);
+                                } while (match({TokenType::Comma}));
+                                consume(TokenType::Semicolon, "Expected ';' after delete statement.");
+                            }
                         } else {
                             throw std::runtime_error("Only 'delete' is allowed in definition-time template specialization.");
                         }
@@ -536,9 +571,15 @@ void CHTLParser::parseTemplateDefinition(bool is_custom) {
 
         consume(TokenType::OpenBrace, "Expected '{' after template name.");
         while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-            auto nodes = parseDeclaration();
-            for (auto& node : nodes) {
-                templateNode->children_.push_back(std::move(node));
+            if (match({TokenType::AtElement})) {
+                const Token& inheritedName = consume(TokenType::Identifier, "Expected inherited template name.");
+                consume(TokenType::Semicolon, "Expected ';' after inherited element template.");
+                templateNode->inherits_.push_back(inheritedName.lexeme);
+            } else {
+                auto nodes = parseDeclaration();
+                for (auto& node : nodes) {
+                    templateNode->children_.push_back(std::move(node));
+                }
             }
         }
         consume(TokenType::CloseBrace, "Expected '}' after template body.");
@@ -550,11 +591,17 @@ void CHTLParser::parseTemplateDefinition(bool is_custom) {
 
         consume(TokenType::OpenBrace, "Expected '{' after template name.");
         while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-            const Token& key = consume(TokenType::Identifier, "Expected variable name in template.");
-            consumeColonOrEquals();
-            auto value_parts = parsePropertyValue();
-            consume(TokenType::Semicolon, "Expected ';' after variable value.");
-            templateNode->variables_[key.lexeme] = std::move(value_parts);
+            if (match({TokenType::AtVar})) {
+                const Token& inheritedName = consume(TokenType::Identifier, "Expected inherited template name.");
+                consume(TokenType::Semicolon, "Expected ';' after inherited var template.");
+                templateNode->inherits_.push_back(inheritedName.lexeme);
+            } else {
+                const Token& key = consume(TokenType::Identifier, "Expected variable name in template.");
+                consumeColonOrEquals();
+                auto value_parts = parsePropertyValue();
+                consume(TokenType::Semicolon, "Expected ';' after variable value.");
+                templateNode->variables_[key.lexeme] = std::move(value_parts);
+            }
         }
         consume(TokenType::CloseBrace, "Expected '}' after template body.");
         context_->var_templates_[qualified_name] = templateNode;
@@ -583,10 +630,21 @@ void CHTLParser::applyStyleTemplate(
     const auto& templateNode = context_->style_templates_.at(template_name);
 
     for (const auto& inherited_name : templateNode->inherits_) {
-        if (deleted_templates.count(inherited_name)) {
+        // Check for deletion from point-of-use OR from template definition
+        if (deleted_templates.count(inherited_name) || templateNode->deleted_inherits_.count(inherited_name)) {
             continue;
         }
-        applyStyleTemplate(styleNode, inherited_name, provided_values, deleted_properties, deleted_templates, visited_templates);
+
+        // Pass down the specializations defined in the current template if they exist
+        const auto& definition_time_deleted_props = templateNode->inheritance_specializations_.count(inherited_name)
+            ? templateNode->inheritance_specializations_.at(inherited_name)
+            : std::unordered_set<std::string>();
+
+        // Combine definition-time and use-time deleted properties
+        std::unordered_set<std::string> combined_deleted_props = deleted_properties;
+        combined_deleted_props.insert(definition_time_deleted_props.begin(), definition_time_deleted_props.end());
+
+        applyStyleTemplate(styleNode, inherited_name, provided_values, combined_deleted_props, deleted_templates, visited_templates);
     }
 
     for (const auto& prop : templateNode->properties_) {
@@ -727,28 +785,43 @@ std::vector<PropertyValue> CHTLParser::parsePropertyValue() {
             Token prop = consume(TokenType::Identifier, "Expected property name after '.'.");
             parts.emplace_back(PropertyReferenceNode(selector, prop));
         } else if (first.type == TokenType::Identifier && second.type == TokenType::OpenParen) {
-            // This could be a variable group like `MyVars(var_name)`
-            if (tokens_[current_ + 2].type == TokenType::Identifier && tokens_[current_ + 3].type == TokenType::CloseParen) {
+            // This could be a variable group like `MyVars(var_name)` or `MyVars(var_name = value)`
+            if (tokens_[current_ + 2].type == TokenType::Identifier) {
                 const Token& groupNameToken = advance();
                 consume(TokenType::OpenParen, "Expected '(' after variable group name.");
                 const Token& varNameToken = consume(TokenType::Identifier, "Expected variable name inside parentheses.");
-                consume(TokenType::CloseParen, "Expected ')' after variable name.");
 
-                // Here we resolve the variable group name
-                std::string qualified_group_name = resolveUnqualifiedName(groupNameToken.lexeme, TemplateType::Var);
-
-                if (context_->var_templates_.count(qualified_group_name)) {
-                    const auto& templateNode = context_->var_templates_.at(qualified_group_name);
-                    if (templateNode->variables_.count(varNameToken.lexeme)) {
-                        const auto& substituted_parts = templateNode->variables_.at(varNameToken.lexeme);
-                        parts.insert(parts.end(), substituted_parts.begin(), substituted_parts.end());
-                    } else {
-                        throw std::runtime_error("Undefined variable '" + varNameToken.lexeme + "' in group '" + groupNameToken.lexeme + "'.");
-                    }
+                if (match({TokenType::Equals, TokenType::Colon})) {
+                    // This is a specialization: Group(Var = Value)
+                    auto specialized_parts = parsePropertyValue(); // Recursively parse the value part
+                    parts.insert(parts.end(), specialized_parts.begin(), specialized_parts.end());
                 } else {
-                    // This should not be reached if the resolver works.
-                    throw std::runtime_error("Use of undefined variable group '" + groupNameToken.lexeme + "'.");
+                    // This is a normal lookup: Group(Var)
+                    std::string qualified_group_name = resolveUnqualifiedName(groupNameToken.lexeme, TemplateType::Var);
+
+                    std::function<const std::vector<PropertyValue>*(const std::string&)> findVar =
+                        [&](const std::string& tpl_name) -> const std::vector<PropertyValue>* {
+                        if (!context_->var_templates_.count(tpl_name)) return nullptr;
+                        const auto& tpl = context_->var_templates_.at(tpl_name);
+
+                        if (tpl->variables_.count(varNameToken.lexeme)) {
+                            return &tpl->variables_.at(varNameToken.lexeme);
+                        }
+                        for (const auto& inherited_name : tpl->inherits_) {
+                            auto* result = findVar(resolveUnqualifiedName(inherited_name, TemplateType::Var));
+                            if (result) return result;
+                        }
+                        return nullptr;
+                    };
+
+                    const auto* substituted_parts = findVar(qualified_group_name);
+                    if (substituted_parts) {
+                        parts.insert(parts.end(), substituted_parts->begin(), substituted_parts->end());
+                    } else {
+                        throw std::runtime_error("Undefined variable '" + varNameToken.lexeme + "' in group '" + groupNameToken.lexeme + "' or its inherited templates.");
+                    }
                 }
+                consume(TokenType::CloseParen, "Expected ')' after variable expression.");
             } else {
                 // Not a var group, just a regular token.
                 parts.emplace_back(advance());

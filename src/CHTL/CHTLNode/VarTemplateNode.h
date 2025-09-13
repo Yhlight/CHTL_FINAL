@@ -14,6 +14,7 @@ public:
     explicit VarTemplateNode(const std::string& name) : name_(name) {}
 
     std::string name_;
+    std::vector<std::string> inherits_;
     std::unordered_map<std::string, std::vector<PropertyValue>> variables_;
 };
 

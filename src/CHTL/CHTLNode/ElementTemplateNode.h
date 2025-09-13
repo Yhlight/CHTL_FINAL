@@ -14,6 +14,7 @@ public:
     explicit ElementTemplateNode(const std::string& name) : name_(name) {}
 
     std::string name_;
+    std::vector<std::string> inherits_;
     std::vector<std::unique_ptr<Node>> children_;
 };
 

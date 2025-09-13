@@ -1,0 +1,51 @@
+// Test file for basic template inheritance
+
+// Style Template Inheritance
+[Template] @Style BaseStyle {
+    color: "blue";
+    font-size: 16px;
+}
+
+[Template] @Style InheritedStyle {
+    @Style BaseStyle;
+    font-weight: "bold";
+}
+
+// Element Template Inheritance
+[Template] @Element BaseElement {
+    span { text: "Base"; }
+}
+
+[Template] @Element InheritedElement {
+    @Element BaseElement;
+    div { text: "Inherited"; }
+}
+
+// Variable Template Inheritance
+[Template] @Var BaseVars {
+    mainColor: "red";
+}
+
+[Template] @Var InheritedVars {
+    @Var BaseVars;
+    secondaryColor: "green";
+}
+
+
+// Usage
+div {
+    style {
+        @Style InheritedStyle; // Should have color, font-size, and font-weight
+    }
+}
+
+body {
+    @Element InheritedElement; // Should have a span and a div
+}
+
+footer {
+    style {
+        background-color: InheritedVars(mainColor); // Should be red
+        color: InheritedVars(secondaryColor); // Should be green
+    }
+}

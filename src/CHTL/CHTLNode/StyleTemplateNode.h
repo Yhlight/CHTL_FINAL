@@ -19,8 +19,10 @@ public:
     std::string name_;
     bool is_custom_;
     std::vector<std::string> inherits_;
-    // e.g. from "ParentTemplate" -> set of {"prop1", "prop2"}
+    // e.g. from "ParentTemplate" -> set of {"prop1", "prop2"} to delete
     std::map<std::string, std::unordered_set<std::string>> inheritance_specializations_;
+    // Set of inherited template names to delete entirely
+    std::unordered_set<std::string> deleted_inherits_;
     std::vector<std::pair<std::string, std::vector<PropertyValue>>> properties_;
 };
 

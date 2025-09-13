@@ -1,0 +1,59 @@
+// Test file for the insert keyword in custom elements
+
+[Custom] @Element BaseBox {
+    div { id: "first"; }
+    span { id: "second"; }
+    div { id: "third"; }
+}
+
+// --- Test Cases ---
+
+// Test 'at top'
+body {
+    id: "test-at-top";
+    @Element BaseBox {
+        insert at top {
+            p { text: "inserted at top"; }
+        }
+    }
+}
+
+// Test 'at bottom'
+body {
+    id: "test-at-bottom";
+    @Element BaseBox {
+        insert at bottom {
+            p { text: "inserted at bottom"; }
+        }
+    }
+}
+
+// Test 'before'
+body {
+    id: "test-before";
+    @Element BaseBox {
+        insert before span#second {
+            p { text: "inserted before second"; }
+        }
+    }
+}
+
+// Test 'after'
+body {
+    id: "test-after";
+    @Element BaseBox {
+        insert after span#second {
+            p { text: "inserted after second"; }
+        }
+    }
+}
+
+// Test 'replace'
+body {
+    id: "test-replace";
+    @Element BaseBox {
+        insert replace span#second {
+            p { text: "replaced second"; }
+        }
+    }
+}

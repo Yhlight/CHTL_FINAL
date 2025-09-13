@@ -1,0 +1,19 @@
+// Test file for variable group specialization
+
+[Template] @Var Theme {
+    mainColor: "blue";
+    secondaryColor: "white";
+}
+
+// --- Usage ---
+
+div {
+    id: "test-specialization";
+    style {
+        // This should use the specialized value 'red' instead of the default 'blue'
+        background-color: Theme(mainColor = red);
+
+        // This should use the default value 'white'
+        color: Theme(secondaryColor);
+    }
+}
