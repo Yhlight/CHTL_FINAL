@@ -39,6 +39,14 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     std::vector<std::unique_ptr<Node>> nodes;
     if (match({TokenType::Namespace})) {
         current_namespace_ = consume(TokenType::Identifier, "Expected namespace name.").lexeme;
+        if (match({TokenType::OpenBrace})) {
+            while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+                auto parsed_nodes = parseDeclaration();
+                nodes.insert(nodes.end(), std::make_move_iterator(parsed_nodes.begin()), std::make_move_iterator(parsed_nodes.end()));
+            }
+            consume(TokenType::CloseBrace, "Expected '}' to close namespace block.");
+            current_namespace_ = "";
+        }
         return nodes;
     }
     if (match({TokenType::Configuration})) {
@@ -586,6 +594,11 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
         if (match({TokenType::AtStyle})) {
             const Token& name = consume(TokenType::Identifier, "Expected template name after '@Style'.");
             std::string qualified_name = name.lexeme;
+
+            if (match({TokenType::From})) {
+                 const Token& ns = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
+                 qualified_name = ns.lexeme + "::" + name.lexeme;
+            }
 
             if (!context_->style_templates_.count(qualified_name)) {
                  throw std::runtime_error("Use of undefined style template '" + qualified_name + "'.");
