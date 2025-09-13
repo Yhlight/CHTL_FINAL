@@ -2,6 +2,7 @@
 #include "CHTLJS/CHTLJSNode/EnhancedSelectorNode.h"
 #include "CHTLJS/CHTLJSNode/ListenNode.h"
 #include "CHTLJS/CHTLJSNode/DelegateNode.h"
+#include "CHTLJS/CHTLJSNode/AnimateNode.h"
 #include <stdexcept>
 #include <sstream>
 
@@ -25,6 +26,9 @@ void CHTLJSGenerator::visit(const CHTLJSNode* node) {
             break;
         case CHTLJSNodeType::Delegate:
             visitDelegateNode(static_cast<const DelegateNode*>(node));
+            break;
+        case CHTLJSNodeType::Animate:
+            visitAnimateNode(static_cast<const AnimateNode*>(node));
             break;
         default:
             throw std::runtime_error("Unknown CHTL JS node type for generation.");
@@ -70,6 +74,70 @@ void CHTLJSGenerator::visitDelegateNode(const DelegateNode* node) {
         }
 
         output_ += "});\n";
+    }
+}
+
+void CHTLJSGenerator::visitAnimateNode(const AnimateNode* node) {
+    // 1. Generate the keyframes array
+    std::stringstream keyframes_ss;
+    keyframes_ss << "[";
+    bool first_frame = true;
+    for (const auto& kf : node->keyframes_) {
+        if (!first_frame) keyframes_ss << ", ";
+        keyframes_ss << "{ ";
+        if (kf.offset.has_value()) {
+            keyframes_ss << "offset: " << kf.offset.value() << ", ";
+        }
+        bool first_prop = true;
+        for (const auto& prop_pair : kf.properties) {
+            if (!first_prop) keyframes_ss << ", ";
+            keyframes_ss << "'" << prop_pair.first << "': '" << prop_pair.second << "'";
+            first_prop = false;
+        }
+        keyframes_ss << " }";
+        first_frame = false;
+    }
+    keyframes_ss << "]";
+
+    // 2. Generate the options object
+    std::stringstream options_ss;
+    options_ss << "{ ";
+    bool first_option = true;
+    if (node->duration_.has_value()) {
+        options_ss << "duration: " << node->duration_.value();
+        first_option = false;
+    }
+    if (node->easing_.has_value()) {
+        if (!first_option) options_ss << ", ";
+        options_ss << "easing: '" << node->easing_.value() << "'";
+        first_option = false;
+    }
+    if (node->loop_.has_value()) {
+        if (!first_option) options_ss << ", ";
+        options_ss << "iterations: " << node->loop_.value();
+        first_option = false;
+    }
+    if (node->direction_.has_value()) {
+        if (!first_option) options_ss << ", ";
+        options_ss << "direction: '" << node->direction_.value() << "'";
+        first_option = false;
+    }
+    if (node->delay_.has_value()) {
+        if (!first_option) options_ss << ", ";
+        options_ss << "delay: " << node->delay_.value();
+        first_option = false;
+    }
+    options_ss << " }";
+
+    // 3. Generate the final .animate() call on the target(s)
+    for (const auto& target : node->targets_) {
+        visit(target.get()); // generates the document.querySelector(...)
+        output_ += ".animate(" + keyframes_ss.str() + ", " + options_ss.str() + ")";
+        if (node->callback_.has_value()) {
+            output_ += ".addEventListener('finish', " + node->callback_.value() + ");\n";
+        } else {
+            output_ += ";\n";
+        }
     }
 }
 

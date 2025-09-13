@@ -19,7 +19,9 @@ enum class CHTLJSTokenType {
     CloseBracket,     // ]
     Colon,            // :
     Comma,            // ,
-    Identifier,       // selector inside braces
+    Identifier,
+    String,
+    Number,
     Dot,              // .
     Arrow,            // ->
 

@@ -10,6 +10,7 @@ enum class CHTLJSNodeType {
     EnhancedSelector,
     Listen,
     Delegate,
+    Animate,
     // Future node types will go here
 };
 

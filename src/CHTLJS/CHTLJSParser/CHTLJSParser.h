@@ -19,6 +19,7 @@ private:
     bool isAtEnd() const;
     std::unique_ptr<CHTLJSNode> parseListenBlock(std::unique_ptr<CHTLJSNode> object);
     std::unique_ptr<CHTLJSNode> parseDelegateBlock(std::unique_ptr<CHTLJSNode> object);
+    std::unique_ptr<CHTLJSNode> parseAnimateBlock();
 
     std::vector<CHTLJSToken>& tokens_;
     size_t current_ = 0;

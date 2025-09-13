@@ -61,19 +61,17 @@ void CHTLJSLexer::scanToken() {
         case '\n':
             // Ignore whitespace
             break;
+        case '\'':
+        case '"':
+            stringLiteral(c);
+            break;
         default:
             if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') {
                 identifier();
+            } else if (c >= '0' && c <= '9') {
+                number();
             } else if (c == '/' && peek() == '/') {
                 while(peek() != '\n' && !isAtEnd()) advance();
-            }
-            else {
-                // For now, assume the rest is a JS callback body
-                // This is a major simplification. A real implementation would need to parse JS properly.
-                 while (peek() != ',' && peek() != '}' && !isAtEnd()) {
-                    advance();
-                }
-                addToken(CHTLJSTokenType::Identifier);
             }
             break;
     }
@@ -92,9 +90,36 @@ void CHTLJSLexer::identifier() {
     }
 }
 
+void CHTLJSLexer::number() {
+    while (peek() >= '0' && peek() <= '9') advance();
+    if (peek() == '.' && (peekNext() >= '0' && peekNext() <= '9')) {
+        advance();
+        while (peek() >= '0' && peek() <= '9') advance();
+    }
+    addToken(CHTLJSTokenType::Number);
+}
+
+void CHTLJSLexer::stringLiteral(char quote) {
+    while (peek() != quote && !isAtEnd()) {
+        if (peek() == '\n') line_++;
+        advance();
+    }
+    if (isAtEnd()) {
+        throw std::runtime_error("Unterminated string literal.");
+    }
+    advance(); // The closing quote
+    std::string value = source_.substr(start_ + 1, current_ - start_ - 2);
+    tokens_.push_back({CHTLJSTokenType::String, value, line_, 0});
+}
+
 char CHTLJSLexer::peek() const {
     if (isAtEnd()) return '\0';
     return source_[current_];
+}
+
+char CHTLJSLexer::peekNext() const {
+    if (current_ + 1 >= source_.length()) return '\0';
+    return source_[current_ + 1];
 }
 
 char CHTLJSLexer::advance() {

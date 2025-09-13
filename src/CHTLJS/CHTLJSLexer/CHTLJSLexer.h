@@ -16,8 +16,11 @@ public:
 private:
     void scanToken();
     void identifier();
+    void number();
+    void stringLiteral(char quote);
 
     char peek() const;
+    char peekNext() const;
     char advance();
     bool isAtEnd() const;
     void addToken(CHTLJSTokenType type);
