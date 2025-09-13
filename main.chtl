@@ -1,0 +1,12 @@
+[Import] @Chtl from "my_module.chtl";
+
+html {
+    head {
+        title {
+            text: "Import Test";
+        }
+    }
+    body {
+        @Element MyElement from my_module;
+    }
+}

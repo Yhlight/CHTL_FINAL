@@ -1,0 +1,19 @@
+[Namespace] my_module;
+
+[Template] @Var MyVars {
+    brand-color: "orange";
+}
+
+[Template] @Style MyStyle {
+    color: MyVars(brand-color);
+    font-size: 24px;
+}
+
+[Template] @Element MyElement {
+    h1 {
+        style {
+            @Style MyStyle;
+        }
+        text: "Hello from a module!";
+    }
+}

@@ -9,11 +9,6 @@ namespace CHTL {
 
 CHTLParser::CHTLParser(const std::string& source, std::vector<Token>& tokens, CHTLLoader& loader, const std::string& initial_path, std::shared_ptr<ParserContext> context)
     : source_(source), tokens_(tokens), loader_(loader), current_path_(initial_path), context_(context) {
-    if (!tokens_.empty() && tokens_[0].type == TokenType::Namespace) {
-        if (tokens_.size() > 1 && tokens_[1].type == TokenType::Identifier) {
-            current_namespace_ = tokens_[1].lexeme;
-        }
-    }
 }
 
 std::unique_ptr<RootNode> CHTLParser::parse() {
@@ -37,6 +32,9 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     std::vector<std::unique_ptr<Node>> nodes;
     if (match({TokenType::Namespace})) {
         current_namespace_ = consume(TokenType::Identifier, "Expected namespace name.").lexeme;
+        context_->namespace_ = current_namespace_;
+        // Also expect a semicolon, as per the spec image
+        consume(TokenType::Semicolon, "Expected ';' after namespace declaration.");
         return nodes;
     }
     if (match({TokenType::Configuration})) {
@@ -50,21 +48,31 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
         consume(TokenType::Semicolon, "Expected ';' after import statement.");
         std::string import_path = pathToken.lexeme;
         if(auto content = loader_.loadFile(import_path, current_path_)) {
-            std::filesystem::path p(import_path);
-            std::string default_namespace = p.stem().string();
+            // Create a new, separate context for the imported file
+            auto imported_context = std::make_shared<ParserContext>();
+
             std::string imported_file_canonical_path;
             try {
                 imported_file_canonical_path = std::filesystem::canonical(std::filesystem::path(current_path_).parent_path() / import_path).string();
             } catch (const std::filesystem::filesystem_error& e) {
                  throw std::runtime_error("Could not find imported file: " + import_path);
             }
+
             CHTLLexer imported_lexer(*content);
             std::vector<Token> imported_tokens = imported_lexer.scanTokens();
-            CHTLParser imported_parser(*content, imported_tokens, loader_, imported_file_canonical_path, context_);
-            if (imported_parser.current_namespace_.empty()) {
-                imported_parser.current_namespace_ = default_namespace;
-            }
+            // The new parser uses the new context
+            CHTLParser imported_parser(*content, imported_tokens, loader_, imported_file_canonical_path, imported_context);
             imported_parser.parse();
+
+            // Determine the namespace
+            std::string import_namespace = imported_context->namespace_;
+            if (import_namespace.empty()) {
+                std::filesystem::path p(import_path);
+                import_namespace = p.stem().string();
+            }
+
+            // Store the populated context in the main context's namespace map
+            context_->namespaces_[import_namespace] = imported_context;
         }
         return nodes;
     }
@@ -75,15 +83,25 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     }
     if (match({TokenType::AtElement})) {
         const Token& name = consume(TokenType::Identifier, "Expected template name after '@Element'.");
-        std::string qualified_name = name.lexeme;
+        std::shared_ptr<const ElementTemplateNode> templateNode;
+
         if (match({TokenType::From})) {
-            const Token& ns = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
-            qualified_name = ns.lexeme + "::" + name.lexeme;
+            const Token& ns_token = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
+            const std::string& ns = ns_token.lexeme;
+            if (!context_->namespaces_.count(ns)) {
+                throw std::runtime_error("Use of undefined namespace '" + ns + "'.");
+            }
+            const auto& imported_context = context_->namespaces_.at(ns);
+            if (!imported_context->element_templates_.count(name.lexeme)) {
+                throw std::runtime_error("Element template '" + name.lexeme + "' not found in namespace '" + ns + "'.");
+            }
+            templateNode = imported_context->element_templates_.at(name.lexeme);
+        } else {
+            if (!context_->element_templates_.count(name.lexeme)) {
+                throw std::runtime_error("Use of undefined element template '" + name.lexeme + "'.");
+            }
+            templateNode = context_->element_templates_.at(name.lexeme);
         }
-        if (!context_->element_templates_.count(qualified_name)) {
-            throw std::runtime_error("Use of undefined element template '" + qualified_name + "'.");
-        }
-        const auto& templateNode = context_->element_templates_.at(qualified_name);
         for (const auto& child : templateNode->children_) {
             nodes.push_back(child->clone());
         }
@@ -397,8 +415,8 @@ void CHTLParser::parseConfigurationBlock() {
 void CHTLParser::parseTemplateDefinition(bool is_custom) {
     if (match({TokenType::AtStyle})) {
         const Token& name = consume(TokenType::Identifier, "Expected template name.");
-        std::string qualified_name = current_namespace_.empty() ? name.lexeme : current_namespace_ + "::" + name.lexeme;
-        auto templateNode = std::make_shared<StyleTemplateNode>(qualified_name, is_custom);
+        auto templateNode = std::make_shared<StyleTemplateNode>(name.lexeme, is_custom);
+        context_->style_templates_[name.lexeme] = templateNode;
         consume(TokenType::OpenBrace, "Expected '{' after template name.");
         while (!check(TokenType::CloseBrace) && !isAtEnd()) {
             if (match({TokenType::GeneratorComment})) {
@@ -437,11 +455,10 @@ void CHTLParser::parseTemplateDefinition(bool is_custom) {
             }
         }
         consume(TokenType::CloseBrace, "Expected '}' after template body.");
-        context_->style_templates_[qualified_name] = templateNode;
     } else if (match({TokenType::AtElement})) {
         const Token& name = consume(TokenType::Identifier, "Expected template name.");
-        std::string qualified_name = current_namespace_.empty() ? name.lexeme : current_namespace_ + "::" + name.lexeme;
-        auto templateNode = std::make_shared<ElementTemplateNode>(qualified_name);
+        auto templateNode = std::make_shared<ElementTemplateNode>(name.lexeme);
+        context_->element_templates_[name.lexeme] = templateNode;
         consume(TokenType::OpenBrace, "Expected '{' after template name.");
         while (!check(TokenType::CloseBrace) && !isAtEnd()) {
             auto nodes = parseDeclaration();
@@ -450,11 +467,10 @@ void CHTLParser::parseTemplateDefinition(bool is_custom) {
             }
         }
         consume(TokenType::CloseBrace, "Expected '}' after template body.");
-        context_->element_templates_[qualified_name] = templateNode;
     } else if (match({TokenType::AtVar})) {
         const Token& name = consume(TokenType::Identifier, "Expected template name.");
-        std::string qualified_name = current_namespace_.empty() ? name.lexeme : current_namespace_ + "::" + name.lexeme;
-        auto templateNode = std::make_shared<VarTemplateNode>(qualified_name);
+        auto templateNode = std::make_shared<VarTemplateNode>(name.lexeme);
+        context_->var_templates_[name.lexeme] = templateNode;
         consume(TokenType::OpenBrace, "Expected '{' after template name.");
         while (!check(TokenType::CloseBrace) && !isAtEnd()) {
             const Token& key = consume(TokenType::Identifier, "Expected variable name in template.");
@@ -467,7 +483,6 @@ void CHTLParser::parseTemplateDefinition(bool is_custom) {
             templateNode->variables_[key.lexeme] = value_tokens;
         }
         consume(TokenType::CloseBrace, "Expected '}' after template body.");
-        context_->var_templates_[qualified_name] = templateNode;
     }
     else {
         throw std::runtime_error("Expected '@Style', '@Element', or '@Var' after '[Template]'.");
@@ -495,14 +510,24 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
             const Token& name = consume(TokenType::Identifier, "Expected template name after '@Style'.");
             std::string qualified_name = name.lexeme;
             bool is_custom_usage = check(TokenType::OpenBrace);
+            std::shared_ptr<StyleTemplateNode> templateNode;
             if (!is_custom_usage && match({TokenType::From})) {
-                 const Token& ns = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
-                 qualified_name = ns.lexeme + "::" + name.lexeme;
+                const Token& ns_token = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
+                const std::string& ns = ns_token.lexeme;
+                if (!context_->namespaces_.count(ns)) {
+                    throw std::runtime_error("Use of undefined namespace '" + ns + "'.");
+                }
+                const auto& imported_context = context_->namespaces_.at(ns);
+                if (!imported_context->style_templates_.count(name.lexeme)) {
+                    throw std::runtime_error("Style template '" + name.lexeme + "' not found in namespace '" + ns + "'.");
+                }
+                templateNode = imported_context->style_templates_.at(name.lexeme);
+            } else {
+                if (!context_->style_templates_.count(name.lexeme)) {
+                    throw std::runtime_error("Use of undefined style template '" + name.lexeme + "'.");
+                }
+                templateNode = context_->style_templates_.at(name.lexeme);
             }
-            if (!context_->style_templates_.count(qualified_name)) {
-                throw std::runtime_error("Use of undefined style template '" + qualified_name + "'.");
-            }
-            const auto& templateNode = context_->style_templates_.at(qualified_name);
             if (templateNode->is_custom_) {
                 consume(TokenType::OpenBrace, "Expected '{' for custom style usage.");
                 std::unordered_map<std::string, std::vector<Token>> provided_values;
@@ -596,16 +621,31 @@ std::vector<Token> CHTLParser::parsePropertyValue() {
             consume(TokenType::OpenParen, "Expected '(' after variable group name.");
             const Token& varName = consume(TokenType::Identifier, "Expected variable name inside parentheses.");
             consume(TokenType::CloseParen, "Expected ')' after variable name.");
-            if (context_->var_templates_.count(groupName.lexeme)) {
-                const auto& templateNode = context_->var_templates_.at(groupName.lexeme);
-                if (templateNode->variables_.count(varName.lexeme)) {
-                    const auto& substituted_tokens = templateNode->variables_.at(varName.lexeme);
-                    final_tokens.insert(final_tokens.end(), substituted_tokens.begin(), substituted_tokens.end());
-                } else {
-                    throw std::runtime_error("Undefined variable '" + varName.lexeme + "' in group '" + groupName.lexeme + "'.");
+
+            std::shared_ptr<const VarTemplateNode> templateNode;
+            if (match({TokenType::From})) {
+                const Token& ns_token = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
+                const std::string& ns = ns_token.lexeme;
+                 if (!context_->namespaces_.count(ns)) {
+                    throw std::runtime_error("Use of undefined namespace '" + ns + "'.");
                 }
+                const auto& imported_context = context_->namespaces_.at(ns);
+                if (!imported_context->var_templates_.count(groupName.lexeme)) {
+                    throw std::runtime_error("Variable group '" + groupName.lexeme + "' not found in namespace '" + ns + "'.");
+                }
+                templateNode = imported_context->var_templates_.at(groupName.lexeme);
             } else {
-                throw std::runtime_error("Use of undefined variable group '" + groupName.lexeme + "'.");
+                if (!context_->var_templates_.count(groupName.lexeme)) {
+                    throw std::runtime_error("Use of undefined variable group '" + groupName.lexeme + "'.");
+                }
+                templateNode = context_->var_templates_.at(groupName.lexeme);
+            }
+
+            if (templateNode->variables_.count(varName.lexeme)) {
+                const auto& substituted_tokens = templateNode->variables_.at(varName.lexeme);
+                final_tokens.insert(final_tokens.end(), substituted_tokens.begin(), substituted_tokens.end());
+            } else {
+                throw std::runtime_error("Undefined variable '" + varName.lexeme + "' in group '" + groupName.lexeme + "'.");
             }
         } else {
             final_tokens.push_back(advance());
