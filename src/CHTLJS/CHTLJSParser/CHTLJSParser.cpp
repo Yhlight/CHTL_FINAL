@@ -1,6 +1,7 @@
 #include "CHTLJS/CHTLJSParser/CHTLJSParser.h"
 #include "CHTLJS/CHTLJSNode/EnhancedSelectorNode.h"
 #include "CHTLJS/CHTLJSNode/ListenNode.h"
+#include "CHTLJS/CHTLJSNode/DelegateNode.h"
 #include <stdexcept>
 
 namespace CHTLJS {
@@ -36,6 +37,9 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parse() {
         if (peek().type == CHTLJSTokenType::Listen) {
             advance(); // consume 'listen'
             return parseListenBlock(std::move(object_node));
+        } else if (peek().type == CHTLJSTokenType::Delegate) {
+            advance(); // consume 'delegate'
+            return parseDelegateBlock(std::move(object_node));
         }
     }
 
@@ -79,6 +83,57 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseListenBlock(std::unique_ptr<CHTLJ
     advance(); // consume '}'
 
     return listen_node;
+}
+
+std::unique_ptr<CHTLJSNode> CHTLJSParser::parseDelegateBlock(std::unique_ptr<CHTLJSNode> object) {
+    auto delegate_node = std::make_unique<DelegateNode>(std::move(object));
+
+    if (peek().type != CHTLJSTokenType::OpenBrace) {
+        throw std::runtime_error("Expected '{' to open delegate block.");
+    }
+    advance(); // consume '{'
+
+    while (peek().type != CHTLJSTokenType::CloseBrace && !isAtEnd()) {
+        if (peek().type == CHTLJSTokenType::Identifier && peek().lexeme == "target") {
+            advance(); // consume 'target'
+            if (peek().type != CHTLJSTokenType::Colon) throw std::runtime_error("Expected ':' after 'target'.");
+            advance(); // consume ':'
+
+            if (peek().type == CHTLJSTokenType::OpenBracket) {
+                // Array of targets
+                advance(); // consume '['
+                while(peek().type != CHTLJSTokenType::CloseBracket && !isAtEnd()) {
+                    delegate_node->addTarget(parse());
+                    if (peek().type == CHTLJSTokenType::Comma) advance();
+                }
+                if (peek().type != CHTLJSTokenType::CloseBracket) throw std::runtime_error("Expected ']' to close target array.");
+                advance(); // consume ']'
+            } else {
+                // Single target
+                delegate_node->addTarget(parse());
+            }
+        } else {
+            // Parse event-callback pair
+            if (peek().type != CHTLJSTokenType::Identifier) throw std::runtime_error("Expected event name identifier in delegate block.");
+            std::string event_name = advance().lexeme;
+            if (peek().type != CHTLJSTokenType::Colon) throw std::runtime_error("Expected ':' after event name.");
+            advance(); // consume ':'
+            if (peek().type != CHTLJSTokenType::Identifier) throw std::runtime_error("Expected callback body after event name.");
+            std::string callback_body = advance().lexeme;
+            delegate_node->addEvent(event_name, callback_body);
+        }
+
+        if (peek().type == CHTLJSTokenType::Comma) {
+            advance(); // consume optional comma
+        }
+    }
+
+    if (peek().type != CHTLJSTokenType::CloseBrace) {
+        throw std::runtime_error("Expected '}' to close delegate block.");
+    }
+    advance(); // consume '}'
+
+    return delegate_node;
 }
 
 const CHTLJSToken& CHTLJSParser::peek() const {

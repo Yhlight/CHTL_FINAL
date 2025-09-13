@@ -9,6 +9,7 @@ namespace CHTLJS {
 // Forward declarations
 class EnhancedSelectorNode;
 class ListenNode;
+class DelegateNode;
 
 class CHTLJSGenerator {
 public:
@@ -19,6 +20,7 @@ private:
     void visit(const CHTLJSNode* node);
     void visitEnhancedSelector(const EnhancedSelectorNode* node);
     void visitListenNode(const ListenNode* node);
+    void visitDelegateNode(const DelegateNode* node);
 
     std::string output_;
 };

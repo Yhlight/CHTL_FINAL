@@ -15,6 +15,8 @@ enum class CHTLJSTokenType {
     CloseDoubleBrace, // }}
     OpenBrace,        // {
     CloseBrace,       // }
+    OpenBracket,      // [
+    CloseBracket,     // ]
     Colon,            // :
     Comma,            // ,
     Identifier,       // selector inside braces

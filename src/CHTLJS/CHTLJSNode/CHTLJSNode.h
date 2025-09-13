@@ -9,6 +9,7 @@ enum class CHTLJSNodeType {
     Root,
     EnhancedSelector,
     Listen,
+    Delegate,
     // Future node types will go here
 };
 

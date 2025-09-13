@@ -62,3 +62,7 @@ add_test(
     NAME run_listen_test
     COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/listen_test.chtl
 )
+add_test(
+    NAME run_delegate_test
+    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/delegate_test.chtl
+)
