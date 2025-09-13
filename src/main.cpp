@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
     std::unique_ptr<CHTL::RootNode> ast = parser.parse();
 
     // 3. Generator
-    CHTL::CHTLGenerator generator;
+    CHTL::CHTLGenerator generator(context);
     std::string html = generator.generate(*ast);
 
     std::cout << html << std::endl;

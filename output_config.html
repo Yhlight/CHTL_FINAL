@@ -1,0 +1,26 @@
+
+    <style>
+      .box {
+        width: 100px;
+      }
+      .box {
+        width: 200px;
+      }
+    </style>
+<html>
+  <body>
+    <!-- This div should NOT get class="box" -->
+    <div />
+  </body>
+</html>
+<!-- The configuration is file-scoped, so this second html block -->
+<!-- will be in a "different file" conceptually and use the default config. -->
+<!-- This is a limitation of testing without a real multi-file setup, -->
+<!-- but for now we will just check the output. A better test would -->
+<!-- be two separate files. -->
+<html>
+  <body>
+    <!-- This div SHOULD get class="box" -->
+    <div />
+  </body>
+</html>

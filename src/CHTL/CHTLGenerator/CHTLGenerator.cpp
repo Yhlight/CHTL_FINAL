@@ -4,6 +4,9 @@
 
 namespace CHTL {
 
+CHTLGenerator::CHTLGenerator(std::shared_ptr<ParserContext> context)
+    : context_(context) {}
+
 // The main entry point for generation.
 std::string CHTLGenerator::generate(const RootNode& root) {
     // Pass 1: Collect all static properties for referencing.
@@ -207,7 +210,7 @@ void CHTLGenerator::visitElement(const ElementNode* node) {
                 }
                 global_styles_ << "      }\n";
 
-                if (rule->selector_[0] == '.') {
+                if (rule->selector_[0] == '.' && !context_->config_.DISABLE_STYLE_AUTO_ADD_CLASS) {
                     std::string className = rule->selector_.substr(1);
                     if (attributes.count("class")) {
                         if ((" " + attributes["class"] + " ").find(" " + className + " ") == std::string::npos) {
@@ -216,7 +219,7 @@ void CHTLGenerator::visitElement(const ElementNode* node) {
                     } else {
                         attributes["class"] = className;
                     }
-                } else if (rule->selector_[0] == '#') {
+                } else if (rule->selector_[0] == '#' && !context_->config_.DISABLE_STYLE_AUTO_ADD_ID) {
                     attributes["id"] = rule->selector_.substr(1);
                 }
             }

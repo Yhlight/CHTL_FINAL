@@ -12,12 +12,13 @@
 #include <sstream>
 #include <memory>
 #include "CssValueEvaluator.h" // For PropertyRegistry and ValueUnit
+#include "../CHTLParser/ParserContext.h" // For ParserContext
 
 namespace CHTL {
 
 class CHTLGenerator {
 public:
-    CHTLGenerator() = default;
+    explicit CHTLGenerator(std::shared_ptr<ParserContext> context);
     std::string generate(const RootNode& root);
 
 private:
@@ -30,8 +31,7 @@ private:
 
     void indent();
 
-    std::string renderCssValue(const std::vector<Token>& tokens);
-
+    std::shared_ptr<ParserContext> context_;
     CssValueEvaluator::PropertyRegistry property_registry_;
     std::stringstream output_;
     std::stringstream global_styles_;

@@ -450,9 +450,16 @@ void CHTLParser::parseConfigurationBlock() {
             context_->config_.INDEX_INITIAL_COUNT = std::stoul(value.lexeme);
         } else if (key.lexeme == "DEBUG_MODE") {
             const Token& value = consume(TokenType::Identifier, "Expected 'true' or 'false' for DEBUG_MODE.");
-            if (value.lexeme == "true") context_->config_.DEBUG_MODE = true;
-            else if (value.lexeme == "false") context_->config_.DEBUG_MODE = false;
-            else throw std::runtime_error("Expected 'true' or 'false' for DEBUG_MODE value.");
+            context_->config_.DEBUG_MODE = (value.lexeme == "true");
+        } else if (key.lexeme == "DISABLE_STYLE_AUTO_ADD_CLASS") {
+            const Token& value = consume(TokenType::Identifier, "Expected 'true' or 'false'.");
+            context_->config_.DISABLE_STYLE_AUTO_ADD_CLASS = (value.lexeme == "true");
+        } else if (key.lexeme == "DISABLE_STYLE_AUTO_ADD_ID") {
+            const Token& value = consume(TokenType::Identifier, "Expected 'true' or 'false'.");
+            context_->config_.DISABLE_STYLE_AUTO_ADD_ID = (value.lexeme == "true");
+        } else if (key.lexeme == "DISABLE_DEFAULT_NAMESPACE") {
+            const Token& value = consume(TokenType::Identifier, "Expected 'true' or 'false'.");
+            context_->config_.DISABLE_DEFAULT_NAMESPACE = (value.lexeme == "true");
         }
         else {
             while(peek().type != TokenType::Semicolon && !isAtEnd()) {
