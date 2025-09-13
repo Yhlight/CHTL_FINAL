@@ -21,6 +21,8 @@ const std::unordered_map<std::string, TokenType> CHTLLexer::keywords = {
     {"@Style", TokenType::AtStyle},
     {"@Element", TokenType::AtElement},
     {"@Var", TokenType::AtVar},
+    {"@Html", TokenType::AtHtml},
+    {"@JavaScript", TokenType::AtJavaScript},
     {"@Chtl", TokenType::AtChtl},
 };
 

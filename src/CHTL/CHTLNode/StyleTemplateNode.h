@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <map>
+#include <unordered_set>
 #include "PropertyValue.h"
 
 namespace CHTL {
@@ -16,6 +18,9 @@ public:
 
     std::string name_;
     bool is_custom_;
+    std::vector<std::string> inherits_;
+    // e.g. from "ParentTemplate" -> set of {"prop1", "prop2"}
+    std::map<std::string, std::unordered_set<std::string>> inheritance_specializations_;
     std::vector<std::pair<std::string, std::vector<PropertyValue>>> properties_;
 };
 

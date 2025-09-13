@@ -7,8 +7,29 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <variant>
 
 namespace CHTL {
+
+enum class BannedNodeType {
+    Html,
+    Template,
+    Custom,
+    VarTemplate,
+    StyleTemplate,
+    ElementTemplate
+};
+
+struct PreciseConstraint {
+    std::string name;
+    // Could also store a NodeType enum if needed
+};
+
+struct TypeConstraint {
+    BannedNodeType node_type;
+};
+
+using Constraint = std::variant<PreciseConstraint, TypeConstraint>;
 
 class ElementNode : public Node {
 public:
@@ -25,6 +46,7 @@ public:
             new_node->children_.push_back(child->clone());
         }
         new_node->computed_styles_ = this->computed_styles_;
+        new_node->constraints_ = this->constraints_;
         return new_node;
     }
 
@@ -32,6 +54,7 @@ public:
     std::vector<std::unique_ptr<AttributeNode>> attributes_;
     std::vector<std::unique_ptr<Node>> children_;
     std::map<std::string, std::string> computed_styles_;
+    std::vector<Constraint> constraints_;
 };
 
 } // namespace CHTL

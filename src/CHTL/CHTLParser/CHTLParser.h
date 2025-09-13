@@ -18,6 +18,7 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include <set>
 
 namespace CHTL {
 
@@ -40,6 +41,15 @@ private:
     std::unique_ptr<StyleBlockNode> parseStyleBlock();
     std::unique_ptr<CommentNode> parseGeneratorComment();
     void consumeColonOrEquals();
+    void checkConstraints(const ElementNode& parent, const Node& child);
+    void applyStyleTemplate(
+        StyleBlockNode& styleNode,
+        const std::string& template_name,
+        const std::unordered_map<std::string, std::vector<PropertyValue>>& provided_values,
+        const std::unordered_set<std::string>& deleted_properties,
+        const std::unordered_set<std::string>& deleted_templates,
+        std::set<std::string>& visited_templates
+    );
 
 
     const Token& peek() const;
