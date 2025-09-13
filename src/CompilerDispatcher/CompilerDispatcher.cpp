@@ -15,51 +15,71 @@ namespace CHTL {
 CompilerDispatcher::CompilerDispatcher() {
     chtl_context_ = std::make_shared<ParserContext>();
     chtljs_context_ = std::make_shared<CHTLJS::CHTLJSContext>();
+    code_merger_ = std::make_unique<CodeMerger>();
 }
+
+CompilerDispatcher::~CompilerDispatcher() = default;
 
 std::string CompilerDispatcher::compile(const std::string& source) {
     CHTLUnifiedScanner unified_scanner(source);
     chunks_ = unified_scanner.scan();
 
     std::string html_output;
+    std::string css_output;
     std::vector<std::string> js_outputs;
+
+    CHTLLoader loader; // Loader can be shared for all CHTL chunks
 
     for (const auto& chunk : chunks_) {
         if (chunk.content.empty()) continue;
 
-        if (chunk.type == ChunkType::CHTL) {
-            CHTLLoader loader;
-            CHTLLexer lexer(chunk.content);
-            std::vector<Token> tokens = lexer.scanTokens();
-            if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == TokenType::EndOfFile)) continue;
+        switch (chunk.type) {
+            case ChunkType::CHTL: {
+                CHTLLexer lexer(chunk.content);
+                std::vector<Token> tokens = lexer.scanTokens();
+                if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == TokenType::EndOfFile)) continue;
 
-            CHTLParser parser(chunk.content, tokens, loader, "./", chtl_context_);
-            std::unique_ptr<RootNode> ast = parser.parse();
-
-            CHTLGenerator generator;
-            CompilationResult result = generator.generate(*ast);
-            html_output += result.html;
-            if (!result.js.empty()) {
-                js_outputs.push_back(result.js);
+                CHTLParser parser(chunk.content, tokens, loader, "./", chtl_context_);
+                std::unique_ptr<RootNode> ast = parser.parse();
+                if (ast) {
+                    CHTLGenerator generator;
+                    CompilationResult result = generator.generate(*ast);
+                    html_output += result.html;
+                    if (!result.js.empty()) {
+                        js_outputs.push_back(result.js);
+                    }
+                }
+                break;
             }
+            case ChunkType::ChtlJs: {
+                CHTLJS::CHTLJSLexer lexer(chunk.content);
+                std::vector<CHTLJS::CHTLJSToken> tokens = lexer.scanTokens();
+                if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) continue;
 
-        } else if (chunk.type == ChunkType::ChtlJs) {
-            CHTLJS::CHTLJSLexer lexer(chunk.content);
-            std::vector<CHTLJS::CHTLJSToken> tokens = lexer.scanTokens();
-            if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) continue;
+                CHTLJS::CHTLJSParser parser(tokens, chtljs_context_);
+                std::unique_ptr<CHTLJS::CHTLJSNode> ast = parser.parse();
 
-            CHTLJS::CHTLJSParser parser(tokens, chtljs_context_);
-            std::unique_ptr<CHTLJS::CHTLJSNode> ast = parser.parse();
-
-            if (ast) {
-                CHTLJS::CHTLJSGenerator generator;
-                js_outputs.push_back(generator.generate(*ast));
+                if (ast) {
+                    CHTLJS::CHTLJSGenerator generator;
+                    js_outputs.push_back(generator.generate(*ast));
+                }
+                break;
             }
+            case ChunkType::JavaScript: {
+                js_outputs.push_back(chunk.content);
+                break;
+            }
+            case ChunkType::Css: {
+                css_output += chunk.content;
+                break;
+            }
+            default:
+                // Ignore Placeholder or other unknown chunk types for now
+                break;
         }
     }
 
-    CodeMerger merger;
-    return merger.merge(html_output, js_outputs);
+    return code_merger_->merge(html_output, css_output, js_outputs);
 }
 
 } // namespace CHTL

@@ -19,6 +19,7 @@ class CodeMerger;
 class CompilerDispatcher {
 public:
     CompilerDispatcher();
+    ~CompilerDispatcher();
 
     std::string compile(const std::string& source);
 
@@ -27,12 +28,8 @@ private:
     std::shared_ptr<ParserContext> chtl_context_;
     std::shared_ptr<CHTLJS::CHTLJSContext> chtljs_context_;
 
-    // Compilers
-    std::unique_ptr<CHTLParser> chtl_parser_;
-    // std::unique_ptr<CHTLJSParser> chtljs_parser_; // Future
-
     // Merger
-    // std::unique_ptr<CodeMerger> code_merger_; // Future
+    std::unique_ptr<CodeMerger> code_merger_;
 };
 
 } // namespace CHTL
