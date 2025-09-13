@@ -13,6 +13,7 @@ enum class TokenType {
 
     // Literals
     Identifier,
+    ResponsiveValue, // $var$
     StringLiteral,
     UnquotedLiteral,
     Number,
@@ -44,6 +45,10 @@ enum class TokenType {
     DoublePipe,     // ||
     GreaterThan,    // >
     LessThan,       // <
+    GreaterThanEquals, // >=
+    LessThanEquals,    // <=
+    DoubleEquals,      // ==
+    NotEquals,         // !=
     Arrow,          // ->
 
     // Comments

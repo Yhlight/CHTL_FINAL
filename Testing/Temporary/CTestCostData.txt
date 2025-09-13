@@ -1,6 +1,0 @@
-run_delete_test 1 0.00517786
-run_insert_test 1 0.00430681
-run_insert_extended_test 1 0.00466494
-run_delete_style_test 1 0.00521674
-run_import_assets_test 1 0.00464936
----

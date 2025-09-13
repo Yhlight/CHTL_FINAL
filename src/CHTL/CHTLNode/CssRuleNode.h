@@ -4,7 +4,7 @@
 #include "BaseNode.h"
 #include <string>
 #include <vector>
-#include <memory>
+#include <utility>
 #include "PropertyValue.h"
 
 namespace CHTL {
@@ -17,14 +17,12 @@ public:
 
     std::unique_ptr<Node> clone() const override {
         auto new_node = std::make_unique<CssRuleNode>(selector_);
-        for (const auto& prop : this->properties_) {
-            new_node->properties_.emplace_back(prop.name, prop.value->clone());
-        }
+        new_node->properties_ = this->properties_; // Deep copy of vector of pairs of string and vector
         return new_node;
     }
 
     std::string selector_;
-    std::vector<PropertyDeclaration> properties_;
+    std::vector<std::pair<std::string, std::vector<PropertyValue>>> properties_;
 };
 
 } // namespace CHTL

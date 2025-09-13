@@ -14,7 +14,6 @@
 #include "../CHTLLoader/CHTLLoader.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/PropertyValue.h"
-#include "../CHTLNode/ExpressionNode.h"
 #include "ParserContext.h"
 #include <vector>
 #include <memory>
@@ -37,12 +36,7 @@ private:
     void parseTemplateDefinition(bool is_custom);
     std::unique_ptr<ElementNode> parseElement();
     void parseElementBody(ElementNode& element);
-    PropertyDeclaration parsePropertyDeclaration();
-    std::unique_ptr<ExpressionNode> parseExpression();
-    std::unique_ptr<ExpressionNode> parseConditional();
-    std::unique_ptr<ExpressionNode> parseTerm();
-    std::unique_ptr<ExpressionNode> parseFactor();
-    std::unique_ptr<ExpressionNode> parsePrimary();
+    std::vector<PropertyValue> parsePropertyValue();
     std::unique_ptr<TextNode> parseText();
     std::unique_ptr<StyleBlockNode> parseStyleBlock();
     std::unique_ptr<CommentNode> parseGeneratorComment();
@@ -51,7 +45,7 @@ private:
     void applyStyleTemplate(
         StyleBlockNode& styleNode,
         const std::string& template_name,
-        const std::unordered_map<std::string, std::unique_ptr<ExpressionNode>>& provided_values,
+        const std::unordered_map<std::string, std::vector<PropertyValue>>& provided_values,
         const std::unordered_set<std::string>& deleted_properties,
         const std::unordered_set<std::string>& deleted_templates,
         std::set<std::string>& visited_templates
@@ -67,6 +61,9 @@ private:
     const Token& peekNext() const;
     const Token& consume(TokenType type, const std::string& message);
     void synchronize();
+
+    enum class TemplateType { Style, Element, Var };
+    std::string resolveUnqualifiedName(const std::string& name, TemplateType type);
 
     std::vector<Token>& tokens_;
     CHTLLoader& loader_;

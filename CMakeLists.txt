@@ -11,11 +11,16 @@ add_executable(chtl_compiler src/main.cpp)
 
 # Define the source files for the CHTL library
 set(CHTL_LIB_SOURCES
-    src/Scanner/UnifiedScanner.cpp
     src/CHTL/CHTLLexer/CHTLLexer.cpp
     src/CHTL/CHTLParser/CHTLParser.cpp
     src/CHTL/CHTLGenerator/CHTLGenerator.cpp
     src/CHTL/CHTLLoader/CHTLLoader.cpp
+    src/Scanner/CHTLUnifiedScanner.cpp
+    src/CompilerDispatcher/CompilerDispatcher.cpp
+    src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp
+    src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp
+    src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp
+    src/CodeMerger/CodeMerger.cpp
 )
 
 # Create a static library for our compiler components
@@ -28,24 +33,13 @@ target_link_libraries(chtl_compiler PRIVATE chtl_lib)
 target_include_directories(chtl_compiler PUBLIC src)
 target_include_directories(chtl_lib PUBLIC src)
 
-# Optional: Add custom test commands
-add_test(
-    NAME run_delete_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/delete_test.chtl
-)
-add_test(
-    NAME run_insert_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/insert_test.chtl
-)
-add_test(
-    NAME run_insert_extended_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/insert_extended_test.chtl
-)
-add_test(
-    NAME run_delete_style_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/delete_style_test.chtl
-)
-add_test(
-    NAME run_import_assets_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/import_assets_test.chtl
-)
+# Configuration for the new test runner
+add_executable(test_runner tests/test_runner.cpp)
+target_link_libraries(test_runner PRIVATE stdc++fs)
+
+# Add the new single test command
+add_test(NAME SnapshotTests WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} COMMAND test_runner)
+
+# Configuration for the scanner test
+add_executable(test_scanner tests/test_scanner.cpp)
+target_link_libraries(test_scanner PRIVATE chtl_lib)

@@ -10,43 +10,62 @@
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/PropertyReferenceNode.h"
 #include "../CHTLNode/PropertyValue.h"
-#include "../CHTLNode/ExpressionNode.h"
 #include <string>
 #include <sstream>
 #include <memory>
 #include <map>
 #include <vector>
+#include <set>
 
 namespace CHTL {
+
+// Forward declaration
+class ElementNode;
+
+// Struct to hold info about a property that needs late resolution
+struct UnresolvedProperty {
+    ElementNode* element; // Pointer to the element node
+    std::string property_name;
+    std::vector<PropertyValue> value_parts;
+};
+
+struct CompilationResult {
+    std::string html;
+    std::string js;
+};
 
 class CHTLGenerator {
 public:
     CHTLGenerator() = default;
-    std::string generate(RootNode& root);
+    CompilationResult generate(RootNode& root);
 
 private:
-    class ExpressionEvaluator : public ExpressionVisitor {
-    public:
-        ExpressionEvaluator(CHTLGenerator& generator, const ElementNode* context_element);
-        std::string evaluate(const ExpressionNode& expr);
+    // Expression Evaluation
+    Value resolvePropertyValue(const std::vector<PropertyValue>& parts);
+    Value evaluateExpression(std::vector<PropertyValue>::const_iterator& it, const std::vector<PropertyValue>::const_iterator& end, int min_precedence);
 
-        void visit(const BinaryExpression& expr) override;
-        void visit(const ConditionalExpression& expr) override;
-        void visit(const LiteralExpression& expr) override;
-        void visit(const ReferenceExpression& expr) override;
+    // Two-pass methods
+    void firstPass(Node* node);
+    void firstPassVisitElement(ElementNode* node);
 
-    private:
-        CHTLGenerator& generator_;
-        const ElementNode* context_element_;
-        std::string result_;
-    };
+    void secondPass();
+    std::string generateReactivityScript();
 
+    // Final rendering methods
     void render(const Node* node);
     void renderElement(const ElementNode* node);
     void renderText(const TextNode* node);
     void renderComment(const CommentNode* node);
+    void renderOrigin(const OriginNode* node);
 
+    std::string getElementUniqueId(const ElementNode* node);
     void indent();
+
+    // Data structures for two-pass generation
+    std::vector<ElementNode*> all_elements_;
+    std::map<std::string, std::map<std::string, Value>> symbol_table_;
+    std::vector<UnresolvedProperty> unresolved_properties_;
+    std::set<std::string> responsive_variables_;
 
     std::stringstream output_;
     std::stringstream global_styles_;

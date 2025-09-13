@@ -4,6 +4,7 @@
 #include "BaseNode.h"
 #include <string>
 #include <vector>
+#include <utility> // For std::pair
 #include <memory>
 #include "PropertyValue.h"
 #include "CssRuleNode.h"
@@ -16,15 +17,17 @@ public:
 
     NodeType getType() const override { return NodeType::StyleBlock; }
 
-    std::vector<PropertyDeclaration> inline_properties_;
+    // For inline styles directly on the parent element
+    std::vector<std::pair<std::string, std::vector<PropertyValue>>> inline_properties_;
+
+    // For full CSS rules to be extracted to a global style tag
     std::vector<std::unique_ptr<CssRuleNode>> rules_;
 
     std::unique_ptr<Node> clone() const override {
         auto new_node = std::make_unique<StyleBlockNode>();
-        for (const auto& prop : this->inline_properties_) {
-            new_node->inline_properties_.emplace_back(prop.name, prop.value->clone());
-        }
+        new_node->inline_properties_ = this->inline_properties_;
         for (const auto& rule : this->rules_) {
+            // CssRuleNode inherits from Node, but we need to downcast from the result of clone()
             new_node->rules_.push_back(std::unique_ptr<CssRuleNode>(static_cast<CssRuleNode*>(rule->clone().release())));
         }
         return new_node;
