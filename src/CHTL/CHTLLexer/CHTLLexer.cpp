@@ -130,7 +130,7 @@ void CHTLLexer::scanToken() {
         default:
             if (isDigit(c)) {
                 number();
-            } else if (isAlpha(c) || c == '.' || c == '#' || c == '_') {
+            } else if (isAlpha(c) || c == '#' || c == '_') {
                 identifier();
             } else {
                 unquotedLiteral();
@@ -167,7 +167,7 @@ void CHTLLexer::handleSpecialSyntax() {
 }
 
 void CHTLLexer::identifier() {
-    if (source_[start_] == '@' || source_[start_] == '.' || source_[start_] == '#' || source_[start_] == '&') {
+    if (source_[start_] == '@' || source_[start_] == '#' || source_[start_] == '&') {
         // Selectors can contain colons for pseudo-classes
         while (isAlphaNumeric(peek()) || peek() == '-' || peek() == ':') advance();
     } else {

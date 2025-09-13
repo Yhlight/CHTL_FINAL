@@ -35,11 +35,11 @@ private:
     void parseTemplateDefinition(bool is_custom);
     std::unique_ptr<ElementNode> parseElement();
     void parseElementBody(ElementNode& element);
-    void parseAttributes(ElementNode& element);
     std::vector<PropertyValue> parsePropertyValue();
     std::unique_ptr<TextNode> parseText();
     std::unique_ptr<StyleBlockNode> parseStyleBlock();
     std::unique_ptr<CommentNode> parseGeneratorComment();
+    void consumeColonOrEquals();
 
 
     const Token& peek() const;
