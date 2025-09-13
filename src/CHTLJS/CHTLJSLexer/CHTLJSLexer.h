@@ -1,0 +1,32 @@
+#ifndef CHTL_JS_LEXER_H
+#define CHTL_JS_LEXER_H
+
+#include "CHTLJSToken.h"
+#include <string>
+#include <vector>
+
+namespace CHTLJS {
+
+class CHTLJSLexer {
+public:
+    explicit CHTLJSLexer(const std::string& source);
+    std::vector<CHTLJSToken> scanTokens();
+
+private:
+    void scanToken();
+
+    char peek() const;
+    char advance();
+    bool isAtEnd() const;
+    void addToken(CHTLJSTokenType type);
+
+    const std::string& source_;
+    std::vector<CHTLJSToken> tokens_;
+    size_t start_ = 0;
+    size_t current_ = 0;
+    size_t line_ = 1;
+};
+
+} // namespace CHTLJS
+
+#endif // CHTL_JS_LEXER_H

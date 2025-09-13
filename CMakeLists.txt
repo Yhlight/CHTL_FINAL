@@ -15,6 +15,12 @@ set(CHTL_LIB_SOURCES
     src/CHTL/CHTLParser/CHTLParser.cpp
     src/CHTL/CHTLGenerator/CHTLGenerator.cpp
     src/CHTL/CHTLLoader/CHTLLoader.cpp
+    src/Scanner/CHTLUnifiedScanner.cpp
+    src/CompilerDispatcher/CompilerDispatcher.cpp
+    src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp
+    src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp
+    src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp
+    src/CodeMerger/CodeMerger.cpp
 )
 
 # Create a static library for our compiler components
@@ -47,4 +53,8 @@ add_test(
 add_test(
     NAME run_conditional_expressions_test
     COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/conditional_expressions_test.chtl
+)
+add_test(
+    NAME run_script_block_test
+    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/script_block_test.chtl
 )
