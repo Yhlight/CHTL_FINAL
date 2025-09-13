@@ -58,10 +58,19 @@ void CHTLLexer::scanToken() {
             }
             break;
         case '|': addToken(match('|') ? TokenType::DoublePipe : TokenType::Pipe); break;
-        case '=': addToken(TokenType::Equals); break;
+        case '=': addToken(match('=') ? TokenType::DoubleEquals : TokenType::Equals); break;
+        case '!':
+            if (match('=')) {
+                addToken(TokenType::NotEquals);
+            } else {
+                // Could be an error, or just a lone '!' if the language supports it.
+                // For now, let's treat it as part of an unquoted literal if it's not '!='
+                unquotedLiteral();
+            }
+            break;
         case '+': addToken(TokenType::Plus); break;
-        case '>': addToken(TokenType::GreaterThan); break;
-        case '<': addToken(TokenType::LessThan); break;
+        case '>': addToken(match('=') ? TokenType::GreaterThanEquals : TokenType::GreaterThan); break;
+        case '<': addToken(match('=') ? TokenType::LessThanEquals : TokenType::LessThan); break;
         case '%': addToken(TokenType::Percent); break;
 
         case '#':

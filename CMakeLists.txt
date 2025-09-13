@@ -36,3 +36,15 @@ add_test(
     NAME run_insert_test
     COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/insert_test.chtl
 )
+add_test(
+    NAME run_property_reference_test
+    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/property_reference_test.chtl
+)
+add_test(
+    NAME run_custom_style_groups_test
+    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/custom_style_groups_test.chtl
+)
+add_test(
+    NAME run_conditional_expressions_test
+    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/conditional_expressions_test.chtl
+)

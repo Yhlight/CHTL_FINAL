@@ -13,36 +13,29 @@
 namespace CHTL {
 
 // Forward declarations for our new structured approach
-Value evaluateArithmetic(const std::vector<PropertyValue>& parts);
+Value evaluateExpression(std::vector<PropertyValue>::const_iterator& it, const std::vector<PropertyValue>::const_iterator& end, int min_precedence, const std::vector<ElementNode*>& all_elements, std::map<std::string, std::map<std::string, Value>>& symbol_table);
 std::string formatValue(const Value& val);
-Value resolvePropertyValue(const std::vector<PropertyValue>& parts);
+Value resolvePropertyValue(const std::vector<PropertyValue>& parts, const std::vector<ElementNode*>& all_elements, std::map<std::string, std::map<std::string, Value>>& symbol_table);
 ElementNode* findElementBySelector(const std::string& selector, const std::vector<ElementNode*>& elements);
 
-// --- Core Arithmetic Evaluation Logic ---
+// --- Core Expression Evaluation Logic ---
 
 int getPrecedence(TokenType type) {
     switch (type) {
-        case TokenType::Plus: case TokenType::Minus: return 1;
-        case TokenType::Asterisk: case TokenType::Slash: case TokenType::Percent: return 2;
-        case TokenType::DoubleAsterisk: return 3;
-        default: return 0;
+        case TokenType::DoublePipe: return 1;
+        case TokenType::DoubleAmpersand: return 2;
+        case TokenType::DoubleEquals: case TokenType::NotEquals: return 3;
+        case TokenType::GreaterThan: case TokenType::LessThan: case TokenType::GreaterThanEquals: case TokenType::LessThanEquals: return 4;
+        case TokenType::Plus: case TokenType::Minus: return 5;
+        case TokenType::Asterisk: case TokenType::Slash: case TokenType::Percent: return 6;
+        case TokenType::DoubleAsterisk: return 7; // Right-associative
+        default: return 0; // For non-operators like ':', ')', etc.
     }
 }
 
 Value applyOp(TokenType op, Value b, Value a) {
     Value val;
-    if (op == TokenType::Asterisk || op == TokenType::Slash) {
-        if (op == TokenType::Slash && !a.Svalue.empty() && a.Svalue == b.Svalue) val.Svalue = "";
-        else if (a.Svalue.empty() && !b.Svalue.empty()) val.Svalue = b.Svalue;
-        else if (!a.Svalue.empty() && b.Svalue.empty()) val.Svalue = a.Svalue;
-        else if (a.Svalue.empty() && b.Svalue.empty()) val.Svalue = "";
-        else throw std::runtime_error("Invalid unit operation for '*' or '/'.");
-    } else {
-        if (a.Svalue != b.Svalue && !a.Svalue.empty() && !b.Svalue.empty()) {
-             throw std::runtime_error("Unit mismatch in operation: " + a.Svalue + " and " + b.Svalue);
-        }
-        val.Svalue = a.Svalue.empty() ? b.Svalue : a.Svalue;
-    }
+    val.Svalue = a.Svalue.empty() ? b.Svalue : a.Svalue;
 
     switch (op) {
         case TokenType::Plus: val.Dvalue = a.Dvalue + b.Dvalue; break;
@@ -51,150 +44,264 @@ Value applyOp(TokenType op, Value b, Value a) {
         case TokenType::Slash: if (b.Dvalue == 0) throw std::runtime_error("Division by zero."); val.Dvalue = a.Dvalue / b.Dvalue; break;
         case TokenType::Percent: val.Dvalue = fmod(a.Dvalue, b.Dvalue); break;
         case TokenType::DoubleAsterisk: val.Dvalue = pow(a.Dvalue, b.Dvalue); break;
+        case TokenType::GreaterThan: val.Dvalue = a.Dvalue > b.Dvalue; val.Svalue = ""; break;
+        case TokenType::LessThan: val.Dvalue = a.Dvalue < b.Dvalue; val.Svalue = ""; break;
+        case TokenType::GreaterThanEquals: val.Dvalue = a.Dvalue >= b.Dvalue; val.Svalue = ""; break;
+        case TokenType::LessThanEquals: val.Dvalue = a.Dvalue <= b.Dvalue; val.Svalue = ""; break;
+        case TokenType::DoubleEquals: val.Dvalue = a.Dvalue == b.Dvalue; val.Svalue = ""; break;
+        case TokenType::NotEquals: val.Dvalue = a.Dvalue != b.Dvalue; val.Svalue = ""; break;
+        case TokenType::DoubleAmpersand: val.Dvalue = a.Dvalue && b.Dvalue; val.Svalue = ""; break;
+        case TokenType::DoublePipe: val.Dvalue = a.Dvalue || b.Dvalue; val.Svalue = ""; break;
         default: throw std::runtime_error("Unknown operator.");
     }
     return val;
 }
 
-Value evaluateArithmetic(const std::vector<PropertyValue>& parts) {
-    std::vector<Token> tokens;
-    for(const auto& part : parts) {
-        if(std::holds_alternative<Token>(part)) tokens.push_back(std::get<Token>(part));
-        else throw std::runtime_error("Cannot evaluate property with unresolved reference during arithmetic.");
-    }
+Value evaluateExpression(std::vector<PropertyValue>::const_iterator& it, const std::vector<PropertyValue>::const_iterator& end, int min_precedence, const std::vector<ElementNode*>& all_elements, std::map<std::string, std::map<std::string, Value>>& symbol_table) {
+    Value lhs;
+    if (it == end) throw std::runtime_error("Unexpected end of expression.");
+    const auto& current_part = *it;
 
-    std::stack<Value> values;
-    std::stack<Token> ops;
-    bool expect_operand = true;
-    size_t i = 0;
-
-    while (i < tokens.size()) {
-        const auto& token = tokens[i];
-        if (token.type == TokenType::Number) {
-            double val = std::stod(token.lexeme);
-            std::string unit = "";
-            if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Identifier) { unit = tokens[++i].lexeme; }
-            else if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Percent) { unit = tokens[++i].lexeme; }
-            values.push({val, unit, ""});
-            expect_operand = false;
-        } else if (token.type == TokenType::Minus && expect_operand) {
-            if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Number) {
-                double val = -std::stod(tokens[++i].lexeme);
-                std::string unit = "";
-                if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Identifier) { unit = tokens[++i].lexeme; }
-                else if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Percent) { unit = tokens[++i].lexeme; }
-                values.push({val, unit, ""});
-                expect_operand = false;
+    if (std::holds_alternative<Token>(current_part)) {
+        const auto& token = std::get<Token>(current_part);
+        if (token.type == TokenType::OpenParen) {
+            ++it;
+            lhs = evaluateExpression(it, end, 0, all_elements, symbol_table);
+            if (it == end || !std::holds_alternative<Token>(*it) || std::get<Token>(*it).type != TokenType::CloseParen) {
+                throw std::runtime_error("Expected ')' to close expression.");
             }
-        } else if (getPrecedence(token.type) > 0) {
-            while (!ops.empty() && getPrecedence(ops.top().type) >= getPrecedence(token.type)) {
-                Token op = ops.top(); ops.pop();
-                if (values.size() < 2) throw std::runtime_error("Invalid expression: not enough values for an operator.");
-                Value val2 = values.top(); values.pop();
-                Value val1 = values.top(); values.pop();
-                values.push(applyOp(op.type, val2, val1));
+            ++it;
+        } else if (token.type == TokenType::Number) {
+            ++it;
+            double d_val = std::stod(token.lexeme);
+            std::string unit;
+            if (it != end && std::holds_alternative<Token>(*it) && (std::get<Token>(*it).type == TokenType::Identifier || std::get<Token>(*it).type == TokenType::Percent)) {
+                unit = std::get<Token>(*it).lexeme;
+                ++it;
             }
-            ops.push(token);
-            expect_operand = true;
+            lhs = {d_val, unit, ""};
+        } else if (token.type == TokenType::StringLiteral || token.type == TokenType::UnquotedLiteral) {
+            ++it;
+            lhs = {0, "", token.lexeme};
+        } else if (token.type == TokenType::Minus) {
+            ++it;
+            lhs = evaluateExpression(it, end, 10, all_elements, symbol_table);
+            lhs.Dvalue = -lhs.Dvalue;
         } else {
-             throw std::runtime_error("Invalid token in arithmetic expression: " + token.lexeme);
+             throw std::runtime_error("Unexpected token in expression: " + token.lexeme);
         }
-        i++;
+    } else {
+        throw std::runtime_error("Property reference should be resolved before evaluation.");
     }
 
-    while (!ops.empty()) {
-        Token op = ops.top(); ops.pop();
-        if (values.size() < 2) throw std::runtime_error("Invalid expression: not enough values for an operator.");
-        Value val2 = values.top(); values.pop();
-        Value val1 = values.top(); values.pop();
-        values.push(applyOp(op.type, val2, val1));
+    while (it != end) {
+        if (!std::holds_alternative<Token>(*it)) break;
+        TokenType op_type = std::get<Token>(*it).type;
+
+        if (op_type == TokenType::QuestionMark) {
+            const int TERNARY_PRECEDENCE = 1;
+            if (TERNARY_PRECEDENCE < min_precedence) break;
+
+            ++it; // consume '?'
+            Value true_val = evaluateExpression(it, end, 0, all_elements, symbol_table);
+
+            if (it == end || !std::holds_alternative<Token>(*it) || std::get<Token>(*it).type != TokenType::Colon) {
+                 throw std::runtime_error("Expected ':' for ternary operator.");
+            }
+            ++it; // consume ':'
+
+            Value false_val = evaluateExpression(it, end, TERNARY_PRECEDENCE, all_elements, symbol_table);
+            lhs = (lhs.Dvalue != 0) ? true_val : false_val;
+            continue;
+        }
+
+        int precedence = getPrecedence(op_type);
+        if (precedence == 0 || precedence < min_precedence) break;
+
+        int next_min_precedence = (op_type == TokenType::DoubleAsterisk) ? precedence : precedence;
+        if (op_type != TokenType::DoubleAsterisk) next_min_precedence++;
+
+        ++it;
+        Value rhs = evaluateExpression(it, end, next_min_precedence, all_elements, symbol_table);
+        lhs = applyOp(op_type, rhs, lhs);
     }
 
-    if (values.size() != 1) throw std::runtime_error("Invalid expression.");
-    return values.top();
+    return lhs;
 }
 
-
-// --- New Top-Level Resolution and Formatting Logic ---
-
 std::string formatValue(const Value& val) {
-    if (!val.stringValue.empty()) {
-        return val.stringValue;
-    }
+    if (!val.stringValue.empty()) return val.stringValue;
     std::stringstream ss;
     ss << val.Dvalue;
     std::string s = ss.str();
     if (s.find('.') != std::string::npos) {
         s.erase(s.find_last_not_of('0') + 1, std::string::npos);
-        if (!s.empty() && s.back() == '.') {
-            s.pop_back();
-        }
+        if (!s.empty() && s.back() == '.') s.pop_back();
     }
     return s + val.Svalue;
 }
 
-Value resolvePropertyValue(const std::vector<PropertyValue>& parts) {
-    if (parts.empty()) {
-        return {0, "", ""};
-    }
+Value resolvePropertyValue(const std::vector<PropertyValue>& parts, const std::vector<ElementNode*>& all_elements, std::map<std::string, std::map<std::string, Value>>& symbol_table) {
+    if (parts.empty()) return {0, "", ""};
 
-    bool is_expression = false;
-    for (const auto& part : parts) {
-        if (std::holds_alternative<Token>(part)) {
-            if (getPrecedence(std::get<Token>(part).type) > 0) {
-                is_expression = true;
-                break;
+    // If it's just one part, it might be a simple literal without expression
+    if (parts.size() == 1) {
+        if (std::holds_alternative<Token>(parts[0])) {
+            const auto& token = std::get<Token>(parts[0]);
+            if (token.type == TokenType::StringLiteral || token.type == TokenType::UnquotedLiteral || token.type == TokenType::Identifier) {
+                return {0, "", token.lexeme};
+            }
+             if (token.type == TokenType::Number) {
+                return {std::stod(token.lexeme), "", ""};
             }
         }
     }
 
-    if (is_expression) {
-        return evaluateArithmetic(parts);
-    } else {
-        std::stringstream ss;
-        bool first = true;
-        for (const auto& part : parts) {
-            if (!first) ss << " ";
-            if(std::holds_alternative<Token>(part)) {
-                ss << std::get<Token>(part).lexeme;
-            } else {
-                const auto& ref_node = std::get<PropertyReferenceNode>(part);
-                ss << ref_node.selector_.lexeme << "." << ref_node.property_.lexeme;
-            }
-            first = false;
-        }
-        return {0, "", ss.str()};
-    }
+    auto it = parts.begin();
+    return evaluateExpression(it, parts.end(), 0, all_elements, symbol_table);
 }
 
 
 // --- Selector and Generator Logic ---
 
-ElementNode* findElementBySelector(const std::string& selector, const std::vector<ElementNode*>& elements) {
-    if (selector.empty()) return nullptr;
+// Helper to check if a single element matches a simple selector (no spaces)
+bool elementMatchesSimpleSelector(const ElementNode* elem, const std::string& simple_selector) {
+    if (!elem || simple_selector.empty()) return false;
 
+    std::string selector = simple_selector;
+    int index = -1;
+
+    // Handle indexed access like `div[0]`
+    size_t bracket_pos = selector.find('[');
+    if (bracket_pos != std::string::npos) {
+        size_t end_bracket_pos = selector.find(']');
+        if (end_bracket_pos == std::string::npos) throw std::runtime_error("Mismatched brackets in selector.");
+        try {
+            index = std::stoi(selector.substr(bracket_pos + 1, end_bracket_pos - bracket_pos - 1));
+        } catch (const std::exception&) {
+            throw std::runtime_error("Invalid index in selector.");
+        }
+        selector = selector.substr(0, bracket_pos);
+    }
+
+    bool matches = false;
     if (selector[0] == '#') {
         std::string id = selector.substr(1);
-        for (auto* elem : elements) {
-            for (const auto& attr : elem->attributes_) {
-                if (attr->key_ == "id" && attr->value_ == id) return elem;
+        for (const auto& attr : elem->attributes_) {
+            if (attr->key_ == "id" && attr->value_ == id) {
+                matches = true;
+                break;
             }
         }
     } else if (selector[0] == '.') {
         std::string className = selector.substr(1);
-        for (auto* elem : elements) {
+        for (const auto& attr : elem->attributes_) {
+            if (attr->key_ == "class") {
+                std::stringstream ss(attr->value_);
+                std::string current_class;
+                while (ss >> current_class) {
+                    if (current_class == className) {
+                        matches = true;
+                        break;
+                    }
+                }
+            }
+            if (matches) break;
+        }
+    } else {
+        // Plain tag name or auto-detect
+        if (elem->tagName_ == selector) matches = true;
+        // Fallback checks from original implementation
+        if (!matches) {
             for (const auto& attr : elem->attributes_) {
-                if (attr->key_ == "class") {
-                    if (attr->value_.find(className) != std::string::npos) return elem;
+                if (attr->key_ == "id" && attr->value_ == selector) {
+                    matches = true;
+                    break;
                 }
             }
         }
-    } else {
-        for (auto* elem : elements) { if (elem->tagName_ == selector) return elem; }
-        for (auto* elem : elements) { for (const auto& attr : elem->attributes_) { if (attr->key_ == "id" && attr->value_ == selector) return elem; } }
-        for (auto* elem : elements) { for (const auto& attr : elem->attributes_) { if (attr->key_ == "class" && attr->value_.find(selector) != std::string::npos) return elem; } }
+        if (!matches) {
+            for (const auto& attr : elem->attributes_) {
+                if (attr->key_ == "class") {
+                     if (attr->value_.find(selector) != std::string::npos) {
+                         matches = true;
+                         break;
+                     }
+                }
+            }
+        }
     }
-    return nullptr;
+    return matches;
+}
+
+
+// Finds all children (recursively) of a given element
+void findAllDescendants(const ElementNode* parent, std::vector<ElementNode*>& descendants) {
+    if (!parent) return;
+    for (const auto& child : parent->children_) {
+        if (child->getType() == NodeType::Element) {
+            auto* child_elem = static_cast<ElementNode*>(child.get());
+            descendants.push_back(child_elem);
+            findAllDescendants(child_elem, descendants);
+        }
+    }
+}
+
+ElementNode* findElementBySelector(const std::string& selector, const std::vector<ElementNode*>& elements) {
+    std::stringstream ss(selector);
+    std::string segment;
+    std::vector<std::string> segments;
+    while (ss >> segment) {
+        segments.push_back(segment);
+    }
+
+    if (segments.empty()) return nullptr;
+
+    std::vector<ElementNode*> current_search_space = elements;
+    std::vector<ElementNode*> next_search_space;
+    ElementNode* final_match = nullptr;
+    int index_to_find = -1;
+
+    for (size_t i = 0; i < segments.size(); ++i) {
+        std::string current_segment = segments[i];
+
+        // Check for index on this segment
+        size_t bracket_pos = current_segment.find('[');
+        if (bracket_pos != std::string::npos) {
+            size_t end_bracket_pos = current_segment.find(']');
+            if (end_bracket_pos == std::string::npos) throw std::runtime_error("Mismatched brackets in selector.");
+            index_to_find = std::stoi(current_segment.substr(bracket_pos + 1, end_bracket_pos - bracket_pos - 1));
+            current_segment = current_segment.substr(0, bracket_pos);
+        } else {
+            index_to_find = -1;
+        }
+
+        int current_match_count = 0;
+        final_match = nullptr;
+        next_search_space.clear();
+
+        for (auto* elem : current_search_space) {
+            if (elementMatchesSimpleSelector(elem, current_segment)) {
+                 if (index_to_find == -1 || current_match_count == index_to_find) {
+                    final_match = elem;
+                    if (i < segments.size() - 1) {
+                        findAllDescendants(elem, next_search_space);
+                    } else {
+                         // If it's the last segment and we found our match, we're done
+                         return final_match;
+                    }
+                }
+                current_match_count++;
+            }
+        }
+
+        if (final_match == nullptr) return nullptr; // No match found for this segment
+
+        // Prepare for the next segment
+        current_search_space = next_search_space;
+    }
+
+    return final_match;
 }
 
 
@@ -244,7 +351,7 @@ void CHTLGenerator::firstPassVisitElement(ElementNode* node) {
                 if (has_reference) {
                     unresolved_properties_.push_back({node, prop.first, prop.second});
                 } else {
-                    Value value = resolvePropertyValue(prop.second);
+                    Value value = resolvePropertyValue(prop.second, all_elements_, symbol_table_);
                     node->computed_styles_[prop.first] = formatValue(value);
                     if (!element_id.empty()) {
                        symbol_table_[element_id][prop.first] = value;
@@ -298,7 +405,8 @@ void CHTLGenerator::firstPassVisitElement(ElementNode* node) {
                 }
                 global_styles_ << "  " << final_selector << " {\n";
                 for (const auto& prop : rule->properties_) {
-                    Value value = resolvePropertyValue(prop.second);
+                    // CSS rules in style blocks are assumed to not have cross-references for now.
+                    Value value = resolvePropertyValue(prop.second, all_elements_, symbol_table_);
                     global_styles_ << "    " << prop.first << ": " << formatValue(value) << ";\n";
                 }
                 global_styles_ << "  }\n";
@@ -346,7 +454,7 @@ void CHTLGenerator::secondPass() {
                 resolved_parts.push_back(part);
             }
         }
-        Value final_value = resolvePropertyValue(resolved_parts);
+        Value final_value = resolvePropertyValue(resolved_parts, all_elements_, symbol_table_);
         unresolved.element->computed_styles_[unresolved.property_name] = formatValue(final_value);
     }
 }

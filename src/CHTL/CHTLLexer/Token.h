@@ -44,6 +44,10 @@ enum class TokenType {
     DoublePipe,     // ||
     GreaterThan,    // >
     LessThan,       // <
+    GreaterThanEquals, // >=
+    LessThanEquals,    // <=
+    DoubleEquals,      // ==
+    NotEquals,         // !=
     Arrow,          // ->
 
     // Comments

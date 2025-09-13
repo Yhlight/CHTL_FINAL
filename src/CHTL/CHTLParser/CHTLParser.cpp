@@ -329,8 +329,23 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
                 } else {
                     target_node->children_.push_back(std::move(newStyleBlock));
                 }
-            } else {
-                throw std::runtime_error("Only 'style' blocks are allowed in element specialization for now.");
+            } else if (peek().type == TokenType::Identifier && (peekNext().type == TokenType::Colon || peekNext().type == TokenType::Equals)) {
+                const Token& key = consume(TokenType::Identifier, "Expected attribute name.");
+                consumeColonOrEquals();
+                std::string value;
+                if (match({TokenType::StringLiteral, TokenType::UnquotedLiteral, TokenType::Identifier})) {
+                    value = previous().lexeme;
+                } else {
+                    throw std::runtime_error("Expected attribute value.");
+                }
+                consume(TokenType::Semicolon, "Expected ';' after attribute value.");
+                target_node->attributes_.push_back(std::make_unique<AttributeNode>(key.lexeme, value));
+            }
+            else {
+                 auto nodes = parseDeclaration();
+                 for (auto& node : nodes) {
+                    target_node->children_.push_back(std::move(node));
+                 }
             }
         }
 
