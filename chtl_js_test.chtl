@@ -4,6 +4,13 @@ div {
 
 script {
     const my_div_element = {{#myDiv}};
-    const my_string = "this is a JS string";
-    console.log(my_string, my_div_element);
+
+    my_div_element->listen {
+        click: () => {
+            console.log("Div clicked!");
+        },
+        mouseenter: () => {
+            my_div_element.style.backgroundColor = "lightblue";
+        }
+    };
 }

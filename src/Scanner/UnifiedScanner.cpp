@@ -1,6 +1,7 @@
 #include "UnifiedScanner.h"
 #include "../ThirdParty/MinimalJSTokenizer.h"
 #include <sstream>
+#include <vector>
 
 namespace CHTL {
 
@@ -8,7 +9,15 @@ UnifiedScanner::UnifiedScanner(const std::string& source) : source_(source) {}
 
 std::string UnifiedScanner::swissCheeseScanScript(const std::string& script_content) {
     ThirdParty::MinimalJSTokenizer tokenizer(script_content);
-    std::vector<ThirdParty::JSToken> tokens = tokenizer.tokenize();
+    std::vector<ThirdParty::JSToken> all_tokens = tokenizer.tokenize();
+
+    // Create a token stream without whitespace for easier pattern matching
+    std::vector<ThirdParty::JSToken> tokens;
+    for(const auto& t : all_tokens) {
+        if (t.type != ThirdParty::JSTokenType::Whitespace) {
+            tokens.push_back(t);
+        }
+    }
 
     std::stringstream result_ss;
     std::stringstream js_buffer;
@@ -23,8 +32,44 @@ std::string UnifiedScanner::swissCheeseScanScript(const std::string& script_cont
         }
     };
 
-    for (const auto& token : tokens) {
-        if (token.type == ThirdParty::JSTokenType::CHTLLiteral) {
+    for (size_t i = 0; i < tokens.size(); ++i) {
+        const auto& token = tokens[i];
+
+        // Look for the CHTL JS listen pattern: IDENTIFIER -> listen { ... }
+        if (i + 3 < tokens.size() &&
+            token.type == ThirdParty::JSTokenType::Identifier &&
+            tokens[i+1].type == ThirdParty::JSTokenType::Operator && tokens[i+1].text == "->" &&
+            tokens[i+2].type == ThirdParty::JSTokenType::Keyword && tokens[i+2].text == "listen" &&
+            tokens[i+3].type == ThirdParty::JSTokenType::Operator && tokens[i+3].text == "{")
+        {
+            flush_js_buffer(); // Flush any JS code before this construct
+
+            // Find the matching closing brace
+            int brace_level = 1;
+            size_t block_start_index = i + 3;
+            size_t block_end_index = block_start_index;
+            for (size_t j = block_start_index + 1; j < tokens.size(); ++j) {
+                if (tokens[j].text == "{") brace_level++;
+                if (tokens[j].text == "}") brace_level--;
+                if (brace_level == 0) {
+                    block_end_index = j;
+                    break;
+                }
+            }
+
+            // Append the entire CHTL JS construct
+            for(size_t k = i; k <= block_end_index; ++k) {
+                result_ss << tokens[k].text;
+            }
+            // Also need to consume the semicolon if it exists
+            if (block_end_index + 1 < tokens.size() && tokens[block_end_index + 1].text == ";") {
+                result_ss << tokens[block_end_index + 1].text;
+                block_end_index++;
+            }
+
+            i = block_end_index; // Move the main loop index forward
+        }
+        else if (token.type == ThirdParty::JSTokenType::CHTLLiteral) {
             flush_js_buffer();
             result_ss << token.text;
         } else {

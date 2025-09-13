@@ -15,6 +15,8 @@ public:
     std::vector<std::unique_ptr<CHTLJSNode>> parse();
 
 private:
+    std::unique_ptr<CHTLJSNode> parsePrimary();
+
     std::vector<JSToken>& tokens_;
     size_t current_ = 0;
 };

@@ -9,8 +9,23 @@ namespace CHTL_JS {
 enum class JSTokenType {
     EndOfFile,
     Unexpected,
-    Selector,       // Represents a full {{...}} expression
-    JSCode,         // Represents a __JS_CODE_...__ placeholder
+
+    // CHTL JS constructs
+    Selector,       // {{...}}
+    Listen,         // listen
+
+    // JS placeholers
+    JSCode,         // __JS_CODE_...__
+
+    // Primitives
+    Identifier,
+
+    // Punctuation
+    Arrow,          // ->
+    OpenBrace,      // {
+    CloseBrace,     // }
+    Colon,          // :
+    Comma,          // ,
 };
 
 struct JSToken {

@@ -2,6 +2,7 @@
 #include "../../CHTL_JS/CHTLJSLexer/CHTLJSLexer.h"
 #include "../../CHTL_JS/CHTLJSParser/CHTLJSParser.h"
 #include "../../CHTL_JS/CHTLJSNode/SelectorNode.h"
+#include "../../CHTL_JS/CHTLJSNode/ListenNode.h"
 #include "../../CHTL_JS/CHTLJSNode/JSCodeNode.h"
 #include <map>
 #include <stack>
@@ -19,11 +20,28 @@ ElementNode* findElementBySelector(const std::string& selector, const std::vecto
 
 CHTLGenerator::CHTLGenerator(std::shared_ptr<CompilerDispatcher> dispatcher) : dispatcher_(dispatcher) {}
 
-std::string CHTLGenerator::resolvePlaceholders(std::string content, bool is_script) {
-    size_t pos = 0;
+std::string CHTLGenerator::compileCHTMLJSSelector(const std::string& selector_text) {
+    // Check if it's a real selector {{...}} or just an identifier
+    if (selector_text.rfind("{{", 0) == 0) {
+        // Basic implementation of {{...}} compilation
+        std::string inner = selector_text.substr(2, selector_text.length() - 4);
+        if (inner.rfind("#", 0) == 0) { // starts with #
+            return "document.getElementById('" + inner.substr(1) + "')";
+        }
+        if (inner.rfind(".", 0) == 0) { // starts with .
+            return "document.querySelector('" + inner + "')";
+        }
+        // TODO: Add support for other selectors like tag, etc.
+        return "document.querySelector('" + inner + "')";
+    }
+    // It's just an identifier, return it as is.
+    return selector_text;
+}
 
+
+std::string CHTLGenerator::resolvePlaceholders(std::string content, bool is_script) {
     if (is_script) {
-        // This is script content, which may contain CHTL JS and JS placeholders.
+        // This is script content, which is a "swiss cheese" string from the scanner.
         // We need to compile the CHTL JS parts.
         CHTL_JS::CHTLJSLexer js_lexer(content);
         auto js_tokens = js_lexer.scanTokens();
@@ -31,37 +49,39 @@ std::string CHTLGenerator::resolvePlaceholders(std::string content, bool is_scri
         CHTL_JS::CHTLJSParser js_parser(js_tokens);
         auto js_ast = js_parser.parse();
 
-        std::stringstream final_script;
+        std::stringstream compiled_script_with_placeholders;
         for (const auto& node : js_ast) {
             if (auto selector_node = dynamic_cast<CHTL_JS::SelectorNode*>(node.get())) {
-                // TODO: This is where the CHTL JS -> JS compilation would happen.
-                // For now, just output the selector as a string literal for testing.
-                final_script << "\"" << selector_node->selector_text_ << "\"";
-            } else if (auto js_code_node = dynamic_cast<CHTL_JS::JSCodeNode*>(node.get())) {
-                // This is a placeholder for standard JS, resolve it.
-                final_script << dispatcher_->getPlaceholderContent(js_code_node->placeholder_);
+                compiled_script_with_placeholders << compileCHTMLJSSelector(selector_node->selector_text_);
+            } else if (auto listen_node = dynamic_cast<CHTL_JS::ListenNode*>(node.get())) {
+                // Compile the target selector
+                std::string target = compileCHTMLJSSelector(listen_node->target_->selector_text_);
+                // The event handlers are a raw string containing JS code with placeholders.
+                // We will resolve them in a final pass.
+                std::string handlers = listen_node->event_handlers_raw_string_;
+                // This is a simplification. A real implementation would parse the handlers
+                // and generate individual addEventListener calls.
+                compiled_script_with_placeholders << target << ".addEventListener(" << handlers << ")";
+            }
+            else if (auto js_code_node = dynamic_cast<CHTL_JS::JSCodeNode*>(node.get())) {
+                // Pass the placeholder through for the final resolution pass.
+                compiled_script_with_placeholders << js_code_node->placeholder_;
             }
         }
-        return final_script.str();
+        content = compiled_script_with_placeholders.str();
     }
 
-    // This is for non-script content, like [Origin] blocks
-    while(pos < content.length()) {
-        size_t next_placeholder = content.find("__", pos);
-        if (next_placeholder == std::string::npos) {
-            break; // No more placeholders
-        }
+    // Final resolution pass for all placeholder types
+    size_t pos = 0;
+    while((pos = content.find("__", pos)) != std::string::npos) {
+        size_t end_pos = content.find("__", pos + 2);
+        if (end_pos == std::string::npos) break;
 
-        size_t end_pos = content.find("__", next_placeholder + 2);
-        if (end_pos == std::string::npos) {
-            break; // Malformed placeholder
-        }
-
-        std::string placeholder = content.substr(next_placeholder, end_pos - next_placeholder + 2);
+        std::string placeholder = content.substr(pos, end_pos - pos + 2);
         std::string resolved_content = dispatcher_->getPlaceholderContent(placeholder);
 
-        content.replace(next_placeholder, placeholder.length(), resolved_content);
-        pos = next_placeholder + resolved_content.length();
+        content.replace(pos, placeholder.length(), resolved_content);
+        pos += resolved_content.length();
     }
     return content;
 }

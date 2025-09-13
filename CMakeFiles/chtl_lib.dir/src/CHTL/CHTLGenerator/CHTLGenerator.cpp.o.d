@@ -210,6 +210,8 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: \
  /app/src/CHTL/CHTLGenerator/../../CHTL_JS/CHTLJSParser/../CHTLJSNode/CHTLJSBaseNode.h \
  /app/src/CHTL/CHTLGenerator/../../CHTL_JS/CHTLJSNode/SelectorNode.h \
  /app/src/CHTL/CHTLGenerator/../../CHTL_JS/CHTLJSNode/CHTLJSBaseNode.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTL_JS/CHTLJSNode/ListenNode.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTL_JS/CHTLJSNode/SelectorNode.h \
  /app/src/CHTL/CHTLGenerator/../../CHTL_JS/CHTLJSNode/JSCodeNode.h \
  /usr/include/c++/13/stack /usr/include/c++/13/deque \
  /usr/include/c++/13/bits/stl_deque.h /usr/include/c++/13/bits/deque.tcc \

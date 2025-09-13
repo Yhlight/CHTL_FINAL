@@ -55,7 +55,8 @@ private:
     size_t pos_;
     const std::unordered_set<std::string> keywords_ = {
         "const", "let", "var", "function", "if", "else", "for", "while",
-        "return", "class", "new", "this", "true", "false", "null"
+        "return", "class", "new", "this", "true", "false", "null",
+        "listen" // Add listen as a keyword
     };
 
     JSToken consumeWhitespace() {
@@ -115,8 +116,12 @@ private:
 
     JSToken consumeOperator() {
         size_t start = pos_;
-        pos_++; // Consume at least one char
-        // This is a simplification and doesn't handle multi-char operators well, but it's ok for now.
+        if (source_.substr(pos_, 2) == "->") {
+            pos_ += 2;
+            return {JSTokenType::Operator, "->"};
+        }
+
+        pos_++; // Consume at least one char for other single-char operators
         return {JSTokenType::Operator, source_.substr(start, 1)};
     }
 };

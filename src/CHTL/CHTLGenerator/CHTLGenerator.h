@@ -39,6 +39,7 @@ private:
     std::shared_ptr<CompilerDispatcher> dispatcher_;
 
     std::string resolvePlaceholders(std::string content, bool is_script);
+    std::string compileCHTMLJSSelector(const std::string& selector_text);
 
     // Two-pass methods
     void firstPass(Node* node);
