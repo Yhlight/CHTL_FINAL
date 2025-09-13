@@ -23,6 +23,7 @@ std::string CompilerDispatcher::compile(const std::string& source) {
 
     std::string html_output;
     std::vector<std::string> js_outputs;
+    std::vector<std::string> css_outputs;
 
     for (const auto& chunk : chunks_) {
         if (chunk.content.empty()) continue;
@@ -55,11 +56,15 @@ std::string CompilerDispatcher::compile(const std::string& source) {
                 CHTLJS::CHTLJSGenerator generator;
                 js_outputs.push_back(generator.generate(*ast));
             }
+        } else if (chunk.type == ChunkType::Css) {
+            // For now, we just pass the raw CSS through.
+            // In the future, a CSS parser/processor could be added here.
+            css_outputs.push_back(chunk.content);
         }
     }
 
     CodeMerger merger;
-    return merger.merge(html_output, js_outputs);
+    return merger.merge(html_output, js_outputs, css_outputs);
 }
 
 } // namespace CHTL

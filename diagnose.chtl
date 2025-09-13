@@ -1,6 +1,16 @@
+style {
+    body {
+        font-family: sans-serif;
+    }
+}
+
 html {
     body {
         div {
+            id: "main";
+            style {
+                color: red;
+            }
             text {
                 "Hello, World!"
             }
