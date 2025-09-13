@@ -1,0 +1,43 @@
+// This is a test file for the CHTLUnifiedScanner.
+
+html {
+    head {
+        title { text: "Scanner Test" }
+    }
+
+    body {
+        div {
+            id: "main-container";
+
+            style {
+                width: 100%;
+                height: 100vh;
+                background-color: #f0f0f0;
+
+                .nested-class {
+                    color: blue;
+                }
+            }
+
+            script {
+                // This is a JS comment
+                function sayHello() {
+                    console.log("Hello from pure JS!");
+                }
+
+                sayHello();
+
+                {{#main-container}}->listen {
+                    click: () => {
+                        console.log("Container clicked!");
+                    }
+                };
+
+                const a = 1;
+                let b = {{some_value}}; // A mix of JS and CHTL JS
+
+                console.log("More pure JS at the end.");
+            }
+        }
+    }
+}
