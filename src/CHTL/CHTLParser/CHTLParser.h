@@ -31,6 +31,7 @@ private:
     const std::string& source_;
     void applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes);
     std::vector<std::unique_ptr<Node>> parseDeclaration();
+    std::vector<std::unique_ptr<Node>> parseNestedDeclaration();
     std::unique_ptr<OriginNode> parseOriginBlock();
     void parseConfigurationBlock();
     void parseTemplateDefinition(bool is_custom);

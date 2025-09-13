@@ -36,6 +36,72 @@ std::unique_ptr<RootNode> CHTLParser::parse() {
     return root;
 }
 
+std::vector<std::unique_ptr<Node>> CHTLParser::parseNestedDeclaration() {
+    std::vector<std::unique_ptr<Node>> nodes;
+
+    if (match({TokenType::Template, TokenType::Custom})) {
+        bool is_custom = previous().type == TokenType::Custom;
+        parseTemplateDefinition(is_custom);
+        return nodes;
+    }
+    if (match({TokenType::AtElement})) {
+        const Token& name = consume(TokenType::Identifier, "Expected template name after '@Element'.");
+        std::string qualified_name;
+        if (match({TokenType::From})) {
+            const Token& ns = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
+            qualified_name = ns.lexeme + "::" + name.lexeme;
+        } else {
+            qualified_name = resolveUnqualifiedName(name.lexeme, TemplateType::Element);
+        }
+
+        if (!context_->element_templates_.count(qualified_name)) {
+            throw std::runtime_error("Use of undefined element template '" + qualified_name + "'.");
+        }
+
+        const auto& templateNode = context_->element_templates_.at(qualified_name);
+        for (const auto& child : templateNode->children_) {
+            nodes.push_back(child->clone());
+        }
+
+        if (match({TokenType::OpenBrace})) {
+            applySpecializations(nodes);
+            consume(TokenType::CloseBrace, "Expected '}' to close specialization block.");
+        } else {
+            consume(TokenType::Semicolon, "Expected ';' after element template usage.");
+        }
+
+        return nodes;
+    }
+
+    std::unique_ptr<Node> singleNode = nullptr;
+    if (match({TokenType::Style})) {
+        singleNode = parseStyleBlock();
+    } else if (match({TokenType::Identifier})) {
+        if (peek().type == TokenType::OpenBrace) {
+            singleNode = parseElement();
+        } else if (check(TokenType::Semicolon)) {
+            const Token& name = previous();
+            consume(TokenType::Semicolon, "Expected ';' after empty element.");
+            singleNode = std::make_unique<ElementNode>(name.lexeme);
+        }
+    } else if (match({TokenType::GeneratorComment})) {
+        singleNode = parseGeneratorComment();
+    } else if (match({TokenType::Origin})) {
+        singleNode = parseOriginBlock();
+    }
+    // NOTE: The `else if (match({TokenType::Text}))` case is intentionally omitted here
+    // to prevent `text:` from being parsed as a top-level block inside an element.
+
+    if(singleNode) {
+        nodes.push_back(std::move(singleNode));
+        return nodes;
+    }
+
+    advance();
+    throw std::runtime_error("Expected a nested declaration (element, style, etc.).");
+}
+
+
 std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     std::vector<std::unique_ptr<Node>> nodes;
     if (match({TokenType::Namespace})) {
@@ -420,7 +486,7 @@ void CHTLParser::parseElementBody(ElementNode& element) {
                 consume(TokenType::Semicolon, "Expected ';' after except clause.");
             }
 
-            auto nodes = parseDeclaration();
+            auto nodes = parseNestedDeclaration();
             for (auto& node : nodes) {
                 checkConstraints(element, *node);
                 element.children_.push_back(std::move(node));
