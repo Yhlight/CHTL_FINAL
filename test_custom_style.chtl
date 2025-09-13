@@ -1,0 +1,32 @@
+[Template] @Style Base
+{
+    font-size: 16px;
+    line-height: 1.6;
+    border: 1px solid black;
+}
+
+[Custom] @Style TextSet
+{
+    @Style Base;
+    color,
+    font-weight;
+    border: 2px dotted blue; -- Override
+}
+
+html {
+    body {
+        div {
+            style {
+                @Style TextSet
+                {
+                    -- provide values for placeholders
+                    color: "green";
+                    font-weight: "bold";
+
+                    -- delete an inherited property
+                    delete line-height;
+                }
+            }
+        }
+    }
+}

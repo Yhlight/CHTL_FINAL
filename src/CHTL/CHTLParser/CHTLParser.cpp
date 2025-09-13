@@ -425,23 +425,31 @@ void CHTLParser::parseTemplateDefinition(bool is_custom) {
                 continue;
             }
 
-            const Token& key = consume(TokenType::Identifier, "Expected CSS property name in template.");
+            const Token& first_key = consume(TokenType::Identifier, "Expected CSS property name in template.");
 
-            std::vector<Token> value_tokens;
+            // Check if this is a placeholder list or a full property definition
             if (is_custom && !check(TokenType::Colon)) {
-                 if (!match({TokenType::Comma, TokenType::Semicolon})) {
-                    throw std::runtime_error("Expected ',' or ';' after placeholder property.");
+                std::vector<std::string> keys;
+                keys.push_back(first_key.lexeme);
+
+                // Consume more comma-separated keys
+                while(match({TokenType::Comma})) {
+                    keys.push_back(consume(TokenType::Identifier, "Expected property name after comma.").lexeme);
                 }
-            } else {
+                consume(TokenType::Semicolon, "Expected ';' after placeholder list.");
+
+                for (const auto& key : keys) {
+                    templateNode->properties_.emplace_back(key, std::vector<Token>{});
+                }
+            } else { // It's a regular property with a value
                 consume(TokenType::Colon, "Expected ':' after property name.");
-                value_tokens = parsePropertyValue();
+                std::vector<Token> value_tokens = parsePropertyValue();
                 if (value_tokens.empty()) {
                     throw std::runtime_error("Expected CSS property value in template.");
                 }
                 consume(TokenType::Semicolon, "Expected ';' after property value.");
+                templateNode->properties_.emplace_back(first_key.lexeme, value_tokens);
             }
-
-            templateNode->properties_.emplace_back(key.lexeme, value_tokens);
         }
         consume(TokenType::CloseBrace, "Expected '}' after template body.");
         context_->style_templates_[qualified_name] = templateNode;
@@ -528,9 +536,12 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
             if (templateNode->is_custom_) {
                 consume(TokenType::OpenBrace, "Expected '{' for custom style usage.");
                 std::unordered_map<std::string, std::vector<Token>> provided_values;
-                std::unordered_set<std::string> deleted_properties;
+                std::unordered_set<std::string> deleted_properties; // For the next step
 
                 while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+                    if (match({TokenType::GeneratorComment})) {
+                        continue;
+                    }
                     if (match({TokenType::Delete})) {
                         do {
                             deleted_properties.insert(consume(TokenType::Identifier, "Expected property name after 'delete'.").lexeme);
@@ -545,20 +556,29 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
                 }
                 consume(TokenType::CloseBrace, "Expected '}' after custom style block.");
 
-                for (const auto& prop : templateNode->properties_) {
+                std::vector<std::pair<std::string, std::vector<Token>>> expanded_props_with_dupes;
+                expandStyleTemplate(templateNode, expanded_props_with_dupes);
+
+                // De-duplicate properties using a map to handle overrides correctly.
+                std::map<std::string, std::vector<Token>> final_props_map;
+                for(const auto& prop : expanded_props_with_dupes) {
+                    final_props_map[prop.first] = prop.second;
+                }
+
+                for (const auto& prop : final_props_map) {
                     const std::string& prop_name = prop.first;
                     if (deleted_properties.count(prop_name)) {
                         continue;
                     }
 
                     const auto& prop_value = prop.second;
-                    if (prop_value.empty()) {
+                    if (prop_value.empty()) { // This is a placeholder
                         if (provided_values.count(prop_name)) {
                             styleNode->inline_properties_.emplace_back(prop_name, provided_values.at(prop_name));
                         } else {
-                            throw std::runtime_error("Value for placeholder '" + prop_name + "' not provided for '" + prop_name + "'.");
+                            throw std::runtime_error("Value for placeholder '" + prop_name + "' not provided for custom template '" + qualified_name + "'.");
                         }
-                    } else {
+                    } else { // This is a property with a default value
                         styleNode->inline_properties_.push_back(prop);
                     }
                 }
