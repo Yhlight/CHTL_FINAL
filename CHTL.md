@@ -2474,6 +2474,152 @@ CHTL代码几乎总是以块存在，因此可以收集块来推送给编译器
 而chtl js和js相互混杂，chtl js本身具有特殊性，其提供的函数内部甚至可能具有js代码，因此，要做到严判，以最小单元和占位符机制进行处理    
 在处理完毕chtl，chtl js的代码后，毫无疑问，剩下的就是js代码  
 
+### 统一扫描器效果演示
+#### 预留占位符
+在一些情况下，统一扫描器需要与编译器进行交互  
+例如CHTL JS中，很多功能都会内置JS代码，如果只是依靠统一扫描器  
+那么CHTL JS编译器肯定是无法处理  
+因此我们需要预先在代码实现中添加这些占位符，表示CHTL JS编译器不直接处理的语法  
+
+```chtl
+listen {
+    click: _CODE_PLACEHOLDER_ ,  // 在代码实现时，添加占位符，让CHTL JS编译器不直接处理其中的语法，而是跳过这部分代码，让CHTL JS编译器更加智能，避免因为引入JS语法的可能
+}
+```
+
+```chtl
+listen {
+    click: () => { {{box}}->textContent = "Hello World"; }
+}
+```
+
+在实际实现中，统一扫描器会将() => { {{box}}->textContent = "Hello World"; }  
+转换为
+_JS_CODE_PLACEHOLDER_ { {{box}}->_JS_CODE_PLACEHOLDER_ }
+这样，由CHTL JS拿到的内容就是占位符 + CHTL JS代码，由此就无需对JS代码进行解析  
+
+#### 语法边界与符号的忽略
+在JS中，很多功能都是具有语法边界的，例如函数，类，if-else等基本的结构    
+这些结构通常以块存在，而这些语法边界符号CHTL JS编译器会天然忽略掉  
+通常来说，应该只有{}需要进行保留，保留{}将可能在一些特殊情况下提供帮助  
+而不是把所有内容都归为占位符  
+
+```chtl
+listen {
+    click: () => { if({{box}}->textContent == "HelloWorld") { console.log({{box}}->textContent) } }
+}
+```
+() => { if({{box}}->textContent == "HelloWorld") { console.log({{box}}->textContent) } }
+转换为  
+
+_JS_CODE_PLACEHOLDER_ {
+    _JS_CODE_PLACEHOLDER_ {{box}}-> _JS_CODE_PLACEHOLDER_ {
+        _JS_CODE_PLACEHOLDER_ {{box}}-> _JS_CODE_PLACEHOLDER_
+    }
+}
+
+#### 黑盒机制
+很显然，CHTL JS不会认识JS代码，不会认识除了CHTL JS语法之外的语法  
+这样，我们就可以放肆地将非CHTL JS的语法的代码块替换为占位符  
+
+```chtl
+((window) => {
+    const Louder = {
+        modules: {},
+        define: function (name, deps, factory) {
+            if (this.modules[name]) return;
+
+            this.modules[name] = {
+                deps,
+                factory,
+                exports: {},
+                initialized: false,
+            };
+        },
+
+        test: {{box}},
+
+        require: function (name) {
+            const mod = this.modules[name];
+            if (!mod) throw new Error(`模块${name}未定义`);
+            if (mod.initialized) return mod.exports;
+
+            mod.initialized = true;
+            const depExports = mod.deps.map(dep => {
+                if (dep === "require") return this.require;
+                if (dep === "exports") return mod.exports;
+                if (dep === "module") return mod;
+                return this.require(dep);
+            });
+
+            mod.factory.apply(null, depExports);
+
+            return mod.exports;
+        }
+    }
+
+    window.Louder = Louder;
+})(window);
+```
+
+上述代码最终变为  
+```chtl
+_JS_CODE_PLACEHOLDER_ {
+    _JS_CODE_PLACEHOLDER_ {
+        _JS_CODE_PLACEHOLDER_ { }
+        _JS_CODE_PLACEHOLDER_ {
+            _JS_CODE_PLACEHOLDER_ {
+                _JS_CODE_PLACEHOLDER_ { }
+                _JS_CODE_PLACEHOLDER_
+            }
+        }
+
+        _JS_CODE_PLACEHOLDER_ {{box}}
+        _JS_CODE_PLACEHOLDER_ {
+            _JS_CODE_PLACEHOLDER_ { }
+            _JS_CODE_PLACEHOLDER_
+        }
+    }
+}_JS_CODE_PLACEHOLDER_
+```
+
+解码得到的就是  
+```chtl
+((window) => {
+    const Louder = {
+        modules: {}
+        ,define: function (name, deps, factory) {
+            if (this.modules[name]) return;
+
+            this.modules[name] = {
+                deps,
+                factory,
+                exports: { }
+                ,initialized: false,
+            }
+
+            ,test: {{box}}
+            ,require: function (name) {
+                const mod = this.modules[name];
+                if (!mod) throw new Error(`模块${name}未定义`);
+                if (mod.initialized) return mod.exports;
+
+                mod.initialized = true;
+                const depExports = mod.deps.map(dep => {
+
+                }
+
+                );
+                mod.factory.apply(null, depExports);
+                return mod.exports;
+            }
+        }
+    }
+})(window);
+```
+
+由此可见，占位符机制更像是一种状态转换的机制  
+
 #### 静态环境与运行时代码
 尽管CHTL和CHTL JS都是在静态的环境，通过编译转换为HTML + CSS + JS代码  
 不具有着运行时的环境，但这并不代表CHTL JS无法支持运行时功能  
