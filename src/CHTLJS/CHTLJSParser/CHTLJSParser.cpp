@@ -66,15 +66,22 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parse() {
 
     if (peek().type == CHTLJSTokenType::OpenDoubleBrace) {
         advance(); // consume '{{'
+
+        std::string selector_str;
+        if (peek().type == CHTLJSTokenType::Hash || peek().type == CHTLJSTokenType::Dot) {
+            selector_str += advance().lexeme;
+        }
+
         if (peek().type != CHTLJSTokenType::Identifier) {
             throw std::runtime_error("Expected an identifier inside {{...}}.");
         }
-        CHTLJSToken selector_token = advance();
+        selector_str += advance().lexeme;
+
         if (peek().type != CHTLJSTokenType::CloseDoubleBrace) {
             throw std::runtime_error("Expected '}}' to close enhanced selector.");
         }
         advance(); // consume '}}'
-        object_node = std::make_unique<EnhancedSelectorNode>(selector_token.lexeme);
+        object_node = std::make_unique<EnhancedSelectorNode>(selector_str);
     } else {
         // In the future, other object types could be parsed here.
         return nullptr;

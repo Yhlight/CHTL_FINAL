@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <sstream>
 
 namespace CHTL {
 
@@ -26,11 +27,14 @@ public:
 
     std::vector<CodeChunk> scan();
 
+    const std::map<std::string, std::string>& getPlaceholderMap() const;
+
 private:
     void process();
-    void handleScriptTag();
-    void handleStyleTag();
-    void handleChtlBlock();
+    void handleScriptTag(std::stringstream& builder);
+    void handleStyleTag(std::stringstream& builder);
+    CodeChunk handleChtlBlock();
+    void handleOriginBlock(std::stringstream& builder);
 
     const std::string& source_;
     std::vector<CodeChunk> chunks_;

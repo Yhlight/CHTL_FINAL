@@ -1,6 +1,7 @@
 #include "CHTLJS/CHTLJSLexer/CHTLJSLexer.h"
 #include <stdexcept>
 #include <unordered_map>
+#include <cctype>
 
 namespace CHTLJS {
 
@@ -51,10 +52,17 @@ void CHTLJSLexer::scanToken() {
              if (peek() == '>') {
                 advance();
                 addToken(CHTLJSTokenType::Arrow);
+            } else {
+                // Part of an identifier
+                current_--;
+                identifier();
             }
             break;
         case '.':
             addToken(CHTLJSTokenType::Dot);
+            break;
+        case '#':
+            addToken(CHTLJSTokenType::Hash);
             break;
         case ' ':
         case '\r':
@@ -67,9 +75,11 @@ void CHTLJSLexer::scanToken() {
             stringLiteral(c);
             break;
         default:
-            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') {
+            if (isalnum(c) || c == '_') {
+                current_--;
                 identifier();
-            } else if (c >= '0' && c <= '9') {
+            } else if (isdigit(c)) {
+                current_--;
                 number();
             } else if (c == '/' && peek() == '/') {
                 while(peek() != '\n' && !isAtEnd()) advance();
@@ -79,7 +89,7 @@ void CHTLJSLexer::scanToken() {
 }
 
 void CHTLJSLexer::identifier() {
-    while ((peek() >= 'a' && peek() <= 'z') || (peek() >= 'A' && peek() <= 'Z') || (peek() >= '0' && peek() <= '9') || peek() == '_') {
+    while (isalnum(peek()) || peek() == '_' || peek() == '-') {
         advance();
     }
     std::string text = source_.substr(start_, current_ - start_);

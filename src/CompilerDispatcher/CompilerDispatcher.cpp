@@ -59,7 +59,7 @@ std::string CompilerDispatcher::compile(const std::string& source) {
     }
 
     CodeMerger merger;
-    return merger.merge(html_output, js_outputs);
+    return merger.merge(html_output, js_outputs, unified_scanner.getPlaceholderMap());
 }
 
 } // namespace CHTL

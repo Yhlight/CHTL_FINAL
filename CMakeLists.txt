@@ -37,5 +37,13 @@ target_include_directories(chtl_lib PUBLIC src)
 add_executable(test_runner tests/test_runner.cpp)
 target_link_libraries(test_runner PRIVATE stdc++fs)
 
-# Add the new single test command
+# Add the snapshot test command
 add_test(NAME SnapshotTests WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} COMMAND test_runner)
+
+# Configuration for the scanner unit tests
+add_executable(scanner_test_runner tests/scanner_test.cpp)
+target_link_libraries(scanner_test_runner PRIVATE chtl_lib)
+target_include_directories(scanner_test_runner PUBLIC src)
+
+# Add the scanner unit test command
+add_test(NAME ScannerUnitTests WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} COMMAND scanner_test_runner)
