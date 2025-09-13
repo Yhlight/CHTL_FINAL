@@ -79,6 +79,9 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
                 imported_parser.current_namespace_ = default_namespace;
             }
 
+            // Add the namespace to the context so it can be searched
+            context_->imported_namespaces_.push_back(imported_parser.current_namespace_);
+
             imported_parser.parse();
         }
 
@@ -594,14 +597,33 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
         if (match({TokenType::AtStyle})) {
             const Token& name = consume(TokenType::Identifier, "Expected template name after '@Style'.");
             std::string qualified_name = name.lexeme;
+            bool found = false;
 
             if (match({TokenType::From})) {
                  const Token& ns = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
                  qualified_name = ns.lexeme + "::" + name.lexeme;
+                 if (context_->style_templates_.count(qualified_name)) {
+                     found = true;
+                 }
+            } else {
+                // If 'from' is not specified, try to find it in the global scope first
+                if (context_->style_templates_.count(qualified_name)) {
+                    found = true;
+                } else {
+                    // Then search in imported namespaces
+                    for (const auto& ns : context_->imported_namespaces_) {
+                        std::string temp_name = ns + "::" + name.lexeme;
+                        if (context_->style_templates_.count(temp_name)) {
+                            qualified_name = temp_name;
+                            found = true;
+                            break;
+                        }
+                    }
+                }
             }
 
-            if (!context_->style_templates_.count(qualified_name)) {
-                 throw std::runtime_error("Use of undefined style template '" + qualified_name + "'.");
+            if (!found) {
+                 throw std::runtime_error("Use of undefined style template '" + name.lexeme + "'.");
             }
             const auto& templateNode = context_->style_templates_.at(qualified_name);
 

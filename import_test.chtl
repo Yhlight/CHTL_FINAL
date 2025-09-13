@@ -1,0 +1,12 @@
+// This file tests the [Import] functionality.
+
+[Import] @Chtl from "imports/definitions.chtl";
+
+body {
+    p {
+        style {
+            @Style ImportedStyle;
+        }
+        text: "This paragraph should be green with a black border.";
+    }
+}

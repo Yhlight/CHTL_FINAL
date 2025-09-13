@@ -27,12 +27,31 @@ target_link_libraries(chtl_compiler PRIVATE chtl_lib)
 target_include_directories(chtl_compiler PUBLIC src)
 target_include_directories(chtl_lib PUBLIC src)
 
-# Optional: Add custom test commands
-add_test(
-    NAME run_delete_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/delete_test.chtl
+# --- Test Suite ---
+# Add a test for each .chtl file in the root directory.
+# This allows us to use `ctest` to see the compiler's output for each test case.
+set(CHTL_TEST_FILES
+    auto_inference_test.chtl
+    components.chtl
+    custom_style_groups_test.chtl
+    debug_test.chtl
+    defaults.chtl
+    definitions.chtl
+    delete_test.chtl
+    insert_test.chtl
+    property_reference_test.chtl
+    selector_test.chtl
+    test.chtl
+    test2.chtl
+    import_test.chtl
 )
-add_test(
-    NAME run_insert_test
-    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/insert_test.chtl
-)
+
+foreach(test_file ${CHTL_TEST_FILES})
+    # Get the filename without the extension to use as the test name
+    get_filename_component(test_name ${test_file} NAME_WE)
+
+    add_test(
+        NAME run_${test_name}
+        COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/${test_file}
+    )
+endforeach()

@@ -58,11 +58,47 @@ Value applyOp(TokenType op, Value b, Value a) {
 
 Value evaluateArithmetic(const std::vector<PropertyValue>& parts) {
     std::vector<Token> tokens;
+    bool has_plus_or_minus = false;
+    std::string first_unit = "";
+    bool has_mixed_units_for_calc = false;
+
     for(const auto& part : parts) {
-        if(std::holds_alternative<Token>(part)) tokens.push_back(std::get<Token>(part));
-        else throw std::runtime_error("Cannot evaluate property with unresolved reference during arithmetic.");
+        if(std::holds_alternative<Token>(part)) {
+            const auto& token = std::get<Token>(part);
+            tokens.push_back(token);
+            if (token.type == TokenType::Plus || token.type == TokenType::Minus) {
+                has_plus_or_minus = true;
+            }
+            // A simple heuristic to find units: check for identifiers or percent sign
+            // that follow a number. This is imperfect but covers many cases.
+            if (token.type == TokenType::Identifier || token.type == TokenType::Percent) {
+                if (first_unit.empty()) {
+                    first_unit = token.lexeme;
+                } else if (first_unit != token.lexeme) {
+                    has_mixed_units_for_calc = true;
+                }
+            }
+        } else {
+            throw std::runtime_error("Cannot evaluate property with unresolved reference during arithmetic.");
+        }
     }
 
+    // If we have mixed units with + or -, fallback to a calc() expression
+    if (has_plus_or_minus && has_mixed_units_for_calc) {
+        std::stringstream ss;
+        ss << "calc(";
+        for (size_t i = 0; i < tokens.size(); ++i) {
+            ss << tokens[i].lexeme;
+            // CSS calc() requires spaces around + and -
+            if (i < tokens.size() - 1 && (tokens[i].type == TokenType::Plus || tokens[i].type == TokenType::Minus || tokens[i+1].type == TokenType::Plus || tokens[i+1].type == TokenType::Minus)) {
+                ss << " ";
+            }
+        }
+        ss << ")";
+        return {0, "", ss.str()};
+    }
+
+    // --- Original Shunting-Yard Implementation ---
     std::stack<Value> values;
     std::stack<Token> ops;
     bool expect_operand = true;
@@ -74,7 +110,7 @@ Value evaluateArithmetic(const std::vector<PropertyValue>& parts) {
             double val = std::stod(token.lexeme);
             std::string unit = "";
             if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Identifier) { unit = tokens[++i].lexeme; }
-            else if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Percent) { unit = tokens[++i].lexeme; }
+            else if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Percent) { unit = "%"; i++; }
             values.push({val, unit, ""});
             expect_operand = false;
         } else if (token.type == TokenType::Minus && expect_operand) {
@@ -82,7 +118,7 @@ Value evaluateArithmetic(const std::vector<PropertyValue>& parts) {
                 double val = -std::stod(tokens[++i].lexeme);
                 std::string unit = "";
                 if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Identifier) { unit = tokens[++i].lexeme; }
-                else if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Percent) { unit = tokens[++i].lexeme; }
+                else if (i + 1 < tokens.size() && tokens[i+1].type == TokenType::Percent) { unit = "%"; i++;}
                 values.push({val, unit, ""});
                 expect_operand = false;
             }
