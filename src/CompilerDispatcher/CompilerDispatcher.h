@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include "../CHTLJS/CHTLJSParser/CHTLJSContext.h"
 
 namespace CHTL {
 
@@ -24,7 +25,7 @@ public:
 private:
     std::vector<CodeChunk> chunks_;
     std::shared_ptr<ParserContext> chtl_context_;
-    // std::shared_ptr<CHTLJSContext> chtljs_context_; // Future
+    std::shared_ptr<CHTLJS::CHTLJSContext> chtljs_context_;
 
     // Compilers
     std::unique_ptr<CHTLParser> chtl_parser_;

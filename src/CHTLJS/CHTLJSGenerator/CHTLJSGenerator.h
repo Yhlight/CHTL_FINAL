@@ -11,6 +11,7 @@ class EnhancedSelectorNode;
 class ListenNode;
 class DelegateNode;
 class AnimateNode;
+class ValueNode;
 
 class CHTLJSGenerator {
 public:
@@ -23,6 +24,7 @@ private:
     void visitListenNode(const ListenNode* node);
     void visitDelegateNode(const DelegateNode* node);
     void visitAnimateNode(const AnimateNode* node);
+    void visitValueNode(const ValueNode* node);
 
     std::string output_;
 };

@@ -14,6 +14,7 @@ namespace CHTL {
 
 CompilerDispatcher::CompilerDispatcher() {
     chtl_context_ = std::make_shared<ParserContext>();
+    chtljs_context_ = std::make_shared<CHTLJS::CHTLJSContext>();
 }
 
 std::string CompilerDispatcher::compile(const std::string& source) {
@@ -47,7 +48,7 @@ std::string CompilerDispatcher::compile(const std::string& source) {
             std::vector<CHTLJS::CHTLJSToken> tokens = lexer.scanTokens();
             if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) continue;
 
-            CHTLJS::CHTLJSParser parser(tokens);
+            CHTLJS::CHTLJSParser parser(tokens, chtljs_context_);
             std::unique_ptr<CHTLJS::CHTLJSNode> ast = parser.parse();
 
             if (ast) {

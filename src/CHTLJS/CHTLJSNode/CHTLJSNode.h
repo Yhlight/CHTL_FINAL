@@ -11,6 +11,7 @@ enum class CHTLJSNodeType {
     Listen,
     Delegate,
     Animate,
+    Value,
     // Future node types will go here
 };
 

@@ -24,6 +24,7 @@ enum class CHTLJSTokenType {
     Number,
     Dot,              // .
     Arrow,            // ->
+    Equals,           // =
 
     // Keywords (for future features)
     Listen,

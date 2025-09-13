@@ -46,6 +46,7 @@ void CHTLJSLexer::scanToken() {
         case ']': addToken(CHTLJSTokenType::CloseBracket); break;
         case ':': addToken(CHTLJSTokenType::Colon); break;
         case ',': addToken(CHTLJSTokenType::Comma); break;
+        case '=': addToken(CHTLJSTokenType::Equals); break;
         case '-':
              if (peek() == '>') {
                 advance();

@@ -3,19 +3,63 @@
 #include "CHTLJS/CHTLJSNode/ListenNode.h"
 #include "CHTLJS/CHTLJSNode/DelegateNode.h"
 #include "CHTLJS/CHTLJSNode/AnimateNode.h"
+#include "CHTLJS/CHTLJSNode/ValueNode.h"
 #include <stdexcept>
 
 namespace CHTLJS {
 
-CHTLJSParser::CHTLJSParser(std::vector<CHTLJSToken>& tokens) : tokens_(tokens) {}
+CHTLJSParser::CHTLJSParser(std::vector<CHTLJSToken>& tokens, std::shared_ptr<CHTLJSContext> context)
+    : tokens_(tokens), context_(context) {}
 
 std::unique_ptr<CHTLJSNode> CHTLJSParser::parse() {
     // For now, we parse a single expression, not a full script.
     if (isAtEnd()) return nullptr;
 
+    if (peek().type == CHTLJSTokenType::Vir) {
+        advance(); // consume 'vir'
+        CHTLJSToken name = advance();
+        if (name.type != CHTLJSTokenType::Identifier) {
+            throw std::runtime_error("Expected identifier after 'vir'.");
+        }
+        if (advance().type != CHTLJSTokenType::Equals) {
+             throw std::runtime_error("Expected '=' after vir identifier.");
+        }
+
+        auto value_node = parse();
+        if (value_node) {
+            context_->virtual_objects[name.lexeme] = std::move(value_node);
+        }
+        return nullptr; // A declaration doesn't produce a renderable node.
+    }
+
     if (peek().type == CHTLJSTokenType::Animate) {
         advance(); // consume 'animate'
         return parseAnimateBlock();
+    }
+
+    // Check for vir object access, e.g. myListener->click
+    if (peek().type == CHTLJSTokenType::Identifier && context_->virtual_objects.count(peek().lexeme)) {
+        CHTLJSToken vir_name = advance();
+        if (peek().type != CHTLJSTokenType::Arrow && peek().type != CHTLJSTokenType::Dot) {
+            throw std::runtime_error("Expected '->' or '.' after virtual object name.");
+        }
+        advance(); // consume '->' or '.'
+        CHTLJSToken prop_name = advance();
+        if (prop_name.type != CHTLJSTokenType::Identifier) {
+            throw std::runtime_error("Expected property name after '->'.");
+        }
+
+        // Now, inspect the stored node to get the value
+        auto stored_node = context_->virtual_objects.at(vir_name.lexeme);
+        if (stored_node->getType() == CHTLJSNodeType::Listen) {
+            auto listen_node = static_cast<ListenNode*>(stored_node.get());
+            if (listen_node->getEvents().count(prop_name.lexeme)) {
+                return std::make_unique<ValueNode>(listen_node->getEvents().at(prop_name.lexeme));
+            }
+        }
+        // TODO: Add cases for other vir-compatible nodes like AnimateNode
+
+        throw std::runtime_error("Property '" + prop_name.lexeme + "' not found on virtual object '" + vir_name.lexeme + "'.");
     }
 
     std::unique_ptr<CHTLJSNode> object_node;

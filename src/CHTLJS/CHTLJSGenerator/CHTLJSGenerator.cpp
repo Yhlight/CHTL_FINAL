@@ -3,6 +3,7 @@
 #include "CHTLJS/CHTLJSNode/ListenNode.h"
 #include "CHTLJS/CHTLJSNode/DelegateNode.h"
 #include "CHTLJS/CHTLJSNode/AnimateNode.h"
+#include "CHTLJS/CHTLJSNode/ValueNode.h"
 #include <stdexcept>
 #include <sstream>
 
@@ -29,6 +30,9 @@ void CHTLJSGenerator::visit(const CHTLJSNode* node) {
             break;
         case CHTLJSNodeType::Animate:
             visitAnimateNode(static_cast<const AnimateNode*>(node));
+            break;
+        case CHTLJSNodeType::Value:
+            visitValueNode(static_cast<const ValueNode*>(node));
             break;
         default:
             throw std::runtime_error("Unknown CHTL JS node type for generation.");
@@ -139,6 +143,10 @@ void CHTLJSGenerator::visitAnimateNode(const AnimateNode* node) {
             output_ += ";\n";
         }
     }
+}
+
+void CHTLJSGenerator::visitValueNode(const ValueNode* node) {
+    output_ += node->getValue();
 }
 
 

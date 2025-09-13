@@ -5,12 +5,13 @@
 #include "../CHTLJSNode/CHTLJSNode.h"
 #include <vector>
 #include <memory>
+#include "CHTLJSContext.h"
 
 namespace CHTLJS {
 
 class CHTLJSParser {
 public:
-    explicit CHTLJSParser(std::vector<CHTLJSToken>& tokens);
+    explicit CHTLJSParser(std::vector<CHTLJSToken>& tokens, std::shared_ptr<CHTLJSContext> context);
     std::unique_ptr<CHTLJSNode> parse();
 
 private:
@@ -22,6 +23,7 @@ private:
     std::unique_ptr<CHTLJSNode> parseAnimateBlock();
 
     std::vector<CHTLJSToken>& tokens_;
+    std::shared_ptr<CHTLJSContext> context_;
     size_t current_ = 0;
 };
 

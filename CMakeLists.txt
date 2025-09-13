@@ -71,6 +71,10 @@ add_test(
     COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/animate_test.chtl
 )
 add_test(
+    NAME run_vir_object_test
+    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/vir_object_test.chtl
+)
+add_test(
     NAME run_responsive_values_test
     COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/responsive_values_test.chtl
 )
