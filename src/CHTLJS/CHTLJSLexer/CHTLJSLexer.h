@@ -4,6 +4,7 @@
 #include "CHTLJSToken.h"
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace CHTLJS {
 
@@ -14,6 +15,7 @@ public:
 
 private:
     void scanToken();
+    void identifier();
 
     char peek() const;
     char advance();
@@ -25,6 +27,8 @@ private:
     size_t start_ = 0;
     size_t current_ = 0;
     size_t line_ = 1;
+
+    static const std::unordered_map<std::string, CHTLJSTokenType> keywords;
 };
 
 } // namespace CHTLJS

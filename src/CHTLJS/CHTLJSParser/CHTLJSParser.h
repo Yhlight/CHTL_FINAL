@@ -17,6 +17,7 @@ private:
     const CHTLJSToken& peek() const;
     const CHTLJSToken& advance();
     bool isAtEnd() const;
+    std::unique_ptr<CHTLJSNode> parseListenBlock(std::unique_ptr<CHTLJSNode> object);
 
     std::vector<CHTLJSToken>& tokens_;
     size_t current_ = 0;

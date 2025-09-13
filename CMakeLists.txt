@@ -58,3 +58,7 @@ add_test(
     NAME run_script_block_test
     COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/script_block_test.chtl
 )
+add_test(
+    NAME run_listen_test
+    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/listen_test.chtl
+)

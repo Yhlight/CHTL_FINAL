@@ -1,7 +1,16 @@
 #include "CHTLJS/CHTLJSLexer/CHTLJSLexer.h"
 #include <stdexcept>
+#include <unordered_map>
 
 namespace CHTLJS {
+
+const std::unordered_map<std::string, CHTLJSTokenType> CHTLJSLexer::keywords = {
+    {"listen", CHTLJSTokenType::Listen},
+    {"animate", CHTLJSTokenType::Animate},
+    {"delegate", CHTLJSTokenType::Delegate},
+    {"router", CHTLJSTokenType::Router},
+    {"vir", CHTLJSTokenType::Vir},
+};
 
 CHTLJSLexer::CHTLJSLexer(const std::string& source) : source_(source) {}
 
@@ -19,24 +28,22 @@ void CHTLJSLexer::scanToken() {
     switch (c) {
         case '{':
             if (peek() == '{') {
-                advance(); // consume second '{'
+                advance();
                 addToken(CHTLJSTokenType::OpenDoubleBrace);
-                // Scan for the identifier inside
-                start_ = current_;
-                while (peek() != '}' && !isAtEnd()) {
-                    advance();
-                }
-                if (current_ > start_) {
-                    tokens_.push_back({CHTLJSTokenType::Identifier, source_.substr(start_, current_ - start_), line_, 0});
-                }
+            } else {
+                addToken(CHTLJSTokenType::OpenBrace);
             }
             break;
         case '}':
             if (peek() == '}') {
-                advance(); // consume second '}'
+                advance();
                 addToken(CHTLJSTokenType::CloseDoubleBrace);
+            } else {
+                addToken(CHTLJSTokenType::CloseBrace);
             }
             break;
+        case ':': addToken(CHTLJSTokenType::Colon); break;
+        case ',': addToken(CHTLJSTokenType::Comma); break;
         case '-':
              if (peek() == '>') {
                 advance();
@@ -53,9 +60,33 @@ void CHTLJSLexer::scanToken() {
             // Ignore whitespace
             break;
         default:
-            // For now, we only care about the {{...}} syntax
-            // In the future, this will handle other CHTL JS features
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') {
+                identifier();
+            } else if (c == '/' && peek() == '/') {
+                while(peek() != '\n' && !isAtEnd()) advance();
+            }
+            else {
+                // For now, assume the rest is a JS callback body
+                // This is a major simplification. A real implementation would need to parse JS properly.
+                 while (peek() != ',' && peek() != '}' && !isAtEnd()) {
+                    advance();
+                }
+                addToken(CHTLJSTokenType::Identifier);
+            }
             break;
+    }
+}
+
+void CHTLJSLexer::identifier() {
+    while ((peek() >= 'a' && peek() <= 'z') || (peek() >= 'A' && peek() <= 'Z') || (peek() >= '0' && peek() <= '9') || peek() == '_') {
+        advance();
+    }
+    std::string text = source_.substr(start_, current_ - start_);
+    auto it = keywords.find(text);
+    if (it != keywords.end()) {
+        addToken(it->second);
+    } else {
+        addToken(CHTLJSTokenType::Identifier);
     }
 }
 

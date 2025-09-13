@@ -8,6 +8,7 @@ namespace CHTLJS {
 enum class CHTLJSNodeType {
     Root,
     EnhancedSelector,
+    Listen,
     // Future node types will go here
 };
 
