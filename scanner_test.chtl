@@ -1,0 +1,51 @@
+// scanner_test.chtl
+
+// Global style block, should be extracted as CSS
+style {
+    body {
+        font-family: "Arial", sans-serif;
+        margin: 0;
+    }
+}
+
+// CHTL part
+div {
+    id: main-container;
+
+    // Local style block, should remain in CHTL fragment
+    style {
+        width: 100%;
+        height: 200px;
+        background-color: #eee;
+    }
+
+    text {
+        "Hello, CHTL!"
+    }
+}
+
+// Global script block
+script {
+    // This is standard JS
+    const element = document.getElementById('main-container');
+    console.log("Element found:", element);
+
+    // This is CHTL JS mixed with standard JS
+    {{.main-container}}->listen {
+        click: () => {
+            console.log("Container was clicked!");
+            {{element}}->style.backgroundColor = "blue";
+        }
+    };
+
+    // More standard JS
+    function updateText() {
+        element.innerText = "Updated by JS!";
+    }
+    updateText();
+}
+
+// More CHTL
+footer {
+    text: "End of test file."
+}

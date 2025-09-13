@@ -11,6 +11,7 @@ add_executable(chtl_compiler src/main.cpp)
 
 # Define the source files for the CHTL library
 set(CHTL_LIB_SOURCES
+    src/Scanner/UnifiedScanner.cpp
     src/CHTL/CHTLLexer/CHTLLexer.cpp
     src/CHTL/CHTLParser/CHTLParser.cpp
     src/CHTL/CHTLGenerator/CHTLGenerator.cpp
