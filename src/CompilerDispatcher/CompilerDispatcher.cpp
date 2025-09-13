@@ -18,53 +18,59 @@ CompilerDispatcher::CompilerDispatcher() {
 }
 
 std::string CompilerDispatcher::compile(const std::string& source) {
-    CHTLUnifiedScanner unified_scanner(source);
-    chunks_ = unified_scanner.scan();
+    CHTLUnifiedScanner scanner(source);
+    auto chunks = scanner.scan();
+    const auto& placeholder_map = scanner.getPlaceholderMap();
 
     std::string html_output;
-    std::vector<std::string> js_outputs;
     std::vector<std::string> css_outputs;
+    std::vector<std::string> js_outputs;
 
-    for (const auto& chunk : chunks_) {
+    // First pass for CHTL and raw CSS/JS
+    for (const auto& chunk : chunks) {
         if (chunk.content.empty()) continue;
 
-        if (chunk.type == ChunkType::CHTL) {
-            CHTLLoader loader;
-            CHTLLexer lexer(chunk.content);
-            std::vector<Token> tokens = lexer.scanTokens();
-            if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == TokenType::EndOfFile)) continue;
+        switch (chunk.type) {
+            case ChunkType::CHTL: {
+                CHTLLoader loader;
+                CHTLLexer lexer(chunk.content);
+                std::vector<Token> tokens = lexer.scanTokens();
+                if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == TokenType::EndOfFile)) continue;
 
-            CHTLParser parser(chunk.content, tokens, loader, "./", chtl_context_);
-            std::unique_ptr<RootNode> ast = parser.parse();
+                CHTLParser parser(chunk.content, tokens, loader, "./", chtl_context_);
+                std::unique_ptr<RootNode> ast = parser.parse();
 
-            CHTLGenerator generator;
-            CompilationResult result = generator.generate(*ast);
-            html_output += result.html;
-            if (!result.js.empty()) {
-                js_outputs.push_back(result.js);
+                CHTLGenerator generator;
+                CompilationResult result = generator.generate(*ast);
+                html_output += result.html;
+                if (!result.js.empty()) {
+                    js_outputs.push_back(result.js);
+                }
+                break;
             }
-
-        } else if (chunk.type == ChunkType::ChtlJs) {
-            CHTLJS::CHTLJSLexer lexer(chunk.content);
-            std::vector<CHTLJS::CHTLJSToken> tokens = lexer.scanTokens();
-            if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) continue;
-
-            CHTLJS::CHTLJSParser parser(tokens, chtljs_context_);
-            std::unique_ptr<CHTLJS::CHTLJSNode> ast = parser.parse();
-
-            if (ast) {
-                CHTLJS::CHTLJSGenerator generator;
-                js_outputs.push_back(generator.generate(*ast));
+            case ChunkType::Css: {
+                css_outputs.push_back(chunk.content);
+                break;
             }
-        } else if (chunk.type == ChunkType::Css) {
-            // For now, we just pass the raw CSS through.
-            // In the future, a CSS parser/processor could be added here.
-            css_outputs.push_back(chunk.content);
+            case ChunkType::JavaScript: {
+                js_outputs.push_back(chunk.content);
+                break;
+            }
+            default:
+                // ChtlJs and Placeholder chunks will be handled by the CHTLJSGenerator
+                break;
         }
     }
 
+    // Second pass for CHTL-JS, which needs the full context of placeholders
+    CHTLJS::CHTLJSGenerator chtljs_generator;
+    std::string chtljs_output = chtljs_generator.generate(chunks, placeholder_map, chtljs_context_);
+    if (!chtljs_output.empty()) {
+        js_outputs.push_back(chtljs_output);
+    }
+
     CodeMerger merger;
-    return merger.merge(html_output, js_outputs, css_outputs);
+    return merger.merge(html_output, css_outputs, js_outputs);
 }
 
 } // namespace CHTL

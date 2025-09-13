@@ -1,14 +1,14 @@
 #ifndef CHTL_COMPILER_DISPATCHER_H
 #define CHTL_COMPILER_DISPATCHER_H
 
-#include "../Scanner/CHTLUnifiedScanner.h"
-#include "../CHTL/CHTLParser/CHTLParser.h"
-// #include "../CHTLJS/CHTLJSParser.h" // Future CHTL JS Parser
-// #include "../CodeMerger/CodeMerger.h" // Future Code Merger
+#include "Scanner/CHTLUnifiedScanner.h"
+#include "CHTL/CHTLParser/CHTLParser.h"
+#include "CHTLJS/CHTLJSParser/CHTLJSParser.h"
+#include "CodeMerger/CodeMerger.h"
 #include <string>
 #include <vector>
 #include <memory>
-#include "../CHTLJS/CHTLJSParser/CHTLJSContext.h"
+#include "CHTLJS/CHTLJSParser/CHTLJSContext.h"
 
 namespace CHTL {
 

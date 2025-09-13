@@ -10,9 +10,9 @@ class CodeMerger {
 public:
     CodeMerger() = default;
 
-    // Takes the main HTML output and collections of JavaScript and CSS strings
+    // Takes the main HTML output and collections of CSS and JavaScript strings
     // and merges them into a final HTML document.
-    std::string merge(const std::string& html_output, const std::vector<std::string>& js_outputs, const std::vector<std::string>& css_outputs);
+    std::string merge(const std::string& html_output, const std::vector<std::string>& css_outputs, const std::vector<std::string>& js_outputs);
 };
 
 } // namespace CHTL

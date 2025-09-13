@@ -1,8 +1,12 @@
 #ifndef CHTL_JS_GENERATOR_H
 #define CHTL_JS_GENERATOR_H
 
-#include "../CHTLJSNode/CHTLJSNode.h"
+#include "Scanner/CHTLUnifiedScanner.h" // For CodeChunk
+#include "CHTLJS/CHTLJSParser/CHTLJSParser.h" // For CHTLJSParser
 #include <string>
+#include <vector>
+#include <map>
+#include <memory>
 
 namespace CHTLJS {
 
@@ -16,7 +20,7 @@ class ValueNode;
 class CHTLJSGenerator {
 public:
     CHTLJSGenerator();
-    std::string generate(const CHTLJSNode& root);
+    std::string generate(const std::vector<CHTL::CodeChunk>& chunks, const std::map<std::string, std::string>& placeholder_map, std::shared_ptr<CHTLJSContext> context);
 
 private:
     void visit(const CHTLJSNode* node);

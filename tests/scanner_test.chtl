@@ -1,0 +1,34 @@
+div {
+    id: myDiv;
+    text: "Hello, World!";
+}
+
+style {
+    body {
+        background-color: #f0f0f0;
+    }
+}
+
+div {
+    script {
+        const myElement = {{#myDiv}};
+        myElement->listen {
+            click: () => {
+                console.log("Element clicked!");
+            }
+        };
+        const anotherVar = 123;
+    }
+}
+
+[Origin] @Html {
+    <p>This is a raw HTML paragraph.</p>
+}
+
+[Origin] @Style {
+    .raw-css { color: blue; }
+}
+
+[Origin] @JavaScript {
+    alert("Raw JavaScript executed!");
+}

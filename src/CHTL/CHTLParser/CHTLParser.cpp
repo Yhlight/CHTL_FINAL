@@ -374,9 +374,7 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
 
 void CHTLParser::parseElementBody(ElementNode& element) {
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        // Specifically check for the attribute form `text: "..."`
-        if (peek().type == TokenType::Text && (peekNext().type == TokenType::Colon || peekNext().type == TokenType::Equals)) {
-             match({TokenType::Text}); // Consume the 'text' token
+        if (match({TokenType::Text})) {
              consumeColonOrEquals();
              std::string value;
              if (match({TokenType::StringLiteral, TokenType::UnquotedLiteral, TokenType::Identifier})) {
@@ -387,7 +385,6 @@ void CHTLParser::parseElementBody(ElementNode& element) {
              consume(TokenType::Semicolon, "Expected ';' after text attribute value.");
              element.children_.push_back(std::make_unique<TextNode>(value));
         }
-        // Check for any other attribute `identifier: "..."`
         else if (peek().type == TokenType::Identifier && (peekNext().type == TokenType::Colon || peekNext().type == TokenType::Equals)) {
             const Token& key = consume(TokenType::Identifier, "Expected attribute name.");
             consumeColonOrEquals();
@@ -402,7 +399,6 @@ void CHTLParser::parseElementBody(ElementNode& element) {
             consume(TokenType::Semicolon, "Expected ';' after attribute value.");
             element.attributes_.push_back(std::make_unique<AttributeNode>(key.lexeme, value));
         }
-        // Otherwise, it must be a nested declaration (element, text block, style block, etc.)
         else {
             if (match({TokenType::Except})) {
                 do {
