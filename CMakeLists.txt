@@ -4,7 +4,7 @@ project(CHTL_Compiler CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# enable_testing()
+enable_testing()
 
 # Define the executable
 add_executable(chtl_compiler src/main.cpp)
@@ -34,8 +34,8 @@ target_include_directories(chtl_compiler PUBLIC src)
 target_include_directories(chtl_lib PUBLIC src)
 
 # Configuration for the new test runner
-# add_executable(test_runner tests/test_runner.cpp)
-# target_link_libraries(test_runner PRIVATE stdc++fs)
+add_executable(test_runner tests/test_runner.cpp)
+target_link_libraries(test_runner PRIVATE stdc++fs)
 
 # Add the new single test command
-# add_test(NAME SnapshotTests WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} COMMAND test_runner)
+add_test(NAME SnapshotTests WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} COMMAND test_runner)
