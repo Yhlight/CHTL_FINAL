@@ -8,6 +8,7 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include <set>
 
 namespace CHTL {
 
@@ -17,6 +18,7 @@ struct ParserContext {
     std::unordered_map<std::string, std::shared_ptr<StyleTemplateNode>> style_templates_;
     std::unordered_map<std::string, std::shared_ptr<ElementTemplateNode>> element_templates_;
     std::unordered_map<std::string, std::shared_ptr<VarTemplateNode>> var_templates_;
+    std::set<std::string> imported_namespaces_;
 };
 
 } // namespace CHTL

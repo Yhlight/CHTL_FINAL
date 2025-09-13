@@ -62,6 +62,9 @@ private:
     const Token& consume(TokenType type, const std::string& message);
     void synchronize();
 
+    enum class TemplateType { Style, Element, Var };
+    std::string resolveUnqualifiedName(const std::string& name, TemplateType type);
+
     std::vector<Token>& tokens_;
     CHTLLoader& loader_;
     std::string current_path_;

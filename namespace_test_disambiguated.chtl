@@ -1,0 +1,11 @@
+[Import] @Chtl from "ns1.chtl";
+[Import] @Chtl from "ns2.chtl";
+
+html {
+    body {
+        // This should succeed by using "from" to specify which "Box" to use.
+        @Element Box from space1;
+
+        @Element Box from space2;
+    }
+}

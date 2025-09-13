@@ -79,6 +79,10 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
                 imported_parser.current_namespace_ = default_namespace;
             }
 
+            if (!imported_parser.current_namespace_.empty()) {
+                context_->imported_namespaces_.insert(imported_parser.current_namespace_);
+            }
+
             imported_parser.parse();
         }
 
@@ -91,13 +95,16 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     }
     if (match({TokenType::AtElement})) {
         const Token& name = consume(TokenType::Identifier, "Expected template name after '@Element'.");
-        std::string qualified_name = name.lexeme;
+        std::string qualified_name;
         if (match({TokenType::From})) {
             const Token& ns = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
             qualified_name = ns.lexeme + "::" + name.lexeme;
+        } else {
+            qualified_name = resolveUnqualifiedName(name.lexeme, TemplateType::Element);
         }
 
         if (!context_->element_templates_.count(qualified_name)) {
+            // This should ideally not be reached if resolveUnqualifiedName works correctly, but it's good practice.
             throw std::runtime_error("Use of undefined element template '" + qualified_name + "'.");
         }
 
@@ -608,11 +615,13 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
         if (match({TokenType::AtStyle})) {
             const Token& name = consume(TokenType::Identifier, "Expected template name after '@Style'.");
-            std::string qualified_name = name.lexeme;
+            std::string qualified_name;
 
             if (match({TokenType::From})) {
                  const Token& ns = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
                  qualified_name = ns.lexeme + "::" + name.lexeme;
+            } else {
+                qualified_name = resolveUnqualifiedName(name.lexeme, TemplateType::Style);
             }
 
             if (!context_->style_templates_.count(qualified_name)) {
@@ -714,24 +723,30 @@ std::vector<PropertyValue> CHTLParser::parsePropertyValue() {
             Token prop = consume(TokenType::Identifier, "Expected property name after '.'.");
             parts.emplace_back(PropertyReferenceNode(selector, prop));
         } else if (first.type == TokenType::Identifier && second.type == TokenType::OpenParen) {
+            // This could be a variable group like `MyVars(var_name)`
             if (tokens_[current_ + 2].type == TokenType::Identifier && tokens_[current_ + 3].type == TokenType::CloseParen) {
-                const Token& groupName = advance();
+                const Token& groupNameToken = advance();
                 consume(TokenType::OpenParen, "Expected '(' after variable group name.");
-                const Token& varName = consume(TokenType::Identifier, "Expected variable name inside parentheses.");
+                const Token& varNameToken = consume(TokenType::Identifier, "Expected variable name inside parentheses.");
                 consume(TokenType::CloseParen, "Expected ')' after variable name.");
 
-                if (context_->var_templates_.count(groupName.lexeme)) {
-                    const auto& templateNode = context_->var_templates_.at(groupName.lexeme);
-                    if (templateNode->variables_.count(varName.lexeme)) {
-                        const auto& substituted_parts = templateNode->variables_.at(varName.lexeme);
+                // Here we resolve the variable group name
+                std::string qualified_group_name = resolveUnqualifiedName(groupNameToken.lexeme, TemplateType::Var);
+
+                if (context_->var_templates_.count(qualified_group_name)) {
+                    const auto& templateNode = context_->var_templates_.at(qualified_group_name);
+                    if (templateNode->variables_.count(varNameToken.lexeme)) {
+                        const auto& substituted_parts = templateNode->variables_.at(varNameToken.lexeme);
                         parts.insert(parts.end(), substituted_parts.begin(), substituted_parts.end());
                     } else {
-                        throw std::runtime_error("Undefined variable '" + varName.lexeme + "' in group '" + groupName.lexeme + "'.");
+                        throw std::runtime_error("Undefined variable '" + varNameToken.lexeme + "' in group '" + groupNameToken.lexeme + "'.");
                     }
                 } else {
-                    throw std::runtime_error("Use of undefined variable group '" + groupName.lexeme + "'.");
+                    // This should not be reached if the resolver works.
+                    throw std::runtime_error("Use of undefined variable group '" + groupNameToken.lexeme + "'.");
                 }
             } else {
+                // Not a var group, just a regular token.
                 parts.emplace_back(advance());
             }
         }
@@ -837,6 +852,59 @@ void CHTLParser::checkConstraints(const ElementNode& parent, const Node& child) 
             }
         }
     }
+}
+
+std::string CHTLParser::resolveUnqualifiedName(const std::string& name, TemplateType type) {
+    // 1. Check global namespace first
+    switch (type) {
+        case TemplateType::Style:
+            if (context_->style_templates_.count(name)) return name;
+            break;
+        case TemplateType::Element:
+            if (context_->element_templates_.count(name)) return name;
+            break;
+        case TemplateType::Var:
+            if (context_->var_templates_.count(name)) return name;
+            break;
+    }
+
+    // 2. Search imported namespaces
+    std::vector<std::string> found_in_namespaces;
+    for (const auto& ns : context_->imported_namespaces_) {
+        std::string qualified_name = ns + "::" + name;
+        bool found = false;
+        switch (type) {
+            case TemplateType::Style:
+                if (context_->style_templates_.count(qualified_name)) found = true;
+                break;
+            case TemplateType::Element:
+                if (context_->element_templates_.count(qualified_name)) found = true;
+                break;
+            case TemplateType::Var:
+                if (context_->var_templates_.count(qualified_name)) found = true;
+                break;
+        }
+        if (found) {
+            found_in_namespaces.push_back(ns);
+        }
+    }
+
+    // 3. Analyze results
+    if (found_in_namespaces.empty()) {
+        throw std::runtime_error("Use of undefined template '" + name + "'. It was not found in the global scope or any imported namespace.");
+    }
+
+    if (found_in_namespaces.size() > 1) {
+        std::string error_msg = "Ambiguous reference to template '" + name + "'. It was found in multiple namespaces: ";
+        for (const auto& ns : found_in_namespaces) {
+            error_msg += ns + " ";
+        }
+        error_msg += ". Use 'from <namespace>' to disambiguate.";
+        throw std::runtime_error(error_msg);
+    }
+
+    // Exactly one match found
+    return found_in_namespaces[0] + "::" + name;
 }
 
 } // namespace CHTL
