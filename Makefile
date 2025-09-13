@@ -272,6 +272,54 @@ src/CHTL/CHTLParser/CHTLParser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.s
 .PHONY : src/CHTL/CHTLParser/CHTLParser.cpp.s
 
+src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.o: src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o
+.PHONY : src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.o
+
+# target to build an object file
+src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o
+.PHONY : src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o
+
+src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.i: src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.i
+.PHONY : src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.i
+
+# target to preprocess a source file
+src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.i
+.PHONY : src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.i
+
+src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.s: src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.s
+.PHONY : src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.s
+
+# target to generate assembly for a file
+src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.s
+.PHONY : src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.s
+
+src/CHTL_JS/CHTLJSParser/CHTLJSParser.o: src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o
+.PHONY : src/CHTL_JS/CHTLJSParser/CHTLJSParser.o
+
+# target to build an object file
+src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o
+.PHONY : src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o
+
+src/CHTL_JS/CHTLJSParser/CHTLJSParser.i: src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.i
+.PHONY : src/CHTL_JS/CHTLJSParser/CHTLJSParser.i
+
+# target to preprocess a source file
+src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.i
+.PHONY : src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.i
+
+src/CHTL_JS/CHTLJSParser/CHTLJSParser.s: src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.s
+.PHONY : src/CHTL_JS/CHTLJSParser/CHTLJSParser.s
+
+# target to generate assembly for a file
+src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.s
+.PHONY : src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.s
+
 src/CompilerDispatcher/CompilerDispatcher.o: src/CompilerDispatcher/CompilerDispatcher.cpp.o
 .PHONY : src/CompilerDispatcher/CompilerDispatcher.o
 
@@ -370,6 +418,12 @@ help:
 	@echo "... src/CHTL/CHTLParser/CHTLParser.o"
 	@echo "... src/CHTL/CHTLParser/CHTLParser.i"
 	@echo "... src/CHTL/CHTLParser/CHTLParser.s"
+	@echo "... src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.o"
+	@echo "... src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.i"
+	@echo "... src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.s"
+	@echo "... src/CHTL_JS/CHTLJSParser/CHTLJSParser.o"
+	@echo "... src/CHTL_JS/CHTLJSParser/CHTLJSParser.i"
+	@echo "... src/CHTL_JS/CHTLJSParser/CHTLJSParser.s"
 	@echo "... src/CompilerDispatcher/CompilerDispatcher.o"
 	@echo "... src/CompilerDispatcher/CompilerDispatcher.i"
 	@echo "... src/CompilerDispatcher/CompilerDispatcher.s"

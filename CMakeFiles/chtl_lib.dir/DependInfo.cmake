@@ -13,6 +13,8 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/app/src/CHTL/CHTLLexer/CHTLLexer.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o.d"
   "/app/src/CHTL/CHTLLoader/CHTLLoader.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.o.d"
   "/app/src/CHTL/CHTLParser/CHTLParser.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o.d"
+  "/app/src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o.d"
+  "/app/src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp" "CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o.d"
   "/app/src/CompilerDispatcher/CompilerDispatcher.cpp" "CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o.d"
   "/app/src/Scanner/UnifiedScanner.cpp" "CMakeFiles/chtl_lib.dir/src/Scanner/UnifiedScanner.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/Scanner/UnifiedScanner.cpp.o.d"
   )

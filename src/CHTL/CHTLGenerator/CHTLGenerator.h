@@ -38,7 +38,7 @@ public:
 private:
     std::shared_ptr<CompilerDispatcher> dispatcher_;
 
-    std::string resolvePlaceholders(std::string content);
+    std::string resolvePlaceholders(std::string content, bool is_script);
 
     // Two-pass methods
     void firstPass(Node* node);

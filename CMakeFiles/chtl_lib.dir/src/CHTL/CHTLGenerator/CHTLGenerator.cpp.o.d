@@ -202,11 +202,19 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: \
  /usr/include/c++/13/unordered_map \
  /usr/include/c++/13/bits/unordered_map.h \
  /usr/include/c++/13/bits/hashtable.h \
- /usr/include/c++/13/bits/hashtable_policy.h /usr/include/c++/13/stack \
- /usr/include/c++/13/deque /usr/include/c++/13/bits/stl_deque.h \
- /usr/include/c++/13/bits/deque.tcc /usr/include/c++/13/bits/stl_stack.h \
- /usr/include/c++/13/cmath /usr/include/math.h \
- /usr/include/x86_64-linux-gnu/bits/math-vector.h \
+ /usr/include/c++/13/bits/hashtable_policy.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTL_JS/CHTLJSLexer/CHTLJSLexer.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTL_JS/CHTLJSLexer/CHTLJSToken.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTL_JS/CHTLJSParser/CHTLJSParser.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTL_JS/CHTLJSParser/../CHTLJSLexer/CHTLJSToken.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTL_JS/CHTLJSParser/../CHTLJSNode/CHTLJSBaseNode.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTL_JS/CHTLJSNode/SelectorNode.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTL_JS/CHTLJSNode/CHTLJSBaseNode.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTL_JS/CHTLJSNode/JSCodeNode.h \
+ /usr/include/c++/13/stack /usr/include/c++/13/deque \
+ /usr/include/c++/13/bits/stl_deque.h /usr/include/c++/13/bits/deque.tcc \
+ /usr/include/c++/13/bits/stl_stack.h /usr/include/c++/13/cmath \
+ /usr/include/math.h /usr/include/x86_64-linux-gnu/bits/math-vector.h \
  /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
  /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h \
  /usr/include/x86_64-linux-gnu/bits/fp-logb.h \

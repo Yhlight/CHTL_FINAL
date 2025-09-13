@@ -1,4 +1,8 @@
 #include "CHTLGenerator.h"
+#include "../../CHTL_JS/CHTLJSLexer/CHTLJSLexer.h"
+#include "../../CHTL_JS/CHTLJSParser/CHTLJSParser.h"
+#include "../../CHTL_JS/CHTLJSNode/SelectorNode.h"
+#include "../../CHTL_JS/CHTLJSNode/JSCodeNode.h"
 #include <map>
 #include <stack>
 #include <vector>
@@ -15,8 +19,33 @@ ElementNode* findElementBySelector(const std::string& selector, const std::vecto
 
 CHTLGenerator::CHTLGenerator(std::shared_ptr<CompilerDispatcher> dispatcher) : dispatcher_(dispatcher) {}
 
-std::string CHTLGenerator::resolvePlaceholders(std::string content) {
+std::string CHTLGenerator::resolvePlaceholders(std::string content, bool is_script) {
     size_t pos = 0;
+
+    if (is_script) {
+        // This is script content, which may contain CHTL JS and JS placeholders.
+        // We need to compile the CHTL JS parts.
+        CHTL_JS::CHTLJSLexer js_lexer(content);
+        auto js_tokens = js_lexer.scanTokens();
+
+        CHTL_JS::CHTLJSParser js_parser(js_tokens);
+        auto js_ast = js_parser.parse();
+
+        std::stringstream final_script;
+        for (const auto& node : js_ast) {
+            if (auto selector_node = dynamic_cast<CHTL_JS::SelectorNode*>(node.get())) {
+                // TODO: This is where the CHTL JS -> JS compilation would happen.
+                // For now, just output the selector as a string literal for testing.
+                final_script << "\"" << selector_node->selector_text_ << "\"";
+            } else if (auto js_code_node = dynamic_cast<CHTL_JS::JSCodeNode*>(node.get())) {
+                // This is a placeholder for standard JS, resolve it.
+                final_script << dispatcher_->getPlaceholderContent(js_code_node->placeholder_);
+            }
+        }
+        return final_script.str();
+    }
+
+    // This is for non-script content, like [Origin] blocks
     while(pos < content.length()) {
         size_t next_placeholder = content.find("__", pos);
         if (next_placeholder == std::string::npos) {
@@ -31,8 +60,6 @@ std::string CHTLGenerator::resolvePlaceholders(std::string content) {
         std::string placeholder = content.substr(next_placeholder, end_pos - next_placeholder + 2);
         std::string resolved_content = dispatcher_->getPlaceholderContent(placeholder);
 
-        // This is where a sub-compiler would be called based on prefix.
-        // For now, we just substitute the original text back.
         content.replace(next_placeholder, placeholder.length(), resolved_content);
         pos = next_placeholder + resolved_content.length();
     }
@@ -462,7 +489,7 @@ void CHTLGenerator::renderComment(const CommentNode* node) {
 
 void CHTLGenerator::renderOrigin(const OriginNode* node) {
     if (dispatcher_) {
-        output_ << dispatcher_->getPlaceholderContent(node->content_);
+        output_ << resolvePlaceholders(node->content_, false);
     } else {
         // Fallback for when no dispatcher is provided (e.g. old tests)
         output_ << node->content_;
@@ -476,7 +503,7 @@ void CHTLGenerator::renderScriptBlock(const ScriptBlockNode* node) {
     indent();
     if (dispatcher_) {
         std::string script_content = dispatcher_->getPlaceholderContent(node->content_);
-        output_ << resolvePlaceholders(script_content);
+        output_ << resolvePlaceholders(script_content, true);
     }
     output_ << "\n";
     indentLevel_--;
