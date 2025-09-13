@@ -32,7 +32,7 @@ private:
     std::unique_ptr<OriginNode> parseOriginBlock();
     void parseConfigurationBlock();
     void parseTemplateDefinition(bool is_custom);
-    std::unique_ptr<ElementNode> parseElement();
+    std::unique_ptr<ElementNode> parseElement(const Token& name);
     void parseElementBody(ElementNode& element);
     void parseAttributes(ElementNode& element);
     std::vector<Token> parsePropertyValue();

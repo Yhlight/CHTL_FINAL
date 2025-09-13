@@ -1,0 +1,45 @@
+[Template] @Element Box
+{
+    div {
+        class: "header";
+        text: "Header";
+    }
+    span {
+        text: "Content 1";
+    }
+    span {
+        text: "Content 2";
+    }
+    div {
+        class: "footer";
+        text: "Footer";
+    }
+}
+
+html {
+    body {
+        -- Use the Box template and customize it
+        @Element Box
+        {
+            -- 1. Apply targeted styling with indexed access
+            span[0] {
+                style {
+                    color: "blue";
+                }
+            }
+
+            -- 2. Delete an element
+            delete span[1];
+
+            -- 3. Insert an element
+            insert after div[0] {
+                hr {}
+            }
+
+            -- 4. Replace an element
+            insert replace div[1] {
+                p { text: "New Footer"; }
+            }
+        }
+    }
+}
