@@ -308,14 +308,19 @@ void CHTLGenerator::firstPassVisitElement(ElementNode* node) {
         if (child->getType() == NodeType::StyleBlock) {
             auto* styleNode = static_cast<StyleBlockNode*>(child.get());
             for (const auto& prop : styleNode->inline_properties_) {
-                bool has_reference = false;
+                bool needs_second_pass = false;
                 for (const auto& part : prop.second) {
                     if (std::holds_alternative<PropertyReferenceNode>(part)) {
-                        has_reference = true;
+                        needs_second_pass = true;
+                        break;
+                    }
+                    if (std::holds_alternative<Token>(part) && std::get<Token>(part).type == TokenType::QuestionMark) {
+                        needs_second_pass = true;
                         break;
                     }
                 }
-                if (has_reference) {
+
+                if (needs_second_pass) {
                     unresolved_properties_.push_back({node, prop.first, prop.second});
                 } else {
                     Value value = resolvePropertyValue(prop.second);
@@ -327,22 +332,36 @@ void CHTLGenerator::firstPassVisitElement(ElementNode* node) {
             }
             for (const auto& rule : styleNode->rules_) {
                 const std::string& selector = rule->selector_;
-                if (selector.length() > 1 && selector[0] == '.') {
+                if (selector.length() > 1 && selector[0] == '.' && context_->config_.DISABLE_STYLE_AUTO_ADD_CLASS == false) {
                     std::string className = selector.substr(1);
                     AttributeNode* classAttr = nullptr;
                     for (auto& attr : node->attributes_) {
                         if (attr->key_ == "class") { classAttr = attr.get(); break; }
                     }
                     if (classAttr) {
-                        if (classAttr->value_.find(className) == std::string::npos) classAttr->value_ += " " + className;
+                        // Check if the class already exists in the attribute value
+                        std::stringstream ss(classAttr->value_);
+                        std::string existing_class;
+                        bool found = false;
+                        while (ss >> existing_class) {
+                            if (existing_class == className) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            classAttr->value_ += " " + className;
+                        }
                     } else {
                         node->attributes_.push_back(std::make_unique<AttributeNode>("class", className));
                     }
-                } else if (selector.length() > 1 && selector[0] == '#') {
+                } else if (selector.length() > 1 && selector[0] == '#' && context_->config_.DISABLE_STYLE_AUTO_ADD_ID == false) {
                     std::string idName = selector.substr(1);
                     bool idExists = false;
                     for (const auto& attr : node->attributes_) { if (attr->key_ == "id") { idExists = true; break; } }
-                    if (!idExists) node->attributes_.push_back(std::make_unique<AttributeNode>("id", idName));
+                    if (!idExists) {
+                        node->attributes_.push_back(std::make_unique<AttributeNode>("id", idName));
+                    }
                 }
             }
             std::string element_selector;

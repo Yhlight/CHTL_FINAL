@@ -1,0 +1,21 @@
+div {
+    style {
+        .auto-class {
+            color: red;
+        }
+        #auto-id {
+            border: 1px solid black;
+        }
+    }
+    text: "This div should get a class and an id automatically.";
+}
+
+span {
+    class: "existing-class";
+    style {
+        .another-class {
+            font-weight: bold;
+        }
+    }
+    text: "This span should have its existing class preserved and the new one appended.";
+}
