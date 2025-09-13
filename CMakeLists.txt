@@ -33,15 +33,13 @@ target_link_libraries(chtl_compiler PRIVATE chtl_lib)
 target_include_directories(chtl_compiler PUBLIC src)
 target_include_directories(chtl_lib PUBLIC src)
 
-# Configuration for the original snapshot test runner
+# Configuration for the new test runner
 add_executable(test_runner tests/test_runner.cpp)
 target_link_libraries(test_runner PRIVATE stdc++fs)
-# The original test runner executes the compiler, so it doesn't need to link to the lib
 
-# Configuration for our new isolated scanner test
-add_executable(scanner_test_runner tests/run_scanner_test.cpp)
+# Add the new single test command
+add_test(NAME SnapshotTests WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} COMMAND test_runner)
+
+# Configuration for the scanner-specific test runner
+add_executable(scanner_test_runner tests/scanner_integration_test.cpp)
 target_link_libraries(scanner_test_runner PRIVATE chtl_lib)
-target_include_directories(scanner_test_runner PUBLIC src)
-
-# The `add_test` command is for the original snapshot tests. We will run our
-# scanner_test_runner manually for isolated testing.

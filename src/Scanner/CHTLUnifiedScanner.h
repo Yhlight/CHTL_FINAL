@@ -29,7 +29,7 @@ public:
 private:
     void process();
     void handleScriptTag();
-    void handleStyleTag();
+    void handleStyleTag(int brace_level);
     void handleChtlBlock();
 
     const std::string& source_;

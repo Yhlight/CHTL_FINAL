@@ -1,0 +1,127 @@
+Start testing: Sep 13 17:31 UTC
+----------------------------------------------------------
+1/1 Testing: SnapshotTests
+1/1 Test: SnapshotTests
+Command: "/app/test_runner"
+Directory: /app
+"SnapshotTests" start time: Sep 13 17:31 UTC
+Output:
+----------------------------------------------------------
+Running CHTL Snapshot Tester...
+TEST: vir_object_test ... FAILED (Compiler Error)
+Parse Error: Expected ';' after attribute value. at line 3
+Parse Error: Expected '{' after 'text' keyword. at line 3
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected '{' after 'text' keyword. at line 4
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected a declaration (element, text, etc.).
+
+TEST: conditional_expressions_test ... FAILED (Compiler Error)
+Parse Error: Expected '}' after element body. at line 5
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected a declaration (element, text, etc.).
+
+TEST: test ... FAILED (Compiler Error)
+Parse Error: Expected '}' after element body. at line 2
+Parse Error: Expected a declaration (element, text, etc.).
+
+TEST: listen_test ... FAILED (Compiler Error)
+Parse Error: Expected '}' after element body. at line 11
+Parse Error: Expected a declaration (element, text, etc.).
+
+TEST: scanner_test ... FAILED (Compiler Error)
+Parse Error: Expected '}' after element body. at line 8
+Parse Error: Expected a declaration (element, text, etc.).
+
+TEST: responsive_values_test ... FAILED (Compiler Error)
+Parse Error: Expected '}' after element body. at line 5
+Parse Error: Expected '{' after 'text' keyword. at line 2
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected a declaration (element, text, etc.).
+
+TEST: selector_test ... FAILED (Compiler Error)
+Parse Error: Expected '}' after element body. at line 3
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected a declaration (element, text, etc.).
+
+TEST: delete_test ... FAILED (Compiler Error)
+Parse Error: Expected ':' or '=' at line 3
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected a declaration (element, text, etc.).
+Content from CHTL
+More content from CHTL
+
+TEST: delegate_test ... FAILED (Compiler Error)
+Parse Error: Expected '}' after element body. at line 15
+Parse Error: Expected a declaration (element, text, etc.).
+
+TEST: debug_test ... FAILED (Compiler Error)
+Parse Error: Expected '}' after element body. at line 2
+Parse Error: Expected a declaration (element, text, etc.).
+
+TEST: custom_style_groups_test ... FAILED (Compiler Error)
+Parse Error: Expected ':' or '=' at line 21
+Parse Error: Expected ':' or '=' at line 4
+Parse Error: Expected '{' after 'text' keyword. at line 11
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Use of undefined template 'WarningText'. It was not found in the global scope or any imported namespace.
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Use of undefined template 'WarningText'. It was not found in the global scope or any imported namespace.
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected '{' after 'text' keyword. at line 29
+Parse Error: Expected a declaration (element, text, etc.).
+
+TEST: defaults ... WARNING: No snapshot found. Creating one.
+TEST: components ... WARNING: No snapshot found. Creating one.
+TEST: insert_test ... FAILED (Compiler Error)
+Parse Error: Expected ':' or '=' at line 2
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected ':' or '=' at line 15
+Original paragraph.
+New Main Title
+
+TEST: script_block_test ... FAILED (Compiler Error)
+Parse Error: Expected '}' after element body. at line 11
+Parse Error: Expected a declaration (element, text, etc.).
+
+TEST: definitions ... FAILED (Compiler Error)
+Parse Error: Expected ':' or '=' at line 4
+Parse Error: Expected a declaration (element, text, etc.).
+This is the content of the card.
+
+TEST: auto_inference_test ... FAILED (Compiler Error)
+Parse Error: Expected '}' after element body. at line 3
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected a declaration (element, text, etc.).
+
+TEST: test2 ... FAILED (Compiler Error)
+Parse Error: Expected ':' or '=' at line 4
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected ':' or '=' at line 13
+Parse Error: Expected a declaration (element, text, etc.).
+This is a paragraph.
+
+TEST: animate_test ... FAILED (Compiler Error)
+Parse Error: Expected '}' after element body. at line 5
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected a declaration (element, text, etc.).
+
+TEST: property_reference_test ... FAILED (Compiler Error)
+Parse Error: Expected '}' after element body. at line 3
+Parse Error: Expected a declaration (element, text, etc.).
+Parse Error: Expected a declaration (element, text, etc.).
+
+
+18 test(s) failed.
+<end of output>
+Test time =   0.10 sec
+----------------------------------------------------------
+Test Failed.
+"SnapshotTests" end time: Sep 13 17:31 UTC
+"SnapshotTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 13 17:31 UTC
