@@ -3,6 +3,9 @@
 #include "../CHTL/CHTLParser/CHTLParser.h"
 #include "../CHTL/CHTLGenerator/CHTLGenerator.h"
 #include "../CHTL/CHTLLoader/CHTLLoader.h"
+#include "../CHTLJS/CHTLJSLexer.h"
+#include "../CHTLJS/CHTLJSParser.h"
+#include "../CHTLJS/CHTLJSGenerator.h"
 #include <sstream>
 
 namespace CHTL {
@@ -23,7 +26,12 @@ std::string CompilerDispatcher::compile(const FragmentList& fragments, const std
             CHTLGenerator generator;
             final_html << generator.generate(*ast);
         } else if (fragment.type == FragmentType::JavaScript) {
-            final_js << fragment.content;
+            CHTLJS::CHTLJSLexer js_lexer(fragment.content);
+            auto js_tokens = js_lexer.scanTokens();
+            CHTLJS::CHTLJSParser js_parser(std::move(js_tokens));
+            auto js_ast = js_parser.parse();
+            CHTLJS::CHTLJSGenerator js_generator;
+            final_js << js_generator.generate(js_ast);
         }
     }
 

@@ -17,6 +17,9 @@ set(CHTL_LIB_SOURCES
     src/CHTL/CHTLLoader/CHTLLoader.cpp
     src/Scanner/UnifiedScanner.cpp
     src/CompilerDispatcher/CompilerDispatcher.cpp
+    src/CHTLJS/CHTLJSLexer.cpp
+    src/CHTLJS/CHTLJSParser.cpp
+    src/CHTLJS/CHTLJSGenerator.cpp
 )
 
 # Create a static library for our compiler components
@@ -34,7 +37,7 @@ target_include_directories(chtl_lib PUBLIC src)
 file(GLOB CHTL_TEST_FILES "*.chtl")
 
 foreach(test_file ${CHTL_TEST_FILES})
-    string(REPLACE ".chtl" "" test_name ${test_file})
+    string(REPLACE "./" "" test_name ${test_file})
     string(REPLACE "./" "" test_name ${test_name})
 
     add_test(

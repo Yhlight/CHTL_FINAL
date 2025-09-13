@@ -1,0 +1,9 @@
+div {
+    id: mydiv;
+    text: "Test";
+}
+
+script {
+    const myDiv = {{#mydiv}};
+    myDiv.style.color = "red";
+}
