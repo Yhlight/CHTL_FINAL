@@ -25,6 +25,7 @@ public:
     explicit CHTLUnifiedScanner(const std::string& source);
 
     std::vector<CodeChunk> scan();
+    const std::map<std::string, std::string>& getPlaceholderMap() const;
 
 private:
     void process();

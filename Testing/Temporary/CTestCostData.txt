@@ -1,2 +1,2 @@
-SnapshotTests 1 0.0622298
+SnapshotTests 2 0.0313556
 ---
