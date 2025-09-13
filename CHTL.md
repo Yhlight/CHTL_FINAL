@@ -1268,14 +1268,14 @@ CHTL JS的函数皆为声明式语法
 ### 文件后缀
 对于包含CHTL JS的JS文件，你可以命名为*.cjjs  
 
-### 文件载入
-你可以使用fileloader {}来导入文件  
+### 脚本加载器
+你可以使用scriptloader {}来导入文件  
 CHTL JS实现了AMD风格JavaScript文件加载器  
 目的是让开发者能够无序引入js文件，无需考虑加载顺序，文件依赖等问题  
 支持无序键值对，可选键值对，无修饰字面量  
 
 ```chtl
-fileloader {
+你可以使用scriptloader {
     load: ./module.cjjs,
     load: ./module2.cjjs,
     load: ./module3.cjjs,
