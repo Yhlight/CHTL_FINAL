@@ -22,7 +22,6 @@ enum class BannedNodeType {
 
 struct PreciseConstraint {
     std::string name;
-    // Could also store a NodeType enum if needed
 };
 
 struct TypeConstraint {
