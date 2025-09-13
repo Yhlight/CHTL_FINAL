@@ -1,0 +1,10 @@
+// This file tests nested namespaces.
+
+[Namespace] space {
+    [Namespace] room {
+        [Template] @Style NestedStyle {
+            font-size: 20pt;
+            color: purple;
+        }
+    }
+}

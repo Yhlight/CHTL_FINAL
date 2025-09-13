@@ -5,17 +5,25 @@
 #include <unordered_set>
 #include <set>
 #include <algorithm>
+#include <sstream>
 #include "../CHTLNode/PropertyReferenceNode.h"
 
 namespace CHTL {
 
 CHTLParser::CHTLParser(const std::string& source, std::vector<Token>& tokens, CHTLLoader& loader, const std::string& initial_path, std::shared_ptr<ParserContext> context)
     : source_(source), tokens_(tokens), loader_(loader), current_path_(initial_path), context_(context) {
-    if (!tokens_.empty() && tokens_[0].type == TokenType::Namespace) {
-        if (tokens_.size() > 1 && tokens_[1].type == TokenType::Identifier) {
-            current_namespace_ = tokens_[1].lexeme;
-        }
+}
+
+std::string CHTLParser::getQualifiedName(const std::string& name) const {
+    if (namespace_stack_.empty()) {
+        return name;
     }
+    std::stringstream ss;
+    for (const auto& ns : namespace_stack_) {
+        ss << ns << "::";
+    }
+    ss << name;
+    return ss.str();
 }
 
 std::unique_ptr<RootNode> CHTLParser::parse() {
@@ -38,15 +46,15 @@ std::unique_ptr<RootNode> CHTLParser::parse() {
 std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     std::vector<std::unique_ptr<Node>> nodes;
     if (match({TokenType::Namespace})) {
-        current_namespace_ = consume(TokenType::Identifier, "Expected namespace name.").lexeme;
+        namespace_stack_.push_back(consume(TokenType::Identifier, "Expected namespace name.").lexeme);
         if (match({TokenType::OpenBrace})) {
             while (!check(TokenType::CloseBrace) && !isAtEnd()) {
                 auto parsed_nodes = parseDeclaration();
                 nodes.insert(nodes.end(), std::make_move_iterator(parsed_nodes.begin()), std::make_move_iterator(parsed_nodes.end()));
             }
             consume(TokenType::CloseBrace, "Expected '}' to close namespace block.");
-            current_namespace_ = "";
         }
+        namespace_stack_.pop_back();
         return nodes;
     }
     if (match({TokenType::Configuration})) {
@@ -75,12 +83,17 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
             std::vector<Token> imported_tokens = imported_lexer.scanTokens();
             CHTLParser imported_parser(*content, imported_tokens, loader_, imported_file_canonical_path, context_);
 
-            if (imported_parser.current_namespace_.empty()) {
-                imported_parser.current_namespace_ = default_namespace;
+            // Check if the imported file starts with a namespace block
+            bool has_explicit_namespace = !imported_tokens.empty() && imported_tokens[0].type == TokenType::Namespace;
+            if (!has_explicit_namespace) {
+                 imported_parser.namespace_stack_.push_back(default_namespace);
             }
 
-            // Add the namespace to the context so it can be searched
-            context_->imported_namespaces_.push_back(imported_parser.current_namespace_);
+            // Add the default namespace to the context so it can be searched
+            auto& imported_ns_list = context_->imported_namespaces_;
+            if(std::find(imported_ns_list.begin(), imported_ns_list.end(), default_namespace) == imported_ns_list.end()){
+                imported_ns_list.push_back(default_namespace);
+            }
 
             imported_parser.parse();
         }
@@ -148,25 +161,39 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
 }
 
 std::unique_ptr<OriginNode> CHTLParser::parseOriginBlock() {
-    const Token& type = consume(TokenType::Identifier, "Expected origin type (e.g., @Html).");
+    if (!match({TokenType::AtHtml, TokenType::AtStyle, TokenType::AtJavaScript, TokenType::Identifier})) {
+        throw std::runtime_error("Expected origin type (e.g., @Html, @Style, or custom @Type).");
+    }
+    const Token& type = previous();
     consume(TokenType::OpenBrace, "Expected '{' to open origin block.");
 
-    std::stringstream content_ss;
+    const Token& content_start_token = peek();
+    size_t content_start_offset = content_start_token.offset;
+
     int brace_level = 1;
+    size_t end_token_idx = current_;
     while (brace_level > 0 && !isAtEnd()) {
         if (peek().type == TokenType::OpenBrace) brace_level++;
         else if (peek().type == TokenType::CloseBrace) brace_level--;
 
         if (brace_level == 0) break;
 
-        content_ss << advance().lexeme << " ";
+        end_token_idx = current_;
+        advance();
     }
 
     if (brace_level > 0) {
         throw std::runtime_error("Unterminated origin block.");
     }
 
-    return std::make_unique<OriginNode>(type.lexeme, content_ss.str());
+    const Token& content_end_token = tokens_[end_token_idx];
+    size_t content_end_offset = content_end_token.offset + content_end_token.lexeme.length();
+
+    std::string raw_content = source_.substr(content_start_offset, content_end_offset - content_start_offset);
+
+    consume(TokenType::CloseBrace, "Expected '}' after origin block.");
+
+    return std::make_unique<OriginNode>(type.lexeme, raw_content);
 }
 
 void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes) {
@@ -180,164 +207,79 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
             }
             consume(TokenType::Semicolon, "Expected ';' after delete statement.");
 
-            for (auto& top_level_node : target_nodes) {
-                if (top_level_node->getType() == NodeType::Element) {
-                    auto* element = static_cast<ElementNode*>(top_level_node.get());
-                    int current_tag_count = 0;
-                    element->children_.erase(
-                        std::remove_if(element->children_.begin(), element->children_.end(),
-                            [&](const std::unique_ptr<Node>& child) {
-                                if (child->getType() == NodeType::Element) {
-                                    auto* child_element = static_cast<ElementNode*>(child.get());
-                                    if (child_element->tagName_ == tagName.lexeme) {
-                                        bool match = (tag_index == -1 || current_tag_count == tag_index);
-                                        current_tag_count++;
-                                        return match;
-                                    }
-                                }
-                                return false;
-                            }),
-                        element->children_.end()
-                    );
-                }
-            }
+            int current_tag_count = 0;
+            target_nodes.erase(
+                std::remove_if(target_nodes.begin(), target_nodes.end(),
+                    [&](const std::unique_ptr<Node>& child) {
+                        if (child->getType() == NodeType::Element) {
+                            auto* child_element = static_cast<ElementNode*>(child.get());
+                            if (child_element->tagName_ == tagName.lexeme) {
+                                bool match = (tag_index == -1 || current_tag_count == tag_index);
+                                current_tag_count++;
+                                return match;
+                            }
+                        }
+                        return false;
+                    }),
+                target_nodes.end()
+            );
             continue;
         }
 
         if (match({TokenType::Insert})) {
             Token position_token = advance();
-            if (position_token.type != TokenType::After && position_token.type != TokenType::Before && position_token.type != TokenType::Replace && position_token.type != TokenType::AtTop && position_token.type != TokenType::AtBottom) {
-                throw std::runtime_error("Expected a valid position for insert (after, before, replace, at top, at bottom).");
+            if (position_token.type != TokenType::After && position_token.type != TokenType::Before && position_token.type != TokenType::Replace) {
+                throw std::runtime_error("Expected a valid position for insert (after, before, replace).");
+            }
+
+            const Token& tagName = consume(TokenType::Identifier, "Expected tag name for insertion target.");
+            int tag_index = -1;
+            if (match({TokenType::OpenBracket})) {
+                tag_index = std::stoi(consume(TokenType::Number, "Expected index in brackets.").lexeme);
+                consume(TokenType::CloseBracket, "Expected ']' after index.");
             }
 
             std::vector<std::unique_ptr<Node>> new_nodes;
-            auto* element = static_cast<ElementNode*>(target_nodes[0].get());
-
-            if (position_token.type == TokenType::AtTop) {
-                 consume(TokenType::OpenBrace, "Expected '{' for insert block.");
-                 while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-                    auto parsed = parseDeclaration();
-                    new_nodes.insert(new_nodes.end(), std::make_move_iterator(parsed.begin()), std::make_move_iterator(parsed.end()));
-                 }
-                 consume(TokenType::CloseBrace, "Expected '}' after insert block.");
-                 element->children_.insert(element->children_.begin(), std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
-            } else if (position_token.type == TokenType::AtBottom) {
-                consume(TokenType::OpenBrace, "Expected '{' for insert block.");
-                 while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-                    auto parsed = parseDeclaration();
-                    new_nodes.insert(new_nodes.end(), std::make_move_iterator(parsed.begin()), std::make_move_iterator(parsed.end()));
-                 }
-                 consume(TokenType::CloseBrace, "Expected '}' after insert block.");
-                 element->children_.insert(element->children_.end(), std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+            consume(TokenType::OpenBrace, "Expected '{' for insert block.");
+            while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+                auto parsed = parseDeclaration();
+                new_nodes.insert(new_nodes.end(), std::make_move_iterator(parsed.begin()), std::make_move_iterator(parsed.end()));
             }
-            else {
-                 const Token& tagName = consume(TokenType::Identifier, "Expected tag name for insertion target.");
-                int tag_index = -1;
-                if (match({TokenType::OpenBracket})) {
-                    tag_index = std::stoi(consume(TokenType::Number, "Expected index in brackets.").lexeme);
-                    consume(TokenType::CloseBracket, "Expected ']' after index.");
-                }
-                consume(TokenType::OpenBrace, "Expected '{' for insert block.");
-                while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-                    auto parsed = parseDeclaration();
-                    new_nodes.insert(new_nodes.end(), std::make_move_iterator(parsed.begin()), std::make_move_iterator(parsed.end()));
-                }
-                consume(TokenType::CloseBrace, "Expected '}' after insert block.");
+            consume(TokenType::CloseBrace, "Expected '}' after insert block.");
 
-                int current_tag_count = 0;
-                auto it = element->children_.begin();
-                bool found = false;
-                while(it != element->children_.end()) {
-                    if ((*it)->getType() == NodeType::Element) {
-                        auto* child_element = static_cast<ElementNode*>((*it).get());
-                        if (child_element->tagName_ == tagName.lexeme) {
-                            if (tag_index == -1 || current_tag_count == tag_index) {
-                                if (position_token.type == TokenType::Before) {
-                                    element->children_.insert(it, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
-                                } else if (position_token.type == TokenType::After) {
-                                    it = element->children_.insert(it + 1, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
-                                } else if (position_token.type == TokenType::Replace) {
-                                    it = element->children_.erase(it);
-                                    element->children_.insert(it, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
-                                }
-                                found = true;
-                                break;
+            int current_tag_count = 0;
+            auto it = target_nodes.begin();
+            bool found = false;
+            while(it != target_nodes.end()) {
+                if ((*it)->getType() == NodeType::Element) {
+                    auto* child_element = static_cast<ElementNode*>((*it).get());
+                    if (child_element->tagName_ == tagName.lexeme) {
+                        if (tag_index == -1 || current_tag_count == tag_index) {
+                            if (position_token.type == TokenType::Before) {
+                                target_nodes.insert(it, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+                            } else if (position_token.type == TokenType::After) {
+                                it = target_nodes.insert(it + 1, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+                                std::advance(it, new_nodes.size() - 1);
+                            } else if (position_token.type == TokenType::Replace) {
+                                it = target_nodes.erase(it);
+                                it = target_nodes.insert(it, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+                                std::advance(it, new_nodes.size() - 1);
                             }
-                            current_tag_count++;
+                            found = true;
+                            break;
                         }
+                        current_tag_count++;
                     }
-                    ++it;
                 }
-                 if (!found) throw std::runtime_error("Could not find target for insert operation.");
+                ++it;
             }
+            if (!found) throw std::runtime_error("Could not find target for insert operation.");
             continue;
         }
+        // ... other specializations like style overrides would go here ...
 
-        const Token& tagName = consume(TokenType::Identifier, "Expected tag name for specialization.");
-        int tag_index = -1;
-        if (match({TokenType::OpenBracket})) {
-            tag_index = std::stoi(consume(TokenType::Number, "Expected index in brackets.").lexeme);
-            consume(TokenType::CloseBracket, "Expected ']' after index.");
-        }
-
-        consume(TokenType::OpenBrace, "Expected '{' for specialization body.");
-
-        std::vector<ElementNode*> matched_nodes;
-        int current_tag_count = 0;
-        for (auto& top_level_node : target_nodes) {
-            if (top_level_node->getType() == NodeType::Element) {
-                auto* top_level_element = static_cast<ElementNode*>(top_level_node.get());
-                for (auto& child_node : top_level_element->children_) {
-                     if (child_node->getType() == NodeType::Element) {
-                        auto* child_element = static_cast<ElementNode*>(child_node.get());
-                        if (child_element->tagName_ == tagName.lexeme) {
-                            if (tag_index == -1 || current_tag_count == tag_index) {
-                                matched_nodes.push_back(child_element);
-                            }
-                            current_tag_count++;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (matched_nodes.empty()) {
-            throw std::runtime_error("No element found for selector '" + tagName.lexeme + "' to specialize.");
-        }
-
-        auto* target_node = matched_nodes[0];
-        while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-            if (match({TokenType::Style})) {
-                auto newStyleBlock = parseStyleBlock();
-
-                StyleBlockNode* existingStyleBlock = nullptr;
-                for (auto& child : target_node->children_) {
-                    if (child->getType() == NodeType::StyleBlock) {
-                        existingStyleBlock = static_cast<StyleBlockNode*>(child.get());
-                        break;
-                    }
-                }
-
-                if (existingStyleBlock) {
-                    existingStyleBlock->inline_properties_.insert(
-                        existingStyleBlock->inline_properties_.end(),
-                        std::make_move_iterator(newStyleBlock->inline_properties_.begin()),
-                        std::make_move_iterator(newStyleBlock->inline_properties_.end())
-                    );
-                    existingStyleBlock->rules_.insert(
-                        existingStyleBlock->rules_.end(),
-                        std::make_move_iterator(newStyleBlock->rules_.begin()),
-                        std::make_move_iterator(newStyleBlock->rules_.end())
-                    );
-                } else {
-                    target_node->children_.push_back(std::move(newStyleBlock));
-                }
-            } else {
-                throw std::runtime_error("Only 'style' blocks are allowed in element specialization for now.");
-            }
-        }
-
-        consume(TokenType::CloseBrace, "Expected '}' to close specialization body.");
+        // If no other specialization keyword is found, assume it's an error.
+        throw std::runtime_error("Unexpected token in specialization block.");
     }
 }
 
@@ -354,32 +296,37 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
 
 void CHTLParser::parseElementBody(ElementNode& element) {
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        if (match({TokenType::Text})) {
-             consumeColonOrEquals();
-             std::string value;
-             if (match({TokenType::StringLiteral, TokenType::UnquotedLiteral, TokenType::Identifier})) {
-                value = previous().lexeme;
-             } else {
-                throw std::runtime_error("Expected value for text attribute.");
-             }
-             consume(TokenType::Semicolon, "Expected ';' after text attribute value.");
-             element.children_.push_back(std::make_unique<TextNode>(value));
-        }
-        else if (peek().type == TokenType::Identifier && (peekNext().type == TokenType::Colon || peekNext().type == TokenType::Equals)) {
-            const Token& key = consume(TokenType::Identifier, "Expected attribute name.");
+        // Check for attributes first, including the 'text' attribute
+        if ((peek().type == TokenType::Identifier || peek().type == TokenType::Text) &&
+            (peekNext().type == TokenType::Colon || peekNext().type == TokenType::Equals)) {
+
+            const Token& key = advance(); // Consume 'text' or a generic identifier
             consumeColonOrEquals();
 
-            std::string value;
-            if (match({TokenType::StringLiteral, TokenType::UnquotedLiteral, TokenType::Identifier})) {
-                value = previous().lexeme;
+            if (key.type == TokenType::Text) {
+                // Special handling for text attribute
+                std::string value;
+                if (match({TokenType::StringLiteral, TokenType::UnquotedLiteral, TokenType::Identifier})) {
+                   value = previous().lexeme;
+                } else {
+                   throw std::runtime_error("Expected value for text attribute.");
+                }
+                consume(TokenType::Semicolon, "Expected ';' after text attribute value.");
+                element.children_.push_back(std::make_unique<TextNode>(value));
             } else {
-                throw std::runtime_error("Expected attribute value.");
+                // Generic attribute
+                std::string value;
+                if (match({TokenType::StringLiteral, TokenType::UnquotedLiteral, TokenType::Identifier})) {
+                    value = previous().lexeme;
+                } else {
+                    throw std::runtime_error("Expected attribute value.");
+                }
+                consume(TokenType::Semicolon, "Expected ';' after attribute value.");
+                element.attributes_.push_back(std::make_unique<AttributeNode>(key.lexeme, value));
             }
-
-            consume(TokenType::Semicolon, "Expected ';' after attribute value.");
-            element.attributes_.push_back(std::make_unique<AttributeNode>(key.lexeme, value));
         }
         else {
+            // If it's not an attribute, it must be a child element declaration or constraint
             if (match({TokenType::Except})) {
                 do {
                     if (match({TokenType::Template})) {
@@ -465,7 +412,7 @@ void CHTLParser::parseConfigurationBlock() {
 void CHTLParser::parseTemplateDefinition(bool is_custom) {
     if (match({TokenType::AtStyle})) {
         const Token& name = consume(TokenType::Identifier, "Expected template name.");
-        std::string qualified_name = current_namespace_.empty() ? name.lexeme : current_namespace_ + "::" + name.lexeme;
+        std::string qualified_name = getQualifiedName(name.lexeme);
         auto templateNode = std::make_shared<StyleTemplateNode>(qualified_name, is_custom);
 
         consume(TokenType::OpenBrace, "Expected '{' after template name.");
@@ -511,7 +458,7 @@ void CHTLParser::parseTemplateDefinition(bool is_custom) {
 
     } else if (match({TokenType::AtElement})) {
         const Token& name = consume(TokenType::Identifier, "Expected template name.");
-        std::string qualified_name = current_namespace_.empty() ? name.lexeme : current_namespace_ + "::" + name.lexeme;
+        std::string qualified_name = getQualifiedName(name.lexeme);
         auto templateNode = std::make_shared<ElementTemplateNode>(qualified_name);
 
         consume(TokenType::OpenBrace, "Expected '{' after template name.");
@@ -525,7 +472,7 @@ void CHTLParser::parseTemplateDefinition(bool is_custom) {
         context_->element_templates_[qualified_name] = templateNode;
     } else if (match({TokenType::AtVar})) {
         const Token& name = consume(TokenType::Identifier, "Expected template name.");
-        std::string qualified_name = current_namespace_.empty() ? name.lexeme : current_namespace_ + "::" + name.lexeme;
+        std::string qualified_name = getQualifiedName(name.lexeme);
         auto templateNode = std::make_shared<VarTemplateNode>(qualified_name);
 
         consume(TokenType::OpenBrace, "Expected '{' after template name.");
@@ -600,24 +547,39 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
             bool found = false;
 
             if (match({TokenType::From})) {
-                 const Token& ns = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
-                 qualified_name = ns.lexeme + "::" + name.lexeme;
+                 std::string from_ns;
+                 do {
+                     from_ns += consume(TokenType::Identifier, "Expected namespace name after 'from'.").lexeme;
+                     if (match({TokenType::Dot})) {
+                         from_ns += "::";
+                     } else {
+                         break;
+                     }
+                 } while(true);
+
+                 qualified_name = from_ns + "::" + name.lexeme;
                  if (context_->style_templates_.count(qualified_name)) {
                      found = true;
                  }
             } else {
-                // If 'from' is not specified, try to find it in the global scope first
+                // If 'from' is not specified, search for a unique match across all namespaces
                 if (context_->style_templates_.count(qualified_name)) {
                     found = true;
                 } else {
-                    // Then search in imported namespaces
-                    for (const auto& ns : context_->imported_namespaces_) {
-                        std::string temp_name = ns + "::" + name.lexeme;
-                        if (context_->style_templates_.count(temp_name)) {
-                            qualified_name = temp_name;
-                            found = true;
-                            break;
+                    std::string found_q_name;
+                    int matches = 0;
+                    for (const auto& pair : context_->style_templates_) {
+                        const std::string& q_name = pair.first;
+                        if (q_name == name.lexeme || (q_name.length() > name.lexeme.length() + 2 && q_name.substr(q_name.length() - (name.lexeme.length() + 2)) == "::" + name.lexeme)) {
+                             matches++;
+                             found_q_name = q_name;
                         }
+                    }
+                    if (matches == 1) {
+                        qualified_name = found_q_name;
+                        found = true;
+                    } else if (matches > 1) {
+                        throw std::runtime_error("Ambiguous style template reference for '" + name.lexeme + "'. Use 'from' to specify the namespace.");
                     }
                 }
             }
@@ -822,25 +784,37 @@ void CHTLParser::consumeColonOrEquals() {
 }
 
 void CHTLParser::checkConstraints(const ElementNode& parent, const Node& child) {
+    if (child.getType() != NodeType::Element) {
+        return; // Constraints only apply to element nodes for now
+    }
+    const auto& element_child = static_cast<const ElementNode&>(child);
+
     for (const auto& constraint : parent.constraints_) {
         if (std::holds_alternative<TypeConstraint>(constraint)) {
             const auto& type_constraint = std::get<TypeConstraint>(constraint);
-            if (type_constraint.node_type == BannedNodeType::Html && child.getType() == NodeType::Element) {
-                throw std::runtime_error("Constraint violation: HTML elements are not allowed in <" + parent.tagName_ + ">.");
+            bool violation = false;
+            switch(type_constraint.node_type) {
+                case BannedNodeType::Html:
+                    if (element_child.getType() == NodeType::Element) violation = true;
+                    break;
+                case BannedNodeType::Template:
+                     // This needs more info to check, e.g. if the node came from a template instantiation
+                    break;
+                case BannedNodeType::Custom:
+                    // This needs more info to check
+                    break;
+                case BannedNodeType::VarTemplate:
+                    // Not applicable to element children
+                    break;
             }
-            if (type_constraint.node_type == BannedNodeType::Template && child.getType() == NodeType::Template) {
-                 throw std::runtime_error("Constraint violation: [Template] nodes are not allowed in <" + parent.tagName_ + ">.");
+            if (violation) {
+                 throw std::runtime_error("Constraint violation: Banned type in <" + parent.tagName_ + ">.");
             }
-             if (type_constraint.node_type == BannedNodeType::Custom && child.getType() == NodeType::Custom) {
-                 throw std::runtime_error("Constraint violation: [Custom] nodes are not allowed in <" + parent.tagName_ + ">.");
-            }
+
         } else if (std::holds_alternative<PreciseConstraint>(constraint)) {
             const auto& precise_constraint = std::get<PreciseConstraint>(constraint);
-            if (child.getType() == NodeType::Element) {
-                const auto& element_child = static_cast<const ElementNode&>(child);
-                if (element_child.tagName_ == precise_constraint.name) {
-                    throw std::runtime_error("Constraint violation: element <" + precise_constraint.name + "> is not allowed in <" + parent.tagName_ + ">.");
-                }
+            if (element_child.tagName_ == precise_constraint.name) {
+                throw std::runtime_error("Constraint violation: element <" + precise_constraint.name + "> is not allowed in <" + parent.tagName_ + ">.");
             }
         }
     }

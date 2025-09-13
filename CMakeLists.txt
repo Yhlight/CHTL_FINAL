@@ -44,6 +44,9 @@ set(CHTL_TEST_FILES
     test.chtl
     test2.chtl
     import_test.chtl
+    namespace_test.chtl
+    spec_delete_test.chtl
+    # constraint_test.chtl # This test is expected to fail, so it's excluded from the main suite
 )
 
 foreach(test_file ${CHTL_TEST_FILES})

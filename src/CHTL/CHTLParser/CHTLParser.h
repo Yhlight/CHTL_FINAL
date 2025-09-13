@@ -62,10 +62,12 @@ private:
     const Token& consume(TokenType type, const std::string& message);
     void synchronize();
 
+    std::string getQualifiedName(const std::string& name) const;
+
     std::vector<Token>& tokens_;
     CHTLLoader& loader_;
     std::string current_path_;
-    std::string current_namespace_;
+    std::vector<std::string> namespace_stack_;
     std::shared_ptr<ParserContext> context_;
     size_t current_ = 0;
     bool hadError_ = false;
