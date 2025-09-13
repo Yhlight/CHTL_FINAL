@@ -1,0 +1,35 @@
+[Template] @Style BaseStyle {
+    color: "blue";
+    background-color: "white";
+    font-size: 16px;
+    border: "1px solid black";
+}
+
+[Custom] @Style MyCustomStyle {
+    @Style BaseStyle {
+        delete font-size, border; // Delete specific properties
+    }
+    color: "red"; // Override a property
+}
+
+[Template] @Style AnotherBase {
+    padding: 10px;
+}
+
+[Custom] @Style FinalStyle {
+    @Style MyCustomStyle;
+    @Style AnotherBase {
+        delete @Style BaseStyle; // This feature is not supported yet, but should parse
+    }
+}
+
+html {
+    body {
+        div {
+            // Should have color: red, background-color: white
+            style {
+                @Style MyCustomStyle;
+            }
+        }
+    }
+}

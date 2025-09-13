@@ -3,12 +3,17 @@
 
 #include <string>
 #include <vector>
-#include <utility>
 #include <map>
 #include <unordered_set>
-#include "PropertyValue.h"
+#include <memory>
+#include "ExpressionNode.h"
 
 namespace CHTL {
+
+struct SpecializationInfo {
+    std::unordered_set<std::string> deleted_properties;
+    std::unordered_set<std::string> deleted_templates;
+};
 
 // This is a storage class for the parser, not a part of the main AST tree.
 class StyleTemplateNode {
@@ -19,9 +24,9 @@ public:
     std::string name_;
     bool is_custom_;
     std::vector<std::string> inherits_;
-    // e.g. from "ParentTemplate" -> set of {"prop1", "prop2"}
-    std::map<std::string, std::unordered_set<std::string>> inheritance_specializations_;
-    std::vector<std::pair<std::string, std::vector<PropertyValue>>> properties_;
+    std::map<std::string, SpecializationInfo> inheritance_specializations_;
+    // Placeholders are represented by a null ExpressionNode
+    std::vector<std::pair<std::string, std::unique_ptr<ExpressionNode>>> properties_;
 };
 
 } // namespace CHTL

@@ -1,20 +1,20 @@
 #ifndef CHTL_PROPERTY_VALUE_H
 #define CHTL_PROPERTY_VALUE_H
 
-#include <variant>
 #include <string>
-#include "../CHTLLexer/Token.h"
-#include "PropertyReferenceNode.h"
+#include <memory>
+#include "ExpressionNode.h"
 
 namespace CHTL {
 
-struct Value {
-    double Dvalue;
-    std::string Svalue;
-    std::string stringValue;
-};
+// Represents a single CSS property declaration (e.g., "color: red;")
+struct PropertyDeclaration {
+    std::string name;
+    std::unique_ptr<ExpressionNode> value;
 
-using PropertyValue = std::variant<Token, PropertyReferenceNode>;
+    PropertyDeclaration(std::string n, std::unique_ptr<ExpressionNode> v)
+        : name(std::move(n)), value(std::move(v)) {}
+};
 
 } // namespace CHTL
 

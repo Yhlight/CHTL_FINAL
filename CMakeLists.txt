@@ -36,3 +36,15 @@ add_test(
     NAME run_insert_test
     COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/insert_test.chtl
 )
+add_test(
+    NAME run_insert_extended_test
+    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/insert_extended_test.chtl
+)
+add_test(
+    NAME run_delete_style_test
+    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/delete_style_test.chtl
+)
+add_test(
+    NAME run_import_assets_test
+    COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/import_assets_test.chtl
+)

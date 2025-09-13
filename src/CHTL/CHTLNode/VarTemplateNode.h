@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include "PropertyValue.h"
+#include <memory>
+#include "ExpressionNode.h"
 
 namespace CHTL {
 
@@ -14,7 +15,7 @@ public:
     explicit VarTemplateNode(const std::string& name) : name_(name) {}
 
     std::string name_;
-    std::unordered_map<std::string, std::vector<PropertyValue>> variables_;
+    std::unordered_map<std::string, std::unique_ptr<ExpressionNode>> variables_;
 };
 
 } // namespace CHTL
