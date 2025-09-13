@@ -25,12 +25,11 @@ public:
     explicit CHTLUnifiedScanner(const std::string& source);
 
     std::vector<CodeChunk> scan();
+    const std::map<std::string, std::string>& getPlaceholderMap() const { return placeholder_map_; };
 
 private:
-    void process();
-    void handleScriptTag();
-    void handleStyleTag();
-    void handleChtlBlock();
+    std::string process_script_block(const std::string& content);
+    std::string process_style_block(const std::string& content);
 
     const std::string& source_;
     std::vector<CodeChunk> chunks_;
