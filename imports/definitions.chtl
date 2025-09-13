@@ -1,6 +1,0 @@
-// This file contains definitions to be imported by other files.
-
-[Template] @Style ImportedStyle {
-    color: green;
-    border: 1px solid black;
-}

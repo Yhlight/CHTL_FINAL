@@ -15,6 +15,8 @@ set(CHTL_LIB_SOURCES
     src/CHTL/CHTLParser/CHTLParser.cpp
     src/CHTL/CHTLGenerator/CHTLGenerator.cpp
     src/CHTL/CHTLLoader/CHTLLoader.cpp
+    src/Scanner/UnifiedScanner.cpp
+    src/CompilerDispatcher/CompilerDispatcher.cpp
 )
 
 # Create a static library for our compiler components
@@ -29,32 +31,14 @@ target_include_directories(chtl_lib PUBLIC src)
 
 # --- Test Suite ---
 # Add a test for each .chtl file in the root directory.
-# This allows us to use `ctest` to see the compiler's output for each test case.
-set(CHTL_TEST_FILES
-    auto_inference_test.chtl
-    components.chtl
-    custom_style_groups_test.chtl
-    debug_test.chtl
-    defaults.chtl
-    definitions.chtl
-    delete_test.chtl
-    insert_test.chtl
-    property_reference_test.chtl
-    selector_test.chtl
-    test.chtl
-    test2.chtl
-    import_test.chtl
-    namespace_test.chtl
-    spec_delete_test.chtl
-    # constraint_test.chtl # This test is expected to fail, so it's excluded from the main suite
-)
+file(GLOB CHTL_TEST_FILES "*.chtl")
 
 foreach(test_file ${CHTL_TEST_FILES})
-    # Get the filename without the extension to use as the test name
-    get_filename_component(test_name ${test_file} NAME_WE)
+    string(REPLACE ".chtl" "" test_name ${test_file})
+    string(REPLACE "./" "" test_name ${test_name})
 
     add_test(
         NAME run_${test_name}
-        COMMAND chtl_compiler ${CMAKE_CURRENT_SOURCE_DIR}/${test_file}
+        COMMAND chtl_compiler ${test_file}
     )
 endforeach()

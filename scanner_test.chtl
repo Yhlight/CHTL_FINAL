@@ -1,0 +1,14 @@
+div {
+    p { text: "This is CHTL content before the script."; }
+}
+
+script {
+    const x = 10;
+    if (x > 5) {
+        console.log("Hello from JavaScript!");
+    }
+}
+
+div {
+    p { text: "This is CHTL content after the script."; }
+}

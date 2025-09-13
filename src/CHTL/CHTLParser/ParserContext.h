@@ -17,7 +17,6 @@ struct ParserContext {
     std::unordered_map<std::string, std::shared_ptr<StyleTemplateNode>> style_templates_;
     std::unordered_map<std::string, std::shared_ptr<ElementTemplateNode>> element_templates_;
     std::unordered_map<std::string, std::shared_ptr<VarTemplateNode>> var_templates_;
-    std::vector<std::string> imported_namespaces_;
 };
 
 } // namespace CHTL

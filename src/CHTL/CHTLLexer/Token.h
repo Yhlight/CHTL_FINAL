@@ -97,7 +97,6 @@ struct Token {
     std::string lexeme;
     size_t line = 1;
     size_t column = 1;
-    size_t offset = 0; // Character offset from the start of the source
 };
 
 } // namespace CHTL
