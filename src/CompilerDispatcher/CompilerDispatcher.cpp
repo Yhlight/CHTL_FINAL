@@ -21,42 +21,54 @@ std::string CompilerDispatcher::compile(const std::string& source) {
     CHTLUnifiedScanner unified_scanner(source);
     chunks_ = unified_scanner.scan();
 
-    std::string html_output;
-    std::vector<std::string> js_outputs;
+    std::stringstream pure_chtl_stream;
+    std::vector<CodeChunk> script_chunks;
+    std::vector<CodeChunk> style_chunks;
 
+    // Separate chunks by type
     for (const auto& chunk : chunks_) {
         if (chunk.content.empty()) continue;
 
-        if (chunk.type == ChunkType::CHTL) {
-            CHTLLoader loader;
-            CHTLLexer lexer(chunk.content);
-            std::vector<Token> tokens = lexer.scanTokens();
-            if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == TokenType::EndOfFile)) continue;
-
-            CHTLParser parser(chunk.content, tokens, loader, "./", chtl_context_);
-            std::unique_ptr<RootNode> ast = parser.parse();
-
-            CHTLGenerator generator;
-            CompilationResult result = generator.generate(*ast);
-            html_output += result.html;
-            if (!result.js.empty()) {
-                js_outputs.push_back(result.js);
-            }
-
-        } else if (chunk.type == ChunkType::ChtlJs) {
-            CHTLJS::CHTLJSLexer lexer(chunk.content);
-            std::vector<CHTLJS::CHTLJSToken> tokens = lexer.scanTokens();
-            if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) continue;
-
-            CHTLJS::CHTLJSParser parser(tokens, chtljs_context_);
-            std::unique_ptr<CHTLJS::CHTLJSNode> ast = parser.parse();
-
-            if (ast) {
-                CHTLJS::CHTLJSGenerator generator;
-                js_outputs.push_back(generator.generate(*ast));
-            }
+        switch(chunk.type) {
+            case ChunkType::CHTL:
+                pure_chtl_stream << chunk.content;
+                break;
+            case ChunkType::ChtlJs:
+            case ChunkType::JavaScript:
+                script_chunks.push_back(chunk);
+                break;
+            case ChunkType::Css:
+                style_chunks.push_back(chunk);
+                break;
+            default:
+                break;
         }
     }
+
+    std::string pure_chtl_source = pure_chtl_stream.str();
+    std::string html_output;
+    std::vector<std::string> js_outputs;
+
+    // Process the aggregated CHTL source
+    if (!pure_chtl_source.empty()) {
+        CHTLLoader loader;
+        CHTLLexer lexer(pure_chtl_source);
+        std::vector<Token> tokens = lexer.scanTokens();
+        if (!tokens.empty() && !(tokens.size() == 1 && tokens[0].type == TokenType::EndOfFile)) {
+             CHTLParser parser(pure_chtl_source, tokens, loader, "./", chtl_context_);
+             std::unique_ptr<RootNode> ast = parser.parse();
+
+             CHTLGenerator generator;
+             CompilationResult result = generator.generate(*ast);
+             html_output += result.html;
+             if (!result.js.empty()) {
+                 js_outputs.push_back(result.js);
+             }
+        }
+    }
+
+    // TODO: Process script_chunks and style_chunks
+    // For now, we will ignore them to get the CHTL part working.
 
     CodeMerger merger;
     return merger.merge(html_output, js_outputs);
