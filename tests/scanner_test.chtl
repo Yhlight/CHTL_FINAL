@@ -1,0 +1,32 @@
+// CHTL Test File for Scanner
+
+div {
+    id: main_container;
+    text: "Welcome to CHTL";
+
+    style {
+        color: red;
+        font-size: 16px;
+    }
+}
+
+script {
+    // This is a script block
+    const el = {{#main_container}};
+
+    function greet(name) {
+        console.log("Hello, " + name);
+    }
+
+    if (el) {
+        el.addEventListener('click', () => {
+            greet("World");
+        });
+    }
+
+    const test = {{.other_element}};
+}
+
+footer {
+    text: "End of file.";
+}

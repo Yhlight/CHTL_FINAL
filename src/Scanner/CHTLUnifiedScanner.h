@@ -23,14 +23,14 @@ struct CodeChunk {
 class CHTLUnifiedScanner {
 public:
     explicit CHTLUnifiedScanner(const std::string& source);
-
     std::vector<CodeChunk> scan();
 
 private:
     void process();
-    void handleScriptTag();
-    void handleStyleTag();
-    void handleChtlBlock();
+    void handleBlock(size_t& last_pos, size_t keyword_pos, ChunkType type);
+    std::string processScriptContent(size_t content_start, size_t content_end);
+    size_t findBlockEnd(size_t start_pos);
+    void skipString(const std::string& s, size_t& pos);
 
     const std::string& source_;
     std::vector<CodeChunk> chunks_;
