@@ -1,0 +1,40 @@
+Start testing: Sep 13 17:51 UTC
+----------------------------------------------------------
+1/1 Testing: SnapshotTests
+1/1 Test: SnapshotTests
+Command: "/app/test_runner"
+Directory: /app
+"SnapshotTests" start time: Sep 13 17:51 UTC
+Output:
+----------------------------------------------------------
+Running CHTL Snapshot Tester...
+TEST: vir_object_test ... WARNING: No snapshot found. Creating one.
+TEST: conditional_expressions_test ... WARNING: No snapshot found. Creating one.
+TEST: test ... WARNING: No snapshot found. Creating one.
+TEST: listen_test ... WARNING: No snapshot found. Creating one.
+TEST: responsive_values_test ... WARNING: No snapshot found. Creating one.
+TEST: selector_test ... WARNING: No snapshot found. Creating one.
+TEST: delete_test ... WARNING: No snapshot found. Creating one.
+TEST: delegate_test ... WARNING: No snapshot found. Creating one.
+TEST: debug_test ... WARNING: No snapshot found. Creating one.
+TEST: custom_style_groups_test ... WARNING: No snapshot found. Creating one.
+TEST: defaults ... WARNING: No snapshot found. Creating one.
+TEST: components ... WARNING: No snapshot found. Creating one.
+TEST: insert_test ... WARNING: No snapshot found. Creating one.
+TEST: script_block_test ... WARNING: No snapshot found. Creating one.
+TEST: definitions ... WARNING: No snapshot found. Creating one.
+TEST: auto_inference_test ... WARNING: No snapshot found. Creating one.
+TEST: test2 ... WARNING: No snapshot found. Creating one.
+TEST: animate_test ... WARNING: No snapshot found. Creating one.
+TEST: property_reference_test ... WARNING: No snapshot found. Creating one.
+
+All tests passed.
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"SnapshotTests" end time: Sep 13 17:51 UTC
+"SnapshotTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 13 17:51 UTC

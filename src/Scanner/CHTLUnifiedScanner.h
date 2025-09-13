@@ -31,6 +31,7 @@ private:
     void handleScriptTag();
     void handleStyleTag();
     void handleChtlBlock();
+    void scanScriptContent(const std::string& content);
 
     const std::string& source_;
     std::vector<CodeChunk> chunks_;
