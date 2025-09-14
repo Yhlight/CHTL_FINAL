@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 
+namespace CHTL {
 namespace CHTLJS {
 
 class CHTLJSLexer {
@@ -35,5 +36,6 @@ private:
 };
 
 } // namespace CHTLJS
+} // namespace CHTL
 
 #endif // CHTL_JS_LEXER_H

@@ -7,6 +7,7 @@
 #include <memory>
 #include "CHTLJSContext.h"
 
+namespace CHTL {
 namespace CHTLJS {
 
 class CHTLJSParser {
@@ -28,5 +29,6 @@ private:
 };
 
 } // namespace CHTLJS
+} // namespace CHTL
 
 #endif // CHTL_JS_PARSER_H

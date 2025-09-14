@@ -7,6 +7,7 @@
 #include <map>
 #include <utility>
 
+namespace CHTL {
 namespace CHTLJS {
 
 class ListenNode : public CHTLJSNode {
@@ -34,5 +35,6 @@ private:
 };
 
 } // namespace CHTLJS
+} // namespace CHTL
 
 #endif // CHTL_JS_LISTEN_NODE_H

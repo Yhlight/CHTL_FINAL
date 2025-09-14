@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <sstream>
 
+namespace CHTL {
 namespace CHTLJS {
 
 CHTLJSGenerator::CHTLJSGenerator() {}
@@ -151,3 +152,4 @@ void CHTLJSGenerator::visitValueNode(const ValueNode* node) {
 
 
 } // namespace CHTLJS
+} // namespace CHTL

@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <unordered_map>
 
+namespace CHTL {
 namespace CHTLJS {
 
 const std::unordered_map<std::string, CHTLJSTokenType> CHTLJSLexer::keywords = {
@@ -137,3 +138,4 @@ void CHTLJSLexer::addToken(CHTLJSTokenType type) {
 }
 
 } // namespace CHTLJS
+} // namespace CHTL

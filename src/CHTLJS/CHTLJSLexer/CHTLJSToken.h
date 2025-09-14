@@ -3,6 +3,7 @@
 
 #include <string>
 
+namespace CHTL {
 namespace CHTLJS {
 
 enum class CHTLJSTokenType {
@@ -42,5 +43,6 @@ struct CHTLJSToken {
 };
 
 } // namespace CHTLJS
+} // namespace CHTL
 
 #endif // CHTL_JS_TOKEN_H

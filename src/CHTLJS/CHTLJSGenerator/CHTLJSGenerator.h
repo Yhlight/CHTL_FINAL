@@ -4,6 +4,7 @@
 #include "../CHTLJSNode/CHTLJSNode.h"
 #include <string>
 
+namespace CHTL {
 namespace CHTLJS {
 
 // Forward declarations
@@ -30,5 +31,6 @@ private:
 };
 
 } // namespace CHTLJS
+} // namespace CHTL
 
 #endif // CHTL_JS_GENERATOR_H

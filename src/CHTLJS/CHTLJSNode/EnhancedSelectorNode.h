@@ -4,6 +4,7 @@
 #include "CHTLJSNode.h"
 #include <string>
 
+namespace CHTL {
 namespace CHTLJS {
 
 class EnhancedSelectorNode : public CHTLJSNode {
@@ -23,5 +24,6 @@ private:
 };
 
 } // namespace CHTLJS
+} // namespace CHTL
 
 #endif // CHTL_JS_ENHANCED_SELECTOR_NODE_H

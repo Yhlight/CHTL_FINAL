@@ -3,6 +3,7 @@
 
 #include <memory>
 
+namespace CHTL {
 namespace CHTLJS {
 
 enum class CHTLJSNodeType {
@@ -23,5 +24,6 @@ public:
 };
 
 } // namespace CHTLJS
+} // namespace CHTL
 
 #endif // CHTL_JS_NODE_H

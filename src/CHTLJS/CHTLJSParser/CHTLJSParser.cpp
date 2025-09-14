@@ -6,6 +6,7 @@
 #include "CHTLJS/CHTLJSNode/ValueNode.h"
 #include <stdexcept>
 
+namespace CHTL {
 namespace CHTLJS {
 
 CHTLJSParser::CHTLJSParser(std::vector<CHTLJSToken>& tokens, std::shared_ptr<CHTLJSContext> context)
@@ -290,3 +291,4 @@ bool CHTLJSParser::isAtEnd() const {
 }
 
 } // namespace CHTLJS
+} // namespace CHTL

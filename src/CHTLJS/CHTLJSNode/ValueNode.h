@@ -4,6 +4,7 @@
 #include "CHTLJSNode.h"
 #include <string>
 
+namespace CHTL {
 namespace CHTLJS {
 
 // A simple node to hold a literal value, used as the result of a `vir` lookup.
@@ -24,5 +25,6 @@ private:
 };
 
 } // namespace CHTLJS
+} // namespace CHTL
 
 #endif // CHTL_JS_VALUE_NODE_H

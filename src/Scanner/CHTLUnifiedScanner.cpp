@@ -199,4 +199,8 @@ void CHTLUnifiedScanner::handleStyleTag() {
     }
 }
 
+const std::map<std::string, std::string>& CHTLUnifiedScanner::getPlaceholderMap() const {
+    return placeholder_map_;
+}
+
 } // namespace CHTL

@@ -6,6 +6,7 @@
 #include <memory>
 #include <map>
 
+namespace CHTL {
 namespace CHTLJS {
 
 struct CHTLJSContext {
@@ -14,5 +15,6 @@ struct CHTLJSContext {
 };
 
 } // namespace CHTLJS
+} // namespace CHTL
 
 #endif // CHTL_JS_CONTEXT_H

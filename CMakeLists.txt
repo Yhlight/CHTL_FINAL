@@ -39,3 +39,8 @@ target_link_libraries(scanner_test PRIVATE chtl_lib)
 
 # Add the new single test command
 add_test(NAME ScannerTest COMMAND scanner_test)
+
+# Configuration for the dispatcher test
+add_executable(dispatcher_test tests/dispatcher_test.cpp)
+target_link_libraries(dispatcher_test PRIVATE chtl_lib)
+add_test(NAME DispatcherTest COMMAND dispatcher_test)

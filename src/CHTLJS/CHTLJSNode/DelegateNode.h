@@ -7,6 +7,7 @@
 #include <map>
 #include <memory>
 
+namespace CHTL {
 namespace CHTLJS {
 
 class DelegateNode : public CHTLJSNode {
@@ -43,5 +44,6 @@ private:
 };
 
 } // namespace CHTLJS
+} // namespace CHTL
 
 #endif // CHTL_JS_DELEGATE_NODE_H

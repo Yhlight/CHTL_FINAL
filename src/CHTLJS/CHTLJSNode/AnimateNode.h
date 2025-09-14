@@ -8,6 +8,7 @@
 #include <memory>
 #include <optional>
 
+namespace CHTL {
 namespace CHTLJS {
 
 struct Keyframe {
@@ -47,5 +48,6 @@ public:
 };
 
 } // namespace CHTLJS
+} // namespace CHTL
 
 #endif // CHTL_JS_ANIMATE_NODE_H
