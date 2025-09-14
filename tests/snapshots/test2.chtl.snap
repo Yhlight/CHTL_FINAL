@@ -1,0 +1,18 @@
+<html>
+  <head>
+    <title>
+      My CHTL Page
+    </title>
+  </head>
+  <body>
+    <div id="main-content" class="container">
+      <h1>
+        Welcome to CHTL!
+      </h1>
+      <!-- This is a comment that should appear in the HTML -->
+      <p>
+        This is a paragraph.
+      </p>
+    </div>
+  </body>
+</html>

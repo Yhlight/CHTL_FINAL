@@ -13,7 +13,7 @@ html {
                 text { "Welcome to CHTL!" }
             }
 
-            -- This is a comment that should appear in the HTML
+            # This is a comment that should appear in the HTML
             p {
                 text { "This is a paragraph." }
             }

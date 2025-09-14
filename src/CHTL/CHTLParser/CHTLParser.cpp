@@ -156,25 +156,41 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
 }
 
 std::unique_ptr<OriginNode> CHTLParser::parseOriginBlock() {
-    const Token& type = consume(TokenType::Identifier, "Expected origin type (e.g., @Html).");
+    Token type_token;
+    if (match({TokenType::AtHtml, TokenType::AtStyle, TokenType::AtJavaScript})) {
+        type_token = previous();
+    } else if (peek().type == TokenType::Identifier && peek().lexeme.rfind('@', 0) == 0) {
+        type_token = advance();
+    } else {
+        throw std::runtime_error("Expected origin type (e.g., @Html). at line " + std::to_string(peek().line));
+    }
+
     consume(TokenType::OpenBrace, "Expected '{' to open origin block.");
 
     std::stringstream content_ss;
     int brace_level = 1;
+    size_t content_start = current_;
+
     while (brace_level > 0 && !isAtEnd()) {
         if (peek().type == TokenType::OpenBrace) brace_level++;
         else if (peek().type == TokenType::CloseBrace) brace_level--;
 
-        if (brace_level == 0) break;
-
-        content_ss << advance().lexeme << " ";
+        if (brace_level > 0) {
+            advance();
+        }
     }
 
     if (brace_level > 0) {
         throw std::runtime_error("Unterminated origin block.");
     }
 
-    return std::make_unique<OriginNode>(type.lexeme, content_ss.str());
+    size_t content_end = current_;
+    std::string raw_content = source_.substr(tokens_[content_start].start_pos, tokens_[content_end].start_pos - tokens_[content_start].start_pos);
+
+    // Consume the final brace
+    consume(TokenType::CloseBrace, "Expected '}' to close origin block.");
+
+    return std::make_unique<OriginNode>(type_token.lexeme, raw_content);
 }
 
 void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes) {
@@ -377,7 +393,8 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
 
 void CHTLParser::parseElementBody(ElementNode& element) {
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        if (match({TokenType::Text})) {
+        if (peek().type == TokenType::Text && (peekNext().type == TokenType::Colon || peekNext().type == TokenType::Equals)) {
+             advance(); // Consume 'text'
              consumeColonOrEquals();
              std::string value;
              if (match({TokenType::StringLiteral, TokenType::UnquotedLiteral, TokenType::Identifier})) {

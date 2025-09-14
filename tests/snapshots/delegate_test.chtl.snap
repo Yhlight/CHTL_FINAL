@@ -1,0 +1,16 @@
+<html>
+  <body>
+    <div id="container">
+      <button class="action-btn">
+        Button 1
+      </button>
+      <button class="action-btn">
+        Button 2
+      </button>
+    </div>
+  <script>
+document.querySelector("container")
+
+</script>
+</body>
+</html>

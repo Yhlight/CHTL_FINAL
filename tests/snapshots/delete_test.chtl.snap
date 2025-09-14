@@ -1,0 +1,19 @@
+<html>
+  <head>
+    <title>
+      Origin Test
+    </title>
+  </head>
+  <body>
+    <h1>
+      Content from CHTL
+    </h1>
+<div class="raw-html">
+                <p>This is <strong>raw, unprocessed</strong> HTML.</p>
+                <!-- This is a raw HTML comment -->
+            </div>
+            <p>
+      More content from CHTL
+    </p>
+  </body>
+</html>
