@@ -5,14 +5,16 @@
 #include "CHTL/CHTLParser/CHTLParser.h"
 #include "CHTL/CHTLGenerator/CHTLGenerator.h"
 #include "CHTL/CHTLLoader/CHTLLoader.h"
+#include "CHTLJS/CHTLJSLexer/CHTLJSLexer.h"
+#include "CHTLJS/CHTLJSParser/CHTLJSParser.h"
+#include "CHTLJS/CHTLJSGenerator/CHTLJSGenerator.h"
 #include <sstream>
 
 namespace CHTL {
 
 CompilerDispatcher::CompilerDispatcher() {
     chtl_context_ = std::make_shared<ParserContext>();
-    // CHTL JS context can be initialized later when its parser is mature
-    // chtljs_context_ = std::make_shared<CHTLJS::CHTLJSContext>();
+    chtljs_context_ = std::make_shared<CHTLJS::CHTLJSContext>();
 }
 
 std::string CompilerDispatcher::compile(const std::string& source) {
@@ -55,13 +57,17 @@ std::string CompilerDispatcher::compile(const std::string& source) {
                 break;
             }
             case ChunkType::ChtlJs: {
-                // For now, treat {{...}} as a simple JS expression.
-                // A more advanced CHTLJSParser would handle this.
-                std::string js_expression = chunk.content;
-                if (js_expression.rfind("{{", 0) == 0 && js_expression.size() > 4) {
-                    js_expression = js_expression.substr(2, js_expression.size() - 4);
+                CHTLJS::CHTLJSLexer lexer(chunk.content);
+                std::vector<CHTLJS::CHTLJSToken> tokens = lexer.scanTokens();
+                if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) continue;
+
+                CHTLJS::CHTLJSParser parser(tokens, chtljs_context_);
+                std::unique_ptr<CHTLJS::CHTLJSNode> ast = parser.parse();
+
+                if (ast) {
+                    CHTLJS::CHTLJSGenerator generator;
+                    js_outputs.push_back(generator.generate(*ast));
                 }
-                js_outputs.push_back(js_expression);
                 break;
             }
             case ChunkType::Placeholder: {
