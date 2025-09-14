@@ -35,8 +35,7 @@ target_include_directories(chtl_lib PUBLIC src)
 
 # Configuration for the new test runner
 add_executable(test_runner tests/test_runner.cpp)
-target_include_directories(test_runner PUBLIC src)
-target_link_libraries(test_runner PRIVATE chtl_lib stdc++fs)
+target_link_libraries(test_runner PRIVATE stdc++fs)
 
 # Add the new single test command
-add_test(NAME UnitTests WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} COMMAND test_runner)
+add_test(NAME SnapshotTests WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} COMMAND test_runner)

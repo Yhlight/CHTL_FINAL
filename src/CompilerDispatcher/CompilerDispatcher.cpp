@@ -20,6 +20,7 @@ CompilerDispatcher::CompilerDispatcher() {
 std::string CompilerDispatcher::compile(const std::string& source) {
     CHTLUnifiedScanner unified_scanner(source);
     chunks_ = unified_scanner.scan();
+    auto placeholder_map = unified_scanner.getPlaceholderMap();
 
     std::string html_output;
     std::vector<std::string> js_outputs;
@@ -59,7 +60,7 @@ std::string CompilerDispatcher::compile(const std::string& source) {
     }
 
     CodeMerger merger;
-    return merger.merge(html_output, js_outputs);
+    return merger.merge(html_output, js_outputs, placeholder_map);
 }
 
 } // namespace CHTL
