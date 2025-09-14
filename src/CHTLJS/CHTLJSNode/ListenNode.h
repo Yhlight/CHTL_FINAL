@@ -11,9 +11,8 @@ namespace CHTLJS {
 
 class ListenNode : public CHTLJSNode {
 public:
-    explicit ListenNode(std::unique_ptr<CHTLJSNode> object) : object_(std::move(object)) {}
-
-    CHTLJSNodeType getType() const override { return CHTLJSNodeType::Listen; }
+    explicit ListenNode(std::unique_ptr<CHTLJSNode> object)
+        : CHTLJSNode(CHTLJSNodeType::Listen), object_(std::move(object)) {}
 
     std::unique_ptr<CHTLJSNode> clone() const override {
         auto new_node = std::make_unique<ListenNode>(object_->clone());

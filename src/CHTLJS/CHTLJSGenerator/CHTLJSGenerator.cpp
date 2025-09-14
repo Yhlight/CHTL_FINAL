@@ -1,4 +1,6 @@
 #include "CHTLJS/CHTLJSGenerator/CHTLJSGenerator.h"
+#include "CHTLJS/CHTLJSNode/RootNode.h"
+#include "CHTLJS/CHTLJSNode/PlaceholderNode.h"
 #include "CHTLJS/CHTLJSNode/EnhancedSelectorNode.h"
 #include "CHTLJS/CHTLJSNode/ListenNode.h"
 #include "CHTLJS/CHTLJSNode/DelegateNode.h"
@@ -11,7 +13,7 @@ namespace CHTLJS {
 
 CHTLJSGenerator::CHTLJSGenerator() {}
 
-std::string CHTLJSGenerator::generate(const CHTLJSNode& root) {
+std::string CHTLJSGenerator::generate(const RootNode& root) {
     visit(&root);
     return output_;
 }
@@ -19,6 +21,12 @@ std::string CHTLJSGenerator::generate(const CHTLJSNode& root) {
 void CHTLJSGenerator::visit(const CHTLJSNode* node) {
     if (!node) return;
     switch (node->getType()) {
+        case CHTLJSNodeType::Root:
+            visitRootNode(static_cast<const RootNode*>(node));
+            break;
+        case CHTLJSNodeType::Placeholder:
+            visitPlaceholderNode(static_cast<const PlaceholderNode*>(node));
+            break;
         case CHTLJSNodeType::EnhancedSelector:
             visitEnhancedSelector(static_cast<const EnhancedSelectorNode*>(node));
             break;
@@ -39,15 +47,29 @@ void CHTLJSGenerator::visit(const CHTLJSNode* node) {
     }
 }
 
+void CHTLJSGenerator::visitRootNode(const RootNode* node) {
+    for (const auto& child : node->getChildren()) {
+        visit(child.get());
+    }
+}
+
+void CHTLJSGenerator::visitPlaceholderNode(const PlaceholderNode* node) {
+    output_ += node->getPlaceholderText();
+}
+
+
 void CHTLJSGenerator::visitEnhancedSelector(const EnhancedSelectorNode* node) {
-    output_ += "document.querySelector(\"" + node->getSelector() + "\")";
+    // A simple querySelector. In a real scenario, this might need to respect
+    // context (e.g. class vs id vs tag).
+    output_ += "document.querySelector('" + node->getSelector() + "')";
 }
 
 void CHTLJSGenerator::visitListenNode(const ListenNode* node) {
     visit(node->getObject());
     for (const auto& event_pair : node->getEvents()) {
-        output_ += ".addEventListener('" + event_pair.first + "', " + event_pair.second + ");";
+        output_ += ".addEventListener('" + event_pair.first + "', " + event_pair.second + ")";
     }
+    output_ += ";";
 }
 
 void CHTLJSGenerator::visitDelegateNode(const DelegateNode* node) {
@@ -62,19 +84,16 @@ void CHTLJSGenerator::visitDelegateNode(const DelegateNode* node) {
         output_ += delegator_stream.str() + ".addEventListener('" + event_pair.first + "', (event) => {\n";
 
         for (const auto& target_node : node->getTargets()) {
-            std::stringstream target_selector_stream;
-            std::string temp_output = output_;
-            output_ = "";
-            // We assume targets are EnhancedSelectorNodes which generate a selector string.
-            // A more robust implementation would handle other node types.
-            if(target_node->getType() == CHTLJSNodeType::EnhancedSelector) {
-                 target_selector_stream << "\"" << static_cast<const EnhancedSelectorNode*>(target_node.get())->getSelector() << "\"";
+            if (target_node->getType() == CHTLJSNodeType::EnhancedSelector) {
+                auto selector_node = static_cast<const EnhancedSelectorNode*>(target_node.get());
+                std::string selector_str = "'" + selector_node->getSelector() + "'";
+                output_ += "  if (event.target.matches(" + selector_str + ")) {\n";
+                output_ += "    (" + event_pair.second + ")(event);\n";
+                output_ += "  }\n";
             }
-            output_ = temp_output;
-
-            output_ += "  if (event.target.matches(" + target_selector_stream.str() + ")) {\n";
-            output_ += "    (" + event_pair.second + ")(event);\n";
-            output_ += "  }\n";
+            // Note: This logic assumes targets are simple selectors. A more robust
+            // implementation might need to handle other node types that can resolve
+            // to an element.
         }
 
         output_ += "});\n";
@@ -129,7 +148,6 @@ void CHTLJSGenerator::visitAnimateNode(const AnimateNode* node) {
     if (node->delay_.has_value()) {
         if (!first_option) options_ss << ", ";
         options_ss << "delay: " << node->delay_.value();
-        first_option = false;
     }
     options_ss << " }";
 

@@ -9,6 +9,7 @@ enum class CHTLJSTokenType {
     // Special
     EndOfFile,
     Unexpected,
+    Placeholder,      // _JS_CODE_PLACEHOLDER_..._
 
     // Punctuation
     OpenDoubleBrace,  // {{

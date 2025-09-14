@@ -18,6 +18,7 @@ private:
     void identifier();
     void number();
     void stringLiteral(char quote);
+    void placeholder();
 
     char peek() const;
     char peekNext() const;

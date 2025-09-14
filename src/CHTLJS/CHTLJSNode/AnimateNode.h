@@ -17,9 +17,7 @@ struct Keyframe {
 
 class AnimateNode : public CHTLJSNode {
 public:
-    AnimateNode() = default;
-
-    CHTLJSNodeType getType() const override { return CHTLJSNodeType::Animate; }
+    AnimateNode() : CHTLJSNode(CHTLJSNodeType::Animate) {}
 
     std::unique_ptr<CHTLJSNode> clone() const override {
         auto new_node = std::make_unique<AnimateNode>();

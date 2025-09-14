@@ -11,9 +11,8 @@ namespace CHTLJS {
 
 class DelegateNode : public CHTLJSNode {
 public:
-    explicit DelegateNode(std::unique_ptr<CHTLJSNode> delegator) : delegator_(std::move(delegator)) {}
-
-    CHTLJSNodeType getType() const override { return CHTLJSNodeType::Delegate; }
+    explicit DelegateNode(std::unique_ptr<CHTLJSNode> delegator)
+        : CHTLJSNode(CHTLJSNodeType::Delegate), delegator_(std::move(delegator)) {}
 
     std::unique_ptr<CHTLJSNode> clone() const override {
         auto new_node = std::make_unique<DelegateNode>(delegator_->clone());

@@ -67,10 +67,17 @@ void CHTLJSLexer::scanToken() {
             stringLiteral(c);
             break;
         default:
-            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') {
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
                 identifier();
             } else if (c >= '0' && c <= '9') {
                 number();
+            } else if (c == '_' ) {
+                // Could be an identifier or a placeholder
+                if (source_.substr(current_, 20) == "JS_CODE_PLACEHOLDER_") {
+                    placeholder();
+                } else {
+                    identifier();
+                }
             } else if (c == '/' && peek() == '/') {
                 while(peek() != '\n' && !isAtEnd()) advance();
             }
@@ -78,8 +85,31 @@ void CHTLJSLexer::scanToken() {
     }
 }
 
+void CHTLJSLexer::placeholder() {
+    // Consume the known part "JS_CODE_PLACEHOLDER_"
+    current_ += 20;
+    // Consume digits
+    while(peek() >= '0' && peek() <= '9') {
+        advance();
+    }
+    // Consume the final '_'
+    if (peek() == '_') {
+        advance();
+        addToken(CHTLJSTokenType::Placeholder);
+    } else {
+        // This is malformed, but we'll treat what we have as an identifier
+        // to avoid crashing.
+        identifier();
+    }
+}
+
 void CHTLJSLexer::identifier() {
-    while ((peek() >= 'a' && peek() <= 'z') || (peek() >= 'A' && peek() <= 'Z') || (peek() >= '0' && peek() <= '9') || peek() == '_') {
+    while (
+        (peek() >= 'a' && peek() <= 'z') ||
+        (peek() >= 'A' && peek() <= 'Z') ||
+        (peek() >= '0' && peek() <= '9') ||
+        peek() == '_' || peek() == '#' || peek() == '.' || peek() == '-' || peek() == ' '
+    ) {
         advance();
     }
     std::string text = source_.substr(start_, current_ - start_);
