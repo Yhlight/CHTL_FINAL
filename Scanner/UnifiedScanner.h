@@ -20,6 +20,7 @@ struct CodeFragment {
     size_t startPos;
     size_t endPos;
     std::string placeholder; // 用于占位符机制
+    bool isPlaceholder;      // 是否为占位符
 };
 
 class UnifiedScanner {
@@ -27,10 +28,10 @@ public:
     UnifiedScanner();
     ~UnifiedScanner() = default;
 
-    // 主要扫描函数
+    // 主要扫描函数 - 分离CHTL、CHTL JS、CSS、JS代码
     std::vector<CodeFragment> scan(const std::string& sourceCode);
     
-    // 占位符机制
+    // 占位符机制 - 用于分离JS和CHTL JS代码
     std::string createPlaceholder(const std::string& type = "JS_CODE");
     std::string decodePlaceholder(const std::string& content);
     
@@ -49,17 +50,21 @@ public:
     void setPlaceholderPrefix(const std::string& prefix) { placeholderPrefix_ = prefix; }
 
 private:
-    // 核心扫描算法
+    // 核心扫描算法 - 宽判严判机制
     std::vector<CodeFragment> performScan(const std::string& sourceCode);
     
-    // 双指针扫描
-    std::vector<CodeFragment> dualPointerScan(const std::string& content);
+    // 宽判 - 处理大块CHTL代码
+    std::vector<CodeFragment> wideScan(const std::string& content);
     
-    // 前置截取
-    std::string preExtract(const std::string& content, size_t& pos);
+    // 严判 - 处理CHTL JS和JS混合代码
+    std::vector<CodeFragment> strictScan(const std::string& content);
+    
+    // 占位符机制 - 分离JS和CHTL JS
+    std::string applyPlaceholderMechanism(const std::string& content);
     
     // 语法边界识别
-    bool detectSyntaxBoundary(const std::string& content, size_t pos);
+    bool detectCHTLSyntaxBoundary(const std::string& content, size_t pos);
+    bool detectCHTLJSSyntaxBoundary(const std::string& content, size_t pos);
     
     // 占位符管理
     std::map<std::string, std::string> placeholderMap_;
@@ -77,6 +82,10 @@ private:
     bool isStringDelimiter(char c);
     bool isBlockStart(const std::string& content, size_t pos);
     bool isBlockEnd(const std::string& content, size_t pos);
+    size_t findBlockEnd(const std::string& content, size_t start);
+    
+    // 调试
+    void debugFragment(const CodeFragment& fragment) const;
 };
 
 } // namespace CHTL
