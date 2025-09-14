@@ -33,6 +33,7 @@ private:
     void applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes);
     std::vector<std::unique_ptr<Node>> parseDeclaration();
     std::unique_ptr<OriginNode> parseOriginBlock();
+    void parseImportStatement();
     void parseConfigurationBlock();
     void parseTemplateDefinition(bool is_custom);
     std::unique_ptr<ElementNode> parseElement();

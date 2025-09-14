@@ -1,0 +1,12 @@
+<html>
+  <head>
+    <title>
+      Importer Test
+    </title>
+  </head>
+  <body>
+    <div style="border: 1px; color: #333; font-family: Arial; font-size: 16px; ">
+      This text should be styled by the imported module.
+    </div>
+  </body>
+</html>

@@ -28,13 +28,31 @@ static bool isKeyword(const std::string& source, size_t pos, const std::string& 
 
 CHTLUnifiedScanner::CHTLUnifiedScanner(const std::string& source)
     : source_(source),
-      chtljs_keywords_({"{{", "listen", "animate", "delegate", "vir", "router"}) {}
+      chtljs_keywords_({"{{", "listen", "animate", "delegate", "vir", "router"}) {
+    chtljs_context_ = std::make_shared<CHTLJS::CHTLJSContext>();
+}
 
 ScanningResult CHTLUnifiedScanner::scan() {
-    // This class is now a utility for processing a script string.
-    // The main entry point is processScriptContent.
-    std::string processed_content = processScriptContent(source_);
-    return {processed_content, placeholder_map_};
+    // 1. Isolate the CHTL JS syntax by replacing all pure JS with placeholders.
+    std::string chtljs_only_source = isolateChtlJs(source_);
+
+    // 2. Compile the CHTL JS-only source into standard JavaScript.
+    CHTLJS::CHTLJSLexer lexer(chtljs_only_source);
+    auto tokens = lexer.scanTokens();
+
+    // If there's nothing to parse, just return.
+    if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) {
+        return {"", placeholder_map_};
+    }
+
+    CHTLJS::CHTLJSParser parser(tokens, chtljs_context_);
+    auto ast = parser.parse();
+
+    CHTLJS::CHTLJSGenerator generator;
+    std::string final_js = generator.generate(*ast);
+
+    // 3. The final JS still has placeholders, which will be resolved by the CodeMerger later.
+    return {final_js, placeholder_map_};
 }
 
 std::string CHTLUnifiedScanner::generatePlaceholder() {
@@ -54,7 +72,7 @@ size_t CHTLUnifiedScanner::findEndOfChtlJsBlock(const std::string& content, size
     return (brace_level == 0) ? scan_pos : std::string::npos;
 }
 
-std::string CHTLUnifiedScanner::processScriptContent(const std::string& script_content) {
+std::string CHTLUnifiedScanner::isolateChtlJs(const std::string& script_content) {
     std::string processed_content;
     size_t cursor = 0;
 
@@ -75,47 +93,18 @@ std::string CHTLUnifiedScanner::processScriptContent(const std::string& script_c
         if (next_kw_pos == std::string::npos) {
             std::string js_part = script_content.substr(cursor);
             if (!js_part.empty()) {
-                 size_t first_char = js_part.find_first_not_of(" \t\n\r\f\v");
-                if (first_char == std::string::npos) { // All whitespace
-                    processed_content += js_part;
-                } else {
-                    size_t last_char = js_part.find_last_not_of(" \t\n\r\f\v");
-                    std::string leading_ws = js_part.substr(0, first_char);
-                    std::string trailing_ws = js_part.substr(last_char + 1);
-                    std::string core_js = js_part.substr(first_char, last_char - first_char + 1);
-
-                    processed_content += leading_ws;
-                    if (!core_js.empty()) {
-                        std::string placeholder = generatePlaceholder();
-                        placeholder_map_[placeholder] = core_js;
-                        processed_content += placeholder;
-                    }
-                    processed_content += trailing_ws;
-                }
+                std::string placeholder = generatePlaceholder();
+                placeholder_map_[placeholder] = js_part;
+                processed_content += placeholder;
             }
             break;
         }
 
         if (next_kw_pos > cursor) {
             std::string js_part = script_content.substr(cursor, next_kw_pos - cursor);
-
-            size_t first_char = js_part.find_first_not_of(" \t\n\r\f\v");
-            if (first_char == std::string::npos) { // All whitespace
-                processed_content += js_part;
-            } else {
-                size_t last_char = js_part.find_last_not_of(" \t\n\r\f\v");
-                std::string leading_ws = js_part.substr(0, first_char);
-                std::string trailing_ws = js_part.substr(last_char + 1);
-                std::string core_js = js_part.substr(first_char, last_char - first_char + 1);
-
-                processed_content += leading_ws;
-                if (!core_js.empty()) {
-                    std::string placeholder = generatePlaceholder();
-                    placeholder_map_[placeholder] = core_js;
-                    processed_content += placeholder;
-                }
-                processed_content += trailing_ws;
-            }
+            std::string placeholder = generatePlaceholder();
+            placeholder_map_[placeholder] = js_part;
+            processed_content += placeholder;
         }
 
         if (found_kw == "{{") {
@@ -137,7 +126,7 @@ std::string CHTLUnifiedScanner::processScriptContent(const std::string& script_c
 
             processed_content += script_content.substr(next_kw_pos, brace_open_pos - next_kw_pos + 1);
             std::string inner_content = script_content.substr(brace_open_pos + 1, construct_end_pos - brace_open_pos - 2);
-            processed_content += processScriptContent(inner_content);
+            processed_content += isolateChtlJs(inner_content);
             processed_content += "}";
             cursor = construct_end_pos;
         }

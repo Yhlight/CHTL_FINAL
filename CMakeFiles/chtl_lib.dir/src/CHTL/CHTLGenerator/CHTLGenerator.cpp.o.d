@@ -208,6 +208,34 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: \
  /usr/include/c++/13/bits/hashtable_policy.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/ResponsiveValueNode.h \
  /app/src/CHTL/CHTLGenerator/../../Scanner/CHTLUnifiedScanner.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSLexer/CHTLJSLexer.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSLexer/CHTLJSToken.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/CHTLJSParser.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSLexer/CHTLJSToken.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/CHTLJSNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/RootNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/CHTLJSNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/EnhancedSelectorNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/ListenNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/AnimateNode.h \
+ /usr/include/c++/13/optional \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/DelegateNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/RouterNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/ValueNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/VirNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/ValueNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/CHTLJSContext.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSGenerator/CHTLJSGenerator.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/CHTLJSNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/RootNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/EnhancedSelectorNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/ListenNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/AnimateNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/DelegateNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/RouterNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/VirNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/ValueNode.h \
+ /app/src/CHTL/CHTLGenerator/../../Scanner/../CHTLJS/CHTLJSParser/CHTLJSContext.h \
  /usr/include/c++/13/stack /usr/include/c++/13/deque \
  /usr/include/c++/13/bits/stl_deque.h /usr/include/c++/13/bits/deque.tcc \
  /usr/include/c++/13/bits/stl_stack.h /usr/include/c++/13/cmath \

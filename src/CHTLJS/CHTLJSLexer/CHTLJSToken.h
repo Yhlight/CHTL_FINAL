@@ -13,6 +13,8 @@ enum class CHTLJSTokenType {
     // Punctuation
     OpenDoubleBrace,  // {{
     CloseDoubleBrace, // }}
+    OpenParen,        // (
+    CloseParen,       // )
     OpenBrace,        // {
     CloseBrace,       // }
     OpenBracket,      // [

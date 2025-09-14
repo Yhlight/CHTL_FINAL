@@ -1,0 +1,19 @@
+// tests/importer_test.chtl
+
+// Use a direct relative path from the project root
+[Import] @Chtl from "tests/module/definitions.chtl";
+
+html {
+    head {
+        title { text: "Importer Test"; }
+    }
+    body {
+        div {
+            style {
+                @Style CommonText;
+                border: 1px solid black;
+            }
+            text: "This text should be styled by the imported module.";
+        }
+    }
+}

@@ -42,6 +42,8 @@ void CHTLJSLexer::scanToken() {
                 addToken(CHTLJSTokenType::CloseBrace);
             }
             break;
+        case '(': addToken(CHTLJSTokenType::OpenParen); break;
+        case ')': addToken(CHTLJSTokenType::CloseParen); break;
         case '[': addToken(CHTLJSTokenType::OpenBracket); break;
         case ']': addToken(CHTLJSTokenType::CloseBracket); break;
         case ':': addToken(CHTLJSTokenType::Colon); break;

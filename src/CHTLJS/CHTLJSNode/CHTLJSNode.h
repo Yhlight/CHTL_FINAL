@@ -12,7 +12,8 @@ enum class CHTLJSNodeType {
     Delegate,
     Animate,
     Value,
-    // Future node types will go here
+    Router,
+    Vir,
 };
 
 class CHTLJSNode {

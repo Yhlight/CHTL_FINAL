@@ -34,14 +34,16 @@ int main() {
 
     fs::path tests_dir("tests");
     fs::path snapshots_dir("tests/snapshots");
-    fs::path compiler_path("chtl_compiler"); // Assumes compiler is in the same dir or in PATH
+
+    if (!fs::exists(snapshots_dir)) {
+        fs::create_directory(snapshots_dir);
+    }
+
+    fs::path compiler_path("./chtl_compiler"); // Use explicit relative path
 
     if (!fs::exists(compiler_path)) {
-        compiler_path = "./build/chtl_compiler";
-         if (!fs::exists(compiler_path)) {
-            std::cerr << "FATAL: Compiler executable not found at " << compiler_path << std::endl;
-            return 1;
-         }
+        std::cerr << "FATAL: Compiler executable not found at " << compiler_path << std::endl;
+        return 1;
     }
 
     for (const auto& entry : fs::directory_iterator(tests_dir)) {

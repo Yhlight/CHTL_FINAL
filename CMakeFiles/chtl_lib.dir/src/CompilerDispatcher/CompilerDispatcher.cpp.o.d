@@ -126,14 +126,8 @@ CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/CHTLParser.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLLexer/Token.h \
- /usr/include/c++/13/variant \
- /usr/include/c++/13/bits/enable_special_members.h \
- /usr/include/c++/13/bits/parse_numbers.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/BaseNode.h \
- /usr/include/c++/13/memory /usr/include/c++/13/bits/stl_tempbuf.h \
+ /usr/include/c++/13/bits/erase_if.h /usr/include/c++/13/memory \
+ /usr/include/c++/13/bits/stl_tempbuf.h \
  /usr/include/c++/13/bits/stl_raw_storage_iter.h \
  /usr/include/c++/13/bits/align.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
@@ -169,6 +163,63 @@ CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSLexer/CHTLJSLexer.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSLexer/CHTLJSToken.h \
+ /usr/include/c++/13/unordered_map \
+ /usr/include/c++/13/bits/unordered_map.h \
+ /usr/include/c++/13/bits/hashtable.h \
+ /usr/include/c++/13/bits/hashtable_policy.h \
+ /usr/include/c++/13/bits/enable_special_members.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/CHTLJSParser.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSLexer/CHTLJSToken.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/CHTLJSNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/RootNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/CHTLJSNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/EnhancedSelectorNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/ListenNode.h \
+ /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/AnimateNode.h \
+ /usr/include/c++/13/optional \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/DelegateNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/RouterNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/ValueNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/VirNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/../CHTLJSNode/ValueNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/CHTLJSContext.h \
+ /usr/include/c++/13/stdexcept \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSGenerator/CHTLJSGenerator.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/CHTLJSNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/RootNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/EnhancedSelectorNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/ListenNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/AnimateNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/DelegateNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/RouterNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/VirNode.h \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSGenerator/../CHTLJSNode/ValueNode.h \
+ /usr/include/c++/13/sstream /usr/include/c++/13/istream \
+ /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
+ /usr/include/c++/13/bits/locale_classes.h \
+ /usr/include/c++/13/bits/locale_classes.tcc \
+ /usr/include/c++/13/system_error \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/error_constants.h \
+ /usr/include/c++/13/streambuf /usr/include/c++/13/bits/streambuf.tcc \
+ /usr/include/c++/13/bits/basic_ios.h \
+ /usr/include/c++/13/bits/locale_facets.h /usr/include/c++/13/cwctype \
+ /usr/include/wctype.h /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h \
+ /usr/include/c++/13/bits/streambuf_iterator.h \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h \
+ /usr/include/c++/13/bits/locale_facets.tcc \
+ /usr/include/c++/13/bits/basic_ios.tcc /usr/include/c++/13/ostream \
+ /usr/include/c++/13/bits/ostream.tcc \
+ /usr/include/c++/13/bits/istream.tcc \
+ /usr/include/c++/13/bits/sstream.tcc \
+ /app/src/CompilerDispatcher/../Scanner/../CHTLJS/CHTLJSParser/CHTLJSContext.h \
+ /app/src/CompilerDispatcher/../CHTL/CHTLParser/CHTLParser.h \
+ /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLLexer/Token.h \
+ /usr/include/c++/13/variant /usr/include/c++/13/bits/parse_numbers.h \
+ /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/BaseNode.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/RootNode.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/BaseNode.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/ElementNode.h \
@@ -176,7 +227,6 @@ CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/TextNode.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/CommentNode.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/StyleBlockNode.h \
- /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/PropertyValue.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/../CHTLLexer/Token.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/PropertyReferenceNode.h \
@@ -186,43 +236,21 @@ CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/StyleTemplateNode.h \
  /usr/include/c++/13/unordered_set \
  /usr/include/c++/13/bits/unordered_set.h \
- /usr/include/c++/13/bits/hashtable.h \
- /usr/include/c++/13/bits/hashtable_policy.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/ElementTemplateNode.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/VarTemplateNode.h \
- /usr/include/c++/13/unordered_map \
- /usr/include/c++/13/bits/unordered_map.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLLoader/CHTLLoader.h \
- /usr/include/c++/13/optional /usr/include/c++/13/filesystem \
- /usr/include/c++/13/bits/fs_fwd.h /usr/include/c++/13/system_error \
- /usr/include/x86_64-linux-gnu/c++/13/bits/error_constants.h \
- /usr/include/c++/13/stdexcept /usr/include/c++/13/cstdint \
- /usr/include/c++/13/bits/chrono.h /usr/include/c++/13/ratio \
- /usr/include/c++/13/limits /usr/include/c++/13/ctime \
- /usr/include/c++/13/bits/fs_path.h /usr/include/c++/13/locale \
- /usr/include/c++/13/bits/locale_classes.h \
- /usr/include/c++/13/bits/locale_classes.tcc \
- /usr/include/c++/13/bits/locale_facets.h /usr/include/c++/13/cwctype \
- /usr/include/wctype.h /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
- /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h \
- /usr/include/c++/13/bits/ios_base.h /usr/include/c++/13/streambuf \
- /usr/include/c++/13/bits/streambuf.tcc \
- /usr/include/c++/13/bits/streambuf_iterator.h \
- /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h \
- /usr/include/c++/13/bits/locale_facets.tcc \
+ /usr/include/c++/13/filesystem /usr/include/c++/13/bits/fs_fwd.h \
+ /usr/include/c++/13/cstdint /usr/include/c++/13/bits/chrono.h \
+ /usr/include/c++/13/ratio /usr/include/c++/13/limits \
+ /usr/include/c++/13/ctime /usr/include/c++/13/bits/fs_path.h \
+ /usr/include/c++/13/locale \
  /usr/include/c++/13/bits/locale_facets_nonio.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/time_members.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/messages_members.h \
  /usr/include/libintl.h /usr/include/c++/13/bits/codecvt.h \
  /usr/include/c++/13/bits/locale_facets_nonio.tcc \
  /usr/include/c++/13/bits/locale_conv.h /usr/include/c++/13/iomanip \
- /usr/include/c++/13/bits/quoted_string.h /usr/include/c++/13/sstream \
- /usr/include/c++/13/istream /usr/include/c++/13/ios \
- /usr/include/c++/13/bits/basic_ios.h \
- /usr/include/c++/13/bits/basic_ios.tcc /usr/include/c++/13/ostream \
- /usr/include/c++/13/bits/ostream.tcc \
- /usr/include/c++/13/bits/istream.tcc \
- /usr/include/c++/13/bits/sstream.tcc /usr/include/c++/13/codecvt \
+ /usr/include/c++/13/bits/quoted_string.h /usr/include/c++/13/codecvt \
  /usr/include/c++/13/bits/fs_dir.h /usr/include/c++/13/bits/fs_ops.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/OriginNode.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/PropertyValue.h \
@@ -231,7 +259,6 @@ CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /usr/include/c++/13/set /usr/include/c++/13/bits/stl_set.h \
  /usr/include/c++/13/bits/stl_multiset.h \
  /app/src/CompilerDispatcher/../CHTLJS/CHTLJSParser/CHTLJSContext.h \
- /app/src/CompilerDispatcher/../CHTLJS/CHTLJSParser/../CHTLJSNode/CHTLJSNode.h \
  /app/src/CodeMerger/CodeMerger.h /app/src/CHTL/CHTLLexer/CHTLLexer.h \
  /app/src/CHTL/CHTLLexer/Token.h /app/src/CHTL/CHTLParser/CHTLParser.h \
  /app/src/CHTL/CHTLGenerator/CHTLGenerator.h \
