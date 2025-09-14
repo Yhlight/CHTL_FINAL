@@ -182,6 +182,7 @@ CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/PropertyReferenceNode.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/ResponsiveValueNode.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/CssRuleNode.h \
+ /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/ScriptBlockNode.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/StyleTemplateNode.h \
  /usr/include/c++/13/unordered_set \
  /usr/include/c++/13/bits/unordered_set.h \
@@ -231,9 +232,8 @@ CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /usr/include/c++/13/bits/stl_multiset.h \
  /app/src/CompilerDispatcher/../CHTLJS/CHTLJSParser/CHTLJSContext.h \
  /app/src/CompilerDispatcher/../CHTLJS/CHTLJSParser/../CHTLJSNode/CHTLJSNode.h \
- /app/src/Scanner/CHTLUnifiedScanner.h /app/src/CodeMerger/CodeMerger.h \
- /app/src/CHTL/CHTLLexer/CHTLLexer.h /app/src/CHTL/CHTLLexer/Token.h \
- /app/src/CHTL/CHTLParser/CHTLParser.h \
+ /app/src/CodeMerger/CodeMerger.h /app/src/CHTL/CHTLLexer/CHTLLexer.h \
+ /app/src/CHTL/CHTLLexer/Token.h /app/src/CHTL/CHTLParser/CHTLParser.h \
  /app/src/CHTL/CHTLGenerator/CHTLGenerator.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/BaseNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/RootNode.h \
@@ -241,15 +241,8 @@ CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/TextNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/CommentNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/StyleBlockNode.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLNode/ScriptBlockNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/OriginNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/PropertyReferenceNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/PropertyValue.h \
- /app/src/CHTL/CHTLLoader/CHTLLoader.h \
- /app/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.h \
- /app/src/CHTLJS/CHTLJSLexer/CHTLJSToken.h \
- /app/src/CHTLJS/CHTLJSParser/CHTLJSParser.h \
- /app/src/CHTLJS/CHTLJSParser/../CHTLJSLexer/CHTLJSToken.h \
- /app/src/CHTLJS/CHTLJSParser/../CHTLJSNode/CHTLJSNode.h \
- /app/src/CHTLJS/CHTLJSParser/CHTLJSContext.h \
- /app/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.h \
- /app/src/CHTLJS/CHTLJSGenerator/../CHTLJSNode/CHTLJSNode.h
+ /app/src/CHTL/CHTLLoader/CHTLLoader.h

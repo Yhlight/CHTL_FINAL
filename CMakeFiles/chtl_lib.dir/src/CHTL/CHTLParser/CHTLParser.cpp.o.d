@@ -179,6 +179,7 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o: \
  /app/src/CHTL/CHTLParser/../CHTLNode/PropertyReferenceNode.h \
  /app/src/CHTL/CHTLParser/../CHTLNode/ResponsiveValueNode.h \
  /app/src/CHTL/CHTLParser/../CHTLNode/CssRuleNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/ScriptBlockNode.h \
  /app/src/CHTL/CHTLParser/../CHTLNode/StyleTemplateNode.h \
  /usr/include/c++/13/unordered_set \
  /usr/include/c++/13/bits/unordered_set.h \

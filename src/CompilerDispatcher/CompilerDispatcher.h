@@ -23,7 +23,6 @@ public:
     std::string compile(const std::string& source);
 
 private:
-    std::vector<CodeChunk> chunks_;
     std::shared_ptr<ParserContext> chtl_context_;
     std::shared_ptr<CHTLJS::CHTLJSContext> chtljs_context_;
 

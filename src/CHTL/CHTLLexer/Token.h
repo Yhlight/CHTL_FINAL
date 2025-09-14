@@ -102,6 +102,8 @@ struct Token {
     std::string lexeme;
     size_t line = 1;
     size_t column = 1;
+    size_t start_pos = 0;
+    size_t end_pos = 0;
 };
 
 } // namespace CHTL

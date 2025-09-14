@@ -7,6 +7,7 @@
 #include <algorithm>
 #include "../CHTLNode/PropertyReferenceNode.h"
 #include "../CHTLNode/ResponsiveValueNode.h"
+#include "../CHTLNode/ScriptBlockNode.h"
 
 namespace CHTL {
 
@@ -127,6 +128,8 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     std::unique_ptr<Node> singleNode = nullptr;
     if (match({TokenType::Style})) {
         singleNode = parseStyleBlock();
+    } else if (match({TokenType::Script})) {
+        singleNode = parseScriptBlock();
     } else if (match({TokenType::Identifier})) {
         if (peek().type == TokenType::OpenBrace) {
             singleNode = parseElement();
@@ -909,6 +912,35 @@ std::string CHTLParser::resolveUnqualifiedName(const std::string& name, Template
 
     // Exactly one match found
     return found_in_namespaces[0] + "::" + name;
+}
+
+std::unique_ptr<ScriptBlockNode> CHTLParser::parseScriptBlock() {
+    consume(TokenType::OpenBrace, "Expected '{' to open script block.");
+    const Token& content_start_token = peek();
+
+    int brace_level = 1;
+    while (brace_level > 0 && !isAtEnd()) {
+        if (peek().type == TokenType::OpenBrace) brace_level++;
+        else if (peek().type == TokenType::CloseBrace) brace_level--;
+
+        if (brace_level == 0) break;
+
+        advance();
+    }
+
+    if (brace_level > 0) {
+        throw std::runtime_error("Unterminated script block.");
+    }
+
+    const Token& content_end_token = previous();
+    size_t content_start_pos = content_start_token.start_pos;
+    size_t content_end_pos = content_end_token.end_pos;
+
+    std::string raw_content = source_.substr(content_start_pos, content_end_pos - content_start_pos);
+
+    consume(TokenType::CloseBrace, "Expected '}' to close script block.");
+
+    return std::make_unique<ScriptBlockNode>(raw_content);
 }
 
 } // namespace CHTL

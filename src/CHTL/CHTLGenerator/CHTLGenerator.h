@@ -7,6 +7,7 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/StyleBlockNode.h"
+#include "../CHTLNode/ScriptBlockNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/PropertyReferenceNode.h"
 #include "../CHTLNode/PropertyValue.h"
@@ -32,6 +33,7 @@ struct UnresolvedProperty {
 struct CompilationResult {
     std::string html;
     std::string js;
+    std::map<std::string, std::string> placeholder_map;
 };
 
 class CHTLGenerator {
@@ -57,6 +59,7 @@ private:
     void renderText(const TextNode* node);
     void renderComment(const CommentNode* node);
     void renderOrigin(const OriginNode* node);
+    void renderScriptBlock(const ScriptBlockNode* node);
 
     std::string getElementUniqueId(const ElementNode* node);
     void indent();
@@ -69,6 +72,8 @@ private:
 
     std::stringstream output_;
     std::stringstream global_styles_;
+    std::stringstream global_scripts_;
+    std::map<std::string, std::string> placeholder_map_;
     int indentLevel_ = 0;
 };
 

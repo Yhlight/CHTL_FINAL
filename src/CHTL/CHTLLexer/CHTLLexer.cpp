@@ -308,7 +308,7 @@ void CHTLLexer::addToken(TokenType type) {
 }
 
 void CHTLLexer::addToken(TokenType type, const std::string& lexeme) {
-    tokens_.push_back({type, lexeme, line_, start_ - line_start_ + 1});
+    tokens_.push_back({type, lexeme, line_, start_ - line_start_ + 1, start_, current_});
 }
 
 }

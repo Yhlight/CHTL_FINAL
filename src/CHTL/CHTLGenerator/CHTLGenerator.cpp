@@ -1,6 +1,8 @@
 #include "CHTLGenerator.h"
 #include "../CHTLLexer/CHTLLexer.h"
 #include "../CHTLNode/ResponsiveValueNode.h"
+#include "../CHTLNode/ScriptBlockNode.h"
+#include "../../Scanner/CHTLUnifiedScanner.h"
 #include <map>
 #include <stack>
 #include <vector>
@@ -291,7 +293,8 @@ CompilationResult CHTLGenerator::generate(RootNode& root) {
         }
     }
     std::string js = generateReactivityScript();
-    return {html, js};
+    global_scripts_ << js;
+    return {html, global_scripts_.str(), placeholder_map_};
 }
 
 void CHTLGenerator::firstPass(Node* node) {
@@ -449,7 +452,8 @@ void CHTLGenerator::render(const Node* node) {
         case NodeType::Text: renderText(static_cast<const TextNode*>(node)); break;
         case NodeType::Comment: renderComment(static_cast<const CommentNode*>(node)); break;
         case NodeType::Origin: renderOrigin(static_cast<const OriginNode*>(node)); break;
-        case NodeType::StyleBlock: break;
+        case NodeType::StyleBlock: break; // Handled in first pass
+        case NodeType::ScriptBlock: renderScriptBlock(static_cast<const ScriptBlockNode*>(node)); break;
         default: break;
     }
 }
@@ -501,6 +505,18 @@ std::string CHTLGenerator::getElementUniqueId(const ElementNode* node) {
 
 void CHTLGenerator::indent() {
     for (int i = 0; i < indentLevel_; ++i) output_ << "  ";
+}
+
+void CHTLGenerator::renderScriptBlock(const ScriptBlockNode* node) {
+    if (node->content_.empty()) {
+        return;
+    }
+    // Here is where the scanner is finally used.
+    CHTLUnifiedScanner scanner(node->content_);
+    ScanningResult result = scanner.scan();
+
+    global_scripts_ << result.modified_source << "\n";
+    placeholder_map_.insert(result.placeholder_map.begin(), result.placeholder_map.end());
 }
 
 }

@@ -8,6 +8,7 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
 #include "../CHTLNode/StyleBlockNode.h"
+#include "../CHTLNode/ScriptBlockNode.h"
 #include "../CHTLNode/StyleTemplateNode.h"
 #include "../CHTLNode/ElementTemplateNode.h"
 #include "../CHTLNode/VarTemplateNode.h"
@@ -39,6 +40,7 @@ private:
     std::vector<PropertyValue> parsePropertyValue();
     std::unique_ptr<TextNode> parseText();
     std::unique_ptr<StyleBlockNode> parseStyleBlock();
+    std::unique_ptr<ScriptBlockNode> parseScriptBlock();
     std::unique_ptr<CommentNode> parseGeneratorComment();
     void consumeColonOrEquals();
     void checkConstraints(const ElementNode& parent, const Node& child);
