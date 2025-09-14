@@ -26,6 +26,8 @@ public:
 
     std::vector<CodeChunk> scan();
 
+    const std::map<std::string, std::string>& getPlaceholderMap() const;
+
 private:
     void process();
     void handleScriptTag();

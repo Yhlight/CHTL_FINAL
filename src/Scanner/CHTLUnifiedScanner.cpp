@@ -12,6 +12,10 @@ std::vector<CodeChunk> CHTLUnifiedScanner::scan() {
     return chunks_;
 }
 
+const std::map<std::string, std::string>& CHTLUnifiedScanner::getPlaceholderMap() const {
+    return placeholder_map_;
+}
+
 // Helper to check if a keyword is a whole word
 bool isWordBoundary(const std::string& source, size_t pos, size_t len) {
     bool start_boundary = (pos == 0) || isspace(source[pos - 1]) || source[pos - 1] == '{' || source[pos - 1] == '}';
