@@ -10,6 +10,7 @@ const std::unordered_map<std::string, CHTLJSTokenType> CHTLJSLexer::keywords = {
     {"delegate", CHTLJSTokenType::Delegate},
     {"router", CHTLJSTokenType::Router},
     {"vir", CHTLJSTokenType::Vir},
+    {"scriptloader", CHTLJSTokenType::Scriptloader},
 };
 
 CHTLJSLexer::CHTLJSLexer(const std::string& source) : source_(source) {}

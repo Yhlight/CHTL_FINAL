@@ -52,10 +52,6 @@ std::string CompilerDispatcher::compile(const std::string& source) {
                 }
                 break;
             }
-            case ChunkType::Css: {
-                css_output << chunk.content << "\n";
-                break;
-            }
             case ChunkType::ChtlJs: {
                 CHTLJS::CHTLJSLexer lexer(chunk.content);
                 std::vector<CHTLJS::CHTLJSToken> tokens = lexer.scanTokens();

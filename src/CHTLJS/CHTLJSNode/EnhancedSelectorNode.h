@@ -8,9 +8,8 @@ namespace CHTLJS {
 
 class EnhancedSelectorNode : public CHTLJSNode {
 public:
-    explicit EnhancedSelectorNode(std::string selector) : selector_(std::move(selector)) {}
-
-    CHTLJSNodeType getType() const override { return CHTLJSNodeType::EnhancedSelector; }
+    explicit EnhancedSelectorNode(std::string selector)
+        : CHTLJSNode(CHTLJSNodeType::EnhancedSelector), selector_(std::move(selector)) {}
 
     std::unique_ptr<CHTLJSNode> clone() const override {
         return std::make_unique<EnhancedSelectorNode>(selector_);

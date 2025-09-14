@@ -42,17 +42,14 @@ size_t findClosingBrace(const std::string& source, size_t start_pos) {
 void CHTLUnifiedScanner::process() {
     size_t last_pos = 0;
     while (current_ < source_.length()) {
-        size_t script_pos = source_.find("script", current_);
-        size_t style_pos = source_.find("style", current_);
-
-        size_t next_pos = std::min(script_pos, style_pos);
+        size_t next_pos = source_.find("script", current_);
 
         if (next_pos == std::string::npos) {
-            // No more script or style tags, the rest is CHTL
+            // No more script blocks, the rest is CHTL.
             break;
         }
 
-        const std::string& keyword = (next_pos == script_pos) ? "script" : "style";
+        const std::string keyword = "script";
 
         if (isWordBoundary(source_, next_pos, keyword.length())) {
             size_t brace_pos = source_.find('{', next_pos + keyword.length());
@@ -67,24 +64,20 @@ void CHTLUnifiedScanner::process() {
                 }
 
                 if (only_whitespace) {
-                    // We found a block. Chunk the preceding text as CHTL.
+                    // We found a script block. Chunk the preceding text as CHTL.
                     if (next_pos > last_pos) {
                         chunks_.push_back({ChunkType::CHTL, source_.substr(last_pos, next_pos - last_pos)});
                     }
 
                     current_ = brace_pos; // Position at the opening brace
-                    if (keyword == "script") {
-                        handleScriptTag();
-                    } else {
-                        handleStyleTag();
-                    }
+                    handleScriptTag();
                     last_pos = current_;
                     continue; // Continue scanning from the new position
                 }
             }
         }
         // If it wasn't a valid block, just advance past the keyword and continue scanning
-        current_ = next_pos + 1;
+        current_ = next_pos + keyword.length();
     }
 
     // Add the final remaining CHTL chunk
@@ -147,21 +140,6 @@ void CHTLUnifiedScanner::handleScriptTag() {
     }
 
     current_ = end_brace + 1;
-}
-
-void CHTLUnifiedScanner::handleStyleTag() {
-    size_t end_brace = findClosingBrace(source_, current_);
-    if (end_brace != std::string::npos) {
-        // Extract the entire content of the style block as a single CSS chunk.
-        // The CompilerDispatcher will later send this to the appropriate compiler
-        // that can handle CHTL features within CSS.
-        std::string content = source_.substr(current_ + 1, end_brace - current_ - 1);
-        chunks_.push_back({ChunkType::Css, content});
-        current_ = end_brace + 1;
-    } else {
-        // Unmatched brace, treat as error or consume rest of file.
-        current_ = source_.length();
-    }
 }
 
 } // namespace CHTL

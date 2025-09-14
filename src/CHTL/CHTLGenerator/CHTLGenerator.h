@@ -32,6 +32,7 @@ struct UnresolvedProperty {
 struct CompilationResult {
     std::string html;
     std::string js;
+    std::string css;
 };
 
 class CHTLGenerator {

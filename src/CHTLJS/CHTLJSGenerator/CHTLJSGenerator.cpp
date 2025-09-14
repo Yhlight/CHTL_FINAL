@@ -5,6 +5,7 @@
 #include "CHTLJS/CHTLJSNode/AnimateNode.h"
 #include "CHTLJS/CHTLJSNode/ValueNode.h"
 #include "CHTLJS/CHTLJSNode/RouterNode.h"
+#include "CHTLJS/CHTLJSNode/ScriptLoaderNode.h"
 #include <stdexcept>
 #include <sstream>
 
@@ -37,6 +38,9 @@ void CHTLJSGenerator::visit(const CHTLJSNode* node) {
             break;
         case CHTLJSNodeType::Router:
             visitRouterNode(static_cast<const RouterNode*>(node));
+            break;
+        case CHTLJSNodeType::Scriptloader:
+            visitScriptLoaderNode(static_cast<const ScriptLoaderNode*>(node));
             break;
         default:
             throw std::runtime_error("Unknown CHTL JS node type for generation.");
@@ -159,14 +163,22 @@ void CHTLJSGenerator::visitRouterNode(const RouterNode* node) {
     bool first_route = true;
     for(const auto& route : node->routes_) {
         if (!first_route) routes_ss << ", ";
-        // Generate the selector for the page
+
+        // The following is a common pattern in this generator to capture the output
+        // of a recursive visit call without affecting the main output string.
+        // 1. Save main output
+        // 2. Clear main output
+        // 3. Visit sub-node (which populates the now-clear main output)
+        // 4. Capture the result from the main output
+        // 5. Restore main output
         std::string original_output = output_;
         output_ = "";
-        visit(route.page_node.get());
-        std::string page_selector = output_;
+        visit(route.page_node.get()); // This will generate code like `document.querySelector(...)`
+        std::string page_element_accessor = output_;
         output_ = original_output;
 
-        routes_ss << "\"" << route.url << "\": " << page_selector;
+        // This builds a JS key-value pair like: "/home": document.querySelector("#home-page")
+        routes_ss << "\"" << route.url << "\": " << page_element_accessor;
         first_route = false;
     }
     routes_ss << "}";
@@ -233,6 +245,57 @@ void CHTLJSGenerator::visitRouterNode(const RouterNode* node) {
   });
 )JS";
     output_ += "\n})();";
+}
+
+void CHTLJSGenerator::visitScriptLoaderNode(const ScriptLoaderNode* node) {
+    // Generate the core AMD loader object
+    output_ += R"JS(
+((window) => {
+    const Louder = {
+        modules: {},
+        define: function (name, deps, factory) {
+            if (this.modules[name]) return;
+            this.modules[name] = {
+                deps,
+                factory,
+                exports: {},
+                initialized: false,
+            };
+        },
+        require: function (name) {
+            const mod = this.modules[name];
+            if (!mod) throw new Error(`Module ${name} not defined`);
+            if (mod.initialized) return mod.exports;
+            mod.initialized = true;
+            const depExports = mod.deps.map(dep => {
+                if (dep === "require") return this.require.bind(this);
+                if (dep === "exports") return mod.exports;
+                if (dep === "module") return mod;
+                return this.require(dep);
+            });
+            mod.factory.apply(null, depExports);
+            return mod.exports;
+        },
+        load: function(path, callback) {
+            const script = document.createElement('script');
+            script.src = path;
+            script.async = true;
+            script.onload = () => {
+                if (callback) callback();
+            };
+            document.head.appendChild(script);
+        }
+    };
+    window.Louder = Louder;
+})(window);
+)JS";
+
+    // Generate the calls to load the scripts specified in the node
+    output_ += "\ndocument.addEventListener('DOMContentLoaded', () => {\n";
+    for (const auto& path : node->paths_) {
+        output_ += "  Louder.load('" + path + "');\n";
+    }
+    output_ += "});\n";
 }
 
 } // namespace CHTLJS

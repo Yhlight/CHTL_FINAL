@@ -291,7 +291,8 @@ CompilationResult CHTLGenerator::generate(RootNode& root) {
         }
     }
     std::string js = generateReactivityScript();
-    return {html, js};
+    // The dispatcher will handle merging, so we return the raw CSS here.
+    return {html, js, global_styles_.str()};
 }
 
 void CHTLGenerator::firstPass(Node* node) {

@@ -42,6 +42,11 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parse() {
         return parseRouterBlock();
     }
 
+    if (peek().type == CHTLJSTokenType::Scriptloader) {
+        advance(); // consume 'scriptloader'
+        return parseScriptLoaderBlock();
+    }
+
     // Check for vir object access, e.g. myListener->click
     if (peek().type == CHTLJSTokenType::Identifier && context_->virtual_objects.count(peek().lexeme)) {
         CHTLJSToken vir_name = advance();
@@ -357,6 +362,7 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseRouterBlock() {
             //Handles root: "/" || {{selector}} or root: {"/", {{selector}}}
             if (peek().type == CHTLJSTokenType::OpenBrace) {
                 advance(); // consume '{'
+                if (peek().type != CHTLJSTokenType::String) throw std::runtime_error("Expected string literal for root path in object.");
                 router_node->root_path_ = advance().lexeme;
                 if (!match({CHTLJSTokenType::Comma})) throw std::runtime_error("Expected ',' separating root path and container.");
                 router_node->root_container_ = parse();
@@ -396,6 +402,41 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseRouterBlock() {
     }
 
     return router_node;
+}
+
+std::unique_ptr<CHTLJSNode> CHTLJSParser::parseScriptLoaderBlock() {
+    auto script_loader_node = std::make_unique<ScriptLoaderNode>();
+
+    if (peek().type != CHTLJSTokenType::OpenBrace) {
+        throw std::runtime_error("Expected '{' to open scriptloader block.");
+    }
+    advance(); // consume '{'
+
+    while (peek().type != CHTLJSTokenType::CloseBrace && !isAtEnd()) {
+        if (peek().type != CHTLJSTokenType::Identifier || advance().lexeme != "load") {
+            throw std::runtime_error("Expected 'load' keyword in scriptloader block.");
+        }
+
+        if (peek().type != CHTLJSTokenType::Colon) throw std::runtime_error("Expected ':' after 'load' key.");
+        advance(); // consume ':'
+
+        do {
+            if (peek().type != CHTLJSTokenType::String) throw std::runtime_error("Expected string literal for script path.");
+            script_loader_node->paths_.push_back(advance().lexeme);
+        } while (match({CHTLJSTokenType::Comma}));
+
+        // Consume optional comma between key-value pairs
+        if (peek().type == CHTLJSTokenType::Comma) {
+            advance();
+        }
+    }
+
+    if (peek().type != CHTLJSTokenType::CloseBrace) {
+        throw std::runtime_error("Expected '}' to close scriptloader block.");
+    }
+    advance(); // consume '}'
+
+    return script_loader_node;
 }
 
 } // namespace CHTLJS

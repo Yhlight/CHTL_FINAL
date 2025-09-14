@@ -31,7 +31,6 @@ public:
 private:
     void process();
     void handleScriptTag();
-    void handleStyleTag();
 
     const std::string& source_;
     std::vector<CodeChunk> chunks_;

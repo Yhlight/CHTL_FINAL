@@ -23,6 +23,7 @@ private:
     std::unique_ptr<CHTLJSNode> parseDelegateBlock(std::unique_ptr<CHTLJSNode> object);
     std::unique_ptr<CHTLJSNode> parseAnimateBlock();
     std::unique_ptr<CHTLJSNode> parseRouterBlock();
+    std::unique_ptr<CHTLJSNode> parseScriptLoaderBlock();
 
     std::vector<CHTLJSToken>& tokens_;
     std::shared_ptr<CHTLJSContext> context_;

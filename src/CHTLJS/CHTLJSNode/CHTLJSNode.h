@@ -2,7 +2,8 @@
 #define CHTL_JS_NODE_H
 
 #include <memory>
-#include "RouterNode.h" // Include the new node type
+#include "RouterNode.h"
+#include "ScriptLoaderNode.h"
 
 namespace CHTLJS {
 
@@ -14,6 +15,7 @@ enum class CHTLJSNodeType {
     Animate,
     Value,
     Router,
+    Scriptloader,
     // Future node types will go here
 };
 
