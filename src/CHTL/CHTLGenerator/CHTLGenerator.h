@@ -6,10 +6,10 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
-#include "../CHTLNode/StyleBlockNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/PropertyReferenceNode.h"
 #include "../CHTLNode/PropertyValue.h"
+#include "../../CHTLJS/CHTLJSParser/CHTLJSContext.h"
 #include <string>
 #include <sstream>
 #include <memory>
@@ -19,8 +19,14 @@
 
 namespace CHTL {
 
-// Forward declaration
+// Forward declarations
 class ElementNode;
+class RawScriptNode;
+class RawStyleNode;
+namespace CHTLJS {
+    class CHTLJSParser;
+    class CHTLJSGenerator;
+}
 
 // Struct to hold info about a property that needs late resolution
 struct UnresolvedProperty {
@@ -36,7 +42,8 @@ struct CompilationResult {
 
 class CHTLGenerator {
 public:
-    CHTLGenerator() = default;
+    CHTLGenerator();
+    ~CHTLGenerator();
     CompilationResult generate(RootNode& root);
 
 private:
@@ -57,9 +64,16 @@ private:
     void renderText(const TextNode* node);
     void renderComment(const CommentNode* node);
     void renderOrigin(const OriginNode* node);
+    void renderRawStyle(const RawStyleNode* node);
+    void renderRawScript(const RawScriptNode* node);
 
     std::string getElementUniqueId(const ElementNode* node);
     void indent();
+
+    // CHTL JS processing pipeline
+    std::shared_ptr<CHTLJS::CHTLJSContext> chtljs_context_;
+    std::unique_ptr<CHTLJS::CHTLJSParser> chtljs_parser_;
+    std::unique_ptr<CHTLJS::CHTLJSGenerator> chtljs_generator_;
 
     // Data structures for two-pass generation
     std::vector<ElementNode*> all_elements_;
@@ -69,6 +83,7 @@ private:
 
     std::stringstream output_;
     std::stringstream global_styles_;
+    std::stringstream global_scripts_;
     int indentLevel_ = 0;
 };
 

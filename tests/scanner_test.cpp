@@ -3,59 +3,23 @@
 #include <vector>
 #include <cassert>
 #include <string>
-#include <algorithm>
-#include <cctype>
-
-// Helper to print raw string content for debugging
-void print_raw(const std::string& s) {
-    for (char c : s) {
-        if (c == '\n') std::cout << "\\n";
-        else if (c == '\r') std::cout << "\\r";
-        else if (c == '\t') std::cout << "\\t";
-        else if (isprint(c)) std::cout << c;
-        else std::cout << "\\" << (int)c;
-    }
-}
 
 void run_scanner_test() {
     std::cout << "Running Unified Scanner Test..." << std::endl;
 
     std::string source = R"~(
-div {
-    text: "Hello";
-}
-style {
-    color: red;
-}
-body {
-    script {
-        let a = 1;
-        {{box}}->show();
-        let b = 2;
-    }
-}
-)~";
+        console.log("Setup");
+        {{.container}}->hide();
+        console.log("Done");
+    )~";
 
     CHTL::CHTLUnifiedScanner scanner(source);
     std::vector<CHTL::CodeChunk> chunks = scanner.scan();
 
-    // This is for debugging to get the exact output
-    std::cout << "==== ACTUAL CHUNKS ====\n";
-    for(size_t i = 0; i < chunks.size(); ++i) {
-        std::cout << "Chunk " << i << " type " << (int)chunks[i].type << ":\n---\n";
-        print_raw(chunks[i].content);
-        std::cout << "\n---\n";
-    }
-    std::cout << "=======================\n";
-
-
-    // Expected chunks - to be updated after we see the actual output
     std::vector<CHTL::CodeChunk> expected_chunks = {
-        {CHTL::ChunkType::CHTL, "\ndiv {\n    text: \"Hello\";\n}\n"},
-        {CHTL::ChunkType::Css, "\n    color: red;\n"},
-        {CHTL::ChunkType::CHTL, "\nbody {\n    "},
-        {CHTL::ChunkType::ChtlJs, "_JS_PLACEHOLDER_0_{{box}}->show();_JS_PLACEHOLDER_1_"},
-        {CHTL::ChunkType::CHTL, "\n}\n"}
+        {CHTL::ChunkType::JavaScript, "\n        console.log(\"Setup\");\n        "},
+        {CHTL::ChunkType::ChtlJs, "{{.container}}->hide();"},
+        {CHTL::ChunkType::JavaScript, "\n        console.log(\"Done\");\n    "}
     };
 
     assert(chunks.size() == expected_chunks.size());

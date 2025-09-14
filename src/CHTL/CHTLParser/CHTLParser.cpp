@@ -7,6 +7,8 @@
 #include <algorithm>
 #include "../CHTLNode/PropertyReferenceNode.h"
 #include "../CHTLNode/ResponsiveValueNode.h"
+#include "CHTL/CHTLNode/RawScriptNode.h"
+#include "CHTL/CHTLNode/RawStyleNode.h"
 
 namespace CHTL {
 
@@ -126,7 +128,9 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
 
     std::unique_ptr<Node> singleNode = nullptr;
     if (match({TokenType::Style})) {
-        singleNode = parseStyleBlock();
+        singleNode = parseRawBlock(NodeType::RawStyle);
+    } else if (match({TokenType::Script})) {
+        singleNode = parseRawBlock(NodeType::RawScript);
     } else if (match({TokenType::Identifier})) {
         if (peek().type == TokenType::OpenBrace) {
             singleNode = parseElement();
@@ -312,6 +316,7 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
 
         auto* target_node = matched_nodes[0];
         while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+            /*
             if (match({TokenType::Style})) {
                 auto newStyleBlock = parseStyleBlock();
 
@@ -337,7 +342,7 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
                 } else {
                     target_node->children_.push_back(std::move(newStyleBlock));
                 }
-            } else if (peek().type == TokenType::Identifier && (peekNext().type == TokenType::Colon || peekNext().type == TokenType::Equals)) {
+            } else*/ if (peek().type == TokenType::Identifier && (peekNext().type == TokenType::Colon || peekNext().type == TokenType::Equals)) {
                 const Token& key = consume(TokenType::Identifier, "Expected attribute name.");
                 consumeColonOrEquals();
                 std::string value;
@@ -564,6 +569,7 @@ void CHTLParser::parseTemplateDefinition(bool is_custom) {
     }
 }
 
+/*
 void CHTLParser::applyStyleTemplate(
     StyleBlockNode& styleNode,
     const std::string& template_name,
@@ -572,137 +578,74 @@ void CHTLParser::applyStyleTemplate(
     const std::unordered_set<std::string>& deleted_templates,
     std::set<std::string>& visited_templates
 ) {
-    if (visited_templates.count(template_name)) {
-        return;
-    }
-    visited_templates.insert(template_name);
+    // if (visited_templates.count(template_name)) {
+    //     return;
+    // }
+    // visited_templates.insert(template_name);
 
-    if (!context_->style_templates_.count(template_name)) {
-        throw std::runtime_error("Use of undefined style template '" + template_name + "'.");
-    }
-    const auto& templateNode = context_->style_templates_.at(template_name);
+    // if (!context_->style_templates_.count(template_name)) {
+    //     throw std::runtime_error("Use of undefined style template '" + template_name + "'.");
+    // }
+    // const auto& templateNode = context_->style_templates_.at(template_name);
 
-    for (const auto& inherited_name : templateNode->inherits_) {
-        if (deleted_templates.count(inherited_name)) {
-            continue;
-        }
-        applyStyleTemplate(styleNode, inherited_name, provided_values, deleted_properties, deleted_templates, visited_templates);
-    }
+    // for (const auto& inherited_name : templateNode->inherits_) {
+    //     if (deleted_templates.count(inherited_name)) {
+    //         continue;
+    //     }
+    //     applyStyleTemplate(styleNode, inherited_name, provided_values, deleted_properties, deleted_templates, visited_templates);
+    // }
 
-    for (const auto& prop : templateNode->properties_) {
-        const std::string& prop_name = prop.first;
-        if (deleted_properties.count(prop_name)) {
-            continue;
-        }
+    // for (const auto& prop : templateNode->properties_) {
+    //     const std::string& prop_name = prop.first;
+    //     if (deleted_properties.count(prop_name)) {
+    //         continue;
+    //     }
 
-        const auto& prop_value = prop.second;
-        if (prop_value.empty()) {
-            if (provided_values.count(prop_name)) {
-                styleNode.inline_properties_.emplace_back(prop_name, provided_values.at(prop_name));
-            } else {
-                 throw std::runtime_error("Value for placeholder '" + prop_name + "' not provided for '" + prop_name + "'.");
-            }
-        } else {
-            styleNode.inline_properties_.push_back(prop);
-        }
-    }
+    //     const auto& prop_value = prop.second;
+    //     if (prop_value.empty()) {
+    //         if (provided_values.count(prop_name)) {
+    //             styleNode.inline_properties_.emplace_back(prop_name, provided_values.at(prop_name));
+    //         } else {
+    //              throw std::runtime_error("Value for placeholder '" + prop_name + "' not provided for '" + prop_name + "'.");
+    //         }
+    //     } else {
+    //         styleNode.inline_properties_.push_back(prop);
+    //     }
+    // }
 }
+*/
 
 
-std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
-    auto styleNode = std::make_unique<StyleBlockNode>();
-    consume(TokenType::OpenBrace, "Expected '{' after 'style' keyword.");
+std::unique_ptr<Node> CHTLParser::parseRawBlock(NodeType type) {
+    consume(TokenType::OpenBrace, "Expected '{' to open raw block.");
 
-    while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-        if (match({TokenType::AtStyle})) {
-            const Token& name = consume(TokenType::Identifier, "Expected template name after '@Style'.");
-            std::string qualified_name;
+    // The previous token was '{', its start_char gives us the position
+    const Token& start_brace = previous();
+    size_t content_start_pos = start_brace.end_char;
 
-            if (match({TokenType::From})) {
-                 const Token& ns = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
-                 qualified_name = ns.lexeme + "::" + name.lexeme;
-            } else {
-                qualified_name = resolveUnqualifiedName(name.lexeme, TemplateType::Style);
-            }
+    int brace_level = 1;
+    while (brace_level > 0 && !isAtEnd()) {
+        if (peek().type == TokenType::OpenBrace) brace_level++;
+        else if (peek().type == TokenType::CloseBrace) brace_level--;
 
-            if (!context_->style_templates_.count(qualified_name)) {
-                 throw std::runtime_error("Use of undefined style template '" + qualified_name + "'.");
-            }
-            const auto& templateNode = context_->style_templates_.at(qualified_name);
-
-            if (templateNode->is_custom_) {
-                if (match({TokenType::OpenBrace})) {
-                    std::unordered_map<std::string, std::vector<PropertyValue>> provided_values;
-                    std::unordered_set<std::string> deleted_properties;
-                    std::unordered_set<std::string> deleted_templates;
-
-                    while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-                        if (match({TokenType::Delete})) {
-                            if (match({TokenType::AtStyle})) {
-                                deleted_templates.insert(consume(TokenType::Identifier, "Expected template name after '@Style'.").lexeme);
-                            } else {
-                                do {
-                                    deleted_properties.insert(consume(TokenType::Identifier, "Expected property name after 'delete'.").lexeme);
-                                } while (match({TokenType::Comma}));
-                            }
-                            consume(TokenType::Semicolon, "Expected ';' after delete statement.");
-                        } else {
-                            const Token& key = consume(TokenType::Identifier, "Expected property name in custom style usage.");
-                            consumeColonOrEquals();
-                            provided_values[key.lexeme] = parsePropertyValue();
-                            consume(TokenType::Semicolon, "Expected ';' after property value.");
-                        }
-                    }
-                    consume(TokenType::CloseBrace, "Expected '}' after custom style block.");
-
-                    std::set<std::string> visited;
-                    applyStyleTemplate(*styleNode, qualified_name, provided_values, deleted_properties, deleted_templates, visited);
-                } else {
-                    consume(TokenType::Semicolon, "Expected ';' after custom template usage.");
-                    std::set<std::string> visited;
-                    applyStyleTemplate(*styleNode, qualified_name, {}, {}, {}, visited);
-                }
-            } else {
-                consume(TokenType::Semicolon, "Expected ';' after template usage.");
-                 std::set<std::string> visited;
-                applyStyleTemplate(*styleNode, qualified_name, {}, {}, {}, visited);
-            }
-        }
-        else if (peek().type == TokenType::Identifier && (peekNext().type == TokenType::Colon || peekNext().type == TokenType::Equals)) {
-            const Token& key = consume(TokenType::Identifier, "Expected CSS property name.");
-            consumeColonOrEquals();
-            auto value_parts = parsePropertyValue();
-            consume(TokenType::Semicolon, "Expected ';' after CSS property value.");
-            styleNode->inline_properties_.emplace_back(key.lexeme, std::move(value_parts));
-        }
-        else if (peek().type == TokenType::Identifier || peek().type == TokenType::Ampersand || peek().type == TokenType::Dot) {
-            std::string selector_str;
-            if (peek().type == TokenType::Dot) {
-                selector_str += advance().lexeme;
-                selector_str += consume(TokenType::Identifier, "Expected class name after '.'").lexeme;
-            } else {
-                 selector_str = advance().lexeme;
-            }
-            auto ruleNode = std::make_unique<CssRuleNode>(selector_str);
-
-            consume(TokenType::OpenBrace, "Expected '{' after selector.");
-            while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-                const Token& key = consume(TokenType::Identifier, "Expected CSS property name inside rule.");
-                consumeColonOrEquals();
-                auto value_parts = parsePropertyValue();
-                consume(TokenType::Semicolon, "Expected ';' after CSS property value.");
-                ruleNode->properties_.emplace_back(key.lexeme, std::move(value_parts));
-            }
-            consume(TokenType::CloseBrace, "Expected '}' after CSS rule block.");
-            styleNode->rules_.push_back(std::move(ruleNode));
-        }
-        else {
-            throw std::runtime_error("Unexpected token inside style block.");
-        }
+        advance();
     }
 
-    consume(TokenType::CloseBrace, "Expected '}' after style block.");
-    return styleNode;
+    if (brace_level > 0) {
+        throw std::runtime_error("Unterminated raw block.");
+    }
+
+    // The previous token is now the final '}'
+    const Token& end_brace = previous();
+    size_t content_end_pos = end_brace.start_char;
+
+    std::string content = source_.substr(content_start_pos, content_end_pos - content_start_pos);
+
+    if (type == NodeType::RawStyle) {
+        return std::make_unique<RawStyleNode>(std::move(content));
+    } else { // RawScript
+        return std::make_unique<RawScriptNode>(std::move(content));
+    }
 }
 
 std::vector<PropertyValue> CHTLParser::parsePropertyValue() {

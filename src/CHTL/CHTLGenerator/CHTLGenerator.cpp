@@ -1,6 +1,12 @@
 #include "CHTLGenerator.h"
 #include "../CHTLLexer/CHTLLexer.h"
 #include "../CHTLNode/ResponsiveValueNode.h"
+#include "../CHTLNode/RawScriptNode.h"
+#include "../CHTLNode/RawStyleNode.h"
+#include "../../Scanner/CHTLUnifiedScanner.h"
+#include "../../CHTLJS/CHTLJSLexer/CHTLJSLexer.h"
+#include "../../CHTLJS/CHTLJSParser/CHTLJSParser.h"
+#include "../../CHTLJS/CHTLJSGenerator/CHTLJSGenerator.h"
 #include <map>
 #include <stack>
 #include <vector>
@@ -50,6 +56,13 @@ Value applyOp(TokenType op, Value b, Value a) {
     }
     return val;
 }
+
+CHTLGenerator::CHTLGenerator() {
+    chtljs_context_ = std::make_shared<CHTLJS::CHTLJSContext>();
+    chtljs_generator_ = std::make_unique<CHTLJS::CHTLJSGenerator>();
+}
+
+CHTLGenerator::~CHTLGenerator() = default;
 
 Value CHTLGenerator::evaluateExpression(std::vector<PropertyValue>::const_iterator& it, const std::vector<PropertyValue>::const_iterator& end, int min_precedence) {
     Value lhs;
@@ -281,8 +294,10 @@ CompilationResult CHTLGenerator::generate(RootNode& root) {
     for (const auto& child : root.children_) render(child.get());
     std::string html = output_.str();
     std::string styles = global_styles_.str();
+    std::string scripts = global_scripts_.str();
+
     if (!styles.empty()) {
-        std::string style_tag = "\n    <style>\n" + styles + "    </style>\n";
+        std::string style_tag = "\n<style>\n" + styles + "</style>\n";
         size_t head_pos = html.find("</head>");
         if (head_pos != std::string::npos) {
             html.insert(head_pos, style_tag);
@@ -290,8 +305,23 @@ CompilationResult CHTLGenerator::generate(RootNode& root) {
             html = style_tag + html;
         }
     }
-    std::string js = generateReactivityScript();
-    return {html, js};
+
+    std::string reactivity_script = generateReactivityScript();
+    if (!reactivity_script.empty()) {
+        scripts += reactivity_script;
+    }
+
+    if(!scripts.empty()) {
+        std::string script_tag = "\n<script>\n" + scripts + "\n</script>\n";
+         size_t body_pos = html.rfind("</body>");
+        if (body_pos != std::string::npos) {
+            html.insert(body_pos, script_tag);
+        } else {
+            html += script_tag;
+        }
+    }
+
+    return {html, ""}; // JS is now merged directly
 }
 
 void CHTLGenerator::firstPass(Node* node) {
@@ -305,6 +335,7 @@ void CHTLGenerator::firstPassVisitElement(ElementNode* node) {
     all_elements_.push_back(node);
     std::string element_id = getElementUniqueId(node);
     for (auto& child : node->children_) {
+        /*
         if (child->getType() == NodeType::StyleBlock) {
             auto* styleNode = static_cast<StyleBlockNode*>(child.get());
             for (const auto& prop : styleNode->inline_properties_) {
@@ -375,6 +406,7 @@ void CHTLGenerator::firstPassVisitElement(ElementNode* node) {
                 global_styles_ << "  }\n";
             }
         }
+        */
         firstPass(child.get());
     }
 }
@@ -449,7 +481,8 @@ void CHTLGenerator::render(const Node* node) {
         case NodeType::Text: renderText(static_cast<const TextNode*>(node)); break;
         case NodeType::Comment: renderComment(static_cast<const CommentNode*>(node)); break;
         case NodeType::Origin: renderOrigin(static_cast<const OriginNode*>(node)); break;
-        case NodeType::StyleBlock: break;
+        case NodeType::RawStyle: renderRawStyle(static_cast<const RawStyleNode*>(node)); break;
+        case NodeType::RawScript: renderRawScript(static_cast<const RawScriptNode*>(node)); break;
         default: break;
     }
 }
@@ -466,7 +499,7 @@ void CHTLGenerator::renderElement(const ElementNode* node) {
         output_ << "\"";
     }
     bool hasNonStyleChildren = false;
-    for (const auto& child : node->children_) { if (child->getType() != NodeType::StyleBlock) { hasNonStyleChildren = true; break; } }
+    for (const auto& child : node->children_) { if (child->getType() != NodeType::RawStyle && child->getType() != NodeType::RawScript) { hasNonStyleChildren = true; break; } }
     if (!hasNonStyleChildren) {
         output_ << " />\n";
     } else {
@@ -491,6 +524,34 @@ void CHTLGenerator::renderComment(const CommentNode* node) {
 
 void CHTLGenerator::renderOrigin(const OriginNode* node) {
     output_ << node->content_;
+}
+
+void CHTLGenerator::renderRawStyle(const RawStyleNode* node) {
+    global_styles_ << node->getContent();
+}
+
+void CHTLGenerator::renderRawScript(const RawScriptNode* node) {
+    // The scanner is now specialized for script content.
+    CHTLUnifiedScanner scanner(node->getContent());
+    auto chunks = scanner.scan();
+
+    for (const auto& chunk : chunks) {
+        if (chunk.type == ChunkType::JavaScript) {
+            global_scripts_ << chunk.content;
+        } else if (chunk.type == ChunkType::ChtlJs) {
+            CHTL::CHTLJS::CHTLJSLexer lexer(chunk.content);
+            auto tokens = lexer.scanTokens();
+            if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == CHTL::CHTLJS::CHTLJSTokenType::EndOfFile)) continue;
+
+            // The CHTLJSParser is stateful, so we create it here.
+            CHTL::CHTLJS::CHTLJSParser parser(tokens, chtljs_context_);
+            auto ast = parser.parse();
+
+            if (ast) {
+                global_scripts_ << chtljs_generator_->generate(*ast);
+            }
+        }
+    }
 }
 
 std::string CHTLGenerator::getElementUniqueId(const ElementNode* node) {

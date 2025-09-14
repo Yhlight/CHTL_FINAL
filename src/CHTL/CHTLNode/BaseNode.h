@@ -18,11 +18,11 @@ enum class NodeType {
     Root,
 
     // CHTL specific constructs
-    StyleBlock,
+    RawStyle,
+    RawScript,
     CssRule,
     PropertyReference,
     ResponsiveValue,
-    ScriptBlock,
     Template,
     Custom,
     Origin,

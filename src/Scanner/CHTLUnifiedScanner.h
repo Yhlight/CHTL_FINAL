@@ -30,8 +30,6 @@ public:
 
     std::vector<CodeChunk> scan();
 
-    const std::map<std::string, std::string>& getPlaceholderMap() const;
-
 private:
     void process();
     void handleScriptTag();
@@ -39,9 +37,7 @@ private:
 
     const std::string& source_;
     std::vector<CodeChunk> chunks_;
-    std::map<std::string, std::string> placeholder_map_;
     size_t current_ = 0;
-    int placeholder_id_ = 0;
 };
 
 } // namespace CHTL

@@ -7,7 +7,6 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
-#include "../CHTLNode/StyleBlockNode.h"
 #include "../CHTLNode/StyleTemplateNode.h"
 #include "../CHTLNode/ElementTemplateNode.h"
 #include "../CHTLNode/VarTemplateNode.h"
@@ -38,18 +37,18 @@ private:
     void parseElementBody(ElementNode& element);
     std::vector<PropertyValue> parsePropertyValue();
     std::unique_ptr<TextNode> parseText();
-    std::unique_ptr<StyleBlockNode> parseStyleBlock();
+    std::unique_ptr<Node> parseRawBlock(NodeType type);
     std::unique_ptr<CommentNode> parseGeneratorComment();
     void consumeColonOrEquals();
     void checkConstraints(const ElementNode& parent, const Node& child);
-    void applyStyleTemplate(
-        StyleBlockNode& styleNode,
-        const std::string& template_name,
-        const std::unordered_map<std::string, std::vector<PropertyValue>>& provided_values,
-        const std::unordered_set<std::string>& deleted_properties,
-        const std::unordered_set<std::string>& deleted_templates,
-        std::set<std::string>& visited_templates
-    );
+    // void applyStyleTemplate(
+    //     StyleBlockNode& styleNode,
+    //     const std::string& template_name,
+    //     const std::unordered_map<std::string, std::vector<PropertyValue>>& provided_values,
+    //     const std::unordered_set<std::string>& deleted_properties,
+    //     const std::unordered_set<std::string>& deleted_templates,
+    //     std::set<std::string>& visited_templates
+    // );
 
 
     const Token& peek() const;
