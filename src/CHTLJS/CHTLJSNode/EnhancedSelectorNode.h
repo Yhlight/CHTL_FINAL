@@ -17,9 +17,12 @@ public:
     }
 
     const std::string& getSelector() const { return selector_; }
+    const std::string& getChainedCode() const { return chained_code_; }
+    void setChainedCode(std::string code) { chained_code_ = std::move(code); }
 
 private:
     std::string selector_;
+    std::string chained_code_;
 };
 
 } // namespace CHTLJS

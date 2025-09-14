@@ -28,19 +28,37 @@ void CHTLJSLexer::scanToken() {
     switch (c) {
         case '{':
             if (peek() == '{') {
-                advance();
+                // Consume the whole {{...}} construct at once.
+                advance(); // consume second '{'
                 addToken(CHTLJSTokenType::OpenDoubleBrace);
+
+                start_ = current_; // The selector content starts after the '{{'
+                while (!isAtEnd() && (peek() != '}' || peekNext() != '}')) {
+                    if (peek() == '\n') line_++;
+                    advance();
+                }
+
+                if (current_ > start_) {
+                    addToken(CHTLJSTokenType::Identifier); // This token holds the selector string
+                }
+
+                if (isAtEnd() || peek() != '}' || peekNext() != '}') {
+                    throw std::runtime_error("Unterminated enhanced selector {{...");
+                }
+
+                start_ = current_;
+                advance(); // consume first '}'
+                advance(); // consume second '}'
+                addToken(CHTLJSTokenType::CloseDoubleBrace);
+
             } else {
                 addToken(CHTLJSTokenType::OpenBrace);
             }
             break;
         case '}':
-            if (peek() == '}') {
-                advance();
-                addToken(CHTLJSTokenType::CloseDoubleBrace);
-            } else {
-                addToken(CHTLJSTokenType::CloseBrace);
-            }
+             // This case now only handles single closing braces,
+             // as the {{...}} construct is handled by the '{' case.
+            addToken(CHTLJSTokenType::CloseBrace);
             break;
         case '[': addToken(CHTLJSTokenType::OpenBracket); break;
         case ']': addToken(CHTLJSTokenType::CloseBracket); break;
@@ -67,7 +85,27 @@ void CHTLJSLexer::scanToken() {
             stringLiteral(c);
             break;
         default:
-            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') {
+    if (c == '_' && peek() == '_') {
+        // Potential placeholder
+        std::string prefix = "__JS_PLACEHOLDER_";
+        if (source_.substr(start_, prefix.length()) == prefix) {
+            current_ = start_ + prefix.length();
+            while (peek() >= '0' && peek() <= '9') {
+                advance();
+            }
+            if (peek() == '_' && peekNext() == '_') {
+                advance();
+                advance();
+                addToken(CHTLJSTokenType::Placeholder);
+                return;
+            }
+        }
+        // If it wasn't a valid placeholder, fall back to treating it as a normal identifier
+        current_ = start_ + 1; // reset current
+        identifier();
+
+    }
+    else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') {
                 identifier();
             } else if (c >= '0' && c <= '9') {
                 number();

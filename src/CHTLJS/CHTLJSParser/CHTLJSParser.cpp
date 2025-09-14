@@ -74,7 +74,13 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parse() {
             throw std::runtime_error("Expected '}}' to close enhanced selector.");
         }
         advance(); // consume '}}'
-        object_node = std::make_unique<EnhancedSelectorNode>(selector_token.lexeme);
+        auto selector_node = std::make_unique<EnhancedSelectorNode>(selector_token.lexeme);
+
+        if (peek().type == CHTLJSTokenType::Placeholder) {
+            selector_node->setChainedCode(advance().lexeme);
+        }
+
+        object_node = std::move(selector_node);
     } else {
         // In the future, other object types could be parsed here.
         return nullptr;
@@ -205,8 +211,8 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseListenBlock(std::unique_ptr<CHTLJ
         }
         advance(); // consume ':'
 
-        if (peek().type != CHTLJSTokenType::Identifier) {
-            throw std::runtime_error("Expected callback body after event name.");
+        if (peek().type != CHTLJSTokenType::Identifier && peek().type != CHTLJSTokenType::Placeholder) {
+            throw std::runtime_error("Expected callback body (identifier or JS placeholder) after event name.");
         }
         std::string callback_body = advance().lexeme;
 
@@ -258,7 +264,9 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseDelegateBlock(std::unique_ptr<CHT
             std::string event_name = advance().lexeme;
             if (peek().type != CHTLJSTokenType::Colon) throw std::runtime_error("Expected ':' after event name.");
             advance(); // consume ':'
-            if (peek().type != CHTLJSTokenType::Identifier) throw std::runtime_error("Expected callback body after event name.");
+            if (peek().type != CHTLJSTokenType::Identifier && peek().type != CHTLJSTokenType::Placeholder) {
+                 throw std::runtime_error("Expected callback body (identifier or JS placeholder) after event name.");
+            }
             std::string callback_body = advance().lexeme;
             delegate_node->addEvent(event_name, callback_body);
         }

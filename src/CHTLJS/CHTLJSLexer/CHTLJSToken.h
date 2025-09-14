@@ -32,6 +32,9 @@ enum class CHTLJSTokenType {
     Delegate,
     Router,
     Vir,
+
+    // Represents a block of pure JS code
+    Placeholder,
 };
 
 struct CHTLJSToken {

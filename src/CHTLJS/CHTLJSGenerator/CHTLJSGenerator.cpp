@@ -41,6 +41,9 @@ void CHTLJSGenerator::visit(const CHTLJSNode* node) {
 
 void CHTLJSGenerator::visitEnhancedSelector(const EnhancedSelectorNode* node) {
     output_ += "document.querySelector(\"" + node->getSelector() + "\")";
+    if (!node->getChainedCode().empty()) {
+        output_ += node->getChainedCode();
+    }
 }
 
 void CHTLJSGenerator::visitListenNode(const ListenNode* node) {
@@ -65,14 +68,16 @@ void CHTLJSGenerator::visitDelegateNode(const DelegateNode* node) {
             std::stringstream target_selector_stream;
             std::string temp_output = output_;
             output_ = "";
-            // We assume targets are EnhancedSelectorNodes which generate a selector string.
-            // A more robust implementation would handle other node types.
-            if(target_node->getType() == CHTLJSNodeType::EnhancedSelector) {
-                 target_selector_stream << "\"" << static_cast<const EnhancedSelectorNode*>(target_node.get())->getSelector() << "\"";
-            }
-            output_ = temp_output;
+            std::string temp_target_output = output_;
+            output_ = "";
+            visit(target_node.get());
+            std::string target_selector = output_;
+            output_ = temp_target_output;
+            // The visitor for EnhancedSelectorNode generates `document.querySelector(...)`. We only need the selector part.
+            std::string selector_string = target_selector.substr(target_selector.find('"'));
 
-            output_ += "  if (event.target.matches(" + target_selector_stream.str() + ")) {\n";
+
+            output_ += "  if (event.target.matches(" + selector_string + ")) {\n";
             output_ += "    (" + event_pair.second + ")(event);\n";
             output_ += "  }\n";
         }
