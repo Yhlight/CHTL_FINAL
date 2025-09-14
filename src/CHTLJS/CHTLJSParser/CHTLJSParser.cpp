@@ -37,6 +37,11 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parse() {
         return parseAnimateBlock();
     }
 
+    if (peek().type == CHTLJSTokenType::Router) {
+        advance(); // consume 'router'
+        return parseRouterBlock();
+    }
+
     // Check for vir object access, e.g. myListener->click
     if (peek().type == CHTLJSTokenType::Identifier && context_->virtual_objects.count(peek().lexeme)) {
         CHTLJSToken vir_name = advance();
@@ -287,6 +292,70 @@ const CHTLJSToken& CHTLJSParser::advance() {
 
 bool CHTLJSParser::isAtEnd() const {
     return peek().type == CHTLJSTokenType::EndOfFile;
+}
+
+bool CHTLJSParser::match(const std::vector<CHTLJSTokenType>& types) {
+    for (CHTLJSTokenType type : types) {
+        if (peek().type == type) {
+            advance();
+            return true;
+        }
+    }
+    return false;
+}
+
+
+std::unique_ptr<CHTLJSNode> CHTLJSParser::parseRouterBlock() {
+    auto router_node = std::make_unique<RouterNode>();
+
+    if (peek().type != CHTLJSTokenType::OpenBrace) {
+        throw std::runtime_error("Expected '{' to open router block.");
+    }
+    advance(); // consume '{'
+
+    while (peek().type != CHTLJSTokenType::CloseBrace && !isAtEnd()) {
+        if (peek().type != CHTLJSTokenType::Identifier) {
+            throw std::runtime_error("Expected property key identifier in router block.");
+        }
+        CHTLJSToken key = advance();
+        if (peek().type != CHTLJSTokenType::Colon) throw std::runtime_error("Expected ':' after router property key.");
+        advance(); // consume ':'
+
+        if (key.lexeme == "url") {
+            do {
+                if (peek().type != CHTLJSTokenType::String) throw std::runtime_error("Expected string literal for url.");
+                // This assumes a single page is defined elsewhere for this url.
+                // We will need to handle multiple pages for multiple urls later.
+                if (router_node->routes_.empty()) router_node->routes_.emplace_back();
+                router_node->routes_.back().url = advance().lexeme;
+            } while (match({CHTLJSTokenType::Comma}));
+        } else if (key.lexeme == "page") {
+             do {
+                if (router_node->routes_.empty()) router_node->routes_.emplace_back();
+                router_node->routes_.back().page_node = parse();
+            } while (match({CHTLJSTokenType::Comma}));
+        } else if (key.lexeme == "root") {
+            if (peek().type == CHTLJSTokenType::String) {
+                router_node->root_path_ = advance().lexeme;
+            } else {
+                router_node->root_container_ = parse();
+            }
+        } else if (key.lexeme == "mode") {
+            if (peek().type != CHTLJSTokenType::String) throw std::runtime_error("Expected string literal for mode.");
+            router_node->mode_ = advance().lexeme;
+        }
+
+        if (peek().type == CHTLJSTokenType::Comma) {
+            advance();
+        }
+    }
+
+    if (peek().type != CHTLJSTokenType::CloseBrace) {
+        throw std::runtime_error("Expected '}' to close router block.");
+    }
+    advance(); // consume '}'
+
+    return router_node;
 }
 
 } // namespace CHTLJS

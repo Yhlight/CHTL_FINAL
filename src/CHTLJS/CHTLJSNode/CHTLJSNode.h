@@ -2,6 +2,7 @@
 #define CHTL_JS_NODE_H
 
 #include <memory>
+#include "RouterNode.h" // Include the new node type
 
 namespace CHTLJS {
 
@@ -12,14 +13,23 @@ enum class CHTLJSNodeType {
     Delegate,
     Animate,
     Value,
+    Router,
     // Future node types will go here
 };
 
 class CHTLJSNode {
+protected:
+    CHTLJSNodeType type_;
+
 public:
+    explicit CHTLJSNode(CHTLJSNodeType type) : type_(type) {}
     virtual ~CHTLJSNode() = default;
-    virtual CHTLJSNodeType getType() const = 0;
-    virtual std::unique_ptr<CHTLJSNode> clone() const = 0;
+    CHTLJSNodeType getType() const { return type_; }
+    // Making clone pure virtual might be too restrictive if some nodes are not clonable.
+    // For now, let's provide a default implementation that throws.
+    virtual std::unique_ptr<CHTLJSNode> clone() const {
+        throw std::runtime_error("Clone not implemented for this node type.");
+    }
 };
 
 } // namespace CHTLJS

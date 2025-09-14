@@ -18,9 +18,11 @@ private:
     const CHTLJSToken& peek() const;
     const CHTLJSToken& advance();
     bool isAtEnd() const;
+    bool match(const std::vector<CHTLJSTokenType>& types);
     std::unique_ptr<CHTLJSNode> parseListenBlock(std::unique_ptr<CHTLJSNode> object);
     std::unique_ptr<CHTLJSNode> parseDelegateBlock(std::unique_ptr<CHTLJSNode> object);
     std::unique_ptr<CHTLJSNode> parseAnimateBlock();
+    std::unique_ptr<CHTLJSNode> parseRouterBlock();
 
     std::vector<CHTLJSToken>& tokens_;
     std::shared_ptr<CHTLJSContext> context_;

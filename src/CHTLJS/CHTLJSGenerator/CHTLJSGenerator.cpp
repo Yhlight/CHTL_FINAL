@@ -4,6 +4,7 @@
 #include "CHTLJS/CHTLJSNode/DelegateNode.h"
 #include "CHTLJS/CHTLJSNode/AnimateNode.h"
 #include "CHTLJS/CHTLJSNode/ValueNode.h"
+#include "CHTLJS/CHTLJSNode/RouterNode.h"
 #include <stdexcept>
 #include <sstream>
 
@@ -33,6 +34,9 @@ void CHTLJSGenerator::visit(const CHTLJSNode* node) {
             break;
         case CHTLJSNodeType::Value:
             visitValueNode(static_cast<const ValueNode*>(node));
+            break;
+        case CHTLJSNodeType::Router:
+            visitRouterNode(static_cast<const RouterNode*>(node));
             break;
         default:
             throw std::runtime_error("Unknown CHTL JS node type for generation.");
@@ -149,5 +153,86 @@ void CHTLJSGenerator::visitValueNode(const ValueNode* node) {
     output_ += node->getValue();
 }
 
+void CHTLJSGenerator::visitRouterNode(const RouterNode* node) {
+    std::stringstream routes_ss;
+    routes_ss << "{";
+    bool first_route = true;
+    for(const auto& route : node->routes_) {
+        if (!first_route) routes_ss << ", ";
+        // Generate the selector for the page
+        std::string original_output = output_;
+        output_ = "";
+        visit(route.page_node.get());
+        std::string page_selector = output_;
+        output_ = original_output;
+
+        routes_ss << "\"" << route.url << "\": " << page_selector;
+        first_route = false;
+    }
+    routes_ss << "}";
+
+    std::string root_container_str = "null";
+    if (node->root_container_) {
+        std::string original_output = output_;
+        output_ = "";
+        visit(node->root_container_.get());
+        root_container_str = output_;
+        output_ = original_output;
+    }
+
+    std::string root_path_str = node->root_path_.value_or("/");
+    std::string mode_str = node->mode_.value_or("history");
+
+    output_ += "(() => {\n";
+    output_ += "  const routes = " + routes_ss.str() + ";\n";
+    output_ += "  const rootContainer = " + root_container_str + ";\n";
+    output_ += "  const rootPath = '" + root_path_str + "';\n";
+    output_ += "  const mode = '" + mode_str + "';\n\n";
+
+    output_ += R"JS(
+  const navigate = (url) => {
+    if (mode === 'history') {
+      history.pushState(null, null, url);
+      render();
+    } else {
+      window.location.hash = '#' + url;
+    }
+  };
+
+  const render = () => {
+    const path = mode === 'history'
+      ? window.location.pathname.replace(rootPath, '') || '/'
+      : window.location.hash.substring(1) || '/';
+
+    // Hide all pages first
+    Object.values(routes).forEach(pageElement => {
+        if (pageElement && pageElement.style) pageElement.style.display = 'none';
+    });
+
+    // Show the matching page
+    const page = routes[path];
+    if (page && page.style) {
+      page.style.display = 'block';
+    } else {
+      // Optional: handle 404
+      console.log('404: Page not found for path: ' + path);
+    }
+  };
+
+  window.addEventListener(mode === 'history' ? 'popstate' : 'hashchange', render);
+  document.addEventListener('DOMContentLoaded', () => {
+    if (rootContainer) {
+        rootContainer.addEventListener('click', (e) => {
+            if (e.target.matches('[data-link]')) {
+                e.preventDefault();
+                navigate(e.target.getAttribute('href'));
+            }
+        });
+    }
+    render();
+  });
+)JS";
+    output_ += "\n})();";
+}
 
 } // namespace CHTLJS
