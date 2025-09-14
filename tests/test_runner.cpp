@@ -34,7 +34,13 @@ int main() {
 
     fs::path tests_dir("tests");
     fs::path snapshots_dir("tests/snapshots");
-    fs::path compiler_path("chtl_compiler"); // Assumes compiler is in the same dir or in PATH
+    fs::path compiler_path("./chtl_compiler"); // Assumes compiler is in the current dir
+
+    // Create snapshots directory if it doesn't exist
+    if (!fs::exists(snapshots_dir)) {
+        fs::create_directory(snapshots_dir);
+        std::cout << "INFO: Created snapshots directory at " << snapshots_dir << std::endl;
+    }
 
     if (!fs::exists(compiler_path)) {
         compiler_path = "./build/chtl_compiler";

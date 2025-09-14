@@ -1,51 +1,68 @@
-#include "CompilerDispatcher/CompilerDispatcher.h"
-#include "CodeMerger/CodeMerger.h"
-#include "CHTL/CHTLLexer/CHTLLexer.h"
-#include "CHTL/CHTLParser/CHTLParser.h"
-#include "CHTL/CHTLGenerator/CHTLGenerator.h"
-#include "CHTL/CHTLLoader/CHTLLoader.h"
+#include "CompilerDispatcher.h"
+#include "../Scanner/CHTLUnifiedScanner.h"
+#include "../CHTL/CHTLLexer/CHTLLexer.h"
+#include "../CHTL/CHTLParser/CHTLParser.h"
+#include "../CHTL/CHTLGenerator/CHTLGenerator.h"
+#include "../CHTL/CHTLLoader/CHTLLoader.h"
+#include "../CodeMerger/CodeMerger.h"
 #include <sstream>
 #include <vector>
+#include <iostream>
 
 namespace CHTL {
 
 CompilerDispatcher::CompilerDispatcher() {
     chtl_context_ = std::make_shared<ParserContext>();
-    chtljs_context_ = std::make_shared<CHTLJS::CHTLJSContext>();
 }
 
 std::string CompilerDispatcher::compile(const std::string& source) {
-    // 1. Lex and Parse the raw source.
-    // The parser now knows how to handle script blocks correctly.
-    CHTLLoader loader;
-    CHTLLexer lexer(source);
-    std::vector<Token> tokens = lexer.scanTokens();
+    // 1. Scan the source to get code fragments
+    CHTLUnifiedScanner unified_scanner(source);
+    std::vector<CodeFragment> fragments = unified_scanner.scan();
 
-    if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == TokenType::EndOfFile)) {
-        return "";
+    std::string chtl_source;
+    std::vector<std::string> js_fragments;
+
+    for (const auto& fragment : fragments) {
+        if (fragment.type == FragmentType::CHTL) {
+            chtl_source += fragment.content;
+        } else if (fragment.type == FragmentType::JS) {
+            js_fragments.push_back(fragment.content);
+        }
+        // CSS and CHTL_JS fragments will be handled here in the future
     }
 
-    CHTLParser parser(source, tokens, loader, "./", chtl_context_);
-    std::unique_ptr<RootNode> ast = parser.parse();
+    // 2. Compile the CHTL part
+    std::string html_output;
+    std::string css_output; // Future use
+    std::string js_from_chtl; // JS generated from CHTL (e.g. for responsive values)
 
-    if (!ast) {
-        // Parser failed and should have printed an error.
-        return "";
+    if (!chtl_source.empty()) {
+        CHTLLoader loader;
+        CHTLLexer lexer(chtl_source);
+        std::vector<Token> tokens = lexer.scanTokens();
+
+        if (!tokens.empty() && !(tokens.size() == 1 && tokens[0].type == TokenType::EndOfFile)) {
+             CHTLParser parser(chtl_source, tokens, loader, "./", chtl_context_);
+            std::unique_ptr<RootNode> ast = parser.parse();
+
+            if (ast) {
+                CHTLGenerator generator;
+                CompilationResult compilation_result = generator.generate(*ast);
+                html_output = compilation_result.html;
+                // For now, CHTL generator might produce JS. We'll add it to our list.
+                if (!compilation_result.js.empty()) {
+                    js_fragments.insert(js_fragments.begin(), compilation_result.js);
+                }
+            }
+        }
     }
 
-    // 2. Generate the output from the AST.
-    // The generator will invoke the scanner on script content.
-    CHTLGenerator generator;
-    CompilationResult compilation_result = generator.generate(*ast);
 
     // 3. Merge the final results.
-    // The merger will substitute the placeholders.
+    // The merger will combine the HTML from CHTL compilation with all JS code.
     CodeMerger merger;
-    std::vector<std::string> js_outputs = { compilation_result.js };
-    // The generator doesn't produce separate CSS yet. This is handled by the generator internally for now.
-    std::vector<std::string> css_outputs = {};
-
-    return merger.merge(compilation_result.html, js_outputs, compilation_result.placeholder_map);
+    return merger.merge(html_output, js_fragments);
 }
 
 } // namespace CHTL

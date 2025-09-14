@@ -2,7 +2,6 @@
 #include "../CHTLLexer/CHTLLexer.h"
 #include "../CHTLNode/ResponsiveValueNode.h"
 #include "../CHTLNode/ScriptBlockNode.h"
-#include "../../Scanner/CHTLUnifiedScanner.h"
 #include <map>
 #include <stack>
 #include <vector>
@@ -294,7 +293,7 @@ CompilationResult CHTLGenerator::generate(RootNode& root) {
     }
     std::string js = generateReactivityScript();
     global_scripts_ << js;
-    return {html, global_scripts_.str(), placeholder_map_};
+    return {html, global_scripts_.str()};
 }
 
 void CHTLGenerator::firstPass(Node* node) {
@@ -508,15 +507,11 @@ void CHTLGenerator::indent() {
 }
 
 void CHTLGenerator::renderScriptBlock(const ScriptBlockNode* node) {
-    if (node->content_.empty()) {
-        return;
-    }
-    // Here is where the scanner is finally used.
-    CHTLUnifiedScanner scanner(node->content_);
-    ScanningResult result = scanner.scan();
-
-    global_scripts_ << result.modified_source << "\n";
-    placeholder_map_.insert(result.placeholder_map.begin(), result.placeholder_map.end());
+    // This function is now a no-op.
+    // Script content is extracted by the CHTLUnifiedScanner at the beginning
+    // of the compilation process and handled by the CompilerDispatcher.
+    // The generator's job is only to render the CHTL-defined AST.
+    (void)node; // Mark as unused
 }
 
 }
