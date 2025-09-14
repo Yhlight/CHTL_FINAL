@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include "Scanner/CHTLUnifiedScanner.h"
 #include "CompilerDispatcher/CompilerDispatcher.h"
 
 int main(int argc, char* argv[]) {
@@ -20,10 +21,19 @@ int main(int argc, char* argv[]) {
     buffer << file.rdbuf();
     std::string source = buffer.str();
 
-    CHTL::CompilerDispatcher dispatcher;
     try {
-        std::string html = dispatcher.compile(source);
-        std::cout << html << std::endl;
+        // The intended pipeline: Scanner -> Dispatcher
+        // NOTE: The dispatcher is not fully implemented to handle chunks yet.
+        // This sets up the structure for future development.
+        CHTL::CHTLUnifiedScanner scanner(source);
+        std::vector<CHTL::CodeChunk> chunks = scanner.scan();
+
+        // CHTL::CompilerDispatcher dispatcher;
+        // std::string html = dispatcher.compile(chunks); // This is the eventual goal
+
+        // For now, we'll just acknowledge that the scan is complete.
+        std::cout << "CHTL source file successfully scanned into " << chunks.size() << " chunks." << std::endl;
+
     } catch (const std::runtime_error& e) {
         std::cerr << "Compilation Error: " << e.what() << std::endl;
         return 1;

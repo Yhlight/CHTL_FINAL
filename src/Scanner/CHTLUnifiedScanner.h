@@ -28,9 +28,10 @@ public:
 
 private:
     void process();
-    void handleScriptTag();
-    void handleStyleTag();
-    void handleChtlBlock();
+    void handleScriptTag(int brace_level);
+    void handleStyleTag(int brace_level);
+    void handleChtlBlock(int brace_level);
+    void processScriptContent(const std::string& content);
 
     const std::string& source_;
     std::vector<CodeChunk> chunks_;
