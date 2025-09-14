@@ -18,6 +18,10 @@ enum class ChunkType {
 struct CodeChunk {
     ChunkType type;
     std::string content;
+    // Add an operator== for easy testing
+    bool operator==(const CodeChunk& other) const {
+        return type == other.type && content == other.content;
+    }
 };
 
 class CHTLUnifiedScanner {
@@ -25,13 +29,11 @@ public:
     explicit CHTLUnifiedScanner(const std::string& source);
 
     std::vector<CodeChunk> scan();
-    const std::map<std::string, std::string>& getPlaceholderMap() const;
 
 private:
     void process();
     void handleScriptTag();
-    void handleStyleTag(int brace_level);
-    void handleChtlBlock();
+    void handleStyleTag();
 
     const std::string& source_;
     std::vector<CodeChunk> chunks_;

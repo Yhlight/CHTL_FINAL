@@ -1,3 +1,0 @@
-SnapshotTests 0 0
----
-SnapshotTests
