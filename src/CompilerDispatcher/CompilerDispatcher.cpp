@@ -22,6 +22,7 @@ std::string CompilerDispatcher::compile(const std::string& source) {
     chunks_ = unified_scanner.scan();
 
     std::string html_output;
+    std::string css_output;
     std::vector<std::string> js_outputs;
 
     for (const auto& chunk : chunks_) {
@@ -55,11 +56,15 @@ std::string CompilerDispatcher::compile(const std::string& source) {
                 CHTLJS::CHTLJSGenerator generator;
                 js_outputs.push_back(generator.generate(*ast));
             }
+        } else if (chunk.type == ChunkType::Css) {
+            css_output += chunk.content;
+        } else if (chunk.type == ChunkType::JavaScript) {
+            js_outputs.push_back(chunk.content);
         }
     }
 
     CodeMerger merger;
-    return merger.merge(html_output, js_outputs);
+    return merger.merge(html_output, css_output, js_outputs);
 }
 
 } // namespace CHTL
