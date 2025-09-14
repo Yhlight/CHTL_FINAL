@@ -1,0 +1,33 @@
+// This is a test file for the CHTL Unified Scanner.
+
+div {
+    id: main_content;
+    text: "Hello, CHTL!";
+}
+
+style {
+    body {
+        font-family: "Arial";
+        background-color: #eee;
+    }
+}
+
+div {
+    class: "container";
+
+    script {
+        // Standard JS
+        console.log("Script start");
+
+        const my_element = {{.box}}; // CHTL JS
+
+        my_element.listen { // CHTL JS Block
+            click: () => {
+                console.log("Clicked!");
+            }
+        };
+
+        // More standard JS
+        console.log("Script end");
+    }
+}
