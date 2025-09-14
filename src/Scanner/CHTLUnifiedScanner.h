@@ -26,17 +26,26 @@ public:
 
     std::vector<CodeChunk> scan();
 
+    const std::map<std::string, std::string>& getPlaceholderMap() const {
+        return placeholder_map_;
+    }
+
 private:
     void process();
-    void handleScriptTag();
-    void handleStyleTag();
-    void handleChtlBlock();
+    void handleScriptTag(size_t brace_open_pos);
+    void handleStyleTag(size_t brace_open_pos);
+
+    // Helper for script handling
+    std::string processScriptContent(const std::string& script_content);
+    std::string generatePlaceholder();
+    size_t findEndOfChtlJsBlock(const std::string& content, size_t block_start_pos);
 
     const std::string& source_;
     std::vector<CodeChunk> chunks_;
     std::map<std::string, std::string> placeholder_map_;
     size_t current_ = 0;
     int placeholder_id_ = 0;
+    const std::vector<std::string> chtljs_keywords_;
 };
 
 } // namespace CHTL
