@@ -313,6 +313,10 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseRouterBlock() {
     }
     advance(); // consume '{'
 
+    std::vector<std::string> urls;
+    std::vector<std::unique_ptr<CHTLJSNode>> pages;
+    bool explicit_pairing = false;
+
     while (peek().type != CHTLJSTokenType::CloseBrace && !isAtEnd()) {
         if (peek().type != CHTLJSTokenType::Identifier) {
             throw std::runtime_error("Expected property key identifier in router block.");
@@ -324,27 +328,53 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseRouterBlock() {
         if (key.lexeme == "url") {
             do {
                 if (peek().type != CHTLJSTokenType::String) throw std::runtime_error("Expected string literal for url.");
-                // This assumes a single page is defined elsewhere for this url.
-                // We will need to handle multiple pages for multiple urls later.
-                if (router_node->routes_.empty()) router_node->routes_.emplace_back();
-                router_node->routes_.back().url = advance().lexeme;
+                urls.push_back(advance().lexeme);
             } while (match({CHTLJSTokenType::Comma}));
         } else if (key.lexeme == "page") {
-             do {
-                if (router_node->routes_.empty()) router_node->routes_.emplace_back();
-                router_node->routes_.back().page_node = parse();
-            } while (match({CHTLJSTokenType::Comma}));
-        } else if (key.lexeme == "root") {
-            if (peek().type == CHTLJSTokenType::String) {
-                router_node->root_path_ = advance().lexeme;
+            if (peek().type == CHTLJSTokenType::OpenBrace) {
+                // Syntax: page: {"/url", {{selector}}}, {"/url2", {{selector2}}}
+                explicit_pairing = true;
+                do {
+                    if (peek().type != CHTLJSTokenType::OpenBrace) throw std::runtime_error("Expected '{' for page-url pair.");
+                    advance(); // consume '{'
+                    if (peek().type != CHTLJSTokenType::String) throw std::runtime_error("Expected URL string in page-url pair.");
+                    std::string url = advance().lexeme;
+                    if (!match({CHTLJSTokenType::Comma})) throw std::runtime_error("Expected ',' separating url and page in page-url pair.");
+                    auto page_node = parse();
+                    if (!page_node) throw std::runtime_error("Expected page selector in page-url pair.");
+                    if (peek().type != CHTLJSTokenType::CloseBrace) throw std::runtime_error("Expected '}' to close page-url pair.");
+                    advance(); // consume '}'
+                    router_node->routes_.push_back({url, std::move(page_node)});
+                } while (match({CHTLJSTokenType::Comma}));
+
             } else {
+                // Syntax: page: {{selector1}}, {{selector2}}
+                do {
+                    pages.push_back(parse());
+                } while (match({CHTLJSTokenType::Comma}));
+            }
+        } else if (key.lexeme == "root") {
+            //Handles root: "/" || {{selector}} or root: {"/", {{selector}}}
+            if (peek().type == CHTLJSTokenType::OpenBrace) {
+                advance(); // consume '{'
+                router_node->root_path_ = advance().lexeme;
+                if (!match({CHTLJSTokenType::Comma})) throw std::runtime_error("Expected ',' separating root path and container.");
                 router_node->root_container_ = parse();
+                if (peek().type != CHTLJSTokenType::CloseBrace) throw std::runtime_error("Expected '}' to close root object.");
+                advance(); // consume '}'
+            } else {
+                 if (peek().type == CHTLJSTokenType::String) {
+                    router_node->root_path_ = advance().lexeme;
+                 } else {
+                    router_node->root_container_ = parse();
+                 }
             }
         } else if (key.lexeme == "mode") {
             if (peek().type != CHTLJSTokenType::String) throw std::runtime_error("Expected string literal for mode.");
             router_node->mode_ = advance().lexeme;
         }
 
+        // Consume optional comma between key-value pairs
         if (peek().type == CHTLJSTokenType::Comma) {
             advance();
         }
@@ -354,6 +384,16 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseRouterBlock() {
         throw std::runtime_error("Expected '}' to close router block.");
     }
     advance(); // consume '}'
+
+    // If we used the url/page syntax, pair them up now.
+    if (!explicit_pairing) {
+        if (urls.size() != pages.size()) {
+            throw std::runtime_error("Mismatched number of urls and pages in router block.");
+        }
+        for (size_t i = 0; i < urls.size(); ++i) {
+            router_node->routes_.push_back({urls[i], std::move(pages[i])});
+        }
+    }
 
     return router_node;
 }
