@@ -16,6 +16,10 @@ std::vector<CodeChunk> CHTLUnifiedScanner::scan() {
     return chunks_;
 }
 
+const std::map<std::string, std::string>& CHTLUnifiedScanner::getPlaceholderMap() const {
+    return placeholder_map_;
+}
+
 void CHTLUnifiedScanner::scanSource() {
     while (!isAtEnd()) {
         start_ = current_;

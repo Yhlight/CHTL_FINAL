@@ -55,11 +55,14 @@ std::string CompilerDispatcher::compile(const std::string& source) {
                 CHTLJS::CHTLJSGenerator generator;
                 js_outputs.push_back(generator.generate(*ast));
             }
+        } else if (chunk.type == ChunkType::Placeholder) {
+            js_outputs.push_back(chunk.content);
         }
     }
 
     CodeMerger merger;
-    return merger.merge(html_output, js_outputs);
+    const auto& placeholder_map = unified_scanner.getPlaceholderMap();
+    return merger.merge(html_output, js_outputs, placeholder_map);
 }
 
 } // namespace CHTL
