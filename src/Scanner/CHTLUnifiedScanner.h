@@ -27,10 +27,19 @@ public:
     std::vector<CodeChunk> scan();
 
 private:
+    // Main scanning loop logic
     void process();
-    void handleScriptTag();
-    void handleStyleTag();
+
+    // Block handlers
+    bool handleScriptBlock(size_t keyword_pos, size_t& last_pos);
+    bool handleStyleBlock(size_t keyword_pos, size_t& last_pos);
+    bool handleOriginBlock(size_t keyword_pos, size_t& last_pos);
     void handleChtlBlock();
+
+    // Helpers
+    std::string scanScriptContent(const std::string& content);
+    bool isWordBoundary(const std::string& source, size_t pos, size_t word_len);
+    size_t findMatchingBrace(const std::string& source, size_t start_pos);
 
     const std::string& source_;
     std::vector<CodeChunk> chunks_;
