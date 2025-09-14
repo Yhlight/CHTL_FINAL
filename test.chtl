@@ -1,0 +1,54 @@
+# 这是一个CHTL测试文件
+
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                CHTL测试页面
+            }
+        }
+    }
+
+    body
+    {
+        div
+        {
+            id: main;
+            class: container;
+
+            text
+            {
+                欢迎使用CHTL！
+            }
+
+            style
+            {
+                .container
+                {
+                    width: 100%;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+
+                &:hover
+                {
+                    background-color: #f0f0f0;
+                }
+            }
+        }
+
+        script
+        {
+            console.log("Hello from CHTL JS!");
+            
+            {{main}}->addEventListener('click', () => {
+                console.log('Main div clicked!');
+            });
+        }
+    }
+}
