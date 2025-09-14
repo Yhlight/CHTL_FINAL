@@ -3,6 +3,9 @@
 #include "../CHTLNode/ResponsiveValueNode.h"
 #include "../CHTLNode/ScriptBlockNode.h"
 #include "../../Scanner/CHTLUnifiedScanner.h"
+#include "../../CHTLJS/CHTLJSLexer/CHTLJSLexer.h"
+#include "../../CHTLJS/CHTLJSParser/CHTLJSParser.h"
+#include "../../CHTLJS/CHTLJSGenerator/CHTLJSGenerator.h"
 #include <map>
 #include <stack>
 #include <vector>
@@ -511,12 +514,31 @@ void CHTLGenerator::renderScriptBlock(const ScriptBlockNode* node) {
     if (node->content_.empty()) {
         return;
     }
-    // Here is where the scanner is finally used.
+    // 1. Scan the raw script content to separate JS from CHTL JS
     CHTLUnifiedScanner scanner(node->content_);
-    ScanningResult result = scanner.scan();
+    ScanningResult scan_result = scanner.scan();
 
-    global_scripts_ << result.modified_source << "\n";
-    placeholder_map_.insert(result.placeholder_map.begin(), result.placeholder_map.end());
+    // 2. Compile the processed CHTL JS string
+    auto chtljs_context = std::make_shared<CHTLJS::CHTLJSContext>();
+    CHTLJS::CHTLJSLexer js_lexer(scan_result.modified_source);
+    std::vector<CHTLJS::CHTLJSToken> js_tokens = js_lexer.scanTokens();
+
+    if (js_tokens.empty() || (js_tokens.size() == 1 && js_tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) {
+        // Script block may contain only plain JS, which is fine.
+        // The plain JS is already in the placeholder map.
+    } else {
+        CHTLJS::CHTLJSParser js_parser(js_tokens, chtljs_context);
+        std::unique_ptr<CHTLJS::CHTLJSNode> js_ast = js_parser.parse();
+
+        if (js_ast) {
+            CHTLJS::CHTLJSGenerator js_generator;
+            std::string compiled_js = js_generator.generate(*js_ast);
+            global_scripts_ << compiled_js << "\n";
+        }
+    }
+
+    // 3. Add the placeholder map to the generator's map
+    placeholder_map_.insert(scan_result.placeholder_map.begin(), scan_result.placeholder_map.end());
 }
 
 }
