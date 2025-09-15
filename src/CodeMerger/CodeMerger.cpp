@@ -5,47 +5,25 @@
 namespace CHTL {
 
 std::string CodeMerger::merge(const std::string& html_output,
-                              const std::vector<std::string>& js_outputs,
-                              const std::map<std::string, std::string>& placeholder_map) {
+                              const std::map<std::string, std::string>& scripts) {
+
+    if (scripts.empty()) {
+        return html_output;
+    }
 
     std::string final_html = html_output;
 
-    // Merge JS into <body>
-    if (!js_outputs.empty()) {
-        std::stringstream combined_js_stream;
-        for (const auto& js : js_outputs) {
-            combined_js_stream << js << "\n";
-        }
-        std::string combined_js = combined_js_stream.str();
+    // The CHTL Generator produces HTML with placeholders (e.g., <script>__CHTL_SCRIPT_PLACEHOLDER_1__</script>).
+    // The merger's job is to replace these placeholders with the actual script content.
+    // This new logic respects the original position of the script blocks.
 
-        // Substitute placeholders
-        for (const auto& pair : placeholder_map) {
-            size_t pos = combined_js.find(pair.first);
-            while (pos != std::string::npos) {
-                combined_js.replace(pos, pair.first.length(), pair.second);
-                pos = combined_js.find(pair.first, pos + pair.second.length());
-            }
-        }
+    for (const auto& pair : scripts) {
+        const std::string& placeholder = pair.first;
+        const std::string& script_content = pair.second;
 
-        if (!combined_js.empty()) {
-             // Avoid adding empty script tags
-            bool only_whitespace = true;
-            for(char c : combined_js) {
-                if(!isspace(c)) {
-                    only_whitespace = false;
-                    break;
-                }
-            }
-
-            if (!only_whitespace) {
-                std::string js_script_tag = "<script>\n" + combined_js + "</script>";
-                size_t body_end_pos = final_html.rfind("</body>");
-                if (body_end_pos != std::string::npos) {
-                    final_html.insert(body_end_pos, js_script_tag + "\n");
-                } else {
-                    final_html += "\n" + js_script_tag;
-                }
-            }
+        size_t pos = final_html.find(placeholder);
+        if (pos != std::string::npos) {
+            final_html.replace(pos, placeholder.length(), script_content);
         }
     }
 

@@ -245,4 +245,5 @@ CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/OriginNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/PropertyReferenceNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/PropertyValue.h \
- /app/src/CHTL/CHTLLoader/CHTLLoader.h
+ /app/src/CHTL/CHTLLoader/CHTLLoader.h \
+ /app/src/Scanner/CHTLUnifiedScanner.h

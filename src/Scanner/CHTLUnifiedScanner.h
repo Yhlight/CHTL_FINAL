@@ -26,10 +26,18 @@ struct CodeFragment {
     std::string placeholder;
 };
 
+// The final result of the scanning process.
+struct ScanningResult {
+    // The main CHTL source code with all non-CHTL parts replaced by placeholders.
+    std::string chtl_with_placeholders;
+    // A map from placeholder to the original code fragment.
+    std::map<std::string, CodeFragment> placeholder_map;
+};
+
 class CHTLUnifiedScanner {
 public:
     explicit CHTLUnifiedScanner(const std::string& source);
-    std::vector<CodeFragment> scan();
+    ScanningResult scan();
 
 private:
     // Represents the current parsing context.

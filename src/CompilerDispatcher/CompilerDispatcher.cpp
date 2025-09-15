@@ -14,37 +14,56 @@ CompilerDispatcher::CompilerDispatcher() {
     chtljs_context_ = std::make_shared<CHTLJS::CHTLJSContext>();
 }
 
+#include "Scanner/CHTLUnifiedScanner.h"
+
 std::string CompilerDispatcher::compile(const std::string& source) {
-    // 1. Setup components
+    // Step 1: Use the Unified Scanner to separate CHTL from other languages.
+    // The scanner replaces script blocks with placeholders.
+    CHTLUnifiedScanner scanner(source);
+    ScanningResult scan_result = scanner.scan();
+
+    // Step 2: Compile the CHTL-only source code.
+    // This source now contains placeholders instead of raw script content.
     CHTLLoader loader;
     CHTLGenerator generator;
     CodeMerger merger;
 
-    // 2. Lex and Parse CHTL source
-    CHTLLexer lexer(source);
+    CHTLLexer lexer(scan_result.chtl_with_placeholders);
     std::vector<Token> tokens = lexer.scanTokens();
 
-    // Handle empty source
     if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == TokenType::EndOfFile)) {
         return "";
     }
 
-    CHTLParser parser(source, tokens, loader, "./", chtl_context_);
+    CHTLParser parser(scan_result.chtl_with_placeholders, tokens, loader, "./", chtl_context_);
     std::unique_ptr<RootNode> ast = parser.parse();
 
     if (!ast) {
-        // Parser should have already printed an error message.
-        return "";
+        return ""; // Parser errors are handled internally.
     }
 
-    // 3. Generate code using the two-pass generator.
-    // The generator is responsible for the entire compilation, including handling script blocks.
-    CompilationResult compilation_result = generator.generate(*ast);
+    // The CHTL generator will now generate HTML and will encounter the placeholders
+    // that the CHTL parser has stored in ScriptBlockNodes. The generator will
+    // pass these placeholders along in its own placeholder map.
+    CompilationResult chtl_compilation_result = generator.generate(*ast);
 
-    // 4. Merge the final results.
-    // The merger will substitute placeholders in the JS and inject the final script into the HTML.
-    std::vector<std::string> js_outputs = { compilation_result.js };
-    return merger.merge(compilation_result.html, js_outputs, compilation_result.placeholder_map);
+    // Step 3: Process the script content from the scanner's placeholder map.
+    // For now, we are not compiling the JS/CHTL-JS. We are just collecting the
+    // raw content from the scanner's map.
+    // In the future, this is where we would dispatch to CHTLJSParser.
+    std::map<std::string, std::string> processed_scripts;
+    for (const auto& pair : scan_result.placeholder_map) {
+        // The key is the placeholder (e.g., __CHTL_SCRIPT_PLACEHOLDER_1__)
+        // The value is the CodeFragment containing the raw JS.
+        // For now, we just pass the raw JS to be merged.
+        processed_scripts[pair.first] = pair.second.content;
+    }
+
+
+    // Step 4: Merge the final results.
+    // The merger will take the HTML from the CHTL generator and substitute the
+    // script placeholders with the (currently raw, eventually compiled) JS.
+    return merger.merge(chtl_compilation_result.html, processed_scripts);
 }
 
 } // namespace CHTL
