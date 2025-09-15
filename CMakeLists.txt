@@ -29,6 +29,8 @@ set(CHTL_SOURCES
     CHTL/CHTL/CHTLParser/CHTLParser.cpp
     CHTL/CHTL/CHTLParser/CHTLASTNode.cpp
     CHTL/CHTL/CHTLGenerator/CHTLGenerator.cpp
+    CHTL/CHTL/CHTLContext/CHTLContext.cpp
+    CHTL/CHTL/CMODSystem/CMODSystem.cpp
 )
 
 # 统一扫描器源文件

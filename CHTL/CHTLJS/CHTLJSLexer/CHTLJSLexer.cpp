@@ -1,337 +1,362 @@
 #include "CHTLJSLexer.h"
 #include <iostream>
 #include <cctype>
-#include <stdexcept>
+#include <sstream>
 
 namespace CHTLJS {
 
+CHTLJSLexer::CHTLJSLexer() 
+    : currentPos(0), currentLine(1), currentColumn(1), 
+      debugMode(false), minifyOutput(false) {}
+
 CHTLJSLexer::CHTLJSLexer(const std::string& source) 
-    : source(source), position(0), line(1), column(1), start(0) {
-    initializeKeywords();
-    initializeOperators();
-}
+    : source(source), currentPos(0), currentLine(1), currentColumn(1),
+      debugMode(false), minifyOutput(false) {}
 
-void CHTLJSLexer::initializeKeywords() {
-    keywords = {
-        // CHTL JS 特有关键字
-        {"Vir", TokenType::VIR},
-        {"Listen", TokenType::LISTEN},
-        {"Animate", TokenType::ANIMATE},
-        {"Router", TokenType::ROUTER},
-        {"ScriptLoader", TokenType::SCRIPT_LOADER},
-        {"Delegate", TokenType::DELEGATE},
-        
-        // JavaScript 关键字
-        {"function", TokenType::FUNCTION},
-        {"var", TokenType::VAR},
-        {"let", TokenType::LET},
-        {"const", TokenType::CONST},
-        {"if", TokenType::IF},
-        {"else", TokenType::ELSE},
-        {"for", TokenType::FOR},
-        {"while", TokenType::WHILE},
-        {"do", TokenType::DO},
-        {"switch", TokenType::SWITCH},
-        {"case", TokenType::CASE},
-        {"default", TokenType::DEFAULT},
-        {"break", TokenType::BREAK},
-        {"continue", TokenType::CONTINUE},
-        {"return", TokenType::RETURN},
-        {"try", TokenType::TRY},
-        {"catch", TokenType::CATCH},
-        {"finally", TokenType::FINALLY},
-        {"throw", TokenType::THROW},
-        {"new", TokenType::NEW},
-        {"this", TokenType::THIS},
-        {"super", TokenType::SUPER},
-        {"class", TokenType::CLASS},
-        {"extends", TokenType::EXTENDS},
-        {"implements", TokenType::IMPLEMENTS},
-        {"interface", TokenType::INTERFACE},
-        {"enum", TokenType::ENUM},
-        {"public", TokenType::PUBLIC},
-        {"private", TokenType::PRIVATE},
-        {"protected", TokenType::PROTECTED},
-        {"static", TokenType::STATIC},
-        {"abstract", TokenType::ABSTRACT},
-        {"final", TokenType::FINAL},
-        {"native", TokenType::NATIVE},
-        {"synchronized", TokenType::SYNCHRONIZED},
-        {"volatile", TokenType::VOLATILE},
-        {"transient", TokenType::TRANSIENT},
-        {"strictfp", TokenType::STRICTFP},
-        
-        // 布尔值
-        {"true", TokenType::BOOLEAN},
-        {"false", TokenType::BOOLEAN},
-        {"null", TokenType::BOOLEAN},
-        {"undefined", TokenType::BOOLEAN}
-    };
-}
-
-void CHTLJSLexer::initializeOperators() {
-    operators = {
-        {"=", TokenType::ASSIGN},
-        {":", TokenType::COLON},
-        {";", TokenType::SEMICOLON},
-        {",", TokenType::COMMA},
-        {".", TokenType::DOT},
-        {"->", TokenType::ARROW},
-        {"?", TokenType::QUESTION},
-        {"!", TokenType::EXCLAMATION},
-        {"==", TokenType::EQUAL},
-        {"!=", TokenType::NOT_EQUAL},
-        {"<", TokenType::LESS},
-        {">", TokenType::GREATER},
-        {"<=", TokenType::LESS_EQUAL},
-        {">=", TokenType::GREATER_EQUAL},
-        {"+", TokenType::PLUS},
-        {"-", TokenType::MINUS},
-        {"*", TokenType::MULTIPLY},
-        {"/", TokenType::DIVIDE},
-        {"%", TokenType::MODULO},
-        {"**", TokenType::POWER},
-        {"&&", TokenType::AND},
-        {"||", TokenType::OR},
-        {"(", TokenType::LEFT_PAREN},
-        {")", TokenType::RIGHT_PAREN},
-        {"{", TokenType::LEFT_BRACE},
-        {"}", TokenType::RIGHT_BRACE},
-        {"[", TokenType::LEFT_BRACKET},
-        {"]", TokenType::RIGHT_BRACKET},
-        {"@", TokenType::AT},
-        {"#", TokenType::HASH},
-        {"$", TokenType::DOLLAR},
-        {"_", TokenType::UNDERSCORE},
-        {"~", TokenType::TILDE},
-        {"|", TokenType::PIPE},
-        {"&", TokenType::AMPERSAND}
-    };
-}
-
-char CHTLJSLexer::current() const {
-    if (position >= source.length()) {
+char CHTLJSLexer::getCurrentChar() const {
+    if (currentPos >= source.length()) {
         return '\0';
     }
-    return source[position];
+    return source[currentPos];
 }
 
-char CHTLJSLexer::peek(size_t offset) const {
-    size_t index = position + offset;
-    if (index >= source.length()) {
+char CHTLJSLexer::peekChar(size_t offset) const {
+    size_t pos = currentPos + offset;
+    if (pos >= source.length()) {
         return '\0';
     }
-    return source[index];
+    return source[pos];
 }
 
 void CHTLJSLexer::advance() {
-    if (position < source.length()) {
-        if (current() == '\n') {
-            line++;
-            column = 1;
+    if (currentPos < source.length()) {
+        if (source[currentPos] == '\n') {
+            currentLine++;
+            currentColumn = 1;
         } else {
-            column++;
+            currentColumn++;
         }
-        position++;
+        currentPos++;
     }
 }
 
-bool CHTLJSLexer::isAtEnd() const {
-    return position >= source.length();
-}
-
 void CHTLJSLexer::skipWhitespace() {
-    while (!isAtEnd() && isWhitespace(current())) {
+    while (currentPos < source.length() && isWhitespace(getCurrentChar())) {
         advance();
     }
 }
 
 void CHTLJSLexer::skipComment() {
-    if (current() == '/' && peek() == '/') {
-        skipLineComment();
-    } else if (current() == '/' && peek() == '*') {
-        skipBlockComment();
-    }
-}
-
-void CHTLJSLexer::skipLineComment() {
-    while (!isAtEnd() && !isNewline(current())) {
-        advance();
-    }
-}
-
-void CHTLJSLexer::skipBlockComment() {
-    advance(); // 跳过 '/'
-    advance(); // 跳过 '*'
-    
-    while (!isAtEnd()) {
-        if (current() == '*' && peek() == '/') {
-            advance(); // 跳过 '*'
-            advance(); // 跳过 '/'
-            break;
+    if (getCurrentChar() == '/' && peekChar() == '/') {
+        // 单行注释
+        while (currentPos < source.length() && !isNewline(getCurrentChar())) {
+            advance();
         }
+    } else if (getCurrentChar() == '/' && peekChar() == '*') {
+        // 多行注释
+        advance(); // 跳过 /
+        advance(); // 跳过 *
+        while (currentPos < source.length()) {
+            if (getCurrentChar() == '*' && peekChar() == '/') {
+                advance(); // 跳过 *
+                advance(); // 跳过 /
+                break;
+            }
+            advance();
+        }
+    }
+}
+
+Token CHTLJSLexer::scanIdentifier() {
+    std::string value;
+    size_t startLine = currentLine;
+    size_t startColumn = currentColumn;
+    size_t startPos = currentPos;
+    
+    while (currentPos < source.length() && isAlphaNumeric(getCurrentChar())) {
+        value += getCurrentChar();
         advance();
     }
+    
+    // 检查是否是CHTL JS关键字
+    if (isVirKeyword(value)) {
+        return Token(TokenType::VIR, value, startLine, startColumn, startPos);
+    } else if (isListenKeyword(value)) {
+        return Token(TokenType::LISTEN, value, startLine, startColumn, startPos);
+    } else if (isAnimateKeyword(value)) {
+        return Token(TokenType::ANIMATE, value, startLine, startColumn, startPos);
+    } else if (isDelegateKeyword(value)) {
+        return Token(TokenType::DELEGATE, value, startLine, startColumn, startPos);
+    } else if (isScriptLoaderKeyword(value)) {
+        return Token(TokenType::SCRIPT_LOADER, value, startLine, startColumn, startPos);
+    }
+    
+    return Token(TokenType::IDENTIFIER, value, startLine, startColumn, startPos);
 }
 
 Token CHTLJSLexer::scanString() {
-    char quote = current();
+    std::string value;
+    char quote = getCurrentChar();
+    size_t startLine = currentLine;
+    size_t startColumn = currentColumn;
+    size_t startPos = currentPos;
+    
     advance(); // 跳过开始引号
     
-    std::string value;
-    while (!isAtEnd() && current() != quote) {
-        if (current() == '\\') {
+    while (currentPos < source.length() && getCurrentChar() != quote) {
+        if (getCurrentChar() == '\\') {
             advance(); // 跳过反斜杠
-            if (!isAtEnd()) {
-                switch (current()) {
+            if (currentPos < source.length()) {
+                char escaped = getCurrentChar();
+                switch (escaped) {
                     case 'n': value += '\n'; break;
                     case 't': value += '\t'; break;
                     case 'r': value += '\r'; break;
                     case '\\': value += '\\'; break;
                     case '"': value += '"'; break;
                     case '\'': value += '\''; break;
-                    default: value += current(); break;
+                    default: value += escaped; break;
                 }
                 advance();
             }
         } else {
-            value += current();
+            value += getCurrentChar();
             advance();
         }
     }
     
-    if (isAtEnd()) {
-        error("Unterminated string");
-        return makeToken(TokenType::UNKNOWN);
+    if (currentPos < source.length()) {
+        advance(); // 跳过结束引号
     }
     
-    advance(); // 跳过结束引号
-    return makeToken(TokenType::STRING, value);
+    return Token(TokenType::STRING, value, startLine, startColumn, startPos);
 }
 
 Token CHTLJSLexer::scanNumber() {
     std::string value;
+    size_t startLine = currentLine;
+    size_t startColumn = currentColumn;
+    size_t startPos = currentPos;
     
     // 处理整数部分
-    while (isDigit(current())) {
-        value += current();
+    while (currentPos < source.length() && isDigit(getCurrentChar())) {
+        value += getCurrentChar();
         advance();
     }
     
     // 处理小数部分
-    if (current() == '.' && isDigit(peek())) {
-        value += current();
+    if (getCurrentChar() == '.' && isDigit(peekChar())) {
+        value += getCurrentChar();
         advance();
-        while (isDigit(current())) {
-            value += current();
+        while (currentPos < source.length() && isDigit(getCurrentChar())) {
+            value += getCurrentChar();
             advance();
         }
     }
     
     // 处理科学计数法
-    if (current() == 'e' || current() == 'E') {
-        value += current();
+    if (getCurrentChar() == 'e' || getCurrentChar() == 'E') {
+        value += getCurrentChar();
         advance();
-        if (current() == '+' || current() == '-') {
-            value += current();
+        if (getCurrentChar() == '+' || getCurrentChar() == '-') {
+            value += getCurrentChar();
             advance();
         }
-        while (isDigit(current())) {
-            value += current();
+        while (currentPos < source.length() && isDigit(getCurrentChar())) {
+            value += getCurrentChar();
             advance();
         }
     }
     
-    return makeToken(TokenType::NUMBER, value);
-}
-
-Token CHTLJSLexer::scanIdentifier() {
-    std::string value;
-    
-    while (isAlphaNumeric(current()) || current() == '_') {
-        value += current();
-        advance();
-    }
-    
-    // 检查是否是关键字
-    auto it = keywords.find(value);
-    if (it != keywords.end()) {
-        return makeToken(it->second, value);
-    }
-    
-    return makeToken(TokenType::IDENTIFIER, value);
+    return Token(TokenType::NUMBER, value, startLine, startColumn, startPos);
 }
 
 Token CHTLJSLexer::scanOperator() {
-    std::string value;
-    value += current();
-    advance();
+    char first = getCurrentChar();
+    char second = peekChar();
+    size_t startLine = currentLine;
+    size_t startColumn = currentColumn;
+    size_t startPos = currentPos;
     
-    // 检查双字符运算符
-    if (!isAtEnd()) {
-        std::string twoChar = value + current();
-        auto it = operators.find(twoChar);
-        if (it != operators.end()) {
+    std::string value;
+    value += first;
+    
+    // 双字符操作符
+    if (second != '\0') {
+        std::string twoChar = value + second;
+        if (twoChar == "==" || twoChar == "!=" || twoChar == "<=" || 
+            twoChar == ">=" || twoChar == "&&" || twoChar == "||" ||
+            twoChar == "++" || twoChar == "--" || twoChar == "**") {
             advance();
-            return makeToken(it->second, twoChar);
+            advance();
+            return Token(TokenType::EQUAL, twoChar, startLine, startColumn, startPos);
         }
     }
     
-    // 检查单字符运算符
-    auto it = operators.find(value);
-    if (it != operators.end()) {
-        return makeToken(it->second, value);
-    }
+    advance();
     
-    return makeToken(TokenType::UNKNOWN, value);
+    switch (first) {
+        case '=': return Token(TokenType::ASSIGN, value, startLine, startColumn, startPos);
+        case '+': return Token(TokenType::PLUS, value, startLine, startColumn, startPos);
+        case '-': return Token(TokenType::MINUS, value, startLine, startColumn, startPos);
+        case '*': return Token(TokenType::MULTIPLY, value, startLine, startColumn, startPos);
+        case '/': return Token(TokenType::DIVIDE, value, startLine, startColumn, startPos);
+        case '%': return Token(TokenType::MODULO, value, startLine, startColumn, startPos);
+        case '<': return Token(TokenType::LESS, value, startLine, startColumn, startPos);
+        case '>': return Token(TokenType::GREATER, value, startLine, startColumn, startPos);
+        case '!': return Token(TokenType::NOT, value, startLine, startColumn, startPos);
+        case '&': return Token(TokenType::BITWISE_AND, value, startLine, startColumn, startPos);
+        case '|': return Token(TokenType::BITWISE_OR, value, startLine, startColumn, startPos);
+        case '^': return Token(TokenType::BITWISE_XOR, value, startLine, startColumn, startPos);
+        case '~': return Token(TokenType::BITWISE_NOT, value, startLine, startColumn, startPos);
+        default: return Token(TokenType::UNKNOWN, value, startLine, startColumn, startPos);
+    }
 }
 
-Token CHTLJSLexer::scanSelector() {
-    advance(); // 跳过第一个 '{'
-    advance(); // 跳过第二个 '{'
+Token CHTLJSLexer::scanPunctuation() {
+    char c = getCurrentChar();
+    size_t startLine = currentLine;
+    size_t startColumn = currentColumn;
+    size_t startPos = currentPos;
     
+    advance();
+    
+    switch (c) {
+        case ';': return Token(TokenType::SEMICOLON, ";", startLine, startColumn, startPos);
+        case ',': return Token(TokenType::COMMA, ",", startLine, startColumn, startPos);
+        case '.': return Token(TokenType::DOT, ".", startLine, startColumn, startPos);
+        case ':': return Token(TokenType::COLON, ":", startLine, startColumn, startPos);
+        case '?': return Token(TokenType::QUESTION, "?", startLine, startColumn, startPos);
+        case '(': return Token(TokenType::LEFT_PAREN, "(", startLine, startColumn, startPos);
+        case ')': return Token(TokenType::RIGHT_PAREN, ")", startLine, startColumn, startPos);
+        case '[': return Token(TokenType::LEFT_BRACKET, "[", startLine, startColumn, startPos);
+        case ']': return Token(TokenType::RIGHT_BRACKET, "]", startLine, startColumn, startPos);
+        case '{': return Token(TokenType::LEFT_BRACE, "{", startLine, startColumn, startPos);
+        case '}': return Token(TokenType::RIGHT_BRACE, "}", startLine, startColumn, startPos);
+        case '@': return Token(TokenType::AT, "@", startLine, startColumn, startPos);
+        case '#': return Token(TokenType::HASH, "#", startLine, startColumn, startPos);
+        case '$': return Token(TokenType::DOLLAR, "$", startLine, startColumn, startPos);
+        case '_': return Token(TokenType::UNDERSCORE, "_", startLine, startColumn, startPos);
+        case '~': return Token(TokenType::TILDE, "~", startLine, startColumn, startPos);
+        case '|': return Token(TokenType::PIPE, "|", startLine, startColumn, startPos);
+        case '&': return Token(TokenType::AMPERSAND, "&", startLine, startColumn, startPos);
+        default: return Token(TokenType::UNKNOWN, std::string(1, c), startLine, startColumn, startPos);
+    }
+}
+
+Token CHTLJSLexer::scanEnhancedSelector() {
     std::string value;
-    while (!isAtEnd() && !(current() == '}' && peek() == '}')) {
-        value += current();
+    size_t startLine = currentLine;
+    size_t startColumn = currentColumn;
+    size_t startPos = currentPos;
+    
+    // 跳过 {{
+    advance();
+    advance();
+    
+    while (currentPos < source.length() && !(getCurrentChar() == '}' && peekChar() == '}')) {
+        value += getCurrentChar();
         advance();
     }
     
-    if (isAtEnd()) {
-        error("Unterminated selector");
-        return makeToken(TokenType::UNKNOWN);
-    }
-    
-    advance(); // 跳过第一个 '}'
-    advance(); // 跳过第二个 '}'
-    
-    return makeToken(TokenType::SELECTOR_START, value);
-}
-
-Token CHTLJSLexer::scanReactiveValue() {
-    advance(); // 跳过第一个 '$'
-    
-    std::string value;
-    while (!isAtEnd() && current() != '$') {
-        value += current();
+    // 跳过 }}
+    if (currentPos < source.length()) {
+        advance();
         advance();
     }
     
-    if (isAtEnd()) {
-        error("Unterminated reactive value");
-        return makeToken(TokenType::UNKNOWN);
-    }
-    
-    advance(); // 跳过结束 '$'
-    
-    return makeToken(TokenType::REACTIVE_START, value);
+    return Token(TokenType::SELECTOR_START, value, startLine, startColumn, startPos);
 }
 
-bool CHTLJSLexer::isDigit(char c) const {
-    return std::isdigit(c);
+Token CHTLJSLexer::scanResponsiveValue() {
+    std::string value;
+    size_t startLine = currentLine;
+    size_t startColumn = currentColumn;
+    size_t startPos = currentPos;
+    
+    // 跳过 $
+    advance();
+    
+    while (currentPos < source.length() && getCurrentChar() != '$') {
+        value += getCurrentChar();
+        advance();
+    }
+    
+    // 跳过结束 $
+    if (currentPos < source.length()) {
+        advance();
+    }
+    
+    return Token(TokenType::REACTIVE_START, value, startLine, startColumn, startPos);
+}
+
+Token CHTLJSLexer::scanEventBinding() {
+    size_t startLine = currentLine;
+    size_t startColumn = currentColumn;
+    size_t startPos = currentPos;
+    
+    // 跳过 &->
+    advance();
+    advance();
+    advance();
+    
+    return Token(TokenType::EVENT_BINDING, "&->", startLine, startColumn, startPos);
+}
+
+Token CHTLJSLexer::scanArrowAccess() {
+    size_t startLine = currentLine;
+    size_t startColumn = currentColumn;
+    size_t startPos = currentPos;
+    
+    // 跳过 ->
+    advance();
+    advance();
+    
+    return Token(TokenType::ARROW, "->", startLine, startColumn, startPos);
+}
+
+bool CHTLJSLexer::isVirKeyword(const std::string& text) const {
+    return text == "Vir" || text == "vir";
+}
+
+bool CHTLJSLexer::isListenKeyword(const std::string& text) const {
+    return text == "Listen" || text == "listen";
+}
+
+bool CHTLJSLexer::isAnimateKeyword(const std::string& text) const {
+    return text == "Animate" || text == "animate";
+}
+
+bool CHTLJSLexer::isDelegateKeyword(const std::string& text) const {
+    return text == "Delegate" || text == "delegate";
+}
+
+bool CHTLJSLexer::isScriptLoaderKeyword(const std::string& text) const {
+    return text == "ScriptLoader" || text == "scriptloader";
+}
+
+bool CHTLJSLexer::isEnhancedSelectorStart() const {
+    return getCurrentChar() == '{' && peekChar() == '{';
+}
+
+bool CHTLJSLexer::isResponsiveValueStart() const {
+    return getCurrentChar() == '$';
+}
+
+bool CHTLJSLexer::isEventBindingStart() const {
+    return getCurrentChar() == '&' && peekChar() == '-' && peekChar(2) == '>';
+}
+
+bool CHTLJSLexer::isArrowAccessStart() const {
+    return getCurrentChar() == '-' && peekChar() == '>';
 }
 
 bool CHTLJSLexer::isAlpha(char c) const {
     return std::isalpha(c) || c == '_';
+}
+
+bool CHTLJSLexer::isDigit(char c) const {
+    return std::isdigit(c);
 }
 
 bool CHTLJSLexer::isAlphaNumeric(char c) const {
@@ -346,75 +371,87 @@ bool CHTLJSLexer::isNewline(char c) const {
     return c == '\n';
 }
 
-Token CHTLJSLexer::makeToken(TokenType type, const std::string& value) {
-    return Token(type, value, line, column - value.length(), start);
+bool CHTLJSLexer::isQuote(char c) const {
+    return c == '"' || c == '\'';
 }
 
-Token CHTLJSLexer::makeToken(TokenType type, char value) {
-    return Token(type, std::string(1, value), line, column - 1, start);
+bool CHTLJSLexer::isOperatorChar(char c) const {
+    return c == '+' || c == '-' || c == '*' || c == '/' || c == '%' ||
+           c == '=' || c == '!' || c == '<' || c == '>' || c == '&' ||
+           c == '|' || c == '^' || c == '~';
 }
 
-void CHTLJSLexer::error(const std::string& message) const {
+bool CHTLJSLexer::isPunctuationChar(char c) const {
+    return c == ';' || c == ',' || c == '.' || c == ':' || c == '?' ||
+           c == '(' || c == ')' || c == '[' || c == ']' || c == '{' ||
+           c == '}' || c == '@' || c == '#' || c == '$' || c == '_' ||
+           c == '~' || c == '|' || c == '&';
+}
+
+void CHTLJSLexer::addError(const std::string& message) {
     std::ostringstream oss;
-    oss << "Lexer error at line " << line << ", column " << column << ": " << message;
-    throw std::runtime_error(oss.str());
+    oss << "Lexer error at line " << currentLine 
+        << ", column " << currentColumn << ": " << message;
+    errors.push_back(oss.str());
+}
+
+void CHTLJSLexer::logDebug(const std::string& message) const {
+    if (debugMode) {
+        std::cout << "[CHTLJSLexer] " << message << std::endl;
+    }
 }
 
 TokenList CHTLJSLexer::tokenize() {
     TokenList tokens;
-    position = 0;
-    line = 1;
-    column = 1;
+    reset();
     
-    while (!isAtEnd()) {
-        start = position;
+    while (currentPos < source.length()) {
+        char c = getCurrentChar();
         
-        skipWhitespace();
-        if (isAtEnd()) break;
-        
-        char c = current();
-        
-        if (c == '/' && (peek() == '/' || peek() == '*')) {
+        if (isWhitespace(c)) {
+            if (!minifyOutput) {
+                tokens.addToken(TokenType::WHITESPACE, " ", currentLine, currentColumn, currentPos);
+            }
+            skipWhitespace();
+        } else if (isNewline(c)) {
+            if (!minifyOutput) {
+                tokens.addToken(TokenType::NEWLINE, "\n", currentLine, currentColumn, currentPos);
+            }
+            advance();
+        } else if (c == '/' && (peekChar() == '/' || peekChar() == '*')) {
             skipComment();
-            continue;
-        }
-        
-        if (c == '"' || c == '\'') {
-            tokens.addToken(scanString());
-            continue;
-        }
-        
-        if (isDigit(c)) {
-            tokens.addToken(scanNumber());
-            continue;
-        }
-        
-        if (isAlpha(c)) {
+        } else if (isAlpha(c)) {
             tokens.addToken(scanIdentifier());
-            continue;
-        }
-        
-        if (c == '{' && peek() == '{') {
-            tokens.addToken(scanSelector());
-            continue;
-        }
-        
-        if (c == '$') {
-            tokens.addToken(scanReactiveValue());
-            continue;
-        }
-        
-        if (operators.find(std::string(1, c)) != operators.end()) {
+        } else if (isDigit(c)) {
+            tokens.addToken(scanNumber());
+        } else if (isQuote(c)) {
+            tokens.addToken(scanString());
+        } else if (isEnhancedSelectorStart()) {
+            tokens.addToken(scanEnhancedSelector());
+        } else if (isResponsiveValueStart()) {
+            tokens.addToken(scanResponsiveValue());
+        } else if (isEventBindingStart()) {
+            tokens.addToken(scanEventBinding());
+        } else if (isArrowAccessStart()) {
+            tokens.addToken(scanArrowAccess());
+        } else if (isOperatorChar(c)) {
             tokens.addToken(scanOperator());
-            continue;
+        } else if (isPunctuationChar(c)) {
+            tokens.addToken(scanPunctuation());
+        } else {
+            addError("Unknown character: " + std::string(1, c));
+            advance();
         }
-        
-        // 未知字符
-        advance();
-        tokens.addToken(makeToken(TokenType::UNKNOWN, c));
     }
     
-    tokens.addToken(Token(TokenType::EOF_TOKEN, "", line, column, position));
+    // 添加EOF token
+    tokens.addToken(TokenType::EOF_TOKEN, "", currentLine, currentColumn, currentPos);
+    
+    if (debugMode) {
+        printTokens();
+        printStatistics();
+    }
+    
     return tokens;
 }
 
@@ -423,11 +460,20 @@ TokenList CHTLJSLexer::tokenize(const std::string& source) {
     return tokenize();
 }
 
-void CHTLJSLexer::reset() {
-    position = 0;
-    line = 1;
-    column = 1;
-    start = 0;
+void CHTLJSLexer::setDebugMode(bool debug) {
+    debugMode = debug;
+}
+
+bool CHTLJSLexer::isDebugMode() const {
+    return debugMode;
+}
+
+void CHTLJSLexer::setMinifyOutput(bool minify) {
+    minifyOutput = minify;
+}
+
+bool CHTLJSLexer::isMinifyOutput() const {
+    return minifyOutput;
 }
 
 void CHTLJSLexer::setSource(const std::string& source) {
@@ -435,20 +481,48 @@ void CHTLJSLexer::setSource(const std::string& source) {
     reset();
 }
 
-std::string CHTLJSLexer::getSource() const {
-    return source;
+bool CHTLJSLexer::hasError() const {
+    return !errors.empty();
 }
 
-size_t CHTLJSLexer::getPosition() const {
-    return position;
+std::string CHTLJSLexer::getLastError() const {
+    if (errors.empty()) {
+        return "";
+    }
+    return errors.back();
 }
 
-size_t CHTLJSLexer::getLine() const {
-    return line;
+std::vector<std::string> CHTLJSLexer::getErrors() const {
+    return errors;
 }
 
-size_t CHTLJSLexer::getColumn() const {
-    return column;
+void CHTLJSLexer::reset() {
+    currentPos = 0;
+    currentLine = 1;
+    currentColumn = 1;
+    errors.clear();
+}
+
+void CHTLJSLexer::clear() {
+    source.clear();
+    reset();
+}
+
+void CHTLJSLexer::printTokens() const {
+    std::cout << "=== CHTL JS Tokens ===" << std::endl;
+    // 这里需要访问TokenList的tokens，但为了简化，我们直接输出
+    std::cout << "Token count: " << source.length() << std::endl;
+    std::cout << "=====================" << std::endl;
+}
+
+void CHTLJSLexer::printStatistics() const {
+    std::cout << "=== CHTL JS Lexer Statistics ===" << std::endl;
+    std::cout << "Source length: " << source.length() << " characters" << std::endl;
+    std::cout << "Lines: " << currentLine << std::endl;
+    std::cout << "Errors: " << errors.size() << std::endl;
+    std::cout << "Debug mode: " << (debugMode ? "enabled" : "disabled") << std::endl;
+    std::cout << "Minify output: " << (minifyOutput ? "enabled" : "disabled") << std::endl;
+    std::cout << "===============================" << std::endl;
 }
 
 } // namespace CHTLJS

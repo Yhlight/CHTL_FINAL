@@ -3,67 +3,90 @@
 
 #include "Token.h"
 #include <string>
-#include <unordered_map>
-#include <memory>
+#include <vector>
 
 namespace CHTLJS {
 
 class CHTLJSLexer {
 private:
     std::string source;
-    size_t position;
-    size_t line;
-    size_t column;
-    size_t start;
+    size_t currentPos;
+    size_t currentLine;
+    size_t currentColumn;
+    bool debugMode;
+    bool minifyOutput;
+    std::vector<std::string> errors;
     
-    std::unordered_map<std::string, TokenType> keywords;
-    std::unordered_map<std::string, TokenType> operators;
-    
-    void initializeKeywords();
-    void initializeOperators();
-    
-    char current() const;
-    char peek(size_t offset = 1) const;
+    // 内部方法
+    char getCurrentChar() const;
+    char peekChar(size_t offset = 1) const;
     void advance();
-    bool isAtEnd() const;
-    
     void skipWhitespace();
     void skipComment();
-    void skipLineComment();
-    void skipBlockComment();
     
+    // Token识别方法
+    Token scanIdentifier();
     Token scanString();
     Token scanNumber();
-    Token scanIdentifier();
     Token scanOperator();
-    Token scanSelector();
-    Token scanReactiveValue();
+    Token scanPunctuation();
+    Token scanEnhancedSelector();
+    Token scanResponsiveValue();
+    Token scanEventBinding();
+    Token scanArrowAccess();
     
-    bool isDigit(char c) const;
+    // CHTL JS特有语法识别
+    bool isVirKeyword(const std::string& text) const;
+    bool isListenKeyword(const std::string& text) const;
+    bool isAnimateKeyword(const std::string& text) const;
+    bool isDelegateKeyword(const std::string& text) const;
+    bool isScriptLoaderKeyword(const std::string& text) const;
+    bool isEnhancedSelectorStart() const;
+    bool isResponsiveValueStart() const;
+    bool isEventBindingStart() const;
+    bool isArrowAccessStart() const;
+    
+    // 工具方法
     bool isAlpha(char c) const;
+    bool isDigit(char c) const;
     bool isAlphaNumeric(char c) const;
     bool isWhitespace(char c) const;
     bool isNewline(char c) const;
+    bool isQuote(char c) const;
+    bool isOperatorChar(char c) const;
+    bool isPunctuationChar(char c) const;
     
-    Token makeToken(TokenType type, const std::string& value = "");
-    Token makeToken(TokenType type, char value);
-    
-    void error(const std::string& message) const;
+    void addError(const std::string& message);
+    void logDebug(const std::string& message) const;
     
 public:
+    CHTLJSLexer();
     CHTLJSLexer(const std::string& source);
     ~CHTLJSLexer() = default;
     
+    // 主要方法
     TokenList tokenize();
     TokenList tokenize(const std::string& source);
     
-    void reset();
+    // 配置方法
+    void setDebugMode(bool debug);
+    bool isDebugMode() const;
+    void setMinifyOutput(bool minify);
+    bool isMinifyOutput() const;
     void setSource(const std::string& source);
     
-    std::string getSource() const;
-    size_t getPosition() const;
-    size_t getLine() const;
-    size_t getColumn() const;
+    // 状态查询
+    bool hasError() const;
+    std::string getLastError() const;
+    std::vector<std::string> getErrors() const;
+    
+    // 工具方法
+    void reset();
+    void clear();
+    
+    // 调试方法
+    void printTokens() const;
+    void printStatistics() const;
 };
 
 } // namespace CHTLJS
