@@ -64,16 +64,8 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parse() {
 
     std::unique_ptr<CHTLJSNode> object_node;
 
-    if (peek().type == CHTLJSTokenType::OpenDoubleBrace) {
-        advance(); // consume '{{'
-        if (peek().type != CHTLJSTokenType::Identifier) {
-            throw std::runtime_error("Expected an identifier inside {{...}}.");
-        }
+    if (peek().type == CHTLJSTokenType::Selector) {
         CHTLJSToken selector_token = advance();
-        if (peek().type != CHTLJSTokenType::CloseDoubleBrace) {
-            throw std::runtime_error("Expected '}}' to close enhanced selector.");
-        }
-        advance(); // consume '}}'
         object_node = std::make_unique<EnhancedSelectorNode>(selector_token.lexeme);
     } else {
         // In the future, other object types could be parsed here.
@@ -81,9 +73,8 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parse() {
     }
 
     // Check for chained calls
-    if (peek().type == CHTLJSTokenType::Arrow || peek().type == CHTLJSTokenType::Dot) {
-        advance(); // consume '->' or '.'
-
+    if (peek().type == CHTLJSTokenType::Arrow) {
+        advance(); // consume '->'
         if (peek().type == CHTLJSTokenType::Listen) {
             advance(); // consume 'listen'
             return parseListenBlock(std::move(object_node));
@@ -91,6 +82,10 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parse() {
             advance(); // consume 'delegate'
             return parseDelegateBlock(std::move(object_node));
         }
+    }
+    else if (peek().type == CHTLJSTokenType::Identifier && peek().lexeme.rfind("__JS_PLACEHOLDER_", 0) == 0) {
+        auto* selector_node = static_cast<EnhancedSelectorNode*>(object_node.get());
+        selector_node->trailing_js_placeholder = advance().lexeme;
     }
 
     return object_node;

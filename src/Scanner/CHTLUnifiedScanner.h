@@ -27,7 +27,7 @@ private:
 
     // Helper methods for script processing.
     std::string generatePlaceholder();
-    size_t findEndOfChtlJsBlock(const std::string& content, size_t block_start_pos);
+    size_t findEndOfBraceBlock(const std::string& content, size_t block_start_pos);
 
     const std::string& source_;
     std::map<std::string, std::string> placeholder_map_;

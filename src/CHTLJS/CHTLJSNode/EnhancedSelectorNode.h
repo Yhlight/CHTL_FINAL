@@ -3,6 +3,7 @@
 
 #include "CHTLJSNode.h"
 #include <string>
+#include <memory>
 
 namespace CHTLJS {
 
@@ -13,10 +14,14 @@ public:
     CHTLJSNodeType getType() const override { return CHTLJSNodeType::EnhancedSelector; }
 
     std::unique_ptr<CHTLJSNode> clone() const override {
-        return std::make_unique<EnhancedSelectorNode>(selector_);
+        auto node = std::make_unique<EnhancedSelectorNode>(selector_);
+        node->trailing_js_placeholder = this->trailing_js_placeholder;
+        return node;
     }
 
     const std::string& getSelector() const { return selector_; }
+
+    std::string trailing_js_placeholder;
 
 private:
     std::string selector_;

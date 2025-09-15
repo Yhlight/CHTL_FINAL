@@ -11,8 +11,6 @@ enum class CHTLJSTokenType {
     Unexpected,
 
     // Punctuation
-    OpenDoubleBrace,  // {{
-    CloseDoubleBrace, // }}
     OpenBrace,        // {
     CloseBrace,       // }
     OpenBracket,      // [
@@ -20,11 +18,13 @@ enum class CHTLJSTokenType {
     Colon,            // :
     Comma,            // ,
     Identifier,
+    Selector,
     String,
     Number,
     Dot,              // .
     Arrow,            // ->
     Equals,           // =
+    Semicolon,        // ;
 
     // Keywords (for future features)
     Listen,

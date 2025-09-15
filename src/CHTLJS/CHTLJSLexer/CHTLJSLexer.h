@@ -15,6 +15,7 @@ public:
 
 private:
     void scanToken();
+    void selector();
     void identifier();
     void number();
     void stringLiteral(char quote);

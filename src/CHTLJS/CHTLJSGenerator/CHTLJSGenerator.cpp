@@ -12,6 +12,7 @@ namespace CHTLJS {
 CHTLJSGenerator::CHTLJSGenerator() {}
 
 std::string CHTLJSGenerator::generate(const CHTLJSNode& root) {
+    output_ = "";
     visit(&root);
     return output_;
 }
@@ -40,7 +41,7 @@ void CHTLJSGenerator::visit(const CHTLJSNode* node) {
 }
 
 void CHTLJSGenerator::visitEnhancedSelector(const EnhancedSelectorNode* node) {
-    output_ += "document.querySelector(\"" + node->getSelector() + "\")";
+    output_ += "document.querySelector(\"" + node->getSelector() + "\")" + node->trailing_js_placeholder;
 }
 
 void CHTLJSGenerator::visitListenNode(const ListenNode* node) {
@@ -65,8 +66,6 @@ void CHTLJSGenerator::visitDelegateNode(const DelegateNode* node) {
             std::stringstream target_selector_stream;
             std::string temp_output = output_;
             output_ = "";
-            // We assume targets are EnhancedSelectorNodes which generate a selector string.
-            // A more robust implementation would handle other node types.
             if(target_node->getType() == CHTLJSNodeType::EnhancedSelector) {
                  target_selector_stream << "\"" << static_cast<const EnhancedSelectorNode*>(target_node.get())->getSelector() << "\"";
             }
@@ -82,7 +81,6 @@ void CHTLJSGenerator::visitDelegateNode(const DelegateNode* node) {
 }
 
 void CHTLJSGenerator::visitAnimateNode(const AnimateNode* node) {
-    // 1. Generate the keyframes array
     std::stringstream keyframes_ss;
     keyframes_ss << "[";
     bool first_frame = true;
@@ -103,7 +101,6 @@ void CHTLJSGenerator::visitAnimateNode(const AnimateNode* node) {
     }
     keyframes_ss << "]";
 
-    // 2. Generate the options object
     std::stringstream options_ss;
     options_ss << "{ ";
     bool first_option = true;
@@ -133,9 +130,8 @@ void CHTLJSGenerator::visitAnimateNode(const AnimateNode* node) {
     }
     options_ss << " }";
 
-    // 3. Generate the final .animate() call on the target(s)
     for (const auto& target : node->targets_) {
-        visit(target.get()); // generates the document.querySelector(...)
+        visit(target.get());
         output_ += ".animate(" + keyframes_ss.str() + ", " + options_ss.str() + ")";
         if (node->callback_.has_value()) {
             output_ += ".addEventListener('finish', " + node->callback_.value() + ");\n";
@@ -150,4 +146,4 @@ void CHTLJSGenerator::visitValueNode(const ValueNode* node) {
 }
 
 
-} // namespace CHTLJS
+}

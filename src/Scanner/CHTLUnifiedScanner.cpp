@@ -13,14 +13,14 @@ static bool isKeyword(const std::string& source, size_t pos, const std::string& 
     if (keyword == "{{" || keyword == "}}") {
          return source.substr(pos, keyword.length()) == keyword;
     }
-    if (pos > 0 && isalnum(source[pos - 1])) {
+    if (pos > 0 && (isalnum(source[pos - 1]) || source[pos-1] == '_')) {
         return false;
     }
     if (source.substr(pos, keyword.length()) != keyword) {
         return false;
     }
     size_t after_keyword = pos + keyword.length();
-    if (after_keyword < source.length() && isalnum(source[after_keyword])) {
+    if (after_keyword < source.length() && (isalnum(source[after_keyword]) || source[after_keyword] == '_')) {
         return false;
     }
     return true;
@@ -31,8 +31,10 @@ CHTLUnifiedScanner::CHTLUnifiedScanner(const std::string& source)
       chtljs_keywords_({"{{", "listen", "animate", "delegate", "vir", "router"}) {}
 
 ScanningResult CHTLUnifiedScanner::scan() {
-    // This class is now a utility for processing a script string.
-    // The main entry point is processScriptContent.
+    // This is the main entry point called by the CHTLGenerator.
+    // It processes the content of a script block.
+    placeholder_map_.clear();
+    placeholder_id_ = 0;
     std::string processed_content = processScriptContent(source_);
     return {processed_content, placeholder_map_};
 }
@@ -41,7 +43,7 @@ std::string CHTLUnifiedScanner::generatePlaceholder() {
     return "__JS_PLACEHOLDER_" + std::to_string(placeholder_id_++) + "__";
 }
 
-size_t CHTLUnifiedScanner::findEndOfChtlJsBlock(const std::string& content, size_t block_start_pos) {
+size_t CHTLUnifiedScanner::findEndOfBraceBlock(const std::string& content, size_t block_start_pos) {
     size_t brace_open_pos = content.find('{', block_start_pos);
     if (brace_open_pos == std::string::npos) return std::string::npos;
     int brace_level = 1;
@@ -74,73 +76,44 @@ std::string CHTLUnifiedScanner::processScriptContent(const std::string& script_c
 
         if (next_kw_pos == std::string::npos) {
             std::string js_part = script_content.substr(cursor);
-            if (!js_part.empty()) {
-                 size_t first_char = js_part.find_first_not_of(" \t\n\r\f\v");
-                if (first_char == std::string::npos) { // All whitespace
-                    processed_content += js_part;
-                } else {
-                    size_t last_char = js_part.find_last_not_of(" \t\n\r\f\v");
-                    std::string leading_ws = js_part.substr(0, first_char);
-                    std::string trailing_ws = js_part.substr(last_char + 1);
-                    std::string core_js = js_part.substr(first_char, last_char - first_char + 1);
-
-                    processed_content += leading_ws;
-                    if (!core_js.empty()) {
-                        std::string placeholder = generatePlaceholder();
-                        placeholder_map_[placeholder] = core_js;
-                        processed_content += placeholder;
-                    }
-                    processed_content += trailing_ws;
-                }
+            if (!js_part.empty() && js_part.find_first_not_of(" \t\n\r") != std::string::npos) {
+                std::string placeholder = generatePlaceholder();
+                placeholder_map_[placeholder] = js_part;
+                processed_content += placeholder;
+            } else {
+                processed_content += js_part;
             }
             break;
         }
 
         if (next_kw_pos > cursor) {
             std::string js_part = script_content.substr(cursor, next_kw_pos - cursor);
-
-            size_t first_char = js_part.find_first_not_of(" \t\n\r\f\v");
-            if (first_char == std::string::npos) { // All whitespace
-                processed_content += js_part;
+            if (!js_part.empty() && js_part.find_first_not_of(" \t\n\r") != std::string::npos) {
+                std::string placeholder = generatePlaceholder();
+                placeholder_map_[placeholder] = js_part;
+                processed_content += placeholder;
             } else {
-                size_t last_char = js_part.find_last_not_of(" \t\n\r\f\v");
-                std::string leading_ws = js_part.substr(0, first_char);
-                std::string trailing_ws = js_part.substr(last_char + 1);
-                std::string core_js = js_part.substr(first_char, last_char - first_char + 1);
-
-                processed_content += leading_ws;
-                if (!core_js.empty()) {
-                    std::string placeholder = generatePlaceholder();
-                    placeholder_map_[placeholder] = core_js;
-                    processed_content += placeholder;
-                }
-                processed_content += trailing_ws;
+                processed_content += js_part;
             }
         }
 
+        size_t construct_end_pos = 0;
         if (found_kw == "{{") {
-            size_t construct_end_pos = script_content.find("}}", next_kw_pos);
+            construct_end_pos = script_content.find("}}", next_kw_pos);
             if (construct_end_pos != std::string::npos) {
                 construct_end_pos += 2;
-                processed_content += script_content.substr(next_kw_pos, construct_end_pos - next_kw_pos);
-                cursor = construct_end_pos;
             } else {
                  throw std::runtime_error("Unmatched {{ in script.");
             }
-        } else { // Block constructs like listen, animate, etc.
-            size_t brace_open_pos = script_content.find('{', next_kw_pos);
-            size_t construct_end_pos = findEndOfChtlJsBlock(script_content, next_kw_pos);
-
-            if (brace_open_pos == std::string::npos || construct_end_pos == std::string::npos) {
+        } else {
+            construct_end_pos = findEndOfBraceBlock(script_content, next_kw_pos);
+             if (construct_end_pos == std::string::npos) {
                 throw std::runtime_error("Malformed CHTL JS block in script: " + found_kw);
             }
-
-            processed_content += script_content.substr(next_kw_pos, brace_open_pos - next_kw_pos + 1);
-            std::string inner_content = script_content.substr(brace_open_pos + 1, construct_end_pos - brace_open_pos - 2);
-            processed_content += processScriptContent(inner_content);
-            processed_content += "}";
-            cursor = construct_end_pos;
         }
+
+        processed_content += script_content.substr(next_kw_pos, construct_end_pos - next_kw_pos);
+        cursor = construct_end_pos;
     }
     return processed_content;
 }

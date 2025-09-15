@@ -280,10 +280,21 @@ ElementNode* findElementBySelector(const std::string& selector, const std::vecto
 }
 
 CompilationResult CHTLGenerator::generate(RootNode& root) {
+    // Reset state
+    output_.str("");
+    global_styles_.str("");
+    global_scripts_.str("");
+    placeholder_map_.clear();
     responsive_variables_.clear();
+    all_elements_.clear();
+    symbol_table_.clear();
+    unresolved_properties_.clear();
+    indentLevel_ = 0;
+
     for (auto& child : root.children_) firstPass(child.get());
     secondPass();
     for (const auto& child : root.children_) render(child.get());
+
     std::string html = output_.str();
     std::string styles = global_styles_.str();
     if (!styles.empty()) {
@@ -295,9 +306,24 @@ CompilationResult CHTLGenerator::generate(RootNode& root) {
             html = style_tag + html;
         }
     }
-    std::string js = generateReactivityScript();
-    global_scripts_ << js;
-    return {html, global_scripts_.str(), placeholder_map_};
+
+    std::string final_js = global_scripts_.str();
+
+    // Substitute placeholders in the final combined script
+    for (const auto& pair : placeholder_map_) {
+        size_t pos = final_js.find(pair.first);
+        while (pos != std::string::npos) {
+            final_js.replace(pos, pair.first.length(), pair.second);
+            pos = final_js.find(pair.first, pos + pair.second.length());
+        }
+    }
+
+    std::string reactivity_js = generateReactivityScript();
+    if (!reactivity_js.empty()) {
+        final_js = reactivity_js + "\n" + final_js;
+    }
+
+    return {html, final_js, {}};
 }
 
 void CHTLGenerator::firstPass(Node* node) {
@@ -455,7 +481,7 @@ void CHTLGenerator::render(const Node* node) {
         case NodeType::Text: renderText(static_cast<const TextNode*>(node)); break;
         case NodeType::Comment: renderComment(static_cast<const CommentNode*>(node)); break;
         case NodeType::Origin: renderOrigin(static_cast<const OriginNode*>(node)); break;
-        case NodeType::StyleBlock: break; // Handled in first pass
+        case NodeType::StyleBlock: break;
         case NodeType::ScriptBlock: renderScriptBlock(static_cast<const ScriptBlockNode*>(node)); break;
         default: break;
     }
@@ -519,26 +545,31 @@ void CHTLGenerator::renderScriptBlock(const ScriptBlockNode* node) {
     ScanningResult scan_result = scanner.scan();
 
     // 2. Compile the processed CHTL JS string
+    std::string compiled_js;
     auto chtljs_context = std::make_shared<CHTLJS::CHTLJSContext>();
     CHTLJS::CHTLJSLexer js_lexer(scan_result.modified_source);
     std::vector<CHTLJS::CHTLJSToken> js_tokens = js_lexer.scanTokens();
 
     if (js_tokens.empty() || (js_tokens.size() == 1 && js_tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) {
-        // Script block may contain only plain JS, which is fine.
-        // The plain JS is already in the placeholder map.
+        compiled_js = scan_result.modified_source;
     } else {
         CHTLJS::CHTLJSParser js_parser(js_tokens, chtljs_context);
         std::unique_ptr<CHTLJS::CHTLJSNode> js_ast = js_parser.parse();
 
         if (js_ast) {
             CHTLJS::CHTLJSGenerator js_generator;
-            std::string compiled_js = js_generator.generate(*js_ast);
-            global_scripts_ << compiled_js << "\n";
+            compiled_js = js_generator.generate(*js_ast);
+        } else {
+            compiled_js = scan_result.modified_source;
         }
     }
 
-    // 3. Add the placeholder map to the generator's map
-    placeholder_map_.insert(scan_result.placeholder_map.begin(), scan_result.placeholder_map.end());
+    // Temporarily add to the main placeholder map for final substitution
+    for (const auto& pair : scan_result.placeholder_map) {
+        placeholder_map_[pair.first] = pair.second;
+    }
+
+    global_scripts_ << compiled_js << "\n";
 }
 
 }

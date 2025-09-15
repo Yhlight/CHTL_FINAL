@@ -23,30 +23,47 @@ std::vector<CHTLJSToken> CHTLJSLexer::scanTokens() {
     return tokens_;
 }
 
+void CHTLJSLexer::selector() {
+    start_ = current_;
+    while (!isAtEnd()) {
+        if (peek() == '}' && peekNext() == '}') {
+            break;
+        }
+        if (peek() == '\n') line_++;
+        advance();
+    }
+
+    if (isAtEnd() || peekNext() == '\0') {
+        throw std::runtime_error("Unterminated selector literal.");
+    }
+
+    std::string value = source_.substr(start_, current_ - start_);
+    tokens_.push_back({CHTLJSTokenType::Selector, value, line_, 0});
+
+    advance();
+    advance();
+}
+
 void CHTLJSLexer::scanToken() {
     char c = advance();
     switch (c) {
         case '{':
             if (peek() == '{') {
                 advance();
-                addToken(CHTLJSTokenType::OpenDoubleBrace);
+                selector();
             } else {
                 addToken(CHTLJSTokenType::OpenBrace);
             }
             break;
         case '}':
-            if (peek() == '}') {
-                advance();
-                addToken(CHTLJSTokenType::CloseDoubleBrace);
-            } else {
-                addToken(CHTLJSTokenType::CloseBrace);
-            }
+             addToken(CHTLJSTokenType::CloseBrace);
             break;
         case '[': addToken(CHTLJSTokenType::OpenBracket); break;
         case ']': addToken(CHTLJSTokenType::CloseBracket); break;
         case ':': addToken(CHTLJSTokenType::Colon); break;
         case ',': addToken(CHTLJSTokenType::Comma); break;
         case '=': addToken(CHTLJSTokenType::Equals); break;
+        case ';': addToken(CHTLJSTokenType::Semicolon); break;
         case '-':
              if (peek() == '>') {
                 advance();
@@ -60,7 +77,6 @@ void CHTLJSLexer::scanToken() {
         case '\r':
         case '\t':
         case '\n':
-            // Ignore whitespace
             break;
         case '\'':
         case '"':
@@ -108,7 +124,7 @@ void CHTLJSLexer::stringLiteral(char quote) {
     if (isAtEnd()) {
         throw std::runtime_error("Unterminated string literal.");
     }
-    advance(); // The closing quote
+    advance();
     std::string value = source_.substr(start_ + 1, current_ - start_ - 2);
     tokens_.push_back({CHTLJSTokenType::String, value, line_, 0});
 }
