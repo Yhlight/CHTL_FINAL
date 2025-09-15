@@ -22,6 +22,16 @@ set(CHTLJS_SOURCES
     CHTL/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp
 )
 
+# CJMOD API 源文件
+set(CJMOD_API_SOURCES
+    CHTL/CHTLJS/CJMODSystem/CJMODAPI/Syntax.cpp
+    CHTL/CHTLJS/CJMODSystem/CJMODAPI/Arg.cpp
+    CHTL/CHTLJS/CJMODSystem/CJMODAPI/AtomArg.cpp
+    CHTL/CHTLJS/CJMODSystem/CJMODAPI/CJMODScanner.cpp
+    CHTL/CHTLJS/CJMODSystem/CJMODAPI/CJMODGenerator.cpp
+    CHTL/CHTLJS/CJMODSystem/CJMODAPI/CHTLJSFunction.cpp
+)
+
 # CHTL 源文件
 set(CHTL_SOURCES
     CHTL/CHTL/CHTLLexer/CHTLLexer.cpp
@@ -50,6 +60,7 @@ set(CODE_MERGER_SOURCES
 
 # 创建库
 add_library(chtljs STATIC ${CHTLJS_SOURCES})
+add_library(cjmod_api STATIC ${CJMOD_API_SOURCES})
 add_library(chtl STATIC ${CHTL_SOURCES})
 add_library(scanner STATIC ${SCANNER_SOURCES})
 add_library(compiler_dispatcher STATIC ${COMPILER_DISPATCHER_SOURCES})
@@ -59,13 +70,16 @@ add_library(code_merger STATIC ${CODE_MERGER_SOURCES})
 add_executable(test_chtljs test_chtljs.cpp)
 target_link_libraries(test_chtljs chtljs)
 
+add_executable(test_cjmod_api test_cjmod_api.cpp)
+target_link_libraries(test_cjmod_api cjmod_api)
+
 add_executable(test_basic test_basic.cpp)
 
 add_executable(demo demo.cpp)
-target_link_libraries(demo chtljs chtl scanner compiler_dispatcher code_merger)
+target_link_libraries(demo chtljs cjmod_api chtl scanner compiler_dispatcher code_merger)
 
 # 安装目标
-install(TARGETS chtljs test_chtljs
+install(TARGETS chtljs cjmod_api test_chtljs test_cjmod_api
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
