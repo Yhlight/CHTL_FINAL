@@ -178,6 +178,19 @@ test_parser/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_parser.dir/build.make CMakeFiles/test_parser.dir/build
 .PHONY : test_parser/fast
 
+#=============================================================================
+# Target rules for targets named test_scanner
+
+# Build rule for target.
+test_scanner: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_scanner
+.PHONY : test_scanner
+
+# fast build rule for target.
+test_scanner/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner.dir/build.make CMakeFiles/test_scanner.dir/build
+.PHONY : test_scanner/fast
+
 src/CHTL/CHTLGenerator/CHTLGenerator.o: src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o
 .PHONY : src/CHTL/CHTLGenerator/CHTLGenerator.o
 
@@ -490,6 +503,30 @@ tests/test_runner.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_runner.dir/build.make CMakeFiles/test_runner.dir/tests/test_runner.cpp.s
 .PHONY : tests/test_runner.cpp.s
 
+tests/test_scanner.o: tests/test_scanner.cpp.o
+.PHONY : tests/test_scanner.o
+
+# target to build an object file
+tests/test_scanner.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner.dir/build.make CMakeFiles/test_scanner.dir/tests/test_scanner.cpp.o
+.PHONY : tests/test_scanner.cpp.o
+
+tests/test_scanner.i: tests/test_scanner.cpp.i
+.PHONY : tests/test_scanner.i
+
+# target to preprocess a source file
+tests/test_scanner.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner.dir/build.make CMakeFiles/test_scanner.dir/tests/test_scanner.cpp.i
+.PHONY : tests/test_scanner.cpp.i
+
+tests/test_scanner.s: tests/test_scanner.cpp.s
+.PHONY : tests/test_scanner.s
+
+# target to generate assembly for a file
+tests/test_scanner.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner.dir/build.make CMakeFiles/test_scanner.dir/tests/test_scanner.cpp.s
+.PHONY : tests/test_scanner.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -503,6 +540,7 @@ help:
 	@echo "... chtl_lib"
 	@echo "... test_parser"
 	@echo "... test_runner"
+	@echo "... test_scanner"
 	@echo "... src/CHTL/CHTLGenerator/CHTLGenerator.o"
 	@echo "... src/CHTL/CHTLGenerator/CHTLGenerator.i"
 	@echo "... src/CHTL/CHTLGenerator/CHTLGenerator.s"
@@ -542,6 +580,9 @@ help:
 	@echo "... tests/test_runner.o"
 	@echo "... tests/test_runner.i"
 	@echo "... tests/test_runner.s"
+	@echo "... tests/test_scanner.o"
+	@echo "... tests/test_scanner.i"
+	@echo "... tests/test_scanner.s"
 .PHONY : help
 
 

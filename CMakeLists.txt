@@ -41,5 +41,9 @@ target_link_libraries(test_runner PRIVATE stdc++fs)
 add_executable(test_parser tests/test_parser.cpp)
 target_link_libraries(test_parser PRIVATE chtl_lib)
 
+# CHTL Unified Scanner Test runner
+add_executable(test_scanner tests/test_scanner.cpp)
+target_link_libraries(test_scanner PRIVATE chtl_lib)
+
 # Add the new single test command
 add_test(NAME SnapshotTests WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} COMMAND test_runner)
