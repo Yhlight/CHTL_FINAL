@@ -1,0 +1,87 @@
+// CJMOD API测试文件
+
+[Module] CJMOD AnimationModule
+{
+    version: "1.0.0";
+    path: "./modules/animations.chtl";
+    description: "动画效果模块";
+    export: "fadeIn";
+    export: "slideUp";
+    export: "bounce";
+}
+
+// CHTL JS扩展语法测试
+vir div
+{
+    class: "container";
+    id: "main-container";
+}
+
+listen click
+{
+    handler: "handleClick";
+    element: "document";
+}
+
+animate #main-container
+{
+    opacity: 0.5;
+    transform: "translateY(20px)";
+    duration: 1000;
+    easing: "ease-in-out";
+}
+
+router /home
+{
+    params: {};
+    replace: false;
+}
+
+delegate .button
+{
+    event: "click";
+    handler: "handleButtonClick";
+    parent: "document";
+}
+
+fileloader ./data.json
+{
+    type: "json";
+    callback: "handleDataLoaded";
+}
+
+html
+{
+    body
+    {
+        div
+        {
+            class: "container";
+            
+            h1
+            {
+                text
+                {
+                    CHTL CJMOD API测试
+                }
+            }
+            
+            p
+            {
+                text
+                {
+                    这个页面演示了CHTL的CJMOD API功能，包括虚拟元素、事件监听、动画、路由、委托和文件加载。
+                }
+            }
+            
+            button
+            {
+                class: "button";
+                text
+                {
+                    点击我
+                }
+            }
+        }
+    }
+}

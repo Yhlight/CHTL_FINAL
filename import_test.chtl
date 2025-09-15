@@ -1,0 +1,16 @@
+[Import] CHTL "components/button.chtl"
+
+[Import] CSS "styles/main.css"
+
+[Import] JS "scripts/app.js"
+
+[Import] CMOD "modules/ui.chtl" {
+    Button
+    Card
+    Modal
+}
+
+[Import] CJMOD "modules/interactions.chtl" {
+    Animation
+    Router
+}

@@ -1,0 +1,23 @@
+[Namespace] UI {
+    [Template] @Style Button {
+        color: blue;
+        background: white;
+    }
+    
+    [Custom] @Element Card {
+        class: "ui-card";
+    }
+}
+
+[Namespace] Utils {
+    [Template] @Var Colors {
+        primary: "#007bff";
+        secondary: "#6c757d";
+    }
+    
+    [Origin] @JavaScript {
+        function formatDate(date) {
+            return date.toLocaleDateString();
+        }
+    }
+}
