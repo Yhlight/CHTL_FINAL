@@ -515,6 +515,11 @@ void CHTLGenerator::renderScriptBlock(const ScriptBlockNode* node) {
     if (node->content_.empty()) {
         return;
     }
+    // TODO: The scanner API has changed. This function needs to be updated
+    // to handle the new std::vector<CodeFragment> output.
+    // For now, we will just pass the raw content to the global scripts.
+    global_scripts_ << node->content_ << "\n";
+    /*
     // 1. Scan the raw script content to separate JS from CHTL JS
     CHTLUnifiedScanner scanner(node->content_);
     ScanningResult scan_result = scanner.scan();
@@ -552,6 +557,7 @@ void CHTLGenerator::renderScriptBlock(const ScriptBlockNode* node) {
 
     // 4. Add the placeholder map from the scanner to the generator's main map
     placeholder_map_.insert(scan_result.placeholder_map.begin(), scan_result.placeholder_map.end());
+    */
 }
 
 }

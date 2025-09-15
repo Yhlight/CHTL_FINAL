@@ -1,0 +1,30 @@
+// Test for CHTL JS / JS separation
+script {
+    // This is a plain JS comment
+    function myJsFunction(arg) {
+    console.log("Hello from plain JS!", arg);
+    // Let's call a CHTL JS function inside here
+    const listener = {{.my-button}}->listen({
+        click: (e) => {
+        console.log("Click event on .my-button");
+        // Nested CHTL JS inside a JS callback
+        animate({ target: {{e.target}} });
+        }
+    });
+    console.log("Back to plain JS");
+    }
+
+    // A CHTL JS statement at the top level
+    vir my_animation = animate({
+        target: [{{.box1}}, {{.box2}}],
+        duration: 1000,
+        // A string that contains a keyword: "vir"
+        easing: "ease-in-out-vir-test"
+    });
+
+    // Another plain JS function
+    const anotherFunc = () => {
+    let x = "This is not a listen { block }";
+    return x;
+    };
+}
