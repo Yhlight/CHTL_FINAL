@@ -9,13 +9,8 @@ namespace CHTLJS {
 // A simple node to hold a literal value, used as the result of a `vir` lookup.
 class ValueNode : public CHTLJSNode {
 public:
-    explicit ValueNode(std::string value) : value_(std::move(value)) {}
-
-    CHTLJSNodeType getType() const override { return CHTLJSNodeType::Value; }
-
-    std::unique_ptr<CHTLJSNode> clone() const override {
-        return std::make_unique<ValueNode>(value_);
-    }
+    explicit ValueNode(std::string value)
+        : CHTLJSNode(CHTLJSNodeType::Value), value_(std::move(value)) {}
 
     const std::string& getValue() const { return value_; }
 

@@ -214,6 +214,9 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: \
  /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSParser/../CHTLJSLexer/CHTLJSToken.h \
  /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSParser/../CHTLJSNode/CHTLJSNode.h \
  /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSParser/CHTLJSContext.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSParser/../CHTLJSNode/SequenceNode.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSParser/../CHTLJSNode/CHTLJSNode.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSNode/SequenceNode.h \
  /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSGenerator/CHTLJSGenerator.h \
  /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSGenerator/../CHTLJSNode/CHTLJSNode.h \
  /usr/include/c++/13/stack /usr/include/c++/13/deque \

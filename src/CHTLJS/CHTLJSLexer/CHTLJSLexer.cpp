@@ -79,10 +79,17 @@ void CHTLJSLexer::scanToken() {
 }
 
 void CHTLJSLexer::identifier() {
-    while ((peek() >= 'a' && peek() <= 'z') || (peek() >= 'A' && peek() <= 'Z') || (peek() >= '0' && peek() <= '9') || peek() == '_') {
+    while ((peek() >= 'a' && peek() <= 'z') || (peek() >= 'A' && peek() <= 'Z') || (peek() >= '0' && peek() <= '9') || peek() == '_' || peek() == '-') {
         advance();
     }
     std::string text = source_.substr(start_, current_ - start_);
+
+    // Check for placeholder pattern
+    if (text.length() > 4 && text.substr(0, 2) == "__" && text.substr(text.length() - 2) == "__") {
+        addToken(CHTLJSTokenType::Placeholder);
+        return;
+    }
+
     auto it = keywords.find(text);
     if (it != keywords.end()) {
         addToken(it->second);

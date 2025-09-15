@@ -7,8 +7,10 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o
  /app/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.h
  /app/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.h
  /app/src/CHTLJS/CHTLJSLexer/CHTLJSToken.h
+ /app/src/CHTLJS/CHTLJSNode/SequenceNode.h
  /app/src/CHTLJS/CHTLJSLexer/CHTLJSToken.h
  /app/src/CHTLJS/CHTLJSNode/CHTLJSNode.h
+ /app/src/CHTLJS/CHTLJSNode/SequenceNode.h
  /app/src/CHTLJS/CHTLJSParser/CHTLJSContext.h
  /app/src/CHTLJS/CHTLJSParser/CHTLJSParser.h
  /app/src/Scanner/CHTLUnifiedScanner.h
@@ -1037,7 +1039,10 @@ CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o
  /app/src/CHTLJS/CHTLJSNode/DelegateNode.h
  /app/src/CHTLJS/CHTLJSNode/EnhancedSelectorNode.h
  /app/src/CHTLJS/CHTLJSNode/ListenNode.h
+ /app/src/CHTLJS/CHTLJSNode/PlaceholderNode.h
+ /app/src/CHTLJS/CHTLJSNode/SequenceNode.h
  /app/src/CHTLJS/CHTLJSNode/ValueNode.h
+ /app/src/CHTLJS/CHTLJSNode/VirNode.h
  /usr/include/alloca.h
  /usr/include/asm-generic/errno-base.h
  /usr/include/asm-generic/errno.h
@@ -1429,9 +1434,12 @@ CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o
  /app/src/CHTLJS/CHTLJSNode/DelegateNode.h
  /app/src/CHTLJS/CHTLJSNode/EnhancedSelectorNode.h
  /app/src/CHTLJS/CHTLJSNode/ListenNode.h
+ /app/src/CHTLJS/CHTLJSNode/PlaceholderNode.h
  /app/src/CHTLJS/CHTLJSNode/ValueNode.h
+ /app/src/CHTLJS/CHTLJSNode/VirNode.h
  /app/src/CHTLJS/CHTLJSLexer/CHTLJSToken.h
  /app/src/CHTLJS/CHTLJSNode/CHTLJSNode.h
+ /app/src/CHTLJS/CHTLJSNode/SequenceNode.h
  /app/src/CHTLJS/CHTLJSParser/CHTLJSContext.h
  /app/src/CHTLJS/CHTLJSParser/CHTLJSParser.h
  /usr/include/alloca.h

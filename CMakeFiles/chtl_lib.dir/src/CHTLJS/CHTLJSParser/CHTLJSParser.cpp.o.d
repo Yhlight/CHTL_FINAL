@@ -164,6 +164,8 @@ CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o: \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
  /usr/include/c++/13/bits/erase_if.h \
+ /app/src/CHTLJS/CHTLJSParser/../CHTLJSNode/SequenceNode.h \
+ /app/src/CHTLJS/CHTLJSParser/../CHTLJSNode/CHTLJSNode.h \
  /app/src/CHTLJS/CHTLJSNode/EnhancedSelectorNode.h \
  /app/src/CHTLJS/CHTLJSNode/CHTLJSNode.h \
  /app/src/CHTLJS/CHTLJSNode/ListenNode.h /usr/include/c++/13/utility \
@@ -171,4 +173,6 @@ CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o: \
  /app/src/CHTLJS/CHTLJSNode/DelegateNode.h \
  /app/src/CHTLJS/CHTLJSNode/AnimateNode.h /usr/include/c++/13/optional \
  /usr/include/c++/13/bits/enable_special_members.h \
- /app/src/CHTLJS/CHTLJSNode/ValueNode.h /usr/include/c++/13/stdexcept
+ /app/src/CHTLJS/CHTLJSNode/PlaceholderNode.h \
+ /app/src/CHTLJS/CHTLJSNode/ValueNode.h \
+ /app/src/CHTLJS/CHTLJSNode/VirNode.h /usr/include/c++/13/stdexcept

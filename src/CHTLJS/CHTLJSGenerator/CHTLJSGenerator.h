@@ -13,20 +13,31 @@ class DelegateNode;
 class AnimateNode;
 class ValueNode;
 
+// Forward declarations for all node types
+class SequenceNode;
+class EnhancedSelectorNode;
+class ListenNode;
+class DelegateNode;
+class AnimateNode;
+class ValueNode;
+class PlaceholderNode;
+class VirNode;
+
 class CHTLJSGenerator {
 public:
-    CHTLJSGenerator();
+    CHTLJSGenerator() = default;
     std::string generate(const CHTLJSNode& root);
 
 private:
-    void visit(const CHTLJSNode* node);
-    void visitEnhancedSelector(const EnhancedSelectorNode* node);
-    void visitListenNode(const ListenNode* node);
-    void visitDelegateNode(const DelegateNode* node);
-    void visitAnimateNode(const AnimateNode* node);
-    void visitValueNode(const ValueNode* node);
-
-    std::string output_;
+    std::string visit(const CHTLJSNode* node);
+    std::string visitSequenceNode(const SequenceNode* node);
+    std::string visitEnhancedSelector(const EnhancedSelectorNode* node);
+    std::string visitListenNode(const ListenNode* node);
+    std::string visitDelegateNode(const DelegateNode* node);
+    std::string visitAnimateNode(const AnimateNode* node);
+    std::string visitValueNode(const ValueNode* node);
+    std::string visitPlaceholderNode(const PlaceholderNode* node);
+    std::string visitVirNode(const VirNode* node);
 };
 
 } // namespace CHTLJS

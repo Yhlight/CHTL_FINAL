@@ -15,12 +15,16 @@ CompilerDispatcher::CompilerDispatcher() {
 }
 
 std::string CompilerDispatcher::compile(const std::string& source) {
-    // 1. Lex and Parse the raw source.
-    // The parser now knows how to handle script blocks correctly.
+    // 1. Setup components
     CHTLLoader loader;
+    CHTLGenerator generator;
+    CodeMerger merger;
+
+    // 2. Lex and Parse CHTL source
     CHTLLexer lexer(source);
     std::vector<Token> tokens = lexer.scanTokens();
 
+    // Handle empty source
     if (tokens.empty() || (tokens.size() == 1 && tokens[0].type == TokenType::EndOfFile)) {
         return "";
     }
@@ -29,22 +33,17 @@ std::string CompilerDispatcher::compile(const std::string& source) {
     std::unique_ptr<RootNode> ast = parser.parse();
 
     if (!ast) {
-        // Parser failed and should have printed an error.
+        // Parser should have already printed an error message.
         return "";
     }
 
-    // 2. Generate the output from the AST.
-    // The generator will invoke the scanner on script content.
-    CHTLGenerator generator;
+    // 3. Generate code using the two-pass generator.
+    // The generator is responsible for the entire compilation, including handling script blocks.
     CompilationResult compilation_result = generator.generate(*ast);
 
-    // 3. Merge the final results.
-    // The merger will substitute the placeholders.
-    CodeMerger merger;
+    // 4. Merge the final results.
+    // The merger will substitute placeholders in the JS and inject the final script into the HTML.
     std::vector<std::string> js_outputs = { compilation_result.js };
-    // The generator doesn't produce separate CSS yet. This is handled by the generator internally for now.
-    std::vector<std::string> css_outputs = {};
-
     return merger.merge(compilation_result.html, js_outputs, compilation_result.placeholder_map);
 }
 

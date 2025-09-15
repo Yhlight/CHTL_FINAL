@@ -61,6 +61,7 @@ CMakeFiles/chtl_compiler.dir/src/main.cpp.o: src/main.cpp \
   /usr/include/c++/13/bits/fs_fwd.h \
   /usr/include/c++/13/bits/fs_ops.h \
   /usr/include/c++/13/bits/fs_path.h \
+  /usr/include/c++/13/bits/fstream.tcc \
   /usr/include/c++/13/bits/functexcept.h \
   /usr/include/c++/13/bits/functional_hash.h \
   /usr/include/c++/13/bits/hash_bytes.h \
@@ -149,6 +150,7 @@ CMakeFiles/chtl_compiler.dir/src/main.cpp.o: src/main.cpp \
   /usr/include/c++/13/ext/string_conversions.h \
   /usr/include/c++/13/ext/type_traits.h \
   /usr/include/c++/13/filesystem \
+  /usr/include/c++/13/fstream \
   /usr/include/c++/13/initializer_list \
   /usr/include/c++/13/iomanip \
   /usr/include/c++/13/ios \
@@ -261,8 +263,10 @@ CMakeFiles/chtl_compiler.dir/src/main.cpp.o: src/main.cpp \
   /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
   /usr/include/x86_64-linux-gnu/bits/wordsize.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/atomic_word.h \
+  /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
+  /usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/cpu_defines.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h \
@@ -314,13 +318,15 @@ CMakeFiles/chtl_compiler.dir/src/main.cpp.o: src/main.cpp \
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h:
 
+/usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h:
+
 /usr/include/x86_64-linux-gnu/c++/13/bits/atomic_word.h:
 
 /usr/include/x86_64-linux-gnu/bits/wordsize.h:
 
-/usr/include/c++/13/cerrno:
+/usr/include/x86_64-linux-gnu/bits/wctype-wchar.h:
 
-/usr/include/x86_64-linux-gnu/bits/stdint-least.h:
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
 
 /usr/include/c++/13/cctype:
 
@@ -339,10 +345,6 @@ CMakeFiles/chtl_compiler.dir/src/main.cpp.o: src/main.cpp \
 /usr/include/c++/13/iomanip:
 
 /usr/include/c++/13/bits/unordered_set.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
-
-/usr/include/c++/13/bits/unique_ptr.h:
 
 /usr/include/c++/13/bits/align.h:
 
@@ -381,10 +383,6 @@ src/CHTL/CHTLNode/ScriptBlockNode.h:
 /usr/include/c++/13/bits/locale_facets.tcc:
 
 src/CHTL/CHTLNode/AttributeNode.h:
-
-/usr/include/c++/13/bits/refwrap.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
 
 /usr/include/c++/13/bits/range_access.h:
 
@@ -438,6 +436,12 @@ src/CHTL/CHTLNode/CommentNode.h:
 
 /usr/include/c++/13/bits/node_handle.h:
 
+/usr/include/c++/13/bits/refwrap.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
+
+/usr/include/c++/13/bits/fstream.tcc:
+
 src/CompilerDispatcher/CompilerDispatcher.h:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h:
@@ -480,6 +484,8 @@ src/CHTL/CHTLNode/PropertyReferenceNode.h:
 
 src/CHTLJS/CHTLJSParser/CHTLJSContext.h:
 
+/usr/include/c++/13/fstream:
+
 /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:
 
 /usr/include/c++/13/bits/basic_string.h:
@@ -511,8 +517,6 @@ src/CHTL/CHTLNode/StyleTemplateNode.h:
 /usr/include/c++/13/sstream:
 
 /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h:
-
-/usr/include/x86_64-linux-gnu/bits/wchar.h:
 
 /usr/include/alloca.h:
 
@@ -628,6 +632,8 @@ src/CHTL/CHTLParser/CHTLParser.h:
 
 /usr/include/c++/13/bits/cxxabi_init_exception.h:
 
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h:
+
 /usr/include/c++/13/typeinfo:
 
 /usr/include/c++/13/bits/localefwd.h:
@@ -639,6 +645,14 @@ src/main.cpp:
 /usr/include/c++/13/bits/stl_iterator_base_types.h:
 
 /usr/include/stdio.h:
+
+/usr/include/c++/13/cerrno:
+
+/usr/include/x86_64-linux-gnu/bits/stdint-least.h:
+
+/usr/include/c++/13/bits/unique_ptr.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
 
 /usr/include/c++/13/codecvt:
 
@@ -827,8 +841,6 @@ src/CHTL/CHTLConfig/Configuration.h:
 /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
-
-/usr/include/x86_64-linux-gnu/bits/wctype-wchar.h:
 
 /usr/include/c++/13/ext/atomicity.h:
 

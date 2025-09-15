@@ -12,14 +12,20 @@ enum class CHTLJSNodeType {
     Delegate,
     Animate,
     Value,
+    Placeholder,
+    Sequence,
+    Vir,
     // Future node types will go here
 };
 
 class CHTLJSNode {
 public:
+    explicit CHTLJSNode(CHTLJSNodeType type) : type_(type) {}
     virtual ~CHTLJSNode() = default;
-    virtual CHTLJSNodeType getType() const = 0;
-    virtual std::unique_ptr<CHTLJSNode> clone() const = 0;
+    CHTLJSNodeType getType() const { return type_; }
+
+protected:
+    CHTLJSNodeType type_;
 };
 
 } // namespace CHTLJS

@@ -20,6 +20,7 @@ enum class CHTLJSTokenType {
     Colon,            // :
     Comma,            // ,
     Identifier,
+    Placeholder,
     String,
     Number,
     Dot,              // .

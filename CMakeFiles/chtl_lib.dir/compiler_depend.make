@@ -6,8 +6,10 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: src/CHTL/CHT
   src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.h \
   src/CHTLJS/CHTLJSLexer/CHTLJSLexer.h \
   src/CHTLJS/CHTLJSLexer/CHTLJSToken.h \
+  src/CHTLJS/CHTLJSNode/SequenceNode.h \
   src/CHTLJS/CHTLJSLexer/CHTLJSToken.h \
   src/CHTLJS/CHTLJSNode/CHTLJSNode.h \
+  src/CHTLJS/CHTLJSNode/SequenceNode.h \
   src/CHTLJS/CHTLJSParser/CHTLJSContext.h \
   src/CHTLJS/CHTLJSParser/CHTLJSParser.h \
   src/Scanner/CHTLUnifiedScanner.h \
@@ -1032,7 +1034,10 @@ CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o: src/CH
   src/CHTLJS/CHTLJSNode/DelegateNode.h \
   src/CHTLJS/CHTLJSNode/EnhancedSelectorNode.h \
   src/CHTLJS/CHTLJSNode/ListenNode.h \
+  src/CHTLJS/CHTLJSNode/PlaceholderNode.h \
+  src/CHTLJS/CHTLJSNode/SequenceNode.h \
   src/CHTLJS/CHTLJSNode/ValueNode.h \
+  src/CHTLJS/CHTLJSNode/VirNode.h \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
   /usr/include/asm-generic/errno.h \
@@ -1422,9 +1427,12 @@ CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o: src/CHTLJS/C
   src/CHTLJS/CHTLJSNode/DelegateNode.h \
   src/CHTLJS/CHTLJSNode/EnhancedSelectorNode.h \
   src/CHTLJS/CHTLJSNode/ListenNode.h \
+  src/CHTLJS/CHTLJSNode/PlaceholderNode.h \
   src/CHTLJS/CHTLJSNode/ValueNode.h \
+  src/CHTLJS/CHTLJSNode/VirNode.h \
   src/CHTLJS/CHTLJSLexer/CHTLJSToken.h \
   src/CHTLJS/CHTLJSNode/CHTLJSNode.h \
+  src/CHTLJS/CHTLJSNode/SequenceNode.h \
   src/CHTLJS/CHTLJSParser/CHTLJSContext.h \
   src/CHTLJS/CHTLJSParser/CHTLJSParser.h \
   /usr/include/alloca.h \
@@ -2301,6 +2309,8 @@ src/CodeMerger/CodeMerger.cpp:
 
 src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp:
 
+src/CHTLJS/CHTLJSNode/VirNode.h:
+
 src/CHTLJS/CHTLJSNode/ListenNode.h:
 
 src/CHTLJS/CHTLJSNode/EnhancedSelectorNode.h:
@@ -2571,8 +2581,6 @@ src/CHTL/CHTLNode/PropertyReferenceNode.h:
 
 /usr/include/errno.h:
 
-/usr/include/c++/13/backward/auto_ptr.h:
-
 src/CHTL/CHTLLexer/Token.h:
 
 /usr/include/alloca.h:
@@ -2592,12 +2600,6 @@ src/CHTLJS/CHTLJSParser/CHTLJSParser.h:
 src/CHTL/CHTLGenerator/CHTLGenerator.cpp:
 
 src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.h:
-
-src/CHTL/CHTLNode/ElementTemplateNode.h:
-
-/usr/include/c++/13/cstdio:
-
-src/CHTLJS/CHTLJSParser/CHTLJSContext.h:
 
 src/CHTL/CHTLNode/StyleTemplateNode.h:
 
@@ -2623,6 +2625,12 @@ src/CHTLJS/CHTLJSLexer/CHTLJSToken.h:
 
 /usr/include/x86_64-linux-gnu/bits/endianness.h:
 
+src/CHTLJS/CHTLJSNode/SequenceNode.h:
+
+src/CHTLJS/CHTLJSNode/PlaceholderNode.h:
+
+/usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h:
+
 src/CHTLJS/CHTLJSLexer/CHTLJSLexer.h:
 
 /usr/include/c++/13/bits/stl_iterator_base_types.h:
@@ -2641,6 +2649,12 @@ src/CHTLJS/CHTLJSLexer/CHTLJSLexer.h:
 
 /usr/include/c++/13/bits/ostream_insert.h:
 
+src/CHTLJS/CHTLJSParser/CHTLJSContext.h:
+
+src/CHTL/CHTLNode/ElementTemplateNode.h:
+
+/usr/include/c++/13/cstdio:
+
 /usr/include/c++/13/cctype:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
@@ -2654,6 +2668,8 @@ src/CHTL/CHTLLexer/CHTLLexer.h:
 /usr/include/c++/13/tr1/ell_integral.tcc:
 
 /usr/include/c++/13/bits/unordered_map.h:
+
+/usr/include/c++/13/backward/auto_ptr.h:
 
 /usr/include/c++/13/backward/binders.h:
 
@@ -2890,8 +2906,6 @@ src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp:
 /usr/include/stdint.h:
 
 /usr/include/stdlib.h:
-
-/usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h:
 
 /usr/include/x86_64-linux-gnu/bits/byteswap.h:
 

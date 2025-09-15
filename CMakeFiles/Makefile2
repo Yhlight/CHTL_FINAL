@@ -66,6 +66,7 @@ CMAKE_BINARY_DIR = /app
 all: CMakeFiles/chtl_compiler.dir/all
 all: CMakeFiles/chtl_lib.dir/all
 all: CMakeFiles/test_runner.dir/all
+all: CMakeFiles/test_parser.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -76,6 +77,7 @@ preinstall:
 clean: CMakeFiles/chtl_compiler.dir/clean
 clean: CMakeFiles/chtl_lib.dir/clean
 clean: CMakeFiles/test_runner.dir/clean
+clean: CMakeFiles/test_parser.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -137,7 +139,7 @@ CMakeFiles/chtl_lib.dir/clean:
 CMakeFiles/test_runner.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_runner.dir/build.make CMakeFiles/test_runner.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_runner.dir/build.make CMakeFiles/test_runner.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/CMakeFiles --progress-num=14,15 "Built target test_runner"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/CMakeFiles --progress-num=16,17 "Built target test_runner"
 .PHONY : CMakeFiles/test_runner.dir/all
 
 # Build rule for subdir invocation for target.
@@ -155,6 +157,32 @@ test_runner: CMakeFiles/test_runner.dir/rule
 CMakeFiles/test_runner.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_runner.dir/build.make CMakeFiles/test_runner.dir/clean
 .PHONY : CMakeFiles/test_runner.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/test_parser.dir
+
+# All Build rule for target.
+CMakeFiles/test_parser.dir/all: CMakeFiles/chtl_lib.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_parser.dir/build.make CMakeFiles/test_parser.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_parser.dir/build.make CMakeFiles/test_parser.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/CMakeFiles --progress-num=14,15 "Built target test_parser"
+.PHONY : CMakeFiles/test_parser.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/test_parser.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/CMakeFiles 13
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/test_parser.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/CMakeFiles 0
+.PHONY : CMakeFiles/test_parser.dir/rule
+
+# Convenience name for target.
+test_parser: CMakeFiles/test_parser.dir/rule
+.PHONY : test_parser
+
+# clean rule for target.
+CMakeFiles/test_parser.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_parser.dir/build.make CMakeFiles/test_parser.dir/clean
+.PHONY : CMakeFiles/test_parser.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

@@ -127,7 +127,17 @@ std::string CHTLUnifiedScanner::processScriptContent(const std::string& script_c
             } else {
                  throw std::runtime_error("Unmatched {{ in script.");
             }
-        } else { // Block constructs like listen, animate, etc.
+        } else if (found_kw == "vir") {
+             size_t construct_end_pos = script_content.find(';', next_kw_pos);
+             if (construct_end_pos == std::string::npos) {
+                 throw std::runtime_error("Unterminated 'vir' statement; expected ';'.");
+             }
+             construct_end_pos += 1; // include the semicolon
+             // The vir statement is a leaf for the scanner; the parser will handle its contents. No recursion.
+             processed_content += script_content.substr(next_kw_pos, construct_end_pos - next_kw_pos);
+             cursor = construct_end_pos;
+        }
+        else { // Block constructs like listen, animate, etc.
             size_t brace_open_pos = script_content.find('{', next_kw_pos);
             size_t construct_end_pos = findEndOfChtlJsBlock(script_content, next_kw_pos);
 

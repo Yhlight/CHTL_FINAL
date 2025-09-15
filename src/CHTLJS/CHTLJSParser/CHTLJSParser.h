@@ -7,20 +7,38 @@
 #include <memory>
 #include "CHTLJSContext.h"
 
+#include "../CHTLJSNode/SequenceNode.h"
+
 namespace CHTLJS {
 
 class CHTLJSParser {
 public:
     explicit CHTLJSParser(std::vector<CHTLJSToken>& tokens, std::shared_ptr<CHTLJSContext> context);
-    std::unique_ptr<CHTLJSNode> parse();
+    std::unique_ptr<SequenceNode> parse();
 
 private:
-    const CHTLJSToken& peek() const;
-    const CHTLJSToken& advance();
-    bool isAtEnd() const;
+    // Statement-level parsing
+    std::unique_ptr<CHTLJSNode> parseStatement();
+    std::unique_ptr<CHTLJSNode> parseVirDeclaration();
+
+    // Expression-level parsing
+    std::unique_ptr<CHTLJSNode> parseExpression();
+    std::unique_ptr<CHTLJSNode> parsePrimaryExpression();
+    std::unique_ptr<CHTLJSNode> parseMemberAccessExpression(std::unique_ptr<CHTLJSNode> object);
+
+    // Block parsing
     std::unique_ptr<CHTLJSNode> parseListenBlock(std::unique_ptr<CHTLJSNode> object);
     std::unique_ptr<CHTLJSNode> parseDelegateBlock(std::unique_ptr<CHTLJSNode> object);
     std::unique_ptr<CHTLJSNode> parseAnimateBlock();
+    // std::unique_ptr<CHTLJSNode> parseRouterBlock(); // Future
+
+    // Helpers
+    const CHTLJSToken& peek() const;
+    const CHTLJSToken& advance();
+    bool isAtEnd() const;
+    const CHTLJSToken& consume(CHTLJSTokenType type, const std::string& error_message);
+    bool match(CHTLJSTokenType type);
+
 
     std::vector<CHTLJSToken>& tokens_;
     std::shared_ptr<CHTLJSContext> context_;

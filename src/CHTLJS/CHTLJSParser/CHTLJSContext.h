@@ -9,8 +9,9 @@
 namespace CHTLJS {
 
 struct CHTLJSContext {
-    // Stores the mapping from a virtual object's name to the AST node it represents.
-    std::map<std::string, std::shared_ptr<CHTLJSNode>> virtual_objects;
+    // Stores a non-owning raw pointer from a virtual object's name to the AST node it represents.
+    // The main AST owns the node via std::unique_ptr.
+    std::map<std::string, CHTLJSNode*> virtual_objects;
 };
 
 } // namespace CHTLJS

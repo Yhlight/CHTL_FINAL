@@ -153,12 +153,13 @@ CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o: \
  /usr/include/c++/13/bits/basic_string.tcc \
  /usr/include/c++/13/bits/memory_resource.h /usr/include/c++/13/cstddef \
  /usr/include/c++/13/bits/uses_allocator_args.h \
- /app/src/CHTLJS/CHTLJSNode/EnhancedSelectorNode.h \
- /app/src/CHTLJS/CHTLJSNode/CHTLJSNode.h \
- /app/src/CHTLJS/CHTLJSNode/ListenNode.h /usr/include/c++/13/vector \
+ /app/src/CHTLJS/CHTLJSNode/SequenceNode.h \
+ /app/src/CHTLJS/CHTLJSNode/CHTLJSNode.h /usr/include/c++/13/vector \
  /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc /usr/include/c++/13/map \
+ /usr/include/c++/13/bits/vector.tcc \
+ /app/src/CHTLJS/CHTLJSNode/EnhancedSelectorNode.h \
+ /app/src/CHTLJS/CHTLJSNode/ListenNode.h /usr/include/c++/13/map \
  /usr/include/c++/13/bits/stl_tree.h \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
@@ -168,7 +169,9 @@ CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o: \
  /app/src/CHTLJS/CHTLJSNode/DelegateNode.h \
  /app/src/CHTLJS/CHTLJSNode/AnimateNode.h /usr/include/c++/13/optional \
  /usr/include/c++/13/bits/enable_special_members.h \
- /app/src/CHTLJS/CHTLJSNode/ValueNode.h /usr/include/c++/13/stdexcept \
+ /app/src/CHTLJS/CHTLJSNode/ValueNode.h \
+ /app/src/CHTLJS/CHTLJSNode/PlaceholderNode.h \
+ /app/src/CHTLJS/CHTLJSNode/VirNode.h /usr/include/c++/13/stdexcept \
  /usr/include/c++/13/sstream /usr/include/c++/13/istream \
  /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \

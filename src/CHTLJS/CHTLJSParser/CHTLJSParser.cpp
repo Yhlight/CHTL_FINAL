@@ -3,7 +3,9 @@
 #include "CHTLJS/CHTLJSNode/ListenNode.h"
 #include "CHTLJS/CHTLJSNode/DelegateNode.h"
 #include "CHTLJS/CHTLJSNode/AnimateNode.h"
+#include "CHTLJS/CHTLJSNode/PlaceholderNode.h"
 #include "CHTLJS/CHTLJSNode/ValueNode.h"
+#include "CHTLJS/CHTLJSNode/VirNode.h"
 #include <stdexcept>
 
 namespace CHTLJS {
@@ -11,270 +13,237 @@ namespace CHTLJS {
 CHTLJSParser::CHTLJSParser(std::vector<CHTLJSToken>& tokens, std::shared_ptr<CHTLJSContext> context)
     : tokens_(tokens), context_(context) {}
 
-std::unique_ptr<CHTLJSNode> CHTLJSParser::parse() {
-    // For now, we parse a single expression, not a full script.
-    if (isAtEnd()) return nullptr;
+std::unique_ptr<SequenceNode> CHTLJSParser::parse() {
+    auto sequence = std::make_unique<SequenceNode>();
+    while (!isAtEnd()) {
+        sequence->statements_.push_back(parseStatement());
+    }
+    return sequence;
+}
 
+std::unique_ptr<CHTLJSNode> CHTLJSParser::parseStatement() {
     if (peek().type == CHTLJSTokenType::Vir) {
-        advance(); // consume 'vir'
-        CHTLJSToken name = advance();
-        if (name.type != CHTLJSTokenType::Identifier) {
-            throw std::runtime_error("Expected identifier after 'vir'.");
-        }
-        if (advance().type != CHTLJSTokenType::Equals) {
-             throw std::runtime_error("Expected '=' after vir identifier.");
-        }
+        return parseVirDeclaration();
+    }
+    return parseExpression();
+}
 
-        auto value_node = parse();
-        if (value_node) {
-            context_->virtual_objects[name.lexeme] = std::move(value_node);
-        }
-        return nullptr; // A declaration doesn't produce a renderable node.
+std::unique_ptr<CHTLJSNode> CHTLJSParser::parseVirDeclaration() {
+    consume(CHTLJSTokenType::Vir, "Expected 'vir' keyword.");
+    CHTLJSToken name = consume(CHTLJSTokenType::Identifier, "Expected identifier after 'vir'.");
+    consume(CHTLJSTokenType::Equals, "Expected '=' after vir identifier.");
+
+    auto value_node = parseExpression();
+    if (!value_node) {
+        throw std::runtime_error("Expected expression as value for vir declaration.");
     }
 
-    if (peek().type == CHTLJSTokenType::Animate) {
-        advance(); // consume 'animate'
+    // The node is stored in the context for lookups, and also returned as part of the AST
+    // so the generator can decide what to do with it (e.g., declare a const).
+    context_->virtual_objects[name.lexeme] = value_node.get();
+    return std::make_unique<VirNode>(name.lexeme, std::move(value_node));
+}
+
+
+std::unique_ptr<CHTLJSNode> CHTLJSParser::parseExpression() {
+    auto object = parsePrimaryExpression();
+    while (match(CHTLJSTokenType::Arrow) || match(CHTLJSTokenType::Dot)) {
+        object = parseMemberAccessExpression(std::move(object));
+    }
+    return object;
+}
+
+std::unique_ptr<CHTLJSNode> CHTLJSParser::parsePrimaryExpression() {
+    if (match(CHTLJSTokenType::OpenDoubleBrace)) {
+        std::string selector_str;
+        while (peek().type != CHTLJSTokenType::CloseDoubleBrace && !isAtEnd()) {
+            selector_str += advance().lexeme;
+        }
+        consume(CHTLJSTokenType::CloseDoubleBrace, "Expected '}}' to close enhanced selector.");
+        return std::make_unique<EnhancedSelectorNode>(selector_str);
+    }
+
+    if (match(CHTLJSTokenType::Placeholder)) {
+        return std::make_unique<PlaceholderNode>(tokens_[current_ - 1].lexeme);
+    }
+
+    if (match(CHTLJSTokenType::Animate)) {
         return parseAnimateBlock();
     }
 
-    // Check for vir object access, e.g. myListener->click
     if (peek().type == CHTLJSTokenType::Identifier && context_->virtual_objects.count(peek().lexeme)) {
-        CHTLJSToken vir_name = advance();
-        if (peek().type != CHTLJSTokenType::Arrow && peek().type != CHTLJSTokenType::Dot) {
-            throw std::runtime_error("Expected '->' or '.' after virtual object name.");
-        }
-        advance(); // consume '->' or '.'
-        CHTLJSToken prop_name = advance();
-        if (prop_name.type != CHTLJSTokenType::Identifier) {
-            throw std::runtime_error("Expected property name after '->'.");
-        }
-
-        // Now, inspect the stored node to get the value
-        auto stored_node = context_->virtual_objects.at(vir_name.lexeme);
-        if (stored_node->getType() == CHTLJSNodeType::Listen) {
-            auto listen_node = static_cast<ListenNode*>(stored_node.get());
-            if (listen_node->getEvents().count(prop_name.lexeme)) {
-                return std::make_unique<ValueNode>(listen_node->getEvents().at(prop_name.lexeme));
-            }
-        }
-        // TODO: Add cases for other vir-compatible nodes like AnimateNode
-
-        throw std::runtime_error("Property '" + prop_name.lexeme + "' not found on virtual object '" + vir_name.lexeme + "'.");
+        // This is a vir object access, which is a primary expression.
+        return parseExpression();
     }
 
-    std::unique_ptr<CHTLJSNode> object_node;
-
-    if (peek().type == CHTLJSTokenType::OpenDoubleBrace) {
-        advance(); // consume '{{'
-        if (peek().type != CHTLJSTokenType::Identifier) {
-            throw std::runtime_error("Expected an identifier inside {{...}}.");
-        }
-        CHTLJSToken selector_token = advance();
-        if (peek().type != CHTLJSTokenType::CloseDoubleBrace) {
-            throw std::runtime_error("Expected '}}' to close enhanced selector.");
-        }
-        advance(); // consume '}}'
-        object_node = std::make_unique<EnhancedSelectorNode>(selector_token.lexeme);
-    } else {
-        // In the future, other object types could be parsed here.
-        return nullptr;
+    // Fallback for simple values
+    if (match(CHTLJSTokenType::Identifier) || match(CHTLJSTokenType::String) || match(CHTLJSTokenType::Number)) {
+        return std::make_unique<ValueNode>(tokens_[current_ - 1].lexeme);
     }
 
-    // Check for chained calls
-    if (peek().type == CHTLJSTokenType::Arrow || peek().type == CHTLJSTokenType::Dot) {
-        advance(); // consume '->' or '.'
-
-        if (peek().type == CHTLJSTokenType::Listen) {
-            advance(); // consume 'listen'
-            return parseListenBlock(std::move(object_node));
-        } else if (peek().type == CHTLJSTokenType::Delegate) {
-            advance(); // consume 'delegate'
-            return parseDelegateBlock(std::move(object_node));
-        }
-    }
-
-    return object_node;
+    throw std::runtime_error("Unexpected token when parsing expression: " + peek().lexeme);
 }
+
+std::unique_ptr<CHTLJSNode> CHTLJSParser::parseMemberAccessExpression(std::unique_ptr<CHTLJSNode> object) {
+    if (match(CHTLJSTokenType::Listen)) {
+        return parseListenBlock(std::move(object));
+    }
+    if (match(CHTLJSTokenType::Delegate)) {
+        return parseDelegateBlock(std::move(object));
+    }
+
+    // Handle simple property access, e.g., myVir->prop
+    CHTLJSToken prop_name = consume(CHTLJSTokenType::Identifier, "Expected property name after '->' or '.'");
+
+    // This is where we would perform a vir object lookup at parse time if needed.
+    // For now, we just create a value node representing the access.
+    // The generator will be responsible for resolving it.
+    // Example: myVir->click becomes ValueNode("myVir.click")
+    if (object->getType() == CHTLJSNodeType::Value) {
+         auto value_node = static_cast<ValueNode*>(object.get());
+         return std::make_unique<ValueNode>(value_node->getValue() + "." + prop_name.lexeme);
+    }
+
+    // For now, we can't handle member access on other node types yet.
+    throw std::runtime_error("Member access on this expression type is not yet supported.");
+}
+
+
+// --- Block Parsers ---
 
 std::unique_ptr<CHTLJSNode> CHTLJSParser::parseAnimateBlock() {
     auto animate_node = std::make_unique<AnimateNode>();
-
-    if (peek().type != CHTLJSTokenType::OpenBrace) {
-        throw std::runtime_error("Expected '{' to open animate block.");
-    }
-    advance(); // consume '{'
+    consume(CHTLJSTokenType::OpenBrace, "Expected '{' to open animate block.");
 
     while (peek().type != CHTLJSTokenType::CloseBrace && !isAtEnd()) {
-        if (peek().type != CHTLJSTokenType::Identifier) {
-            throw std::runtime_error("Expected property key identifier in animate block.");
-        }
-        CHTLJSToken key = advance();
-        if (peek().type != CHTLJSTokenType::Colon) throw std::runtime_error("Expected ':' after animate property key.");
-        advance(); // consume ':'
+        CHTLJSToken key = consume(CHTLJSTokenType::Identifier, "Expected property key identifier in animate block.");
+        consume(CHTLJSTokenType::Colon, "Expected ':' after animate property key.");
 
         if (key.lexeme == "target") {
+            // The value can be a single expression or an array of expressions
             if (peek().type == CHTLJSTokenType::OpenBracket) {
-                advance(); // consume '['
+                consume(CHTLJSTokenType::OpenBracket, "Expected '[' for target array.");
                 while (peek().type != CHTLJSTokenType::CloseBracket && !isAtEnd()) {
-                    animate_node->targets_.push_back(parse());
-                    if (peek().type == CHTLJSTokenType::Comma) advance();
+                    animate_node->targets_.push_back(parseExpression());
+                    match(CHTLJSTokenType::Comma);
                 }
-                if (peek().type != CHTLJSTokenType::CloseBracket) throw std::runtime_error("Expected ']' to close target array.");
-                advance(); // consume ']'
+                consume(CHTLJSTokenType::CloseBracket, "Expected ']' to close target array.");
             } else {
-                animate_node->targets_.push_back(parse());
+                animate_node->targets_.push_back(parseExpression());
             }
-        } else if (key.lexeme == "duration") {
-            animate_node->duration_ = advance().lexeme;
-        } else if (key.lexeme == "easing") {
-            animate_node->easing_ = advance().lexeme;
-        } else if (key.lexeme == "loop") {
-            animate_node->loop_ = advance().lexeme;
-        } else if (key.lexeme == "direction") {
-            animate_node->direction_ = advance().lexeme;
-        } else if (key.lexeme == "delay") {
-            animate_node->delay_ = advance().lexeme;
-        } else if (key.lexeme == "callback") {
-            animate_node->callback_ = advance().lexeme;
-        } else if (key.lexeme == "begin" || key.lexeme == "end") {
-            Keyframe k;
-            k.offset = (key.lexeme == "begin") ? 0.0 : 1.0;
-            if (peek().type != CHTLJSTokenType::OpenBrace) throw std::runtime_error("Expected '{' for keyframe block.");
-            advance();
-            while (peek().type != CHTLJSTokenType::CloseBrace && !isAtEnd()) {
-                std::string prop = advance().lexeme;
-                if (peek().type != CHTLJSTokenType::Colon) throw std::runtime_error("Expected ':' in keyframe.");
-                advance();
-                k.properties[prop] = advance().lexeme;
-                if (peek().type == CHTLJSTokenType::Comma) advance();
-            }
-            advance();
-            animate_node->keyframes_.push_back(k);
         } else if (key.lexeme == "when") {
-            if (peek().type != CHTLJSTokenType::OpenBracket) throw std::runtime_error("Expected '[' for 'when' keyframes.");
-            advance();
+            // when: [ { at: 0.5, ... }, { ... } ]
+            consume(CHTLJSTokenType::OpenBracket, "Expected '[' for 'when' keyframes.");
             while (peek().type != CHTLJSTokenType::CloseBracket && !isAtEnd()) {
-                if (peek().type != CHTLJSTokenType::OpenBrace) throw std::runtime_error("Expected '{' for keyframe block.");
-                advance();
+                consume(CHTLJSTokenType::OpenBrace, "Expected '{' for keyframe block.");
                 Keyframe k;
                 while (peek().type != CHTLJSTokenType::CloseBrace && !isAtEnd()) {
-                    std::string prop = advance().lexeme;
-                    if (peek().type != CHTLJSTokenType::Colon) throw std::runtime_error("Expected ':' in keyframe.");
-                    advance();
-                    std::string val = advance().lexeme;
-                    if (prop == "at") k.offset = std::stod(val);
-                    else k.properties[prop] = val;
-                    if (peek().type == CHTLJSTokenType::Comma) advance();
+                    CHTLJSToken prop_key = consume(CHTLJSTokenType::Identifier, "Expected property key in keyframe.");
+                    consume(CHTLJSTokenType::Colon, "Expected ':' in keyframe.");
+                    auto prop_val_node = parseExpression();
+                    if (prop_val_node->getType() != CHTLJSNodeType::Value) {
+                         throw std::runtime_error("Keyframe property values must be simple values.");
+                    }
+                    std::string prop_val = static_cast<ValueNode*>(prop_val_node.get())->getValue();
+
+                    if (prop_key.lexeme == "at") {
+                        k.offset = std::stod(prop_val);
+                    } else {
+                        k.properties[prop_key.lexeme] = prop_val;
+                    }
+                    match(CHTLJSTokenType::Comma);
                 }
-                advance();
+                consume(CHTLJSTokenType::CloseBrace, "Expected '}' to close keyframe.");
                 animate_node->keyframes_.push_back(k);
-                if (peek().type == CHTLJSTokenType::Comma) advance();
+                match(CHTLJSTokenType::Comma);
             }
-            advance();
+            consume(CHTLJSTokenType::CloseBracket, "Expected ']' to close 'when' keyframes array.");
+        } else {
+            // Other properties like duration, easing, etc.
+            auto value_node = parseExpression();
+            if (value_node->getType() != CHTLJSNodeType::Value && value_node->getType() != CHTLJSNodeType::Placeholder) {
+                throw std::runtime_error("Animate property values must be simple values or placeholders.");
+            }
+            std::string value_str = (value_node->getType() == CHTLJSNodeType::Value)
+                ? static_cast<ValueNode*>(value_node.get())->getValue()
+                : static_cast<PlaceholderNode*>(value_node.get())->getPlaceholderText();
+
+            if (key.lexeme == "duration") animate_node->duration_ = value_str;
+            else if (key.lexeme == "easing") animate_node->easing_ = value_str;
+            else if (key.lexeme == "loop") animate_node->loop_ = value_str;
+            else if (key.lexeme == "direction") animate_node->direction_ = value_str;
+            else if (key.lexeme == "delay") animate_node->delay_ = value_str;
+            else if (key.lexeme == "callback") animate_node->callback_ = value_str;
+            // 'begin' and 'end' can be added here as special cases for keyframes at 0 and 1
         }
 
-        if (peek().type == CHTLJSTokenType::Comma) {
-            advance();
-        }
+        match(CHTLJSTokenType::Comma);
     }
 
-    if (peek().type != CHTLJSTokenType::CloseBrace) {
-        throw std::runtime_error("Expected '}' to close animate block.");
-    }
-    advance(); // consume '}'
-
+    consume(CHTLJSTokenType::CloseBrace, "Expected '}' to close animate block.");
     return animate_node;
 }
 
 std::unique_ptr<CHTLJSNode> CHTLJSParser::parseListenBlock(std::unique_ptr<CHTLJSNode> object) {
     auto listen_node = std::make_unique<ListenNode>(std::move(object));
-
-    if (peek().type != CHTLJSTokenType::OpenBrace) {
-        throw std::runtime_error("Expected '{' to open listen block.");
-    }
-    advance(); // consume '{'
+    consume(CHTLJSTokenType::OpenBrace, "Expected '{' to open listen block.");
 
     while (peek().type != CHTLJSTokenType::CloseBrace && !isAtEnd()) {
-        if (peek().type != CHTLJSTokenType::Identifier) {
-            throw std::runtime_error("Expected event name identifier in listen block.");
-        }
-        std::string event_name = advance().lexeme;
+        CHTLJSToken event_name = consume(CHTLJSTokenType::Identifier, "Expected event name identifier in listen block.");
+        consume(CHTLJSTokenType::Colon, "Expected ':' after event name.");
 
-        if (peek().type != CHTLJSTokenType::Colon) {
-            throw std::runtime_error("Expected ':' after event name.");
+        // The callback is an expression, which could be a placeholder.
+        auto callback_expr = parseExpression();
+        if (!callback_expr || callback_expr->getType() != CHTLJSNodeType::Placeholder) {
+             throw std::runtime_error("Expected a placeholder for the callback body.");
         }
-        advance(); // consume ':'
+        auto placeholder_node = static_cast<PlaceholderNode*>(callback_expr.get());
+        listen_node->addEvent(event_name.lexeme, placeholder_node->getPlaceholderText());
 
-        if (peek().type != CHTLJSTokenType::Identifier) {
-            throw std::runtime_error("Expected callback body after event name.");
-        }
-        std::string callback_body = advance().lexeme;
-
-        listen_node->addEvent(event_name, callback_body);
-
-        if (peek().type == CHTLJSTokenType::Comma) {
-            advance(); // consume optional comma
-        }
+        match(CHTLJSTokenType::Comma); // Consume optional comma
     }
-
-    if (peek().type != CHTLJSTokenType::CloseBrace) {
-        throw std::runtime_error("Expected '}' to close listen block.");
-    }
-    advance(); // consume '}'
-
+    consume(CHTLJSTokenType::CloseBrace, "Expected '}' to close listen block.");
     return listen_node;
 }
 
 std::unique_ptr<CHTLJSNode> CHTLJSParser::parseDelegateBlock(std::unique_ptr<CHTLJSNode> object) {
     auto delegate_node = std::make_unique<DelegateNode>(std::move(object));
-
-    if (peek().type != CHTLJSTokenType::OpenBrace) {
-        throw std::runtime_error("Expected '{' to open delegate block.");
-    }
-    advance(); // consume '{'
+    consume(CHTLJSTokenType::OpenBrace, "Expected '{' to open delegate block.");
 
     while (peek().type != CHTLJSTokenType::CloseBrace && !isAtEnd()) {
-        if (peek().type == CHTLJSTokenType::Identifier && peek().lexeme == "target") {
-            advance(); // consume 'target'
-            if (peek().type != CHTLJSTokenType::Colon) throw std::runtime_error("Expected ':' after 'target'.");
-            advance(); // consume ':'
+        CHTLJSToken key = consume(CHTLJSTokenType::Identifier, "Expected property key identifier in delegate block.");
+        consume(CHTLJSTokenType::Colon, "Expected ':' after property key.");
 
+        if (key.lexeme == "target") {
             if (peek().type == CHTLJSTokenType::OpenBracket) {
-                // Array of targets
-                advance(); // consume '['
-                while(peek().type != CHTLJSTokenType::CloseBracket && !isAtEnd()) {
-                    delegate_node->addTarget(parse());
-                    if (peek().type == CHTLJSTokenType::Comma) advance();
+                consume(CHTLJSTokenType::OpenBracket, "Expected '[' for target array.");
+                while (peek().type != CHTLJSTokenType::CloseBracket && !isAtEnd()) {
+                    delegate_node->addTarget(parseExpression());
+                    match(CHTLJSTokenType::Comma);
                 }
-                if (peek().type != CHTLJSTokenType::CloseBracket) throw std::runtime_error("Expected ']' to close target array.");
-                advance(); // consume ']'
+                consume(CHTLJSTokenType::CloseBracket, "Expected ']' to close target array.");
             } else {
-                // Single target
-                delegate_node->addTarget(parse());
+                delegate_node->addTarget(parseExpression());
             }
         } else {
-            // Parse event-callback pair
-            if (peek().type != CHTLJSTokenType::Identifier) throw std::runtime_error("Expected event name identifier in delegate block.");
-            std::string event_name = advance().lexeme;
-            if (peek().type != CHTLJSTokenType::Colon) throw std::runtime_error("Expected ':' after event name.");
-            advance(); // consume ':'
-            if (peek().type != CHTLJSTokenType::Identifier) throw std::runtime_error("Expected callback body after event name.");
-            std::string callback_body = advance().lexeme;
-            delegate_node->addEvent(event_name, callback_body);
+            // It's an event:callback pair
+            auto callback_expr = parseExpression();
+            if (!callback_expr || callback_expr->getType() != CHTLJSNodeType::Placeholder) {
+                 throw std::runtime_error("Expected a placeholder for the callback body.");
+            }
+            auto placeholder_node = static_cast<PlaceholderNode*>(callback_expr.get());
+            delegate_node->addEvent(key.lexeme, placeholder_node->getPlaceholderText());
         }
 
-        if (peek().type == CHTLJSTokenType::Comma) {
-            advance(); // consume optional comma
-        }
+        match(CHTLJSTokenType::Comma);
     }
 
-    if (peek().type != CHTLJSTokenType::CloseBrace) {
-        throw std::runtime_error("Expected '}' to close delegate block.");
-    }
-    advance(); // consume '}'
-
+    consume(CHTLJSTokenType::CloseBrace, "Expected '}' to close delegate block.");
     return delegate_node;
 }
+
+
+// --- Helpers ---
 
 const CHTLJSToken& CHTLJSParser::peek() const {
     return tokens_[current_];
@@ -287,6 +256,21 @@ const CHTLJSToken& CHTLJSParser::advance() {
 
 bool CHTLJSParser::isAtEnd() const {
     return peek().type == CHTLJSTokenType::EndOfFile;
+}
+
+const CHTLJSToken& CHTLJSParser::consume(CHTLJSTokenType type, const std::string& error_message) {
+    if (peek().type == type) {
+        return advance();
+    }
+    throw std::runtime_error(error_message + " Got " + peek().lexeme + " instead.");
+}
+
+bool CHTLJSParser::match(CHTLJSTokenType type) {
+    if (peek().type == type) {
+        advance();
+        return true;
+    }
+    return false;
 }
 
 } // namespace CHTLJS
