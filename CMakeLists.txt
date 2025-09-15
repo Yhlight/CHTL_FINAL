@@ -27,6 +27,11 @@ set(SOURCES
     "CHTL JS/CHTLJSParser/ASTNode.cpp"
     "CHTL JS/CHTLJSParser/CHTLJSParser.cpp"
     "CHTL JS/CHTLJSGenerator/CHTLJSGenerator.cpp"
+    CHTL/CHTLLexer/CHTLToken.cpp
+    CHTL/CHTLLexer/CHTLLexer.cpp
+    CHTL/CHTLParser/CHTLASTNode.cpp
+    CHTL/CHTLParser/CHTLParser.cpp
+    CHTL/CHTLGenerator/CHTLGenerator.cpp
 )
 
 # 头文件
@@ -39,6 +44,11 @@ set(HEADERS
     "CHTL JS/CHTLJSParser/ASTNode.h"
     "CHTL JS/CHTLJSParser/CHTLJSParser.h"
     "CHTL JS/CHTLJSGenerator/CHTLJSGenerator.h"
+    CHTL/CHTLLexer/CHTLToken.h
+    CHTL/CHTLLexer/CHTLLexer.h
+    CHTL/CHTLParser/CHTLASTNode.h
+    CHTL/CHTLParser/CHTLParser.h
+    CHTL/CHTLGenerator/CHTLGenerator.h
     miniz.h
 )
 

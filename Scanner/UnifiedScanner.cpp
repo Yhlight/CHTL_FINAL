@@ -1,6 +1,8 @@
 #include "UnifiedScanner.h"
 #include <algorithm>
 #include <cctype>
+#include <set>
+#include <iostream>
 
 namespace CHTL {
 
@@ -27,6 +29,14 @@ std::vector<CodeFragment> UnifiedScanner::scan(const std::string& source) {
     }
     
     return fragments;
+}
+
+bool UnifiedScanner::hasErrors() const {
+    return !errors.empty();
+}
+
+std::vector<std::string> UnifiedScanner::getErrors() const {
+    return errors;
 }
 
 void UnifiedScanner::setSource(const std::string& source) {
@@ -331,17 +341,46 @@ void UnifiedScanner::advance() {
 bool UnifiedScanner::isCHTLBoundary() const {
     // 检测CHTL语法边界
     // 例如: div { }, [Template], [Custom], 等
-    std::string lookahead = source.substr(position, std::min(size_t(10), source.length() - position));
+    std::string lookahead = source.substr(position, std::min(size_t(20), source.length() - position));
     
-    // 检测HTML元素
-    if (std::isalpha(lookahead[0]) && lookahead.find('{') != std::string::npos) {
-        return true;
+    // 检测HTML元素 - 查找标识符后跟空格、换行或{
+    size_t spacePos = lookahead.find(' ');
+    size_t newlinePos = lookahead.find('\n');
+    size_t bracePos = lookahead.find('{');
+    
+    size_t endPos = std::min({spacePos, newlinePos, bracePos});
+    if (endPos != std::string::npos) {
+        std::string identifier = lookahead.substr(0, endPos);
+        if (std::isalpha(identifier[0])) {
+            // 检查是否是HTML标签
+            std::set<std::string> htmlTags = {
+                "html", "head", "body", "div", "span", "p", "h1", "h2", "h3", "h4", "h5", "h6",
+                "title", "meta", "link", "script", "style", "ul", "ol", "li", "a", "img", "button",
+                "input", "form", "label", "table", "tr", "td", "th", "thead", "tbody", "tfoot",
+                "nav", "header", "footer", "main", "section", "article", "aside", "figure", "figcaption"
+            };
+            
+            if (htmlTags.find(identifier) != htmlTags.end()) {
+                return true;
+            }
+        }
     }
     
     // 检测模板语法
     if (lookahead.find("[Template]") == 0 || lookahead.find("[Custom]") == 0 ||
         lookahead.find("[Origin]") == 0 || lookahead.find("[Import]") == 0 ||
-        lookahead.find("[Configuration]") == 0 || lookahead.find("[Namespace]") == 0) {
+        lookahead.find("[Configuration]") == 0 || lookahead.find("[Namespace]") == 0 ||
+        lookahead.find("[Info]") == 0 || lookahead.find("[Export]") == 0) {
+        return true;
+    }
+    
+    // 检测use语句
+    if (lookahead.find("use ") == 0) {
+        return true;
+    }
+    
+    // 检测text语句
+    if (lookahead.find("text") == 0) {
         return true;
     }
     

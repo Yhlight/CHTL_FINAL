@@ -1,4 +1,10 @@
 #include "CompilerDispatcher.h"
+#include "../CHTL/CHTLLexer/CHTLLexer.h"
+#include "../CHTL/CHTLParser/CHTLParser.h"
+#include "../CHTL/CHTLGenerator/CHTLGenerator.h"
+#include "../CHTL JS/CHTLJSLexer/CHTLJSLexer.h"
+#include "../CHTL JS/CHTLJSParser/CHTLJSParser.h"
+#include "../CHTL JS/CHTLJSGenerator/CHTLJSGenerator.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -134,25 +140,85 @@ CompileResult CompilerDispatcher::compileFragments(const std::vector<CodeFragmen
 }
 
 std::string CompilerDispatcher::compileCHTL(const std::string& code) {
-    // TODO: 实现CHTL编译器
-    // 这里应该调用CHTL编译器的实际实现
     if (debugMode) {
         std::cout << "Compiling CHTL code: " << code.substr(0, 50) << "..." << std::endl;
     }
     
-    // 临时实现：直接返回HTML
-    return "<!-- CHTL compiled code -->\n" + code + "\n";
+    try {
+        // 词法分析
+        CHTL::CHTLLexer lexer;
+        auto tokens = lexer.tokenize(code);
+        
+        if (lexer.hasErrors()) {
+            for (const auto& error : lexer.getErrors()) {
+                addError("CHTL Lexer: " + error);
+            }
+            return "";
+        }
+        
+        // 语法分析
+        CHTL::CHTLParser parser;
+        auto ast = parser.parse(tokens);
+        
+        if (parser.hasErrors()) {
+            for (const auto& error : parser.getErrors()) {
+                addError("CHTL Parser: " + error);
+            }
+            return "";
+        }
+        
+        // 代码生成
+        CHTL::CHTLGenerator generator;
+        std::string html = generator.generate(ast);
+        
+        // 添加全局样式
+        std::string globalStyles = generator.generateGlobalStyles();
+        if (!globalStyles.empty()) {
+            html += "<style>\n" + globalStyles + "</style>";
+        }
+        
+        return html;
+    } catch (const std::exception& e) {
+        addError("CHTL compilation error: " + std::string(e.what()));
+        return "";
+    }
 }
 
 std::string CompilerDispatcher::compileCHTLJS(const std::string& code) {
-    // TODO: 实现CHTL JS编译器
-    // 这里应该调用CHTL JS编译器的实际实现
     if (debugMode) {
         std::cout << "Compiling CHTL JS code: " << code.substr(0, 50) << "..." << std::endl;
     }
     
-    // 临时实现：直接返回JavaScript
-    return "// CHTL JS compiled code\n" + code + "\n";
+    try {
+        // 词法分析
+        CHTLJS::CHTLJSLexer lexer;
+        auto tokens = lexer.tokenize(code);
+        
+        if (lexer.hasErrors()) {
+            for (const auto& error : lexer.getErrors()) {
+                addError("CHTL JS Lexer: " + error);
+            }
+            return "";
+        }
+        
+        // 语法分析
+        CHTLJS::CHTLJSParser parser;
+        auto ast = parser.parse(tokens);
+        
+        if (parser.hasErrors()) {
+            for (const auto& error : parser.getErrors()) {
+                addError("CHTL JS Parser: " + error);
+            }
+            return "";
+        }
+        
+        // 代码生成
+        CHTLJS::CHTLJSGenerator generator;
+        return generator.generate(ast);
+    } catch (const std::exception& e) {
+        addError("CHTL JS compilation error: " + std::string(e.what()));
+        return "";
+    }
 }
 
 std::string CompilerDispatcher::compileCSS(const std::string& code) {

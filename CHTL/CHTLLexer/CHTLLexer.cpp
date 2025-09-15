@@ -193,7 +193,7 @@ CHTLToken CHTLLexer::readNumber() {
 CHTLToken CHTLLexer::readIdentifier() {
     std::string value;
     
-    while (!isAtEnd() && isAlphaNumeric(currentChar())) {
+    while (!isAtEnd() && (isAlphaNumeric(currentChar()) || currentChar() == '-')) {
         value += currentChar();
         advance();
     }
@@ -219,6 +219,12 @@ CHTLToken CHTLLexer::readOperator() {
         case '?': return CHTLToken(CHTLTokenType::QUESTION, "?", line, column);
         case '!': return CHTLToken(CHTLTokenType::EXCLAMATION, "!", line, column);
         case '_': return CHTLToken(CHTLTokenType::UNDERSCORE, "_", line, column);
+        case '-':
+            if (peekChar() == '>') {
+                advance(); // 跳过 '>'
+                return CHTLToken(CHTLTokenType::ARROW, "->", line, column);
+            }
+            return CHTLToken(CHTLTokenType::MINUS, "-", line, column);
         default: return CHTLToken(CHTLTokenType::UNKNOWN, std::string(1, c), line, column);
     }
 }
@@ -304,7 +310,7 @@ bool CHTLLexer::isWhitespace(char c) const {
 bool CHTLLexer::isOperatorChar(char c) const {
     return c == ':' || c == '=' || c == ';' || c == ',' || 
            c == '.' || c == '#' || c == '%' || c == '&' || 
-           c == '|' || c == '?' || c == '!' || c == '_';
+           c == '|' || c == '?' || c == '!' || c == '_' || c == '-';
 }
 
 bool CHTLLexer::isPunctuationChar(char c) const {

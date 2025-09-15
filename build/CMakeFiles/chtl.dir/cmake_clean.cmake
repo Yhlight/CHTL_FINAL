@@ -1,0 +1,40 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/chtl.dir/link.d"
+  "CMakeFiles/chtl.dir/CHTL/CHTLGenerator/CHTLGenerator.cpp.o"
+  "CMakeFiles/chtl.dir/CHTL/CHTLGenerator/CHTLGenerator.cpp.o.d"
+  "CMakeFiles/chtl.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o"
+  "CMakeFiles/chtl.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o.d"
+  "CMakeFiles/chtl.dir/CHTL/CHTLLexer/CHTLToken.cpp.o"
+  "CMakeFiles/chtl.dir/CHTL/CHTLLexer/CHTLToken.cpp.o.d"
+  "CMakeFiles/chtl.dir/CHTL/CHTLParser/CHTLASTNode.cpp.o"
+  "CMakeFiles/chtl.dir/CHTL/CHTLParser/CHTLASTNode.cpp.o.d"
+  "CMakeFiles/chtl.dir/CHTL/CHTLParser/CHTLParser.cpp.o"
+  "CMakeFiles/chtl.dir/CHTL/CHTLParser/CHTLParser.cpp.o.d"
+  "CMakeFiles/chtl.dir/CHTL_JS/CHTLJSContext/CHTLJSContext.cpp.o"
+  "CMakeFiles/chtl.dir/CHTL_JS/CHTLJSContext/CHTLJSContext.cpp.o.d"
+  "CMakeFiles/chtl.dir/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o"
+  "CMakeFiles/chtl.dir/CHTL_JS/CHTLJSGenerator/CHTLJSGenerator.cpp.o.d"
+  "CMakeFiles/chtl.dir/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o"
+  "CMakeFiles/chtl.dir/CHTL_JS/CHTLJSLexer/CHTLJSLexer.cpp.o.d"
+  "CMakeFiles/chtl.dir/CHTL_JS/CHTLJSLexer/Token.cpp.o"
+  "CMakeFiles/chtl.dir/CHTL_JS/CHTLJSLexer/Token.cpp.o.d"
+  "CMakeFiles/chtl.dir/CHTL_JS/CHTLJSParser/ASTNode.cpp.o"
+  "CMakeFiles/chtl.dir/CHTL_JS/CHTLJSParser/ASTNode.cpp.o.d"
+  "CMakeFiles/chtl.dir/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o"
+  "CMakeFiles/chtl.dir/CHTL_JS/CHTLJSParser/CHTLJSParser.cpp.o.d"
+  "CMakeFiles/chtl.dir/CompilerDispatcher/CompilerDispatcher.cpp.o"
+  "CMakeFiles/chtl.dir/CompilerDispatcher/CompilerDispatcher.cpp.o.d"
+  "CMakeFiles/chtl.dir/Scanner/UnifiedScanner.cpp.o"
+  "CMakeFiles/chtl.dir/Scanner/UnifiedScanner.cpp.o.d"
+  "CMakeFiles/chtl.dir/main.cpp.o"
+  "CMakeFiles/chtl.dir/main.cpp.o.d"
+  "CMakeFiles/chtl.dir/miniz.c.o"
+  "CMakeFiles/chtl.dir/miniz.c.o.d"
+  "bin/chtl"
+  "bin/chtl.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang C CXX)
+  include(CMakeFiles/chtl.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

@@ -91,6 +91,8 @@ enum class CHTLTokenType {
     QUESTION,       // ?
     EXCLAMATION,    // !
     UNDERSCORE,     // _
+    MINUS,          // -
+    ARROW,          // ->
     
     // 括号
     LEFT_PAREN,     // (
