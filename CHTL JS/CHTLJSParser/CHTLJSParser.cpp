@@ -1,29 +1,37 @@
 #include "CHTLJSParser.h"
-#include "../CHTLJSNode/CHTLJSFunctionNode.h"
 #include "../CHTLJSNode/CHTLJSSpecialNode.h"
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
 
 namespace CHTLJS {
 
-CHTLJSParser::CHTLJSParser(const std::vector<Token>& tokens)
-    : tokens_(tokens), position_(0) {
+CHTLJSParser::CHTLJSParser(const std::vector<CHTLJS_Token>& tokens, 
+                           std::shared_ptr<CHTLJSContext> context)
+    : tokens_(tokens), position_(0), context_(context) {
+    if (!context_) {
+        context_ = std::make_shared<CHTLJSContext>();
+    }
 }
 
 CHTLJSParser::~CHTLJSParser() {
 }
 
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parse() {
-    auto block = std::make_shared<BlockNode>();
+    return parseProgram();
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseProgram() {
+    auto program = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::BLOCK_STATEMENT);
     
-    while (hasMoreTokens()) {
+    while (hasMoreTokens() && currentToken().type != CHTLJS_TokenType::EOF_TOKEN) {
         auto statement = parseStatement();
         if (statement) {
-            block->addStatement(statement);
+            program->addChild(statement);
         }
     }
     
-    return block;
+    return program;
 }
 
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseStatement() {
@@ -31,76 +39,296 @@ std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseStatement() {
         return nullptr;
     }
     
-    const Token& token = currentToken();
+    const CHTLJS_Token& token = currentToken();
     
-    switch (token.getType()) {
-        case TokenType::SCRIPT_LOADER:
+    // CHTL JS特有语法
+    switch (token.type) {
+        case CHTLJS_TokenType::SCRIPT_LOADER:
             return parseScriptLoader();
-        case TokenType::LISTEN:
+        case CHTLJS_TokenType::LISTEN:
             return parseListen();
-        case TokenType::ANIMATE:
+        case CHTLJS_TokenType::ANIMATE:
             return parseAnimate();
-        case TokenType::ROUTER:
+        case CHTLJS_TokenType::ROUTER:
             return parseRouter();
-        case TokenType::VIR:
+        case CHTLJS_TokenType::VIR:
             return parseVir();
-        case TokenType::INEVERAWAY:
+        case CHTLJS_TokenType::INEVERAWAY:
             return parseINeverAway();
-        case TokenType::UTIL:
+        case CHTLJS_TokenType::UTIL:
             return parseUtilThen();
-        case TokenType::PRINTMYLOVE:
+        case CHTLJS_TokenType::PRINTMYLOVE:
             return parsePrintMylove();
-        case TokenType::SELECTOR_START:
-            return parseSelector();
-        case TokenType::RESPONSIVE_START:
-            return parseResponsiveValue();
-        case TokenType::LEFT_BRACE:
-            return parseBlock();
+        case CHTLJS_TokenType::CHTL_SELECTOR:
+            return parseCHTLSelector();
+        case CHTLJS_TokenType::RESPONSIVE_GET:
+            return parseResponsiveGet();
+        case CHTLJS_TokenType::RESPONSIVE_SET:
+            return parseResponsiveSet();
+    }
+    
+    // 传统语句
+    switch (token.type) {
+        case CHTLJS_TokenType::LEFT_BRACE:
+            return parseBlockStatement();
+        case CHTLJS_TokenType::IDENTIFIER:
+            // 可能是变量声明或函数声明
+            if (peekToken().type == CHTLJS_TokenType::ASSIGN) {
+                return parseVariableDeclaration();
+            } else if (peekToken().type == CHTLJS_TokenType::LEFT_PAREN) {
+                return parseFunctionDeclaration();
+            } else {
+                return parseExpressionStatement();
+            }
+        case CHTLJS_TokenType::SEMICOLON:
+            advance(); // 空语句
+            return nullptr;
         default:
-            return parseExpression();
+            return parseExpressionStatement();
     }
 }
 
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseExpression() {
-    if (!hasMoreTokens()) {
-        return nullptr;
+    return parseAssignmentExpression();
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseAssignmentExpression() {
+    auto left = parseLogicalOrExpression();
+    
+    if (isAssignmentOperator(currentToken().type)) {
+        CHTLJS_Token operatorToken = consume(currentToken().type);
+        auto right = parseAssignmentExpression();
+        
+        auto assignment = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::ASSIGNMENT);
+        assignment->addChild(left);
+        assignment->addChild(right);
+        assignment->setAttribute("operator", operatorToken.value);
+        
+        return assignment;
     }
     
-    const Token& token = currentToken();
+    return left;
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseLogicalOrExpression() {
+    auto left = parseLogicalAndExpression();
     
-    if (token.getType() == TokenType::IDENTIFIER) {
-        return parseFunctionCall();
+    while (match(CHTLJS_TokenType::OR)) {
+        CHTLJS_Token operatorToken = consume(CHTLJS_TokenType::OR);
+        auto right = parseLogicalAndExpression();
+        
+        auto logicalOr = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::BINARY_EXPRESSION);
+        logicalOr->addChild(left);
+        logicalOr->addChild(right);
+        logicalOr->setAttribute("operator", operatorToken.value);
+        
+        left = logicalOr;
     }
     
-    if (token.getType() == TokenType::STRING || 
-        token.getType() == TokenType::NUMBER || 
-        token.getType() == TokenType::BOOLEAN) {
-        auto expr = std::make_shared<ExpressionNode>(token.getValue());
-        advance();
-        return expr;
+    return left;
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseLogicalAndExpression() {
+    auto left = parseEqualityExpression();
+    
+    while (match(CHTLJS_TokenType::AND)) {
+        CHTLJS_Token operatorToken = consume(CHTLJS_TokenType::AND);
+        auto right = parseEqualityExpression();
+        
+        auto logicalAnd = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::BINARY_EXPRESSION);
+        logicalAnd->addChild(left);
+        logicalAnd->addChild(right);
+        logicalAnd->setAttribute("operator", operatorToken.value);
+        
+        left = logicalAnd;
     }
     
-    return nullptr;
+    return left;
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseEqualityExpression() {
+    auto left = parseRelationalExpression();
+    
+    while (match({CHTLJS_TokenType::EQUAL, CHTLJS_TokenType::NOT_EQUAL})) {
+        CHTLJS_Token operatorToken = consume(currentToken().type);
+        auto right = parseRelationalExpression();
+        
+        auto equality = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::BINARY_EXPRESSION);
+        equality->addChild(left);
+        equality->addChild(right);
+        equality->setAttribute("operator", operatorToken.value);
+        
+        left = equality;
+    }
+    
+    return left;
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseRelationalExpression() {
+    auto left = parseAdditiveExpression();
+    
+    while (match({CHTLJS_TokenType::LESS, CHTLJS_TokenType::GREATER, 
+                  CHTLJS_TokenType::LESS_EQUAL, CHTLJS_TokenType::GREATER_EQUAL})) {
+        CHTLJS_Token operatorToken = consume(currentToken().type);
+        auto right = parseAdditiveExpression();
+        
+        auto relational = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::BINARY_EXPRESSION);
+        relational->addChild(left);
+        relational->addChild(right);
+        relational->setAttribute("operator", operatorToken.value);
+        
+        left = relational;
+    }
+    
+    return left;
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseAdditiveExpression() {
+    auto left = parseMultiplicativeExpression();
+    
+    while (match({CHTLJS_TokenType::PLUS, CHTLJS_TokenType::MINUS})) {
+        CHTLJS_Token operatorToken = consume(currentToken().type);
+        auto right = parseMultiplicativeExpression();
+        
+        auto additive = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::BINARY_EXPRESSION);
+        additive->addChild(left);
+        additive->addChild(right);
+        additive->setAttribute("operator", operatorToken.value);
+        
+        left = additive;
+    }
+    
+    return left;
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseMultiplicativeExpression() {
+    auto left = parseUnaryExpression();
+    
+    while (match({CHTLJS_TokenType::MULTIPLY, CHTLJS_TokenType::DIVIDE, CHTLJS_TokenType::MODULO, CHTLJS_TokenType::POWER})) {
+        CHTLJS_Token operatorToken = consume(currentToken().type);
+        auto right = parseUnaryExpression();
+        
+        auto multiplicative = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::BINARY_EXPRESSION);
+        multiplicative->addChild(left);
+        multiplicative->addChild(right);
+        multiplicative->setAttribute("operator", operatorToken.value);
+        
+        left = multiplicative;
+    }
+    
+    return left;
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseUnaryExpression() {
+    if (isUnaryOperator(currentToken().type)) {
+        CHTLJS_Token operatorToken = consume(currentToken().type);
+        auto operand = parseUnaryExpression();
+        
+        auto unary = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::UNARY_EXPRESSION);
+        unary->addChild(operand);
+        unary->setAttribute("operator", operatorToken.value);
+        
+        return unary;
+    }
+    
+    return parsePostfixExpression();
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parsePostfixExpression() {
+    auto left = parsePrimaryExpression();
+    
+    while (match({CHTLJS_TokenType::LEFT_BRACKET, CHTLJS_TokenType::DOT, CHTLJS_TokenType::LEFT_PAREN})) {
+        if (match(CHTLJS_TokenType::LEFT_BRACKET)) {
+            // 数组访问
+            consume(CHTLJS_TokenType::LEFT_BRACKET);
+            auto index = parseExpression();
+            consume(CHTLJS_TokenType::RIGHT_BRACKET);
+            
+            auto memberAccess = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::MEMBER_EXPRESSION);
+            memberAccess->addChild(left);
+            memberAccess->addChild(index);
+            memberAccess->setAttribute("computed", "true");
+            
+            left = memberAccess;
+        } else if (match(CHTLJS_TokenType::DOT)) {
+            // 属性访问
+            consume(CHTLJS_TokenType::DOT);
+            CHTLJS_Token property = consume(CHTLJS_TokenType::IDENTIFIER);
+            
+            auto memberAccess = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::MEMBER_EXPRESSION);
+            memberAccess->addChild(left);
+            memberAccess->setAttribute("property", property.value);
+            memberAccess->setAttribute("computed", "false");
+            
+            left = memberAccess;
+        } else if (match(CHTLJS_TokenType::LEFT_PAREN)) {
+            // 函数调用
+            auto args = parseArgumentList();
+            
+            auto call = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::FUNCTION_CALL);
+            call->addChild(left);
+            for (auto arg : args) {
+                call->addChild(arg);
+            }
+            
+            left = call;
+        }
+    }
+    
+    return left;
+}
+
+std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parsePrimaryExpression() {
+    const CHTLJS_Token& token = currentToken();
+    
+    switch (token.type) {
+        case CHTLJS_TokenType::IDENTIFIER:
+            return parseIdentifier();
+        case CHTLJS_TokenType::STRING_LITERAL:
+            return parseStringLiteral();
+        case CHTLJS_TokenType::NUMBER_LITERAL:
+            return parseNumberLiteral();
+        case CHTLJS_TokenType::BOOLEAN_LITERAL:
+            return parseBooleanLiteral();
+        case CHTLJS_TokenType::LEFT_PAREN:
+            consume(CHTLJS_TokenType::LEFT_PAREN);
+            auto expr = parseExpression();
+            consume(CHTLJS_TokenType::RIGHT_PAREN);
+            return expr;
+        case CHTLJS_TokenType::LEFT_BRACKET:
+            return parseArrayLiteral();
+        case CHTLJS_TokenType::LEFT_BRACE:
+            return parseObjectLiteral();
+        case CHTLJS_TokenType::RESPONSIVE_GET:
+            return parseResponsiveGet();
+        case CHTLJS_TokenType::CHTL_SELECTOR:
+            return parseCHTLSelector();
+        case CHTLJS_TokenType::CHTL_RESPONSIVE:
+            return parseCHTLResponsive();
+        default:
+            error("Unexpected token in primary expression: " + token.value);
+            return nullptr;
+    }
 }
 
 bool CHTLJSParser::hasMoreTokens() const {
-    return position_ < tokens_.size();
+    return position_ < tokens_.size() && currentToken().type != CHTLJS_TokenType::EOF_TOKEN;
 }
 
-const Token& CHTLJSParser::currentToken() const {
+const CHTLJS_Token& CHTLJSParser::currentToken() const {
     if (position_ >= tokens_.size()) {
-        static Token eof(TokenType::EOF_TOKEN, "", 0, 0);
+        static CHTLJS_Token eof(CHTLJS_TokenType::EOF_TOKEN, "", 0, 0);
         return eof;
     }
     return tokens_[position_];
 }
 
-const Token& CHTLJSParser::peekToken() const {
-    if (position_ + 1 >= tokens_.size()) {
-        static Token eof(TokenType::EOF_TOKEN, "", 0, 0);
+const CHTLJS_Token& CHTLJSParser::peekToken(int offset) const {
+    if (position_ + offset >= tokens_.size()) {
+        static CHTLJS_Token eof(CHTLJS_TokenType::EOF_TOKEN, "", 0, 0);
         return eof;
     }
-    return tokens_[position_ + 1];
+    return tokens_[position_ + offset];
 }
 
 void CHTLJSParser::advance() {
@@ -109,110 +337,226 @@ void CHTLJSParser::advance() {
     }
 }
 
-bool CHTLJSParser::match(TokenType type) {
-    return hasMoreTokens() && currentToken().getType() == type;
+bool CHTLJSParser::match(CHTLJS_TokenType type) {
+    return hasMoreTokens() && currentToken().type == type;
 }
 
-bool CHTLJSParser::match(const std::vector<TokenType>& types) {
+bool CHTLJSParser::match(const std::vector<CHTLJS_TokenType>& types) {
     if (!hasMoreTokens()) return false;
     
-    TokenType current = currentToken().getType();
-    for (TokenType type : types) {
+    CHTLJS_TokenType current = currentToken().type;
+    for (CHTLJS_TokenType type : types) {
         if (current == type) return true;
     }
     return false;
 }
 
-Token CHTLJSParser::consume(TokenType type) {
+CHTLJS_Token CHTLJSParser::consume(CHTLJS_TokenType type) {
     if (!match(type)) {
         error("Expected token type " + std::to_string(static_cast<int>(type)));
     }
     
-    Token token = currentToken();
+    CHTLJS_Token token = currentToken();
     advance();
     return token;
 }
 
-Token CHTLJSParser::consume(const std::vector<TokenType>& types) {
+CHTLJS_Token CHTLJSParser::consume(const std::vector<CHTLJS_TokenType>& types) {
     if (!match(types)) {
         error("Expected one of the specified token types");
     }
     
-    Token token = currentToken();
+    CHTLJS_Token token = currentToken();
     advance();
     return token;
 }
 
+bool CHTLJSParser::expect(CHTLJS_TokenType type, const std::string& expected) {
+    if (!match(type)) {
+        error("Expected " + expected + " but found " + currentToken().value);
+        return false;
+    }
+    return true;
+}
+
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseScriptLoader() {
-    consume(TokenType::SCRIPT_LOADER);
-    consume(TokenType::LEFT_BRACE);
+    consume(CHTLJS_TokenType::SCRIPT_LOADER);
+    consume(CHTLJS_TokenType::LEFT_BRACE);
     
-    auto node = std::make_shared<ScriptLoaderNode>();
-    parseParameters(node);
+    auto node = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::SCRIPT_LOADER);
     
-    consume(TokenType::RIGHT_BRACE);
+    // 解析参数
+    while (hasMoreTokens() && !match(CHTLJS_TokenType::RIGHT_BRACE)) {
+        if (match(CHTLJS_TokenType::IDENTIFIER)) {
+            CHTLJS_Token keyToken = consume(CHTLJS_TokenType::IDENTIFIER);
+            consume(CHTLJS_TokenType::COLON);
+            
+            if (match(CHTLJS_TokenType::STRING_LITERAL)) {
+                CHTLJS_Token valueToken = consume(CHTLJS_TokenType::STRING_LITERAL);
+                node->setAttribute(keyToken.value, valueToken.value);
+            } else if (match(CHTLJS_TokenType::IDENTIFIER)) {
+                CHTLJS_Token valueToken = consume(CHTLJS_TokenType::IDENTIFIER);
+                node->setAttribute(keyToken.value, valueToken.value);
+            }
+            
+            if (match(CHTLJS_TokenType::COMMA)) {
+                consume(CHTLJS_TokenType::COMMA);
+            }
+        } else {
+            advance();
+        }
+    }
+    
+    consume(CHTLJS_TokenType::RIGHT_BRACE);
     return node;
 }
 
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseListen() {
-    consume(TokenType::LISTEN);
-    consume(TokenType::LEFT_BRACE);
+    consume(CHTLJS_TokenType::LISTEN);
+    consume(CHTLJS_TokenType::LEFT_BRACE);
     
-    auto node = std::make_shared<ListenNode>();
-    parseParameters(node);
+    auto node = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::LISTEN);
     
-    consume(TokenType::RIGHT_BRACE);
+    // 解析参数
+    while (hasMoreTokens() && !match(CHTLJS_TokenType::RIGHT_BRACE)) {
+        if (match(CHTLJS_TokenType::IDENTIFIER)) {
+            CHTLJS_Token keyToken = consume(CHTLJS_TokenType::IDENTIFIER);
+            consume(CHTLJS_TokenType::COLON);
+            
+            if (match(CHTLJS_TokenType::STRING_LITERAL)) {
+                CHTLJS_Token valueToken = consume(CHTLJS_TokenType::STRING_LITERAL);
+                node->setAttribute(keyToken.value, valueToken.value);
+            } else if (match(CHTLJS_TokenType::IDENTIFIER)) {
+                CHTLJS_Token valueToken = consume(CHTLJS_TokenType::IDENTIFIER);
+                node->setAttribute(keyToken.value, valueToken.value);
+            }
+            
+            if (match(CHTLJS_TokenType::COMMA)) {
+                consume(CHTLJS_TokenType::COMMA);
+            }
+        } else {
+            advance();
+        }
+    }
+    
+    consume(CHTLJS_TokenType::RIGHT_BRACE);
     return node;
 }
 
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseAnimate() {
-    consume(TokenType::ANIMATE);
-    consume(TokenType::LEFT_BRACE);
+    consume(CHTLJS_TokenType::ANIMATE);
+    consume(CHTLJS_TokenType::LEFT_BRACE);
     
-    auto node = std::make_shared<AnimateNode>();
-    parseParameters(node);
+    auto node = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::ANIMATE);
     
-    consume(TokenType::RIGHT_BRACE);
+    // 解析参数
+    while (hasMoreTokens() && !match(CHTLJS_TokenType::RIGHT_BRACE)) {
+        if (match(CHTLJS_TokenType::IDENTIFIER)) {
+            CHTLJS_Token keyToken = consume(CHTLJS_TokenType::IDENTIFIER);
+            consume(CHTLJS_TokenType::COLON);
+            
+            if (match(CHTLJS_TokenType::STRING_LITERAL)) {
+                CHTLJS_Token valueToken = consume(CHTLJS_TokenType::STRING_LITERAL);
+                node->setAttribute(keyToken.value, valueToken.value);
+            } else if (match(CHTLJS_TokenType::IDENTIFIER)) {
+                CHTLJS_Token valueToken = consume(CHTLJS_TokenType::IDENTIFIER);
+                node->setAttribute(keyToken.value, valueToken.value);
+            }
+            
+            if (match(CHTLJS_TokenType::COMMA)) {
+                consume(CHTLJS_TokenType::COMMA);
+            }
+        } else {
+            advance();
+        }
+    }
+    
+    consume(CHTLJS_TokenType::RIGHT_BRACE);
     return node;
 }
 
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseRouter() {
-    consume(TokenType::ROUTER);
-    consume(TokenType::LEFT_BRACE);
+    consume(CHTLJS_TokenType::ROUTER);
+    consume(CHTLJS_TokenType::LEFT_BRACE);
     
-    auto node = std::make_shared<RouterNode>();
-    parseParameters(node);
+    auto node = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::ROUTER);
     
-    consume(TokenType::RIGHT_BRACE);
+    // 解析参数
+    while (hasMoreTokens() && !match(CHTLJS_TokenType::RIGHT_BRACE)) {
+        if (match(CHTLJS_TokenType::IDENTIFIER)) {
+            CHTLJS_Token keyToken = consume(CHTLJS_TokenType::IDENTIFIER);
+            consume(CHTLJS_TokenType::COLON);
+            
+            if (match(CHTLJS_TokenType::STRING_LITERAL)) {
+                CHTLJS_Token valueToken = consume(CHTLJS_TokenType::STRING_LITERAL);
+                node->setAttribute(keyToken.value, valueToken.value);
+            } else if (match(CHTLJS_TokenType::IDENTIFIER)) {
+                CHTLJS_Token valueToken = consume(CHTLJS_TokenType::IDENTIFIER);
+                node->setAttribute(keyToken.value, valueToken.value);
+            }
+            
+            if (match(CHTLJS_TokenType::COMMA)) {
+                consume(CHTLJS_TokenType::COMMA);
+            }
+        } else {
+            advance();
+        }
+    }
+    
+    consume(CHTLJS_TokenType::RIGHT_BRACE);
     return node;
 }
 
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseVir() {
-    consume(TokenType::VIR);
+    consume(CHTLJS_TokenType::VIR);
     
-    Token nameToken = consume(TokenType::IDENTIFIER);
-    consume(TokenType::EQUAL);
+    CHTLJS_Token nameToken = consume(CHTLJS_TokenType::IDENTIFIER);
+    consume(CHTLJS_TokenType::ASSIGN);
     
-    auto node = std::make_shared<VirNode>();
-    node->setFunctionName(nameToken.getValue());
+    auto node = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::VIR);
+    node->setAttribute("name", nameToken.value);
     
     // 解析右侧的表达式
     auto value = parseExpression();
     if (value) {
-        node->addParameter("value", value);
+        node->addChild(value);
     }
     
     return node;
 }
 
 std::shared_ptr<CHTLJSBaseNode> CHTLJSParser::parseINeverAway() {
-    consume(TokenType::INEVERAWAY);
-    consume(TokenType::LEFT_BRACE);
+    consume(CHTLJS_TokenType::INEVERAWAY);
+    consume(CHTLJS_TokenType::LEFT_BRACE);
     
-    auto node = std::make_shared<INeverAwayNode>();
-    parseParameters(node);
+    auto node = std::make_shared<CHTLJSBaseNode>(CHTLJSBaseNode::NodeType::INEVERAWAY);
     
-    consume(TokenType::RIGHT_BRACE);
+    // 解析参数
+    while (hasMoreTokens() && !match(CHTLJS_TokenType::RIGHT_BRACE)) {
+        if (match(CHTLJS_TokenType::IDENTIFIER)) {
+            CHTLJS_Token keyToken = consume(CHTLJS_TokenType::IDENTIFIER);
+            consume(CHTLJS_TokenType::COLON);
+            
+            if (match(CHTLJS_TokenType::STRING_LITERAL)) {
+                CHTLJS_Token valueToken = consume(CHTLJS_TokenType::STRING_LITERAL);
+                node->setAttribute(keyToken.value, valueToken.value);
+            } else if (match(CHTLJS_TokenType::IDENTIFIER)) {
+                CHTLJS_Token valueToken = consume(CHTLJS_TokenType::IDENTIFIER);
+                node->setAttribute(keyToken.value, valueToken.value);
+            } else if (match(CHTLJS_TokenType::LEFT_BRACE)) {
+                auto blockValue = parseBlockStatement();
+                node->addChild(blockValue);
+            }
+            
+            if (match(CHTLJS_TokenType::COMMA)) {
+                consume(CHTLJS_TokenType::COMMA);
+            }
+        } else {
+            advance();
+        }
+    }
+    
+    consume(CHTLJS_TokenType::RIGHT_BRACE);
     return node;
 }
 
