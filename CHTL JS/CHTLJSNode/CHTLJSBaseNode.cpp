@@ -3,7 +3,8 @@
 
 namespace CHTLJS {
 
-CHTLJSBaseNode::CHTLJSBaseNode(NodeType type) : type_(type) {
+CHTLJSBaseNode::CHTLJSBaseNode(NodeType type) 
+    : type_(type), line_(0), column_(0) {
 }
 
 CHTLJSBaseNode::~CHTLJSBaseNode() {
@@ -31,6 +32,43 @@ const std::vector<std::shared_ptr<CHTLJSBaseNode>>& CHTLJSBaseNode::getChildren(
 
 void CHTLJSBaseNode::clearChildren() {
     children_.clear();
+}
+
+void CHTLJSBaseNode::setAttribute(const std::string& name, const std::string& value) {
+    attributes_[name] = value;
+}
+
+std::string CHTLJSBaseNode::getAttribute(const std::string& name) const {
+    auto it = attributes_.find(name);
+    if (it != attributes_.end()) {
+        return it->second;
+    }
+    return "";
+}
+
+bool CHTLJSBaseNode::hasAttribute(const std::string& name) const {
+    return attributes_.find(name) != attributes_.end();
+}
+
+const std::map<std::string, std::string>& CHTLJSBaseNode::getAttributes() const {
+    return attributes_;
+}
+
+void CHTLJSBaseNode::clearAttributes() {
+    attributes_.clear();
+}
+
+void CHTLJSBaseNode::setPosition(int line, int column) {
+    line_ = line;
+    column_ = column;
+}
+
+int CHTLJSBaseNode::getLine() const {
+    return line_;
+}
+
+int CHTLJSBaseNode::getColumn() const {
+    return column_;
 }
 
 } // namespace CHTLJS

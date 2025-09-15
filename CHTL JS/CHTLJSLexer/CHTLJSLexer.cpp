@@ -4,6 +4,63 @@
 
 namespace CHTLJS {
 
+// 静态成员初始化
+const std::map<std::string, CHTLJS_TokenType> CHTLJSLexer::keywords_ = {
+    // CHTL JS特有关键字
+    {"ScriptLoader", CHTLJS_TokenType::SCRIPT_LOADER},
+    {"Listen", CHTLJS_TokenType::LISTEN},
+    {"Animate", CHTLJS_TokenType::ANIMATE},
+    {"Router", CHTLJS_TokenType::ROUTER},
+    {"Vir", CHTLJS_TokenType::VIR},
+    {"util", CHTLJS_TokenType::UTIL},
+    {"change", CHTLJS_TokenType::CHANGE},
+    {"then", CHTLJS_TokenType::THEN},
+    {"printMylove", CHTLJS_TokenType::PRINTMYLOVE},
+    {"iNeverAway", CHTLJS_TokenType::INEVERAWAY},
+    
+    // 布尔字面量
+    {"true", CHTLJS_TokenType::BOOLEAN_LITERAL},
+    {"false", CHTLJS_TokenType::BOOLEAN_LITERAL}
+};
+
+const std::map<std::string, CHTLJS_TokenType> CHTLJSLexer::operators_ = {
+    // CHTL JS特有操作符
+    {"&->", CHTLJS_TokenType::BIND_OPERATOR},
+    {"->", CHTLJS_TokenType::ARROW_OPERATOR},
+    
+    // 传统操作符
+    {"=", CHTLJS_TokenType::ASSIGN},
+    {"==", CHTLJS_TokenType::EQUAL},
+    {"!=", CHTLJS_TokenType::NOT_EQUAL},
+    {"<", CHTLJS_TokenType::LESS},
+    {">", CHTLJS_TokenType::GREATER},
+    {"<=", CHTLJS_TokenType::LESS_EQUAL},
+    {">=", CHTLJS_TokenType::GREATER_EQUAL},
+    {"&&", CHTLJS_TokenType::AND},
+    {"||", CHTLJS_TokenType::OR},
+    {"!", CHTLJS_TokenType::NOT},
+    {"+", CHTLJS_TokenType::PLUS},
+    {"-", CHTLJS_TokenType::MINUS},
+    {"*", CHTLJS_TokenType::MULTIPLY},
+    {"/", CHTLJS_TokenType::DIVIDE},
+    {"%", CHTLJS_TokenType::MODULO},
+    {"**", CHTLJS_TokenType::POWER}
+};
+
+const std::map<std::string, CHTLJS_TokenType> CHTLJSLexer::punctuation_ = {
+    {"(", CHTLJS_TokenType::LEFT_PAREN},
+    {")", CHTLJS_TokenType::RIGHT_PAREN},
+    {"{", CHTLJS_TokenType::LEFT_BRACE},
+    {"}", CHTLJS_TokenType::RIGHT_BRACE},
+    {"[", CHTLJS_TokenType::LEFT_BRACKET},
+    {"]", CHTLJS_TokenType::RIGHT_BRACKET},
+    {";", CHTLJS_TokenType::SEMICOLON},
+    {",", CHTLJS_TokenType::COMMA},
+    {".", CHTLJS_TokenType::DOT},
+    {":", CHTLJS_TokenType::COLON},
+    {"?", CHTLJS_TokenType::QUESTION}
+};
+
 CHTLJSLexer::CHTLJSLexer(const std::string& source)
     : source_(source), position_(0), line_(1), column_(1) {
 }
@@ -11,12 +68,12 @@ CHTLJSLexer::CHTLJSLexer(const std::string& source)
 CHTLJSLexer::~CHTLJSLexer() {
 }
 
-std::vector<Token> CHTLJSLexer::tokenize() {
-    std::vector<Token> tokens;
+std::vector<CHTLJS_Token> CHTLJSLexer::tokenize() {
+    std::vector<CHTLJS_Token> tokens;
     
     while (hasMoreTokens()) {
-        Token token = nextToken();
-        if (token.getType() != TokenType::UNKNOWN) {
+        CHTLJS_Token token = nextToken();
+        if (token.type != CHTLJS_TokenType::UNKNOWN) {
             tokens.push_back(token);
         }
     }
@@ -24,14 +81,24 @@ std::vector<Token> CHTLJSLexer::tokenize() {
     return tokens;
 }
 
-Token CHTLJSLexer::nextToken() {
+CHTLJS_Token CHTLJSLexer::nextToken() {
     skipWhitespace();
     
     if (!hasMoreTokens()) {
-        return Token(TokenType::EOF_TOKEN, "", line_, column_);
+        return CHTLJS_Token(CHTLJS_TokenType::EOF_TOKEN, "", line_, column_);
     }
     
     char c = currentChar();
+    
+    // CHTL选择器 {{...}}
+    if (c == '{' && peekChar() == '{') {
+        return parseCHTLSelector();
+    }
+    
+    // CHTL响应式值 $JS变量名$
+    if (c == '$') {
+        return parseCHTLResponsive();
+    }
     
     // 字符串
     if (c == '"' || c == '\'') {
@@ -43,96 +110,30 @@ Token CHTLJSLexer::nextToken() {
         return parseNumber();
     }
     
-    // 增强选择器 {{
-    if (c == '{' && peekChar() == '{') {
-        return parseSelector();
-    }
-    
-    // 响应式值 $JS变量名$
-    if (c == '$') {
-        return parseResponsiveValue();
-    }
-    
     // 标识符和关键字
     if (isLetter(c) || c == '_') {
         return parseIdentifier();
     }
     
-    // 操作符和符号
-    switch (c) {
-        case '>':
-            advance();
-            if (currentChar() == '-') {
-                advance();
-                return Token(TokenType::ARROW, "->", line_, column_ - 1);
-            }
-            return Token(TokenType::UNKNOWN, std::string(1, c), line_, column_);
-            
-        case '&':
-            advance();
-            if (currentChar() == '-' && peekChar() == '>') {
-                advance();
-                advance();
-                return Token(TokenType::BIND_OP, "&->", line_, column_ - 2);
-            }
-            return Token(TokenType::UNKNOWN, std::string(1, c), line_, column_);
-            
-        case '.':
-            advance();
-            return Token(TokenType::DOT, ".", line_, column_);
-            
-        case ',':
-            advance();
-            return Token(TokenType::COMMA, ",", line_, column_);
-            
-        case ';':
-            advance();
-            return Token(TokenType::SEMICOLON, ";", line_, column_);
-            
-        case ':':
-            advance();
-            return Token(TokenType::COLON, ":", line_, column_);
-            
-        case '=':
-            advance();
-            return Token(TokenType::EQUAL, "=", line_, column_);
-            
-        case '?':
-            advance();
-            return Token(TokenType::QUESTION, "?", line_, column_);
-            
-        case '!':
-            advance();
-            return Token(TokenType::EXCLAMATION, "!", line_, column_);
-            
-        case '(':
-            advance();
-            return Token(TokenType::LEFT_PAREN, "(", line_, column_);
-            
-        case ')':
-            advance();
-            return Token(TokenType::RIGHT_PAREN, ")", line_, column_);
-            
-        case '{':
-            advance();
-            return Token(TokenType::LEFT_BRACE, "{", line_, column_);
-            
-        case '}':
-            advance();
-            return Token(TokenType::RIGHT_BRACE, "}", line_, column_);
-            
-        case '[':
-            advance();
-            return Token(TokenType::LEFT_BRACKET, "[", line_, column_);
-            
-        case ']':
-            advance();
-            return Token(TokenType::RIGHT_BRACKET, "]", line_, column_);
-            
-        default:
-            advance();
-            return Token(TokenType::UNKNOWN, std::string(1, c), line_, column_);
+    // 操作符和标点符号
+    if (isOperatorChar(c)) {
+        return parseOperator();
     }
+    
+    // 标点符号
+    if (isPunctuationChar(c)) {
+        return parsePunctuation();
+    }
+    
+    // 换行
+    if (c == '\n') {
+        advance();
+        return CHTLJS_Token(CHTLJS_TokenType::NEWLINE, "\n", line_, column_);
+    }
+    
+    // 未知字符
+    advance();
+    return CHTLJS_Token(CHTLJS_TokenType::UNKNOWN, std::string(1, c), line_, column_);
 }
 
 bool CHTLJSLexer::hasMoreTokens() const {
@@ -202,7 +203,7 @@ void CHTLJSLexer::skipComment() {
     }
 }
 
-Token CHTLJSLexer::parseString() {
+CHTLJS_Token CHTLJSLexer::parseString() {
     char quote = currentChar();
     advance(); // skip opening quote
     
@@ -232,10 +233,10 @@ Token CHTLJSLexer::parseString() {
         advance(); // skip closing quote
     }
     
-    return Token(TokenType::STRING, value, line_, column_);
+    return CHTLJS_Token(CHTLJS_TokenType::STRING_LITERAL, value, line_, column_);
 }
 
-Token CHTLJSLexer::parseNumber() {
+CHTLJS_Token CHTLJSLexer::parseNumber() {
     std::string value;
     
     while (hasMoreTokens() && (isDigit(currentChar()) || currentChar() == '.')) {
@@ -243,10 +244,10 @@ Token CHTLJSLexer::parseNumber() {
         advance();
     }
     
-    return Token(TokenType::NUMBER, value, line_, column_);
+    return CHTLJS_Token(CHTLJS_TokenType::NUMBER_LITERAL, value, line_, column_);
 }
 
-Token CHTLJSLexer::parseIdentifier() {
+CHTLJS_Token CHTLJSLexer::parseIdentifier() {
     std::string value;
     
     while (hasMoreTokens() && isAlphaNumeric(currentChar())) {
@@ -254,15 +255,15 @@ Token CHTLJSLexer::parseIdentifier() {
         advance();
     }
     
-    TokenType type = getKeywordType(value);
-    if (type != TokenType::UNKNOWN) {
-        return Token(type, value, line_, column_);
+    CHTLJS_TokenType type = getKeywordType(value);
+    if (type != CHTLJS_TokenType::UNKNOWN) {
+        return CHTLJS_Token(type, value, line_, column_);
     }
     
-    return Token(TokenType::IDENTIFIER, value, line_, column_);
+    return CHTLJS_Token(CHTLJS_TokenType::IDENTIFIER, value, line_, column_);
 }
 
-Token CHTLJSLexer::parseSelector() {
+CHTLJS_Token CHTLJSLexer::parseCHTLSelector() {
     advance(); // skip first {
     advance(); // skip second {
     
@@ -277,10 +278,10 @@ Token CHTLJSLexer::parseSelector() {
         advance(); // skip second }
     }
     
-    return Token(TokenType::SELECTOR_START, value, line_, column_);
+    return CHTLJS_Token(CHTLJS_TokenType::CHTL_SELECTOR, value, line_, column_);
 }
 
-Token CHTLJSLexer::parseResponsiveValue() {
+CHTLJS_Token CHTLJSLexer::parseCHTLResponsive() {
     advance(); // skip $
     
     std::string value;
@@ -293,7 +294,42 @@ Token CHTLJSLexer::parseResponsiveValue() {
         advance(); // skip closing $
     }
     
-    return Token(TokenType::RESPONSIVE_START, value, line_, column_);
+    return CHTLJS_Token(CHTLJS_TokenType::CHTL_RESPONSIVE, value, line_, column_);
+}
+
+CHTLJS_Token CHTLJSLexer::parseOperator() {
+    std::string value;
+    value += currentChar();
+    advance();
+    
+    // 检查多字符操作符
+    if (hasMoreTokens()) {
+        std::string twoChar = value + currentChar();
+        if (operators_.find(twoChar) != operators_.end()) {
+            value = twoChar;
+            advance();
+        }
+    }
+    
+    CHTLJS_TokenType type = getOperatorType(value);
+    if (type != CHTLJS_TokenType::UNKNOWN) {
+        return CHTLJS_Token(type, value, line_, column_);
+    }
+    
+    return CHTLJS_Token(CHTLJS_TokenType::UNKNOWN, value, line_, column_);
+}
+
+CHTLJS_Token CHTLJSLexer::parsePunctuation() {
+    std::string value;
+    value += currentChar();
+    advance();
+    
+    CHTLJS_TokenType type = getPunctuationType(value);
+    if (type != CHTLJS_TokenType::UNKNOWN) {
+        return CHTLJS_Token(type, value, line_, column_);
+    }
+    
+    return CHTLJS_Token(CHTLJS_TokenType::UNKNOWN, value, line_, column_);
 }
 
 bool CHTLJSLexer::isLetter(char c) const {
@@ -309,27 +345,45 @@ bool CHTLJSLexer::isAlphaNumeric(char c) const {
 }
 
 bool CHTLJSLexer::isWhitespace(char c) const {
-    return c == ' ' || c == '\t' || c == '\r' || c == '\n';
+    return c == ' ' || c == '\t' || c == '\r';
 }
 
-TokenType CHTLJSLexer::getKeywordType(const std::string& keyword) const {
-    static const std::map<std::string, TokenType> keywords = {
-        {"ScriptLoader", TokenType::SCRIPT_LOADER},
-        {"Listen", TokenType::LISTEN},
-        {"Animate", TokenType::ANIMATE},
-        {"Router", TokenType::ROUTER},
-        {"Vir", TokenType::VIR},
-        {"iNeverAway", TokenType::INEVERAWAY},
-        {"util", TokenType::UTIL},
-        {"printMylove", TokenType::PRINTMYLOVE}
-    };
-    
-    auto it = keywords.find(keyword);
-    if (it != keywords.end()) {
+bool CHTLJSLexer::isNewline(char c) const {
+    return c == '\n';
+}
+
+bool CHTLJSLexer::isOperatorChar(char c) const {
+    return c == '&' || c == '-' || c == '=' || c == '!' || c == '<' || c == '>' || 
+           c == '&' || c == '|' || c == '+' || c == '*' || c == '/' || c == '%';
+}
+
+bool CHTLJSLexer::isPunctuationChar(char c) const {
+    return c == '(' || c == ')' || c == '{' || c == '}' || c == '[' || c == ']' ||
+           c == ';' || c == ',' || c == '.' || c == ':' || c == '?';
+}
+
+CHTLJS_TokenType CHTLJSLexer::getKeywordType(const std::string& keyword) const {
+    auto it = keywords_.find(keyword);
+    if (it != keywords_.end()) {
         return it->second;
     }
-    
-    return TokenType::UNKNOWN;
+    return CHTLJS_TokenType::UNKNOWN;
+}
+
+CHTLJS_TokenType CHTLJSLexer::getOperatorType(const std::string& op) const {
+    auto it = operators_.find(op);
+    if (it != operators_.end()) {
+        return it->second;
+    }
+    return CHTLJS_TokenType::UNKNOWN;
+}
+
+CHTLJS_TokenType CHTLJSLexer::getPunctuationType(const std::string& punct) const {
+    auto it = punctuation_.find(punct);
+    if (it != punctuation_.end()) {
+        return it->second;
+    }
+    return CHTLJS_TokenType::UNKNOWN;
 }
 
 } // namespace CHTLJS

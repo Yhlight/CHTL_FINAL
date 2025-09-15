@@ -1,65 +1,74 @@
 #include "Token.h"
 #include <sstream>
+#include <map>
 
 namespace CHTLJS {
 
-Token::Token(TokenType type, const std::string& value, int line, int column)
-    : type_(type), value_(value), line_(line), column_(column) {
-}
-
-TokenType Token::getType() const {
-    return type_;
-}
-
-const std::string& Token::getValue() const {
-    return value_;
-}
-
-int Token::getLine() const {
-    return line_;
-}
-
-int Token::getColumn() const {
-    return column_;
-}
-
-std::string Token::toString() const {
+std::string CHTLJS_Token::toString() const {
     std::stringstream ss;
-    ss << "Token(" << static_cast<int>(type_) << ", \"" << value_ << "\", " 
-       << line_ << ", " << column_ << ")";
+    ss << "CHTLJS_Token(" << static_cast<int>(type) << ", \"" << value << "\", " 
+       << line << ", " << column << ")";
     return ss.str();
 }
 
-bool Token::isOperator() const {
-    return type_ == TokenType::ARROW || 
-           type_ == TokenType::BIND_OP ||
-           type_ == TokenType::DOT ||
-           type_ == TokenType::COMMA ||
-           type_ == TokenType::SEMICOLON ||
-           type_ == TokenType::COLON ||
-           type_ == TokenType::EQUAL ||
-           type_ == TokenType::QUESTION ||
-           type_ == TokenType::EXCLAMATION;
+bool CHTLJS_Token::isKeyword() const {
+    return type == CHTLJS_TokenType::SCRIPT_LOADER ||
+           type == CHTLJS_TokenType::LISTEN ||
+           type == CHTLJS_TokenType::ANIMATE ||
+           type == CHTLJS_TokenType::ROUTER ||
+           type == CHTLJS_TokenType::VIR ||
+           type == CHTLJS_TokenType::UTIL ||
+           type == CHTLJS_TokenType::CHANGE ||
+           type == CHTLJS_TokenType::THEN ||
+           type == CHTLJS_TokenType::PRINTMYLOVE ||
+           type == CHTLJS_TokenType::INEVERAWAY;
 }
 
-bool Token::isKeyword() const {
-    return type_ == TokenType::SCRIPT_LOADER ||
-           type_ == TokenType::LISTEN ||
-           type_ == TokenType::ANIMATE ||
-           type_ == TokenType::ROUTER ||
-           type_ == TokenType::VIR ||
-           type_ == TokenType::INEVERAWAY ||
-           type_ == TokenType::UTIL ||
-           type_ == TokenType::PRINTMYLOVE;
+bool CHTLJS_Token::isOperator() const {
+    return type == CHTLJS_TokenType::BIND_OPERATOR ||
+           type == CHTLJS_TokenType::ARROW_OPERATOR ||
+           type == CHTLJS_TokenType::ASSIGN ||
+           type == CHTLJS_TokenType::EQUAL ||
+           type == CHTLJS_TokenType::NOT_EQUAL ||
+           type == CHTLJS_TokenType::LESS ||
+           type == CHTLJS_TokenType::GREATER ||
+           type == CHTLJS_TokenType::LESS_EQUAL ||
+           type == CHTLJS_TokenType::GREATER_EQUAL ||
+           type == CHTLJS_TokenType::AND ||
+           type == CHTLJS_TokenType::OR ||
+           type == CHTLJS_TokenType::NOT ||
+           type == CHTLJS_TokenType::PLUS ||
+           type == CHTLJS_TokenType::MINUS ||
+           type == CHTLJS_TokenType::MULTIPLY ||
+           type == CHTLJS_TokenType::DIVIDE ||
+           type == CHTLJS_TokenType::MODULO ||
+           type == CHTLJS_TokenType::POWER;
 }
 
-bool Token::isBracket() const {
-    return type_ == TokenType::LEFT_PAREN ||
-           type_ == TokenType::RIGHT_PAREN ||
-           type_ == TokenType::LEFT_BRACE ||
-           type_ == TokenType::RIGHT_BRACE ||
-           type_ == TokenType::LEFT_BRACKET ||
-           type_ == TokenType::RIGHT_BRACKET;
+bool CHTLJS_Token::isLiteral() const {
+    return type == CHTLJS_TokenType::STRING_LITERAL ||
+           type == CHTLJS_TokenType::NUMBER_LITERAL ||
+           type == CHTLJS_TokenType::BOOLEAN_LITERAL;
+}
+
+bool CHTLJS_Token::isCHTLJSSpecific() const {
+    return type == CHTLJS_TokenType::SCRIPT_LOADER ||
+           type == CHTLJS_TokenType::LISTEN ||
+           type == CHTLJS_TokenType::ANIMATE ||
+           type == CHTLJS_TokenType::ROUTER ||
+           type == CHTLJS_TokenType::VIR ||
+           type == CHTLJS_TokenType::UTIL ||
+           type == CHTLJS_TokenType::CHANGE ||
+           type == CHTLJS_TokenType::THEN ||
+           type == CHTLJS_TokenType::PRINTMYLOVE ||
+           type == CHTLJS_TokenType::INEVERAWAY ||
+           type == CHTLJS_TokenType::BIND_OPERATOR ||
+           type == CHTLJS_TokenType::ARROW_OPERATOR ||
+           type == CHTLJS_TokenType::RESPONSIVE_GET ||
+           type == CHTLJS_TokenType::RESPONSIVE_SET ||
+           type == CHTLJS_TokenType::CHTL_SELECTOR ||
+           type == CHTLJS_TokenType::CHTL_RESPONSIVE ||
+           type == CHTLJS_TokenType::CHTL_FUNCTION;
 }
 
 } // namespace CHTLJS
