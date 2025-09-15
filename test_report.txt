@@ -1,0 +1,119 @@
+CHTL Test Suite Report
+=====================
+
+Generated: 2025-09-12 16:47:22
+
+Test: basic_template_style
+Description: Test basic template style syntax
+Status: FAILED
+Duration: 7ms
+Error: Output does not match expected result
+
+Test: basic_template_element
+Description: Test basic template element syntax
+Status: FAILED
+Duration: 7ms
+Error: Input file not found: test/test_basic_template_element.chtl
+
+Test: basic_template_var
+Description: Test basic template variable syntax
+Status: FAILED
+Duration: 7ms
+Error: Input file not found: test/test_basic_template_var.chtl
+
+Test: custom_style
+Description: Test custom style syntax
+Status: FAILED
+Duration: 7ms
+Error: Input file not found: test/test_custom_style.chtl
+
+Test: custom_element
+Description: Test custom element syntax
+Status: FAILED
+Duration: 7ms
+Error: Input file not found: test/test_custom_element.chtl
+
+Test: import_namespace
+Description: Test import and namespace syntax
+Status: FAILED
+Duration: 7ms
+Error: Input file not found: test/test_import_namespace.chtl
+
+Test: origin_content
+Description: Test origin content embedding
+Status: FAILED
+Duration: 7ms
+Error: Input file not found: test/test_origin_content.chtl
+
+Test: configuration
+Description: Test configuration syntax
+Status: FAILED
+Duration: 7ms
+Error: Input file not found: test/test_configuration.chtl
+
+Test: template_inheritance
+Description: Test template inheritance
+Status: FAILED
+Duration: 7ms
+Error: Input file not found: test/test_template_inheritance.chtl
+
+Test: module_system
+Description: Test module system (CMOD/CJMOD)
+Status: FAILED
+Duration: 7ms
+Error: Input file not found: test/test_module_system.chtl
+
+Test: chtl_js_basic
+Description: Test basic CHTL JS syntax
+Status: FAILED
+Duration: 6ms
+Error: Output does not match expected result
+
+Test: chtl_js_cjmod
+Description: Test CHTL JS CJMOD syntax
+Status: FAILED
+Duration: 6ms
+Error: Input file not found: test/test_chtl_js_cjmod.chtljs
+
+Test: chtl_js_animation
+Description: Test CHTL JS animation syntax
+Status: FAILED
+Duration: 6ms
+Error: Input file not found: test/test_chtl_js_animation.chtljs
+
+Test: chtl_js_route
+Description: Test CHTL JS route syntax
+Status: FAILED
+Duration: 6ms
+Error: Input file not found: test/test_chtl_js_route.chtljs
+
+Test: error_syntax
+Description: Test syntax error handling
+Status: FAILED
+Duration: 6ms
+Error: Input file not found: test/test_error_syntax.chtl
+
+Test: error_semantic
+Description: Test semantic error handling
+Status: FAILED
+Duration: 6ms
+Error: Input file not found: test/test_error_semantic.chtl
+
+Test: performance_large_file
+Description: Test performance with large file
+Status: FAILED
+Duration: 6ms
+Error: Input file not found: test/test_performance_large.chtl
+
+Test: edge_cases
+Description: Test edge cases and boundary conditions
+Status: FAILED
+Duration: 6ms
+Error: Input file not found: test/test_edge_cases.chtl
+
+Summary
+=======
+Total Tests: 18
+Passed: 0
+Failed: 18
+Success Rate: 0%

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CHTL Test</title>
+</head>
+<body>
+    <h1>Hello CHTL!</h1>
+    <p>This is a test of the CHTL compiler.</p>
+    
+    <!-- CHTL Template Test -->
+    [Template] @Style MyStyle
+    .my-class {
+        color: blue;
+        font-size: 16px;
+    }
+    
+    <!-- CHTL Custom Test -->
+    [Custom] @Element MyButton
+    <button class="my-button">Click me</button>
+    
+    <!-- CHTL JS Test -->
+    <script>
+        {{console.log("Hello from CHTL JS!")}}
+    </script>
+</body>
+</html>

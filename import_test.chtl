@@ -1,0 +1,70 @@
+// CHTL导入测试文件
+
+// 导入HTML文件
+[Import] @Html from "header.html" as Header;
+
+// 导入CSS文件
+[Import] @Style from "styles.css" as MainStyles;
+
+// 导入JS文件
+[Import] @JavaScript from "script.js" as MainScript;
+
+// 导入CHTL文件
+[Import] @Chtl from "components.chtl";
+
+// 导入模板
+[Import] [Template] @Style DefaultText from "templates.chtl" as DefaultTextTemplate;
+
+// 导入自定义
+[Import] [Custom] @Element Box from "components.chtl" as BoxComponent;
+
+// 导入原始嵌入
+[Import] [Origin] @Html Header from "templates.chtl" as HeaderTemplate;
+
+// 导入配置
+[Import] [Configuration] @Config Basic from "config.chtl" as BasicConfig;
+
+// 使用导入的内容
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                CHTL Import Test
+            }
+        }
+        
+        @Style MainStyles;
+    }
+
+    body
+    {
+        @Html Header;
+        
+        div
+        {
+            id: main-content;
+            class: container;
+            
+            style
+            {
+                @Style DefaultTextTemplate;
+            }
+            
+            h1
+            {
+                text
+                {
+                    Import Test Page
+                }
+            }
+            
+            @Element BoxComponent;
+        }
+        
+        @JavaScript MainScript;
+    }
+}

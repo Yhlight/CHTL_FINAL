@@ -1,0 +1,97 @@
+// CHTL自定义测试文件
+
+// 自定义样式组
+[Custom] @Style YellowText
+{
+    @Style DefaultText
+    {
+        color: yellow;
+        font-size: 18px;
+    }
+    
+    delete line-height, border;
+}
+
+// 自定义元素
+[Custom] @Element Box
+{
+    div
+    {
+        style
+        {
+            width: 200px;
+            height: 200px;
+            background-color: red;
+        }
+    }
+    
+    div
+    {
+        style
+        {
+            width: 200px;
+            height: 200px;
+            background-color: blue;
+        }
+    }
+    
+    span
+    {
+        text
+        {
+            Box Content
+        }
+    }
+}
+
+// 自定义变量组
+[Custom] @Var ThemeColor
+{
+    @Var BaseTheme
+    {
+        primaryColor: rgb(255, 192, 203);
+        secondaryColor: rgb(145, 155, 200);
+    }
+    
+    primaryColor: rgb(255, 100, 100);
+    textColor: white;
+}
+
+// 使用自定义
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                CHTL Custom Test
+            }
+        }
+    }
+
+    body
+    {
+        div
+        {
+            id: main-container;
+            class: container;
+            
+            style
+            {
+                @Style YellowText;
+            }
+            
+            h1
+            {
+                text
+                {
+                    Custom Test Page
+                }
+            }
+            
+            @Element Box;
+        }
+    }
+}
