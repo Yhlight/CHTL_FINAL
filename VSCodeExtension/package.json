@@ -1,0 +1,187 @@
+{
+  "name": "chtl-language-support",
+  "displayName": "CHTL Language Support",
+  "description": "Language support for CHTL (C++ HyperText Language)",
+  "version": "1.0.0",
+  "publisher": "chtl-team",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "chtl",
+    "html",
+    "css",
+    "javascript",
+    "markup",
+    "language"
+  ],
+  "activationEvents": [
+    "onLanguage:chtl"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "chtl",
+        "aliases": [
+          "CHTL",
+          "chtl"
+        ],
+        "extensions": [
+          ".chtl"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "chtl",
+        "scopeName": "source.chtl",
+        "path": "./syntaxes/chtl.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "chtl",
+        "path": "./snippets/chtl.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "chtl.compile",
+        "title": "Compile CHTL",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.compileToHtml",
+        "title": "Compile to HTML",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.compileToCss",
+        "title": "Compile to CSS",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.compileToJs",
+        "title": "Compile to JavaScript",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.preview",
+        "title": "Preview in Browser",
+        "category": "CHTL"
+      },
+      {
+        "command": "chtl.openDocs",
+        "title": "Open Documentation",
+        "category": "CHTL"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "resourceExtname == .chtl",
+          "command": "chtl.compile",
+          "group": "chtl"
+        },
+        {
+          "when": "resourceExtname == .chtl",
+          "command": "chtl.preview",
+          "group": "chtl"
+        }
+      ],
+      "editor/context": [
+        {
+          "when": "resourceExtname == .chtl",
+          "command": "chtl.compile",
+          "group": "chtl"
+        },
+        {
+          "when": "resourceExtname == .chtl",
+          "command": "chtl.preview",
+          "group": "chtl"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "chtl.compile",
+          "when": "resourceExtname == .chtl"
+        },
+        {
+          "command": "chtl.compileToHtml",
+          "when": "resourceExtname == .chtl"
+        },
+        {
+          "command": "chtl.compileToCss",
+          "when": "resourceExtname == .chtl"
+        },
+        {
+          "command": "chtl.compileToJs",
+          "when": "resourceExtname == .chtl"
+        },
+        {
+          "command": "chtl.preview",
+          "when": "resourceExtname == .chtl"
+        },
+        {
+          "command": "chtl.openDocs"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "CHTL",
+      "properties": {
+        "chtl.compilerPath": {
+          "type": "string",
+          "default": "chtl",
+          "description": "Path to the CHTL compiler executable"
+        },
+        "chtl.outputDirectory": {
+          "type": "string",
+          "default": "dist",
+          "description": "Default output directory for compiled files"
+        },
+        "chtl.autoCompile": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically compile CHTL files on save"
+        },
+        "chtl.debugMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable debug mode for compilation"
+        },
+        "chtl.includeDefaultStructure": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include default HTML structure in output"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^8.1.0"
+  }
+}

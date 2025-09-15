@@ -1,0 +1,322 @@
+{
+  "scopeName": "source.chtl",
+  "name": "CHTL",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#template-blocks"
+    },
+    {
+      "include": "#custom-blocks"
+    },
+    {
+      "include": "#origin-blocks"
+    },
+    {
+      "include": "#import-blocks"
+    },
+    {
+      "include": "#namespace-blocks"
+    },
+    {
+      "include": "#configuration-blocks"
+    },
+    {
+      "include": "#html-elements"
+    },
+    {
+      "include": "#style-blocks"
+    },
+    {
+      "include": "#script-blocks"
+    },
+    {
+      "include": "#text-blocks"
+    },
+    {
+      "include": "#attributes"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#keywords"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.chtl",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.chtl",
+          "begin": "/\\*",
+          "end": "\\*/"
+        },
+        {
+          "name": "comment.generator.chtl",
+          "match": "^#\\s+.*$"
+        }
+      ]
+    },
+    "template-blocks": {
+      "patterns": [
+        {
+          "name": "meta.template.chtl",
+          "begin": "\\[Template\\]",
+          "end": "\\}",
+          "patterns": [
+            {
+              "include": "#template-content"
+            }
+          ]
+        }
+      ]
+    },
+    "custom-blocks": {
+      "patterns": [
+        {
+          "name": "meta.custom.chtl",
+          "begin": "\\[Custom\\]",
+          "end": "\\}",
+          "patterns": [
+            {
+              "include": "#custom-content"
+            }
+          ]
+        }
+      ]
+    },
+    "origin-blocks": {
+      "patterns": [
+        {
+          "name": "meta.origin.chtl",
+          "begin": "\\[Origin\\]",
+          "end": "\\}",
+          "patterns": [
+            {
+              "include": "#origin-content"
+            }
+          ]
+        }
+      ]
+    },
+    "import-blocks": {
+      "patterns": [
+        {
+          "name": "meta.import.chtl",
+          "begin": "\\[Import\\]",
+          "end": "\\}",
+          "patterns": [
+            {
+              "include": "#import-content"
+            }
+          ]
+        }
+      ]
+    },
+    "namespace-blocks": {
+      "patterns": [
+        {
+          "name": "meta.namespace.chtl",
+          "begin": "\\[Namespace\\]",
+          "end": "\\}",
+          "patterns": [
+            {
+              "include": "#namespace-content"
+            }
+          ]
+        }
+      ]
+    },
+    "configuration-blocks": {
+      "patterns": [
+        {
+          "name": "meta.configuration.chtl",
+          "begin": "\\[Configuration\\]",
+          "end": "\\}",
+          "patterns": [
+            {
+              "include": "#configuration-content"
+            }
+          ]
+        }
+      ]
+    },
+    "html-elements": {
+      "patterns": [
+        {
+          "name": "entity.name.tag.chtl",
+          "match": "\\b(html|head|body|title|meta|link|script|style|div|span|p|h[1-6]|ul|ol|li|a|img|button|input|form|label|table|tr|td|th|thead|tbody|tfoot|section|article|header|footer|nav|aside|main|figure|figcaption|blockquote|code|pre|em|strong|small|mark|del|ins|sub|sup|br|hr)\\b"
+        }
+      ]
+    },
+    "style-blocks": {
+      "patterns": [
+        {
+          "name": "meta.style.chtl",
+          "begin": "\\bstyle\\s*\\{",
+          "end": "\\}",
+          "patterns": [
+            {
+              "include": "source.css"
+            }
+          ]
+        }
+      ]
+    },
+    "script-blocks": {
+      "patterns": [
+        {
+          "name": "meta.script.chtl",
+          "begin": "\\bscript\\s*\\{",
+          "end": "\\}",
+          "patterns": [
+            {
+              "include": "source.javascript"
+            }
+          ]
+        }
+      ]
+    },
+    "text-blocks": {
+      "patterns": [
+        {
+          "name": "meta.text.chtl",
+          "begin": "\\btext\\s*\\{",
+          "end": "\\}",
+          "patterns": [
+            {
+              "include": "#strings"
+            }
+          ]
+        }
+      ]
+    },
+    "attributes": {
+      "patterns": [
+        {
+          "name": "entity.other.attribute-name.chtl",
+          "match": "\\b\\w+\\s*[:=]"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.chtl",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.chtl",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.chtl",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.chtl",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.chtl",
+          "match": "\\b\\d+(\\.\\d+)?(px|em|rem|%|vh|vw|vmin|vmax)?\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.chtl",
+          "match": "\\b(if|else|for|while|do|switch|case|default|break|continue|return|try|catch|finally|throw|new|this|typeof|instanceof|in|of|class|extends|import|export|function|var|let|const)\\b"
+        },
+        {
+          "name": "keyword.operator.chtl",
+          "match": "\\b(and|or|not|in|is|as)\\b"
+        },
+        {
+          "name": "keyword.other.chtl",
+          "match": "\\b(use|except|delete|insert|inherit|from|as|at|top|bottom|after|before|replace)\\b"
+        }
+      ]
+    },
+    "template-content": {
+      "patterns": [
+        {
+          "include": "#html-elements"
+        },
+        {
+          "include": "#style-blocks"
+        },
+        {
+          "include": "#script-blocks"
+        },
+        {
+          "include": "#text-blocks"
+        },
+        {
+          "include": "#attributes"
+        },
+        {
+          "include": "#strings"
+        }
+      ]
+    },
+    "custom-content": {
+      "patterns": [
+        {
+          "include": "#template-content"
+        }
+      ]
+    },
+    "origin-content": {
+      "patterns": [
+        {
+          "include": "#template-content"
+        }
+      ]
+    },
+    "import-content": {
+      "patterns": [
+        {
+          "include": "#strings"
+        }
+      ]
+    },
+    "namespace-content": {
+      "patterns": [
+        {
+          "include": "#template-content"
+        }
+      ]
+    },
+    "configuration-content": {
+      "patterns": [
+        {
+          "include": "#strings"
+        },
+        {
+          "include": "#numbers"
+        }
+      ]
+    }
+  }
+}

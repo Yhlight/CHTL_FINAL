@@ -1,0 +1,129 @@
+html
+{
+    head
+    {
+        title
+        {
+            "CHTL Example"
+        }
+        
+        style
+        {
+            body
+            {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 20px;
+                background-color: #f0f0f0;
+            }
+            
+            .container
+            {
+                max-width: 800px;
+                margin: 0 auto;
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            h1
+            {
+                color: #333;
+                text-align: center;
+                margin-bottom: 30px;
+            }
+            
+            .feature
+            {
+                margin-bottom: 20px;
+                padding: 15px;
+                background-color: #f8f9fa;
+                border-left: 4px solid #007bff;
+                border-radius: 4px;
+            }
+            
+            .feature h3
+            {
+                margin-top: 0;
+                color: #007bff;
+            }
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            class: container;
+            
+            h1
+            {
+                "Welcome to CHTL"
+            }
+            
+            p
+            {
+                "CHTL (C++ HyperText Language) is a modern markup language that provides a more developer-friendly way to write HTML code."
+            }
+            
+            div
+            {
+                class: feature;
+                
+                h3
+                {
+                    "Key Features"
+                }
+                
+                ul
+                {
+                    li
+                    {
+                        "Clean, C++-like syntax"
+                    }
+                    
+                    li
+                    {
+                        "Built-in CSS support with local style blocks"
+                    }
+                    
+                    li
+                    {
+                        "Template and custom component system"
+                    }
+                    
+                    li
+                    {
+                        "CHTL JS for enhanced JavaScript functionality"
+                    }
+                    
+                    li
+                    {
+                        "Module system for code organization"
+                    }
+                }
+            }
+            
+            div
+            {
+                class: feature;
+                
+                h3
+                {
+                    "Getting Started"
+                }
+                
+                p
+                {
+                    "To compile this CHTL file, use the following command:"
+                }
+                
+                code
+                {
+                    "chtl compile example.chtl -o example.html"
+                }
+            }
+        }
+    }
+}
