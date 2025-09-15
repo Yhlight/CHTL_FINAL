@@ -1,0 +1,10 @@
+// CHTL JS Enhanced Selector Test
+
+const a = {{.class-a}};
+const b = {{#id-b}};
+const c = {{body}};
+const d = {{.parent .child}};
+const e = {{div[0]}};
+
+// Test within another expression
+const f = my_func({{.another-one}});

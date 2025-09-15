@@ -3,7 +3,7 @@ set -e
 
 echo "--- BUILDING PROJECT ---"
 # Clean and build from scratch
-rm -rf CMakeFiles/ CMakeCache.txt cmake_install.cmake Makefile CTestTestfile.cmake *.a chtl_compiler test_runner test_parser test_scanner build/
+rm -rf CMakeFiles/ CMakeCache.txt cmake_install.cmake Makefile CTestTestfile.cmake *.a chtl_compiler test_runner test_parser test_scanner test_chtljs_compiler build/
 cmake .
 make
 
@@ -13,6 +13,12 @@ echo -e "\n--- RUNNING ALL TESTS ---"
 echo -e "\n>>> Running test_parser on tests/parser_test.cjjs"
 ./test_parser tests/parser_test.cjjs
 echo "--------------------------------"
+
+# Run the new CHTL JS compiler test
+echo -e "\n>>> Running test_chtljs_compiler on tests/chtljs_selector_test.cjjs"
+./test_chtljs_compiler tests/chtljs_selector_test.cjjs
+echo "--------------------------------"
+
 
 # Run all scanner tests
 echo -e "\n>>> Running test_scanner on tests/refactor_test.chtl"

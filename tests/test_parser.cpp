@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
 
         // 2. Parse the tokens
         auto context = std::make_shared<CHTLJS::CHTLJSContext>();
-        CHTLJS::CHTLJSParser parser(tokens, context);
+        CHTLJS::CHTLJSParser parser(source, tokens, context);
         std::unique_ptr<CHTLJS::SequenceNode> ast = parser.parse();
 
         // 3. Generate JS from the AST

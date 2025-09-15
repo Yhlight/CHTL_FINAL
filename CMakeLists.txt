@@ -20,6 +20,7 @@ set(CHTL_LIB_SOURCES
     src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp
     src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp
     src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp
+    src/CHTLJS/CHTLJSplitter.cpp
     src/CodeMerger/CodeMerger.cpp
 )
 
@@ -44,6 +45,10 @@ target_link_libraries(test_parser PRIVATE chtl_lib)
 # CHTL Unified Scanner Test runner
 add_executable(test_scanner tests/test_scanner.cpp)
 target_link_libraries(test_scanner PRIVATE chtl_lib)
+
+# CHTL JS Compiler Test runner
+add_executable(test_chtljs_compiler tests/test_chtljs_compiler.cpp)
+target_link_libraries(test_chtljs_compiler PRIVATE chtl_lib)
 
 # Add the new single test command
 add_test(NAME SnapshotTests WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} COMMAND test_runner)

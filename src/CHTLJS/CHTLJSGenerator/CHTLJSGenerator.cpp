@@ -43,7 +43,7 @@ std::string CHTLJSGenerator::visit(const CHTLJSNode* node) {
 std::string CHTLJSGenerator::visitSequenceNode(const SequenceNode* node) {
     std::stringstream ss;
     for (const auto& stmt : node->statements_) {
-        ss << visit(stmt.get()) << ";\n";
+        ss << visit(stmt.get());
     }
     return ss.str();
 }

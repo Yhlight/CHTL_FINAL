@@ -13,7 +13,7 @@ namespace CHTLJS {
 
 class CHTLJSParser {
 public:
-    explicit CHTLJSParser(std::vector<CHTLJSToken>& tokens, std::shared_ptr<CHTLJSContext> context);
+    explicit CHTLJSParser(const std::string& source, std::vector<CHTLJSToken>& tokens, std::shared_ptr<CHTLJSContext> context);
     std::unique_ptr<SequenceNode> parse();
 
 private:
@@ -39,7 +39,7 @@ private:
     const CHTLJSToken& consume(CHTLJSTokenType type, const std::string& error_message);
     bool match(CHTLJSTokenType type);
 
-
+    const std::string& source_;
     std::vector<CHTLJSToken>& tokens_;
     std::shared_ptr<CHTLJSContext> context_;
     size_t current_ = 0;

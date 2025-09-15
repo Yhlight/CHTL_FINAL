@@ -1,55 +1,55 @@
-#include "CodeMerger/CodeMerger.h"
+#include "CodeMerger.h"
 #include <sstream>
-#include <map>
 
 namespace CHTL {
 
-std::string CodeMerger::merge(const std::string& html_output,
-                              const std::vector<std::string>& js_outputs,
-                              const std::map<std::string, std::string>& placeholder_map) {
+std::string CodeMerger::merge(std::string html_output,
+                              const std::vector<std::string>& js_scripts,
+                              const std::vector<std::string>& css_styles) {
 
-    std::string final_html = html_output;
-
-    // Merge JS into <body>
-    if (!js_outputs.empty()) {
-        std::stringstream combined_js_stream;
-        for (const auto& js : js_outputs) {
-            combined_js_stream << js << "\n";
-        }
-        std::string combined_js = combined_js_stream.str();
-
-        // Substitute placeholders
-        for (const auto& pair : placeholder_map) {
-            size_t pos = combined_js.find(pair.first);
-            while (pos != std::string::npos) {
-                combined_js.replace(pos, pair.first.length(), pair.second);
-                pos = combined_js.find(pair.first, pos + pair.second.length());
+    // 1. Merge all CSS styles into a single <style> tag and inject into <head>
+    if (!css_styles.empty()) {
+        std::stringstream combined_css_stream;
+        for (const auto& css : css_styles) {
+            if (!css.empty()) {
+                combined_css_stream << css << "\n";
             }
         }
-
-        if (!combined_js.empty()) {
-             // Avoid adding empty script tags
-            bool only_whitespace = true;
-            for(char c : combined_js) {
-                if(!isspace(c)) {
-                    only_whitespace = false;
-                    break;
-                }
-            }
-
-            if (!only_whitespace) {
-                std::string js_script_tag = "<script>\n" + combined_js + "</script>";
-                size_t body_end_pos = final_html.rfind("</body>");
-                if (body_end_pos != std::string::npos) {
-                    final_html.insert(body_end_pos, js_script_tag + "\n");
-                } else {
-                    final_html += "\n" + js_script_tag;
-                }
+        std::string combined_css = combined_css_stream.str();
+        if (!combined_css.empty()) {
+            std::string style_tag = "<style>\n" + combined_css + "</style>";
+            size_t head_end_pos = html_output.find("</head>");
+            if (head_end_pos != std::string::npos) {
+                html_output.insert(head_end_pos, style_tag + "\n");
+            } else {
+                // Fallback if no <head> tag is found
+                html_output.insert(0, style_tag + "\n");
             }
         }
     }
 
-    return final_html;
+    // 2. Merge all JS scripts into a single <script> tag and inject before </body>
+    if (!js_scripts.empty()) {
+        std::stringstream combined_js_stream;
+        for (const auto& js : js_scripts) {
+            if (!js.empty()) {
+                combined_js_stream << js << "\n";
+            }
+        }
+        std::string combined_js = combined_js_stream.str();
+        if (!combined_js.empty()) {
+            std::string script_tag = "<script>\n" + combined_js + "</script>";
+            size_t body_end_pos = html_output.rfind("</body>");
+            if (body_end_pos != std::string::npos) {
+                html_output.insert(body_end_pos, script_tag + "\n");
+            } else {
+                // Fallback if no </body> tag is found
+                html_output += "\n" + script_tag;
+            }
+        }
+    }
+
+    return html_output;
 }
 
 } // namespace CHTL

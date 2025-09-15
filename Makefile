@@ -191,6 +191,19 @@ test_scanner/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner.dir/build.make CMakeFiles/test_scanner.dir/build
 .PHONY : test_scanner/fast
 
+#=============================================================================
+# Target rules for targets named test_chtljs_compiler
+
+# Build rule for target.
+test_chtljs_compiler: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_chtljs_compiler
+.PHONY : test_chtljs_compiler
+
+# fast build rule for target.
+test_chtljs_compiler/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_chtljs_compiler.dir/build.make CMakeFiles/test_chtljs_compiler.dir/build
+.PHONY : test_chtljs_compiler/fast
+
 src/CHTL/CHTLGenerator/CHTLGenerator.o: src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o
 .PHONY : src/CHTL/CHTLGenerator/CHTLGenerator.o
 
@@ -359,6 +372,30 @@ src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.s
 .PHONY : src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.s
 
+src/CHTLJS/CHTLJSplitter.o: src/CHTLJS/CHTLJSplitter.cpp.o
+.PHONY : src/CHTLJS/CHTLJSplitter.o
+
+# target to build an object file
+src/CHTLJS/CHTLJSplitter.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.o
+.PHONY : src/CHTLJS/CHTLJSplitter.cpp.o
+
+src/CHTLJS/CHTLJSplitter.i: src/CHTLJS/CHTLJSplitter.cpp.i
+.PHONY : src/CHTLJS/CHTLJSplitter.i
+
+# target to preprocess a source file
+src/CHTLJS/CHTLJSplitter.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.i
+.PHONY : src/CHTLJS/CHTLJSplitter.cpp.i
+
+src/CHTLJS/CHTLJSplitter.s: src/CHTLJS/CHTLJSplitter.cpp.s
+.PHONY : src/CHTLJS/CHTLJSplitter.s
+
+# target to generate assembly for a file
+src/CHTLJS/CHTLJSplitter.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.s
+.PHONY : src/CHTLJS/CHTLJSplitter.cpp.s
+
 src/CodeMerger/CodeMerger.o: src/CodeMerger/CodeMerger.cpp.o
 .PHONY : src/CodeMerger/CodeMerger.o
 
@@ -455,6 +492,30 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+tests/test_chtljs_compiler.o: tests/test_chtljs_compiler.cpp.o
+.PHONY : tests/test_chtljs_compiler.o
+
+# target to build an object file
+tests/test_chtljs_compiler.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_chtljs_compiler.dir/build.make CMakeFiles/test_chtljs_compiler.dir/tests/test_chtljs_compiler.cpp.o
+.PHONY : tests/test_chtljs_compiler.cpp.o
+
+tests/test_chtljs_compiler.i: tests/test_chtljs_compiler.cpp.i
+.PHONY : tests/test_chtljs_compiler.i
+
+# target to preprocess a source file
+tests/test_chtljs_compiler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_chtljs_compiler.dir/build.make CMakeFiles/test_chtljs_compiler.dir/tests/test_chtljs_compiler.cpp.i
+.PHONY : tests/test_chtljs_compiler.cpp.i
+
+tests/test_chtljs_compiler.s: tests/test_chtljs_compiler.cpp.s
+.PHONY : tests/test_chtljs_compiler.s
+
+# target to generate assembly for a file
+tests/test_chtljs_compiler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_chtljs_compiler.dir/build.make CMakeFiles/test_chtljs_compiler.dir/tests/test_chtljs_compiler.cpp.s
+.PHONY : tests/test_chtljs_compiler.cpp.s
+
 tests/test_parser.o: tests/test_parser.cpp.o
 .PHONY : tests/test_parser.o
 
@@ -538,6 +599,7 @@ help:
 	@echo "... test"
 	@echo "... chtl_compiler"
 	@echo "... chtl_lib"
+	@echo "... test_chtljs_compiler"
 	@echo "... test_parser"
 	@echo "... test_runner"
 	@echo "... test_scanner"
@@ -562,6 +624,9 @@ help:
 	@echo "... src/CHTLJS/CHTLJSParser/CHTLJSParser.o"
 	@echo "... src/CHTLJS/CHTLJSParser/CHTLJSParser.i"
 	@echo "... src/CHTLJS/CHTLJSParser/CHTLJSParser.s"
+	@echo "... src/CHTLJS/CHTLJSplitter.o"
+	@echo "... src/CHTLJS/CHTLJSplitter.i"
+	@echo "... src/CHTLJS/CHTLJSplitter.s"
 	@echo "... src/CodeMerger/CodeMerger.o"
 	@echo "... src/CodeMerger/CodeMerger.i"
 	@echo "... src/CodeMerger/CodeMerger.s"
@@ -574,6 +639,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... tests/test_chtljs_compiler.o"
+	@echo "... tests/test_chtljs_compiler.i"
+	@echo "... tests/test_chtljs_compiler.s"
 	@echo "... tests/test_parser.o"
 	@echo "... tests/test_parser.i"
 	@echo "... tests/test_parser.s"

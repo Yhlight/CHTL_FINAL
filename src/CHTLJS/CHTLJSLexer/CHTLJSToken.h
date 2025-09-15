@@ -38,8 +38,10 @@ enum class CHTLJSTokenType {
 struct CHTLJSToken {
     CHTLJSTokenType type;
     std::string lexeme;
-    size_t line = 1;
-    size_t column = 1;
+    size_t line;
+    size_t column;
+    size_t start_pos; // Start character offset in the source
+    size_t end_pos;   // End character offset in the source
 };
 
 } // namespace CHTLJS

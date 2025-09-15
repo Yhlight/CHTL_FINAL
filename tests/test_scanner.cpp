@@ -34,16 +34,23 @@ int main(int argc, char* argv[]) {
 
     try {
         CHTL::CHTLUnifiedScanner scanner(source);
-        std::vector<CHTL::CodeFragment> fragments = scanner.scan();
+        CHTL::ScanResult result = scanner.scan();
 
         std::cout << "--- SCANNER OUTPUT ---" << std::endl;
-        for (const auto& fragment : fragments) {
+
+        std::cout << "=== CHTL with Placeholders ===" << std::endl;
+        std::cout << result.chtl_with_placeholders << std::endl;
+
+        std::cout << "\n=== Placeholder Map Contents ===" << std::endl;
+        for (const auto& pair : result.placeholder_map) {
             std::cout << "====================" << std::endl;
-            std::cout << "TYPE: " << fragmentTypeToString(fragment.type) << std::endl;
+            std::cout << "PLACEHOLDER: " << pair.first << std::endl;
+            std::cout << "TYPE: " << fragmentTypeToString(pair.second.type) << std::endl;
             std::cout << "--------------------" << std::endl;
-            std::cout << fragment.content << std::endl;
-            std::cout << "====================" << std::endl;
+            std::cout << pair.second.content << std::endl;
         }
+        std::cout << "====================" << std::endl;
+
 
     } catch (const std::runtime_error& e) {
         std::cerr << "Error: " << e.what() << std::endl;

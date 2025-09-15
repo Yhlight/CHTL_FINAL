@@ -107,4 +107,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/test_runner.dir/DependInfo.cmake"
   "CMakeFiles/test_parser.dir/DependInfo.cmake"
   "CMakeFiles/test_scanner.dir/DependInfo.cmake"
+  "CMakeFiles/test_chtljs_compiler.dir/DependInfo.cmake"
   )

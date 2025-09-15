@@ -15,6 +15,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/app/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp" "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o.d"
   "/app/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp" "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o.d"
   "/app/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp" "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o.d"
+  "/app/src/CHTLJS/CHTLJSplitter.cpp" "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.o.d"
   "/app/src/CodeMerger/CodeMerger.cpp" "CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o.d"
   "/app/src/CompilerDispatcher/CompilerDispatcher.cpp" "CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o.d"
   "/app/src/Scanner/CHTLUnifiedScanner.cpp" "CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o.d"

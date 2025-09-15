@@ -14,56 +14,57 @@ enum class FragmentType {
     CSS,
     JS,
     CHTL_JS,
-    // RESPONSIVE_VALUE removed as it's handled by the CHTL parser
     UNKNOWN
 };
 
-// The output of the scanner will be a vector of these fragments.
+// Represents a fragment of code identified by the scanner.
 struct CodeFragment {
     std::string content;
     FragmentType type;
-    // The placeholder key if this fragment was replaced.
-    std::string placeholder;
+    std::string placeholder; // The key used to replace this fragment.
+};
+
+
+// The result of a full scan operation.
+struct ScanResult {
+    // The main CHTL source code with non-CHTL blocks replaced by placeholders.
+    std::string chtl_with_placeholders;
+    // A map from placeholder keys to the original code fragments.
+    std::map<std::string, CodeFragment> placeholder_map;
 };
 
 class CHTLUnifiedScanner {
 public:
     explicit CHTLUnifiedScanner(const std::string& source);
-    std::vector<CodeFragment> scan();
+    ScanResult scan();
 
 private:
     // Represents the current parsing context.
     enum class ScannerContext {
-        GENERAL,
-        IN_SCRIPT,
-        IN_STYLE
+        GENERAL
+        // No longer need IN_SCRIPT or IN_STYLE as we treat those blocks as opaque
     };
 
     // Main processing logic
-    void process();
     void processGeneral();
-    void processScript(size_t script_end_pos);
-    void processStyle();
 
     // Helper methods for scanning and state management
     void advance(size_t n = 1);
     char peek(size_t offset = 0) const;
     bool isAtEnd() const;
-    void skipWhitespace();
     std::string identifyKeywordAt(size_t pos);
     size_t findNextKeyword();
 
     // Methods for finding construct boundaries
     size_t findEndOfBlock(char open_brace, char close_brace);
-    size_t findEndOfConstruct(const std::string& keyword);
 
     // Placeholder and fragment management
-    std::string createPlaceholder(const std::string& content, FragmentType type);
-    void flushChunk(size_t end, FragmentType type);
+    std::string createPlaceholder(FragmentType type);
+    void flushChunk(size_t end);
 
     // Member variables
     const std::string& source_;
-    std::vector<CodeFragment> fragments_;
+    ScanResult result_; // The result object being built during the scan.
 
     size_t cursor_ = 0;
     size_t last_flush_pos_ = 0;

@@ -10,8 +10,8 @@
 
 namespace CHTLJS {
 
-CHTLJSParser::CHTLJSParser(std::vector<CHTLJSToken>& tokens, std::shared_ptr<CHTLJSContext> context)
-    : tokens_(tokens), context_(context) {}
+CHTLJSParser::CHTLJSParser(const std::string& source, std::vector<CHTLJSToken>& tokens, std::shared_ptr<CHTLJSContext> context)
+    : source_(source), tokens_(tokens), context_(context) {}
 
 std::unique_ptr<SequenceNode> CHTLJSParser::parse() {
     auto sequence = std::make_unique<SequenceNode>();
@@ -55,11 +55,28 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseExpression() {
 
 std::unique_ptr<CHTLJSNode> CHTLJSParser::parsePrimaryExpression() {
     if (match(CHTLJSTokenType::OpenDoubleBrace)) {
-        std::string selector_str;
-        while (peek().type != CHTLJSTokenType::CloseDoubleBrace && !isAtEnd()) {
-            selector_str += advance().lexeme;
+        // The previous token was '{{'. Its end position is our start.
+        size_t start_pos = tokens_[current_ - 1].end_pos;
+
+        // Find the closing '}}' without consuming tokens in between.
+        size_t selector_end_token_idx = current_;
+        while (tokens_[selector_end_token_idx].type != CHTLJSTokenType::CloseDoubleBrace &&
+               tokens_[selector_end_token_idx].type != CHTLJSTokenType::EndOfFile) {
+            selector_end_token_idx++;
         }
+
+        if (tokens_[selector_end_token_idx].type == CHTLJSTokenType::EndOfFile) {
+            throw std::runtime_error("Unterminated enhanced selector.");
+        }
+
+        // The end position is the start of the '}}' token.
+        size_t end_pos = tokens_[selector_end_token_idx].start_pos;
+        std::string selector_str = source_.substr(start_pos, end_pos - start_pos);
+
+        // Now, advance the parser's cursor past all the selector tokens.
+        current_ = selector_end_token_idx;
         consume(CHTLJSTokenType::CloseDoubleBrace, "Expected '}}' to close enhanced selector.");
+
         return std::make_unique<EnhancedSelectorNode>(selector_str);
     }
 

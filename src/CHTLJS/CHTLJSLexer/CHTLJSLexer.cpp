@@ -19,7 +19,7 @@ std::vector<CHTLJSToken> CHTLJSLexer::scanTokens() {
         start_ = current_;
         scanToken();
     }
-    tokens_.push_back({CHTLJSTokenType::EndOfFile, "", line_, 0});
+    tokens_.push_back({CHTLJSTokenType::EndOfFile, "", line_, 0, start_, current_});
     return tokens_;
 }
 
@@ -117,7 +117,7 @@ void CHTLJSLexer::stringLiteral(char quote) {
     }
     advance(); // The closing quote
     std::string value = source_.substr(start_ + 1, current_ - start_ - 2);
-    tokens_.push_back({CHTLJSTokenType::String, value, line_, 0});
+    tokens_.push_back({CHTLJSTokenType::String, value, line_, 0, start_, current_});
 }
 
 char CHTLJSLexer::peek() const {
@@ -140,7 +140,7 @@ bool CHTLJSLexer::isAtEnd() const {
 }
 
 void CHTLJSLexer::addToken(CHTLJSTokenType type) {
-    tokens_.push_back({type, source_.substr(start_, current_ - start_), line_, 0});
+    tokens_.push_back({type, source_.substr(start_, current_ - start_), line_, 0, start_, current_});
 }
 
 } // namespace CHTLJS

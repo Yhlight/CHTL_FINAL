@@ -195,10 +195,24 @@ CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.s: cmake_
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp -o CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.s
 
+CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
+CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.o: src/CHTLJS/CHTLJSplitter.cpp
+CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.o -c /app/src/CHTLJS/CHTLJSplitter.cpp
+
+CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/src/CHTLJS/CHTLJSplitter.cpp > CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.i
+
+CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTLJS/CHTLJSplitter.cpp -o CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.s
+
 CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
 CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o: src/CodeMerger/CodeMerger.cpp
 CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o -c /app/src/CodeMerger/CodeMerger.cpp
 
 CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.i: cmake_force
@@ -220,6 +234,7 @@ chtl_lib_OBJECTS = \
 "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o" \
 "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o" \
 "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o" \
+"CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.o" \
 "CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o"
 
 # External object files for target chtl_lib
@@ -234,10 +249,11 @@ libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o
+libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.o
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/build.make
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX static library libchtl_lib.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX static library libchtl_lib.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/chtl_lib.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/chtl_lib.dir/link.txt --verbose=$(VERBOSE)
 

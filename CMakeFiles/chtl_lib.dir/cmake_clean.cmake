@@ -13,6 +13,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o.d"
   "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o"
   "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o.d"
+  "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.o"
+  "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSplitter.cpp.o.d"
   "CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o"
   "CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o.d"
   "CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o"
