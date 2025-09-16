@@ -11,8 +11,8 @@
 
 namespace CHTL {
 
-CHTLParser::CHTLParser(const std::string& source, std::vector<Token>& tokens, CHTLLoader& loader, const std::string& initial_path, std::shared_ptr<ParserContext> context)
-    : source_(source), tokens_(tokens), loader_(loader), current_path_(initial_path), context_(context) {
+CHTLParser::CHTLParser(std::string source, std::vector<Token>& tokens, CHTLLoader& loader, const std::string& initial_path, std::shared_ptr<ParserContext> context)
+    : source_(std::move(source)), tokens_(tokens), loader_(loader), current_path_(initial_path), context_(context) {
     if (!tokens_.empty() && tokens_[0].type == TokenType::Namespace) {
         if (tokens_.size() > 1 && tokens_[1].type == TokenType::Identifier) {
             current_namespace_ = tokens_[1].lexeme;
@@ -37,19 +37,59 @@ std::unique_ptr<RootNode> CHTLParser::parse() {
     return root;
 }
 
+void CHTLParser::parseExportStatement() {
+    CMODExport export_data;
+
+    // 1. Parse Type
+    if (match({TokenType::AtElement})) {
+        export_data.type = CMODExportType::Element;
+    } else if (match({TokenType::AtStyle})) {
+        export_data.type = CMODExportType::Style;
+    } else if (match({TokenType::AtVar})) {
+        export_data.type = CMODExportType::Var;
+    } else {
+        throw std::runtime_error("Expected export type (@Element, @Style, @Var) after [Export].");
+    }
+
+    // 2. Parse Symbol Name
+    export_data.symbol_name = consume(TokenType::Identifier, "Expected identifier for export name.").lexeme;
+
+    // 3. Parse Source File
+    consume(TokenType::From, "Expected 'from' keyword in @export statement.");
+    export_data.source_file = consume(TokenType::StringLiteral, "Expected file path string for export source.").lexeme;
+
+    // 4. Consume Semicolon
+    consume(TokenType::Semicolon, "Expected ';' after @export statement.");
+
+    // 5. Add to context
+    if (!current_namespace_.empty()) {
+        context_->cmod_exports[current_namespace_].push_back(export_data);
+    } else {
+        throw std::runtime_error("Cannot process @export without a namespace/module name declared.");
+    }
+}
+
 std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     std::vector<std::unique_ptr<Node>> nodes;
     if (match({TokenType::Namespace})) {
         current_namespace_ = consume(TokenType::Identifier, "Expected namespace name.").lexeme;
+        // A namespace can be a single-line declaration for a file, or a block.
+        // If it's a block, we parse it and then reset the namespace.
         if (match({TokenType::OpenBrace})) {
             while (!check(TokenType::CloseBrace) && !isAtEnd()) {
                 auto parsed_nodes = parseDeclaration();
                 nodes.insert(nodes.end(), std::make_move_iterator(parsed_nodes.begin()), std::make_move_iterator(parsed_nodes.end()));
             }
             consume(TokenType::CloseBrace, "Expected '}' to close namespace block.");
-            current_namespace_ = "";
+            current_namespace_ = ""; // Reset after block
+        } else {
+            consume(TokenType::Semicolon, "Expected ';' after namespace declaration.");
         }
         return nodes;
+    }
+    if (match({TokenType::Export})) {
+        parseExportStatement();
+        return nodes; // Return empty nodes vector
     }
     if (match({TokenType::Configuration})) {
         parseConfigurationBlock();
@@ -62,13 +102,17 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
             consume(TokenType::Semicolon, "Expected ';' after import statement.");
 
             std::string import_path = pathToken.lexeme;
-            if(auto content = loader_.loadFile(import_path, current_path_)) {
+            // Pass the context to the loader
+            if(auto content = loader_.loadFile(import_path, current_path_, context_)) {
                 std::filesystem::path p(import_path);
                 std::string default_namespace = p.stem().string();
 
                 std::string imported_file_canonical_path;
                 try {
-                    imported_file_canonical_path = std::filesystem::canonical(std::filesystem::path(current_path_).parent_path() / import_path).string();
+                    // This logic might be tricky with CMODs. The loader now handles canonical paths.
+                    // Let's simplify and use the import path as the "new" current path.
+                    // The loader itself should resolve the full path.
+                    imported_file_canonical_path = p.string();
                 } catch (const std::filesystem::filesystem_error& e) {
                      throw std::runtime_error("Could not find imported file: " + import_path);
                 }
@@ -77,6 +121,7 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
                 std::vector<Token> imported_tokens = imported_lexer.scanTokens();
                 CHTLParser imported_parser(*content, imported_tokens, loader_, imported_file_canonical_path, context_);
 
+                // The namespace might be set by the file itself, or we use the filename as default.
                 if (imported_parser.current_namespace_.empty()) {
                     imported_parser.current_namespace_ = default_namespace;
                 }
@@ -91,7 +136,7 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
             consume(TokenType::From, "Expected 'from' keyword in @CJmod import statement.");
             const Token& pathToken = consume(TokenType::StringLiteral, "Expected file path string.");
             consume(TokenType::Semicolon, "Expected ';' after import statement.");
-            loader_.loadCJMOD(pathToken.lexeme, current_path_, context_);
+            loader_.loadSharedLibrary(pathToken.lexeme, current_path_, context_); // Renamed function
         }
         else {
             throw std::runtime_error("Expected '@Chtl' or '@CJmod' after [Import].");
@@ -106,7 +151,11 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     if (match({TokenType::AtElement})) {
         const Token& name = consume(TokenType::Identifier, "Expected template name after '@Element'.");
         std::string qualified_name;
-        if (match({TokenType::From})) {
+        if (match({TokenType::Dot})) {
+            const Token& symbol = consume(TokenType::Identifier, "Expected symbol name after '.'.");
+            qualified_name = name.lexeme + "::" + symbol.lexeme;
+        }
+        else if (match({TokenType::From})) {
             const Token& ns = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
             qualified_name = ns.lexeme + "::" + name.lexeme;
         } else {
@@ -629,7 +678,10 @@ std::unique_ptr<StyleBlockNode> CHTLParser::parseStyleBlock() {
             const Token& name = consume(TokenType::Identifier, "Expected template name after '@Style'.");
             std::string qualified_name;
 
-            if (match({TokenType::From})) {
+            if (match({TokenType::Dot})) {
+                const Token& symbol = consume(TokenType::Identifier, "Expected symbol name after '.'.");
+                qualified_name = name.lexeme + "::" + symbol.lexeme;
+            } else if (match({TokenType::From})) {
                  const Token& ns = consume(TokenType::Identifier, "Expected namespace name after 'from'.");
                  qualified_name = ns.lexeme + "::" + name.lexeme;
             } else {
@@ -732,37 +784,39 @@ std::vector<PropertyValue> CHTLParser::parsePropertyValue() {
         } else if (first.type == TokenType::ResponsiveValue) {
             Token token = advance();
             parts.emplace_back(ResponsiveValueNode(token.lexeme));
-        } else if (first.type == TokenType::Identifier && second.type == TokenType::Dot) {
+        } else if (first.type == TokenType::Identifier && second.type == TokenType::Dot && tokens_[current_ + 3].type != TokenType::OpenParen) {
+            // This is Module.property, not Module.VarGroup(...)
             Token selector = advance();
             advance();
             Token prop = consume(TokenType::Identifier, "Expected property name after '.'.");
             parts.emplace_back(PropertyReferenceNode(selector, prop));
-        } else if (first.type == TokenType::Identifier && second.type == TokenType::OpenParen) {
-            // This could be a variable group like `MyVars(var_name)`
-            if (tokens_[current_ + 2].type == TokenType::Identifier && tokens_[current_ + 3].type == TokenType::CloseParen) {
+        } else if (first.type == TokenType::Identifier && (second.type == TokenType::OpenParen || (second.type == TokenType::Dot && tokens_[current_ + 2].type == TokenType::Identifier && tokens_[current_ + 3].type == TokenType::OpenParen))) {
+            // This handles `VarGroup(...)` and `Module.VarGroup(...)`
+            std::string qualified_group_name;
+            if (second.type == TokenType::Dot) { // Module.VarGroup
+                const Token& moduleName = advance();
+                consume(TokenType::Dot, "Expected '.'");
+                const Token& groupName = consume(TokenType::Identifier, "Expected var group name.");
+                qualified_group_name = moduleName.lexeme + "::" + groupName.lexeme;
+            } else { // VarGroup
                 const Token& groupNameToken = advance();
-                consume(TokenType::OpenParen, "Expected '(' after variable group name.");
-                const Token& varNameToken = consume(TokenType::Identifier, "Expected variable name inside parentheses.");
-                consume(TokenType::CloseParen, "Expected ')' after variable name.");
+                qualified_group_name = resolveUnqualifiedName(groupNameToken.lexeme, TemplateType::Var);
+            }
 
-                // Here we resolve the variable group name
-                std::string qualified_group_name = resolveUnqualifiedName(groupNameToken.lexeme, TemplateType::Var);
+            consume(TokenType::OpenParen, "Expected '(' after variable group name.");
+            const Token& varNameToken = consume(TokenType::Identifier, "Expected variable name inside parentheses.");
+            consume(TokenType::CloseParen, "Expected ')' after variable name.");
 
-                if (context_->var_templates_.count(qualified_group_name)) {
-                    const auto& templateNode = context_->var_templates_.at(qualified_group_name);
-                    if (templateNode->variables_.count(varNameToken.lexeme)) {
-                        const auto& substituted_parts = templateNode->variables_.at(varNameToken.lexeme);
-                        parts.insert(parts.end(), substituted_parts.begin(), substituted_parts.end());
-                    } else {
-                        throw std::runtime_error("Undefined variable '" + varNameToken.lexeme + "' in group '" + groupNameToken.lexeme + "'.");
-                    }
+            if (context_->var_templates_.count(qualified_group_name)) {
+                const auto& templateNode = context_->var_templates_.at(qualified_group_name);
+                if (templateNode->variables_.count(varNameToken.lexeme)) {
+                    const auto& substituted_parts = templateNode->variables_.at(varNameToken.lexeme);
+                    parts.insert(parts.end(), substituted_parts.begin(), substituted_parts.end());
                 } else {
-                    // This should not be reached if the resolver works.
-                    throw std::runtime_error("Use of undefined variable group '" + groupNameToken.lexeme + "'.");
+                    throw std::runtime_error("Undefined variable '" + varNameToken.lexeme + "' in group '" + qualified_group_name + "'.");
                 }
             } else {
-                // Not a var group, just a regular token.
-                parts.emplace_back(advance());
+                throw std::runtime_error("Use of undefined variable group '" + qualified_group_name + "'.");
             }
         }
         else {
@@ -830,6 +884,7 @@ void CHTLParser::synchronize() {
             case TokenType::Script:
             case TokenType::Import:
             case TokenType::Namespace:
+            case TokenType::Export:
                 return;
             default:
                 break;
@@ -870,7 +925,25 @@ void CHTLParser::checkConstraints(const ElementNode& parent, const Node& child) 
 }
 
 std::string CHTLParser::resolveUnqualifiedName(const std::string& name, TemplateType type) {
-    // 1. Check global namespace first
+    // 1. Check current namespace first
+    if (!current_namespace_.empty()) {
+        std::string qualified_name = current_namespace_ + "::" + name;
+        bool found = false;
+        switch (type) {
+            case TemplateType::Style:
+                if (context_->style_templates_.count(qualified_name)) found = true;
+                break;
+            case TemplateType::Element:
+                if (context_->element_templates_.count(qualified_name)) found = true;
+                break;
+            case TemplateType::Var:
+                if (context_->var_templates_.count(qualified_name)) found = true;
+                break;
+        }
+        if (found) return qualified_name;
+    }
+
+    // 2. Check global namespace (empty namespace)
     switch (type) {
         case TemplateType::Style:
             if (context_->style_templates_.count(name)) return name;
@@ -883,7 +956,7 @@ std::string CHTLParser::resolveUnqualifiedName(const std::string& name, Template
             break;
     }
 
-    // 2. Search imported namespaces
+    // 3. Search imported namespaces
     std::vector<std::string> found_in_namespaces;
     for (const auto& ns : context_->imported_namespaces_) {
         std::string qualified_name = ns + "::" + name;

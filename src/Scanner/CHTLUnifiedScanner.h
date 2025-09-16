@@ -12,9 +12,8 @@ namespace CHTL {
 enum class FragmentType {
     CHTL,
     CSS,
-    JS_PLACEHOLDER, // Represents a placeholder for a pure JS block
-    CHTL_JS,        // Represents a pure CHTL_JS construct
-    JS_WITH_CHTLJS, // Represents a JS block that contains CHTL_JS within it
+    JS,
+    CHTL_JS,
     UNKNOWN
 };
 
@@ -33,8 +32,11 @@ public:
     const std::map<std::string, std::string>& getPlaceholderMap() const;
 
 private:
+    enum class ScannerState { CHTL, CSS, SCRIPT };
+
     // Main processing logic
     void process();
+    bool isKeywordAt(size_t pos, const std::string& keyword);
 
     // Scans the content of a <script>...</script> block.
     void scanScriptBlock(size_t block_end_pos);

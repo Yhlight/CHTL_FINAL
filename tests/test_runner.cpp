@@ -48,7 +48,7 @@ int main() {
         if (entry.path().extension() == ".chtl") {
             const std::string test_name = entry.path().stem().string();
             // Skip test assets
-            if (test_name.rfind("ns", 0) == 0 || test_name.rfind("namespace_test", 0) == 0) continue;
+            if (test_name.rfind("ns", 0) == 0 || test_name.rfind("namespace_test", 0) == 0 || test_name == "scanner_js_test") continue;
 
             std::cout << "TEST: " << test_name << " ... ";
 

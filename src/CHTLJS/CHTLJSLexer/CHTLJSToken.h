@@ -33,6 +33,8 @@ enum class CHTLJSTokenType {
     Delegate,
     Router,
     Vir,
+    ScriptLoader,
+    Semicolon,
 };
 
 struct CHTLJSToken {

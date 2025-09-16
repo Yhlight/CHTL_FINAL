@@ -6,7 +6,10 @@
 #include "CHTLJS/CHTLJSNode/PlaceholderNode.h"
 #include "CHTLJS/CHTLJSNode/ValueNode.h"
 #include "CHTLJS/CHTLJSNode/VirNode.h"
+#include "CHTLJS/CHTLJSNode/RouterNode.h"
+#include "CHTLJS/CHTLJSNode/ScriptLoaderNode.h"
 #include <stdexcept>
+#include <iostream>
 
 namespace CHTLJS {
 
@@ -25,7 +28,21 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseStatement() {
     if (peek().type == CHTLJSTokenType::Vir) {
         return parseVirDeclaration();
     }
-    return parseExpression();
+    if (match(CHTLJSTokenType::Router)) {
+        return parseRouterBlock();
+    }
+    if (match(CHTLJSTokenType::ScriptLoader)) {
+        return parseScriptLoaderBlock();
+    }
+    if (peek().type == CHTLJSTokenType::Placeholder) {
+        auto node = std::make_unique<PlaceholderNode>(advance().lexeme);
+        consume(CHTLJSTokenType::Semicolon, "Expected ';' after placeholder statement.");
+        return node;
+    }
+
+    auto expr = parseExpression();
+    consume(CHTLJSTokenType::Semicolon, "Expected ';' after expression statement.");
+    return expr;
 }
 
 std::unique_ptr<CHTLJSNode> CHTLJSParser::parseVirDeclaration() {
@@ -41,6 +58,8 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseVirDeclaration() {
     // The node is stored in the context for lookups, and also returned as part of the AST
     // so the generator can decide what to do with it (e.g., declare a const).
     context_->virtual_objects[name.lexeme] = value_node.get();
+
+    consume(CHTLJSTokenType::Semicolon, "Expected ';' after vir declaration.");
     return std::make_unique<VirNode>(name.lexeme, std::move(value_node));
 }
 
@@ -110,6 +129,132 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseMemberAccessExpression(std::uniqu
 
 
 // --- Block Parsers ---
+
+std::unique_ptr<CHTLJSNode> CHTLJSParser::parseScriptLoaderBlock() {
+    auto loader_node = std::make_unique<ScriptLoaderNode>();
+    consume(CHTLJSTokenType::OpenBrace, "Expected '{' to open ScriptLoader block.");
+
+    while (peek().type != CHTLJSTokenType::CloseBrace && !isAtEnd()) {
+        CHTLJSToken keyword = consume(CHTLJSTokenType::Identifier, "Expected 'load' keyword in ScriptLoader block.");
+        if (keyword.lexeme != "load") {
+            throw std::runtime_error("Unsupported keyword in ScriptLoader block. Only 'load' is allowed.");
+        }
+        consume(CHTLJSTokenType::Colon, "Expected ':' after 'load' keyword.");
+
+        do {
+            if (peek().type != CHTLJSTokenType::String) {
+                throw std::runtime_error("Expected string literal for file path.");
+            }
+            loader_node->addPath(advance().lexeme);
+        } while (match(CHTLJSTokenType::Comma));
+
+        match(CHTLJSTokenType::Semicolon); // Optional semicolon
+    }
+
+    consume(CHTLJSTokenType::CloseBrace, "Expected '}' to close ScriptLoader block.");
+    return loader_node;
+}
+
+std::unique_ptr<CHTLJSNode> CHTLJSParser::parseRouterBlock() {
+    auto router_node = std::make_unique<RouterNode>();
+    consume(CHTLJSTokenType::OpenBrace, "Expected '{' to open router block.");
+
+    std::vector<std::unique_ptr<ValueNode>> urls;
+    std::vector<std::unique_ptr<EnhancedSelectorNode>> pages;
+
+    while (peek().type != CHTLJSTokenType::CloseBrace && !isAtEnd()) {
+        CHTLJSToken key = consume(CHTLJSTokenType::Identifier, "Expected property key identifier in router block.");
+        consume(CHTLJSTokenType::Colon, "Expected ':' after router property key.");
+
+        if (key.lexeme == "url") {
+             do {
+                auto url_expr = parseExpression();
+                if (url_expr->getType() != CHTLJSNodeType::Value) throw std::runtime_error("URL must be a string value.");
+                urls.push_back(std::unique_ptr<ValueNode>(static_cast<ValueNode*>(url_expr.release())));
+            } while (match(CHTLJSTokenType::Comma));
+        }
+        else if (key.lexeme == "page") {
+            if (peek().type == CHTLJSTokenType::OpenBrace) {
+                 // Handles: page: {"/home", {{selector1}}}, {"/about", {{selector2}}}
+                do {
+                    consume(CHTLJSTokenType::OpenBrace, "Expected '{' for a route pair.");
+                    auto url_expr = parseExpression();
+                    consume(CHTLJSTokenType::Comma, "Expected ',' separating url and page in route pair.");
+                    auto page_expr = parseExpression();
+                    consume(CHTLJSTokenType::CloseBrace, "Expected '}' to close route pair.");
+
+                    if (url_expr->getType() != CHTLJSNodeType::Value || page_expr->getType() != CHTLJSNodeType::EnhancedSelector) {
+                        throw std::runtime_error("Route pair must be a string url and an enhanced selector page.");
+                    }
+
+                    RoutePair pair;
+                    pair.url = std::unique_ptr<ValueNode>(static_cast<ValueNode*>(url_expr.release()));
+                    pair.page = std::unique_ptr<EnhancedSelectorNode>(static_cast<EnhancedSelectorNode*>(page_expr.release()));
+                    router_node->routes.push_back(std::move(pair));
+
+                } while (match(CHTLJSTokenType::Comma));
+            } else {
+                // Handles: page: {{selector1}}, {{selector2}}
+                do {
+                    auto page_expr = parseExpression();
+                    if (page_expr->getType() != CHTLJSNodeType::EnhancedSelector) throw std::runtime_error("Page must be an enhanced selector.");
+                    pages.push_back(std::unique_ptr<EnhancedSelectorNode>(static_cast<EnhancedSelectorNode*>(page_expr.release())));
+                } while (match(CHTLJSTokenType::Comma));
+            }
+        } else if (key.lexeme == "root") {
+            RootConfig config;
+            if (match(CHTLJSTokenType::OpenBrace)) {
+                // Handles: root: {"/", {{container}}}
+                auto path_expr = parseExpression();
+                consume(CHTLJSTokenType::Comma, "Expected ',' separating path and container in root config.");
+                auto container_expr = parseExpression();
+                consume(CHTLJSTokenType::CloseBrace, "Expected '}' to close root config.");
+                if (path_expr->getType() == CHTLJSNodeType::Value) {
+                     config.path = std::unique_ptr<ValueNode>(static_cast<ValueNode*>(path_expr.release()));
+                }
+                if (container_expr->getType() == CHTLJSNodeType::EnhancedSelector) {
+                    config.container = std::unique_ptr<EnhancedSelectorNode>(static_cast<EnhancedSelectorNode*>(container_expr.release()));
+                }
+            } else {
+                // Handles: root: "/" OR root: {{container}}
+                auto expr = parseExpression();
+                 if (expr->getType() == CHTLJSNodeType::Value) {
+                     config.path = std::unique_ptr<ValueNode>(static_cast<ValueNode*>(expr.release()));
+                } else if (expr->getType() == CHTLJSNodeType::EnhancedSelector) {
+                    config.container = std::unique_ptr<EnhancedSelectorNode>(static_cast<EnhancedSelectorNode*>(expr.release()));
+                }
+            }
+            router_node->root_config = std::move(config);
+        } else if (key.lexeme == "mode") {
+            auto mode_expr = parseExpression();
+            if (mode_expr->getType() != CHTLJSNodeType::Value) {
+                throw std::runtime_error("Router mode must be a string value.");
+            }
+            router_node->mode = static_cast<ValueNode*>(mode_expr.get())->getValue();
+        } else {
+             throw std::runtime_error("Unsupported key in router block: " + key.lexeme);
+        }
+
+        match(CHTLJSTokenType::Comma);
+    }
+
+    consume(CHTLJSTokenType::CloseBrace, "Expected '}' to close router block.");
+
+    if (!urls.empty()) {
+        if (urls.size() != pages.size()) {
+            throw std::runtime_error("Mismatched number of urls and pages in Router block.");
+        }
+        for (size_t i = 0; i < urls.size(); ++i) {
+            RoutePair pair;
+            pair.url = std::move(urls[i]);
+            pair.page = std::move(pages[i]);
+            router_node->routes.push_back(std::move(pair));
+        }
+    }
+
+    return router_node;
+}
+
 
 std::unique_ptr<CHTLJSNode> CHTLJSParser::parseAnimateBlock() {
     auto animate_node = std::make_unique<AnimateNode>();

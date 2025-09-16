@@ -15,6 +15,8 @@ enum class CHTLJSNodeType {
     Placeholder,
     Sequence,
     Vir,
+    Router,
+    ScriptLoader,
     // Future node types will go here
 };
 

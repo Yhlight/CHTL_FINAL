@@ -25,13 +25,14 @@ namespace CHTL {
 
 class CHTLParser {
 public:
-    CHTLParser(const std::string& source, std::vector<Token>& tokens, CHTLLoader& loader, const std::string& initial_path, std::shared_ptr<ParserContext> context);
+    CHTLParser(std::string source, std::vector<Token>& tokens, CHTLLoader& loader, const std::string& initial_path, std::shared_ptr<ParserContext> context);
     std::unique_ptr<RootNode> parse();
 
 private:
-    const std::string& source_;
+    const std::string source_;
     void applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes);
     std::vector<std::unique_ptr<Node>> parseDeclaration();
+    void parseExportStatement();
     std::unique_ptr<OriginNode> parseOriginBlock();
     void parseConfigurationBlock();
     void parseTemplateDefinition(bool is_custom);
@@ -70,9 +71,10 @@ private:
     std::vector<Token>& tokens_;
     CHTLLoader& loader_;
     std::string current_path_;
-    std::string current_namespace_;
     std::shared_ptr<ParserContext> context_;
     size_t current_ = 0;
+public:
+    std::string current_namespace_;
     bool hadError_ = false;
 };
 
