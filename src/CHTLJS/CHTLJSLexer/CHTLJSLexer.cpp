@@ -10,6 +10,7 @@ const std::unordered_map<std::string, CHTLJSTokenType> CHTLJSLexer::keywords = {
     {"delegate", CHTLJSTokenType::Delegate},
     {"router", CHTLJSTokenType::Router},
     {"vir", CHTLJSTokenType::Vir},
+    {"scriptloader", CHTLJSTokenType::ScriptLoader},
 };
 
 CHTLJSLexer::CHTLJSLexer(const std::string& source) : source_(source) {}
@@ -46,6 +47,7 @@ void CHTLJSLexer::scanToken() {
         case ']': addToken(CHTLJSTokenType::CloseBracket); break;
         case ':': addToken(CHTLJSTokenType::Colon); break;
         case ',': addToken(CHTLJSTokenType::Comma); break;
+        case ';': addToken(CHTLJSTokenType::Semicolon); break;
         case '=': addToken(CHTLJSTokenType::Equals); break;
         case '-':
              if (peek() == '>') {

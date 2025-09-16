@@ -8,6 +8,8 @@
 #include "CHTLJSContext.h"
 
 #include "../CHTLJSNode/SequenceNode.h"
+#include "../CHTLJSNode/RouterNode.h"
+#include "../CHTLJSNode/ScriptLoaderNode.h"
 
 namespace CHTLJS {
 
@@ -30,7 +32,8 @@ private:
     std::unique_ptr<CHTLJSNode> parseListenBlock(std::unique_ptr<CHTLJSNode> object);
     std::unique_ptr<CHTLJSNode> parseDelegateBlock(std::unique_ptr<CHTLJSNode> object);
     std::unique_ptr<CHTLJSNode> parseAnimateBlock();
-    // std::unique_ptr<CHTLJSNode> parseRouterBlock(); // Future
+    std::unique_ptr<CHTLJSNode> parseRouterBlock();
+    std::unique_ptr<CHTLJSNode> parseScriptLoaderBlock();
 
     // Helpers
     const CHTLJSToken& peek() const;

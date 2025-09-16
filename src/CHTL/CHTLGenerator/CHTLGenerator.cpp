@@ -69,7 +69,144 @@ Value CHTLGenerator::evaluateExpression(std::vector<PropertyValue>::const_iterat
         this->responsive_variables_.insert(responsive_node.getVariableName());
         lhs = {0, "", "var(--" + responsive_node.getVariableName() + ")"};
         ++it;
-    } else if (std::holds_alternative<Token>(current_part)) {
+    } else if (std::holds_alternative<PropertyReferenceNode>(current_part)) {
+        const auto& ref_node = std::get<PropertyReferenceNode>(current_part);
+        ElementNode* target_element = findElementBySelector(ref_node.selector_.lexeme, all_elements_);
+        if (!target_element) {
+            throw std::runtime_error("Could not find element for selector: " + ref_node.selector_.lexeme);
+        }
+        std::string unique_id = getElementUniqueId(target_element);
+        if(symbol_table_.count(unique_id) && symbol_table_.at(unique_id).count(ref_node.property_.lexeme)) {
+            lhs = symbol_table_.at(unique_id).at(ref_node.property_.lexeme);
+            ++it;
+        } else {
+            throw std::runtime_error("Could not resolve property reference: " + ref_node.selector_.lexeme + "." + ref_node.property_.lexeme);
+        }
+    }
+    } else if (std::holds_alternative<PropertyReferenceNode>(current_part)) {
+        const auto& ref_node = std::get<PropertyReferenceNode>(current_part);
+        ElementNode* target_element = findElementBySelector(ref_node.selector_.lexeme, all_elements_);
+        if (!target_element) {
+            throw std::runtime_error("Could not find element for selector: " + ref_node.selector_.lexeme);
+        }
+        std::string unique_id = getElementUniqueId(target_element);
+        if(symbol_table_.count(unique_id) && symbol_table_.at(unique_id).count(ref_node.property_.lexeme)) {
+            lhs = symbol_table_.at(unique_id).at(ref_node.property_.lexeme);
+            ++it;
+        } else {
+            // The property might not be in the symbol table if it hasn't been resolved yet.
+            // This indicates a dependency issue that should be handled by the pass-based system.
+            // For now, we throw, but a more robust system might queue this for later evaluation.
+            throw std::runtime_error("Could not resolve property reference: " + ref_node.selector_.lexeme + "." + ref_node.property_.lexeme);
+        }
+    }
+    } else if (std::holds_alternative<PropertyReferenceNode>(current_part)) {
+        const auto& ref_node = std::get<PropertyReferenceNode>(current_part);
+        ElementNode* target_element = findElementBySelector(ref_node.selector_.lexeme, all_elements_);
+        if (!target_element) {
+            throw std::runtime_error("Could not find element for selector: " + ref_node.selector_.lexeme);
+        }
+        std::string unique_id = getElementUniqueId(target_element);
+        if(symbol_table_.count(unique_id) && symbol_table_.at(unique_id).count(ref_node.property_.lexeme)) {
+            lhs = symbol_table_.at(unique_id).at(ref_node.property_.lexeme);
+            ++it;
+        } else {
+            throw std::runtime_error("Could not resolve property reference: " + ref_node.selector_.lexeme + "." + ref_node.property_.lexeme);
+        }
+    }
+    } else if (std::holds_alternative<PropertyReferenceNode>(current_part)) {
+        const auto& ref_node = std::get<PropertyReferenceNode>(current_part);
+        ElementNode* target_element = findElementBySelector(ref_node.selector_.lexeme, all_elements_);
+        if (!target_element) {
+            throw std::runtime_error("Could not find element for selector: " + ref_node.selector_.lexeme);
+        }
+        std::string unique_id = getElementUniqueId(target_element);
+        if(symbol_table_.count(unique_id) && symbol_table_.at(unique_id).count(ref_node.property_.lexeme)) {
+            lhs = symbol_table_.at(unique_id).at(ref_node.property_.lexeme);
+            ++it;
+        } else {
+            throw std::runtime_error("Could not resolve property reference: " + ref_node.selector_.lexeme + "." + ref_node.property_.lexeme);
+        }
+    }
+    } else if (std::holds_alternative<PropertyReferenceNode>(current_part)) {
+        const auto& ref_node = std::get<PropertyReferenceNode>(current_part);
+        ElementNode* target_element = findElementBySelector(ref_node.selector_.lexeme, all_elements_);
+        if (!target_element) {
+            throw std::runtime_error("Could not find element for selector: " + ref_node.selector_.lexeme);
+        }
+        std::string unique_id = getElementUniqueId(target_element);
+        if(symbol_table_.count(unique_id) && symbol_table_.at(unique_id).count(ref_node.property_.lexeme)) {
+            lhs = symbol_table_.at(unique_id).at(ref_node.property_.lexeme);
+            ++it;
+        } else {
+            throw std::runtime_error("Could not resolve property reference: " + ref_node.selector_.lexeme + "." + ref_node.property_.lexeme);
+        }
+    } else if (std::holds_alternative<PropertyReferenceNode>(current_part)) {
+        const auto& ref_node = std::get<PropertyReferenceNode>(current_part);
+        ElementNode* target_element = findElementBySelector(ref_node.selector_.lexeme, all_elements_);
+        if (!target_element) {
+            throw std::runtime_error("Could not find element for selector: " + ref_node.selector_.lexeme);
+        }
+        std::string unique_id = getElementUniqueId(target_element);
+        if(symbol_table_.count(unique_id) && symbol_table_.at(unique_id).count(ref_node.property_.lexeme)) {
+            lhs = symbol_table_.at(unique_id).at(ref_node.property_.lexeme);
+            ++it;
+        } else {
+            throw std::runtime_error("Could not resolve property reference: " + ref_node.selector_.lexeme + "." + ref_node.property_.lexeme);
+        }
+    } else if (std::holds_alternative<PropertyReferenceNode>(current_part)) {
+        const auto& ref_node = std::get<PropertyReferenceNode>(current_part);
+        ElementNode* target_element = findElementBySelector(ref_node.selector_.lexeme, all_elements_);
+        if (!target_element) {
+            throw std::runtime_error("Could not find element for selector: " + ref_node.selector_.lexeme);
+        }
+        std::string unique_id = getElementUniqueId(target_element);
+        if(symbol_table_.count(unique_id) && symbol_table_.at(unique_id).count(ref_node.property_.lexeme)) {
+            lhs = symbol_table_.at(unique_id).at(ref_node.property_.lexeme);
+            ++it;
+        } else {
+            throw std::runtime_error("Could not resolve property reference: " + ref_node.selector_.lexeme + "." + ref_node.property_.lexeme);
+        }
+    } else if (std::holds_alternative<PropertyReferenceNode>(current_part)) {
+        const auto& ref_node = std::get<PropertyReferenceNode>(current_part);
+        ElementNode* target_element = findElementBySelector(ref_node.selector_.lexeme, all_elements_);
+        if (!target_element) {
+            throw std::runtime_error("Could not find element for selector: " + ref_node.selector_.lexeme);
+        }
+        std::string unique_id = getElementUniqueId(target_element);
+        if(symbol_table_.count(unique_id) && symbol_table_.at(unique_id).count(ref_node.property_.lexeme)) {
+            lhs = symbol_table_.at(unique_id).at(ref_node.property_.lexeme);
+            ++it;
+        } else {
+            throw std::runtime_error("Could not resolve property reference: " + ref_node.selector_.lexeme + "." + ref_node.property_.lexeme);
+        }
+    } else if (std::holds_alternative<PropertyReferenceNode>(current_part)) {
+        const auto& ref_node = std::get<PropertyReferenceNode>(current_part);
+        ElementNode* target_element = findElementBySelector(ref_node.selector_.lexeme, all_elements_);
+        if (!target_element) {
+            throw std::runtime_error("Could not find element for selector: " + ref_node.selector_.lexeme);
+        }
+        std::string unique_id = getElementUniqueId(target_element);
+        if(symbol_table_.count(unique_id) && symbol_table_.at(unique_id).count(ref_node.property_.lexeme)) {
+            lhs = symbol_table_.at(unique_id).at(ref_node.property_.lexeme);
+            ++it;
+        } else {
+            throw std::runtime_error("Could not resolve property reference: " + ref_node.selector_.lexeme + "." + ref_node.property_.lexeme);
+        }
+    } else if (std::holds_alternative<PropertyReferenceNode>(current_part)) {
+        const auto& ref_node = std::get<PropertyReferenceNode>(current_part);
+        ElementNode* target_element = findElementBySelector(ref_node.selector_.lexeme, all_elements_);
+        if (!target_element) {
+            throw std::runtime_error("Could not find element for selector: " + ref_node.selector_.lexeme);
+        }
+        std::string unique_id = getElementUniqueId(target_element);
+        if(symbol_table_.count(unique_id) && symbol_table_.at(unique_id).count(ref_node.property_.lexeme)) {
+            lhs = symbol_table_.at(unique_id).at(ref_node.property_.lexeme);
+            ++it;
+        } else {
+            throw std::runtime_error("Could not resolve property reference: " + ref_node.selector_.lexeme + "." + ref_node.property_.lexeme);
+        }
+    else if (std::holds_alternative<Token>(current_part)) {
         const auto& token = std::get<Token>(current_part);
         if (token.type == TokenType::OpenParen) {
             ++it;
@@ -98,7 +235,9 @@ Value CHTLGenerator::evaluateExpression(std::vector<PropertyValue>::const_iterat
              throw std::runtime_error("Unexpected token in expression: " + token.lexeme);
         }
     } else {
-        throw std::runtime_error("Property reference should be resolved before evaluation.");
+        // This case might now be obsolete if the parser wraps all single tokens in a vector<PropertyValue>
+        // but we'll leave it for robustness.
+        throw std::runtime_error("Unhandled variant type in expression evaluator.");
     }
 
     while (it != end) {

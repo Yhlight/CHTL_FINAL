@@ -16,6 +16,8 @@ class AnimateNode;
 class ValueNode;
 class PlaceholderNode;
 class VirNode;
+class RouterNode;
+class ScriptLoaderNode;
 
 class CHTLJSGenerator {
 public:
@@ -34,6 +36,8 @@ private:
     std::string visitValueNode(const ValueNode* node);
     std::string visitPlaceholderNode(const PlaceholderNode* node);
     std::string visitVirNode(const VirNode* node);
+    std::string visitRouterNode(const RouterNode* node);
+    std::string visitScriptLoaderNode(const ScriptLoaderNode* node);
 
     // Store the map for access during the recursive visit calls.
     const std::map<std::string, std::string>* placeholder_map_ = nullptr;

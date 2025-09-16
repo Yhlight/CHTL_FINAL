@@ -233,6 +233,11 @@ CMakeFiles/chtl_compiler.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: \
  /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSParser/CHTLJSContext.h \
  /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSParser/../CHTLJSNode/SequenceNode.h \
  /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSParser/../CHTLJSNode/CHTLJSNode.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSParser/../CHTLJSNode/RouterNode.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSParser/../CHTLJSNode/ValueNode.h \
+ /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSParser/../CHTLJSNode/EnhancedSelectorNode.h \
+ /usr/include/c++/13/optional \
+ /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSParser/../CHTLJSNode/ScriptLoaderNode.h \
  /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSNode/SequenceNode.h \
  /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSGenerator/CHTLJSGenerator.h \
  /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSGenerator/../CHTLJSNode/CHTLJSNode.h \
