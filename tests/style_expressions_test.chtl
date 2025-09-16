@@ -1,0 +1,35 @@
+// Test file for CHTL Style Expressions
+
+#box1 {
+    style {
+        width: 100px;
+        height: 50px;
+        padding: 10px;
+    }
+}
+
+#box2 {
+    style {
+        // Simple Arithmetic
+        width: 10px + 20px; // 30px
+        height: 50px - 10px; // 40px
+        left: 10px * 3; // 30px
+        top: 100px / 2; // 50px
+
+        // Operator Precedence
+        margin: 10px + 5px * 2; // 20px
+
+        // Parentheses
+        padding: (10px + 5px) * 2; // 30px
+
+        // Property Reference
+        font-size: #box1.padding; // 10px
+
+        // Property Reference in Expression
+        z-index: #box1.width + #box1.height; // 150
+
+        // Conditional Expression
+        color: 10 > 5 ? "red" : "blue"; // red
+        background-color: #box1.width == 100px ? "green" : "yellow"; // green
+    }
+}

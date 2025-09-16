@@ -1,0 +1,21 @@
+// This is the refactor test file.
+
+div {
+    text: "This is a CHTL element."
+}
+
+style {
+    body {
+        background-color: #eee;
+    }
+}
+
+p {
+    text: "Another CHTL element."
+}
+
+script {
+    function hello() {
+        console.log("Hello from script block");
+    }
+}
