@@ -8,9 +8,13 @@
 #include "../CHTLJSNode/SequenceNode.h"
 #include "../CHTLJSNode/ValueNode.h"
 #include "../CHTLJSNode/VirNode.h"
+#include "../CHTLJSNode/RouterNode.h"
+#include "../CHTLJSNode/ScriptLoaderNode.h"
+
 
 #include <stdexcept>
 #include <iostream>
+#include <sstream>
 
 namespace CHTLJS {
 
@@ -41,9 +45,51 @@ std::string CHTLJSGenerator::visit(const CHTLJSNode* node) {
              return "/* DelegateNode not fully implemented */";
         case CHTLJSNodeType::Vir:
              return "/* VirNode not fully implemented */";
+        case CHTLJSNodeType::Router:
+            return visitRouterNode(static_cast<const RouterNode*>(node));
+        case CHTLJSNodeType::ScriptLoader:
+            return visitScriptLoaderNode(static_cast<const ScriptLoaderNode*>(node));
         default:
             throw std::runtime_error("Unknown CHTLJSNode type in generator.");
     }
+}
+
+std::string CHTLJSGenerator::visitScriptLoaderNode(const ScriptLoaderNode* node) {
+    std::stringstream ss;
+    ss << "(function() {\n";
+    ss << "    const scripts = [\n";
+    for (const auto& path : node->file_paths) {
+        ss << "        '" << path << "',\n";
+    }
+    ss << "    ];\n\n";
+
+    ss << R"__(
+    function loadScript(index) {
+        if (index >= scripts.length) {
+            return; // All scripts loaded
+        }
+        const script = document.createElement('script');
+        script.src = scripts[index];
+        script.onload = () => {
+            // console.log(`Loaded ${scripts[index]}`);
+            loadScript(index + 1); // Load the next script
+        };
+        script.onerror = () => {
+            console.error(`Failed to load ${scripts[index]}`);
+            loadScript(index + 1); // Continue with next script even if one fails
+        };
+        document.head.appendChild(script);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => loadScript(0));
+    } else {
+        loadScript(0);
+    }
+)__";
+
+    ss << "\n})();\n";
+    return ss.str();
 }
 
 std::string CHTLJSGenerator::visitSequenceNode(const SequenceNode* node) {
@@ -92,5 +138,91 @@ std::string CHTLJSGenerator::visitListenNode(const ListenNode* node) {
 std::string CHTLJSGenerator::visitValueNode(const ValueNode* node) {
     return node->getValue();
 }
+
+std::string CHTLJSGenerator::visitRouterNode(const RouterNode* node) {
+    std::stringstream ss;
+    ss << "(function() {\n";
+
+    // 1. Build routes map
+    ss << "    const routes = {\n";
+    for (const auto& route : node->routes) {
+        // Assuming url is a ValueNode and page is an EnhancedSelectorNode
+        ss << "        \"" << static_cast<ValueNode*>(route.url.get())->getValue() << "\": "
+           << "document.querySelector(\"" << static_cast<EnhancedSelectorNode*>(route.page.get())->getSelector() << "\")" << ",\n";
+    }
+    ss << "    };\n";
+
+    // 2. Get mode and root container
+    std::string mode = node->mode.value_or("history");
+    std::string container_selector = "document.body";
+    if (node->root_config && node->root_config->container) {
+        container_selector = "document.querySelector(\"" + static_cast<EnhancedSelectorNode*>(node->root_config->container.value().get())->getSelector() + "\")";
+    }
+
+    ss << "    const mode = '" << mode << "';\n";
+    ss << "    const container = " << container_selector << ";\n";
+
+    // 3. Navigation and rendering logic
+    ss << R"__(
+    function navigate(path) {
+        if (mode === 'history') {
+            history.pushState(null, null, path);
+        } else {
+            path = '#' + path;
+            window.location.hash = path;
+        }
+        render(path);
+    }
+
+    function render(path) {
+        if (mode === 'hash') {
+            path = path.substring(1);
+        }
+
+        // Hide all pages within the container
+        Object.values(routes).forEach(page => {
+            if (page) page.style.display = 'none';
+        });
+
+        // Show the target page
+        const targetPage = routes[path];
+        if (targetPage) {
+            targetPage.style.display = 'block';
+        } else {
+            // Optional: handle 404 - show a default page or do nothing
+            const defaultPath = Object.keys(routes)[0] || '/';
+            const defaultPage = routes[defaultPath];
+            if(defaultPage) defaultPage.style.display = 'block';
+        }
+    }
+
+    // 4. Event listeners
+    if (mode === 'history') {
+        window.addEventListener('popstate', () => render(window.location.pathname));
+        document.addEventListener('click', e => {
+            if (e.target.matches('a')) {
+                const href = e.target.getAttribute('href');
+                if (href && href.startsWith('/')) {
+                    e.preventDefault();
+                    navigate(href);
+                }
+            }
+        });
+    } else {
+        window.addEventListener('hashchange', () => render(window.location.hash));
+    }
+
+    // 5. Initial render
+    document.addEventListener('DOMContentLoaded', () => {
+        const initialPath = mode === 'history' ? window.location.pathname : window.location.hash;
+        render(initialPath || '/');
+    });
+
+)__";
+
+    ss << "})();\n";
+    return ss.str();
+}
+
 
 } // namespace CHTLJS

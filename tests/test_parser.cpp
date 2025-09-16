@@ -36,8 +36,13 @@ int main(int argc, char* argv[]) {
         // 3. Generate JS from the AST
         if (ast) {
             CHTLJS::CHTLJSGenerator generator;
-            std::map<std::string, std::string> empty_map;
-            std::string js_code = generator.generate(*ast, empty_map);
+            std::map<std::string, std::string> placeholder_map;
+            placeholder_map["__JS_PLACEHOLDER_0__"] = "() => { console.log('click'); }";
+            placeholder_map["__JS_PLACEHOLDER_1__"] = "() => { console.log('mouseenter'); }";
+            placeholder_map["__JS_PLACEHOLDER_2__"] = "() => { console.log('animation done'); }";
+            placeholder_map["__JS_PLACEHOLDER_3__"] = "console.log('standalone statement');";
+
+            std::string js_code = generator.generate(*ast, placeholder_map);
             std::cout << "--- GENERATED JS ---" << std::endl;
             std::cout << js_code << std::endl;
         } else {

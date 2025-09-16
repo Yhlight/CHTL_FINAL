@@ -69,6 +69,19 @@ Value CHTLGenerator::evaluateExpression(std::vector<PropertyValue>::const_iterat
         this->responsive_variables_.insert(responsive_node.getVariableName());
         lhs = {0, "", "var(--" + responsive_node.getVariableName() + ")"};
         ++it;
+    } else if (std::holds_alternative<PropertyReferenceNode>(current_part)) {
+        const auto& ref_node = std::get<PropertyReferenceNode>(current_part);
+        ElementNode* target_element = findElementBySelector(ref_node.selector_.lexeme, all_elements_);
+        if (!target_element) {
+            throw std::runtime_error("Could not find element for selector: " + ref_node.selector_.lexeme);
+        }
+        std::string unique_id = getElementUniqueId(target_element);
+        if(symbol_table_.count(unique_id) && symbol_table_.at(unique_id).count(ref_node.property_.lexeme)) {
+            lhs = symbol_table_.at(unique_id).at(ref_node.property_.lexeme);
+            ++it;
+        } else {
+            throw std::runtime_error("Could not resolve property reference: " + ref_node.selector_.lexeme + "." + ref_node.property_.lexeme);
+        }
     } else if (std::holds_alternative<Token>(current_part)) {
         const auto& token = std::get<Token>(current_part);
         if (token.type == TokenType::OpenParen) {
@@ -98,7 +111,7 @@ Value CHTLGenerator::evaluateExpression(std::vector<PropertyValue>::const_iterat
              throw std::runtime_error("Unexpected token in expression: " + token.lexeme);
         }
     } else {
-        throw std::runtime_error("Property reference should be resolved before evaluation.");
+        throw std::runtime_error("Unhandled variant type in expression evaluator.");
     }
 
     while (it != end) {
@@ -560,69 +573,39 @@ void CHTLGenerator::renderScriptBlock(const ScriptBlockNode* node) {
         return;
     }
 
-    std::string script_content = node->content_;
-
-    // ** CJMOD INTEGRATION POINT **
-    // Here, we would iterate through the rules registered in the CJMODManager
-    // and apply them to the script_content before it's scanned by the CHTL JS pipeline.
-    // for (const auto& rule : context_->cjmod_manager->getRules()) {
-    //     script_content = CJMODScanner::scanAndReplace(rule, script_content);
-    // }
-
     // 1. Scan the raw script content to separate JS from CHTL JS
-    CHTLUnifiedScanner scanner(script_content);
+    CHTLUnifiedScanner scanner(node->content_);
     std::vector<CodeFragment> fragments = scanner.scan();
-    const auto& p_map = scanner.getPlaceholderMap();
 
-    // Find the main script fragment that contains the placeholders
-    std::string script_with_placeholders;
+    // 2. Process the fragments
     for (const auto& fragment : fragments) {
-        if (fragment.type == FragmentType::JS_WITH_CHTLJS) {
-            script_with_placeholders = fragment.content;
-            break;
-        }
-    }
+        if (fragment.type == FragmentType::JS) {
+            // Pure JS fragments are appended directly
+            global_scripts_ << fragment.content;
+        } else if (fragment.type == FragmentType::CHTL_JS) {
+            // CHTL_JS fragments need to be compiled
+            try {
+                auto chtljs_context = std::make_shared<CHTLJS::CHTLJSContext>();
+                CHTLJS::CHTLJSLexer js_lexer(fragment.content);
+                std::vector<CHTLJS::CHTLJSToken> js_tokens = js_lexer.scanTokens();
 
-    if (script_with_placeholders.empty()) {
-        // If there was no CHTL JS, the scanner might have just output a single JS fragment.
-        // In that case, we can just append the raw content.
-        global_scripts_ << node->content_ << "\n";
-        return;
-    }
+                if (!js_tokens.empty() && !(js_tokens.size() == 1 && js_tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) {
+                    CHTLJS::CHTLJSParser js_parser(js_tokens, chtljs_context);
+                    std::unique_ptr<CHTLJS::SequenceNode> js_ast = js_parser.parse();
 
-    // 2. Compile the processed CHTL JS string.
-    std::string final_js;
-    try {
-        auto chtljs_context = std::make_shared<CHTLJS::CHTLJSContext>();
-        CHTLJS::CHTLJSLexer js_lexer(script_with_placeholders);
-        std::vector<CHTLJS::CHTLJSToken> js_tokens = js_lexer.scanTokens();
-
-        if (!js_tokens.empty() && !(js_tokens.size() == 1 && js_tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) {
-            CHTLJS::CHTLJSParser js_parser(js_tokens, chtljs_context);
-            std::unique_ptr<CHTLJS::SequenceNode> js_ast = js_parser.parse();
-
-            if (js_ast) {
-                CHTLJS::CHTLJSGenerator js_generator;
-                final_js = js_generator.generate(*js_ast, p_map);
-            }
-        } else {
-            // No CHTL JS tokens were found, which means the script was pure JS.
-            // Reconstruct from placeholders.
-            final_js = script_with_placeholders;
-            for(auto const& [key, val] : p_map) {
-                size_t pos = final_js.find(key);
-                if (pos != std::string::npos) {
-                    final_js.replace(pos, key.length(), val);
+                    if (js_ast) {
+                        CHTLJS::CHTLJSGenerator js_generator;
+                        // The placeholder map is empty because the new scanner doesn't create them for script blocks
+                        std::map<std::string, std::string> empty_map;
+                        global_scripts_ << js_generator.generate(*js_ast, empty_map);
+                    }
                 }
+            } catch (const std::exception& e) {
+                throw std::runtime_error("CHTLJS compilation error in script block: " + std::string(e.what()));
             }
         }
-    } catch (const std::exception& e) {
-        // If CHTLJS compilation fails, it's a critical error.
-        throw std::runtime_error("CHTLJS compilation error: " + std::string(e.what()));
     }
-
-    // 3. Add the final generated JS to global scripts
-    global_scripts_ << final_js << "\n";
+    global_scripts_ << "\n";
 }
 
 }

@@ -16,7 +16,7 @@ animate {
         { at: 1.0, opacity: 0 }
     ],
     callback: __JS_PLACEHOLDER_2__
-}
+};
 
 // Standalone placeholder
 __JS_PLACEHOLDER_3__;

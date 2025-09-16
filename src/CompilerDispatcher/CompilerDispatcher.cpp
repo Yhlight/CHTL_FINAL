@@ -17,7 +17,7 @@ CompilerDispatcher::CompilerDispatcher() {
 std::string CompilerDispatcher::compile(const std::string& source) {
     // 1. Setup components
     CHTLLoader loader;
-    CHTLGenerator generator;
+    CHTLGenerator generator(chtl_context_);
     CodeMerger merger;
 
     // 2. Lex and Parse CHTL source

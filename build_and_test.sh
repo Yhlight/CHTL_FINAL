@@ -35,4 +35,9 @@ echo -e "\n>>> Running test_scanner on tests/responsive_values_test.chtl"
 ./test_scanner tests/responsive_values_test.chtl
 echo "--------------------------------"
 
+# Run the new scanner JS test
+echo -e "\n>>> Running test_scanner on tests/scanner_js_test.chtl"
+./test_scanner tests/scanner_js_test.chtl
+echo "--------------------------------"
+
 echo -e "\n--- ALL TESTS PASSED ---"

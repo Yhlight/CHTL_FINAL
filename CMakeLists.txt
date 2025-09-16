@@ -4,9 +4,8 @@ project(CHTL_Compiler CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Add all sources directly to the executable
-add_executable(chtl_compiler
-    src/main.cpp
+# Create a static library with all the core components
+add_library(chtl_lib STATIC
     src/CHTL/CHTLLexer/CHTLLexer.cpp
     src/CHTL/CHTLParser/CHTLParser.cpp
     src/CHTL/CHTLGenerator/CHTLGenerator.cpp
@@ -17,15 +16,26 @@ add_executable(chtl_compiler
     src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp
     src/CJMOD/API/Syntax.cpp
     src/CJMOD/Scanner/CJMODScanner.cpp
+    src/CompilerDispatcher/CompilerDispatcher.cpp
+    src/CodeMerger/CodeMerger.cpp
 )
 
-# Target include directories
-target_include_directories(chtl_compiler PUBLIC src src/CJMOD)
+# Public include directories for the library
+target_include_directories(chtl_lib PUBLIC src src/CJMOD)
 
-# Link against filesystem
-target_link_libraries(chtl_compiler PRIVATE stdc++fs)
-
-# Add platform-specific libraries for dynamic loading
+# Main compiler executable
+add_executable(chtl_compiler src/main.cpp)
+target_link_libraries(chtl_compiler PRIVATE chtl_lib stdc++fs)
 if (UNIX AND NOT APPLE)
     target_link_libraries(chtl_compiler PRIVATE dl)
 endif()
+
+# Test executables
+add_executable(test_parser tests/test_parser.cpp)
+target_link_libraries(test_parser PRIVATE chtl_lib)
+
+add_executable(test_scanner tests/test_scanner.cpp)
+target_link_libraries(test_scanner PRIVATE chtl_lib)
+
+add_executable(test_runner tests/test_runner.cpp)
+target_link_libraries(test_runner PRIVATE chtl_lib)
