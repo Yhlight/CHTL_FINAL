@@ -1,349 +1,227 @@
 #include "CHTLUnifiedScanner.h"
-#include <cctype>
 #include <stdexcept>
+#include <cctype>
 #include <algorithm>
+#include <iostream>
 
 namespace CHTL {
 
+// Helper to check if a substring matches at a certain position
+bool startsWith(const std::string& haystack, const std::string& needle, size_t pos) {
+    if (pos + needle.length() > haystack.length()) {
+        return false;
+    }
+    return haystack.substr(pos, needle.length()) == needle;
+}
+
+// CHTL JS Keywords
+const std::vector<std::string> CHTLJS_KEYWORDS = {
+    "{{", "Listen", "Delegate", "Animate", "Vir", "Router", "&->", "->"
+};
+
 CHTLUnifiedScanner::CHTLUnifiedScanner(const std::string& source)
-    : source_(source),
-      context_keywords_({
-          {ScannerContext::GENERAL, {"script", "style", "[Template]", "[Custom]", "[Origin]", "[Import]", "[Namespace]", "[Configuration]"}},
-          {ScannerContext::IN_SCRIPT, {"{{", "listen", "animate", "delegate", "vir", "router", "->"}},
-          {ScannerContext::IN_STYLE, {"@Style", "&:", "#", "."}}
-      }) {}
+    : source_(source) {}
+
+const std::map<std::string, std::string>& CHTLUnifiedScanner::getPlaceholderMap() const {
+    return placeholder_map_;
+}
 
 std::vector<CodeFragment> CHTLUnifiedScanner::scan() {
-    while (!isAtEnd()) {
-        process();
-    }
-    // After the main loop, there might be a final chunk of CHTL content.
-    flushChunk(source_.length(), FragmentType::CHTL);
+    process();
     return fragments_;
 }
 
-// --- Main Processing Logic ---
+void CHTLUnifiedScanner::addFragment(const std::string& content, FragmentType type) {
+    if (!content.empty()) {
+        fragments_.push_back({content, type});
+    }
+}
+
+std::string CHTLUnifiedScanner::createPlaceholder(const std::string& content) {
+    if (content.empty() || content.find_first_not_of(" \t\n\r") == std::string::npos) {
+        return "";
+    }
+    std::string placeholder = "__CHTL_JS_PLACEHOLDER_" + std::to_string(placeholder_id_++) + "__";
+    placeholder_map_[placeholder] = content;
+    return placeholder;
+}
+
+size_t CHTLUnifiedScanner::findEndOfBlock(size_t start_pos, char open_brace, char close_brace) {
+    int brace_level = 0;
+    bool in_string = false;
+    char string_char = '\0';
+
+    for (size_t i = start_pos; i < source_.length(); ++i) {
+        char current_char = source_[i];
+        char next_char = (i + 1 < source_.length()) ? source_[i + 1] : '\0';
+
+        if (in_string) {
+            if (current_char == '\\') {
+                i++; // Skip escaped character
+            } else if (current_char == string_char) {
+                in_string = false;
+            }
+            continue;
+        }
+
+        if (current_char == '"' || current_char == '\'' || current_char == '`') {
+            in_string = true;
+            string_char = current_char;
+            continue;
+        }
+
+        if (current_char == '/' && next_char == '/') { // Skip single-line comment
+            i = source_.find('\n', i);
+            if (i == std::string::npos) return std::string::npos;
+            continue;
+        }
+
+        if (current_char == '/' && next_char == '*') { // Skip multi-line comment
+            i = source_.find("*/", i + 2);
+            if (i == std::string::npos) return std::string::npos;
+            i++; // move past the '/'
+            continue;
+        }
+
+        if (current_char == open_brace) {
+            brace_level++;
+        } else if (current_char == close_brace) {
+            brace_level--;
+            if (brace_level == 0) {
+                return i + 1; // Return position *after* the closing brace
+            }
+        }
+    }
+
+    return std::string::npos; // Unbalanced braces
+}
+
+void CHTLUnifiedScanner::scanJsAndChtlJs(const std::string& script_content) {
+    std::string processed_script;
+    size_t current_pos = 0;
+    size_t last_flush_pos = 0;
+
+    while (current_pos < script_content.length()) {
+        size_t next_keyword_pos = std::string::npos;
+        std::string found_keyword;
+
+        // Find the earliest CHTL JS keyword
+        for (const auto& keyword : CHTLJS_KEYWORDS) {
+            size_t pos = script_content.find(keyword, current_pos);
+            if (pos != std::string::npos && pos < next_keyword_pos) {
+                // Basic word boundary check for alphabetic keywords
+                if (isalpha(keyword[0])) {
+                    if (pos > 0 && isalnum(script_content[pos - 1])) continue;
+                    if (pos + keyword.length() < script_content.length() && isalnum(script_content[pos + keyword.length()])) continue;
+                }
+                next_keyword_pos = pos;
+                found_keyword = keyword;
+            }
+        }
+
+        if (next_keyword_pos == std::string::npos) {
+            // No more keywords, the rest is pure JS
+            break;
+        }
+
+        // Flush the JS before the keyword as a placeholder
+        std::string js_before = script_content.substr(last_flush_pos, next_keyword_pos - last_flush_pos);
+        processed_script += createPlaceholder(js_before);
+
+        // Now, extract the CHTL JS construct
+        size_t construct_start = next_keyword_pos;
+        size_t construct_end;
+
+        if (found_keyword == "{{") {
+            construct_end = script_content.find("}}", construct_start);
+            if (construct_end == std::string::npos) throw std::runtime_error("Unmatched '{{'");
+            construct_end += 2; // include the "}}"
+        } else if (found_keyword == "->" || found_keyword == "&->") {
+             construct_end = construct_start + found_keyword.length();
+        }
+        else { // Assumes block-based constructs like Listen, Animate, etc.
+            size_t block_start = script_content.find('{', construct_start);
+            if (block_start == std::string::npos) throw std::runtime_error("Expected '{' after CHTL JS keyword: " + found_keyword);
+
+            // Re-use the brace matching logic, but on the substring
+            int brace_level = 1;
+            size_t temp_cursor = block_start + 1;
+            while (temp_cursor < script_content.length()) {
+                if (script_content[temp_cursor] == '{') brace_level++;
+                if (script_content[temp_cursor] == '}') brace_level--;
+                if (brace_level == 0) break;
+                temp_cursor++;
+            }
+            if (brace_level != 0) throw std::runtime_error("Unmatched '{' in CHTL JS block for: " + found_keyword);
+            construct_end = temp_cursor + 1;
+        }
+
+        std::string chtl_js_construct = script_content.substr(construct_start, construct_end - construct_start);
+        processed_script += chtl_js_construct;
+
+        current_pos = construct_end;
+        last_flush_pos = current_pos;
+    }
+
+    // Flush any remaining JS at the end
+    std::string final_js = script_content.substr(last_flush_pos);
+    processed_script += createPlaceholder(final_js);
+
+    // Add the main fragment that contains the processed script with placeholders
+    addFragment(processed_script, FragmentType::JS_WITH_CHTLJS);
+}
+
 
 void CHTLUnifiedScanner::process() {
-    switch (context_) {
-        case ScannerContext::GENERAL:
-            processGeneral();
+    size_t last_flush_pos = 0;
+
+    while (cursor_ < source_.length()) {
+        // For simplicity, we'll just look for top-level script and style blocks for now.
+        // A more robust solution would use the CHTL lexer/parser to guide this process.
+        size_t script_pos = source_.find("script", cursor_);
+        size_t style_pos = source_.find("style", cursor_);
+
+        size_t next_pos = std::min(script_pos, style_pos);
+
+        if (next_pos == std::string::npos) {
+            // No more script/style blocks, the rest is CHTL
+            addFragment(source_.substr(last_flush_pos), FragmentType::CHTL);
+            last_flush_pos = source_.length();
             break;
-        case ScannerContext::IN_SCRIPT:
-            // This case should not be hit directly from the main loop,
-            // as processGeneral now calls processScript with a boundary.
-            // This is a safeguard.
-            throw std::logic_error("processScript should be called directly by processGeneral.");
-            break;
-        case ScannerContext::IN_STYLE:
-            processStyle();
-            break;
-    }
-}
-
-void CHTLUnifiedScanner::processGeneral() {
-    size_t keyword_pos = findNextKeyword();
-
-    if (keyword_pos == std::string::npos) {
-        // No more global keywords, the rest of the file is considered one CHTL chunk.
-        // This will be parsed by the CHTL parser which understands nested structures.
-        flushChunk(source_.length(), FragmentType::CHTL);
-        cursor_ = source_.length();
-        return;
-    }
-
-    // We found a keyword. Flush everything before it as CHTL.
-    flushChunk(keyword_pos, FragmentType::CHTL);
-    cursor_ = keyword_pos;
-
-    std::string keyword = identifyKeywordAt(cursor_);
-
-    // Find the opening brace that belongs to this keyword.
-    size_t block_start = source_.find('{', cursor_);
-
-    // Handle line-based constructs like [Import]
-    if (block_start == std::string::npos ||
-        (keyword.rfind('[', 0) == 0 && source_.substr(cursor_ + keyword.length(), block_start - (cursor_ + keyword.length())).find('\n') != std::string::npos)) {
-        size_t end_of_statement = source_.find('\n', cursor_);
-        if (end_of_statement == std::string::npos) {
-            end_of_statement = source_.length();
         }
-        flushChunk(end_of_statement, FragmentType::CHTL);
-        cursor_ = end_of_statement;
-        last_flush_pos_ = cursor_;
-        return;
-    }
 
-    // We found a block. Move the cursor inside it.
-    cursor_ = block_start + 1;
+        // Flush CHTL before the block
+        addFragment(source_.substr(last_flush_pos, next_pos - last_flush_pos), FragmentType::CHTL);
 
-    // Find the end of this entire block.
-    size_t block_end = findEndOfBlock('{', '}');
-    if (block_end == std::string::npos) {
-        throw std::runtime_error("Malformed block for keyword: " + keyword);
-    }
+        // Find the opening brace
+        size_t block_start = source_.find('{', next_pos);
+        if (block_start == std::string::npos) {
+            throw std::runtime_error("Malformed block found.");
+        }
 
-    // Now, decide what to do with this block.
-    if (keyword == "script") {
-        // The content of the script block needs to be processed by processScript.
-        last_flush_pos_ = cursor_; // Mark the start of the script content.
-        context_ = ScannerContext::IN_SCRIPT;
-        // We call process() again, which will dispatch to processScript.
-        // But processScript needs to know where to stop. We pass the boundary.
-        processScript(block_end);
-    } else if (keyword == "style") {
-        // For now, we assume any top-level style block is global CSS.
-        // The CHTL parser will be responsible for local styles.
-        flushChunk(block_end, FragmentType::CSS);
+        size_t block_end = findEndOfBlock(block_start + 1, '{', '}');
+        if (block_end == std::string::npos) {
+            throw std::runtime_error("Unmatched '{' in block.");
+        }
+
+        std::string block_content = source_.substr(block_start + 1, block_end - (block_start + 2));
+
+        if (next_pos == script_pos) {
+            // Found a script block, process it with the special scanner
+            scanJsAndChtlJs(block_content);
+        } else {
+            // Found a style block, treat as CSS for now
+            addFragment(block_content, FragmentType::CSS);
+        }
+
         cursor_ = block_end;
-        last_flush_pos_ = cursor_;
-    } else {
-        // For any other global CHTL construct ([Template], etc.), flush the whole thing as CHTL.
-        flushChunk(block_end, FragmentType::CHTL);
-        cursor_ = block_end;
-        last_flush_pos_ = cursor_;
+        last_flush_pos = cursor_;
+    }
+     // Add any remaining CHTL content
+    if(last_flush_pos < source_.length()){
+         addFragment(source_.substr(last_flush_pos), FragmentType::CHTL);
     }
 }
 
-// processScript now takes a boundary
-void CHTLUnifiedScanner::processScript(size_t script_end_pos) {
-    // This is the implementation from the previous step.
-    // It scans within the script block for CHTL JS keywords.
-    while (cursor_ < script_end_pos - 1) {
-        size_t keyword_pos = findNextKeyword();
 
-        if (keyword_pos == std::string::npos || keyword_pos >= script_end_pos - 1) {
-            flushChunk(script_end_pos - 1, FragmentType::JS);
-            last_flush_pos_ = cursor_ = script_end_pos - 1;
-            break;
-        }
-
-        flushChunk(keyword_pos, FragmentType::JS);
-        cursor_ = keyword_pos;
-
-        std::string keyword = identifyKeywordAt(cursor_);
-        size_t construct_end_pos = findEndOfConstruct(keyword);
-        if (construct_end_pos == std::string::npos) {
-            throw std::runtime_error("Malformed CHTL JS construct starting with: " + keyword);
-        }
-
-        flushChunk(construct_end_pos, FragmentType::CHTL_JS);
-        cursor_ = construct_end_pos;
-        last_flush_pos_ = cursor_;
-    }
-
-    // Move cursor past the script block's closing brace and switch context back.
-    cursor_ = script_end_pos;
-    last_flush_pos_ = cursor_;
-    context_ = ScannerContext::GENERAL;
-}
-
-void CHTLUnifiedScanner::processStyle() {
-    // This function is now only for top-level style blocks.
-    // The logic from the previous step is sufficient.
-    size_t end_pos = findEndOfBlock('{', '}');
-    if (end_pos == std::string::npos) {
-        throw std::runtime_error("Unmatched '{' in style block.");
-    }
-
-    flushChunk(end_pos - 1, FragmentType::CSS);
-    cursor_ = end_pos;
-    last_flush_pos_ = cursor_;
-    context_ = ScannerContext::GENERAL;
-}
-
-// --- Helper Methods ---
-
-char CHTLUnifiedScanner::peek(size_t offset) const {
-    if (cursor_ + offset >= source_.length()) return '\0';
-    return source_[cursor_ + offset];
-}
-
-bool CHTLUnifiedScanner::isAtEnd() const {
-    return cursor_ >= source_.length();
-}
-
-void CHTLUnifiedScanner::advance(size_t n) {
-    cursor_ += n;
-}
-
-void CHTLUnifiedScanner::skipWhitespace() {
-    while (!isAtEnd() && isspace(peek())) {
-        advance();
-    }
-}
-
-std::string CHTLUnifiedScanner::identifyKeywordAt(size_t pos) {
-    const auto& keywords = context_keywords_.at(context_);
-    for (const auto& kw : keywords) {
-        if (source_.rfind(kw, pos) == pos) {
-            // Basic word boundary check
-            if (isalnum(kw[0])) {
-                if (pos > 0 && isalnum(source_[pos - 1])) continue;
-                if (pos + kw.length() < source_.length() && isalnum(source_[pos + kw.length()])) continue;
-            }
-            return kw;
-        }
-    }
-    return "";
-}
-
-size_t CHTLUnifiedScanner::findNextKeyword() {
-    size_t temp_cursor = cursor_;
-    while(temp_cursor < source_.length()) {
-        char c = source_[temp_cursor];
-        if (c == '{') { // In general context, we don't scan for keywords inside blocks.
-            if (context_ == ScannerContext::GENERAL) {
-                int brace_level = 1;
-                temp_cursor++;
-                while(temp_cursor < source_.length() && brace_level > 0) {
-                    if (source_[temp_cursor] == '{') brace_level++;
-                    if (source_[temp_cursor] == '}') brace_level--;
-                    temp_cursor++;
-                }
-                continue;
-            }
-        }
-        if (c == '"' || c == '\'' || c == '`') { // Skip strings
-            char quote = c;
-            temp_cursor++;
-            while (temp_cursor < source_.length() && (source_[temp_cursor] != quote || source_[temp_cursor - 1] == '\\')) {
-                temp_cursor++;
-            }
-            if(temp_cursor < source_.length()) temp_cursor++;
-            continue;
-        }
-        if (c == '/' && temp_cursor + 1 < source_.length()) {
-            if (source_[temp_cursor + 1] == '/') { // single line comment
-                temp_cursor += 2;
-                while(temp_cursor < source_.length() && source_[temp_cursor] != '\n') {
-                    temp_cursor++;
-                }
-                continue;
-            }
-            if (source_[temp_cursor + 1] == '*') { // multi-line comment
-                temp_cursor += 2;
-                while(temp_cursor + 1 < source_.length() && (source_[temp_cursor] != '*' || source_[temp_cursor+1] != '/')) {
-                    temp_cursor++;
-                }
-                if (temp_cursor + 1 < source_.length()) temp_cursor += 2;
-                continue;
-            }
-        }
-
-        if (identifyKeywordAt(temp_cursor) != "") {
-            return temp_cursor;
-        }
-        temp_cursor++;
-    }
-    return std::string::npos;
-}
-
-size_t CHTLUnifiedScanner::findEndOfBlock(char open_brace, char close_brace) {
-    // This function assumes the cursor is already *inside* the block.
-    int brace_level = 1;
-    size_t temp_cursor = cursor_;
-    while (temp_cursor < source_.length()) {
-        char c = source_[temp_cursor];
-
-        // In the GENERAL context, we must not find keywords inside other blocks.
-        // We simply skip the entire block.
-        if (c == '{' && context_ == ScannerContext::GENERAL) {
-            int brace_level = 1;
-            temp_cursor++;
-            while(temp_cursor < source_.length() && brace_level > 0) {
-                if (source_[temp_cursor] == '{') brace_level++;
-                if (source_[temp_cursor] == '}') brace_level--;
-                temp_cursor++;
-            }
-            continue;
-        }
-
-        if (c == '"' || c == '\'' || c == '`') { // Skip strings
-            char quote = c;
-            temp_cursor++;
-            while (temp_cursor < source_.length() && (source_[temp_cursor] != quote || source_[temp_cursor - 1] == '\\')) {
-                temp_cursor++;
-            }
-        } else if (c == '/' && temp_cursor + 1 < source_.length()) { // Skip comments
-            if (source_[temp_cursor + 1] == '/') { // single line comment
-                temp_cursor += 2;
-                while(temp_cursor < source_.length() && source_[temp_cursor] != '\n') {
-                    temp_cursor++;
-                }
-                // continue without incrementing at the end
-                continue;
-            }
-            if (source_[temp_cursor + 1] == '*') { // multi-line comment
-                temp_cursor += 2;
-                while(temp_cursor + 1 < source_.length() && (source_[temp_cursor] != '*' || source_[temp_cursor+1] != '/')) {
-                    temp_cursor++;
-                }
-                if (temp_cursor + 1 < source_.length()) temp_cursor += 2;
-                // continue without incrementing at the end
-                continue;
-            }
-        } else if (c == open_brace) {
-            brace_level++;
-        } else if (c == close_brace) {
-            brace_level--;
-            if (brace_level == 0) {
-                return temp_cursor + 1; // Return position *after* the closing brace
-            }
-        }
-        temp_cursor++;
-    }
-    return std::string::npos; // Unbalanced braces
-}
-
-
-void CHTLUnifiedScanner::flushChunk(size_t end, FragmentType type) {
-    if (last_flush_pos_ >= end) return;
-    std::string content = source_.substr(last_flush_pos_, end - last_flush_pos_);
-    if (!content.empty() && content.find_first_not_of(" \t\n\r\f\v") != std::string::npos) {
-        fragments_.push_back({content, type, ""});
-    }
-    last_flush_pos_ = end;
-}
-
-size_t CHTLUnifiedScanner::findEndOfConstruct(const std::string& keyword) {
-    if (keyword == "{{") {
-        size_t end_pos = source_.find("}}", cursor_);
-        return (end_pos != std::string::npos) ? end_pos + 2 : std::string::npos;
-    }
-    if (keyword == "vir") {
-        size_t end_pos = source_.find(';', cursor_);
-        return (end_pos != std::string::npos) ? end_pos + 1 : std::string::npos;
-    }
-    // For block constructs like listen, animate, delegate, router
-    size_t block_start = source_.find('{', cursor_ + keyword.length());
-    if (block_start == std::string::npos) return std::string::npos;
-
-    // This is a duplication of the logic in findEndOfBlock. It is necessary
-    // to give findEndOfConstruct its own brace-balancing logic that does not
-    // interfere with the main scanner's cursor.
-    int brace_level = 1;
-    size_t temp_cursor = block_start + 1;
-    while (temp_cursor < source_.length()) {
-        char c = source_[temp_cursor];
-        if (c == '"' || c == '\'' || c == '`') { // Skip strings
-            char quote = c;
-            temp_cursor++;
-            while (temp_cursor < source_.length() && (source_[temp_cursor] != quote || source_[temp_cursor - 1] == '\\')) {
-                temp_cursor++;
-            }
-        } else if (c == '{') {
-            brace_level++;
-        } else if (c == '}') {
-            brace_level--;
-            if (brace_level == 0) {
-                return temp_cursor + 1; // Return position *after* the closing brace
-            }
-        }
-        temp_cursor++;
-    }
-    return std::string::npos; // Unbalanced braces
-}
-
-std::string CHTLUnifiedScanner::createPlaceholder(const std::string& content, FragmentType type) { return ""; }
 } // namespace CHTL

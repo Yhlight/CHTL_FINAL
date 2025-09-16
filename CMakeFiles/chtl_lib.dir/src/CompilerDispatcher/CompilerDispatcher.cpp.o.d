@@ -228,7 +228,15 @@ CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/PropertyValue.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/ParserContext.h \
  /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLConfig/Configuration.h \
- /usr/include/c++/13/set /usr/include/c++/13/bits/stl_set.h \
+ /app/src/CompilerDispatcher/../CHTL/CHTLParser/../../CJMOD/API/CJMODManager.h \
+ /app/src/CJMOD/API/Arg.h /app/src/CJMOD/API/AtomArg.h \
+ /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
+ /usr/include/c++/13/array /usr/include/c++/13/compare \
+ /usr/include/c++/13/bits/stl_algo.h \
+ /usr/include/c++/13/bits/algorithmfwd.h \
+ /usr/include/c++/13/bits/stl_heap.h \
+ /usr/include/c++/13/bits/uniform_int_dist.h /usr/include/c++/13/set \
+ /usr/include/c++/13/bits/stl_set.h \
  /usr/include/c++/13/bits/stl_multiset.h \
  /app/src/CompilerDispatcher/../CHTLJS/CHTLJSParser/CHTLJSContext.h \
  /app/src/CompilerDispatcher/../CHTLJS/CHTLJSParser/../CHTLJSNode/CHTLJSNode.h \
@@ -245,4 +253,5 @@ CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/OriginNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/PropertyReferenceNode.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/PropertyValue.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLParser/ParserContext.h \
  /app/src/CHTL/CHTLLoader/CHTLLoader.h

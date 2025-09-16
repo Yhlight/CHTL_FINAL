@@ -225,15 +225,19 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o: \
  /app/src/CHTL/CHTLParser/../CHTLNode/PropertyValue.h \
  /app/src/CHTL/CHTLParser/ParserContext.h \
  /app/src/CHTL/CHTLParser/../CHTLConfig/Configuration.h \
- /usr/include/c++/13/set /usr/include/c++/13/bits/stl_set.h \
+ /app/src/CHTL/CHTLParser/../../CJMOD/API/CJMODManager.h \
+ /app/src/CJMOD/API/Arg.h /app/src/CJMOD/API/AtomArg.h \
+ /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
+ /usr/include/c++/13/array /usr/include/c++/13/compare \
+ /usr/include/c++/13/bits/stl_algo.h \
+ /usr/include/c++/13/bits/algorithmfwd.h \
+ /usr/include/c++/13/bits/stl_heap.h \
+ /usr/include/c++/13/bits/uniform_int_dist.h /usr/include/c++/13/set \
+ /usr/include/c++/13/bits/stl_set.h \
  /usr/include/c++/13/bits/stl_multiset.h \
  /app/src/CHTL/CHTLParser/../CHTLLexer/CHTLLexer.h \
  /app/src/CHTL/CHTLParser/../CHTLLexer/Token.h \
  /usr/include/c++/13/iostream /usr/include/c++/13/algorithm \
- /usr/include/c++/13/bits/stl_algo.h \
- /usr/include/c++/13/bits/algorithmfwd.h \
- /usr/include/c++/13/bits/stl_heap.h \
- /usr/include/c++/13/bits/uniform_int_dist.h \
  /usr/include/c++/13/pstl/glue_algorithm_defs.h \
  /app/src/CHTL/CHTLParser/../CHTLNode/PropertyReferenceNode.h \
  /app/src/CHTL/CHTLParser/../CHTLNode/ResponsiveValueNode.h

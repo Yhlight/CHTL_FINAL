@@ -200,12 +200,29 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: \
  /usr/include/c++/13/bits/sstream.tcc /usr/include/c++/13/set \
  /usr/include/c++/13/bits/stl_set.h \
  /usr/include/c++/13/bits/stl_multiset.h \
- /app/src/CHTL/CHTLGenerator/../CHTLLexer/CHTLLexer.h \
- /app/src/CHTL/CHTLGenerator/../CHTLLexer/Token.h \
- /usr/include/c++/13/unordered_map \
- /usr/include/c++/13/bits/unordered_map.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLParser/ParserContext.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLParser/../CHTLNode/StyleTemplateNode.h \
+ /usr/include/c++/13/unordered_set \
+ /usr/include/c++/13/bits/unordered_set.h \
  /usr/include/c++/13/bits/hashtable.h \
  /usr/include/c++/13/bits/hashtable_policy.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLParser/../CHTLNode/PropertyValue.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLParser/../CHTLNode/ElementTemplateNode.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLParser/../CHTLNode/BaseNode.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLParser/../CHTLNode/VarTemplateNode.h \
+ /usr/include/c++/13/unordered_map \
+ /usr/include/c++/13/bits/unordered_map.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLParser/../CHTLConfig/Configuration.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLParser/../../CJMOD/API/CJMODManager.h \
+ /app/src/CJMOD/API/Arg.h /app/src/CJMOD/API/AtomArg.h \
+ /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
+ /usr/include/c++/13/array /usr/include/c++/13/compare \
+ /usr/include/c++/13/bits/stl_algo.h \
+ /usr/include/c++/13/bits/algorithmfwd.h \
+ /usr/include/c++/13/bits/stl_heap.h \
+ /usr/include/c++/13/bits/uniform_int_dist.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLLexer/CHTLLexer.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLLexer/Token.h \
  /app/src/CHTL/CHTLGenerator/../CHTLNode/ResponsiveValueNode.h \
  /app/src/CHTL/CHTLGenerator/../../Scanner/CHTLUnifiedScanner.h \
  /app/src/CHTL/CHTLGenerator/../../CHTLJS/CHTLJSLexer/CHTLJSLexer.h \
@@ -244,8 +261,4 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: \
  /usr/include/c++/13/tr1/poly_hermite.tcc \
  /usr/include/c++/13/tr1/poly_laguerre.tcc \
  /usr/include/c++/13/tr1/riemann_zeta.tcc /usr/include/c++/13/algorithm \
- /usr/include/c++/13/bits/stl_algo.h \
- /usr/include/c++/13/bits/algorithmfwd.h \
- /usr/include/c++/13/bits/stl_heap.h \
- /usr/include/c++/13/bits/uniform_int_dist.h \
  /usr/include/c++/13/pstl/glue_algorithm_defs.h

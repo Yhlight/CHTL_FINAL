@@ -92,7 +92,6 @@ test_parser_EXTERNAL_OBJECTS =
 
 test_parser: CMakeFiles/test_parser.dir/tests/test_parser.cpp.o
 test_parser: CMakeFiles/test_parser.dir/build.make
-test_parser: libchtl_lib.a
 test_parser: CMakeFiles/test_parser.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable test_parser"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/test_parser.dir/link.txt --verbose=$(VERBOSE)

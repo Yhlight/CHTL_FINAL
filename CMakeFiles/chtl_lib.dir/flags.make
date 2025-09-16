@@ -4,6 +4,6 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES =
 
-CXX_INCLUDES = -I/app/src
+CXX_INCLUDES = -I/app/src -I/app/src/CJMOD
 
 CXX_FLAGS = -std=gnu++17

@@ -17,6 +17,7 @@
 #include <map>
 #include <vector>
 #include <set>
+#include "../CHTLParser/ParserContext.h"
 
 namespace CHTL {
 
@@ -38,10 +39,11 @@ struct CompilationResult {
 
 class CHTLGenerator {
 public:
-    CHTLGenerator() = default;
-    CompilationResult generate(RootNode& root);
+    explicit CHTLGenerator(std::shared_ptr<ParserContext> context);
+    CompilationResult generate(RootNode& root, bool use_default_struct = false);
 
 private:
+    std::shared_ptr<ParserContext> context_;
     // Expression Evaluation
     Value resolvePropertyValue(const std::vector<PropertyValue>& parts);
     Value evaluateExpression(std::vector<PropertyValue>::const_iterator& it, const std::vector<PropertyValue>::const_iterator& end, int min_precedence);

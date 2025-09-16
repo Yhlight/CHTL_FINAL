@@ -24,6 +24,7 @@ const std::unordered_map<std::string, TokenType> CHTLLexer::keywords = {
     {"@Html", TokenType::AtHtml},
     {"@JavaScript", TokenType::AtJavaScript},
     {"@Chtl", TokenType::AtChtl},
+    {"@CJmod", TokenType::AtCJmod},
 };
 
 CHTLLexer::CHTLLexer(const std::string& source) : source_(source) {}

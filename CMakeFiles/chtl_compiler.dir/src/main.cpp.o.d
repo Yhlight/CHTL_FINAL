@@ -157,22 +157,8 @@ CMakeFiles/chtl_compiler.dir/src/main.cpp.o: /app/src/main.cpp \
  /usr/include/c++/13/bits/stl_uninitialized.h \
  /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc \
- /app/src/CompilerDispatcher/CompilerDispatcher.h \
- /app/src/CompilerDispatcher/../Scanner/CHTLUnifiedScanner.h \
- /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \
- /usr/include/c++/13/ext/aligned_buffer.h \
- /usr/include/c++/13/bits/node_handle.h \
- /usr/include/c++/13/bits/stl_map.h \
- /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/CHTLParser.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLLexer/Token.h \
- /usr/include/c++/13/variant \
- /usr/include/c++/13/bits/enable_special_members.h \
- /usr/include/c++/13/bits/parse_numbers.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/BaseNode.h \
- /usr/include/c++/13/memory /usr/include/c++/13/bits/stl_tempbuf.h \
+ /usr/include/c++/13/bits/vector.tcc /usr/include/c++/13/memory \
+ /usr/include/c++/13/bits/stl_tempbuf.h \
  /usr/include/c++/13/bits/stl_raw_storage_iter.h \
  /usr/include/c++/13/bits/align.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
@@ -182,6 +168,7 @@ CMakeFiles/chtl_compiler.dir/src/main.cpp.o: /app/src/main.cpp \
  /usr/include/c++/13/bits/shared_ptr.h \
  /usr/include/c++/13/bits/shared_ptr_base.h \
  /usr/include/c++/13/bits/allocated_ptr.h \
+ /usr/include/c++/13/ext/aligned_buffer.h \
  /usr/include/c++/13/ext/concurrence.h \
  /usr/include/c++/13/bits/shared_ptr_atomic.h \
  /usr/include/c++/13/bits/atomic_base.h \
@@ -189,30 +176,42 @@ CMakeFiles/chtl_compiler.dir/src/main.cpp.o: /app/src/main.cpp \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/RootNode.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/BaseNode.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/ElementNode.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/AttributeNode.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/TextNode.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/CommentNode.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/StyleBlockNode.h \
- /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/PropertyValue.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/../CHTLLexer/Token.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/PropertyReferenceNode.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/ResponsiveValueNode.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/CssRuleNode.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/ScriptBlockNode.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/StyleTemplateNode.h \
- /usr/include/c++/13/unordered_set \
- /usr/include/c++/13/bits/unordered_set.h \
- /usr/include/c++/13/bits/hashtable.h \
- /usr/include/c++/13/bits/hashtable_policy.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/ElementTemplateNode.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/VarTemplateNode.h \
+ /app/src/CHTL/CHTLLexer/CHTLLexer.h /app/src/CHTL/CHTLLexer/Token.h \
+ /usr/include/c++/13/variant \
+ /usr/include/c++/13/bits/enable_special_members.h \
+ /usr/include/c++/13/bits/parse_numbers.h \
  /usr/include/c++/13/unordered_map \
  /usr/include/c++/13/bits/unordered_map.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLLoader/CHTLLoader.h \
+ /usr/include/c++/13/bits/hashtable.h \
+ /usr/include/c++/13/bits/hashtable_policy.h \
+ /usr/include/c++/13/bits/node_handle.h \
+ /usr/include/c++/13/bits/erase_if.h \
+ /app/src/CHTL/CHTLParser/CHTLParser.h \
+ /app/src/CHTL/CHTLParser/../CHTLLexer/Token.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/BaseNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/RootNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/BaseNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/ElementNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/AttributeNode.h \
+ /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \
+ /usr/include/c++/13/bits/stl_map.h \
+ /usr/include/c++/13/bits/stl_multimap.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/TextNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/CommentNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/StyleBlockNode.h \
+ /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/PropertyValue.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/../CHTLLexer/Token.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/PropertyReferenceNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/ResponsiveValueNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/CssRuleNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/ScriptBlockNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/StyleTemplateNode.h \
+ /usr/include/c++/13/unordered_set \
+ /usr/include/c++/13/bits/unordered_set.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/ElementTemplateNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/VarTemplateNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLLoader/CHTLLoader.h \
  /usr/include/c++/13/optional /usr/include/c++/13/filesystem \
  /usr/include/c++/13/bits/fs_fwd.h /usr/include/c++/13/cstdint \
  /usr/include/c++/13/bits/chrono.h /usr/include/c++/13/ratio \
@@ -225,11 +224,31 @@ CMakeFiles/chtl_compiler.dir/src/main.cpp.o: /app/src/main.cpp \
  /usr/include/c++/13/bits/locale_conv.h /usr/include/c++/13/iomanip \
  /usr/include/c++/13/bits/quoted_string.h /usr/include/c++/13/codecvt \
  /usr/include/c++/13/bits/fs_dir.h /usr/include/c++/13/bits/fs_ops.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/OriginNode.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/PropertyValue.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/ParserContext.h \
- /app/src/CompilerDispatcher/../CHTL/CHTLParser/../CHTLConfig/Configuration.h \
- /usr/include/c++/13/set /usr/include/c++/13/bits/stl_set.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/OriginNode.h \
+ /app/src/CHTL/CHTLParser/../CHTLNode/PropertyValue.h \
+ /app/src/CHTL/CHTLParser/ParserContext.h \
+ /app/src/CHTL/CHTLParser/../CHTLConfig/Configuration.h \
+ /app/src/CHTL/CHTLParser/../../CJMOD/API/CJMODManager.h \
+ /app/src/CJMOD/API/Arg.h /app/src/CJMOD/API/AtomArg.h \
+ /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
+ /usr/include/c++/13/array /usr/include/c++/13/compare \
+ /usr/include/c++/13/bits/stl_algo.h \
+ /usr/include/c++/13/bits/algorithmfwd.h \
+ /usr/include/c++/13/bits/stl_heap.h \
+ /usr/include/c++/13/bits/uniform_int_dist.h /usr/include/c++/13/set \
+ /usr/include/c++/13/bits/stl_set.h \
  /usr/include/c++/13/bits/stl_multiset.h \
- /app/src/CompilerDispatcher/../CHTLJS/CHTLJSParser/CHTLJSContext.h \
- /app/src/CompilerDispatcher/../CHTLJS/CHTLJSParser/../CHTLJSNode/CHTLJSNode.h
+ /app/src/CHTL/CHTLGenerator/CHTLGenerator.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLNode/BaseNode.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLNode/RootNode.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLNode/ElementNode.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLNode/TextNode.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLNode/CommentNode.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLNode/StyleBlockNode.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLNode/ScriptBlockNode.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLNode/OriginNode.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLNode/PropertyReferenceNode.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLNode/PropertyValue.h \
+ /app/src/CHTL/CHTLGenerator/../CHTLParser/ParserContext.h \
+ /app/src/CHTL/CHTLLoader/CHTLLoader.h \
+ /app/src/CHTL/CHTLParser/ParserContext.h

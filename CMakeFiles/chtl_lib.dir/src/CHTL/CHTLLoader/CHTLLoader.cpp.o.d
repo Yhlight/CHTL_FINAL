@@ -180,14 +180,58 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.o: \
  /usr/include/c++/13/bits/unique_ptr.h \
  /usr/include/c++/13/ext/aligned_buffer.h \
  /usr/include/c++/13/bits/fs_dir.h /usr/include/c++/13/bits/fs_ops.h \
- /usr/include/c++/13/fstream \
+ /usr/include/c++/13/memory /usr/include/c++/13/bits/stl_tempbuf.h \
+ /usr/include/c++/13/bits/stl_raw_storage_iter.h \
+ /usr/include/c++/13/bits/align.h \
+ /usr/include/c++/13/bits/shared_ptr_atomic.h \
+ /usr/include/c++/13/bits/atomic_base.h \
+ /usr/include/c++/13/bits/atomic_lockfree_defines.h \
+ /usr/include/c++/13/backward/auto_ptr.h \
+ /usr/include/c++/13/pstl/glue_memory_defs.h \
+ /usr/include/c++/13/pstl/execution_defs.h \
+ /app/src/CHTL/CHTLLoader/../CHTLParser/ParserContext.h \
+ /app/src/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/StyleTemplateNode.h \
+ /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
+ /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \
+ /usr/include/c++/13/bits/node_handle.h \
+ /usr/include/c++/13/bits/stl_map.h \
+ /usr/include/c++/13/bits/stl_multimap.h \
+ /usr/include/c++/13/bits/erase_if.h /usr/include/c++/13/unordered_set \
+ /usr/include/c++/13/bits/unordered_set.h \
+ /usr/include/c++/13/bits/hashtable.h \
+ /usr/include/c++/13/bits/hashtable_policy.h \
+ /app/src/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/PropertyValue.h \
+ /usr/include/c++/13/variant \
+ /app/src/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/../CHTLLexer/Token.h \
+ /app/src/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/PropertyReferenceNode.h \
+ /app/src/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/BaseNode.h \
+ /app/src/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/ResponsiveValueNode.h \
+ /app/src/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/ElementTemplateNode.h \
+ /app/src/CHTL/CHTLLoader/../CHTLParser/../CHTLNode/VarTemplateNode.h \
+ /usr/include/c++/13/unordered_map \
+ /usr/include/c++/13/bits/unordered_map.h \
+ /app/src/CHTL/CHTLLoader/../CHTLParser/../CHTLConfig/Configuration.h \
+ /app/src/CHTL/CHTLLoader/../CHTLParser/../../CJMOD/API/CJMODManager.h \
+ /app/src/CJMOD/API/Arg.h /app/src/CJMOD/API/AtomArg.h \
+ /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
+ /usr/include/c++/13/array /usr/include/c++/13/compare \
+ /usr/include/c++/13/bits/stl_algo.h \
+ /usr/include/c++/13/bits/algorithmfwd.h \
+ /usr/include/c++/13/bits/stl_heap.h \
+ /usr/include/c++/13/bits/uniform_int_dist.h /usr/include/c++/13/set \
+ /usr/include/c++/13/bits/stl_set.h \
+ /usr/include/c++/13/bits/stl_multiset.h /usr/include/c++/13/fstream \
  /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h \
  /usr/include/c++/13/bits/fstream.tcc /usr/include/c++/13/iostream \
- /usr/include/c++/13/algorithm /usr/include/c++/13/bits/stl_algo.h \
- /usr/include/c++/13/bits/algorithmfwd.h \
- /usr/include/c++/13/bits/stl_heap.h \
- /usr/include/c++/13/bits/uniform_int_dist.h \
- /usr/include/c++/13/bits/stl_tempbuf.h \
- /usr/include/c++/13/pstl/glue_algorithm_defs.h \
- /usr/include/c++/13/pstl/execution_defs.h
+ /usr/include/c++/13/algorithm \
+ /usr/include/c++/13/pstl/glue_algorithm_defs.h /usr/include/unistd.h \
+ /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
+ /usr/include/x86_64-linux-gnu/bits/environments.h \
+ /usr/include/x86_64-linux-gnu/bits/confname.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
+ /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
+ /usr/include/linux/close_range.h /usr/include/linux/limits.h \
+ /usr/include/dlfcn.h /usr/include/x86_64-linux-gnu/bits/dlfcn.h \
+ /usr/include/x86_64-linux-gnu/bits/dl_find_object.h

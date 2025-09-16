@@ -18,6 +18,8 @@
 
 namespace CHTL {
 
+CHTLGenerator::CHTLGenerator(std::shared_ptr<ParserContext> context) : context_(std::move(context)) {}
+
 std::string formatValue(const Value& val);
 ElementNode* findElementBySelector(const std::string& selector, const std::vector<ElementNode*>& elements);
 
@@ -280,25 +282,67 @@ ElementNode* findElementBySelector(const std::string& selector, const std::vecto
     return final_match;
 }
 
-CompilationResult CHTLGenerator::generate(RootNode& root) {
+CompilationResult CHTLGenerator::generate(RootNode& root, bool use_default_struct) {
+    // Clear state from previous runs
+    output_.str("");
+    output_.clear();
+    global_styles_.str("");
+    global_styles_.clear();
+    global_scripts_.str("");
+    global_scripts_.clear();
+    all_elements_.clear();
+    symbol_table_.clear();
+    unresolved_properties_.clear();
     responsive_variables_.clear();
+    placeholder_map_.clear();
+    indentLevel_ = 0;
+
     for (auto& child : root.children_) firstPass(child.get());
     secondPass();
     for (const auto& child : root.children_) render(child.get());
-    std::string html = output_.str();
+
+    std::string html_body = output_.str();
+    std::string final_html;
+
     std::string styles = global_styles_.str();
-    if (!styles.empty()) {
-        std::string style_tag = "\n    <style>\n" + styles + "    </style>\n";
-        size_t head_pos = html.find("</head>");
-        if (head_pos != std::string::npos) {
-            html.insert(head_pos, style_tag);
-        } else {
-            html = style_tag + html;
-        }
+    std::string scripts = global_scripts_.str();
+    std::string reactivity_script = generateReactivityScript();
+    if (!reactivity_script.empty()) {
+        scripts = reactivity_script + "\n" + scripts;
     }
-    std::string js = generateReactivityScript();
-    global_scripts_ << js;
-    return {html, global_scripts_.str(), placeholder_map_};
+
+    if (use_default_struct) {
+        std::stringstream ss;
+        ss << "<!DOCTYPE html>\n";
+        ss << "<html>\n";
+        ss << "<head>\n";
+        ss << "  <meta charset=\"UTF-8\">\n";
+        ss << "  <title>CHTL Output</title>\n";
+        if (!styles.empty()) {
+            ss << "  <style>\n" << styles << "  </style>\n";
+        }
+        ss << "</head>\n";
+        ss << "<body>\n";
+        ss << html_body;
+        if (!scripts.empty()) {
+            ss << "  <script>\n" << scripts << "  </script>\n";
+        }
+        ss << "</body>\n";
+        ss << "</html>";
+        final_html = ss.str();
+    } else {
+        // Just return the raw parts, let the caller combine them.
+        // For CLI, we'll still combine them.
+        if (!styles.empty()) {
+            html_body = "<style>\n" + styles + "</style>\n" + html_body;
+        }
+        if (!scripts.empty()) {
+            html_body += "\n<script>\n" + scripts + "</script>\n";
+        }
+        final_html = html_body;
+    }
+
+    return {final_html, scripts, placeholder_map_};
 }
 
 void CHTLGenerator::firstPass(Node* node) {
@@ -515,49 +559,70 @@ void CHTLGenerator::renderScriptBlock(const ScriptBlockNode* node) {
     if (node->content_.empty()) {
         return;
     }
-    // TODO: The scanner API has changed. This function needs to be updated
-    // to handle the new std::vector<CodeFragment> output.
-    // For now, we will just pass the raw content to the global scripts.
-    global_scripts_ << node->content_ << "\n";
-    /*
+
+    std::string script_content = node->content_;
+
+    // ** CJMOD INTEGRATION POINT **
+    // Here, we would iterate through the rules registered in the CJMODManager
+    // and apply them to the script_content before it's scanned by the CHTL JS pipeline.
+    // for (const auto& rule : context_->cjmod_manager->getRules()) {
+    //     script_content = CJMODScanner::scanAndReplace(rule, script_content);
+    // }
+
     // 1. Scan the raw script content to separate JS from CHTL JS
-    CHTLUnifiedScanner scanner(node->content_);
-    ScanningResult scan_result = scanner.scan();
+    CHTLUnifiedScanner scanner(script_content);
+    std::vector<CodeFragment> fragments = scanner.scan();
+    const auto& p_map = scanner.getPlaceholderMap();
 
-    // The modified_source contains CHTL-JS constructs and placeholders for plain JS.
-    std::string script_to_compile = scan_result.modified_source;
+    // Find the main script fragment that contains the placeholders
+    std::string script_with_placeholders;
+    for (const auto& fragment : fragments) {
+        if (fragment.type == FragmentType::JS_WITH_CHTLJS) {
+            script_with_placeholders = fragment.content;
+            break;
+        }
+    }
 
-    // 2. Attempt to compile the processed CHTL JS string.
-    // This is wrapped in a try-catch to be resilient against the incomplete CHTL JS pipeline.
+    if (script_with_placeholders.empty()) {
+        // If there was no CHTL JS, the scanner might have just output a single JS fragment.
+        // In that case, we can just append the raw content.
+        global_scripts_ << node->content_ << "\n";
+        return;
+    }
+
+    // 2. Compile the processed CHTL JS string.
+    std::string final_js;
     try {
         auto chtljs_context = std::make_shared<CHTLJS::CHTLJSContext>();
-        CHTLJS::CHTLJSLexer js_lexer(script_to_compile);
+        CHTLJS::CHTLJSLexer js_lexer(script_with_placeholders);
         std::vector<CHTLJS::CHTLJSToken> js_tokens = js_lexer.scanTokens();
 
-        // Only proceed if there are actual tokens to parse.
         if (!js_tokens.empty() && !(js_tokens.size() == 1 && js_tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) {
             CHTLJS::CHTLJSParser js_parser(js_tokens, chtljs_context);
             std::unique_ptr<CHTLJS::SequenceNode> js_ast = js_parser.parse();
 
             if (js_ast) {
                 CHTLJS::CHTLJSGenerator js_generator;
-                // The generator will produce compiled JS from CHTL JS AST nodes,
-                // and should pass through any placeholders it finds.
-                script_to_compile = js_generator.generate(*js_ast);
+                final_js = js_generator.generate(*js_ast, p_map);
+            }
+        } else {
+            // No CHTL JS tokens were found, which means the script was pure JS.
+            // Reconstruct from placeholders.
+            final_js = script_with_placeholders;
+            for(auto const& [key, val] : p_map) {
+                size_t pos = final_js.find(key);
+                if (pos != std::string::npos) {
+                    final_js.replace(pos, key.length(), val);
+                }
             }
         }
     } catch (const std::exception& e) {
-        // If CHTLJS compilation fails (which is expected at this stage), we can log the error.
-        // We will proceed with the placeholder-filled string, allowing plain JS to still work.
-        // std::cerr << "CHTLJS compilation warning: " << e.what() << std::endl;
+        // If CHTLJS compilation fails, it's a critical error.
+        throw std::runtime_error("CHTLJS compilation error: " + std::string(e.what()));
     }
 
-    // 3. Add the result (compiled CHTL-JS + placeholders) to global scripts
-    global_scripts_ << script_to_compile << "\n";
-
-    // 4. Add the placeholder map from the scanner to the generator's main map
-    placeholder_map_.insert(scan_result.placeholder_map.begin(), scan_result.placeholder_map.end());
-    */
+    // 3. Add the final generated JS to global scripts
+    global_scripts_ << final_js << "\n";
 }
 
 }

@@ -5,6 +5,7 @@
 #include "../CHTLNode/ElementTemplateNode.h"
 #include "../CHTLNode/VarTemplateNode.h"
 #include "../CHTLConfig/Configuration.h"
+#include "../../CJMOD/API/CJMODManager.h"
 #include <string>
 #include <memory>
 #include <unordered_map>
@@ -19,6 +20,7 @@ struct ParserContext {
     std::unordered_map<std::string, std::shared_ptr<ElementTemplateNode>> element_templates_;
     std::unordered_map<std::string, std::shared_ptr<VarTemplateNode>> var_templates_;
     std::set<std::string> imported_namespaces_;
+    std::shared_ptr<CJMOD::CJMODManager> cjmod_manager = std::make_shared<CJMOD::CJMODManager>();
 };
 
 } // namespace CHTL

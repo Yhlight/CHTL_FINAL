@@ -69,38 +69,10 @@ include CMakeFiles/chtl_lib.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/chtl_lib.dir/flags.make
 
-CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
-CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o: src/CHTL/CHTLLexer/CHTLLexer.cpp
-CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o -c /app/src/CHTL/CHTLLexer/CHTLLexer.cpp
-
-CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/src/CHTL/CHTLLexer/CHTLLexer.cpp > CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.i
-
-CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTL/CHTLLexer/CHTLLexer.cpp -o CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.s
-
-CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
-CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o: src/CHTL/CHTLParser/CHTLParser.cpp
-CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o -c /app/src/CHTL/CHTLParser/CHTLParser.cpp
-
-CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/src/CHTL/CHTLParser/CHTLParser.cpp > CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.i
-
-CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTL/CHTLParser/CHTLParser.cpp -o CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.s
-
 CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
 CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: src/CHTL/CHTLGenerator/CHTLGenerator.cpp
 CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o -c /app/src/CHTL/CHTLGenerator/CHTLGenerator.cpp
 
 CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.i: cmake_force
@@ -111,10 +83,24 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTL/CHTLGenerator/CHTLGenerator.cpp -o CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.s
 
+CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
+CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o: src/CHTL/CHTLLexer/CHTLLexer.cpp
+CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o -c /app/src/CHTL/CHTLLexer/CHTLLexer.cpp
+
+CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/src/CHTL/CHTLLexer/CHTLLexer.cpp > CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.i
+
+CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTL/CHTLLexer/CHTLLexer.cpp -o CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.s
+
 CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
 CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.o: src/CHTL/CHTLLoader/CHTLLoader.cpp
 CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.o -c /app/src/CHTL/CHTLLoader/CHTLLoader.cpp
 
 CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.i: cmake_force
@@ -125,38 +111,38 @@ CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTL/CHTLLoader/CHTLLoader.cpp -o CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.s
 
-CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
-CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o: src/Scanner/CHTLUnifiedScanner.cpp
-CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o -MF CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o -c /app/src/Scanner/CHTLUnifiedScanner.cpp
+CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
+CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o: src/CHTL/CHTLParser/CHTLParser.cpp
+CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o -c /app/src/CHTL/CHTLParser/CHTLParser.cpp
 
-CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/src/Scanner/CHTLUnifiedScanner.cpp > CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.i
+CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/src/CHTL/CHTLParser/CHTLParser.cpp > CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.i
 
-CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/Scanner/CHTLUnifiedScanner.cpp -o CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.s
+CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTL/CHTLParser/CHTLParser.cpp -o CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.s
 
-CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
-CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o: src/CompilerDispatcher/CompilerDispatcher.cpp
-CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o -c /app/src/CompilerDispatcher/CompilerDispatcher.cpp
+CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
+CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o: src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp
+CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o -c /app/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp
 
-CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/src/CompilerDispatcher/CompilerDispatcher.cpp > CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.i
+CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp > CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.i
 
-CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CompilerDispatcher/CompilerDispatcher.cpp -o CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.s
+CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp -o CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.s
 
 CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
 CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o: src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp
 CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o -c /app/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp
 
 CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.i: cmake_force
@@ -170,7 +156,7 @@ CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.s: cmake_force
 CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
 CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o: src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp
 CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o -c /app/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp
 
 CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.i: cmake_force
@@ -181,19 +167,33 @@ CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp -o CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.s
 
-CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
-CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o: src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp
-CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o -c /app/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp
+CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
+CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.o: src/CJMOD/API/Syntax.cpp
+CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.o -c /app/src/CJMOD/API/Syntax.cpp
 
-CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp > CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.i
+CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/src/CJMOD/API/Syntax.cpp > CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.i
 
-CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp -o CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.s
+CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CJMOD/API/Syntax.cpp -o CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.s
+
+CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
+CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.o: src/CJMOD/Scanner/CJMODScanner.cpp
+CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.o -MF CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.o -c /app/src/CJMOD/Scanner/CJMODScanner.cpp
+
+CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/src/CJMOD/Scanner/CJMODScanner.cpp > CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.i
+
+CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CJMOD/Scanner/CJMODScanner.cpp -o CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.s
 
 CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
 CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o: src/CodeMerger/CodeMerger.cpp
@@ -209,35 +209,51 @@ CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/CodeMerger/CodeMerger.cpp -o CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.s
 
+CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o: CMakeFiles/chtl_lib.dir/flags.make
+CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o: src/Scanner/CHTLUnifiedScanner.cpp
+CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o: CMakeFiles/chtl_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o -MF CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o.d -o CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o -c /app/src/Scanner/CHTLUnifiedScanner.cpp
+
+CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/src/Scanner/CHTLUnifiedScanner.cpp > CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.i
+
+CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/src/Scanner/CHTLUnifiedScanner.cpp -o CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.s
+
 # Object files for target chtl_lib
 chtl_lib_OBJECTS = \
-"CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o" \
-"CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o" \
 "CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o" \
+"CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o" \
 "CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.o" \
-"CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o" \
-"CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o" \
+"CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o" \
+"CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o" \
 "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o" \
 "CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o" \
-"CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o" \
-"CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o"
+"CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.o" \
+"CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.o" \
+"CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o" \
+"CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o"
 
 # External object files for target chtl_lib
 chtl_lib_EXTERNAL_OBJECTS =
 
-libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o
-libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTL/CHTLGenerator/CHTLGenerator.cpp.o
+libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLexer/CHTLLexer.cpp.o
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTL/CHTLLoader/CHTLLoader.cpp.o
-libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o
-libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o
+libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTL/CHTLParser/CHTLParser.cpp.o
+libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSLexer/CHTLJSLexer.cpp.o
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSParser/CHTLJSParser.cpp.o
-libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o
+libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CJMOD/API/Syntax.cpp.o
+libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CJMOD/Scanner/CJMODScanner.cpp.o
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.o
+libchtl_lib.a: CMakeFiles/chtl_lib.dir/src/Scanner/CHTLUnifiedScanner.cpp.o
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/build.make
 libchtl_lib.a: CMakeFiles/chtl_lib.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX static library libchtl_lib.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX static library libchtl_lib.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/chtl_lib.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/chtl_lib.dir/link.txt --verbose=$(VERBOSE)
 
