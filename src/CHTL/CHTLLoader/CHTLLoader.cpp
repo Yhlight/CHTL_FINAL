@@ -81,4 +81,23 @@ std::optional<std::string> CHTLLoader::loadFile(const std::string& import_path, 
     return std::nullopt;
 }
 
+
+void CHTLLoader::loadCJMOD(const std::string& module_path, const std::string& base_path, std::shared_ptr<ParserContext> context) {
+    // This is a placeholder implementation.
+    // A real implementation would use dlopen/LoadLibrary and dlsym/GetProcAddress
+    // to load a shared library and call an initialization function.
+    std::cout << "--- (Placeholder) Pretending to load CJMOD: " << module_path << std::endl;
+
+    // To prevent reloading, we would check against a list of loaded cjmods.
+    if (std::find(loaded_cjmods_.begin(), loaded_cjmods_.end(), module_path) != loaded_cjmods_.end()) {
+        return;
+    }
+    loaded_cjmods_.push_back(module_path);
+
+    // The loaded CJMOD would then call back into the context's CJMODManager to register rules.
+    // For example:
+    // CJMOD::Arg rule = CJMOD::Syntax::analyze("$ ** $");
+    // context->cjmod_manager->registerRule("**", rule);
+}
+
 } // namespace CHTL

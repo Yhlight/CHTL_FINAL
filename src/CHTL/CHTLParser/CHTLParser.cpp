@@ -56,38 +56,46 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
         return nodes;
     }
     if (match({TokenType::Import})) {
-        consume(TokenType::AtChtl, "Expected '@Chtl' for file import.");
-        consume(TokenType::From, "Expected 'from' keyword in import statement.");
-        const Token& pathToken = consume(TokenType::StringLiteral, "Expected file path string.");
-        consume(TokenType::Semicolon, "Expected ';' after import statement.");
+        if (match({TokenType::AtChtl})) {
+            consume(TokenType::From, "Expected 'from' keyword in @Chtl import statement.");
+            const Token& pathToken = consume(TokenType::StringLiteral, "Expected file path string.");
+            consume(TokenType::Semicolon, "Expected ';' after import statement.");
 
-        std::string import_path = pathToken.lexeme;
-        if(auto content = loader_.loadFile(import_path, current_path_)) {
-            std::filesystem::path p(import_path);
-            std::string default_namespace = p.stem().string();
+            std::string import_path = pathToken.lexeme;
+            if(auto content = loader_.loadFile(import_path, current_path_)) {
+                std::filesystem::path p(import_path);
+                std::string default_namespace = p.stem().string();
 
-            std::string imported_file_canonical_path;
-            try {
-                imported_file_canonical_path = std::filesystem::canonical(std::filesystem::path(current_path_).parent_path() / import_path).string();
-            } catch (const std::filesystem::filesystem_error& e) {
-                 throw std::runtime_error("Could not find imported file: " + import_path);
+                std::string imported_file_canonical_path;
+                try {
+                    imported_file_canonical_path = std::filesystem::canonical(std::filesystem::path(current_path_).parent_path() / import_path).string();
+                } catch (const std::filesystem::filesystem_error& e) {
+                     throw std::runtime_error("Could not find imported file: " + import_path);
+                }
+
+                CHTLLexer imported_lexer(*content);
+                std::vector<Token> imported_tokens = imported_lexer.scanTokens();
+                CHTLParser imported_parser(*content, imported_tokens, loader_, imported_file_canonical_path, context_);
+
+                if (imported_parser.current_namespace_.empty()) {
+                    imported_parser.current_namespace_ = default_namespace;
+                }
+
+                if (!imported_parser.current_namespace_.empty()) {
+                    context_->imported_namespaces_.insert(imported_parser.current_namespace_);
+                }
+
+                imported_parser.parse();
             }
-
-            CHTLLexer imported_lexer(*content);
-            std::vector<Token> imported_tokens = imported_lexer.scanTokens();
-            CHTLParser imported_parser(*content, imported_tokens, loader_, imported_file_canonical_path, context_);
-
-            if (imported_parser.current_namespace_.empty()) {
-                imported_parser.current_namespace_ = default_namespace;
-            }
-
-            if (!imported_parser.current_namespace_.empty()) {
-                context_->imported_namespaces_.insert(imported_parser.current_namespace_);
-            }
-
-            imported_parser.parse();
+        } else if (match({TokenType::AtCJmod})) {
+            consume(TokenType::From, "Expected 'from' keyword in @CJmod import statement.");
+            const Token& pathToken = consume(TokenType::StringLiteral, "Expected file path string.");
+            consume(TokenType::Semicolon, "Expected ';' after import statement.");
+            loader_.loadCJMOD(pathToken.lexeme, current_path_, context_);
         }
-
+        else {
+            throw std::runtime_error("Expected '@Chtl' or '@CJmod' after [Import].");
+        }
         return nodes;
     }
     if (match({TokenType::Template, TokenType::Custom})) {

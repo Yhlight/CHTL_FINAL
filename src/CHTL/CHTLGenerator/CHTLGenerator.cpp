@@ -18,6 +18,8 @@
 
 namespace CHTL {
 
+CHTLGenerator::CHTLGenerator(std::shared_ptr<ParserContext> context) : context_(std::move(context)) {}
+
 std::string formatValue(const Value& val);
 ElementNode* findElementBySelector(const std::string& selector, const std::vector<ElementNode*>& elements);
 
@@ -558,8 +560,17 @@ void CHTLGenerator::renderScriptBlock(const ScriptBlockNode* node) {
         return;
     }
 
+    std::string script_content = node->content_;
+
+    // ** CJMOD INTEGRATION POINT **
+    // Here, we would iterate through the rules registered in the CJMODManager
+    // and apply them to the script_content before it's scanned by the CHTL JS pipeline.
+    // for (const auto& rule : context_->cjmod_manager->getRules()) {
+    //     script_content = CJMODScanner::scanAndReplace(rule, script_content);
+    // }
+
     // 1. Scan the raw script content to separate JS from CHTL JS
-    CHTLUnifiedScanner scanner(node->content_);
+    CHTLUnifiedScanner scanner(script_content);
     std::vector<CodeFragment> fragments = scanner.scan();
     const auto& p_map = scanner.getPlaceholderMap();
 

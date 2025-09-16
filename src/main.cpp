@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
         std::unique_ptr<CHTL::RootNode> ast = parser.parse();
 
         // 4. Generate the final output from the AST
-        CHTL::CHTLGenerator generator;
+        CHTL::CHTLGenerator generator(context);
         CHTL::CompilationResult result = generator.generate(*ast, use_default_struct);
 
         // 5. Write the output files
