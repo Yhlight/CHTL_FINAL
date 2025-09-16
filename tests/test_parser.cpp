@@ -36,7 +36,8 @@ int main(int argc, char* argv[]) {
         // 3. Generate JS from the AST
         if (ast) {
             CHTLJS::CHTLJSGenerator generator;
-            std::string js_code = generator.generate(*ast);
+            std::map<std::string, std::string> empty_map;
+            std::string js_code = generator.generate(*ast, empty_map);
             std::cout << "--- GENERATED JS ---" << std::endl;
             std::cout << js_code << std::endl;
         } else {

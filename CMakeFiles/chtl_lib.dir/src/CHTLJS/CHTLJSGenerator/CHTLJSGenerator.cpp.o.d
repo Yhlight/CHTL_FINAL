@@ -152,28 +152,29 @@ CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o: \
  /usr/include/c++/13/bits/charconv.h \
  /usr/include/c++/13/bits/basic_string.tcc \
  /usr/include/c++/13/bits/memory_resource.h /usr/include/c++/13/cstddef \
- /usr/include/c++/13/bits/uses_allocator_args.h \
- /app/src/CHTLJS/CHTLJSNode/SequenceNode.h \
- /app/src/CHTLJS/CHTLJSNode/CHTLJSNode.h /usr/include/c++/13/vector \
- /usr/include/c++/13/bits/stl_vector.h \
- /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc \
- /app/src/CHTLJS/CHTLJSNode/EnhancedSelectorNode.h \
- /app/src/CHTLJS/CHTLJSNode/ListenNode.h /usr/include/c++/13/map \
+ /usr/include/c++/13/bits/uses_allocator_args.h /usr/include/c++/13/map \
  /usr/include/c++/13/bits/stl_tree.h \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h /usr/include/c++/13/utility \
- /usr/include/c++/13/bits/stl_relops.h \
- /app/src/CHTLJS/CHTLJSNode/DelegateNode.h \
- /app/src/CHTLJS/CHTLJSNode/AnimateNode.h /usr/include/c++/13/optional \
+ /usr/include/c++/13/bits/erase_if.h \
+ /app/src/CHTLJS/CHTLJSGenerator/../CHTLJSNode/AnimateNode.h \
+ /app/src/CHTLJS/CHTLJSGenerator/../CHTLJSNode/CHTLJSNode.h \
+ /usr/include/c++/13/vector /usr/include/c++/13/bits/stl_vector.h \
+ /usr/include/c++/13/bits/stl_bvector.h \
+ /usr/include/c++/13/bits/vector.tcc /usr/include/c++/13/optional \
  /usr/include/c++/13/bits/enable_special_members.h \
- /app/src/CHTLJS/CHTLJSNode/ValueNode.h \
- /app/src/CHTLJS/CHTLJSNode/PlaceholderNode.h \
- /app/src/CHTLJS/CHTLJSNode/VirNode.h /usr/include/c++/13/stdexcept \
- /usr/include/c++/13/sstream /usr/include/c++/13/istream \
- /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
+ /app/src/CHTLJS/CHTLJSGenerator/../CHTLJSNode/DelegateNode.h \
+ /app/src/CHTLJS/CHTLJSGenerator/../CHTLJSNode/EnhancedSelectorNode.h \
+ /app/src/CHTLJS/CHTLJSGenerator/../CHTLJSNode/ListenNode.h \
+ /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
+ /app/src/CHTLJS/CHTLJSGenerator/../CHTLJSNode/PlaceholderNode.h \
+ /app/src/CHTLJS/CHTLJSGenerator/../CHTLJSNode/SequenceNode.h \
+ /app/src/CHTLJS/CHTLJSGenerator/../CHTLJSNode/ValueNode.h \
+ /app/src/CHTLJS/CHTLJSGenerator/../CHTLJSNode/VirNode.h \
+ /usr/include/c++/13/stdexcept /usr/include/c++/13/iostream \
+ /usr/include/c++/13/ostream /usr/include/c++/13/ios \
+ /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \
  /usr/include/c++/13/bits/locale_classes.tcc \
  /usr/include/c++/13/system_error \
@@ -186,7 +187,6 @@ CMakeFiles/chtl_lib.dir/src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp.o: \
  /usr/include/c++/13/bits/streambuf_iterator.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h \
  /usr/include/c++/13/bits/locale_facets.tcc \
- /usr/include/c++/13/bits/basic_ios.tcc /usr/include/c++/13/ostream \
- /usr/include/c++/13/bits/ostream.tcc \
- /usr/include/c++/13/bits/istream.tcc \
- /usr/include/c++/13/bits/sstream.tcc
+ /usr/include/c++/13/bits/basic_ios.tcc \
+ /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
+ /usr/include/c++/13/bits/istream.tcc

@@ -3,15 +3,9 @@
 
 #include "../CHTLJSNode/CHTLJSNode.h"
 #include <string>
+#include <map>
 
 namespace CHTLJS {
-
-// Forward declarations
-class EnhancedSelectorNode;
-class ListenNode;
-class DelegateNode;
-class AnimateNode;
-class ValueNode;
 
 // Forward declarations for all node types
 class SequenceNode;
@@ -26,7 +20,9 @@ class VirNode;
 class CHTLJSGenerator {
 public:
     CHTLJSGenerator() = default;
-    std::string generate(const CHTLJSNode& root);
+
+    // The placeholder map from the scanner is required for generation.
+    std::string generate(const CHTLJSNode& root, const std::map<std::string, std::string>& placeholder_map);
 
 private:
     std::string visit(const CHTLJSNode* node);
@@ -38,6 +34,9 @@ private:
     std::string visitValueNode(const ValueNode* node);
     std::string visitPlaceholderNode(const PlaceholderNode* node);
     std::string visitVirNode(const VirNode* node);
+
+    // Store the map for access during the recursive visit calls.
+    const std::map<std::string, std::string>* placeholder_map_ = nullptr;
 };
 
 } // namespace CHTLJS

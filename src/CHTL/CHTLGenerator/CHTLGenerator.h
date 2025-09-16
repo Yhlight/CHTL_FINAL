@@ -39,7 +39,7 @@ struct CompilationResult {
 class CHTLGenerator {
 public:
     CHTLGenerator() = default;
-    CompilationResult generate(RootNode& root);
+    CompilationResult generate(RootNode& root, bool use_default_struct = false);
 
 private:
     // Expression Evaluation
