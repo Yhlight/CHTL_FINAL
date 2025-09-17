@@ -22,7 +22,9 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::RIGHT_BRACKET:      return "]";
         case TokenType::LEFT_PAREN:         return "(";
         case TokenType::RIGHT_PAREN:        return ")";
+        case TokenType::COMMA:              return ",";
         case TokenType::HASH_COMMENT:       return "HASH_COMMENT";
+        case TokenType::KEYWORD_DELETE:     return "delete";
         default:                            return "UNKNOWN";
     }
 }

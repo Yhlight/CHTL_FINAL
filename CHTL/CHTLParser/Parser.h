@@ -34,9 +34,11 @@ private:
     std::shared_ptr<Expression> parseExpression();
     std::shared_ptr<TextNode> parseTextAttributeAsNode();
     std::string parseSelector();
-    std::shared_ptr<Statement> parseTemplateStatement();
+    std::shared_ptr<Statement> parseDefinitionStatement(); // For [Template] and [Custom]
     std::shared_ptr<TemplateUsageNode> parseTemplateUsageNode();
     std::shared_ptr<Expression> parseVarUsageExpression();
+    void parseStyleCustomBody(std::shared_ptr<StyleCustomNode> node);
+    std::shared_ptr<DeletePropertyNode> parseDeleteStatement();
 
     Lexer& lexer;
     Context& context;

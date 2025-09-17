@@ -1,5 +1,6 @@
 #include "Parser.h"
 #include <string>
+#include <iostream>
 
 Parser::Parser(Lexer& lexer, Context& context) : lexer(lexer), context(context) {
     // Initialize with the first two tokens
@@ -63,7 +64,7 @@ std::shared_ptr<TextNode> parseTextAttributeAsNode();
 // Dispatcher for different statement types.
 std::shared_ptr<Statement> Parser::parseStatement() {
     if (currentTokenIs(TokenType::LEFT_BRACKET)) {
-        return parseTemplateStatement();
+        return parseDefinitionStatement();
     }
 
     if (currentTokenIs(TokenType::AT_SIGN)) {
@@ -270,6 +271,23 @@ std::string Parser::parseSelector() {
 }
 
 
+// Parses a `delete prop1, prop2;` statement
+std::shared_ptr<DeletePropertyNode> Parser::parseDeleteStatement() {
+    auto deleteNode = std::make_shared<DeletePropertyNode>(currentToken);
+    nextToken(); // consume delete
+
+    while(!currentTokenIs(TokenType::SEMICOLON) && !currentTokenIs(TokenType::END_OF_FILE)) {
+        if (currentTokenIs(TokenType::IDENTIFIER)) {
+            deleteNode->propertiesToDelete.push_back(currentToken.literal);
+        }
+        // Consume the token (identifier or comma) to advance the loop
+        nextToken();
+    }
+    if(currentTokenIs(TokenType::SEMICOLON)) nextToken(); // consume semicolon
+    return deleteNode;
+}
+
+
 std::shared_ptr<TemplateUsageNode> Parser::parseTemplateUsageNode() {
     // Expects current token to be @
     nextToken(); // consume @
@@ -279,12 +297,33 @@ std::shared_ptr<TemplateUsageNode> Parser::parseTemplateUsageNode() {
 
     if (!currentTokenIs(TokenType::IDENTIFIER)) return nullptr;
     Token nameToken = currentToken; // e.g. MyTemplate
-    nextToken();
 
-    if (!currentTokenIs(TokenType::SEMICOLON)) return nullptr;
-    nextToken(); // consume ;
+    auto node = std::make_shared<TemplateUsageNode>(typeToken, nameToken.literal);
+    nextToken(); // consume name
 
-    return std::make_shared<TemplateUsageNode>(typeToken, nameToken.literal);
+    if (currentTokenIs(TokenType::SEMICOLON)) {
+        nextToken(); // consume ;
+        return node; // No specialization block
+    }
+
+    if (currentTokenIs(TokenType::LEFT_BRACE)) {
+        nextToken(); // consume {
+
+        while(!currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
+            if (currentTokenIs(TokenType::KEYWORD_DELETE)) {
+                node->specializations.push_back(parseDeleteStatement());
+            } else if (currentTokenIs(TokenType::IDENTIFIER) && (peekTokenIs(TokenType::COLON) || peekTokenIs(TokenType::EQUALS))) {
+                node->specializations.push_back(parseAttributeNode());
+            } else {
+                nextToken(); // Skip invalid tokens
+            }
+        }
+
+        if (!currentTokenIs(TokenType::RIGHT_BRACE)) return nullptr; // error
+        nextToken(); // consume }
+    }
+
+    return node;
 }
 
 
@@ -350,12 +389,42 @@ std::shared_ptr<StyleNode> Parser::parseStyleNode() {
     return node;
 }
 
-std::shared_ptr<Statement> Parser::parseTemplateStatement() {
-    // Expect [Template]
+// A helper for parsing the body of a [Custom] @Style block
+void Parser::parseStyleCustomBody(std::shared_ptr<StyleCustomNode> node) {
+    while(!currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
+        if (currentTokenIs(TokenType::KEYWORD_DELETE)) {
+            node->statements.push_back(parseDeleteStatement());
+        } else if (currentTokenIs(TokenType::AT_SIGN)) {
+            node->statements.push_back(parseTemplateUsageNode());
+        } else if (currentTokenIs(TokenType::IDENTIFIER)) {
+            if (peekTokenIs(TokenType::COLON) || peekTokenIs(TokenType::EQUALS)) {
+                // It's a regular property with a value
+                node->statements.push_back(parseAttributeNode());
+            } else {
+                // It's a valueless property, possibly the start of a list
+                node->statements.push_back(std::make_shared<AttributeNode>(currentToken, currentToken.literal, nullptr));
+                nextToken(); // consume identifier
+
+                if (currentTokenIs(TokenType::COMMA)) {
+                    nextToken(); // consume comma and continue loop for next property
+                } else if (currentTokenIs(TokenType::SEMICOLON)) {
+                    nextToken(); // consume semicolon, statement is done
+                }
+            }
+        } else {
+            nextToken(); // Skip other tokens like extra semicolons
+        }
+    }
+}
+
+
+std::shared_ptr<Statement> Parser::parseDefinitionStatement() {
+    // Expect [Type]
     if (!currentTokenIs(TokenType::LEFT_BRACKET)) return nullptr;
     nextToken(); // consume [
-    if (currentToken.literal != "Template") return nullptr;
-    nextToken(); // consume Template
+    Token definitionType = currentToken; // "Template" or "Custom"
+    if (!currentTokenIs(TokenType::IDENTIFIER)) return nullptr;
+    nextToken(); // consume identifier
     if (!currentTokenIs(TokenType::RIGHT_BRACKET)) return nullptr;
     nextToken(); // consume ]
 
@@ -363,7 +432,7 @@ std::shared_ptr<Statement> Parser::parseTemplateStatement() {
     if (!currentTokenIs(TokenType::AT_SIGN)) return nullptr;
     nextToken(); // consume @
     if (!currentTokenIs(TokenType::IDENTIFIER)) return nullptr;
-    Token typeToken = currentToken;
+    Token typeToken = currentToken; // "Style", "Element", "Var"
     nextToken(); // consume Type
 
     // Expect Name
@@ -374,55 +443,47 @@ std::shared_ptr<Statement> Parser::parseTemplateStatement() {
     if (!currentTokenIs(TokenType::LEFT_BRACE)) return nullptr;
     nextToken(); // consume {
 
-    if (typeToken.literal == "Style") {
-        auto node = std::make_shared<StyleTemplateNode>(nameToken, nameToken.literal);
-        while(!currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
-            if (currentTokenIs(TokenType::IDENTIFIER) && (peekTokenIs(TokenType::COLON) || peekTokenIs(TokenType::EQUALS))) {
-                node->properties.push_back(parseAttributeNode());
-            } else {
-                nextToken();
+    // Dispatch based on definition type and content type
+    if (definitionType.literal == "Template") {
+        if (typeToken.literal == "Style") {
+            auto node = std::make_shared<StyleTemplateNode>(nameToken, nameToken.literal);
+            while(!currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
+                if (currentTokenIs(TokenType::IDENTIFIER) && (peekTokenIs(TokenType::COLON) || peekTokenIs(TokenType::EQUALS))) {
+                    node->properties.push_back(parseAttributeNode());
+                } else { nextToken(); }
             }
-        }
-        context.addStyleTemplate(nameToken.literal, node);
-        if (!currentTokenIs(TokenType::RIGHT_BRACE)) return nullptr;
-        nextToken(); // consume }
-        return node;
-
-    } else if (typeToken.literal == "Element") {
-        auto node = std::make_shared<ElementTemplateNode>(nameToken, nameToken.literal);
-        while(!currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
-            auto stmt = parseStatement();
-            if (stmt) {
-                node->children.push_back(stmt);
-            } else {
-                nextToken();
+            context.addStyleTemplate(nameToken.literal, node);
+        } else if (typeToken.literal == "Element") {
+            auto node = std::make_shared<ElementTemplateNode>(nameToken, nameToken.literal);
+            while(!currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
+                auto stmt = parseStatement();
+                if (stmt) node->children.push_back(stmt);
+                else nextToken();
             }
-        }
-        context.addElementTemplate(nameToken.literal, node);
-        if (!currentTokenIs(TokenType::RIGHT_BRACE)) return nullptr;
-        nextToken(); // consume }
-        return node;
-
-    } else if (typeToken.literal == "Var") {
-        auto node = std::make_shared<VarTemplateNode>(nameToken, nameToken.literal);
-         while(!currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
-            if (currentTokenIs(TokenType::IDENTIFIER) && (peekTokenIs(TokenType::COLON) || peekTokenIs(TokenType::EQUALS))) {
-                node->variables.push_back(parseAttributeNode());
-            } else {
-                nextToken();
+            context.addElementTemplate(nameToken.literal, node);
+        } else if (typeToken.literal == "Var") {
+            auto node = std::make_shared<VarTemplateNode>(nameToken, nameToken.literal);
+            while(!currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
+                if (currentTokenIs(TokenType::IDENTIFIER) && (peekTokenIs(TokenType::COLON) || peekTokenIs(TokenType::EQUALS))) {
+                    node->variables.push_back(parseAttributeNode());
+                } else { nextToken(); }
             }
+            context.addVarTemplate(nameToken.literal, node);
         }
-        context.addVarTemplate(nameToken.literal, node);
-        if (!currentTokenIs(TokenType::RIGHT_BRACE)) return nullptr;
-        nextToken(); // consume }
-        return node;
+    } else if (definitionType.literal == "Custom") {
+        if (typeToken.literal == "Style") {
+            auto node = std::make_shared<StyleCustomNode>(nameToken, nameToken.literal);
+            parseStyleCustomBody(node); // Use helper to parse the body
+            context.addStyleCustom(nameToken.literal, node);
+        }
+        // ... other custom types ...
     }
 
-    // Unknown template type, skip block
-    while(!currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
-        nextToken();
-    }
     if (!currentTokenIs(TokenType::RIGHT_BRACE)) return nullptr;
     nextToken(); // consume }
-    return nullptr;
+
+    // The definition statement itself doesn't become part of the final AST,
+    // it only populates the context. We return a placeholder statement so the
+    // main parse loop knows a statement was successfully parsed.
+    return std::make_shared<Statement>();
 }

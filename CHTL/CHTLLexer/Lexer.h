@@ -20,7 +20,6 @@ private:
     Token makeToken(TokenType type, const std::string& literal);
     Token readIdentifier();
     Token readStringLiteral();
-    Token readUnquotedLiteral();
     Token readHashComment();
 
     std::string source;

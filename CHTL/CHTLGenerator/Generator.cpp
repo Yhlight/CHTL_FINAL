@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <set>
 #include <map>
-
+#include <functional>
 // Set of HTML5 void elements. These tags cannot have any content.
 static const std::set<std::string> voidElements = {
     "area", "base", "br", "col", "embed", "hr", "img", "input",
@@ -64,65 +64,113 @@ void Generator::generateProgram(const std::shared_ptr<Program>& node) {
     }
 }
 
-// New helper function to process StyleNodes
-void Generator::generateStyle(const std::shared_ptr<StyleNode>& styleNode, std::map<std::string, std::string>& attributes) {
-    std::string mainSelector;
+// Forward declaration for the recursive helper
+std::map<std::string, std::string> computeStyleProperties(const std::vector<std::shared_ptr<Statement>>& statements, Context& context, std::function<std::string(std::shared_ptr<Expression>)> expGen);
 
-    // First pass: find auto-generated classes/ids and inline styles from all sources
-    for (const auto& stmt : styleNode->statements) {
-        if (auto rule = std::dynamic_pointer_cast<CssRuleNode>(stmt)) {
-            if (rule->selector == "&") {
-                // This rule contains inline styles
-                for (const auto& prop : rule->properties) {
-                    attributes["style"] += prop->key + ":" + generateExpression(prop->value) + ";";
-                }
-            } else if (rule->selector[0] == '.') {
-                // Auto-add class
-                std::string className = rule->selector.substr(1);
-                attributes["class"] = attributes["class"].empty() ? className : attributes["class"] + " " + className;
-                if (mainSelector.empty()) mainSelector = rule->selector;
-            } else if (rule->selector[0] == '#') {
-                // Auto-add id
-                attributes["id"] = rule->selector.substr(1);
-                if (mainSelector.empty()) mainSelector = rule->selector;
-            }
-        } else if (auto usage = std::dynamic_pointer_cast<TemplateUsageNode>(stmt)) {
-            // This is a template usage, e.g., @Style MyTemplate;
-            if (usage->token.literal == "Style") {
-                auto styleTemplate = context.getStyleTemplate(usage->name);
-                if (styleTemplate) {
-                    // Inject the template's properties as inline styles
-                    for (const auto& prop : styleTemplate->properties) {
-                        attributes["style"] += prop->key + ":" + generateExpression(prop->value) + ";";
-                    }
+std::map<std::string, std::string> computeUsage(const std::shared_ptr<TemplateUsageNode>& usage, Context& context, std::function<std::string(std::shared_ptr<Expression>)> expGen) {
+    if (usage->token.literal != "Style") return {};
+
+    auto styleCustom = context.getStyleCustom(usage->name);
+    if (styleCustom) {
+        // It's a custom style. Recursively compute its base properties.
+        std::map<std::string, std::string> props = computeStyleProperties(styleCustom->statements, context, expGen);
+        // Now, apply specializations from the usage site.
+        for (const auto& specStmt : usage->specializations) {
+            if (auto attr = std::dynamic_pointer_cast<AttributeNode>(specStmt)) {
+                props[attr->key] = expGen(attr->value); // Add or overwrite
+            } else if (auto del = std::dynamic_pointer_cast<DeletePropertyNode>(specStmt)) {
+                for (const auto& propName : del->propertiesToDelete) {
+                    props.erase(propName);
                 }
             }
         }
+        return props;
+    } else {
+        // It's a simple template.
+        auto styleTemplate = context.getStyleTemplate(usage->name);
+        if (styleTemplate) {
+            std::map<std::string, std::string> props;
+            for (const auto& prop : styleTemplate->properties) {
+                props[prop->key] = expGen(prop->value);
+            }
+            return props;
+        }
+    }
+    return {};
+}
+
+std::map<std::string, std::string> computeStyleProperties(const std::vector<std::shared_ptr<Statement>>& statements, Context& context, std::function<std::string(std::shared_ptr<Expression>)> expGen) {
+    std::map<std::string, std::string> props;
+    for(const auto& stmt : statements) {
+        if (auto rule = std::dynamic_pointer_cast<CssRuleNode>(stmt)) {
+            if (rule->selector == "&") {
+                for (const auto& prop : rule->properties) {
+                    props[prop->key] = expGen(prop->value);
+                }
+            }
+        } else if (auto attr = std::dynamic_pointer_cast<AttributeNode>(stmt)) {
+            props[attr->key] = attr->value ? expGen(attr->value) : "";
+        } else if (auto usage = std::dynamic_pointer_cast<TemplateUsageNode>(stmt)) {
+            auto resolvedProps = computeUsage(usage, context, expGen);
+            for (const auto& [key, val] : resolvedProps) {
+                props[key] = val;
+            }
+        }
+    }
+    return props;
+}
+
+void Generator::generateStyle(const std::shared_ptr<StyleNode>& styleNode, std::map<std::string, std::string>& attributes) {
+    std::string mainSelector;
+
+    auto expGen = [this](std::shared_ptr<Expression> node) {
+        return this->generateExpression(node);
+    };
+
+    // First pass: Compute all final inline styles by processing all statements.
+    std::map<std::string, std::string> finalInlineStyles = computeStyleProperties(styleNode->statements, context, expGen);
+
+    for(const auto& [key, val] : finalInlineStyles) {
+        if (!val.empty()) {
+            attributes["style"] += key + ":" + val + ";";
+        }
     }
 
-    // If main selector wasn't found from rules, infer from existing attributes
+    // Second pass: find main selector for global rules and add classes/ids
+    for (const auto& stmt : styleNode->statements) {
+         if (auto rule = std::dynamic_pointer_cast<CssRuleNode>(stmt)) {
+            if (mainSelector.empty()) {
+                if (rule->selector[0] == '.') {
+                    attributes["class"] = attributes["class"].empty() ? rule->selector.substr(1) : attributes["class"] + " " + rule->selector.substr(1);
+                    mainSelector = rule->selector;
+                } else if (rule->selector[0] == '#') {
+                    attributes["id"] = rule->selector.substr(1);
+                    mainSelector = rule->selector;
+                }
+            }
+         }
+    }
     if (mainSelector.empty()) {
         if (attributes.count("id")) mainSelector = "#" + attributes["id"];
         else if (attributes.count("class")) mainSelector = "." + attributes["class"].substr(0, attributes["class"].find(' '));
     }
 
-
-    // Second pass: generate global CSS for all nested rules
+    // Third pass: generate global CSS for all nested rules
     for (const auto& stmt : styleNode->statements) {
-        auto rule = std::dynamic_pointer_cast<CssRuleNode>(stmt);
-        if (!rule || rule->selector == "&") continue; // Skip non-rules and inline styles
+        if (auto rule = std::dynamic_pointer_cast<CssRuleNode>(stmt)) {
+            if (rule->selector == "&") continue; // Skip inline styles
 
-        std::string finalSelector = rule->selector;
-        if (finalSelector[0] == '&') {
-            // Replace '&' with the main selector for contextual selectors
-            finalSelector.replace(0, 1, mainSelector);
-        }
+            std::string finalSelector = rule->selector;
+            if (finalSelector[0] == '&') {
+                finalSelector.replace(0, 1, mainSelector);
+            }
 
-        cssStream << finalSelector << " {\n";
-        for (const auto& prop : rule->properties) {
-            cssStream << "  " << prop->key << ": " << generateExpression(prop->value) << ";\n";
+            cssStream << finalSelector << " {\n";
+            for (const auto& prop : rule->properties) {
+                cssStream << "  " << prop->key << ": " << generateExpression(prop->value) << ";\n";
+            }
+            cssStream << "}\n\n";
         }
-        cssStream << "}\n\n";
     }
 }
 

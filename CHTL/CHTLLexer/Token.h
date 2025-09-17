@@ -28,11 +28,13 @@ enum class TokenType {
     RIGHT_BRACKET, // ]
     LEFT_PAREN,    // (
     RIGHT_PAREN,   // )
+    COMMA,         // ,
 
     // Comments
     HASH_COMMENT, // # A comment
 
-    // Keywords are handled by the parser based on identifier value
+    // Keywords
+    KEYWORD_DELETE,
 };
 
 // A struct to represent a token

@@ -4,8 +4,7 @@
 
 // Map of keywords to their corresponding token types
 static const std::map<std::string, TokenType> keywords = {
-    // "text" and "style" are now parsed as regular identifiers.
-    // The parser will determine their meaning based on context.
+    {"delete", TokenType::KEYWORD_DELETE},
 };
 
 Lexer::Lexer(const std::string& source) : source(source), position(0), readPosition(0), ch(0), line(1) {
@@ -133,6 +132,7 @@ Token Lexer::nextToken() {
         case ']': tok = makeToken(TokenType::RIGHT_BRACKET, "]"); readChar(); break;
         case '(': tok = makeToken(TokenType::LEFT_PAREN, "("); readChar(); break;
         case ')': tok = makeToken(TokenType::RIGHT_PAREN, ")"); readChar(); break;
+        case ',': tok = makeToken(TokenType::COMMA, ","); readChar(); break;
         case '"':
         case '\'':
             return readStringLiteral();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../CHTLNode/TemplateNodes.h"
+#include "../CHTLNode/CustomNodes.h"
 #include <string>
 #include <memory>
 #include <map>
@@ -43,8 +44,20 @@ public:
     }
 
 
+    // Custom Style Definitions
+    void addStyleCustom(const std::string& name, std::shared_ptr<StyleCustomNode> node) {
+        styleCustoms[name] = node;
+    }
+    std::shared_ptr<StyleCustomNode> getStyleCustom(const std::string& name) const {
+        if (styleCustoms.count(name)) {
+            return styleCustoms.at(name);
+        }
+        return nullptr;
+    }
+
 private:
     std::map<std::string, std::shared_ptr<StyleTemplateNode>> styleTemplates;
     std::map<std::string, std::shared_ptr<ElementTemplateNode>> elementTemplates;
     std::map<std::string, std::shared_ptr<VarTemplateNode>> varTemplates;
+    std::map<std::string, std::shared_ptr<StyleCustomNode>> styleCustoms;
 };

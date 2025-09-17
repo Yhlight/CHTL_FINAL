@@ -50,7 +50,9 @@ public:
 };
 
 
-// Represents the usage of a template, e.g., @Style MyStyles;
+#include "CustomNodes.h"
+
+// Represents the usage of a template or custom, e.g., @Style MyStyles; or @Style MyCustom { ... }
 class TemplateUsageNode : public Statement {
 public:
     TemplateUsageNode(Token token, std::string name)
@@ -60,4 +62,7 @@ public:
 
     Token token; // The token for the type, e.g., @Style
     std::string name;
+
+    // For specialization, e.g. @Style MyCustom { color: red; delete border; }
+    std::vector<std::shared_ptr<Statement>> specializations;
 };

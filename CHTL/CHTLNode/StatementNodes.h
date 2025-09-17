@@ -9,7 +9,7 @@
 
 // Represents a key-value pair, like an HTML attribute or a CSS property.
 // It's a general-purpose node used inside other nodes.
-class AttributeNode : public Node {
+class AttributeNode : public Statement {
 public:
     AttributeNode(Token token, std::string key, std::shared_ptr<Expression> value)
         : token(std::move(token)), key(std::move(key)), value(std::move(value)) {}

@@ -1,0 +1,5 @@
+# Ignore the compiled executable
+chtl_compiler
+
+# Ignore object files
+*.o
