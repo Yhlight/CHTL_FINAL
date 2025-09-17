@@ -10,7 +10,7 @@ static const std::map<std::string, TokenType> keywords = {
     {"style", TokenType::STYLE},
     {"script", TokenType::SCRIPT},
     {"inherit", TokenType::INHERIT},
-    {"delete", TokenType::DELETE},
+    // {"delete", TokenType::KEYWORD_DELETE}, // Reverted
     {"insert", TokenType::INSERT},
     {"after", TokenType::AFTER},
     {"before", TokenType::BEFORE},
@@ -82,7 +82,6 @@ void Lexer::skipBlockComment() {
 
 Token Lexer::readIdentifier() {
     int start_pos = m_position;
-    // An identifier starts with a letter or _, followed by letters, numbers, _, or -
     while (std::isalnum(m_char) || m_char == '_' || m_char == '-') {
         readChar();
     }

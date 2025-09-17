@@ -73,7 +73,6 @@ enum class TokenType {
 
     // Other Keywords
     INHERIT,
-    DELETE,
     INSERT,
     AFTER,
     BEFORE,
