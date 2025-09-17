@@ -1,0 +1,15 @@
+[Info]
+{
+    name = "Chtholly";
+    version = "1.0.0";
+    description = "Official CHTL module for Chtholly Nota Seniorious. Provides beautiful and happy components.";
+    author = "CHTL Team";
+    license = "MIT";
+    minCHTLVersion = "1.0.0";
+}
+
+// The [Export] block tells the compiler what's available from this module.
+[Export]
+{
+    [Custom] @Element ChthollyCard;
+}
