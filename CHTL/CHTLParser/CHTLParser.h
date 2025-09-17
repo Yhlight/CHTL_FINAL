@@ -19,6 +19,7 @@ private:
     std::unique_ptr<ElementNode> parseElement();
     std::unique_ptr<TextNode> parseText();
     std::unique_ptr<StyleNode> parseStyle();
+    std::unique_ptr<SelectorNode> parseSelector();
     std::unique_ptr<AttributeNode> parseAttribute();
     std::unique_ptr<ValueNode> parseValue();
 

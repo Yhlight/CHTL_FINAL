@@ -57,8 +57,14 @@ Token CHTLLexer::nextToken() {
             return stringLiteral();
 
         case '#':
-            while (peek() != '\n' && !isAtEnd()) advance();
-            return makeToken(TokenType::GENERATOR_COMMENT);
+            // If it's followed by a space, it's a generator comment.
+            // Otherwise, it's a HASH for an ID selector.
+            if (peek() == ' ') {
+                while (peek() != '\n' && !isAtEnd()) advance();
+                return makeToken(TokenType::GENERATOR_COMMENT);
+            } else {
+                return makeToken(TokenType::HASH);
+            }
     }
 
     return errorToken("Unexpected character.");
@@ -120,7 +126,8 @@ Token CHTLLexer::stringLiteral() {
 }
 
 Token CHTLLexer::identifier() {
-    while (isalnum(peek()) || peek() == '_') advance();
+    // Allow hyphens in identifiers for CSS properties like font-weight
+    while (isalnum(peek()) || peek() == '_' || peek() == '-') advance();
 
     // Check if it's a keyword
     std::string text = source.substr(start, current - start);

@@ -94,22 +94,80 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyle() {
     consume(TokenType::LBRACE, "Expect '{' after 'style' keyword.");
     auto styleNode = std::make_unique<StyleNode>();
     while (!check(TokenType::RBRACE) && !isAtEnd()) {
-        styleNode->properties.push_back(parseAttribute());
+        const Token& currentToken = peek();
+        const Token& nextToken = (current + 1 < tokens.size()) ? tokens[current + 1] : currentToken;
+
+        // Check if it's an inline property (e.g., color: red;)
+        if (currentToken.type == TokenType::IDENTIFIER && nextToken.type == TokenType::COLON) {
+            styleNode->children.push_back(parseAttribute());
+        }
+        // Otherwise, assume it's a selector block (e.g., .box { ... })
+        else {
+            styleNode->children.push_back(parseSelector());
+        }
     }
     consume(TokenType::RBRACE, "Expect '}' after style block.");
     return styleNode;
 }
 
-std::unique_ptr<ValueNode> CHTLParser::parseValue() {
-    if (match({TokenType::STRING_LITERAL, TokenType::UNQUOTED_LITERAL, TokenType::IDENTIFIER})) {
-        return std::make_unique<ValueNode>(previous());
+std::unique_ptr<SelectorNode> CHTLParser::parseSelector() {
+    std::string selector_text;
+    // Consume tokens until we hit a left brace, concatenating them to form the selector.
+    // For now, we'll do a simple concatenation. This works for simple selectors
+    // like `.box` and `&:hover`, but not for descendant selectors like `.box button`.
+    // A more advanced implementation would intelligently add spaces.
+    while (!check(TokenType::LBRACE) && !isAtEnd()) {
+        selector_text += advance().lexeme;
     }
-    // This is a syntax error
-    // A real parser would throw an exception or enter panic mode.
-    std::cerr << "Error: Expected a value (string, identifier, or unquoted literal) at line "
-              << peek().line << ", column " << peek().column << std::endl;
-    // Return a dummy value to prevent crashing
-    return std::make_unique<ValueNode>(peek());
+
+    auto selectorNode = std::make_unique<SelectorNode>(selector_text);
+
+    consume(TokenType::LBRACE, "Expect '{' after selector.");
+
+    while (!check(TokenType::RBRACE) && !isAtEnd()) {
+        selectorNode->properties.push_back(parseAttribute());
+    }
+
+    consume(TokenType::RBRACE, "Expect '}' after selector property block.");
+
+    return selectorNode;
+}
+
+
+std::unique_ptr<ValueNode> CHTLParser::parseValue() {
+    std::string value_text;
+    const Token& first_token = peek();
+
+    // Consume tokens until we hit a semicolon or a closing brace.
+    // This allows for multi-token values like `1px solid black`.
+    if (first_token.type == TokenType::STRING_LITERAL) {
+        // If it's a string literal, consume only that one token.
+        value_text = advance().lexeme;
+    } else {
+        while (!check(TokenType::SEMICOLON) && !check(TokenType::RBRACE) && !isAtEnd()) {
+            if (!value_text.empty()) {
+                value_text += " ";
+            }
+            value_text += advance().lexeme;
+        }
+    }
+
+    if (value_text.empty()) {
+        std::cerr << "Error: Expected a value at line "
+                  << peek().line << ", column " << peek().column << std::endl;
+        // Return a dummy value to prevent crashing
+        return std::make_unique<ValueNode>(peek());
+    }
+
+    // Create a new synthetic token for the whole value
+    Token value_token;
+    // Preserve the original token type if it was a string
+    value_token.type = (first_token.type == TokenType::STRING_LITERAL) ? TokenType::STRING_LITERAL : TokenType::UNQUOTED_LITERAL;
+    value_token.lexeme = value_text;
+    value_token.line = first_token.line;
+    value_token.column = first_token.column;
+
+    return std::make_unique<ValueNode>(value_token);
 }
 
 

@@ -39,6 +39,7 @@ enum class TokenType {
     RBRACKET,           // ]
     COMMA,              // ,
     DOT,                // .
+    HASH,               // #
 
     // Comments
     SINGLE_LINE_COMMENT, // // ...

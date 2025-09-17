@@ -50,6 +50,16 @@ public:
         printIndent();
         ss << "Style\n";
         indent++;
+        for (auto& child : node.children) {
+            child->accept(*this);
+        }
+        indent--;
+    }
+
+    void visit(SelectorNode& node) override {
+        printIndent();
+        ss << "Selector<" << node.selector << ">\n";
+        indent++;
         for (auto& prop : node.properties) {
             prop->accept(*this);
         }
@@ -91,6 +101,37 @@ R"(Program
   Element<body>
     Element<div>
       Attr[id: '"main"']
+)";
+
+    ASSERT_EQ(result, expected);
+}
+
+TEST(ParserTest, StyleBlockWithSelector) {
+    std::string source = R"(
+div {
+    style {
+        color: blue;
+        .box {
+            width: 100px;
+        }
+    }
+}
+)";
+    CHTLLexer lexer(source);
+    std::vector<Token> tokens = lexer.tokenize();
+    CHTLParser parser(tokens);
+    std::unique_ptr<ProgramNode> ast = parser.parse();
+
+    ASTStringifier stringifier;
+    std::string result = stringifier.stringify(*ast);
+
+    std::string expected =
+R"(Program
+  Element<div>
+    Style
+      Attr[color: 'blue']
+      Selector<.box>
+        Attr[width: '100px']
 )";
 
     ASSERT_EQ(result, expected);

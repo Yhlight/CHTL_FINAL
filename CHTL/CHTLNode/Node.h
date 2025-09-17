@@ -12,6 +12,7 @@ struct AttributeNode;
 struct TextNode;
 struct StyleNode;
 struct ValueNode;
+struct SelectorNode; // New
 
 // Base Node class using visitor pattern for future operations (like generation)
 struct INodeVisitor;
@@ -29,6 +30,7 @@ struct INodeVisitor {
     virtual void visit(TextNode& node) = 0;
     virtual void visit(StyleNode& node) = 0;
     virtual void visit(ValueNode& node) = 0;
+    virtual void visit(SelectorNode& node) = 0; // New
 };
 
 
@@ -57,9 +59,21 @@ struct AttributeNode : public Node {
 };
 
 // Represents a style block (e.g., style { color: red; })
-// For now, we'll just store the properties as a simple list of attributes.
+// Can now contain direct properties (AttributeNode) or full selector blocks (SelectorNode)
 struct StyleNode : public Node {
+    std::vector<std::unique_ptr<Node>> children;
+
+    void accept(INodeVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+};
+
+// Represents a CSS selector block (e.g., .box { color: red; })
+struct SelectorNode : public Node {
+    std::string selector;
     std::vector<std::unique_ptr<AttributeNode>> properties;
+
+    explicit SelectorNode(const std::string& selector) : selector(selector) {}
 
     void accept(INodeVisitor& visitor) override {
         visitor.visit(*this);
