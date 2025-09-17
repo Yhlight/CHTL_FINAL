@@ -9,13 +9,18 @@ namespace CHTL {
 
 class CodeMerger {
 public:
-    CodeMerger() = default;
+    explicit CodeMerger(const std::map<std::string, std::string>& placeholder_map);
 
-    // Takes the main HTML output and a collection of JavaScript strings
+    // Replaces all JS placeholders in a string with their original code.
+    std::string resolveJsPlaceholders(std::string js_with_placeholders);
+
+    // Takes the main HTML body, final CSS, and final JS
     // and merges them into a final HTML document.
-    std::string merge(const std::string& html_output,
-                      const std::vector<std::string>& js_outputs,
-                      const std::map<std::string, std::string>& placeholder_map);
+    std::string merge(const std::string& html_body,
+                      const std::string& css,
+                      const std::string& js);
+private:
+    const std::map<std::string, std::string>& placeholder_map_;
 };
 
 } // namespace CHTL

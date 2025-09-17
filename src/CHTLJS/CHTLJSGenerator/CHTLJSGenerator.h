@@ -2,8 +2,10 @@
 #define CHTL_JS_GENERATOR_H
 
 #include "../CHTLJSNode/CHTLJSNode.h"
+#include "../CHTLJSParser/CHTLJSContext.h"
 #include <string>
 #include <map>
+#include <memory>
 
 namespace CHTLJS {
 
@@ -21,7 +23,7 @@ class ScriptLoaderNode;
 
 class CHTLJSGenerator {
 public:
-    CHTLJSGenerator() = default;
+    explicit CHTLJSGenerator(std::shared_ptr<CHTLJSContext> context);
 
     // The placeholder map from the scanner is required for generation.
     std::string generate(const CHTLJSNode& root, const std::map<std::string, std::string>& placeholder_map);
@@ -39,7 +41,7 @@ private:
     std::string visitRouterNode(const RouterNode* node);
     std::string visitScriptLoaderNode(const ScriptLoaderNode* node);
 
-    // Store the map for access during the recursive visit calls.
+    std::shared_ptr<CHTLJSContext> context_;
     const std::map<std::string, std::string>* placeholder_map_ = nullptr;
 };
 

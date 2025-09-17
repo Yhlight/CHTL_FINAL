@@ -86,7 +86,7 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
         if (match({TokenType::AtChtl})) {
             consume(TokenType::From, "Expected 'from' keyword in @Chtl import statement.");
             const Token& pathToken = consume(TokenType::StringLiteral, "Expected file path string.");
-            consume(TokenType::Semicolon, "Expected ';' after import statement.");
+            match({TokenType::Semicolon}); // Make semicolon optional
             std::string import_path = pathToken.lexeme;
             if(auto content = loader_.loadFile(import_path, current_path_, context_)) {
                 std::filesystem::path p(import_path);
@@ -106,7 +106,7 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
         } else if (match({TokenType::AtCJmod})) {
             consume(TokenType::From, "Expected 'from' keyword in @CJmod import statement.");
             const Token& pathToken = consume(TokenType::StringLiteral, "Expected file path string.");
-            consume(TokenType::Semicolon, "Expected ';' after import statement.");
+            match({TokenType::Semicolon}); // Make semicolon optional
             loader_.loadSharedLibrary(pathToken.lexeme, current_path_, context_);
         }
         else {
@@ -170,18 +170,46 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
 }
 
 std::unique_ptr<OriginNode> CHTLParser::parseOriginBlock() {
-    const Token& type = consume(TokenType::Identifier, "Expected origin type (e.g., @Html).");
+    Token type_token;
+    if (match({TokenType::AtHtml, TokenType::AtStyle, TokenType::AtJavaScript, TokenType::Identifier})) {
+        type_token = previous();
+    } else {
+        throw std::runtime_error("Expected origin type (e.g., @Html, @Style, or a custom identifier).");
+    }
+
+    // Handle named origin blocks
+    if (match({TokenType::Identifier})) {
+        // This is a named block, the previous token was the name, and this one is the type.
+        // This part of the logic needs to be fully fleshed out as per CHTL.md,
+        // but for now, we'll just consume the tokens to avoid parse errors.
+        // For now, let's assume the first identifier was the type if a second one follows.
+    }
+
     consume(TokenType::OpenBrace, "Expected '{' to open origin block.");
-    std::stringstream content_ss;
+    const Token& content_start_token = peek();
     int brace_level = 1;
     while (brace_level > 0 && !isAtEnd()) {
         if (peek().type == TokenType::OpenBrace) brace_level++;
         else if (peek().type == TokenType::CloseBrace) brace_level--;
         if (brace_level == 0) break;
-        content_ss << advance().lexeme << " ";
+        advance();
     }
     if (brace_level > 0) { throw std::runtime_error("Unterminated origin block."); }
-    return std::make_unique<OriginNode>(type.lexeme, content_ss.str());
+
+    const Token& content_end_token = previous();
+    size_t content_start_pos = content_start_token.start_pos;
+    // content_end_pos should be the start of the final '}' token
+    size_t content_end_pos = content_end_token.start_pos;
+    if (content_start_pos > content_end_pos) { // Empty block
+        return std::make_unique<OriginNode>(type_token.lexeme, "");
+    }
+
+    std::string raw_content = source_.substr(content_start_pos, content_end_pos - content_start_pos);
+
+    // We've already advanced past the content, so we just need to consume the final brace.
+    consume(TokenType::CloseBrace, "Expected '}' to close origin block.");
+
+    return std::make_unique<OriginNode>(type_token.lexeme, raw_content);
 }
 
 void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes) {
@@ -361,6 +389,7 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
 std::unique_ptr<ElementNode> CHTLParser::parseElement() {
     const Token& name = previous();
     auto element = std::make_unique<ElementNode>(name.lexeme);
+    context_->all_elements_.push_back(element.get()); // Register element in the shared context
     consume(TokenType::OpenBrace, "Expected '{' after element name.");
     parseElementBody(*element);
     consume(TokenType::CloseBrace, "Expected '}' after element body.");
@@ -390,7 +419,7 @@ void CHTLParser::parseElementBody(ElementNode& element) {
                     throw std::runtime_error("Invalid attribute list.");
                 }
             } while (match({TokenType::Comma}));
-            consume(TokenType::Semicolon, "Expected ';' after attribute list.");
+            match({TokenType::Semicolon}); // Make semicolon optional
         }
         else {
             if (match({TokenType::Except})) {
@@ -721,13 +750,30 @@ const Token& CHTLParser::peekNext() const {
     return tokens_[current_ + 1];
 }
 
-const Token& CHTLParser::peek() const { return tokens_[current_]; }
+const Token& CHTLParser::peek() const {
+    if (current_ >= tokens_.size()) {
+        // This should not happen if isAtEnd() is checked properly, but as a safeguard:
+        // Return the last token, which should be EOF.
+        return tokens_.back();
+    }
+    return tokens_[current_];
+}
+
 const Token& CHTLParser::previous() const { return tokens_[current_ - 1]; }
+
 const Token& CHTLParser::advance() {
-    if (!isAtEnd()) current_++;
+    if (!isAtEnd()) {
+        current_++;
+    }
     return previous();
 }
-bool CHTLParser::isAtEnd() const { return peek().type == TokenType::EndOfFile; }
+
+bool CHTLParser::isAtEnd() const {
+    // We are at the end if the current index is out of bounds OR if the token is EndOfFile.
+    // The lexer for a fragment might not produce an EOF, so the size check is crucial.
+    return current_ >= tokens_.size() || peek().type == TokenType::EndOfFile;
+}
+
 bool CHTLParser::check(TokenType type) const {
     if (isAtEnd()) return false;
     return peek().type == type;

@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 
         // 3. Generate JS from the AST
         if (ast) {
-            CHTLJS::CHTLJSGenerator generator;
+            CHTLJS::CHTLJSGenerator generator(context);
             std::map<std::string, std::string> placeholder_map;
             placeholder_map["__JS_PLACEHOLDER_0__"] = "() => { console.log('click'); }";
             placeholder_map["__JS_PLACEHOLDER_1__"] = "() => { console.log('mouseenter'); }";

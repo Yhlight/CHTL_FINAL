@@ -1,34 +1,19 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <vector>
 #include <string>
-#include <memory>
-
-#include "CHTL/CHTLLexer/CHTLLexer.h"
-#include "CHTL/CHTLParser/CHTLParser.h"
-#include "CHTL/CHTLGenerator/CHTLGenerator.h"
-#include "CHTL/CHTLLoader/CHTLLoader.h"
-#include "CHTL/CHTLParser/ParserContext.h"
+#include <vector>
+#include "Scanner/CHTLUnifiedScanner.h"
+#include "CompilerDispatcher/CompilerDispatcher.h"
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <input_file.chtl> [output_basename] [--default-struct]" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <input_file.chtl> [output_file.html]" << std::endl;
         return 1;
     }
 
     std::string input_filepath = argv[1];
-    std::string output_basename = "output";
-    bool use_default_struct = false;
-
-    for (int i = 2; i < argc; ++i) {
-        std::string arg = argv[i];
-        if (arg == "--default-struct") {
-            use_default_struct = true;
-        } else {
-            output_basename = arg;
-        }
-    }
+    std::string output_filepath = (argc > 2) ? argv[2] : "output.html";
 
     std::ifstream file(input_filepath);
     if (!file.is_open()) {
@@ -40,43 +25,28 @@ int main(int argc, char* argv[]) {
     buffer << file.rdbuf();
     std::string source = buffer.str();
 
+    if (source.empty()) {
+        std::cout << "Input file is empty. Nothing to generate." << std::endl;
+        return 0;
+    }
+
     try {
-        // 1. Setup compilation context
-        CHTL::CHTLLoader loader;
-        auto context = std::make_shared<CHTL::ParserContext>();
+        // 1. Scan the source code to get fragments
+        CHTL::CHTLUnifiedScanner scanner(source);
+        std::vector<CHTL::CodeFragment> fragments = scanner.scan();
 
-        // 2. Lex the source file
-        CHTL::CHTLLexer lexer(source);
-        std::vector<CHTL::Token> tokens = lexer.scanTokens();
+        // 2. Dispatch fragments to their respective compilers
+        CHTL::CompilerDispatcher dispatcher(input_filepath, scanner.getPlaceholderMap());
+        CHTL::FinalCompilationResult result = dispatcher.dispatch(fragments);
 
-        // 3. Parse the tokens into an AST
-        CHTL::CHTLParser parser(source, tokens, loader, input_filepath, context);
-        std::unique_ptr<CHTL::RootNode> ast = parser.parse();
-
-        // 4. Generate the final output from the AST
-        CHTL::CHTLGenerator generator(context);
-        CHTL::CompilationResult result = generator.generate(*ast, use_default_struct);
-
-        // 5. Write the output files
-        std::string html_output_path = output_basename + ".html";
-        std::ofstream html_file(html_output_path);
+        // 3. Write the final, merged result to the output file
+        std::ofstream html_file(output_filepath);
         if (!html_file.is_open()) {
-            std::cerr << "Error: Could not open " << html_output_path << " for writing." << std::endl;
+            std::cerr << "Error: Could not open " << output_filepath << " for writing." << std::endl;
             return 1;
         }
         html_file << result.html;
-        std::cout << "Successfully generated " << html_output_path << std::endl;
-
-        if (!result.js.empty()) {
-            std::string js_output_path = output_basename + ".js";
-            std::ofstream js_file(js_output_path);
-            if (!js_file.is_open()) {
-                std::cerr << "Error: Could not open " << js_output_path << " for writing." << std::endl;
-                return 1;
-            }
-            js_file << result.js;
-            std::cout << "Successfully generated " << js_output_path << std::endl;
-        }
+        std::cout << "Successfully generated " << output_filepath << std::endl;
 
     } catch (const std::runtime_error& e) {
         std::cerr << "Compilation Error: " << e.what() << std::endl;

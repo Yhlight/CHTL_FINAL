@@ -1,37 +1,57 @@
 #ifndef CHTL_COMPILER_DISPATCHER_H
 #define CHTL_COMPILER_DISPATCHER_H
 
-#include "../Scanner/CHTLUnifiedScanner.h"
-#include "../CHTL/CHTLParser/CHTLParser.h"
-// #include "../CHTLJS/CHTLJSParser.h" // Future CHTL JS Parser
-// #include "../CodeMerger/CodeMerger.h" // Future Code Merger
 #include <string>
 #include <vector>
+#include <map>
 #include <memory>
-#include "../CHTLJS/CHTLJSParser/CHTLJSContext.h"
+#include <sstream>
+#include "Scanner/CHTLUnifiedScanner.h"
+#include "CHTL/CHTLParser/CHTLParser.h"
+#include "CHTL/CHTLGenerator/CHTLGenerator.h"
+#include "CHTL/CHTLLoader/CHTLLoader.h"
+#include "CHTLJS/CHTLJSParser/CHTLJSParser.h"
+#include "CHTLJS/CHTLJSGenerator/CHTLJSGenerator.h"
+#include "CodeMerger/CodeMerger.h"
+
 
 namespace CHTL {
 
-// Forward declarations for future components
-class CHTLJSParser;
-class CodeMerger;
+// This struct will be returned by the dispatcher
+struct FinalCompilationResult {
+    std::string html;
+};
 
 class CompilerDispatcher {
 public:
-    CompilerDispatcher();
+    CompilerDispatcher(std::string input_filepath, const std::map<std::string, std::string>& placeholder_map);
 
-    std::string compile(const std::string& source);
+    FinalCompilationResult dispatch(const std::vector<CodeFragment>& fragments);
 
 private:
+    // These process methods are now helpers called from the main dispatch loop
+    void processCssFragment(const std::string& content);
+    void processChtlJsFragment(const std::string& content);
+    void processJsFragment(const std::string& content);
+
+    std::string input_filepath_;
+    const std::map<std::string, std::string>& placeholder_map_;
+
+    // CHTL Compilation Tools
+    CHTLLoader loader_;
     std::shared_ptr<ParserContext> chtl_context_;
+    CHTLGenerator chtl_generator_;
+
+    // CHTLJS Compilation Tools
     std::shared_ptr<CHTLJS::CHTLJSContext> chtljs_context_;
+    // CHTLJSGenerator is now created on the stack in processChtlJsFragment
 
-    // Compilers
-    std::unique_ptr<CHTLParser> chtl_parser_;
-    // std::unique_ptr<CHTLJSParser> chtljs_parser_; // Future
+    // Code Merger
+    CodeMerger code_merger_;
 
-    // Merger
-    // std::unique_ptr<CodeMerger> code_merger_; // Future
+    // Collected results for the merger
+    std::stringstream compiled_css_;
+    std::stringstream compiled_js_;
 };
 
 } // namespace CHTL

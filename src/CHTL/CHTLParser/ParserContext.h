@@ -4,6 +4,7 @@
 #include "../CHTLNode/StyleTemplateNode.h"
 #include "../CHTLNode/ElementTemplateNode.h"
 #include "../CHTLNode/VarTemplateNode.h"
+#include "../CHTLNode/PropertyValue.h" // Now includes UnresolvedProperty and Value definitions
 #include "../CHTLConfig/Configuration.h"
 #include "../../CJMOD/API/CJMODManager.h"
 #include <string>
@@ -14,6 +15,8 @@
 
 namespace CHTL {
 
+class ElementNode; // Forward declaration is still needed here
+
 enum class CMODExportType {
     Element,
     Style,
@@ -23,10 +26,9 @@ enum class CMODExportType {
 struct CMODExport {
     CMODExportType type;
     std::string symbol_name;
-    std::string source_file; // Path relative to the CMOD root
+    std::string source_file;
 };
 
-// Holds the shared state between parsers when handling imports.
 struct ParserContext {
     Configuration config_;
     std::unordered_map<std::string, std::shared_ptr<StyleTemplateNode>> style_templates_;
@@ -34,10 +36,15 @@ struct ParserContext {
     std::unordered_map<std::string, std::shared_ptr<VarTemplateNode>> var_templates_;
     std::set<std::string> imported_namespaces_;
     std::shared_ptr<CJMOD::CJMODManager> cjmod_manager = std::make_shared<CJMOD::CJMODManager>();
-
-    // Key is the module name (e.g., "MyModule")
-    // Value is a list of all things that module exports.
     std::unordered_map<std::string, std::vector<CMODExport>> cmod_exports;
+
+    // A global list of all element nodes created by the parser across all fragments.
+    std::vector<ElementNode*> all_elements_;
+
+    // State for the generator, shared across fragments
+    std::map<std::string, std::map<std::string, Value>> symbol_table_;
+    std::vector<UnresolvedProperty> unresolved_properties_;
+    std::set<std::string> responsive_variables_;
 };
 
 } // namespace CHTL

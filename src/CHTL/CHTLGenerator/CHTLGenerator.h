@@ -3,60 +3,48 @@
 
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/RootNode.h"
-#include "../CHTLNode/ElementNode.h"
+#include "../CHTLParser/ParserContext.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/CommentNode.h"
-#include "../CHTLNode/StyleBlockNode.h"
-#include "../CHTLNode/ScriptBlockNode.h"
 #include "../CHTLNode/OriginNode.h"
-#include "../CHTLNode/PropertyReferenceNode.h"
-#include "../CHTLNode/PropertyValue.h"
+#include "../CHTLNode/ScriptBlockNode.h"
 #include <string>
 #include <sstream>
 #include <memory>
-#include <map>
 #include <vector>
-#include <set>
-#include "../CHTLParser/ParserContext.h"
 
 namespace CHTL {
 
-// Forward declaration
-class ElementNode;
-
-// Struct to hold info about a property that needs late resolution
-struct UnresolvedProperty {
-    ElementNode* element; // Pointer to the element node
-    std::string property_name;
-    std::vector<PropertyValue> value_parts;
-};
-
-struct CompilationResult {
+// The result of a single render pass.
+struct RenderResult {
     std::string html;
+    std::string css;
     std::string js;
-    std::map<std::string, std::string> placeholder_map;
 };
 
 class CHTLGenerator {
 public:
     explicit CHTLGenerator(std::shared_ptr<ParserContext> context);
-    CompilationResult generate(RootNode& root, bool use_default_struct = false);
+
+    // Pass 1: Analyze an AST and populate the shared context.
+    void analyze(RootNode& root);
+
+    // Pass 2: Render the final output from a fully analyzed context.
+    RenderResult render(const std::vector<std::unique_ptr<RootNode>>& asts);
 
 private:
     std::shared_ptr<ParserContext> context_;
+
     // Expression Evaluation
     Value resolvePropertyValue(const std::vector<PropertyValue>& parts);
     Value evaluateExpression(std::vector<PropertyValue>::const_iterator& it, const std::vector<PropertyValue>::const_iterator& end, int min_precedence);
 
-    // Two-pass methods
-    void firstPass(Node* node);
-    void firstPassVisitElement(ElementNode* node);
+    // Analysis methods (previously firstPass)
+    void analyzeNode(Node* node);
+    void analyzeElement(ElementNode* node);
 
-    void secondPass();
-    std::string generateReactivityScript();
-
-    // Final rendering methods
-    void render(const Node* node);
+    // Rendering methods
+    void renderNode(const Node* node);
     void renderElement(const ElementNode* node);
     void renderText(const TextNode* node);
     void renderComment(const CommentNode* node);
@@ -66,16 +54,10 @@ private:
     std::string getElementUniqueId(const ElementNode* node);
     void indent();
 
-    // Data structures for two-pass generation
-    std::vector<ElementNode*> all_elements_;
-    std::map<std::string, std::map<std::string, Value>> symbol_table_;
-    std::vector<UnresolvedProperty> unresolved_properties_;
-    std::set<std::string> responsive_variables_;
-
+    // Local state for a single render pass
     std::stringstream output_;
     std::stringstream global_styles_;
     std::stringstream global_scripts_;
-    std::map<std::string, std::string> placeholder_map_;
     int indentLevel_ = 0;
 };
 

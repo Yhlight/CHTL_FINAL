@@ -18,6 +18,8 @@
 
 namespace CHTLJS {
 
+CHTLJSGenerator::CHTLJSGenerator(std::shared_ptr<CHTLJSContext> context) : context_(context) {}
+
 std::string CHTLJSGenerator::generate(const CHTLJSNode& root, const std::map<std::string, std::string>& placeholder_map) {
     this->placeholder_map_ = &placeholder_map;
     return visit(&root);
@@ -44,7 +46,7 @@ std::string CHTLJSGenerator::visit(const CHTLJSNode* node) {
         case CHTLJSNodeType::Delegate:
              return "/* DelegateNode not fully implemented */";
         case CHTLJSNodeType::Vir:
-             return "/* VirNode not fully implemented */";
+             return visitVirNode(static_cast<const VirNode*>(node));
         case CHTLJSNodeType::Router:
             return visitRouterNode(static_cast<const RouterNode*>(node));
         case CHTLJSNodeType::ScriptLoader:
@@ -53,6 +55,14 @@ std::string CHTLJSGenerator::visit(const CHTLJSNode* node) {
             throw std::runtime_error("Unknown CHTLJSNode type in generator.");
     }
 }
+
+std::string CHTLJSGenerator::visitVirNode(const VirNode* node) {
+    // A vir declaration itself produces no runtime code.
+    // It only populates the context for other parts of the generator to use.
+    // The expression it holds will be generated if it's used elsewhere.
+    return "";
+}
+
 
 std::string CHTLJSGenerator::visitScriptLoaderNode(const ScriptLoaderNode* node) {
     std::stringstream ss;
@@ -136,7 +146,33 @@ std::string CHTLJSGenerator::visitListenNode(const ListenNode* node) {
 }
 
 std::string CHTLJSGenerator::visitValueNode(const ValueNode* node) {
-    return node->getValue();
+    std::string value = node->getValue();
+    size_t dot_pos = value.find('.');
+    if (dot_pos == std::string::npos) {
+        return value; // Not a member access
+    }
+
+    std::string object_name = value.substr(0, dot_pos);
+    std::string prop_name = value.substr(dot_pos + 1);
+
+    if (context_->virtual_objects.count(object_name)) {
+        CHTLJSNode* vir_source_node = context_->virtual_objects[object_name];
+        if (vir_source_node->getType() == CHTLJSNodeType::Listen) {
+            auto* listen_node = static_cast<const ListenNode*>(vir_source_node);
+            const auto& events = listen_node->getEvents();
+            auto it = events.find(prop_name);
+            if (it != events.end()) {
+                const std::string& callback_placeholder = it->second;
+                if (placeholder_map_->count(callback_placeholder)) {
+                    return placeholder_map_->at(callback_placeholder);
+                }
+            }
+        }
+        // Add logic for other vir object types here...
+    }
+
+    // If not a recognized vir object access, return the literal value.
+    return value;
 }
 
 std::string CHTLJSGenerator::visitRouterNode(const RouterNode* node) {

@@ -1,0 +1,58 @@
+// This is a test for the new unified scanner pipeline.
+
+[Template] @Style MyTemplate
+{
+    font-size: 16px;
+    color: black;
+}
+
+div
+{
+    id: main-content;
+    text: "Hello, CHTL!";
+}
+
+style
+{
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    #main-content {
+        border: 1px solid #ccc;
+    }
+}
+
+[Origin] @Html MyRawHtml
+{
+    <!-- This is a raw HTML comment -->
+    <p>This is a raw HTML paragraph.</p>
+}
+
+script
+{
+    // Plain JS part 1
+    const element = document.getElementById('main-content');
+    console.log("Element selected");
+
+    // CHTL JS part 1
+    {{element}}->Listen {
+        click: () => {
+            console.log("Clicked!");
+        }
+    };
+
+    // Plain JS part 2
+    function showMessage(msg) {
+        alert(msg);
+    }
+
+    // CHTL JS part 2
+    {{#main-content}}->textContent = "New Text!";
+}
+
+footer
+{
+    text: "End of file.";
+}
