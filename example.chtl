@@ -1,0 +1,33 @@
+// CHTL Example File
+
+# This is a special comment for the generator.
+
+html {
+    head {
+        title {
+            text { "My CHTL Website" }
+        }
+    }
+    body {
+        div {
+            id: "header";
+            class: "main-header";
+            h1 {
+                text { "Welcome to CHTL!" }
+            }
+        }
+        div {
+            class: "content";
+            p {
+                style {
+                    color: blue;
+                    font-size: 18px;
+                }
+                text { "This is a paragraph styled with CHTL." }
+            }
+            p {
+                text { "This is another paragraph." }
+            }
+        }
+    }
+}

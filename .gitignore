@@ -1,0 +1,19 @@
+# Build artifacts
+/build/
+
+# Other common ignores for C++ projects
+*.o
+*.a
+*.so
+*.exe
+*.out
+*.dll
+
+# IDE-specific files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
