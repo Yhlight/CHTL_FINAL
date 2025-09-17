@@ -1,7 +1,6 @@
 #include "Token.h"
 #include <string>
 
-// Converts a TokenType enum to its string representation.
 std::string tokenTypeToString(TokenType type) {
     switch (type) {
         case TokenType::ILLEGAL:            return "ILLEGAL";
@@ -25,11 +24,17 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::COMMA:              return ",";
         case TokenType::HASH_COMMENT:       return "HASH_COMMENT";
         case TokenType::KEYWORD_DELETE:     return "delete";
+        case TokenType::KEYWORD_INSERT:     return "insert";
+        case TokenType::KEYWORD_AFTER:      return "after";
+        case TokenType::KEYWORD_BEFORE:     return "before";
+        case TokenType::KEYWORD_REPLACE:    return "replace";
+        case TokenType::KEYWORD_AT:         return "at";
+        case TokenType::KEYWORD_TOP:        return "top";
+        case TokenType::KEYWORD_BOTTOM:     return "bottom";
         default:                            return "UNKNOWN";
     }
 }
 
-// Returns a string representation of a Token, useful for debugging.
 std::string Token::toString() const {
     return "Token[type: " + tokenTypeToString(type) + ", literal: '" + literal + "', line: " + std::to_string(line) + "]";
 }

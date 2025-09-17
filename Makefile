@@ -5,9 +5,8 @@ CXXFLAGS = -std=c++17 -Wall -I. -g
 # Executable name
 EXEC = chtl_compiler
 
-# Source files
-# Use find to automatically get all .cpp files
-SRCS = $(shell find . -name "*.cpp")
+# Find all .cpp files recursively
+SRCS = $(shell find CHTL -name "*.cpp") main.cpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
@@ -29,6 +28,6 @@ clean:
 
 # A simple run target for convenience
 run: all
-	./$(EXEC) Test/custom_features.chtl
+	./$(EXEC) Test/basic.chtl
 
 .PHONY: all clean run
