@@ -138,3 +138,34 @@ button {
 
     ASSERT_EQ(removeWhitespace(final_html), removeWhitespace(expected_html));
 }
+
+TEST(GeneratorTest, AttributeArithmetic) {
+    std::string source = R"(
+div {
+    style {
+        width: 100px + 50px * 2;
+    }
+}
+)";
+
+    CHTLLexer lexer(source);
+    std::vector<Token> tokens = lexer.tokenize();
+    CHTLParser parser(tokens);
+    std::unique_ptr<ProgramNode> ast = parser.parse();
+    ASSERT_TRUE(ast != nullptr);
+    CHTLGenerator generator;
+    std::string final_html = generator.generate(*ast);
+
+    std::string expected_html = R"(
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<div style="width: calc(100px + (50px * 2)); "></div>
+</body>
+</html>
+)";
+
+    ASSERT_EQ(removeWhitespace(final_html), removeWhitespace(expected_html));
+}

@@ -21,7 +21,33 @@ private:
     std::unique_ptr<StyleNode> parseStyle();
     std::unique_ptr<SelectorNode> parseSelector();
     std::unique_ptr<AttributeNode> parseAttribute();
-    std::unique_ptr<ValueNode> parseValue();
+    std::unique_ptr<ExpressionNode> parseExpression();
+
+    // Pratt parser helpers
+    enum Precedence {
+        PREC_NONE,
+        PREC_ASSIGNMENT,
+        PREC_TERM,       // + -
+        PREC_FACTOR,     // * / %
+        PREC_POWER,      // **
+        PREC_UNARY,      // -
+        PREC_PRIMARY
+    };
+    struct ParseRule;
+    typedef std::unique_ptr<ExpressionNode> (CHTLParser::*PrefixParseFn)();
+    typedef std::unique_ptr<ExpressionNode> (CHTLParser::*InfixParseFn)(std::unique_ptr<ExpressionNode>);
+    struct ParseRule {
+        PrefixParseFn prefix;
+        InfixParseFn infix;
+        Precedence precedence;
+    };
+
+    ParseRule* getRule(TokenType type);
+    std::unique_ptr<ExpressionNode> parsePrecedence(Precedence precedence);
+    std::unique_ptr<ExpressionNode> parseLiteral();
+    std::unique_ptr<ExpressionNode> parseGrouping();
+    std::unique_ptr<ExpressionNode> parseUnary();
+    std::unique_ptr<ExpressionNode> parseBinary(std::unique_ptr<ExpressionNode> left);
 
     // Token helpers
     const Token& peek();

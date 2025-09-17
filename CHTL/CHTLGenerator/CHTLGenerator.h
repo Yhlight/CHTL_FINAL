@@ -15,10 +15,11 @@ public:
     void visit(AttributeNode& node) override;
     void visit(TextNode& node) override;
     void visit(StyleNode& node) override;
-    void visit(ValueNode& node) override;
     void visit(SelectorNode& node) override;
 
 private:
+    std::string generateExpression(ExpressionNode* node, bool is_top_level = true);
+
     std::stringstream html_out;
     std::stringstream css_out;
 

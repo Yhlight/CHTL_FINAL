@@ -12,4 +12,6 @@ add_test([=[GeneratorTest.AutomaticAttributeMerging]=]  /app/run_tests [==[--gte
 set_tests_properties([=[GeneratorTest.AutomaticAttributeMerging]=]  PROPERTIES WORKING_DIRECTORY /app SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
 add_test([=[GeneratorTest.AmpersandSelectorReplacement]=]  /app/run_tests [==[--gtest_filter=GeneratorTest.AmpersandSelectorReplacement]==] --gtest_also_run_disabled_tests)
 set_tests_properties([=[GeneratorTest.AmpersandSelectorReplacement]=]  PROPERTIES WORKING_DIRECTORY /app SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-set(  run_tests_TESTS LexerTest.BasicElementsAndAttributes LexerTest.CommentsAndWhitespace ParserTest.BasicStructure ParserTest.StyleBlockWithSelector GeneratorTest.FullPipelineWithMixedStyles GeneratorTest.AutomaticAttributeMerging GeneratorTest.AmpersandSelectorReplacement)
+add_test([=[GeneratorTest.AttributeArithmetic]=]  /app/run_tests [==[--gtest_filter=GeneratorTest.AttributeArithmetic]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[GeneratorTest.AttributeArithmetic]=]  PROPERTIES WORKING_DIRECTORY /app SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+set(  run_tests_TESTS LexerTest.BasicElementsAndAttributes LexerTest.CommentsAndWhitespace ParserTest.BasicStructure ParserTest.StyleBlockWithSelector GeneratorTest.FullPipelineWithMixedStyles GeneratorTest.AutomaticAttributeMerging GeneratorTest.AmpersandSelectorReplacement GeneratorTest.AttributeArithmetic)

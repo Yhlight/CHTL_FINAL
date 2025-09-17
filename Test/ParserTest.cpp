@@ -35,14 +35,22 @@ public:
     void visit(AttributeNode& node) override {
         printIndent();
         ss << "Attr[" << node.key << ": ";
-        node.value->accept(*this);
+        // We can't visit the expression anymore with this visitor,
+        // so we just print a placeholder.
+        if (auto* literal = dynamic_cast<LiteralNode*>(node.value.get())) {
+            ss << "Literal<'" << literal->token.lexeme << "'>";
+        } else if (dynamic_cast<BinaryOpNode*>(node.value.get())) {
+            ss << "BinaryOp<...>";
+        }
         ss << "]\n";
     }
 
     void visit(TextNode& node) override {
         printIndent();
         ss << "Text{";
-        node.content->accept(*this);
+        if (auto* literal = dynamic_cast<LiteralNode*>(node.content.get())) {
+            ss << "Literal<'" << literal->token.lexeme << "'>";
+        }
         ss << "}\n";
     }
 
@@ -64,10 +72,6 @@ public:
             prop->accept(*this);
         }
         indent--;
-    }
-
-    void visit(ValueNode& node) override {
-        ss << "'" << node.token.lexeme << "'";
     }
 
 private:
@@ -100,7 +104,7 @@ body {
 R"(Program
   Element<body>
     Element<div>
-      Attr[id: '"main"']
+      Attr[id: Literal<'"main"'>]
 )";
 
     ASSERT_EQ(result, expected);
@@ -129,9 +133,9 @@ div {
 R"(Program
   Element<div>
     Style
-      Attr[color: 'blue']
+      Attr[color: Literal<'blue'>]
       Selector<.box>
-        Attr[width: '100px']
+        Attr[width: Literal<'100px'>]
 )";
 
     ASSERT_EQ(result, expected);
