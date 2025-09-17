@@ -173,4 +173,5 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o: \
  /app/CHTL/CHTLParser/../CHTLContext.h \
  /app/CHTL/CHTLParser/../CHTLNode/TextNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/LiteralNode.h \
- /app/CHTL/CHTLParser/../CHTLNode/TemplateInstantiationNode.h
+ /app/CHTL/CHTLParser/../CHTLNode/TemplateInstantiationNode.h \
+ /app/CHTL/CHTLParser/../CHTLNode/VarSubstitutionNode.h

@@ -5,6 +5,7 @@
 #include "../CHTLNode/LiteralNode.h"
 #include "../CHTLNode/TemplateNode.h"
 #include "../CHTLNode/TemplateInstantiationNode.h"
+#include "../CHTLNode/VarSubstitutionNode.h"
 #include <string>
 
 namespace CHTL {
@@ -63,9 +64,20 @@ std::unique_ptr<Statement> Parser::parseStatement() {
 
 std::unique_ptr<AttributeNode> Parser::parseAttribute() {
     auto attr = std::make_unique<AttributeNode>(m_currentToken, m_currentToken.literal);
-    nextToken();
-    nextToken();
-    attr->m_value = std::make_unique<LiteralNode>(m_currentToken);
+    nextToken(); // consume key
+    nextToken(); // consume ':'
+
+    if (m_peekToken.type == TokenType::LPAREN) {
+        Token groupName = m_currentToken;
+        nextToken();
+        nextToken();
+        Token varName = m_currentToken;
+        if (!expectPeek(TokenType::RPAREN)) return nullptr;
+        attr->m_value = std::make_unique<VarSubstitutionNode>(groupName, varName);
+    } else {
+        attr->m_value = std::make_unique<LiteralNode>(m_currentToken);
+    }
+
     if (m_peekToken.type == TokenType::SEMICOLON) {
         nextToken();
     }
@@ -106,14 +118,14 @@ std::unique_ptr<TemplateNode> Parser::parseTemplateStatement() {
 
     if (!expectPeek(TokenType::LBRACE)) return nullptr;
 
-    if (typeToken.type == TokenType::AT_STYLE) {
+    if (typeToken.type == TokenType::AT_STYLE || typeToken.type == TokenType::AT_VAR) {
         while (m_peekToken.type != TokenType::RBRACE && m_peekToken.type != TokenType::END_OF_FILE) {
             nextToken();
             if (m_currentToken.type == TokenType::IDENTIFIER) {
                 templateNode->children.push_back(parseAttribute());
             }
         }
-    } else {
+    } else { // AT_ELEMENT
         while (m_peekToken.type != TokenType::RBRACE && m_peekToken.type != TokenType::END_OF_FILE) {
             nextToken();
             auto stmt = parseStatement();

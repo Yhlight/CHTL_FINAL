@@ -7,29 +7,27 @@
 #include "CHTL/CHTLNode/Node.h"
 
 int main() {
-    std::string input = R"(
-        [Template] @Style Theme {
-            color: red;
-            font-size: 16px;
+    std::string input = R"----(
+        [Template] @Var Theme {
+            brandColor: "rgb(255, 0, 0)";
+            secondaryColor: "#EEE";
         }
 
-        [Template] @Element Box {
-            div {
-                text: "This is from a template.";
-            }
+        [Template] @Style ThemedText {
+            color: Theme(brandColor);
+            background-color: Theme(secondaryColor);
         }
 
         body {
             h1 {
                 style {
-                    @Style Theme;
+                    @Style ThemedText;
                     font-weight: bold;
                 }
-                text: "Welcome";
+                text: "This text is themed!";
             }
-            @Element Box;
         }
-    )";
+    )----";
 
     CHTL::Lexer lexer(input);
     CHTL::Parser parser(lexer);
