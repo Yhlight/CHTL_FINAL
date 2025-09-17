@@ -24,4 +24,19 @@ body {
         }
         text: "This is a paragraph using a style template.";
     }
+
+    // Use the element template
+    @Element MyBox;
+}
+
+// Define an element template
+[Template] @Element MyBox
+{
+    div {
+        class: "box-from-template";
+        text: "This content is from an element template.";
+        span {
+            text: "Nested element in template.";
+        }
+    }
 }

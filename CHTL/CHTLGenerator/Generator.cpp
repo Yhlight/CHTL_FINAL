@@ -38,6 +38,17 @@ void Generator::generateNode(const std::shared_ptr<Node>& node) {
         generateElement(elementNode);
     } else if (auto textNode = std::dynamic_pointer_cast<TextNode>(node)) {
         generateText(textNode);
+    } else if (auto usageNode = std::dynamic_pointer_cast<TemplateUsageNode>(node)) {
+        // Handle @Element MyTemplate; usage
+        if (usageNode->token.literal == "Element") {
+            auto elementTemplate = context.getElementTemplate(usageNode->name);
+            if (elementTemplate) {
+                for (const auto& child : elementTemplate->children) {
+                    generateNode(child); // Recursively generate the template's content
+                }
+            }
+        }
+        // @Style usage is handled inside generateStyle, so we ignore it here.
     } else if (auto styleNode = std::dynamic_pointer_cast<StyleNode>(node)) {
         // Style nodes are handled within generateElement, so we can ignore them here
         // to avoid them being processed twice.

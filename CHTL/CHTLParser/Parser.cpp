@@ -48,8 +48,11 @@ std::shared_ptr<Program> Parser::parseProgram() {
         auto stmt = parseStatement();
         if (stmt) {
             program->statements.push_back(stmt);
+        } else {
+            // If parseStatement returns nullptr, it means we have a token
+            // that doesn't start a statement. Skip it to avoid infinite loops.
+            nextToken();
         }
-        nextToken();
     }
     return program;
 }
@@ -61,6 +64,10 @@ std::shared_ptr<TextNode> parseTextAttributeAsNode();
 std::shared_ptr<Statement> Parser::parseStatement() {
     if (currentTokenIs(TokenType::LEFT_BRACKET)) {
         return parseTemplateStatement();
+    }
+
+    if (currentTokenIs(TokenType::AT_SIGN)) {
+        return parseTemplateUsageNode();
     }
 
     if (currentTokenIs(TokenType::HASH_COMMENT)) {
