@@ -1,76 +1,40 @@
 #include "Generator.h"
+#include "ExpressionEvaluator.h"
 #include <iostream>
+#include <sstream>
 
 // --- TemplateCollector Implementation ---
-
 TemplateCollector::TemplateCollector(
     std::map<std::string, TemplateStyleNode*>& st,
     std::map<std::string, TemplateElementNode*>& et
 ) : style_templates(st), element_templates(et) {}
-
-void TemplateCollector::collect(ProgramNode& root) {
-    root.accept(*this);
-}
-
-void TemplateCollector::visit(ProgramNode& node) {
-    for (const auto& child : node.children) {
-        child->accept(*this);
-    }
-}
-
-// We don't want to recurse into elements during the collection phase,
-// so this method is intentionally shallow.
-void TemplateCollector::visit(ElementNode& node) {
-    // This visitor only cares about top-level template definitions.
-}
-
-void TemplateCollector::visit(TemplateStyleNode& node) {
-    style_templates[node.name.lexeme] = &node;
-}
-
-void TemplateCollector::visit(TemplateElementNode& node) {
-    element_templates[node.name.lexeme] = &node;
-}
+void TemplateCollector::collect(ProgramNode& root) { root.accept(*this); }
+void TemplateCollector::visit(ProgramNode& node) { for (const auto& child : node.children) child->accept(*this); }
+void TemplateCollector::visit(ElementNode& node) {}
+void TemplateCollector::visit(TemplateStyleNode& node) { style_templates[node.name.lexeme] = &node; }
+void TemplateCollector::visit(TemplateElementNode& node) { element_templates[node.name.lexeme] = &node; }
 
 
 // --- Generator Implementation ---
-
 const std::set<std::string> Generator::void_elements = {
     "area", "base", "br", "col", "embed", "hr", "img", "input",
     "link", "meta", "param", "source", "track", "wbr"
 };
-
 Generator::Generator() {}
 
 std::string Generator::generateHTML(ProgramNode& root) {
-    // Clear state
-    html_buffer.str("");
-    html_buffer.clear();
-    css_buffer.str("");
-    css_buffer.clear();
-    style_templates.clear();
-    element_templates.clear();
+    html_buffer.str(""); html_buffer.clear();
+    css_buffer.str(""); css_buffer.clear();
+    style_templates.clear(); element_templates.clear();
     indent_level = 0;
-
-    // 1. Pre-pass to collect all template definitions
     TemplateCollector collector(style_templates, element_templates);
     collector.collect(root);
-
-    // 2. Main generation pass
     root.accept(*this);
-
     return html_buffer.str();
 }
 
-std::string Generator::getCSS() {
-    return css_buffer.str();
-}
-
-void Generator::do_indent() {
-    for (int i = 0; i < indent_level; ++i) {
-        html_buffer << "  ";
-    }
-}
+std::string Generator::getCSS() { return css_buffer.str(); }
+void Generator::do_indent() { for (int i = 0; i < indent_level; ++i) html_buffer << "  "; }
 
 void Generator::generateTokenSequence(std::stringstream& buffer, const std::vector<Token>& tokens) {
     for (size_t i = 0; i < tokens.size(); ++i) {
@@ -92,10 +56,7 @@ void Generator::generateTokenSequence(std::stringstream& buffer, const std::vect
 
 void Generator::visit(ProgramNode& node) {
     for (const auto& child : node.children) {
-        // Skip template definitions in the main generation pass
-        if (dynamic_cast<TemplateDefinitionNode*>(child.get())) {
-            continue;
-        }
+        if (dynamic_cast<TemplateDefinitionNode*>(child.get())) continue;
         child->accept(*this);
     }
 }
@@ -107,7 +68,6 @@ void Generator::visit(ElementNode& node) {
         html_buffer << " ";
         attr->accept(*this);
     }
-
     if (node.styleBlock) {
         std::stringstream inline_styles_buffer;
         html_buffer.swap(inline_styles_buffer);
@@ -120,20 +80,15 @@ void Generator::visit(ElementNode& node) {
             html_buffer << " style=\"" << styles << "\"";
         }
     }
-
     const bool is_void = void_elements.count(node.tagName.lexeme) > 0;
     if (node.children.empty() && is_void) {
         html_buffer << ">\n";
         return;
     }
-
     html_buffer << ">\n";
     indent_level++;
-    for (const auto& child : node.children) {
-        child->accept(*this);
-    }
+    for (const auto& child : node.children) child->accept(*this);
     indent_level--;
-
     if (!is_void) {
         do_indent();
         html_buffer << "</" << node.tagName.lexeme << ">\n";
@@ -141,15 +96,13 @@ void Generator::visit(ElementNode& node) {
 }
 
 void Generator::visit(AttributeNode& node) {
-    value_buffer.str("");
-    value_buffer.clear();
+    value_buffer.str(""); value_buffer.clear();
     node.value->accept(*this);
     html_buffer << node.name.lexeme << "=\"" << value_buffer.str() << "\"";
 }
 
 void Generator::visit(TextNode& node) {
-    value_buffer.str("");
-    value_buffer.clear();
+    value_buffer.str(""); value_buffer.clear();
     node.value->accept(*this);
     do_indent();
     html_buffer << value_buffer.str() << "\n";
@@ -171,27 +124,30 @@ void Generator::visit(StringLiteralNode& node) {
     if (val.length() >= 2) value_buffer << val.substr(1, val.length() - 2);
 }
 
-void Generator::visit(UnquotedLiteralNode& node) {
-    generateTokenSequence(value_buffer, node.tokens);
-}
-
-void Generator::visit(NumberLiteralNode& node) {
-    value_buffer << node.value.lexeme;
-}
-
-void Generator::visit(StyleBlockNode& node) {
-    for (const auto& content : node.contents) {
-        content->accept(*this);
-    }
-}
+void Generator::visit(UnquotedLiteralNode& node) { generateTokenSequence(value_buffer, node.tokens); }
+void Generator::visit(NumberLiteralNode& node) { value_buffer << node.value.lexeme; }
+void Generator::visit(StyleBlockNode& node) { for (const auto& content : node.contents) content->accept(*this); }
 
 void Generator::visit(StylePropertyNode& node) {
-    value_buffer.str("");
-    value_buffer.clear();
-    node.value->accept(*this);
+    ExpressionEvaluator evaluator;
+    CssValue result = evaluator.evaluate(*node.value);
+
     std::stringstream* target_buffer = (style_context == StyleContext::INLINE) ? &html_buffer : &css_buffer;
+
     if (style_context == StyleContext::GLOBAL_RULE) *target_buffer << "  ";
-    *target_buffer << node.name.lexeme << ": " << value_buffer.str() << ";";
+
+    // Convert double to string, removing trailing zeros
+    std::string value_str;
+    if (result.value == static_cast<long long>(result.value)) {
+        value_str = std::to_string(static_cast<long long>(result.value));
+    } else {
+        value_str = std::to_string(result.value);
+        value_str.erase ( value_str.find_last_not_of('0') + 1, std::string::npos );
+        if(value_str.back() == '.') value_str.pop_back();
+    }
+
+    *target_buffer << node.name.lexeme << ": " << value_str << result.unit << ";";
+
     if (style_context == StyleContext::INLINE) *target_buffer << " ";
     else *target_buffer << "\n";
 }
@@ -201,34 +157,26 @@ void Generator::visit(StyleRuleNode& node) {
     style_context = StyleContext::GLOBAL_RULE;
     generateTokenSequence(css_buffer, node.selector);
     css_buffer << " {\n";
-    for (const auto& prop : node.properties) {
-        prop->accept(*this);
-    }
+    for (const auto& prop : node.properties) prop->accept(*this);
     css_buffer << "}\n\n";
     style_context = original_context;
 }
 
-void Generator::visit(TemplateStyleNode& node) { /* Handled by collector */ }
-void Generator::visit(TemplateElementNode& node) { /* Handled by collector */ }
+void Generator::visit(TemplateStyleNode& node) {}
+void Generator::visit(TemplateElementNode& node) {}
+void Generator::visit(BinaryOpNode& node) {}
+void Generator::visit(DimensionNode& node) {}
 
 void Generator::visit(UseStyleNode& node) {
     if (style_templates.count(node.name.lexeme)) {
         TemplateStyleNode* tpl = style_templates[node.name.lexeme];
-        for (const auto& prop : tpl->properties) {
-            prop->accept(*this);
-        }
-    } else {
-        // Handle error: template not found
+        for (const auto& prop : tpl->properties) prop->accept(*this);
     }
 }
 
 void Generator::visit(UseElementNode& node) {
     if (element_templates.count(node.name.lexeme)) {
         TemplateElementNode* tpl = element_templates[node.name.lexeme];
-        for (const auto& child : tpl->children) {
-            child->accept(*this);
-        }
-    } else {
-        // Handle error: template not found
+        for (const auto& child : tpl->children) child->accept(*this);
     }
 }

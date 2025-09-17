@@ -35,6 +35,8 @@ public:
     void visit(StyleRuleNode& node) override {}
     void visit(UseStyleNode& node) override {}
     void visit(UseElementNode& node) override {}
+    void visit(BinaryOpNode& node) override {}
+    void visit(DimensionNode& node) override {}
 
     // These are the methods that will actually do the work.
     void visit(TemplateStyleNode& node) override;
@@ -72,6 +74,8 @@ public:
     void visit(TemplateElementNode& node) override;
     void visit(UseStyleNode& node) override;
     void visit(UseElementNode& node) override;
+    void visit(BinaryOpNode& node) override;
+    void visit(DimensionNode& node) override;
 
 private:
     enum class StyleContext { INLINE, GLOBAL_RULE };

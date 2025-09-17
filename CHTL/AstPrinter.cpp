@@ -81,14 +81,35 @@ void AstPrinter::visit(NumberLiteralNode& node) {
     buffer << node.value.lexeme;
 }
 
-// Dummy implementations for now
-void AstPrinter::visit(StyleBlockNode& node) { buffer << "(StyleBlock ...)"; }
-void AstPrinter::visit(StylePropertyNode& node) { buffer << "(StyleProperty ...)"; }
+void AstPrinter::visit(StyleBlockNode& node) {
+    buffer << "(StyleBlock";
+    for (const auto& content : node.contents) {
+        buffer << "\n      ";
+        content->accept(*this);
+    }
+    buffer << "\n    )";
+}
+void AstPrinter::visit(StylePropertyNode& node) {
+    buffer << "(Property " << node.name.lexeme << " ";
+    node.value->accept(*this);
+    buffer << ")";
+}
 void AstPrinter::visit(StyleRuleNode& node) { buffer << "(StyleRule ...)"; }
 void AstPrinter::visit(TemplateStyleNode& node) { buffer << "(TemplateStyle ...)"; }
 void AstPrinter::visit(TemplateElementNode& node) { buffer << "(TemplateElement ...)"; }
 void AstPrinter::visit(UseStyleNode& node) { buffer << "(UseStyle ...)"; }
 void AstPrinter::visit(UseElementNode& node) { buffer << "(UseElement ...)"; }
+
+void AstPrinter::visit(BinaryOpNode& node) {
+    buffer << "(Binary " << node.op.lexeme << " ";
+    node.left->accept(*this);
+    buffer << " ";
+    node.right->accept(*this);
+    buffer << ")";
+}
+void AstPrinter::visit(DimensionNode& node) {
+    buffer << node.number.lexeme << node.unit.lexeme;
+}
 
 void AstPrinter::visit(UnquotedLiteralNode& node) {
     buffer << "(Unquoted";

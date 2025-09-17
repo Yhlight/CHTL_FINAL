@@ -1,34 +1,6 @@
-[Template] @Style DefaultText
-{
-    color: black;
-    font-size: 16px;
-}
-
-[Template] @Element Card
-{
-    div {
-        class: "card";
-        h2 {
-            text { Card Title }
-        }
-        p {
-            text { Card content goes here. }
-        }
-    }
-}
-
-body {
-    // Use the element template
-    @Element Card;
-
-    div {
-        style {
-            @Style DefaultText;
-            background-color: lightblue;
-        }
-
-        text {
-            I should have default text styles.
-        }
+div {
+    style {
+        width: 100px + 50px * 2;
+        height: 200px;
     }
 }

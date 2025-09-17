@@ -15,6 +15,10 @@ public:
     std::unique_ptr<ProgramNode> parse();
 
 private:
+    // Expression parsing helpers
+    std::unique_ptr<ExpressionNode> parsePrecedence(int precedence);
+    int getPrecedence(TokenType type);
+
     const std::vector<Token>& tokens;
     size_t current = 0;
 
@@ -24,7 +28,9 @@ private:
     std::unique_ptr<AttributeNode> attributeDeclaration();
     std::unique_ptr<TextNode> textDeclaration();
     std::unique_ptr<CommentNode> commentDeclaration();
-    std::unique_ptr<ValueNode> value();
+
+    // Expression Parsing
+    std::unique_ptr<ExpressionNode> expression();
 
     // Style-related parsing methods
     std::unique_ptr<StyleBlockNode> styleBlockDeclaration();

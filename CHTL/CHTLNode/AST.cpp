@@ -62,3 +62,11 @@ void UseStyleNode::accept(Visitor& visitor) {
 void UseElementNode::accept(Visitor& visitor) {
     visitor.visit(*this);
 }
+
+void BinaryOpNode::accept(Visitor& visitor) {
+    visitor.visit(*this);
+}
+
+void DimensionNode::accept(Visitor& visitor) {
+    visitor.visit(*this);
+}

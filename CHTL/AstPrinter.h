@@ -27,6 +27,8 @@ public:
     void visit(TemplateElementNode& node) override;
     void visit(UseStyleNode& node) override;
     void visit(UseElementNode& node) override;
+    void visit(BinaryOpNode& node) override;
+    void visit(DimensionNode& node) override;
 
 private:
     std::stringstream buffer;

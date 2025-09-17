@@ -7,7 +7,7 @@
 #include <memory>
 #include <variant>
 
-// Forward declarations for all AST nodes and the Visitor
+// Forward declarations
 class ProgramNode;
 class ElementNode;
 class AttributeNode;
@@ -25,10 +25,13 @@ class TemplateStyleNode;
 class TemplateElementNode;
 class UseStyleNode;
 class UseElementNode;
+class ExpressionNode;
+class BinaryOpNode;
+class DimensionNode;
 class Visitor;
 
 
-// The Visitor interface for processing the AST
+// The Visitor interface
 class Visitor {
 public:
     virtual ~Visitor() = default;
@@ -47,21 +50,43 @@ public:
     virtual void visit(TemplateElementNode& node) = 0;
     virtual void visit(UseStyleNode& node) = 0;
     virtual void visit(UseElementNode& node) = 0;
+    virtual void visit(BinaryOpNode& node) = 0;
+    virtual void visit(DimensionNode& node) = 0;
 };
 
 
-// Base class for all nodes in the AST
+// Base class for all nodes
 class BaseNode {
 public:
     virtual ~BaseNode() = default;
     virtual void accept(Visitor& visitor) = 0;
 };
 
+// --- Expression Node Hierarchy (for style properties) ---
+class ExpressionNode : public BaseNode {};
 
-// Base class for all value types (strings, numbers, etc.)
+class BinaryOpNode : public ExpressionNode {
+public:
+    std::unique_ptr<ExpressionNode> left;
+    Token op;
+    std::unique_ptr<ExpressionNode> right;
+    BinaryOpNode(std::unique_ptr<ExpressionNode> left, Token op, std::unique_ptr<ExpressionNode> right)
+        : left(std::move(left)), op(std::move(op)), right(std::move(right)) {}
+    void accept(Visitor& visitor) override;
+};
+
+class DimensionNode : public ExpressionNode {
+public:
+    Token number;
+    Token unit; // can be empty
+    DimensionNode(Token number, Token unit) : number(std::move(number)), unit(std::move(unit)) {}
+    void accept(Visitor& visitor) override;
+};
+
+
+// --- Legacy Value Node Hierarchy (for attributes and text) ---
 class ValueNode : public BaseNode {};
 
-// Represents a quoted string literal, e.g., "hello" or 'world'
 class StringLiteralNode : public ValueNode {
 public:
     Token value;
@@ -69,7 +94,6 @@ public:
     void accept(Visitor& visitor) override;
 };
 
-// Represents an unquoted literal, which is a sequence of other tokens
 class UnquotedLiteralNode : public ValueNode {
 public:
     std::vector<Token> tokens;
@@ -77,7 +101,7 @@ public:
     void accept(Visitor& visitor) override;
 };
 
-// Represents a number literal
+// Number literals are now part of the Expression hierarchy, but we keep this for legacy nodes.
 class NumberLiteralNode : public ValueNode {
 public:
     Token value;
@@ -86,7 +110,7 @@ public:
 };
 
 
-// Represents an element attribute, e.g., id: "box"
+// Represents an element attribute
 class AttributeNode : public BaseNode {
 public:
     Token name;
@@ -97,20 +121,19 @@ public:
 };
 
 
-// Represents an HTML element, e.g., div { ... }
+// Represents an HTML element
 class ElementNode : public BaseNode {
 public:
     Token tagName;
     std::vector<std::unique_ptr<AttributeNode>> attributes;
     std::unique_ptr<StyleBlockNode> styleBlock;
     std::vector<std::unique_ptr<BaseNode>> children;
-
     explicit ElementNode(Token tagName) : tagName(std::move(tagName)), styleBlock(nullptr) {}
     void accept(Visitor& visitor) override;
 };
 
 
-// Represents a text block, e.g., text { ... }
+// Represents a text block
 class TextNode : public BaseNode {
 public:
     std::unique_ptr<ValueNode> value;
@@ -119,7 +142,7 @@ public:
 };
 
 
-// Represents a generator comment, e.g., # a comment
+// Represents a generator comment
 class CommentNode : public BaseNode {
 public:
     Token comment;
@@ -128,7 +151,7 @@ public:
 };
 
 
-// The root node of the entire AST
+// The root node of the AST
 class ProgramNode : public BaseNode {
 public:
     std::vector<std::unique_ptr<BaseNode>> children;
@@ -137,21 +160,17 @@ public:
 
 
 // --- Style-related Nodes ---
-
-// Base class for nodes that can appear inside a style { ... } block.
 class StyleContentNode : public BaseNode {};
 
-// Represents a single CSS property, e.g., `width: 100px;`
 class StylePropertyNode : public StyleContentNode {
 public:
     Token name;
-    std::unique_ptr<ValueNode> value;
-    StylePropertyNode(Token name, std::unique_ptr<ValueNode> value)
+    std::unique_ptr<ExpressionNode> value; // Changed from ValueNode
+    StylePropertyNode(Token name, std::unique_ptr<ExpressionNode> value)
         : name(std::move(name)), value(std::move(value)) {}
     void accept(Visitor& visitor) override;
 };
 
-// Represents a full CSS rule with a selector, e.g., `.box { ... }`
 class StyleRuleNode : public StyleContentNode {
 public:
     std::vector<Token> selector;
@@ -160,7 +179,6 @@ public:
     void accept(Visitor& visitor) override;
 };
 
-// Represents the entire `style { ... }` block associated with an element.
 class StyleBlockNode : public BaseNode {
 public:
     std::vector<std::unique_ptr<StyleContentNode>> contents;
@@ -169,40 +187,31 @@ public:
 
 
 // --- Template-related Nodes ---
-
-// Base class for all [Template] definitions.
 class TemplateDefinitionNode : public BaseNode {
 public:
     Token name;
 };
 
-// e.g., [Template] @Style DefaultText { ... }
 class TemplateStyleNode : public TemplateDefinitionNode {
 public:
     std::vector<std::unique_ptr<StylePropertyNode>> properties;
     void accept(Visitor& visitor) override;
 };
 
-// e.g., [Template] @Element Box { ... }
 class TemplateElementNode : public TemplateDefinitionNode {
 public:
     std::vector<std::unique_ptr<BaseNode>> children;
     void accept(Visitor& visitor) override;
 };
 
-
-// Represents the usage of a template, e.g., @Style DefaultText;
-
-// e.g., @Style DefaultText;
-class UseStyleNode : public StyleContentNode { // Can only be used inside a style block
+class UseStyleNode : public StyleContentNode {
 public:
     Token name;
     explicit UseStyleNode(Token name) : name(std::move(name)) {}
     void accept(Visitor& visitor) override;
 };
 
-// e.g., @Element Box;
-class UseElementNode : public BaseNode { // Can be used in the main body
+class UseElementNode : public BaseNode {
 public:
     Token name;
     explicit UseElementNode(Token name) : name(std::move(name)) {}
