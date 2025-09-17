@@ -1,0 +1,37 @@
+// Test for recognizing all major CHTL block constructs.
+
+[Configuration] {
+    INDEX_INITIAL_COUNT = 1;
+}
+
+[Template] @Element MyComponent {
+    div {
+        text: "This is a template.";
+    }
+}
+
+[Custom] @Style MyCustomStyle {
+    color: red;
+}
+
+body {
+    // This is a standard HTML-like element
+    p {
+        text: "Hello";
+    }
+}
+
+[Origin] @Html MyRawHtml {
+    <p>This is raw, un-processed HTML.</p>
+}
+
+[Import] @Chtl from "./some_other_file.chtl"
+
+[Namespace] MySpace {
+    // This is a namespace
+}
+
+// A script block to ensure context switching still works.
+script {
+    console.log("Still works!");
+}

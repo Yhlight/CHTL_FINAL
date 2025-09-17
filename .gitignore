@@ -1,0 +1,23 @@
+# IDE files
+.vscode/
+
+# Swap files
+*.swp
+*.swo
+
+# Build artifacts
+build/
+dist/
+/CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.a
+*.o
+*.o.d
+
+# Executables
+chtl_compiler
+test_parser
+test_runner
+test_scanner

@@ -1,0 +1,6 @@
+[Template] @Element button {
+    button {
+        class: "my-module-button";
+        text: "Click Me";
+    }
+}
