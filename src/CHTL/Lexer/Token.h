@@ -11,8 +11,10 @@ enum class TokenType {
     KEYWORD_TEXT,
     KEYWORD_STYLE,
     KEYWORD_TEMPLATE,
+    KEYWORD_CUSTOM,
     KEYWORD_ELEMENT,
     KEYWORD_VAR,
+    KEYWORD_DELETE,
 
     // Literals
     IDENTIFIER,
@@ -30,6 +32,7 @@ enum class TokenType {
     COLON,        // :
     SEMICOLON,    // ;
     EQUALS,       // =
+    COMMA,        // ,
 
     // Comments
     COMMENT,

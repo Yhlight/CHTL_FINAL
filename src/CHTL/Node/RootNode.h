@@ -10,6 +10,14 @@ namespace CHTL {
 class RootNode : public BaseNode {
 public:
     std::vector<std::shared_ptr<BaseNode>> children;
+
+    std::shared_ptr<BaseNode> clone() const override {
+        auto node = std::make_shared<RootNode>();
+        for (const auto& child : this->children) {
+            node->children.push_back(child->clone());
+        }
+        return node;
+    }
 };
 
 } // namespace CHTL

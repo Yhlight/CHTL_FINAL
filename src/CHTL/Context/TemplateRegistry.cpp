@@ -2,15 +2,15 @@
 
 namespace CHTL {
 
-void TemplateRegistry::registerTemplate(const std::string& name, std::shared_ptr<TemplateNode> node) {
+void TemplateRegistry::registerDefinition(const std::string& name, std::shared_ptr<BaseNode> node) {
     m_templates[name] = node;
 }
 
-std::shared_ptr<TemplateNode> TemplateRegistry::lookupTemplate(const std::string& name) {
+std::shared_ptr<BaseNode> TemplateRegistry::lookupDefinition(const std::string& name) {
     if (m_templates.count(name)) {
         return m_templates[name];
     }
-    return nullptr; // Or throw an error
+    return nullptr;
 }
 
 } // namespace CHTL

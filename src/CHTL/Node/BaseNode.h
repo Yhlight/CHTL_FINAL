@@ -10,8 +10,7 @@ namespace CHTL {
 class BaseNode {
 public:
     virtual ~BaseNode() = default;
-    // A virtual method for the Visitor pattern can be added here later.
-    // virtual void accept(class Visitor& visitor) = 0;
+    virtual std::shared_ptr<BaseNode> clone() const = 0;
 };
 
 } // namespace CHTL

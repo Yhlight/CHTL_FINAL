@@ -14,6 +14,9 @@
 #include "../Node/VarDeclarationNode.h"
 #include "../Node/VarUsageNode.h"
 #include "../Node/LiteralNode.h"
+#include "../Node/CustomNode.h"
+#include "../Node/CustomUsageNode.h"
+#include "../Node/DeleteNode.h"
 #include "../Context/TemplateRegistry.h"
 
 #include <vector>
@@ -32,10 +35,11 @@ private:
     std::shared_ptr<AttributeNode> parseAttribute();
     std::shared_ptr<TextNode> parseTextBlock();
     std::shared_ptr<StyleNode> parseStyleBlock();
-    std::shared_ptr<TemplateNode> parseTemplateDefinition();
-    std::shared_ptr<TemplateUsageNode> parseTemplateUsage();
+    std::shared_ptr<BaseNode> parseDefinitionBlock();
+    std::shared_ptr<BaseNode> parseUsage();
     std::shared_ptr<BaseNode> parseValue();
     std::shared_ptr<VarUsageNode> parseVarUsage();
+    std::shared_ptr<DeleteNode> parseDelete();
 
     const Token& currentToken() const;
     const Token& peekToken() const;

@@ -9,6 +9,12 @@ namespace CHTL {
 class TextNode : public BaseNode {
 public:
     std::string content;
+
+    std::shared_ptr<BaseNode> clone() const override {
+        auto node = std::make_shared<TextNode>();
+        node->content = this->content;
+        return node;
+    }
 };
 
 } // namespace CHTL

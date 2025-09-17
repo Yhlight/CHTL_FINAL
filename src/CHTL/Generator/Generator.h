@@ -13,6 +13,9 @@
 #include "../Node/LiteralNode.h"
 #include "../Node/VarUsageNode.h"
 #include "../Node/VarDeclarationNode.h"
+#include "../Node/CustomUsageNode.h"
+#include "../Node/CustomNode.h"
+#include "../Node/DeleteNode.h"
 #include "../Context/TemplateRegistry.h"
 #include <string>
 #include <memory>

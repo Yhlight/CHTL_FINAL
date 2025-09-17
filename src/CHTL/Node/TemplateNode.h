@@ -18,11 +18,17 @@ class TemplateNode : public BaseNode {
 public:
     TemplateType templateType;
     std::string name;
-    // The body of a template can contain other nodes.
-    // For a style template, the body will be a StyleNode.
-    // For an element template, it will be a list of other nodes.
-    // We can use a generic container for now.
     std::vector<std::shared_ptr<BaseNode>> body;
+
+    std::shared_ptr<BaseNode> clone() const override {
+        auto node = std::make_shared<TemplateNode>();
+        node->templateType = this->templateType;
+        node->name = this->name;
+        for (const auto& child : this->body) {
+            node->body.push_back(child->clone());
+        }
+        return node;
+    }
 };
 
 } // namespace CHTL

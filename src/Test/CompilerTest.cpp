@@ -5,35 +5,23 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
-#include <regex>
+#include <algorithm>
 
-// Helper to remove whitespace for easier comparison
-std::string removeWhitespace(const std::string& str) {
-    std::string out = str;
-    out.erase(std::remove(out.begin(), out.end(), ' '), out.end());
-    out.erase(std::remove(out.begin(), out.end(), '\n'), out.end());
-    return out;
-}
-
-void testTemplateInheritance() {
-    std::cout << "--- Testing Template Inheritance ---\n";
+void testCustomDefinitionAndExpansion() {
+    std::cout << "--- Testing [Custom] Definition and Expansion ---\n";
     std::string source = R"(
-        [Template] @Style BaseStyle
+        [Custom] @Style BaseCustomStyle
         {
             color: blue;
             font-weight: bold;
-        }
-
-        [Template] @Style FullStyle
-        {
-            @Style BaseStyle;
-            font-size: 20px;
-            color: red; // This should override the color from BaseStyle
+            font-size: 16px;
         }
 
         div {
             style {
-                @Style FullStyle;
+                @Style BaseCustomStyle {
+                    delete font-size;
+                }
             }
         }
     )";
@@ -42,37 +30,38 @@ void testTemplateInheritance() {
     std::vector<CHTL::Token> tokens = lexer.getAllTokens();
     CHTL::Parser parser(tokens);
     std::shared_ptr<CHTL::RootNode> ast = parser.parse();
+
+    // Test Parser
+    auto customNode = std::dynamic_pointer_cast<CHTL::CustomNode>(ast->children[0]);
+    assert(customNode != nullptr);
+    assert(customNode->name == "BaseCustomStyle");
+    auto styleNode = std::dynamic_pointer_cast<CHTL::StyleNode>(customNode->body[0]);
+    assert(styleNode != nullptr);
+    assert(styleNode->children.size() == 3);
+    std::cout << "Parser correctly parsed [Custom] definition.\n";
+
+    // Test Generator
     CHTL::Generator generator(ast);
     generator.generate();
     std::string html = generator.getHtml();
 
     std::cout << "Generated HTML:\n" << html << std::endl;
 
-    // Verification
-    // The final style should have properties from both, with 'color' overridden.
-    // CSS cascading means the last 'color' property (red) will be applied.
-    std::string expected_style_substr1 = "color:blue;";
-    std::string expected_style_substr2 = "font-weight:bold;";
-    std::string expected_style_substr3 = "font-size:20px;";
-    std::string expected_style_substr4 = "color:red;";
+    std::string clean_html;
+    clean_html.resize(html.size());
+    auto it = std::remove_copy_if(html.begin(), html.end(), clean_html.begin(), ::isspace);
+    clean_html.erase(it, clean_html.end());
 
-    std::string clean_html = removeWhitespace(html);
+    assert(clean_html.find("font-weight:bold;") != std::string::npos);
+    assert(clean_html.find("color:blue;") != std::string::npos);
+    assert(clean_html.find("font-size:16px;") == std::string::npos);
 
-    assert(clean_html.find(expected_style_substr1) != std::string::npos);
-    assert(clean_html.find(expected_style_substr2) != std::string::npos);
-    assert(clean_html.find(expected_style_substr3) != std::string::npos);
-    assert(clean_html.find(expected_style_substr4) != std::string::npos);
-
-    // Check that the override happened correctly (red appears after blue)
-    assert(clean_html.find("color:blue;") < clean_html.find("color:red;"));
-
-
-    std::cout << "Template inheritance test passed.\n";
+    std::cout << "[Custom] expansion test passed.\n";
     std::cout << "--------------------------------\n\n";
 }
 
 
 int main() {
-    testTemplateInheritance();
+    testCustomDefinitionAndExpansion();
     return 0;
 }

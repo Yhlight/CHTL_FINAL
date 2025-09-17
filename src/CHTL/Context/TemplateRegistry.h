@@ -1,7 +1,7 @@
 #ifndef CHTL_TEMPLATE_REGISTRY_H
 #define CHTL_TEMPLATE_REGISTRY_H
 
-#include "../Node/TemplateNode.h"
+#include "../Node/BaseNode.h"
 #include <string>
 #include <unordered_map>
 #include <memory>
@@ -10,8 +10,8 @@ namespace CHTL {
 
 class TemplateRegistry {
 public:
-    void registerTemplate(const std::string& name, std::shared_ptr<TemplateNode> node);
-    std::shared_ptr<TemplateNode> lookupTemplate(const std::string& name);
+    void registerDefinition(const std::string& name, std::shared_ptr<BaseNode> node);
+    std::shared_ptr<BaseNode> lookupDefinition(const std::string& name);
 
     static TemplateRegistry& getInstance() {
         static TemplateRegistry instance;
@@ -20,7 +20,7 @@ public:
 
 private:
     TemplateRegistry() = default;
-    std::unordered_map<std::string, std::shared_ptr<TemplateNode>> m_templates;
+    std::unordered_map<std::string, std::shared_ptr<BaseNode>> m_templates;
 
 public:
     // Prevent copying and assignment

@@ -10,6 +10,12 @@ namespace CHTL {
 class LiteralNode : public BaseNode {
 public:
     std::string value;
+
+    std::shared_ptr<BaseNode> clone() const override {
+        auto node = std::make_shared<LiteralNode>();
+        node->value = this->value;
+        return node;
+    }
 };
 
 } // namespace CHTL

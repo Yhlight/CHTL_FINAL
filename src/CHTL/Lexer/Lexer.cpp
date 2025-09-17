@@ -7,9 +7,11 @@ const std::unordered_map<std::string, TokenType> Lexer::s_keywords = {
     {"text", TokenType::KEYWORD_TEXT},
     {"style", TokenType::KEYWORD_STYLE},
     {"Template", TokenType::KEYWORD_TEMPLATE},
+    {"Custom", TokenType::KEYWORD_CUSTOM},
     {"Style", TokenType::KEYWORD_STYLE},
     {"Element", TokenType::KEYWORD_ELEMENT},
-    {"Var", TokenType::KEYWORD_VAR}
+    {"Var", TokenType::KEYWORD_VAR},
+    {"delete", TokenType::KEYWORD_DELETE}
 };
 
 Lexer::Lexer(const std::string& source) : m_source(source) {}
@@ -73,6 +75,7 @@ Token Lexer::getNextToken() {
         case ':': advance(); return makeToken(TokenType::COLON, ":");
         case ';': advance(); return makeToken(TokenType::SEMICOLON, ";");
         case '=': advance(); return makeToken(TokenType::EQUALS, "=");
+        case ',': advance(); return makeToken(TokenType::COMMA, ",");
     }
 
     if (!std::isspace(c) && c != '{' && c != '}' && c != ':' && c != ';') {

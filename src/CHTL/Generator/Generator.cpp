@@ -1,5 +1,6 @@
 #include "Generator.h"
 #include <stdexcept>
+#include <algorithm>
 
 namespace CHTL {
 
@@ -23,12 +24,14 @@ std::string Generator::generateValue(const std::shared_ptr<BaseNode>& valueNode)
     }
     if (auto varUsage = std::dynamic_pointer_cast<VarUsageNode>(valueNode)) {
         auto& registry = TemplateRegistry::getInstance();
-        auto varGroup = registry.lookupTemplate(varUsage->groupName);
-        if (varGroup && varGroup->templateType == TemplateType::VAR) {
-            for (const auto& var_decl_base : varGroup->body) {
-                if (auto var_decl = std::dynamic_pointer_cast<VarDeclarationNode>(var_decl_base)) {
-                    if (var_decl->name == varUsage->varName) {
-                        return var_decl->value;
+        auto varGroupDef = registry.lookupDefinition(varUsage->groupName);
+        if (auto varGroup = std::dynamic_pointer_cast<TemplateNode>(varGroupDef)) {
+            if (varGroup->templateType == TemplateType::VAR) {
+                for (const auto& var_decl_base : varGroup->body) {
+                    if (auto var_decl = std::dynamic_pointer_cast<VarDeclarationNode>(var_decl_base)) {
+                        if (var_decl->name == varUsage->varName) {
+                            return var_decl->value;
+                        }
                     }
                 }
             }
@@ -48,21 +51,19 @@ void Generator::visit(const std::shared_ptr<BaseNode>& node) {
     } else if (auto textNode = std::dynamic_pointer_cast<TextNode>(node)) {
         visitTextNode(textNode);
     } else if (std::dynamic_pointer_cast<StyleNode>(node)) {
-        // Handled by parent
     } else if (std::dynamic_pointer_cast<TemplateNode>(node)) {
-        // Definitions produce no output
+    } else if (std::dynamic_pointer_cast<CustomNode>(node)) {
     } else if (auto usageNode = std::dynamic_pointer_cast<TemplateUsageNode>(node)) {
         if (usageNode->templateType == TemplateType::ELEMENT) {
             auto& registry = TemplateRegistry::getInstance();
-            auto templateNode = registry.lookupTemplate(usageNode->name);
-            if (templateNode) {
+            auto templateDef = registry.lookupDefinition(usageNode->name);
+            if (auto templateNode = std::dynamic_pointer_cast<TemplateNode>(templateDef)) {
                 for (const auto& bodyNode : templateNode->body) {
                     visit(bodyNode);
                 }
             }
         }
     } else {
-        throw std::runtime_error("Unknown node type in generator.");
     }
 }
 
@@ -79,12 +80,13 @@ void Generator::expandStyleNode(std::stringstream& stream, const std::shared_ptr
         } else if (auto usageNode = std::dynamic_pointer_cast<TemplateUsageNode>(style_child)) {
             if (usageNode->templateType == TemplateType::STYLE) {
                 auto& registry = TemplateRegistry::getInstance();
-                auto templateNode = registry.lookupTemplate(usageNode->name);
-                if (templateNode && templateNode->templateType == usageNode->templateType) {
-                    for (const auto& template_body_node : templateNode->body) {
-                        if (auto templateStyleNode = std::dynamic_pointer_cast<StyleNode>(template_body_node)) {
-                            // Recursive call to handle nested inheritance
-                            expandStyleNode(stream, templateStyleNode);
+                auto templateDef = registry.lookupDefinition(usageNode->name);
+                if (auto templateNode = std::dynamic_pointer_cast<TemplateNode>(templateDef)) {
+                    if (templateNode->templateType == usageNode->templateType) {
+                        for (const auto& template_body_node : templateNode->body) {
+                            if (auto templateStyleNode = std::dynamic_pointer_cast<StyleNode>(template_body_node)) {
+                                expandStyleNode(stream, templateStyleNode);
+                            }
                         }
                     }
                 }
@@ -104,7 +106,50 @@ void Generator::visitElementNode(const std::shared_ptr<ElementNode>& node) {
     std::stringstream inline_style_stream;
     for (const auto& child : node->children) {
         if (auto styleNode = std::dynamic_pointer_cast<StyleNode>(child)) {
-            expandStyleNode(inline_style_stream, styleNode);
+            for (const auto& style_child : styleNode->children) {
+                if (auto customUsage = std::dynamic_pointer_cast<CustomUsageNode>(style_child)) {
+                    auto& registry = TemplateRegistry::getInstance();
+                    auto baseDef = registry.lookupDefinition(customUsage->name);
+                    if (baseDef) {
+                        std::shared_ptr<StyleNode> styleBodyToProcess;
+                        if (auto templateNode = std::dynamic_pointer_cast<TemplateNode>(baseDef)) {
+                            if (!templateNode->body.empty()) {
+                                styleBodyToProcess = std::dynamic_pointer_cast<StyleNode>(templateNode->body[0]);
+                            }
+                        } else if (auto customNode = std::dynamic_pointer_cast<CustomNode>(baseDef)) {
+                            if (!customNode->body.empty()) {
+                                styleBodyToProcess = std::dynamic_pointer_cast<StyleNode>(customNode->body[0]);
+                            }
+                        }
+
+                        if (styleBodyToProcess) {
+                            auto clonedStyleNode = std::dynamic_pointer_cast<StyleNode>(styleBodyToProcess->clone());
+                            if (clonedStyleNode) {
+                                for (const auto& spec_node : customUsage->specializationBody) {
+                                    if (auto deleteNode = std::dynamic_pointer_cast<DeleteNode>(spec_node)) {
+                                        for (const auto& target : deleteNode->targets) {
+                                            clonedStyleNode->children.erase(
+                                                std::remove_if(clonedStyleNode->children.begin(), clonedStyleNode->children.end(),
+                                                    [&](const std::shared_ptr<BaseNode>& n) {
+                                                        if (auto p = std::dynamic_pointer_cast<CssPropertyNode>(n)) {
+                                                            return p->key == target;
+                                                        }
+                                                        return false;
+                                                    }),
+                                                clonedStyleNode->children.end());
+                                        }
+                                    }
+                                }
+                                expandStyleNode(inline_style_stream, clonedStyleNode);
+                            }
+                        }
+                    }
+                } else {
+                    auto tempStyleNode = std::make_shared<StyleNode>();
+                    tempStyleNode->children.push_back(style_child);
+                    expandStyleNode(inline_style_stream, tempStyleNode);
+                }
+            }
         }
     }
     if (inline_style_stream.str().length() > 0) {

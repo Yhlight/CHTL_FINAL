@@ -10,6 +10,9 @@
 #include "../CHTL/Node/VarDeclarationNode.h"
 #include "../CHTL/Node/VarUsageNode.h"
 #include "../CHTL/Node/LiteralNode.h"
+#include "../CHTL/Node/CustomNode.h"
+#include "../CHTL/Node/CustomUsageNode.h"
+#include "../CHTL/Node/DeleteNode.h"
 #include <iostream>
 
 namespace CHTL {
@@ -69,9 +72,25 @@ void AstPrinter::visit(const std::shared_ptr<BaseNode>& node, int indentLevel) {
         m_output += indent + "LiteralNode: \"" + literalNode->value + "\"\n";
     } else if (auto varDeclNode = std::dynamic_pointer_cast<VarDeclarationNode>(node)) {
         m_output += indent + "VarDeclarationNode: " + varDeclNode->name + " = \"" + varDeclNode->value + "\"\n";
+    } else if (auto deleteNode = std::dynamic_pointer_cast<DeleteNode>(node)) {
+        m_output += indent + "DeleteNode (Targets: ";
+        for(size_t i = 0; i < deleteNode->targets.size(); ++i) {
+            m_output += deleteNode->targets[i] + (i == deleteNode->targets.size() - 1 ? "" : ", ");
+        }
+        m_output += ")\n";
     } else if (auto templateNode = std::dynamic_pointer_cast<TemplateNode>(node)) {
         m_output += indent + "TemplateNode (Name: " + templateNode->name + ")\n";
         for (const auto& child : templateNode->body) {
+            visit(child, indentLevel + 1);
+        }
+    } else if (auto customNode = std::dynamic_pointer_cast<CustomNode>(node)) {
+        m_output += indent + "CustomNode (Name: " + customNode->name + ")\n";
+        for (const auto& child : customNode->body) {
+            visit(child, indentLevel + 1);
+        }
+    } else if (auto customUsageNode = std::dynamic_pointer_cast<CustomUsageNode>(node)) {
+        m_output += indent + "CustomUsageNode (Name: " + customUsageNode->name + ")\n";
+        for (const auto& child : customUsageNode->specializationBody) {
             visit(child, indentLevel + 1);
         }
     } else {

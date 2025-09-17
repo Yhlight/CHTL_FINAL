@@ -10,6 +10,13 @@ class VarDeclarationNode : public BaseNode {
 public:
     std::string name;
     std::string value;
+
+    std::shared_ptr<BaseNode> clone() const override {
+        auto node = std::make_shared<VarDeclarationNode>();
+        node->name = this->name;
+        node->value = this->value;
+        return node;
+    }
 };
 
 } // namespace CHTL

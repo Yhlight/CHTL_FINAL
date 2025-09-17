@@ -12,6 +12,13 @@ class TemplateUsageNode : public BaseNode {
 public:
     TemplateType templateType;
     std::string name;
+
+    std::shared_ptr<BaseNode> clone() const override {
+        auto node = std::make_shared<TemplateUsageNode>();
+        node->templateType = this->templateType;
+        node->name = this->name;
+        return node;
+    }
 };
 
 } // namespace CHTL
