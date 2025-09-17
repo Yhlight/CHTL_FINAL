@@ -34,7 +34,7 @@ int main() {
 
     fs::path tests_dir("tests");
     fs::path snapshots_dir("tests/snapshots");
-    fs::path compiler_path("chtl_compiler"); // Assumes compiler is in the same dir or in PATH
+    fs::path compiler_path("./chtl_compiler"); // Assumes compiler is in the current directory
 
     if (!fs::exists(compiler_path)) {
         compiler_path = "./build/chtl_compiler";

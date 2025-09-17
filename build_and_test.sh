@@ -7,5 +7,5 @@ rm -rf CMakeFiles/ CMakeCache.txt cmake_install.cmake Makefile CTestTestfile.cma
 cmake .
 make
 
-echo -e "\n--- RUNNING SNAPSHOT TESTS ---"
+echo -e "\n--- RUNNING END-TO-END SNAPSHOT TESTS ---"
 ./test_runner
