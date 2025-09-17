@@ -68,6 +68,7 @@ std::unique_ptr<ExpressionNode> CHTLParser::parseBinary(std::unique_ptr<Expressi
     return std::make_unique<BinaryOpNode>(std::move(left), op, std::move(right));
 }
 
+
 // --- Main Parser Logic ---
 
 std::unique_ptr<ProgramNode> CHTLParser::parse() {
@@ -82,6 +83,7 @@ std::unique_ptr<ProgramNode> CHTLParser::parse() {
 }
 
 std::unique_ptr<Node> CHTLParser::parseStatement() {
+    if (peek().type == TokenType::KEYWORD_TEMPLATE) return parseTemplateDefinition();
     if (peek().type == TokenType::TEXT) return parseText();
     if (peek().type == TokenType::STYLE) return parseStyle();
     if (peek().type == TokenType::IDENTIFIER) return parseElement();
@@ -100,7 +102,11 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
     while (!check(TokenType::RBRACE) && !isAtEnd()) {
         const Token& currentToken = peek();
         const Token& nextToken = (current + 1 < tokens.size()) ? tokens[current + 1] : currentToken;
-        if (currentToken.type == TokenType::IDENTIFIER && nextToken.type == TokenType::COLON) {
+
+        if (currentToken.type == TokenType::AT_STYLE || currentToken.type == TokenType::AT_ELEMENT) {
+            element->children.push_back(parseTemplateUsage());
+        }
+        else if (currentToken.type == TokenType::IDENTIFIER && nextToken.type == TokenType::COLON) {
             element->children.push_back(parseAttribute());
         } else if (currentToken.type == TokenType::STYLE) {
             element->children.push_back(parseStyle());
@@ -109,7 +115,7 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
         } else if (currentToken.type == TokenType::IDENTIFIER) {
             element->children.push_back(parseElement());
         } else {
-            consume(TokenType::IDENTIFIER, "Expect identifier, 'style', or 'text' inside element body.");
+            consume(TokenType::IDENTIFIER, "Expect identifier, style, text, or template usage inside element body.");
             break;
         }
     }
@@ -140,7 +146,11 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyle() {
     while (!check(TokenType::RBRACE) && !isAtEnd()) {
         const Token& currentToken = peek();
         const Token& nextToken = (current + 1 < tokens.size()) ? tokens[current + 1] : currentToken;
-        if (currentToken.type == TokenType::IDENTIFIER && nextToken.type == TokenType::COLON) {
+
+        if (currentToken.type == TokenType::AT_STYLE) {
+            styleNode->children.push_back(parseTemplateUsage());
+        }
+        else if (currentToken.type == TokenType::IDENTIFIER && nextToken.type == TokenType::COLON) {
             styleNode->children.push_back(parseAttribute());
         } else {
             styleNode->children.push_back(parseSelector());
@@ -164,15 +174,61 @@ std::unique_ptr<SelectorNode> CHTLParser::parseSelector() {
     return selectorNode;
 }
 
+std::unique_ptr<TemplateDefinitionNode> CHTLParser::parseTemplateDefinition() {
+    consume(TokenType::KEYWORD_TEMPLATE, "Expect '[Template]' keyword.");
+    auto node = std::make_unique<TemplateDefinitionNode>();
+
+    // Parse @Type
+    if (match({TokenType::AT_STYLE, TokenType::AT_ELEMENT, TokenType::AT_VAR})) {
+        node->template_type = previous();
+    } else {
+        consume(TokenType::AT_STYLE, "Expect template type like @Style, @Element, or @Var.");
+    }
+
+    // Parse Name
+    node->name = consume(TokenType::IDENTIFIER, "Expect template name.");
+
+    // Parse Body
+    consume(TokenType::LBRACE, "Expect '{' after template name.");
+    while (!check(TokenType::RBRACE) && !isAtEnd()) {
+        // The body of a template can contain different things depending on its type.
+        if (peek().type == TokenType::AT_STYLE) {
+            // Handle nested @Style template usage (inheritance)
+            node->children.push_back(parseTemplateUsage());
+        }
+        else if (node->template_type.type == TokenType::AT_STYLE) {
+            // Handle attribute for @Style template
+            node->children.push_back(parseAttribute());
+        } else { // @Element
+            // Handle statement for @Element template
+            node->children.push_back(parseStatement());
+        }
+    }
+    consume(TokenType::RBRACE, "Expect '}' after template body.");
+
+    return node;
+}
+
+std::unique_ptr<TemplateUsageNode> CHTLParser::parseTemplateUsage() {
+    auto node = std::make_unique<TemplateUsageNode>();
+
+    if (match({TokenType::AT_STYLE, TokenType::AT_ELEMENT, TokenType::AT_VAR})) {
+        node->template_type = previous();
+    } else {
+        consume(TokenType::AT_STYLE, "Expect template usage like @Style or @Element.");
+    }
+
+    node->name = consume(TokenType::IDENTIFIER, "Expect template name for usage.");
+    consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+
+    return node;
+}
+
 // Hybrid Expression Parser
 std::unique_ptr<ExpressionNode> CHTLParser::parseExpression() {
     auto expr = parsePrecedence(PREC_ASSIGNMENT);
-
-    // After parsing a potential arithmetic expression, check if it's followed
-    // by more literals. This handles cases like `1px solid black`.
     if (auto* literal = dynamic_cast<LiteralNode*>(expr.get())) {
         if (getRule(peek().type)->precedence == PREC_NONE && peek().type != TokenType::SEMICOLON && peek().type != TokenType::RBRACE) {
-            // It's a multi-token literal.
             std::string new_lexeme = literal->token.lexeme;
             while (!check(TokenType::SEMICOLON) && !check(TokenType::RBRACE) && !isAtEnd()) {
                 new_lexeme += " " + advance().lexeme;
@@ -182,7 +238,6 @@ std::unique_ptr<ExpressionNode> CHTLParser::parseExpression() {
             return std::make_unique<LiteralNode>(new_token);
         }
     }
-
     return expr;
 }
 

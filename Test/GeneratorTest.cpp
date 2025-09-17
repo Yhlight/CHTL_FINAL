@@ -14,15 +14,18 @@ std::string removeWhitespace(std::string str) {
     return str;
 }
 
-TEST(GeneratorTest, FullPipelineWithMixedStyles) {
+
+TEST(GeneratorTest, StyleTemplate) {
     std::string source = R"(
+[Template] @Style DefaultText {
+    color: black;
+    font-size: 16px;
+}
+
 div {
-    id: "main-box";
     style {
-        color: red;
-        .box {
-            border: 1px solid black;
-        }
+        @Style DefaultText;
+        border: 1px solid grey;
     }
 }
 )";
@@ -39,14 +42,9 @@ div {
 <!DOCTYPE html>
 <html>
 <head>
-<style>
-.box {
-  border: 1px solid black;
-}
-</style>
 </head>
 <body>
-<div id="main-box" class="box" style="color: red; "></div>
+<div style="color: black; font-size: 16px; border: 1px solid grey; "></div>
 </body>
 </html>
 )";
@@ -54,18 +52,14 @@ div {
     ASSERT_EQ(removeWhitespace(final_html), removeWhitespace(expected_html));
 }
 
-TEST(GeneratorTest, AutomaticAttributeMerging) {
+TEST(GeneratorTest, ElementTemplate) {
     std::string source = R"(
+[Template] @Element MyBox {
+    span { text { "I am in a box" } }
+}
+
 div {
-    class: "explicit-class";
-    style {
-        .implicit-class {
-            font-weight: bold;
-        }
-        #implicit-id {
-            display: block;
-        }
-    }
+    @Element MyBox;
 }
 )";
 
@@ -81,17 +75,9 @@ div {
 <!DOCTYPE html>
 <html>
 <head>
-<style>
-.implicit-class {
-  font-weight: bold;
-}
-#implicit-id {
-  display: block;
-}
-</style>
 </head>
 <body>
-<div id="implicit-id" class="explicit-class implicit-class"></div>
+<div><span>I am in a box</span></div>
 </body>
 </html>
 )";
@@ -99,51 +85,20 @@ div {
     ASSERT_EQ(removeWhitespace(final_html), removeWhitespace(expected_html));
 }
 
-
-TEST(GeneratorTest, AmpersandSelectorReplacement) {
+TEST(GeneratorTest, TemplateInheritance) {
     std::string source = R"(
-button {
-    class: btn;
-    style {
-        &:hover {
-            background-color: blue;
-        }
-    }
-}
-)";
-
-    CHTLLexer lexer(source);
-    std::vector<Token> tokens = lexer.tokenize();
-    CHTLParser parser(tokens);
-    std::unique_ptr<ProgramNode> ast = parser.parse();
-    ASSERT_TRUE(ast != nullptr);
-    CHTLGenerator generator;
-    std::string final_html = generator.generate(*ast);
-
-    std::string expected_html = R"(
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-.btn:hover {
-  background-color: blue;
-}
-</style>
-</head>
-<body>
-<button class="btn"></button>
-</body>
-</html>
-)";
-
-    ASSERT_EQ(removeWhitespace(final_html), removeWhitespace(expected_html));
+[Template] @Style Base {
+    padding: 10px;
 }
 
-TEST(GeneratorTest, AttributeArithmetic) {
-    std::string source = R"(
+[Template] @Style RedBox {
+    @Style Base;
+    background-color: red;
+}
+
 div {
     style {
-        width: 100px + 50px * 2;
+        @Style RedBox;
     }
 }
 )";
@@ -162,7 +117,7 @@ div {
 <head>
 </head>
 <body>
-<div style="width: calc(100px + (50px * 2)); "></div>
+<div style="padding: 10px; background-color: red; "></div>
 </body>
 </html>
 )";

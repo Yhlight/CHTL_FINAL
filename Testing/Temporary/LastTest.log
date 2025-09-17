@@ -1,10 +1,10 @@
-Start testing: Sep 17 12:56 UTC
+Start testing: Sep 17 13:22 UTC
 ----------------------------------------------------------
-1/8 Testing: LexerTest.BasicElementsAndAttributes
-1/8 Test: LexerTest.BasicElementsAndAttributes
+1/6 Testing: LexerTest.BasicElementsAndAttributes
+1/6 Test: LexerTest.BasicElementsAndAttributes
 Command: "/app/run_tests" "--gtest_filter=LexerTest.BasicElementsAndAttributes" "--gtest_also_run_disabled_tests"
 Directory: /app
-"LexerTest.BasicElementsAndAttributes" start time: Sep 17 12:56 UTC
+"LexerTest.BasicElementsAndAttributes" start time: Sep 17 13:22 UTC
 Output:
 ----------------------------------------------------------
 Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
@@ -23,15 +23,15 @@ Note: Google Test filter = LexerTest.BasicElementsAndAttributes
 Test time =   0.00 sec
 ----------------------------------------------------------
 Test Passed.
-"LexerTest.BasicElementsAndAttributes" end time: Sep 17 12:56 UTC
+"LexerTest.BasicElementsAndAttributes" end time: Sep 17 13:22 UTC
 "LexerTest.BasicElementsAndAttributes" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-2/8 Testing: LexerTest.CommentsAndWhitespace
-2/8 Test: LexerTest.CommentsAndWhitespace
+2/6 Testing: LexerTest.CommentsAndWhitespace
+2/6 Test: LexerTest.CommentsAndWhitespace
 Command: "/app/run_tests" "--gtest_filter=LexerTest.CommentsAndWhitespace" "--gtest_also_run_disabled_tests"
 Directory: /app
-"LexerTest.CommentsAndWhitespace" start time: Sep 17 12:56 UTC
+"LexerTest.CommentsAndWhitespace" start time: Sep 17 13:22 UTC
 Output:
 ----------------------------------------------------------
 Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
@@ -47,81 +47,54 @@ Note: Google Test filter = LexerTest.CommentsAndWhitespace
 [==========] 1 test from 1 test suite ran. (0 ms total)
 [  PASSED  ] 1 test.
 <end of output>
-Test time =   0.00 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"LexerTest.CommentsAndWhitespace" end time: Sep 17 12:56 UTC
+"LexerTest.CommentsAndWhitespace" end time: Sep 17 13:22 UTC
 "LexerTest.CommentsAndWhitespace" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-3/8 Testing: ParserTest.BasicStructure
-3/8 Test: ParserTest.BasicStructure
-Command: "/app/run_tests" "--gtest_filter=ParserTest.BasicStructure" "--gtest_also_run_disabled_tests"
+3/6 Testing: ParserTest.TemplateDefinitionAndUsage
+3/6 Test: ParserTest.TemplateDefinitionAndUsage
+Command: "/app/run_tests" "--gtest_filter=ParserTest.TemplateDefinitionAndUsage" "--gtest_also_run_disabled_tests"
 Directory: /app
-"ParserTest.BasicStructure" start time: Sep 17 12:56 UTC
+"ParserTest.TemplateDefinitionAndUsage" start time: Sep 17 13:22 UTC
 Output:
 ----------------------------------------------------------
 Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
-Note: Google Test filter = ParserTest.BasicStructure
+Note: Google Test filter = ParserTest.TemplateDefinitionAndUsage
 [==========] Running 1 test from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 1 test from ParserTest
-[ RUN      ] ParserTest.BasicStructure
-[       OK ] ParserTest.BasicStructure (0 ms)
+[ RUN      ] ParserTest.TemplateDefinitionAndUsage
+[       OK ] ParserTest.TemplateDefinitionAndUsage (0 ms)
 [----------] 1 test from ParserTest (0 ms total)
 
 [----------] Global test environment tear-down
 [==========] 1 test from 1 test suite ran. (0 ms total)
 [  PASSED  ] 1 test.
 <end of output>
-Test time =   0.00 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"ParserTest.BasicStructure" end time: Sep 17 12:56 UTC
-"ParserTest.BasicStructure" time elapsed: 00:00:00
+"ParserTest.TemplateDefinitionAndUsage" end time: Sep 17 13:22 UTC
+"ParserTest.TemplateDefinitionAndUsage" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-4/8 Testing: ParserTest.StyleBlockWithSelector
-4/8 Test: ParserTest.StyleBlockWithSelector
-Command: "/app/run_tests" "--gtest_filter=ParserTest.StyleBlockWithSelector" "--gtest_also_run_disabled_tests"
+4/6 Testing: GeneratorTest.StyleTemplate
+4/6 Test: GeneratorTest.StyleTemplate
+Command: "/app/run_tests" "--gtest_filter=GeneratorTest.StyleTemplate" "--gtest_also_run_disabled_tests"
 Directory: /app
-"ParserTest.StyleBlockWithSelector" start time: Sep 17 12:56 UTC
+"GeneratorTest.StyleTemplate" start time: Sep 17 13:22 UTC
 Output:
 ----------------------------------------------------------
 Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
-Note: Google Test filter = ParserTest.StyleBlockWithSelector
-[==========] Running 1 test from 1 test suite.
-[----------] Global test environment set-up.
-[----------] 1 test from ParserTest
-[ RUN      ] ParserTest.StyleBlockWithSelector
-[       OK ] ParserTest.StyleBlockWithSelector (0 ms)
-[----------] 1 test from ParserTest (0 ms total)
-
-[----------] Global test environment tear-down
-[==========] 1 test from 1 test suite ran. (0 ms total)
-[  PASSED  ] 1 test.
-<end of output>
-Test time =   0.00 sec
-----------------------------------------------------------
-Test Passed.
-"ParserTest.StyleBlockWithSelector" end time: Sep 17 12:56 UTC
-"ParserTest.StyleBlockWithSelector" time elapsed: 00:00:00
-----------------------------------------------------------
-
-5/8 Testing: GeneratorTest.FullPipelineWithMixedStyles
-5/8 Test: GeneratorTest.FullPipelineWithMixedStyles
-Command: "/app/run_tests" "--gtest_filter=GeneratorTest.FullPipelineWithMixedStyles" "--gtest_also_run_disabled_tests"
-Directory: /app
-"GeneratorTest.FullPipelineWithMixedStyles" start time: Sep 17 12:56 UTC
-Output:
-----------------------------------------------------------
-Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
-Note: Google Test filter = GeneratorTest.FullPipelineWithMixedStyles
+Note: Google Test filter = GeneratorTest.StyleTemplate
 [==========] Running 1 test from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 1 test from GeneratorTest
-[ RUN      ] GeneratorTest.FullPipelineWithMixedStyles
-[       OK ] GeneratorTest.FullPipelineWithMixedStyles (0 ms)
+[ RUN      ] GeneratorTest.StyleTemplate
+[       OK ] GeneratorTest.StyleTemplate (0 ms)
 [----------] 1 test from GeneratorTest (0 ms total)
 
 [----------] Global test environment tear-down
@@ -131,89 +104,62 @@ Note: Google Test filter = GeneratorTest.FullPipelineWithMixedStyles
 Test time =   0.00 sec
 ----------------------------------------------------------
 Test Passed.
-"GeneratorTest.FullPipelineWithMixedStyles" end time: Sep 17 12:56 UTC
-"GeneratorTest.FullPipelineWithMixedStyles" time elapsed: 00:00:00
+"GeneratorTest.StyleTemplate" end time: Sep 17 13:22 UTC
+"GeneratorTest.StyleTemplate" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-6/8 Testing: GeneratorTest.AutomaticAttributeMerging
-6/8 Test: GeneratorTest.AutomaticAttributeMerging
-Command: "/app/run_tests" "--gtest_filter=GeneratorTest.AutomaticAttributeMerging" "--gtest_also_run_disabled_tests"
+5/6 Testing: GeneratorTest.ElementTemplate
+5/6 Test: GeneratorTest.ElementTemplate
+Command: "/app/run_tests" "--gtest_filter=GeneratorTest.ElementTemplate" "--gtest_also_run_disabled_tests"
 Directory: /app
-"GeneratorTest.AutomaticAttributeMerging" start time: Sep 17 12:56 UTC
+"GeneratorTest.ElementTemplate" start time: Sep 17 13:22 UTC
 Output:
 ----------------------------------------------------------
 Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
-Note: Google Test filter = GeneratorTest.AutomaticAttributeMerging
+Note: Google Test filter = GeneratorTest.ElementTemplate
 [==========] Running 1 test from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 1 test from GeneratorTest
-[ RUN      ] GeneratorTest.AutomaticAttributeMerging
-[       OK ] GeneratorTest.AutomaticAttributeMerging (0 ms)
+[ RUN      ] GeneratorTest.ElementTemplate
+[       OK ] GeneratorTest.ElementTemplate (0 ms)
 [----------] 1 test from GeneratorTest (0 ms total)
 
 [----------] Global test environment tear-down
 [==========] 1 test from 1 test suite ran. (0 ms total)
 [  PASSED  ] 1 test.
 <end of output>
-Test time =   0.00 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"GeneratorTest.AutomaticAttributeMerging" end time: Sep 17 12:56 UTC
-"GeneratorTest.AutomaticAttributeMerging" time elapsed: 00:00:00
+"GeneratorTest.ElementTemplate" end time: Sep 17 13:22 UTC
+"GeneratorTest.ElementTemplate" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-7/8 Testing: GeneratorTest.AmpersandSelectorReplacement
-7/8 Test: GeneratorTest.AmpersandSelectorReplacement
-Command: "/app/run_tests" "--gtest_filter=GeneratorTest.AmpersandSelectorReplacement" "--gtest_also_run_disabled_tests"
+6/6 Testing: GeneratorTest.TemplateInheritance
+6/6 Test: GeneratorTest.TemplateInheritance
+Command: "/app/run_tests" "--gtest_filter=GeneratorTest.TemplateInheritance" "--gtest_also_run_disabled_tests"
 Directory: /app
-"GeneratorTest.AmpersandSelectorReplacement" start time: Sep 17 12:56 UTC
+"GeneratorTest.TemplateInheritance" start time: Sep 17 13:22 UTC
 Output:
 ----------------------------------------------------------
 Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
-Note: Google Test filter = GeneratorTest.AmpersandSelectorReplacement
+Note: Google Test filter = GeneratorTest.TemplateInheritance
 [==========] Running 1 test from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 1 test from GeneratorTest
-[ RUN      ] GeneratorTest.AmpersandSelectorReplacement
-[       OK ] GeneratorTest.AmpersandSelectorReplacement (0 ms)
+[ RUN      ] GeneratorTest.TemplateInheritance
+[       OK ] GeneratorTest.TemplateInheritance (0 ms)
 [----------] 1 test from GeneratorTest (0 ms total)
 
 [----------] Global test environment tear-down
 [==========] 1 test from 1 test suite ran. (0 ms total)
 [  PASSED  ] 1 test.
 <end of output>
-Test time =   0.00 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"GeneratorTest.AmpersandSelectorReplacement" end time: Sep 17 12:56 UTC
-"GeneratorTest.AmpersandSelectorReplacement" time elapsed: 00:00:00
+"GeneratorTest.TemplateInheritance" end time: Sep 17 13:22 UTC
+"GeneratorTest.TemplateInheritance" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-8/8 Testing: GeneratorTest.AttributeArithmetic
-8/8 Test: GeneratorTest.AttributeArithmetic
-Command: "/app/run_tests" "--gtest_filter=GeneratorTest.AttributeArithmetic" "--gtest_also_run_disabled_tests"
-Directory: /app
-"GeneratorTest.AttributeArithmetic" start time: Sep 17 12:56 UTC
-Output:
-----------------------------------------------------------
-Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
-Note: Google Test filter = GeneratorTest.AttributeArithmetic
-[==========] Running 1 test from 1 test suite.
-[----------] Global test environment set-up.
-[----------] 1 test from GeneratorTest
-[ RUN      ] GeneratorTest.AttributeArithmetic
-[       OK ] GeneratorTest.AttributeArithmetic (0 ms)
-[----------] 1 test from GeneratorTest (0 ms total)
-
-[----------] Global test environment tear-down
-[==========] 1 test from 1 test suite ran. (0 ms total)
-[  PASSED  ] 1 test.
-<end of output>
-Test time =   0.00 sec
-----------------------------------------------------------
-Test Passed.
-"GeneratorTest.AttributeArithmetic" end time: Sep 17 12:56 UTC
-"GeneratorTest.AttributeArithmetic" time elapsed: 00:00:00
-----------------------------------------------------------
-
-End testing: Sep 17 12:56 UTC
+End testing: Sep 17 13:22 UTC

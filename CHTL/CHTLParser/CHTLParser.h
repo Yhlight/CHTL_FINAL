@@ -22,6 +22,8 @@ private:
     std::unique_ptr<SelectorNode> parseSelector();
     std::unique_ptr<AttributeNode> parseAttribute();
     std::unique_ptr<ExpressionNode> parseExpression();
+    std::unique_ptr<TemplateDefinitionNode> parseTemplateDefinition();
+    std::unique_ptr<TemplateUsageNode> parseTemplateUsage();
 
     // Pratt parser helpers
     enum Precedence {

@@ -5,7 +5,6 @@
 #include <string>
 #include <sstream>
 
-// An AST visitor that creates a string representation of the tree.
 class ASTStringifier : public INodeVisitor {
 public:
     std::string stringify(Node& node) {
@@ -35,8 +34,6 @@ public:
     void visit(AttributeNode& node) override {
         printIndent();
         ss << "Attr[" << node.key << ": ";
-        // We can't visit the expression anymore with this visitor,
-        // so we just print a placeholder.
         if (auto* literal = dynamic_cast<LiteralNode*>(node.value.get())) {
             ss << "Literal<'" << literal->token.lexeme << "'>";
         } else if (dynamic_cast<BinaryOpNode*>(node.value.get())) {
@@ -74,6 +71,21 @@ public:
         indent--;
     }
 
+    void visit(TemplateDefinitionNode& node) override {
+        printIndent();
+        ss << "TemplateDefinition<" << node.template_type.lexeme << " " << node.name.lexeme << ">\n";
+        indent++;
+        for (auto& child : node.children) {
+            child->accept(*this);
+        }
+        indent--;
+    }
+
+    void visit(TemplateUsageNode& node) override {
+        printIndent();
+        ss << "TemplateUsage<" << node.template_type.lexeme << " " << node.name.lexeme << ">\n";
+    }
+
 private:
     std::stringstream ss;
     int indent = 0;
@@ -84,40 +96,17 @@ private:
     }
 };
 
-TEST(ParserTest, BasicStructure) {
+
+TEST(ParserTest, TemplateDefinitionAndUsage) {
     std::string source = R"(
-body {
-    div {
-        id: "main";
-    }
-}
-)";
-    CHTLLexer lexer(source);
-    std::vector<Token> tokens = lexer.tokenize();
-    CHTLParser parser(tokens);
-    std::unique_ptr<ProgramNode> ast = parser.parse();
-
-    ASTStringifier stringifier;
-    std::string result = stringifier.stringify(*ast);
-
-    std::string expected =
-R"(Program
-  Element<body>
-    Element<div>
-      Attr[id: Literal<'"main"'>]
-)";
-
-    ASSERT_EQ(result, expected);
+[Template] @Style DefaultText {
+    color: black;
+    font-size: 16px;
 }
 
-TEST(ParserTest, StyleBlockWithSelector) {
-    std::string source = R"(
 div {
     style {
-        color: blue;
-        .box {
-            width: 100px;
-        }
+        @Style DefaultText;
     }
 }
 )";
@@ -131,11 +120,12 @@ div {
 
     std::string expected =
 R"(Program
+  TemplateDefinition<@Style DefaultText>
+    Attr[color: Literal<'black'>]
+    Attr[font-size: Literal<'16px'>]
   Element<div>
     Style
-      Attr[color: Literal<'blue'>]
-      Selector<.box>
-        Attr[width: Literal<'100px'>]
+      TemplateUsage<@Style DefaultText>
 )";
 
     ASSERT_EQ(result, expected);

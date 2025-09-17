@@ -3,11 +3,14 @@
 #include <iostream>
 #include <algorithm>
 #include <set>
+#include <map>
 
 CHTLGenerator::CHTLGenerator() {}
 
 std::string CHTLGenerator::generate(Node& root) {
+    collectTemplateDefinitions(&root);
     root.accept(*this);
+
     std::stringstream final_html;
     final_html << "<!DOCTYPE html>\n";
     std::string html_content = html_out.str();
@@ -22,7 +25,20 @@ std::string CHTLGenerator::generate(Node& root) {
     return final_html.str();
 }
 
-// --- Expression Generation Helper ---
+void CHTLGenerator::collectTemplateDefinitions(Node* node) {
+    if (!node) return;
+    if (auto* def_node = dynamic_cast<TemplateDefinitionNode*>(node)) {
+        template_table[def_node->name.lexeme] = def_node;
+    }
+    if (auto* p_node = dynamic_cast<ProgramNode*>(node)) {
+        for (auto& child : p_node->children) collectTemplateDefinitions(child.get());
+    } else if (auto* e_node = dynamic_cast<ElementNode*>(node)) {
+        for (auto& child : e_node->children) collectTemplateDefinitions(child.get());
+    } else if (auto* s_node = dynamic_cast<StyleNode*>(node)) {
+        for (auto& child : s_node->children) collectTemplateDefinitions(child.get());
+    }
+}
+
 std::string CHTLGenerator::generateExpression(ExpressionNode* node, bool is_top_level) {
     if (auto* literal = dynamic_cast<LiteralNode*>(node)) {
         return literal->token.lexeme;
@@ -31,15 +47,10 @@ std::string CHTLGenerator::generateExpression(ExpressionNode* node, bool is_top_
         std::string left = generateExpression(binary->left.get(), false);
         std::string right = generateExpression(binary->right.get(), false);
         std::string content = left + " " + binary->op.lexeme + " " + right;
-        if (is_top_level) {
-            return "calc(" + content + ")";
-        } else {
-            return "(" + content + ")";
-        }
+        return is_top_level ? "calc(" + content + ")" : "(" + content + ")";
     }
     return "";
 }
-
 
 // --- Visitor Implementations ---
 
@@ -58,8 +69,7 @@ void CHTLGenerator::visit(ElementNode& node) {
     for (auto& child : node.children) {
         if (auto* attr_node = dynamic_cast<AttributeNode*>(child.get())) {
             if (attr_node->key == "id") {
-                if(auto* literal = dynamic_cast<LiteralNode*>(attr_node->value.get()))
-                    id_value = unquote(literal->token.lexeme);
+                 if(auto* literal = dynamic_cast<LiteralNode*>(attr_node->value.get())) id_value = unquote(literal->token.lexeme);
             } else if (attr_node->key == "class") {
                 if(auto* literal = dynamic_cast<LiteralNode*>(attr_node->value.get())) {
                     std::stringstream ss(unquote(literal->token.lexeme));
@@ -105,11 +115,14 @@ void CHTLGenerator::visit(ElementNode& node) {
 
     std::stringstream inline_style_ss;
     if (style_node) {
-        for (auto& style_child : style_node->children) {
-            if (auto* attr_node = dynamic_cast<AttributeNode*>(style_child.get())) {
-                inline_style_ss << attr_node->key << ": " << generateExpression(attr_node->value.get()) << "; ";
-            }
-        }
+        auto* old_stream = active_css_stream;
+        active_css_stream = &inline_style_ss;
+        generating_inline_style = true;
+
+        style_node->accept(*this);
+
+        generating_inline_style = false;
+        active_css_stream = old_stream;
     }
     if (!inline_style_ss.str().empty()) {
         html_out << " style=\"" << inline_style_ss.str() << "\"";
@@ -130,10 +143,20 @@ void CHTLGenerator::visit(ElementNode& node) {
 }
 
 void CHTLGenerator::visit(AttributeNode& node) {
-    if (in_style_block) {
-        css_out << "  " << node.key << ": " << generateExpression(node.value.get()) << ";\n";
+    if (generating_inline_style) {
+        (*active_css_stream) << node.key << ": " << generateExpression(node.value.get()) << "; ";
+    }
+    else if (in_style_block) {
+        (*active_css_stream) << "  " << node.key << ": " << generateExpression(node.value.get()) << ";\n";
     } else {
-        html_out << " " << node.key << "=" << generateExpression(node.value.get());
+        html_out << " " << node.key << "=";
+        if(auto* literal = dynamic_cast<LiteralNode*>(node.value.get())) {
+            if (literal->token.type == TokenType::STRING_LITERAL) {
+                html_out << literal->token.lexeme;
+            } else {
+                html_out << "\"" << literal->token.lexeme << "\"";
+            }
+        }
     }
 }
 
@@ -145,26 +168,52 @@ void CHTLGenerator::visit(TextNode& node) {
 
 void CHTLGenerator::visit(StyleNode& node) {
     for (auto& child : node.children) {
-        if (dynamic_cast<SelectorNode*>(child.get())) {
-            child->accept(*this);
+        if (generating_inline_style) {
+            if (dynamic_cast<AttributeNode*>(child.get()) || dynamic_cast<TemplateUsageNode*>(child.get())) {
+                 child->accept(*this);
+            }
+        } else {
+            if (dynamic_cast<SelectorNode*>(child.get())) {
+                child->accept(*this);
+            }
         }
     }
 }
 
 void CHTLGenerator::visit(SelectorNode& node) {
+    auto* old_stream = active_css_stream;
+    active_css_stream = &css_out;
     bool originally_in_style = in_style_block;
     in_style_block = true;
+
     std::string final_selector = node.selector;
     size_t pos = final_selector.find('&');
     if (pos != std::string::npos && !this->current_element_selector.empty()) {
         final_selector.replace(pos, 1, this->current_element_selector);
     }
-    css_out << final_selector << " {\n";
+    (*active_css_stream) << final_selector << " {\n";
     for (auto& prop : node.properties) {
         prop->accept(*this);
     }
-    css_out << "}\n";
+    (*active_css_stream) << "}\n";
+
     in_style_block = originally_in_style;
+    active_css_stream = old_stream;
+}
+
+void CHTLGenerator::visit(TemplateDefinitionNode& node) {
+    // Handled in pre-pass
+}
+
+void CHTLGenerator::visit(TemplateUsageNode& node) {
+    if (template_table.count(node.name.lexeme)) {
+        TemplateDefinitionNode* def = template_table[node.name.lexeme];
+        for (auto& child : def->children) {
+            child->accept(*this);
+        }
+    } else {
+        std::cerr << "Error: Template '" << node.name.lexeme << "' not found." << std::endl;
+    }
 }
 
 std::string CHTLGenerator::unquote(const std::string& s) {

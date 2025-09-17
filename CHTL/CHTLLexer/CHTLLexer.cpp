@@ -23,14 +23,18 @@ Token CHTLLexer::nextToken() {
     char c = advance();
 
     if (isalpha(c) || c == '_') return identifier();
-    if (isdigit(c)) return number(); // For now, let's just consume a simple number
+    if (isdigit(c)) return number();
 
     switch (c) {
         case '{': return makeToken(TokenType::LBRACE);
         case '}': return makeToken(TokenType::RBRACE);
         case '(': return makeToken(TokenType::LPAREN);
         case ')': return makeToken(TokenType::RPAREN);
-        case '[': return makeToken(TokenType::LBRACKET);
+        case '[':
+            if (match('T') && match('e') && match('m') && match('p') && match('l') && match('a') && match('t') && match('e') && match(']')) {
+                return makeToken(TokenType::KEYWORD_TEMPLATE);
+            }
+            return makeToken(TokenType::LBRACKET);
         case ']': return makeToken(TokenType::RBRACKET);
         case ';': return makeToken(TokenType::SEMICOLON);
         case ',': return makeToken(TokenType::COMMA);
@@ -40,7 +44,6 @@ Token CHTLLexer::nextToken() {
         case '/': return makeToken(TokenType::SLASH);
         case '%': return makeToken(TokenType::PERCENT);
         case '?': return makeToken(TokenType::QUESTION_MARK);
-
         case '*':
             return makeToken(match('*') ? TokenType::DOUBLE_ASTERISK : TokenType::ASTERISK);
         case ':':
@@ -51,20 +54,28 @@ Token CHTLLexer::nextToken() {
             return makeToken(match('&') ? TokenType::DOUBLE_AMPERSAND : TokenType::AMPERSAND);
         case '|':
             return makeToken(match('|') ? TokenType::DOUBLE_PIPE : TokenType::PIPE);
-
         case '"':
         case '\'':
             return stringLiteral();
-
         case '#':
-            // If it's followed by a space, it's a generator comment.
-            // Otherwise, it's a HASH for an ID selector.
             if (peek() == ' ') {
                 while (peek() != '\n' && !isAtEnd()) advance();
                 return makeToken(TokenType::GENERATOR_COMMENT);
             } else {
                 return makeToken(TokenType::HASH);
             }
+        case '@': {
+            size_t at_start = current;
+            while (isalpha(peek())) {
+                advance();
+            }
+            std::string text = source.substr(at_start, current - at_start);
+            if (text == "Style") return makeToken(TokenType::AT_STYLE);
+            if (text == "Element") return makeToken(TokenType::AT_ELEMENT);
+            if (text == "Var") return makeToken(TokenType::AT_VAR);
+            if (text == "Html") return makeToken(TokenType::AT_HTML);
+            return errorToken("Unknown @-rule.");
+        }
     }
 
     return errorToken("Unexpected character.");
@@ -88,8 +99,8 @@ void CHTLLexer::skipWhitespaceAndComments() {
                 if (peekNext() == '/') {
                     while (peek() != '\n' && !isAtEnd()) advance();
                 } else if (peekNext() == '*') {
-                    advance(); // consume /
-                    advance(); // consume *
+                    advance();
+                    advance();
                     while (!(peek() == '*' && peekNext() == '/') && !isAtEnd()) {
                         if (peek() == '\n') {
                             line++;
@@ -97,8 +108,8 @@ void CHTLLexer::skipWhitespaceAndComments() {
                         }
                         advance();
                     }
-                    if (!isAtEnd()) advance(); // consume *
-                    if (!isAtEnd()) advance(); // consume /
+                    if (!isAtEnd()) advance();
+                    if (!isAtEnd()) advance();
                 } else {
                     return;
                 }
@@ -121,54 +132,36 @@ Token CHTLLexer::stringLiteral() {
 
     if (isAtEnd()) return errorToken("Unterminated string.");
 
-    advance(); // The closing quote.
+    advance();
     return makeToken(TokenType::STRING_LITERAL);
 }
 
 Token CHTLLexer::identifier() {
-    // Allow hyphens in identifiers for CSS properties like font-weight
     while (isalnum(peek()) || peek() == '_' || peek() == '-') advance();
 
-    // Check if it's a keyword
     std::string text = source.substr(start, current - start);
     TokenType type = TokenType::IDENTIFIER;
 
-    // This is a simple but inefficient way to check for keywords.
-    // A trie or a perfect hash function would be better for a production compiler.
     if (text == "text") type = TokenType::TEXT;
     else if (text == "style") type = TokenType::STYLE;
     else if (text == "script") type = TokenType::SCRIPT;
     else if (text == "inherit") type = TokenType::KEYWORD_INHERIT;
-    // ... add all other keywords here
-
-    // For now, let's treat unquoted literals as identifiers as well.
-    // The parser will decide how to interpret them based on context.
-    // A more sophisticated lexer might distinguish them.
-    // For example, `color: red` -> IDENTIFIER("color"), COLON, IDENTIFIER("red"), SEMICOLON
-    // `width: 100px` -> IDENTIFIER("width"), COLON, IDENTIFIER("100px"), SEMICOLON
-    // Let's create a separate type for things that look like unquoted literals
-    // if the parser needs it. For now, IDENTIFIER is fine.
 
     return makeToken(type);
 }
 
-
 Token CHTLLexer::number() {
     while (isdigit(peek())) advance();
 
-    // Look for a fractional part.
     if (peek() == '.' && isdigit(peekNext())) {
-        // Consume the ".".
         advance();
         while (isdigit(peek())) advance();
     }
 
-    // Also consume any unit suffix like 'px', 'em', '%' etc.
     while (isalpha(peek()) || peek() == '%') advance();
 
     return makeToken(TokenType::UNQUOTED_LITERAL);
 }
-
 
 char CHTLLexer::advance() {
     current++;

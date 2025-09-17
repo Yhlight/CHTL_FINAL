@@ -53,7 +53,7 @@ enum class TokenType {
     SCRIPT,
 
     // Templates & Customization
-    KEYWORD_TEMPLATE,   // [Template]
+    KEYWORD_TEMPLATE,   // [Template] // This was already here, but not used.
     KEYWORD_CUSTOM,     // [Custom]
     KEYWORD_ORIGIN,     // [Origin]
     KEYWORD_IMPORT,     // [Import]
