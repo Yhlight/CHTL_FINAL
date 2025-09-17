@@ -3,40 +3,14 @@
 #include <cctype>
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 
 namespace CHTL {
 
-// CHTL JS Keywords
+// CHTL JS Keywords, kept here as they are specific to the script scanning logic
 const std::vector<std::string> CHTLJS_KEYWORDS = {
     "{{", "listen", "delegate", "animate", "vir", "router", "&->", "->"
 };
-
-CHTLUnifiedScanner::CHTLUnifiedScanner(const std::string& source)
-    : source_(source) {}
-
-const std::map<std::string, std::string>& CHTLUnifiedScanner::getPlaceholderMap() const {
-    return placeholder_map_;
-}
-
-std::vector<CodeFragment> CHTLUnifiedScanner::scan() {
-    process();
-    return fragments_;
-}
-
-void CHTLUnifiedScanner::addFragment(const std::string& content, FragmentType type) {
-    if (!content.empty()) {
-        fragments_.push_back({content, type});
-    }
-}
-
-std::string CHTLUnifiedScanner::createPlaceholder(const std::string& content) {
-    if (content.empty() || content.find_first_not_of(" \t\n\r") == std::string::npos) {
-        return "";
-    }
-    std::string placeholder = "__CHTL_JS_PLACEHOLDER_" + std::to_string(placeholder_id_++) + "__";
-    placeholder_map_[placeholder] = content;
-    return placeholder;
-}
 
 // This new static helper contains the robust state machine for finding a closing brace.
 // It can be used on any string, which is crucial for reusability.
@@ -69,7 +43,6 @@ static size_t find_block_end_robustly(const std::string& text, size_t start_pos,
                     }
                 }
                 break;
-
             case CHTLUnifiedScanner::ParsingState::IN_STRING:
                 if (current_char == '\\') {
                     i++;
@@ -77,13 +50,11 @@ static size_t find_block_end_robustly(const std::string& text, size_t start_pos,
                     state = CHTLUnifiedScanner::ParsingState::DEFAULT;
                 }
                 break;
-
             case CHTLUnifiedScanner::ParsingState::IN_SINGLE_LINE_COMMENT:
                 if (current_char == '\n') {
                     state = CHTLUnifiedScanner::ParsingState::DEFAULT;
                 }
                 break;
-
             case CHTLUnifiedScanner::ParsingState::IN_MULTI_LINE_COMMENT:
                 if (current_char == '*' && next_char == '/') {
                     state = CHTLUnifiedScanner::ParsingState::DEFAULT;
@@ -95,8 +66,34 @@ static size_t find_block_end_robustly(const std::string& text, size_t start_pos,
     return std::string::npos; // Unbalanced braces
 }
 
+CHTLUnifiedScanner::CHTLUnifiedScanner(const std::string& source)
+    : source_(source) {}
+
+const std::map<std::string, std::string>& CHTLUnifiedScanner::getPlaceholderMap() const {
+    return placeholder_map_;
+}
+
+std::vector<CodeFragment> CHTLUnifiedScanner::scan() {
+    process();
+    return fragments_;
+}
+
+void CHTLUnifiedScanner::addFragment(const std::string& content, FragmentType type) {
+    if (!content.empty()) {
+        fragments_.push_back({content, type});
+    }
+}
+
+std::string CHTLUnifiedScanner::createPlaceholder(const std::string& content) {
+    if (content.empty() || content.find_first_not_of(" \t\n\r") == std::string::npos) {
+        return "";
+    }
+    std::string placeholder = "__CHTL_JS_PLACEHOLDER_" + std::to_string(placeholder_id_++) + "__";
+    placeholder_map_[placeholder] = content;
+    return placeholder;
+}
+
 size_t CHTLUnifiedScanner::findEndOfBlock(size_t start_pos, char open_brace, char close_brace) {
-    // The member function now calls the static helper on the source string.
     return find_block_end_robustly(source_, start_pos, open_brace, close_brace);
 }
 
@@ -109,7 +106,6 @@ std::string CHTLUnifiedScanner::scanJsAndChtlJs(const std::string& script_conten
         size_t next_keyword_pos = std::string::npos;
         std::string found_keyword;
 
-        // Find the earliest CHTL JS keyword
         for (const auto& keyword : CHTLJS_KEYWORDS) {
             size_t pos = script_content.find(keyword, current_pos);
             if (pos != std::string::npos) {
@@ -129,9 +125,7 @@ std::string CHTLUnifiedScanner::scanJsAndChtlJs(const std::string& script_conten
         }
 
         std::string js_block = script_content.substr(last_flush_pos, next_keyword_pos - last_flush_pos);
-        if (!js_block.empty()) {
-            result << createPlaceholder(js_block);
-        }
+        result << createPlaceholder(js_block);
 
         size_t construct_start = next_keyword_pos;
         size_t construct_end;
@@ -145,23 +139,17 @@ std::string CHTLUnifiedScanner::scanJsAndChtlJs(const std::string& script_conten
         } else {
             size_t block_start = script_content.find('{', construct_start);
             if (block_start == std::string::npos) throw std::runtime_error("Expected '{' after CHTL JS keyword: " + found_keyword);
-
-            // Using the robust helper function now
             construct_end = find_block_end_robustly(script_content, block_start + 1, '{', '}');
             if (construct_end == std::string::npos) throw std::runtime_error("Unmatched '{' in CHTL JS block for: " + found_keyword);
         }
 
-        std::string chtl_js_construct = script_content.substr(construct_start, construct_end - construct_start);
-        result << chtl_js_construct;
-
+        result << script_content.substr(construct_start, construct_end - construct_start);
         current_pos = construct_end;
         last_flush_pos = current_pos;
     }
 
     std::string final_js_block = script_content.substr(last_flush_pos);
-    if (!final_js_block.empty()) {
-        result << createPlaceholder(final_js_block);
-    }
+    result << createPlaceholder(final_js_block);
 
     return result.str();
 }
@@ -170,10 +158,10 @@ bool CHTLUnifiedScanner::isKeywordAt(size_t pos, const std::string& keyword) {
     if (pos + keyword.length() > source_.length() || source_.substr(pos, keyword.length()) != keyword) {
         return false;
     }
-    if (pos + keyword.length() < source_.length() && isalnum(source_[pos + keyword.length()])) {
+    if (pos > 0 && isalnum(source_[pos - 1])) {
         return false;
     }
-    if (pos > 0 && isalnum(source_[pos - 1])) {
+    if (pos + keyword.length() < source_.length() && isalnum(source_[pos + keyword.length()])) {
         return false;
     }
     size_t temp_cursor = pos + keyword.length();
@@ -182,7 +170,6 @@ bool CHTLUnifiedScanner::isKeywordAt(size_t pos, const std::string& keyword) {
     }
     return temp_cursor < source_.length() && source_[temp_cursor] == '{';
 }
-
 
 void CHTLUnifiedScanner::process() {
     size_t last_flush_pos = 0;
@@ -193,9 +180,6 @@ void CHTLUnifiedScanner::process() {
         char current_char = source_[cursor_];
         char next_char = (cursor_ + 1 < source_.length()) ? source_[cursor_ + 1] : '\0';
 
-        bool processed = false;
-
-        // The main state machine for scanning the top-level source
         switch (state_) {
             case ParsingState::DEFAULT:
                 if (current_char == '"' || current_char == '\'' || current_char == '`') {
@@ -203,69 +187,51 @@ void CHTLUnifiedScanner::process() {
                     string_delimiter_ = current_char;
                 } else if (current_char == '/' && next_char == '/') {
                     state_ = ParsingState::IN_SINGLE_LINE_COMMENT;
-                    cursor_++; // Skip the second '/'
                 } else if (current_char == '/' && next_char == '*') {
                     state_ = ParsingState::IN_MULTI_LINE_COMMENT;
-                    cursor_++; // Skip the '*'
                 } else if (isKeywordAt(cursor_, "style")) {
                     addFragment(source_.substr(last_flush_pos, cursor_ - last_flush_pos), FragmentType::CHTL);
-
                     size_t block_start = source_.find('{', cursor_);
-                    if (block_start == std::string::npos) throw std::runtime_error("Expected '{' after style keyword.");
-
                     size_t block_end = findEndOfBlock(block_start + 1, '{', '}');
                     if (block_end == std::string::npos) throw std::runtime_error("Unmatched '{' in style block.");
-
                     std::string block_content = source_.substr(block_start + 1, block_end - (block_start + 2));
                     addFragment(block_content, FragmentType::CSS);
-
-                    cursor_ = block_end -1; // -1 because cursor will be incremented at the end of the loop
-                    last_flush_pos = block_end;
-                    processed = true;
+                    cursor_ = block_end;
+                    last_flush_pos = cursor_;
+                    continue;
                 } else if (isKeywordAt(cursor_, "script")) {
                     addFragment(source_.substr(last_flush_pos, cursor_ - last_flush_pos), FragmentType::CHTL);
-
                     size_t block_start = source_.find('{', cursor_);
-                    if (block_start == std::string::npos) throw std::runtime_error("Expected '{' after script keyword.");
-
                     size_t block_end = findEndOfBlock(block_start + 1, '{', '}');
                     if (block_end == std::string::npos) throw std::runtime_error("Unmatched '{' in script block.");
-
                     std::string block_content = source_.substr(block_start + 1, block_end - (block_start + 2));
-                    std::string chtl_js_with_placeholders = scanJsAndChtlJs(block_content);
-                    addFragment(chtl_js_with_placeholders, FragmentType::CHTL_JS);
-
-                    cursor_ = block_end - 1; // -1 because cursor will be incremented at the end of the loop
-                    last_flush_pos = block_end;
-                    processed = true;
+                    std::string processed_script = scanJsAndChtlJs(block_content);
+                    addFragment(processed_script, FragmentType::CHTL_JS);
+                    cursor_ = block_end;
+                    last_flush_pos = cursor_;
+                    continue;
                 }
                 break;
-
             case ParsingState::IN_STRING:
                 if (current_char == '\\') {
-                    cursor_++; // Skip escaped character
+                    cursor_++;
                 } else if (current_char == string_delimiter_) {
                     state_ = ParsingState::DEFAULT;
                 }
                 break;
-
             case ParsingState::IN_SINGLE_LINE_COMMENT:
                 if (current_char == '\n') {
                     state_ = ParsingState::DEFAULT;
                 }
                 break;
-
             case ParsingState::IN_MULTI_LINE_COMMENT:
                 if (current_char == '*' && next_char == '/') {
                     state_ = ParsingState::DEFAULT;
-                    cursor_++; // Skip the '/'
+                    cursor_++;
                 }
                 break;
         }
-
-        if (!processed) {
-            cursor_++;
-        }
+        cursor_++;
     }
 
     if (last_flush_pos < source_.length()) {
@@ -273,5 +239,12 @@ void CHTLUnifiedScanner::process() {
     }
 }
 
+// Helper methods for the old implementation - can be removed if no longer used
+void CHTLUnifiedScanner::advance(size_t n) { cursor_ += n; }
+char CHTLUnifiedScanner::peek(size_t offset) const {
+    if (cursor_ + offset >= source_.length()) return '\0';
+    return source_[cursor_ + offset];
+}
+bool CHTLUnifiedScanner::isAtEnd() const { return cursor_ >= source_.length(); }
 
-} // namespace CHTL
+}

@@ -5,6 +5,8 @@
 #include <map>
 #include "../src/Scanner/CHTLUnifiedScanner.h"
 
+using namespace CHTL;
+
 // Function to convert FragmentType enum to a string for printing
 std::string fragmentTypeToString(CHTL::FragmentType type) {
     switch (type) {
@@ -50,94 +52,88 @@ int tests_failed = 0;
 
 TEST_CASE(test_simple_chtl) {
     std::string source = "div { text: 'hello'; }";
-    CHTL::CHTLUnifiedScanner scanner(source);
+    CHTLUnifiedScanner scanner(source);
     auto fragments = scanner.scan();
     ASSERT_EQUAL(1, fragments.size());
-    ASSERT_EQUAL(CHTL::FragmentType::CHTL, fragments[0].type);
+    ASSERT_EQUAL(FragmentType::CHTL, fragments[0].type);
     ASSERT_EQUAL(source, fragments[0].content);
 }
 
 TEST_CASE(test_simple_style_block) {
     std::string source = "style { color: red; }";
-    CHTL::CHTLUnifiedScanner scanner(source);
+    CHTLUnifiedScanner scanner(source);
     auto fragments = scanner.scan();
-    ASSERT_EQUAL(1, fragments.size()); // The empty CHTL fragment before is correctly suppressed.
-    ASSERT_EQUAL(CHTL::FragmentType::CSS, fragments[0].type);
+    ASSERT_EQUAL(1, fragments.size());
+    ASSERT_EQUAL(FragmentType::CSS, fragments[0].type);
     ASSERT_EQUAL(" color: red; ", fragments[0].content);
 }
 
 TEST_CASE(test_nested_script_block) {
     std::string source = "div { script { console.log(1); } }";
-    CHTL::CHTLUnifiedScanner scanner(source);
+    CHTLUnifiedScanner scanner(source);
     auto fragments = scanner.scan();
     ASSERT_EQUAL(3, fragments.size());
-    ASSERT_EQUAL(CHTL::FragmentType::CHTL, fragments[0].type);
+    ASSERT_EQUAL(FragmentType::CHTL, fragments[0].type);
     ASSERT_EQUAL("div { ", fragments[0].content);
-    ASSERT_EQUAL(CHTL::FragmentType::CHTL_JS, fragments[1].type);
-    ASSERT_EQUAL(CHTL::FragmentType::CHTL, fragments[2].type);
+    ASSERT_EQUAL(FragmentType::CHTL_JS, fragments[1].type);
+    ASSERT_EQUAL(FragmentType::CHTL, fragments[2].type);
     ASSERT_EQUAL(" }", fragments[2].content);
 }
 
 TEST_CASE(test_keyword_in_string) {
     std::string source = "div { text: 'style { color: blue; }'; }";
-    CHTL::CHTLUnifiedScanner scanner(source);
+    CHTLUnifiedScanner scanner(source);
     auto fragments = scanner.scan();
     ASSERT_EQUAL(1, fragments.size());
-    ASSERT_EQUAL(CHTL::FragmentType::CHTL, fragments[0].type);
+    ASSERT_EQUAL(FragmentType::CHTL, fragments[0].type);
     ASSERT_EQUAL(source, fragments[0].content);
 }
 
 TEST_CASE(test_keyword_in_comment) {
     std::string source = "div { /* script { alert('x'); } */ }";
-    CHTL::CHTLUnifiedScanner scanner(source);
+    CHTLUnifiedScanner scanner(source);
     auto fragments = scanner.scan();
     ASSERT_EQUAL(1, fragments.size());
-    ASSERT_EQUAL(CHTL::FragmentType::CHTL, fragments[0].type);
+    ASSERT_EQUAL(FragmentType::CHTL, fragments[0].type);
 }
 
 TEST_CASE(test_placeholder_logic_simple) {
     std::string source = "script { const a = 1; {{box}}->show(); const b = 2; }";
-    CHTL::CHTLUnifiedScanner scanner(source);
+    CHTLUnifiedScanner scanner(source);
     auto fragments = scanner.scan();
 
-    // The process loop will create an initial empty CHTL fragment, which is suppressed.
-    // Then it creates a single CHTL_JS fragment for the whole block.
     ASSERT_EQUAL(1, fragments.size());
-    ASSERT_EQUAL(CHTL::FragmentType::CHTL_JS, fragments[0].type);
+    ASSERT_EQUAL(FragmentType::CHTL_JS, fragments[0].type);
 
     const auto& placeholder_map = scanner.getPlaceholderMap();
     ASSERT_EQUAL(2, placeholder_map.size());
 
-    // Check the generated CHTL_JS with placeholders.
-    // The scanner treats `{{box}}` and `->` as separate constructs.
     std::string expected_chtl_js = "__CHTL_JS_PLACEHOLDER_0__{{box}}->__CHTL_JS_PLACEHOLDER_1__";
     ASSERT_EQUAL(expected_chtl_js, fragments[0].content);
 
-    // Check the content of the placeholders based on the actual scanner logic.
     ASSERT_EQUAL(" const a = 1; ", placeholder_map.at("__CHTL_JS_PLACEHOLDER_0__"));
     ASSERT_EQUAL("show(); const b = 2; ", placeholder_map.at("__CHTL_JS_PLACEHOLDER_1__"));
 }
 
 TEST_CASE(test_placeholder_with_robust_block_finding) {
     std::string source = "script { animate { target: {{box}}, duration: 100, easing: 'ease-in-out' } }";
-    CHTL::CHTLUnifiedScanner scanner(source);
+    CHTLUnifiedScanner scanner(source);
     scanner.scan();
     const auto& placeholder_map = scanner.getPlaceholderMap();
-    // The logic correctly suppresses placeholders for empty JS blocks.
     ASSERT_EQUAL(0, placeholder_map.size());
 }
 
 TEST_CASE(test_multiple_blocks) {
     std::string source = "style{a:b} div{} script{c:d}style{e:f}";
-    CHTL::CHTLUnifiedScanner scanner(source);
+    CHTLUnifiedScanner scanner(source);
     auto fragments = scanner.scan();
     ASSERT_EQUAL(4, fragments.size());
-    ASSERT_EQUAL(CHTL::FragmentType::CSS, fragments[0].type);
+    ASSERT_EQUAL(FragmentType::CSS, fragments[0].type);
     ASSERT_EQUAL("a:b", fragments[0].content);
-    ASSERT_EQUAL(CHTL::FragmentType::CHTL, fragments[1].type);
+    ASSERT_EQUAL(FragmentType::CHTL, fragments[1].type);
     ASSERT_EQUAL(" div{} ", fragments[1].content);
-    ASSERT_EQUAL(CHTL::FragmentType::CHTL_JS, fragments[2].type);
-    ASSERT_EQUAL(CHTL::FragmentType::CSS, fragments[3].type);
+    ASSERT_EQUAL(FragmentType::CHTL_JS, fragments[2].type);
+    ASSERT_EQUAL(FragmentType::CSS, fragments[3].type);
     ASSERT_EQUAL("e:f", fragments[3].content);
 }
 
@@ -152,6 +148,6 @@ int main() {
     RUN_TEST(test_placeholder_with_robust_block_finding);
     RUN_TEST(test_multiple_blocks);
 
-    std::cout << "\nTests finished. " << tests_run << " run, " << tests_failed << " failed." << std::endl;
+    std::cout << "\nScanner Unit Tests finished. " << tests_run << " run, " << tests_failed << " failed." << std::endl;
     return tests_failed > 0 ? 1 : 0;
 }

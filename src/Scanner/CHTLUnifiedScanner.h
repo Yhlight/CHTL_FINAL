@@ -31,7 +31,7 @@ public:
     // The CodeMerger will need this map to reconstruct the final JS file.
     const std::map<std::string, std::string>& getPlaceholderMap() const;
 
-    // Represents the granular parsing state, character by character.
+    // Public for the static helper function in the .cpp file
     enum class ParsingState {
         DEFAULT,
         IN_STRING,
@@ -40,12 +40,9 @@ public:
     };
 
 private:
-    // Main processing logic, now a true state machine.
+    // Main processing logic
     void process();
     bool isKeywordAt(size_t pos, const std::string& keyword);
-
-    // Finds the end of a CHTL construct like script {} or [Template] {}
-    size_t findEndOfBlock(size_t start_pos, char open_brace, char close_brace);
 
     // This is the new core function for placeholder-based scanning.
     // It scans a given string (a script block) and returns the modified
@@ -56,6 +53,9 @@ private:
     void advance(size_t n = 1);
     char peek(size_t offset = 0) const;
     bool isAtEnd() const;
+
+    // Finds the end of a CHTL construct like script {} or [Template] {}
+    size_t findEndOfBlock(size_t start_pos, char open_brace, char close_brace);
 
     // Placeholder and fragment management
     std::string createPlaceholder(const std::string& content);
