@@ -50,4 +50,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/test_scanner.dir/DependInfo.cmake"
   "CMakeFiles/test_unified_scanner.dir/DependInfo.cmake"
   "CMakeFiles/test_runner.dir/DependInfo.cmake"
+  "CMakeFiles/test_scanner_v2.dir/DependInfo.cmake"
   )
