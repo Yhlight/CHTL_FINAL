@@ -12,7 +12,9 @@ std::shared_ptr<RootNode> Parser::parse() {
             advance();
         }
         if (currentToken().type == TokenType::END_OF_FILE) break;
-        root->children.push_back(parseNode());
+        auto child = parseNode();
+        child->parent = root;
+        root->children.push_back(child);
     }
     return root;
 }
@@ -38,28 +40,40 @@ std::shared_ptr<ElementNode> Parser::parseElement() {
     consume(TokenType::LEFT_BRACE, "Expected '{' after element name.");
 
     while (currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
+        std::shared_ptr<BaseNode> childNode;
+        bool isAttribute = false;
+
         if (currentToken().type == TokenType::KEYWORD_TEXT) {
             if (peekToken().type == TokenType::LEFT_BRACE) {
-                 element->children.push_back(parseTextBlock());
+                 childNode = parseTextBlock();
             } else if (peekToken().type == TokenType::COLON || peekToken().type == TokenType::EQUALS) {
-                element->attributes.push_back(parseAttribute());
+                childNode = parseAttribute();
+                isAttribute = true;
             } else {
                  throw std::runtime_error("Unexpected token after 'text' keyword.");
             }
         } else if (currentToken().type == TokenType::IDENTIFIER) {
             if (peekToken().type == TokenType::LEFT_BRACE) {
-                element->children.push_back(parseElement());
+                childNode = parseElement();
             } else if (peekToken().type == TokenType::COLON || peekToken().type == TokenType::EQUALS) {
-                element->attributes.push_back(parseAttribute());
+                childNode = parseAttribute();
+                isAttribute = true;
             } else {
                 throw std::runtime_error("Unexpected token after identifier in element block.");
             }
         } else if (currentToken().type == TokenType::KEYWORD_STYLE) {
-            element->children.push_back(parseStyleBlock());
+            childNode = parseStyleBlock();
         } else if (currentToken().type == TokenType::AT_SIGN) {
-            element->children.push_back(parseUsage());
+            childNode = parseUsage();
         } else {
             throw std::runtime_error("Unexpected token in element block: " + currentToken().value);
+        }
+
+        childNode->parent = element;
+        if (isAttribute) {
+            element->attributes.push_back(std::dynamic_pointer_cast<AttributeNode>(childNode));
+        } else {
+            element->children.push_back(childNode);
         }
     }
 
@@ -82,7 +96,9 @@ std::shared_ptr<AttributeNode> Parser::parseAttribute() {
         consume(TokenType::EQUALS, "Expected ':' or '=' after attribute key.");
     }
 
-    attribute->value = parseValue();
+    auto valueNode = parseValue();
+    valueNode->parent = attribute;
+    attribute->value = valueNode;
 
     consume(TokenType::SEMICOLON, "Expected ';' after attribute value.");
     return attribute;
@@ -147,16 +163,23 @@ std::shared_ptr<StyleNode> Parser::parseStyleBlock() {
     consume(TokenType::LEFT_BRACE, "Expected '{' after 'style'.");
 
     while (currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
+        std::shared_ptr<BaseNode> child;
         if (currentToken().type == TokenType::AT_SIGN) {
-            styleNode->children.push_back(parseUsage());
+            child = parseUsage();
         } else {
             auto propNode = std::make_shared<CssPropertyNode>();
             propNode->key = consume(TokenType::IDENTIFIER, "Expected CSS property key.").value;
             consume(TokenType::COLON, "Expected ':' after CSS property key.");
-            propNode->value = parseValue();
+
+            auto valueNode = parseValue();
+            valueNode->parent = propNode;
+            propNode->value = valueNode;
+
             consume(TokenType::SEMICOLON, "Expected ';' after CSS property value.");
-            styleNode->children.push_back(propNode);
+            child = propNode;
         }
+        child->parent = styleNode;
+        styleNode->children.push_back(child);
     }
 
     consume(TokenType::RIGHT_BRACE, "Expected '}' after style block.");
@@ -193,24 +216,28 @@ std::shared_ptr<BaseNode> Parser::parseDefinitionBlock() {
         customNode->name = name;
         customNode->customType = type;
 
-        // The body of a [Custom] @Style is the same as a [Template] @Style
         if (type == TemplateType::STYLE) {
             auto styleNode = std::make_shared<StyleNode>();
+            styleNode->parent = customNode;
             while (currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
+                std::shared_ptr<BaseNode> child;
                 if (currentToken().type == TokenType::AT_SIGN) {
-                    styleNode->children.push_back(parseUsage());
+                    child = parseUsage();
                 } else {
                     auto propNode = std::make_shared<CssPropertyNode>();
                     propNode->key = consume(TokenType::IDENTIFIER, "Expected CSS property key.").value;
                     consume(TokenType::COLON, "Expected ':' after CSS property key.");
-                    propNode->value = parseValue();
+                    auto valueNode = parseValue();
+                    valueNode->parent = propNode;
+                    propNode->value = valueNode;
                     consume(TokenType::SEMICOLON, "Expected ';' after CSS property value.");
-                    styleNode->children.push_back(propNode);
+                    child = propNode;
                 }
+                child->parent = styleNode;
+                styleNode->children.push_back(child);
             }
             customNode->body.push_back(styleNode);
         } else {
-             // TODO: Implement parsing for Element and Var custom bodies.
             while(currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) advance();
         }
 
@@ -224,22 +251,30 @@ std::shared_ptr<BaseNode> Parser::parseDefinitionBlock() {
 
         if (type == TemplateType::STYLE) {
             auto styleNode = std::make_shared<StyleNode>();
+            styleNode->parent = templateNode;
             while (currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
-                if (currentToken().type == TokenType::AT_SIGN) {
-                    styleNode->children.push_back(parseUsage());
+                std::shared_ptr<BaseNode> child;
+                 if (currentToken().type == TokenType::AT_SIGN) {
+                    child = parseUsage();
                 } else {
                     auto propNode = std::make_shared<CssPropertyNode>();
                     propNode->key = consume(TokenType::IDENTIFIER, "Expected CSS property key.").value;
                     consume(TokenType::COLON, "Expected ':' after CSS property key.");
-                    propNode->value = parseValue();
+                    auto valueNode = parseValue();
+                    valueNode->parent = propNode;
+                    propNode->value = valueNode;
                     consume(TokenType::SEMICOLON, "Expected ';' after CSS property value.");
-                    styleNode->children.push_back(propNode);
+                    child = propNode;
                 }
+                child->parent = styleNode;
+                styleNode->children.push_back(child);
             }
             templateNode->body.push_back(styleNode);
         } else if (type == TemplateType::ELEMENT) {
             while (currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
-                templateNode->body.push_back(parseNode());
+                auto child = parseNode();
+                child->parent = templateNode;
+                templateNode->body.push_back(child);
             }
         } else if (type == TemplateType::VAR) {
              while (currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
@@ -248,6 +283,7 @@ std::shared_ptr<BaseNode> Parser::parseDefinitionBlock() {
                 consume(TokenType::COLON, "Expected ':' after variable name.");
                 varNode->value = consume(TokenType::STRING_LITERAL, "Expected string literal for var value.").value;
                 consume(TokenType::SEMICOLON, "Expected ';' after variable value.");
+                varNode->parent = templateNode;
                 templateNode->body.push_back(varNode);
             }
         }
@@ -272,24 +308,26 @@ std::shared_ptr<BaseNode> Parser::parseUsage() {
     std::string name = consume(TokenType::IDENTIFIER, "Expected name for usage.").value;
 
     if (match(TokenType::SEMICOLON)) {
-        // Simple template usage
         auto usageNode = std::make_shared<TemplateUsageNode>();
         usageNode->templateType = type;
         usageNode->name = name;
         return usageNode;
     } else if (match(TokenType::LEFT_BRACE)) {
-        // Specialized custom usage
         auto customUsageNode = std::make_shared<CustomUsageNode>();
         customUsageNode->usageType = type;
         customUsageNode->name = name;
 
         while(currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
+            std::shared_ptr<BaseNode> child;
             if (currentToken().type == TokenType::KEYWORD_DELETE) {
-                customUsageNode->specializationBody.push_back(parseDelete());
+                child = parseDelete();
+            } else if (currentToken().type == TokenType::KEYWORD_INSERT) {
+                child = parseInsert();
             } else {
-                // TODO: Parse other specialization types (insert, etc.)
                 throw std::runtime_error("Unsupported specialization syntax.");
             }
+            child->parent = customUsageNode;
+            customUsageNode->specializationBody.push_back(child);
         }
 
         consume(TokenType::RIGHT_BRACE, "Expected '}' to close specialization body.");
@@ -333,6 +371,48 @@ std::shared_ptr<DeleteNode> Parser::parseDelete() {
 
     consume(TokenType::SEMICOLON, "Expected ';' after delete statement.");
     return deleteNode;
+}
+
+std::shared_ptr<InsertNode> Parser::parseInsert() {
+    consume(TokenType::KEYWORD_INSERT, "Expected 'insert' keyword.");
+    auto insertNode = std::make_shared<InsertNode>();
+
+    if (match(TokenType::KEYWORD_AFTER)) {
+        insertNode->position = InsertPosition::AFTER;
+    } else if (match(TokenType::KEYWORD_BEFORE)) {
+        insertNode->position = InsertPosition::BEFORE;
+    } else if (match(TokenType::KEYWORD_REPLACE)) {
+        insertNode->position = InsertPosition::REPLACE;
+    } else if (match(TokenType::KEYWORD_AT)) {
+        if (match(TokenType::KEYWORD_TOP)) {
+            insertNode->position = InsertPosition::AT_TOP;
+        } else if (match(TokenType::KEYWORD_BOTTOM)) {
+            insertNode->position = InsertPosition::AT_BOTTOM;
+        } else {
+            throw std::runtime_error("Expected 'top' or 'bottom' after 'at'.");
+        }
+    } else {
+        throw std::runtime_error("Expected position keyword (after, before, etc.) after 'insert'.");
+    }
+
+    std::string selector_str = consume(TokenType::IDENTIFIER, "Expected selector tag name.").value;
+    if (match(TokenType::LEFT_BRACKET)) {
+        selector_str += "[";
+        selector_str += consume(TokenType::UNQUOTED_LITERAL, "Expected index in selector.").value;
+        selector_str += "]";
+        consume(TokenType::RIGHT_BRACKET, "Expected ']' after selector index.");
+    }
+    insertNode->selector = selector_str;
+
+    consume(TokenType::LEFT_BRACE, "Expected '{' for insert body.");
+    while(currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
+        auto child = parseNode();
+        child->parent = insertNode;
+        insertNode->body.push_back(child);
+    }
+    consume(TokenType::RIGHT_BRACE, "Expected '}' to close insert body.");
+
+    return insertNode;
 }
 
 } // namespace CHTL

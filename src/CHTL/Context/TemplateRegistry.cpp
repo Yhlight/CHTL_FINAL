@@ -13,4 +13,8 @@ std::shared_ptr<BaseNode> TemplateRegistry::lookupDefinition(const std::string& 
     return nullptr;
 }
 
+void TemplateRegistry::clear() {
+    m_templates.clear();
+}
+
 } // namespace CHTL

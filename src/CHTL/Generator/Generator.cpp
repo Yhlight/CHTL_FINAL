@@ -4,6 +4,50 @@
 
 namespace CHTL {
 
+// --- New Selector Engine ---
+struct Selector {
+    std::string tagName;
+    int index = 0;
+
+    Selector(const std::string& s) {
+        size_t bracket_pos = s.find('[');
+        if (bracket_pos != std::string::npos) {
+            tagName = s.substr(0, bracket_pos);
+            size_t end_bracket_pos = s.find(']');
+            if (end_bracket_pos != std::string::npos && end_bracket_pos > bracket_pos) {
+                std::string index_str = s.substr(bracket_pos + 1, end_bracket_pos - bracket_pos - 1);
+                try {
+                    index = std::stoi(index_str);
+                } catch (...) {
+                    index = 0;
+                }
+            }
+        } else {
+            tagName = s;
+        }
+    }
+};
+
+std::vector<std::shared_ptr<BaseNode>>::iterator findTarget(
+    std::vector<std::shared_ptr<BaseNode>>& nodes,
+    const Selector& selector)
+{
+    int count = 0;
+    return std::find_if(nodes.begin(), nodes.end(), [&](const std::shared_ptr<BaseNode>& n) {
+        if (auto en = std::dynamic_pointer_cast<ElementNode>(n)) {
+            if (en->tagName == selector.tagName) {
+                if (count == selector.index) {
+                    return true;
+                }
+                count++;
+            }
+        }
+        return false;
+    });
+}
+// --- End Selector Engine ---
+
+
 Generator::Generator(std::shared_ptr<BaseNode> root) : m_root(std::move(root)) {}
 
 void Generator::generate() {
@@ -50,9 +94,7 @@ void Generator::visit(const std::shared_ptr<BaseNode>& node) {
         visitElementNode(elementNode);
     } else if (auto textNode = std::dynamic_pointer_cast<TextNode>(node)) {
         visitTextNode(textNode);
-    } else if (std::dynamic_pointer_cast<StyleNode>(node)) {
-    } else if (std::dynamic_pointer_cast<TemplateNode>(node)) {
-    } else if (std::dynamic_pointer_cast<CustomNode>(node)) {
+    } else if (std::dynamic_pointer_cast<TemplateNode>(node) || std::dynamic_pointer_cast<CustomNode>(node)) {
     } else if (auto usageNode = std::dynamic_pointer_cast<TemplateUsageNode>(node)) {
         if (usageNode->templateType == TemplateType::ELEMENT) {
             auto& registry = TemplateRegistry::getInstance();
@@ -63,7 +105,48 @@ void Generator::visit(const std::shared_ptr<BaseNode>& node) {
                 }
             }
         }
-    } else {
+    } else if (auto customUsage = std::dynamic_pointer_cast<CustomUsageNode>(node)) {
+        if (customUsage->usageType == TemplateType::ELEMENT) {
+            auto& registry = TemplateRegistry::getInstance();
+            auto baseDef = registry.lookupDefinition(customUsage->name);
+            if (baseDef) {
+                std::vector<std::shared_ptr<BaseNode>> baseBody;
+                if (auto tn = std::dynamic_pointer_cast<TemplateNode>(baseDef)) baseBody = tn->body;
+                else if (auto cn = std::dynamic_pointer_cast<CustomNode>(baseDef)) baseBody = cn->body;
+
+                std::vector<std::shared_ptr<BaseNode>> clonedBody;
+                for(const auto& n : baseBody) {
+                    clonedBody.push_back(n->clone());
+                }
+
+                for (const auto& spec_node : customUsage->specializationBody) {
+                    if (auto insertNode = std::dynamic_pointer_cast<InsertNode>(spec_node)) {
+                        Selector selector(insertNode->selector);
+                        auto targetIt = findTarget(clonedBody, selector);
+
+                        if (targetIt != clonedBody.end()) {
+                            if (insertNode->position == InsertPosition::AFTER) {
+                                clonedBody.insert(targetIt + 1, insertNode->body.begin(), insertNode->body.end());
+                            } else if (insertNode->position == InsertPosition::BEFORE) {
+                                clonedBody.insert(targetIt, insertNode->body.begin(), insertNode->body.end());
+                            } else if (insertNode->position == InsertPosition::REPLACE) {
+                                targetIt = clonedBody.erase(targetIt);
+                                clonedBody.insert(targetIt, insertNode->body.begin(), insertNode->body.end());
+                            } else if (insertNode->position == InsertPosition::AT_TOP) {
+                                auto targetElement = std::dynamic_pointer_cast<ElementNode>(*targetIt);
+                                if(targetElement) targetElement->children.insert(targetElement->children.begin(), insertNode->body.begin(), insertNode->body.end());
+                            } else if (insertNode->position == InsertPosition::AT_BOTTOM) {
+                                auto targetElement = std::dynamic_pointer_cast<ElementNode>(*targetIt);
+                                if(targetElement) targetElement->children.insert(targetElement->children.end(), insertNode->body.begin(), insertNode->body.end());
+                            }
+                        }
+                    }
+                }
+                for (const auto& bodyNode : clonedBody) {
+                    visit(bodyNode);
+                }
+            }
+        }
     }
 }
 
@@ -112,14 +195,10 @@ void Generator::visitElementNode(const std::shared_ptr<ElementNode>& node) {
                     auto baseDef = registry.lookupDefinition(customUsage->name);
                     if (baseDef) {
                         std::shared_ptr<StyleNode> styleBodyToProcess;
-                        if (auto templateNode = std::dynamic_pointer_cast<TemplateNode>(baseDef)) {
-                            if (!templateNode->body.empty()) {
-                                styleBodyToProcess = std::dynamic_pointer_cast<StyleNode>(templateNode->body[0]);
-                            }
+                         if (auto templateNode = std::dynamic_pointer_cast<TemplateNode>(baseDef)) {
+                            if (!templateNode->body.empty()) styleBodyToProcess = std::dynamic_pointer_cast<StyleNode>(templateNode->body[0]);
                         } else if (auto customNode = std::dynamic_pointer_cast<CustomNode>(baseDef)) {
-                            if (!customNode->body.empty()) {
-                                styleBodyToProcess = std::dynamic_pointer_cast<StyleNode>(customNode->body[0]);
-                            }
+                            if (!customNode->body.empty()) styleBodyToProcess = std::dynamic_pointer_cast<StyleNode>(customNode->body[0]);
                         }
 
                         if (styleBodyToProcess) {
@@ -131,9 +210,7 @@ void Generator::visitElementNode(const std::shared_ptr<ElementNode>& node) {
                                             clonedStyleNode->children.erase(
                                                 std::remove_if(clonedStyleNode->children.begin(), clonedStyleNode->children.end(),
                                                     [&](const std::shared_ptr<BaseNode>& n) {
-                                                        if (auto p = std::dynamic_pointer_cast<CssPropertyNode>(n)) {
-                                                            return p->key == target;
-                                                        }
+                                                        if (auto p = std::dynamic_pointer_cast<CssPropertyNode>(n)) return p->key == target;
                                                         return false;
                                                     }),
                                                 clonedStyleNode->children.end());

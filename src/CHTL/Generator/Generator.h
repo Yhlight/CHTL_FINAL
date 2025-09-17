@@ -16,6 +16,7 @@
 #include "../Node/CustomUsageNode.h"
 #include "../Node/CustomNode.h"
 #include "../Node/DeleteNode.h"
+#include "../Node/InsertNode.h"
 #include "../Context/TemplateRegistry.h"
 #include <string>
 #include <memory>

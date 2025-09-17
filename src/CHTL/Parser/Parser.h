@@ -17,6 +17,7 @@
 #include "../Node/CustomNode.h"
 #include "../Node/CustomUsageNode.h"
 #include "../Node/DeleteNode.h"
+#include "../Node/InsertNode.h"
 #include "../Context/TemplateRegistry.h"
 
 #include <vector>
@@ -40,6 +41,7 @@ private:
     std::shared_ptr<BaseNode> parseValue();
     std::shared_ptr<VarUsageNode> parseVarUsage();
     std::shared_ptr<DeleteNode> parseDelete();
+    std::shared_ptr<InsertNode> parseInsert();
 
     const Token& currentToken() const;
     const Token& peekToken() const;

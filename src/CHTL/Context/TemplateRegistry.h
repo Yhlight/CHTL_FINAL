@@ -12,6 +12,7 @@ class TemplateRegistry {
 public:
     void registerDefinition(const std::string& name, std::shared_ptr<BaseNode> node);
     std::shared_ptr<BaseNode> lookupDefinition(const std::string& name);
+    void clear();
 
     static TemplateRegistry& getInstance() {
         static TemplateRegistry instance;

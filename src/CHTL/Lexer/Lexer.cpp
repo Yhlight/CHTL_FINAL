@@ -11,7 +11,14 @@ const std::unordered_map<std::string, TokenType> Lexer::s_keywords = {
     {"Style", TokenType::KEYWORD_STYLE},
     {"Element", TokenType::KEYWORD_ELEMENT},
     {"Var", TokenType::KEYWORD_VAR},
-    {"delete", TokenType::KEYWORD_DELETE}
+    {"delete", TokenType::KEYWORD_DELETE},
+    {"insert", TokenType::KEYWORD_INSERT},
+    {"after", TokenType::KEYWORD_AFTER},
+    {"before", TokenType::KEYWORD_BEFORE},
+    {"replace", TokenType::KEYWORD_REPLACE},
+    {"at", TokenType::KEYWORD_AT},
+    {"top", TokenType::KEYWORD_TOP},
+    {"bottom", TokenType::KEYWORD_BOTTOM}
 };
 
 Lexer::Lexer(const std::string& source) : m_source(source) {}
@@ -167,7 +174,7 @@ Token Lexer::unquotedLiteral() {
     size_t start_col = m_column;
     while (m_current < m_source.length()) {
         char c = peek();
-        if (std::isspace(c) || c == '{' || c == '}' || c == ';' || c == ':') {
+        if (std::isspace(c) || c == '{' || c == '}' || c == ';' || c == ':' || c == '[' || c == ']' || c == '(' || c == ')') {
             break;
         }
         value += c;

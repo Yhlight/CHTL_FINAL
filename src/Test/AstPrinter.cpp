@@ -13,6 +13,7 @@
 #include "../CHTL/Node/CustomNode.h"
 #include "../CHTL/Node/CustomUsageNode.h"
 #include "../CHTL/Node/DeleteNode.h"
+#include "../CHTL/Node/InsertNode.h"
 #include <iostream>
 
 namespace CHTL {
@@ -78,6 +79,11 @@ void AstPrinter::visit(const std::shared_ptr<BaseNode>& node, int indentLevel) {
             m_output += deleteNode->targets[i] + (i == deleteNode->targets.size() - 1 ? "" : ", ");
         }
         m_output += ")\n";
+    } else if (auto insertNode = std::dynamic_pointer_cast<InsertNode>(node)) {
+        m_output += indent + "InsertNode (Position: " + std::to_string((int)insertNode->position) + ", Selector: " + insertNode->selector + ")\n";
+        for (const auto& child : insertNode->body) {
+            visit(child, indentLevel + 1);
+        }
     } else if (auto templateNode = std::dynamic_pointer_cast<TemplateNode>(node)) {
         m_output += indent + "TemplateNode (Name: " + templateNode->name + ")\n";
         for (const auto& child : templateNode->body) {

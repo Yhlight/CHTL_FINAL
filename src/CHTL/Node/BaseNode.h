@@ -9,6 +9,8 @@ namespace CHTL {
 
 class BaseNode {
 public:
+    std::weak_ptr<BaseNode> parent;
+
     virtual ~BaseNode() = default;
     virtual std::shared_ptr<BaseNode> clone() const = 0;
 };
