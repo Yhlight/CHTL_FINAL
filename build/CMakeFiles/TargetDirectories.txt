@@ -1,0 +1,4 @@
+/app/build/CMakeFiles/chtl_lib.dir
+/app/build/CMakeFiles/chthl_runner.dir
+/app/build/CMakeFiles/edit_cache.dir
+/app/build/CMakeFiles/rebuild_cache.dir
