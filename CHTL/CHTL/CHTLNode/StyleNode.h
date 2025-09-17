@@ -1,8 +1,6 @@
 #pragma once
 
 #include "BaseNode.h"
-#include "PropertyNode.h"
-#include "RuleNode.h"
 #include <vector>
 #include <memory>
 
@@ -14,16 +12,11 @@ public:
         visitor.visit(*this);
     }
 
-    void addProperty(std::shared_ptr<PropertyNode> prop) {
-        properties.push_back(prop);
+    void addChild(std::shared_ptr<BaseNode> child) {
+        children.push_back(child);
     }
 
-    void addRule(std::shared_ptr<RuleNode> rule) {
-        rules.push_back(rule);
-    }
-
-    // For inline styles
-    std::vector<std::shared_ptr<PropertyNode>> properties;
-    // For global styles
-    std::vector<std::shared_ptr<RuleNode>> rules;
+    // A style block can contain properties, rules, or template usages.
+    // The template resolver will expand usages into properties and rules.
+    std::vector<std::shared_ptr<BaseNode>> children;
 };

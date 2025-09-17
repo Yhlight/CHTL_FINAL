@@ -1,5 +1,6 @@
 #include "CHTL/CHTLLexer/Lexer.h"
 #include "CHTL/CHTLParser/Parser.h"
+#include "CHTL/CHTLResolver/TemplateResolver.h"
 #include "CHTL/CHTLGenerator/Generator.h"
 #include <iostream>
 #include <fstream>
@@ -42,13 +43,17 @@ int main(int argc, char* argv[]) {
 
         // 3. Parse
         Parser parser(tokens);
-        std::shared_ptr<RootNode> ast = parser.parse();
+        std::shared_ptr<RootNode> rawAst = parser.parse();
 
-        // 4. Generate
+        // 4. Resolve Templates
+        TemplateResolver resolver;
+        std::shared_ptr<RootNode> resolvedAst = resolver.resolve(rawAst);
+
+        // 5. Generate
         Generator generator;
-        std::string html = generator.generate(ast);
+        std::string html = generator.generate(resolvedAst);
 
-        // 5. Write to output file
+        // 6. Write to output file
         writeFile(outputFile, html);
 
         std::cout << "Successfully compiled " << inputFile << " to " << outputFile << std::endl;

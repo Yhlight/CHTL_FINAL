@@ -7,6 +7,8 @@
 #include "../CHTLNode/AttributeNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/RuleNode.h"
+#include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../CHTLNode/TemplateUsageNode.h"
 #include "../CHTLNode/Expression/ExprNode.h"
 #include <vector>
 #include <memory>
@@ -37,6 +39,9 @@ private:
     std::shared_ptr<TextNode> parseTextObject();
     std::shared_ptr<StyleNode> parseStyleBlock();
     std::shared_ptr<RuleNode> parseRule();
+    std::shared_ptr<TemplateDefinitionNode> parseTemplateDefinition();
+    std::shared_ptr<TemplateUsageNode> parseTemplateUsage();
+
 
     // Expression parsers
     std::shared_ptr<ExprNode> parseExpression();

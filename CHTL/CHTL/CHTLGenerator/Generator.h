@@ -19,6 +19,8 @@ public:
     void visit(StyleNode& node) override;
     void visit(PropertyNode& node) override;
     void visit(RuleNode& node) override;
+    void visit(TemplateDefinitionNode& node) override;
+    void visit(TemplateUsageNode& node) override;
 
 private:
     std::string html;
