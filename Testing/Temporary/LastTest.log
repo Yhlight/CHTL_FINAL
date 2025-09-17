@@ -1,10 +1,10 @@
-Start testing: Sep 17 13:22 UTC
+Start testing: Sep 17 13:39 UTC
 ----------------------------------------------------------
-1/6 Testing: LexerTest.BasicElementsAndAttributes
-1/6 Test: LexerTest.BasicElementsAndAttributes
+1/4 Testing: LexerTest.BasicElementsAndAttributes
+1/4 Test: LexerTest.BasicElementsAndAttributes
 Command: "/app/run_tests" "--gtest_filter=LexerTest.BasicElementsAndAttributes" "--gtest_also_run_disabled_tests"
 Directory: /app
-"LexerTest.BasicElementsAndAttributes" start time: Sep 17 13:22 UTC
+"LexerTest.BasicElementsAndAttributes" start time: Sep 17 13:39 UTC
 Output:
 ----------------------------------------------------------
 Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
@@ -20,18 +20,18 @@ Note: Google Test filter = LexerTest.BasicElementsAndAttributes
 [==========] 1 test from 1 test suite ran. (0 ms total)
 [  PASSED  ] 1 test.
 <end of output>
-Test time =   0.00 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"LexerTest.BasicElementsAndAttributes" end time: Sep 17 13:22 UTC
+"LexerTest.BasicElementsAndAttributes" end time: Sep 17 13:39 UTC
 "LexerTest.BasicElementsAndAttributes" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-2/6 Testing: LexerTest.CommentsAndWhitespace
-2/6 Test: LexerTest.CommentsAndWhitespace
+2/4 Testing: LexerTest.CommentsAndWhitespace
+2/4 Test: LexerTest.CommentsAndWhitespace
 Command: "/app/run_tests" "--gtest_filter=LexerTest.CommentsAndWhitespace" "--gtest_also_run_disabled_tests"
 Directory: /app
-"LexerTest.CommentsAndWhitespace" start time: Sep 17 13:22 UTC
+"LexerTest.CommentsAndWhitespace" start time: Sep 17 13:39 UTC
 Output:
 ----------------------------------------------------------
 Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
@@ -50,52 +50,25 @@ Note: Google Test filter = LexerTest.CommentsAndWhitespace
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"LexerTest.CommentsAndWhitespace" end time: Sep 17 13:22 UTC
+"LexerTest.CommentsAndWhitespace" end time: Sep 17 13:39 UTC
 "LexerTest.CommentsAndWhitespace" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-3/6 Testing: ParserTest.TemplateDefinitionAndUsage
-3/6 Test: ParserTest.TemplateDefinitionAndUsage
-Command: "/app/run_tests" "--gtest_filter=ParserTest.TemplateDefinitionAndUsage" "--gtest_also_run_disabled_tests"
+3/4 Testing: ParserTest.CustomStyleDefinitionAndUsage
+3/4 Test: ParserTest.CustomStyleDefinitionAndUsage
+Command: "/app/run_tests" "--gtest_filter=ParserTest.CustomStyleDefinitionAndUsage" "--gtest_also_run_disabled_tests"
 Directory: /app
-"ParserTest.TemplateDefinitionAndUsage" start time: Sep 17 13:22 UTC
+"ParserTest.CustomStyleDefinitionAndUsage" start time: Sep 17 13:39 UTC
 Output:
 ----------------------------------------------------------
 Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
-Note: Google Test filter = ParserTest.TemplateDefinitionAndUsage
+Note: Google Test filter = ParserTest.CustomStyleDefinitionAndUsage
 [==========] Running 1 test from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 1 test from ParserTest
-[ RUN      ] ParserTest.TemplateDefinitionAndUsage
-[       OK ] ParserTest.TemplateDefinitionAndUsage (0 ms)
+[ RUN      ] ParserTest.CustomStyleDefinitionAndUsage
+[       OK ] ParserTest.CustomStyleDefinitionAndUsage (0 ms)
 [----------] 1 test from ParserTest (0 ms total)
-
-[----------] Global test environment tear-down
-[==========] 1 test from 1 test suite ran. (0 ms total)
-[  PASSED  ] 1 test.
-<end of output>
-Test time =   0.01 sec
-----------------------------------------------------------
-Test Passed.
-"ParserTest.TemplateDefinitionAndUsage" end time: Sep 17 13:22 UTC
-"ParserTest.TemplateDefinitionAndUsage" time elapsed: 00:00:00
-----------------------------------------------------------
-
-4/6 Testing: GeneratorTest.StyleTemplate
-4/6 Test: GeneratorTest.StyleTemplate
-Command: "/app/run_tests" "--gtest_filter=GeneratorTest.StyleTemplate" "--gtest_also_run_disabled_tests"
-Directory: /app
-"GeneratorTest.StyleTemplate" start time: Sep 17 13:22 UTC
-Output:
-----------------------------------------------------------
-Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
-Note: Google Test filter = GeneratorTest.StyleTemplate
-[==========] Running 1 test from 1 test suite.
-[----------] Global test environment set-up.
-[----------] 1 test from GeneratorTest
-[ RUN      ] GeneratorTest.StyleTemplate
-[       OK ] GeneratorTest.StyleTemplate (0 ms)
-[----------] 1 test from GeneratorTest (0 ms total)
 
 [----------] Global test environment tear-down
 [==========] 1 test from 1 test suite ran. (0 ms total)
@@ -104,24 +77,24 @@ Note: Google Test filter = GeneratorTest.StyleTemplate
 Test time =   0.00 sec
 ----------------------------------------------------------
 Test Passed.
-"GeneratorTest.StyleTemplate" end time: Sep 17 13:22 UTC
-"GeneratorTest.StyleTemplate" time elapsed: 00:00:00
+"ParserTest.CustomStyleDefinitionAndUsage" end time: Sep 17 13:39 UTC
+"ParserTest.CustomStyleDefinitionAndUsage" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-5/6 Testing: GeneratorTest.ElementTemplate
-5/6 Test: GeneratorTest.ElementTemplate
-Command: "/app/run_tests" "--gtest_filter=GeneratorTest.ElementTemplate" "--gtest_also_run_disabled_tests"
+4/4 Testing: GeneratorTest.CustomStyleSpecialization
+4/4 Test: GeneratorTest.CustomStyleSpecialization
+Command: "/app/run_tests" "--gtest_filter=GeneratorTest.CustomStyleSpecialization" "--gtest_also_run_disabled_tests"
 Directory: /app
-"GeneratorTest.ElementTemplate" start time: Sep 17 13:22 UTC
+"GeneratorTest.CustomStyleSpecialization" start time: Sep 17 13:39 UTC
 Output:
 ----------------------------------------------------------
 Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
-Note: Google Test filter = GeneratorTest.ElementTemplate
+Note: Google Test filter = GeneratorTest.CustomStyleSpecialization
 [==========] Running 1 test from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 1 test from GeneratorTest
-[ RUN      ] GeneratorTest.ElementTemplate
-[       OK ] GeneratorTest.ElementTemplate (0 ms)
+[ RUN      ] GeneratorTest.CustomStyleSpecialization
+[       OK ] GeneratorTest.CustomStyleSpecialization (0 ms)
 [----------] 1 test from GeneratorTest (0 ms total)
 
 [----------] Global test environment tear-down
@@ -131,35 +104,8 @@ Note: Google Test filter = GeneratorTest.ElementTemplate
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"GeneratorTest.ElementTemplate" end time: Sep 17 13:22 UTC
-"GeneratorTest.ElementTemplate" time elapsed: 00:00:00
+"GeneratorTest.CustomStyleSpecialization" end time: Sep 17 13:39 UTC
+"GeneratorTest.CustomStyleSpecialization" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-6/6 Testing: GeneratorTest.TemplateInheritance
-6/6 Test: GeneratorTest.TemplateInheritance
-Command: "/app/run_tests" "--gtest_filter=GeneratorTest.TemplateInheritance" "--gtest_also_run_disabled_tests"
-Directory: /app
-"GeneratorTest.TemplateInheritance" start time: Sep 17 13:22 UTC
-Output:
-----------------------------------------------------------
-Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
-Note: Google Test filter = GeneratorTest.TemplateInheritance
-[==========] Running 1 test from 1 test suite.
-[----------] Global test environment set-up.
-[----------] 1 test from GeneratorTest
-[ RUN      ] GeneratorTest.TemplateInheritance
-[       OK ] GeneratorTest.TemplateInheritance (0 ms)
-[----------] 1 test from GeneratorTest (0 ms total)
-
-[----------] Global test environment tear-down
-[==========] 1 test from 1 test suite ran. (0 ms total)
-[  PASSED  ] 1 test.
-<end of output>
-Test time =   0.01 sec
-----------------------------------------------------------
-Test Passed.
-"GeneratorTest.TemplateInheritance" end time: Sep 17 13:22 UTC
-"GeneratorTest.TemplateInheritance" time elapsed: 00:00:00
-----------------------------------------------------------
-
-End testing: Sep 17 13:22 UTC
+End testing: Sep 17 13:39 UTC

@@ -19,6 +19,7 @@ public:
     void visit(SelectorNode& node) override;
     void visit(TemplateDefinitionNode& node) override;
     void visit(TemplateUsageNode& node) override;
+    void visit(DeleteNode& node) override;
 
 private:
     std::string generateExpression(ExpressionNode* node, bool is_top_level = true);

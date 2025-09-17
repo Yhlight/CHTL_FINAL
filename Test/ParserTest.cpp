@@ -34,10 +34,14 @@ public:
     void visit(AttributeNode& node) override {
         printIndent();
         ss << "Attr[" << node.key << ": ";
-        if (auto* literal = dynamic_cast<LiteralNode*>(node.value.get())) {
-            ss << "Literal<'" << literal->token.lexeme << "'>";
-        } else if (dynamic_cast<BinaryOpNode*>(node.value.get())) {
-            ss << "BinaryOp<...>";
+        if (node.value) {
+            if (auto* literal = dynamic_cast<LiteralNode*>(node.value.get())) {
+                ss << "Literal<'" << literal->token.lexeme << "'>";
+            } else if (dynamic_cast<BinaryOpNode*>(node.value.get())) {
+                ss << "BinaryOp<...>";
+            }
+        } else {
+            ss << "(null)";
         }
         ss << "]\n";
     }
@@ -73,7 +77,7 @@ public:
 
     void visit(TemplateDefinitionNode& node) override {
         printIndent();
-        ss << "TemplateDefinition<" << node.template_type.lexeme << " " << node.name.lexeme << ">\n";
+        ss << "Definition<" << node.node_type.lexeme << " " << node.template_type.lexeme << " " << node.name.lexeme << ">\n";
         indent++;
         for (auto& child : node.children) {
             child->accept(*this);
@@ -83,7 +87,22 @@ public:
 
     void visit(TemplateUsageNode& node) override {
         printIndent();
-        ss << "TemplateUsage<" << node.template_type.lexeme << " " << node.name.lexeme << ">\n";
+        ss << "Usage<" << node.template_type.lexeme << " " << node.name.lexeme << ">";
+        if (!node.body.empty()) {
+            ss << " with body\n";
+            indent++;
+            for (auto& rule : node.body) {
+                rule->accept(*this);
+            }
+            indent--;
+        } else {
+            ss << "\n";
+        }
+    }
+
+    void visit(DeleteNode& node) override {
+        printIndent();
+        ss << "Delete<" << node.identifier.lexeme << ">\n";
     }
 
 private:
@@ -96,17 +115,19 @@ private:
     }
 };
 
-
-TEST(ParserTest, TemplateDefinitionAndUsage) {
+TEST(ParserTest, CustomStyleDefinitionAndUsage) {
     std::string source = R"(
-[Template] @Style DefaultText {
-    color: black;
-    font-size: 16px;
+[Custom] @Style TextSet {
+    color,
+    font-size;
 }
 
 div {
     style {
-        @Style DefaultText;
+        @Style TextSet {
+            color: red;
+            delete font-size;
+        }
     }
 }
 )";
@@ -120,12 +141,14 @@ div {
 
     std::string expected =
 R"(Program
-  TemplateDefinition<@Style DefaultText>
-    Attr[color: Literal<'black'>]
-    Attr[font-size: Literal<'16px'>]
+  Definition<[Custom] @Style TextSet>
+    Attr[color: (null)]
+    Attr[font-size: (null)]
   Element<div>
     Style
-      TemplateUsage<@Style DefaultText>
+      Usage<@Style TextSet> with body
+        Attr[color: Literal<'red'>]
+        Delete<font-size>
 )";
 
     ASSERT_EQ(result, expected);

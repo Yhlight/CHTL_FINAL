@@ -206,15 +206,58 @@ void CHTLGenerator::visit(TemplateDefinitionNode& node) {
 }
 
 void CHTLGenerator::visit(TemplateUsageNode& node) {
-    if (template_table.count(node.name.lexeme)) {
-        TemplateDefinitionNode* def = template_table[node.name.lexeme];
+    if (template_table.count(node.name.lexeme) == 0) {
+        std::cerr << "Error: Template '" << node.name.lexeme << "' not found." << std::endl;
+        return;
+    }
+    TemplateDefinitionNode* def = template_table[node.name.lexeme];
+
+    // Simple case: no customization body, just inline the definition
+    if (node.body.empty()) {
         for (auto& child : def->children) {
             child->accept(*this);
         }
-    } else {
-        std::cerr << "Error: Template '" << node.name.lexeme << "' not found." << std::endl;
+        return;
     }
+
+    // Customization logic for @Style templates
+    if (def->template_type.type == TokenType::AT_STYLE) {
+        std::map<std::string, ExpressionNode*> final_properties;
+
+        // 1. Load base properties
+        for (auto& child : def->children) {
+            if (auto* attr = dynamic_cast<AttributeNode*>(child.get())) {
+                final_properties[attr->key] = attr->value.get();
+            }
+        }
+
+        // 2. Apply customizations from usage body
+        for (auto& rule : node.body) {
+            if (auto* attr = dynamic_cast<AttributeNode*>(rule.get())) {
+                final_properties[attr->key] = attr->value.get(); // Add or overwrite
+            } else if (auto* del = dynamic_cast<DeleteNode*>(rule.get())) {
+                final_properties.erase(del->identifier.lexeme); // Delete
+            }
+        }
+
+        // 3. Generate the final CSS
+        for (const auto& pair : final_properties) {
+            if (pair.second != nullptr) { // Only generate properties that have a value
+                 if (generating_inline_style) {
+                    (*active_css_stream) << pair.first << ": " << generateExpression(pair.second) << "; ";
+                 } else if (in_style_block) {
+                    (*active_css_stream) << "  " << pair.first << ": " << generateExpression(pair.second) << ";\n";
+                 }
+            }
+        }
+    }
+    // Logic for @Element customization would go here
 }
+
+void CHTLGenerator::visit(DeleteNode& node) {
+    // This node is handled inside visit(TemplateUsageNode&), does nothing on its own.
+}
+
 
 std::string CHTLGenerator::unquote(const std::string& s) {
     if (s.length() >= 2 && (s.front() == '"' || s.front() == '\'') && s.front() == s.back()) {

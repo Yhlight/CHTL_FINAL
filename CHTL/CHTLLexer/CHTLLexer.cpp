@@ -34,6 +34,9 @@ Token CHTLLexer::nextToken() {
             if (match('T') && match('e') && match('m') && match('p') && match('l') && match('a') && match('t') && match('e') && match(']')) {
                 return makeToken(TokenType::KEYWORD_TEMPLATE);
             }
+            if (match('C') && match('u') && match('s') && match('t') && match('o') && match('m') && match(']')) {
+                return makeToken(TokenType::KEYWORD_CUSTOM);
+            }
             return makeToken(TokenType::LBRACKET);
         case ']': return makeToken(TokenType::RBRACKET);
         case ';': return makeToken(TokenType::SEMICOLON);
@@ -146,6 +149,7 @@ Token CHTLLexer::identifier() {
     else if (text == "style") type = TokenType::STYLE;
     else if (text == "script") type = TokenType::SCRIPT;
     else if (text == "inherit") type = TokenType::KEYWORD_INHERIT;
+    else if (text == "delete") type = TokenType::KEYWORD_DELETE;
 
     return makeToken(type);
 }

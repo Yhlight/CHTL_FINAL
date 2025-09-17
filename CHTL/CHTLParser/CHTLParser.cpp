@@ -83,7 +83,7 @@ std::unique_ptr<ProgramNode> CHTLParser::parse() {
 }
 
 std::unique_ptr<Node> CHTLParser::parseStatement() {
-    if (peek().type == TokenType::KEYWORD_TEMPLATE) return parseTemplateDefinition();
+    if (peek().type == TokenType::KEYWORD_TEMPLATE || peek().type == TokenType::KEYWORD_CUSTOM) return parseTemplateDefinition();
     if (peek().type == TokenType::TEXT) return parseText();
     if (peek().type == TokenType::STYLE) return parseStyle();
     if (peek().type == TokenType::IDENTIFIER) return parseElement();
@@ -125,6 +125,12 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
 
 std::unique_ptr<AttributeNode> CHTLParser::parseAttribute() {
     const Token& key = consume(TokenType::IDENTIFIER, "Expect attribute name.");
+    // Handle valueless properties in [Custom] blocks e.g. `color, font-size;`
+    if (match({TokenType::COMMA, TokenType::SEMICOLON})) {
+        // Create an attribute with a null value expression
+        return std::make_unique<AttributeNode>(key.lexeme, nullptr);
+    }
+
     consume(TokenType::COLON, "Expect ':' after attribute name.");
     auto value = parseExpression();
     consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
@@ -175,32 +181,33 @@ std::unique_ptr<SelectorNode> CHTLParser::parseSelector() {
 }
 
 std::unique_ptr<TemplateDefinitionNode> CHTLParser::parseTemplateDefinition() {
-    consume(TokenType::KEYWORD_TEMPLATE, "Expect '[Template]' keyword.");
     auto node = std::make_unique<TemplateDefinitionNode>();
+    if (match({TokenType::KEYWORD_TEMPLATE, TokenType::KEYWORD_CUSTOM})) {
+        node->node_type = previous();
+    } else {
+        consume(TokenType::KEYWORD_TEMPLATE, "Expect '[Template]' or '[Custom]' keyword.");
+    }
 
-    // Parse @Type
     if (match({TokenType::AT_STYLE, TokenType::AT_ELEMENT, TokenType::AT_VAR})) {
         node->template_type = previous();
     } else {
         consume(TokenType::AT_STYLE, "Expect template type like @Style, @Element, or @Var.");
     }
 
-    // Parse Name
     node->name = consume(TokenType::IDENTIFIER, "Expect template name.");
 
-    // Parse Body
     consume(TokenType::LBRACE, "Expect '{' after template name.");
     while (!check(TokenType::RBRACE) && !isAtEnd()) {
-        // The body of a template can contain different things depending on its type.
         if (peek().type == TokenType::AT_STYLE) {
-            // Handle nested @Style template usage (inheritance)
             node->children.push_back(parseTemplateUsage());
         }
-        else if (node->template_type.type == TokenType::AT_STYLE) {
-            // Handle attribute for @Style template
+        else if (node->node_type.type == TokenType::KEYWORD_CUSTOM && node->template_type.type == TokenType::AT_STYLE) {
+            // Custom style can have valueless properties
             node->children.push_back(parseAttribute());
-        } else { // @Element
-            // Handle statement for @Element template
+        }
+        else if (node->template_type.type == TokenType::AT_STYLE) {
+            node->children.push_back(parseAttribute());
+        } else {
             node->children.push_back(parseStatement());
         }
     }
@@ -219,9 +226,29 @@ std::unique_ptr<TemplateUsageNode> CHTLParser::parseTemplateUsage() {
     }
 
     node->name = consume(TokenType::IDENTIFIER, "Expect template name for usage.");
-    consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+
+    // Check for an optional customization body
+    if (match({TokenType::LBRACE})) {
+        while(!check(TokenType::RBRACE) && !isAtEnd()) {
+            if (peek().type == TokenType::KEYWORD_DELETE) {
+                node->body.push_back(parseDelete());
+            } else {
+                node->body.push_back(parseAttribute());
+            }
+        }
+        consume(TokenType::RBRACE, "Expect '}' after customization body.");
+    } else {
+        consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+    }
 
     return node;
+}
+
+std::unique_ptr<DeleteNode> CHTLParser::parseDelete() {
+    consume(TokenType::KEYWORD_DELETE, "Expect 'delete' keyword.");
+    Token identifier = consume(TokenType::IDENTIFIER, "Expect property name to delete.");
+    consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
+    return std::make_unique<DeleteNode>(identifier);
 }
 
 // Hybrid Expression Parser

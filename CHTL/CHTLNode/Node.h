@@ -14,12 +14,12 @@ struct StyleNode;
 struct SelectorNode;
 struct TemplateDefinitionNode;
 struct TemplateUsageNode;
+struct DeleteNode;
 // Expression Nodes
 struct ExpressionNode;
 struct LiteralNode;
 struct BinaryOpNode;
 
-// Base Node class using visitor pattern for future operations (like generation)
 struct INodeVisitor;
 
 struct Node {
@@ -27,7 +27,6 @@ struct Node {
     virtual void accept(INodeVisitor& visitor) = 0;
 };
 
-// Visitor Interface
 struct INodeVisitor {
     virtual void visit(ProgramNode& node) = 0;
     virtual void visit(ElementNode& node) = 0;
@@ -37,21 +36,17 @@ struct INodeVisitor {
     virtual void visit(SelectorNode& node) = 0;
     virtual void visit(TemplateDefinitionNode& node) = 0;
     virtual void visit(TemplateUsageNode& node) = 0;
+    virtual void visit(DeleteNode& node) = 0;
 };
 
 // --- Expression Nodes ---
-
 struct ExpressionNode : public Node {
-    void accept(INodeVisitor& visitor) override {
-        // This node is not directly visited; it's handled by its parent.
-    }
+    void accept(INodeVisitor& visitor) override {}
 };
-
 struct LiteralNode : public ExpressionNode {
     Token token;
     explicit LiteralNode(const Token& token) : token(token) {}
 };
-
 struct BinaryOpNode : public ExpressionNode {
     std::unique_ptr<ExpressionNode> left;
     Token op;
@@ -60,10 +55,10 @@ struct BinaryOpNode : public ExpressionNode {
         : left(std::move(left)), op(op), right(std::move(right)) {}
 };
 
-
 // --- Statement and Declaration Nodes ---
 
 struct TemplateDefinitionNode : public Node {
+    Token node_type; // [Template] or [Custom]
     Token template_type; // @Style, @Element, @Var
     Token name;
     std::vector<std::unique_ptr<Node>> children;
@@ -73,6 +68,13 @@ struct TemplateDefinitionNode : public Node {
 struct TemplateUsageNode : public Node {
     Token template_type; // @Style, @Element, @Var
     Token name;
+    std::vector<std::unique_ptr<Node>> body; // Optional body for customization
+    void accept(INodeVisitor& visitor) override { visitor.visit(*this); }
+};
+
+struct DeleteNode : public Node {
+    Token identifier; // The name of the property to delete
+    explicit DeleteNode(const Token& identifier) : identifier(identifier) {}
     void accept(INodeVisitor& visitor) override { visitor.visit(*this); }
 };
 
