@@ -1,0 +1,106 @@
+Start testing: Sep 17 12:41 UTC
+----------------------------------------------------------
+1/6 Testing: LexerTests
+1/6 Test: LexerTests
+Command: "/app/build/run_lexer_tests"
+Directory: /app/build
+"LexerTests" start time: Sep 17 12:41 UTC
+Output:
+----------------------------------------------------------
+Running Lexer Test...
+Lexer Test Passed!
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"LexerTests" end time: Sep 17 12:41 UTC
+"LexerTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/6 Testing: ParserTests
+2/6 Test: ParserTests
+Command: "/app/build/run_parser_tests"
+Directory: /app/build
+"ParserTests" start time: Sep 17 12:41 UTC
+Output:
+----------------------------------------------------------
+Running Parser Test...
+Parser Test Passed!
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ParserTests" end time: Sep 17 12:41 UTC
+"ParserTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/6 Testing: GeneratorTests
+3/6 Test: GeneratorTests
+Command: "/app/build/run_generator_tests"
+Directory: /app/build
+"GeneratorTests" start time: Sep 17 12:41 UTC
+Output:
+----------------------------------------------------------
+Running Generator Test...
+Generator Test Passed!
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"GeneratorTests" end time: Sep 17 12:41 UTC
+"GeneratorTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/6 Testing: AttributeTests
+4/6 Test: AttributeTests
+Command: "/app/build/run_attribute_tests"
+Directory: /app/build
+"AttributeTests" start time: Sep 17 12:41 UTC
+Output:
+----------------------------------------------------------
+Running Attribute Test...
+Attribute Test Passed!
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"AttributeTests" end time: Sep 17 12:41 UTC
+"AttributeTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/6 Testing: StyleTests
+5/6 Test: StyleTests
+Command: "/app/build/run_style_tests"
+Directory: /app/build
+"StyleTests" start time: Sep 17 12:41 UTC
+Output:
+----------------------------------------------------------
+Running Style Test...
+Style Test Passed!
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"StyleTests" end time: Sep 17 12:41 UTC
+"StyleTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/6 Testing: ErrorTests
+6/6 Test: ErrorTests
+Command: "/app/build/run_error_tests"
+Directory: /app/build
+"ErrorTests" start time: Sep 17 12:41 UTC
+Output:
+----------------------------------------------------------
+Running Error Test...
+Error Test Passed! Parser correctly detected 1 error(s).
+  - Found expected error: line 4:9 - expected next token to be of type 10, got type 5 instead.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ErrorTests" end time: Sep 17 12:41 UTC
+"ErrorTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 17 12:41 UTC
