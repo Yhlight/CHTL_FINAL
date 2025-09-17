@@ -1,0 +1,2 @@
+/usr/bin/ar qc lib/libCHTL_UTIL.a CMakeFiles/CHTL_UTIL.dir/Util/FileSystem/FileSystem.cpp.o CMakeFiles/CHTL_UTIL.dir/Util/ZipUtil/ZipUtil.cpp.o CMakeFiles/CHTL_UTIL.dir/Util/StringUtil/StringUtil.cpp.o
+/usr/bin/ranlib lib/libCHTL_UTIL.a
