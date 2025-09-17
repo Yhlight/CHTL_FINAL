@@ -82,7 +82,8 @@ void Lexer::skipBlockComment() {
 
 Token Lexer::readIdentifier() {
     int start_pos = m_position;
-    while (std::isalpha(m_char) || m_char == '_') {
+    // An identifier starts with a letter or _, followed by letters, numbers, or _.
+    while (std::isalnum(m_char) || m_char == '_') {
         readChar();
     }
     std::string literal = m_input.substr(start_pos, m_position - start_pos);
@@ -142,7 +143,7 @@ Token Lexer::nextToken() {
             {
                 readChar(); // consume '['
                 Token id = readIdentifier();
-                if (m_char != ']') { // Corrected check
+                if (m_char != ']') {
                     tok = {TokenType::ILLEGAL, "[" + id.literal, m_line, m_column};
                 } else {
                     if (id.literal == "Template") tok = {TokenType::TEMPLATE, "[Template]", m_line, m_column - 10};
@@ -153,14 +154,14 @@ Token Lexer::nextToken() {
                     else if (id.literal == "Configuration") tok = {TokenType::CONFIGURATION, "[Configuration]", m_line, m_column - 15};
                     else tok = {TokenType::ILLEGAL, "[" + id.literal + "]", m_line, m_column};
                 }
-                readChar(); // consume ']'
+                readChar();
                 return tok;
             }
         case ']': tok = {TokenType::RBRACKET, "]", m_line, m_column}; break;
         case ',': tok = {TokenType::COMMA, ",", m_line, m_column}; break;
         case '@':
             {
-                readChar(); // consume '@'
+                readChar();
                 Token id = readIdentifier();
                 if (id.literal == "Style") tok = {TokenType::AT_STYLE, "@Style", m_line, m_column - 6};
                 else if (id.literal == "Element") tok = {TokenType::AT_ELEMENT, "@Element", m_line, m_column - 8};

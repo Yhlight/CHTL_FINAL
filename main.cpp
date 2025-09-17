@@ -5,18 +5,19 @@
 #include "CHTL/CHTLParser/Parser.h"
 #include "CHTL/CHTLGenerator/Generator.h"
 #include "CHTL/CHTLNode/Node.h"
-#include "CHTL/CHTLNode/ElementNode.h" // Required for dynamic_cast
 
 int main() {
     std::string input = R"(
         [Template] @Element Box {
             div {
-                text: "This is a box.";
+                text: "This is from a template.";
             }
         }
 
         body {
-            // Later, we will instantiate the template like: @Element Box;
+            h1 { text: "Welcome"; }
+            @Element Box;
+            p { text: "This is after the template."; }
         }
     )";
 
@@ -26,7 +27,8 @@ int main() {
     auto program = parser.parseProgram();
 
     if (!parser.getErrors().empty()) {
-        std::cerr << "--- Parser Errors ---" << std::endl;
+        std::cerr << "--- Parser Errors ---" <<
+        std::endl;
         for (const auto& error : parser.getErrors()) {
             std::cerr << error << std::endl;
         }
@@ -38,16 +40,9 @@ int main() {
         return 1;
     }
 
-    std::cout << "--- Abstract Syntax Tree ---" << std::endl;
-    std::cout << program->toString(0);
-    std::cout << "--------------------------" << std::endl;
-
-    // The generator doesn't know how to handle TemplateNodes yet,
-    // so we will just generate the regular elements.
-    CHTL::Generator generator;
+    CHTL::Generator generator(parser.getContext());
     std::string html_output = generator.generate(program.get());
 
-    std::cout << "--- Generated HTML ---" << std::endl;
     std::cout << html_output << std::endl;
 
     return 0;

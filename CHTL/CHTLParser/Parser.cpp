@@ -4,6 +4,7 @@
 #include "../CHTLNode/AttributeNode.h"
 #include "../CHTLNode/LiteralNode.h"
 #include "../CHTLNode/TemplateNode.h"
+#include "../CHTLNode/TemplateInstantiationNode.h"
 #include <string>
 
 namespace CHTL {
@@ -35,33 +36,29 @@ bool Parser::expectPeek(TokenType t) {
 std::unique_ptr<Node> Parser::parseProgram() {
     auto programNode = std::make_unique<ElementNode>(Token{TokenType::IDENTIFIER, "root"}, "root");
     while (m_currentToken.type != TokenType::END_OF_FILE) {
-        std::unique_ptr<Statement> stmt = nullptr;
-        switch (m_currentToken.type) {
-            case TokenType::TEMPLATE:
-            case TokenType::CUSTOM:
-                stmt = parseTemplateStatement();
-                break;
-            case TokenType::IDENTIFIER:
-                stmt = parseStatement();
-                break;
-            default:
-                // Skip unknown tokens at top level
-                nextToken();
-                break;
-        }
-
+        auto stmt = parseStatement();
         if (stmt) {
             programNode->children.push_back(std::move(stmt));
+        } else {
+             if (m_currentToken.type != TokenType::END_OF_FILE) nextToken();
         }
     }
     return programNode;
 }
 
 std::unique_ptr<Statement> Parser::parseStatement() {
-    if (m_currentToken.type == TokenType::IDENTIFIER) {
-        return parseElementStatement();
+    switch (m_currentToken.type) {
+        case TokenType::IDENTIFIER:
+            return parseElementStatement();
+        case TokenType::TEMPLATE:
+        case TokenType::CUSTOM:
+            return parseTemplateStatement();
+        case TokenType::AT_ELEMENT:
+        case TokenType::AT_STYLE:
+            return parseTemplateInstantiationStatement();
+        default:
+            return nullptr;
     }
-    return nullptr;
 }
 
 std::unique_ptr<AttributeNode> Parser::parseAttribute() {
@@ -82,9 +79,7 @@ std::unique_ptr<StyleNode> Parser::parseStyleBlock() {
     while (m_currentToken.type != TokenType::RBRACE && m_currentToken.type != TokenType::END_OF_FILE) {
         if (m_currentToken.type == TokenType::IDENTIFIER) {
             auto prop = parseAttribute();
-            if (prop) {
-                styleNode->properties.push_back(std::move(prop));
-            }
+            if (prop) styleNode->properties.push_back(std::move(prop));
         }
         nextToken();
     }
@@ -99,45 +94,57 @@ std::unique_ptr<TemplateNode> Parser::parseTemplateStatement() {
     Token nameToken = m_currentToken;
 
     auto templateNode = std::make_unique<TemplateNode>(templateToken, typeToken, nameToken);
+    m_context.registerTemplate(nameToken.literal, templateNode.get());
 
-    if (!expectPeek(TokenType::LBRACE)) {
-        return nullptr;
-    }
-    nextToken();
+    if (!expectPeek(TokenType::LBRACE)) return nullptr;
 
-    while (m_currentToken.type != TokenType::RBRACE && m_currentToken.type != TokenType::END_OF_FILE) {
+    while (m_peekToken.type != TokenType::RBRACE && m_peekToken.type != TokenType::END_OF_FILE) {
+        nextToken();
         auto stmt = parseStatement();
         if (stmt) {
             templateNode->children.push_back(std::move(stmt));
-        } else {
-            nextToken();
         }
     }
-    nextToken(); // Consume closing brace
+    if (!expectPeek(TokenType::RBRACE)) return nullptr;
     return templateNode;
+}
+
+std::unique_ptr<Statement> Parser::parseTemplateInstantiationStatement() {
+    Token typeToken = m_currentToken;
+    if (!expectPeek(TokenType::IDENTIFIER)) return nullptr;
+    Token nameToken = m_currentToken;
+    auto node = std::make_unique<TemplateInstantiationNode>(typeToken, typeToken, nameToken);
+    if (m_peekToken.type == TokenType::SEMICOLON) {
+        nextToken();
+    }
+    return node;
 }
 
 std::unique_ptr<ElementNode> Parser::parseElementStatement() {
     auto element = std::make_unique<ElementNode>(m_currentToken, m_currentToken.literal);
     if (!expectPeek(TokenType::LBRACE)) return nullptr;
 
-    nextToken();
+    while (m_peekToken.type != TokenType::RBRACE && m_peekToken.type != TokenType::END_OF_FILE) {
+        nextToken();
 
-    while (m_currentToken.type != TokenType::RBRACE && m_currentToken.type != TokenType::END_OF_FILE) {
         if (m_currentToken.literal == "style" && m_peekToken.type == TokenType::LBRACE) {
             element->styleBlock = parseStyleBlock();
-        } else if (m_currentToken.type == TokenType::IDENTIFIER && m_peekToken.type == TokenType::LBRACE) {
-            element->children.push_back(parseElementStatement());
+        } else if (m_currentToken.type == TokenType::IDENTIFIER && m_peekToken.type == TokenType::COLON) {
+            element->attributes.push_back(parseAttribute());
         } else if (m_currentToken.type == TokenType::TEXT && m_peekToken.type == TokenType::COLON) {
             nextToken();
             nextToken();
             element->children.push_back(std::make_unique<TextNode>(m_currentToken, m_currentToken.literal));
             if (m_peekToken.type == TokenType::SEMICOLON) nextToken();
-        } else if (m_currentToken.type == TokenType::IDENTIFIER && m_peekToken.type == TokenType::COLON) {
-             element->attributes.push_back(parseAttribute());
+        } else {
+            auto stmt = parseStatement();
+            if (stmt) {
+                element->children.push_back(std::move(stmt));
+            }
         }
-        nextToken();
     }
+
+    if (!expectPeek(TokenType::RBRACE)) return nullptr;
     return element;
 }
 

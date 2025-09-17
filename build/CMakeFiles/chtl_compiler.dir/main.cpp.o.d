@@ -184,6 +184,8 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
  /usr/include/c++/13/bits/stl_multimap.h \
  /usr/include/c++/13/bits/erase_if.h \
  /app/CHTL/CHTLParser/../CHTLNode/TemplateNode.h \
+ /app/CHTL/CHTLParser/../CHTLContext.h \
  /app/CHTL/CHTLGenerator/Generator.h \
  /app/CHTL/CHTLGenerator/../CHTLNode/TextNode.h \
+ /app/CHTL/CHTLGenerator/../CHTLNode/TemplateInstantiationNode.h \
  /usr/include/c++/13/sstream /usr/include/c++/13/bits/sstream.tcc

@@ -3,7 +3,7 @@
 
 namespace CHTL {
 
-Generator::Generator() {}
+Generator::Generator(CHTLContext& context) : m_context(context) {}
 
 std::string Generator::generate(Node* node) {
     m_output.str("");
@@ -19,8 +19,24 @@ void Generator::visit(Node* node) {
         visitElementNode(elementNode);
     } else if (auto textNode = dynamic_cast<TextNode*>(node)) {
         visitTextNode(textNode);
+    } else if (auto instantiationNode = dynamic_cast<TemplateInstantiationNode*>(node)) {
+        visitTemplateInstantiationNode(instantiationNode);
+    }
+    // TemplateNode definitions are ignored by the generator
+}
+
+void Generator::visitTemplateInstantiationNode(TemplateInstantiationNode* node) {
+    TemplateNode* templateDef = m_context.findTemplate(node->m_name.literal);
+    if (templateDef) {
+        // This is a simple implementation. It doesn't handle template arguments yet.
+        for (const auto& child : templateDef->children) {
+            visit(child.get());
+        }
+    } else {
+        // Handle error: template not found
     }
 }
+
 
 void Generator::visitElementNode(ElementNode* node) {
     if (node->m_tagName == "root") {
@@ -32,12 +48,10 @@ void Generator::visitElementNode(ElementNode* node) {
 
     m_output << "<" << node->m_tagName;
 
-    // Handle attributes
     for (const auto& attr : node->attributes) {
         m_output << " " << attr->m_key << "=\"" << attr->m_value->toString(0) << "\"";
     }
 
-    // Handle style blocks
     if (node->styleBlock && !node->styleBlock->properties.empty()) {
         m_output << " style=\"";
         for (size_t i = 0; i < node->styleBlock->properties.size(); ++i) {

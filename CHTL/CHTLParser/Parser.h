@@ -7,6 +7,7 @@
 #include <memory>
 #include <map>
 #include "../CHTLNode/TemplateNode.h"
+#include "../CHTLContext.h"
 
 namespace CHTL {
 
@@ -16,6 +17,7 @@ public:
 
     std::unique_ptr<Node> parseProgram();
     const std::vector<std::string>& getErrors() const { return m_errors; }
+    CHTLContext& getContext() { return m_context; }
 
 private:
     void nextToken();
@@ -27,12 +29,14 @@ private:
     std::unique_ptr<StyleNode> parseStyleBlock();
     std::unique_ptr<AttributeNode> parseAttribute();
     std::unique_ptr<TemplateNode> parseTemplateStatement();
+    std::unique_ptr<Statement> parseTemplateInstantiationStatement();
 
     Lexer& m_lexer;
     std::vector<std::string> m_errors;
 
     Token m_currentToken;
     Token m_peekToken;
+    CHTLContext m_context;
 };
 
 } // namespace CHTL

@@ -165,8 +165,16 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o: \
  /usr/include/c++/13/bits/parse_numbers.h \
  /app/CHTL/CHTLGenerator/../CHTLNode/StyleNode.h \
  /app/CHTL/CHTLGenerator/../CHTLNode/TextNode.h \
- /usr/include/c++/13/sstream /usr/include/c++/13/istream \
- /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
+ /app/CHTL/CHTLGenerator/../CHTLNode/TemplateInstantiationNode.h \
+ /app/CHTL/CHTLGenerator/../CHTLContext.h \
+ /app/CHTL/CHTLGenerator/../CHTLNode/TemplateNode.h \
+ /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \
+ /usr/include/c++/13/bits/node_handle.h \
+ /usr/include/c++/13/bits/stl_map.h \
+ /usr/include/c++/13/bits/stl_multimap.h \
+ /usr/include/c++/13/bits/erase_if.h /usr/include/c++/13/sstream \
+ /usr/include/c++/13/istream /usr/include/c++/13/ios \
+ /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \
  /usr/include/c++/13/bits/locale_classes.tcc \
  /usr/include/c++/13/system_error \
