@@ -181,6 +181,19 @@ test_runner/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_runner.dir/build.make CMakeFiles/test_runner.dir/build
 .PHONY : test_runner/fast
 
+#=============================================================================
+# Target rules for targets named run_scanner_tests
+
+# Build rule for target.
+run_scanner_tests: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 run_scanner_tests
+.PHONY : run_scanner_tests
+
+# fast build rule for target.
+run_scanner_tests/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_scanner_tests.dir/build.make CMakeFiles/run_scanner_tests.dir/build
+.PHONY : run_scanner_tests/fast
+
 miniz.o: miniz.c.o
 .PHONY : miniz.o
 
@@ -517,6 +530,30 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+tests/run_scanner_tests.o: tests/run_scanner_tests.cpp.o
+.PHONY : tests/run_scanner_tests.o
+
+# target to build an object file
+tests/run_scanner_tests.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_scanner_tests.dir/build.make CMakeFiles/run_scanner_tests.dir/tests/run_scanner_tests.cpp.o
+.PHONY : tests/run_scanner_tests.cpp.o
+
+tests/run_scanner_tests.i: tests/run_scanner_tests.cpp.i
+.PHONY : tests/run_scanner_tests.i
+
+# target to preprocess a source file
+tests/run_scanner_tests.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_scanner_tests.dir/build.make CMakeFiles/run_scanner_tests.dir/tests/run_scanner_tests.cpp.i
+.PHONY : tests/run_scanner_tests.cpp.i
+
+tests/run_scanner_tests.s: tests/run_scanner_tests.cpp.s
+.PHONY : tests/run_scanner_tests.s
+
+# target to generate assembly for a file
+tests/run_scanner_tests.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_scanner_tests.dir/build.make CMakeFiles/run_scanner_tests.dir/tests/run_scanner_tests.cpp.s
+.PHONY : tests/run_scanner_tests.cpp.s
+
 tests/test_parser.o: tests/test_parser.cpp.o
 .PHONY : tests/test_parser.o
 
@@ -599,6 +636,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... chtl_compiler"
 	@echo "... chtl_lib"
+	@echo "... run_scanner_tests"
 	@echo "... test_parser"
 	@echo "... test_runner"
 	@echo "... test_scanner"
@@ -644,6 +682,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... tests/run_scanner_tests.o"
+	@echo "... tests/run_scanner_tests.i"
+	@echo "... tests/run_scanner_tests.s"
 	@echo "... tests/test_parser.o"
 	@echo "... tests/test_parser.i"
 	@echo "... tests/test_parser.s"

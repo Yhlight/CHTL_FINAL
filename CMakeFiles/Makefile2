@@ -68,6 +68,7 @@ all: CMakeFiles/chtl_compiler.dir/all
 all: CMakeFiles/test_parser.dir/all
 all: CMakeFiles/test_scanner.dir/all
 all: CMakeFiles/test_runner.dir/all
+all: CMakeFiles/run_scanner_tests.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -80,6 +81,7 @@ clean: CMakeFiles/chtl_compiler.dir/clean
 clean: CMakeFiles/test_parser.dir/clean
 clean: CMakeFiles/test_scanner.dir/clean
 clean: CMakeFiles/test_runner.dir/clean
+clean: CMakeFiles/run_scanner_tests.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -141,7 +143,7 @@ CMakeFiles/chtl_compiler.dir/clean:
 CMakeFiles/test_parser.dir/all: CMakeFiles/chtl_lib.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_parser.dir/build.make CMakeFiles/test_parser.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_parser.dir/build.make CMakeFiles/test_parser.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/CMakeFiles --progress-num=17,18 "Built target test_parser"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/CMakeFiles --progress-num=19,20 "Built target test_parser"
 .PHONY : CMakeFiles/test_parser.dir/all
 
 # Build rule for subdir invocation for target.
@@ -167,7 +169,7 @@ CMakeFiles/test_parser.dir/clean:
 CMakeFiles/test_scanner.dir/all: CMakeFiles/chtl_lib.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner.dir/build.make CMakeFiles/test_scanner.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner.dir/build.make CMakeFiles/test_scanner.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/CMakeFiles --progress-num=21,22 "Built target test_scanner"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/CMakeFiles --progress-num=23,24 "Built target test_scanner"
 .PHONY : CMakeFiles/test_scanner.dir/all
 
 # Build rule for subdir invocation for target.
@@ -193,7 +195,7 @@ CMakeFiles/test_scanner.dir/clean:
 CMakeFiles/test_runner.dir/all: CMakeFiles/chtl_lib.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_runner.dir/build.make CMakeFiles/test_runner.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_runner.dir/build.make CMakeFiles/test_runner.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/CMakeFiles --progress-num=19,20 "Built target test_runner"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/CMakeFiles --progress-num=21,22 "Built target test_runner"
 .PHONY : CMakeFiles/test_runner.dir/all
 
 # Build rule for subdir invocation for target.
@@ -211,6 +213,32 @@ test_runner: CMakeFiles/test_runner.dir/rule
 CMakeFiles/test_runner.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_runner.dir/build.make CMakeFiles/test_runner.dir/clean
 .PHONY : CMakeFiles/test_runner.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/run_scanner_tests.dir
+
+# All Build rule for target.
+CMakeFiles/run_scanner_tests.dir/all: CMakeFiles/chtl_lib.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_scanner_tests.dir/build.make CMakeFiles/run_scanner_tests.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_scanner_tests.dir/build.make CMakeFiles/run_scanner_tests.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/CMakeFiles --progress-num=17,18 "Built target run_scanner_tests"
+.PHONY : CMakeFiles/run_scanner_tests.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/run_scanner_tests.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/CMakeFiles 16
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/run_scanner_tests.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/CMakeFiles 0
+.PHONY : CMakeFiles/run_scanner_tests.dir/rule
+
+# Convenience name for target.
+run_scanner_tests: CMakeFiles/run_scanner_tests.dir/rule
+.PHONY : run_scanner_tests
+
+# clean rule for target.
+CMakeFiles/run_scanner_tests.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_scanner_tests.dir/build.make CMakeFiles/run_scanner_tests.dir/clean
+.PHONY : CMakeFiles/run_scanner_tests.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

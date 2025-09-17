@@ -3,5 +3,6 @@
 /app/CMakeFiles/test_parser.dir
 /app/CMakeFiles/test_scanner.dir
 /app/CMakeFiles/test_runner.dir
+/app/CMakeFiles/run_scanner_tests.dir
 /app/CMakeFiles/edit_cache.dir
 /app/CMakeFiles/rebuild_cache.dir

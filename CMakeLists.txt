@@ -41,3 +41,7 @@ target_link_libraries(test_scanner PRIVATE chtl_lib)
 
 add_executable(test_runner tests/test_runner.cpp)
 target_link_libraries(test_runner PRIVATE chtl_lib)
+
+# Unit test for the unified scanner
+add_executable(run_scanner_tests tests/run_scanner_tests.cpp)
+target_link_libraries(run_scanner_tests PRIVATE chtl_lib)
