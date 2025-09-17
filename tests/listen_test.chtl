@@ -1,0 +1,22 @@
+html {
+    head {
+        title { text: "Listen Test"; }
+    }
+    body {
+        button {
+            id: "my-btn";
+            text: "Click Me";
+        }
+
+        script {
+            {{#my-btn}}->listen {
+                click: () => {
+                    alert("Button was clicked!");
+                },
+                mouseenter: () => {
+                    console.log("Mouse entered button area.");
+                }
+            }
+        }
+    }
+}

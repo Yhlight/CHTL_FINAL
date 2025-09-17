@@ -1,0 +1,19 @@
+// Chtholly Module - Main File
+
+// A simple, reusable card component
+[Custom] @Element ChthollyCard
+{
+    div
+    {
+        style
+        {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-family: sans-serif;
+        }
+
+        // The card can have content inserted into it.
+    }
+}

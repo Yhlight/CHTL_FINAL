@@ -1,0 +1,19 @@
+[Import] @Chtl from "Chtholly/Chtholly.chtl";
+
+html
+{
+    head
+    {
+        title { "Module Test" }
+    }
+    body
+    {
+        h1 { "Testing the Chtholly Module" }
+
+        // Use the imported component
+        @Element ChthollyCard
+        {
+            p { "This is a card from the module!" }
+        }
+    }
+}

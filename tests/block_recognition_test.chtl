@@ -1,0 +1,33 @@
+// Test for block recognition and context switching.
+
+header {
+    h1 { text: "Welcome to the Block Test"; }
+}
+
+style {
+    /* This is a CSS comment */
+    body {
+        font-family: "Helvetica", sans-serif;
+        /* A string with braces: "{}" */
+        content: "Just a { test } string";
+    }
+}
+
+main {
+    p { text: "Some content between blocks."; }
+}
+
+script {
+    // This is a JS comment
+    let message = "A message with { braces }";
+    function greet() {
+        if (true) {
+            console.log(message);
+        }
+    }
+    greet();
+}
+
+footer {
+    p { text: "End of page."; }
+}

@@ -1,0 +1,5 @@
+[Template] @Style main_theme {
+    border: 1px solid colors(secondary);
+    background-color: #f8f9fa;
+    font-family: sans-serif;
+}
