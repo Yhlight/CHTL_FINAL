@@ -37,6 +37,7 @@ private:
     void parseConfigurationBlock();
     void parseTemplateDefinition(bool is_custom);
     std::unique_ptr<ElementNode> parseElement();
+    std::unique_ptr<ElementNode> parseIdSelectorElement();
     void parseElementBody(ElementNode& element);
     std::vector<PropertyValue> parsePropertyValue();
     std::unique_ptr<TextNode> parseText();

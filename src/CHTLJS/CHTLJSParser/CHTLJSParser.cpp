@@ -34,14 +34,9 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseStatement() {
     if (match(CHTLJSTokenType::ScriptLoader)) {
         return parseScriptLoaderBlock();
     }
-    if (peek().type == CHTLJSTokenType::Placeholder) {
-        auto node = std::make_unique<PlaceholderNode>(advance().lexeme);
-        consume(CHTLJSTokenType::Semicolon, "Expected ';' after placeholder statement.");
-        return node;
-    }
-
     auto expr = parseExpression();
-    consume(CHTLJSTokenType::Semicolon, "Expected ';' after expression statement.");
+    // It's possible for an expression to be a full statement, optionally ending with a semicolon.
+    match(CHTLJSTokenType::Semicolon);
     return expr;
 }
 
@@ -90,6 +85,18 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parsePrimaryExpression() {
         return parseAnimateBlock();
     }
 
+    if (match(CHTLJSTokenType::Animate)) {
+        return parseAnimateBlock();
+    }
+
+    if (match(CHTLJSTokenType::Listen)) {
+        return parseListenBlock(nullptr);
+    }
+
+    if (match(CHTLJSTokenType::Delegate)) {
+        return parseDelegateBlock(nullptr);
+    }
+
     if (peek().type == CHTLJSTokenType::Identifier && context_->virtual_objects.count(peek().lexeme)) {
         // This is a vir object access, which is a primary expression.
         return parseExpression();
@@ -121,6 +128,14 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseMemberAccessExpression(std::uniqu
     if (object->getType() == CHTLJSNodeType::Value) {
          auto value_node = static_cast<ValueNode*>(object.get());
          return std::make_unique<ValueNode>(value_node->getValue() + "." + prop_name.lexeme);
+    }
+
+    if (object->getType() == CHTLJSNodeType::EnhancedSelector) {
+        auto* selector_node = static_cast<EnhancedSelectorNode*>(object.get());
+        // This is a simplification. In a real implementation, this would create
+        // a proper MemberAccessNode to be handled by the generator.
+        // For now, we'll create a ValueNode that represents the JS equivalent.
+        return std::make_unique<ValueNode>("document.querySelector('" + selector_node->getSelector() + "')." + prop_name.lexeme);
     }
 
     // For now, we can't handle member access on other node types yet.
@@ -339,11 +354,15 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseListenBlock(std::unique_ptr<CHTLJ
 
         // The callback is an expression, which could be a placeholder.
         auto callback_expr = parseExpression();
-        if (!callback_expr || callback_expr->getType() != CHTLJSNodeType::Placeholder) {
-             throw std::runtime_error("Expected a placeholder for the callback body.");
+        if (callback_expr->getType() == CHTLJSNodeType::Placeholder) {
+            auto placeholder_node = static_cast<PlaceholderNode*>(callback_expr.get());
+            listen_node->addEvent(event_name.lexeme, placeholder_node->getPlaceholderText());
+        } else if (callback_expr->getType() == CHTLJSNodeType::Value) {
+            auto value_node = static_cast<ValueNode*>(callback_expr.get());
+            listen_node->addEvent(event_name.lexeme, value_node->getValue());
+        } else {
+             throw std::runtime_error("Event callback must be an identifier or an inline function.");
         }
-        auto placeholder_node = static_cast<PlaceholderNode*>(callback_expr.get());
-        listen_node->addEvent(event_name.lexeme, placeholder_node->getPlaceholderText());
 
         match(CHTLJSTokenType::Comma); // Consume optional comma
     }
@@ -373,11 +392,15 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseDelegateBlock(std::unique_ptr<CHT
         } else {
             // It's an event:callback pair
             auto callback_expr = parseExpression();
-            if (!callback_expr || callback_expr->getType() != CHTLJSNodeType::Placeholder) {
-                 throw std::runtime_error("Expected a placeholder for the callback body.");
+            if (callback_expr->getType() == CHTLJSNodeType::Placeholder) {
+                 auto placeholder_node = static_cast<PlaceholderNode*>(callback_expr.get());
+                 delegate_node->addEvent(key.lexeme, placeholder_node->getPlaceholderText());
+            } else if (callback_expr->getType() == CHTLJSNodeType::Value) {
+                auto value_node = static_cast<ValueNode*>(callback_expr.get());
+                delegate_node->addEvent(key.lexeme, value_node->getValue());
+            } else {
+                throw std::runtime_error("Delegate event callback must be an identifier or an inline function.");
             }
-            auto placeholder_node = static_cast<PlaceholderNode*>(callback_expr.get());
-            delegate_node->addEvent(key.lexeme, placeholder_node->getPlaceholderText());
         }
 
         match(CHTLJSTokenType::Comma);

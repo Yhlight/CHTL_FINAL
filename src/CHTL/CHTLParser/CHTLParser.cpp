@@ -150,6 +150,9 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     std::unique_ptr<Node> singleNode = nullptr;
     if (match({TokenType::Style})) { singleNode = parseStyleBlock(); }
     else if (match({TokenType::Script})) { singleNode = parseScriptBlock(); }
+    else if (peek().type == TokenType::Identifier && peek().lexeme.rfind("#", 0) == 0) {
+        singleNode = parseIdSelectorElement();
+    }
     else if (match({TokenType::Identifier})) {
         if (peek().type == TokenType::OpenBrace) {
             singleNode = parseElement();
@@ -356,6 +359,17 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
         }
         consume(TokenType::CloseBrace, "Expected '}' to close specialization body.");
     }
+}
+
+std::unique_ptr<ElementNode> CHTLParser::parseIdSelectorElement() {
+    const Token& id_token = consume(TokenType::Identifier, "Expected ID selector.");
+    // Assuming "div" as the default element for ID selectors, as it's the most common case.
+    auto element = std::make_unique<ElementNode>("div");
+    element->attributes_.push_back(std::make_unique<AttributeNode>("id", id_token.lexeme.substr(1)));
+    consume(TokenType::OpenBrace, "Expected '{' after ID selector.");
+    parseElementBody(*element);
+    consume(TokenType::CloseBrace, "Expected '}' after element body.");
+    return element;
 }
 
 std::unique_ptr<ElementNode> CHTLParser::parseElement() {

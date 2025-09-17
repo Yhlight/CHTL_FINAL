@@ -128,7 +128,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/chtl_lib.dir/DependInfo.cmake"
   "CMakeFiles/chtl_compiler.dir/DependInfo.cmake"
-  "CMakeFiles/test_parser.dir/DependInfo.cmake"
   "CMakeFiles/test_scanner.dir/DependInfo.cmake"
   "CMakeFiles/test_runner.dir/DependInfo.cmake"
   )

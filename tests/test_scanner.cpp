@@ -1,19 +1,10 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <vector>
 #include "../src/Scanner/CHTLUnifiedScanner.h"
 
-// Function to convert FragmentType enum to a string for printing
-std::string fragmentTypeToString(CHTL::FragmentType type) {
-    switch (type) {
-        case CHTL::FragmentType::CHTL: return "CHTL";
-        case CHTL::FragmentType::CSS: return "CSS";
-        case CHTL::FragmentType::JS: return "JS";
-        case CHTL::FragmentType::CHTL_JS: return "CHTL_JS";
-        case CHTL::FragmentType::UNKNOWN: return "UNKNOWN";
-        default: return "INVALID";
-    }
+void printHorizontalLine() {
+    std::cout << "\n" << std::string(80, '-') << "\n" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -32,18 +23,34 @@ int main(int argc, char* argv[]) {
     buffer << file.rdbuf();
     std::string source = buffer.str();
 
+    std::cout << "--- ORIGINAL SOURCE ---" << std::endl;
+    std::cout << source << std::endl;
+
     try {
         CHTL::CHTLUnifiedScanner scanner(source);
-        std::vector<CHTL::CodeFragment> fragments = scanner.scan();
+        CHTL::ScannedData result = scanner.scan();
 
-        std::cout << "--- SCANNER OUTPUT ---" << std::endl;
-        for (const auto& fragment : fragments) {
-            std::cout << "====================" << std::endl;
-            std::cout << "TYPE: " << fragmentTypeToString(fragment.type) << std::endl;
-            std::cout << "--------------------" << std::endl;
-            std::cout << fragment.content << std::endl;
-            std::cout << "====================" << std::endl;
+        printHorizontalLine();
+
+        std::cout << "--- SCANNED CHTL (WITH PLACEHOLDERS) ---" << std::endl;
+        std::cout << result.chtl_source << std::endl;
+
+        printHorizontalLine();
+
+        std::cout << "--- JS PLACEHOLDER MAP (" << result.js_placeholder_map.size() << " entries) ---" << std::endl;
+        for (const auto& pair : result.js_placeholder_map) {
+            std::cout << "[[ " << pair.first << " ]]" << "  =>  " << "{" << pair.second << "}" << std::endl;
         }
+
+        printHorizontalLine();
+
+        std::cout << "--- CSS FRAGMENTS (" << result.css_fragments.size() << " entries) ---" << std::endl;
+        for (const auto& fragment : result.css_fragments) {
+            std::cout << "{" << fragment.content << "}" << std::endl;
+        }
+
+        printHorizontalLine();
+
 
     } catch (const std::runtime_error& e) {
         std::cerr << "Error: " << e.what() << std::endl;

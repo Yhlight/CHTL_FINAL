@@ -18,8 +18,7 @@
 
 namespace CHTLJS {
 
-std::string CHTLJSGenerator::generate(const CHTLJSNode& root, const std::map<std::string, std::string>& placeholder_map) {
-    this->placeholder_map_ = &placeholder_map;
+std::string CHTLJSGenerator::generate(const CHTLJSNode& root) {
     return visit(&root);
 }
 
@@ -101,15 +100,8 @@ std::string CHTLJSGenerator::visitSequenceNode(const SequenceNode* node) {
 }
 
 std::string CHTLJSGenerator::visitPlaceholderNode(const PlaceholderNode* node) {
-    if (!placeholder_map_) {
-        throw std::runtime_error("Placeholder map is not set in the generator.");
-    }
-    auto it = placeholder_map_->find(node->getPlaceholderText());
-    if (it == placeholder_map_->end()) {
-        // This should not happen if the scanner and parser are correct.
-        throw std::runtime_error("Could not find placeholder in map: " + node->getPlaceholderText());
-    }
-    return it->second;
+    // The generator's job is to pass the placeholder through, not to replace it.
+    return node->getPlaceholderText();
 }
 
 std::string CHTLJSGenerator::visitEnhancedSelector(const EnhancedSelectorNode* node) {
@@ -123,14 +115,8 @@ std::string CHTLJSGenerator::visitListenNode(const ListenNode* node) {
     std::string result;
     for (const auto& pair : node->getEvents()) {
         const std::string& event_name = pair.first;
-        const std::string& callback_placeholder = pair.second;
-
-        if (placeholder_map_->find(callback_placeholder) == placeholder_map_->end()) {
-            throw std::runtime_error("Could not find callback placeholder in map: " + callback_placeholder);
-        }
-        std::string callback_js = placeholder_map_->at(callback_placeholder);
-
-        result += target_js + ".addEventListener('" + event_name + "', " + callback_js + ");\n";
+        const std::string& callback_body = pair.second; // This is either a placeholder or an identifier
+        result += target_js + ".addEventListener('" + event_name + "', " + callback_body + ");\n";
     }
     return result;
 }

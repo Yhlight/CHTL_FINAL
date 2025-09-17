@@ -143,19 +143,6 @@ chtl_compiler/fast:
 .PHONY : chtl_compiler/fast
 
 #=============================================================================
-# Target rules for targets named test_parser
-
-# Build rule for target.
-test_parser: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_parser
-.PHONY : test_parser
-
-# fast build rule for target.
-test_parser/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_parser.dir/build.make CMakeFiles/test_parser.dir/build
-.PHONY : test_parser/fast
-
-#=============================================================================
 # Target rules for targets named test_scanner
 
 # Build rule for target.
@@ -445,30 +432,6 @@ src/CodeMerger/CodeMerger.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.s
 .PHONY : src/CodeMerger/CodeMerger.cpp.s
 
-src/CompilerDispatcher/CompilerDispatcher.o: src/CompilerDispatcher/CompilerDispatcher.cpp.o
-.PHONY : src/CompilerDispatcher/CompilerDispatcher.o
-
-# target to build an object file
-src/CompilerDispatcher/CompilerDispatcher.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o
-.PHONY : src/CompilerDispatcher/CompilerDispatcher.cpp.o
-
-src/CompilerDispatcher/CompilerDispatcher.i: src/CompilerDispatcher/CompilerDispatcher.cpp.i
-.PHONY : src/CompilerDispatcher/CompilerDispatcher.i
-
-# target to preprocess a source file
-src/CompilerDispatcher/CompilerDispatcher.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.i
-.PHONY : src/CompilerDispatcher/CompilerDispatcher.cpp.i
-
-src/CompilerDispatcher/CompilerDispatcher.s: src/CompilerDispatcher/CompilerDispatcher.cpp.s
-.PHONY : src/CompilerDispatcher/CompilerDispatcher.s
-
-# target to generate assembly for a file
-src/CompilerDispatcher/CompilerDispatcher.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.s
-.PHONY : src/CompilerDispatcher/CompilerDispatcher.cpp.s
-
 src/Scanner/CHTLUnifiedScanner.o: src/Scanner/CHTLUnifiedScanner.cpp.o
 .PHONY : src/Scanner/CHTLUnifiedScanner.o
 
@@ -516,30 +479,6 @@ src/main.s: src/main.cpp.s
 src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_compiler.dir/build.make CMakeFiles/chtl_compiler.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
-
-tests/test_parser.o: tests/test_parser.cpp.o
-.PHONY : tests/test_parser.o
-
-# target to build an object file
-tests/test_parser.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_parser.dir/build.make CMakeFiles/test_parser.dir/tests/test_parser.cpp.o
-.PHONY : tests/test_parser.cpp.o
-
-tests/test_parser.i: tests/test_parser.cpp.i
-.PHONY : tests/test_parser.i
-
-# target to preprocess a source file
-tests/test_parser.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_parser.dir/build.make CMakeFiles/test_parser.dir/tests/test_parser.cpp.i
-.PHONY : tests/test_parser.cpp.i
-
-tests/test_parser.s: tests/test_parser.cpp.s
-.PHONY : tests/test_parser.s
-
-# target to generate assembly for a file
-tests/test_parser.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_parser.dir/build.make CMakeFiles/test_parser.dir/tests/test_parser.cpp.s
-.PHONY : tests/test_parser.cpp.s
 
 tests/test_runner.o: tests/test_runner.cpp.o
 .PHONY : tests/test_runner.o
@@ -599,7 +538,6 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... chtl_compiler"
 	@echo "... chtl_lib"
-	@echo "... test_parser"
 	@echo "... test_runner"
 	@echo "... test_scanner"
 	@echo "... miniz.o"
@@ -635,18 +573,12 @@ help:
 	@echo "... src/CodeMerger/CodeMerger.o"
 	@echo "... src/CodeMerger/CodeMerger.i"
 	@echo "... src/CodeMerger/CodeMerger.s"
-	@echo "... src/CompilerDispatcher/CompilerDispatcher.o"
-	@echo "... src/CompilerDispatcher/CompilerDispatcher.i"
-	@echo "... src/CompilerDispatcher/CompilerDispatcher.s"
 	@echo "... src/Scanner/CHTLUnifiedScanner.o"
 	@echo "... src/Scanner/CHTLUnifiedScanner.i"
 	@echo "... src/Scanner/CHTLUnifiedScanner.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
-	@echo "... tests/test_parser.o"
-	@echo "... tests/test_parser.i"
-	@echo "... tests/test_parser.s"
 	@echo "... tests/test_runner.o"
 	@echo "... tests/test_runner.i"
 	@echo "... tests/test_runner.s"

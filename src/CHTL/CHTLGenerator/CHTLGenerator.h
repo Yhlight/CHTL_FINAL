@@ -33,8 +33,8 @@ struct UnresolvedProperty {
 
 struct CompilationResult {
     std::string html;
-    std::string js;
-    std::map<std::string, std::string> placeholder_map;
+    std::string js_with_placeholders;
+    std::string css;
 };
 
 class CHTLGenerator {
@@ -75,7 +75,6 @@ private:
     std::stringstream output_;
     std::stringstream global_styles_;
     std::stringstream global_scripts_;
-    std::map<std::string, std::string> placeholder_map_;
     int indentLevel_ = 0;
 };
 

@@ -23,8 +23,8 @@ class CHTLJSGenerator {
 public:
     CHTLJSGenerator() = default;
 
-    // The placeholder map from the scanner is required for generation.
-    std::string generate(const CHTLJSNode& root, const std::map<std::string, std::string>& placeholder_map);
+    // Generates JS code (which still contains placeholders) from a CHTL JS AST.
+    std::string generate(const CHTLJSNode& root);
 
 private:
     std::string visit(const CHTLJSNode* node);
@@ -38,9 +38,6 @@ private:
     std::string visitVirNode(const VirNode* node);
     std::string visitRouterNode(const RouterNode* node);
     std::string visitScriptLoaderNode(const ScriptLoaderNode* node);
-
-    // Store the map for access during the recursive visit calls.
-    const std::map<std::string, std::string>* placeholder_map_ = nullptr;
 };
 
 } // namespace CHTLJS

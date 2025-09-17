@@ -39,14 +39,43 @@ int getPrecedence(TokenType type) {
 
 Value applyOp(TokenType op, Value b, Value a) {
     Value val;
-    val.Svalue = a.Svalue.empty() ? b.Svalue : a.Svalue;
+    bool a_has_unit = !a.Svalue.empty();
+    bool b_has_unit = !b.Svalue.empty();
+
+    if (a_has_unit && b_has_unit && a.Svalue != b.Svalue) {
+         throw std::runtime_error("Mismatched units in expression: " + a.Svalue + " and " + b.Svalue);
+    }
+
+    // Default unit propagation: if one has a unit, the result has that unit.
+    val.Svalue = a_has_unit ? a.Svalue : b.Svalue;
+
     switch (op) {
-        case TokenType::Plus: val.Dvalue = a.Dvalue + b.Dvalue; break;
-        case TokenType::Minus: val.Dvalue = a.Dvalue - b.Dvalue; break;
-        case TokenType::Asterisk: val.Dvalue = a.Dvalue * b.Dvalue; break;
-        case TokenType::Slash: if (b.Dvalue == 0) throw std::runtime_error("Division by zero."); val.Dvalue = a.Dvalue / b.Dvalue; break;
-        case TokenType::Percent: val.Dvalue = fmod(a.Dvalue, b.Dvalue); break;
-        case TokenType::DoubleAsterisk: val.Dvalue = pow(a.Dvalue, b.Dvalue); break;
+        case TokenType::Plus:
+        case TokenType::Minus:
+            val.Dvalue = (op == TokenType::Plus) ? (a.Dvalue + b.Dvalue) : (a.Dvalue - b.Dvalue);
+            break;
+        case TokenType::Asterisk:
+            if (a_has_unit && b_has_unit) throw std::runtime_error("Cannot multiply two values with units.");
+            val.Dvalue = a.Dvalue * b.Dvalue;
+            break;
+        case TokenType::Slash:
+            if (b.Dvalue == 0) throw std::runtime_error("Division by zero.");
+            if (b_has_unit) { // e.g. 100px / 10px = 10 (unitless)
+                 if (!a_has_unit) throw std::runtime_error("Cannot divide a unitless value by a value with units.");
+                 val.Dvalue = a.Dvalue / b.Dvalue;
+                 val.Svalue = ""; // Result is unitless
+            } else { // e.g. 100px / 10 = 10px
+                val.Dvalue = a.Dvalue / b.Dvalue;
+                val.Svalue = a.Svalue; // Keep the unit of the dividend
+            }
+            break;
+        case TokenType::Percent:
+            val.Dvalue = fmod(a.Dvalue, b.Dvalue);
+            break;
+        case TokenType::DoubleAsterisk:
+            if (a_has_unit || b_has_unit) throw std::runtime_error("Units are not supported for the power operator.");
+            val.Dvalue = pow(a.Dvalue, b.Dvalue);
+            break;
         case TokenType::GreaterThan: val.Dvalue = a.Dvalue > b.Dvalue; val.Svalue = ""; break;
         case TokenType::LessThan: val.Dvalue = a.Dvalue < b.Dvalue; val.Svalue = ""; break;
         case TokenType::GreaterThanEquals: val.Dvalue = a.Dvalue >= b.Dvalue; val.Svalue = ""; break;
@@ -119,18 +148,19 @@ Value CHTLGenerator::evaluateExpression(std::vector<PropertyValue>::const_iterat
         if (!std::holds_alternative<Token>(*it)) break;
         TokenType op_type = std::get<Token>(*it).type;
 
+        // Special handling for ternary operator, which is not a standard binary operator
         if (op_type == TokenType::QuestionMark) {
-            const int TERNARY_PRECEDENCE = 1;
-            if (TERNARY_PRECEDENCE < min_precedence) break;
-            ++it;
+            if (min_precedence > 1) break; // Ternary has low precedence
+            ++it; // consume '?'
             Value true_val = evaluateExpression(it, end, 0);
             if (it == end || !std::holds_alternative<Token>(*it) || std::get<Token>(*it).type != TokenType::Colon) {
                  throw std::runtime_error("Expected ':' for ternary operator.");
             }
-            ++it;
-            Value false_val = evaluateExpression(it, end, TERNARY_PRECEDENCE);
+            ++it; // consume ':'
+            // The right-hand side of a ternary is right-associative, so its precedence is 1.
+            Value false_val = evaluateExpression(it, end, 1);
             lhs = (lhs.Dvalue != 0) ? true_val : false_val;
-            continue;
+            continue; // continue the loop to handle operators after the ternary
         }
 
         int precedence = getPrecedence(op_type);
@@ -155,26 +185,51 @@ std::string formatValue(const Value& val) {
     return s + val.Svalue;
 }
 
+std::string propertyValueToString(const PropertyValue& pv) {
+    if (std::holds_alternative<Token>(pv)) {
+        return std::get<Token>(pv).lexeme;
+    }
+    // This is a simplification; a full implementation would need to handle
+    // converting PropertyReferenceNode etc. back to a string representation.
+    return "";
+}
+
 Value CHTLGenerator::resolvePropertyValue(const std::vector<PropertyValue>& parts) {
     if (parts.empty()) return {0, "", ""};
-    if (parts.size() == 1) {
-        const auto& part = parts[0];
-        if (std::holds_alternative<Token>(part)) {
-            const auto& token = std::get<Token>(part);
-            if (token.type == TokenType::StringLiteral || token.type == TokenType::UnquotedLiteral || token.type == TokenType::Identifier) {
-                return {0, "", token.lexeme};
+    try {
+        if (parts.size() == 1) {
+            const auto& part = parts[0];
+            if (std::holds_alternative<Token>(part)) {
+                const auto& token = std::get<Token>(part);
+                if (token.type == TokenType::StringLiteral || token.type == TokenType::UnquotedLiteral || token.type == TokenType::Identifier) {
+                    return {0, "", token.lexeme};
+                }
+                 if (token.type == TokenType::Number) {
+                    return {std::stod(token.lexeme), "", ""};
+                }
+            } else if (std::holds_alternative<ResponsiveValueNode>(part)) {
+                const auto& responsive_node = std::get<ResponsiveValueNode>(part);
+                responsive_variables_.insert(responsive_node.getVariableName());
+                return {0, "", "var(--" + responsive_node.getVariableName() + ")"};
             }
-             if (token.type == TokenType::Number) {
-                return {std::stod(token.lexeme), "", ""};
-            }
-        } else if (std::holds_alternative<ResponsiveValueNode>(part)) {
-            const auto& responsive_node = std::get<ResponsiveValueNode>(part);
-            responsive_variables_.insert(responsive_node.getVariableName());
-            return {0, "", "var(--" + responsive_node.getVariableName() + ")"};
         }
+        auto it = parts.begin();
+        return evaluateExpression(it, parts.end(), 0);
+    } catch (const std::runtime_error& e) {
+        std::string error_str = e.what();
+        if (error_str.find("Mismatched units") != std::string::npos) {
+            // Fallback to calc()
+            std::stringstream ss;
+            ss << "calc(";
+            for (const auto& part : parts) {
+                ss << propertyValueToString(part) << " ";
+            }
+            ss << ")";
+            return {0, "", ss.str()};
+        }
+        // Re-throw other errors
+        throw;
     }
-    auto it = parts.begin();
-    return evaluateExpression(it, parts.end(), 0);
 }
 
 bool elementMatchesSimpleSelector(const ElementNode* elem, const std::string& simple_selector) {
@@ -308,7 +363,6 @@ CompilationResult CHTLGenerator::generate(RootNode& root, bool use_default_struc
     symbol_table_.clear();
     unresolved_properties_.clear();
     responsive_variables_.clear();
-    placeholder_map_.clear();
     indentLevel_ = 0;
 
     for (auto& child : root.children_) firstPass(child.get());
@@ -345,18 +399,10 @@ CompilationResult CHTLGenerator::generate(RootNode& root, bool use_default_struc
         ss << "</html>";
         final_html = ss.str();
     } else {
-        // Just return the raw parts, let the caller combine them.
-        // For CLI, we'll still combine them.
-        if (!styles.empty()) {
-            html_body = "<style>\n" + styles + "</style>\n" + html_body;
-        }
-        if (!scripts.empty()) {
-            html_body += "\n<script>\n" + scripts + "</script>\n";
-        }
         final_html = html_body;
     }
 
-    return {final_html, scripts, placeholder_map_};
+    return {final_html, scripts, styles};
 }
 
 void CHTLGenerator::firstPass(Node* node) {
@@ -574,39 +620,30 @@ void CHTLGenerator::renderScriptBlock(const ScriptBlockNode* node) {
         return;
     }
 
-    // 1. Scan the raw script content to separate JS from CHTL JS
-    CHTLUnifiedScanner scanner(node->content_);
-    std::vector<CodeFragment> fragments = scanner.scan();
+    // The content of the script block has already been processed by the Unified Scanner.
+    // It now contains CHTL JS code and __JS_PLACEHOLDER__ tokens.
+    // We need to compile this CHTL JS to JS, which will still contain the placeholders.
+    try {
+        auto chtljs_context = std::make_shared<CHTLJS::CHTLJSContext>();
+        CHTLJS::CHTLJSLexer js_lexer(node->content_);
+        std::vector<CHTLJS::CHTLJSToken> js_tokens = js_lexer.scanTokens();
 
-    // 2. Process the fragments
-    for (const auto& fragment : fragments) {
-        if (fragment.type == FragmentType::JS) {
-            // Pure JS fragments are appended directly
-            global_scripts_ << fragment.content;
-        } else if (fragment.type == FragmentType::CHTL_JS) {
-            // CHTL_JS fragments need to be compiled
-            try {
-                auto chtljs_context = std::make_shared<CHTLJS::CHTLJSContext>();
-                CHTLJS::CHTLJSLexer js_lexer(fragment.content);
-                std::vector<CHTLJS::CHTLJSToken> js_tokens = js_lexer.scanTokens();
-
-                if (!js_tokens.empty() && !(js_tokens.size() == 1 && js_tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) {
-                    CHTLJS::CHTLJSParser js_parser(js_tokens, chtljs_context);
-                    std::unique_ptr<CHTLJS::SequenceNode> js_ast = js_parser.parse();
-
-                    if (js_ast) {
-                        CHTLJS::CHTLJSGenerator js_generator;
-                        // The placeholder map is empty because the new scanner doesn't create them for script blocks
-                        std::map<std::string, std::string> empty_map;
-                        global_scripts_ << js_generator.generate(*js_ast, empty_map);
-                    }
-                }
-            } catch (const std::exception& e) {
-                throw std::runtime_error("CHTLJS compilation error in script block: " + std::string(e.what()));
-            }
+        // Basic check to avoid parsing empty content
+        if (js_tokens.empty() || (js_tokens.size() == 1 && js_tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) {
+            return;
         }
+
+        CHTLJS::CHTLJSParser js_parser(js_tokens, chtljs_context);
+        std::unique_ptr<CHTLJS::SequenceNode> js_ast = js_parser.parse();
+
+        if (js_ast) {
+            CHTLJS::CHTLJSGenerator js_generator;
+                        global_scripts_ << js_generator.generate(*js_ast);
+        }
+    } catch (const std::exception& e) {
+        // Provide more context for the error
+        throw std::runtime_error("CHTLJS compilation failed inside a script block: " + std::string(e.what()));
     }
-    global_scripts_ << "\n";
 }
 
 }

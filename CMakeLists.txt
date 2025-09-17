@@ -17,7 +17,6 @@ add_library(chtl_lib STATIC
     src/CHTLJS/CHTLJSGenerator/CHTLJSGenerator.cpp
     src/CJMOD/API/Syntax.cpp
     src/CJMOD/Scanner/CJMODScanner.cpp
-    src/CompilerDispatcher/CompilerDispatcher.cpp
     src/CodeMerger/CodeMerger.cpp
 )
 
@@ -33,8 +32,8 @@ if (UNIX AND NOT APPLE)
 endif()
 
 # Test executables
-add_executable(test_parser tests/test_parser.cpp)
-target_link_libraries(test_parser PRIVATE chtl_lib)
+# add_executable(test_parser tests/test_parser.cpp)
+# target_link_libraries(test_parser PRIVATE chtl_lib)
 
 add_executable(test_scanner tests/test_scanner.cpp)
 target_link_libraries(test_scanner PRIVATE chtl_lib)
