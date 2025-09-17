@@ -1,0 +1,71 @@
+# 这是一个CHTL示例文件
+# 演示基本的CHTL语法
+
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                Hello CHTL World
+            }
+        }
+    }
+
+    body
+    {
+        h1
+        {
+            text
+            {
+                Welcome to CHTL
+            }
+        }
+
+        div
+        {
+            id: main-content;
+            class: container;
+
+            style
+            {
+                width: 100%;
+                height: 500px;
+                background-color: #f0f0f0;
+                padding: 20px;
+            }
+
+            p
+            {
+                text
+                {
+                    This is a paragraph with some text content.
+                    CHTL makes it easier to write HTML!
+                }
+            }
+
+            button
+            {
+                id: click-me;
+                class: btn btn-primary;
+
+                style
+                {
+                    background-color: #007bff;
+                    color: white;
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+
+                text
+                {
+                    Click Me!
+                }
+            }
+        }
+    }
+}
