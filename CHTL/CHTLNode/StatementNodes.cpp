@@ -37,8 +37,8 @@ std::string CssRuleNode::toString() const {
 // Returns a string representation of a StyleNode for debugging.
 std::string StyleNode::toString() const {
     std::string result = "style {\n";
-    for (const auto& rule : rules) {
-        if (rule) result += "\t" + rule->toString();
+    for (const auto& stmt : statements) {
+        if (stmt) result += "\t" + stmt->toString();
     }
     result += "}\n";
     return result;

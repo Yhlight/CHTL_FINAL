@@ -23,6 +23,9 @@ enum class TokenType {
     AMPERSAND,   // &
     DOT,         // .
     POUND,       // #
+    AT_SIGN,     // @
+    LEFT_BRACKET,  // [
+    RIGHT_BRACKET, // ]
 
     // Comments
     HASH_COMMENT, // # A comment

@@ -53,7 +53,7 @@ public:
 
 
 // Represents a single rule within a style block, e.g., `.selector { prop: val; }`
-class CssRuleNode : public Node {
+class CssRuleNode : public Statement {
 public:
     explicit CssRuleNode(std::string selector) : selector(std::move(selector)) {}
 
@@ -72,8 +72,8 @@ public:
     std::string toString() const override;
 
     Token token;
-    // A style block can contain direct properties (inline) and nested rules.
-    std::vector<std::shared_ptr<CssRuleNode>> rules;
+    // A style block can contain direct properties, nested rules, and template usages.
+    std::vector<std::shared_ptr<Statement>> statements;
 };
 
 

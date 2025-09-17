@@ -7,6 +7,7 @@
 #include "CHTL/CHTLLexer/Lexer.h"
 #include "CHTL/CHTLParser/Parser.h"
 #include "CHTL/CHTLGenerator/Generator.h"
+#include "CHTL/CHTLContext/Context.h"
 
 // A helper function to print errors
 void printParserErrors(const std::vector<std::string>& errors) {
@@ -36,8 +37,11 @@ int main(int argc, char* argv[]) {
     // 1. Lexing
     Lexer lexer(source);
 
+    // Create a context to hold state (like templates)
+    Context context;
+
     // 2. Parsing
-    Parser parser(lexer);
+    Parser parser(lexer, context);
     std::shared_ptr<Program> program = parser.parseProgram();
 
     // Check for parsing errors
@@ -47,7 +51,7 @@ int main(int argc, char* argv[]) {
     }
 
     // 3. Generation
-    Generator generator(program);
+    Generator generator(program, context);
     generator.generate();
 
     // 4. Output the results

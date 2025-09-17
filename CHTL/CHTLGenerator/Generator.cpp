@@ -9,8 +9,8 @@ static const std::set<std::string> voidElements = {
     "link", "meta", "param", "source", "track", "wbr"
 };
 
-Generator::Generator(std::shared_ptr<Program> program)
-    : program(std::move(program)), indentLevel(0) {}
+Generator::Generator(std::shared_ptr<Program> program, Context& context)
+    : program(std::move(program)), context(context), indentLevel(0) {}
 
 void Generator::generate() {
     if (program) {
@@ -57,39 +57,53 @@ void Generator::generateProgram(const std::shared_ptr<Program>& node) {
 void Generator::generateStyle(const std::shared_ptr<StyleNode>& styleNode, std::map<std::string, std::string>& attributes) {
     std::string mainSelector;
 
-    // First pass: find auto-generated classes/ids and inline styles
-    for (const auto& rule : styleNode->rules) {
-        if (rule->selector == "&") {
-            // Inline styles
-            for (const auto& prop : rule->properties) {
-                attributes["style"] += prop->key + ":" + generateExpression(prop->value) + ";";
+    // First pass: find auto-generated classes/ids and inline styles from all sources
+    for (const auto& stmt : styleNode->statements) {
+        if (auto rule = std::dynamic_pointer_cast<CssRuleNode>(stmt)) {
+            if (rule->selector == "&") {
+                // This rule contains inline styles
+                for (const auto& prop : rule->properties) {
+                    attributes["style"] += prop->key + ":" + generateExpression(prop->value) + ";";
+                }
+            } else if (rule->selector[0] == '.') {
+                // Auto-add class
+                std::string className = rule->selector.substr(1);
+                attributes["class"] = attributes["class"].empty() ? className : attributes["class"] + " " + className;
+                if (mainSelector.empty()) mainSelector = rule->selector;
+            } else if (rule->selector[0] == '#') {
+                // Auto-add id
+                attributes["id"] = rule->selector.substr(1);
+                if (mainSelector.empty()) mainSelector = rule->selector;
             }
-        } else if (rule->selector[0] == '.') {
-            // Auto-add class
-            std::string className = rule->selector.substr(1);
-            attributes["class"] = attributes["class"].empty() ? className : attributes["class"] + " " + className;
-            if (mainSelector.empty()) mainSelector = rule->selector;
-        } else if (rule->selector[0] == '#') {
-            // Auto-add id
-            attributes["id"] = rule->selector.substr(1);
-            if (mainSelector.empty()) mainSelector = rule->selector;
+        } else if (auto usage = std::dynamic_pointer_cast<TemplateUsageNode>(stmt)) {
+            // This is a template usage, e.g., @Style MyTemplate;
+            if (usage->token.literal == "Style") {
+                auto styleTemplate = context.getStyleTemplate(usage->name);
+                if (styleTemplate) {
+                    // Inject the template's properties as inline styles
+                    for (const auto& prop : styleTemplate->properties) {
+                        attributes["style"] += prop->key + ":" + generateExpression(prop->value) + ";";
+                    }
+                }
+            }
         }
     }
 
-    // If main selector wasn't found, infer from existing attributes
+    // If main selector wasn't found from rules, infer from existing attributes
     if (mainSelector.empty()) {
         if (attributes.count("id")) mainSelector = "#" + attributes["id"];
         else if (attributes.count("class")) mainSelector = "." + attributes["class"].substr(0, attributes["class"].find(' '));
     }
 
 
-    // Second pass: generate CSS for all rules
-    for (const auto& rule : styleNode->rules) {
-        if (rule->selector == "&") continue; // Already handled
+    // Second pass: generate global CSS for all nested rules
+    for (const auto& stmt : styleNode->statements) {
+        auto rule = std::dynamic_pointer_cast<CssRuleNode>(stmt);
+        if (!rule || rule->selector == "&") continue; // Skip non-rules and inline styles
 
         std::string finalSelector = rule->selector;
         if (finalSelector[0] == '&') {
-            // Replace '&' with the main selector
+            // Replace '&' with the main selector for contextual selectors
             finalSelector.replace(0, 1, mainSelector);
         }
 

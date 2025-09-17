@@ -8,9 +8,11 @@
 #include <string>
 #include <memory>
 
+#include "../CHTLContext/Context.h"
+
 class Parser {
 public:
-    explicit Parser(Lexer& lexer);
+    Parser(Lexer& lexer, Context& context);
 
     std::shared_ptr<Program> parseProgram();
     const std::vector<std::string>& getErrors() const;
@@ -32,8 +34,11 @@ private:
     std::shared_ptr<Expression> parseExpression();
     std::shared_ptr<TextNode> parseTextAttributeAsNode();
     std::string parseSelector();
+    std::shared_ptr<Statement> parseTemplateStatement();
+    std::shared_ptr<TemplateUsageNode> parseTemplateUsageNode();
 
     Lexer& lexer;
+    Context& context;
     Token currentToken;
     Token peekToken;
     std::vector<std::string> errors;

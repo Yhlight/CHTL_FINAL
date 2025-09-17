@@ -17,6 +17,9 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::AMPERSAND:          return "&";
         case TokenType::DOT:                return ".";
         case TokenType::POUND:              return "#";
+        case TokenType::AT_SIGN:            return "@";
+        case TokenType::LEFT_BRACKET:       return "[";
+        case TokenType::RIGHT_BRACKET:      return "]";
         case TokenType::HASH_COMMENT:       return "HASH_COMMENT";
         default:                            return "UNKNOWN";
     }

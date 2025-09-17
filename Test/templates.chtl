@@ -1,0 +1,27 @@
+// Test file for template features
+
+[Template] @Style DefaultText
+{
+    color: "black";
+    font-size: "16px";
+    line-height: "1.6";
+}
+
+body {
+    p {
+        id: "my-para";
+        style {
+            // Use the template
+            @Style DefaultText;
+
+            // Add an additional inline style
+            background-color: "lightgray";
+
+            // Add a nested rule
+            &:hover {
+                color: "darkred";
+            }
+        }
+        text: "This is a paragraph using a style template.";
+    }
+}

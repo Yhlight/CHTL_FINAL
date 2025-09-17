@@ -3,6 +3,8 @@
 #include "../CHTLNode/Node.h"
 #include "../CHTLNode/StatementNodes.h"
 #include "../CHTLNode/ExpressionNodes.h"
+#include "../CHTLNode/TemplateNodes.h"
+#include "../CHTLContext/Context.h"
 #include <string>
 #include <sstream>
 #include <memory>
@@ -11,7 +13,7 @@
 
 class Generator {
 public:
-    explicit Generator(std::shared_ptr<Program> program);
+    Generator(std::shared_ptr<Program> program, Context& context);
 
     // The main entry point to start the generation process.
     void generate();
@@ -38,6 +40,7 @@ private:
     void writeIndent();
 
     std::shared_ptr<Program> program;
+    Context& context;
     std::stringstream htmlStream;
     std::stringstream cssStream;
     int indentLevel;
