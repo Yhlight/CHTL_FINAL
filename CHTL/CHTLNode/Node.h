@@ -15,6 +15,8 @@ struct SelectorNode;
 struct TemplateDefinitionNode;
 struct TemplateUsageNode;
 struct DeleteNode;
+struct ElementSpecializationNode;
+struct InsertNode;
 // Expression Nodes
 struct ExpressionNode;
 struct LiteralNode;
@@ -37,6 +39,8 @@ struct INodeVisitor {
     virtual void visit(TemplateDefinitionNode& node) = 0;
     virtual void visit(TemplateUsageNode& node) = 0;
     virtual void visit(DeleteNode& node) = 0;
+    virtual void visit(ElementSpecializationNode& node) = 0;
+    virtual void visit(InsertNode& node) = 0;
 };
 
 // --- Expression Nodes ---
@@ -75,6 +79,19 @@ struct TemplateUsageNode : public Node {
 struct DeleteNode : public Node {
     Token identifier; // The name of the property to delete
     explicit DeleteNode(const Token& identifier) : identifier(identifier) {}
+    void accept(INodeVisitor& visitor) override { visitor.visit(*this); }
+};
+
+struct ElementSpecializationNode : public Node {
+    Token target; // e.g., div[1]
+    std::vector<std::unique_ptr<Node>> body;
+    void accept(INodeVisitor& visitor) override { visitor.visit(*this); }
+};
+
+struct InsertNode : public Node {
+    Token position; // after, before, etc.
+    Token target;
+    std::vector<std::unique_ptr<Node>> body;
     void accept(INodeVisitor& visitor) override { visitor.visit(*this); }
 };
 

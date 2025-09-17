@@ -258,6 +258,14 @@ void CHTLGenerator::visit(DeleteNode& node) {
     // This node is handled inside visit(TemplateUsageNode&), does nothing on its own.
 }
 
+void CHTLGenerator::visit(ElementSpecializationNode& node) {
+    // Will be implemented in a future step.
+}
+
+void CHTLGenerator::visit(InsertNode& node) {
+    // Will be implemented in a future step.
+}
+
 
 std::string CHTLGenerator::unquote(const std::string& s) {
     if (s.length() >= 2 && (s.front() == '"' || s.front() == '\'') && s.front() == s.back()) {

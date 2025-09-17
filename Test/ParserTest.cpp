@@ -105,6 +105,26 @@ public:
         ss << "Delete<" << node.identifier.lexeme << ">\n";
     }
 
+    void visit(ElementSpecializationNode& node) override {
+        printIndent();
+        ss << "ElementSpec<" << node.target.lexeme << ">\n";
+        indent++;
+        for (auto& item : node.body) {
+            item->accept(*this);
+        }
+        indent--;
+    }
+
+    void visit(InsertNode& node) override {
+        printIndent();
+        ss << "Insert<" << node.position.lexeme << " " << node.target.lexeme << ">\n";
+        indent++;
+        for (auto& item : node.body) {
+            item->accept(*this);
+        }
+        indent--;
+    }
+
 private:
     std::stringstream ss;
     int indent = 0;
@@ -115,18 +135,20 @@ private:
     }
 };
 
-TEST(ParserTest, CustomStyleDefinitionAndUsage) {
+TEST(ParserTest, CustomElementDefinitionAndUsage) {
     std::string source = R"(
-[Custom] @Style TextSet {
-    color,
-    font-size;
+[Custom] @Element Box {
+    div {}
+    span {}
 }
 
-div {
-    style {
-        @Style TextSet {
-            color: red;
-            delete font-size;
+body {
+    @Element Box {
+        insert after div {
+            p { text { "inserted" } }
+        }
+        span {
+            style { color: red; }
         }
     }
 }
@@ -141,14 +163,17 @@ div {
 
     std::string expected =
 R"(Program
-  Definition<[Custom] @Style TextSet>
-    Attr[color: (null)]
-    Attr[font-size: (null)]
-  Element<div>
-    Style
-      Usage<@Style TextSet> with body
-        Attr[color: Literal<'red'>]
-        Delete<font-size>
+  Definition<[Custom] @Element Box>
+    Element<div>
+    Element<span>
+  Element<body>
+    Usage<@Element Box> with body
+      Insert<after div>
+        Element<p>
+          Text{Literal<'"inserted"'>}
+      ElementSpec<span>
+        Style
+          Attr[color: Literal<'red'>]
 )";
 
     ASSERT_EQ(result, expected);

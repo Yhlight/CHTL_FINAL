@@ -20,6 +20,8 @@ public:
     void visit(TemplateDefinitionNode& node) override;
     void visit(TemplateUsageNode& node) override;
     void visit(DeleteNode& node) override;
+    void visit(ElementSpecializationNode& node) override;
+    void visit(InsertNode& node) override;
 
 private:
     std::string generateExpression(ExpressionNode* node, bool is_top_level = true);

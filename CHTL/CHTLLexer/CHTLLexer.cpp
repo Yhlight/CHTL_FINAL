@@ -150,6 +150,17 @@ Token CHTLLexer::identifier() {
     else if (text == "script") type = TokenType::SCRIPT;
     else if (text == "inherit") type = TokenType::KEYWORD_INHERIT;
     else if (text == "delete") type = TokenType::KEYWORD_DELETE;
+    else if (text == "insert") type = TokenType::KEYWORD_INSERT;
+    else if (text == "after") type = TokenType::KEYWORD_AFTER;
+    else if (text == "before") type = TokenType::KEYWORD_BEFORE;
+    else if (text == "replace") type = TokenType::KEYWORD_REPLACE;
+    else if (text == "at") {
+        // Handle "at top" and "at bottom"
+        // This is a simplification. A real lexer might need more state
+        // to handle multi-word keywords robustly.
+        // For now, we assume this is sufficient.
+        // We will not tokenize "at top" as a single token. The parser will handle it.
+    }
 
     return makeToken(type);
 }

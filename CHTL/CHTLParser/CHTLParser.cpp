@@ -101,12 +101,11 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
     consume(TokenType::LBRACE, "Expect '{' after element name.");
     while (!check(TokenType::RBRACE) && !isAtEnd()) {
         const Token& currentToken = peek();
-        const Token& nextToken = (current + 1 < tokens.size()) ? tokens[current + 1] : currentToken;
 
         if (currentToken.type == TokenType::AT_STYLE || currentToken.type == TokenType::AT_ELEMENT) {
             element->children.push_back(parseTemplateUsage());
         }
-        else if (currentToken.type == TokenType::IDENTIFIER && nextToken.type == TokenType::COLON) {
+        else if (currentToken.type == TokenType::IDENTIFIER && tokens[current + 1].type == TokenType::COLON) {
             element->children.push_back(parseAttribute());
         } else if (currentToken.type == TokenType::STYLE) {
             element->children.push_back(parseStyle());
@@ -125,12 +124,9 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
 
 std::unique_ptr<AttributeNode> CHTLParser::parseAttribute() {
     const Token& key = consume(TokenType::IDENTIFIER, "Expect attribute name.");
-    // Handle valueless properties in [Custom] blocks e.g. `color, font-size;`
     if (match({TokenType::COMMA, TokenType::SEMICOLON})) {
-        // Create an attribute with a null value expression
         return std::make_unique<AttributeNode>(key.lexeme, nullptr);
     }
-
     consume(TokenType::COLON, "Expect ':' after attribute name.");
     auto value = parseExpression();
     consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
@@ -151,12 +147,10 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyle() {
     auto styleNode = std::make_unique<StyleNode>();
     while (!check(TokenType::RBRACE) && !isAtEnd()) {
         const Token& currentToken = peek();
-        const Token& nextToken = (current + 1 < tokens.size()) ? tokens[current + 1] : currentToken;
-
         if (currentToken.type == TokenType::AT_STYLE) {
             styleNode->children.push_back(parseTemplateUsage());
         }
-        else if (currentToken.type == TokenType::IDENTIFIER && nextToken.type == TokenType::COLON) {
+        else if (currentToken.type == TokenType::IDENTIFIER && tokens[current + 1].type == TokenType::COLON) {
             styleNode->children.push_back(parseAttribute());
         } else {
             styleNode->children.push_back(parseSelector());
@@ -202,7 +196,6 @@ std::unique_ptr<TemplateDefinitionNode> CHTLParser::parseTemplateDefinition() {
             node->children.push_back(parseTemplateUsage());
         }
         else if (node->node_type.type == TokenType::KEYWORD_CUSTOM && node->template_type.type == TokenType::AT_STYLE) {
-            // Custom style can have valueless properties
             node->children.push_back(parseAttribute());
         }
         else if (node->template_type.type == TokenType::AT_STYLE) {
@@ -212,7 +205,6 @@ std::unique_ptr<TemplateDefinitionNode> CHTLParser::parseTemplateDefinition() {
         }
     }
     consume(TokenType::RBRACE, "Expect '}' after template body.");
-
     return node;
 }
 
@@ -227,12 +219,17 @@ std::unique_ptr<TemplateUsageNode> CHTLParser::parseTemplateUsage() {
 
     node->name = consume(TokenType::IDENTIFIER, "Expect template name for usage.");
 
-    // Check for an optional customization body
     if (match({TokenType::LBRACE})) {
         while(!check(TokenType::RBRACE) && !isAtEnd()) {
             if (peek().type == TokenType::KEYWORD_DELETE) {
                 node->body.push_back(parseDelete());
-            } else {
+            } else if (peek().type == TokenType::KEYWORD_INSERT) {
+                node->body.push_back(parseInsertStatement());
+            }
+            else if (node->template_type.type == TokenType::AT_ELEMENT) {
+                node->body.push_back(parseElementSpecialization());
+            }
+             else {
                 node->body.push_back(parseAttribute());
             }
         }
@@ -249,6 +246,40 @@ std::unique_ptr<DeleteNode> CHTLParser::parseDelete() {
     Token identifier = consume(TokenType::IDENTIFIER, "Expect property name to delete.");
     consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
     return std::make_unique<DeleteNode>(identifier);
+}
+
+std::unique_ptr<InsertNode> CHTLParser::parseInsertStatement() {
+    auto node = std::make_unique<InsertNode>();
+    consume(TokenType::KEYWORD_INSERT, "Expect 'insert' keyword.");
+    if (match({TokenType::KEYWORD_AFTER, TokenType::KEYWORD_BEFORE, TokenType::KEYWORD_REPLACE})) {
+        node->position = previous();
+    } else {
+        // Handle 'at top' / 'at bottom' later if needed
+        consume(TokenType::KEYWORD_AFTER, "Expect position keyword like 'after', 'before', or 'replace'.");
+    }
+    node->target = consume(TokenType::IDENTIFIER, "Expect target element selector.");
+    consume(TokenType::LBRACE, "Expect '{' for insert body.");
+    while(!check(TokenType::RBRACE) && !isAtEnd()) {
+        node->body.push_back(parseStatement());
+    }
+    consume(TokenType::RBRACE, "Expect '}' after insert body.");
+    return node;
+}
+
+std::unique_ptr<ElementSpecializationNode> CHTLParser::parseElementSpecialization() {
+    auto node = std::make_unique<ElementSpecializationNode>();
+    node->target = consume(TokenType::IDENTIFIER, "Expect target element selector.");
+    consume(TokenType::LBRACE, "Expect '{' for specialization body.");
+    while(!check(TokenType::RBRACE) && !isAtEnd()) {
+        // Can only contain style blocks for now as per spec
+        if (peek().type == TokenType::STYLE) {
+            node->body.push_back(parseStyle());
+        } else {
+            consume(TokenType::STYLE, "Expect 'style' block inside element specialization.");
+        }
+    }
+    consume(TokenType::RBRACE, "Expect '}' after specialization body.");
+    return node;
 }
 
 // Hybrid Expression Parser
