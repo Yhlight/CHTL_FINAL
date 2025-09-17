@@ -3,7 +3,7 @@
 
 namespace CHTL {
 
-CHTLGenerator::CHTLGenerator() : m_indent_level(0) {}
+CHTLGenerator::CHTLGenerator(CHTLEnvironment& env) : m_env(env), m_indent_level(0) {}
 
 std::string CHTLGenerator::Generate(Program* program) {
     m_output.str(""); // Clear the stream
@@ -40,9 +40,29 @@ void CHTLGenerator::generateAttributeNode(AttributeNode* node, std::vector<std::
 }
 
 void CHTLGenerator::generateStyleNode(StyleNode* node, std::vector<std::string>& style_properties) {
-    for (const auto& prop : node->properties) {
+    // A style block can contain direct properties or template usages
+    for (const auto& stmt : node->statements) {
+        if (auto* prop = dynamic_cast<AttributeNode*>(stmt.get())) {
+             if (prop && prop->value) {
+                style_properties.push_back(prop->key.literal + ":" + prop->value->GetTokenLiteral());
+            }
+        } else if (auto* usage = dynamic_cast<TemplateUsageNode*>(stmt.get())) {
+            generateTemplateUsageNode(usage, style_properties);
+        }
+    }
+}
+
+void CHTLGenerator::generateTemplateUsageNode(TemplateUsageNode* node, std::vector<std::string>& style_properties) {
+    auto definition = m_env.getTemplate(node->nameToken.literal);
+    if (!definition) {
+        // In a real compiler, this would be a fatal error.
+        // For now, we just ignore it.
+        return;
+    }
+
+    // Expand the template by adding its properties to the list
+    for (const auto& prop : definition->properties) {
         if (prop && prop->value) {
-            // "key:value"
             style_properties.push_back(prop->key.literal + ":" + prop->value->GetTokenLiteral());
         }
     }

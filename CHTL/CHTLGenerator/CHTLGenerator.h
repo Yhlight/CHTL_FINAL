@@ -11,12 +11,14 @@
 #include <vector>
 #include <sstream>
 #include <memory>
+#include "../CHTLContext/CHTLEnvironment.h"
+#include "../CHTLNode/TemplateNodes.h"
 
 namespace CHTL {
 
 class CHTLGenerator {
 public:
-    CHTLGenerator();
+    CHTLGenerator(CHTLEnvironment& env);
     std::string Generate(Program* program);
 
 private:
@@ -26,8 +28,10 @@ private:
     void generateCommentNode(CommentNode* node);
     void generateAttributeNode(AttributeNode* node, std::vector<std::string>& attributes);
     void generateStyleNode(StyleNode* node, std::vector<std::string>& style_properties);
+    void generateTemplateUsageNode(TemplateUsageNode* node, std::vector<std::string>& style_properties);
 
     std::stringstream m_output;
+    CHTLEnvironment& m_env;
     int m_indent_level;
 
     void indent();

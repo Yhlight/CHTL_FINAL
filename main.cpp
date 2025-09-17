@@ -6,6 +6,7 @@
 #include "CHTL/CHTLLexer/CHTLLexer.h"
 #include "CHTL/CHTLParser/CHTLParser.h"
 #include "CHTL/CHTLGenerator/CHTLGenerator.h"
+#include "CHTL/CHTLContext/CHTLEnvironment.h"
 
 void printParserErrors(const std::vector<std::string>& errors) {
     std::cerr << "Parser has " << errors.size() << " errors:" << std::endl;
@@ -37,7 +38,8 @@ int main(int argc, char* argv[]) {
 
 
     CHTL::CHTLLexer lexer(source);
-    CHTL::CHTLParser parser(lexer);
+    CHTL::CHTLEnvironment env;
+    CHTL::CHTLParser parser(lexer, env);
     auto program = parser.ParseProgram();
 
     if (!parser.Errors().empty()) {
@@ -50,7 +52,7 @@ int main(int argc, char* argv[]) {
     std::cout << program->ToString() << std::endl;
     std::cout << "------------------------------------" << std::endl << std::endl;
 
-    CHTL::CHTLGenerator generator;
+    CHTL::CHTLGenerator generator(env);
     std::string html_output = generator.Generate(program.get());
 
     std::cout << "Generated HTML Output:" << std::endl;

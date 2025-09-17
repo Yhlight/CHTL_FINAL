@@ -8,6 +8,8 @@
 #include "../CHTLNode/AttributeNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/ExpressionNodes.h"
+#include "../CHTLNode/TemplateNodes.h"
+#include "../CHTLContext/CHTLEnvironment.h"
 
 #include <vector>
 #include <string>
@@ -17,7 +19,7 @@ namespace CHTL {
 
 class CHTLParser {
 public:
-    CHTLParser(CHTLLexer& lexer);
+    CHTLParser(CHTLLexer& lexer, CHTLEnvironment& env);
 
     std::unique_ptr<Program> ParseProgram();
 
@@ -36,9 +38,12 @@ private:
     std::shared_ptr<AttributeNode> parseAttributeStatement();
     std::shared_ptr<StyleNode> parseStyleStatement();
     std::shared_ptr<Expression> parseExpression();
+    std::shared_ptr<TemplateDefinitionNode> parseTemplateDefinitionStatement();
+    std::shared_ptr<TemplateUsageNode> parseTemplateUsageStatement();
 
 
     CHTLLexer& m_lexer;
+    CHTLEnvironment& m_env;
     Token m_curToken;
     Token m_peekToken;
 

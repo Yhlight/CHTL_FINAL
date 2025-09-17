@@ -3,7 +3,7 @@
 
 namespace CHTL {
 
-CHTLParser::CHTLParser(CHTLLexer& lexer) : m_lexer(lexer) {
+CHTLParser::CHTLParser(CHTLLexer& lexer, CHTLEnvironment& env) : m_lexer(lexer), m_env(env) {
     // Prime the parser with the first two tokens
     nextToken();
     nextToken();
@@ -64,10 +64,70 @@ std::shared_ptr<Statement> CHTLParser::parseStatement() {
             return parseTextStatement();
         case TokenType::TOKEN_KEYWORD_STYLE:
             return parseStyleStatement();
+        case TokenType::TOKEN_KEYWORD_TEMPLATE:
+            return parseTemplateDefinitionStatement();
+        case TokenType::TOKEN_AT:
+             return parseTemplateUsageStatement();
         default:
             return nullptr;
     }
     return nullptr;
+}
+
+std::shared_ptr<TemplateDefinitionNode> CHTLParser::parseTemplateDefinitionStatement() {
+    Token templateToken = m_curToken; // The [Template] token
+
+    if (!expectPeek(TokenType::TOKEN_AT)) return nullptr;
+    if (!expectPeek(TokenType::TOKEN_IDENTIFIER)) return nullptr; // Expects Style, Element, etc.
+    Token typeToken = m_curToken;
+
+    if (!expectPeek(TokenType::TOKEN_IDENTIFIER)) return nullptr; // Expects the template name
+    Token nameToken = m_curToken;
+
+    auto node = std::make_shared<TemplateDefinitionNode>(templateToken, typeToken, nameToken);
+
+    if (!expectPeek(TokenType::TOKEN_LBRACE)) return nullptr;
+    nextToken(); // consume '{'
+
+    // For now, only parse properties for @Style templates
+    if (typeToken.literal == "Style") {
+        while (!curTokenIs(TokenType::TOKEN_RBRACE) && !curTokenIs(TokenType::TOKEN_EOF)) {
+            if (curTokenIs(TokenType::TOKEN_IDENTIFIER)) {
+                auto prop = parseAttributeStatement();
+                if (prop) {
+                    node->properties.push_back(prop);
+                }
+            }
+            nextToken();
+        }
+    }
+    // else if (typeToken.literal == "Element") { ... }
+
+    if (!curTokenIs(TokenType::TOKEN_RBRACE)) {
+        m_errors.push_back("Error: Unterminated template definition. Expected '}'.");
+        return nullptr;
+    }
+
+    m_env.setTemplate(nameToken.literal, node);
+    return node;
+}
+
+std::shared_ptr<TemplateUsageNode> CHTLParser::parseTemplateUsageStatement() {
+    Token atToken = m_curToken; // The @ token
+
+    if (!expectPeek(TokenType::TOKEN_IDENTIFIER)) return nullptr; // Expects Style, Element, etc.
+    Token typeToken = m_curToken;
+
+    if (!expectPeek(TokenType::TOKEN_IDENTIFIER)) return nullptr; // Expects the template name
+    Token nameToken = m_curToken;
+
+    if (!peekTokenIs(TokenType::TOKEN_SEMICOLON)) {
+        m_errors.push_back("Error: Expected ';' after template usage.");
+        return nullptr;
+    }
+    nextToken(); // consume ';'
+
+    return std::make_shared<TemplateUsageNode>(atToken, typeToken, nameToken);
 }
 
 std::shared_ptr<Expression> CHTLParser::parseExpression() {
@@ -115,11 +175,9 @@ std::shared_ptr<StyleNode> CHTLParser::parseStyleStatement() {
     nextToken(); // consume '{'
 
     while (!curTokenIs(TokenType::TOKEN_RBRACE) && !curTokenIs(TokenType::TOKEN_EOF)) {
-        if (m_curToken.type == TokenType::TOKEN_IDENTIFIER) {
-            auto prop = parseAttributeStatement();
-            if (prop) {
-                styleNode->properties.push_back(prop);
-            }
+        auto stmt = parseStatement();
+        if (stmt) {
+            styleNode->statements.push_back(stmt);
         }
         nextToken();
     }
