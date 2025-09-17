@@ -1,0 +1,248 @@
+# 由比滨结衣主题模块
+# 温柔的女孩
+
+[Custom] @Var YuigahamaColors
+{
+    primary: "#87CEEB";
+    secondary: "#98FB98";
+    accent: "#FFB6C1";
+    background: "#F0F8FF";
+    surface: "#FFFFFF";
+    text: "#2F4F4F";
+    textSecondary: "#708090";
+    border: "#D3D3D3";
+    shadow: "rgba(135, 206, 235, 0.2)";
+}
+
+[Custom] @Var YuigahamaFonts
+{
+    primary: "Inter, sans-serif";
+    secondary: "Noto Sans CJK SC, sans-serif";
+    mono: "JetBrains Mono, monospace";
+}
+
+[Custom] @Var YuigahamaSpacing
+{
+    xs: "4px";
+    sm: "8px";
+    md: "16px";
+    lg: "24px";
+    xl: "32px";
+    xxl: "48px";
+}
+
+[Custom] @Var YuigahamaBreakpoints
+{
+    mobile: "768px";
+    tablet: "1024px";
+    desktop: "1200px";
+}
+
+[Custom] @Var YuigahamaAnimations
+{
+    fast: "0.2s";
+    normal: "0.3s";
+    slow: "0.5s";
+    easing: "cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+}
+
+[Custom] @Style YuigahamaStyle
+{
+    color: YuigahamaColors(text);
+    font-family: YuigahamaFonts(primary);
+    line-height: 1.7;
+    background-color: YuigahamaColors(background);
+}
+
+[Custom] @Style YuigahamaCard
+{
+    background-color: YuigahamaColors(surface);
+    border-radius: 16px;
+    box-shadow: 0 2px 15px YuigahamaColors(shadow);
+    padding: YuigahamaSpacing(lg);
+    border: 1px solid YuigahamaColors(border);
+    transition: all YuigahamaAnimations(normal) YuigahamaAnimations(easing);
+}
+
+[Custom] @Style YuigahamaCard:hover
+{
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px YuigahamaColors(shadow);
+}
+
+[Custom] @Style YuigahamaButton
+{
+    background: linear-gradient(135deg, YuigahamaColors(primary), YuigahamaColors(secondary));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: YuigahamaSpacing(sm) YuigahamaSpacing(lg);
+    font-family: YuigahamaFonts(primary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all YuigahamaAnimations(normal) YuigahamaAnimations(easing);
+    box-shadow: 0 3px 12px YuigahamaColors(shadow);
+}
+
+[Custom] @Style YuigahamaButton:hover
+{
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px YuigahamaColors(shadow);
+}
+
+[Custom] @Style YuigahamaButton:active
+{
+    transform: translateY(0);
+    box-shadow: 0 2px 8px YuigahamaColors(shadow);
+}
+
+[Custom] @Style YuigahamaHeader
+{
+    background: linear-gradient(135deg, YuigahamaColors(primary), YuigahamaColors(secondary));
+    color: white;
+    padding: YuigahamaSpacing(lg) 0;
+    box-shadow: 0 2px 15px YuigahamaColors(shadow);
+}
+
+[Custom] @Style YuigahamaFooter
+{
+    background-color: YuigahamaColors(text);
+    color: white;
+    padding: YuigahamaSpacing(xl) 0;
+    text-align: center;
+}
+
+[Custom] @Element YuigahamaPage
+{
+    html
+    {
+        head
+        {
+            meta
+            {
+                charset: "utf-8";
+            }
+            
+            meta
+            {
+                name: "viewport";
+                content: "width=device-width, initial-scale=1";
+            }
+            
+            title
+            {
+                "由比滨结衣主题页面"
+            }
+            
+            link
+            {
+                rel: "stylesheet";
+                href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap";
+            }
+        }
+        
+        body
+        {
+            @Style YuigahamaStyle;
+            
+            div
+            {
+                class: yuigahama-container;
+                
+                header
+                {
+                    class: yuigahama-header;
+                    
+                    nav
+                    {
+                        class: yuigahama-nav;
+                        
+                        div
+                        {
+                            class: nav-brand;
+                            
+                            h1
+                            {
+                                "由比滨结衣"
+                            }
+                        }
+                        
+                        ul
+                        {
+                            class: nav-menu;
+                            
+                            li
+                            {
+                                a
+                                {
+                                    href: "#home";
+                                    "首页"
+                                }
+                            }
+                            
+                            li
+                            {
+                                a
+                                {
+                                    href: "#about";
+                                    "关于"
+                                }
+                            }
+                            
+                            li
+                            {
+                                a
+                                {
+                                    href: "#contact";
+                                    "联系"
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                main
+                {
+                    class: yuigahama-main;
+                    
+                    section
+                    {
+                        class: yuigahama-section;
+                        
+                        div
+                        {
+                            class: yuigahama-card;
+                            
+                            h2
+                            {
+                                "欢迎来到由比滨结衣的世界"
+                            }
+                            
+                            p
+                            {
+                                "这是温柔女孩的主题模块。"
+                            }
+                            
+                            button
+                            {
+                                class: yuigahama-button;
+                                
+                                "了解更多"
+                            }
+                        }
+                    }
+                }
+                
+                footer
+                {
+                    class: yuigahama-footer;
+                    
+                    p
+                    {
+                        "© 2024 由比滨结衣主题模块. 保留所有权利."
+                    }
+                }
+            }
+        }
+    }
+}

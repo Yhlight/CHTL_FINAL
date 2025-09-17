@@ -1,0 +1,249 @@
+{
+  "HTML Element": {
+    "prefix": "elem",
+    "body": [
+      "${1:element}",
+      "{",
+      "    ${2:content}",
+      "}"
+    ],
+    "description": "Create an HTML element"
+  },
+  "Div Element": {
+    "prefix": "div",
+    "body": [
+      "div",
+      "{",
+      "    ${1:content}",
+      "}"
+    ],
+    "description": "Create a div element"
+  },
+  "Paragraph": {
+    "prefix": "p",
+    "body": [
+      "p",
+      "{",
+      "    ${1:text}",
+      "}"
+    ],
+    "description": "Create a paragraph element"
+  },
+  "Heading": {
+    "prefix": "h",
+    "body": [
+      "h${1:1}",
+      "{",
+      "    ${2:text}",
+      "}"
+    ],
+    "description": "Create a heading element"
+  },
+  "Link": {
+    "prefix": "a",
+    "body": [
+      "a",
+      "{",
+      "    href: \"${1:url}\";",
+      "    ${2:text}",
+      "}"
+    ],
+    "description": "Create a link element"
+  },
+  "Image": {
+    "prefix": "img",
+    "body": [
+      "img",
+      "{",
+      "    src: \"${1:image.jpg}\";",
+      "    alt: \"${2:description}\";",
+      "}"
+    ],
+    "description": "Create an image element"
+  },
+  "Button": {
+    "prefix": "button",
+    "body": [
+      "button",
+      "{",
+      "    ${1:text}",
+      "}"
+    ],
+    "description": "Create a button element"
+  },
+  "Style Block": {
+    "prefix": "style",
+    "body": [
+      "style",
+      "{",
+      "    ${1:property}: ${2:value};",
+      "}"
+    ],
+    "description": "Create a style block"
+  },
+  "Script Block": {
+    "prefix": "script",
+    "body": [
+      "script",
+      "{",
+      "    ${1:javascript code}",
+      "}"
+    ],
+    "description": "Create a script block"
+  },
+  "Text Block": {
+    "prefix": "text",
+    "body": [
+      "text",
+      "{",
+      "    \"${1:text content}\"",
+      "}"
+    ],
+    "description": "Create a text block"
+  },
+  "Template": {
+    "prefix": "template",
+    "body": [
+      "[Template] @${1:Type} ${2:Name}",
+      "{",
+      "    ${3:content}",
+      "}"
+    ],
+    "description": "Create a template"
+  },
+  "Custom": {
+    "prefix": "custom",
+    "body": [
+      "[Custom] @${1:Type} ${2:Name}",
+      "{",
+      "    ${3:content}",
+      "}"
+    ],
+    "description": "Create a custom element"
+  },
+  "Import": {
+    "prefix": "import",
+    "body": [
+      "[Import] @${1:Type} from \"${2:path}\" as ${3:name}"
+    ],
+    "description": "Create an import statement"
+  },
+  "Namespace": {
+    "prefix": "namespace",
+    "body": [
+      "[Namespace] ${1:name}",
+      "{",
+      "    ${2:content}",
+      "}"
+    ],
+    "description": "Create a namespace"
+  },
+  "Configuration": {
+    "prefix": "config",
+    "body": [
+      "[Configuration]",
+      "{",
+      "    ${1:setting} = ${2:value};",
+      "}"
+    ],
+    "description": "Create a configuration block"
+  },
+  "HTML5 Document": {
+    "prefix": "html5",
+    "body": [
+      "use html5;",
+      "",
+      "html",
+      "{",
+      "    head",
+      "    {",
+      "        title",
+      "        {",
+      "            \"${1:Page Title}\"",
+      "        }",
+      "    }",
+      "    ",
+      "    body",
+      "    {",
+      "        ${2:content}",
+      "    }",
+      "}"
+    ],
+    "description": "Create a complete HTML5 document"
+  },
+  "CHTL JS ScriptLoader": {
+    "prefix": "scriptloader",
+    "body": [
+      "ScriptLoader",
+      "{",
+      "    load: \"${1:module.js}\",",
+      "    load: \"${2:module2.js}\"",
+      "}"
+    ],
+    "description": "Create a ScriptLoader"
+  },
+  "CHTL JS Listen": {
+    "prefix": "listen",
+    "body": [
+      "Listen",
+      "{",
+      "    click: () => {",
+      "        ${1:code}",
+      "    }",
+      "}"
+    ],
+    "description": "Create a Listen event handler"
+  },
+  "CHTL JS Animate": {
+    "prefix": "animate",
+    "body": [
+      "Animate",
+      "{",
+      "    target: ${1:element},",
+      "    duration: ${2:1000},",
+      "    easing: ${3:ease-in-out},",
+      "    ",
+      "    begin: {",
+      "        ${4:css properties}",
+      "    },",
+      "    ",
+      "    end: {",
+      "        ${5:css properties}",
+      "    }",
+      "}"
+    ],
+    "description": "Create an Animate animation"
+  },
+  "CHTL JS Router": {
+    "prefix": "router",
+    "body": [
+      "Router",
+      "{",
+      "    url: \"${1:/path}\",",
+      "    page: ${2:element}",
+      "}"
+    ],
+    "description": "Create a Router"
+  },
+  "CHTL JS Vir": {
+    "prefix": "vir",
+    "body": [
+      "Vir ${1:name} = ${2:function};"
+    ],
+    "description": "Create a Vir virtual object"
+  },
+  "CHTL JS Selector": {
+    "prefix": "selector",
+    "body": [
+      "{{${1:selector}}}"
+    ],
+    "description": "Create a CHTL JS selector"
+  },
+  "Responsive Value": {
+    "prefix": "responsive",
+    "body": [
+      "$${1:variableName}$"
+    ],
+    "description": "Create a responsive value"
+  }
+}

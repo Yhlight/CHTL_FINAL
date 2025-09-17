@@ -1,0 +1,24 @@
+[Info]
+{
+    name = "yuigahama";
+    version = "1.0.0";
+    description = "由比滨结衣主题模块 - 温柔的女孩";
+    author = "CHTL Team";
+    license = "MIT";
+    dependencies = "";
+    category = "theme";
+    minCHTLVersion = "1.0.0";
+    maxCHTLVersion = "2.0.0";
+}
+
+[Export]
+{
+    [Custom] @Style YuigahamaStyle, YuigahamaCard, YuigahamaButton,
+           YuigahamaHeader, YuigahamaFooter;
+
+    [Custom] @Element YuigahamaPage, YuigahamaSection, YuigahamaNav,
+             YuigahamaModal, YuigahamaGallery;
+
+    [Custom] @Var YuigahamaColors, YuigahamaFonts, YuigahamaSpacing,
+         YuigahamaBreakpoints, YuigahamaAnimations;
+}
