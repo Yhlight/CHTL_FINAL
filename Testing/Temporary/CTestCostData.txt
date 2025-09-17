@@ -1,0 +1,11 @@
+LexerTest.BasicElementsAndAttributes 19 0.000222976
+LexerTest.CommentsAndWhitespace 19 0.000204352
+ParserTest.BasicStructure 16 0.00025262
+GeneratorTest.FullPipeline 4 0.000959653
+ParserTest.StyleBlockWithSelector 14 0.000287876
+GeneratorTest.FullPipelineWithMixedStyles 8 0.000495865
+GeneratorTest.AutomaticAttributeMerging 9 0.000427348
+GeneratorTest.AmpersandSelectorReplacement 8 0.000512407
+ParserTest.ExpressionPrecedence 2 0
+GeneratorTest.AttributeArithmetic 1 0.00391692
+---
