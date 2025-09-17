@@ -1,49 +1,58 @@
 #include "CompilerDispatcher.h"
-#include "../CodeMerger/CodeMerger.h"
 #include "../CHTL/CHTLLexer/Lexer.h"
 #include "../CHTL/CHTLParser/Parser.h"
 #include "../CHTL/CHTLGenerator/Generator.h"
 #include <iostream>
+#include <sstream>
 
 namespace CHTL {
 
 CompilerDispatcher::CompilerDispatcher() {}
 
 std::string CompilerDispatcher::dispatch(const std::vector<CodeFragment>& fragments) {
-    CodeMerger merger;
-    Generator generator; // Create one generator and reuse it.
+    Generator generator;
+    std::stringstream body_stream;
 
     for (const auto& fragment : fragments) {
         if (fragment.type == CodeType::CHTL) {
-            // Instantiate the CHTL compiler pipeline
             Lexer lexer(fragment.content);
             Parser parser(lexer);
             std::unique_ptr<RootNode> ast = parser.parseProgram();
 
-            // Check for parsing errors
             if (!parser.getErrors().empty()) {
                 std::cerr << "Parsing failed with " << parser.getErrors().size() << " errors.\n";
-                // For now, we'll continue and try to generate what we can.
-                // A real compiler might stop here.
+                for(const auto& err : parser.getErrors()) {
+                    std::cerr << "  - " << err << "\n";
+                }
             }
 
-            // Generate HTML from the AST
-            std::string html_output = generator.generate(ast.get());
-            merger.addHtml(html_output);
-
-        } else if (fragment.type == CodeType::CSS) {
-            // In a future phase, this would go to a CSS compiler/processor.
-            // For now, we can just merge it directly.
-            merger.addCss(fragment.content);
-        } else if (fragment.type == CodeType::JS) {
-            // To be handled by the JS compiler.
-            merger.addJs(fragment.content);
+            // The generator now produces the body and collects global CSS separately.
+            body_stream << generator.generate(ast.get());
         }
-        // CHTL_JS will also be handled in a future phase.
     }
 
-    // The merger will combine the pieces into the final output.
-    return merger.getFinalOutput();
+    // Assemble the final document
+    std::stringstream final_doc;
+    final_doc << "<!DOCTYPE html>\n";
+    final_doc << "<html>\n";
+    final_doc << "<head>\n";
+    final_doc << "  <meta charset=\"UTF-8\">\n";
+    final_doc << "  <title>CHTL Output</title>\n";
+
+    std::string global_css = generator.getGlobalCss();
+    if (!global_css.empty()) {
+        final_doc << "  <style>\n";
+        final_doc << global_css;
+        final_doc << "  </style>\n";
+    }
+
+    final_doc << "</head>\n";
+    final_doc << "<body>\n";
+    final_doc << body_stream.str();
+    final_doc << "</body>\n";
+    final_doc << "</html>\n";
+
+    return final_doc.str();
 }
 
 } // namespace CHTL

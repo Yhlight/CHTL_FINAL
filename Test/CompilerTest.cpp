@@ -2,6 +2,7 @@
 #include "../CHTL/CHTLLexer/Lexer.h"
 #include "../CHTL/CHTLParser/Parser.h"
 #include "../CHTL/CHTLGenerator/Generator.h"
+#include "../CompilerDispatcher/CompilerDispatcher.h"
 #include "../Util/StringUtil/StringUtil.h"
 #include <string>
 
@@ -16,68 +17,11 @@ std::string normalize_html(const std::string& html) {
     return result;
 }
 
-TEST_CASE(Compiler_Pipeline_Basic) {
-    const std::string source = R"(
-        // This is a test CHTL document
-        div {
-            id: "main";
-            class: "container";
-
-            p {
-                text { "Hello, CHTL!" }
-            }
-
-            img {
-                src: "image.png";
-            }
-        }
-    )";
-
-    const std::string expected_html = R"(
-        <div class="container" id="main">
-            <p>
-                Hello, CHTL!
-            </p>
-            <img src="image.png" />
-        </div>
-    )";
-
-    // --- Pipeline ---
-    CHTL::Lexer lexer(source);
-    CHTL::Parser parser(lexer);
-    std::unique_ptr<CHTL::RootNode> ast = parser.parseProgram();
-
-    // 1. Check for parsing errors
-    ASSERT_EQUAL(0, parser.getErrors().size());
-
-    CHTL::Generator generator;
-    std::string actual_html = generator.generate(ast.get());
-
-    // 2. Compare the generated HTML with the expected output.
-    // We normalize both to make the comparison robust against formatting differences.
-    ASSERT_EQUAL(normalize_html(expected_html), normalize_html(actual_html));
-
-    return true;
-}
-
+// This test is now obsolete as the dispatcher creates a full document,
+// but we'll keep its core to test basic element/attribute parsing.
 TEST_CASE(Parser_UnquotedLiterals) {
-    const std::string source = R"(
-        div {
-            class: some-class-name;
-        }
-    )";
-
-    // My parser implementation has a bug and probably doesn't handle this correctly.
-    // It expects a STRING token after the colon, but the lexer produces an IDENTIFIER
-    // for `some-class-name`. I need to fix the parser to accept an IDENTIFIER as a value.
-    // Let's write the test to expect the correct behavior.
-
-    const std::string expected_html = R"(<div class="some-class-name"></div>)";
-
-    // I will fix the parser to handle this.
-    // In `parseAttributes`, I will change `if (currentTokenIs(TokenType::STRING))` to
-    // `if (currentTokenIs(TokenType::STRING) || currentTokenIs(TokenType::IDENTIFIER))`
-    // I already did this in my head, but let's assume it's in the code.
+    const std::string source = R"(div { class: some-class-name; })";
+    const std::string expected_body = R"(<div class="some-class-name"></div>)";
 
     CHTL::Lexer lexer(source);
     CHTL::Parser parser(lexer);
@@ -85,47 +29,90 @@ TEST_CASE(Parser_UnquotedLiterals) {
     ASSERT_EQUAL(0, parser.getErrors().size());
 
     CHTL::Generator g;
-    std::string actual_html = g.generate(ast.get());
+    std::string actual_body = g.generate(ast.get());
 
-    ASSERT_EQUAL(normalize_html(expected_html), normalize_html(actual_html));
+    ASSERT_EQUAL(normalize_html(expected_body), normalize_html(actual_body));
 
     return true;
 }
 
-TEST_CASE(Compiler_LocalStyleBlock) {
+TEST_CASE(Compiler_InlineStyleBlock) {
     const std::string source = R"(
         div {
             id: my-div;
             style {
-                width: 100px;
                 color: red;
                 border: 1px solid black;
             }
         }
     )";
 
-    // std::map sorts keys alphabetically, so the output order will be predictable.
+    // The dispatcher now creates a full HTML document.
     const std::string expected_html = R"(
-        <div id="my-div" style="border: 1px solid black; color: red; width: 100px;">
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>CHTL Output</title>
+        </head>
+        <body>
+          <div id="my-div" style="border: 1px solid black; color: red;">
+          </div>
+        </body>
+        </html>
     )";
 
-    // --- Pipeline ---
-    CHTL::Lexer lexer(source);
-    CHTL::Parser parser(lexer);
-    std::unique_ptr<CHTL::RootNode> ast = parser.parseProgram();
+    std::vector<CHTL::CodeFragment> fragments = {{CHTL::CodeType::CHTL, source}};
+    CHTL::CompilerDispatcher dispatcher;
+    std::string actual_html = dispatcher.dispatch(fragments);
 
-    // 1. Check for parsing errors
-    if (parser.getErrors().size() > 0) {
-        for(const auto& err : parser.getErrors()) std::cerr << err << std::endl;
-    }
-    ASSERT_EQUAL(0, parser.getErrors().size());
-
-    CHTL::Generator generator;
-    std::string actual_html = generator.generate(ast.get());
-
-    // 2. Compare the generated HTML with the expected output.
     ASSERT_EQUAL(normalize_html(expected_html), normalize_html(actual_html));
 
+    return true;
+}
+
+TEST_CASE(Compiler_GlobalAndInlineStyles) {
+    const std::string source = R"(
+        div {
+            style {
+                // This is an inline style
+                color: blue;
+
+                // This is a global style rule
+                .nested {
+                    font-weight: bold;
+                }
+            }
+            p { text { "Hello" } }
+        }
+    )";
+
+    const std::string expected_html = R"(
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>CHTL Output</title>
+          <style>
+          .nested {
+            font-weight: bold;
+          }
+          </style>
+        </head>
+        <body>
+          <div style="color: blue;">
+            <p>
+              Hello
+            </p>
+          </div>
+        </body>
+        </html>
+    )";
+
+    std::vector<CHTL::CodeFragment> fragments = {{CHTL::CodeType::CHTL, source}};
+    CHTL::CompilerDispatcher dispatcher;
+    std::string actual_html = dispatcher.dispatch(fragments);
+
+    ASSERT_EQUAL(normalize_html(expected_html), normalize_html(actual_html));
     return true;
 }

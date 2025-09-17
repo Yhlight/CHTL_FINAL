@@ -193,5 +193,7 @@ CMakeFiles/run_tests.dir/Test/CompilerTest.cpp.o: \
  /usr/include/c++/13/pstl/execution_defs.h \
  /app/Test/../CHTL/CHTLGenerator/Generator.h \
  /app/Test/../CHTL/CHTLGenerator/../CHTLNode/Node.h \
+ /app/Test/../CompilerDispatcher/CompilerDispatcher.h \
+ /app/Test/../CompilerDispatcher/../Scanner/UnifiedScanner.h \
  /app/Test/../Util/StringUtil/StringUtil.h /usr/include/c++/13/algorithm \
  /usr/include/c++/13/pstl/glue_algorithm_defs.h

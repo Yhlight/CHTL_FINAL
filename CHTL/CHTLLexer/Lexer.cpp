@@ -119,6 +119,8 @@ Token Lexer::nextToken() {
         case ':': tok = {TokenType::COLON, ":", m_line}; break;
         case '=': tok = {TokenType::EQUALS, "=", m_line}; break;
         case ';': tok = {TokenType::SEMICOLON, ";", m_line}; break;
+        case '.': tok = {TokenType::DOT, ".", m_line}; break;
+        case '#': tok = {TokenType::HASH, "#", m_line}; break;
         case '"': return readQuotedString('"');
         case '\'': return readQuotedString('\'');
         case 0: tok = {TokenType::END_OF_FILE, "", m_line}; break;

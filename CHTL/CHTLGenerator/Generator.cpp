@@ -15,15 +15,20 @@ namespace CHTL {
 Generator::Generator() {}
 
 std::string Generator::generate(const Node* rootNode) {
-    m_ss.str(""); // Clear the stream
+    m_ss.str("");
+    m_global_css_stream.str("");
     m_indent_level = 0;
     visit(rootNode);
     return m_ss.str();
 }
 
+std::string Generator::getGlobalCss() const {
+    return m_global_css_stream.str();
+}
+
 void Generator::writeIndent() {
     for (int i = 0; i < m_indent_level; ++i) {
-        m_ss << "  "; // 2 spaces for indentation
+        m_ss << "  ";
     }
 }
 
@@ -40,8 +45,13 @@ void Generator::visit(const Node* node) {
         case NodeType::Text:
             visitTextNode(static_cast<const TextNode*>(node));
             break;
+        case NodeType::Style:
+            visitStyleNode(static_cast<const StyleNode*>(node));
+            break;
+        case NodeType::CssRule:
+            visitCssRuleNode(static_cast<const CssRuleNode*>(node));
+            break;
         case NodeType::Comment:
-            // Not implemented in Phase 1
             break;
     }
 }
@@ -56,18 +66,26 @@ void Generator::visitElementNode(const ElementNode* node) {
     writeIndent();
     m_ss << "<" << node->getTagName();
 
-    // Write attributes
     for (const auto& attr : node->getAttributes()) {
         m_ss << " " << attr.first << "=\"" << attr.second << "\"";
     }
 
-    // Write styles
-    const auto& styles = node->getStyles();
-    if (!styles.empty()) {
+    // Collect inline styles from any StyleNode children
+    StyleMap inline_styles;
+    for (const auto& child : node->getChildren()) {
+        if (child->getType() == NodeType::Style) {
+            const auto* style_node = static_cast<const StyleNode*>(child.get());
+            for (const auto& style_prop : style_node->getInlineStyles()) {
+                inline_styles[style_prop.first] = style_prop.second;
+            }
+        }
+    }
+
+    if (!inline_styles.empty()) {
         m_ss << " style=\"";
-        for (auto it = styles.begin(); it != styles.end(); ++it) {
+        for (auto it = inline_styles.begin(); it != inline_styles.end(); ++it) {
             m_ss << it->first << ": " << it->second << ";";
-            if (std::next(it) != styles.end()) {
+            if (std::next(it) != inline_styles.end()) {
                 m_ss << " ";
             }
         }
@@ -76,24 +94,48 @@ void Generator::visitElementNode(const ElementNode* node) {
 
     if (node->getChildren().empty() && void_elements.count(node->getTagName())) {
         m_ss << " />\n";
-    } else {
-        m_ss << ">\n";
-        m_indent_level++;
+        return;
+    }
 
-        // Visit children
-        for (const auto& child : node->getChildren()) {
+    m_ss << ">\n";
+    m_indent_level++;
+
+    // Visit children, but skip StyleNodes as they've been processed
+    for (const auto& child : node->getChildren()) {
+        if (child->getType() != NodeType::Style) {
+            visit(child.get());
+        } else {
+            // Visit the style node to process its global rules, but don't generate HTML
             visit(child.get());
         }
-
-        m_indent_level--;
-        writeIndent();
-        m_ss << "</" << node->getTagName() << ">\n";
     }
+
+    m_indent_level--;
+    writeIndent();
+    m_ss << "</" << node->getTagName() << ">\n";
 }
 
 void Generator::visitTextNode(const TextNode* node) {
     writeIndent();
     m_ss << node->getText() << "\n";
+}
+
+void Generator::visitStyleNode(const StyleNode* node) {
+    // This node's purpose is to hold inline styles and CSS rules.
+    // Inline styles are handled by the parent ElementNode visitor.
+    // Here, we just need to visit its children to process the global CSS rules.
+    for (const auto& child : node->getChildren()) {
+        visit(child.get());
+    }
+}
+
+void Generator::visitCssRuleNode(const CssRuleNode* node) {
+    // This node's output goes to the global CSS buffer, not the main HTML stream.
+    m_global_css_stream << node->getSelector() << " {\n";
+    for (const auto& prop : node->getProperties()) {
+        m_global_css_stream << "  " << prop.first << ": " << prop.second << ";\n";
+    }
+    m_global_css_stream << "}\n";
 }
 
 } // namespace CHTL

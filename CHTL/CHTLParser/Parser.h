@@ -29,7 +29,8 @@ private:
     std::unique_ptr<ElementNode> parseElementStatement(Node* parent);
     void parseAttributes(ElementNode* element);
     std::unique_ptr<TextNode> parseTextStatement();
-    void parseStyleStatement(ElementNode* owner);
+    std::unique_ptr<StyleNode> parseStyleNodeStatement();
+    std::unique_ptr<CssRuleNode> parseCssRuleNode();
 
     // Helper to check the current token type.
     bool currentTokenIs(TokenType t) const;

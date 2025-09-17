@@ -13,14 +13,16 @@ class Node;
 
 // Define a type for a list of child nodes using smart pointers for automatic memory management.
 using NodeList = std::vector<std::unique_ptr<Node>>;
+using StyleMap = std::map<std::string, std::string>;
 
 // Enum to identify the type of a node, crucial for casting and processing.
 enum class NodeType {
     Root,
     Element,
     Text,
-    Comment
-    // This will be extended with more types like Style, Script, Template, etc.
+    Comment,
+    Style,
+    CssRule
 };
 
 // The base class for all AST nodes.
@@ -55,17 +57,41 @@ public:
 
     const std::string& getTagName() const { return m_tag_name; }
 
-    const std::map<std::string, std::string>& getAttributes() const { return m_attributes; }
+    const StyleMap& getAttributes() const { return m_attributes; }
     void setAttribute(const std::string& key, const std::string& value) { m_attributes[key] = value; }
-
-    const std::map<std::string, std::string>& getStyles() const { return m_styles; }
-    void setStyle(const std::string& key, const std::string& value) { m_styles[key] = value; }
 
 private:
     std::string m_tag_name;
-    std::map<std::string, std::string> m_attributes;
-    std::map<std::string, std::string> m_styles;
+    StyleMap m_attributes;
 };
+
+// Represents a CSS rule with a selector and properties.
+class CssRuleNode : public Node {
+public:
+    CssRuleNode(std::string selector) : m_selector(std::move(selector)) {}
+    NodeType getType() const override { return NodeType::CssRule; }
+
+    const std::string& getSelector() const { return m_selector; }
+    const StyleMap& getProperties() const { return m_properties; }
+    void setProperty(const std::string& key, const std::string& value) { m_properties[key] = value; }
+
+private:
+    std::string m_selector;
+    StyleMap m_properties;
+};
+
+// Represents a style block, which can contain inline styles and CSS rule children.
+class StyleNode : public Node {
+public:
+    StyleNode() = default;
+    NodeType getType() const override { return NodeType::Style; }
+
+    const StyleMap& getInlineStyles() const { return m_inline_styles; }
+    void setInlineStyle(const std::string& key, const std::string& value) { m_inline_styles[key] = value; }
+private:
+    StyleMap m_inline_styles;
+};
+
 
 // Represents the root of the AST.
 class RootNode : public Node {
