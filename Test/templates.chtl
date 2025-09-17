@@ -1,5 +1,11 @@
 // Test file for template features
 
+[Template] @Var Theme
+{
+    primaryColor: "darkred";
+    defaultFont: "Arial";
+}
+
 [Template] @Style DefaultText
 {
     color: "black";
@@ -11,15 +17,16 @@ body {
     p {
         id: "my-para";
         style {
-            // Use the template
+            // Use the style template
             @Style DefaultText;
 
-            // Add an additional inline style
+            // Use variables from the var template
             background-color: "lightgray";
+            font-family: Theme(defaultFont);
 
-            // Add a nested rule
+            // Add a nested rule that also uses a variable
             &:hover {
-                color: "darkred";
+                color: Theme(primaryColor);
             }
         }
         text: "This is a paragraph using a style template.";

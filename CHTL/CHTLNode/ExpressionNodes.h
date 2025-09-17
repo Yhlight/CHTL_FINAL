@@ -27,3 +27,16 @@ public:
     Token token; // The token::{ type: STRING_LITERAL, literal: "some text" }
     std::string value;
 };
+
+// Represents the usage of a variable from a Var template, e.g., ThemeColor(tableColor)
+class VarUsageNode : public Expression {
+public:
+    VarUsageNode(const Token& token, std::string groupName, std::string variableName)
+        : token(token), groupName(std::move(groupName)), variableName(std::move(variableName)) {}
+
+    std::string toString() const override { return groupName + "(" + variableName + ")"; }
+
+    Token token;
+    std::string groupName;
+    std::string variableName;
+};

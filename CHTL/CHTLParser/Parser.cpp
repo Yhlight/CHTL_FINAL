@@ -195,6 +195,9 @@ std::shared_ptr<AttributeNode> Parser::parseAttributeNode() {
 }
 
 std::shared_ptr<Expression> Parser::parseExpression() {
+    if (currentTokenIs(TokenType::IDENTIFIER) && peekTokenIs(TokenType::LEFT_PAREN)) {
+        return parseVarUsageExpression();
+    }
     if (currentTokenIs(TokenType::STRING_LITERAL)) {
         return std::make_shared<StringLiteralNode>(currentToken, currentToken.literal);
     }
@@ -202,6 +205,27 @@ std::shared_ptr<Expression> Parser::parseExpression() {
         return std::make_shared<IdentifierNode>(currentToken, currentToken.literal);
     }
     return nullptr;
+}
+
+std::shared_ptr<Expression> Parser::parseVarUsageExpression() {
+    Token groupToken = currentToken; // The ThemeColor part
+    nextToken(); // consume group name
+    nextToken(); // consume (
+
+    if (!currentTokenIs(TokenType::IDENTIFIER)) {
+        errors.push_back("Expected variable name inside parentheses for variable usage.");
+        return nullptr;
+    }
+    Token varToken = currentToken; // The tableColor part
+    nextToken(); // consume variable name
+
+    if (!currentTokenIs(TokenType::RIGHT_PAREN)) {
+        errors.push_back("Expected ')' after variable name.");
+        return nullptr;
+    }
+    // nextToken() will be called by the caller (parseAttributeNode)
+
+    return std::make_shared<VarUsageNode>(groupToken, groupToken.literal, varToken.literal);
 }
 
 

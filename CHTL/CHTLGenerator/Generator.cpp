@@ -192,6 +192,16 @@ std::string Generator::generateExpression(const std::shared_ptr<Expression>& nod
         return identNode->value;
     } else if (auto strNode = std::dynamic_pointer_cast<StringLiteralNode>(node)) {
         return strNode->value;
+    } else if (auto varUsageNode = std::dynamic_pointer_cast<VarUsageNode>(node)) {
+        auto varTemplate = context.getVarTemplate(varUsageNode->groupName);
+        if (varTemplate) {
+            for (const auto& var : varTemplate->variables) {
+                if (var->key == varUsageNode->variableName) {
+                    // Recursively call generateExpression to resolve the value
+                    return generateExpression(var->value);
+                }
+            }
+        }
     }
     return "";
 }

@@ -36,6 +36,7 @@ private:
     std::string parseSelector();
     std::shared_ptr<Statement> parseTemplateStatement();
     std::shared_ptr<TemplateUsageNode> parseTemplateUsageNode();
+    std::shared_ptr<Expression> parseVarUsageExpression();
 
     Lexer& lexer;
     Context& context;

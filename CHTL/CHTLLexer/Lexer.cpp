@@ -131,6 +131,8 @@ Token Lexer::nextToken() {
         case '@': tok = makeToken(TokenType::AT_SIGN, "@"); readChar(); break;
         case '[': tok = makeToken(TokenType::LEFT_BRACKET, "["); readChar(); break;
         case ']': tok = makeToken(TokenType::RIGHT_BRACKET, "]"); readChar(); break;
+        case '(': tok = makeToken(TokenType::LEFT_PAREN, "("); readChar(); break;
+        case ')': tok = makeToken(TokenType::RIGHT_PAREN, ")"); readChar(); break;
         case '"':
         case '\'':
             return readStringLiteral();

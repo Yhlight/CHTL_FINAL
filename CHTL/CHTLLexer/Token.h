@@ -26,6 +26,8 @@ enum class TokenType {
     AT_SIGN,     // @
     LEFT_BRACKET,  // [
     RIGHT_BRACKET, // ]
+    LEFT_PAREN,    // (
+    RIGHT_PAREN,   // )
 
     // Comments
     HASH_COMMENT, // # A comment
