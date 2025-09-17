@@ -1,6 +1,7 @@
 #include "CHTLParser.h"
 #include "../CHTLLexer/CHTLLexer.h" // For recursive parsing
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <unordered_set>
 #include <set>
