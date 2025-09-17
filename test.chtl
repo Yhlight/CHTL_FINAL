@@ -1,0 +1,21 @@
+// This is a test file for the CHTL Lexer.
+# This is a generator comment
+
+div {
+    id: "main-box";
+    class = my_class; // Colon and Equal are equivalent
+
+    /*
+     * A multi-line
+     * comment block.
+     */
+    text {
+        Hello World! This is an unquoted literal.
+        123.45
+    }
+
+    style {
+        color: red;
+        width: 100px + 20%;
+    }
+}
