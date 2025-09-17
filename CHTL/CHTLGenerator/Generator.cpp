@@ -1,4 +1,14 @@
 #include "Generator.h"
+#include <unordered_set>
+#include <iterator>
+
+namespace {
+// A helper set of HTML void elements that should not have a closing tag.
+const std::unordered_set<std::string> void_elements = {
+    "area", "base", "br", "col", "embed", "hr", "img", "input",
+    "link", "meta", "param", "source", "track", "wbr"
+};
+}
 
 namespace CHTL {
 
@@ -51,9 +61,20 @@ void Generator::visitElementNode(const ElementNode* node) {
         m_ss << " " << attr.first << "=\"" << attr.second << "\"";
     }
 
-    if (node->getChildren().empty()) {
-        // Self-closing tag for simplicity if no children
-        // A more robust solution would check for HTML void elements
+    // Write styles
+    const auto& styles = node->getStyles();
+    if (!styles.empty()) {
+        m_ss << " style=\"";
+        for (auto it = styles.begin(); it != styles.end(); ++it) {
+            m_ss << it->first << ": " << it->second << ";";
+            if (std::next(it) != styles.end()) {
+                m_ss << " ";
+            }
+        }
+        m_ss << "\"";
+    }
+
+    if (node->getChildren().empty() && void_elements.count(node->getTagName())) {
         m_ss << " />\n";
     } else {
         m_ss << ">\n";

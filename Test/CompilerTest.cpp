@@ -34,7 +34,7 @@ TEST_CASE(Compiler_Pipeline_Basic) {
     )";
 
     const std::string expected_html = R"(
-        <div id="main" class="container">
+        <div class="container" id="main">
             <p>
                 Hello, CHTL!
             </p>
@@ -87,6 +87,44 @@ TEST_CASE(Parser_UnquotedLiterals) {
     CHTL::Generator g;
     std::string actual_html = g.generate(ast.get());
 
+    ASSERT_EQUAL(normalize_html(expected_html), normalize_html(actual_html));
+
+    return true;
+}
+
+TEST_CASE(Compiler_LocalStyleBlock) {
+    const std::string source = R"(
+        div {
+            id: my-div;
+            style {
+                width: 100px;
+                color: red;
+                border: 1px solid black;
+            }
+        }
+    )";
+
+    // std::map sorts keys alphabetically, so the output order will be predictable.
+    const std::string expected_html = R"(
+        <div id="my-div" style="border: 1px solid black; color: red; width: 100px;">
+        </div>
+    )";
+
+    // --- Pipeline ---
+    CHTL::Lexer lexer(source);
+    CHTL::Parser parser(lexer);
+    std::unique_ptr<CHTL::RootNode> ast = parser.parseProgram();
+
+    // 1. Check for parsing errors
+    if (parser.getErrors().size() > 0) {
+        for(const auto& err : parser.getErrors()) std::cerr << err << std::endl;
+    }
+    ASSERT_EQUAL(0, parser.getErrors().size());
+
+    CHTL::Generator generator;
+    std::string actual_html = generator.generate(ast.get());
+
+    // 2. Compare the generated HTML with the expected output.
     ASSERT_EQUAL(normalize_html(expected_html), normalize_html(actual_html));
 
     return true;

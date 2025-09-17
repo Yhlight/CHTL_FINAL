@@ -39,6 +39,10 @@ public:
         while (std::getline(tokenStream, token, delimiter)) {
             tokens.push_back(token);
         }
+        // Handle the case where the string ends with a delimiter
+        if (!s.empty() && s.back() == delimiter) {
+            tokens.push_back("");
+        }
         return tokens;
     }
 };

@@ -25,10 +25,11 @@ private:
     // The core parsing functions that build the AST.
     // These methods correspond to different rules in the CHTL grammar.
     void parseStatementList(Node* parent);
-    std::unique_ptr<Node> parseStatement();
-    std::unique_ptr<ElementNode> parseElementStatement();
+    std::unique_ptr<Node> parseStatement(Node* parent);
+    std::unique_ptr<ElementNode> parseElementStatement(Node* parent);
     void parseAttributes(ElementNode* element);
     std::unique_ptr<TextNode> parseTextStatement();
+    void parseStyleStatement(ElementNode* owner);
 
     // Helper to check the current token type.
     bool currentTokenIs(TokenType t) const;

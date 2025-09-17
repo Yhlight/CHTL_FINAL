@@ -54,13 +54,17 @@ public:
     NodeType getType() const override { return NodeType::Element; }
 
     const std::string& getTagName() const { return m_tag_name; }
-    const std::map<std::string, std::string>& getAttributes() const { return m_attributes; }
 
+    const std::map<std::string, std::string>& getAttributes() const { return m_attributes; }
     void setAttribute(const std::string& key, const std::string& value) { m_attributes[key] = value; }
+
+    const std::map<std::string, std::string>& getStyles() const { return m_styles; }
+    void setStyle(const std::string& key, const std::string& value) { m_styles[key] = value; }
 
 private:
     std::string m_tag_name;
     std::map<std::string, std::string> m_attributes;
+    std::map<std::string, std::string> m_styles;
 };
 
 // Represents the root of the AST.

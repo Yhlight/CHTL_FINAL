@@ -1,5 +1,6 @@
 #include "Parser.h"
 #include <iostream>
+#include "../../Util/StringUtil/StringUtil.h"
 
 namespace CHTL {
 
@@ -51,7 +52,7 @@ std::unique_ptr<RootNode> Parser::parseProgram() {
 
 void Parser::parseStatementList(Node* parent) {
     while (!currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
-        auto stmt = parseStatement();
+        auto stmt = parseStatement(parent);
         if (stmt) {
             parent->addChild(std::move(stmt));
         }
@@ -59,16 +60,24 @@ void Parser::parseStatementList(Node* parent) {
     }
 }
 
-std::unique_ptr<Node> Parser::parseStatement() {
+std::unique_ptr<Node> Parser::parseStatement(Node* parent) {
     if (currentTokenIs(TokenType::IDENTIFIER)) {
-        return parseElementStatement();
+        return parseElementStatement(parent);
     } else if (currentTokenIs(TokenType::KEYWORD_TEXT)) {
         return parseTextStatement();
+    } else if (currentTokenIs(TokenType::KEYWORD_STYLE)) {
+        // Style statements modify their parent, they don't produce a new node.
+        if (auto element_parent = dynamic_cast<ElementNode*>(parent)) {
+            parseStyleStatement(element_parent);
+        } else {
+            m_errors.push_back("Error: Style block can only be a child of an element.");
+        }
+        return nullptr;
     }
     return nullptr;
 }
 
-std::unique_ptr<ElementNode> Parser::parseElementStatement() {
+std::unique_ptr<ElementNode> Parser::parseElementStatement(Node* parent) {
     auto element = std::make_unique<ElementNode>(m_currentToken.literal);
 
     if (!expectPeek(TokenType::LEFT_BRACE)) {
@@ -76,12 +85,12 @@ std::unique_ptr<ElementNode> Parser::parseElementStatement() {
     }
     nextToken(); // Consume '{'
 
-    // In here, we can have attributes or child elements.
+    // In here, we can have attributes or child elements/statements.
     while (!currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
         if (currentTokenIs(TokenType::IDENTIFIER) && peekTokenIs(TokenType::COLON)) {
             parseAttributes(element.get());
         } else {
-             auto stmt = parseStatement();
+             auto stmt = parseStatement(element.get());
              if (stmt) {
                  element->addChild(std::move(stmt));
              }
@@ -93,47 +102,76 @@ std::unique_ptr<ElementNode> Parser::parseElementStatement() {
 }
 
 void Parser::parseAttributes(ElementNode* element) {
-    // Expecting: IDENTIFIER : (STRING | IDENTIFIER) ;
     std::string key = m_currentToken.literal;
 
     if (!expectPeek(TokenType::COLON)) return;
     nextToken(); // consume ':'
 
-    // CHTL allows unquoted literals for attribute values, which the lexer will
-    // often tokenize as IDENTIFIER. We also accept STRING.
     if (currentTokenIs(TokenType::STRING) || currentTokenIs(TokenType::IDENTIFIER)) {
         element->setAttribute(key, m_currentToken.literal);
     } else {
-        // Error: invalid attribute value
-        std::string error_msg = "Error: Invalid attribute value for key '" + key + "'.";
-        m_errors.push_back(error_msg);
-        std::cerr << error_msg << std::endl;
+        m_errors.push_back("Error: Invalid attribute value for key '" + key + "'.");
     }
 
     if (peekTokenIs(TokenType::SEMICOLON)) {
-        nextToken(); // consume ';'
+        nextToken();
     }
 }
 
 std::unique_ptr<TextNode> Parser::parseTextStatement() {
-    // Expecting: text { STRING }
-    if (!expectPeek(TokenType::LEFT_BRACE)) {
-        return nullptr;
-    }
+    if (!expectPeek(TokenType::LEFT_BRACE)) return nullptr;
     nextToken(); // consume '{'
 
-    if (!currentTokenIs(TokenType::STRING)) {
-         // Error: text block must contain a string literal.
+    if (!currentTokenIs(TokenType::STRING) && !currentTokenIs(TokenType::IDENTIFIER)) {
+        m_errors.push_back("Error: text block must contain a string or unquoted literal.");
         return nullptr;
     }
 
     auto textNode = std::make_unique<TextNode>(m_currentToken.literal);
 
-    if (!expectPeek(TokenType::RIGHT_BRACE)) {
-        return nullptr;
-    }
+    if (!expectPeek(TokenType::RIGHT_BRACE)) return nullptr;
 
     return textNode;
+}
+
+void Parser::parseStyleStatement(ElementNode* owner) {
+    if (!expectPeek(TokenType::LEFT_BRACE)) return;
+    nextToken(); // consume '{'
+
+    while (!currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
+        if (currentTokenIs(TokenType::IDENTIFIER) && peekTokenIs(TokenType::COLON)) {
+            std::string key = m_currentToken.literal;
+            nextToken(); // consume identifier
+            nextToken(); // consume ':'
+
+            std::string value;
+            // CHTL allows complex unquoted values, e.g., `border: 1px solid black;`
+            // We'll consume tokens until we hit a semicolon.
+            while(!currentTokenIs(TokenType::SEMICOLON) && !currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
+                value += m_currentToken.literal;
+                if(peekTokenIs(TokenType::SEMICOLON) || peekTokenIs(TokenType::RIGHT_BRACE)) {
+                    // don't add space at the end
+                } else {
+                    value += " ";
+                }
+                nextToken();
+            }
+            StringUtil::Trim(value);
+            owner->setStyle(key, value);
+
+            // current token is now semicolon, loop will advance past it.
+        } else {
+            // Invalid line in style block, skip to next semicolon or brace.
+            m_errors.push_back("Error: Invalid statement in style block.");
+            while(!currentTokenIs(TokenType::SEMICOLON) && !currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
+                nextToken();
+            }
+        }
+
+        if (currentTokenIs(TokenType::SEMICOLON)) {
+             nextToken(); // consume optional semicolon
+        }
+    }
 }
 
 } // namespace CHTL
