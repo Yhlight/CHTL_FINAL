@@ -1,0 +1,22 @@
+div {
+    id: mydiv;
+    style {
+        width: 100px;
+    }
+}
+
+p {
+    class: mypara;
+    style {
+        font-size: 16px;
+        display: block;
+    }
+}
+
+span {
+    style {
+        width: mydiv.width;
+        font-size: mypara.font-size;
+        display: p.display;
+    }
+}
