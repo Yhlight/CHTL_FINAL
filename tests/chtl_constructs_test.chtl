@@ -25,7 +25,7 @@ body {
     <p>This is raw, un-processed HTML.</p>
 }
 
-[Import] @Chtl from "./some_other_file.chtl"
+[Import] @Chtl from "./some_other_file.chtl";
 
 [Namespace] MySpace {
     // This is a namespace

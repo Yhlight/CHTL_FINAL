@@ -8,10 +8,7 @@
 std::string fragmentTypeToString(CHTL::FragmentType type) {
     switch (type) {
         case CHTL::FragmentType::CHTL: return "CHTL";
-        case CHTL::FragmentType::CSS: return "CSS";
-        case CHTL::FragmentType::JS: return "JS";
         case CHTL::FragmentType::CHTL_JS: return "CHTL_JS";
-        case CHTL::FragmentType::UNKNOWN: return "UNKNOWN";
         default: return "INVALID";
     }
 }

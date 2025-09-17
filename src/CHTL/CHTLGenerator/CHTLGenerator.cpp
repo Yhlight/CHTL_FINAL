@@ -157,24 +157,52 @@ std::string formatValue(const Value& val) {
 
 Value CHTLGenerator::resolvePropertyValue(const std::vector<PropertyValue>& parts) {
     if (parts.empty()) return {0, "", ""};
-    if (parts.size() == 1) {
-        const auto& part = parts[0];
+
+    bool is_expression = false;
+    for (const auto& part : parts) {
         if (std::holds_alternative<Token>(part)) {
-            const auto& token = std::get<Token>(part);
-            if (token.type == TokenType::StringLiteral || token.type == TokenType::UnquotedLiteral || token.type == TokenType::Identifier) {
-                return {0, "", token.lexeme};
+            TokenType type = std::get<Token>(part).type;
+            if (getPrecedence(type) > 0 || type == TokenType::QuestionMark) {
+                is_expression = true;
+                break;
             }
-             if (token.type == TokenType::Number) {
-                return {std::stod(token.lexeme), "", ""};
-            }
-        } else if (std::holds_alternative<ResponsiveValueNode>(part)) {
-            const auto& responsive_node = std::get<ResponsiveValueNode>(part);
-            responsive_variables_.insert(responsive_node.getVariableName());
-            return {0, "", "var(--" + responsive_node.getVariableName() + ")"};
         }
     }
-    auto it = parts.begin();
-    return evaluateExpression(it, parts.end(), 0);
+
+    if (is_expression) {
+        auto it = parts.begin();
+        return evaluateExpression(it, parts.end(), 0);
+    } else {
+        // Not an expression, so just concatenate the parts with intelligent spacing.
+        std::stringstream ss;
+        for (size_t i = 0; i < parts.size(); ++i) {
+            const auto& part = parts[i];
+            if (std::holds_alternative<Token>(part)) {
+                ss << std::get<Token>(part).lexeme;
+            } else if (std::holds_alternative<ResponsiveValueNode>(part)) {
+                const auto& responsive_node = std::get<ResponsiveValueNode>(part);
+                responsive_variables_.insert(responsive_node.getVariableName());
+                ss << "var(--" << responsive_node.getVariableName() << ")";
+            }
+            // TODO: Handle PropertyReferenceNode here as well if it can appear in non-expressions.
+
+            if (i < parts.size() - 1) {
+                bool current_is_num = std::holds_alternative<Token>(part) && std::get<Token>(part).type == TokenType::Number;
+                bool next_is_unit = false;
+                if (std::holds_alternative<Token>(parts[i+1])) {
+                    TokenType next_type = std::get<Token>(parts[i+1]).type;
+                    if (next_type == TokenType::Identifier || next_type == TokenType::Percent) {
+                        next_is_unit = true;
+                    }
+                }
+
+                if (!(current_is_num && next_is_unit)) {
+                    ss << " ";
+                }
+            }
+        }
+        return {0, "", ss.str()};
+    }
 }
 
 bool elementMatchesSimpleSelector(const ElementNode* elem, const std::string& simple_selector) {
@@ -482,6 +510,10 @@ void CHTLGenerator::secondPass() {
             }
         }
         Value final_value = resolvePropertyValue(resolved_parts);
+        // HACK: Special handling for unitless properties. A better solution would involve a list of unitless CSS properties.
+        if (unresolved.property_name == "z-index" || unresolved.property_name == "opacity" || unresolved.property_name == "line-height") {
+            final_value.Svalue = "";
+        }
         unresolved.element->computed_styles_[unresolved.property_name] = formatValue(final_value);
     }
 }
@@ -516,6 +548,9 @@ void CHTLGenerator::render(const Node* node) {
         case NodeType::Origin: renderOrigin(static_cast<const OriginNode*>(node)); break;
         case NodeType::StyleBlock: break; // Handled in first pass
         case NodeType::ScriptBlock: renderScriptBlock(static_cast<const ScriptBlockNode*>(node)); break;
+        case NodeType::Namespace: renderNamespace(static_cast<const NamespaceNode*>(node)); break;
+        case NodeType::Import: break; // No direct output
+        case NodeType::Configuration: break; // No direct output
         default: break;
     }
 }
@@ -574,39 +609,45 @@ void CHTLGenerator::renderScriptBlock(const ScriptBlockNode* node) {
         return;
     }
 
-    // 1. Scan the raw script content to separate JS from CHTL JS
+    // 1. Use the Unified Scanner to process the script content.
     CHTLUnifiedScanner scanner(node->content_);
-    std::vector<CodeFragment> fragments = scanner.scan();
+    ScannerResult scanner_result = scanner.scan();
 
-    // 2. Process the fragments
-    for (const auto& fragment : fragments) {
-        if (fragment.type == FragmentType::JS) {
-            // Pure JS fragments are appended directly
-            global_scripts_ << fragment.content;
-        } else if (fragment.type == FragmentType::CHTL_JS) {
-            // CHTL_JS fragments need to be compiled
-            try {
-                auto chtljs_context = std::make_shared<CHTLJS::CHTLJSContext>();
-                CHTLJS::CHTLJSLexer js_lexer(fragment.content);
-                std::vector<CHTLJS::CHTLJSToken> js_tokens = js_lexer.scanTokens();
+    // 2. Merge the placeholder map from the scanner into the generator's main map.
+    placeholder_map_.insert(scanner_result.placeholder_map.begin(), scanner_result.placeholder_map.end());
 
-                if (!js_tokens.empty() && !(js_tokens.size() == 1 && js_tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) {
-                    CHTLJS::CHTLJSParser js_parser(js_tokens, chtljs_context);
-                    std::unique_ptr<CHTLJS::SequenceNode> js_ast = js_parser.parse();
+    // 3. The scanner gives us a CHTL-JS string with pure JS as placeholders.
+    //    We now parse this CHTL-JS string.
+    auto chtljs_context = std::make_shared<CHTLJS::CHTLJSContext>();
+    CHTLJS::CHTLJSLexer js_lexer(scanner_result.modified_content);
+    std::vector<CHTLJS::CHTLJSToken> js_tokens = js_lexer.scanTokens();
 
-                    if (js_ast) {
-                        CHTLJS::CHTLJSGenerator js_generator;
-                        // The placeholder map is empty because the new scanner doesn't create them for script blocks
-                        std::map<std::string, std::string> empty_map;
-                        global_scripts_ << js_generator.generate(*js_ast, empty_map);
-                    }
-                }
-            } catch (const std::exception& e) {
-                throw std::runtime_error("CHTLJS compilation error in script block: " + std::string(e.what()));
-            }
+    if (js_tokens.empty() || (js_tokens.size() == 1 && js_tokens[0].type == CHTLJS::CHTLJSTokenType::EndOfFile)) {
+        // If there's nothing but placeholders, the lexer might return empty.
+        // We still need to process the original content.
+        if (scanner_result.placeholder_map.count(scanner_result.modified_content)) {
+             global_scripts_ << scanner_result.placeholder_map.at(scanner_result.modified_content);
+        } else {
+             global_scripts_ << scanner_result.modified_content;
         }
+        global_scripts_ << "\n";
+        return;
     }
-    global_scripts_ << "\n";
+
+    CHTLJS::CHTLJSParser js_parser(js_tokens, chtljs_context);
+    std::unique_ptr<CHTLJS::SequenceNode> js_ast = js_parser.parse();
+
+    if (js_ast) {
+        CHTLJS::CHTLJSGenerator js_generator;
+        std::string final_js = js_generator.generate(*js_ast, placeholder_map_);
+        global_scripts_ << final_js << "\n";
+    }
+}
+
+void CHTLGenerator::renderNamespace(const NamespaceNode* node) {
+    for (const auto& child : node->children_) {
+        render(child.get());
+    }
 }
 
 }

@@ -36,12 +36,13 @@ std::unique_ptr<CHTLJSNode> CHTLJSParser::parseStatement() {
     }
     if (peek().type == CHTLJSTokenType::Placeholder) {
         auto node = std::make_unique<PlaceholderNode>(advance().lexeme);
-        consume(CHTLJSTokenType::Semicolon, "Expected ';' after placeholder statement.");
+        match(CHTLJSTokenType::Semicolon); // Optional semicolon
         return node;
     }
 
     auto expr = parseExpression();
-    consume(CHTLJSTokenType::Semicolon, "Expected ';' after expression statement.");
+    // Semicolon is optional, especially at the end of a block.
+    match(CHTLJSTokenType::Semicolon);
     return expr;
 }
 

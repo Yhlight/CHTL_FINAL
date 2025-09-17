@@ -12,8 +12,13 @@
 
 namespace CHTL {
 
-CHTLParser::CHTLParser(std::string source, std::vector<Token>& tokens, CHTLLoader& loader, const std::string& initial_path, std::shared_ptr<ParserContext> context)
-    : source_(std::move(source)), tokens_(tokens), loader_(loader), current_path_(initial_path), context_(context) {
+CHTLParser::CHTLParser(const std::string& source, CHTLLoader& loader, const std::string& initial_path, std::shared_ptr<ParserContext> context)
+    : source_(source), loader_(loader), current_path_(initial_path), context_(context) {
+    CHTLLexer lexer(source_);
+    tokens_ = lexer.scanTokens();
+
+    // The logic to detect the initial namespace should be done carefully.
+    // Let's assume for now the parse logic will handle it correctly.
     if (!tokens_.empty() && tokens_[0].type == TokenType::Namespace) {
         if (tokens_.size() > 1 && tokens_[1].type == TokenType::Identifier) {
             current_namespace_ = tokens_[1].lexeme;
@@ -61,17 +66,7 @@ void CHTLParser::parseExportStatement() {
 std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     std::vector<std::unique_ptr<Node>> nodes;
     if (match({TokenType::Namespace})) {
-        current_namespace_ = consume(TokenType::Identifier, "Expected namespace name.").lexeme;
-        if (match({TokenType::OpenBrace})) {
-            while (!check(TokenType::CloseBrace) && !isAtEnd()) {
-                auto parsed_nodes = parseDeclaration();
-                nodes.insert(nodes.end(), std::make_move_iterator(parsed_nodes.begin()), std::make_move_iterator(parsed_nodes.end()));
-            }
-            consume(TokenType::CloseBrace, "Expected '}' to close namespace block.");
-            current_namespace_ = "";
-        } else {
-            consume(TokenType::Semicolon, "Expected ';' after namespace declaration.");
-        }
+        nodes.push_back(parseNamespaceBlock());
         return nodes;
     }
     if (match({TokenType::Export})) {
@@ -79,39 +74,11 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
         return nodes;
     }
     if (match({TokenType::Configuration})) {
-        parseConfigurationBlock();
+        nodes.push_back(parseConfigurationBlock());
         return nodes;
     }
     if (match({TokenType::Import})) {
-        if (match({TokenType::AtChtl})) {
-            consume(TokenType::From, "Expected 'from' keyword in @Chtl import statement.");
-            const Token& pathToken = consume(TokenType::StringLiteral, "Expected file path string.");
-            consume(TokenType::Semicolon, "Expected ';' after import statement.");
-            std::string import_path = pathToken.lexeme;
-            if(auto content = loader_.loadFile(import_path, current_path_, context_)) {
-                std::filesystem::path p(import_path);
-                std::string default_namespace = p.stem().string();
-                std::string imported_file_canonical_path = p.string();
-                CHTLLexer imported_lexer(*content);
-                std::vector<Token> imported_tokens = imported_lexer.scanTokens();
-                CHTLParser imported_parser(std::move(*content), imported_tokens, loader_, imported_file_canonical_path, context_);
-                if (imported_parser.current_namespace_.empty()) {
-                    imported_parser.current_namespace_ = default_namespace;
-                }
-                if (!imported_parser.current_namespace_.empty()) {
-                    context_->imported_namespaces_.insert(imported_parser.current_namespace_);
-                }
-                imported_parser.parse();
-            }
-        } else if (match({TokenType::AtCJmod})) {
-            consume(TokenType::From, "Expected 'from' keyword in @CJmod import statement.");
-            const Token& pathToken = consume(TokenType::StringLiteral, "Expected file path string.");
-            consume(TokenType::Semicolon, "Expected ';' after import statement.");
-            loader_.loadSharedLibrary(pathToken.lexeme, current_path_, context_);
-        }
-        else {
-            throw std::runtime_error("Expected '@Chtl' or '@CJmod' after [Import].");
-        }
+        nodes.push_back(parseImportStatement());
         return nodes;
     }
     if (match({TokenType::Template, TokenType::Custom})) {
@@ -169,8 +136,94 @@ std::vector<std::unique_ptr<Node>> CHTLParser::parseDeclaration() {
     throw std::runtime_error("Expected a declaration (element, text, etc.).");
 }
 
+std::unique_ptr<NamespaceNode> CHTLParser::parseNamespaceBlock() {
+    const Token& name = consume(TokenType::Identifier, "Expected namespace name.");
+    auto node = std::make_unique<NamespaceNode>(name.lexeme);
+
+    if (match({TokenType::OpenBrace})) {
+        // Namespace with a block has a scoped effect.
+        std::string previous_namespace = current_namespace_;
+        current_namespace_ = name.lexeme;
+        while (!check(TokenType::CloseBrace) && !isAtEnd()) {
+            auto parsed_nodes = parseDeclaration();
+            for (auto& parsed_node : parsed_nodes) {
+                node->children_.push_back(std::move(parsed_node));
+            }
+        }
+        consume(TokenType::CloseBrace, "Expected '}' to close namespace block.");
+        current_namespace_ = previous_namespace; // Restore context
+    } else {
+        // Block-less namespace applies to the rest of the fragment.
+        // No semicolon is required, and the context is not restored.
+        current_namespace_ = name.lexeme;
+    }
+
+    return node;
+}
+
+std::unique_ptr<ImportNode> CHTLParser::parseImportStatement() {
+    ImportType type = ImportType::Unknown;
+    std::unique_ptr<ImportNode> node;
+
+    if (match({TokenType::AtChtl})) {
+        type = ImportType::Chtl;
+        consume(TokenType::From, "Expected 'from' keyword in @Chtl import statement.");
+        const Token& pathToken = consume(TokenType::StringLiteral, "Expected file path string.");
+        node = std::make_unique<ImportNode>(type, pathToken.lexeme);
+
+        // Side effect: load and parse the file
+        if(auto content = loader_.loadFile(node->path_, current_path_, context_)) {
+            std::filesystem::path p(node->path_);
+            std::string default_namespace = p.stem().string();
+            std::string imported_file_canonical_path = p.string();
+            CHTLParser imported_parser(*content, loader_, imported_file_canonical_path, context_);
+            if (imported_parser.current_namespace_.empty()) {
+                imported_parser.current_namespace_ = default_namespace;
+            }
+            if (!imported_parser.current_namespace_.empty()) {
+                context_->imported_namespaces_.insert(imported_parser.current_namespace_);
+            }
+            imported_parser.parse(); // This populates the context
+        }
+
+    } else if (match({TokenType::AtCJmod})) {
+        type = ImportType::Cjmod;
+        consume(TokenType::From, "Expected 'from' keyword in @CJmod import statement.");
+        const Token& pathToken = consume(TokenType::StringLiteral, "Expected file path string.");
+        node = std::make_unique<ImportNode>(type, pathToken.lexeme);
+
+        // Side effect: load the shared library
+        loader_.loadSharedLibrary(node->path_, current_path_, context_);
+
+    } else {
+        // TODO: Handle all other import types from CHTL.md
+        // e.g., [Import] [Custom] @Element ...
+        throw std::runtime_error("Unsupported import type after [Import].");
+    }
+
+    if (match({TokenType::As})) {
+        node->alias_ = consume(TokenType::Identifier, "Expected alias name after 'as'.").lexeme;
+    }
+
+    consume(TokenType::Semicolon, "Expected ';' after import statement.");
+    return node;
+}
+
 std::unique_ptr<OriginNode> CHTLParser::parseOriginBlock() {
-    const Token& type = consume(TokenType::Identifier, "Expected origin type (e.g., @Html).");
+    if (!match({TokenType::AtHtml, TokenType::AtJavaScript, TokenType::AtStyle})) {
+        // This is a temporary fix. A more robust solution is needed for custom @ types.
+        if (check(TokenType::Identifier) && peek().lexeme[0] == '@') {
+             // Allow any identifier starting with @ for custom types
+        } else {
+            throw std::runtime_error("Expected origin type (e.g., @Html, @Style, or custom @Type).");
+        }
+    }
+    const Token& type = previous();
+    std::string name;
+    if (check(TokenType::Identifier)) {
+        name = advance().lexeme;
+    }
+
     consume(TokenType::OpenBrace, "Expected '{' to open origin block.");
     std::stringstream content_ss;
     int brace_level = 1;
@@ -181,7 +234,8 @@ std::unique_ptr<OriginNode> CHTLParser::parseOriginBlock() {
         content_ss << advance().lexeme << " ";
     }
     if (brace_level > 0) { throw std::runtime_error("Unterminated origin block."); }
-    return std::make_unique<OriginNode>(type.lexeme, content_ss.str());
+    consume(TokenType::CloseBrace, "Expected '}' to close origin block.");
+    return std::make_unique<OriginNode>(type.lexeme, content_ss.str(), name);
 }
 
 void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes) {
@@ -223,7 +277,6 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
                 throw std::runtime_error("Expected a valid position for insert (after, before, replace, at top, at bottom).");
             }
             std::vector<std::unique_ptr<Node>> new_nodes;
-            auto* element = static_cast<ElementNode*>(target_nodes[0].get());
             if (position_token.type == TokenType::AtTop) {
                  consume(TokenType::OpenBrace, "Expected '{' for insert block.");
                  while (!check(TokenType::CloseBrace) && !isAtEnd()) {
@@ -231,7 +284,7 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
                     new_nodes.insert(new_nodes.end(), std::make_move_iterator(parsed.begin()), std::make_move_iterator(parsed.end()));
                  }
                  consume(TokenType::CloseBrace, "Expected '}' after insert block.");
-                 element->children_.insert(element->children_.begin(), std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+                 target_nodes.insert(target_nodes.begin(), std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
             } else if (position_token.type == TokenType::AtBottom) {
                 consume(TokenType::OpenBrace, "Expected '{' for insert block.");
                  while (!check(TokenType::CloseBrace) && !isAtEnd()) {
@@ -239,9 +292,8 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
                     new_nodes.insert(new_nodes.end(), std::make_move_iterator(parsed.begin()), std::make_move_iterator(parsed.end()));
                  }
                  consume(TokenType::CloseBrace, "Expected '}' after insert block.");
-                 element->children_.insert(element->children_.end(), std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
-            }
-            else {
+                 target_nodes.insert(target_nodes.end(), std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+            } else {
                 const Token& tagName = consume(TokenType::Identifier, "Expected tag name for insertion target.");
                 int tag_index = -1;
                 if (match({TokenType::OpenBracket})) {
@@ -254,21 +306,21 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
                     new_nodes.insert(new_nodes.end(), std::make_move_iterator(parsed.begin()), std::make_move_iterator(parsed.end()));
                 }
                 consume(TokenType::CloseBrace, "Expected '}' after insert block.");
+
                 int current_tag_count = 0;
-                auto it = element->children_.begin();
                 bool found = false;
-                while(it != element->children_.end()) {
+                for (auto it = target_nodes.begin(); it != target_nodes.end(); ++it) {
                     if ((*it)->getType() == NodeType::Element) {
                         auto* child_element = static_cast<ElementNode*>((*it).get());
                         if (child_element->tagName_ == tagName.lexeme) {
                             if (tag_index == -1 || current_tag_count == tag_index) {
                                 if (position_token.type == TokenType::Before) {
-                                    element->children_.insert(it, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+                                    target_nodes.insert(it, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
                                 } else if (position_token.type == TokenType::After) {
-                                    it = element->children_.insert(it + 1, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+                                    it = target_nodes.insert(it + 1, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
                                 } else if (position_token.type == TokenType::Replace) {
-                                    it = element->children_.erase(it);
-                                    element->children_.insert(it, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
+                                    it = target_nodes.erase(it);
+                                    it = target_nodes.insert(it, std::make_move_iterator(new_nodes.begin()), std::make_move_iterator(new_nodes.end()));
                                 }
                                 found = true;
                                 break;
@@ -276,9 +328,8 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
                             current_tag_count++;
                         }
                     }
-                    ++it;
                 }
-                 if (!found) throw std::runtime_error("Could not find target for insert operation.");
+                if (!found) throw std::runtime_error("Could not find target for insert operation.");
             }
             continue;
         }
@@ -359,8 +410,20 @@ void CHTLParser::applySpecializations(std::vector<std::unique_ptr<Node>>& target
 }
 
 std::unique_ptr<ElementNode> CHTLParser::parseElement() {
-    const Token& name = previous();
-    auto element = std::make_unique<ElementNode>(name.lexeme);
+    const Token& name_token = previous();
+    std::string tag_name = name_token.lexeme;
+    std::unique_ptr<ElementNode> element;
+
+    if (tag_name[0] == '#') {
+        element = std::make_unique<ElementNode>("div");
+        element->attributes_.push_back(std::make_unique<AttributeNode>("id", tag_name.substr(1)));
+    } else if (tag_name[0] == '.') {
+        element = std::make_unique<ElementNode>("div");
+        element->attributes_.push_back(std::make_unique<AttributeNode>("class", tag_name.substr(1)));
+    } else {
+        element = std::make_unique<ElementNode>(tag_name);
+    }
+
     consume(TokenType::OpenBrace, "Expected '{' after element name.");
     parseElementBody(*element);
     consume(TokenType::CloseBrace, "Expected '}' after element body.");
@@ -390,7 +453,8 @@ void CHTLParser::parseElementBody(ElementNode& element) {
                     throw std::runtime_error("Invalid attribute list.");
                 }
             } while (match({TokenType::Comma}));
-            consume(TokenType::Semicolon, "Expected ';' after attribute list.");
+            // Semicolon is optional at the end of an attribute list.
+            match({TokenType::Semicolon});
         }
         else {
             if (match({TokenType::Except})) {
@@ -436,26 +500,37 @@ std::unique_ptr<CommentNode> CHTLParser::parseGeneratorComment() {
     return std::make_unique<CommentNode>(previous().lexeme);
 }
 
-void CHTLParser::parseConfigurationBlock() {
+std::unique_ptr<ConfigurationNode> CHTLParser::parseConfigurationBlock() {
+    auto node = std::make_unique<ConfigurationNode>();
+    if (match({TokenType::AtConfig})) {
+        node->name_ = consume(TokenType::Identifier, "Expected configuration name after @Config.").lexeme;
+    }
+
     consume(TokenType::OpenBrace, "Expected '{' after [Configuration] keyword.");
     while (!check(TokenType::CloseBrace) && !isAtEnd()) {
         const Token& key = consume(TokenType::Identifier, "Expected configuration key.");
         consumeColonOrEquals();
+        const Token& valueToken = advance(); // Assuming simple values for now
+        std::string value = valueToken.lexeme;
+
+        // Update the ParserContext as a side effect
         if (key.lexeme == "INDEX_INITIAL_COUNT") {
-            const Token& value = consume(TokenType::Number, "Expected number for INDEX_INITIAL_COUNT.");
-            context_->config_.INDEX_INITIAL_COUNT = std::stoul(value.lexeme);
+            context_->config_.INDEX_INITIAL_COUNT = std::stoul(value);
+            node->settings_[key.lexeme] = value;
         } else if (key.lexeme == "DEBUG_MODE") {
-            const Token& value = consume(TokenType::Identifier, "Expected 'true' or 'false' for DEBUG_MODE.");
-            if (value.lexeme == "true") context_->config_.DEBUG_MODE = true;
-            else if (value.lexeme == "false") context_->config_.DEBUG_MODE = false;
+            if (value == "true") context_->config_.DEBUG_MODE = true;
+            else if (value == "false") context_->config_.DEBUG_MODE = false;
             else throw std::runtime_error("Expected 'true' or 'false' for DEBUG_MODE value.");
+            node->settings_[key.lexeme] = value;
         }
+        // TODO: Add parsing for [Name] group and other config options.
         else {
-            while(peek().type != TokenType::Semicolon && !isAtEnd()) { advance(); }
+            node->settings_[key.lexeme] = value;
         }
         consume(TokenType::Semicolon, "Expected ';' after configuration value.");
     }
     consume(TokenType::CloseBrace, "Expected '}' after configuration block.");
+    return node;
 }
 
 void CHTLParser::parseTemplateDefinition(bool is_custom) {

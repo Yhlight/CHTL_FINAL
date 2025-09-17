@@ -11,6 +11,9 @@
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/PropertyReferenceNode.h"
 #include "../CHTLNode/PropertyValue.h"
+#include "../CHTLNode/NamespaceNode.h"
+#include "../CHTLNode/ImportNode.h"
+#include "../CHTLNode/ConfigurationNode.h"
 #include <string>
 #include <sstream>
 #include <memory>
@@ -62,6 +65,7 @@ private:
     void renderComment(const CommentNode* node);
     void renderOrigin(const OriginNode* node);
     void renderScriptBlock(const ScriptBlockNode* node);
+    void renderNamespace(const NamespaceNode* node);
 
     std::string getElementUniqueId(const ElementNode* node);
     void indent();

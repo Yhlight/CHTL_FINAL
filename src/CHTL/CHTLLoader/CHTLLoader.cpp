@@ -108,9 +108,7 @@ std::optional<std::string> CHTLLoader::loadCmodArchive(const std::filesystem::pa
             std::string info_content(static_cast<char*>(p_uncompressed_data), uncompressed_size);
             mz_free(p_uncompressed_data);
 
-            CHTLLexer info_lexer(info_content);
-            std::vector<Token> info_tokens = info_lexer.scanTokens();
-            CHTLParser info_parser(std::move(info_content), info_tokens, *this, cmod_path.string(), context);
+            CHTLParser info_parser(info_content, *this, cmod_path.string(), context);
             info_parser.current_namespace_ = module_name;
             info_parser.parse();
         }
@@ -145,9 +143,7 @@ std::optional<std::string> CHTLLoader::loadCmodArchive(const std::filesystem::pa
             std::string template_content(static_cast<char*>(p_uncompressed_data), uncompressed_size);
             mz_free(p_uncompressed_data);
 
-            CHTLLexer template_lexer(template_content);
-            std::vector<Token> template_tokens = template_lexer.scanTokens();
-            CHTLParser template_parser(std::move(template_content), template_tokens, *this, cmod_path.string(), context);
+            CHTLParser template_parser(template_content, *this, cmod_path.string(), context);
             template_parser.current_namespace_ = module_name;
             template_parser.parse();
 

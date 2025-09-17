@@ -45,19 +45,21 @@ int main(int argc, char* argv[]) {
         CHTL::CHTLLoader loader;
         auto context = std::make_shared<CHTL::ParserContext>();
 
-        // 2. Lex the source file
-        CHTL::CHTLLexer lexer(source);
-        std::vector<CHTL::Token> tokens = lexer.scanTokens();
-
-        // 3. Parse the tokens into an AST
-        CHTL::CHTLParser parser(source, tokens, loader, input_filepath, context);
+        // 2. The CHTL Parser is the main entry point. It handles its own lexing.
+        CHTL::CHTLParser parser(source, loader, input_filepath, context);
         std::unique_ptr<CHTL::RootNode> ast = parser.parse();
 
-        // 4. Generate the final output from the AST
+        if (!ast) {
+            std::cerr << "Parsing failed." << std::endl;
+            return 1;
+        }
+
+        // 3. The Generator traverses the AST and produces the final output.
+        // It is responsible for invoking the CHTL-JS pipeline on script blocks.
         CHTL::CHTLGenerator generator(context);
         CHTL::CompilationResult result = generator.generate(*ast, use_default_struct);
 
-        // 5. Write the output files
+        // 4. Write the output files
         std::string html_output_path = output_basename + ".html";
         std::ofstream html_file(html_output_path);
         if (!html_file.is_open()) {

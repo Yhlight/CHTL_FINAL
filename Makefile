@@ -156,32 +156,6 @@ test_parser/fast:
 .PHONY : test_parser/fast
 
 #=============================================================================
-# Target rules for targets named test_scanner
-
-# Build rule for target.
-test_scanner: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_scanner
-.PHONY : test_scanner
-
-# fast build rule for target.
-test_scanner/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner.dir/build.make CMakeFiles/test_scanner.dir/build
-.PHONY : test_scanner/fast
-
-#=============================================================================
-# Target rules for targets named test_unified_scanner
-
-# Build rule for target.
-test_unified_scanner: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_unified_scanner
-.PHONY : test_unified_scanner
-
-# fast build rule for target.
-test_unified_scanner/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_unified_scanner.dir/build.make CMakeFiles/test_unified_scanner.dir/build
-.PHONY : test_unified_scanner/fast
-
-#=============================================================================
 # Target rules for targets named test_runner
 
 # Build rule for target.
@@ -193,19 +167,6 @@ test_runner: cmake_check_build_system
 test_runner/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_runner.dir/build.make CMakeFiles/test_runner.dir/build
 .PHONY : test_runner/fast
-
-#=============================================================================
-# Target rules for targets named test_scanner_v2
-
-# Build rule for target.
-test_scanner_v2: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_scanner_v2
-.PHONY : test_scanner_v2
-
-# fast build rule for target.
-test_scanner_v2/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner_v2.dir/build.make CMakeFiles/test_scanner_v2.dir/build
-.PHONY : test_scanner_v2/fast
 
 miniz.o: miniz.c.o
 .PHONY : miniz.o
@@ -471,30 +432,6 @@ src/CodeMerger/CodeMerger.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CodeMerger/CodeMerger.cpp.s
 .PHONY : src/CodeMerger/CodeMerger.cpp.s
 
-src/CompilerDispatcher/CompilerDispatcher.o: src/CompilerDispatcher/CompilerDispatcher.cpp.o
-.PHONY : src/CompilerDispatcher/CompilerDispatcher.o
-
-# target to build an object file
-src/CompilerDispatcher/CompilerDispatcher.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.o
-.PHONY : src/CompilerDispatcher/CompilerDispatcher.cpp.o
-
-src/CompilerDispatcher/CompilerDispatcher.i: src/CompilerDispatcher/CompilerDispatcher.cpp.i
-.PHONY : src/CompilerDispatcher/CompilerDispatcher.i
-
-# target to preprocess a source file
-src/CompilerDispatcher/CompilerDispatcher.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.i
-.PHONY : src/CompilerDispatcher/CompilerDispatcher.cpp.i
-
-src/CompilerDispatcher/CompilerDispatcher.s: src/CompilerDispatcher/CompilerDispatcher.cpp.s
-.PHONY : src/CompilerDispatcher/CompilerDispatcher.s
-
-# target to generate assembly for a file
-src/CompilerDispatcher/CompilerDispatcher.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/src/CompilerDispatcher/CompilerDispatcher.cpp.s
-.PHONY : src/CompilerDispatcher/CompilerDispatcher.cpp.s
-
 src/Scanner/CHTLUnifiedScanner.o: src/Scanner/CHTLUnifiedScanner.cpp.o
 .PHONY : src/Scanner/CHTLUnifiedScanner.o
 
@@ -591,78 +528,6 @@ tests/test_runner.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_runner.dir/build.make CMakeFiles/test_runner.dir/tests/test_runner.cpp.s
 .PHONY : tests/test_runner.cpp.s
 
-tests/test_scanner.o: tests/test_scanner.cpp.o
-.PHONY : tests/test_scanner.o
-
-# target to build an object file
-tests/test_scanner.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner.dir/build.make CMakeFiles/test_scanner.dir/tests/test_scanner.cpp.o
-.PHONY : tests/test_scanner.cpp.o
-
-tests/test_scanner.i: tests/test_scanner.cpp.i
-.PHONY : tests/test_scanner.i
-
-# target to preprocess a source file
-tests/test_scanner.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner.dir/build.make CMakeFiles/test_scanner.dir/tests/test_scanner.cpp.i
-.PHONY : tests/test_scanner.cpp.i
-
-tests/test_scanner.s: tests/test_scanner.cpp.s
-.PHONY : tests/test_scanner.s
-
-# target to generate assembly for a file
-tests/test_scanner.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner.dir/build.make CMakeFiles/test_scanner.dir/tests/test_scanner.cpp.s
-.PHONY : tests/test_scanner.cpp.s
-
-tests/test_scanner_v2.o: tests/test_scanner_v2.cpp.o
-.PHONY : tests/test_scanner_v2.o
-
-# target to build an object file
-tests/test_scanner_v2.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner_v2.dir/build.make CMakeFiles/test_scanner_v2.dir/tests/test_scanner_v2.cpp.o
-.PHONY : tests/test_scanner_v2.cpp.o
-
-tests/test_scanner_v2.i: tests/test_scanner_v2.cpp.i
-.PHONY : tests/test_scanner_v2.i
-
-# target to preprocess a source file
-tests/test_scanner_v2.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner_v2.dir/build.make CMakeFiles/test_scanner_v2.dir/tests/test_scanner_v2.cpp.i
-.PHONY : tests/test_scanner_v2.cpp.i
-
-tests/test_scanner_v2.s: tests/test_scanner_v2.cpp.s
-.PHONY : tests/test_scanner_v2.s
-
-# target to generate assembly for a file
-tests/test_scanner_v2.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner_v2.dir/build.make CMakeFiles/test_scanner_v2.dir/tests/test_scanner_v2.cpp.s
-.PHONY : tests/test_scanner_v2.cpp.s
-
-tests/test_unified_scanner.o: tests/test_unified_scanner.cpp.o
-.PHONY : tests/test_unified_scanner.o
-
-# target to build an object file
-tests/test_unified_scanner.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_unified_scanner.dir/build.make CMakeFiles/test_unified_scanner.dir/tests/test_unified_scanner.cpp.o
-.PHONY : tests/test_unified_scanner.cpp.o
-
-tests/test_unified_scanner.i: tests/test_unified_scanner.cpp.i
-.PHONY : tests/test_unified_scanner.i
-
-# target to preprocess a source file
-tests/test_unified_scanner.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_unified_scanner.dir/build.make CMakeFiles/test_unified_scanner.dir/tests/test_unified_scanner.cpp.i
-.PHONY : tests/test_unified_scanner.cpp.i
-
-tests/test_unified_scanner.s: tests/test_unified_scanner.cpp.s
-.PHONY : tests/test_unified_scanner.s
-
-# target to generate assembly for a file
-tests/test_unified_scanner.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_unified_scanner.dir/build.make CMakeFiles/test_unified_scanner.dir/tests/test_unified_scanner.cpp.s
-.PHONY : tests/test_unified_scanner.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -675,9 +540,6 @@ help:
 	@echo "... chtl_lib"
 	@echo "... test_parser"
 	@echo "... test_runner"
-	@echo "... test_scanner"
-	@echo "... test_scanner_v2"
-	@echo "... test_unified_scanner"
 	@echo "... miniz.o"
 	@echo "... miniz.i"
 	@echo "... miniz.s"
@@ -711,9 +573,6 @@ help:
 	@echo "... src/CodeMerger/CodeMerger.o"
 	@echo "... src/CodeMerger/CodeMerger.i"
 	@echo "... src/CodeMerger/CodeMerger.s"
-	@echo "... src/CompilerDispatcher/CompilerDispatcher.o"
-	@echo "... src/CompilerDispatcher/CompilerDispatcher.i"
-	@echo "... src/CompilerDispatcher/CompilerDispatcher.s"
 	@echo "... src/Scanner/CHTLUnifiedScanner.o"
 	@echo "... src/Scanner/CHTLUnifiedScanner.i"
 	@echo "... src/Scanner/CHTLUnifiedScanner.s"
@@ -726,15 +585,6 @@ help:
 	@echo "... tests/test_runner.o"
 	@echo "... tests/test_runner.i"
 	@echo "... tests/test_runner.s"
-	@echo "... tests/test_scanner.o"
-	@echo "... tests/test_scanner.i"
-	@echo "... tests/test_scanner.s"
-	@echo "... tests/test_scanner_v2.o"
-	@echo "... tests/test_scanner_v2.i"
-	@echo "... tests/test_scanner_v2.s"
-	@echo "... tests/test_unified_scanner.o"
-	@echo "... tests/test_unified_scanner.i"
-	@echo "... tests/test_unified_scanner.s"
 .PHONY : help
 
 

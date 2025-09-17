@@ -40,7 +40,7 @@ std::string CHTLJSGenerator::visit(const CHTLJSNode* node) {
         case CHTLJSNodeType::Value:
             return visitValueNode(static_cast<const ValueNode*>(node));
         case CHTLJSNodeType::Animate:
-             return "/* AnimateNode not fully implemented */";
+             return visitAnimateNode(static_cast<const AnimateNode*>(node));
         case CHTLJSNodeType::Delegate:
              return "/* DelegateNode not fully implemented */";
         case CHTLJSNodeType::Vir:
@@ -137,6 +137,54 @@ std::string CHTLJSGenerator::visitListenNode(const ListenNode* node) {
 
 std::string CHTLJSGenerator::visitValueNode(const ValueNode* node) {
     return node->getValue();
+}
+
+std::string CHTLJSGenerator::visitAnimateNode(const AnimateNode* node) {
+    std::stringstream ss;
+
+    // 1. Keyframes
+    ss << "const keyframes = [";
+    for (const auto& kf : node->keyframes_) {
+        ss << "{ ";
+        if (kf.offset.has_value()) {
+            ss << "offset: " << kf.offset.value() << ", ";
+        }
+        for (const auto& prop : kf.properties) {
+            // CSS properties with dashes need to be camelCased for JS animation API
+            std::string js_prop = prop.first;
+            size_t dash_pos;
+            while ((dash_pos = js_prop.find('-')) != std::string::npos) {
+                js_prop.erase(dash_pos, 1);
+                if (dash_pos < js_prop.length()) {
+                    js_prop[dash_pos] = toupper(js_prop[dash_pos]);
+                }
+            }
+            ss << js_prop << ": \"" << prop.second << "\", ";
+        }
+        ss << "},";
+    }
+    ss << "];\n";
+
+    // 2. Options
+    ss << "const options = {";
+    if (node->duration_.has_value()) ss << "duration: " << node->duration_.value() << ",";
+    if (node->easing_.has_value()) ss << "easing: \"" << node->easing_.value() << "\",";
+    if (node->loop_.has_value()) ss << "iterations: " << node->loop_.value() << ",";
+    if (node->direction_.has_value()) ss << "direction: \"" << node->direction_.value() << "\",";
+    if (node->delay_.has_value()) ss << "delay: " << node->delay_.value() << ",";
+    ss << "fill: 'forwards'};"; // Always fill forwards to maintain end state
+
+    // 3. Targets and execution
+    ss << "\n";
+    for (const auto& target_node : node->targets_) {
+        ss << visit(target_node.get()) << ".animate(keyframes, options);\n";
+    }
+
+    if (node->callback_.has_value()) {
+        ss << "setTimeout(() => {" << placeholder_map_->at(node->callback_.value()) << "}, " << (node->duration_.has_value() ? node->duration_.value() : "0") << ");\n";
+    }
+
+    return ss.str();
 }
 
 std::string CHTLJSGenerator::visitRouterNode(const RouterNode* node) {

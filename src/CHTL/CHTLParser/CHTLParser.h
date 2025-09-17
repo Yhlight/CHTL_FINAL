@@ -14,6 +14,9 @@
 #include "../CHTLNode/VarTemplateNode.h"
 #include "../CHTLLoader/CHTLLoader.h"
 #include "../CHTLNode/OriginNode.h"
+#include "../CHTLNode/ImportNode.h"
+#include "../CHTLNode/NamespaceNode.h"
+#include "../CHTLNode/ConfigurationNode.h"
 #include "../CHTLNode/PropertyValue.h"
 #include "ParserContext.h"
 #include <vector>
@@ -25,16 +28,19 @@ namespace CHTL {
 
 class CHTLParser {
 public:
-    CHTLParser(std::string source, std::vector<Token>& tokens, CHTLLoader& loader, const std::string& initial_path, std::shared_ptr<ParserContext> context);
+    CHTLParser(const std::string& source, CHTLLoader& loader, const std::string& initial_path, std::shared_ptr<ParserContext> context);
     std::unique_ptr<RootNode> parse();
 
 private:
     const std::string source_;
+    std::vector<Token> tokens_;
     void applySpecializations(std::vector<std::unique_ptr<Node>>& target_nodes);
     std::vector<std::unique_ptr<Node>> parseDeclaration();
+    std::unique_ptr<NamespaceNode> parseNamespaceBlock();
+    std::unique_ptr<ImportNode> parseImportStatement();
     void parseExportStatement();
     std::unique_ptr<OriginNode> parseOriginBlock();
-    void parseConfigurationBlock();
+    std::unique_ptr<ConfigurationNode> parseConfigurationBlock();
     void parseTemplateDefinition(bool is_custom);
     std::unique_ptr<ElementNode> parseElement();
     void parseElementBody(ElementNode& element);
@@ -68,7 +74,6 @@ private:
     enum class TemplateType { Style, Element, Var };
     std::string resolveUnqualifiedName(const std::string& name, TemplateType type);
 
-    std::vector<Token>& tokens_;
     CHTLLoader& loader_;
     std::string current_path_;
     std::shared_ptr<ParserContext> context_;

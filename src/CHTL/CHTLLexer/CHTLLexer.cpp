@@ -104,6 +104,11 @@ void CHTLLexer::scanToken() {
         case '-':
             if (match('>')) {
                 addToken(TokenType::Arrow);
+            } else if (match('-')) {
+                // This is a SQL-style comment, treat it as a generator comment
+                while (peek() != '\n' && !isAtEnd()) advance();
+                std::string comment = source_.substr(start_ + 2, current_ - (start_ + 2));
+                addToken(TokenType::GeneratorComment, comment);
             } else {
                 addToken(TokenType::Minus);
             }
