@@ -9,6 +9,7 @@ file(GLOB_RECURSE CHTL_SOURCES
     "CHTL/CHTLLexer/*.cpp"
     "CHTL/CHTLNode/*.cpp"
     "CHTL/CHTLParser/*.cpp"
+    "CHTL/CHTLGenerator/*.cpp"
     "Util/StringUtil/*.cpp"
     "Util/FileSystem/*.cpp"
 )

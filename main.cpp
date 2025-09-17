@@ -5,6 +5,7 @@
 #include "Util/FileSystem/FileSystem.h"
 #include "CHTL/CHTLLexer/CHTLLexer.h"
 #include "CHTL/CHTLParser/CHTLParser.h"
+#include "CHTL/CHTLGenerator/CHTLGenerator.h"
 
 void printParserErrors(const std::vector<std::string>& errors) {
     std::cerr << "Parser has " << errors.size() << " errors:" << std::endl;
@@ -47,6 +48,14 @@ int main(int argc, char* argv[]) {
     std::cout << "Successfully parsed program. AST:" << std::endl;
     std::cout << "------------------------------------" << std::endl;
     std::cout << program->ToString() << std::endl;
+    std::cout << "------------------------------------" << std::endl << std::endl;
+
+    CHTL::CHTLGenerator generator;
+    std::string html_output = generator.Generate(program.get());
+
+    std::cout << "Generated HTML Output:" << std::endl;
+    std::cout << "------------------------------------" << std::endl;
+    std::cout << html_output << std::endl;
 
     return 0;
 }
