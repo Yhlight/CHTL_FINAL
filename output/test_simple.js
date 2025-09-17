@@ -1,0 +1,19 @@
+// JavaScript compiled code
+html
+{
+    head
+    {
+        title
+        {
+            text: "简单测试";
+        }
+    }
+    
+    body
+    {
+        div
+        {
+            text: "Hello World";
+        }
+    }
+}

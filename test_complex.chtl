@@ -1,0 +1,191 @@
+use html5;
+
+html
+{
+    head
+    {
+        title
+        {
+            text: "CHTL复杂测试页面";
+        }
+        
+        meta
+        {
+            charset: "UTF-8";
+        }
+    }
+
+    body
+    {
+        div
+        {
+            id: main-container;
+            class: container;
+            
+            style
+            {
+                .container
+                {
+                    width: 100%;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #f5f5f5;
+                }
+                
+                .header
+                {
+                    background-color: #333;
+                    color: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    margin-bottom: 20px;
+                }
+                
+                .content
+                {
+                    background-color: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                
+                .button
+                {
+                    background-color: #007bff;
+                    color: white;
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    margin: 5px;
+                }
+                
+                .button:hover
+                {
+                    background-color: #0056b3;
+                }
+                
+                .button:active
+                {
+                    background-color: #004085;
+                }
+            }
+
+            h1
+            {
+                class: header;
+                text: "CHTL编译器测试页面";
+            }
+
+            div
+            {
+                class: content;
+                
+                p
+                {
+                    text: "这是一个使用CHTL语法编写的复杂测试页面，展示了CHTL的各种特性。";
+                }
+                
+                div
+                {
+                    class: button-group;
+                    
+                    button
+                    {
+                        class: button;
+                        text: "点击我";
+                        
+                        script
+                        {
+                            {{button}}->Listen
+                            {
+                                click: () => {
+                                    console.log("按钮被点击了!");
+                                    {{button}}->textContent = "已点击!";
+                                }
+                            };
+                        }
+                    }
+                    
+                    button
+                    {
+                        class: button;
+                        text: "重置";
+                        
+                        script
+                        {
+                            {{button}}->Listen
+                            {
+                                click: () => {
+                                    console.log("重置按钮被点击了!");
+                                    {{button}}->textContent = "重置";
+                                }
+                            };
+                        }
+                    }
+                }
+                
+                div
+                {
+                    class: info-section;
+                    
+                    style
+                    {
+                        .info-section
+                        {
+                            margin-top: 20px;
+                            padding: 15px;
+                            background-color: #e9ecef;
+                            border-radius: 4px;
+                        }
+                        
+                        .info-title
+                        {
+                            font-weight: bold;
+                            color: #495057;
+                            margin-bottom: 10px;
+                        }
+                        
+                        .info-content
+                        {
+                            color: #6c757d;
+                            line-height: 1.5;
+                        }
+                    }
+                    
+                    h3
+                    {
+                        class: info-title;
+                        text: "CHTL特性展示";
+                    }
+                    
+                    ul
+                    {
+                        class: info-content;
+                        
+                        li
+                        {
+                            text: "局部样式块 - 支持内联样式和选择器";
+                        }
+                        
+                        li
+                        {
+                            text: "属性运算 - 支持CSS属性计算";
+                        }
+                        
+                        li
+                        {
+                            text: "上下文推导 - 使用&引用当前元素";
+                        }
+                        
+                        li
+                        {
+                            text: "CHTL JS集成 - 支持事件绑定和DOM操作";
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
