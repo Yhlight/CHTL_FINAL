@@ -55,25 +55,14 @@ void Lexer::skipWhitespaceAndComments() {
             }
             advance();
         } else if (c == '/' && peekNext() == '/') {
-            // Single-line comment
-            while (peek() != '\n' && !isAtEnd()) {
-                advance();
-            }
+            while (peek() != '\n' && !isAtEnd()) advance();
         } else if (c == '/' && peekNext() == '*') {
-            // Multi-line comment
-            advance(); // consume /
-            advance(); // consume *
+            advance(); advance();
             while (!isAtEnd() && (peek() != '*' || peekNext() != '/')) {
-                if (peek() == '\n') {
-                    line++;
-                    column = 0;
-                }
+                if (peek() == '\n') { line++; column = 0; }
                 advance();
             }
-            if (!isAtEnd()) {
-                advance(); // consume *
-                advance(); // consume /
-            }
+            if (!isAtEnd()) { advance(); advance(); }
         } else {
             break;
         }
@@ -82,66 +71,48 @@ void Lexer::skipWhitespaceAndComments() {
 
 Token Lexer::scanToken() {
     char c = peek();
-
-    if (std::isalpha(c) || c == '_') {
-        return scanIdentifierOrKeyword();
-    }
-    if (std::isdigit(c)) {
-        return scanNumberLiteral();
-    }
-    if (c == '"' || c == '\'') {
-        return scanStringLiteral();
-    }
-
+    if (std::isalpha(c) || c == '_') return scanIdentifierOrKeyword();
+    if (std::isdigit(c) || (c == '.' && std::isdigit(peekNext()))) return scanNumberLiteral();
+    if (c == '"' || c == '\'') return scanStringLiteral();
     return scanSymbol();
 }
 
 Token Lexer::scanIdentifierOrKeyword() {
     size_t start = current;
-    while (std::isalnum(peek()) || peek() == '_' || peek() == '-') {
-        advance();
-    }
+    while (std::isalnum(peek()) || peek() == '_' || peek() == '-') advance();
     std::string value = source.substr(start, current - start);
-
-    // Check for keywords
     if (value == "text") return makeToken(TokenType::KEYWORD_TEXT, value);
     if (value == "style") return makeToken(TokenType::KEYWORD_STYLE, value);
-
-    // It's a regular identifier (or a tag name, handled by parser)
-    // For now, let's use a generic IDENTIFIER type. The parser can decide if it's a tag or attribute.
     return makeToken(TokenType::IDENTIFIER, value);
 }
 
 Token Lexer::scanStringLiteral() {
-    char quote_type = advance(); // Consume opening quote
+    char quote_type = advance();
     size_t start = current;
     while (peek() != quote_type && !isAtEnd()) {
-        if (peek() == '\n') {
-            line++;
-            column = 0;
-        }
+        if (peek() == '\n') { line++; column = 0; }
         advance();
     }
-
-    if (isAtEnd()) {
-        return makeToken(TokenType::UNKNOWN, "Unterminated string");
-    }
-
+    if (isAtEnd()) return makeToken(TokenType::UNKNOWN, "Unterminated string");
     std::string value = source.substr(start, current - start);
-    advance(); // Consume closing quote
+    advance();
     return makeToken(TokenType::STRING_LITERAL, value);
 }
 
 Token Lexer::scanNumberLiteral() {
     size_t start = current;
-    while (std::isdigit(peek()) || (peek() == '.' && std::isdigit(peekNext()))) {
+    while (std::isdigit(peek())) advance();
+    if (peek() == '.' && std::isdigit(peekNext())) {
         advance();
+        while (std::isdigit(peek())) advance();
     }
+    while (std::isalpha(peek()) || peek() == '%') advance();
     std::string value = source.substr(start, current - start);
     return makeToken(TokenType::NUMBER_LITERAL, value);
 }
 
 Token Lexer::scanSymbol() {
+    size_t start = current;
     char c = advance();
     switch (c) {
         case '{': return makeToken(TokenType::LBRACE, c);
@@ -155,6 +126,18 @@ Token Lexer::scanSymbol() {
         case ')': return makeToken(TokenType::R_PAREN, c);
         case ',': return makeToken(TokenType::COMMA, c);
         case '@': return makeToken(TokenType::AT_SIGN, c);
+        case '.': return makeToken(TokenType::DOT, c);
+        case '&': return makeToken(TokenType::AMPERSAND, c);
+        case '+': return makeToken(TokenType::PLUS, c);
+        case '-': return makeToken(TokenType::MINUS, c);
+        case '*': return makeToken(TokenType::STAR, c);
+        case '/': return makeToken(TokenType::SLASH, c);
+        case '#':
+            // If we see a #, greedily consume hex characters for colors
+            while (std::isxdigit(peek())) {
+                advance();
+            }
+            return makeToken(TokenType::IDENTIFIER, source.substr(start, current - start));
         default:
             return makeToken(TokenType::UNKNOWN, std::string(1, c));
     }

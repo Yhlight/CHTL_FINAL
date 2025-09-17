@@ -7,18 +7,27 @@ int main() {
     std::string source = R"(
 html {
     head {
-        title { text: "My CHTL Page"; }
+        title { text: "Global Styles Test"; }
     }
     body {
         div {
-            id = main-content;
-            class: "container";
-            text {
-                "Hello, CHTL!"
+            // This div should get class="box" added automatically
+            style {
+                // This is an inline style
+                background-color: #eee;
+
+                // This is a global rule
+                .box {
+                    border: 1px solid black;
+                    padding: 10px + 5px;
+                }
+
+                // This should become .box:hover
+                &:hover {
+                    background-color: #ccc;
+                }
             }
-        }
-        span {
-            text: "Another element";
+            text: "This box should have a border and padding.";
         }
     }
 }
@@ -38,7 +47,7 @@ html {
         std::string html = generator.generate(ast);
 
         // 4. Print
-        std::cout << "--- Generated HTML ---" << std::endl;
+        std::cout << "--- Generated HTML with Global Styles ---" << std::endl;
         std::cout << html << std::endl;
 
     } catch (const std::runtime_error& e) {

@@ -16,15 +16,24 @@ enum class TokenType {
     R_PAREN,        // )
     COMMA,          // ,
     AT_SIGN,        // @
+    DOT,            // .
+    HASH,           // #
+    AMPERSAND,      // &
+
+    // Operators
+    PLUS,           // +
+    MINUS,          // -
+    STAR,           // *
+    SLASH,          // /
 
     // Literals
     TAG_NAME,       // e.g., div, p, html
-    IDENTIFIER,     // General identifier (can be attribute name, class name, etc.)
+    IDENTIFIER,     // General identifier
     STRING_LITERAL, // "a string" or 'a string'
     UNQUOTED_LITERAL, // a_bare_word
     NUMBER_LITERAL, // 123, 1.5
 
-    // Keywords (will be expanded)
+    // Keywords
     KEYWORD_TEXT,   // text
     KEYWORD_STYLE,  // style
 
@@ -57,6 +66,13 @@ inline std::string tokenTypeToString(TokenType type) {
         case TokenType::R_PAREN: return "R_PAREN";
         case TokenType::COMMA: return "COMMA";
         case TokenType::AT_SIGN: return "AT_SIGN";
+        case TokenType::DOT: return "DOT";
+        case TokenType::HASH: return "HASH";
+        case TokenType::AMPERSAND: return "AMPERSAND";
+        case TokenType::PLUS: return "PLUS";
+        case TokenType::MINUS: return "MINUS";
+        case TokenType::STAR: return "STAR";
+        case TokenType::SLASH: return "SLASH";
         case TokenType::TAG_NAME: return "TAG_NAME";
         case TokenType::IDENTIFIER: return "IDENTIFIER";
         case TokenType::STRING_LITERAL: return "STRING_LITERAL";
