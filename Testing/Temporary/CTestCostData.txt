@@ -1,0 +1,5 @@
+LexerTest.BasicElementsAndAttributes 1 0.0041148
+LexerTest.CommentsAndWhitespace 1 0.00377446
+ParserTest.BasicStructure 1 0.00414377
+GeneratorTest.FullPipeline 1 0.00388814
+---

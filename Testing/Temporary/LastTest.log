@@ -1,0 +1,111 @@
+Start testing: Sep 17 12:05 UTC
+----------------------------------------------------------
+1/4 Testing: LexerTest.BasicElementsAndAttributes
+1/4 Test: LexerTest.BasicElementsAndAttributes
+Command: "/app/run_tests" "--gtest_filter=LexerTest.BasicElementsAndAttributes" "--gtest_also_run_disabled_tests"
+Directory: /app
+"LexerTest.BasicElementsAndAttributes" start time: Sep 17 12:05 UTC
+Output:
+----------------------------------------------------------
+Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = LexerTest.BasicElementsAndAttributes
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from LexerTest
+[ RUN      ] LexerTest.BasicElementsAndAttributes
+[       OK ] LexerTest.BasicElementsAndAttributes (0 ms)
+[----------] 1 test from LexerTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"LexerTest.BasicElementsAndAttributes" end time: Sep 17 12:05 UTC
+"LexerTest.BasicElementsAndAttributes" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/4 Testing: LexerTest.CommentsAndWhitespace
+2/4 Test: LexerTest.CommentsAndWhitespace
+Command: "/app/run_tests" "--gtest_filter=LexerTest.CommentsAndWhitespace" "--gtest_also_run_disabled_tests"
+Directory: /app
+"LexerTest.CommentsAndWhitespace" start time: Sep 17 12:05 UTC
+Output:
+----------------------------------------------------------
+Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = LexerTest.CommentsAndWhitespace
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from LexerTest
+[ RUN      ] LexerTest.CommentsAndWhitespace
+[       OK ] LexerTest.CommentsAndWhitespace (0 ms)
+[----------] 1 test from LexerTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"LexerTest.CommentsAndWhitespace" end time: Sep 17 12:05 UTC
+"LexerTest.CommentsAndWhitespace" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/4 Testing: ParserTest.BasicStructure
+3/4 Test: ParserTest.BasicStructure
+Command: "/app/run_tests" "--gtest_filter=ParserTest.BasicStructure" "--gtest_also_run_disabled_tests"
+Directory: /app
+"ParserTest.BasicStructure" start time: Sep 17 12:05 UTC
+Output:
+----------------------------------------------------------
+Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = ParserTest.BasicStructure
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from ParserTest
+[ RUN      ] ParserTest.BasicStructure
+[       OK ] ParserTest.BasicStructure (0 ms)
+[----------] 1 test from ParserTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ParserTest.BasicStructure" end time: Sep 17 12:05 UTC
+"ParserTest.BasicStructure" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/4 Testing: GeneratorTest.FullPipeline
+4/4 Test: GeneratorTest.FullPipeline
+Command: "/app/run_tests" "--gtest_filter=GeneratorTest.FullPipeline" "--gtest_also_run_disabled_tests"
+Directory: /app
+"GeneratorTest.FullPipeline" start time: Sep 17 12:05 UTC
+Output:
+----------------------------------------------------------
+Running main() from /app/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GeneratorTest.FullPipeline
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GeneratorTest
+[ RUN      ] GeneratorTest.FullPipeline
+[       OK ] GeneratorTest.FullPipeline (0 ms)
+[----------] 1 test from GeneratorTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"GeneratorTest.FullPipeline" end time: Sep 17 12:05 UTC
+"GeneratorTest.FullPipeline" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 17 12:05 UTC
