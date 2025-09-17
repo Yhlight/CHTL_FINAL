@@ -7,7 +7,7 @@
 
 namespace CHTL {
 
-class AttributeNode : public Expression {
+class AttributeNode : public Statement {
 public:
     AttributeNode(Token token, std::string key)
         : m_token(std::move(token)), m_key(std::move(key)) {}

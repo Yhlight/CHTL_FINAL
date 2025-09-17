@@ -3,6 +3,10 @@
 
 namespace CHTL {
 
+// Forward declaration for recursive call
+void generateStyleString(Node* node, CHTLContext& context, std::stringstream& ss);
+
+
 Generator::Generator(CHTLContext& context) : m_context(context) {}
 
 std::string Generator::generate(Node* node) {
@@ -22,18 +26,17 @@ void Generator::visit(Node* node) {
     } else if (auto instantiationNode = dynamic_cast<TemplateInstantiationNode*>(node)) {
         visitTemplateInstantiationNode(instantiationNode);
     }
-    // TemplateNode definitions are ignored by the generator
 }
 
 void Generator::visitTemplateInstantiationNode(TemplateInstantiationNode* node) {
     TemplateNode* templateDef = m_context.findTemplate(node->m_name.literal);
     if (templateDef) {
-        // This is a simple implementation. It doesn't handle template arguments yet.
-        for (const auto& child : templateDef->children) {
-            visit(child.get());
+        if (node->m_templateType.type == TokenType::AT_ELEMENT) {
+            for (const auto& child : templateDef->children) {
+                visit(child.get());
+            }
         }
-    } else {
-        // Handle error: template not found
+        // @Style instantiations are handled within visitElementNode
     }
 }
 
@@ -52,14 +55,10 @@ void Generator::visitElementNode(ElementNode* node) {
         m_output << " " << attr->m_key << "=\"" << attr->m_value->toString(0) << "\"";
     }
 
-    if (node->styleBlock && !node->styleBlock->properties.empty()) {
+    if (node->styleBlock && !node->styleBlock->children.empty()) {
         m_output << " style=\"";
-        for (size_t i = 0; i < node->styleBlock->properties.size(); ++i) {
-            const auto& prop = node->styleBlock->properties[i];
-            m_output << prop->m_key << ":" << prop->m_value->toString(0);
-            if (i < node->styleBlock->properties.size() - 1) {
-                m_output << ";";
-            }
+        for (const auto& child : node->styleBlock->children) {
+            generateStyleString(child.get(), m_context, m_output);
         }
         m_output << "\"";
     }
@@ -75,6 +74,24 @@ void Generator::visitElementNode(ElementNode* node) {
 
 void Generator::visitTextNode(TextNode* node) {
     m_output << node->m_value;
+}
+
+
+// Helper function to recursively generate style strings
+void generateStyleString(Node* node, CHTLContext& context, std::stringstream& ss) {
+    if (auto attr = dynamic_cast<AttributeNode*>(node)) {
+        ss << attr->m_key << ":" << attr->m_value->toString(0) << ";";
+    } else if (auto inst = dynamic_cast<TemplateInstantiationNode*>(node)) {
+        if (inst->m_templateType.type == TokenType::AT_STYLE) {
+            TemplateNode* templateDef = context.findTemplate(inst->m_name.literal);
+            if (templateDef) {
+                for (const auto& child : templateDef->children) {
+                    // Recurse in case a style template includes another style template
+                    generateStyleString(child.get(), context, ss);
+                }
+            }
+        }
+    }
 }
 
 } // namespace CHTL

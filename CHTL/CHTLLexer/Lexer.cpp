@@ -82,8 +82,8 @@ void Lexer::skipBlockComment() {
 
 Token Lexer::readIdentifier() {
     int start_pos = m_position;
-    // An identifier starts with a letter or _, followed by letters, numbers, or _.
-    while (std::isalnum(m_char) || m_char == '_') {
+    // An identifier starts with a letter or _, followed by letters, numbers, _, or -
+    while (std::isalnum(m_char) || m_char == '_' || m_char == '-') {
         readChar();
     }
     std::string literal = m_input.substr(start_pos, m_position - start_pos);

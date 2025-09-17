@@ -76,12 +76,20 @@ std::unique_ptr<StyleNode> Parser::parseStyleBlock() {
     auto styleNode = std::make_unique<StyleNode>(m_currentToken);
     nextToken();
     nextToken();
+
     while (m_currentToken.type != TokenType::RBRACE && m_currentToken.type != TokenType::END_OF_FILE) {
+        std::unique_ptr<Statement> stmt = nullptr;
         if (m_currentToken.type == TokenType::IDENTIFIER) {
-            auto prop = parseAttribute();
-            if (prop) styleNode->properties.push_back(std::move(prop));
+            stmt = parseAttribute();
+        } else if (m_currentToken.type == TokenType::AT_STYLE) {
+            stmt = parseTemplateInstantiationStatement();
         }
-        nextToken();
+
+        if (stmt) {
+            styleNode->children.push_back(std::move(stmt));
+        } else {
+            nextToken();
+        }
     }
     return styleNode;
 }
@@ -98,13 +106,23 @@ std::unique_ptr<TemplateNode> Parser::parseTemplateStatement() {
 
     if (!expectPeek(TokenType::LBRACE)) return nullptr;
 
-    while (m_peekToken.type != TokenType::RBRACE && m_peekToken.type != TokenType::END_OF_FILE) {
-        nextToken();
-        auto stmt = parseStatement();
-        if (stmt) {
-            templateNode->children.push_back(std::move(stmt));
+    if (typeToken.type == TokenType::AT_STYLE) {
+        while (m_peekToken.type != TokenType::RBRACE && m_peekToken.type != TokenType::END_OF_FILE) {
+            nextToken();
+            if (m_currentToken.type == TokenType::IDENTIFIER) {
+                templateNode->children.push_back(parseAttribute());
+            }
+        }
+    } else {
+        while (m_peekToken.type != TokenType::RBRACE && m_peekToken.type != TokenType::END_OF_FILE) {
+            nextToken();
+            auto stmt = parseStatement();
+            if (stmt) {
+                templateNode->children.push_back(std::move(stmt));
+            }
         }
     }
+
     if (!expectPeek(TokenType::RBRACE)) return nullptr;
     return templateNode;
 }

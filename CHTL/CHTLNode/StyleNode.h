@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Node.h"
-#include "AttributeNode.h"
 #include <vector>
 #include <memory>
 
@@ -13,7 +12,7 @@ public:
 
     std::string toString(int indent = 0) const override {
         std::string out = std::string(indent, ' ') + "style {\n";
-        for (const auto& prop : properties) {
+        for (const auto& prop : children) {
             out += prop->toString(indent + 2);
         }
         out += std::string(indent, ' ') + "}\n";
@@ -21,7 +20,7 @@ public:
     }
 
     Token m_token; // The 'style' token
-    std::vector<std::unique_ptr<AttributeNode>> properties;
+    std::vector<std::unique_ptr<Statement>> children;
 };
 
 } // namespace CHTL

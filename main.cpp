@@ -8,6 +8,11 @@
 
 int main() {
     std::string input = R"(
+        [Template] @Style Theme {
+            color: red;
+            font-size: 16px;
+        }
+
         [Template] @Element Box {
             div {
                 text: "This is from a template.";
@@ -15,9 +20,14 @@ int main() {
         }
 
         body {
-            h1 { text: "Welcome"; }
+            h1 {
+                style {
+                    @Style Theme;
+                    font-weight: bold;
+                }
+                text: "Welcome";
+            }
             @Element Box;
-            p { text: "This is after the template."; }
         }
     )";
 
