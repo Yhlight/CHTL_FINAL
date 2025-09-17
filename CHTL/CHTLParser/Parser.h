@@ -32,6 +32,13 @@ private:
     std::unique_ptr<StylePropertyNode> stylePropertyDeclaration();
     std::unique_ptr<StyleRuleNode> styleRuleDeclaration();
 
+    // Template-related parsing methods
+    std::unique_ptr<BaseNode> templateDeclaration();
+    std::unique_ptr<TemplateStyleNode> templateStyleDeclaration();
+    std::unique_ptr<TemplateElementNode> templateElementDeclaration();
+    std::unique_ptr<UseStyleNode> useStyleDeclaration();
+    std::unique_ptr<UseElementNode> useElementDeclaration();
+
     // --- Token Manipulation Helpers ---
     Token advance();
     Token peek() const;

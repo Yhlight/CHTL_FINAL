@@ -19,6 +19,9 @@ std::unique_ptr<ProgramNode> Parser::parse() {
 // --- Grammar Rule Implementations ---
 
 std::unique_ptr<BaseNode> Parser::declaration() {
+    if (peek().type == TokenType::LEFT_BRACKET) {
+        return templateDeclaration();
+    }
     if (peek().type == TokenType::COMMENT) {
         return commentDeclaration();
     }
@@ -50,6 +53,10 @@ std::unique_ptr<ElementNode> Parser::elementDeclaration() {
         // Check for an attribute
         else if (peek().type == TokenType::IDENTIFIER && (tokens[current + 1].type == TokenType::COLON || tokens[current + 1].type == TokenType::EQUAL)) {
             element->attributes.push_back(attributeDeclaration());
+        }
+        // Check for template usage
+        else if (peek().type == TokenType::AT) {
+            element->children.push_back(useElementDeclaration());
         }
         // Otherwise, it's a nested child declaration
         else {
@@ -191,6 +198,11 @@ std::unique_ptr<StyleBlockNode> Parser::styleBlockDeclaration() {
 }
 
 std::unique_ptr<StyleContentNode> Parser::styleContentDeclaration() {
+    // Check for template usage, e.g. @Style MyTemplate;
+    if (peek().type == TokenType::AT) {
+        return useStyleDeclaration();
+    }
+
     // To distinguish a property from a rule, we can scan ahead.
     // A property will have a ':' before a ';'.
     // A rule will have a '{' before any ';'.
@@ -256,4 +268,74 @@ std::unique_ptr<StyleRuleNode> Parser::styleRuleDeclaration() {
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' after style rule block.");
     return rule;
+}
+
+
+// --- Template-related parsers ---
+
+std::unique_ptr<BaseNode> Parser::templateDeclaration() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start template declaration.");
+    Token keyword = consume(TokenType::IDENTIFIER, "Expect 'Template' or 'Custom' etc.");
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' after template keyword.");
+
+    // For now, only handle [Template]
+    if (keyword.lexeme != "Template") {
+        throw error(keyword, "Only [Template] is supported currently.");
+    }
+
+    consume(TokenType::AT, "Expect '@' for template type.");
+    Token type = consume(TokenType::IDENTIFIER, "Expect template type (e.g., 'Style', 'Element').");
+
+    if (type.lexeme == "Style") {
+        return templateStyleDeclaration();
+    } else if (type.lexeme == "Element") {
+        return templateElementDeclaration();
+    }
+
+    throw error(type, "Unknown or unsupported template type.");
+}
+
+std::unique_ptr<TemplateStyleNode> Parser::templateStyleDeclaration() {
+    Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+    auto templateNode = std::make_unique<TemplateStyleNode>();
+    templateNode->name = name;
+
+    consume(TokenType::LEFT_BRACE, "Expect '{' to start template body.");
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        templateNode->properties.push_back(stylePropertyDeclaration());
+    }
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to end template body.");
+
+    return templateNode;
+}
+
+std::unique_ptr<TemplateElementNode> Parser::templateElementDeclaration() {
+    Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+    auto templateNode = std::make_unique<TemplateElementNode>();
+    templateNode->name = name;
+
+    consume(TokenType::LEFT_BRACE, "Expect '{' to start template body.");
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        templateNode->children.push_back(declaration());
+    }
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to end template body.");
+
+    return templateNode;
+}
+
+std::unique_ptr<UseStyleNode> Parser::useStyleDeclaration() {
+    consume(TokenType::AT, "Expect '@' to use a template.");
+    // The spec is a bit ambiguous if @Style is one token or two. Assuming two.
+    consume(TokenType::IDENTIFIER, "Expect 'Style' keyword for @Style usage.");
+    Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+    consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+    return std::make_unique<UseStyleNode>(name);
+}
+
+std::unique_ptr<UseElementNode> Parser::useElementDeclaration() {
+    consume(TokenType::AT, "Expect '@' to use a template.");
+    consume(TokenType::IDENTIFIER, "Expect 'Element' keyword for @Element usage.");
+    Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+    consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+    return std::make_unique<UseElementNode>(name);
 }

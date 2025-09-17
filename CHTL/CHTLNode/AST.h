@@ -20,6 +20,11 @@ class NumberLiteralNode;
 class StyleBlockNode;
 class StylePropertyNode;
 class StyleRuleNode;
+class TemplateDefinitionNode;
+class TemplateStyleNode;
+class TemplateElementNode;
+class UseStyleNode;
+class UseElementNode;
 class Visitor;
 
 
@@ -38,6 +43,10 @@ public:
     virtual void visit(StyleBlockNode& node) = 0;
     virtual void visit(StylePropertyNode& node) = 0;
     virtual void visit(StyleRuleNode& node) = 0;
+    virtual void visit(TemplateStyleNode& node) = 0;
+    virtual void visit(TemplateElementNode& node) = 0;
+    virtual void visit(UseStyleNode& node) = 0;
+    virtual void visit(UseElementNode& node) = 0;
 };
 
 
@@ -155,6 +164,48 @@ public:
 class StyleBlockNode : public BaseNode {
 public:
     std::vector<std::unique_ptr<StyleContentNode>> contents;
+    void accept(Visitor& visitor) override;
+};
+
+
+// --- Template-related Nodes ---
+
+// Base class for all [Template] definitions.
+class TemplateDefinitionNode : public BaseNode {
+public:
+    Token name;
+};
+
+// e.g., [Template] @Style DefaultText { ... }
+class TemplateStyleNode : public TemplateDefinitionNode {
+public:
+    std::vector<std::unique_ptr<StylePropertyNode>> properties;
+    void accept(Visitor& visitor) override;
+};
+
+// e.g., [Template] @Element Box { ... }
+class TemplateElementNode : public TemplateDefinitionNode {
+public:
+    std::vector<std::unique_ptr<BaseNode>> children;
+    void accept(Visitor& visitor) override;
+};
+
+
+// Represents the usage of a template, e.g., @Style DefaultText;
+
+// e.g., @Style DefaultText;
+class UseStyleNode : public StyleContentNode { // Can only be used inside a style block
+public:
+    Token name;
+    explicit UseStyleNode(Token name) : name(std::move(name)) {}
+    void accept(Visitor& visitor) override;
+};
+
+// e.g., @Element Box;
+class UseElementNode : public BaseNode { // Can be used in the main body
+public:
+    Token name;
+    explicit UseElementNode(Token name) : name(std::move(name)) {}
     void accept(Visitor& visitor) override;
 };
 

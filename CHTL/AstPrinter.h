@@ -20,6 +20,13 @@ public:
     void visit(StringLiteralNode& node) override;
     void visit(UnquotedLiteralNode& node) override;
     void visit(NumberLiteralNode& node) override;
+    void visit(StyleBlockNode& node) override;
+    void visit(StylePropertyNode& node) override;
+    void visit(StyleRuleNode& node) override;
+    void visit(TemplateStyleNode& node) override;
+    void visit(TemplateElementNode& node) override;
+    void visit(UseStyleNode& node) override;
+    void visit(UseElementNode& node) override;
 
 private:
     std::stringstream buffer;

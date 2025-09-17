@@ -46,3 +46,19 @@ void StylePropertyNode::accept(Visitor& visitor) {
 void StyleRuleNode::accept(Visitor& visitor) {
     visitor.visit(*this);
 }
+
+void TemplateStyleNode::accept(Visitor& visitor) {
+    visitor.visit(*this);
+}
+
+void TemplateElementNode::accept(Visitor& visitor) {
+    visitor.visit(*this);
+}
+
+void UseStyleNode::accept(Visitor& visitor) {
+    visitor.visit(*this);
+}
+
+void UseElementNode::accept(Visitor& visitor) {
+    visitor.visit(*this);
+}

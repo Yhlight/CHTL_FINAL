@@ -23,6 +23,10 @@ void AstPrinter::visit(ElementNode& node) {
         buffer << "\n    ";
         attr->accept(*this);
     }
+    if (node.styleBlock) {
+        buffer << "\n    ";
+        node.styleBlock->accept(*this);
+    }
     for (const auto& child : node.children) {
         buffer << "\n    ";
         child->accept(*this);
@@ -76,6 +80,15 @@ void AstPrinter::visit(StringLiteralNode& node) {
 void AstPrinter::visit(NumberLiteralNode& node) {
     buffer << node.value.lexeme;
 }
+
+// Dummy implementations for now
+void AstPrinter::visit(StyleBlockNode& node) { buffer << "(StyleBlock ...)"; }
+void AstPrinter::visit(StylePropertyNode& node) { buffer << "(StyleProperty ...)"; }
+void AstPrinter::visit(StyleRuleNode& node) { buffer << "(StyleRule ...)"; }
+void AstPrinter::visit(TemplateStyleNode& node) { buffer << "(TemplateStyle ...)"; }
+void AstPrinter::visit(TemplateElementNode& node) { buffer << "(TemplateElement ...)"; }
+void AstPrinter::visit(UseStyleNode& node) { buffer << "(UseStyle ...)"; }
+void AstPrinter::visit(UseElementNode& node) { buffer << "(UseElement ...)"; }
 
 void AstPrinter::visit(UnquotedLiteralNode& node) {
     buffer << "(Unquoted";
