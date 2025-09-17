@@ -1,12 +1,22 @@
 html {
     head {
         title {
-            text { "My First CHTL Page" }
+            text { "My Advanced CHTL Page" }
         }
     }
     body {
+        id: main-body;
+        class: "container";
+
         div {
-            text { "Hello, World!" }
+            id: "welcome-box";
+
+            style {
+                color: red;
+                font-size: "16px";
+            }
+
+            text { "Hello, Attributes!" }
         }
     }
 }

@@ -28,16 +28,67 @@ void CHTLGenerator::generateNode(BaseNode* node) {
     } else if (auto* comment = dynamic_cast<CommentNode*>(node)) {
         generateCommentNode(comment);
     }
-    // Note: Other node types will be added here
+    // AttributeNode and StyleNode are handled within generateElementNode,
+    // so they are not dispatched from here.
+}
+
+void CHTLGenerator::generateAttributeNode(AttributeNode* node, std::vector<std::string>& attributes) {
+    if (node && node->value) {
+        // "key=\"value\""
+        attributes.push_back(node->key.literal + "=\"" + node->value->GetTokenLiteral() + "\"");
+    }
+}
+
+void CHTLGenerator::generateStyleNode(StyleNode* node, std::vector<std::string>& style_properties) {
+    for (const auto& prop : node->properties) {
+        if (prop && prop->value) {
+            // "key:value"
+            style_properties.push_back(prop->key.literal + ":" + prop->value->GetTokenLiteral());
+        }
+    }
 }
 
 void CHTLGenerator::generateElementNode(ElementNode* node) {
-    indent();
-    m_output << "<" << node->GetTokenLiteral() << ">" << "\n";
+    std::vector<std::string> attributes;
+    std::vector<std::string> style_properties;
 
+    // First pass: collect attributes and styles
+    for (const auto& child : node->children) {
+        if (auto* attr = dynamic_cast<AttributeNode*>(child.get())) {
+            generateAttributeNode(attr, attributes);
+        } else if (auto* style = dynamic_cast<StyleNode*>(child.get())) {
+            generateStyleNode(style, style_properties);
+        }
+    }
+
+    indent();
+    m_output << "<" << node->GetTokenLiteral();
+
+    // Add attributes to the tag
+    if (!attributes.empty()) {
+        for (const auto& attr : attributes) {
+            m_output << " " << attr;
+        }
+    }
+
+    // Add inline styles to the tag
+    if (!style_properties.empty()) {
+        m_output << " style=\"";
+        for (size_t i = 0; i < style_properties.size(); ++i) {
+            m_output << style_properties[i] << (i == style_properties.size() - 1 ? "" : ";");
+        }
+        m_output << "\"";
+    }
+
+    m_output << ">" << "\n";
+
+    // Second pass: generate content
     m_indent_level++;
     for (const auto& child : node->children) {
-        generateNode(child.get());
+        // Only generate nodes that are not attributes or styles
+        if (!dynamic_cast<AttributeNode*>(child.get()) && !dynamic_cast<StyleNode*>(child.get())) {
+            generateNode(child.get());
+        }
     }
     m_indent_level--;
 

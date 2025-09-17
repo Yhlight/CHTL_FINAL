@@ -21,7 +21,7 @@ void CHTLParser::peekError(TokenType expected) {
 }
 
 bool CHTLParser::expectPeek(TokenType expected) {
-    if (m_peekToken.type == expected) {
+    if (peekTokenIs(expected)) {
         nextToken();
         return true;
     } else {
@@ -30,10 +30,18 @@ bool CHTLParser::expectPeek(TokenType expected) {
     }
 }
 
+bool CHTLParser::curTokenIs(TokenType type) const {
+    return m_curToken.type == type;
+}
+
+bool CHTLParser::peekTokenIs(TokenType type) const {
+    return m_peekToken.type == type;
+}
+
 std::unique_ptr<Program> CHTLParser::ParseProgram() {
     auto program = std::make_unique<Program>();
 
-    while (m_curToken.type != TokenType::TOKEN_EOF) {
+    while (!curTokenIs(TokenType::TOKEN_EOF)) {
         auto stmt = parseStatement();
         if (stmt) {
             program->statements.push_back(stmt);
@@ -46,14 +54,84 @@ std::unique_ptr<Program> CHTLParser::ParseProgram() {
 std::shared_ptr<Statement> CHTLParser::parseStatement() {
     switch (m_curToken.type) {
         case TokenType::TOKEN_IDENTIFIER:
-            return parseElementStatement();
+            if (peekTokenIs(TokenType::TOKEN_COLON)) {
+                return parseAttributeStatement();
+            } else if (peekTokenIs(TokenType::TOKEN_LBRACE)) {
+                return parseElementStatement();
+            }
+            break;
         case TokenType::TOKEN_KEYWORD_TEXT:
             return parseTextStatement();
+        case TokenType::TOKEN_KEYWORD_STYLE:
+            return parseStyleStatement();
         default:
-            // Handle other statement types or return null for now
+            return nullptr;
+    }
+    return nullptr;
+}
+
+std::shared_ptr<Expression> CHTLParser::parseExpression() {
+    switch (m_curToken.type) {
+        case TokenType::TOKEN_IDENTIFIER:
+            return std::make_shared<Identifier>(m_curToken);
+        case TokenType::TOKEN_STRING:
+            return std::make_shared<StringLiteral>(m_curToken);
+        // Add other expression types here (numbers, etc.)
+        default:
             return nullptr;
     }
 }
+
+
+std::shared_ptr<AttributeNode> CHTLParser::parseAttributeStatement() {
+    Token keyToken = m_curToken;
+
+    if (!expectPeek(TokenType::TOKEN_COLON)) {
+        return nullptr;
+    }
+    nextToken(); // consume ':'
+
+    auto value = parseExpression();
+    if (!value) {
+        return nullptr;
+    }
+
+    auto attrNode = std::make_shared<AttributeNode>(keyToken, value);
+
+    // Optional semicolon
+    if (peekTokenIs(TokenType::TOKEN_SEMICOLON)) {
+        nextToken();
+    }
+
+    return attrNode;
+}
+
+std::shared_ptr<StyleNode> CHTLParser::parseStyleStatement() {
+    auto styleNode = std::make_shared<StyleNode>(m_curToken);
+
+    if (!expectPeek(TokenType::TOKEN_LBRACE)) {
+        return nullptr;
+    }
+    nextToken(); // consume '{'
+
+    while (!curTokenIs(TokenType::TOKEN_RBRACE) && !curTokenIs(TokenType::TOKEN_EOF)) {
+        if (m_curToken.type == TokenType::TOKEN_IDENTIFIER) {
+            auto prop = parseAttributeStatement();
+            if (prop) {
+                styleNode->properties.push_back(prop);
+            }
+        }
+        nextToken();
+    }
+
+    if (!curTokenIs(TokenType::TOKEN_RBRACE)) {
+        m_errors.push_back("Error: Unterminated style block. Expected '}'.");
+        return nullptr;
+    }
+
+    return styleNode;
+}
+
 
 std::shared_ptr<ElementNode> CHTLParser::parseElementStatement() {
     auto elementNode = std::make_shared<ElementNode>(m_curToken);
@@ -64,7 +142,7 @@ std::shared_ptr<ElementNode> CHTLParser::parseElementStatement() {
     nextToken(); // Consume '{'
 
     // Parse child statements
-    while (m_curToken.type != TokenType::TOKEN_RBRACE && m_curToken.type != TokenType::TOKEN_EOF) {
+    while (!curTokenIs(TokenType::TOKEN_RBRACE) && !curTokenIs(TokenType::TOKEN_EOF)) {
         auto stmt = parseStatement();
         if (stmt) {
             elementNode->children.push_back(stmt);
@@ -72,8 +150,7 @@ std::shared_ptr<ElementNode> CHTLParser::parseElementStatement() {
         nextToken();
     }
 
-    if (m_curToken.type != TokenType::TOKEN_RBRACE) {
-        // Error: unclosed element
+    if (!curTokenIs(TokenType::TOKEN_RBRACE)) {
         m_errors.push_back("Error: Unterminated element '" + elementNode->GetTokenLiteral() + "'. Expected '}'.");
         return nullptr;
     }

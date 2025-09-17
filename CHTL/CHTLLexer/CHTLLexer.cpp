@@ -75,7 +75,8 @@ void CHTLLexer::skipBlockComment() {
 
 Token CHTLLexer::readIdentifierOrKeyword() {
     size_t startPos = m_position;
-    while (isalpha(m_char) || isdigit(m_char) || m_char == '_') {
+    // Allow '-' in identifiers, e.g., for font-size
+    while (isalpha(m_char) || isdigit(m_char) || m_char == '_' || m_char == '-') {
         readChar();
     }
     std::string literal = m_input.substr(startPos, m_position - startPos);
