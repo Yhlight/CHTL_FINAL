@@ -1,0 +1,49 @@
+// Test file for template features
+
+[Template] @Var Theme
+{
+    primaryColor: "darkred";
+    defaultFont: "Arial";
+}
+
+[Template] @Style DefaultText
+{
+    color: "black";
+    font-size: "16px";
+    line-height: "1.6";
+}
+
+body {
+    p {
+        id: "my-para";
+        style {
+            // Use the style template
+            @Style DefaultText;
+
+            // Use variables from the var template
+            background-color: "lightgray";
+            font-family: Theme(defaultFont);
+
+            // Add a nested rule that also uses a variable
+            &:hover {
+                color: Theme(primaryColor);
+            }
+        }
+        text: "This is a paragraph using a style template.";
+    }
+
+    // Use the element template
+    @Element MyBox;
+}
+
+// Define an element template
+[Template] @Element MyBox
+{
+    div {
+        class: "box-from-template";
+        text: "This content is from an element template.";
+        span {
+            text: "Nested element in template.";
+        }
+    }
+}

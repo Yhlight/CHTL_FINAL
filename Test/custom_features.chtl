@@ -1,0 +1,39 @@
+// Test file for [Custom] features
+
+[Custom] @Style CustomText
+{
+    color, // Valueless property
+    font-size: "12px";
+    border: "1px solid black";
+}
+
+[Custom] @Style SpecialText
+{
+    // Inherit from CustomText and provide a value for 'color'
+    @Style CustomText {
+        color: "blue";
+    }
+}
+
+body {
+    // Test case 1: Using the specialized custom style that inherits
+    div {
+        id: "div1";
+        style {
+            @Style SpecialText;
+        }
+        text: "This text should be blue and 12px with a border.";
+    }
+
+    // Test case 2: Using the base custom style with usage-site specialization
+    div {
+        id: "div2";
+        style {
+            @Style CustomText {
+                color: "green";
+                delete border;
+            }
+        }
+        text: "This text should be green, 12px, and have no border.";
+    }
+}

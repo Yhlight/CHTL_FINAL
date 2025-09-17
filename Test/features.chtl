@@ -1,0 +1,24 @@
+// Test file for new features.
+
+body {
+    # Test the text: attribute
+    div {
+        id: "test1";
+        class: "container";
+        text: "hello from the text attribute";
+    }
+
+    # Test with unquoted literal
+    p {
+        text: unquoted_text_works_too;
+    }
+
+    # Test alongside a text {} block
+    div {
+        class: "mixed";
+        text: "this is from the attribute";
+        text {
+            "this is from the block"
+        }
+    }
+}
