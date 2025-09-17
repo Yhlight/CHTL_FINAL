@@ -7,6 +7,11 @@
 #include <stdexcept>
 #include <cstdlib>
 
+#ifdef _WIN32
+#define popen _popen
+#define pclose _pclose
+#endif
+
 namespace fs = std::filesystem;
 
 // Function to execute a command and capture its combined stdout and stderr

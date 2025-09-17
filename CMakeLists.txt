@@ -23,10 +23,11 @@ add_library(chtl_lib STATIC
 
 # Public include directories for the library
 target_include_directories(chtl_lib PUBLIC src src/CJMOD ${CMAKE_CURRENT_SOURCE_DIR}/third_party/miniz)
+target_compile_features(chtl_lib PUBLIC cxx_std_17)
 
 # Main compiler executable
 add_executable(chtl_compiler src/main.cpp)
-target_link_libraries(chtl_compiler PRIVATE chtl_lib stdc++fs)
+target_link_libraries(chtl_compiler PRIVATE chtl_lib)
 if (UNIX AND NOT APPLE)
     target_link_libraries(chtl_compiler PRIVATE dl)
 endif()
