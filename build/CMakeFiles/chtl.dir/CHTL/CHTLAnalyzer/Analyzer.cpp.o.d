@@ -1,8 +1,8 @@
-CMakeFiles/chtl.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: \
- /app/CompilerDispatcher/CompilerDispatcher.cpp \
- /usr/include/stdc-predef.h /app/CompilerDispatcher/CompilerDispatcher.h \
- /app/CompilerDispatcher/../Scanner/UnifiedScanner.h \
- /usr/include/c++/13/string /usr/include/c++/13/bits/requires_hosted.h \
+CMakeFiles/chtl.dir/CHTL/CHTLAnalyzer/Analyzer.cpp.o: \
+ /app/CHTL/CHTLAnalyzer/Analyzer.cpp /usr/include/stdc-predef.h \
+ /app/CHTL/CHTLAnalyzer/Analyzer.h \
+ /app/CHTL/CHTLAnalyzer/../CHTLNode/Node.h /usr/include/c++/13/string \
+ /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -125,13 +125,8 @@ CMakeFiles/chtl.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /usr/include/c++/13/bits/node_handle.h \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
- /usr/include/c++/13/bits/erase_if.h \
- /app/CompilerDispatcher/../CHTL/CHTLLexer/Lexer.h \
- /app/CompilerDispatcher/../CHTL/CHTLLexer/Token.h \
- /app/CompilerDispatcher/../CHTL/CHTLParser/Parser.h \
- /app/CompilerDispatcher/../CHTL/CHTLParser/../CHTLLexer/Lexer.h \
- /app/CompilerDispatcher/../CHTL/CHTLParser/../CHTLNode/Node.h \
- /usr/include/c++/13/memory /usr/include/c++/13/bits/stl_tempbuf.h \
+ /usr/include/c++/13/bits/erase_if.h /usr/include/c++/13/memory \
+ /usr/include/c++/13/bits/stl_tempbuf.h \
  /usr/include/c++/13/bits/stl_raw_storage_iter.h \
  /usr/include/c++/13/bits/align.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
@@ -166,28 +161,4 @@ CMakeFiles/chtl.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /usr/include/c++/13/bits/atomic_lockfree_defines.h \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
- /usr/include/c++/13/pstl/execution_defs.h \
- /app/CompilerDispatcher/../CHTL/CHTLGenerator/Generator.h \
- /app/CompilerDispatcher/../CHTL/CHTLGenerator/../CHTLNode/Node.h \
- /usr/include/c++/13/sstream /usr/include/c++/13/istream \
- /usr/include/c++/13/ios /usr/include/c++/13/bits/ios_base.h \
- /usr/include/c++/13/bits/locale_classes.h \
- /usr/include/c++/13/bits/locale_classes.tcc \
- /usr/include/c++/13/system_error \
- /usr/include/x86_64-linux-gnu/c++/13/bits/error_constants.h \
- /usr/include/c++/13/stdexcept /usr/include/c++/13/streambuf \
- /usr/include/c++/13/bits/streambuf.tcc \
- /usr/include/c++/13/bits/basic_ios.h \
- /usr/include/c++/13/bits/locale_facets.h /usr/include/c++/13/cwctype \
- /usr/include/wctype.h /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
- /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h \
- /usr/include/c++/13/bits/streambuf_iterator.h \
- /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h \
- /usr/include/c++/13/bits/locale_facets.tcc \
- /usr/include/c++/13/bits/basic_ios.tcc /usr/include/c++/13/ostream \
- /usr/include/c++/13/bits/ostream.tcc \
- /usr/include/c++/13/bits/istream.tcc \
- /usr/include/c++/13/bits/sstream.tcc \
- /app/CompilerDispatcher/../CHTL/CHTLAnalyzer/Analyzer.h \
- /app/CompilerDispatcher/../CHTL/CHTLAnalyzer/../CHTLNode/Node.h \
- /usr/include/c++/13/iostream
+ /usr/include/c++/13/pstl/execution_defs.h

@@ -155,6 +155,33 @@ test/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/build
 .PHONY : test/fast
 
+CHTL/CHTLAnalyzer/Analyzer.o: CHTL/CHTLAnalyzer/Analyzer.cpp.o
+.PHONY : CHTL/CHTLAnalyzer/Analyzer.o
+
+# target to build an object file
+CHTL/CHTLAnalyzer/Analyzer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTL/CHTLAnalyzer/Analyzer.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_tests.dir/build.make CMakeFiles/run_tests.dir/CHTL/CHTLAnalyzer/Analyzer.cpp.o
+.PHONY : CHTL/CHTLAnalyzer/Analyzer.cpp.o
+
+CHTL/CHTLAnalyzer/Analyzer.i: CHTL/CHTLAnalyzer/Analyzer.cpp.i
+.PHONY : CHTL/CHTLAnalyzer/Analyzer.i
+
+# target to preprocess a source file
+CHTL/CHTLAnalyzer/Analyzer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTL/CHTLAnalyzer/Analyzer.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_tests.dir/build.make CMakeFiles/run_tests.dir/CHTL/CHTLAnalyzer/Analyzer.cpp.i
+.PHONY : CHTL/CHTLAnalyzer/Analyzer.cpp.i
+
+CHTL/CHTLAnalyzer/Analyzer.s: CHTL/CHTLAnalyzer/Analyzer.cpp.s
+.PHONY : CHTL/CHTLAnalyzer/Analyzer.s
+
+# target to generate assembly for a file
+CHTL/CHTLAnalyzer/Analyzer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl.dir/build.make CMakeFiles/chtl.dir/CHTL/CHTLAnalyzer/Analyzer.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_tests.dir/build.make CMakeFiles/run_tests.dir/CHTL/CHTLAnalyzer/Analyzer.cpp.s
+.PHONY : CHTL/CHTLAnalyzer/Analyzer.cpp.s
+
 CHTL/CHTLGenerator/Generator.o: CHTL/CHTLGenerator/Generator.cpp.o
 .PHONY : CHTL/CHTLGenerator/Generator.o
 
@@ -478,6 +505,9 @@ help:
 	@echo "... test"
 	@echo "... chtl"
 	@echo "... run_tests"
+	@echo "... CHTL/CHTLAnalyzer/Analyzer.o"
+	@echo "... CHTL/CHTLAnalyzer/Analyzer.i"
+	@echo "... CHTL/CHTLAnalyzer/Analyzer.s"
 	@echo "... CHTL/CHTLGenerator/Generator.o"
 	@echo "... CHTL/CHTLGenerator/Generator.i"
 	@echo "... CHTL/CHTLGenerator/Generator.s"

@@ -2,6 +2,7 @@
 #include "../CHTL/CHTLLexer/Lexer.h"
 #include "../CHTL/CHTLParser/Parser.h"
 #include "../CHTL/CHTLGenerator/Generator.h"
+#include "../CHTL/CHTLAnalyzer/Analyzer.h" // New include
 #include <iostream>
 #include <sstream>
 
@@ -11,10 +12,12 @@ CompilerDispatcher::CompilerDispatcher() {}
 
 std::string CompilerDispatcher::dispatch(const std::vector<CodeFragment>& fragments) {
     Generator generator;
+    Analyzer analyzer; // Create an analyzer
     std::stringstream body_stream;
 
     for (const auto& fragment : fragments) {
         if (fragment.type == CodeType::CHTL) {
+            // 1. Lex & Parse
             Lexer lexer(fragment.content);
             Parser parser(lexer);
             std::unique_ptr<RootNode> ast = parser.parseProgram();
@@ -26,7 +29,10 @@ std::string CompilerDispatcher::dispatch(const std::vector<CodeFragment>& fragme
                 }
             }
 
-            // The generator now produces the body and collects global CSS separately.
+            // 2. Analyze and enrich the AST
+            analyzer.analyze(ast.get());
+
+            // 3. Generate code from the (potentially modified) AST
             body_stream << generator.generate(ast.get());
         }
     }

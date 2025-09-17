@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/run_tests.dir/CHTL/CHTLAnalyzer/Analyzer.cpp.o"
+  "CMakeFiles/run_tests.dir/CHTL/CHTLAnalyzer/Analyzer.cpp.o.d"
   "CMakeFiles/run_tests.dir/CHTL/CHTLGenerator/Generator.cpp.o"
   "CMakeFiles/run_tests.dir/CHTL/CHTLGenerator/Generator.cpp.o.d"
   "CMakeFiles/run_tests.dir/CHTL/CHTLLexer/Lexer.cpp.o"

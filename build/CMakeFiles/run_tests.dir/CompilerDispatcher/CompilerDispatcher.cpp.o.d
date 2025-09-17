@@ -187,4 +187,7 @@ CMakeFiles/run_tests.dir/CompilerDispatcher/CompilerDispatcher.cpp.o: \
  /usr/include/c++/13/bits/basic_ios.tcc /usr/include/c++/13/ostream \
  /usr/include/c++/13/bits/ostream.tcc \
  /usr/include/c++/13/bits/istream.tcc \
- /usr/include/c++/13/bits/sstream.tcc /usr/include/c++/13/iostream
+ /usr/include/c++/13/bits/sstream.tcc \
+ /app/CompilerDispatcher/../CHTL/CHTLAnalyzer/Analyzer.h \
+ /app/CompilerDispatcher/../CHTL/CHTLAnalyzer/../CHTLNode/Node.h \
+ /usr/include/c++/13/iostream

@@ -100,10 +100,55 @@ TEST_CASE(Compiler_GlobalAndInlineStyles) {
           </style>
         </head>
         <body>
-          <div style="color: blue;">
+          <div class="nested" style="color: blue;">
             <p>
               Hello
             </p>
+          </div>
+        </body>
+        </html>
+    )";
+
+    std::vector<CHTL::CodeFragment> fragments = {{CHTL::CodeType::CHTL, source}};
+    CHTL::CompilerDispatcher dispatcher;
+    std::string actual_html = dispatcher.dispatch(fragments);
+
+    ASSERT_EQUAL(normalize_html(expected_html), normalize_html(actual_html));
+    return true;
+}
+
+TEST_CASE(Compiler_AutomaticClassAndId) {
+    const std::string source = R"(
+        div {
+            // This style block should automatically add id="main" and class="box"
+            style {
+                #main {
+                    border: 1px solid green;
+                }
+                .box {
+                    padding: 10px;
+                }
+            }
+        }
+    )";
+
+    const std::string expected_html = R"(
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>CHTL Output</title>
+          <style>
+          #main {
+            border: 1px solid green;
+          }
+          .box {
+            padding: 10px;
+          }
+          </style>
+        </head>
+        <body>
+          <div class="box" id="main">
           </div>
         </body>
         </html>

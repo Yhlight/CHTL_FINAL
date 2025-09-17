@@ -16,6 +16,7 @@ file(GLOB_RECURSE COMPILER_SOURCES
     "CHTL/CHTLLexer/*.cpp"
     "CHTL/CHTLParser/*.cpp"
     "CHTL/CHTLGenerator/*.cpp"
+    "CHTL/CHTLAnalyzer/*.cpp"
     "CompilerDispatcher/*.cpp"
     "CodeMerger/*.cpp"
     "Scanner/*.cpp"
