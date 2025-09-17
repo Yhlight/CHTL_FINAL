@@ -1,0 +1,15 @@
+html {
+    head {
+        title { text: "Script Block Test"; }
+    }
+    body {
+        div {
+            id: "my-div";
+            text: "Hello, World!";
+        }
+
+        script {
+            {{#my-div}}.style.color = "red";
+        }
+    }
+}

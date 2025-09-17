@@ -1,0 +1,13 @@
+[Import] @Chtl from "MyTestModule.chtl";
+
+body {
+    div {
+        class: "container";
+        style {
+            @Style MyTestModule.main_theme;
+            color: MyTestModule.colors(primary);
+        }
+
+        @Element MyTestModule.button;
+    }
+}

@@ -1,0 +1,22 @@
+// Test file for CHTLJS Parser
+
+// Vir declaration
+vir my_listener = {{.my-button}}->listen {
+    click: __JS_PLACEHOLDER_0__,
+    mouseenter: __JS_PLACEHOLDER_1__
+};
+
+// Animate block
+animate {
+    target: {{.box}},
+    duration: 1000,
+    easing: "ease-in-out",
+    when: [
+        { at: 0.5, opacity: 1 },
+        { at: 1.0, opacity: 0 }
+    ],
+    callback: __JS_PLACEHOLDER_2__
+};
+
+// Standalone placeholder
+__JS_PLACEHOLDER_3__;

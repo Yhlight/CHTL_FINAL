@@ -1,0 +1,6 @@
+div {
+    style {
+        height: 50% - 20%;
+        padding: 10px % 3px;
+    }
+}

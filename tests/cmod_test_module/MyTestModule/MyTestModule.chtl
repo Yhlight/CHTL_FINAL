@@ -1,0 +1,13 @@
+// This is the main file for MyTestModule.
+// It can contain non-exported, module-internal definitions.
+
+[Template] @Element internal_header {
+    h1 {
+        text: "MyTestModule Internal Header";
+    }
+}
+
+div {
+    class: "module-container";
+    @Element internal_header;
+}

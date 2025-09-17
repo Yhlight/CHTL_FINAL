@@ -1,0 +1,8 @@
+[Namespace] space1
+
+[Template] @Element Box {
+    div {
+        class: "box-style-1";
+        text: "This is a box from namespace 1.";
+    }
+}

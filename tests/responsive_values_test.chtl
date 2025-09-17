@@ -1,0 +1,26 @@
+html {
+    body {
+        div {
+            id: "test-div";
+            style {
+                width: $boxWidth$;
+                height: 100px;
+                background-color: $boxColor$;
+                transition: all 0.5s ease;
+            }
+            text: "Responsive Box";
+        }
+
+        script {
+            // Initialize the responsive variables
+            let boxWidth = "100px";
+            let boxColor = "red";
+
+            // Change the variables after a delay to test reactivity
+            setTimeout(() => {
+                boxWidth = "300px";
+                boxColor = "blue";
+            }, 100);
+        }
+    }
+}
