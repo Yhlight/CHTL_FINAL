@@ -169,6 +169,19 @@ test_scanner/fast:
 .PHONY : test_scanner/fast
 
 #=============================================================================
+# Target rules for targets named test_unified_scanner
+
+# Build rule for target.
+test_unified_scanner: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_unified_scanner
+.PHONY : test_unified_scanner
+
+# fast build rule for target.
+test_unified_scanner/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_unified_scanner.dir/build.make CMakeFiles/test_unified_scanner.dir/build
+.PHONY : test_unified_scanner/fast
+
+#=============================================================================
 # Target rules for targets named test_runner
 
 # Build rule for target.
@@ -589,6 +602,30 @@ tests/test_scanner.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_scanner.dir/build.make CMakeFiles/test_scanner.dir/tests/test_scanner.cpp.s
 .PHONY : tests/test_scanner.cpp.s
 
+tests/test_unified_scanner.o: tests/test_unified_scanner.cpp.o
+.PHONY : tests/test_unified_scanner.o
+
+# target to build an object file
+tests/test_unified_scanner.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_unified_scanner.dir/build.make CMakeFiles/test_unified_scanner.dir/tests/test_unified_scanner.cpp.o
+.PHONY : tests/test_unified_scanner.cpp.o
+
+tests/test_unified_scanner.i: tests/test_unified_scanner.cpp.i
+.PHONY : tests/test_unified_scanner.i
+
+# target to preprocess a source file
+tests/test_unified_scanner.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_unified_scanner.dir/build.make CMakeFiles/test_unified_scanner.dir/tests/test_unified_scanner.cpp.i
+.PHONY : tests/test_unified_scanner.cpp.i
+
+tests/test_unified_scanner.s: tests/test_unified_scanner.cpp.s
+.PHONY : tests/test_unified_scanner.s
+
+# target to generate assembly for a file
+tests/test_unified_scanner.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_unified_scanner.dir/build.make CMakeFiles/test_unified_scanner.dir/tests/test_unified_scanner.cpp.s
+.PHONY : tests/test_unified_scanner.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -602,6 +639,7 @@ help:
 	@echo "... test_parser"
 	@echo "... test_runner"
 	@echo "... test_scanner"
+	@echo "... test_unified_scanner"
 	@echo "... miniz.o"
 	@echo "... miniz.i"
 	@echo "... miniz.s"
@@ -653,6 +691,9 @@ help:
 	@echo "... tests/test_scanner.o"
 	@echo "... tests/test_scanner.i"
 	@echo "... tests/test_scanner.s"
+	@echo "... tests/test_unified_scanner.o"
+	@echo "... tests/test_unified_scanner.i"
+	@echo "... tests/test_unified_scanner.s"
 .PHONY : help
 
 

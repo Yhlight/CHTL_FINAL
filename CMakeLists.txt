@@ -39,5 +39,8 @@ target_link_libraries(test_parser PRIVATE chtl_lib)
 add_executable(test_scanner tests/test_scanner.cpp)
 target_link_libraries(test_scanner PRIVATE chtl_lib)
 
+add_executable(test_unified_scanner tests/test_unified_scanner.cpp)
+target_link_libraries(test_unified_scanner PRIVATE chtl_lib)
+
 add_executable(test_runner tests/test_runner.cpp)
 target_link_libraries(test_runner PRIVATE chtl_lib)
