@@ -1,0 +1,32 @@
+html {
+    head {
+        title {
+            text: "My First CHTL Website";
+        }
+        meta {
+            charset: "UTF-8";
+        }
+        style {
+            // This is a style block, but the generator doesn't handle it yet.
+            // It will be ignored by the current implementation.
+        }
+    }
+    body {
+        div {
+            id = "main";
+            class: "container";
+
+            h1 {
+                text: "Welcome to CHTL";
+            }
+            p {
+                text { "This is a paragraph generated from CHTL source." }
+            }
+
+            img {
+                src: "image.png";
+                alt: "An image";
+            }
+        }
+    }
+}
