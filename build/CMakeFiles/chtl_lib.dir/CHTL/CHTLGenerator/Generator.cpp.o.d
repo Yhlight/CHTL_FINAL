@@ -184,4 +184,5 @@ CMakeFiles/chtl_lib.dir/CHTL/CHTLGenerator/Generator.cpp.o: \
  /usr/include/c++/13/bits/sstream.tcc /app/CHTL/CHTLNode/StyleNode.h \
  /app/CHTL/CHTLNode/TemplateUsageNode.h \
  /app/CHTL/CHTLNode/StylePropertyNode.h \
- /app/CHTL/CHTLNode/TemplateDefinitionNode.h
+ /app/CHTL/CHTLNode/TemplateDefinitionNode.h \
+ /app/CHTL/CHTLNode/ElementBlockNode.h

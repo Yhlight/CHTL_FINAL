@@ -15,6 +15,7 @@ set(COMPILER_LIB_SOURCES
     CHTL/CHTLNode/TemplateDefinitionNode.cpp
     CHTL/CHTLNode/TemplateUsageNode.cpp
     CHTL/CHTLNode/StylePropertyNode.cpp
+    CHTL/CHTLNode/ElementBlockNode.cpp
     CHTL/CHTLParser/Parser.cpp
     CHTL/CHTLGenerator/Generator.cpp
 )
@@ -63,6 +64,11 @@ add_test(NAME ErrorTests COMMAND run_error_tests)
 add_executable(run_template_tests Test/TemplateTest.cpp)
 target_link_libraries(run_template_tests PRIVATE chtl_lib)
 add_test(NAME TemplateTests COMMAND run_template_tests)
+
+# --- Element Template Test ---
+add_executable(run_element_template_tests Test/ElementTemplateTest.cpp)
+target_link_libraries(run_element_template_tests PRIVATE chtl_lib)
+add_test(NAME ElementTemplateTests COMMAND run_element_template_tests)
 
 
 # Add directories for header files

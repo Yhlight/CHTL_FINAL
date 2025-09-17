@@ -1,10 +1,10 @@
-Start testing: Sep 17 13:18 UTC
+Start testing: Sep 17 13:39 UTC
 ----------------------------------------------------------
-1/7 Testing: LexerTests
-1/7 Test: LexerTests
+1/8 Testing: LexerTests
+1/8 Test: LexerTests
 Command: "/app/build/run_lexer_tests"
 Directory: /app/build
-"LexerTests" start time: Sep 17 13:18 UTC
+"LexerTests" start time: Sep 17 13:39 UTC
 Output:
 ----------------------------------------------------------
 Running Lexer Test...
@@ -13,15 +13,15 @@ Lexer Test Passed!
 Test time =   0.00 sec
 ----------------------------------------------------------
 Test Passed.
-"LexerTests" end time: Sep 17 13:18 UTC
+"LexerTests" end time: Sep 17 13:39 UTC
 "LexerTests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-2/7 Testing: ParserTests
-2/7 Test: ParserTests
+2/8 Testing: ParserTests
+2/8 Test: ParserTests
 Command: "/app/build/run_parser_tests"
 Directory: /app/build
-"ParserTests" start time: Sep 17 13:18 UTC
+"ParserTests" start time: Sep 17 13:39 UTC
 Output:
 ----------------------------------------------------------
 Running Parser Test...
@@ -30,15 +30,15 @@ Parser Test Passed!
 Test time =   0.00 sec
 ----------------------------------------------------------
 Test Passed.
-"ParserTests" end time: Sep 17 13:18 UTC
+"ParserTests" end time: Sep 17 13:39 UTC
 "ParserTests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-3/7 Testing: GeneratorTests
-3/7 Test: GeneratorTests
+3/8 Testing: GeneratorTests
+3/8 Test: GeneratorTests
 Command: "/app/build/run_generator_tests"
 Directory: /app/build
-"GeneratorTests" start time: Sep 17 13:18 UTC
+"GeneratorTests" start time: Sep 17 13:39 UTC
 Output:
 ----------------------------------------------------------
 Running Generator Test...
@@ -47,15 +47,15 @@ Generator Test Passed!
 Test time =   0.00 sec
 ----------------------------------------------------------
 Test Passed.
-"GeneratorTests" end time: Sep 17 13:18 UTC
+"GeneratorTests" end time: Sep 17 13:39 UTC
 "GeneratorTests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-4/7 Testing: AttributeTests
-4/7 Test: AttributeTests
+4/8 Testing: AttributeTests
+4/8 Test: AttributeTests
 Command: "/app/build/run_attribute_tests"
 Directory: /app/build
-"AttributeTests" start time: Sep 17 13:18 UTC
+"AttributeTests" start time: Sep 17 13:39 UTC
 Output:
 ----------------------------------------------------------
 Running Attribute Test...
@@ -64,15 +64,15 @@ Attribute Test Passed!
 Test time =   0.00 sec
 ----------------------------------------------------------
 Test Passed.
-"AttributeTests" end time: Sep 17 13:18 UTC
+"AttributeTests" end time: Sep 17 13:39 UTC
 "AttributeTests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-5/7 Testing: StyleTests
-5/7 Test: StyleTests
+5/8 Testing: StyleTests
+5/8 Test: StyleTests
 Command: "/app/build/run_style_tests"
 Directory: /app/build
-"StyleTests" start time: Sep 17 13:18 UTC
+"StyleTests" start time: Sep 17 13:39 UTC
 Output:
 ----------------------------------------------------------
 Running Style Test...
@@ -81,15 +81,15 @@ Style Test Passed!
 Test time =   0.00 sec
 ----------------------------------------------------------
 Test Passed.
-"StyleTests" end time: Sep 17 13:18 UTC
+"StyleTests" end time: Sep 17 13:39 UTC
 "StyleTests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-6/7 Testing: ErrorTests
-6/7 Test: ErrorTests
+6/8 Testing: ErrorTests
+6/8 Test: ErrorTests
 Command: "/app/build/run_error_tests"
 Directory: /app/build
-"ErrorTests" start time: Sep 17 13:18 UTC
+"ErrorTests" start time: Sep 17 13:39 UTC
 Output:
 ----------------------------------------------------------
 Running Error Test...
@@ -99,15 +99,15 @@ Error Test Passed! Parser correctly detected 1 error(s).
 Test time =   0.00 sec
 ----------------------------------------------------------
 Test Passed.
-"ErrorTests" end time: Sep 17 13:18 UTC
+"ErrorTests" end time: Sep 17 13:39 UTC
 "ErrorTests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-7/7 Testing: TemplateTests
-7/7 Test: TemplateTests
+7/8 Testing: TemplateTests
+7/8 Test: TemplateTests
 Command: "/app/build/run_template_tests"
 Directory: /app/build
-"TemplateTests" start time: Sep 17 13:18 UTC
+"TemplateTests" start time: Sep 17 13:39 UTC
 Output:
 ----------------------------------------------------------
 Running Template Test...
@@ -116,8 +116,25 @@ Template Test Passed!
 Test time =   0.00 sec
 ----------------------------------------------------------
 Test Passed.
-"TemplateTests" end time: Sep 17 13:18 UTC
+"TemplateTests" end time: Sep 17 13:39 UTC
 "TemplateTests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-End testing: Sep 17 13:18 UTC
+8/8 Testing: ElementTemplateTests
+8/8 Test: ElementTemplateTests
+Command: "/app/build/run_element_template_tests"
+Directory: /app/build
+"ElementTemplateTests" start time: Sep 17 13:39 UTC
+Output:
+----------------------------------------------------------
+Running Element Template Test...
+Element Template Test Passed!
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ElementTemplateTests" end time: Sep 17 13:39 UTC
+"ElementTemplateTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 17 13:39 UTC

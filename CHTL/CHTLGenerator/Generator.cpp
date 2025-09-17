@@ -4,7 +4,8 @@
 #include "ElementNode.h"
 #include "TemplateUsageNode.h"
 #include "StylePropertyNode.h"
-#include "TemplateDefinitionNode.h" // Needed for accessing template_def->body
+#include "TemplateDefinitionNode.h"
+#include "ElementBlockNode.h"
 
 namespace CHTL {
 
@@ -65,8 +66,20 @@ void Generator::visit(const Node* node) {
 
     } else if (auto t = dynamic_cast<const TextNode*>(node)) {
         m_output << t->value;
+    } else if (auto u = dynamic_cast<const TemplateUsageNode*>(node)) {
+        // This handles @Element usages that are direct children
+        auto it = m_program.templateRegistry.find(u->name);
+        if (it != m_program.templateRegistry.end()) {
+            const auto& template_def = it->second;
+            // The body of an @Element template is an ElementBlockNode
+            if (auto block = dynamic_cast<const ElementBlockNode*>(template_def->body.get())) {
+                for (const auto& stmt : block->statements) {
+                    visit(stmt.get());
+                }
+            }
+        }
     }
-    // StyleNode is handled within ElementNode logic, so it doesn't need its own case.
+    // StyleNode and @Style usages are handled within ElementNode logic, so they don't need a case here.
 }
 
 } // namespace CHTL

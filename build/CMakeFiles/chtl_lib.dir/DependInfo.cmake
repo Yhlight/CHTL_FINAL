@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/app/CHTL/CHTLGenerator/Generator.cpp" "CMakeFiles/chtl_lib.dir/CHTL/CHTLGenerator/Generator.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/CHTL/CHTLGenerator/Generator.cpp.o.d"
   "/app/CHTL/CHTLLexer/Lexer.cpp" "CMakeFiles/chtl_lib.dir/CHTL/CHTLLexer/Lexer.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/CHTL/CHTLLexer/Lexer.cpp.o.d"
+  "/app/CHTL/CHTLNode/ElementBlockNode.cpp" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/ElementBlockNode.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/ElementBlockNode.cpp.o.d"
   "/app/CHTL/CHTLNode/ElementNode.cpp" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/ElementNode.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/ElementNode.cpp.o.d"
   "/app/CHTL/CHTLNode/Node.cpp" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/Node.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/Node.cpp.o.d"
   "/app/CHTL/CHTLNode/StyleNode.cpp" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/StyleNode.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/StyleNode.cpp.o.d"

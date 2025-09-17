@@ -1,8 +1,7 @@
-CMakeFiles/chtl_lib.dir/CHTL/CHTLParser/Parser.cpp.o: \
- /app/CHTL/CHTLParser/Parser.cpp /usr/include/stdc-predef.h \
- /app/CHTL/CHTLParser/Parser.h /app/CHTL/CHTLLexer/Lexer.h \
- /app/CHTL/CHTLLexer/Token.h /usr/include/c++/13/string \
- /usr/include/c++/13/bits/requires_hosted.h \
+CMakeFiles/run_element_template_tests.dir/Test/ElementTemplateTest.cpp.o: \
+ /app/Test/ElementTemplateTest.cpp /usr/include/stdc-predef.h \
+ /app/CHTL/CHTLLexer/Lexer.h /app/CHTL/CHTLLexer/Token.h \
+ /usr/include/c++/13/string /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -119,8 +118,9 @@ CMakeFiles/chtl_lib.dir/CHTL/CHTLParser/Parser.cpp.o: \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/stl_uninitialized.h \
  /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc /app/CHTL/CHTLNode/Node.h \
- /usr/include/c++/13/memory /usr/include/c++/13/bits/stl_tempbuf.h \
+ /usr/include/c++/13/bits/vector.tcc /app/CHTL/CHTLParser/Parser.h \
+ /app/CHTL/CHTLNode/Node.h /usr/include/c++/13/memory \
+ /usr/include/c++/13/bits/stl_tempbuf.h \
  /usr/include/c++/13/bits/stl_raw_storage_iter.h \
  /usr/include/c++/13/bits/align.h \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
@@ -166,8 +166,7 @@ CMakeFiles/chtl_lib.dir/CHTL/CHTLParser/Parser.cpp.o: \
  /app/CHTL/CHTLNode/TextNode.h /app/CHTL/CHTLNode/StyleNode.h \
  /app/CHTL/CHTLNode/TemplateDefinitionNode.h \
  /app/CHTL/CHTLNode/TemplateUsageNode.h \
- /app/CHTL/CHTLNode/StylePropertyNode.h \
- /app/CHTL/CHTLNode/ElementBlockNode.h /usr/include/c++/13/sstream \
+ /app/CHTL/CHTLGenerator/Generator.h /usr/include/c++/13/sstream \
  /usr/include/c++/13/istream /usr/include/c++/13/ios \
  /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \
@@ -186,4 +185,5 @@ CMakeFiles/chtl_lib.dir/CHTL/CHTLParser/Parser.cpp.o: \
  /usr/include/c++/13/bits/basic_ios.tcc /usr/include/c++/13/ostream \
  /usr/include/c++/13/bits/ostream.tcc \
  /usr/include/c++/13/bits/istream.tcc \
- /usr/include/c++/13/bits/sstream.tcc
+ /usr/include/c++/13/bits/sstream.tcc /usr/include/c++/13/iostream \
+ /usr/include/c++/13/cassert /usr/include/assert.h

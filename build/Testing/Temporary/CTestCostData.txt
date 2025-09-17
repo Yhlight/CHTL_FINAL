@@ -1,8 +1,9 @@
-LexerTests 1 0.00396408
-ParserTests 1 0.00336843
-GeneratorTests 1 0.00385805
-AttributeTests 1 0.00380423
-StyleTests 1 0.00326004
-ErrorTests 1 0.00321456
-TemplateTests 1 0.00360326
+LexerTests 1 0.00477843
+ParserTests 1 0.00394997
+GeneratorTests 1 0.00381233
+AttributeTests 1 0.00359577
+StyleTests 1 0.00397228
+ErrorTests 1 0.0038706
+TemplateTests 1 0.00396914
+ElementTemplateTests 1 0.00361078
 ---

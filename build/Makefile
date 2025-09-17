@@ -243,6 +243,19 @@ run_template_tests/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_template_tests.dir/build.make CMakeFiles/run_template_tests.dir/build
 .PHONY : run_template_tests/fast
 
+#=============================================================================
+# Target rules for targets named run_element_template_tests
+
+# Build rule for target.
+run_element_template_tests: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 run_element_template_tests
+.PHONY : run_element_template_tests
+
+# fast build rule for target.
+run_element_template_tests/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_element_template_tests.dir/build.make CMakeFiles/run_element_template_tests.dir/build
+.PHONY : run_element_template_tests/fast
+
 CHTL/CHTLGenerator/Generator.o: CHTL/CHTLGenerator/Generator.cpp.o
 .PHONY : CHTL/CHTLGenerator/Generator.o
 
@@ -290,6 +303,30 @@ CHTL/CHTLLexer/Lexer.s: CHTL/CHTLLexer/Lexer.cpp.s
 CHTL/CHTLLexer/Lexer.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/CHTL/CHTLLexer/Lexer.cpp.s
 .PHONY : CHTL/CHTLLexer/Lexer.cpp.s
+
+CHTL/CHTLNode/ElementBlockNode.o: CHTL/CHTLNode/ElementBlockNode.cpp.o
+.PHONY : CHTL/CHTLNode/ElementBlockNode.o
+
+# target to build an object file
+CHTL/CHTLNode/ElementBlockNode.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/ElementBlockNode.cpp.o
+.PHONY : CHTL/CHTLNode/ElementBlockNode.cpp.o
+
+CHTL/CHTLNode/ElementBlockNode.i: CHTL/CHTLNode/ElementBlockNode.cpp.i
+.PHONY : CHTL/CHTLNode/ElementBlockNode.i
+
+# target to preprocess a source file
+CHTL/CHTLNode/ElementBlockNode.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/ElementBlockNode.cpp.i
+.PHONY : CHTL/CHTLNode/ElementBlockNode.cpp.i
+
+CHTL/CHTLNode/ElementBlockNode.s: CHTL/CHTLNode/ElementBlockNode.cpp.s
+.PHONY : CHTL/CHTLNode/ElementBlockNode.s
+
+# target to generate assembly for a file
+CHTL/CHTLNode/ElementBlockNode.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/ElementBlockNode.cpp.s
+.PHONY : CHTL/CHTLNode/ElementBlockNode.cpp.s
 
 CHTL/CHTLNode/ElementNode.o: CHTL/CHTLNode/ElementNode.cpp.o
 .PHONY : CHTL/CHTLNode/ElementNode.o
@@ -531,6 +568,30 @@ Test/AttributeTest.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_attribute_tests.dir/build.make CMakeFiles/run_attribute_tests.dir/Test/AttributeTest.cpp.s
 .PHONY : Test/AttributeTest.cpp.s
 
+Test/ElementTemplateTest.o: Test/ElementTemplateTest.cpp.o
+.PHONY : Test/ElementTemplateTest.o
+
+# target to build an object file
+Test/ElementTemplateTest.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_element_template_tests.dir/build.make CMakeFiles/run_element_template_tests.dir/Test/ElementTemplateTest.cpp.o
+.PHONY : Test/ElementTemplateTest.cpp.o
+
+Test/ElementTemplateTest.i: Test/ElementTemplateTest.cpp.i
+.PHONY : Test/ElementTemplateTest.i
+
+# target to preprocess a source file
+Test/ElementTemplateTest.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_element_template_tests.dir/build.make CMakeFiles/run_element_template_tests.dir/Test/ElementTemplateTest.cpp.i
+.PHONY : Test/ElementTemplateTest.cpp.i
+
+Test/ElementTemplateTest.s: Test/ElementTemplateTest.cpp.s
+.PHONY : Test/ElementTemplateTest.s
+
+# target to generate assembly for a file
+Test/ElementTemplateTest.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_element_template_tests.dir/build.make CMakeFiles/run_element_template_tests.dir/Test/ElementTemplateTest.cpp.s
+.PHONY : Test/ElementTemplateTest.cpp.s
+
 Test/ErrorTest.o: Test/ErrorTest.cpp.o
 .PHONY : Test/ErrorTest.o
 
@@ -687,6 +748,7 @@ help:
 	@echo "... chtl"
 	@echo "... chtl_lib"
 	@echo "... run_attribute_tests"
+	@echo "... run_element_template_tests"
 	@echo "... run_error_tests"
 	@echo "... run_generator_tests"
 	@echo "... run_lexer_tests"
@@ -699,6 +761,9 @@ help:
 	@echo "... CHTL/CHTLLexer/Lexer.o"
 	@echo "... CHTL/CHTLLexer/Lexer.i"
 	@echo "... CHTL/CHTLLexer/Lexer.s"
+	@echo "... CHTL/CHTLNode/ElementBlockNode.o"
+	@echo "... CHTL/CHTLNode/ElementBlockNode.i"
+	@echo "... CHTL/CHTLNode/ElementBlockNode.s"
 	@echo "... CHTL/CHTLNode/ElementNode.o"
 	@echo "... CHTL/CHTLNode/ElementNode.i"
 	@echo "... CHTL/CHTLNode/ElementNode.s"
@@ -729,6 +794,9 @@ help:
 	@echo "... Test/AttributeTest.o"
 	@echo "... Test/AttributeTest.i"
 	@echo "... Test/AttributeTest.s"
+	@echo "... Test/ElementTemplateTest.o"
+	@echo "... Test/ElementTemplateTest.i"
+	@echo "... Test/ElementTemplateTest.s"
 	@echo "... Test/ErrorTest.o"
 	@echo "... Test/ErrorTest.i"
 	@echo "... Test/ErrorTest.s"

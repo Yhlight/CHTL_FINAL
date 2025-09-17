@@ -1,5 +1,6 @@
 #include "Parser.h"
 #include "StylePropertyNode.h"
+#include "ElementBlockNode.h"
 #include <sstream>
 
 namespace CHTL {
@@ -96,34 +97,44 @@ std::unique_ptr<TemplateDefinitionNode> Parser::parseTemplateDefinition() {
     // Expect { ... body ... }
     if (!expectPeek(TokenType::LBRACE)) return nullptr;
 
-    // The body of the template depends on its type. For now, we only handle @Style.
+    // The body of the template depends on its type.
     if (node->templateType == "Style") {
-        // A style template body is just like a style block.
-        // We can reuse the parseStyleNode but it returns the wrong type.
-        // Let's parse it manually for now.
         auto styleBody = std::make_unique<StyleNode>();
         nextToken(); // consume '{'
         while (!currentTokenIs(TokenType::RBRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
-            if (!currentTokenIs(TokenType::IDENTIFIER)) { nextToken(); continue; }
-            auto propNode = std::make_unique<StylePropertyNode>();
-            propNode->key = m_currentToken.literal;
-
-            if (!expectPeek(TokenType::COLON)) return nullptr;
-
-            std::string value = "";
-            nextToken(); // consume ':'
-            while (!currentTokenIs(TokenType::SEMICOLON) && !currentTokenIs(TokenType::RBRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
-                value += m_currentToken.literal;
+            if (currentTokenIs(TokenType::AT)) {
+                styleBody->items.push_back(parseTemplateUsage());
+            } else if (currentTokenIs(TokenType::IDENTIFIER)) {
+                auto propNode = std::make_unique<StylePropertyNode>();
+                propNode->key = m_currentToken.literal;
+                if (!expectPeek(TokenType::COLON)) return nullptr;
+                std::string value = "";
+                nextToken(); // consume ':'
+                while (!currentTokenIs(TokenType::SEMICOLON) && !currentTokenIs(TokenType::RBRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
+                    value += m_currentToken.literal;
+                    nextToken();
+                }
+                propNode->value = value;
+                styleBody->items.push_back(std::move(propNode));
+            }
+            if (currentTokenIs(TokenType::SEMICOLON)) {
                 nextToken();
             }
-            propNode->value = value;
-            styleBody->items.push_back(std::move(propNode));
-
-            if (!currentTokenIs(TokenType::SEMICOLON)) return nullptr;
-            nextToken(); // consume ';'
         }
         node->body = std::move(styleBody);
-    } else {
+    } else if (node->templateType == "Element") {
+        auto elementBlock = std::make_unique<ElementBlockNode>();
+        nextToken(); // consume '{'
+        while (!currentTokenIs(TokenType::RBRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
+            auto stmt = parseStatement();
+            if (stmt) {
+                elementBlock->statements.push_back(std::move(stmt));
+            }
+            nextToken();
+        }
+        node->body = std::move(elementBlock);
+    }
+    else {
         // Error: unsupported template type
         return nullptr;
     }
