@@ -4,13 +4,14 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <memory>
 
 namespace CHTL {
 
 class StyleNode : public Node {
 public:
-    // e.g., { {"width", "100px"}, {"height", "200px"} }
-    std::vector<std::pair<std::string, std::string>> properties;
+    // A style block can contain direct properties and template usages
+    std::vector<std::unique_ptr<Node>> items;
 
     std::string ToString() const override;
 };

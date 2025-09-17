@@ -3,8 +3,12 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <map>
 
 namespace CHTL {
+
+// Forward-declare the class to break the include cycle
+class TemplateDefinitionNode;
 
 class Node {
 public:
@@ -20,6 +24,7 @@ public:
     std::string ToString() const override;
 
     std::vector<std::unique_ptr<Node>> statements;
+    std::map<std::string, std::unique_ptr<TemplateDefinitionNode>> templateRegistry;
 };
 
 } // namespace CHTL

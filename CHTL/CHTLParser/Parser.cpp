@@ -1,4 +1,5 @@
 #include "Parser.h"
+#include "StylePropertyNode.h"
 #include <sstream>
 
 namespace CHTL {
@@ -43,9 +44,18 @@ bool Parser::expectPeek(TokenType t) {
 std::unique_ptr<Program> Parser::ParseProgram() {
     auto program = std::make_unique<Program>();
     while (!currentTokenIs(TokenType::END_OF_FILE)) {
-        auto stmt = parseStatement();
-        if (stmt) {
-            program->statements.push_back(std::move(stmt));
+        std::unique_ptr<Node> stmt = nullptr;
+        if (currentTokenIs(TokenType::LBRACKET)) {
+            auto templateDef = parseTemplateDefinition();
+            if (templateDef) {
+                // Add to registry, not statements
+                program->templateRegistry[templateDef->name] = std::move(templateDef);
+            }
+        } else {
+            stmt = parseStatement();
+            if (stmt) {
+                program->statements.push_back(std::move(stmt));
+            }
         }
         nextToken();
     }
@@ -61,8 +71,83 @@ std::unique_ptr<Node> Parser::parseStatement() {
             return parseStyleNode();
         }
         return parseElementNode();
+    } else if (currentTokenIs(TokenType::AT)) {
+        return parseTemplateUsage();
     }
     return nullptr;
+}
+
+std::unique_ptr<TemplateDefinitionNode> Parser::parseTemplateDefinition() {
+    auto node = std::make_unique<TemplateDefinitionNode>();
+
+    // Expect [Template]
+    if (!expectPeek(TokenType::IDENTIFIER) || m_currentToken.literal != "Template") return nullptr;
+    if (!expectPeek(TokenType::RBRACKET)) return nullptr;
+    if (!expectPeek(TokenType::AT)) return nullptr;
+
+    // Expect @Type
+    if (!expectPeek(TokenType::IDENTIFIER)) return nullptr;
+    node->templateType = m_currentToken.literal;
+
+    // Expect Name
+    if (!expectPeek(TokenType::IDENTIFIER)) return nullptr;
+    node->name = m_currentToken.literal;
+
+    // Expect { ... body ... }
+    if (!expectPeek(TokenType::LBRACE)) return nullptr;
+
+    // The body of the template depends on its type. For now, we only handle @Style.
+    if (node->templateType == "Style") {
+        // A style template body is just like a style block.
+        // We can reuse the parseStyleNode but it returns the wrong type.
+        // Let's parse it manually for now.
+        auto styleBody = std::make_unique<StyleNode>();
+        nextToken(); // consume '{'
+        while (!currentTokenIs(TokenType::RBRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
+            if (!currentTokenIs(TokenType::IDENTIFIER)) { nextToken(); continue; }
+            auto propNode = std::make_unique<StylePropertyNode>();
+            propNode->key = m_currentToken.literal;
+
+            if (!expectPeek(TokenType::COLON)) return nullptr;
+
+            std::string value = "";
+            nextToken(); // consume ':'
+            while (!currentTokenIs(TokenType::SEMICOLON) && !currentTokenIs(TokenType::RBRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
+                value += m_currentToken.literal;
+                nextToken();
+            }
+            propNode->value = value;
+            styleBody->items.push_back(std::move(propNode));
+
+            if (!currentTokenIs(TokenType::SEMICOLON)) return nullptr;
+            nextToken(); // consume ';'
+        }
+        node->body = std::move(styleBody);
+    } else {
+        // Error: unsupported template type
+        return nullptr;
+    }
+
+    if (!currentTokenIs(TokenType::RBRACE)) return nullptr;
+
+    return node;
+}
+
+std::unique_ptr<TemplateUsageNode> Parser::parseTemplateUsage() {
+    auto node = std::make_unique<TemplateUsageNode>();
+
+    // Expect @Type
+    if (!expectPeek(TokenType::IDENTIFIER)) return nullptr;
+    node->templateType = m_currentToken.literal;
+
+    // Expect Name
+    if (!expectPeek(TokenType::IDENTIFIER)) return nullptr;
+    node->name = m_currentToken.literal;
+
+    // Expect ;
+    if (!expectPeek(TokenType::SEMICOLON)) return nullptr;
+
+    return node;
 }
 
 std::unique_ptr<StyleNode> Parser::parseStyleNode() {
@@ -73,32 +158,32 @@ std::unique_ptr<StyleNode> Parser::parseStyleNode() {
     }
     nextToken(); // consume '{'
 
-    // Loop until we find the closing brace
     while (!currentTokenIs(TokenType::RBRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
-        // Expect property name (identifier)
-        if (!currentTokenIs(TokenType::IDENTIFIER)) {
+        if (currentTokenIs(TokenType::AT)) {
+            node->items.push_back(parseTemplateUsage());
+        } else if (currentTokenIs(TokenType::IDENTIFIER)) {
+            auto propNode = std::make_unique<StylePropertyNode>();
+            propNode->key = m_currentToken.literal;
+
+            if (!expectPeek(TokenType::COLON)) return nullptr;
+
+            std::string value = "";
+            nextToken(); // consume ':'
+            while (!currentTokenIs(TokenType::SEMICOLON) && !currentTokenIs(TokenType::RBRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
+                value += m_currentToken.literal;
+                nextToken();
+            }
+            propNode->value = value;
+            node->items.push_back(std::move(propNode));
+        } else {
             // Error
             nextToken();
-            continue;
         }
-        std::string key = m_currentToken.literal;
 
-        if (!expectPeek(TokenType::COLON)) return nullptr;
-
-        // For now, let's just parse until the semicolon to get the value
-        // This is a simplification. A real implementation needs to handle complex values.
-        std::string value = "";
-        nextToken(); // consume ':'
-        while (!currentTokenIs(TokenType::SEMICOLON) && !currentTokenIs(TokenType::END_OF_FILE)) {
-            value += m_currentToken.literal;
+        // Consume the semicolon if it's there
+        if (currentTokenIs(TokenType::SEMICOLON)) {
             nextToken();
         }
-
-        node->properties.push_back({key, value});
-
-        if (!currentTokenIs(TokenType::SEMICOLON)) return nullptr;
-
-        nextToken(); // consume ';'
     }
 
     return node;

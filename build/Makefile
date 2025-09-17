@@ -230,6 +230,19 @@ run_error_tests/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_error_tests.dir/build.make CMakeFiles/run_error_tests.dir/build
 .PHONY : run_error_tests/fast
 
+#=============================================================================
+# Target rules for targets named run_template_tests
+
+# Build rule for target.
+run_template_tests: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 run_template_tests
+.PHONY : run_template_tests
+
+# fast build rule for target.
+run_template_tests/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_template_tests.dir/build.make CMakeFiles/run_template_tests.dir/build
+.PHONY : run_template_tests/fast
+
 CHTL/CHTLGenerator/Generator.o: CHTL/CHTLGenerator/Generator.cpp.o
 .PHONY : CHTL/CHTLGenerator/Generator.o
 
@@ -349,6 +362,78 @@ CHTL/CHTLNode/StyleNode.s: CHTL/CHTLNode/StyleNode.cpp.s
 CHTL/CHTLNode/StyleNode.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/StyleNode.cpp.s
 .PHONY : CHTL/CHTLNode/StyleNode.cpp.s
+
+CHTL/CHTLNode/StylePropertyNode.o: CHTL/CHTLNode/StylePropertyNode.cpp.o
+.PHONY : CHTL/CHTLNode/StylePropertyNode.o
+
+# target to build an object file
+CHTL/CHTLNode/StylePropertyNode.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/StylePropertyNode.cpp.o
+.PHONY : CHTL/CHTLNode/StylePropertyNode.cpp.o
+
+CHTL/CHTLNode/StylePropertyNode.i: CHTL/CHTLNode/StylePropertyNode.cpp.i
+.PHONY : CHTL/CHTLNode/StylePropertyNode.i
+
+# target to preprocess a source file
+CHTL/CHTLNode/StylePropertyNode.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/StylePropertyNode.cpp.i
+.PHONY : CHTL/CHTLNode/StylePropertyNode.cpp.i
+
+CHTL/CHTLNode/StylePropertyNode.s: CHTL/CHTLNode/StylePropertyNode.cpp.s
+.PHONY : CHTL/CHTLNode/StylePropertyNode.s
+
+# target to generate assembly for a file
+CHTL/CHTLNode/StylePropertyNode.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/StylePropertyNode.cpp.s
+.PHONY : CHTL/CHTLNode/StylePropertyNode.cpp.s
+
+CHTL/CHTLNode/TemplateDefinitionNode.o: CHTL/CHTLNode/TemplateDefinitionNode.cpp.o
+.PHONY : CHTL/CHTLNode/TemplateDefinitionNode.o
+
+# target to build an object file
+CHTL/CHTLNode/TemplateDefinitionNode.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/TemplateDefinitionNode.cpp.o
+.PHONY : CHTL/CHTLNode/TemplateDefinitionNode.cpp.o
+
+CHTL/CHTLNode/TemplateDefinitionNode.i: CHTL/CHTLNode/TemplateDefinitionNode.cpp.i
+.PHONY : CHTL/CHTLNode/TemplateDefinitionNode.i
+
+# target to preprocess a source file
+CHTL/CHTLNode/TemplateDefinitionNode.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/TemplateDefinitionNode.cpp.i
+.PHONY : CHTL/CHTLNode/TemplateDefinitionNode.cpp.i
+
+CHTL/CHTLNode/TemplateDefinitionNode.s: CHTL/CHTLNode/TemplateDefinitionNode.cpp.s
+.PHONY : CHTL/CHTLNode/TemplateDefinitionNode.s
+
+# target to generate assembly for a file
+CHTL/CHTLNode/TemplateDefinitionNode.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/TemplateDefinitionNode.cpp.s
+.PHONY : CHTL/CHTLNode/TemplateDefinitionNode.cpp.s
+
+CHTL/CHTLNode/TemplateUsageNode.o: CHTL/CHTLNode/TemplateUsageNode.cpp.o
+.PHONY : CHTL/CHTLNode/TemplateUsageNode.o
+
+# target to build an object file
+CHTL/CHTLNode/TemplateUsageNode.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/TemplateUsageNode.cpp.o
+.PHONY : CHTL/CHTLNode/TemplateUsageNode.cpp.o
+
+CHTL/CHTLNode/TemplateUsageNode.i: CHTL/CHTLNode/TemplateUsageNode.cpp.i
+.PHONY : CHTL/CHTLNode/TemplateUsageNode.i
+
+# target to preprocess a source file
+CHTL/CHTLNode/TemplateUsageNode.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/TemplateUsageNode.cpp.i
+.PHONY : CHTL/CHTLNode/TemplateUsageNode.cpp.i
+
+CHTL/CHTLNode/TemplateUsageNode.s: CHTL/CHTLNode/TemplateUsageNode.cpp.s
+.PHONY : CHTL/CHTLNode/TemplateUsageNode.s
+
+# target to generate assembly for a file
+CHTL/CHTLNode/TemplateUsageNode.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/TemplateUsageNode.cpp.s
+.PHONY : CHTL/CHTLNode/TemplateUsageNode.cpp.s
 
 CHTL/CHTLNode/TextNode.o: CHTL/CHTLNode/TextNode.cpp.o
 .PHONY : CHTL/CHTLNode/TextNode.o
@@ -566,6 +651,30 @@ Test/StyleTest.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_style_tests.dir/build.make CMakeFiles/run_style_tests.dir/Test/StyleTest.cpp.s
 .PHONY : Test/StyleTest.cpp.s
 
+Test/TemplateTest.o: Test/TemplateTest.cpp.o
+.PHONY : Test/TemplateTest.o
+
+# target to build an object file
+Test/TemplateTest.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_template_tests.dir/build.make CMakeFiles/run_template_tests.dir/Test/TemplateTest.cpp.o
+.PHONY : Test/TemplateTest.cpp.o
+
+Test/TemplateTest.i: Test/TemplateTest.cpp.i
+.PHONY : Test/TemplateTest.i
+
+# target to preprocess a source file
+Test/TemplateTest.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_template_tests.dir/build.make CMakeFiles/run_template_tests.dir/Test/TemplateTest.cpp.i
+.PHONY : Test/TemplateTest.cpp.i
+
+Test/TemplateTest.s: Test/TemplateTest.cpp.s
+.PHONY : Test/TemplateTest.s
+
+# target to generate assembly for a file
+Test/TemplateTest.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_template_tests.dir/build.make CMakeFiles/run_template_tests.dir/Test/TemplateTest.cpp.s
+.PHONY : Test/TemplateTest.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -583,6 +692,7 @@ help:
 	@echo "... run_lexer_tests"
 	@echo "... run_parser_tests"
 	@echo "... run_style_tests"
+	@echo "... run_template_tests"
 	@echo "... CHTL/CHTLGenerator/Generator.o"
 	@echo "... CHTL/CHTLGenerator/Generator.i"
 	@echo "... CHTL/CHTLGenerator/Generator.s"
@@ -598,6 +708,15 @@ help:
 	@echo "... CHTL/CHTLNode/StyleNode.o"
 	@echo "... CHTL/CHTLNode/StyleNode.i"
 	@echo "... CHTL/CHTLNode/StyleNode.s"
+	@echo "... CHTL/CHTLNode/StylePropertyNode.o"
+	@echo "... CHTL/CHTLNode/StylePropertyNode.i"
+	@echo "... CHTL/CHTLNode/StylePropertyNode.s"
+	@echo "... CHTL/CHTLNode/TemplateDefinitionNode.o"
+	@echo "... CHTL/CHTLNode/TemplateDefinitionNode.i"
+	@echo "... CHTL/CHTLNode/TemplateDefinitionNode.s"
+	@echo "... CHTL/CHTLNode/TemplateUsageNode.o"
+	@echo "... CHTL/CHTLNode/TemplateUsageNode.i"
+	@echo "... CHTL/CHTLNode/TemplateUsageNode.s"
 	@echo "... CHTL/CHTLNode/TextNode.o"
 	@echo "... CHTL/CHTLNode/TextNode.i"
 	@echo "... CHTL/CHTLNode/TextNode.s"
@@ -625,6 +744,9 @@ help:
 	@echo "... Test/StyleTest.o"
 	@echo "... Test/StyleTest.i"
 	@echo "... Test/StyleTest.s"
+	@echo "... Test/TemplateTest.o"
+	@echo "... Test/TemplateTest.i"
+	@echo "... Test/TemplateTest.s"
 .PHONY : help
 
 

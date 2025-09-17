@@ -110,4 +110,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/run_attribute_tests.dir/DependInfo.cmake"
   "CMakeFiles/run_style_tests.dir/DependInfo.cmake"
   "CMakeFiles/run_error_tests.dir/DependInfo.cmake"
+  "CMakeFiles/run_template_tests.dir/DependInfo.cmake"
   )

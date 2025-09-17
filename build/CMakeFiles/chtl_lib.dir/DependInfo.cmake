@@ -13,6 +13,9 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/app/CHTL/CHTLNode/ElementNode.cpp" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/ElementNode.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/ElementNode.cpp.o.d"
   "/app/CHTL/CHTLNode/Node.cpp" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/Node.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/Node.cpp.o.d"
   "/app/CHTL/CHTLNode/StyleNode.cpp" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/StyleNode.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/StyleNode.cpp.o.d"
+  "/app/CHTL/CHTLNode/StylePropertyNode.cpp" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/StylePropertyNode.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/StylePropertyNode.cpp.o.d"
+  "/app/CHTL/CHTLNode/TemplateDefinitionNode.cpp" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/TemplateDefinitionNode.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/TemplateDefinitionNode.cpp.o.d"
+  "/app/CHTL/CHTLNode/TemplateUsageNode.cpp" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/TemplateUsageNode.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/TemplateUsageNode.cpp.o.d"
   "/app/CHTL/CHTLNode/TextNode.cpp" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/TextNode.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/CHTL/CHTLNode/TextNode.cpp.o.d"
   "/app/CHTL/CHTLParser/Parser.cpp" "CMakeFiles/chtl_lib.dir/CHTL/CHTLParser/Parser.cpp.o" "gcc" "CMakeFiles/chtl_lib.dir/CHTL/CHTLParser/Parser.cpp.o.d"
   )

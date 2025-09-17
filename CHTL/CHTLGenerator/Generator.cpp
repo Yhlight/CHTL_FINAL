@@ -2,7 +2,9 @@
 #include "StyleNode.h"
 #include "TextNode.h"
 #include "ElementNode.h"
-// Program is defined in Node.h, which is included via Generator.h
+#include "TemplateUsageNode.h"
+#include "StylePropertyNode.h"
+#include "TemplateDefinitionNode.h" // Needed for accessing template_def->body
 
 namespace CHTL {
 
@@ -28,8 +30,23 @@ void Generator::visit(const Node* node) {
         std::string style_string;
         for (const auto& child : e->children) {
             if (auto style_node = dynamic_cast<const StyleNode*>(child.get())) {
-                for (const auto& prop : style_node->properties) {
-                    style_string += prop.first + ":" + prop.second + ";";
+                for (const auto& item : style_node->items) {
+                    if (auto prop_node = dynamic_cast<const StylePropertyNode*>(item.get())) {
+                        style_string += prop_node->key + ":" + prop_node->value + ";";
+                    } else if (auto usage_node = dynamic_cast<const TemplateUsageNode*>(item.get())) {
+                        // Look up the template in the registry
+                        auto it = m_program.templateRegistry.find(usage_node->name);
+                        if (it != m_program.templateRegistry.end()) {
+                            const auto& template_def = it->second;
+                            if (auto template_style_body = dynamic_cast<const StyleNode*>(template_def->body.get())) {
+                                for (const auto& template_item : template_style_body->items) {
+                                    if (auto template_prop = dynamic_cast<const StylePropertyNode*>(template_item.get())) {
+                                        style_string += template_prop->key + ":" + template_prop->value + ";";
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

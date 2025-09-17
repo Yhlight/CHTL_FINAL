@@ -6,8 +6,8 @@ namespace CHTL {
 std::string StyleNode::ToString() const {
     std::stringstream ss;
     ss << "style { ";
-    for (const auto& prop : properties) {
-        ss << prop.first << ":" << prop.second << "; ";
+    for (const auto& item : items) {
+        ss << item->ToString() << " ";
     }
     ss << "}";
     return ss.str();

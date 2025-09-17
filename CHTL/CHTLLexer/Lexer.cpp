@@ -106,6 +106,15 @@ Token Lexer::NextToken() {
         case ';':
             tok = {TokenType::SEMICOLON, ";", m_line, m_column};
             break;
+        case '@':
+            tok = {TokenType::AT, "@", m_line, m_column};
+            break;
+        case '[':
+            tok = {TokenType::LBRACKET, "[", m_line, m_column};
+            break;
+        case ']':
+            tok = {TokenType::RBRACKET, "]", m_line, m_column};
+            break;
         case '"':
             return readString();
         case 0:

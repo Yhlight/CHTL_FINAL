@@ -156,10 +156,17 @@ CMakeFiles/chtl_lib.dir/CHTL/CHTLParser/Parser.cpp.o: \
  /usr/include/c++/13/bits/atomic_lockfree_defines.h \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
- /usr/include/c++/13/pstl/execution_defs.h \
- /app/CHTL/CHTLNode/ElementNode.h /usr/include/c++/13/utility \
- /usr/include/c++/13/bits/stl_relops.h /app/CHTL/CHTLNode/TextNode.h \
- /app/CHTL/CHTLNode/StyleNode.h /usr/include/c++/13/sstream \
+ /usr/include/c++/13/pstl/execution_defs.h /usr/include/c++/13/map \
+ /usr/include/c++/13/bits/stl_tree.h \
+ /usr/include/c++/13/bits/node_handle.h \
+ /usr/include/c++/13/bits/stl_map.h \
+ /usr/include/c++/13/bits/stl_multimap.h \
+ /usr/include/c++/13/bits/erase_if.h /app/CHTL/CHTLNode/ElementNode.h \
+ /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
+ /app/CHTL/CHTLNode/TextNode.h /app/CHTL/CHTLNode/StyleNode.h \
+ /app/CHTL/CHTLNode/TemplateDefinitionNode.h \
+ /app/CHTL/CHTLNode/TemplateUsageNode.h \
+ /app/CHTL/CHTLNode/StylePropertyNode.h /usr/include/c++/13/sstream \
  /usr/include/c++/13/istream /usr/include/c++/13/ios \
  /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \

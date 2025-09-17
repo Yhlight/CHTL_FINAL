@@ -71,6 +71,7 @@ all: CMakeFiles/run_generator_tests.dir/all
 all: CMakeFiles/run_attribute_tests.dir/all
 all: CMakeFiles/run_style_tests.dir/all
 all: CMakeFiles/run_error_tests.dir/all
+all: CMakeFiles/run_template_tests.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -86,6 +87,7 @@ clean: CMakeFiles/run_generator_tests.dir/clean
 clean: CMakeFiles/run_attribute_tests.dir/clean
 clean: CMakeFiles/run_style_tests.dir/clean
 clean: CMakeFiles/run_error_tests.dir/clean
+clean: CMakeFiles/run_template_tests.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -95,12 +97,12 @@ clean: CMakeFiles/run_error_tests.dir/clean
 CMakeFiles/chtl_lib.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chtl_lib.dir/build.make CMakeFiles/chtl_lib.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=3,4,5,6,7,8,9,10 "Built target chtl_lib"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=3,4,5,6,7,8,9,10,11,12,13 "Built target chtl_lib"
 .PHONY : CMakeFiles/chtl_lib.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/chtl_lib.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 11
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/chtl_lib.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : CMakeFiles/chtl_lib.dir/rule
@@ -126,7 +128,7 @@ CMakeFiles/chtl.dir/all: CMakeFiles/chtl_lib.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/chtl.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 10
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 13
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/chtl.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : CMakeFiles/chtl.dir/rule
@@ -147,12 +149,12 @@ CMakeFiles/chtl.dir/clean:
 CMakeFiles/run_lexer_tests.dir/all: CMakeFiles/chtl_lib.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_lexer_tests.dir/build.make CMakeFiles/run_lexer_tests.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_lexer_tests.dir/build.make CMakeFiles/run_lexer_tests.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=17,18 "Built target run_lexer_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=20,21 "Built target run_lexer_tests"
 .PHONY : CMakeFiles/run_lexer_tests.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/run_lexer_tests.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 10
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 13
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/run_lexer_tests.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : CMakeFiles/run_lexer_tests.dir/rule
@@ -173,12 +175,12 @@ CMakeFiles/run_lexer_tests.dir/clean:
 CMakeFiles/run_parser_tests.dir/all: CMakeFiles/chtl_lib.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_parser_tests.dir/build.make CMakeFiles/run_parser_tests.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_parser_tests.dir/build.make CMakeFiles/run_parser_tests.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=19,20 "Built target run_parser_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=22,23 "Built target run_parser_tests"
 .PHONY : CMakeFiles/run_parser_tests.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/run_parser_tests.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 10
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 13
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/run_parser_tests.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : CMakeFiles/run_parser_tests.dir/rule
@@ -199,12 +201,12 @@ CMakeFiles/run_parser_tests.dir/clean:
 CMakeFiles/run_generator_tests.dir/all: CMakeFiles/chtl_lib.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_generator_tests.dir/build.make CMakeFiles/run_generator_tests.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_generator_tests.dir/build.make CMakeFiles/run_generator_tests.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=15,16 "Built target run_generator_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=18,19 "Built target run_generator_tests"
 .PHONY : CMakeFiles/run_generator_tests.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/run_generator_tests.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 10
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 13
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/run_generator_tests.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : CMakeFiles/run_generator_tests.dir/rule
@@ -225,12 +227,12 @@ CMakeFiles/run_generator_tests.dir/clean:
 CMakeFiles/run_attribute_tests.dir/all: CMakeFiles/chtl_lib.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_attribute_tests.dir/build.make CMakeFiles/run_attribute_tests.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_attribute_tests.dir/build.make CMakeFiles/run_attribute_tests.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=11,12 "Built target run_attribute_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=14,15 "Built target run_attribute_tests"
 .PHONY : CMakeFiles/run_attribute_tests.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/run_attribute_tests.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 10
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 13
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/run_attribute_tests.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : CMakeFiles/run_attribute_tests.dir/rule
@@ -251,12 +253,12 @@ CMakeFiles/run_attribute_tests.dir/clean:
 CMakeFiles/run_style_tests.dir/all: CMakeFiles/chtl_lib.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_style_tests.dir/build.make CMakeFiles/run_style_tests.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_style_tests.dir/build.make CMakeFiles/run_style_tests.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=21,22 "Built target run_style_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=24,25 "Built target run_style_tests"
 .PHONY : CMakeFiles/run_style_tests.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/run_style_tests.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 10
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 13
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/run_style_tests.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : CMakeFiles/run_style_tests.dir/rule
@@ -277,12 +279,12 @@ CMakeFiles/run_style_tests.dir/clean:
 CMakeFiles/run_error_tests.dir/all: CMakeFiles/chtl_lib.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_error_tests.dir/build.make CMakeFiles/run_error_tests.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_error_tests.dir/build.make CMakeFiles/run_error_tests.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=13,14 "Built target run_error_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=16,17 "Built target run_error_tests"
 .PHONY : CMakeFiles/run_error_tests.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/run_error_tests.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 10
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 13
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/run_error_tests.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
 .PHONY : CMakeFiles/run_error_tests.dir/rule
@@ -295,6 +297,32 @@ run_error_tests: CMakeFiles/run_error_tests.dir/rule
 CMakeFiles/run_error_tests.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_error_tests.dir/build.make CMakeFiles/run_error_tests.dir/clean
 .PHONY : CMakeFiles/run_error_tests.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/run_template_tests.dir
+
+# All Build rule for target.
+CMakeFiles/run_template_tests.dir/all: CMakeFiles/chtl_lib.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_template_tests.dir/build.make CMakeFiles/run_template_tests.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_template_tests.dir/build.make CMakeFiles/run_template_tests.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/build/CMakeFiles --progress-num=26,27 "Built target run_template_tests"
+.PHONY : CMakeFiles/run_template_tests.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/run_template_tests.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 13
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/run_template_tests.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/build/CMakeFiles 0
+.PHONY : CMakeFiles/run_template_tests.dir/rule
+
+# Convenience name for target.
+run_template_tests: CMakeFiles/run_template_tests.dir/rule
+.PHONY : run_template_tests
+
+# clean rule for target.
+CMakeFiles/run_template_tests.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_template_tests.dir/build.make CMakeFiles/run_template_tests.dir/clean
+.PHONY : CMakeFiles/run_template_tests.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

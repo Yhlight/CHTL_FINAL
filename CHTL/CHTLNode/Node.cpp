@@ -1,4 +1,5 @@
 #include "Node.h"
+#include "TemplateDefinitionNode.h" // Include the full definition here
 #include <sstream>
 
 namespace CHTL {

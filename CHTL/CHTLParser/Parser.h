@@ -5,6 +5,8 @@
 #include "ElementNode.h"
 #include "TextNode.h"
 #include "StyleNode.h"
+#include "TemplateDefinitionNode.h"
+#include "TemplateUsageNode.h"
 
 #include <memory>
 #include <string>
@@ -29,6 +31,8 @@ private:
     std::unique_ptr<ElementNode> parseElementNode();
     std::unique_ptr<TextNode> parseTextNode();
     std::unique_ptr<StyleNode> parseStyleNode();
+    std::unique_ptr<TemplateDefinitionNode> parseTemplateDefinition();
+    std::unique_ptr<TemplateUsageNode> parseTemplateUsage();
     void parseAttribute(ElementNode* node);
 
     void peekError(TokenType t);

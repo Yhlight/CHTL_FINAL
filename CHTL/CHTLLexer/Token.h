@@ -15,6 +15,7 @@ enum class TokenType {
     STRING,     // "hello world"
 
     // Delimiters
+    AT,         // @
     LBRACE,     // {
     RBRACE,     // }
     LPAREN,     // (
