@@ -67,6 +67,8 @@ Token Lexer::getNextToken() {
         case '}': advance(); return makeToken(TokenType::RIGHT_BRACE, "}");
         case '[': advance(); return makeToken(TokenType::LEFT_BRACKET, "[");
         case ']': advance(); return makeToken(TokenType::RIGHT_BRACKET, "]");
+        case '(': advance(); return makeToken(TokenType::LEFT_PAREN, "(");
+        case ')': advance(); return makeToken(TokenType::RIGHT_PAREN, ")");
         case '@': advance(); return makeToken(TokenType::AT_SIGN, "@");
         case ':': advance(); return makeToken(TokenType::COLON, ":");
         case ';': advance(); return makeToken(TokenType::SEMICOLON, ";");

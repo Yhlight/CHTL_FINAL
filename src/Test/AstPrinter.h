@@ -13,6 +13,7 @@ public:
 
 private:
     void visit(const std::shared_ptr<BaseNode>& node, int indentLevel);
+    std::string valueNodeToString(const std::shared_ptr<BaseNode>& node);
 
     std::string m_output;
 };

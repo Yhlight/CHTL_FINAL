@@ -24,6 +24,8 @@ enum class TokenType {
     RIGHT_BRACE,  // }
     LEFT_BRACKET, // [
     RIGHT_BRACKET,// ]
+    LEFT_PAREN,   // (
+    RIGHT_PAREN,  // )
     AT_SIGN,      // @
     COLON,        // :
     SEMICOLON,    // ;

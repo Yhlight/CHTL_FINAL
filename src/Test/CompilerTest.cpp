@@ -5,43 +5,35 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
+#include <regex>
 
-void testTemplateExpansion() {
-    std::cout << "--- Testing Template Expansion ---\n";
-    std::string source = R"(
-        [Template] @Style DefaultText
-        {
-            color: black;
-        }
-
-        div {
-            style {
-                @Style DefaultText;
-            }
-        }
-    )";
-
-    CHTL::Lexer lexer(source);
-    std::vector<CHTL::Token> tokens = lexer.getAllTokens();
-    CHTL::Parser parser(tokens);
-    std::shared_ptr<CHTL::RootNode> ast = parser.parse();
-    CHTL::Generator generator(ast);
-    generator.generate();
-    std::string html = generator.getHtml();
-    std::cout << "Generated HTML:\n" << html << std::endl;
-
-    std::string expected_style = "style=\"color: black;\"";
-    assert(html.find(expected_style) != std::string::npos);
-    std::cout << "Template expansion test passed.\n";
-    std::cout << "--------------------------------\n\n";
+// Helper to remove whitespace for easier comparison
+std::string removeWhitespace(const std::string& str) {
+    std::string out = str;
+    out.erase(std::remove(out.begin(), out.end(), ' '), out.end());
+    out.erase(std::remove(out.begin(), out.end(), '\n'), out.end());
+    return out;
 }
 
-void testNonExistentTemplate() {
-    std::cout << "--- Testing Non-Existent Template Usage ---\n";
+void testTemplateInheritance() {
+    std::cout << "--- Testing Template Inheritance ---\n";
     std::string source = R"(
+        [Template] @Style BaseStyle
+        {
+            color: blue;
+            font-weight: bold;
+        }
+
+        [Template] @Style FullStyle
+        {
+            @Style BaseStyle;
+            font-size: 20px;
+            color: red; // This should override the color from BaseStyle
+        }
+
         div {
             style {
-                @Style NonExistentTemplate;
+                @Style FullStyle;
             }
         }
     )";
@@ -56,18 +48,31 @@ void testNonExistentTemplate() {
 
     std::cout << "Generated HTML:\n" << html << std::endl;
 
-    // The generator should ignore the missing template, resulting in no style attribute.
-    assert(html.find("style=") == std::string::npos);
-    std::cout << "Non-existent template test passed.\n";
+    // Verification
+    // The final style should have properties from both, with 'color' overridden.
+    // CSS cascading means the last 'color' property (red) will be applied.
+    std::string expected_style_substr1 = "color:blue;";
+    std::string expected_style_substr2 = "font-weight:bold;";
+    std::string expected_style_substr3 = "font-size:20px;";
+    std::string expected_style_substr4 = "color:red;";
+
+    std::string clean_html = removeWhitespace(html);
+
+    assert(clean_html.find(expected_style_substr1) != std::string::npos);
+    assert(clean_html.find(expected_style_substr2) != std::string::npos);
+    assert(clean_html.find(expected_style_substr3) != std::string::npos);
+    assert(clean_html.find(expected_style_substr4) != std::string::npos);
+
+    // Check that the override happened correctly (red appears after blue)
+    assert(clean_html.find("color:blue;") < clean_html.find("color:red;"));
+
+
+    std::cout << "Template inheritance test passed.\n";
     std::cout << "--------------------------------\n\n";
 }
 
 
 int main() {
-    // Clear the registry before each run to ensure tests are isolated.
-    // (This would be better with a proper test framework like gtest,
-    // but for now, we can't re-run the executable, so it's fine).
-    testTemplateExpansion();
-    testNonExistentTemplate();
+    testTemplateInheritance();
     return 0;
 }

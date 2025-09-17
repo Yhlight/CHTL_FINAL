@@ -59,6 +59,8 @@ std::shared_ptr<ElementNode> Parser::parseElement() {
             }
         } else if (currentToken().type == TokenType::KEYWORD_STYLE) {
             element->children.push_back(parseStyleBlock());
+        } else if (currentToken().type == TokenType::AT_SIGN) {
+            element->children.push_back(parseTemplateUsage());
         } else {
             throw std::runtime_error("Unexpected token in element block: " + currentToken().value);
         }
@@ -84,12 +86,7 @@ std::shared_ptr<AttributeNode> Parser::parseAttribute() {
         consume(TokenType::EQUALS, "Expected ':' or '=' after attribute key.");
     }
 
-    if (currentToken().type == TokenType::STRING_LITERAL || currentToken().type == TokenType::IDENTIFIER || currentToken().type == TokenType::UNQUOTED_LITERAL) {
-        attribute->value = currentToken().value;
-        advance();
-    } else {
-        throw std::runtime_error("Expected attribute value.");
-    }
+    attribute->value = parseValue();
 
     consume(TokenType::SEMICOLON, "Expected ';' after attribute value.");
     return attribute;
@@ -162,12 +159,7 @@ std::shared_ptr<StyleNode> Parser::parseStyleBlock() {
             propNode->key = consume(TokenType::IDENTIFIER, "Expected CSS property key.").value;
             consume(TokenType::COLON, "Expected ':' after CSS property key.");
 
-            if (currentToken().type == TokenType::IDENTIFIER || currentToken().type == TokenType::UNQUOTED_LITERAL) {
-                propNode->value = currentToken().value;
-                advance();
-            } else {
-                throw std::runtime_error("Expected CSS property value.");
-            }
+            propNode->value = parseValue();
 
             consume(TokenType::SEMICOLON, "Expected ';' after CSS property value.");
             styleNode->children.push_back(propNode);
@@ -209,24 +201,35 @@ std::shared_ptr<TemplateNode> Parser::parseTemplateDefinition() {
     if (templateNode->templateType == TemplateType::STYLE) {
         auto styleNode = std::make_shared<StyleNode>();
         while (currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
-            auto propNode = std::make_shared<CssPropertyNode>();
-            propNode->key = consume(TokenType::IDENTIFIER, "Expected CSS property key.").value;
-            consume(TokenType::COLON, "Expected ':' after CSS property key.");
-            if (currentToken().type == TokenType::IDENTIFIER || currentToken().type == TokenType::UNQUOTED_LITERAL) {
-                propNode->value = currentToken().value;
-                advance();
+            if (currentToken().type == TokenType::AT_SIGN) {
+                styleNode->children.push_back(parseTemplateUsage());
             } else {
-                throw std::runtime_error("Expected CSS property value.");
+                auto propNode = std::make_shared<CssPropertyNode>();
+                propNode->key = consume(TokenType::IDENTIFIER, "Expected CSS property key.").value;
+                consume(TokenType::COLON, "Expected ':' after CSS property key.");
+                propNode->value = parseValue();
+                consume(TokenType::SEMICOLON, "Expected ';' after CSS property value.");
+                styleNode->children.push_back(propNode);
             }
-            consume(TokenType::SEMICOLON, "Expected ';' after CSS property value.");
-            styleNode->children.push_back(propNode);
         }
         templateNode->body.push_back(styleNode);
-    } else {
-        // TODO: Implement parsing for Element and Var template bodies.
-        // For now, just consume until the closing brace.
-        while(currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
-            advance();
+    } else if (templateNode->templateType == TemplateType::ELEMENT) {
+        while (currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
+            templateNode->body.push_back(parseNode());
+        }
+    } else if (templateNode->templateType == TemplateType::VAR) {
+        while (currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
+            auto varNode = std::make_shared<VarDeclarationNode>();
+            varNode->name = consume(TokenType::IDENTIFIER, "Expected variable name.").value;
+            consume(TokenType::COLON, "Expected ':' after variable name.");
+            if (currentToken().type == TokenType::IDENTIFIER || currentToken().type == TokenType::UNQUOTED_LITERAL || currentToken().type == TokenType::STRING_LITERAL) {
+                varNode->value = currentToken().value;
+                advance();
+            } else {
+                throw std::runtime_error("Expected variable value.");
+            }
+            consume(TokenType::SEMICOLON, "Expected ';' after variable value.");
+            templateNode->body.push_back(varNode);
         }
     }
 
@@ -260,6 +263,30 @@ std::shared_ptr<TemplateUsageNode> Parser::parseTemplateUsage() {
     consume(TokenType::SEMICOLON, "Expected ';' after template usage.");
 
     return usageNode;
+}
+
+std::shared_ptr<BaseNode> Parser::parseValue() {
+    if (currentToken().type == TokenType::IDENTIFIER && peekToken().type == TokenType::LEFT_PAREN) {
+        return parseVarUsage();
+    }
+
+    if (currentToken().type == TokenType::STRING_LITERAL || currentToken().type == TokenType::IDENTIFIER || currentToken().type == TokenType::UNQUOTED_LITERAL) {
+        auto literal = std::make_shared<LiteralNode>();
+        literal->value = currentToken().value;
+        advance();
+        return literal;
+    }
+
+    throw std::runtime_error("Expected a value (literal or variable usage).");
+}
+
+std::shared_ptr<VarUsageNode> Parser::parseVarUsage() {
+    auto varUsage = std::make_shared<VarUsageNode>();
+    varUsage->groupName = consume(TokenType::IDENTIFIER, "Expected variable group name.").value;
+    consume(TokenType::LEFT_PAREN, "Expected '(' after variable group name.");
+    varUsage->varName = consume(TokenType::IDENTIFIER, "Expected variable name inside parentheses.").value;
+    consume(TokenType::RIGHT_PAREN, "Expected ')' after variable name.");
+    return varUsage;
 }
 
 } // namespace CHTL

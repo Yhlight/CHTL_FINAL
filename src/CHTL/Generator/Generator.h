@@ -10,6 +10,9 @@
 #include "../Node/CssPropertyNode.h"
 #include "../Node/TemplateUsageNode.h"
 #include "../Node/TemplateNode.h"
+#include "../Node/LiteralNode.h"
+#include "../Node/VarUsageNode.h"
+#include "../Node/VarDeclarationNode.h"
 #include "../Context/TemplateRegistry.h"
 #include <string>
 #include <memory>
@@ -30,6 +33,8 @@ private:
     void visitElementNode(const std::shared_ptr<ElementNode>& node);
     void visitTextNode(const std::shared_ptr<TextNode>& node);
     void visitStyleNode(const std::shared_ptr<StyleNode>& node);
+    void expandStyleNode(std::stringstream& stream, const std::shared_ptr<StyleNode>& styleNode);
+    std::string generateValue(const std::shared_ptr<BaseNode>& valueNode);
 
 
     std::shared_ptr<BaseNode> m_root;

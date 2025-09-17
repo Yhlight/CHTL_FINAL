@@ -9,7 +9,7 @@ namespace CHTL {
 class CssPropertyNode : public BaseNode {
 public:
     std::string key;
-    std::string value;
+    std::shared_ptr<BaseNode> value;
 };
 
 } // namespace CHTL
