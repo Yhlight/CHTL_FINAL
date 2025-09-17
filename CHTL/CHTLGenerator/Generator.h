@@ -18,14 +18,14 @@ public:
 
 private:
     // Main dispatch function that calls the appropriate specific generator.
-    void visit(const Node* node);
+    void visit(const Node* node, const ElementNode* parent_context);
 
     // Specific visitor functions for each node type.
     void visitRootNode(const RootNode* node);
     void visitElementNode(const ElementNode* node);
     void visitTextNode(const TextNode* node);
-    void visitStyleNode(const StyleNode* node);
-    void visitCssRuleNode(const CssRuleNode* node);
+    void visitStyleNode(const StyleNode* node, const ElementNode* parent_context);
+    void visitCssRuleNode(const CssRuleNode* node, const ElementNode* parent_context);
 
     // Helper for managing indentation to produce readable HTML.
     void writeIndent();

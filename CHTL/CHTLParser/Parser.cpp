@@ -124,7 +124,7 @@ std::unique_ptr<StyleNode> Parser::parseStyleNodeStatement() {
         nextToken();
         if (currentTokenIs(TokenType::RIGHT_BRACE)) break;
 
-        if (currentTokenIs(TokenType::DOT) || currentTokenIs(TokenType::HASH)) {
+        if (currentTokenIs(TokenType::DOT) || currentTokenIs(TokenType::HASH) || currentTokenIs(TokenType::AMPERSAND)) {
             auto rule = parseCssRuleNode();
             if(rule) styleNode->addChild(std::move(rule));
         } else if (currentTokenIs(TokenType::IDENTIFIER) && peekTokenIs(TokenType::COLON)) {
@@ -134,7 +134,11 @@ std::unique_ptr<StyleNode> Parser::parseStyleNodeStatement() {
 
             std::string value;
             while(!currentTokenIs(TokenType::SEMICOLON) && !currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
-                value += m_currentToken.literal;
+                if (m_currentToken.type == TokenType::STRING) {
+                    value += "\"" + m_currentToken.literal + "\"";
+                } else {
+                    value += m_currentToken.literal;
+                }
                 if (!peekTokenIs(TokenType::SEMICOLON) && !peekTokenIs(TokenType::RIGHT_BRACE)) value += " ";
                 nextToken();
             }
@@ -154,16 +158,14 @@ std::unique_ptr<StyleNode> Parser::parseStyleNodeStatement() {
 
 std::unique_ptr<CssRuleNode> Parser::parseCssRuleNode() {
     std::string selector;
-    if (currentTokenIs(TokenType::DOT) || currentTokenIs(TokenType::HASH)) {
+    while (!currentTokenIs(TokenType::LEFT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
         selector += m_currentToken.literal;
-        if (!expectPeek(TokenType::IDENTIFIER)) return nullptr;
-        selector += m_currentToken.literal;
-    } else {
-        return nullptr;
+        nextToken();
     }
+    StringUtil::Trim(selector);
 
     auto ruleNode = std::make_unique<CssRuleNode>(selector);
-    if (!expectPeek(TokenType::LEFT_BRACE)) return nullptr;
+    if (!currentTokenIs(TokenType::LEFT_BRACE)) return nullptr;
 
     while(!peekTokenIs(TokenType::RIGHT_BRACE) && !peekTokenIs(TokenType::END_OF_FILE)) {
         nextToken();
@@ -176,7 +178,11 @@ std::unique_ptr<CssRuleNode> Parser::parseCssRuleNode() {
 
             std::string value;
             while(!currentTokenIs(TokenType::SEMICOLON) && !currentTokenIs(TokenType::RIGHT_BRACE) && !currentTokenIs(TokenType::END_OF_FILE)) {
-                value += m_currentToken.literal;
+                if (m_currentToken.type == TokenType::STRING) {
+                    value += "\"" + m_currentToken.literal + "\"";
+                } else {
+                    value += m_currentToken.literal;
+                }
                 if (!peekTokenIs(TokenType::SEMICOLON) && !peekTokenIs(TokenType::RIGHT_BRACE)) value += " ";
                 nextToken();
             }

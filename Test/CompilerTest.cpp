@@ -117,6 +117,51 @@ TEST_CASE(Compiler_GlobalAndInlineStyles) {
     return true;
 }
 
+TEST_CASE(Compiler_AmpersandSelector) {
+    const std::string source = R"(
+        button {
+            class: btn-primary;
+            style {
+                &:hover {
+                    background-color: blue;
+                }
+                &::before {
+                    content: "> ";
+                }
+            }
+        }
+    )";
+
+    const std::string expected_html = R"(
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>CHTL Output</title>
+          <style>
+          .btn-primary:hover {
+            background-color: blue;
+          }
+          .btn-primary::before {
+            content: "> ";
+          }
+          </style>
+        </head>
+        <body>
+          <button class="btn-primary">
+          </button>
+        </body>
+        </html>
+    )";
+
+    std::vector<CHTL::CodeFragment> fragments = {{CHTL::CodeType::CHTL, source}};
+    CHTL::CompilerDispatcher dispatcher;
+    std::string actual_html = dispatcher.dispatch(fragments);
+
+    ASSERT_EQUAL(normalize_html(expected_html), normalize_html(actual_html));
+    return true;
+}
+
 TEST_CASE(Compiler_AutomaticClassAndId) {
     const std::string source = R"(
         div {

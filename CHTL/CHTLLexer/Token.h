@@ -25,6 +25,7 @@ enum class TokenType {
     SEMICOLON,     // ;
     DOT,           // .
     HASH,          // #
+    AMPERSAND,     // &
 
     // --- Keywords ---
     KEYWORD_TEXT,  // text
@@ -51,6 +52,7 @@ const std::map<TokenType, std::string> token_type_to_string = {
     {TokenType::SEMICOLON, ";"},
     {TokenType::DOT, "."},
     {TokenType::HASH, "#"},
+    {TokenType::AMPERSAND, "&"},
     {TokenType::KEYWORD_TEXT, "text"},
     {TokenType::KEYWORD_STYLE, "style"},
 };

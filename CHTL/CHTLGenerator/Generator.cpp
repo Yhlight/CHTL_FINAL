@@ -1,6 +1,7 @@
 #include "Generator.h"
 #include <unordered_set>
 #include <iterator>
+#include <regex>
 
 namespace {
 // A helper set of HTML void elements that should not have a closing tag.
@@ -18,7 +19,7 @@ std::string Generator::generate(const Node* rootNode) {
     m_ss.str("");
     m_global_css_stream.str("");
     m_indent_level = 0;
-    visit(rootNode);
+    visit(rootNode, nullptr);
     return m_ss.str();
 }
 
@@ -32,7 +33,7 @@ void Generator::writeIndent() {
     }
 }
 
-void Generator::visit(const Node* node) {
+void Generator::visit(const Node* node, const ElementNode* parent_context) {
     if (!node) return;
 
     switch (node->getType()) {
@@ -46,10 +47,10 @@ void Generator::visit(const Node* node) {
             visitTextNode(static_cast<const TextNode*>(node));
             break;
         case NodeType::Style:
-            visitStyleNode(static_cast<const StyleNode*>(node));
+            visitStyleNode(static_cast<const StyleNode*>(node), parent_context);
             break;
         case NodeType::CssRule:
-            visitCssRuleNode(static_cast<const CssRuleNode*>(node));
+            visitCssRuleNode(static_cast<const CssRuleNode*>(node), parent_context);
             break;
         case NodeType::Comment:
             break;
@@ -58,7 +59,7 @@ void Generator::visit(const Node* node) {
 
 void Generator::visitRootNode(const RootNode* node) {
     for (const auto& child : node->getChildren()) {
-        visit(child.get());
+        visit(child.get(), nullptr);
     }
 }
 
@@ -70,7 +71,6 @@ void Generator::visitElementNode(const ElementNode* node) {
         m_ss << " " << attr.first << "=\"" << attr.second << "\"";
     }
 
-    // Collect inline styles from any StyleNode children
     StyleMap inline_styles;
     for (const auto& child : node->getChildren()) {
         if (child->getType() == NodeType::Style) {
@@ -85,9 +85,7 @@ void Generator::visitElementNode(const ElementNode* node) {
         m_ss << " style=\"";
         for (auto it = inline_styles.begin(); it != inline_styles.end(); ++it) {
             m_ss << it->first << ": " << it->second << ";";
-            if (std::next(it) != inline_styles.end()) {
-                m_ss << " ";
-            }
+            if (std::next(it) != inline_styles.end()) m_ss << " ";
         }
         m_ss << "\"";
     }
@@ -100,14 +98,8 @@ void Generator::visitElementNode(const ElementNode* node) {
     m_ss << ">\n";
     m_indent_level++;
 
-    // Visit children, but skip StyleNodes as they've been processed
     for (const auto& child : node->getChildren()) {
-        if (child->getType() != NodeType::Style) {
-            visit(child.get());
-        } else {
-            // Visit the style node to process its global rules, but don't generate HTML
-            visit(child.get());
-        }
+        visit(child.get(), node);
     }
 
     m_indent_level--;
@@ -120,18 +112,35 @@ void Generator::visitTextNode(const TextNode* node) {
     m_ss << node->getText() << "\n";
 }
 
-void Generator::visitStyleNode(const StyleNode* node) {
-    // This node's purpose is to hold inline styles and CSS rules.
-    // Inline styles are handled by the parent ElementNode visitor.
-    // Here, we just need to visit its children to process the global CSS rules.
+void Generator::visitStyleNode(const StyleNode* node, const ElementNode* parent_context) {
     for (const auto& child : node->getChildren()) {
-        visit(child.get());
+        visit(child.get(), parent_context);
     }
 }
 
-void Generator::visitCssRuleNode(const CssRuleNode* node) {
-    // This node's output goes to the global CSS buffer, not the main HTML stream.
-    m_global_css_stream << node->getSelector() << " {\n";
+void Generator::visitCssRuleNode(const CssRuleNode* node, const ElementNode* parent_context) {
+    std::string selector = node->getSelector();
+
+    // Resolve '&' if it exists
+    if (selector.find('&') != std::string::npos) {
+        std::string resolved_base;
+        if (parent_context) {
+            const auto& attrs = parent_context->getAttributes();
+            if (attrs.count("class")) {
+                // For simplicity, we use the first class name if there are multiple.
+                std::string first_class = attrs.at("class").substr(0, attrs.at("class").find(' '));
+                resolved_base = "." + first_class;
+            } else if (attrs.count("id")) {
+                resolved_base = "#" + attrs.at("id");
+            }
+        }
+
+        if (!resolved_base.empty()) {
+            selector = std::regex_replace(selector, std::regex("&"), resolved_base);
+        }
+    }
+
+    m_global_css_stream << selector << " {\n";
     for (const auto& prop : node->getProperties()) {
         m_global_css_stream << "  " << prop.first << ": " << prop.second << ";\n";
     }
