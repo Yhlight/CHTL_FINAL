@@ -192,4 +192,5 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o: \
  /usr/include/c++/13/bits/ostream.tcc \
  /usr/include/c++/13/bits/istream.tcc \
  /usr/include/c++/13/bits/sstream.tcc \
- /app/CHTL/CHTLGenerator/../CHTLNode/VarSubstitutionNode.h
+ /app/CHTL/CHTLGenerator/../CHTLNode/VarSubstitutionNode.h \
+ /usr/include/c++/13/iostream

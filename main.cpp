@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
 #include "CHTL/CHTLLexer/Lexer.h"
 #include "CHTL/CHTLParser/Parser.h"
 #include "CHTL/CHTLGenerator/Generator.h"
@@ -32,7 +33,7 @@ int main() {
     CHTL::Lexer lexer(input);
     CHTL::Parser parser(lexer);
 
-    auto program = parser.parseProgram();
+    std::shared_ptr<CHTL::Node> program = parser.parseProgram();
 
     if (!parser.getErrors().empty()) {
         std::cerr << "--- Parser Errors ---" <<
@@ -49,7 +50,7 @@ int main() {
     }
 
     CHTL::Generator generator(parser.getContext());
-    std::string html_output = generator.generate(program.get());
+    std::string html_output = generator.generate(program);
 
     std::cout << html_output << std::endl;
 

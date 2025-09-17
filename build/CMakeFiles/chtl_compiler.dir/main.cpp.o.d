@@ -152,12 +152,7 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
  /usr/include/c++/13/bits/stl_uninitialized.h \
  /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc /app/CHTL/CHTLLexer/Lexer.h \
- /app/CHTL/CHTLLexer/Token.h /usr/include/c++/13/variant \
- /usr/include/c++/13/bits/enable_special_members.h \
- /usr/include/c++/13/bits/parse_numbers.h \
- /usr/include/c++/13/ext/aligned_buffer.h /app/CHTL/CHTLParser/Parser.h \
- /app/CHTL/CHTLParser/../CHTLNode/Node.h /usr/include/c++/13/memory \
+ /usr/include/c++/13/bits/vector.tcc /usr/include/c++/13/memory \
  /usr/include/c++/13/bits/stl_tempbuf.h \
  /usr/include/c++/13/bits/stl_raw_storage_iter.h \
  /usr/include/c++/13/bits/align.h \
@@ -168,13 +163,18 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
  /usr/include/c++/13/bits/shared_ptr.h \
  /usr/include/c++/13/bits/shared_ptr_base.h \
  /usr/include/c++/13/bits/allocated_ptr.h \
+ /usr/include/c++/13/ext/aligned_buffer.h \
  /usr/include/c++/13/ext/concurrence.h \
  /usr/include/c++/13/bits/shared_ptr_atomic.h \
  /usr/include/c++/13/bits/atomic_base.h \
  /usr/include/c++/13/bits/atomic_lockfree_defines.h \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
- /usr/include/c++/13/pstl/execution_defs.h \
+ /usr/include/c++/13/pstl/execution_defs.h /app/CHTL/CHTLLexer/Lexer.h \
+ /app/CHTL/CHTLLexer/Token.h /usr/include/c++/13/variant \
+ /usr/include/c++/13/bits/enable_special_members.h \
+ /usr/include/c++/13/bits/parse_numbers.h /app/CHTL/CHTLParser/Parser.h \
+ /app/CHTL/CHTLParser/../CHTLNode/Node.h \
  /app/CHTL/CHTLParser/../CHTLNode/ElementNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/AttributeNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/StyleNode.h /usr/include/c++/13/map \

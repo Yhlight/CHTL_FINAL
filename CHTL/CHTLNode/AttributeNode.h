@@ -25,7 +25,7 @@ public:
 
     Token m_token; // The token for the attribute's key (e.g., 'id')
     std::string m_key;
-    std::unique_ptr<Expression> m_value;
+    std::shared_ptr<Expression> m_value;
 };
 
 } // namespace CHTL

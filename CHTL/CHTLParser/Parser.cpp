@@ -34,12 +34,12 @@ bool Parser::expectPeek(TokenType t) {
     return false;
 }
 
-std::unique_ptr<Node> Parser::parseProgram() {
-    auto programNode = std::make_unique<ElementNode>(Token{TokenType::IDENTIFIER, "root"}, "root");
+std::shared_ptr<Node> Parser::parseProgram() {
+    auto programNode = std::make_shared<ElementNode>(Token{TokenType::IDENTIFIER, "root"}, "root");
     while (m_currentToken.type != TokenType::END_OF_FILE) {
         auto stmt = parseStatement();
         if (stmt) {
-            programNode->children.push_back(std::move(stmt));
+            programNode->children.push_back(stmt);
         } else {
              if (m_currentToken.type != TokenType::END_OF_FILE) nextToken();
         }
@@ -47,7 +47,7 @@ std::unique_ptr<Node> Parser::parseProgram() {
     return programNode;
 }
 
-std::unique_ptr<Statement> Parser::parseStatement() {
+std::shared_ptr<Statement> Parser::parseStatement() {
     switch (m_currentToken.type) {
         case TokenType::IDENTIFIER:
             return parseElementStatement();
@@ -62,8 +62,8 @@ std::unique_ptr<Statement> Parser::parseStatement() {
     }
 }
 
-std::unique_ptr<AttributeNode> Parser::parseAttribute() {
-    auto attr = std::make_unique<AttributeNode>(m_currentToken, m_currentToken.literal);
+std::shared_ptr<AttributeNode> Parser::parseAttribute() {
+    auto attr = std::make_shared<AttributeNode>(m_currentToken, m_currentToken.literal);
     nextToken(); // consume key
     nextToken(); // consume ':'
 
@@ -73,9 +73,9 @@ std::unique_ptr<AttributeNode> Parser::parseAttribute() {
         nextToken();
         Token varName = m_currentToken;
         if (!expectPeek(TokenType::RPAREN)) return nullptr;
-        attr->m_value = std::make_unique<VarSubstitutionNode>(groupName, varName);
+        attr->m_value = std::make_shared<VarSubstitutionNode>(groupName, varName);
     } else {
-        attr->m_value = std::make_unique<LiteralNode>(m_currentToken);
+        attr->m_value = std::make_shared<LiteralNode>(m_currentToken);
     }
 
     if (m_peekToken.type == TokenType::SEMICOLON) {
@@ -84,13 +84,13 @@ std::unique_ptr<AttributeNode> Parser::parseAttribute() {
     return attr;
 }
 
-std::unique_ptr<StyleNode> Parser::parseStyleBlock() {
-    auto styleNode = std::make_unique<StyleNode>(m_currentToken);
+std::shared_ptr<StyleNode> Parser::parseStyleBlock() {
+    auto styleNode = std::make_shared<StyleNode>(m_currentToken);
     nextToken();
     nextToken();
 
     while (m_currentToken.type != TokenType::RBRACE && m_currentToken.type != TokenType::END_OF_FILE) {
-        std::unique_ptr<Statement> stmt = nullptr;
+        std::shared_ptr<Statement> stmt = nullptr;
         if (m_currentToken.type == TokenType::IDENTIFIER) {
             stmt = parseAttribute();
         } else if (m_currentToken.type == TokenType::AT_STYLE) {
@@ -98,7 +98,7 @@ std::unique_ptr<StyleNode> Parser::parseStyleBlock() {
         }
 
         if (stmt) {
-            styleNode->children.push_back(std::move(stmt));
+            styleNode->children.push_back(stmt);
         } else {
             nextToken();
         }
@@ -106,15 +106,15 @@ std::unique_ptr<StyleNode> Parser::parseStyleBlock() {
     return styleNode;
 }
 
-std::unique_ptr<TemplateNode> Parser::parseTemplateStatement() {
+std::shared_ptr<TemplateNode> Parser::parseTemplateStatement() {
     Token templateToken = m_currentToken;
     nextToken();
     Token typeToken = m_currentToken;
     nextToken();
     Token nameToken = m_currentToken;
 
-    auto templateNode = std::make_unique<TemplateNode>(templateToken, typeToken, nameToken);
-    m_context.registerTemplate(nameToken.literal, templateNode.get());
+    auto templateNode = std::make_shared<TemplateNode>(templateToken, typeToken, nameToken);
+    m_context.registerTemplate(nameToken.literal, templateNode);
 
     if (!expectPeek(TokenType::LBRACE)) return nullptr;
 
@@ -130,7 +130,7 @@ std::unique_ptr<TemplateNode> Parser::parseTemplateStatement() {
             nextToken();
             auto stmt = parseStatement();
             if (stmt) {
-                templateNode->children.push_back(std::move(stmt));
+                templateNode->children.push_back(stmt);
             }
         }
     }
@@ -139,19 +139,19 @@ std::unique_ptr<TemplateNode> Parser::parseTemplateStatement() {
     return templateNode;
 }
 
-std::unique_ptr<Statement> Parser::parseTemplateInstantiationStatement() {
+std::shared_ptr<Statement> Parser::parseTemplateInstantiationStatement() {
     Token typeToken = m_currentToken;
     if (!expectPeek(TokenType::IDENTIFIER)) return nullptr;
     Token nameToken = m_currentToken;
-    auto node = std::make_unique<TemplateInstantiationNode>(typeToken, typeToken, nameToken);
+    auto node = std::make_shared<TemplateInstantiationNode>(typeToken, typeToken, nameToken);
     if (m_peekToken.type == TokenType::SEMICOLON) {
         nextToken();
     }
     return node;
 }
 
-std::unique_ptr<ElementNode> Parser::parseElementStatement() {
-    auto element = std::make_unique<ElementNode>(m_currentToken, m_currentToken.literal);
+std::shared_ptr<ElementNode> Parser::parseElementStatement() {
+    auto element = std::make_shared<ElementNode>(m_currentToken, m_currentToken.literal);
     if (!expectPeek(TokenType::LBRACE)) return nullptr;
 
     while (m_peekToken.type != TokenType::RBRACE && m_peekToken.type != TokenType::END_OF_FILE) {
@@ -164,12 +164,12 @@ std::unique_ptr<ElementNode> Parser::parseElementStatement() {
         } else if (m_currentToken.type == TokenType::TEXT && m_peekToken.type == TokenType::COLON) {
             nextToken();
             nextToken();
-            element->children.push_back(std::make_unique<TextNode>(m_currentToken, m_currentToken.literal));
+            element->children.push_back(std::make_shared<TextNode>(m_currentToken, m_currentToken.literal));
             if (m_peekToken.type == TokenType::SEMICOLON) nextToken();
         } else {
             auto stmt = parseStatement();
             if (stmt) {
-                element->children.push_back(std::move(stmt));
+                element->children.push_back(stmt);
             }
         }
     }

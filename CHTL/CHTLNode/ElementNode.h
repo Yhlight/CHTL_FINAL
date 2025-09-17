@@ -36,9 +36,9 @@ public:
 
     Token m_token; // The token for the element's tag name (e.g., 'div')
     std::string m_tagName;
-    std::vector<std::unique_ptr<AttributeNode>> attributes;
-    std::unique_ptr<StyleNode> styleBlock;
-    std::vector<std::unique_ptr<Statement>> children;
+    std::vector<std::shared_ptr<AttributeNode>> attributes;
+    std::shared_ptr<StyleNode> styleBlock;
+    std::vector<std::shared_ptr<Statement>> children;
 };
 
 } // namespace CHTL

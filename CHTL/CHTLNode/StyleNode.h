@@ -20,7 +20,7 @@ public:
     }
 
     Token m_token; // The 'style' token
-    std::vector<std::unique_ptr<Statement>> children;
+    std::vector<std::shared_ptr<Statement>> children;
 };
 
 } // namespace CHTL

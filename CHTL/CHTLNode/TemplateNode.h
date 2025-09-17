@@ -26,7 +26,7 @@ public:
     Token m_token; // The [Template] token
     Token m_templateType; // e.g., @Element, @Style
     Token m_name;
-    std::vector<std::unique_ptr<Statement>> children;
+    std::vector<std::shared_ptr<Statement>> children;
 };
 
 } // namespace CHTL

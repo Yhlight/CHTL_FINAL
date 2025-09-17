@@ -13,12 +13,12 @@ namespace CHTL {
 class Generator {
 public:
     Generator(CHTLContext& context);
-    std::string generate(Node* node);
+    std::string generate(std::shared_ptr<Node> node);
 
 private:
     CHTLContext& m_context;
-    void visit(Node* node);
-    void visitElementNode(ElementNode* node);
+    void visit(std::shared_ptr<Node> node);
+    void visitElementNode(std::shared_ptr<ElementNode> node);
     void visitTextNode(TextNode* node);
     void visitTemplateInstantiationNode(TemplateInstantiationNode* node);
 
