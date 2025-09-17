@@ -24,6 +24,9 @@ std::shared_ptr<BaseNode> Parser::parseNode() {
     if (currentToken().type == TokenType::IDENTIFIER) {
         return parseElement();
     }
+    if (currentToken().type == TokenType::LEFT_BRACKET) {
+        return parseTemplateDefinition();
+    }
     // Handle other top-level nodes like comments later
     throw std::runtime_error("Unexpected token in parseNode: " + currentToken().value);
 }
@@ -152,24 +155,111 @@ std::shared_ptr<StyleNode> Parser::parseStyleBlock() {
     consume(TokenType::LEFT_BRACE, "Expected '{' after 'style'.");
 
     while (currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
-        // Parse a css property, e.g. color: red;
-        CssProperty prop;
-        prop.key = consume(TokenType::IDENTIFIER, "Expected CSS property key.").value;
-        consume(TokenType::COLON, "Expected ':' after CSS property key.");
-
-        if (currentToken().type == TokenType::IDENTIFIER || currentToken().type == TokenType::UNQUOTED_LITERAL) {
-            prop.value = currentToken().value;
-            advance();
+        if (currentToken().type == TokenType::AT_SIGN) {
+            styleNode->children.push_back(parseTemplateUsage());
         } else {
-            throw std::runtime_error("Expected CSS property value.");
-        }
+            auto propNode = std::make_shared<CssPropertyNode>();
+            propNode->key = consume(TokenType::IDENTIFIER, "Expected CSS property key.").value;
+            consume(TokenType::COLON, "Expected ':' after CSS property key.");
 
-        consume(TokenType::SEMICOLON, "Expected ';' after CSS property value.");
-        styleNode->properties.push_back(prop);
+            if (currentToken().type == TokenType::IDENTIFIER || currentToken().type == TokenType::UNQUOTED_LITERAL) {
+                propNode->value = currentToken().value;
+                advance();
+            } else {
+                throw std::runtime_error("Expected CSS property value.");
+            }
+
+            consume(TokenType::SEMICOLON, "Expected ';' after CSS property value.");
+            styleNode->children.push_back(propNode);
+        }
     }
 
     consume(TokenType::RIGHT_BRACE, "Expected '}' after style block.");
     return styleNode;
+}
+
+std::shared_ptr<TemplateNode> Parser::parseTemplateDefinition() {
+    auto templateNode = std::make_shared<TemplateNode>();
+
+    consume(TokenType::LEFT_BRACKET, "Expected '[' to start template definition.");
+    consume(TokenType::KEYWORD_TEMPLATE, "Expected 'Template' keyword.");
+    consume(TokenType::RIGHT_BRACKET, "Expected ']' after 'Template' keyword.");
+
+    consume(TokenType::AT_SIGN, "Expected '@' before template type.");
+
+    if (currentToken().type == TokenType::KEYWORD_STYLE) {
+        templateNode->templateType = TemplateType::STYLE;
+        advance();
+    } else if (currentToken().type == TokenType::KEYWORD_ELEMENT) {
+        templateNode->templateType = TemplateType::ELEMENT;
+        advance();
+    } else if (currentToken().type == TokenType::KEYWORD_VAR) {
+        templateNode->templateType = TemplateType::VAR;
+        advance();
+    } else {
+        throw std::runtime_error("Expected template type (Style, Element, or Var).");
+    }
+
+    templateNode->name = consume(TokenType::IDENTIFIER, "Expected template name.").value;
+
+    consume(TokenType::LEFT_BRACE, "Expected '{' for template body.");
+
+    // For now, let's focus on parsing style templates.
+    // The body of a style template is essentially a style block.
+    if (templateNode->templateType == TemplateType::STYLE) {
+        auto styleNode = std::make_shared<StyleNode>();
+        while (currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
+            auto propNode = std::make_shared<CssPropertyNode>();
+            propNode->key = consume(TokenType::IDENTIFIER, "Expected CSS property key.").value;
+            consume(TokenType::COLON, "Expected ':' after CSS property key.");
+            if (currentToken().type == TokenType::IDENTIFIER || currentToken().type == TokenType::UNQUOTED_LITERAL) {
+                propNode->value = currentToken().value;
+                advance();
+            } else {
+                throw std::runtime_error("Expected CSS property value.");
+            }
+            consume(TokenType::SEMICOLON, "Expected ';' after CSS property value.");
+            styleNode->children.push_back(propNode);
+        }
+        templateNode->body.push_back(styleNode);
+    } else {
+        // TODO: Implement parsing for Element and Var template bodies.
+        // For now, just consume until the closing brace.
+        while(currentToken().type != TokenType::RIGHT_BRACE && currentToken().type != TokenType::END_OF_FILE) {
+            advance();
+        }
+    }
+
+
+    consume(TokenType::RIGHT_BRACE, "Expected '}' to close template body.");
+
+    TemplateRegistry::getInstance().registerTemplate(templateNode->name, templateNode);
+
+    return templateNode;
+}
+
+std::shared_ptr<TemplateUsageNode> Parser::parseTemplateUsage() {
+    auto usageNode = std::make_shared<TemplateUsageNode>();
+    consume(TokenType::AT_SIGN, "Expected '@' for template usage.");
+
+    if (currentToken().type == TokenType::KEYWORD_STYLE) {
+        usageNode->templateType = TemplateType::STYLE;
+        advance();
+    } else if (currentToken().type == TokenType::KEYWORD_ELEMENT) {
+        usageNode->templateType = TemplateType::ELEMENT;
+        advance();
+    } else if (currentToken().type == TokenType::KEYWORD_VAR) {
+        usageNode->templateType = TemplateType::VAR;
+        advance();
+    } else {
+        throw std::runtime_error("Expected template type (Style, Element, or Var) after '@'.");
+    }
+
+    usageNode->name = consume(TokenType::IDENTIFIER, "Expected template name for usage.").value;
+
+    consume(TokenType::SEMICOLON, "Expected ';' after template usage.");
+
+    return usageNode;
 }
 
 } // namespace CHTL

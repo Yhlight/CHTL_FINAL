@@ -7,6 +7,10 @@
 #include "../Node/AttributeNode.h"
 #include "../Node/TextNode.h"
 #include "../Node/StyleNode.h"
+#include "../Node/CssPropertyNode.h"
+#include "../Node/TemplateUsageNode.h"
+#include "../Node/TemplateNode.h"
+#include "../Context/TemplateRegistry.h"
 #include <string>
 #include <memory>
 #include <sstream>

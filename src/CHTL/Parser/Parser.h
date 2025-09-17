@@ -8,6 +8,10 @@
 #include "../Node/AttributeNode.h"
 #include "../Node/TextNode.h"
 #include "../Node/StyleNode.h"
+#include "../Node/TemplateNode.h"
+#include "../Node/TemplateUsageNode.h"
+#include "../Node/CssPropertyNode.h"
+#include "../Context/TemplateRegistry.h"
 
 #include <vector>
 #include <memory>
@@ -25,6 +29,8 @@ private:
     std::shared_ptr<AttributeNode> parseAttribute();
     std::shared_ptr<TextNode> parseTextBlock();
     std::shared_ptr<StyleNode> parseStyleBlock();
+    std::shared_ptr<TemplateNode> parseTemplateDefinition();
+    std::shared_ptr<TemplateUsageNode> parseTemplateUsage();
 
     const Token& currentToken() const;
     const Token& peekToken() const;

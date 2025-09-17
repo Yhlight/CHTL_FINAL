@@ -5,7 +5,11 @@ namespace CHTL {
 
 const std::unordered_map<std::string, TokenType> Lexer::s_keywords = {
     {"text", TokenType::KEYWORD_TEXT},
-    {"style", TokenType::KEYWORD_STYLE}
+    {"style", TokenType::KEYWORD_STYLE},
+    {"Template", TokenType::KEYWORD_TEMPLATE},
+    {"Style", TokenType::KEYWORD_STYLE},
+    {"Element", TokenType::KEYWORD_ELEMENT},
+    {"Var", TokenType::KEYWORD_VAR}
 };
 
 Lexer::Lexer(const std::string& source) : m_source(source) {}
@@ -61,6 +65,9 @@ Token Lexer::getNextToken() {
     switch (c) {
         case '{': advance(); return makeToken(TokenType::LEFT_BRACE, "{");
         case '}': advance(); return makeToken(TokenType::RIGHT_BRACE, "}");
+        case '[': advance(); return makeToken(TokenType::LEFT_BRACKET, "[");
+        case ']': advance(); return makeToken(TokenType::RIGHT_BRACKET, "]");
+        case '@': advance(); return makeToken(TokenType::AT_SIGN, "@");
         case ':': advance(); return makeToken(TokenType::COLON, ":");
         case ';': advance(); return makeToken(TokenType::SEMICOLON, ";");
         case '=': advance(); return makeToken(TokenType::EQUALS, "=");

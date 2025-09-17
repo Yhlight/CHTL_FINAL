@@ -10,7 +10,9 @@ enum class TokenType {
     // Keywords
     KEYWORD_TEXT,
     KEYWORD_STYLE,
-    // ... other keywords will be added later
+    KEYWORD_TEMPLATE,
+    KEYWORD_ELEMENT,
+    KEYWORD_VAR,
 
     // Literals
     IDENTIFIER,
@@ -20,6 +22,9 @@ enum class TokenType {
     // Symbols
     LEFT_BRACE,   // {
     RIGHT_BRACE,  // }
+    LEFT_BRACKET, // [
+    RIGHT_BRACKET,// ]
+    AT_SIGN,      // @
     COLON,        // :
     SEMICOLON,    // ;
     EQUALS,       // =

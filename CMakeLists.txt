@@ -9,6 +9,7 @@ add_library(chtl_lib
     src/CHTL/Lexer/Lexer.cpp
     src/CHTL/Parser/Parser.cpp
     src/CHTL/Generator/Generator.cpp
+    src/CHTL/Context/TemplateRegistry.cpp
 )
 # We need to tell the library where to find its headers
 target_include_directories(chtl_lib PUBLIC src)

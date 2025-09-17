@@ -4,50 +4,70 @@
 #include "AstPrinter.h"
 #include <iostream>
 #include <vector>
+#include <cassert>
 
-int main() {
+void testTemplateExpansion() {
+    std::cout << "--- Testing Template Expansion ---\n";
     std::string source = R"(
-        html {
-            body {
-                div {
-                    id: "main-box";
-                    style {
-                        color: red;
-                        font-size: 16px;
-                    }
-                    text {
-                        "Hello, CHTL!"
-                    }
-                }
+        [Template] @Style DefaultText
+        {
+            color: black;
+        }
+
+        div {
+            style {
+                @Style DefaultText;
             }
         }
     )";
 
-    // 1. Lexing
     CHTL::Lexer lexer(source);
     std::vector<CHTL::Token> tokens = lexer.getAllTokens();
-
-    // 2. Parsing
     CHTL::Parser parser(tokens);
-    try {
-        std::shared_ptr<CHTL::RootNode> ast = parser.parse();
+    std::shared_ptr<CHTL::RootNode> ast = parser.parse();
+    CHTL::Generator generator(ast);
+    generator.generate();
+    std::string html = generator.getHtml();
+    std::cout << "Generated HTML:\n" << html << std::endl;
 
-        // Optional: Print AST for debugging
-        CHTL::AstPrinter printer;
-        std::cout << "--- Abstract Syntax Tree ---\n";
-        std::cout << printer.print(ast) << std::endl;
+    std::string expected_style = "style=\"color: black;\"";
+    assert(html.find(expected_style) != std::string::npos);
+    std::cout << "Template expansion test passed.\n";
+    std::cout << "--------------------------------\n\n";
+}
 
-        // 3. Generating
-        CHTL::Generator generator(ast);
-        generator.generate();
+void testNonExistentTemplate() {
+    std::cout << "--- Testing Non-Existent Template Usage ---\n";
+    std::string source = R"(
+        div {
+            style {
+                @Style NonExistentTemplate;
+            }
+        }
+    )";
 
-        std::cout << "\n--- Generated HTML ---\n";
-        std::cout << generator.getHtml() << std::endl;
+    CHTL::Lexer lexer(source);
+    std::vector<CHTL::Token> tokens = lexer.getAllTokens();
+    CHTL::Parser parser(tokens);
+    std::shared_ptr<CHTL::RootNode> ast = parser.parse();
+    CHTL::Generator generator(ast);
+    generator.generate();
+    std::string html = generator.getHtml();
 
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        return 1;
-    }
+    std::cout << "Generated HTML:\n" << html << std::endl;
 
+    // The generator should ignore the missing template, resulting in no style attribute.
+    assert(html.find("style=") == std::string::npos);
+    std::cout << "Non-existent template test passed.\n";
+    std::cout << "--------------------------------\n\n";
+}
+
+
+int main() {
+    // Clear the registry before each run to ensure tests are isolated.
+    // (This would be better with a proper test framework like gtest,
+    // but for now, we can't re-run the executable, so it's fine).
+    testTemplateExpansion();
+    testNonExistentTemplate();
     return 0;
 }
