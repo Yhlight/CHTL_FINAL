@@ -10,8 +10,11 @@ class Generator : public Visitor {
 public:
     Generator();
 
-    // Main entry point to generate code from an AST.
-    std::string generate(ProgramNode& root);
+    // Main entry point to generate HTML code from an AST.
+    std::string generateHTML(ProgramNode& root);
+
+    // Gets the CSS code generated from style rules.
+    std::string getCSS();
 
     // Visitor methods for each node type.
     void visit(ProgramNode& node) override;
@@ -22,22 +25,24 @@ public:
     void visit(StringLiteralNode& node) override;
     void visit(UnquotedLiteralNode& node) override;
     void visit(NumberLiteralNode& node) override;
+    void visit(StyleBlockNode& node) override;
+    void visit(StylePropertyNode& node) override;
+    void visit(StyleRuleNode& node) override;
 
 private:
-    std::stringstream html_buffer;
-    // A separate buffer for CSS, which will be used in later steps.
-    std::stringstream css_buffer;
+    enum class StyleContext { INLINE, GLOBAL_RULE };
 
-    // A temporary buffer to hold the processed value of a ValueNode,
-    // which is then used by its parent (e.g., AttributeNode or TextNode).
+    std::stringstream html_buffer;
+    std::stringstream css_buffer;
     std::stringstream value_buffer;
 
+    StyleContext style_context = StyleContext::INLINE;
     int indent_level = 0;
 
-    // A set of HTML void elements (tags that don't need a closing tag).
     static const std::set<std::string> void_elements;
 
     void do_indent();
+    void generateTokenSequence(std::stringstream& buffer, const std::vector<Token>& tokens);
 };
 
 #endif // GENERATOR_H

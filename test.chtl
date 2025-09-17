@@ -1,21 +1,28 @@
-// This is a test file for the CHTL Lexer.
-# This is a generator comment
+# A test for local style blocks
 
 div {
-    id: "main-box";
-    class = my_class; // Colon and Equal are equivalent
-
-    /*
-     * A multi-line
-     * comment block.
-     */
-    text {
-        Hello World! This is an unquoted literal.
-        123.45
-    }
+    id: "styled-box";
 
     style {
-        color: red;
-        width: 100px + 20%;
+        // These are inline styles
+        width: 100px;
+        height: 100px;
+        background-color: blue;
+
+        // This is a global rule
+        .box-title {
+            font-size: 16px;
+            color: white;
+        }
+
+        // This should also be a global rule
+        &:hover {
+            background-color: darkblue;
+        }
+    }
+
+    span {
+        class: "box-title";
+        text { Title }
     }
 }

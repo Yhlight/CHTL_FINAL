@@ -17,6 +17,9 @@ class ValueNode;
 class StringLiteralNode;
 class UnquotedLiteralNode;
 class NumberLiteralNode;
+class StyleBlockNode;
+class StylePropertyNode;
+class StyleRuleNode;
 class Visitor;
 
 
@@ -32,6 +35,9 @@ public:
     virtual void visit(StringLiteralNode& node) = 0;
     virtual void visit(UnquotedLiteralNode& node) = 0;
     virtual void visit(NumberLiteralNode& node) = 0;
+    virtual void visit(StyleBlockNode& node) = 0;
+    virtual void visit(StylePropertyNode& node) = 0;
+    virtual void visit(StyleRuleNode& node) = 0;
 };
 
 
@@ -87,9 +93,10 @@ class ElementNode : public BaseNode {
 public:
     Token tagName;
     std::vector<std::unique_ptr<AttributeNode>> attributes;
+    std::unique_ptr<StyleBlockNode> styleBlock;
     std::vector<std::unique_ptr<BaseNode>> children;
 
-    explicit ElementNode(Token tagName) : tagName(std::move(tagName)) {}
+    explicit ElementNode(Token tagName) : tagName(std::move(tagName)), styleBlock(nullptr) {}
     void accept(Visitor& visitor) override;
 };
 
@@ -118,5 +125,38 @@ public:
     std::vector<std::unique_ptr<BaseNode>> children;
     void accept(Visitor& visitor) override;
 };
+
+
+// --- Style-related Nodes ---
+
+// Base class for nodes that can appear inside a style { ... } block.
+class StyleContentNode : public BaseNode {};
+
+// Represents a single CSS property, e.g., `width: 100px;`
+class StylePropertyNode : public StyleContentNode {
+public:
+    Token name;
+    std::unique_ptr<ValueNode> value;
+    StylePropertyNode(Token name, std::unique_ptr<ValueNode> value)
+        : name(std::move(name)), value(std::move(value)) {}
+    void accept(Visitor& visitor) override;
+};
+
+// Represents a full CSS rule with a selector, e.g., `.box { ... }`
+class StyleRuleNode : public StyleContentNode {
+public:
+    std::vector<Token> selector;
+    std::vector<std::unique_ptr<StylePropertyNode>> properties;
+    explicit StyleRuleNode(std::vector<Token> selector) : selector(std::move(selector)) {}
+    void accept(Visitor& visitor) override;
+};
+
+// Represents the entire `style { ... }` block associated with an element.
+class StyleBlockNode : public BaseNode {
+public:
+    std::vector<std::unique_ptr<StyleContentNode>> contents;
+    void accept(Visitor& visitor) override;
+};
+
 
 #endif // AST_H

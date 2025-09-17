@@ -26,6 +26,12 @@ private:
     std::unique_ptr<CommentNode> commentDeclaration();
     std::unique_ptr<ValueNode> value();
 
+    // Style-related parsing methods
+    std::unique_ptr<StyleBlockNode> styleBlockDeclaration();
+    std::unique_ptr<StyleContentNode> styleContentDeclaration();
+    std::unique_ptr<StylePropertyNode> stylePropertyDeclaration();
+    std::unique_ptr<StyleRuleNode> styleRuleDeclaration();
+
     // --- Token Manipulation Helpers ---
     Token advance();
     Token peek() const;

@@ -34,3 +34,15 @@ void UnquotedLiteralNode::accept(Visitor& visitor) {
 void NumberLiteralNode::accept(Visitor& visitor) {
     visitor.visit(*this);
 }
+
+void StyleBlockNode::accept(Visitor& visitor) {
+    visitor.visit(*this);
+}
+
+void StylePropertyNode::accept(Visitor& visitor) {
+    visitor.visit(*this);
+}
+
+void StyleRuleNode::accept(Visitor& visitor) {
+    visitor.visit(*this);
+}

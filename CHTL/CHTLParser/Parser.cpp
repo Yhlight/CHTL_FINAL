@@ -40,10 +40,19 @@ std::unique_ptr<ElementNode> Parser::elementDeclaration() {
     consume(TokenType::LEFT_BRACE, "Expect '{' after element name.");
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        // Inside an element, we can have attributes or other elements/declarations.
-        if (peek().type == TokenType::IDENTIFIER && (tokens[current + 1].type == TokenType::COLON || tokens[current + 1].type == TokenType::EQUAL)) {
+        // Check for a style block
+        if (peek().type == TokenType::STYLE) {
+            if (element->styleBlock) {
+                throw error(peek(), "An element can only have one style block.");
+            }
+            element->styleBlock = styleBlockDeclaration();
+        }
+        // Check for an attribute
+        else if (peek().type == TokenType::IDENTIFIER && (tokens[current + 1].type == TokenType::COLON || tokens[current + 1].type == TokenType::EQUAL)) {
             element->attributes.push_back(attributeDeclaration());
-        } else {
+        }
+        // Otherwise, it's a nested child declaration
+        else {
             element->children.push_back(declaration());
         }
     }
@@ -162,4 +171,89 @@ void Parser::synchronize() {
         }
         advance();
     }
+}
+
+
+// --- Style-related parsers ---
+
+std::unique_ptr<StyleBlockNode> Parser::styleBlockDeclaration() {
+    consume(TokenType::STYLE, "Expect 'style' keyword.");
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'style'.");
+
+    auto styleBlock = std::make_unique<StyleBlockNode>();
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        styleBlock->contents.push_back(styleContentDeclaration());
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after style block.");
+    return styleBlock;
+}
+
+std::unique_ptr<StyleContentNode> Parser::styleContentDeclaration() {
+    // To distinguish a property from a rule, we can scan ahead.
+    // A property will have a ':' before a ';'.
+    // A rule will have a '{' before any ';'.
+    // This is a simple but effective lookahead.
+    size_t lookahead_pos = current;
+    while (lookahead_pos < tokens.size() &&
+           tokens[lookahead_pos].type != TokenType::SEMICOLON &&
+           tokens[lookahead_pos].type != TokenType::LEFT_BRACE) {
+        lookahead_pos++;
+    }
+
+    if (lookahead_pos < tokens.size() && tokens[lookahead_pos].type == TokenType::LEFT_BRACE) {
+        return styleRuleDeclaration();
+    }
+
+    // Otherwise, assume it's a property. The property parser will validate.
+    return stylePropertyDeclaration();
+}
+
+std::unique_ptr<StylePropertyNode> Parser::stylePropertyDeclaration() {
+    // CSS properties can contain hyphens (e.g., background-color), which the
+    // lexer tokenizes as IDENTIFIER, MINUS, IDENTIFIER. We must parse this sequence.
+    if (peek().type != TokenType::IDENTIFIER) {
+        throw error(peek(), "Expect style property name.");
+    }
+
+    Token startToken = peek();
+    std::string combinedName = advance().lexeme; // Consume first part.
+
+    while (match({TokenType::MINUS})) {
+        combinedName += "-";
+        combinedName += consume(TokenType::IDENTIFIER, "Expect identifier part after '-'.").lexeme;
+    }
+
+    // Create a new representative token for the property name.
+    Token nameToken = {TokenType::IDENTIFIER, combinedName, startToken.line, startToken.column};
+
+    consume(TokenType::COLON, "Expect ':' after style property name.");
+    auto val = value();
+    consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+    return std::make_unique<StylePropertyNode>(nameToken, std::move(val));
+}
+
+std::unique_ptr<StyleRuleNode> Parser::styleRuleDeclaration() {
+    // A selector is a sequence of tokens until the '{'
+    std::vector<Token> selectorTokens;
+    while (!check(TokenType::LEFT_BRACE) && !isAtEnd()) {
+        selectorTokens.push_back(advance());
+    }
+
+    if (selectorTokens.empty()) {
+        throw error(peek(), "Expect a selector for style rule.");
+    }
+
+    auto rule = std::make_unique<StyleRuleNode>(selectorTokens);
+
+    consume(TokenType::LEFT_BRACE, "Expect '{' after style rule selector.");
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        // Rules can only contain properties.
+        rule->properties.push_back(stylePropertyDeclaration());
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after style rule block.");
+    return rule;
 }

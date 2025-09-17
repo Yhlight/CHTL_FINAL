@@ -17,11 +17,9 @@ int main() {
         return 1;
     }
 
-    // Stage 1: Lexing
+    // Stages 1 & 2: Lexing and Parsing
     Lexer lexer(source);
     std::vector<Token> tokens = lexer.scanTokens();
-
-    // Stage 2: Parsing
     Parser parser(tokens);
     std::unique_ptr<ProgramNode> ast = parser.parse();
 
@@ -31,11 +29,19 @@ int main() {
     }
 
     // Stage 3: Generation
-    std::cout << "\n--- Generated HTML ---\n" << std::endl;
     Generator generator;
-    std::string html = generator.generate(*ast);
+    std::string html = generator.generateHTML(*ast);
+    std::string css = generator.getCSS();
+
+    std::cout << "\n--- Generated HTML ---\n" << std::endl;
     std::cout << html;
-    std::cout << "\n----------------------" << std::endl;
+    std::cout << "----------------------" << std::endl;
+
+    if (!css.empty()) {
+        std::cout << "\n--- Generated CSS ---\n" << std::endl;
+        std::cout << css;
+        std::cout << "---------------------" << std::endl;
+    }
 
     return 0;
 }
