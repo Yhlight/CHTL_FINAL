@@ -1,0 +1,165 @@
+#include "Parser.h"
+
+Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
+
+std::unique_ptr<ProgramNode> Parser::parse() {
+    auto program = std::make_unique<ProgramNode>();
+    while (!isAtEnd()) {
+        try {
+            program->children.push_back(declaration());
+        } catch (const ParseError& e) {
+            // For now, just report and synchronize
+            fprintf(stderr, "%s\n", e.what());
+            synchronize();
+        }
+    }
+    return program;
+}
+
+// --- Grammar Rule Implementations ---
+
+std::unique_ptr<BaseNode> Parser::declaration() {
+    if (peek().type == TokenType::COMMENT) {
+        return commentDeclaration();
+    }
+    if (peek().type == TokenType::TEXT) {
+        return textDeclaration();
+    }
+    // An element can be a generic identifier or a keyword like 'style'
+    if (peek().type == TokenType::IDENTIFIER || peek().type == TokenType::STYLE) {
+        return elementDeclaration();
+    }
+    // If we are here, it's something we don't recognize at the top level.
+    throw error(peek(), "Expect a declaration (element, text, comment, etc.).");
+}
+
+std::unique_ptr<ElementNode> Parser::elementDeclaration() {
+    Token tagName = advance(); // Consume the tag, which was already checked by declaration()
+    auto element = std::make_unique<ElementNode>(tagName);
+
+    consume(TokenType::LEFT_BRACE, "Expect '{' after element name.");
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        // Inside an element, we can have attributes or other elements/declarations.
+        if (peek().type == TokenType::IDENTIFIER && (tokens[current + 1].type == TokenType::COLON || tokens[current + 1].type == TokenType::EQUAL)) {
+            element->attributes.push_back(attributeDeclaration());
+        } else {
+            element->children.push_back(declaration());
+        }
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after element block.");
+    return element;
+}
+
+std::unique_ptr<AttributeNode> Parser::attributeDeclaration() {
+    Token name = consume(TokenType::IDENTIFIER, "Expect attribute name.");
+    if (!match({TokenType::COLON, TokenType::EQUAL})) {
+        throw error(peek(), "Expect ':' or '=' after attribute name.");
+    }
+    auto val = value();
+    consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
+    return std::make_unique<AttributeNode>(name, std::move(val));
+}
+
+std::unique_ptr<TextNode> Parser::textDeclaration() {
+    consume(TokenType::TEXT, "Expect 'text' keyword.");
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'text'.");
+    auto val = value();
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after text block.");
+    return std::make_unique<TextNode>(std::move(val));
+}
+
+std::unique_ptr<CommentNode> Parser::commentDeclaration() {
+    Token comment = consume(TokenType::COMMENT, "Expect comment token.");
+    return std::make_unique<CommentNode>(comment);
+}
+
+std::unique_ptr<ValueNode> Parser::value() {
+    // A single string literal is a distinct, simple value type.
+    if (peek().type == TokenType::STRING) {
+        return std::make_unique<StringLiteralNode>(advance());
+    }
+
+    // Everything else is a sequence of tokens (unquoted literal, expression, etc.)
+    // that we gather until we hit a terminator.
+    std::vector<Token> valueTokens;
+    while (!check(TokenType::SEMICOLON) && !check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        valueTokens.push_back(advance());
+    }
+
+    if (valueTokens.empty()) {
+        throw error(peek(), "Expect a value (string, number, or expression).");
+    }
+
+    // If the sequence happens to be a single number, we can represent it as a NumberLiteralNode.
+    if (valueTokens.size() == 1 && valueTokens[0].type == TokenType::NUMBER) {
+        return std::make_unique<NumberLiteralNode>(valueTokens[0]);
+    }
+
+    // Otherwise, we package the whole sequence as an UnquotedLiteralNode.
+    // This correctly handles cases like `100px` or `100 + 20`.
+    return std::make_unique<UnquotedLiteralNode>(valueTokens);
+}
+
+
+// --- Token Manipulation and Error Handling ---
+
+bool Parser::isAtEnd() const {
+    return peek().type == TokenType::END_OF_FILE;
+}
+
+Token Parser::peek() const {
+    return tokens[current];
+}
+
+Token Parser::previous() const {
+    return tokens[current - 1];
+}
+
+Token Parser::advance() {
+    if (!isAtEnd()) current++;
+    return previous();
+}
+
+bool Parser::check(TokenType type) const {
+    if (isAtEnd()) return false;
+    return peek().type == type;
+}
+
+bool Parser::match(const std::vector<TokenType>& types) {
+    for (TokenType type : types) {
+        if (check(type)) {
+            advance();
+            return true;
+        }
+    }
+    return false;
+}
+
+Token Parser::consume(TokenType type, const std::string& message) {
+    if (check(type)) return advance();
+    throw error(peek(), message);
+}
+
+Parser::ParseError Parser::error(const Token& token, const std::string& message) {
+    std::string error_message = "Parse Error at token " + token.toString() + ": " + message;
+    return ParseError(error_message);
+}
+
+void Parser::synchronize() {
+    advance();
+    while (!isAtEnd()) {
+        if (previous().type == TokenType::SEMICOLON) return;
+        switch (peek().type) {
+            case TokenType::IDENTIFIER: // Could be a new element
+            case TokenType::TEXT:
+            case TokenType::STYLE:
+            case TokenType::SCRIPT:
+                return;
+            default:
+                break;
+        }
+        advance();
+    }
+}
