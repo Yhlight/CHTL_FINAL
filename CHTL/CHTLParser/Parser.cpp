@@ -5,8 +5,10 @@
 #include "../CHTLNode/LiteralNode.h"
 #include "../CHTLNode/TemplateNode.h"
 #include "../CHTLNode/TemplateInstantiationNode.h"
+#include "../CHTLNode/CustomInstantiationNode.h"
 #include "../CHTLNode/VarSubstitutionNode.h"
 #include <string>
+#include <sstream>
 
 namespace CHTL {
 
@@ -64,6 +66,12 @@ std::shared_ptr<Statement> Parser::parseStatement() {
 
 std::shared_ptr<AttributeNode> Parser::parseAttribute() {
     auto attr = std::make_shared<AttributeNode>(m_currentToken, m_currentToken.literal);
+
+    if (m_peekToken.type == TokenType::SEMICOLON) {
+        nextToken();
+        return attr;
+    }
+
     nextToken(); // consume key
     nextToken(); // consume ':'
 
@@ -75,12 +83,29 @@ std::shared_ptr<AttributeNode> Parser::parseAttribute() {
         if (!expectPeek(TokenType::RPAREN)) return nullptr;
         attr->m_value = std::make_shared<VarSubstitutionNode>(groupName, varName);
     } else {
-        attr->m_value = std::make_shared<LiteralNode>(m_currentToken);
+        std::stringstream value_ss;
+        while(m_currentToken.type != TokenType::SEMICOLON && m_currentToken.type != TokenType::RBRACE && m_currentToken.type != TokenType::END_OF_FILE) {
+            value_ss << m_currentToken.literal;
+            if (m_peekToken.type != TokenType::SEMICOLON && m_peekToken.type != TokenType::RBRACE) {
+                 value_ss << " ";
+            }
+            nextToken();
+        }
+        // Backtrack one token since the loop condition consumes the semicolon
+        std::string final_val = value_ss.str();
+        if (!final_val.empty() && final_val.back() == ' ') {
+            final_val.pop_back();
+        }
+        Token valueToken = {m_currentToken.type, final_val};
+        attr->m_value = std::make_shared<LiteralNode>(valueToken);
     }
 
-    if (m_peekToken.type == TokenType::SEMICOLON) {
-        nextToken();
+    if (m_currentToken.type != TokenType::SEMICOLON) {
+         if (m_peekToken.type == TokenType::SEMICOLON) {
+            nextToken();
+        }
     }
+
     return attr;
 }
 
@@ -143,6 +168,21 @@ std::shared_ptr<Statement> Parser::parseTemplateInstantiationStatement() {
     Token typeToken = m_currentToken;
     if (!expectPeek(TokenType::IDENTIFIER)) return nullptr;
     Token nameToken = m_currentToken;
+
+    if (m_peekToken.type == TokenType::LBRACE) {
+        nextToken();
+        auto node = std::make_shared<CustomInstantiationNode>(typeToken, nameToken);
+
+        while (m_peekToken.type != TokenType::RBRACE && m_peekToken.type != TokenType::END_OF_FILE) {
+            nextToken();
+            if (m_currentToken.type == TokenType::IDENTIFIER) {
+                node->children.push_back(parseAttribute());
+            }
+        }
+        if (!expectPeek(TokenType::RBRACE)) return nullptr;
+        return node;
+    }
+
     auto node = std::make_shared<TemplateInstantiationNode>(typeToken, typeToken, nameToken);
     if (m_peekToken.type == TokenType::SEMICOLON) {
         nextToken();

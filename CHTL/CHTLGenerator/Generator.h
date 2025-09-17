@@ -4,6 +4,7 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/TemplateInstantiationNode.h"
+#include "../CHTLNode/CustomInstantiationNode.h"
 #include "../CHTLContext.h"
 #include <string>
 #include <sstream>

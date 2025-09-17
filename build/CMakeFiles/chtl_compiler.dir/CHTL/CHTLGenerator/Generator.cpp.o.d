@@ -166,6 +166,7 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLGenerator/Generator.cpp.o: \
  /app/CHTL/CHTLGenerator/../CHTLNode/StyleNode.h \
  /app/CHTL/CHTLGenerator/../CHTLNode/TextNode.h \
  /app/CHTL/CHTLGenerator/../CHTLNode/TemplateInstantiationNode.h \
+ /app/CHTL/CHTLGenerator/../CHTLNode/CustomInstantiationNode.h \
  /app/CHTL/CHTLGenerator/../CHTLContext.h \
  /app/CHTL/CHTLGenerator/../CHTLNode/TemplateNode.h \
  /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \

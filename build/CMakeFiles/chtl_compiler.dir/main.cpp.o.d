@@ -188,4 +188,5 @@ CMakeFiles/chtl_compiler.dir/main.cpp.o: /app/main.cpp \
  /app/CHTL/CHTLGenerator/Generator.h \
  /app/CHTL/CHTLGenerator/../CHTLNode/TextNode.h \
  /app/CHTL/CHTLGenerator/../CHTLNode/TemplateInstantiationNode.h \
+ /app/CHTL/CHTLGenerator/../CHTLNode/CustomInstantiationNode.h \
  /usr/include/c++/13/sstream /usr/include/c++/13/bits/sstream.tcc

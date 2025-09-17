@@ -85,19 +85,16 @@ void generateStyleString(std::shared_ptr<Node> node, CHTLContext& context, std::
         if (auto varSub = std::dynamic_pointer_cast<VarSubstitutionNode>(attr->m_value)) {
             auto varGroup = context.findTemplate(varSub->m_groupName.literal);
             if (varGroup) {
-                bool found = false;
                 for (const auto& varAttr : varGroup->children) {
                     if (auto concreteVar = std::dynamic_pointer_cast<AttributeNode>(varAttr)) {
                         if (concreteVar->m_key == varSub->m_variableName.literal) {
                             ss << concreteVar->m_value->toString(0);
-                            found = true;
                             break;
                         }
                     }
                 }
-                if (!found) ss << "/* VAR_NOT_FOUND */";
             }
-        } else {
+        } else if (attr->m_value) { // Placeholder attributes have no value
             ss << attr->m_value->toString(0);
         }
         ss << ";";
@@ -107,6 +104,29 @@ void generateStyleString(std::shared_ptr<Node> node, CHTLContext& context, std::
             if (templateDef) {
                 for (const auto& child : templateDef->children) {
                     generateStyleString(child, context, ss);
+                }
+            }
+        }
+    } else if (auto customInst = std::dynamic_pointer_cast<CustomInstantiationNode>(node)) {
+         if (customInst->m_templateType.type == TokenType::AT_STYLE) {
+            auto templateDef = context.findTemplate(customInst->m_name.literal);
+            if (templateDef) {
+                for (const auto& basePropStmt : templateDef->children) {
+                    if (auto baseProp = std::dynamic_pointer_cast<AttributeNode>(basePropStmt)) {
+                        bool overridden = false;
+                        for (const auto& overridePropStmt : customInst->children) {
+                            if (auto overrideProp = std::dynamic_pointer_cast<AttributeNode>(overridePropStmt)) {
+                                if (baseProp->m_key == overrideProp->m_key) {
+                                    generateStyleString(overrideProp, context, ss);
+                                    overridden = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!overridden && baseProp->m_value) {
+                            generateStyleString(baseProp, context, ss);
+                        }
+                    }
                 }
             }
         }

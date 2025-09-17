@@ -9,23 +9,22 @@
 
 int main() {
     std::string input = R"----(
-        [Template] @Var Theme {
-            brandColor: "rgb(255, 0, 0)";
-            secondaryColor: "#EEE";
-        }
-
-        [Template] @Style ThemedText {
-            color: Theme(brandColor);
-            background-color: Theme(secondaryColor);
+        [Custom] @Style TextSet {
+            color;
+            font-size;
+            font-weight: normal;
         }
 
         body {
-            h1 {
+            p {
                 style {
-                    @Style ThemedText;
-                    font-weight: bold;
+                    @Style TextSet {
+                        color: blue;
+                        font-size: 22px;
+                    }
+                    border: 1px solid black;
                 }
-                text: "This text is themed!";
+                text: "This text is customized!";
             }
         }
     )----";
