@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include "../CHTLNode/TemplateNode.h"
 
 namespace CHTL {
 
@@ -25,6 +26,7 @@ private:
     std::unique_ptr<ElementNode> parseElementStatement();
     std::unique_ptr<StyleNode> parseStyleBlock();
     std::unique_ptr<AttributeNode> parseAttribute();
+    std::unique_ptr<TemplateNode> parseTemplateStatement();
 
     Lexer& m_lexer;
     std::vector<std::string> m_errors;

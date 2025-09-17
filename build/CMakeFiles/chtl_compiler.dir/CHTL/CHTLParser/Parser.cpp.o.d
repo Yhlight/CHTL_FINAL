@@ -169,5 +169,6 @@ CMakeFiles/chtl_compiler.dir/CHTL/CHTLParser/Parser.cpp.o: \
  /usr/include/c++/13/bits/stl_map.h \
  /usr/include/c++/13/bits/stl_multimap.h \
  /usr/include/c++/13/bits/erase_if.h \
+ /app/CHTL/CHTLParser/../CHTLNode/TemplateNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/TextNode.h \
  /app/CHTL/CHTLParser/../CHTLNode/LiteralNode.h

@@ -115,12 +115,10 @@ Token Lexer::readNumber() {
     while (std::isdigit(m_char) || m_char == '.') {
         readChar();
     }
-    // After reading the number part, check for an alphabetic unit (e.g., px, em)
     while (std::isalpha(m_char)) {
         readChar();
     }
     std::string literal = m_input.substr(start_pos, m_position - start_pos);
-    // Let's classify this as UNQUOTED_LITERAL for simplicity, as it's not a pure number.
     return {TokenType::UNQUOTED_LITERAL, literal, m_line, m_column - (int)literal.length()};
 }
 
@@ -140,9 +138,36 @@ Token Lexer::nextToken() {
         case ')': tok = {TokenType::RPAREN, ")", m_line, m_column}; break;
         case '{': tok = {TokenType::LBRACE, "{", m_line, m_column}; break;
         case '}': tok = {TokenType::RBRACE, "}", m_line, m_column}; break;
-        case '[': tok = {TokenType::LBRACKET, "[", m_line, m_column}; break;
+        case '[':
+            {
+                readChar(); // consume '['
+                Token id = readIdentifier();
+                if (m_char != ']') { // Corrected check
+                    tok = {TokenType::ILLEGAL, "[" + id.literal, m_line, m_column};
+                } else {
+                    if (id.literal == "Template") tok = {TokenType::TEMPLATE, "[Template]", m_line, m_column - 10};
+                    else if (id.literal == "Custom") tok = {TokenType::CUSTOM, "[Custom]", m_line, m_column - 8};
+                    else if (id.literal == "Origin") tok = {TokenType::ORIGIN, "[Origin]", m_line, m_column - 8};
+                    else if (id.literal == "Import") tok = {TokenType::IMPORT, "[Import]", m_line, m_column - 8};
+                    else if (id.literal == "Namespace") tok = {TokenType::NAMESPACE, "[Namespace]", m_line, m_column - 11};
+                    else if (id.literal == "Configuration") tok = {TokenType::CONFIGURATION, "[Configuration]", m_line, m_column - 15};
+                    else tok = {TokenType::ILLEGAL, "[" + id.literal + "]", m_line, m_column};
+                }
+                readChar(); // consume ']'
+                return tok;
+            }
         case ']': tok = {TokenType::RBRACKET, "]", m_line, m_column}; break;
         case ',': tok = {TokenType::COMMA, ",", m_line, m_column}; break;
+        case '@':
+            {
+                readChar(); // consume '@'
+                Token id = readIdentifier();
+                if (id.literal == "Style") tok = {TokenType::AT_STYLE, "@Style", m_line, m_column - 6};
+                else if (id.literal == "Element") tok = {TokenType::AT_ELEMENT, "@Element", m_line, m_column - 8};
+                else if (id.literal == "Var") tok = {TokenType::AT_VAR, "@Var", m_line, m_column - 4};
+                else tok = {TokenType::ILLEGAL, "@" + id.literal, m_line, m_column};
+                return tok;
+            }
         case '+': tok = {TokenType::PLUS, "+", m_line, m_column}; break;
         case '-':
             if (peekChar() == '>') { readChar(); tok = {TokenType::ARROW, "->", m_line, m_column - 1}; }
@@ -181,7 +206,6 @@ Token Lexer::nextToken() {
             if (std::isalpha(m_char) || m_char == '_') {
                 return readIdentifier();
             } else if (std::isdigit(m_char)) {
-                // Now correctly handles dimensions like "100px"
                 return readNumber();
             } else {
                 tok = {TokenType::ILLEGAL, std::string(1, m_char), m_line, m_column};

@@ -5,18 +5,18 @@
 #include "CHTL/CHTLParser/Parser.h"
 #include "CHTL/CHTLGenerator/Generator.h"
 #include "CHTL/CHTLNode/Node.h"
+#include "CHTL/CHTLNode/ElementNode.h" // Required for dynamic_cast
 
 int main() {
     std::string input = R"(
-        div {
-            style {
-                width: 100px;
-                height: 200px;
-                color: red;
+        [Template] @Element Box {
+            div {
+                text: "This is a box.";
             }
-            span {
-                text: "Hello";
-            }
+        }
+
+        body {
+            // Later, we will instantiate the template like: @Element Box;
         }
     )";
 
@@ -42,7 +42,8 @@ int main() {
     std::cout << program->toString(0);
     std::cout << "--------------------------" << std::endl;
 
-
+    // The generator doesn't know how to handle TemplateNodes yet,
+    // so we will just generate the regular elements.
     CHTL::Generator generator;
     std::string html_output = generator.generate(program.get());
 
