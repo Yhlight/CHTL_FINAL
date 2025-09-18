@@ -9,7 +9,11 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspace/src/CHTL/BaseNode/BaseNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/BaseNode/BaseNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/BaseNode/BaseNode.cpp.o.d"
+  "/workspace/src/CHTL/CHTLContext/CHTLContext.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/CHTLContext/CHTLContext.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/CHTLContext/CHTLContext.cpp.o.d"
+  "/workspace/src/CHTL/CHTLGenerator/CHTLGenerator.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/CHTLGenerator/CHTLGenerator.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/CHTLGenerator/CHTLGenerator.cpp.o.d"
   "/workspace/src/CHTL/CHTLLexer/CHTLLexer.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o.d"
+  "/workspace/src/CHTL/CHTLParser/CHTLParser.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/CHTLParser/CHTLParser.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/CHTLParser/CHTLParser.cpp.o.d"
+  "/workspace/src/CHTL/CHTLState/CHTLState.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/CHTLState/CHTLState.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/CHTLState/CHTLState.cpp.o.d"
   "/workspace/src/CHTL/CompilerDispatcher/CompilerDispatcher.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/CompilerDispatcher/CompilerDispatcher.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/CompilerDispatcher/CompilerDispatcher.cpp.o.d"
   "/workspace/src/CHTL/ConfigurationNode/ConfigurationNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/ConfigurationNode/ConfigurationNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/ConfigurationNode/ConfigurationNode.cpp.o.d"
   "/workspace/src/CHTL/CustomNode/CustomNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/CustomNode/CustomNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/CustomNode/CustomNode.cpp.o.d"

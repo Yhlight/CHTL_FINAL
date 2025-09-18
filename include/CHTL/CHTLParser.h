@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <set>
 
 namespace CHTL {
 
@@ -16,19 +17,34 @@ class CHTLParser {
 public:
     // 解析选项
     struct ParseOptions {
-        bool enableTemplates = true;
-        bool enableCustoms = true;
-        bool enableImports = true;
-        bool enableNamespaces = true;
-        bool enableConfiguration = true;
-        bool enableOriginEmbedding = true;
-        bool enableStyleBlocks = true;
-        bool enableScriptBlocks = true;
-        bool enableAttributeOperations = true;
-        bool enablePropertyReferences = true;
-        bool enableConditionalExpressions = true;
-        bool enableResponsiveValues = true;
-        bool debugMode = false;
+        bool enableTemplates;
+        bool enableCustoms;
+        bool enableImports;
+        bool enableNamespaces;
+        bool enableConfiguration;
+        bool enableOriginEmbedding;
+        bool enableStyleBlocks;
+        bool enableScriptBlocks;
+        bool enableAttributeOperations;
+        bool enablePropertyReferences;
+        bool enableConditionalExpressions;
+        bool enableResponsiveValues;
+        bool debugMode;
+        
+        ParseOptions() : 
+            enableTemplates(true),
+            enableCustoms(true),
+            enableImports(true),
+            enableNamespaces(true),
+            enableConfiguration(true),
+            enableOriginEmbedding(true),
+            enableStyleBlocks(true),
+            enableScriptBlocks(true),
+            enableAttributeOperations(true),
+            enablePropertyReferences(true),
+            enableConditionalExpressions(true),
+            enableResponsiveValues(true),
+            debugMode(false) {}
     };
 
     // 解析结果

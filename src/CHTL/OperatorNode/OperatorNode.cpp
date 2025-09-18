@@ -19,7 +19,7 @@ void OperatorNode::accept(NodeVisitor& visitor) {
 }
 
 OperatorNodePtr OperatorNode::create(const String& type, const SourceLocation& loc) {
-    return std::make_shared<OperatorNode>(type, loc);
+    return std::make_shared<OperatorNode>(type, std::vector<String>{}, loc);
 }
 
 } // namespace CHTL

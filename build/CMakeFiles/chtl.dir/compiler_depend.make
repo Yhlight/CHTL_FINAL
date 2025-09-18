@@ -102,6 +102,7 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /workspace/src/main.cpp \
   /usr/include/x86_64-linux-gnu/sys/single_threaded.h \
   /usr/include/x86_64-linux-gnu/sys/types.h \
   /usr/include/c++/14/any \
+  /usr/include/c++/14/array \
   /usr/include/c++/14/backward/auto_ptr.h \
   /usr/include/c++/14/backward/binders.h \
   /usr/include/c++/14/bit \
@@ -117,6 +118,7 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /workspace/src/main.cpp \
   /usr/include/c++/14/bits/basic_string.tcc \
   /usr/include/c++/14/bits/char_traits.h \
   /usr/include/c++/14/bits/charconv.h \
+  /usr/include/c++/14/bits/chrono.h \
   /usr/include/c++/14/bits/codecvt.h \
   /usr/include/c++/14/bits/concept_check.h \
   /usr/include/c++/14/bits/cpp_type_traits.h \
@@ -160,6 +162,7 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /workspace/src/main.cpp \
   /usr/include/c++/14/bits/shared_ptr_atomic.h \
   /usr/include/c++/14/bits/shared_ptr_base.h \
   /usr/include/c++/14/bits/std_abs.h \
+  /usr/include/c++/14/bits/std_function.h \
   /usr/include/c++/14/bits/stl_algobase.h \
   /usr/include/c++/14/bits/stl_bvector.h \
   /usr/include/c++/14/bits/stl_construct.h \
@@ -167,9 +170,12 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /workspace/src/main.cpp \
   /usr/include/c++/14/bits/stl_iterator.h \
   /usr/include/c++/14/bits/stl_iterator_base_funcs.h \
   /usr/include/c++/14/bits/stl_iterator_base_types.h \
+  /usr/include/c++/14/bits/stl_map.h \
+  /usr/include/c++/14/bits/stl_multimap.h \
   /usr/include/c++/14/bits/stl_pair.h \
   /usr/include/c++/14/bits/stl_raw_storage_iter.h \
   /usr/include/c++/14/bits/stl_tempbuf.h \
+  /usr/include/c++/14/bits/stl_tree.h \
   /usr/include/c++/14/bits/stl_uninitialized.h \
   /usr/include/c++/14/bits/stl_vector.h \
   /usr/include/c++/14/bits/streambuf.tcc \
@@ -186,11 +192,15 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /workspace/src/main.cpp \
   /usr/include/c++/14/bits/version.h \
   /usr/include/c++/14/cctype \
   /usr/include/c++/14/cerrno \
+  /usr/include/c++/14/chrono \
   /usr/include/c++/14/clocale \
+  /usr/include/c++/14/compare \
   /usr/include/c++/14/concepts \
   /usr/include/c++/14/cstddef \
+  /usr/include/c++/14/cstdint \
   /usr/include/c++/14/cstdio \
   /usr/include/c++/14/cstdlib \
+  /usr/include/c++/14/ctime \
   /usr/include/c++/14/cwchar \
   /usr/include/c++/14/cwctype \
   /usr/include/c++/14/debug/assertions.h \
@@ -204,11 +214,14 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /workspace/src/main.cpp \
   /usr/include/c++/14/ext/string_conversions.h \
   /usr/include/c++/14/ext/type_traits.h \
   /usr/include/c++/14/fstream \
+  /usr/include/c++/14/functional \
   /usr/include/c++/14/initializer_list \
   /usr/include/c++/14/ios \
   /usr/include/c++/14/iosfwd \
   /usr/include/c++/14/iostream \
   /usr/include/c++/14/istream \
+  /usr/include/c++/14/limits \
+  /usr/include/c++/14/map \
   /usr/include/c++/14/memory \
   /usr/include/c++/14/new \
   /usr/include/c++/14/optional \
@@ -216,6 +229,7 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /workspace/src/main.cpp \
   /usr/include/c++/14/pstl/execution_defs.h \
   /usr/include/c++/14/pstl/glue_memory_defs.h \
   /usr/include/c++/14/pstl/pstl_config.h \
+  /usr/include/c++/14/ratio \
   /usr/include/c++/14/stdexcept \
   /usr/include/c++/14/streambuf \
   /usr/include/c++/14/string \
@@ -254,9 +268,12 @@ CMakeFiles/chtl.dir/src/main.cpp.o: /workspace/src/main.cpp \
   /usr/lib/llvm-20/lib/clang/20/include/stdarg.h \
   /usr/lib/llvm-20/lib/clang/20/include/stddef.h \
   /usr/lib/llvm-20/lib/clang/20/include/stdint.h \
+  /workspace/include/CHTL/BaseNode.h \
   /workspace/include/CHTL/CHTLLexer.h \
   /workspace/include/CHTL/Common.h \
-  /workspace/include/CHTL/Token.h
+  /workspace/include/CHTL/CompilerDispatcher.h \
+  /workspace/include/CHTL/Token.h \
+  /workspace/include/CHTL/UnifiedScanner.h
 
 bin/chtl: /lib/x86_64-linux-gnu/Scrt1.o \
   /lib/x86_64-linux-gnu/crti.o \
@@ -302,6 +319,26 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /lib/x86_64-linux-gnu/crti.o:
 
+/workspace/include/CHTL/UnifiedScanner.h:
+
+/workspace/include/CHTL/CompilerDispatcher.h:
+
+/workspace/include/CHTL/Common.h:
+
+/workspace/include/CHTL/CHTLLexer.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/stdint.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/stdarg.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/__stddef_wchar_t.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/__stddef_size_t.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/__stddef_offsetof.h:
+
+/usr/lib/llvm-20/lib/clang/20/include/__stddef_null.h:
+
 /usr/include/x86_64-linux-gnu/bits/locale.h:
 
 /usr/include/c++/14/bits/exception.h:
@@ -316,6 +353,10 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/x86_64-linux-gnu/bits/timesize.h:
 
+/usr/lib/llvm-20/lib/clang/20/include/stddef.h:
+
+/usr/include/c++/14/cwchar:
+
 /usr/include/c++/14/stdexcept:
 
 /usr/include/c++/14/bits/charconv.h:
@@ -329,6 +370,8 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 /usr/include/c++/14/bits/alloc_traits.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/14/libgcc_s.so:
+
+/usr/include/c++/14/bits/chrono.h:
 
 /usr/include/c++/14/bit:
 
@@ -356,15 +399,11 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/c++/14/bits/stl_iterator_base_types.h:
 
-/usr/include/x86_64-linux-gnu/bits/sched.h:
-
 /usr/include/x86_64-linux-gnu/bits/waitstatus.h:
 
 /usr/include/c++/14/type_traits:
 
 /usr/include/c++/14/bits/atomic_lockfree_defines.h:
-
-/workspace/include/CHTL/Common.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/wint_t.h:
 
@@ -414,8 +453,6 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/c++/14/bits/allocated_ptr.h:
 
-/usr/include/c++/14/bits/enable_special_members.h:
-
 /usr/include/x86_64-linux-gnu/bits/time64.h:
 
 /usr/include/x86_64-linux-gnu/bits/errno.h:
@@ -456,7 +493,9 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/stdlib.h:
 
-/usr/lib/llvm-20/lib/clang/20/include/sanitizer/tsan_interface.h:
+/workspace/include/CHTL/Token.h:
+
+/usr/include/c++/14/istream:
 
 /usr/include/linux/errno.h:
 
@@ -492,15 +531,25 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/x86_64-linux-gnu/bits/endianness.h:
 
+/usr/lib/llvm-20/lib/clang/20/include/__stddef_nullptr_t.h:
+
+/usr/include/c++/14/bits/stl_uninitialized.h:
+
 /usr/include/c++/14/bits/stl_tempbuf.h:
 
 /usr/include/linux/stddef.h:
 
+/usr/include/c++/14/bits/concept_check.h:
+
+/usr/include/c++/14/bits/ostream.tcc:
+
+/usr/include/c++/14/bits/align.h:
+
+/usr/include/c++/14/ext/aligned_buffer.h:
+
 /usr/include/c++/14/new:
 
 /usr/include/alloca.h:
-
-/usr/include/c++/14/bits/fstream.tcc:
 
 /usr/include/x86_64-linux-gnu/bits/types/FILE.h:
 
@@ -528,13 +577,15 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
 
+/usr/include/c++/14/bits/enable_special_members.h:
+
+/usr/include/c++/14/bits/std_function.h:
+
 /usr/include/c++/14/bits/codecvt.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
 
 /usr/include/c++/14/bits/stl_iterator_base_funcs.h:
-
-/usr/include/c++/14/ext/numeric_traits.h:
 
 /usr/include/wchar.h:
 
@@ -568,7 +619,7 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/c++/14/pstl/pstl_config.h:
 
-/usr/include/c++/14/bits/exception_ptr.h:
+/usr/include/c++/14/functional:
 
 /usr/include/x86_64-linux-gnu/asm/posix_types_64.h:
 
@@ -591,6 +642,10 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 /usr/include/x86_64-linux-gnu/bits/time.h:
 
 /usr/include/x86_64-linux-gnu/bits/select.h:
+
+/lib/x86_64-linux-gnu/Scrt1.o:
+
+/usr/include/c++/14/bits/locale_classes.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/time_t.h:
 
@@ -620,9 +675,15 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/c++/14/iostream:
 
+/usr/include/c++/14/array:
+
 /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
 
-/usr/include/c++/14/bits/functional_hash.h:
+/usr/include/c++/14/bits/exception_ptr.h:
+
+/usr/include/c++/14/bits/fstream.tcc:
+
+/usr/include/c++/14/bits/stl_map.h:
 
 /usr/include/c++/14/bits/hashtable.h:
 
@@ -640,27 +701,13 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/c++/14/bits/memoryfwd.h:
 
+/workspace/include/CHTL/BaseNode.h:
+
 /usr/include/c++/14/bits/nested_exception.h:
-
-/usr/include/c++/14/bits/stl_uninitialized.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stddef_nullptr_t.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stddef_offsetof.h:
 
 /usr/include/features.h:
 
 /usr/include/c++/14/bits/node_handle.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stddef_wchar_t.h:
-
-/usr/include/c++/14/bits/concept_check.h:
-
-/usr/include/c++/14/bits/align.h:
-
-/usr/include/c++/14/ext/aligned_buffer.h:
-
-/usr/include/c++/14/bits/ostream.tcc:
 
 /usr/lib/llvm-20/lib/clang/20/include/__stddef_ptrdiff_t.h:
 
@@ -669,6 +716,8 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 /usr/include/c++/14/bits/ostream_insert.h:
 
 /usr/lib/llvm-20/lib/clang/20/include/__stddef_max_align_t.h:
+
+/usr/include/c++/14/compare:
 
 /usr/include/x86_64-linux-gnu/bits/endian.h:
 
@@ -690,13 +739,23 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/c++/14/bits/stl_construct.h:
 
+/usr/lib/llvm-20/lib/clang/20/include/sanitizer/tsan_interface.h:
+
+/usr/include/c++/14/bits/stl_multimap.h:
+
 /usr/include/c++/14/bits/stl_raw_storage_iter.h:
+
+/usr/include/c++/14/bits/stl_tree.h:
 
 /usr/include/c++/14/bits/streambuf_iterator.h:
 
 /usr/include/c++/14/bits/stringfwd.h:
 
 /usr/include/c++/14/bits/unique_ptr.h:
+
+/usr/include/c++/14/bits/functional_hash.h:
+
+/usr/include/c++/14/limits:
 
 /usr/include/c++/14/bits/unordered_map.h:
 
@@ -712,9 +771,15 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/c++/14/cstddef:
 
+/usr/include/c++/14/cstdint:
+
 /usr/include/c++/14/bits/utility.h:
 
 /usr/include/c++/14/cstdio:
+
+/usr/include/c++/14/ext/numeric_traits.h:
+
+/usr/include/c++/14/ctime:
 
 /usr/include/c++/14/cwctype:
 
@@ -722,13 +787,15 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/x86_64-linux-gnu/bits/wordsize.h:
 
+/usr/include/c++/14/chrono:
+
 /usr/include/c++/14/exception:
 
 /usr/include/c++/14/ext/alloc_traits.h:
 
-/usr/lib/llvm-20/lib/clang/20/include/stdint.h:
-
 /usr/include/c++/14/ext/atomicity.h:
+
+/usr/include/c++/14/map:
 
 /usr/include/c++/14/ext/concurrence.h:
 
@@ -760,6 +827,10 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/c++/14/pstl/execution_defs.h:
 
+/usr/include/x86_64-linux-gnu/bits/sched.h:
+
+/usr/include/c++/14/ratio:
+
 /usr/include/c++/14/string:
 
 /usr/include/c++/14/tuple:
@@ -790,8 +861,6 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 
 /usr/include/x86_64-linux-gnu/c++/14/bits/c++io.h:
 
-/workspace/include/CHTL/CHTLLexer.h:
-
 /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h:
 
 /usr/include/c++/14/clocale:
@@ -807,21 +876,3 @@ CMakeFiles/chtl.dir/src/main.cpp.o:
 /usr/lib/llvm-20/lib/clang/20/include/__stdarg___gnuc_va_list.h:
 
 /usr/lib/llvm-20/lib/clang/20/include/__stddef_header_macro.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/stdarg.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stddef_null.h:
-
-/usr/lib/llvm-20/lib/clang/20/include/__stddef_size_t.h:
-
-/usr/include/c++/14/cwchar:
-
-/usr/lib/llvm-20/lib/clang/20/include/stddef.h:
-
-/usr/include/c++/14/istream:
-
-/workspace/include/CHTL/Token.h:
-
-/usr/include/c++/14/bits/locale_classes.h:
-
-/lib/x86_64-linux-gnu/Scrt1.o:

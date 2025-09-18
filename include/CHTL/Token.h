@@ -13,11 +13,14 @@ enum class TokenType {
     WHITESPACE,
     NEWLINE,
     
-    // 标识符和字面量
-    IDENTIFIER,
-    STRING_LITERAL,
-    NUMBER_LITERAL,
-    BOOLEAN_LITERAL,
+        // 标识符和字面量
+        IDENTIFIER,
+        TEXT,
+        STRING,
+        STRING_LITERAL,
+        NUMBER,
+        NUMBER_LITERAL,
+        BOOLEAN_LITERAL,
     
     // 分隔符
     LEFT_BRACE,      // {

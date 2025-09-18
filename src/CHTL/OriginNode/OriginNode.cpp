@@ -19,7 +19,7 @@ void OriginNode::accept(NodeVisitor& visitor) {
 }
 
 OriginNodePtr OriginNode::create(const String& type, const String& name, const SourceLocation& loc) {
-    return std::make_shared<OriginNode>(type, name, loc);
+    return std::make_shared<OriginNode>(type, name, "", loc);
 }
 
 } // namespace CHTL

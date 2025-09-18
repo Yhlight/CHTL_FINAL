@@ -6,6 +6,8 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <functional>
+#include <set>
 
 namespace CHTL {
 
@@ -16,16 +18,28 @@ class CHTLGenerator {
 public:
     // 生成选项
     struct GenerateOptions {
-        bool enableInlineCSS = false;
-        bool enableInlineJS = false;
-        bool enableDefaultStruct = false;
-        bool enableMinification = false;
-        bool enableSourceMaps = false;
-        std::string outputFormat = "html5"; // html5, xhtml, html4
-        std::string cssOutputPath = "styles.css";
-        std::string jsOutputPath = "scripts.js";
-        std::string sourceMapPath = "source.map";
-        bool debugMode = false;
+        bool enableInlineCSS;
+        bool enableInlineJS;
+        bool enableDefaultStruct;
+        bool enableMinification;
+        bool enableSourceMaps;
+        std::string outputFormat;
+        std::string cssOutputPath;
+        std::string jsOutputPath;
+        std::string sourceMapPath;
+        bool debugMode;
+        
+        GenerateOptions() : 
+            enableInlineCSS(false),
+            enableInlineJS(false),
+            enableDefaultStruct(false),
+            enableMinification(false),
+            enableSourceMaps(false),
+            outputFormat("html5"),
+            cssOutputPath("styles.css"),
+            jsOutputPath("scripts.js"),
+            sourceMapPath("source.map"),
+            debugMode(false) {}
     };
 
     // 生成结果
@@ -91,7 +105,7 @@ public:
 
 private:
     // 内部生成方法
-    std::string generateHTML(std::shared_ptr<BaseNode> ast, const GenerateOptions& options);
+    std::string generateHTML(const ElementNode& node, const GenerateOptions& options);
     std::string generateCSS(std::shared_ptr<BaseNode> ast, const GenerateOptions& options);
     std::string generateJS(std::shared_ptr<BaseNode> ast, const GenerateOptions& options);
     std::string generateSourceMap(const std::string& originalCode, const std::string& generatedCode);
@@ -118,10 +132,10 @@ private:
     std::string generateVirtualObjects(const std::map<std::string, std::string>& objects, int indent = 0);
     
     // 模板生成
-    std::string generateTemplate(std::shared_ptr<TemplateNode> template, int indent = 0);
-    std::string generateCustom(std::shared_ptr<CustomNode> custom, int indent = 0);
-    std::string generateImport(std::shared_ptr<ImportNode> import, int indent = 0);
-    std::string generateNamespace(std::shared_ptr<NamespaceNode> namespace, int indent = 0);
+    std::string generateTemplate(std::shared_ptr<TemplateNode> templateNode, int indent = 0);
+    std::string generateCustom(std::shared_ptr<CustomNode> customNode, int indent = 0);
+    std::string generateImport(std::shared_ptr<ImportNode> importNode, int indent = 0);
+    std::string generateNamespace(std::shared_ptr<NamespaceNode> namespaceNode, int indent = 0);
     std::string generateConfiguration(std::shared_ptr<ConfigurationNode> config, int indent = 0);
     std::string generateOrigin(std::shared_ptr<OriginNode> origin, int indent = 0);
     std::string generateOperator(std::shared_ptr<OperatorNode> op, int indent = 0);
@@ -147,9 +161,9 @@ private:
     std::string processEventDelegation(const std::string& content);
     
     // 模板处理
-    std::string processTemplateInheritance(const std::string& template, const std::string& parent);
-    std::string processTemplateSpecialization(const std::string& template, const std::string& specialization);
-    std::string processTemplateParameters(const std::string& template, const std::map<std::string, std::string>& parameters);
+    std::string processTemplateInheritance(const std::string& templateName, const std::string& parent);
+    std::string processTemplateSpecialization(const std::string& templateName, const std::string& specialization);
+    std::string processTemplateParameters(const std::string& templateName, const std::map<std::string, std::string>& parameters);
     
     // 自定义处理
     std::string processCustomSpecialization(const std::string& custom, const std::string& specialization);
@@ -159,12 +173,12 @@ private:
     // 导入处理
     std::string processImportResolution(const std::string& import, const std::string& path);
     std::string processImportAlias(const std::string& import, const std::string& alias);
-    std::string processImportNamespace(const std::string& import, const std::string& namespace);
+    std::string processImportNamespace(const std::string& import, const std::string& namespaceName);
     
     // 命名空间处理
-    std::string processNamespaceResolution(const std::string& namespace, const std::string& name);
-    std::string processNamespaceNesting(const std::string& namespace, const std::string& parent);
-    std::string processNamespaceConflict(const std::string& namespace, const std::string& conflicting);
+    std::string processNamespaceResolution(const std::string& namespaceName, const std::string& name);
+    std::string processNamespaceNesting(const std::string& namespaceName, const std::string& parent);
+    std::string processNamespaceConflict(const std::string& namespaceName, const std::string& conflicting);
     
     // 配置处理
     std::string processConfigurationProperties(const std::map<std::string, std::string>& properties);
@@ -207,6 +221,14 @@ private:
     std::shared_ptr<void> context_;
     GenerateOptions currentOptions_;
     
+    // 缩进控制
+    size_t indentLevel_;
+    size_t indentSize_;
+    
+    // 生成器映射
+    std::map<std::string, std::function<std::string(const ElementNode&, const GenerateOptions&)>> elementGenerators_;
+    std::map<std::string, std::function<std::string(const std::string&)>> cssGenerators_;
+    
     // 生成状态
     StyleInfo currentStyleInfo_;
     ScriptInfo currentScriptInfo_;
@@ -226,6 +248,7 @@ private:
     // 初始化
     void initializeCounters();
     void resetCounters();
+    void initializeGenerators();
 };
 
 } // namespace CHTL

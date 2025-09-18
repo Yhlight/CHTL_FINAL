@@ -11,7 +11,7 @@ private:
     StringList operands_;
     
 public:
-    OperatorNode(const String& type, const SourceLocation& loc = {})
+    OperatorNode(const String& type, const std::vector<String>& targets = {}, const SourceLocation& loc = {})
         : BaseNode(NodeType::Operator, loc), operatorType_(type) {}
     
     const String& getOperatorType() const { return operatorType_; }

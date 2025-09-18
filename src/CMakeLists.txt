@@ -21,17 +21,17 @@ add_library(CHTLCore STATIC
     CHTL/UnifiedScanner/UnifiedScanner.cpp
     CHTL/CompilerDispatcher/CompilerDispatcher.cpp
     
-    # Parser (to be implemented)
-    # CHTL/CHTLParser/CHTLParser.cpp
+           # Parser
+           CHTL/CHTLParser/CHTLParser.cpp
     
-    # Generator (to be implemented)
-    # CHTL/CHTLGenerator/CHTLGenerator.cpp
+    # Generator
+    CHTL/CHTLGenerator/CHTLGenerator.cpp
     
-    # Context (to be implemented)
-    # CHTL/CHTLContext/CHTLContext.cpp
+    # Context
+    CHTL/CHTLContext/CHTLContext.cpp
     
-    # State (to be implemented)
-    # CHTL/CHTLState/CHTLState.cpp
+    # State
+    CHTL/CHTLState/CHTLState.cpp
     
     # Utilities (to be implemented)
     # Util/FileSystem/FileSystem.cpp

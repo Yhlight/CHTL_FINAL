@@ -12,7 +12,7 @@ private:
     String content_;
     
 public:
-    OriginNode(const String& type, const String& name, const SourceLocation& loc = {})
+    OriginNode(const String& type, const String& name, const String& content = "", const SourceLocation& loc = {})
         : BaseNode(NodeType::Origin, loc), originType_(type), originName_(name) {}
     
     // 原始类型和名称

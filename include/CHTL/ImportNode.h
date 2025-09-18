@@ -13,7 +13,7 @@ private:
     String alias_;
     
 public:
-    ImportNode(const String& type, const String& path, const SourceLocation& loc = {})
+    ImportNode(const String& type, const String& path, const String& alias = "", const SourceLocation& loc = {})
         : BaseNode(NodeType::Import, loc), importType_(type), importPath_(path) {}
     
     // 导入类型和路径

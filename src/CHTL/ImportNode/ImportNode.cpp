@@ -21,7 +21,7 @@ void ImportNode::accept(NodeVisitor& visitor) {
 
 // 工厂方法
 ImportNodePtr ImportNode::create(const String& type, const String& path, const SourceLocation& loc) {
-    return std::make_shared<ImportNode>(type, path, loc);
+    return std::make_shared<ImportNode>(type, path, "", loc);
 }
 
 } // namespace CHTL
