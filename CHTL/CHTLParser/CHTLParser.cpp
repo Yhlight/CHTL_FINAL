@@ -183,6 +183,8 @@ std::unique_ptr<BaseNode> CHTLParser::parse() {
     while (peek().type == TokenType::LEFT_BRACKET) {
         if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Template") {
             parseTemplateDeclaration();
+        } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Custom") {
+            parseCustomDeclaration();
         } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
             parseOriginBlock();
         } else {
@@ -234,6 +236,21 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
 
     error(peek(), "Expect a declaration (element, text, style, or template usage).");
     return {};
+}
+
+std::string CHTLParser::parsePropertyName() {
+    std::string name = consume(TokenType::IDENTIFIER, "Expect property name.").lexeme;
+    while (match({TokenType::MINUS})) {
+        // In the lexer, '-' is a MINUS token. We'll manually check if it's followed by another identifier.
+        if (check(TokenType::IDENTIFIER)) {
+            name += "-" + advance().lexeme;
+        } else {
+            // It was a standalone minus, so we put it back (not really, just break)
+            current--; // Backtrack
+            break;
+        }
+    }
+    return name;
 }
 
 std::unique_ptr<ElementNode> CHTLParser::parseElement() {
@@ -552,6 +569,78 @@ void CHTLParser::parseTemplateDeclaration() {
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' to end template body.");
     template_definitions[def.name] = std::move(def);
+}
+
+
+void CHTLParser::parseCustomDeclaration() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start custom declaration.");
+    Token keyword = consume(TokenType::IDENTIFIER, "Expect 'Custom' keyword.");
+    if (keyword.lexeme != "Custom") {
+        error(keyword, "Expect 'Custom' keyword in declaration.");
+    }
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end custom keyword.");
+
+    consume(TokenType::AT, "Expect '@' for custom type.");
+    Token typeToken = consume(TokenType::IDENTIFIER, "Expect custom type (e.g., Style, Element).");
+
+    CustomDefinitionNode def;
+    if (typeToken.lexeme == "Style") {
+        def.type = CustomType::STYLE;
+    } else if (typeToken.lexeme == "Element") {
+        def.type = CustomType::ELEMENT;
+    } else if (typeToken.lexeme == "Var") {
+        def.type = CustomType::VAR;
+    } else {
+        error(typeToken, "Unknown custom type.");
+    }
+
+    def.name = consume(TokenType::IDENTIFIER, "Expect custom name.").lexeme;
+    consume(TokenType::LEFT_BRACE, "Expect '{' to start custom body.");
+
+    if (def.type == CustomType::STYLE) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            int start_pos = current;
+            parsePropertyName(); // Parse to see what the next token is
+            TokenType next_token_type = peek().type;
+            current = start_pos; // Rewind
+
+            if (next_token_type == TokenType::COMMA || next_token_type == TokenType::SEMICOLON) {
+                // Parse a comma-separated list of valueless properties
+                do {
+                    def.valueless_style_properties.push_back(parsePropertyName());
+                } while (match({TokenType::COMMA}));
+                consume(TokenType::SEMICOLON, "Expect ';' after valueless property list.");
+            } else {
+                // Parse a regular key: value; property
+                std::string key_str = parsePropertyName();
+                consume(TokenType::COLON, "Expect ':' after style property name.");
+                auto value_expr = parseExpression();
+                consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+                AttributeNode attr = {key_str, std::move(value_expr)};
+                def.style_properties.push_back(std::move(attr));
+            }
+        }
+    } else if (def.type == CustomType::ELEMENT) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            for (auto& node : parseDeclaration()) {
+                def.element_body.push_back(std::move(node));
+            }
+        }
+    } else if (def.type == CustomType::VAR) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            std::string key_str;
+            while (!check(TokenType::COLON) && !isAtEnd()) {
+                key_str += advance().lexeme;
+            }
+            consume(TokenType::COLON, "Expect ':' after variable name.");
+            auto value_expr = parseExpression();
+            consume(TokenType::SEMICOLON, "Expect ';' after variable value.");
+            def.variables[key_str] = std::move(value_expr);
+        }
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to end custom body.");
+    custom_definitions[def.name] = std::move(def);
 }
 
 } // namespace CHTL
