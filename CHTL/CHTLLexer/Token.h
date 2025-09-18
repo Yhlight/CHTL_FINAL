@@ -16,9 +16,12 @@ enum class TokenType {
     STRING,
     NUMBER,
 
-    // Keywords - will be added later
+    // Keywords
+    STYLE,
+    TEXT,
 
     // Special
+    SYMBOL, // For single characters like -, #, etc.
     END_OF_FILE,
     UNKNOWN
 };

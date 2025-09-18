@@ -18,6 +18,7 @@ public:
     // Visitor methods for each concrete node type.
     void visit(ElementNode& node) override;
     void visit(TextNode& node) override;
+    void visit(StyleNode& node) override;
 
 private:
     std::stringstream output;

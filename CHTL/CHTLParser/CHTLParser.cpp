@@ -1,6 +1,7 @@
 #include "CHTLParser.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
+#include "../CHTLNode/StyleNode.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -18,21 +19,22 @@ std::unique_ptr<BaseNode> CHTLParser::parse() {
 }
 
 std::unique_ptr<BaseNode> CHTLParser::parseDeclaration() {
-    if (peek().type == TokenType::IDENTIFIER) {
-        // Could be an element or a text block.
-        if (peek().lexeme == "text") {
-            // It's a text block.
-            advance(); // consume 'text'
-            consume(TokenType::LEFT_BRACE, "Expect '{' after 'text'.");
-            Token content = consume(TokenType::STRING, "Expect string literal inside text block.");
-            consume(TokenType::RIGHT_BRACE, "Expect '}' after text block content.");
-            return std::make_unique<TextNode>(content.lexeme);
-        }
-        // It's an element.
+    if (match({TokenType::TEXT})) {
+        consume(TokenType::LEFT_BRACE, "Expect '{' after 'text'.");
+        Token content = consume(TokenType::STRING, "Expect string literal inside text block.");
+        consume(TokenType::RIGHT_BRACE, "Expect '}' after text block content.");
+        return std::make_unique<TextNode>(content.lexeme);
+    }
+
+    if (match({TokenType::STYLE})) {
+        return parseStyleBlock();
+    }
+
+    if (check(TokenType::IDENTIFIER)) {
         return parseElement();
     }
 
-    error(peek(), "Expect a declaration (element or text block).");
+    error(peek(), "Expect a declaration (element, text, or style block).");
     return nullptr; // Should not be reached if error throws
 }
 
@@ -69,6 +71,32 @@ void CHTLParser::parseAttribute(ElementNode* element) {
     consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
 
     element->addAttribute({key.lexeme, value.lexeme});
+}
+
+std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'style' keyword.");
+    auto styleNode = std::make_unique<StyleNode>();
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        // Parse the property key (can be multi-token, e.g., "background-color")
+        std::string key_str;
+        while (!check(TokenType::COLON) && !isAtEnd()) {
+            key_str += advance().lexeme;
+        }
+        consume(TokenType::COLON, "Expect ':' after style property name.");
+
+        // Parse the property value (can be multi-token, e.g., "100px")
+        std::string value_str;
+        while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
+            value_str += advance().lexeme;
+        }
+
+        consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+        styleNode->properties.push_back({key_str, value_str});
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after style block.");
+    return styleNode;
 }
 
 

@@ -36,6 +36,7 @@ private:
     std::unique_ptr<BaseNode> parseDeclaration();
     std::unique_ptr<ElementNode> parseElement();
     void parseAttribute(ElementNode* element);
+    std::unique_ptr<StyleNode> parseStyleBlock();
 
     // --- Error Handling ---
     void error(const Token& token, const std::string& message);

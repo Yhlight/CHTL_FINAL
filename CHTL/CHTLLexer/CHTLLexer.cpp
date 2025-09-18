@@ -1,8 +1,14 @@
 #include "CHTLLexer.h"
 #include <cctype>
 #include <iostream>
+#include <unordered_map>
 
 namespace CHTL {
+
+static std::unordered_map<std::string, TokenType> keywords = {
+    {"style", TokenType::STYLE},
+    {"text", TokenType::TEXT}
+};
 
 CHTLLexer::CHTLLexer(const std::string& source) : source(source) {}
 
@@ -72,7 +78,9 @@ void CHTLLexer::scanToken() {
             } else if (isalpha(c) || c == '_') {
                 identifier();
             } else {
-                std::cout << "Line " << line << ": Unexpected character: " << c << std::endl;
+                // Instead of erroring, treat other single characters as symbols.
+                // This is more flexible for things like CSS properties and values.
+                addToken(TokenType::SYMBOL);
             }
             break;
     }
@@ -138,8 +146,13 @@ void CHTLLexer::identifier() {
     while (isalnum(peek()) || peek() == '_') advance();
 
     std::string text = source.substr(start, current - start);
-    // For now, all are identifiers. Later, we'll check for keywords.
-    addToken(TokenType::IDENTIFIER);
+
+    auto it = keywords.find(text);
+    if (it != keywords.end()) {
+        addToken(it->second);
+    } else {
+        addToken(TokenType::IDENTIFIER);
+    }
 }
 
 } // namespace CHTL

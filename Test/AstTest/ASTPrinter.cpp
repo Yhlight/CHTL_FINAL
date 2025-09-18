@@ -1,6 +1,7 @@
 #include "ASTPrinter.h"
 #include "../../CHTL/CHTLNode/ElementNode.h"
 #include "../../CHTL/CHTLNode/TextNode.h"
+#include "../../CHTL/CHTLNode/StyleNode.h"
 #include <iostream>
 
 namespace CHTL {
@@ -33,6 +34,15 @@ void ASTPrinter::visit(TextNode& node) {
 
 std::string ASTPrinter::indentString() {
     return std::string(indent * 2, ' ');
+}
+
+void ASTPrinter::visit(StyleNode& node) {
+    std::cout << indentString() << "<style>" << std::endl;
+    indent++;
+    for (const auto& prop : node.properties) {
+        std::cout << indentString() << prop.key << ": " << prop.value << ";" << std::endl;
+    }
+    indent--;
 }
 
 } // namespace CHTL

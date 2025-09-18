@@ -6,6 +6,7 @@ namespace CHTL {
 // Forward declarations of the concrete node types.
 class ElementNode;
 class TextNode;
+class StyleNode;
 
 // The Visitor interface declares a set of visiting methods that correspond
 // to classes of the concrete nodes.
@@ -14,6 +15,7 @@ public:
     virtual ~Visitor() = default;
     virtual void visit(ElementNode& node) = 0;
     virtual void visit(TextNode& node) = 0;
+    virtual void visit(StyleNode& node) = 0;
 };
 
 } // namespace CHTL

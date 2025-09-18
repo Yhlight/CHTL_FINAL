@@ -7,14 +7,17 @@ int main() {
     std::string source = R"(
         div {
             id: container;
-            class: "main content";
+
+            style {
+                width: 100px;
+                background-color: #f0f0f0;
+            }
 
             h1 {
-                text { "Hello from CHTL!" }
-            }
-            p {
-                text { "This is a paragraph." }
-                br {} // A void element
+                text { "Styled CHTL!" }
+                style {
+                    color: blue;
+                }
             }
         }
     )";
