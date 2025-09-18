@@ -14,12 +14,13 @@ namespace CHTL {
 // The parser takes a stream of tokens and produces an Abstract Syntax Tree.
 class CHTLParser {
 public:
-    explicit CHTLParser(const std::vector<Token>& tokens);
+    explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens);
 
     // The main entry point for parsing.
     std::unique_ptr<BaseNode> parse();
 
 private:
+    const std::string& source;
     const std::vector<Token>& tokens;
     int current = 0;
 
@@ -48,6 +49,7 @@ private:
     void parseTemplateDeclaration();
     void parseStyleTemplateUsage(StyleNode* styleNode);
     std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();
+    std::unique_ptr<BaseNode> parseOriginBlock();
 };
 
 } // namespace CHTL

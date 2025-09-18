@@ -2,16 +2,27 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
+#include "../CHTLNode/OriginNode.h"
 #include <iostream>
 #include <stdexcept>
 
 namespace CHTL {
 
-CHTLParser::CHTLParser(const std::vector<Token>& tokens) : tokens(tokens) {}
+CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens)
+    : source(source), tokens(tokens) {}
 
 std::unique_ptr<BaseNode> CHTLParser::parse() {
+    // A CHTL file can start with zero or more template or origin declarations.
     while (peek().type == TokenType::LEFT_BRACKET) {
-        parseTemplateDeclaration();
+        if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Template") {
+            parseTemplateDeclaration();
+        } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
+            // Top-level origin blocks are not part of the main AST tree for now.
+            // A more advanced implementation might put them in a pre- or post-document list.
+            parseOriginBlock();
+        } else {
+            break; // Not a template or origin block, must be the main content.
+        }
     }
 
     if (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
@@ -31,6 +42,12 @@ std::unique_ptr<BaseNode> CHTLParser::parse() {
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
     if (check(TokenType::AT)) {
         return parseElementTemplateUsage();
+    }
+
+    if (peek().type == TokenType::LEFT_BRACKET && tokens[current + 1].lexeme == "Origin") {
+        std::vector<std::unique_ptr<BaseNode>> nodes;
+        nodes.push_back(parseOriginBlock());
+        return nodes;
     }
 
     std::vector<std::unique_ptr<BaseNode>> nodes;
@@ -202,6 +219,49 @@ void CHTLParser::error(const Token& token, const std::string& message) {
     }
     std::cerr << ": " << message << std::endl;
     throw std::runtime_error(message);
+}
+
+std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start origin block.");
+    Token keyword = consume(TokenType::IDENTIFIER, "Expect 'Origin' keyword.");
+    if (keyword.lexeme != "Origin") {
+        error(keyword, "Expect 'Origin' keyword.");
+    }
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end origin keyword.");
+
+    consume(TokenType::AT, "Expect '@' for origin type.");
+    Token typeToken = consume(TokenType::IDENTIFIER, "Expect origin type (e.g., Html, Style).");
+
+    OriginType type;
+    if (typeToken.lexeme == "Html") {
+        type = OriginType::HTML;
+    } else if (typeToken.lexeme == "Style") {
+        type = OriginType::STYLE;
+    } else if (typeToken.lexeme == "JavaScript") {
+        type = OriginType::JAVASCRIPT;
+    } else {
+        error(typeToken, "Unknown origin type.");
+    }
+
+    Token open_brace = consume(TokenType::LEFT_BRACE, "Expect '{' to start origin body.");
+
+    int brace_depth = 1;
+    while (brace_depth > 0 && !isAtEnd()) {
+        if (peek().type == TokenType::LEFT_BRACE) brace_depth++;
+        else if (peek().type == TokenType::RIGHT_BRACE) brace_depth--;
+
+        if (brace_depth > 0) {
+            advance();
+        }
+    }
+
+    Token close_brace = consume(TokenType::RIGHT_BRACE, "Expect '}' to end origin body.");
+
+    int start_pos = open_brace.position + open_brace.lexeme.length();
+    int end_pos = close_brace.position;
+    std::string content = source.substr(start_pos, end_pos - start_pos);
+
+    return std::make_unique<OriginNode>(type, content);
 }
 
 void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {

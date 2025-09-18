@@ -95,11 +95,12 @@ char CHTLLexer::advance() {
 
 void CHTLLexer::addToken(TokenType type) {
     std::string text = source.substr(start, current - start);
-    tokens.push_back({type, text, line});
+    tokens.push_back({type, text, line, start});
 }
 
 void CHTLLexer::addToken(TokenType type, const std::string& literal) {
-    tokens.push_back({type, literal, line});
+    // This overload is for string literals where the lexeme is different from the raw text
+    tokens.push_back({type, literal, line, start});
 }
 
 char CHTLLexer::peek() {

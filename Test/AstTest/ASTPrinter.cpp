@@ -2,6 +2,7 @@
 #include "../../CHTL/CHTLNode/ElementNode.h"
 #include "../../CHTL/CHTLNode/TextNode.h"
 #include "../../CHTL/CHTLNode/StyleNode.h"
+#include "../../CHTL/CHTLNode/OriginNode.h"
 #include "../../CHTL/CHTLNode/CssRuleNode.h" // Include new node type
 #include <iostream>
 
@@ -64,6 +65,17 @@ void ASTPrinter::visit(StyleNode& node) {
         }
         indent--;
     }
+    indent--;
+}
+
+void ASTPrinter::visit(OriginNode& node) {
+    std::string type_str = "Html";
+    if (node.type == OriginType::STYLE) type_str = "Style";
+    else if (node.type == OriginType::JAVASCRIPT) type_str = "JavaScript";
+
+    std::cout << indentString() << "[Origin @" << type_str << "]" << std::endl;
+    indent++;
+    std::cout << indentString() << "Content: \"" << node.content.substr(0, 40) << "...\"" << std::endl;
     indent--;
 }
 

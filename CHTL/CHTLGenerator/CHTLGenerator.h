@@ -24,6 +24,7 @@ public:
     void visit(ElementNode& node) override;
     void visit(TextNode& node) override;
     void visit(StyleNode& node) override;
+    void visit(OriginNode& node) override;
 
 private:
     std::stringstream html_output;

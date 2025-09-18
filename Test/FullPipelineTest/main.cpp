@@ -5,29 +5,15 @@
 
 int main() {
     std::string source = R"(
-        [Template] @Style BigText {
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        [Template] @Element Message {
-            p {
-                text { "This is a message from a template." }
-            }
-            hr {}
-        }
-
         div {
-            style {
-                @Style BigText;
-                color: purple;
+            [Origin] @Html {
+                <p>This is some <strong>raw HTML</strong> that should not be parsed.</p>
             }
 
-            h1 {
-                text { "Testing Templates!" }
+            // This is a raw style block, treated as a direct child.
+            [Origin] @Style {
+                .raw-style { font-family: "Courier New", monospace; }
             }
-
-            @Element Message;
         }
     )";
 
@@ -39,7 +25,7 @@ int main() {
         std::vector<CHTL::Token> tokens = lexer.scanTokens();
 
         // 2. Parsing
-        CHTL::CHTLParser parser(tokens);
+        CHTL::CHTLParser parser(source, tokens);
         std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
 
         // 3. Generation

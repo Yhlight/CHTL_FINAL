@@ -32,6 +32,7 @@ struct Token {
     TokenType type;
     std::string lexeme;
     int line;
+    int position; // Starting character position of the lexeme in the source string
 };
 
 // Function to convert TokenType to string for debugging

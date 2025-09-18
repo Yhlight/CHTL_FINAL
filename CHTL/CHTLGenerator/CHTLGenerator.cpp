@@ -2,6 +2,7 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
+#include "../CHTLNode/OriginNode.h"
 #include <unordered_set>
 #include <algorithm> // For std::find_if
 
@@ -105,6 +106,20 @@ void CHTLGenerator::visit(TextNode& node) {
 void CHTLGenerator::visit(StyleNode& node) {
     // This visitor method is intentionally left empty.
     // StyleNodes are processed specially within visit(ElementNode&).
+}
+
+void CHTLGenerator::visit(OriginNode& node) {
+    switch (node.type) {
+        case OriginType::HTML:
+            html_output << node.content;
+            break;
+        case OriginType::STYLE:
+            css_output << node.content;
+            break;
+        case OriginType::JAVASCRIPT:
+            // Not handled yet, but will be placed in a future JS output.
+            break;
+    }
 }
 
 } // namespace CHTL
