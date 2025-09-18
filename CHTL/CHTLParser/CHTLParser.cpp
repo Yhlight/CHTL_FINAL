@@ -78,21 +78,62 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
     auto styleNode = std::make_unique<StyleNode>();
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        // Parse the property key (can be multi-token, e.g., "background-color")
-        std::string key_str;
-        while (!check(TokenType::COLON) && !isAtEnd()) {
-            key_str += advance().lexeme;
+        // Look ahead to see if this is an inline property (key: value;)
+        // or a global rule (.selector { ... }). A simple way is to check
+        // for a colon before a left brace.
+        bool isInlineProp = false;
+        int i = 0;
+        while (tokens[current + i].type != TokenType::END_OF_FILE && tokens[current + i].type != TokenType::RIGHT_BRACE) {
+            if (tokens[current + i].type == TokenType::COLON) {
+                isInlineProp = true;
+                break;
+            }
+            if (tokens[current + i].type == TokenType::LEFT_BRACE) {
+                isInlineProp = false;
+                break;
+            }
+            i++;
         }
-        consume(TokenType::COLON, "Expect ':' after style property name.");
 
-        // Parse the property value (can be multi-token, e.g., "100px")
-        std::string value_str;
-        while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
-            value_str += advance().lexeme;
+        if (isInlineProp) {
+            // Parse as an inline property
+            std::string key_str;
+            while (!check(TokenType::COLON) && !isAtEnd()) {
+                key_str += advance().lexeme;
+            }
+            consume(TokenType::COLON, "Expect ':' after style property name.");
+
+            std::string value_str;
+            while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                value_str += advance().lexeme;
+            }
+            consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+            styleNode->inline_properties.push_back({key_str, value_str});
+        } else {
+            // Parse as a global CSS rule
+            CssRuleNode rule;
+            while (!check(TokenType::LEFT_BRACE) && !isAtEnd()) {
+                rule.selector += advance().lexeme;
+            }
+            consume(TokenType::LEFT_BRACE, "Expect '{' after rule selector.");
+
+            while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                std::string key_str;
+                while (!check(TokenType::COLON) && !isAtEnd()) {
+                    key_str += advance().lexeme;
+                }
+                consume(TokenType::COLON, "Expect ':' after style property name.");
+
+                std::string value_str;
+                while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                    value_str += advance().lexeme;
+                }
+                consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+                rule.properties.push_back({key_str, value_str});
+            }
+            consume(TokenType::RIGHT_BRACE, "Expect '}' after rule block.");
+            styleNode->global_rules.push_back(rule);
         }
-
-        consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-        styleNode->properties.push_back({key_str, value_str});
     }
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' after style block.");

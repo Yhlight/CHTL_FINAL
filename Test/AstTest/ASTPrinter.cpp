@@ -2,6 +2,7 @@
 #include "../../CHTL/CHTLNode/ElementNode.h"
 #include "../../CHTL/CHTLNode/TextNode.h"
 #include "../../CHTL/CHTLNode/StyleNode.h"
+#include "../../CHTL/CHTLNode/CssRuleNode.h" // Include new node type
 #include <iostream>
 
 namespace CHTL {
@@ -39,8 +40,29 @@ std::string ASTPrinter::indentString() {
 void ASTPrinter::visit(StyleNode& node) {
     std::cout << indentString() << "<style>" << std::endl;
     indent++;
-    for (const auto& prop : node.properties) {
-        std::cout << indentString() << prop.key << ": " << prop.value << ";" << std::endl;
+    // Print inline properties
+    if (!node.inline_properties.empty()) {
+        std::cout << indentString() << "[Inline Props]" << std::endl;
+        indent++;
+        for (const auto& prop : node.inline_properties) {
+            std::cout << indentString() << prop.key << ": " << prop.value << ";" << std::endl;
+        }
+        indent--;
+    }
+    // Print global rules
+    if (!node.global_rules.empty()) {
+        std::cout << indentString() << "[Global Rules]" << std::endl;
+        indent++;
+        for (const auto& rule : node.global_rules) {
+            std::cout << indentString() << rule.selector << " {" << std::endl;
+            indent++;
+            for (const auto& prop : rule.properties) {
+                std::cout << indentString() << prop.key << ": " << prop.value << ";" << std::endl;
+            }
+            indent--;
+            std::cout << indentString() << "}" << std::endl;
+        }
+        indent--;
     }
     indent--;
 }

@@ -6,18 +6,18 @@
 int main() {
     std::string source = R"(
         div {
-            id: container;
-
             style {
-                width: 100px;
-                background-color: #f0f0f0;
+                // This should become a global rule
+                .container {
+                    padding: 20px;
+                    border: "1px solid #ccc"; // Use a string for multi-word values
+                }
+                // This should become an inline style
+                background-color: #f4f4f4;
             }
 
             h1 {
-                text { "Styled CHTL!" }
-                style {
-                    color: blue;
-                }
+                text { "Advanced CHTL Styles!" }
             }
         }
     )";
@@ -35,10 +35,11 @@ int main() {
 
         // 3. Generation
         CHTL::CHTLGenerator generator;
-        std::string html_output = generator.generate(ast.get());
+        CHTL::CompilationResult result = generator.generate(ast.get());
 
         // 4. Verification
-        std::cout << "--- Generated HTML ---\n" << html_output << "\n----------------------\n" << std::endl;
+        std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n" << std::endl;
+        std::cout << "--- Generated CSS ---\n" << result.css << "\n---------------------\n" << std::endl;
 
     } catch (const std::runtime_error& e) {
         std::cerr << "Caught a runtime_error exception: " << e.what() << std::endl;

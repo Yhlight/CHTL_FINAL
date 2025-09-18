@@ -3,6 +3,7 @@
 
 #include "BaseNode.h"
 #include "AttributeNode.h"
+#include "CssRuleNode.h"
 #include "Visitor.h"
 #include <vector>
 
@@ -13,9 +14,11 @@ class StyleNode : public BaseNode {
 public:
     void accept(Visitor& visitor) override;
 
-    // A style block contains a list of CSS properties.
-    // We can reuse AttributeNode to represent a property (e.g., key="width", value="100px").
-    std::vector<AttributeNode> properties;
+    // A style block contains a list of simple properties for inline styles.
+    std::vector<AttributeNode> inline_properties;
+
+    // It also contains a list of full CSS rules for the global stylesheet.
+    std::vector<CssRuleNode> global_rules;
 };
 
 } // namespace CHTL

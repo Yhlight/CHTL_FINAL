@@ -8,12 +8,17 @@
 
 namespace CHTL {
 
+struct CompilationResult {
+    std::string html;
+    std::string css;
+};
+
 // The CHTLGenerator traverses the AST using the Visitor pattern
-// and generates the final HTML output.
+// and generates the final HTML and CSS output.
 class CHTLGenerator : public Visitor {
 public:
     // The main entry point. It takes the root of the AST and returns the generated code.
-    std::string generate(BaseNode* root);
+    CompilationResult generate(BaseNode* root);
 
     // Visitor methods for each concrete node type.
     void visit(ElementNode& node) override;
@@ -21,7 +26,8 @@ public:
     void visit(StyleNode& node) override;
 
 private:
-    std::stringstream output;
+    std::stringstream html_output;
+    std::stringstream css_output;
 };
 
 } // namespace CHTL
