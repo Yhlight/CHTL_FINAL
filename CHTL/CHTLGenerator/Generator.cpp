@@ -7,6 +7,9 @@ Generator::Generator() {}
 std::string Generator::generate(const Program* program) {
     std::string html;
     for (const auto& node : program->children) {
+        if (dynamic_cast<const TemplateDefinitionNode*>(node.get())) {
+            continue; // Skip rendering template definitions
+        }
         html += generateNode(node.get());
     }
     return html;

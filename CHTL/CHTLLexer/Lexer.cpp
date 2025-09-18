@@ -3,6 +3,17 @@
 
 namespace CHTL {
 
+const std::map<std::string, TokenType> Lexer::keywords = {
+    {"inherit", TokenType::INHERIT},
+};
+
+TokenType Lexer::lookupIdent(const std::string& ident) {
+    if (keywords.count(ident)) {
+        return keywords.at(ident);
+    }
+    return TokenType::IDENT;
+}
+
 Lexer::Lexer(std::string input) : input(std::move(input)), position(0), readPosition(0), ch(0), line(1) {
     readChar(); // Initialize the first character
 }
@@ -57,15 +68,15 @@ void Lexer::skipWhitespace() {
 
 Token Lexer::readIdentifier() {
     size_t startPosition = position;
-    // CHTL identifiers can be simple names for tags or properties
-    // Allow letters, numbers, underscore, and hyphen (but not as the first char for numbers)
     if (std::isalpha(ch) || ch == '_') {
         readChar();
         while (std::isalnum(ch) || ch == '_' || ch == '-') {
             readChar();
         }
     }
-    return {TokenType::IDENT, input.substr(startPosition, position - startPosition), line};
+    std::string literal = input.substr(startPosition, position - startPosition);
+    TokenType type = lookupIdent(literal);
+    return {type, literal, line};
 }
 
 Token Lexer::readString() {
@@ -112,6 +123,15 @@ Token Lexer::nextToken() {
         case ';':
             tok = {TokenType::SEMICOLON, ";", line};
             break;
+        case '[':
+            tok = {TokenType::LBRACKET, "[", line};
+            break;
+        case ']':
+            tok = {TokenType::RBRACKET, "]", line};
+            break;
+        case '@':
+            tok = {TokenType::AT, "@", line};
+            break;
         case '#':
             return readComment();
         case '"':
@@ -121,15 +141,8 @@ Token Lexer::nextToken() {
             break;
         default:
             if (std::isalpha(ch) || ch == '_') {
-                // It's an identifier
                 return readIdentifier();
             } else {
-                // For now, treat unquoted text as a series of identifiers.
-                // A more advanced implementation would handle this differently,
-                // likely with guidance from the parser.
-                // Let's handle the simple case of unquoted text inside text block
-                // by treating it as an IDENT. The parser can concatenate them.
-                // For now, if it is not an alphabet, it is illegal.
                 tok = {TokenType::ILLEGAL, std::string(1, ch), line};
             }
             break;

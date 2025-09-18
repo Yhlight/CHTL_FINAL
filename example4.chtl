@@ -1,0 +1,42 @@
+[Template] @Style BaseStyle
+{
+    color: blue;
+    font-size: 14px;
+}
+
+[Template] @Style ChildStyle
+{
+    @Style BaseStyle;
+    font-size: 18px; // Override font-size
+    font-weight: bold; // Add new property
+}
+
+[Template] @Element BaseCard
+{
+    div {
+        class: "card-base";
+        p { text { "Base card" } }
+    }
+}
+
+[Template] @Element FancyCard
+{
+    @Element BaseCard;
+    div {
+        class: "card-fancy-overlay";
+        p { text { "Fancy overlay" } }
+    }
+}
+
+html {
+    body {
+        p {
+            style {
+                @Style ChildStyle;
+            }
+            text { "This text should be bold, 18px, and blue." }
+        }
+
+        @Element FancyCard;
+    }
+}

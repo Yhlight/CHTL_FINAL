@@ -4,6 +4,7 @@
 #include "CHTL/CHTLLexer/Lexer.hpp"
 #include "CHTL/CHTLParser/Parser.hpp"
 #include "CHTL/CHTLGenerator/Generator.hpp"
+#include "CHTL/CHTLContext/CHTLContext.hpp"
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
@@ -21,8 +22,9 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    CHTL::CHTLContext context;
     CHTL::Lexer lexer(source);
-    CHTL::Parser parser(lexer);
+    CHTL::Parser parser(lexer, context);
 
     auto program = parser.parseProgram();
 

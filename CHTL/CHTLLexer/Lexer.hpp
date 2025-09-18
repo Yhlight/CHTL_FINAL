@@ -2,6 +2,7 @@
 
 #include "Token.hpp"
 #include <string>
+#include <map>
 
 namespace CHTL {
 
@@ -12,6 +13,8 @@ public:
     Token nextToken();
 
 private:
+    static const std::map<std::string, TokenType> keywords;
+    static TokenType lookupIdent(const std::string& ident);
     void readChar();
     char peekChar();
     void skipWhitespace();
