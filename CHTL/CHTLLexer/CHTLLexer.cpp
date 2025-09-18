@@ -40,11 +40,30 @@ void CHTLLexer::scanToken() {
         case '.': addToken(TokenType::DOT); break;
         case ':': addToken(TokenType::COLON); break;
         case ';': addToken(TokenType::SEMICOLON); break;
+        case '?': addToken(TokenType::QUESTION); break;
         case '+': addToken(TokenType::PLUS); break;
         case '-': addToken(TokenType::MINUS); break;
         case '%': addToken(TokenType::PERCENT); break;
         case '*':
             addToken(match('*') ? TokenType::STAR_STAR : TokenType::STAR);
+            break;
+        case '!':
+            addToken(match('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
+            break;
+        case '=':
+            addToken(match('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL);
+            break;
+        case '<':
+            addToken(match('=') ? TokenType::LESS_EQUAL : TokenType::LESS);
+            break;
+        case '>':
+            addToken(match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
+            break;
+        case '&':
+            addToken(match('&') ? TokenType::AMPERSAND_AMPERSAND : TokenType::AMPERSAND);
+            break;
+        case '|':
+            addToken(match('|') ? TokenType::PIPE_PIPE : TokenType::PIPE);
             break;
 
         // Ignore whitespace.

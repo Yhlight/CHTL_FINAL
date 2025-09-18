@@ -14,7 +14,16 @@ enum class TokenType {
     AT,                          // @
     COLON, SEMICOLON,            // : ;
     DOT,                         // .
+    QUESTION,                    // ?
     PLUS, MINUS, STAR, SLASH, PERCENT,
+    GREATER, LESS,
+
+    // One or two character tokens
+    BANG, BANG_EQUAL,            // ! !=
+    EQUAL, EQUAL_EQUAL,          // = ==
+    GREATER_EQUAL, LESS_EQUAL,    // >= <=
+    AMPERSAND, AMPERSAND_AMPERSAND, // & &&
+    PIPE, PIPE_PIPE,             // | ||
 
     // Two-character tokens
     STAR_STAR,

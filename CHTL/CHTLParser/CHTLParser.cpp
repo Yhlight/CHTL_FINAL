@@ -15,7 +15,58 @@ CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& toke
 // --- Expression Parser Implementation ---
 
 std::unique_ptr<Expr> CHTLParser::parseExpression() {
-    return parseTerm();
+    return parseConditional();
+}
+
+std::unique_ptr<Expr> CHTLParser::parseConditional() {
+    auto expr = parseLogicalOr();
+    if (match({TokenType::QUESTION})) {
+        auto then_branch = parseExpression();
+        consume(TokenType::COLON, "Expect ':' after then branch of conditional expression.");
+        auto else_branch = parseConditional();
+        expr = std::make_unique<ConditionalExpr>(std::move(expr), std::move(then_branch), std::move(else_branch));
+    }
+    return expr;
+}
+
+std::unique_ptr<Expr> CHTLParser::parseLogicalOr() {
+    auto expr = parseLogicalAnd();
+    while (match({TokenType::PIPE_PIPE})) {
+        Token op = previous();
+        auto right = parseLogicalAnd();
+        expr = std::make_unique<LogicalExpr>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<Expr> CHTLParser::parseLogicalAnd() {
+    auto expr = parseEquality();
+    while (match({TokenType::AMPERSAND_AMPERSAND})) {
+        Token op = previous();
+        auto right = parseEquality();
+        expr = std::make_unique<LogicalExpr>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<Expr> CHTLParser::parseEquality() {
+    auto expr = parseComparison();
+    while (match({TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL})) {
+        Token op = previous();
+        auto right = parseComparison();
+        expr = std::make_unique<ComparisonExpr>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<Expr> CHTLParser::parseComparison() {
+    auto expr = parseTerm();
+    while (match({TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL})) {
+        Token op = previous();
+        auto right = parseTerm();
+        expr = std::make_unique<ComparisonExpr>(std::move(expr), op, std::move(right));
+    }
+    return expr;
 }
 
 std::unique_ptr<Expr> CHTLParser::parseTerm() {
@@ -83,8 +134,8 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             consume(TokenType::RIGHT_PAREN, "Expect ')' after variable key name.");
             return std::make_unique<VarExpr>(first_part.lexeme, key_name);
         } else {
-            // It's just a regular identifier, treat as a string literal
-            return std::make_unique<LiteralExpr>(0, first_part.lexeme);
+            // It's an implicit self-reference to a property.
+            return std::make_unique<ReferenceExpr>(Token(), first_part);
         }
     }
 

@@ -39,6 +39,11 @@ private:
 
     // --- Expression Parsing Methods ---
     std::unique_ptr<Expr> parseExpression();
+    std::unique_ptr<Expr> parseConditional();
+    std::unique_ptr<Expr> parseLogicalOr();
+    std::unique_ptr<Expr> parseLogicalAnd();
+    std::unique_ptr<Expr> parseEquality();
+    std::unique_ptr<Expr> parseComparison();
     std::unique_ptr<Expr> parseTerm();
     std::unique_ptr<Expr> parseFactor();
     std::unique_ptr<Expr> parsePower();

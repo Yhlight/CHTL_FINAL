@@ -6,18 +6,14 @@
 int main() {
     std::string source = R"(
         div {
-            id: box1;
+            id: box;
             style {
-                width: 150px;
-            }
-
-            div {
-                id: box2;
-                style {
-                    // Reference the width of box1
-                    width: #box1.width / 2;
-                    height: #box1.width; // Reference again
-                }
+                width: 100px;
+                height: 200px;
+                // Simple conditional using implicit self-reference
+                background-color: width > 50px ? "red" : "blue";
+                // Chained conditional and logical operators
+                border: width > 200px || height < 100px ? "1px solid red" : "2px solid green";
             }
         }
     )";

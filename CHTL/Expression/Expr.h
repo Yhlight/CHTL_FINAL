@@ -13,6 +13,9 @@ class BinaryExpr;
 class LiteralExpr;
 class VarExpr;
 class ReferenceExpr;
+class ComparisonExpr;
+class LogicalExpr;
+class ConditionalExpr;
 class GroupingExpr; // For future use with parentheses
 
 // The base visitor interface for the expression AST.
@@ -25,6 +28,9 @@ public:
     virtual void visit(LiteralExpr& expr) = 0;
     virtual void visit(VarExpr& expr) = 0;
     virtual void visit(ReferenceExpr& expr) = 0;
+    virtual void visit(ComparisonExpr& expr) = 0;
+    virtual void visit(LogicalExpr& expr) = 0;
+    virtual void visit(ConditionalExpr& expr) = 0;
     // virtual void visit(GroupingExpr& expr) = 0; // For future use
 };
 
@@ -96,6 +102,54 @@ public:
 
     Token selector;
     Token property;
+};
+
+// Represents a comparison, e.g., left > right
+class ComparisonExpr : public Expr {
+public:
+    ComparisonExpr(std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right)
+        : left(std::move(left)), op(op), right(std::move(right)) {}
+
+    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
+    std::unique_ptr<Expr> clone() const override {
+        return std::make_unique<ComparisonExpr>(left->clone(), op, right->clone());
+    }
+
+    std::unique_ptr<Expr> left;
+    Token op;
+    std::unique_ptr<Expr> right;
+};
+
+// Represents a logical operation, e.g., left && right
+class LogicalExpr : public Expr {
+public:
+    LogicalExpr(std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right)
+        : left(std::move(left)), op(op), right(std::move(right)) {}
+
+    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
+    std::unique_ptr<Expr> clone() const override {
+        return std::make_unique<LogicalExpr>(left->clone(), op, right->clone());
+    }
+
+    std::unique_ptr<Expr> left;
+    Token op;
+    std::unique_ptr<Expr> right;
+};
+
+// Represents a conditional (ternary) operation, e.g., cond ? then : else
+class ConditionalExpr : public Expr {
+public:
+    ConditionalExpr(std::unique_ptr<Expr> condition, std::unique_ptr<Expr> then_branch, std::unique_ptr<Expr> else_branch)
+        : condition(std::move(condition)), then_branch(std::move(then_branch)), else_branch(std::move(else_branch)) {}
+
+    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
+    std::unique_ptr<Expr> clone() const override {
+        return std::make_unique<ConditionalExpr>(condition->clone(), then_branch->clone(), else_branch->clone());
+    }
+
+    std::unique_ptr<Expr> condition;
+    std::unique_ptr<Expr> then_branch;
+    std::unique_ptr<Expr> else_branch;
 };
 
 } // namespace CHTL

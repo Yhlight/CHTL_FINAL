@@ -57,7 +57,8 @@ void CHTLGenerator::visit(ElementNode& node) {
                 css_output << selector << " {\n";
                 for (const auto& prop : rule.properties) {
                     ExpressionEvaluator evaluator(this->templates, this->doc_root);
-                    EvaluatedValue result = evaluator.evaluate(prop.value_expr.get());
+                    // The context for a global rule is the element it's defined in.
+                    EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
                     css_output << "    " << prop.key << ": ";
                     if (result.value == 0 && !result.unit.empty()) {
                         css_output << result.unit;
@@ -85,7 +86,7 @@ void CHTLGenerator::visit(ElementNode& node) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             for (const auto& prop : styleNode->inline_properties) {
                 ExpressionEvaluator evaluator(this->templates, this->doc_root);
-                EvaluatedValue result = evaluator.evaluate(prop.value_expr.get());
+                EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
                 style_str += prop.key + ": ";
                 if (result.value == 0 && !result.unit.empty()) {
                     style_str += result.unit;
