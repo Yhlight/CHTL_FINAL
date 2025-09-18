@@ -5,17 +5,19 @@
 
 int main() {
     std::string source = R"(
-        [Template] @Var MyTheme {
-            primary-color: #3498db;
-            base-padding: 10px;
-            large-padding: MyTheme(base-padding) * 2;
-        }
-
         div {
+            id: box1;
             style {
-                color: MyTheme(primary-color);
-                padding: MyTheme(large-padding);
-                margin: MyTheme(base-padding) / 2;
+                width: 150px;
+            }
+
+            div {
+                id: box2;
+                style {
+                    // Reference the width of box1
+                    width: #box1.width / 2;
+                    height: #box1.width; // Reference again
+                }
             }
         }
     )";

@@ -12,6 +12,7 @@ namespace CHTL {
 class BinaryExpr;
 class LiteralExpr;
 class VarExpr;
+class ReferenceExpr;
 class GroupingExpr; // For future use with parentheses
 
 // The base visitor interface for the expression AST.
@@ -23,6 +24,7 @@ public:
     virtual void visit(BinaryExpr& expr) = 0;
     virtual void visit(LiteralExpr& expr) = 0;
     virtual void visit(VarExpr& expr) = 0;
+    virtual void visit(ReferenceExpr& expr) = 0;
     // virtual void visit(GroupingExpr& expr) = 0; // For future use
 };
 
@@ -79,6 +81,21 @@ public:
 
     std::string group;
     std::string name;
+};
+
+// Represents a reference to another property, e.g., box.width
+class ReferenceExpr : public Expr {
+public:
+    ReferenceExpr(Token selector, Token property)
+        : selector(selector), property(property) {}
+
+    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
+    std::unique_ptr<Expr> clone() const override {
+        return std::make_unique<ReferenceExpr>(selector, property);
+    }
+
+    Token selector;
+    Token property;
 };
 
 } // namespace CHTL

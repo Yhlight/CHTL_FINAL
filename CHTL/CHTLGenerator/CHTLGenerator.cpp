@@ -20,6 +20,7 @@ CHTLGenerator::CHTLGenerator(const std::map<std::string, TemplateDefinitionNode>
 CompilationResult CHTLGenerator::generate(BaseNode* root) {
     html_output.str("");
     css_output.str("");
+    this->doc_root = root; // Set the document root context
     if (root) {
         root->accept(*this);
     }
@@ -55,7 +56,7 @@ void CHTLGenerator::visit(ElementNode& node) {
 
                 css_output << selector << " {\n";
                 for (const auto& prop : rule.properties) {
-                    ExpressionEvaluator evaluator(this->templates);
+                    ExpressionEvaluator evaluator(this->templates, this->doc_root);
                     EvaluatedValue result = evaluator.evaluate(prop.value_expr.get());
                     css_output << "    " << prop.key << ": ";
                     if (result.value == 0 && !result.unit.empty()) {
@@ -83,7 +84,7 @@ void CHTLGenerator::visit(ElementNode& node) {
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             for (const auto& prop : styleNode->inline_properties) {
-                ExpressionEvaluator evaluator(this->templates);
+                ExpressionEvaluator evaluator(this->templates, this->doc_root);
                 EvaluatedValue result = evaluator.evaluate(prop.value_expr.get());
                 style_str += prop.key + ": ";
                 if (result.value == 0 && !result.unit.empty()) {

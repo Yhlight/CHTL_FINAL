@@ -65,8 +65,14 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
     }
 
     if (match({TokenType::IDENTIFIER})) {
-        if (check(TokenType::LEFT_PAREN)) { // It's a variable usage like Group(key)
-            std::string group_name = previous().lexeme;
+        Token first_part = previous();
+
+        if (check(TokenType::DOT)) { // Reference like box.width
+            consume(TokenType::DOT, "Expect '.' after selector.");
+            Token property = consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
+            return std::make_unique<ReferenceExpr>(first_part, property);
+
+        } else if (check(TokenType::LEFT_PAREN)) { // Variable usage like Group(key)
             consume(TokenType::LEFT_PAREN, "Expect '(' after variable group name.");
 
             std::string key_name;
@@ -75,10 +81,10 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             }
 
             consume(TokenType::RIGHT_PAREN, "Expect ')' after variable key name.");
-            return std::make_unique<VarExpr>(group_name, key_name);
+            return std::make_unique<VarExpr>(first_part.lexeme, key_name);
         } else {
             // It's just a regular identifier, treat as a string literal
-            return std::make_unique<LiteralExpr>(0, previous().lexeme);
+            return std::make_unique<LiteralExpr>(0, first_part.lexeme);
         }
     }
 
@@ -86,13 +92,27 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
         return std::make_unique<LiteralExpr>(0, previous().lexeme);
     }
 
-    // Handle hex codes like #ff00ff
-    if (check(TokenType::SYMBOL) && peek().lexeme == "#") {
-        std::string value = advance().lexeme; // consume '#'
-        while(check(TokenType::IDENTIFIER) || check(TokenType::NUMBER)) {
-            value += advance().lexeme;
+    // Handle selectors like #box.width or .container.height, or hex codes like #fff
+    if (check(TokenType::SYMBOL) && (peek().lexeme == "#" || peek().lexeme == ".")) {
+        Token first_part = advance(); // Consume '#' or '.'
+
+        // To disambiguate, we look ahead for a dot.
+        if (tokens[current + 1].type == TokenType::DOT) {
+            Token selector_name = consume(TokenType::IDENTIFIER, "Expect selector name.");
+            consume(TokenType::DOT, "Expect '.' after selector.");
+            Token property = consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
+
+            // Reconstruct the full selector token for the ReferenceExpr
+            Token full_selector = {first_part.type, first_part.lexeme + selector_name.lexeme, first_part.line, first_part.position};
+            return std::make_unique<ReferenceExpr>(full_selector, property);
+        } else {
+            // It's not a reference, so treat as a literal (e.g., hex code)
+            std::string value = first_part.lexeme;
+            while(check(TokenType::IDENTIFIER) || check(TokenType::NUMBER)) {
+                value += advance().lexeme;
+            }
+            return std::make_unique<LiteralExpr>(0, value);
         }
-        return std::make_unique<LiteralExpr>(0, value);
     }
 
     if (match({TokenType::LEFT_PAREN})) {

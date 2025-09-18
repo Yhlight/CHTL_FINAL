@@ -13,6 +13,7 @@ enum class TokenType {
     LEFT_PAREN, RIGHT_PAREN,     // ( )
     AT,                          // @
     COLON, SEMICOLON,            // : ;
+    DOT,                         // .
     PLUS, MINUS, STAR, SLASH, PERCENT,
 
     // Two-character tokens

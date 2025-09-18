@@ -11,6 +11,8 @@
 
 namespace CHTL {
 
+class ElementNode; // Forward declaration
+
 // A struct to hold the result of an evaluation.
 struct EvaluatedValue {
     double value = 0.0;
@@ -20,15 +22,19 @@ struct EvaluatedValue {
 // This class implements the ExprVisitor pattern to calculate the result of an expression tree.
 class ExpressionEvaluator : public ExprVisitor {
 public:
-    explicit ExpressionEvaluator(const std::map<std::string, TemplateDefinitionNode>& templates);
+    explicit ExpressionEvaluator(const std::map<std::string, TemplateDefinitionNode>& templates, BaseNode* doc_root);
     EvaluatedValue evaluate(Expr* expr);
 
     void visit(BinaryExpr& expr) override;
     void visit(LiteralExpr& expr) override;
     void visit(VarExpr& expr) override;
+    void visit(ReferenceExpr& expr) override;
 
 private:
+    ElementNode* findElement(BaseNode* context, const std::string& selector);
+
     const std::map<std::string, TemplateDefinitionNode>& templates;
+    BaseNode* doc_root;
     std::set<std::string> resolution_stack; // For circular dependency detection
     EvaluatedValue result;
 };

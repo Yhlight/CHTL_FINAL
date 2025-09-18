@@ -31,6 +31,7 @@ public:
 
 private:
     const std::map<std::string, TemplateDefinitionNode>& templates;
+    BaseNode* doc_root = nullptr; // To provide context for the evaluator
     std::stringstream html_output;
     std::stringstream css_output;
 };
