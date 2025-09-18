@@ -1,0 +1,5 @@
+[Template] @Element MyLibComponent {
+    h2 {
+        text { "I came from a library!" }
+    }
+}

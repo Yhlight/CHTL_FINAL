@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/ast_test.dir/AstTest/main.cpp.o CMakeFiles/ast_test.dir/AstTest/ASTPrinter.cpp.o -o ast_test  ../CHTL/libCHTL.a ../Util/libCHTL_Util.a
