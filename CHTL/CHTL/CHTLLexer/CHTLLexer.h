@@ -74,6 +74,12 @@ private:
     Token processGeneratorComment();
     
     /**
+     * 处理方括号关键字
+     * @return Token
+     */
+    Token processBracketKeyword();
+    
+    /**
      * 处理标识符
      * @return Token
      */

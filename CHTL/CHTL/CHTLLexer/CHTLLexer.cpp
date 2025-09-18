@@ -93,6 +93,11 @@ Token CHTLLexer::getNextToken() {
         return processNumber();
     }
     
+    // 处理方括号关键字
+    if (c == '[') {
+        return processBracketKeyword();
+    }
+    
     // 处理标识符和关键字
     if (std::isalpha(c) || c == '_') {
         return processIdentifier();
@@ -216,6 +221,35 @@ Token CHTLLexer::processGeneratorComment() {
     }
     
     return Token(TokenType::GENERATOR_COMMENT, value, startLine, startColumn, startPos);
+}
+
+Token CHTLLexer::processBracketKeyword() {
+    size_t startPos = m_position;
+    size_t startLine = m_line;
+    size_t startColumn = m_column;
+    
+    std::string value;
+    value += current(); // 添加 '['
+    advance();
+    
+    // 读取方括号内的内容
+    while (!isAtEnd() && current() != ']') {
+        value += current();
+        advance();
+    }
+    
+    if (!isAtEnd()) {
+        value += current(); // 添加 ']'
+        advance();
+    }
+    
+    // 检查是否为方括号关键字
+    TokenType type = KeywordMap::getKeywordType(value);
+    if (type != TokenType::UNKNOWN) {
+        return Token(type, value, startLine, startColumn, startPos);
+    }
+    
+    return Token(TokenType::UNKNOWN, value, startLine, startColumn, startPos);
 }
 
 Token CHTLLexer::processIdentifier() {

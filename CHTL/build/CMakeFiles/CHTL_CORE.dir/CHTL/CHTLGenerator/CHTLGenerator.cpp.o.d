@@ -205,6 +205,7 @@ CMakeFiles/CHTL_CORE.dir/CHTL/CHTLGenerator/CHTLGenerator.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/erase_if.h \
   /workspace/CHTL/CHTL/CHTLGenerator/../CHTLNode/ElementNode.h \
   /workspace/CHTL/CHTL/CHTLGenerator/../CHTLNode/TextNode.h \
+  /workspace/CHTL/CHTL/CHTLGenerator/../CHTLNode/StyleNode.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/sstream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/istream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ios \

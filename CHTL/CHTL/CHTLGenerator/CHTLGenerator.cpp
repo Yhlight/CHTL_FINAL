@@ -1,6 +1,7 @@
 #include "CHTLGenerator.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
+#include "../CHTLNode/StyleNode.h"
 #include <sstream>
 
 namespace CHTL {
@@ -93,7 +94,17 @@ std::string CHTLGenerator::generateElementHTML(std::shared_ptr<BaseNode> element
             } else if (child->getType() == BaseNode::NodeType::COMMENT) {
                 html << generateCommentHTML(child);
             } else if (child->getType() == BaseNode::NodeType::STYLE) {
-                html << generateStyleCSS(child);
+                auto styleNode = std::static_pointer_cast<StyleNode>(child);
+                if (styleNode->isInline()) {
+                    // 内联样式
+                    std::string inlineStyle = styleNode->toString();
+                    if (!inlineStyle.empty()) {
+                        html << " style=\"" << escapeHTML(inlineStyle) << "\"";
+                    }
+                } else {
+                    // 选择器样式，添加到全局CSS
+                    m_globalCSS += styleNode->toCSS() + "\n";
+                }
             } else if (child->getType() == BaseNode::NodeType::SCRIPT) {
                 html << generateScriptJavaScript(child);
             }

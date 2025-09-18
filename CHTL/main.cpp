@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
             inlineCSS = true;
         } else if (arg == "--inline-js") {
             inlineJS = true;
-        } else if (arg == "--output" && i + 1 < argc) {
+        } else if ((arg == "--output" || arg == "-o") && i + 1 < argc) {
             outputFile = argv[++i];
         }
     }

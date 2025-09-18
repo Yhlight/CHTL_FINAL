@@ -1,6 +1,9 @@
 #include "CHTLParser.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
+#include "../CHTLNode/StyleNode.h"
+#include "../CHTLNode/TemplateNode.h"
+#include "../CHTLNode/CustomNode.h"
 #include <iostream>
 #include <algorithm>
 
@@ -225,18 +228,232 @@ std::shared_ptr<BaseNode> CHTLParser::parseComment() {
 }
 
 std::shared_ptr<BaseNode> CHTLParser::parseTemplate() {
-    // 解析模板的简化实现
-    return nullptr;
+    if (!consume(TokenType::TEMPLATE)) {
+        return nullptr;
+    }
+    
+    // 解析模板类型
+    if (!match(TokenType::AT_STYLE) && !match(TokenType::AT_ELEMENT) && !match(TokenType::AT_VAR)) {
+        return nullptr;
+    }
+    
+    TemplateNode::TemplateType templateType;
+    if (consume(TokenType::AT_STYLE)) {
+        templateType = TemplateNode::TemplateType::STYLE;
+    } else if (consume(TokenType::AT_ELEMENT)) {
+        templateType = TemplateNode::TemplateType::ELEMENT;
+    } else if (consume(TokenType::AT_VAR)) {
+        templateType = TemplateNode::TemplateType::VAR;
+    }
+    
+    // 解析模板名称
+    if (!match(TokenType::IDENTIFIER)) {
+        return nullptr;
+    }
+    
+    std::string templateName = current().value;
+    advance();
+    
+    auto templateNode = std::make_shared<TemplateNode>(templateType, templateName);
+    templateNode->setPosition(current().line, current().column);
+    
+    // 解析模板内容
+    if (consume(TokenType::LEFT_BRACE)) {
+        while (!isAtEnd() && !match(TokenType::RIGHT_BRACE)) {
+            skipWhitespace();
+            if (isAtEnd()) break;
+            
+            const Token& token = current();
+            
+            if (token.type == TokenType::IDENTIFIER) {
+                // 子元素
+                auto childElement = parseElement();
+                if (childElement) {
+                    templateNode->addChild(childElement);
+                }
+            } else if (token.type == TokenType::TEXT) {
+                // 文本节点
+                auto textNode = parseText();
+                if (textNode) {
+                    templateNode->addChild(textNode);
+                }
+            } else {
+                advance();
+            }
+        }
+        
+        consume(TokenType::RIGHT_BRACE);
+    }
+    
+    return templateNode;
 }
 
 std::shared_ptr<BaseNode> CHTLParser::parseCustom() {
-    // 解析自定义的简化实现
-    return nullptr;
+    if (!consume(TokenType::CUSTOM)) {
+        return nullptr;
+    }
+    
+    // 解析自定义类型
+    if (!match(TokenType::AT_STYLE) && !match(TokenType::AT_ELEMENT) && !match(TokenType::AT_VAR)) {
+        return nullptr;
+    }
+    
+    CustomNode::CustomType customType;
+    if (consume(TokenType::AT_STYLE)) {
+        customType = CustomNode::CustomType::STYLE;
+    } else if (consume(TokenType::AT_ELEMENT)) {
+        customType = CustomNode::CustomType::ELEMENT;
+    } else if (consume(TokenType::AT_VAR)) {
+        customType = CustomNode::CustomType::VAR;
+    }
+    
+    // 解析自定义名称
+    if (!match(TokenType::IDENTIFIER)) {
+        return nullptr;
+    }
+    
+    std::string customName = current().value;
+    advance();
+    
+    auto customNode = std::make_shared<CustomNode>(customType, customName);
+    customNode->setPosition(current().line, current().column);
+    
+    // 解析自定义内容
+    if (consume(TokenType::LEFT_BRACE)) {
+        while (!isAtEnd() && !match(TokenType::RIGHT_BRACE)) {
+            skipWhitespace();
+            if (isAtEnd()) break;
+            
+            const Token& token = current();
+            
+            if (token.type == TokenType::IDENTIFIER) {
+                // 子元素
+                auto childElement = parseElement();
+                if (childElement) {
+                    customNode->addChild(childElement);
+                }
+            } else if (token.type == TokenType::TEXT) {
+                // 文本节点
+                auto textNode = parseText();
+                if (textNode) {
+                    customNode->addChild(textNode);
+                }
+            } else {
+                advance();
+            }
+        }
+        
+        consume(TokenType::RIGHT_BRACE);
+    }
+    
+    return customNode;
 }
 
 std::shared_ptr<BaseNode> CHTLParser::parseStyle() {
-    // 解析样式块的简化实现
-    return nullptr;
+    if (!consume(TokenType::STYLE)) {
+        return nullptr;
+    }
+    
+    auto styleNode = std::make_shared<StyleNode>();
+    styleNode->setPosition(current().line, current().column);
+    
+    if (consume(TokenType::LEFT_BRACE)) {
+        // 解析样式内容
+        while (!isAtEnd() && !match(TokenType::RIGHT_BRACE)) {
+            skipWhitespace();
+            if (isAtEnd()) break;
+            
+            const Token& token = current();
+            
+            if (token.type == TokenType::IDENTIFIER) {
+                // 解析样式属性
+                std::string property = token.value;
+                advance();
+                
+                if (consume(TokenType::COLON)) {
+                    std::string value = parseAttributeValue();
+                    styleNode->addStyleProperty(property, value);
+                }
+            } else if (token.value == ".") {
+                // 类选择器
+                advance();
+                if (match(TokenType::IDENTIFIER)) {
+                    std::string className = current().value;
+                    advance();
+                    styleNode->setStyleType(StyleNode::StyleType::CLASS);
+                    styleNode->setSelector("." + className);
+                    
+                    // 解析类选择器内容
+                    if (consume(TokenType::LEFT_BRACE)) {
+                        parseStyleProperties(styleNode);
+                        consume(TokenType::RIGHT_BRACE);
+                    }
+                }
+            } else if (token.value == "#") {
+                // ID选择器
+                advance();
+                if (match(TokenType::IDENTIFIER)) {
+                    std::string idName = current().value;
+                    advance();
+                    styleNode->setStyleType(StyleNode::StyleType::ID);
+                    styleNode->setSelector("#" + idName);
+                    
+                    // 解析ID选择器内容
+                    if (consume(TokenType::LEFT_BRACE)) {
+                        parseStyleProperties(styleNode);
+                        consume(TokenType::RIGHT_BRACE);
+                    }
+                }
+            } else if (token.value == "&") {
+                // 上下文推导
+                advance();
+                if (match(TokenType::COLON)) {
+                    std::string pseudo = token.value;
+                    advance();
+                    if (match(TokenType::IDENTIFIER)) {
+                        pseudo += current().value;
+                        advance();
+                        styleNode->setStyleType(StyleNode::StyleType::PSEUDO_CLASS);
+                        styleNode->setSelector("&" + pseudo);
+                        
+                        // 解析伪类内容
+                        if (consume(TokenType::LEFT_BRACE)) {
+                            parseStyleProperties(styleNode);
+                            consume(TokenType::RIGHT_BRACE);
+                        }
+                    }
+                }
+            } else {
+                advance();
+            }
+        }
+        
+        consume(TokenType::RIGHT_BRACE);
+    }
+    
+    return styleNode;
+}
+
+void CHTLParser::parseStyleProperties(std::shared_ptr<BaseNode> styleNode) {
+    while (!isAtEnd() && !match(TokenType::RIGHT_BRACE)) {
+        skipWhitespace();
+        if (isAtEnd()) break;
+        
+        const Token& token = current();
+        
+        if (token.type == TokenType::IDENTIFIER) {
+            std::string property = token.value;
+            advance();
+            
+            if (consume(TokenType::COLON)) {
+                std::string value = parseAttributeValue();
+                auto styleNodePtr = std::static_pointer_cast<StyleNode>(styleNode);
+                styleNodePtr->addStyleProperty(property, value);
+            }
+        } else {
+            advance();
+        }
+    }
 }
 
 std::shared_ptr<BaseNode> CHTLParser::parseScript() {
@@ -291,6 +508,14 @@ std::string CHTLParser::parseAttributeValue() {
         advance();
         return token.value;
     } else if (match(TokenType::LITERAL)) {
+        const Token& token = current();
+        advance();
+        return token.value;
+    } else if (match(TokenType::NUMBER)) {
+        const Token& token = current();
+        advance();
+        return token.value;
+    } else if (match(TokenType::IDENTIFIER)) {
         const Token& token = current();
         advance();
         return token.value;

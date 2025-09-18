@@ -60,6 +60,12 @@ set(CHTL_SOURCES
     CHTL/CHTLNode/ElementNode.h
     CHTL/CHTLNode/TextNode.cpp
     CHTL/CHTLNode/TextNode.h
+    CHTL/CHTLNode/StyleNode.cpp
+    CHTL/CHTLNode/StyleNode.h
+    CHTL/CHTLNode/TemplateNode.cpp
+    CHTL/CHTLNode/TemplateNode.h
+    CHTL/CHTLNode/CustomNode.cpp
+    CHTL/CHTLNode/CustomNode.h
 )
 
 set(CHTL_JS_SOURCES

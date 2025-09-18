@@ -1,0 +1,39 @@
+[Template] @Style DefaultText
+{
+    color: black;
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+[Template] @Element Box
+{
+    div
+    {
+        style
+        {
+            width: 200px;
+            height: 200px;
+            background-color: red;
+        }
+    }
+}
+
+[Custom] @Style CustomText
+{
+    color: blue;
+    font-weight: bold;
+}
+
+html
+{
+    body
+    {
+        div
+        {
+            text
+            {
+                测试模板功能
+            }
+        }
+    }
+}

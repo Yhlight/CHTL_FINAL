@@ -110,6 +110,12 @@ private:
     std::string parseAttributeValue();
     
     /**
+     * 解析样式属性
+     * @param styleNode 样式节点
+     */
+    void parseStyleProperties(std::shared_ptr<BaseNode> styleNode);
+    
+    /**
      * 解析字面量
      * @return 字面量值
      */
