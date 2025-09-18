@@ -1,0 +1,33 @@
+[Template] @Style DefaultText
+{
+	color: black;
+	line-height: 1.6;
+}
+
+[Template] @Element Box
+{
+    div {
+        class: "box-container";
+        p {
+            style {
+                @Style DefaultText;
+                font-size: 16px;
+            }
+            text { "This is a box created from a template." }
+        }
+    }
+}
+
+html {
+    body {
+        # Using the Box template
+        @Element Box;
+
+        div {
+            style {
+                @Style DefaultText;
+            }
+            text { "This is a standalone div with a template style." }
+        }
+    }
+}
