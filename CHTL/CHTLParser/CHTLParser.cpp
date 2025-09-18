@@ -6,6 +6,7 @@
 #include "../Expression/Expr.h"
 #include <iostream>
 #include <stdexcept>
+#include <set>
 
 namespace CHTL {
 
@@ -180,22 +181,30 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
 // --- Document Parser Implementation ---
 
 std::unique_ptr<BaseNode> CHTLParser::parse() {
+    // Top-level declarations can be templates or a single root element.
     while (peek().type == TokenType::LEFT_BRACKET) {
         if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Template") {
             parseTemplateDeclaration();
         } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
-            parseOriginBlock();
+            // This is likely a global [Origin] block, handle if necessary
+            // For now, we assume [Origin] is handled inside elements.
+            break;
         } else {
             break;
         }
     }
 
     if (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
+        // After templates, we expect a single root element declaration.
         auto nodes = parseDeclaration();
         if (nodes.size() == 1) {
             return std::move(nodes[0]);
-        } else {
-            error(peek(), "Expected a single root element declaration.");
+        } else if (nodes.empty()) {
+            // It's possible the file only contained template definitions.
+            return nullptr;
+        }
+        else {
+            error(peek(), "Expected a single root element declaration after templates.");
         }
     }
 
@@ -203,37 +212,59 @@ std::unique_ptr<BaseNode> CHTLParser::parse() {
 }
 
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
-    if (check(TokenType::AT)) {
-        return parseElementTemplateUsage();
-    }
-
-    if (peek().type == TokenType::LEFT_BRACKET && tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
-        std::vector<std::unique_ptr<BaseNode>> nodes;
-        nodes.push_back(parseOriginBlock());
-        return nodes;
-    }
-
     std::vector<std::unique_ptr<BaseNode>> nodes;
-    if (match({TokenType::TEXT})) {
+
+    if (check(TokenType::HASHTAG_COMMENT)) {
+        nodes.push_back(parseComment());
+    } else if (check(TokenType::TEXT)) {
+        advance(); // Consume 'text'
         consume(TokenType::LEFT_BRACE, "Expect '{' after 'text'.");
-        Token content = consume(TokenType::STRING, "Expect string literal inside text block.");
+
+        std::string text_content;
+        if (check(TokenType::STRING)) {
+            text_content = advance().lexeme;
+        } else {
+            // Less greedy version for unquoted text
+            static const std::set<TokenType> textLikeTokens = {
+                TokenType::IDENTIFIER, TokenType::NUMBER, TokenType::DOT, TokenType::MINUS,
+                TokenType::PLUS, TokenType::STAR, TokenType::SLASH, TokenType::PERCENT,
+                TokenType::EQUAL, TokenType::COLON, TokenType::QUESTION, TokenType::AMPERSAND,
+                TokenType::PIPE, TokenType::LESS, TokenType::GREATER
+            };
+            while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                if (textLikeTokens.count(peek().type)) {
+                    if (!text_content.empty()) text_content += " ";
+                    text_content += advance().lexeme;
+                } else {
+                    // Stop if we see a token that's definitely not part of text content
+                    break;
+                }
+            }
+        }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after text block content.");
-        nodes.push_back(std::make_unique<TextNode>(content.lexeme));
-        return nodes;
-    }
+        nodes.push_back(std::make_unique<TextNode>(text_content));
 
-    if (match({TokenType::STYLE})) {
+    } else if (check(TokenType::STYLE)) {
+        advance(); // Consume 'style'
         nodes.push_back(parseStyleBlock());
-        return nodes;
-    }
-
-    if (check(TokenType::IDENTIFIER)) {
+    } else if (check(TokenType::AT)) {
+        return parseElementTemplateUsage(); // This returns a vector
+    } else if (peek().type == TokenType::LEFT_BRACKET && tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
+        nodes.push_back(parseOriginBlock());
+    } else if (check(TokenType::IDENTIFIER)) {
         nodes.push_back(parseElement());
-        return nodes;
+    } else if (!isAtEnd() && !check(TokenType::RIGHT_BRACE)) {
+        // Only error if we are not at the end and not about to close a block.
+        // This prevents errors on empty blocks.
+        error(peek(), "Expect a declaration (element, text, style, comment, or template usage).");
     }
 
-    error(peek(), "Expect a declaration (element, text, style, or template usage).");
-    return {};
+    return nodes;
+}
+
+std::unique_ptr<BaseNode> CHTLParser::parseComment() {
+    Token commentToken = consume(TokenType::HASHTAG_COMMENT, "Expect comment.");
+    return std::make_unique<CommentNode>(commentToken.lexeme);
 }
 
 std::unique_ptr<ElementNode> CHTLParser::parseElement() {
@@ -243,9 +274,25 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
     consume(TokenType::LEFT_BRACE, "Expect '{' after element name.");
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        if (peek().type == TokenType::IDENTIFIER && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
+        // Special case for `text: "value";`
+        if (check(TokenType::TEXT) && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
+            advance(); // consume 'text'
+            consume(TokenType::COLON, "Expect ':' after 'text'.");
+            Token value_token;
+            if (match({TokenType::STRING, TokenType::IDENTIFIER, TokenType::NUMBER})) {
+                value_token = previous();
+            } else {
+                error(peek(), "Expect a value for text attribute.");
+            }
+            consume(TokenType::SEMICOLON, "Expect ';' after text value.");
+            element->addChild(std::make_unique<TextNode>(value_token.lexeme));
+        }
+        // Generic attribute parsing
+        else if (check(TokenType::IDENTIFIER) && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
             parseAttribute(element.get());
-        } else {
+        }
+        // Child node parsing
+        else {
             for (auto& child : parseDeclaration()) {
                 element->addChild(std::move(child));
             }
@@ -268,7 +315,6 @@ void CHTLParser::parseAttribute(ElementNode* element) {
     }
 
     consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
-
     element->addAttribute({key.lexeme, value_token.lexeme});
 }
 

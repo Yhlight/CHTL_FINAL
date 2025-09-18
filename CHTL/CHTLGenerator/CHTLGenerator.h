@@ -28,6 +28,7 @@ public:
     void visit(TextNode& node) override;
     void visit(StyleNode& node) override;
     void visit(OriginNode& node) override;
+    void visit(CommentNode& node) override;
 
 private:
     const std::map<std::string, TemplateDefinitionNode>& templates;

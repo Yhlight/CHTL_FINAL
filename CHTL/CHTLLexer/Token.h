@@ -32,6 +32,7 @@ enum class TokenType {
     IDENTIFIER,
     STRING,
     NUMBER,
+    HASHTAG_COMMENT,             // # A comment to be preserved for generation
 
     // Keywords
     STYLE,

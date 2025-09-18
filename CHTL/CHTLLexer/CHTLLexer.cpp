@@ -66,6 +66,23 @@ void CHTLLexer::scanToken() {
             addToken(match('|') ? TokenType::PIPE_PIPE : TokenType::PIPE);
             break;
 
+        case '#':
+            if (peek() == ' ') {
+                // A generator comment goes until the end of the line.
+                // Consume the space
+                advance();
+                // Update start to not include '# ' in the lexeme
+                start = current;
+                while (peek() != '\n' && !isAtEnd()) {
+                    advance();
+                }
+                addToken(TokenType::HASHTAG_COMMENT, source.substr(start, current - start));
+            } else {
+                // Not a valid comment, treat as a symbol
+                addToken(TokenType::SYMBOL);
+            }
+            break;
+
         // Ignore whitespace.
         case ' ':
         case '\r':
@@ -184,7 +201,7 @@ void CHTLLexer::number() {
 }
 
 void CHTLLexer::identifier() {
-    while (isalnum(peek()) || peek() == '_') advance();
+    while (isalnum(peek()) || peek() == '_' || peek() == '-') advance();
 
     std::string text = source.substr(start, current - start);
 

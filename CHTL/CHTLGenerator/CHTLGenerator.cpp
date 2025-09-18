@@ -3,6 +3,7 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
+#include "../CHTLNode/CommentNode.h"
 #include "../Expression/ExpressionEvaluator.h" // Include the new evaluator
 #include <unordered_set>
 #include <algorithm> // For std::find_if
@@ -137,6 +138,10 @@ void CHTLGenerator::visit(OriginNode& node) {
             // Not handled yet, but will be placed in a future JS output.
             break;
     }
+}
+
+void CHTLGenerator::visit(CommentNode& node) {
+    html_output << "<!-- " << node.text << " -->";
 }
 
 } // namespace CHTL

@@ -30,12 +30,14 @@ int main() {
         std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
 
         // 3. Generation
-        CHTL::CHTLGenerator generator(parser.getTemplateDefinitions());
-        CHTL::CompilationResult result = generator.generate(ast.get());
+        if (ast) {
+            CHTL::CHTLGenerator generator(parser.getTemplateDefinitions());
+            CHTL::CompilationResult result = generator.generate(ast.get());
 
-        // 4. Verification
-        std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n" << std::endl;
-        std::cout << "--- Generated CSS ---\n" << result.css << "\n---------------------\n" << std::endl;
+            // 4. Verification
+            std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n" << std::endl;
+            std::cout << "--- Generated CSS ---\n" << result.css << "\n---------------------\n" << std::endl;
+        }
 
     } catch (const std::runtime_error& e) {
         std::cerr << "Caught a runtime_error exception: " << e.what() << std::endl;

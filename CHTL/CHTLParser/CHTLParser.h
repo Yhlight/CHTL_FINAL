@@ -5,6 +5,7 @@
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/ElementNode.h" // Include full definition for std::unique_ptr
 #include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../CHTLNode/CommentNode.h"
 #include <vector>
 #include <memory>
 #include <map>
@@ -51,6 +52,7 @@ private:
 
     // --- Document Parsing Methods ---
     std::vector<std::unique_ptr<BaseNode>> parseDeclaration();
+    std::unique_ptr<BaseNode> parseComment();
     std::unique_ptr<ElementNode> parseElement();
     void parseAttribute(ElementNode* element);
     std::unique_ptr<StyleNode> parseStyleBlock();

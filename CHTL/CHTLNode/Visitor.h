@@ -18,6 +18,7 @@ public:
     virtual void visit(TextNode& node) = 0;
     virtual void visit(StyleNode& node) = 0;
     virtual void visit(OriginNode& node) = 0;
+    virtual void visit(class CommentNode& node) = 0;
 };
 
 } // namespace CHTL
