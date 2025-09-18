@@ -1,24 +1,19 @@
 #include "../../CHTL/CHTLLexer/CHTLLexer.h"
 #include "../../CHTL/CHTLParser/CHTLParser.h"
 #include "../../CHTL/CHTLGenerator/CHTLGenerator.h"
+#include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 
 int main() {
-    std::string source = R"(
-        div {
-            id: box;
-            style {
-                width: 100px;
-                height: 200px;
-                // Simple conditional using implicit self-reference
-                background-color: width > 50px ? "red" : "blue";
-                // Chained conditional and logical operators
-                border: width > 200px || height < 100px ? "1px solid red" : "2px solid green";
-            }
-        }
-    )";
+    std::string entry_point = "Test/ImportTest/main.chtl";
+    std::string source = CHTL::FileSystem::readFile(entry_point);
 
-    std::cout << "--- Input CHTL ---\n" << source << "\n------------------\n" << std::endl;
+    if (source.empty()) {
+        std::cerr << "Failed to read entry point file: " << entry_point << std::endl;
+        return 1;
+    }
+
+    std::cout << "--- Input CHTL from " << entry_point << " ---\n" << source << "\n------------------\n" << std::endl;
 
     try {
         // 1. Lexing
@@ -26,7 +21,7 @@ int main() {
         std::vector<CHTL::Token> tokens = lexer.scanTokens();
 
         // 2. Parsing
-        CHTL::CHTLParser parser(source, tokens);
+        CHTL::CHTLParser parser(source, tokens, entry_point);
         std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
 
         // 3. Generation

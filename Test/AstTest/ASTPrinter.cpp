@@ -47,7 +47,7 @@ void ASTPrinter::visit(StyleNode& node) {
         std::cout << indentString() << "[Inline Props]" << std::endl;
         indent++;
         for (const auto& prop : node.inline_properties) {
-            std::cout << indentString() << prop.key << ": " << prop.value << ";" << std::endl;
+            std::cout << indentString() << prop.key << ": [expression];" << std::endl;
         }
         indent--;
     }
@@ -59,7 +59,7 @@ void ASTPrinter::visit(StyleNode& node) {
             std::cout << indentString() << rule.selector << " {" << std::endl;
             indent++;
             for (const auto& prop : rule.properties) {
-                std::cout << indentString() << prop.key << ": " << prop.value << ";" << std::endl;
+                std::cout << indentString() << prop.key << ": [expression];" << std::endl;
             }
             indent--;
             std::cout << indentString() << "}" << std::endl;

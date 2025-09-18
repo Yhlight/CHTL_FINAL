@@ -16,4 +16,12 @@ std::string FileSystem::readFile(const std::string& path) {
     return buffer.str();
 }
 
+std::string FileSystem::getDirectory(const std::string& path) {
+    size_t found = path.find_last_of("/\\");
+    if (found != std::string::npos) {
+        return path.substr(0, found + 1);
+    }
+    return ""; // No directory part
+}
+
 } // namespace CHTL

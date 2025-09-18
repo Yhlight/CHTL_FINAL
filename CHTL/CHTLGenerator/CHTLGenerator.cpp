@@ -3,9 +3,9 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
-#include "../Expression/ExpressionEvaluator.h" // Include the new evaluator
+#include "../Expression/ExpressionEvaluator.h"
 #include <unordered_set>
-#include <algorithm> // For std::find_if
+#include <algorithm>
 
 namespace CHTL {
 
@@ -14,13 +14,13 @@ const std::unordered_set<std::string> voidElements = {
     "link", "meta", "param", "source", "track", "wbr"
 };
 
-CHTLGenerator::CHTLGenerator(const std::map<std::string, TemplateDefinitionNode>& templates)
-    : templates(templates) {}
+CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates)
+    : templates(templates), doc_root(nullptr) {}
 
 CompilationResult CHTLGenerator::generate(BaseNode* root) {
     html_output.str("");
     css_output.str("");
-    this->doc_root = root; // Set the document root context
+    this->doc_root = root;
     if (root) {
         root->accept(*this);
     }
@@ -28,13 +28,11 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
 }
 
 void CHTLGenerator::visit(ElementNode& node) {
-    // --- Automation and Global CSS Generation ---
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             for (const auto& rule : styleNode->global_rules) {
                 std::string selector = rule.selector;
-                // Automation: if selector is a simple class or id, inject it.
-                if (selector.rfind('.', 0) == 0) { // Starts with .
+                if (selector.rfind('.', 0) == 0) {
                     std::string className = selector.substr(1);
                     auto it = std::find_if(node.attributes.begin(), node.attributes.end(),
                                            [](const HtmlAttribute& attr){ return attr.key == "class"; });
@@ -45,7 +43,7 @@ void CHTLGenerator::visit(ElementNode& node) {
                     } else {
                         node.attributes.push_back({"class", className});
                     }
-                } else if (selector.rfind('#', 0) == 0) { // Starts with #
+                } else if (selector.rfind('#', 0) == 0) {
                     node.attributes.push_back({"id", selector.substr(1)});
                 }
 
@@ -57,7 +55,6 @@ void CHTLGenerator::visit(ElementNode& node) {
                 css_output << selector << " {\n";
                 for (const auto& prop : rule.properties) {
                     ExpressionEvaluator evaluator(this->templates, this->doc_root);
-                    // The context for a global rule is the element it's defined in.
                     EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
                     css_output << "    " << prop.key << ": ";
                     if (result.value == 0 && !result.unit.empty()) {
@@ -72,15 +69,11 @@ void CHTLGenerator::visit(ElementNode& node) {
         }
     }
 
-    // --- HTML Tag Generation ---
     html_output << "<" << node.tagName;
-
-    // Append standard HTML attributes
     for (const auto& attr : node.attributes) {
         html_output << " " << attr.key << "=\"" << attr.value << "\"";
     }
 
-    // Process inline styles by evaluating their expression trees
     std::string style_str;
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
@@ -108,7 +101,6 @@ void CHTLGenerator::visit(ElementNode& node) {
 
     html_output << ">";
 
-    // Process children, skipping style nodes
     for (const auto& child : node.children) {
         if (dynamic_cast<StyleNode*>(child.get())) continue;
         child->accept(*this);
@@ -116,26 +108,13 @@ void CHTLGenerator::visit(ElementNode& node) {
     html_output << "</" << node.tagName << ">";
 }
 
-void CHTLGenerator::visit(TextNode& node) {
-    html_output << node.text;
-}
-
-void CHTLGenerator::visit(StyleNode& node) {
-    // This visitor method is intentionally left empty.
-    // StyleNodes are processed specially within visit(ElementNode&).
-}
-
+void CHTLGenerator::visit(TextNode& node) { html_output << node.text; }
+void CHTLGenerator::visit(StyleNode& node) {}
 void CHTLGenerator::visit(OriginNode& node) {
     switch (node.type) {
-        case OriginType::HTML:
-            html_output << node.content;
-            break;
-        case OriginType::STYLE:
-            css_output << node.content;
-            break;
-        case OriginType::JAVASCRIPT:
-            // Not handled yet, but will be placed in a future JS output.
-            break;
+        case OriginType::HTML: html_output << node.content; break;
+        case OriginType::STYLE: css_output << node.content; break;
+        case OriginType::JAVASCRIPT: break;
     }
 }
 

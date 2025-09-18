@@ -37,6 +37,8 @@ enum class TokenType {
     STYLE,
     TEXT,
     INHERIT,
+    FROM,
+    AS,
 
     // Special
     SYMBOL, // For single characters like -, #, etc.

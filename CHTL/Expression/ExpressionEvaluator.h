@@ -22,7 +22,7 @@ struct EvaluatedValue {
 // This class implements the ExprVisitor pattern to calculate the result of an expression tree.
 class ExpressionEvaluator : public ExprVisitor {
 public:
-    explicit ExpressionEvaluator(const std::map<std::string, TemplateDefinitionNode>& templates, BaseNode* doc_root);
+    explicit ExpressionEvaluator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, BaseNode* doc_root);
     EvaluatedValue evaluate(Expr* expr, ElementNode* current_context);
 
     void visit(BinaryExpr& expr) override;
@@ -36,7 +36,7 @@ public:
 private:
     ElementNode* findElement(BaseNode* context, const std::string& selector);
 
-    const std::map<std::string, TemplateDefinitionNode>& templates;
+    const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
     BaseNode* doc_root;
     ElementNode* current_context = nullptr;
     std::set<std::string> resolution_stack; // For circular dependency detection

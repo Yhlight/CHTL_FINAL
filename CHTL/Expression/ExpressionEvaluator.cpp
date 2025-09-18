@@ -1,4 +1,5 @@
 #include "ExpressionEvaluator.h"
+#include "Expr.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include <iostream>
@@ -12,7 +13,7 @@ static bool isTruthy(const EvaluatedValue& val) {
     return val.value != 0;
 }
 
-ExpressionEvaluator::ExpressionEvaluator(const std::map<std::string, TemplateDefinitionNode>& templates, BaseNode* doc_root)
+ExpressionEvaluator::ExpressionEvaluator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, BaseNode* doc_root)
     : templates(templates), doc_root(doc_root) {}
 
 EvaluatedValue ExpressionEvaluator::evaluate(Expr* expr, ElementNode* context) {
@@ -68,12 +69,15 @@ void ExpressionEvaluator::visit(VarExpr& expr) {
     }
 
     if (templates.count(expr.group)) {
-        const auto& template_def = templates.at(expr.group);
-        if (template_def.type == TemplateType::VAR && template_def.variables.count(expr.name)) {
-            resolution_stack.insert(full_var_name);
-            result = evaluate(template_def.variables.at(expr.name).get(), this->current_context);
-            resolution_stack.erase(full_var_name);
-            return;
+        const auto& ns_templates = templates.at(expr.group);
+        if (ns_templates.count(expr.name)) {
+            const auto& template_def = ns_templates.at(expr.name);
+             if (template_def.type == TemplateType::VAR && template_def.variables.count(expr.name)) { // This check is a bit redundant now
+                resolution_stack.insert(full_var_name);
+                result = evaluate(template_def.variables.at(expr.name).get(), this->current_context);
+                resolution_stack.erase(full_var_name);
+                return;
+            }
         }
     }
     throw std::runtime_error("Variable not found: " + full_var_name);

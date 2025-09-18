@@ -14,16 +14,19 @@ namespace CHTL {
 // The parser takes a stream of tokens and produces an Abstract Syntax Tree.
 class CHTLParser {
 public:
-    explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens);
+    explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path);
 
     // The main entry point for parsing.
     std::unique_ptr<BaseNode> parse();
 
-    const std::map<std::string, TemplateDefinitionNode>& getTemplateDefinitions() const { return template_definitions; }
+    const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getTemplateDefinitions() const { return template_definitions; }
+    std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getMutableTemplateDefinitions() { return template_definitions; }
 
 private:
     const std::string& source;
     const std::vector<Token>& tokens;
+    const std::string file_path;
+    std::string current_namespace;
     int current = 0;
 
     // --- Helper Methods ---
@@ -59,8 +62,10 @@ private:
     void error(const Token& token, const std::string& message);
 
     // --- Symbol Table for Templates ---
-    std::map<std::string, TemplateDefinitionNode> template_definitions;
+    // Namespace -> <Template Name, Template Definition>
+    std::map<std::string, std::map<std::string, TemplateDefinitionNode>> template_definitions;
     void parseTemplateDeclaration();
+    void parseImportStatement();
     void parseStyleTemplateUsage(StyleNode* styleNode);
     std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();
     std::unique_ptr<BaseNode> parseOriginBlock();

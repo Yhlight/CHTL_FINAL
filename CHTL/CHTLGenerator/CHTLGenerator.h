@@ -19,7 +19,7 @@ struct CompilationResult {
 // and generates the final HTML and CSS output.
 class CHTLGenerator : public Visitor {
 public:
-    explicit CHTLGenerator(const std::map<std::string, TemplateDefinitionNode>& templates);
+    explicit CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates);
     // The main entry point. It takes the root of the AST and returns the generated code.
     CompilationResult generate(BaseNode* root);
 
@@ -30,7 +30,7 @@ public:
     void visit(OriginNode& node) override;
 
 private:
-    const std::map<std::string, TemplateDefinitionNode>& templates;
+    const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
     BaseNode* doc_root = nullptr; // To provide context for the evaluator
     std::stringstream html_output;
     std::stringstream css_output;

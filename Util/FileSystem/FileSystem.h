@@ -8,6 +8,7 @@ namespace CHTL {
 class FileSystem {
 public:
     static std::string readFile(const std::string& path);
+    static std::string getDirectory(const std::string& path);
 };
 
 } // namespace CHTL

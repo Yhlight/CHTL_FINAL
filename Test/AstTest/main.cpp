@@ -26,7 +26,7 @@ int main() {
 
         // 2. Parsing
         std::cout << "\n--- Parsing ---" << std::endl;
-        CHTL::CHTLParser parser(source, tokens);
+        CHTL::CHTLParser parser(source, tokens, "test.chtl");
         std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
         std::cout << "Parsing complete." << std::endl;
 
