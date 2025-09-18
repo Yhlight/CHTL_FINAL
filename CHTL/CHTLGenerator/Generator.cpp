@@ -19,6 +19,9 @@ std::string Generator::generateNode(const Node* node) {
     if (const auto text = dynamic_cast<const TextNode*>(node)) {
         return generateTextNode(text);
     }
+    if (const auto comment = dynamic_cast<const CommentNode*>(node)) {
+        return comment->toString();
+    }
     return "<!-- Unknown Node Type -->";
 }
 
@@ -35,7 +38,19 @@ std::string Generator::generateElementNode(const ElementNode* node) {
 
     std::string html;
     html += "<" + node->tagName;
-    // TODO: Add attribute generation here in the future
+
+    for (const auto& attr : node->attributes) {
+        html += " " + attr.first + "=\"" + attr.second + "\"";
+    }
+
+    if (!node->styles.empty()) {
+        html += " style=\"";
+        for (const auto& style : node->styles) {
+            html += style.first + ":" + style.second + ";";
+        }
+        html += "\"";
+    }
+
     html += ">";
 
     for (const auto& child : node->children) {

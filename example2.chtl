@@ -1,0 +1,29 @@
+// Main container for the page
+html {
+    # This is the document head
+    head {
+        title { text { "CHTL Test Page" } }
+    }
+
+    /*
+      This is the main body of the document.
+      It contains a styled div.
+    */
+    body {
+        div {
+            id: main-content;
+            class: "container";
+
+            style {
+                width: 100px;
+                height: 200px;
+                background-color: red;
+            }
+
+            # A paragraph inside the div
+            p {
+                text { "Hello with attributes and styles!" }
+            }
+        }
+    }
+}

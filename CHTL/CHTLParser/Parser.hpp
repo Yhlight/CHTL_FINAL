@@ -17,9 +17,12 @@ public:
 
 private:
     void nextToken();
+    bool expectPeek(TokenType t);
     std::unique_ptr<Node> parseNode();
     std::unique_ptr<ElementNode> parseElementNode();
-    std::unique_ptr<TextNode> parseTextNode(); // Special handling for 'text' element content
+    void parseAttributes(ElementNode* element);
+    void parseStyleBlock(ElementNode* parent);
+    std::unique_ptr<CommentNode> parseCommentNode();
 
     Lexer& lexer;
     std::vector<std::string> errors;

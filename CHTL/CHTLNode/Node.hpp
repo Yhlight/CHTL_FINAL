@@ -10,12 +10,25 @@ namespace CHTL {
 // Forward declarations
 class ElementNode;
 class TextNode;
+class CommentNode;
 
 // Base class for all nodes in the AST
 class Node {
 public:
     virtual ~Node() = default;
     virtual std::string toString() const = 0;
+};
+
+// Represents a comment node, e.g., # This is a comment
+class CommentNode : public Node {
+public:
+    std::string value;
+
+    explicit CommentNode(std::string val) : value(std::move(val)) {}
+
+    std::string toString() const override {
+        return "<!-- " + value + " -->";
+    }
 };
 
 // Represents a text literal node
@@ -35,6 +48,7 @@ class ElementNode : public Node {
 public:
     std::string tagName;
     std::map<std::string, std::string> attributes;
+    std::map<std::string, std::string> styles;
     std::vector<std::unique_ptr<Node>> children;
 
     explicit ElementNode(std::string name) : tagName(std::move(name)) {}

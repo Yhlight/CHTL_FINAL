@@ -13,11 +13,13 @@ enum class TokenType {
     IDENT, // add, foobar, x, y, ...
     STRING, // "foobar"
     TEXT, // Unquoted literal text
+    COMMENT, // # this is a comment
 
     // Operators and Delimiters
     LBRACE, // {
     RBRACE, // }
     COLON, // :
+    EQUAL, // =
     SEMICOLON, // ;
 
     // For now, we will add more as we expand the language
@@ -31,9 +33,11 @@ inline std::string tokenTypeToString(TokenType type) {
         case TokenType::IDENT: return "IDENT";
         case TokenType::STRING: return "STRING";
         case TokenType::TEXT: return "TEXT";
+        case TokenType::COMMENT: return "COMMENT";
         case TokenType::LBRACE: return "{";
         case TokenType::RBRACE: return "}";
         case TokenType::COLON: return ":";
+        case TokenType::EQUAL: return "=";
         case TokenType::SEMICOLON: return ";";
         default: return "UNKNOWN";
     }
