@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CHTL Output</title>
+</head>
+<body>
+<!-- CHTL Fragment -->
+# Advanced CHTL Example
+use html5;
+
+[Configuration]
+{
+    DEBUG_MODE = false;
+    DISABLE_STYLE_AUTO_ADD_CLASS = false;
+    DISABLE_STYLE_AUTO_ADD_ID = false;
+}
+
+[Template] @Style DefaultText
+{
+    color: black;
+    font-size: 16px;
+    line-height: 1.6;
+    font-family: Arial, sans-serif;
+}
+
+[Template] @Element Card
+{
+    div
+    {
+        class: card;
+        style
+        {
+            .card
+            {
+                width: 300px;
+                height: 200px;
+                background-color: white;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            &:hover
+            {
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                transform: translateY(-2px);
+            }
+        }
+    }
+}
+
+[Custom] @Element Button
+{
+    button
+    {
+        class: btn;
+        style
+        {
+            .btn
+            {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.3s ease;
+            }
+            
+            &:hover
+            {
+                opacity: 0.8;
+            }
+        }
+    }
+}
+
+[Custom] @Var Theme
+{
+    primaryColor: #007bff;
+    secondaryColor: #6c757d;
+    successColor: #28a745;
+    dangerColor: #dc3545;
+    warningColor: #ffc107;
+    infoColor: #17a2b8;
+}
+
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                CHTL Advanced Example
+            }
+        }
+        
+        meta
+        {
+            charset: utf-8;
+        }
+        
+        meta
+        {
+            name: viewport;
+            content: width=device-width, initial-scale=1.0;
+        }
+    }
+    
+    body
+    {
+        style
+        {
+            @Style DefaultText;
+            
+            body
+            {
+                margin: 0;
+                padding: 20px;
+                background-color: #f8f9fa;
+            }
+            
+            .container
+            {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            
+            .header
+            {
+                text-align: center;
+                margin-bottom: 40px;
+            }
+            
+            .content
+            {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+            }
+        }
+        
+        div
+        {
+            class: container;
+            
+            header
+            {
+                class: header;
+                
+                h1
+                {
+                    style
+                    {
+                        color: Theme(primaryColor);
+                        font-size: 2.5em;
+                        margin-bottom: 10px;
+                    }
+                    
+                    text
+                    {
+                        Welcome to CHTL
+                    }
+                }
+                
+                p
+                {
+                    style
+                    {
+                        color: Theme(secondaryColor);
+                        font-size: 1.2em;
+                    }
+                    
+                    text
+                    {
+                        A modern hypertext language for web development
+                    }
+                }
+            }
+            
+            main
+            {
+                class: content;
+                
+                @Element Card
+                {
+                    h3
+                    {
+                        style
+                        {
+                            color: Theme(primaryColor);
+                            margin-bottom: 15px;
+                        }
+                        
+                        text
+                        {
+                            Features
+                        }
+                    }
+                    
+                    ul
+                    {
+                        style
+                        {
+                            list-style: none;
+                            padding: 0;
+                        }
+                        
+                        li
+                        {
+                            style
+                            {
+                                padding: 5px 0;
+                                border-bottom: 1px solid #eee;
+                            }
+                            
+                            text
+                            {
+                                ✓ Template System
+                            }
+                        }
+                        
+                        li
+                        {
+                            style
+                            {
+                                padding: 5px 0;
+                                border-bottom: 1px solid #eee;
+                            }
+                            
+                            text
+                            {
+                                ✓ Custom Elements
+                            }
+                        }
+                        
+                        li
+                        {
+                            style
+                            {
+                                padding: 5px 0;
+                                border-bottom: 1px solid #eee;
+                            }
+                            
+                            text
+                            {
+                                ✓ Style Blocks
+                            }
+                        }
+                        
+                        li
+                        {
+                            style
+                            {
+                                padding: 5px 0;
+                                border-bottom: 1px solid #eee;
+                            }
+                            
+                            text
+                            {
+                                ✓ Script Integration
+                            }
+                        }
+                    }
+                }
+                
+                @Element Card
+                {
+                    h3
+                    {
+                        style
+                        {
+                            color: Theme(successColor);
+                            margin-bottom: 15px;
+                        }
+                        
+                        text
+                        {
+                            Benefits
+                        }
+                    }
+                    
+                    p
+                    {
+                        style
+                        {
+                            line-height: 1.6;
+                            margin-bottom: 15px;
+                        }
+                        
+                        text
+                        {
+                            CHTL provides a more intuitive way to write HTML with powerful features like local style blocks, template system, and custom elements.
+                        }
+                    }
+                }
+                
+                @Element Card
+                {
+                    h3
+                    {
+                        style
+                        {
+                            color: Theme(infoColor);
+                            margin-bottom: 15px;
+                        }
+                        
+                        text
+                        {
+                            Get Started
+                        }
+                    }
+                    
+                    p
+                    {
+                        style
+                        {
+                            margin-bottom: 20px;
+                        }
+                        
+                        text
+                        {
+                            Ready to try CHTL? Check out our documentation and examples.
+                        }
+                    }
+                    
+                    @Element Button
+                    {
+                        style
+                        {
+                            background-color: Theme(primaryColor);
+                            color: white;
+                        }
+                        
+                        text
+                        {
+                            Learn More
+                        }
+                    }
+                }
+            }
+        }
+        
+        script
+        {
+            // CHTL JS Example
+            const cards = {{.card}};
+            
+            cards->Listen {
+                click: () => {
+                    console.log('Card clicked!');
+                },
+                
+                mouseenter: () => {
+                    console.log('Card hovered!');
+                }
+            };
+            
+            // Animation example
+            const anim = Animate {
+                target: {{.card}},
+                duration: 1000,
+                easing: ease-in-out,
+                
+                begin: {
+                    opacity: 0,
+                    transform: 'translateY(20px)'
+                },
+                
+                when: [
+                    {
+                        at: 0.5,
+                        opacity: 0.5,
+                        transform: 'translateY(10px)'
+                    }
+                ],
+                
+                end: {
+                    opacity: 1,
+                    transform: 'translateY(0)'
+                },
+                
+                loop: 1,
+                delay: 100
+            };
+            
+            // Router example
+            Router {
+                url: "/",
+                page: {{.content}}
+            };
+            
+            Router {
+                url: "/about",
+                page: {{.header}}
+            };
+        }
+    }
+}
+</body>
+</html>

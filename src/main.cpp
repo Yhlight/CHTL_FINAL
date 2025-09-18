@@ -1,86 +1,142 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <chrono>
 #include "CHTL/CHTLLexer.h"
-#include "CHTL/Common.h"
+#include "CHTL/UnifiedScanner.h"
+#include "CHTL/CompilerDispatcher.h"
+#include "CHTL/BaseNode.h"
 
 using namespace CHTL;
 
 int main(int argc, char* argv[]) {
-    std::cout << "CHTL Compiler v1.0.0" << std::endl;
-    std::cout << "====================" << std::endl;
-    
     if (argc < 2) {
-        std::cout << "Usage: chtl <input_file> [output_file]" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <input.chtl> [options]" << std::endl;
+        std::cerr << "Options:" << std::endl;
+        std::cerr << "  --inline          Inline CSS and JS" << std::endl;
+        std::cerr << "  --inline-css      Inline CSS only" << std::endl;
+        std::cerr << "  --inline-js       Inline JS only" << std::endl;
+        std::cerr << "  --default-struct  Generate default HTML structure" << std::endl;
+        std::cerr << "  --debug           Enable debug mode" << std::endl;
+        std::cerr << "  --output <file>   Specify output file" << std::endl;
         return 1;
     }
     
     std::string inputFile = argv[1];
-    std::string outputFile = argc > 2 ? argv[2] : "output.html";
+    std::string outputFile = "output.html";
+    bool inlineMode = false;
+    bool inlineCSS = false;
+    bool inlineJS = false;
+    bool defaultStruct = false;
+    bool debugMode = false;
+    
+    // 解析命令行参数
+    for (int i = 2; i < argc; i++) {
+        std::string arg = argv[i];
+        if (arg == "--inline") {
+            inlineMode = true;
+            inlineCSS = true;
+            inlineJS = true;
+        } else if (arg == "--inline-css") {
+            inlineCSS = true;
+        } else if (arg == "--inline-js") {
+            inlineJS = true;
+        } else if (arg == "--default-struct") {
+            defaultStruct = true;
+        } else if (arg == "--debug") {
+            debugMode = true;
+        } else if (arg == "--output" && i + 1 < argc) {
+            outputFile = argv[++i];
+        }
+    }
     
     // 读取输入文件
     std::ifstream file(inputFile);
     if (!file.is_open()) {
-        std::cerr << "Error: Cannot open input file: " << inputFile << std::endl;
+        std::cerr << "Error: Cannot open file " << inputFile << std::endl;
         return 1;
     }
     
-    std::string content((std::istreambuf_iterator<char>(file)),
-                        std::istreambuf_iterator<char>());
+    std::string sourceCode((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     file.close();
     
+    std::cout << "CHTL Compiler v2.0.0" << std::endl;
     std::cout << "Input file: " << inputFile << std::endl;
-    std::cout << "File size: " << content.length() << " bytes" << std::endl;
+    std::cout << "Output file: " << outputFile << std::endl;
     
-    // 创建词法分析器
-    CHTLLexer lexer(content);
+    auto startTime = std::chrono::high_resolution_clock::now();
     
-    // 进行词法分析
-    std::cout << "Starting lexical analysis..." << std::endl;
-    TokenList tokens = lexer.tokenize();
-    
-    std::cout << "Tokens found: " << tokens.size() << std::endl;
-    
-    // 检查错误
-    if (lexer.hasErrors()) {
-        std::cout << "Lexical errors found:" << std::endl;
-        lexer.printErrors();
+    try {
+        // 创建编译器调度器
+        CompilerDispatcher dispatcher;
+        
+        // 配置编译选项
+        CompilerDispatcher::CompileConfig config;
+        config.enableInlineCSS = inlineCSS;
+        config.enableInlineJS = inlineJS;
+        config.enableDefaultStruct = defaultStruct;
+        config.enableDebugMode = debugMode;
+        config.outputDirectory = ".";
+        
+        // 执行编译
+        auto result = dispatcher.compile(sourceCode, config);
+        
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        
+        if (result.success) {
+            // 写入输出文件
+            std::ofstream outFile(outputFile);
+            if (outFile.is_open()) {
+                outFile << result.htmlOutput;
+                outFile.close();
+                std::cout << "Output written to: " << outputFile << std::endl;
+            } else {
+                std::cerr << "Error: Cannot create output file " << outputFile << std::endl;
+                return 1;
+            }
+            
+            // 写入CSS文件（如果未内联）
+            if (!inlineCSS && !result.cssOutput.empty()) {
+                std::ofstream cssFile("styles.css");
+                if (cssFile.is_open()) {
+                    cssFile << result.cssOutput;
+                    cssFile.close();
+                    std::cout << "CSS written to: styles.css" << std::endl;
+                }
+            }
+            
+            // 写入JS文件（如果未内联）
+            if (!inlineJS && !result.jsOutput.empty()) {
+                std::ofstream jsFile("scripts.js");
+                if (jsFile.is_open()) {
+                    jsFile << result.jsOutput;
+                    jsFile.close();
+                    std::cout << "JS written to: scripts.js" << std::endl;
+                }
+            }
+            
+            std::cout << "Compilation completed successfully!" << std::endl;
+            std::cout << "Compile time: " << duration.count() << "ms" << std::endl;
+            std::cout << "Memory usage: " << result.memoryUsage << " bytes" << std::endl;
+            
+            // 显示警告
+            if (!result.warnings.empty()) {
+                std::cout << "Warnings:" << std::endl;
+                for (const auto& warning : result.warnings) {
+                    std::cout << "  " << warning << std::endl;
+                }
+            }
+            
+        } else {
+            std::cerr << "Compilation failed: " << result.errorMessage << std::endl;
+            return 1;
+        }
+        
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
-    
-    // 打印前几个token作为示例
-    std::cout << "First 10 tokens:" << std::endl;
-    for (size_t i = 0; i < std::min(tokens.size(), size_t(10)); i++) {
-        const Token& token = tokens[i];
-        std::cout << "  " << i << ": " << static_cast<int>(token.type) 
-                  << " - " << token.value << std::endl;
-    }
-    
-    // 生成输出文件
-    std::ofstream outFile(outputFile);
-    if (!outFile.is_open()) {
-        std::cerr << "Error: Cannot create output file: " << outputFile << std::endl;
-        return 1;
-    }
-    
-    // 简单的HTML输出（目前只是示例）
-    outFile << "<!DOCTYPE html>" << std::endl;
-    outFile << "<html>" << std::endl;
-    outFile << "<head>" << std::endl;
-    outFile << "  <title>CHTL Output</title>" << std::endl;
-    outFile << "</head>" << std::endl;
-    outFile << "<body>" << std::endl;
-    outFile << "  <h1>CHTL Compiler Output</h1>" << std::endl;
-    outFile << "  <p>This is a basic output from CHTL compiler.</p>" << std::endl;
-    outFile << "  <p>Input file: " << inputFile << "</p>" << std::endl;
-    outFile << "  <p>Tokens processed: " << tokens.size() << "</p>" << std::endl;
-    outFile << "</body>" << std::endl;
-    outFile << "</html>" << std::endl;
-    
-    outFile.close();
-    
-    std::cout << "Output file generated: " << outputFile << std::endl;
-    std::cout << "Compilation completed successfully!" << std::endl;
     
     return 0;
 }

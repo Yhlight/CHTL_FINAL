@@ -5,6 +5,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/CHTLCore.dir/CHTL/BaseNode/BaseNode.cpp.o.d"
   "CMakeFiles/CHTLCore.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o"
   "CMakeFiles/CHTLCore.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o.d"
+  "CMakeFiles/CHTLCore.dir/CHTL/CompilerDispatcher/CompilerDispatcher.cpp.o"
+  "CMakeFiles/CHTLCore.dir/CHTL/CompilerDispatcher/CompilerDispatcher.cpp.o.d"
   "CMakeFiles/CHTLCore.dir/CHTL/ConfigurationNode/ConfigurationNode.cpp.o"
   "CMakeFiles/CHTLCore.dir/CHTL/ConfigurationNode/ConfigurationNode.cpp.o.d"
   "CMakeFiles/CHTLCore.dir/CHTL/CustomNode/CustomNode.cpp.o"
@@ -27,6 +29,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/CHTLCore.dir/CHTL/TemplateNode/TemplateNode.cpp.o.d"
   "CMakeFiles/CHTLCore.dir/CHTL/TextNode/TextNode.cpp.o"
   "CMakeFiles/CHTLCore.dir/CHTL/TextNode/TextNode.cpp.o.d"
+  "CMakeFiles/CHTLCore.dir/CHTL/UnifiedScanner/UnifiedScanner.cpp.o"
+  "CMakeFiles/CHTLCore.dir/CHTL/UnifiedScanner/UnifiedScanner.cpp.o.d"
 )
 
 # Per-language clean rules from dependency scanning.

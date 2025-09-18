@@ -223,6 +223,30 @@ CHTL/CHTLLexer/CHTLLexer.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTL/CHTLLexer/CHTLLexer.cpp.s
 .PHONY : CHTL/CHTLLexer/CHTLLexer.cpp.s
 
+CHTL/CompilerDispatcher/CompilerDispatcher.o: CHTL/CompilerDispatcher/CompilerDispatcher.cpp.o
+.PHONY : CHTL/CompilerDispatcher/CompilerDispatcher.o
+
+# target to build an object file
+CHTL/CompilerDispatcher/CompilerDispatcher.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTL/CompilerDispatcher/CompilerDispatcher.cpp.o
+.PHONY : CHTL/CompilerDispatcher/CompilerDispatcher.cpp.o
+
+CHTL/CompilerDispatcher/CompilerDispatcher.i: CHTL/CompilerDispatcher/CompilerDispatcher.cpp.i
+.PHONY : CHTL/CompilerDispatcher/CompilerDispatcher.i
+
+# target to preprocess a source file
+CHTL/CompilerDispatcher/CompilerDispatcher.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTL/CompilerDispatcher/CompilerDispatcher.cpp.i
+.PHONY : CHTL/CompilerDispatcher/CompilerDispatcher.cpp.i
+
+CHTL/CompilerDispatcher/CompilerDispatcher.s: CHTL/CompilerDispatcher/CompilerDispatcher.cpp.s
+.PHONY : CHTL/CompilerDispatcher/CompilerDispatcher.s
+
+# target to generate assembly for a file
+CHTL/CompilerDispatcher/CompilerDispatcher.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTL/CompilerDispatcher/CompilerDispatcher.cpp.s
+.PHONY : CHTL/CompilerDispatcher/CompilerDispatcher.cpp.s
+
 CHTL/ConfigurationNode/ConfigurationNode.o: CHTL/ConfigurationNode/ConfigurationNode.cpp.o
 .PHONY : CHTL/ConfigurationNode/ConfigurationNode.o
 
@@ -487,6 +511,30 @@ CHTL/TextNode/TextNode.cpp.s:
 	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTL/TextNode/TextNode.cpp.s
 .PHONY : CHTL/TextNode/TextNode.cpp.s
 
+CHTL/UnifiedScanner/UnifiedScanner.o: CHTL/UnifiedScanner/UnifiedScanner.cpp.o
+.PHONY : CHTL/UnifiedScanner/UnifiedScanner.o
+
+# target to build an object file
+CHTL/UnifiedScanner/UnifiedScanner.cpp.o:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTL/UnifiedScanner/UnifiedScanner.cpp.o
+.PHONY : CHTL/UnifiedScanner/UnifiedScanner.cpp.o
+
+CHTL/UnifiedScanner/UnifiedScanner.i: CHTL/UnifiedScanner/UnifiedScanner.cpp.i
+.PHONY : CHTL/UnifiedScanner/UnifiedScanner.i
+
+# target to preprocess a source file
+CHTL/UnifiedScanner/UnifiedScanner.cpp.i:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTL/UnifiedScanner/UnifiedScanner.cpp.i
+.PHONY : CHTL/UnifiedScanner/UnifiedScanner.cpp.i
+
+CHTL/UnifiedScanner/UnifiedScanner.s: CHTL/UnifiedScanner/UnifiedScanner.cpp.s
+.PHONY : CHTL/UnifiedScanner/UnifiedScanner.s
+
+# target to generate assembly for a file
+CHTL/UnifiedScanner/UnifiedScanner.cpp.s:
+	cd /workspace/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/CHTLCore.dir/build.make src/CMakeFiles/CHTLCore.dir/CHTL/UnifiedScanner/UnifiedScanner.cpp.s
+.PHONY : CHTL/UnifiedScanner/UnifiedScanner.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -506,6 +554,9 @@ help:
 	@echo "... CHTL/CHTLLexer/CHTLLexer.o"
 	@echo "... CHTL/CHTLLexer/CHTLLexer.i"
 	@echo "... CHTL/CHTLLexer/CHTLLexer.s"
+	@echo "... CHTL/CompilerDispatcher/CompilerDispatcher.o"
+	@echo "... CHTL/CompilerDispatcher/CompilerDispatcher.i"
+	@echo "... CHTL/CompilerDispatcher/CompilerDispatcher.s"
 	@echo "... CHTL/ConfigurationNode/ConfigurationNode.o"
 	@echo "... CHTL/ConfigurationNode/ConfigurationNode.i"
 	@echo "... CHTL/ConfigurationNode/ConfigurationNode.s"
@@ -539,6 +590,9 @@ help:
 	@echo "... CHTL/TextNode/TextNode.o"
 	@echo "... CHTL/TextNode/TextNode.i"
 	@echo "... CHTL/TextNode/TextNode.s"
+	@echo "... CHTL/UnifiedScanner/UnifiedScanner.o"
+	@echo "... CHTL/UnifiedScanner/UnifiedScanner.i"
+	@echo "... CHTL/UnifiedScanner/UnifiedScanner.s"
 .PHONY : help
 
 

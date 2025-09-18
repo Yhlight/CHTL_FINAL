@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspace/src/CHTL/BaseNode/BaseNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/BaseNode/BaseNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/BaseNode/BaseNode.cpp.o.d"
   "/workspace/src/CHTL/CHTLLexer/CHTLLexer.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o.d"
+  "/workspace/src/CHTL/CompilerDispatcher/CompilerDispatcher.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/CompilerDispatcher/CompilerDispatcher.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/CompilerDispatcher/CompilerDispatcher.cpp.o.d"
   "/workspace/src/CHTL/ConfigurationNode/ConfigurationNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/ConfigurationNode/ConfigurationNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/ConfigurationNode/ConfigurationNode.cpp.o.d"
   "/workspace/src/CHTL/CustomNode/CustomNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/CustomNode/CustomNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/CustomNode/CustomNode.cpp.o.d"
   "/workspace/src/CHTL/ElementNode/ElementNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/ElementNode/ElementNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/ElementNode/ElementNode.cpp.o.d"
@@ -21,6 +22,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspace/src/CHTL/StyleNode/StyleNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/StyleNode/StyleNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/StyleNode/StyleNode.cpp.o.d"
   "/workspace/src/CHTL/TemplateNode/TemplateNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/TemplateNode/TemplateNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/TemplateNode/TemplateNode.cpp.o.d"
   "/workspace/src/CHTL/TextNode/TextNode.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/TextNode/TextNode.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/TextNode/TextNode.cpp.o.d"
+  "/workspace/src/CHTL/UnifiedScanner/UnifiedScanner.cpp" "src/CMakeFiles/CHTLCore.dir/CHTL/UnifiedScanner/UnifiedScanner.cpp.o" "gcc" "src/CMakeFiles/CHTLCore.dir/CHTL/UnifiedScanner/UnifiedScanner.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

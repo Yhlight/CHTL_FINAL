@@ -17,6 +17,10 @@ add_library(CHTLCore STATIC
     # Lexer
     CHTL/CHTLLexer/CHTLLexer.cpp
     
+    # Core Components
+    CHTL/UnifiedScanner/UnifiedScanner.cpp
+    CHTL/CompilerDispatcher/CompilerDispatcher.cpp
+    
     # Parser (to be implemented)
     # CHTL/CHTLParser/CHTLParser.cpp
     
@@ -34,14 +38,8 @@ add_library(CHTLCore STATIC
     # Util/StringUtil/StringUtil.cpp
     # Util/ZipUtil/ZipUtil.cpp
     
-    # Scanner (to be implemented)
-    # Scanner/UnifiedScanner.cpp
-    
     # Code Merger (to be implemented)
     # CodeMerger/CodeMerger.cpp
-    
-    # Compiler Dispatcher (to be implemented)
-    # CompilerDispatcher/CompilerDispatcher.cpp
 )
 
 # Set include directories
