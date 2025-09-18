@@ -1,0 +1,186 @@
+# 这是一个CHTL示例文件
+
+[Configuration]
+{
+    DEBUG_MODE = false;
+    INDEX_INITIAL_COUNT = 0;
+}
+
+[Template] @Style DefaultText
+{
+    color: "black";
+    line-height: 1.6;
+    font-family: "Arial", sans-serif;
+}
+
+[Template] @Element Box
+{
+    div
+    {
+        style
+        {
+            .box
+            {
+                width: 200px;
+                height: 200px;
+                background-color: red;
+                border: 1px solid black;
+                margin: 10px;
+                padding: 20px;
+            }
+        }
+        
+        text
+        {
+            Hello World
+        }
+    }
+}
+
+[Custom] @Element Card
+{
+    div
+    {
+        style
+        {
+            .card
+            {
+                width: 300px;
+                height: 200px;
+                background-color: white;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                margin: 10px;
+                padding: 20px;
+            }
+        }
+        
+        h3
+        {
+            style
+            {
+                .card-title
+                {
+                    color: #333;
+                    font-size: 18px;
+                    margin-bottom: 10px;
+                }
+            }
+            
+            text
+            {
+                Card Title
+            }
+        }
+        
+        p
+        {
+            style
+            {
+                .card-content
+                {
+                    color: #666;
+                    font-size: 14px;
+                    line-height: 1.5;
+                }
+            }
+            
+            text
+            {
+                This is a card content. It can contain any text or other elements.
+            }
+        }
+    }
+}
+
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                CHTL Example
+            }
+        }
+        
+        meta
+        {
+            charset: "UTF-8";
+        }
+        
+        meta
+        {
+            name: "viewport";
+            content: "width=device-width, initial-scale=1.0";
+        }
+    }
+    
+    body
+    {
+        style
+        {
+            .body
+            {
+                font-family: "Arial", sans-serif;
+                margin: 0;
+                padding: 20px;
+                background-color: #f5f5f5;
+            }
+        }
+        
+        h1
+        {
+            style
+            {
+                .main-title
+                {
+                    color: #333;
+                    text-align: center;
+                    margin-bottom: 30px;
+                }
+            }
+            
+            text
+            {
+                CHTL Example Page
+            }
+        }
+        
+        div
+        {
+            style
+            {
+                .container
+                {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    display: flex;
+                    flex-wrap: wrap;
+                    justify-content: center;
+                }
+            }
+            
+            @Element Box;
+            @Element Card;
+            @Element Card;
+        }
+        
+        script
+        {
+            console.log("CHTL Example Page Loaded");
+            
+            // 添加一些交互
+            document.addEventListener('DOMContentLoaded', function() {
+                const boxes = document.querySelectorAll('.box');
+                boxes.forEach(function(box) {
+                    box.addEventListener('click', function() {
+                        this.style.backgroundColor = 'blue';
+                    });
+                });
+            });
+        }
+    }
+}
