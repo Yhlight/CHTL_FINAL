@@ -5,13 +5,17 @@
 
 int main() {
     std::string source = R"(
+        [Template] @Var MyTheme {
+            primary-color: #3498db;
+            base-padding: 10px;
+            large-padding: MyTheme(base-padding) * 2;
+        }
+
         div {
             style {
-                width: 100px + 50px;      // 150px
-                height: 10 * 2em;         // 20em
-                padding: (100 + 20) / 6px;  // 20px
-                margin: 22px % 10px;      // 2px
-                font-size: 2 ** 4px;      // 16px
+                color: MyTheme(primary-color);
+                padding: MyTheme(large-padding);
+                margin: MyTheme(base-padding) / 2;
             }
         }
     )";
@@ -28,7 +32,7 @@ int main() {
         std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
 
         // 3. Generation
-        CHTL::CHTLGenerator generator;
+        CHTL::CHTLGenerator generator(parser.getTemplateDefinitions());
         CHTL::CompilationResult result = generator.generate(ast.get());
 
         // 4. Verification

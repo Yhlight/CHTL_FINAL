@@ -4,6 +4,9 @@
 
 namespace CHTL {
 
+ExpressionEvaluator::ExpressionEvaluator(const std::map<std::string, TemplateDefinitionNode>& templates)
+    : templates(templates) {}
+
 EvaluatedValue ExpressionEvaluator::evaluate(Expr* expr) {
     if (expr) {
         expr->accept(*this);
@@ -63,6 +66,31 @@ void ExpressionEvaluator::visit(BinaryExpr& expr) {
     }
 
     result = {result_value, result_unit};
+}
+
+void ExpressionEvaluator::visit(VarExpr& expr) {
+    std::string full_var_name = expr.group + "." + expr.name;
+
+    // Circular dependency check
+    if (resolution_stack.count(full_var_name)) {
+        throw std::runtime_error("Circular variable reference detected for: " + full_var_name);
+    }
+
+    // Find the variable definition
+    if (templates.count(expr.group)) {
+        const auto& template_def = templates.at(expr.group);
+        if (template_def.type == TemplateType::VAR && template_def.variables.count(expr.name)) {
+            // Add to stack before recursive call
+            resolution_stack.insert(full_var_name);
+            // Recursively evaluate the variable's value
+            result = evaluate(template_def.variables.at(expr.name).get());
+            // Remove from stack after call returns
+            resolution_stack.erase(full_var_name);
+            return;
+        }
+    }
+
+    throw std::runtime_error("Variable not found: " + full_var_name);
 }
 
 } // namespace CHTL

@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <map>
 
 namespace CHTL {
 
@@ -28,6 +29,9 @@ public:
 
     // Used for @Style templates
     std::vector<AttributeNode> style_properties;
+
+    // Used for @Var templates
+    std::map<std::string, std::unique_ptr<Expr>> variables;
 };
 
 } // namespace CHTL

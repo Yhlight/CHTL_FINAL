@@ -64,8 +64,35 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
         }
     }
 
-    if (match({TokenType::STRING, TokenType::IDENTIFIER})) {
+    if (match({TokenType::IDENTIFIER})) {
+        if (check(TokenType::LEFT_PAREN)) { // It's a variable usage like Group(key)
+            std::string group_name = previous().lexeme;
+            consume(TokenType::LEFT_PAREN, "Expect '(' after variable group name.");
+
+            std::string key_name;
+            while (!check(TokenType::RIGHT_PAREN) && !isAtEnd()) {
+                key_name += advance().lexeme;
+            }
+
+            consume(TokenType::RIGHT_PAREN, "Expect ')' after variable key name.");
+            return std::make_unique<VarExpr>(group_name, key_name);
+        } else {
+            // It's just a regular identifier, treat as a string literal
+            return std::make_unique<LiteralExpr>(0, previous().lexeme);
+        }
+    }
+
+    if (match({TokenType::STRING})) {
         return std::make_unique<LiteralExpr>(0, previous().lexeme);
+    }
+
+    // Handle hex codes like #ff00ff
+    if (check(TokenType::SYMBOL) && peek().lexeme == "#") {
+        std::string value = advance().lexeme; // consume '#'
+        while(check(TokenType::IDENTIFIER) || check(TokenType::NUMBER)) {
+            value += advance().lexeme;
+        }
+        return std::make_unique<LiteralExpr>(0, value);
     }
 
     if (match({TokenType::LEFT_PAREN})) {
@@ -386,6 +413,8 @@ void CHTLParser::parseTemplateDeclaration() {
         def.type = TemplateType::STYLE;
     } else if (typeToken.lexeme == "Element") {
         def.type = TemplateType::ELEMENT;
+    } else if (typeToken.lexeme == "Var") {
+        def.type = TemplateType::VAR;
     } else {
         error(typeToken, "Unknown template type.");
     }
@@ -427,7 +456,8 @@ void CHTLParser::parseTemplateDeclaration() {
                 consume(TokenType::COLON, "Expect ':' after style property name.");
                 auto value_expr = parseExpression();
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-                def.style_properties.push_back({key_str, std::move(value_expr)});
+                AttributeNode attr = {key_str, std::move(value_expr)};
+                def.style_properties.push_back(std::move(attr));
             }
         }
     } else if (def.type == TemplateType::ELEMENT) {
@@ -435,6 +465,17 @@ void CHTLParser::parseTemplateDeclaration() {
             for (auto& node : parseDeclaration()) {
                 def.element_body.push_back(std::move(node));
             }
+        }
+    } else if (def.type == TemplateType::VAR) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            std::string key_str;
+            while (!check(TokenType::COLON) && !isAtEnd()) {
+                key_str += advance().lexeme;
+            }
+            consume(TokenType::COLON, "Expect ':' after variable name.");
+            auto value_expr = parseExpression();
+            consume(TokenType::SEMICOLON, "Expect ';' after variable value.");
+            def.variables[key_str] = std::move(value_expr);
         }
     }
 

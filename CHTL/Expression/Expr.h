@@ -11,6 +11,7 @@ namespace CHTL {
 // Forward declare all expression types for the visitor
 class BinaryExpr;
 class LiteralExpr;
+class VarExpr;
 class GroupingExpr; // For future use with parentheses
 
 // The base visitor interface for the expression AST.
@@ -21,6 +22,7 @@ public:
     virtual ~ExprVisitor() = default;
     virtual void visit(BinaryExpr& expr) = 0;
     virtual void visit(LiteralExpr& expr) = 0;
+    virtual void visit(VarExpr& expr) = 0;
     // virtual void visit(GroupingExpr& expr) = 0; // For future use
 };
 
@@ -62,6 +64,21 @@ public:
     std::unique_ptr<Expr> left;
     Token op;
     std::unique_ptr<Expr> right;
+};
+
+// Represents a variable usage, e.g., ThemeColor(primary)
+class VarExpr : public Expr {
+public:
+    VarExpr(const std::string& group, const std::string& name)
+        : group(group), name(name) {}
+
+    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
+    std::unique_ptr<Expr> clone() const override {
+        return std::make_unique<VarExpr>(group, name);
+    }
+
+    std::string group;
+    std::string name;
 };
 
 } // namespace CHTL

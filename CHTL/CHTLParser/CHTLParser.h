@@ -19,6 +19,8 @@ public:
     // The main entry point for parsing.
     std::unique_ptr<BaseNode> parse();
 
+    const std::map<std::string, TemplateDefinitionNode>& getTemplateDefinitions() const { return template_definitions; }
+
 private:
     const std::string& source;
     const std::vector<Token>& tokens;
