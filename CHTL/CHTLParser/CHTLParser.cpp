@@ -161,6 +161,8 @@ std::unique_ptr<BaseNode> CHTLParser::parse() {
         if (peek().type == TokenType::LEFT_BRACKET) {
             if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Template") {
                 parseTemplateDeclaration();
+            } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Custom") {
+                parseCustomDeclaration();
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
                 parseOriginBlock();
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Import") {
@@ -221,7 +223,7 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
     auto element = std::make_unique<ElementNode>(tagName.lexeme);
     consume(TokenType::LEFT_BRACE, "Expect '{' after element name.");
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        if (peek().type == TokenType::IDENTIFIER && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
+        if ((peek().type == TokenType::IDENTIFIER || peek().type == TokenType::TEXT) && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
             parseAttribute(element.get());
         } else {
             for (auto& child : parseDeclaration()) {
@@ -234,7 +236,12 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
 }
 
 void CHTLParser::parseAttribute(ElementNode* element) {
-    Token key = consume(TokenType::IDENTIFIER, "Expect attribute name.");
+    Token key;
+    if (match({TokenType::IDENTIFIER, TokenType::TEXT})) {
+        key = previous();
+    } else {
+        error(peek(), "Expect attribute name (identifier or 'text').");
+    }
     consume(TokenType::COLON, "Expect ':' after attribute name.");
     Token value_token;
     if (match({TokenType::STRING, TokenType::IDENTIFIER, TokenType::NUMBER})) {
@@ -338,7 +345,62 @@ void CHTLParser::parseImportStatement() {
     }
 }
 
-std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() { /* ... unchanged ... */ }
+std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start origin block.");
+    consume(TokenType::IDENTIFIER, "Expect 'Origin' keyword.");
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end origin keyword.");
+
+    consume(TokenType::AT, "Expect '@' for origin type.");
+    Token typeToken = consume(TokenType::IDENTIFIER, "Expect origin type (e.g., Html, Style).");
+
+    OriginType originType;
+    if (typeToken.lexeme == "Html") originType = OriginType::HTML;
+    else if (typeToken.lexeme == "Style") originType = OriginType::STYLE;
+    else if (typeToken.lexeme == "JavaScript") originType = OriginType::JAVASCRIPT;
+    else {
+        error(typeToken, "Unsupported origin type.");
+        return nullptr;
+    }
+
+    if (check(TokenType::IDENTIFIER)) {
+        advance(); // Consume optional name, though it's unused in the current AST.
+    }
+
+    consume(TokenType::LEFT_BRACE, "Expect '{' to start origin block body.");
+    Token openBrace = previous();
+
+    int content_start_pos = openBrace.position + openBrace.lexeme.length();
+    int content_end_pos = content_start_pos;
+    int brace_level = 1;
+
+    while (brace_level > 0 && !isAtEnd()) {
+        if (peek().type == TokenType::LEFT_BRACE) {
+            brace_level++;
+        } else if (peek().type == TokenType::RIGHT_BRACE) {
+            brace_level--;
+        }
+
+        if (brace_level > 0) {
+            advance();
+        } else {
+             break;
+        }
+    }
+
+    if (brace_level > 0) {
+         error(peek(), "Unclosed origin block.");
+         return nullptr;
+    }
+
+    Token closeBrace = peek();
+    content_end_pos = closeBrace.position;
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to end origin block body.");
+
+    std::string content = source.substr(content_start_pos, content_end_pos - content_start_pos);
+
+    return std::make_unique<OriginNode>(originType, content);
+}
 
 void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
     consume(TokenType::AT, "Expect '@' for template usage.");
@@ -447,6 +509,57 @@ void CHTLParser::parseTemplateDeclaration() {
     }
     consume(TokenType::RIGHT_BRACE, "Expect '}' to end template body.");
     template_definitions[current_namespace][def.name] = std::move(def);
+}
+
+void CHTLParser::parseCustomDeclaration() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start custom declaration.");
+    Token keyword = consume(TokenType::IDENTIFIER, "Expect 'Custom' keyword.");
+    if (keyword.lexeme != "Custom") { error(keyword, "Expect 'Custom' keyword in declaration."); }
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end custom keyword.");
+    consume(TokenType::AT, "Expect '@' for custom type.");
+    Token typeToken = consume(TokenType::IDENTIFIER, "Expect custom type (e.g., Style, Element).");
+
+    CustomDefinitionNode def;
+    if (typeToken.lexeme == "Style") { def.type = CustomType::STYLE; }
+    else if (typeToken.lexeme == "Element") { def.type = CustomType::ELEMENT; }
+    else if (typeToken.lexeme == "Var") { def.type = CustomType::VAR; }
+    else { error(typeToken, "Unknown custom type."); }
+
+    def.name = consume(TokenType::IDENTIFIER, "Expect custom block name.").lexeme;
+    consume(TokenType::LEFT_BRACE, "Expect '{' to start custom body.");
+
+    if (def.type == CustomType::STYLE) {
+        // Parsing logic for style content (properties, inheritance) is similar to templates
+        // For now, we'll just parse properties to keep it simple.
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            std::string key_str;
+            while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
+            consume(TokenType::COLON, "Expect ':' after style property name.");
+            auto value_expr = parseExpression();
+            consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+            def.style_properties.push_back({key_str, std::move(value_expr)});
+        }
+    } else if (def.type == CustomType::ELEMENT) {
+        // Parsing logic for element content is also similar to templates
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            for (auto& node : parseDeclaration()) {
+                def.element_body.push_back(std::move(node));
+            }
+        }
+    } else if (def.type == CustomType::VAR) {
+        // Parsing logic for var content
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            std::string key_str;
+            while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
+            consume(TokenType::COLON, "Expect ':' after variable name.");
+            auto value_expr = parseExpression();
+            consume(TokenType::SEMICOLON, "Expect ';' after variable value.");
+            def.variables[key_str] = std::move(value_expr);
+        }
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to end custom body.");
+    custom_definitions[current_namespace][def.name] = std::move(def);
 }
 
 } // namespace CHTL

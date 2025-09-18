@@ -5,6 +5,7 @@
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/ElementNode.h" // Include full definition for std::unique_ptr
 #include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../CHTLNode/CustomDefinitionNode.h"
 #include <vector>
 #include <memory>
 #include <map>
@@ -21,6 +22,8 @@ public:
 
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getTemplateDefinitions() const { return template_definitions; }
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getMutableTemplateDefinitions() { return template_definitions; }
+
+    const std::map<std::string, std::map<std::string, CustomDefinitionNode>>& getCustomDefinitions() const { return custom_definitions; }
 
 private:
     const std::string& source;
@@ -65,6 +68,11 @@ private:
     // Namespace -> <Template Name, Template Definition>
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>> template_definitions;
     void parseTemplateDeclaration();
+
+    // --- Symbol Table for Custom Blocks ---
+    std::map<std::string, std::map<std::string, CustomDefinitionNode>> custom_definitions;
+    void parseCustomDeclaration();
+
     void parseImportStatement();
     void parseStyleTemplateUsage(StyleNode* styleNode);
     std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();
