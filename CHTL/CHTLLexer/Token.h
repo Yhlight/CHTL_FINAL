@@ -8,8 +8,10 @@ namespace CHTL {
 
 enum class TokenType {
     // Single-character tokens.
-    LEFT_BRACE, RIGHT_BRACE, // { }
-    COLON, SEMICOLON,       // : ;
+    LEFT_BRACE, RIGHT_BRACE,     // { }
+    LEFT_BRACKET, RIGHT_BRACKET, // [ ]
+    AT,                          // @
+    COLON, SEMICOLON,            // : ;
 
     // Literals.
     IDENTIFIER,

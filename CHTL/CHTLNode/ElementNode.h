@@ -15,9 +15,8 @@ class ElementNode : public BaseNode {
 public:
     explicit ElementNode(const std::string& tagName) : tagName(tagName) {}
 
-    void accept(Visitor& visitor) override {
-        visitor.visit(*this);
-    }
+    void accept(Visitor& visitor) override;
+    std::unique_ptr<BaseNode> clone() const override;
 
     void addChild(std::unique_ptr<BaseNode> child) {
         children.push_back(std::move(child));

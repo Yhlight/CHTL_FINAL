@@ -10,32 +10,50 @@ namespace CHTL {
 CHTLParser::CHTLParser(const std::vector<Token>& tokens) : tokens(tokens) {}
 
 std::unique_ptr<BaseNode> CHTLParser::parse() {
-    // For a CHTL document, we expect a single root element.
-    // For now, we will parse one declaration and expect it to be the root.
-    if (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
-        return parseDeclaration();
+    while (peek().type == TokenType::LEFT_BRACKET) {
+        parseTemplateDeclaration();
     }
+
+    if (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
+        // A document should have a single root node.
+        // parseDeclaration now returns a vector, but we expect one root element.
+        auto nodes = parseDeclaration();
+        if (nodes.size() == 1) {
+            return std::move(nodes[0]);
+        } else {
+            error(peek(), "Expected a single root element declaration.");
+        }
+    }
+
     return nullptr;
 }
 
-std::unique_ptr<BaseNode> CHTLParser::parseDeclaration() {
+std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
+    if (check(TokenType::AT)) {
+        return parseElementTemplateUsage();
+    }
+
+    std::vector<std::unique_ptr<BaseNode>> nodes;
     if (match({TokenType::TEXT})) {
         consume(TokenType::LEFT_BRACE, "Expect '{' after 'text'.");
         Token content = consume(TokenType::STRING, "Expect string literal inside text block.");
         consume(TokenType::RIGHT_BRACE, "Expect '}' after text block content.");
-        return std::make_unique<TextNode>(content.lexeme);
+        nodes.push_back(std::make_unique<TextNode>(content.lexeme));
+        return nodes;
     }
 
     if (match({TokenType::STYLE})) {
-        return parseStyleBlock();
+        nodes.push_back(parseStyleBlock());
+        return nodes;
     }
 
     if (check(TokenType::IDENTIFIER)) {
-        return parseElement();
+        nodes.push_back(parseElement());
+        return nodes;
     }
 
-    error(peek(), "Expect a declaration (element, text, or style block).");
-    return nullptr; // Should not be reached if error throws
+    error(peek(), "Expect a declaration (element, text, style, or template usage).");
+    return {};
 }
 
 std::unique_ptr<ElementNode> CHTLParser::parseElement() {
@@ -45,11 +63,13 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
     consume(TokenType::LEFT_BRACE, "Expect '{' after element name.");
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        // Inside the element, we can have attributes or other declarations.
         if (peek().type == TokenType::IDENTIFIER && tokens[current + 1].type == TokenType::COLON) {
             parseAttribute(element.get());
         } else {
-            element->addChild(parseDeclaration());
+            // A declaration can now expand to multiple nodes from a template
+            for (auto& child : parseDeclaration()) {
+                element->addChild(std::move(child));
+            }
         }
     }
 
@@ -69,7 +89,6 @@ void CHTLParser::parseAttribute(ElementNode* element) {
     }
 
     consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
-
     element->addAttribute({key.lexeme, value.lexeme});
 }
 
@@ -78,9 +97,6 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
     auto styleNode = std::make_unique<StyleNode>();
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        // Look ahead to see if this is an inline property (key: value;)
-        // or a global rule (.selector { ... }). A simple way is to check
-        // for a colon before a left brace.
         bool isInlineProp = false;
         int i = 0;
         while (tokens[current + i].type != TokenType::END_OF_FILE && tokens[current + i].type != TokenType::RIGHT_BRACE) {
@@ -95,14 +111,14 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
             i++;
         }
 
-        if (isInlineProp) {
-            // Parse as an inline property
+        if (check(TokenType::AT)) {
+            parseStyleTemplateUsage(styleNode.get());
+        } else if (isInlineProp) {
             std::string key_str;
             while (!check(TokenType::COLON) && !isAtEnd()) {
                 key_str += advance().lexeme;
             }
             consume(TokenType::COLON, "Expect ':' after style property name.");
-
             std::string value_str;
             while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
                 value_str += advance().lexeme;
@@ -110,20 +126,17 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
             styleNode->inline_properties.push_back({key_str, value_str});
         } else {
-            // Parse as a global CSS rule
             CssRuleNode rule;
             while (!check(TokenType::LEFT_BRACE) && !isAtEnd()) {
                 rule.selector += advance().lexeme;
             }
             consume(TokenType::LEFT_BRACE, "Expect '{' after rule selector.");
-
             while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
                 std::string key_str;
                 while (!check(TokenType::COLON) && !isAtEnd()) {
                     key_str += advance().lexeme;
                 }
                 consume(TokenType::COLON, "Expect ':' after style property name.");
-
                 std::string value_str;
                 while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
                     value_str += advance().lexeme;
@@ -139,7 +152,6 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
     consume(TokenType::RIGHT_BRACE, "Expect '}' after style block.");
     return styleNode;
 }
-
 
 // --- Helper Method Implementations ---
 
@@ -168,8 +180,6 @@ bool CHTLParser::check(TokenType type) {
 Token CHTLParser::consume(TokenType type, const std::string& message) {
     if (check(type)) return advance();
     error(peek(), message);
-    // This part is tricky because error() might throw. If it doesn't, we need to return something.
-    // Let's make error() throw for now to avoid this.
     throw std::runtime_error(message);
 }
 
@@ -191,9 +201,105 @@ void CHTLParser::error(const Token& token, const std::string& message) {
         std::cerr << " at '" << token.lexeme << "'";
     }
     std::cerr << ": " << message << std::endl;
-    // For now, we'll throw an exception to stop parsing.
-    // A more sophisticated parser might enter panic mode and try to recover.
     throw std::runtime_error(message);
+}
+
+void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
+    consume(TokenType::AT, "Expect '@' for template usage.");
+    Token type = consume(TokenType::IDENTIFIER, "Expect template type.");
+    if (type.lexeme != "Style") {
+        error(type, "Expect '@Style' template usage here.");
+    }
+    Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+    consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+
+    if (template_definitions.count(name.lexeme)) {
+        const auto& def = template_definitions.at(name.lexeme);
+        if (def.type != TemplateType::STYLE) {
+            error(name, "Template '" + name.lexeme + "' is not a Style template.");
+        }
+        styleNode->inline_properties.insert(styleNode->inline_properties.end(),
+                                            def.style_properties.begin(),
+                                            def.style_properties.end());
+    } else {
+        error(name, "Style template '" + name.lexeme + "' not found.");
+    }
+}
+
+std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
+    consume(TokenType::AT, "Expect '@' for template usage.");
+    Token type = consume(TokenType::IDENTIFIER, "Expect template type.");
+    if (type.lexeme != "Element") {
+        error(type, "Expect '@Element' template usage here.");
+    }
+    Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+    consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+
+    if (template_definitions.count(name.lexeme)) {
+        const auto& def = template_definitions.at(name.lexeme);
+        if (def.type != TemplateType::ELEMENT) {
+            error(name, "Template '" + name.lexeme + "' is not an Element template.");
+        }
+        // Clone the nodes from the template body
+        std::vector<std::unique_ptr<BaseNode>> cloned_nodes;
+        for (const auto& node : def.element_body) {
+            cloned_nodes.push_back(node->clone());
+        }
+        return cloned_nodes;
+    } else {
+        error(name, "Element template '" + name.lexeme + "' not found.");
+    }
+    return {};
+}
+
+void CHTLParser::parseTemplateDeclaration() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start template declaration.");
+    Token keyword = consume(TokenType::IDENTIFIER, "Expect 'Template' keyword.");
+    if (keyword.lexeme != "Template") {
+        error(keyword, "Expect 'Template' keyword in declaration.");
+    }
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end template keyword.");
+
+    consume(TokenType::AT, "Expect '@' for template type.");
+    Token typeToken = consume(TokenType::IDENTIFIER, "Expect template type (e.g., Style, Element).");
+
+    TemplateDefinitionNode def;
+    if (typeToken.lexeme == "Style") {
+        def.type = TemplateType::STYLE;
+    } else if (typeToken.lexeme == "Element") {
+        def.type = TemplateType::ELEMENT;
+    } else {
+        error(typeToken, "Unknown template type.");
+    }
+
+    def.name = consume(TokenType::IDENTIFIER, "Expect template name.").lexeme;
+    consume(TokenType::LEFT_BRACE, "Expect '{' to start template body.");
+
+    if (def.type == TemplateType::STYLE) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            std::string key_str;
+            while (!check(TokenType::COLON) && !isAtEnd()) {
+                key_str += advance().lexeme;
+            }
+            consume(TokenType::COLON, "Expect ':' after style property name.");
+            std::string value_str;
+            while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                value_str += advance().lexeme;
+            }
+            consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+            def.style_properties.push_back({key_str, value_str});
+        }
+    } else if (def.type == TemplateType::ELEMENT) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            // A template can contain multiple nodes
+            for (auto& node : parseDeclaration()) {
+                def.element_body.push_back(std::move(node));
+            }
+        }
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to end template body.");
+    template_definitions[def.name] = std::move(def);
 }
 
 } // namespace CHTL

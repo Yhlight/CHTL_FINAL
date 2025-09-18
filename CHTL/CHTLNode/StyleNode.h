@@ -13,6 +13,7 @@ namespace CHTL {
 class StyleNode : public BaseNode {
 public:
     void accept(Visitor& visitor) override;
+    std::unique_ptr<BaseNode> clone() const override;
 
     // A style block contains a list of simple properties for inline styles.
     std::vector<AttributeNode> inline_properties;

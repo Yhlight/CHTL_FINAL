@@ -5,20 +5,29 @@
 
 int main() {
     std::string source = R"(
+        [Template] @Style BigText {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        [Template] @Element Message {
+            p {
+                text { "This is a message from a template." }
+            }
+            hr {}
+        }
+
         div {
             style {
-                // This should become a global rule
-                .container {
-                    padding: 20px;
-                    border: "1px solid #ccc"; // Use a string for multi-word values
-                }
-                // This should become an inline style
-                background-color: #f4f4f4;
+                @Style BigText;
+                color: purple;
             }
 
             h1 {
-                text { "Advanced CHTL Styles!" }
+                text { "Testing Templates!" }
             }
+
+            @Element Message;
         }
     )";
 

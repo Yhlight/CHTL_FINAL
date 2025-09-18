@@ -4,8 +4,10 @@
 #include "../CHTLLexer/Token.h"
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/ElementNode.h" // Include full definition for std::unique_ptr
+#include "../CHTLNode/TemplateDefinitionNode.h"
 #include <vector>
 #include <memory>
+#include <map>
 
 namespace CHTL {
 
@@ -33,13 +35,19 @@ private:
     bool match(const std::vector<TokenType>& types);
 
     // --- Parsing Methods ---
-    std::unique_ptr<BaseNode> parseDeclaration();
+    std::vector<std::unique_ptr<BaseNode>> parseDeclaration();
     std::unique_ptr<ElementNode> parseElement();
     void parseAttribute(ElementNode* element);
     std::unique_ptr<StyleNode> parseStyleBlock();
 
     // --- Error Handling ---
     void error(const Token& token, const std::string& message);
+
+    // --- Symbol Table for Templates ---
+    std::map<std::string, TemplateDefinitionNode> template_definitions;
+    void parseTemplateDeclaration();
+    void parseStyleTemplateUsage(StyleNode* styleNode);
+    std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();
 };
 
 } // namespace CHTL

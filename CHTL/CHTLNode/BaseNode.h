@@ -14,6 +14,7 @@ class BaseNode {
 public:
     virtual ~BaseNode() = default;
     virtual void accept(Visitor& visitor) = 0;
+    virtual std::unique_ptr<BaseNode> clone() const = 0;
 };
 
 } // namespace CHTL

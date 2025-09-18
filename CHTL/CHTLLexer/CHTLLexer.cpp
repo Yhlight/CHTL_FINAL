@@ -31,6 +31,9 @@ void CHTLLexer::scanToken() {
     switch (c) {
         case '{': addToken(TokenType::LEFT_BRACE); break;
         case '}': addToken(TokenType::RIGHT_BRACE); break;
+        case '[': addToken(TokenType::LEFT_BRACKET); break;
+        case ']': addToken(TokenType::RIGHT_BRACKET); break;
+        case '@': addToken(TokenType::AT); break;
         case ':': addToken(TokenType::COLON); break;
         case ';': addToken(TokenType::SEMICOLON); break;
 

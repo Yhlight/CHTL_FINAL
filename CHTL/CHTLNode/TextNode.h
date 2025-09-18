@@ -12,9 +12,8 @@ class TextNode : public BaseNode {
 public:
     explicit TextNode(const std::string& text) : text(text) {}
 
-    void accept(Visitor& visitor) override {
-        visitor.visit(*this);
-    }
+    void accept(Visitor& visitor) override;
+    std::unique_ptr<BaseNode> clone() const override;
 
     std::string text;
 };
