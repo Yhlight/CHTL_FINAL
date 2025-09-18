@@ -32,6 +32,9 @@ public:
 
     // Used for @Var custom blocks
     std::map<std::string, std::unique_ptr<Expr>> variables;
+
+    // Stores names of inherited templates/customs
+    std::vector<std::string> inherited_styles;
 };
 
 } // namespace CHTL

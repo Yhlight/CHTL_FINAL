@@ -38,6 +38,7 @@ enum class TokenType {
     STYLE,
     TEXT,
     INHERIT,
+    KEYWORD_DELETE,
 
     // Special
     SYMBOL, // For single characters like -, #, etc.

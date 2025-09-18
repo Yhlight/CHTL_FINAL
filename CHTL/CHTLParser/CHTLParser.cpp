@@ -309,7 +309,7 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
         }
 
         if (check(TokenType::AT)) {
-            parseStyleTemplateUsage(styleNode.get());
+            parseAtStyleUsage(styleNode.get());
         } else if (isInlineProp) {
             std::string key_str;
             while (!check(TokenType::COLON) && !isAtEnd()) {
@@ -438,25 +438,71 @@ std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {
     return std::make_unique<OriginNode>(type, content);
 }
 
-void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
+void CHTLParser::parseAtStyleUsage(StyleNode* styleNode) {
     consume(TokenType::AT, "Expect '@' for template usage.");
     Token type = consume(TokenType::IDENTIFIER, "Expect template type.");
     if (type.lexeme != "Style") {
         error(type, "Expect '@Style' template usage here.");
     }
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
-    consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 
-    if (template_definitions.count(name.lexeme)) {
-        const auto& def = template_definitions.at(name.lexeme);
-        if (def.type != TemplateType::STYLE) {
-            error(name, "Template '" + name.lexeme + "' is not a Style template.");
+    if (match({TokenType::SEMICOLON})) { // Simple template usage
+        if (template_definitions.count(name.lexeme)) {
+            const auto& def = template_definitions.at(name.lexeme);
+            if (def.type != TemplateType::STYLE) {
+                error(name, "Template '" + name.lexeme + "' is not a Style template.");
+            }
+            for (const auto& prop : def.style_properties) {
+                styleNode->inline_properties.push_back(prop.clone());
+            }
+        } else {
+            error(name, "Style template '" + name.lexeme + "' not found.");
         }
-        for (const auto& prop : def.style_properties) {
-            styleNode->inline_properties.push_back(prop.clone());
+    } else if (match({TokenType::LEFT_BRACE})) { // Custom style usage with specialization
+        if (custom_definitions.count(name.lexeme)) {
+            const auto& def = custom_definitions.at(name.lexeme);
+            if (def.type != CustomType::STYLE) {
+                error(name, "Custom block '" + name.lexeme + "' is not a Style custom block.");
+            }
+            // Apply existing valued properties
+            for (const auto& prop : def.style_properties) {
+                styleNode->inline_properties.push_back(prop.clone());
+            }
+
+            // Parse the body to fill in valueless properties and handle specializations
+            while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                if (match({TokenType::KEYWORD_DELETE})) {
+                    if (check(TokenType::AT)) {
+                        // This is a 'delete @Style' statement
+                        consume(TokenType::AT, "Expect '@' after delete.");
+                        consume(TokenType::IDENTIFIER, "Expect 'Style' after '@'."); // Assuming @Style
+                        Token name = consume(TokenType::IDENTIFIER, "Expect template name to delete.");
+                        styleNode->deleted_inherited_styles.push_back(name.lexeme);
+                        consume(TokenType::SEMICOLON, "Expect ';' after delete @Style statement.");
+                    } else {
+                        // This is a 'delete property' statement
+                        do {
+                            styleNode->deleted_properties.push_back(parsePropertyName());
+                        } while (match({TokenType::COMMA}));
+                        consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
+                    }
+                } else {
+                    // This is a value-filling assignment
+                    std::string key_str = parsePropertyName();
+                    consume(TokenType::COLON, "Expect ':' to assign value to a valueless property.");
+                    auto value_expr = parseExpression();
+                    consume(TokenType::SEMICOLON, "Expect ';' after property value.");
+
+                    // TODO: Check if key_str is actually in def.valueless_style_properties
+                    styleNode->inline_properties.push_back({key_str, std::move(value_expr)});
+                }
+            }
+            consume(TokenType::RIGHT_BRACE, "Expect '}' after custom style body.");
+        } else {
+            error(name, "Custom style '" + name.lexeme + "' not found.");
         }
     } else {
-        error(name, "Style template '" + name.lexeme + "' not found.");
+        error(peek(), "Expect ';' or '{' after @Style usage.");
     }
 }
 
@@ -599,25 +645,39 @@ void CHTLParser::parseCustomDeclaration() {
 
     if (def.type == CustomType::STYLE) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            int start_pos = current;
-            parsePropertyName(); // Parse to see what the next token is
-            TokenType next_token_type = peek().type;
-            current = start_pos; // Rewind
-
-            if (next_token_type == TokenType::COMMA || next_token_type == TokenType::SEMICOLON) {
-                // Parse a comma-separated list of valueless properties
-                do {
-                    def.valueless_style_properties.push_back(parsePropertyName());
-                } while (match({TokenType::COMMA}));
-                consume(TokenType::SEMICOLON, "Expect ';' after valueless property list.");
+            if (check(TokenType::AT) || check(TokenType::INHERIT)) {
+                 if (check(TokenType::INHERIT)) {
+                    advance();
+                }
+                consume(TokenType::AT, "Expect '@' for template usage.");
+                Token type = consume(TokenType::IDENTIFIER, "Expect template type.");
+                if (type.lexeme != "Style") {
+                    error(type, "Can only inherit from another @Style template here.");
+                }
+                Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+                consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+                def.inherited_styles.push_back(name.lexeme);
             } else {
-                // Parse a regular key: value; property
-                std::string key_str = parsePropertyName();
-                consume(TokenType::COLON, "Expect ':' after style property name.");
-                auto value_expr = parseExpression();
-                consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-                AttributeNode attr = {key_str, std::move(value_expr)};
-                def.style_properties.push_back(std::move(attr));
+                int start_pos = current;
+                parsePropertyName(); // Parse to see what the next token is
+                TokenType next_token_type = peek().type;
+                current = start_pos; // Rewind
+
+                if (next_token_type == TokenType::COMMA || next_token_type == TokenType::SEMICOLON) {
+                    // Parse a comma-separated list of valueless properties
+                    do {
+                        def.valueless_style_properties.push_back(parsePropertyName());
+                    } while (match({TokenType::COMMA}));
+                    consume(TokenType::SEMICOLON, "Expect ';' after valueless property list.");
+                } else {
+                    // Parse a regular key: value; property
+                    std::string key_str = parsePropertyName();
+                    consume(TokenType::COLON, "Expect ':' after style property name.");
+                    auto value_expr = parseExpression();
+                    consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+                    AttributeNode attr = {key_str, std::move(value_expr)};
+                    def.style_properties.push_back(std::move(attr));
+                }
             }
         }
     } else if (def.type == CustomType::ELEMENT) {

@@ -20,6 +20,12 @@ public:
 
     // It also contains a list of full CSS rules for the global stylesheet.
     std::vector<CssRuleNode> global_rules;
+
+    // Used in specialization to mark properties for deletion.
+    std::vector<std::string> deleted_properties;
+
+    // Used in specialization to mark inherited styles for deletion.
+    std::vector<std::string> deleted_inherited_styles;
 };
 
 } // namespace CHTL

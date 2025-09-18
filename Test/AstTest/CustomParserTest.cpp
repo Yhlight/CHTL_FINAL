@@ -1,64 +1,100 @@
 #include "../../CHTL/CHTLLexer/CHTLLexer.h"
 #include "../../CHTL/CHTLParser/CHTLParser.h"
+#include "../../CHTL/CHTLNode/ElementNode.h"
+#include "../../CHTL/CHTLNode/StyleNode.h"
 #include <iostream>
 #include <cassert>
+#include <algorithm>
 
-void testCustomStyleParsing() {
-    std::cout << "--- Running Test: testCustomStyleParsing ---" << std::endl;
+void testCustomStyleSpecialization() {
+    std::cout << "--- Running Test: testCustomStyleSpecialization ---" << std::endl;
 
     std::string source = R"(
-        [Custom] @Style MyTestStyle {
-            color: red;
-            font-size, margin;
-            background-color: blue;
+        [Template] @Style BaseStyle {
+            border: "1px solid black";
+            padding: "10px";
         }
 
-        div {}
+        [Custom] @Style MySpecialStyle {
+            @Style BaseStyle;
+            color: red;
+            font-size, margin-top;
+        }
+
+        div {
+            style {
+                @Style MySpecialStyle {
+                    font-size: "16px";
+                    margin-top: "20px";
+                    delete padding;
+                    delete @Style BaseStyle;
+                }
+            }
+        }
     )";
 
     try {
-        // 1. Lexing
+        // 1. Lexing & Parsing
         CHTL::CHTLLexer lexer(source);
         std::vector<CHTL::Token> tokens = lexer.scanTokens();
-
-        // 2. Parsing
         CHTL::CHTLParser parser(source, tokens);
-        parser.parse(); // This will parse the declarations
+        std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
 
-        // 3. Verification
-        const auto& custom_defs = parser.getCustomDefinitions();
+        // 2. Verification
+        assert(ast != nullptr);
+        CHTL::ElementNode* divNode = dynamic_cast<CHTL::ElementNode*>(ast.get());
+        assert(divNode != nullptr);
+        assert(divNode->tagName == "div");
 
-        assert(custom_defs.count("MyTestStyle") == 1);
-        std::cout << "Assertion Passed: Custom definition 'MyTestStyle' found." << std::endl;
+        CHTL::StyleNode* styleNode = nullptr;
+        for (const auto& child : divNode->children) {
+            if ((styleNode = dynamic_cast<CHTL::StyleNode*>(child.get()))) {
+                break;
+            }
+        }
+        assert(styleNode != nullptr);
+        std::cout << "Assertion Passed: Found StyleNode in AST." << std::endl;
 
-        const auto& def = custom_defs.at("MyTestStyle");
-        assert(def.type == CHTL::CustomType::STYLE);
-        std::cout << "Assertion Passed: Custom definition type is STYLE." << std::endl;
+        // Check for deleted properties
+        assert(styleNode->deleted_properties.size() == 1);
+        assert(styleNode->deleted_properties[0] == "padding");
+        std::cout << "Assertion Passed: Correctly parsed 'delete property'." << std::endl;
 
-        assert(def.style_properties.size() == 2);
-        std::cout << "Assertion Passed: Correct number of valued properties (2)." << std::endl;
+        // Check for deleted inherited styles
+        assert(styleNode->deleted_inherited_styles.size() == 1);
+        assert(styleNode->deleted_inherited_styles[0] == "BaseStyle");
+        std::cout << "Assertion Passed: Correctly parsed 'delete @Style'." << std::endl;
 
-        assert(def.valueless_style_properties.size() == 2);
-        std::cout << "Assertion Passed: Correct number of valueless properties (2)." << std::endl;
+        // Check for filled-in properties
+        // Note: The generator will handle the actual application/deletion.
+        // The parser's job is just to populate the nodes correctly.
+        // The parser will apply valued properties from the custom definition ('color') and then the filled-in properties from the usage block.
+        assert(styleNode->inline_properties.size() == 3); // color + font-size + margin-top
 
-        assert(def.style_properties[0].key == "color");
-        assert(def.style_properties[1].key == "background-color");
-        std::cout << "Assertion Passed: Valued properties have correct keys." << std::endl;
+        bool hasColor = false;
+        bool hasFontSize = false;
+        bool hasMarginTop = false;
+        for(const auto& prop : styleNode->inline_properties) {
+            if (prop.key == "color") hasColor = true;
+            if (prop.key == "font-size") hasFontSize = true;
+            if (prop.key == "margin-top") hasMarginTop = true;
+        }
+        assert(hasColor && hasFontSize && hasMarginTop);
+        std::cout << "Assertion Passed: Valueless properties were correctly filled." << std::endl;
 
-        assert(def.valueless_style_properties[0] == "font-size");
-        assert(def.valueless_style_properties[1] == "margin");
-        std::cout << "Assertion Passed: Valueless properties have correct names." << std::endl;
 
         std::cout << "--- Test Passed ---" << std::endl;
 
     } catch (const std::runtime_error& e) {
         std::cerr << "Test Failed with exception: " << e.what() << std::endl;
+        assert(false);
     } catch (...) {
         std::cerr << "Test Failed with unknown exception." << std::endl;
+        assert(false);
     }
 }
 
 int main() {
-    testCustomStyleParsing();
+    testCustomStyleSpecialization();
     return 0;
 }

@@ -64,7 +64,7 @@ private:
     // --- Symbol Table for Templates ---
     std::map<std::string, TemplateDefinitionNode> template_definitions;
     void parseTemplateDeclaration();
-    void parseStyleTemplateUsage(StyleNode* styleNode);
+    void parseAtStyleUsage(StyleNode* styleNode);
     std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();
     std::unique_ptr<BaseNode> parseOriginBlock();
 
