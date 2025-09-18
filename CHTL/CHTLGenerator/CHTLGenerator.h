@@ -4,36 +4,46 @@
 #include "../CHTLNode/Visitor.h"
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../Expression/ExpressionEvaluator.h"
 #include <string>
 #include <sstream>
 #include <map>
+#include <memory>
 
 namespace CHTL {
+
+class CssRuleNode; // Forward Declaration
+class DocumentNode; // Forward Declaration
 
 struct CompilationResult {
     std::string html;
     std::string css;
 };
 
-// The CHTLGenerator traverses the AST using the Visitor pattern
-// and generates the final HTML and CSS output.
 class CHTLGenerator : public Visitor {
 public:
     explicit CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates);
-    // The main entry point. It takes the root of the AST and returns the generated code.
+
     CompilationResult generate(BaseNode* root);
 
-    // Visitor methods for each concrete node type.
+    // Visitor methods for AST nodes
     void visit(ElementNode& node) override;
     void visit(TextNode& node) override;
     void visit(StyleNode& node) override;
     void visit(OriginNode& node) override;
+    void visit(CssRuleNode& node) override;
+    void visit(DocumentNode& node) override;
 
 private:
-    const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
-    BaseNode* doc_root = nullptr; // To provide context for the evaluator
-    std::stringstream html_output;
-    std::stringstream css_output;
+    void indent(int level);
+
+    const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& m_templates;
+    BaseNode* m_doc_root = nullptr;
+    std::unique_ptr<ExpressionEvaluator> m_evaluator;
+
+    std::stringstream m_html_output;
+    std::stringstream m_css_output;
+    int m_indent_level = 0;
 };
 
 } // namespace CHTL

@@ -1,0 +1,13 @@
+/app/build/CMakeFiles/edit_cache.dir
+/app/build/CMakeFiles/rebuild_cache.dir
+/app/build/Util/CMakeFiles/Util.dir
+/app/build/Util/CMakeFiles/edit_cache.dir
+/app/build/Util/CMakeFiles/rebuild_cache.dir
+/app/build/CHTL/CMakeFiles/CHTL.dir
+/app/build/CHTL/CMakeFiles/edit_cache.dir
+/app/build/CHTL/CMakeFiles/rebuild_cache.dir
+/app/build/Test/CMakeFiles/pipeline_test.dir
+/app/build/Test/CMakeFiles/expression_test.dir
+/app/build/Test/CMakeFiles/token_test.dir
+/app/build/Test/CMakeFiles/edit_cache.dir
+/app/build/Test/CMakeFiles/rebuild_cache.dir

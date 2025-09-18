@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/token_test.dir/TokenTest/main.cpp.o -o token_test  ../CHTL/libCHTL.a ../Util/libUtil.a

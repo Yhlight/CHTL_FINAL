@@ -5,7 +5,7 @@
 #include <iostream>
 
 int main() {
-    std::string entry_point = "Test/ImportTest/main.chtl";
+    std::string entry_point = "Test/FullPipelineTest/test.chtl";
     std::string source = CHTL::FileSystem::readFile(entry_point);
 
     if (source.empty()) {
@@ -13,7 +13,7 @@ int main() {
         return 1;
     }
 
-    std::cout << "--- Input CHTL from " << entry_point << " ---\n" << source << "\n------------------\n" << std::endl;
+    std::cout << "--- Input CHTL ---\n" << source << "\n------------------\n" << std::endl;
 
     try {
         // 1. Lexing
@@ -24,8 +24,13 @@ int main() {
         CHTL::CHTLParser parser(source, tokens, entry_point);
         std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
 
+        if (!ast) {
+            std::cerr << "Parsing failed, AST is null." << std::endl;
+            return 1;
+        }
+
         // 3. Generation
-        CHTL::CHTLGenerator generator(parser.getTemplateDefinitions());
+        CHTL::CHTLGenerator generator(parser.getMutableTemplateDefinitions());
         CHTL::CompilationResult result = generator.generate(ast.get());
 
         // 4. Verification

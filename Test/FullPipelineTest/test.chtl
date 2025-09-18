@@ -1,0 +1,18 @@
+div {
+    id: box1;
+    style {
+        width: 100px;
+        height: 2 * 25px + 50;
+        padding: 10px;
+    }
+}
+
+div {
+    id: box2;
+    style {
+        // Reference and conditional test
+        width: #box1.width / 2;
+        color: #box1.padding > 5 ? "green" : "red";
+        background-color: "blue";
+    }
+}

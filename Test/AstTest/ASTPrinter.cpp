@@ -3,7 +3,8 @@
 #include "../../CHTL/CHTLNode/TextNode.h"
 #include "../../CHTL/CHTLNode/StyleNode.h"
 #include "../../CHTL/CHTLNode/OriginNode.h"
-#include "../../CHTL/CHTLNode/CssRuleNode.h" // Include new node type
+#include "../../CHTL/CHTLNode/CssRuleNode.h"
+#include "../../CHTL/CHTLNode/DocumentNode.h"
 #include <iostream>
 
 namespace CHTL {
@@ -77,6 +78,24 @@ void ASTPrinter::visit(OriginNode& node) {
     std::cout << indentString() << "[Origin @" << type_str << "]" << std::endl;
     indent++;
     std::cout << indentString() << "Content: \"" << node.content.substr(0, 40) << "...\"" << std::endl;
+    indent--;
+}
+
+void ASTPrinter::visit(CssRuleNode& node) {
+    std::cout << indentString() << "CssRule: " << node.selector << std::endl;
+    indent++;
+    for (const auto& prop : node.properties) {
+        std::cout << indentString() << prop.key << ": [expression];" << std::endl;
+    }
+    indent--;
+}
+
+void ASTPrinter::visit(DocumentNode& node) {
+    std::cout << indentString() << "[Document]" << std::endl;
+    indent++;
+    for (const auto& child : node.getChildren()) {
+        child->accept(*this);
+    }
     indent--;
 }
 

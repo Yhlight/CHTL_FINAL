@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "Value.h"
 
 namespace CHTL {
 
@@ -42,20 +43,18 @@ public:
     virtual std::unique_ptr<Expr> clone() const = 0;
 };
 
-// Represents a literal value, e.g., "100" and "px".
-// We store the value as a double to handle potential floating point math.
+// Represents a literal value (number, string, or boolean).
 class LiteralExpr : public Expr {
 public:
-    LiteralExpr(double value, const std::string& unit)
-        : value(value), unit(unit) {}
+    explicit LiteralExpr(Value val)
+        : value(std::move(val)) {}
 
     void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
     std::unique_ptr<Expr> clone() const override {
-        return std::make_unique<LiteralExpr>(value, unit);
+        return std::make_unique<LiteralExpr>(value);
     }
 
-    double value;
-    std::string unit;
+    Value value;
 };
 
 // Represents a binary operation, e.g., left + right.

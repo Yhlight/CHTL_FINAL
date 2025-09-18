@@ -6,6 +6,8 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../Expression/Expr.h"
+#include "../Expression/Value.h"
+#include "../CHTLNode/DocumentNode.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <stdexcept>
@@ -107,10 +109,12 @@ std::unique_ptr<Expr> CHTLParser::parsePower() {
 std::unique_ptr<Expr> CHTLParser::parsePrimary() {
     if (match({TokenType::NUMBER})) {
         Token number = previous();
-        std::string unit = "";
+        std::string unit;
         if (check(TokenType::IDENTIFIER)) { unit = advance().lexeme; }
         else if (check(TokenType::PERCENT)) { unit = advance().lexeme; }
-        try { return std::make_unique<LiteralExpr>(std::stod(number.lexeme), unit); }
+        try {
+            return std::make_unique<LiteralExpr>(Value(std::stod(number.lexeme), unit));
+        }
         catch (const std::invalid_argument& e) { error(number, "Invalid number format."); }
     }
     if (match({TokenType::IDENTIFIER})) {
@@ -126,7 +130,8 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             consume(TokenType::RIGHT_PAREN, "Expect ')' after variable key name.");
             return std::make_unique<VarExpr>(first_part.lexeme, key_name);
         } else {
-            return std::make_unique<ReferenceExpr>(Token(), first_part);
+             // This is for an unquoted string literal like `color: red;`
+            return std::make_unique<LiteralExpr>(Value(first_part.lexeme));
         }
     }
     if (check(TokenType::SYMBOL) && (peek().lexeme == "#" || peek().lexeme == ".")) {
@@ -140,10 +145,12 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
         } else {
             std::string value = first_part.lexeme;
              while(check(TokenType::IDENTIFIER) || check(TokenType::NUMBER)) { value += advance().lexeme; }
-            return std::make_unique<LiteralExpr>(0, value);
+            return std::make_unique<LiteralExpr>(Value(value));
         }
     }
-    if (match({TokenType::STRING})) { return std::make_unique<LiteralExpr>(0, previous().lexeme); }
+    if (match({TokenType::STRING})) {
+        return std::make_unique<LiteralExpr>(Value(previous().lexeme));
+    }
     if (match({TokenType::LEFT_PAREN})) {
         auto expr = parseExpression();
         consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
@@ -157,34 +164,27 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
 // --- Document Parser Implementation ---
 
 std::unique_ptr<BaseNode> CHTLParser::parse() {
+    auto docNode = std::make_unique<DocumentNode>();
+
     while (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
         if (peek().type == TokenType::LEFT_BRACKET) {
             if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Template") {
                 parseTemplateDeclaration();
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
-                parseOriginBlock();
+                docNode->addChild(parseOriginBlock());
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Import") {
                 parseImportStatement();
             } else {
-                // It's not a special block, so it must be the root element.
-                break;
+                error(peek(), "Unexpected left bracket.");
             }
         } else {
-             // Not a special block, must be the root element.
-            break;
+            for (auto& child : parseDeclaration()) {
+                docNode->addChild(std::move(child));
+            }
         }
     }
 
-    if (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
-        auto nodes = parseDeclaration();
-        if (nodes.size() == 1) {
-            return std::move(nodes[0]);
-        } else {
-            error(peek(), "Expected a single root element declaration after all imports and templates.");
-        }
-    }
-
-    return nullptr;
+    return docNode;
 }
 
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
