@@ -3,6 +3,7 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
+#include "../Expression/Expr.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -11,23 +12,79 @@ namespace CHTL {
 CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens)
     : source(source), tokens(tokens) {}
 
+// --- Expression Parser Implementation ---
+
+std::unique_ptr<Expr> CHTLParser::parseExpression() {
+    return parseTerm();
+}
+
+std::unique_ptr<Expr> CHTLParser::parseTerm() {
+    auto expr = parseFactor();
+    while (match({TokenType::MINUS, TokenType::PLUS})) {
+        Token op = previous();
+        auto right = parseFactor();
+        expr = std::make_unique<BinaryExpr>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<Expr> CHTLParser::parseFactor() {
+    auto expr = parsePower();
+    while (match({TokenType::SLASH, TokenType::STAR, TokenType::PERCENT})) {
+        Token op = previous();
+        auto right = parsePower();
+        expr = std::make_unique<BinaryExpr>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<Expr> CHTLParser::parsePower() {
+    auto expr = parsePrimary();
+    while (match({TokenType::STAR_STAR})) {
+        Token op = previous();
+        auto right = parsePrimary();
+        expr = std::make_unique<BinaryExpr>(std::move(expr), op, std::move(right));
+    }
+    return expr;
+}
+
+std::unique_ptr<Expr> CHTLParser::parsePrimary() {
+    if (match({TokenType::NUMBER})) {
+        Token number = previous();
+        std::string unit = "";
+        if (check(TokenType::IDENTIFIER)) { // Check for a unit
+            unit = advance().lexeme;
+        }
+        try {
+            return std::make_unique<LiteralExpr>(std::stod(number.lexeme), unit);
+        } catch (const std::invalid_argument& e) {
+            error(number, "Invalid number format.");
+        }
+    }
+
+    if (match({TokenType::STRING, TokenType::IDENTIFIER})) {
+        return std::make_unique<LiteralExpr>(0, previous().lexeme);
+    }
+
+    error(peek(), "Expect expression.");
+    return nullptr;
+}
+
+
+// --- Document Parser Implementation ---
+
 std::unique_ptr<BaseNode> CHTLParser::parse() {
-    // A CHTL file can start with zero or more template or origin declarations.
     while (peek().type == TokenType::LEFT_BRACKET) {
         if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Template") {
             parseTemplateDeclaration();
         } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
-            // Top-level origin blocks are not part of the main AST tree for now.
-            // A more advanced implementation might put them in a pre- or post-document list.
             parseOriginBlock();
         } else {
-            break; // Not a template or origin block, must be the main content.
+            break;
         }
     }
 
     if (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
-        // A document should have a single root node.
-        // parseDeclaration now returns a vector, but we expect one root element.
         auto nodes = parseDeclaration();
         if (nodes.size() == 1) {
             return std::move(nodes[0]);
@@ -44,7 +101,7 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
         return parseElementTemplateUsage();
     }
 
-    if (peek().type == TokenType::LEFT_BRACKET && tokens[current + 1].lexeme == "Origin") {
+    if (peek().type == TokenType::LEFT_BRACKET && tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
         std::vector<std::unique_ptr<BaseNode>> nodes;
         nodes.push_back(parseOriginBlock());
         return nodes;
@@ -80,10 +137,9 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
     consume(TokenType::LEFT_BRACE, "Expect '{' after element name.");
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        if (peek().type == TokenType::IDENTIFIER && tokens[current + 1].type == TokenType::COLON) {
+        if (peek().type == TokenType::IDENTIFIER && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
             parseAttribute(element.get());
         } else {
-            // A declaration can now expand to multiple nodes from a template
             for (auto& child : parseDeclaration()) {
                 element->addChild(std::move(child));
             }
@@ -98,15 +154,16 @@ void CHTLParser::parseAttribute(ElementNode* element) {
     Token key = consume(TokenType::IDENTIFIER, "Expect attribute name.");
     consume(TokenType::COLON, "Expect ':' after attribute name.");
 
-    Token value;
+    Token value_token;
     if (match({TokenType::STRING, TokenType::IDENTIFIER, TokenType::NUMBER})) {
-        value = previous();
+        value_token = previous();
     } else {
         error(peek(), "Expect attribute value (string, identifier, or number).");
     }
 
     consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
-    element->addAttribute({key.lexeme, value.lexeme});
+
+    element->addAttribute({key.lexeme, value_token.lexeme});
 }
 
 std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
@@ -116,7 +173,7 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
         bool isInlineProp = false;
         int i = 0;
-        while (tokens[current + i].type != TokenType::END_OF_FILE && tokens[current + i].type != TokenType::RIGHT_BRACE) {
+        while (tokens.size() > current + i && tokens[current + i].type != TokenType::END_OF_FILE && tokens[current + i].type != TokenType::RIGHT_BRACE) {
             if (tokens[current + i].type == TokenType::COLON) {
                 isInlineProp = true;
                 break;
@@ -136,12 +193,9 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
                 key_str += advance().lexeme;
             }
             consume(TokenType::COLON, "Expect ':' after style property name.");
-            std::string value_str;
-            while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
-                value_str += advance().lexeme;
-            }
+            auto value_expr = parseExpression();
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-            styleNode->inline_properties.push_back({key_str, value_str});
+            styleNode->inline_properties.push_back({key_str, std::move(value_expr)});
         } else {
             CssRuleNode rule;
             while (!check(TokenType::LEFT_BRACE) && !isAtEnd()) {
@@ -154,15 +208,12 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
                     key_str += advance().lexeme;
                 }
                 consume(TokenType::COLON, "Expect ':' after style property name.");
-                std::string value_str;
-                while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
-                    value_str += advance().lexeme;
-                }
+                auto value_expr = parseExpression();
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-                rule.properties.push_back({key_str, value_str});
+                rule.properties.push_back({key_str, std::move(value_expr)});
             }
             consume(TokenType::RIGHT_BRACE, "Expect '}' after rule block.");
-            styleNode->global_rules.push_back(rule);
+            styleNode->global_rules.push_back(std::move(rule));
         }
     }
 
@@ -278,9 +329,9 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
         if (def.type != TemplateType::STYLE) {
             error(name, "Template '" + name.lexeme + "' is not a Style template.");
         }
-        styleNode->inline_properties.insert(styleNode->inline_properties.end(),
-                                            def.style_properties.begin(),
-                                            def.style_properties.end());
+        for (const auto& prop : def.style_properties) {
+            styleNode->inline_properties.push_back(prop.clone());
+        }
     } else {
         error(name, "Style template '" + name.lexeme + "' not found.");
     }
@@ -300,7 +351,6 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
         if (def.type != TemplateType::ELEMENT) {
             error(name, "Template '" + name.lexeme + "' is not an Element template.");
         }
-        // Clone the nodes from the template body
         std::vector<std::unique_ptr<BaseNode>> cloned_nodes;
         for (const auto& node : def.element_body) {
             cloned_nodes.push_back(node->clone());
@@ -338,10 +388,8 @@ void CHTLParser::parseTemplateDeclaration() {
     if (def.type == TemplateType::STYLE) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
             if (check(TokenType::AT) || check(TokenType::INHERIT)) {
-                // This is an inheritance/composition relationship.
-                // We need to parse the usage and copy the properties.
                 if (check(TokenType::INHERIT)) {
-                    advance(); // consume 'inherit'
+                    advance();
                 }
                 consume(TokenType::AT, "Expect '@' for template usage.");
                 Token type = consume(TokenType::IDENTIFIER, "Expect template type.");
@@ -356,31 +404,26 @@ void CHTLParser::parseTemplateDeclaration() {
                     if (base_def.type != TemplateType::STYLE) {
                         error(name, "Template '" + name.lexeme + "' is not a Style template.");
                     }
-                    def.style_properties.insert(def.style_properties.end(),
-                                                base_def.style_properties.begin(),
-                                                base_def.style_properties.end());
+                    for (const auto& prop : base_def.style_properties) {
+                        def.style_properties.push_back(prop.clone());
+                    }
                 } else {
                     error(name, "Base style template '" + name.lexeme + "' not found.");
                 }
 
             } else {
-                // This is a regular property declaration.
                 std::string key_str;
                 while (!check(TokenType::COLON) && !isAtEnd()) {
                     key_str += advance().lexeme;
                 }
                 consume(TokenType::COLON, "Expect ':' after style property name.");
-                std::string value_str;
-                while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
-                    value_str += advance().lexeme;
-                }
+                auto value_expr = parseExpression();
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-                def.style_properties.push_back({key_str, value_str});
+                def.style_properties.push_back({key_str, std::move(value_expr)});
             }
         }
     } else if (def.type == TemplateType::ELEMENT) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            // A template can contain multiple nodes
             for (auto& node : parseDeclaration()) {
                 def.element_body.push_back(std::move(node));
             }

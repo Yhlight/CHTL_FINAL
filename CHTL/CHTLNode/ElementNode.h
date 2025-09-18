@@ -3,7 +3,7 @@
 
 #include "BaseNode.h"
 #include "Visitor.h"
-#include "AttributeNode.h"
+#include "HtmlAttribute.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -22,12 +22,12 @@ public:
         children.push_back(std::move(child));
     }
 
-    void addAttribute(const AttributeNode& attr) {
+    void addAttribute(const HtmlAttribute& attr) {
         attributes.push_back(attr);
     }
 
     std::string tagName;
-    std::vector<AttributeNode> attributes;
+    std::vector<HtmlAttribute> attributes;
     std::vector<std::unique_ptr<BaseNode>> children;
 };
 

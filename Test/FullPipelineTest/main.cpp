@@ -5,31 +5,14 @@
 
 int main() {
     std::string source = R"(
-        [Template] @Style BaseStyle {
-            font-family: sans-serif;
-            font-size: 16px;
-        }
-
-        [Template] @Style ChildStyle {
-            @Style BaseStyle; // Inherit from BaseStyle
-            color: green;
-        }
-
-        [Template] @Element BaseElement {
-            p { text { "Base element text." } }
-        }
-
-        [Template] @Element ChildElement {
-            @Element BaseElement; // Inherit from BaseElement
-            p { text { "Child element text." } }
-        }
-
         div {
             style {
-                @Style ChildStyle;
+                width: 100px + 50px;
+                height: 10 * 2em;
+                padding: 100% / 4;
+                margin: 20px - 5px;
+                font-size: 2 ** 4px;
             }
-
-            @Element ChildElement;
         }
     )";
 

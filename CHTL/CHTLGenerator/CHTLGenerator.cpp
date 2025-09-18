@@ -3,6 +3,7 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
+#include "../Expression/ExpressionEvaluator.h" // Include the new evaluator
 #include <unordered_set>
 #include <algorithm> // For std::find_if
 
@@ -24,7 +25,6 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
 
 void CHTLGenerator::visit(ElementNode& node) {
     // --- Automation and Global CSS Generation ---
-    // First, iterate through style nodes to find global rules and inject attributes.
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             for (const auto& rule : styleNode->global_rules) {
@@ -32,9 +32,8 @@ void CHTLGenerator::visit(ElementNode& node) {
                 // Automation: if selector is a simple class or id, inject it.
                 if (selector.rfind('.', 0) == 0) { // Starts with .
                     std::string className = selector.substr(1);
-                    // Avoid adding duplicate classes
                     auto it = std::find_if(node.attributes.begin(), node.attributes.end(),
-                                           [](const AttributeNode& attr){ return attr.key == "class"; });
+                                           [](const HtmlAttribute& attr){ return attr.key == "class"; });
                     if (it != node.attributes.end()) {
                         if (it->value.find(className) == std::string::npos) {
                             it->value += " " + className;
@@ -46,17 +45,22 @@ void CHTLGenerator::visit(ElementNode& node) {
                     node.attributes.push_back({"id", selector.substr(1)});
                 }
 
-                // Context deduction for '&'
-                // A simple version: replace '&' with the element's tag name.
                 size_t pos = selector.find('&');
                 if (pos != std::string::npos) {
                     selector.replace(pos, 1, node.tagName);
                 }
 
-                // Add the rule to the global CSS output
                 css_output << selector << " {\n";
                 for (const auto& prop : rule.properties) {
-                    css_output << "    " << prop.key << ": " << prop.value << ";\n";
+                    ExpressionEvaluator evaluator;
+                    EvaluatedValue result = evaluator.evaluate(prop.value_expr.get());
+                    css_output << "    " << prop.key << ": ";
+                    if (result.value == 0 && !result.unit.empty()) {
+                        css_output << result.unit;
+                    } else {
+                        css_output << result.value << result.unit;
+                    }
+                    css_output << ";\n";
                 }
                 css_output << "}\n";
             }
@@ -66,17 +70,25 @@ void CHTLGenerator::visit(ElementNode& node) {
     // --- HTML Tag Generation ---
     html_output << "<" << node.tagName;
 
-    // Append attributes from the element itself (now including injected ones)
+    // Append standard HTML attributes
     for (const auto& attr : node.attributes) {
         html_output << " " << attr.key << "=\"" << attr.value << "\"";
     }
 
-    // Process inline styles
+    // Process inline styles by evaluating their expression trees
     std::string style_str;
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             for (const auto& prop : styleNode->inline_properties) {
-                style_str += prop.key + ": " + prop.value + ";";
+                ExpressionEvaluator evaluator;
+                EvaluatedValue result = evaluator.evaluate(prop.value_expr.get());
+                style_str += prop.key + ": ";
+                if (result.value == 0 && !result.unit.empty()) {
+                    style_str += result.unit;
+                } else {
+                    style_str += std::to_string(result.value) + result.unit;
+                }
+                style_str += ";";
             }
         }
     }

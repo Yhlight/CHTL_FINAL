@@ -1,0 +1,31 @@
+#ifndef EXPRESSION_EVALUATOR_H
+#define EXPRESSION_EVALUATOR_H
+
+#include "Expr.h"
+#include <string>
+#include <stdexcept>
+#include <cmath> // For pow()
+
+namespace CHTL {
+
+// A struct to hold the result of an evaluation.
+struct EvaluatedValue {
+    double value = 0.0;
+    std::string unit = "";
+};
+
+// This class implements the ExprVisitor pattern to calculate the result of an expression tree.
+class ExpressionEvaluator : public ExprVisitor {
+public:
+    EvaluatedValue evaluate(Expr* expr);
+
+    void visit(BinaryExpr& expr) override;
+    void visit(LiteralExpr& expr) override;
+
+private:
+    EvaluatedValue result;
+};
+
+} // namespace CHTL
+
+#endif // EXPRESSION_EVALUATOR_H

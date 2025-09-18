@@ -35,7 +35,14 @@ private:
     Token consume(TokenType type, const std::string& message);
     bool match(const std::vector<TokenType>& types);
 
-    // --- Parsing Methods ---
+    // --- Expression Parsing Methods ---
+    std::unique_ptr<Expr> parseExpression();
+    std::unique_ptr<Expr> parseTerm();
+    std::unique_ptr<Expr> parseFactor();
+    std::unique_ptr<Expr> parsePower();
+    std::unique_ptr<Expr> parsePrimary();
+
+    // --- Document Parsing Methods ---
     std::vector<std::unique_ptr<BaseNode>> parseDeclaration();
     std::unique_ptr<ElementNode> parseElement();
     void parseAttribute(ElementNode* element);

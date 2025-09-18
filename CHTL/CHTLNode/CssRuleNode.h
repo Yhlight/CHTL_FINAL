@@ -13,6 +13,15 @@ class CssRuleNode {
 public:
     std::string selector;
     std::vector<AttributeNode> properties;
+
+    CssRuleNode clone() const {
+        CssRuleNode new_rule;
+        new_rule.selector = selector;
+        for (const auto& prop : properties) {
+            new_rule.properties.push_back(prop.clone());
+        }
+        return new_rule;
+    }
 };
 
 } // namespace CHTL

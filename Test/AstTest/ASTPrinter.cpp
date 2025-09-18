@@ -20,7 +20,8 @@ void ASTPrinter::visit(ElementNode& node) {
     indent++;
     // Print attributes
     for (const auto& attr : node.attributes) {
-        std::cout << indentString() << "@" << attr.key << " = \"" << attr.value << "\"" << std::endl;
+        // TODO: Implement a proper expression printer
+        std::cout << indentString() << "@" << attr.key << " = [expression]" << std::endl;
     }
 
     // Print children

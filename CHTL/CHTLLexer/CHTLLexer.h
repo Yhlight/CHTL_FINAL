@@ -24,6 +24,7 @@ private:
     char advance();
     void addToken(TokenType type);
     void addToken(TokenType type, const std::string& literal);
+    bool match(char expected);
     char peek();
     char peekNext();
     void string(char quote);

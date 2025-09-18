@@ -12,6 +12,10 @@ enum class TokenType {
     LEFT_BRACKET, RIGHT_BRACKET, // [ ]
     AT,                          // @
     COLON, SEMICOLON,            // : ;
+    PLUS, MINUS, STAR, SLASH, PERCENT,
+
+    // Two-character tokens
+    STAR_STAR,
 
     // Literals.
     IDENTIFIER,

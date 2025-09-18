@@ -37,6 +37,12 @@ void CHTLLexer::scanToken() {
         case '@': addToken(TokenType::AT); break;
         case ':': addToken(TokenType::COLON); break;
         case ';': addToken(TokenType::SEMICOLON); break;
+        case '+': addToken(TokenType::PLUS); break;
+        case '-': addToken(TokenType::MINUS); break;
+        case '%': addToken(TokenType::PERCENT); break;
+        case '*':
+            addToken(match('*') ? TokenType::STAR_STAR : TokenType::STAR);
+            break;
 
         // Ignore whitespace.
         case ' ':
@@ -49,12 +55,11 @@ void CHTLLexer::scanToken() {
             break;
 
         case '/':
-            if (peek() == '/') {
+            if (match('/')) {
                 // A comment goes until the end of the line.
                 while (peek() != '\n' && !isAtEnd()) advance();
-            } else if (peek() == '*') {
+            } else if (match('*')) {
                 // Multi-line comment
-                advance(); // Consume the '*'
                 while (!(peek() == '*' && peekNext() == '/') && !isAtEnd()) {
                     if (peek() == '\n') line++;
                     advance();
@@ -67,8 +72,9 @@ void CHTLLexer::scanToken() {
                     advance();
                     advance();
                 }
+            } else {
+                addToken(TokenType::SLASH);
             }
-            // Note: A single '/' is not a token in CHTL for now.
             break;
 
         case '"':
@@ -102,6 +108,14 @@ void CHTLLexer::addToken(TokenType type) {
 void CHTLLexer::addToken(TokenType type, const std::string& literal) {
     // This overload is for string literals where the lexeme is different from the raw text
     tokens.push_back({type, literal, line, start});
+}
+
+bool CHTLLexer::match(char expected) {
+    if (isAtEnd()) return false;
+    if (source[current] != expected) return false;
+
+    current++;
+    return true;
 }
 
 char CHTLLexer::peek() {
