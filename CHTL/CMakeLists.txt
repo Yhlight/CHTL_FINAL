@@ -66,6 +66,10 @@ set(CHTL_SOURCES
     CHTL/CHTLNode/TemplateNode.h
     CHTL/CHTLNode/CustomNode.cpp
     CHTL/CHTLNode/CustomNode.h
+    CHTL/CHTLNode/ExpressionNode.cpp
+    CHTL/CHTLNode/ExpressionNode.h
+    CHTL/CHTLTemplate/TemplateManager.cpp
+    CHTL/CHTLTemplate/TemplateManager.h
 )
 
 set(CHTL_JS_SOURCES

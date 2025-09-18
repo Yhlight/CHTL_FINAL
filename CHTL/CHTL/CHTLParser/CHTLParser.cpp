@@ -4,12 +4,15 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/TemplateNode.h"
 #include "../CHTLNode/CustomNode.h"
+#include "../CHTLNode/ExpressionNode.h"
+#include "../CHTLTemplate/TemplateManager.h"
 #include <iostream>
 #include <algorithm>
 
 namespace CHTL {
 
 CHTLParser::CHTLParser() : m_position(0) {
+    m_templateManager = std::make_shared<TemplateManager>();
 }
 
 CHTLParser::~CHTLParser() {
@@ -68,6 +71,11 @@ std::shared_ptr<BaseNode> CHTLParser::parse(const std::vector<Token>& tokens) {
                 {
                     auto templateNode = parseTemplate();
                     if (templateNode) {
+                        // 注册模板到管理器
+                        auto templatePtr = std::static_pointer_cast<TemplateNode>(templateNode);
+                        if (templatePtr) {
+                            m_templateManager->registerTemplate(templatePtr);
+                        }
                         m_nodeStack.top()->addChild(templateNode);
                     }
                 }
@@ -78,6 +86,11 @@ std::shared_ptr<BaseNode> CHTLParser::parse(const std::vector<Token>& tokens) {
                 {
                     auto customNode = parseCustom();
                     if (customNode) {
+                        // 注册自定义到管理器
+                        auto customPtr = std::static_pointer_cast<CustomNode>(customNode);
+                        if (customPtr) {
+                            m_templateManager->registerCustom(customPtr);
+                        }
                         m_nodeStack.top()->addChild(customNode);
                     }
                 }
@@ -383,6 +396,19 @@ std::shared_ptr<BaseNode> CHTLParser::parseStyle() {
                     styleNode->setStyleType(StyleNode::StyleType::CLASS);
                     styleNode->setSelector("." + className);
                     
+                    // 自动为父元素添加类名
+                    if (!m_nodeStack.empty()) {
+                        auto parentElement = std::static_pointer_cast<ElementNode>(m_nodeStack.top());
+                        if (parentElement) {
+                            std::string existingClass = parentElement->getAttribute("class");
+                            if (existingClass.empty()) {
+                                parentElement->setAttribute("class", className);
+                            } else {
+                                parentElement->setAttribute("class", existingClass + " " + className);
+                            }
+                        }
+                    }
+                    
                     // 解析类选择器内容
                     if (consume(TokenType::LEFT_BRACE)) {
                         parseStyleProperties(styleNode);
@@ -398,6 +424,14 @@ std::shared_ptr<BaseNode> CHTLParser::parseStyle() {
                     styleNode->setStyleType(StyleNode::StyleType::ID);
                     styleNode->setSelector("#" + idName);
                     
+                    // 自动为父元素添加ID
+                    if (!m_nodeStack.empty()) {
+                        auto parentElement = std::static_pointer_cast<ElementNode>(m_nodeStack.top());
+                        if (parentElement) {
+                            parentElement->setAttribute("id", idName);
+                        }
+                    }
+                    
                     // 解析ID选择器内容
                     if (consume(TokenType::LEFT_BRACE)) {
                         parseStyleProperties(styleNode);
@@ -408,13 +442,31 @@ std::shared_ptr<BaseNode> CHTLParser::parseStyle() {
                 // 上下文推导
                 advance();
                 if (match(TokenType::COLON)) {
-                    std::string pseudo = token.value;
+                    std::string pseudo = ":";
                     advance();
                     if (match(TokenType::IDENTIFIER)) {
                         pseudo += current().value;
                         advance();
+                        
+                        // 根据上下文推导选择器
+                        std::string selector = "&" + pseudo;
+                        if (!m_nodeStack.empty()) {
+                            auto parentElement = std::static_pointer_cast<ElementNode>(m_nodeStack.top());
+                            if (parentElement) {
+                                // 优先使用class，然后使用id
+                                std::string className = parentElement->getAttribute("class");
+                                std::string idName = parentElement->getAttribute("id");
+                                
+                                if (!className.empty()) {
+                                    selector = "." + className + pseudo;
+                                } else if (!idName.empty()) {
+                                    selector = "#" + idName + pseudo;
+                                }
+                            }
+                        }
+                        
                         styleNode->setStyleType(StyleNode::StyleType::PSEUDO_CLASS);
-                        styleNode->setSelector("&" + pseudo);
+                        styleNode->setSelector(selector);
                         
                         // 解析伪类内容
                         if (consume(TokenType::LEFT_BRACE)) {
@@ -520,7 +572,8 @@ std::string CHTLParser::parseAttributeValue() {
         advance();
         return token.value;
     } else {
-        return "";
+        // 尝试解析表达式
+        return parseExpression();
     }
 }
 
@@ -543,8 +596,57 @@ std::string CHTLParser::parseString() {
 }
 
 std::string CHTLParser::parseExpression() {
-    // 解析表达式的简化实现
-    return "";
+    std::string expression = "";
+    
+    // 收集表达式内容直到遇到分号或右大括号
+    while (!isAtEnd() && !match(TokenType::SEMICOLON) && !match(TokenType::RIGHT_BRACE)) {
+        const Token& token = current();
+        
+        if (token.type == TokenType::NUMBER || 
+            token.type == TokenType::IDENTIFIER || 
+            token.type == TokenType::LITERAL ||
+            token.value == "+" || token.value == "-" || 
+            token.value == "*" || token.value == "/" || 
+            token.value == "%" || token.value == "**" ||
+            token.value == ">" || token.value == "<" || 
+            token.value == ">=" || token.value == "<=" ||
+            token.value == "==" || token.value == "!=" ||
+            token.value == "&&" || token.value == "||" ||
+            token.value == "?" || token.value == ":" ||
+            token.value == "(" || token.value == ")" ||
+            token.value == ".") {
+            expression += token.value + " ";
+            advance();
+        } else {
+            break;
+        }
+    }
+    
+    // 去除末尾空白
+    if (!expression.empty() && expression.back() == ' ') {
+        expression.pop_back();
+    }
+    
+    // 如果包含运算符，创建表达式节点并计算
+    if (expression.find('+') != std::string::npos || 
+        expression.find('-') != std::string::npos ||
+        expression.find('*') != std::string::npos ||
+        expression.find('/') != std::string::npos ||
+        expression.find('%') != std::string::npos ||
+        expression.find('?') != std::string::npos) {
+        
+        ExpressionNode::ExpressionType type = ExpressionNode::ExpressionType::ARITHMETIC;
+        if (expression.find('?') != std::string::npos) {
+            type = ExpressionNode::ExpressionType::CONDITIONAL;
+        } else if (expression.find("&&") != std::string::npos || expression.find("||") != std::string::npos) {
+            type = ExpressionNode::ExpressionType::LOGICAL;
+        }
+        
+        ExpressionNode exprNode(type, expression);
+        return exprNode.evaluate();
+    }
+    
+    return expression;
 }
 
 const Token& CHTLParser::current() const {

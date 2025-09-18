@@ -24,6 +24,9 @@ public:
     // 检查是否为HTML5元素
     bool isHTML5Element() const;
     
+    // 获取属性
+    const std::map<std::string, std::string>& getAttributes() const { return m_attributes; }
+    
     // 克隆节点
     std::shared_ptr<BaseNode> clone() const override;
     

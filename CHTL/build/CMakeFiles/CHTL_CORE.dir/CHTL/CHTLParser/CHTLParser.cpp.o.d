@@ -220,6 +220,11 @@ CMakeFiles/CHTL_CORE.dir/CHTL/CHTLParser/CHTLParser.cpp.o: \
   /workspace/CHTL/CHTL/CHTLParser/../CHTLNode/StyleNode.h \
   /workspace/CHTL/CHTL/CHTLParser/../CHTLNode/TemplateNode.h \
   /workspace/CHTL/CHTL/CHTLParser/../CHTLNode/CustomNode.h \
+  /workspace/CHTL/CHTL/CHTLParser/../CHTLNode/ExpressionNode.h \
+  /workspace/CHTL/CHTL/CHTLParser/../CHTLTemplate/TemplateManager.h \
+  /workspace/CHTL/CHTL/CHTLParser/../CHTLTemplate/../CHTLNode/BaseNode.h \
+  /workspace/CHTL/CHTL/CHTLParser/../CHTLTemplate/../CHTLNode/TemplateNode.h \
+  /workspace/CHTL/CHTL/CHTLParser/../CHTLTemplate/../CHTLNode/CustomNode.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iostream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ostream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ios \

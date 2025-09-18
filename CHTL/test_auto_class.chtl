@@ -1,0 +1,41 @@
+div
+{
+    style
+    {
+        .box
+        {
+            width: 300px;
+            height: 200px;
+            background-color: red;
+        }
+        
+        &:hover
+        {
+            background-color: blue;
+        }
+    }
+    
+    text
+    {
+        测试自动化类名和上下文推导
+    }
+}
+
+div
+{
+    id: main-container;
+    
+    style
+    {
+        #main-container
+        {
+            width: 100%;
+            height: 100vh;
+        }
+        
+        &:hover
+        {
+            background-color: green;
+        }
+    }
+}

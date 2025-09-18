@@ -6,6 +6,11 @@
 #include <memory>
 #include <stack>
 
+// 前向声明
+namespace CHTL {
+    class TemplateManager;
+}
+
 namespace CHTL {
 
 /**
@@ -179,6 +184,7 @@ private:
     std::vector<Token> m_tokens;
     size_t m_position;
     std::stack<std::shared_ptr<BaseNode>> m_nodeStack;
+    std::shared_ptr<TemplateManager> m_templateManager;
 };
 
 } // namespace CHTL

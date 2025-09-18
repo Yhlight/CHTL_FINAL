@@ -1,0 +1,16 @@
+div
+{
+    style
+    {
+        width: 100px + 50px;
+        height: 200px * 2;
+        margin: 10px * 3;
+        padding: 20px / 2;
+        background-color: width > 100px ? "red" : "blue";
+    }
+    
+    text
+    {
+        测试属性运算功能
+    }
+}

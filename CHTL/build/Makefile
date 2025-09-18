@@ -396,6 +396,30 @@ CHTL/CHTLNode/ElementNode.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/CHTL_CORE.dir/build.make CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/ElementNode.cpp.s
 .PHONY : CHTL/CHTLNode/ElementNode.cpp.s
 
+CHTL/CHTLNode/ExpressionNode.o: CHTL/CHTLNode/ExpressionNode.cpp.o
+.PHONY : CHTL/CHTLNode/ExpressionNode.o
+
+# target to build an object file
+CHTL/CHTLNode/ExpressionNode.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CHTL_CORE.dir/build.make CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/ExpressionNode.cpp.o
+.PHONY : CHTL/CHTLNode/ExpressionNode.cpp.o
+
+CHTL/CHTLNode/ExpressionNode.i: CHTL/CHTLNode/ExpressionNode.cpp.i
+.PHONY : CHTL/CHTLNode/ExpressionNode.i
+
+# target to preprocess a source file
+CHTL/CHTLNode/ExpressionNode.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CHTL_CORE.dir/build.make CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/ExpressionNode.cpp.i
+.PHONY : CHTL/CHTLNode/ExpressionNode.cpp.i
+
+CHTL/CHTLNode/ExpressionNode.s: CHTL/CHTLNode/ExpressionNode.cpp.s
+.PHONY : CHTL/CHTLNode/ExpressionNode.s
+
+# target to generate assembly for a file
+CHTL/CHTLNode/ExpressionNode.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CHTL_CORE.dir/build.make CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/ExpressionNode.cpp.s
+.PHONY : CHTL/CHTLNode/ExpressionNode.cpp.s
+
 CHTL/CHTLNode/StyleNode.o: CHTL/CHTLNode/StyleNode.cpp.o
 .PHONY : CHTL/CHTLNode/StyleNode.o
 
@@ -491,6 +515,30 @@ CHTL/CHTLParser/CHTLParser.s: CHTL/CHTLParser/CHTLParser.cpp.s
 CHTL/CHTLParser/CHTLParser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/CHTL_CORE.dir/build.make CMakeFiles/CHTL_CORE.dir/CHTL/CHTLParser/CHTLParser.cpp.s
 .PHONY : CHTL/CHTLParser/CHTLParser.cpp.s
+
+CHTL/CHTLTemplate/TemplateManager.o: CHTL/CHTLTemplate/TemplateManager.cpp.o
+.PHONY : CHTL/CHTLTemplate/TemplateManager.o
+
+# target to build an object file
+CHTL/CHTLTemplate/TemplateManager.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CHTL_CORE.dir/build.make CMakeFiles/CHTL_CORE.dir/CHTL/CHTLTemplate/TemplateManager.cpp.o
+.PHONY : CHTL/CHTLTemplate/TemplateManager.cpp.o
+
+CHTL/CHTLTemplate/TemplateManager.i: CHTL/CHTLTemplate/TemplateManager.cpp.i
+.PHONY : CHTL/CHTLTemplate/TemplateManager.i
+
+# target to preprocess a source file
+CHTL/CHTLTemplate/TemplateManager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CHTL_CORE.dir/build.make CMakeFiles/CHTL_CORE.dir/CHTL/CHTLTemplate/TemplateManager.cpp.i
+.PHONY : CHTL/CHTLTemplate/TemplateManager.cpp.i
+
+CHTL/CHTLTemplate/TemplateManager.s: CHTL/CHTLTemplate/TemplateManager.cpp.s
+.PHONY : CHTL/CHTLTemplate/TemplateManager.s
+
+# target to generate assembly for a file
+CHTL/CHTLTemplate/TemplateManager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CHTL_CORE.dir/build.make CMakeFiles/CHTL_CORE.dir/CHTL/CHTLTemplate/TemplateManager.cpp.s
+.PHONY : CHTL/CHTLTemplate/TemplateManager.cpp.s
 
 CompilerDispatcher/CompilerDispatcher.o: CompilerDispatcher/CompilerDispatcher.cpp.o
 .PHONY : CompilerDispatcher/CompilerDispatcher.o
@@ -673,6 +721,9 @@ help:
 	@echo "... CHTL/CHTLNode/ElementNode.o"
 	@echo "... CHTL/CHTLNode/ElementNode.i"
 	@echo "... CHTL/CHTLNode/ElementNode.s"
+	@echo "... CHTL/CHTLNode/ExpressionNode.o"
+	@echo "... CHTL/CHTLNode/ExpressionNode.i"
+	@echo "... CHTL/CHTLNode/ExpressionNode.s"
 	@echo "... CHTL/CHTLNode/StyleNode.o"
 	@echo "... CHTL/CHTLNode/StyleNode.i"
 	@echo "... CHTL/CHTLNode/StyleNode.s"
@@ -685,6 +736,9 @@ help:
 	@echo "... CHTL/CHTLParser/CHTLParser.o"
 	@echo "... CHTL/CHTLParser/CHTLParser.i"
 	@echo "... CHTL/CHTLParser/CHTLParser.s"
+	@echo "... CHTL/CHTLTemplate/TemplateManager.o"
+	@echo "... CHTL/CHTLTemplate/TemplateManager.i"
+	@echo "... CHTL/CHTLTemplate/TemplateManager.s"
 	@echo "... CompilerDispatcher/CompilerDispatcher.o"
 	@echo "... CompilerDispatcher/CompilerDispatcher.i"
 	@echo "... CompilerDispatcher/CompilerDispatcher.s"

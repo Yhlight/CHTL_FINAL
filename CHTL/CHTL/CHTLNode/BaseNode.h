@@ -25,7 +25,8 @@ public:
         IMPORT,         // 导入节点
         CONFIG,         // 配置节点
         NAMESPACE,      // 命名空间节点
-        OPERATOR        // 操作符节点
+        OPERATOR,       // 操作符节点
+        EXPRESSION      // 表达式节点
     };
 
     BaseNode(NodeType type);
@@ -95,6 +96,7 @@ public:
     virtual void visitConfig(class ConfigNode& node) = 0;
     virtual void visitNamespace(class NamespaceNode& node) = 0;
     virtual void visitOperator(class OperatorNode& node) = 0;
+    virtual void visitExpression(class ExpressionNode& node) = 0;
 };
 
 } // namespace CHTL

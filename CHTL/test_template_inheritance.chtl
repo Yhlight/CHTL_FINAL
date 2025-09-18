@@ -1,0 +1,53 @@
+[Template] @Style BaseStyle
+{
+    color: black;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+[Template] @Style ExtendedStyle
+{
+    background-color: white;
+    padding: 10px;
+    @Style BaseStyle;
+}
+
+[Template] @Element Button
+{
+    button
+    {
+        style
+        {
+            @Style ExtendedStyle;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        
+        text
+        {
+            点击我
+        }
+    }
+}
+
+html
+{
+    body
+    {
+        @Element Button;
+        
+        div
+        {
+            style
+            {
+                @Style BaseStyle;
+                margin: 20px;
+            }
+            
+            text
+            {
+                使用基础样式
+            }
+        }
+    }
+}

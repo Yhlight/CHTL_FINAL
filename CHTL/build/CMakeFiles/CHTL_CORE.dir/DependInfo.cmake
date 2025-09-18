@@ -14,10 +14,12 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspace/CHTL/CHTL/CHTLNode/BaseNode.cpp" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/BaseNode.cpp.o" "gcc" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/BaseNode.cpp.o.d"
   "/workspace/CHTL/CHTL/CHTLNode/CustomNode.cpp" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/CustomNode.cpp.o" "gcc" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/CustomNode.cpp.o.d"
   "/workspace/CHTL/CHTL/CHTLNode/ElementNode.cpp" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/ElementNode.cpp.o" "gcc" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/ElementNode.cpp.o.d"
+  "/workspace/CHTL/CHTL/CHTLNode/ExpressionNode.cpp" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/ExpressionNode.cpp.o" "gcc" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/ExpressionNode.cpp.o.d"
   "/workspace/CHTL/CHTL/CHTLNode/StyleNode.cpp" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/StyleNode.cpp.o" "gcc" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/StyleNode.cpp.o.d"
   "/workspace/CHTL/CHTL/CHTLNode/TemplateNode.cpp" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/TemplateNode.cpp.o" "gcc" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/TemplateNode.cpp.o.d"
   "/workspace/CHTL/CHTL/CHTLNode/TextNode.cpp" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/TextNode.cpp.o" "gcc" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/TextNode.cpp.o.d"
   "/workspace/CHTL/CHTL/CHTLParser/CHTLParser.cpp" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLParser/CHTLParser.cpp.o" "gcc" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLParser/CHTLParser.cpp.o.d"
+  "/workspace/CHTL/CHTL/CHTLTemplate/TemplateManager.cpp" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLTemplate/TemplateManager.cpp.o" "gcc" "CMakeFiles/CHTL_CORE.dir/CHTL/CHTLTemplate/TemplateManager.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.
