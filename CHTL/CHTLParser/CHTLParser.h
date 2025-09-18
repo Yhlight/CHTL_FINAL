@@ -1,0 +1,46 @@
+#ifndef CHTL_PARSER_H
+#define CHTL_PARSER_H
+
+#include "../CHTLLexer/Token.h"
+#include "../CHTLNode/BaseNode.h"
+#include "../CHTLNode/ElementNode.h" // Include full definition for std::unique_ptr
+#include <vector>
+#include <memory>
+
+namespace CHTL {
+
+// The parser takes a stream of tokens and produces an Abstract Syntax Tree.
+class CHTLParser {
+public:
+    explicit CHTLParser(const std::vector<Token>& tokens);
+
+    // The main entry point for parsing.
+    std::unique_ptr<BaseNode> parse();
+
+private:
+    const std::vector<Token>& tokens;
+    int current = 0;
+
+    // --- Helper Methods ---
+    // These methods provide a clean interface for consuming and looking at tokens.
+
+    bool isAtEnd();
+    Token peek();
+    Token previous();
+    Token advance();
+    bool check(TokenType type);
+    Token consume(TokenType type, const std::string& message);
+    bool match(const std::vector<TokenType>& types);
+
+    // --- Parsing Methods ---
+    std::unique_ptr<BaseNode> parseDeclaration();
+    std::unique_ptr<ElementNode> parseElement();
+    void parseAttribute(ElementNode* element);
+
+    // --- Error Handling ---
+    void error(const Token& token, const std::string& message);
+};
+
+} // namespace CHTL
+
+#endif // CHTL_PARSER_H
