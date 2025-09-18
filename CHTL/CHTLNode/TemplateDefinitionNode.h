@@ -21,6 +21,9 @@ enum class TemplateType {
 // from BaseNode.
 class TemplateDefinitionNode {
 public:
+    // Method to create a deep copy of the definition
+    std::unique_ptr<TemplateDefinitionNode> clone() const;
+
     TemplateType type;
     std::string name;
 

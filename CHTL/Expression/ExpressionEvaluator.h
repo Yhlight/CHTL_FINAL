@@ -14,9 +14,12 @@ namespace CHTL {
 class ElementNode; // Forward declaration
 
 // A struct to hold the result of an evaluation.
+enum class ValueType { NUMERIC, STRING, BOOL };
+
 struct EvaluatedValue {
-    double value = 0.0;
-    std::string unit = "";
+    ValueType type = ValueType::NUMERIC;
+    double numeric_value = 0.0;
+    std::string string_value = ""; // For units with numbers, or full string values
 };
 
 // This class implements the ExprVisitor pattern to calculate the result of an expression tree.

@@ -6,9 +6,42 @@
 namespace CHTL {
 
 static std::unordered_map<std::string, TokenType> keywords = {
+    // Block types
     {"style", TokenType::STYLE},
     {"text", TokenType::TEXT},
-    {"inherit", TokenType::INHERIT}
+    {"script", TokenType::SCRIPT},
+
+    // Keywords for major features
+    {"Template", TokenType::TEMPLATE},
+    {"Custom", TokenType::CUSTOM},
+    {"Origin", TokenType::ORIGIN},
+    {"Import", TokenType::IMPORT},
+    {"Namespace", TokenType::NAMESPACE},
+    {"Configuration", TokenType::CONFIGURATION},
+
+    // @-prefixed identifiers
+    {"Style", TokenType::STYLE},
+    {"Element", TokenType::ELEMENT},
+    {"Var", TokenType::VAR},
+    {"Html", TokenType::HTML},
+    {"JavaScript", TokenType::JAVASCRIPT},
+    {"Chtl", TokenType::CHTL},
+
+    // Other keywords
+    {"inherit", TokenType::INHERIT},
+    {"from", TokenType::FROM},
+    {"as", TokenType::AS},
+    {"delete", TokenType::DELETE},
+    {"insert", TokenType::INSERT},
+    {"after", TokenType::AFTER},
+    {"before", TokenType::BEFORE},
+    {"replace", TokenType::REPLACE},
+    {"top", TokenType::TOP},
+    {"bottom", TokenType::BOTTOM},
+    {"at", TokenType::AT},
+    {"except", TokenType::EXCEPT},
+    {"use", TokenType::USE},
+    {"html5", TokenType::HTML5},
 };
 
 CHTLLexer::CHTLLexer(const std::string& source) : source(source) {}
@@ -40,6 +73,7 @@ void CHTLLexer::scanToken() {
         case '.': addToken(TokenType::DOT); break;
         case ':': addToken(TokenType::COLON); break;
         case ';': addToken(TokenType::SEMICOLON); break;
+        case ',': addToken(TokenType::COMMA); break;
         case '?': addToken(TokenType::QUESTION); break;
         case '+': addToken(TokenType::PLUS); break;
         case '-': addToken(TokenType::MINUS); break;

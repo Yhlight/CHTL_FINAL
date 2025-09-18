@@ -42,20 +42,31 @@ public:
     virtual std::unique_ptr<Expr> clone() const = 0;
 };
 
-// Represents a literal value, e.g., "100" and "px".
-// We store the value as a double to handle potential floating point math.
+enum class LiteralType { NUMERIC, STRING };
+
+// Represents a literal value, e.g., "100px" or "red".
 class LiteralExpr : public Expr {
 public:
-    LiteralExpr(double value, const std::string& unit)
-        : value(value), unit(unit) {}
+    // Constructor for numeric literals
+    LiteralExpr(double num_val, const std::string& unit_val)
+        : type(LiteralType::NUMERIC), numeric_value(num_val), string_value(unit_val) {}
+
+    // Constructor for string literals
+    explicit LiteralExpr(const std::string& str_val)
+        : type(LiteralType::STRING), numeric_value(0), string_value(str_val) {}
 
     void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
     std::unique_ptr<Expr> clone() const override {
-        return std::make_unique<LiteralExpr>(value, unit);
+        if (type == LiteralType::NUMERIC) {
+            return std::make_unique<LiteralExpr>(numeric_value, string_value);
+        } else {
+            return std::make_unique<LiteralExpr>(string_value);
+        }
     }
 
-    double value;
-    std::string unit;
+    LiteralType type;
+    double numeric_value;
+    std::string string_value; // Used for the unit of a number, or the whole string value
 };
 
 // Represents a binary operation, e.g., left + right.

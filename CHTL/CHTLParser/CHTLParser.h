@@ -5,6 +5,7 @@
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/ElementNode.h" // Include full definition for std::unique_ptr
 #include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../CHTLNode/CustomDeclarationNode.h"
 #include <vector>
 #include <memory>
 #include <map>
@@ -60,7 +61,9 @@ private:
 
     // --- Symbol Table for Templates ---
     std::map<std::string, TemplateDefinitionNode> template_definitions;
-    void parseTemplateDeclaration();
+    std::unique_ptr<BaseNode> parseTopLevelDeclaration(); // New method
+    std::unique_ptr<TemplateDeclarationNode> parseTemplateDeclaration();
+    std::unique_ptr<CustomDeclarationNode> parseCustomDeclaration();
     void parseStyleTemplateUsage(StyleNode* styleNode);
     std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();
     std::unique_ptr<BaseNode> parseOriginBlock();

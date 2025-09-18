@@ -3,9 +3,12 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
+#include "../CHTLNode/TemplateDeclarationNode.h"
+#include "../CHTLNode/CustomDeclarationNode.h"
 #include "../Expression/ExpressionEvaluator.h" // Include the new evaluator
 #include <unordered_set>
 #include <algorithm> // For std::find_if
+#include <sstream>   // For std::stringstream
 
 namespace CHTL {
 
@@ -22,7 +25,20 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
     css_output.str("");
     this->doc_root = root; // Set the document root context
     if (root) {
-        root->accept(*this);
+        if (ElementNode* root_element = dynamic_cast<ElementNode*>(root)) {
+            if (root_element->tagName == "<root>") {
+                // If it's the special root node, don't print the tag, just its children.
+                for (const auto& child : root_element->children) {
+                    child->accept(*this);
+                }
+            } else {
+                // It's a normal element, process as usual.
+                root->accept(*this);
+            }
+        } else {
+             // Not an element at the root (e.g., just a text node), process normally.
+            root->accept(*this);
+        }
     }
     return {html_output.str(), css_output.str()};
 }
@@ -57,13 +73,14 @@ void CHTLGenerator::visit(ElementNode& node) {
                 css_output << selector << " {\n";
                 for (const auto& prop : rule.properties) {
                     ExpressionEvaluator evaluator(this->templates, this->doc_root);
-                    // The context for a global rule is the element it's defined in.
                     EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
                     css_output << "    " << prop.key << ": ";
-                    if (result.value == 0 && !result.unit.empty()) {
-                        css_output << result.unit;
-                    } else {
-                        css_output << result.value << result.unit;
+                    if (result.type == ValueType::STRING) {
+                        css_output << result.string_value;
+                    } else if (result.type == ValueType::NUMERIC) {
+                        std::stringstream ss;
+                        ss << result.numeric_value;
+                        css_output << ss.str() << result.string_value;
                     }
                     css_output << ";\n";
                 }
@@ -88,10 +105,13 @@ void CHTLGenerator::visit(ElementNode& node) {
                 ExpressionEvaluator evaluator(this->templates, this->doc_root);
                 EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
                 style_str += prop.key + ": ";
-                if (result.value == 0 && !result.unit.empty()) {
-                    style_str += result.unit;
-                } else {
-                    style_str += std::to_string(result.value) + result.unit;
+                if (result.type == ValueType::STRING) {
+                    style_str += result.string_value;
+                } else if (result.type == ValueType::NUMERIC) {
+                    // Use a stringstream to format the number without trailing zeros
+                    std::stringstream ss;
+                    ss << result.numeric_value;
+                    style_str += ss.str() + result.string_value;
                 }
                 style_str += ";";
             }
@@ -137,6 +157,18 @@ void CHTLGenerator::visit(OriginNode& node) {
             // Not handled yet, but will be placed in a future JS output.
             break;
     }
+}
+
+void CHTLGenerator::visit(TemplateDeclarationNode& node) {
+    // A template declaration does not produce any direct output.
+    // It's processed by the parser and stored for use elsewhere.
+    // So, this visitor method is intentionally empty.
+}
+
+void CHTLGenerator::visit(CustomDeclarationNode& node) {
+    // A custom declaration does not produce any direct output.
+    // It's processed by the parser and stored for use elsewhere.
+    // So, this visitor method is intentionally empty.
 }
 
 } // namespace CHTL

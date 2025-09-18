@@ -12,7 +12,7 @@ enum class TokenType {
     LEFT_BRACKET, RIGHT_BRACKET, // [ ]
     LEFT_PAREN, RIGHT_PAREN,     // ( )
     AT,                          // @
-    COLON, SEMICOLON,            // : ;
+    COLON, SEMICOLON, COMMA,     // : ; ,
     DOT,                         // .
     QUESTION,                    // ?
     PLUS, MINUS, STAR, SLASH, PERCENT,
@@ -37,6 +37,31 @@ enum class TokenType {
     STYLE,
     TEXT,
     INHERIT,
+    TEMPLATE,
+    CUSTOM,
+    ORIGIN,
+    IMPORT,
+    NAMESPACE,
+    CONFIGURATION,
+    ELEMENT,
+    VAR,
+    HTML,
+    JAVASCRIPT,
+    CHTL,
+    FROM,
+    AS,
+    DELETE,
+    INSERT,
+    AFTER,
+    BEFORE,
+    REPLACE,
+    TOP,
+    BOTTOM,
+    EXCEPT,
+    USE,
+    HTML5,
+    SCRIPT,
+
 
     // Special
     SYMBOL, // For single characters like -, #, etc.

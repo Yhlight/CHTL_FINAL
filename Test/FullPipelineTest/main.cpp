@@ -5,16 +5,25 @@
 
 int main() {
     std::string source = R"(
+        // Define a customizable style group with placeholders
+        [Custom] @Style TextSet
+        {
+            color;
+            font-size;
+            line-height: 1.6;
+        }
+
         div {
-            id: box;
             style {
-                width: 100px;
-                height: 200px;
-                // Simple conditional using implicit self-reference
-                background-color: width > 50px ? "red" : "blue";
-                // Chained conditional and logical operators
-                border: width > 200px || height < 100px ? "1px solid red" : "2px solid green";
+                // Use the customizable style and provide values
+                @Style TextSet {
+                    color: "red";
+                    font-size: 20px;
+                    delete line-height;
+                    border: "1px solid blue"; // Add a new property
+                }
             }
+            text { "Hello Customization!" }
         }
     )";
 

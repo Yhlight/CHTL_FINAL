@@ -8,8 +8,9 @@ namespace CHTL {
 
 // Helper to check for truthiness
 static bool isTruthy(const EvaluatedValue& val) {
-    if (!val.unit.empty() && val.unit != "0") return true;
-    return val.value != 0;
+    if (val.type == ValueType::BOOL) return val.numeric_value != 0;
+    if (val.type == ValueType::STRING) return !val.string_value.empty() && val.string_value != "0";
+    return val.numeric_value != 0;
 }
 
 ExpressionEvaluator::ExpressionEvaluator(const std::map<std::string, TemplateDefinitionNode>& templates, BaseNode* doc_root)
@@ -24,10 +25,10 @@ EvaluatedValue ExpressionEvaluator::evaluate(Expr* expr, ElementNode* context) {
 }
 
 void ExpressionEvaluator::visit(LiteralExpr& expr) {
-    if (expr.unit.empty() || expr.value != 0) {
-         result = {expr.value, expr.unit};
-    } else {
-        result = {0, expr.unit};
+    if (expr.type == LiteralType::NUMERIC) {
+        result = {ValueType::NUMERIC, expr.numeric_value, expr.string_value};
+    } else { // STRING
+        result = {ValueType::STRING, 0, expr.string_value};
     }
 }
 
@@ -35,30 +36,34 @@ void ExpressionEvaluator::visit(BinaryExpr& expr) {
     EvaluatedValue left = evaluate(expr.left.get(), this->current_context);
     EvaluatedValue right = evaluate(expr.right.get(), this->current_context);
 
-    if (!left.unit.empty() && !right.unit.empty() && left.unit != right.unit) {
-        throw std::runtime_error("Mismatched units in expression: '" + left.unit + "' and '" + right.unit + "'.");
+    if (left.type != ValueType::NUMERIC || right.type != ValueType::NUMERIC) {
+        throw std::runtime_error("Arithmetic operations can only be performed on numeric values.");
     }
 
-    std::string result_unit = !left.unit.empty() ? left.unit : right.unit;
+    if (!left.string_value.empty() && !right.string_value.empty() && left.string_value != right.string_value) {
+        throw std::runtime_error("Mismatched units in expression: '" + left.string_value + "' and '" + right.string_value + "'.");
+    }
+
+    std::string result_unit = !left.string_value.empty() ? left.string_value : right.string_value;
     double result_value = 0.0;
 
     switch (expr.op.type) {
-        case TokenType::PLUS: result_value = left.value + right.value; break;
-        case TokenType::MINUS: result_value = left.value - right.value; break;
-        case TokenType::STAR: result_value = left.value * right.value; break;
+        case TokenType::PLUS: result_value = left.numeric_value + right.numeric_value; break;
+        case TokenType::MINUS: result_value = left.numeric_value - right.numeric_value; break;
+        case TokenType::STAR: result_value = left.numeric_value * right.numeric_value; break;
         case TokenType::SLASH:
-            if (right.value == 0) throw std::runtime_error("Division by zero.");
-            result_value = left.value / right.value;
+            if (right.numeric_value == 0) throw std::runtime_error("Division by zero.");
+            result_value = left.numeric_value / right.numeric_value;
             break;
         case TokenType::PERCENT:
-            if (static_cast<int>(right.value) == 0) throw std::runtime_error("Modulo by zero.");
-            result_value = fmod(left.value, right.value);
+            if (static_cast<int>(right.numeric_value) == 0) throw std::runtime_error("Modulo by zero.");
+            result_value = fmod(left.numeric_value, right.numeric_value);
             break;
-        case TokenType::STAR_STAR: result_value = pow(left.value, right.value); break;
+        case TokenType::STAR_STAR: result_value = pow(left.numeric_value, right.numeric_value); break;
         default: throw std::runtime_error("Unknown binary operator.");
     }
 
-    result = {result_value, result_unit};
+    result = {ValueType::NUMERIC, result_value, result_unit};
 }
 
 void ExpressionEvaluator::visit(VarExpr& expr) {
@@ -117,28 +122,50 @@ void ExpressionEvaluator::visit(ComparisonExpr& expr) {
     EvaluatedValue right = evaluate(expr.right.get(), this->current_context);
     bool comparison_result = false;
 
-    switch (expr.op.type) {
-        case TokenType::GREATER:       comparison_result = left.value > right.value; break;
-        case TokenType::GREATER_EQUAL: comparison_result = left.value >= right.value; break;
-        case TokenType::LESS:          comparison_result = left.value < right.value; break;
-        case TokenType::LESS_EQUAL:    comparison_result = left.value <= right.value; break;
-        case TokenType::EQUAL_EQUAL:   comparison_result = left.value == right.value && left.unit == right.unit; break;
-        case TokenType::BANG_EQUAL:    comparison_result = left.value != right.value || left.unit != right.unit; break;
-        default: break;
+    if (left.type != right.type) {
+        // For now, only compare values of the same type.
+        // Could be extended to allow cross-type comparisons.
+        comparison_result = false;
+    } else if (left.type == ValueType::NUMERIC) {
+        switch (expr.op.type) {
+            case TokenType::GREATER:       comparison_result = left.numeric_value > right.numeric_value; break;
+            case TokenType::GREATER_EQUAL: comparison_result = left.numeric_value >= right.numeric_value; break;
+            case TokenType::LESS:          comparison_result = left.numeric_value < right.numeric_value; break;
+            case TokenType::LESS_EQUAL:    comparison_result = left.numeric_value <= right.numeric_value; break;
+            case TokenType::EQUAL_EQUAL:   comparison_result = left.numeric_value == right.numeric_value && left.string_value == right.string_value; break;
+            case TokenType::BANG_EQUAL:    comparison_result = left.numeric_value != right.numeric_value || left.string_value != right.string_value; break;
+            default: break;
+        }
+    } else { // STRING
+        switch (expr.op.type) {
+            case TokenType::EQUAL_EQUAL:   comparison_result = left.string_value == right.string_value; break;
+            case TokenType::BANG_EQUAL:    comparison_result = left.string_value != right.string_value; break;
+            default: // Other comparisons are not well-defined for strings here.
+                comparison_result = false;
+                break;
+        }
     }
-    result = {comparison_result ? 1.0 : 0.0, ""};
+
+    result = {ValueType::BOOL, comparison_result ? 1.0 : 0.0, ""};
 }
 
 void ExpressionEvaluator::visit(LogicalExpr& expr) {
     EvaluatedValue left = evaluate(expr.left.get(), this->current_context);
 
     if (expr.op.type == TokenType::PIPE_PIPE) {
-        if (isTruthy(left)) { result = left; return; }
+        if (isTruthy(left)) {
+            result = {ValueType::BOOL, 1.0, ""};
+            return;
+        }
     } else { // AMPERSAND_AMPERSAND
-        if (!isTruthy(left)) { result = left; return; }
+        if (!isTruthy(left)) {
+            result = {ValueType::BOOL, 0.0, ""};
+            return;
+        }
     }
 
-    result = evaluate(expr.right.get(), this->current_context);
+    EvaluatedValue right = evaluate(expr.right.get(), this->current_context);
+    result = {ValueType::BOOL, isTruthy(right) ? 1.0 : 0.0, ""};
 }
 
 void ExpressionEvaluator::visit(ConditionalExpr& expr) {
