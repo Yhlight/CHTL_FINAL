@@ -1,7 +1,30 @@
 #include "Parser.hpp"
+#include "../CHTLEvaluator/Evaluator.hpp"
 #include <iostream>
+#include <map>
 
 namespace CHTL {
+
+// Precedence levels for operators
+enum Precedence {
+    LOWEST,
+    TERNARY,   // ?
+    CONDITION, // > or <
+    SUM,       // + -
+    PRODUCT,   // * /
+    PREFIX     // -X or !X
+};
+
+static const std::map<TokenType, Precedence> precedences = {
+    {TokenType::PLUS, SUM},
+    {TokenType::MINUS, SUM},
+    {TokenType::ASTERISK, PRODUCT},
+    {TokenType::SLASH, PRODUCT},
+    {TokenType::GT, CONDITION},
+    {TokenType::LT, CONDITION},
+    {TokenType::QUESTION, TERNARY},
+};
+
 
 Parser::Parser(Lexer& l, CHTLContext& ctx) : lexer(l), context(ctx) {
     nextToken();
@@ -38,15 +61,91 @@ std::unique_ptr<Node> Parser::parseNode() {
         case TokenType::COMMENT:    return parseCommentNode();
         case TokenType::IDENT:      return parseElementNode();
         case TokenType::LBRACKET:   return parseTemplateDefinition();
-        case TokenType::AT:         // Top-level usage is handled in parseProgram
         default:                    return nullptr;
     }
 }
 
-std::unique_ptr<InheritanceNode> Parser::parseInheritanceStatement() {
-    if (currentToken.type == TokenType::INHERIT) {
+std::unique_ptr<ExpressionNode> Parser::parsePrefixExpression() {
+    if (currentToken.type == TokenType::NUMBER) {
+        int value = std::stoi(currentToken.literal);
+        return std::make_unique<NumberLiteralNode>(value);
+    }
+    if (currentToken.type == TokenType::STRING) {
+        return std::make_unique<StringLiteralNode>(currentToken.literal);
+    }
+    if (currentToken.type == TokenType::IDENT) {
+        if (peekToken.type == TokenType::LPAREN) { // Variable usage
+            std::string groupName = currentToken.literal;
+            nextToken();
+            nextToken();
+
+            std::string varName = currentToken.literal;
+            nextToken();
+
+            if (currentToken.type != TokenType::RPAREN) return nullptr;
+
+            auto* varTemplate = context.getVarTemplate(groupName);
+            if (!varTemplate) return nullptr;
+
+            for (const auto& child : varTemplate->children) {
+                if (auto* propNode = dynamic_cast<StylePropertyNode*>(child.get())) {
+                    if (propNode->key == varName) {
+                        return std::unique_ptr<ExpressionNode>(static_cast<ExpressionNode*>(propNode->value->clone().release()));
+                    }
+                }
+            }
+            return nullptr;
+        }
+    }
+    return nullptr;
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseExpression(int precedence) {
+    auto leftExp = parsePrefixExpression();
+    if (!leftExp) {
+        nextToken();
+        return nullptr;
+    };
+    nextToken();
+
+    while (currentToken.type != TokenType::SEMICOLON && precedences.count(currentToken.type) && precedence < precedences.at(currentToken.type)) {
+        TokenType op = currentToken.type;
+
+        if (op == TokenType::QUESTION) {
+            nextToken();
+            auto consequence = parseExpression(LOWEST);
+            if (currentToken.type != TokenType::COLON) return nullptr;
+            nextToken();
+            auto alternative = parseExpression(TERNARY);
+            leftExp = std::make_unique<ConditionalExpressionNode>(std::move(leftExp), std::move(consequence), std::move(alternative));
+            continue;
+        }
+
+        nextToken();
+        auto rightExp = parseExpression(precedences.at(op));
+        leftExp = std::make_unique<BinaryExpressionNode>(std::move(leftExp), op, std::move(rightExp));
+    }
+
+    return leftExp;
+}
+
+
+std::unique_ptr<StylePropertyNode> Parser::parseStyleProperty() {
+    std::string key = currentToken.literal;
+    nextToken();
+    nextToken();
+
+    auto value = parseExpression(LOWEST);
+
+    if (currentToken.type == TokenType::SEMICOLON) {
         nextToken();
     }
+    return std::make_unique<StylePropertyNode>(key, std::move(value));
+}
+
+
+std::unique_ptr<InheritanceNode> Parser::parseInheritanceStatement() {
+    if (currentToken.type == TokenType::INHERIT) nextToken();
     if (currentToken.type != TokenType::AT) return nullptr;
     nextToken();
 
@@ -67,11 +166,7 @@ std::unique_ptr<InheritanceNode> Parser::parseInheritanceStatement() {
 
 void Parser::expandElementTemplate(std::vector<std::unique_ptr<Node>>& nodes, const std::string& templateName) {
     auto* templateDef = context.getElementTemplate(templateName);
-    if (!templateDef) {
-        errors.push_back("Element template not found: " + templateName);
-        return;
-    }
-
+    if (!templateDef) return;
     for (const auto& child : templateDef->children) {
         if (auto* inheritNode = dynamic_cast<InheritanceNode*>(child.get())) {
             expandElementTemplate(nodes, inheritNode->name);
@@ -81,19 +176,18 @@ void Parser::expandElementTemplate(std::vector<std::unique_ptr<Node>>& nodes, co
     }
 }
 
-
 std::vector<std::unique_ptr<Node>> Parser::parseTemplateUsage() {
-    nextToken(); // consume '@'
+    nextToken();
     if (currentToken.literal != "Element") return {};
-    nextToken(); // consume 'Element'
+    nextToken();
 
     std::string name = currentToken.literal;
-    nextToken(); // consume name
+    nextToken();
 
     if (currentToken.type != TokenType::SEMICOLON) {
         errors.push_back("Expected ';' after template usage.");
     }
-    nextToken(); // consume ';'
+    nextToken();
 
     std::vector<std::unique_ptr<Node>> clonedNodes;
     expandElementTemplate(clonedNodes, name);
@@ -102,16 +196,15 @@ std::vector<std::unique_ptr<Node>> Parser::parseTemplateUsage() {
 
 void Parser::expandStyleTemplate(ElementNode* parent, const std::string& templateName) {
     auto* templateDef = context.getStyleTemplate(templateName);
-    if (!templateDef) {
-        errors.push_back("Style template not found: " + templateName);
-        return;
-    }
+    if (!templateDef) return;
 
+    Evaluator evaluator;
     for (const auto& child : templateDef->children) {
         if (auto* inheritNode = dynamic_cast<InheritanceNode*>(child.get())) {
             expandStyleTemplate(parent, inheritNode->name);
         } else if (auto* propNode = dynamic_cast<StylePropertyNode*>(child.get())) {
-            parent->styles[propNode->key] = propNode->value;
+            Object result = evaluator.evaluate(propNode->value.get());
+            parent->styles[propNode->key] = result.toString();
         }
     }
 }
@@ -134,27 +227,12 @@ void Parser::parseAttributes(ElementNode* element) {
     }
 }
 
-std::unique_ptr<StylePropertyNode> Parser::parseStyleProperty() {
-    std::string key = currentToken.literal;
-    nextToken();
-    nextToken();
-
-    std::string value;
-    while (currentToken.type != TokenType::SEMICOLON && currentToken.type != TokenType::RBRACE) {
-        value += currentToken.literal;
-        nextToken();
-    }
-
-    if (currentToken.type == TokenType::SEMICOLON) {
-        nextToken();
-    }
-    return std::make_unique<StylePropertyNode>(key, value);
-}
 
 void Parser::parseStyleBlock(ElementNode* parent) {
     nextToken();
     nextToken();
 
+    Evaluator evaluator;
     while (currentToken.type != TokenType::RBRACE && currentToken.type != TokenType::END_OF_FILE) {
         if (currentToken.type == TokenType::AT) {
             nextToken();
@@ -167,8 +245,9 @@ void Parser::parseStyleBlock(ElementNode* parent) {
 
         } else {
             auto propNode = parseStyleProperty();
-            if (propNode) {
-                parent->styles[propNode->key] = propNode->value;
+            if (propNode && propNode->value) {
+                Object result = evaluator.evaluate(propNode->value.get());
+                parent->styles[propNode->key] = result.toString();
             }
         }
     }
@@ -184,6 +263,7 @@ std::unique_ptr<TemplateDefinitionNode> Parser::parseTemplateDefinition() {
     TemplateType type;
     if (currentToken.literal == "Style") type = TemplateType::STYLE;
     else if (currentToken.literal == "Element") type = TemplateType::ELEMENT;
+    else if (currentToken.literal == "Var") type = TemplateType::VAR;
     else return nullptr;
     nextToken();
 
@@ -197,7 +277,7 @@ std::unique_ptr<TemplateDefinitionNode> Parser::parseTemplateDefinition() {
             auto inheritNode = parseInheritanceStatement();
             if(inheritNode) templateNode->addChild(std::move(inheritNode));
         }
-        else if (type == TemplateType::STYLE) {
+        else if (type == TemplateType::STYLE || type == TemplateType::VAR) {
             auto propNode = parseStyleProperty();
             if (propNode) templateNode->addChild(std::move(propNode));
         } else {

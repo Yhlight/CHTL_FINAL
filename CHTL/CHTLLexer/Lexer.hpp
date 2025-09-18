@@ -21,6 +21,7 @@ private:
     Token readIdentifier();
     Token readString();
     Token readComment();
+    Token readNumber();
 
     std::string input;
     size_t position;      // current position in input (points to current char)

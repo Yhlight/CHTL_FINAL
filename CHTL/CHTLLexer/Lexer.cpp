@@ -102,6 +102,14 @@ Token Lexer::readComment() {
     return {TokenType::COMMENT, input.substr(startPosition, position - startPosition), line};
 }
 
+Token Lexer::readNumber() {
+    size_t startPosition = position;
+    while (std::isdigit(ch)) {
+        readChar();
+    }
+    return {TokenType::NUMBER, input.substr(startPosition, position - startPosition), line};
+}
+
 Token Lexer::nextToken() {
     Token tok;
 
@@ -132,6 +140,33 @@ Token Lexer::nextToken() {
         case '@':
             tok = {TokenType::AT, "@", line};
             break;
+        case '(':
+            tok = {TokenType::LPAREN, "(", line};
+            break;
+        case ')':
+            tok = {TokenType::RPAREN, ")", line};
+            break;
+        case '+':
+            tok = {TokenType::PLUS, "+", line};
+            break;
+        case '-':
+            tok = {TokenType::MINUS, "-", line};
+            break;
+        case '*':
+            tok = {TokenType::ASTERISK, "*", line};
+            break;
+        case '/':
+            tok = {TokenType::SLASH, "/", line};
+            break;
+        case '<':
+            tok = {TokenType::LT, "<", line};
+            break;
+        case '>':
+            tok = {TokenType::GT, ">", line};
+            break;
+        case '?':
+            tok = {TokenType::QUESTION, "?", line};
+            break;
         case '#':
             return readComment();
         case '"':
@@ -142,7 +177,10 @@ Token Lexer::nextToken() {
         default:
             if (std::isalpha(ch) || ch == '_') {
                 return readIdentifier();
-            } else {
+            } else if (std::isdigit(ch)) {
+                return readNumber();
+            }
+            else {
                 tok = {TokenType::ILLEGAL, std::string(1, ch), line};
             }
             break;

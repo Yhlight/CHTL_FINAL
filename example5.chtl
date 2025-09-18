@@ -1,0 +1,35 @@
+[Template] @Var Sizing
+{
+    base-padding: 10;
+    border-width: 2;
+    use-large-font: 1; // Use 1 for true
+}
+
+html {
+    body {
+        div {
+            id: "box1";
+            style {
+                // Test basic arithmetic
+                padding: 10 + 5;
+                margin: 30 - 10;
+                // Test conditional
+                color: 10 > 5 ? "red" : "blue";
+            }
+            text { "Box 1" }
+        }
+
+        div {
+            id: "box2";
+            style {
+                // Test variable usage
+                padding: Sizing(base-padding);
+                // Test mixed expression
+                margin: Sizing(base-padding) * Sizing(border-width);
+                // Test conditional with var
+                font-size: Sizing(use-large-font) > 0 ? 24 : 12;
+            }
+            text { "Box 2" }
+        }
+    }
+}

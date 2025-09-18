@@ -28,6 +28,8 @@ private:
     std::vector<std::unique_ptr<Node>> parseTemplateUsage();
     void expandElementTemplate(std::vector<std::unique_ptr<Node>>& nodes, const std::string& templateName);
     std::unique_ptr<StylePropertyNode> parseStyleProperty();
+    std::unique_ptr<ExpressionNode> parseExpression(int precedence);
+    std::unique_ptr<ExpressionNode> parsePrefixExpression();
     void expandStyleTemplate(ElementNode* parent, const std::string& templateName);
     std::unique_ptr<InheritanceNode> parseInheritanceStatement();
 

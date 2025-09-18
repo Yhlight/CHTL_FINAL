@@ -25,8 +25,22 @@ enum class TokenType {
     LBRACKET, // [
     RBRACKET, // ]
     AT, // @
+    LPAREN, // (
+    RPAREN, // )
 
-    // For now, we will add more as we expand the language
+    // Literals
+    NUMBER, // 12345
+
+    // Operators
+    PLUS,     // +
+    MINUS,    // -
+    ASTERISK, // *
+    SLASH,    // /
+
+    // Conditionals
+    LT,       // <
+    GT,       // >
+    QUESTION, // ?
 };
 
 // A simple function to convert TokenType to string for debugging
@@ -47,6 +61,16 @@ inline std::string tokenTypeToString(TokenType type) {
         case TokenType::LBRACKET: return "[";
         case TokenType::RBRACKET: return "]";
         case TokenType::AT: return "@";
+        case TokenType::LPAREN: return "(";
+        case TokenType::RPAREN: return ")";
+        case TokenType::NUMBER: return "NUMBER";
+        case TokenType::PLUS: return "+";
+        case TokenType::MINUS: return "-";
+        case TokenType::ASTERISK: return "*";
+        case TokenType::SLASH: return "/";
+        case TokenType::LT: return "<";
+        case TokenType::GT: return ">";
+        case TokenType::QUESTION: return "?";
         default: return "UNKNOWN";
     }
 }
