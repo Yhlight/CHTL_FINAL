@@ -58,6 +58,20 @@ public:
      * @return 扫描结果
      */
     ScanResult scan(const std::string& code);
+    
+    /**
+     * 扫描全局样式块中的CHTL语法
+     * @param code 样式代码
+     * @return 处理后的代码
+     */
+    std::string scanGlobalStyleBlock(const std::string& code);
+    
+    /**
+     * 扫描局部脚本块中的混合语法
+     * @param code 脚本代码
+     * @return 分离结果
+     */
+    std::vector<CodeFragment> scanLocalScriptBlock(const std::string& code);
 
     /**
      * 恢复占位符为原始代码

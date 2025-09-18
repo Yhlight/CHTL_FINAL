@@ -50,6 +50,16 @@ set(CHTL_SOURCES
     CHTL/CHTLLexer/CHTLLexer.h
     CHTL/CHTLLexer/Token.cpp
     CHTL/CHTLLexer/Token.h
+    CHTL/CHTLParser/CHTLParser.cpp
+    CHTL/CHTLParser/CHTLParser.h
+    CHTL/CHTLGenerator/CHTLGenerator.cpp
+    CHTL/CHTLGenerator/CHTLGenerator.h
+    CHTL/CHTLNode/BaseNode.cpp
+    CHTL/CHTLNode/BaseNode.h
+    CHTL/CHTLNode/ElementNode.cpp
+    CHTL/CHTLNode/ElementNode.h
+    CHTL/CHTLNode/TextNode.cpp
+    CHTL/CHTLNode/TextNode.h
 )
 
 set(CHTL_JS_SOURCES

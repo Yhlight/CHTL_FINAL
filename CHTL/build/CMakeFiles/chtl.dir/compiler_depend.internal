@@ -117,6 +117,7 @@ CMakeFiles/chtl.dir/main.cpp.o
  /usr/include/c++/14/bits/basic_string.tcc
  /usr/include/c++/14/bits/char_traits.h
  /usr/include/c++/14/bits/charconv.h
+ /usr/include/c++/14/bits/codecvt.h
  /usr/include/c++/14/bits/concept_check.h
  /usr/include/c++/14/bits/cpp_type_traits.h
  /usr/include/c++/14/bits/cxxabi_forced.h
@@ -125,6 +126,7 @@ CMakeFiles/chtl.dir/main.cpp.o
  /usr/include/c++/14/bits/exception.h
  /usr/include/c++/14/bits/exception_defines.h
  /usr/include/c++/14/bits/exception_ptr.h
+ /usr/include/c++/14/bits/fstream.tcc
  /usr/include/c++/14/bits/functexcept.h
  /usr/include/c++/14/bits/functional_hash.h
  /usr/include/c++/14/bits/hash_bytes.h
@@ -198,6 +200,7 @@ CMakeFiles/chtl.dir/main.cpp.o
  /usr/include/c++/14/ext/numeric_traits.h
  /usr/include/c++/14/ext/string_conversions.h
  /usr/include/c++/14/ext/type_traits.h
+ /usr/include/c++/14/fstream
  /usr/include/c++/14/initializer_list
  /usr/include/c++/14/ios
  /usr/include/c++/14/iosfwd
@@ -220,8 +223,10 @@ CMakeFiles/chtl.dir/main.cpp.o
  /usr/include/c++/14/typeinfo
  /usr/include/c++/14/vector
  /usr/include/x86_64-linux-gnu/c++/14/bits/atomic_word.h
+ /usr/include/x86_64-linux-gnu/c++/14/bits/basic_file.h
  /usr/include/x86_64-linux-gnu/c++/14/bits/c++allocator.h
  /usr/include/x86_64-linux-gnu/c++/14/bits/c++config.h
+ /usr/include/x86_64-linux-gnu/c++/14/bits/c++io.h
  /usr/include/x86_64-linux-gnu/c++/14/bits/c++locale.h
  /usr/include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h
  /usr/include/x86_64-linux-gnu/c++/14/bits/ctype_base.h
@@ -245,4 +250,28 @@ CMakeFiles/chtl.dir/main.cpp.o
  /usr/lib/llvm-20/lib/clang/20/include/stdint.h
  /workspace/CHTL/CompilerDispatcher/CompilerDispatcher.h
  /workspace/CHTL/Scanner/UnifiedScanner.h
+
+bin/chtl
+ /lib/x86_64-linux-gnu/Scrt1.o
+ /lib/x86_64-linux-gnu/crti.o
+ /lib/x86_64-linux-gnu/crtn.o
+ /lib/x86_64-linux-gnu/libc.so
+ /lib/x86_64-linux-gnu/libc.so.6
+ /lib/x86_64-linux-gnu/libgcc_s.so.1
+ /lib/x86_64-linux-gnu/libm.so
+ /lib/x86_64-linux-gnu/libm.so.6
+ /lib/x86_64-linux-gnu/libmvec.so.1
+ /lib64/ld-linux-x86-64.so.2
+ /usr/lib/gcc/x86_64-linux-gnu/14/crtbeginS.o
+ /usr/lib/gcc/x86_64-linux-gnu/14/crtendS.o
+ /usr/lib/gcc/x86_64-linux-gnu/14/libgcc.a
+ /usr/lib/gcc/x86_64-linux-gnu/14/libgcc_s.so
+ /usr/lib/gcc/x86_64-linux-gnu/14/libstdc++.so
+ /usr/lib/x86_64-linux-gnu/libc_nonshared.a
+ /workspace/CHTL/build/CMakeFiles/chtl.dir/main.cpp.o
+ /workspace/CHTL/build/lib/libCHTL_COMPILER.a
+ /workspace/CHTL/build/lib/libCHTL_CORE.a
+ /workspace/CHTL/build/lib/libCHTL_JS_CORE.a
+ /workspace/CHTL/build/lib/libCHTL_SCANNER.a
+ /workspace/CHTL/build/lib/libCHTL_UTIL.a
 

@@ -36,6 +36,32 @@ UnifiedScanner::ScanResult UnifiedScanner::scan(const std::string& code) {
     return result;
 }
 
+std::string UnifiedScanner::scanGlobalStyleBlock(const std::string& code) {
+    std::string result = code;
+    
+    // 全局样式块允许的CHTL语法：
+    // 属性运算，属性条件表达式，模板变量，自定义变量，自定义变量特例化，
+    // 模板样式组，自定义样式组，无值样式组，自定义样式组特例化，
+    // delete属性，delete继承，样式组间继承，生成器注释，全缀名，
+    // 任意类型原始嵌入，以及通过命名空间引入的语法
+    
+    // 这里需要实现复杂的语法识别和占位符替换
+    // 暂时返回原代码
+    return result;
+}
+
+std::vector<UnifiedScanner::CodeFragment> UnifiedScanner::scanLocalScriptBlock(const std::string& code) {
+    std::vector<CodeFragment> fragments;
+    
+    // 局部脚本块允许使用：
+    // 模板变量，自定义变量组，变量组特例化，命名空间from，
+    // CHTL JS与JS，注释及任意类型原始嵌入
+    
+    // 这里需要实现CHTL、CHTL JS、JS的混合处理
+    // 暂时返回空结果
+    return fragments;
+}
+
 std::string UnifiedScanner::restorePlaceholders(const std::string& processedCode, 
                                                const std::map<std::string, std::string>& placeholderMap) {
     std::string result = processedCode;

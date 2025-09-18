@@ -1,4 +1,6 @@
 #include "CompilerDispatcher.h"
+#include "CHTL/CHTLParser/CHTLParser.h"
+#include "CHTL/CHTLGenerator/CHTLGenerator.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -64,8 +66,15 @@ std::string CompilerDispatcher::compileCode(const std::string& code) {
         std::string bodyContent = "";
         for (const auto& fragment : scanResult.fragments) {
             if (fragment.type == UnifiedScanner::CodeType::CHTL) {
-                // 这里需要调用CHTL编译器
-                bodyContent += fragment.content + "\n";
+                // 使用CHTL编译器处理
+                CHTLParser parser;
+                CHTLGenerator generator;
+                generator.setDefaultStructure(m_defaultStruct);
+                generator.setInlineCSS(m_inlineCSS);
+                generator.setInlineJavaScript(m_inlineJS);
+                
+                auto ast = parser.parse(fragment.content);
+                bodyContent += generator.generateHTML(ast);
             }
         }
         

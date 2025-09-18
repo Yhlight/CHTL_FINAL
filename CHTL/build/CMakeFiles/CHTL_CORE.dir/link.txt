@@ -1,2 +1,2 @@
-/usr/bin/ar qc lib/libCHTL_CORE.a CMakeFiles/CHTL_CORE.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o CMakeFiles/CHTL_CORE.dir/CHTL/CHTLLexer/Token.cpp.o
+/usr/bin/ar qc lib/libCHTL_CORE.a CMakeFiles/CHTL_CORE.dir/CHTL/CHTLLexer/CHTLLexer.cpp.o CMakeFiles/CHTL_CORE.dir/CHTL/CHTLLexer/Token.cpp.o CMakeFiles/CHTL_CORE.dir/CHTL/CHTLParser/CHTLParser.cpp.o CMakeFiles/CHTL_CORE.dir/CHTL/CHTLGenerator/CHTLGenerator.cpp.o CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/BaseNode.cpp.o CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/ElementNode.cpp.o CMakeFiles/CHTL_CORE.dir/CHTL/CHTLNode/TextNode.cpp.o
 /usr/bin/ranlib lib/libCHTL_CORE.a
