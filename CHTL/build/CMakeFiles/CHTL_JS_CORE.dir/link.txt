@@ -1,0 +1,2 @@
+/usr/bin/ar qc lib/libCHTL_JS_CORE.a CMakeFiles/CHTL_JS_CORE.dir/CHTL/CHTLLexer/Token.cpp.o
+/usr/bin/ranlib lib/libCHTL_JS_CORE.a
