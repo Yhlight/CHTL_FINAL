@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 namespace CHTL {
 
@@ -52,7 +53,7 @@ enum class TokenType {
     EQUAL,          // ==
     NOT_EQUAL,      // !=
     
-    // 关键字
+    // 块关键字
     TEMPLATE,       // [Template]
     CUSTOM,         // [Custom]
     ORIGIN,         // [Origin]
@@ -89,7 +90,7 @@ enum class TokenType {
     TEXT,           // text
     SCRIPT,         // script
     
-    // 特殊关键字
+    // CHTL JS关键字
     VIR,            // Vir
     LISTEN,         // Listen
     ANIMATE,        // Animate
@@ -123,6 +124,7 @@ public:
     bool isKeyword() const;
     bool isOperator() const;
     bool isSymbol() const;
+    bool isBlockKeyword() const;
     
     std::string toString() const;
     
@@ -144,11 +146,13 @@ public:
     static TokenType getOperatorType(const std::string& op);
     static bool isKeyword(const std::string& word);
     static bool isOperator(const std::string& op);
+    static bool isBlockKeyword(const std::string& word);
     static std::string getTokenTypeName(TokenType type);
     
 private:
     static std::unordered_map<std::string, TokenType> keywordMap_;
     static std::unordered_map<std::string, TokenType> operatorMap_;
+    static std::unordered_map<std::string, TokenType> blockKeywordMap_;
 };
 
 } // namespace CHTL

@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <functional>
 
 namespace CHTL {
 
@@ -54,6 +55,7 @@ private:
     TokenPtr readSymbol();
     TokenPtr readComment();
     TokenPtr readGeneratorComment();
+    TokenPtr readBlockKeyword();
     
     // 辅助方法
     bool isAlpha(char c) const;
@@ -64,10 +66,12 @@ private:
     bool isCommentStart(char c) const;
     bool isMultilineCommentStart() const;
     bool isGeneratorCommentStart() const;
+    bool isBlockKeywordStart() const;
     
     // 关键字和运算符识别
     TokenType identifyKeyword(const std::string& word);
     TokenType identifyOperator(const std::string& op);
+    TokenType identifyBlockKeyword(const std::string& word);
     
     // 错误报告
     void reportError(const std::string& message);

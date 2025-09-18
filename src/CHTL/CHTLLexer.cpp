@@ -41,6 +41,11 @@ TokenPtr CHTLLexer::nextToken() {
     
     char c = currentChar();
     
+    // 处理块关键字 [Template], [Custom], [Origin], [Import], [Configuration], [Namespace]
+    if (c == '[') {
+        return readBlockKeyword();
+    }
+    
     // 处理标识符和关键字
     if (isAlpha(c) || c == '_') {
         return readIdentifier();
@@ -169,6 +174,27 @@ void CHTLLexer::skipMultilineComment() {
         }
         advance();
     }
+}
+
+TokenPtr CHTLLexer::readBlockKeyword() {
+    size_t start = currentPos_;
+    size_t startLine = currentLine_;
+    size_t startColumn = currentColumn_;
+    
+    // 读取 [keyword]
+    std::string keyword;
+    while (hasMoreTokens() && currentChar() != ']') {
+        keyword += currentChar();
+        advance();
+    }
+    
+    if (currentChar() == ']') {
+        keyword += currentChar();
+        advance();
+    }
+    
+    TokenType type = identifyBlockKeyword(keyword);
+    return std::make_shared<Token>(type, keyword, startLine, startColumn);
 }
 
 TokenPtr CHTLLexer::readIdentifier() {
@@ -380,12 +406,20 @@ bool CHTLLexer::isGeneratorCommentStart() const {
     return currentChar() == '#';
 }
 
+bool CHTLLexer::isBlockKeywordStart() const {
+    return currentChar() == '[';
+}
+
 TokenType CHTLLexer::identifyKeyword(const std::string& word) {
     return GlobalMap::getKeywordType(word);
 }
 
 TokenType CHTLLexer::identifyOperator(const std::string& op) {
     return GlobalMap::getOperatorType(op);
+}
+
+TokenType CHTLLexer::identifyBlockKeyword(const std::string& word) {
+    return GlobalMap::getKeywordType(word);
 }
 
 void CHTLLexer::setErrorHandler(std::function<void(const std::string&, size_t, size_t)> handler) {

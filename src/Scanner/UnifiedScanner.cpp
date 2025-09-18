@@ -183,9 +183,9 @@ bool UnifiedScanner::isCHTLBoundary() const {
     // 检测CHTL语法边界
     if (currentChar() == '[') {
         // 检查是否是CHTL块关键字
-        std::string keyword = extractKeyword();
-        return (keyword == "Template" || keyword == "Custom" || keyword == "Origin" ||
-                keyword == "Import" || keyword == "Configuration" || keyword == "Namespace");
+        std::string keyword = extractKeywordFromPos(source_, currentPos_);
+        return (keyword == "[Template]" || keyword == "[Custom]" || keyword == "[Origin]" ||
+                keyword == "[Import]" || keyword == "[Configuration]" || keyword == "[Namespace]");
     }
     
     // 检查是否是HTML元素
@@ -198,7 +198,7 @@ bool UnifiedScanner::isCHTLBoundary() const {
 
 bool UnifiedScanner::isCHTLJSBoundary() const {
     // 检测CHTL JS语法边界
-    std::string keyword = extractKeyword();
+    std::string keyword = extractKeywordFromPos(source_, currentPos_);
     return (keyword == "Vir" || keyword == "Listen" || keyword == "Animate" ||
             keyword == "Router" || keyword == "ScriptLoader" || keyword == "util");
 }
@@ -226,35 +226,35 @@ bool UnifiedScanner::isHTMLBoundary() const {
 }
 
 bool UnifiedScanner::isStyleBlock() const {
-    return extractKeyword() == "style";
+    return extractKeywordFromPos(source_, currentPos_) == "style";
 }
 
 bool UnifiedScanner::isScriptBlock() const {
-    return extractKeyword() == "script";
+    return extractKeywordFromPos(source_, currentPos_) == "script";
 }
 
 bool UnifiedScanner::isTemplateBlock() const {
-    return extractKeyword() == "Template";
+    return extractKeywordFromPos(source_, currentPos_) == "[Template]";
 }
 
 bool UnifiedScanner::isCustomBlock() const {
-    return extractKeyword() == "Custom";
+    return extractKeywordFromPos(source_, currentPos_) == "[Custom]";
 }
 
 bool UnifiedScanner::isOriginBlock() const {
-    return extractKeyword() == "Origin";
+    return extractKeywordFromPos(source_, currentPos_) == "[Origin]";
 }
 
 bool UnifiedScanner::isImportBlock() const {
-    return extractKeyword() == "Import";
+    return extractKeywordFromPos(source_, currentPos_) == "[Import]";
 }
 
 bool UnifiedScanner::isConfigurationBlock() const {
-    return extractKeyword() == "Configuration";
+    return extractKeywordFromPos(source_, currentPos_) == "[Configuration]";
 }
 
 bool UnifiedScanner::isNamespaceBlock() const {
-    return extractKeyword() == "Namespace";
+    return extractKeywordFromPos(source_, currentPos_) == "[Namespace]";
 }
 
 CodeFragment UnifiedScanner::scanFragmentByType(CodeFragmentType type) {
@@ -490,18 +490,17 @@ void UnifiedScanner::reportError(const std::string& message) {
     }
 }
 
-std::string UnifiedScanner::extractKeyword() const {
+std::string UnifiedScanner::extractKeywordFromPos(const std::string& content, size_t pos) const {
     std::string keyword;
-    size_t pos = currentPos_;
     
     // 跳过开头的非字母字符
-    while (pos < source_.length() && !std::isalpha(source_[pos])) {
+    while (pos < content.length() && !std::isalpha(content[pos]) && content[pos] != '[') {
         pos++;
     }
     
     // 提取关键字
-    while (pos < source_.length() && (std::isalnum(source_[pos]) || source_[pos] == '_')) {
-        keyword += source_[pos];
+    while (pos < content.length() && (std::isalnum(content[pos]) || content[pos] == '_' || content[pos] == '[' || content[pos] == ']')) {
+        keyword += content[pos];
         pos++;
     }
     
@@ -522,23 +521,6 @@ bool UnifiedScanner::isCHTLJSSyntax(const std::string& content, size_t pos) cons
     std::string keyword = extractKeywordFromPos(content, pos);
     return (keyword == "Vir" || keyword == "Listen" || keyword == "Animate" ||
             keyword == "Router" || keyword == "ScriptLoader" || keyword == "util");
-}
-
-std::string UnifiedScanner::extractKeywordFromPos(const std::string& content, size_t pos) const {
-    std::string keyword;
-    
-    // 跳过开头的非字母字符
-    while (pos < content.length() && !std::isalpha(content[pos])) {
-        pos++;
-    }
-    
-    // 提取关键字
-    while (pos < content.length() && (std::isalnum(content[pos]) || content[pos] == '_')) {
-        keyword += content[pos];
-        pos++;
-    }
-    
-    return keyword;
 }
 
 size_t UnifiedScanner::findStyleBlockEnd(const std::string& content, size_t start) const {
@@ -605,6 +587,16 @@ size_t UnifiedScanner::findScriptBlockEnd(const std::string& content, size_t sta
     }
     
     return std::string::npos;
+}
+
+std::string UnifiedScanner::extractModuleName(const std::string& modulePath) const {
+    size_t lastSlash = modulePath.find_last_of("/\\");
+    std::string filename = (lastSlash != std::string::npos) ? 
+                          modulePath.substr(lastSlash + 1) : modulePath;
+    
+    size_t lastDot = filename.find_last_of(".");
+    return (lastDot != std::string::npos) ? 
+           filename.substr(0, lastDot) : filename;
 }
 
 } // namespace CHTL

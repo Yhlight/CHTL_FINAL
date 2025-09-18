@@ -107,6 +107,7 @@ private:
     CodeFragment scanCSSFragment();
     CodeFragment scanJSFragment();
     CodeFragment scanHTMLFragment();
+    CodeFragment scanFragmentByType(CodeFragmentType type);
     
     // 占位符机制
     std::string createPlaceholder(const std::string& content);
@@ -148,6 +149,14 @@ private:
     size_t findMatchingBrace(const std::string& content, size_t start) const;
     size_t findMatchingParen(const std::string& content, size_t start) const;
     size_t findMatchingBracket(const std::string& content, size_t start) const;
+    
+    // CHTL JS语法检测
+    bool isCHTLJSSyntax(const std::string& content, size_t pos) const;
+    bool isCHTLStyleSyntax(const std::string& content, size_t pos) const;
+    std::string extractKeywordFromPos(const std::string& content, size_t pos) const;
+    size_t findStyleBlockEnd(const std::string& content, size_t start) const;
+    size_t findScriptBlockEnd(const std::string& content, size_t start) const;
+    std::string extractModuleName(const std::string& modulePath) const;
 };
 
 } // namespace CHTL

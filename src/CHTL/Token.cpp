@@ -105,6 +105,22 @@ bool Token::isSymbol() const {
     }
 }
 
+bool Token::isBlockKeyword() const {
+    switch (type_) {
+        case TokenType::TEMPLATE:
+        case TokenType::CUSTOM:
+        case TokenType::ORIGIN:
+        case TokenType::IMPORT:
+        case TokenType::NAMESPACE:
+        case TokenType::CONFIGURATION:
+        case TokenType::INFO:
+        case TokenType::EXPORT:
+            return true;
+        default:
+            return false;
+    }
+}
+
 std::string Token::toString() const {
     std::ostringstream oss;
     oss << "Token(" << GlobalMap::getTokenTypeName(type_) 
@@ -115,11 +131,11 @@ std::string Token::toString() const {
 // 全局映射表实现
 std::unordered_map<std::string, TokenType> GlobalMap::keywordMap_;
 std::unordered_map<std::string, TokenType> GlobalMap::operatorMap_;
+std::unordered_map<std::string, TokenType> GlobalMap::blockKeywordMap_;
 
 void GlobalMap::initialize() {
-    // 初始化关键字映射
-    keywordMap_ = {
-        // 块关键字
+    // 初始化块关键字映射
+    blockKeywordMap_ = {
         {"[Template]", TokenType::TEMPLATE},
         {"[Custom]", TokenType::CUSTOM},
         {"[Origin]", TokenType::ORIGIN},
@@ -127,8 +143,11 @@ void GlobalMap::initialize() {
         {"[Namespace]", TokenType::NAMESPACE},
         {"[Configuration]", TokenType::CONFIGURATION},
         {"[Info]", TokenType::INFO},
-        {"[Export]", TokenType::EXPORT},
-        
+        {"[Export]", TokenType::EXPORT}
+    };
+    
+    // 初始化关键字映射
+    keywordMap_ = {
         // 类型关键字
         {"@Style", TokenType::STYLE},
         {"@Element", TokenType::ELEMENT},
@@ -204,6 +223,10 @@ bool GlobalMap::isKeyword(const std::string& word) {
 
 bool GlobalMap::isOperator(const std::string& op) {
     return operatorMap_.find(op) != operatorMap_.end();
+}
+
+bool GlobalMap::isBlockKeyword(const std::string& word) {
+    return blockKeywordMap_.find(word) != blockKeywordMap_.end();
 }
 
 std::string GlobalMap::getTokenTypeName(TokenType type) {
