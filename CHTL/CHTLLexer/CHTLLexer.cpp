@@ -30,6 +30,8 @@ bool CHTLLexer::isAtEnd() {
 void CHTLLexer::scanToken() {
     char c = advance();
     switch (c) {
+        case '(': addToken(TokenType::LEFT_PAREN); break;
+        case ')': addToken(TokenType::RIGHT_PAREN); break;
         case '{': addToken(TokenType::LEFT_BRACE); break;
         case '}': addToken(TokenType::RIGHT_BRACE); break;
         case '[': addToken(TokenType::LEFT_BRACKET); break;

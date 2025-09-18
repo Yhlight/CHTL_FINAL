@@ -52,7 +52,9 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
     if (match({TokenType::NUMBER})) {
         Token number = previous();
         std::string unit = "";
-        if (check(TokenType::IDENTIFIER)) { // Check for a unit
+        if (check(TokenType::IDENTIFIER)) { // Check for a unit like 'px'
+            unit = advance().lexeme;
+        } else if (check(TokenType::PERCENT)) { // Check for '%' as a unit
             unit = advance().lexeme;
         }
         try {
@@ -64,6 +66,12 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
 
     if (match({TokenType::STRING, TokenType::IDENTIFIER})) {
         return std::make_unique<LiteralExpr>(0, previous().lexeme);
+    }
+
+    if (match({TokenType::LEFT_PAREN})) {
+        auto expr = parseExpression();
+        consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
+        return expr;
     }
 
     error(peek(), "Expect expression.");

@@ -7,11 +7,11 @@ int main() {
     std::string source = R"(
         div {
             style {
-                width: 100px + 50px;
-                height: 10 * 2em;
-                padding: 100% / 4;
-                margin: 20px - 5px;
-                font-size: 2 ** 4px;
+                width: 100px + 50px;      // 150px
+                height: 10 * 2em;         // 20em
+                padding: (100 + 20) / 6px;  // 20px
+                margin: 22px % 10px;      // 2px
+                font-size: 2 ** 4px;      // 16px
             }
         }
     )";

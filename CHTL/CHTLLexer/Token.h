@@ -10,6 +10,7 @@ enum class TokenType {
     // Single-character tokens.
     LEFT_BRACE, RIGHT_BRACE,     // { }
     LEFT_BRACKET, RIGHT_BRACKET, // [ ]
+    LEFT_PAREN, RIGHT_PAREN,     // ( )
     AT,                          // @
     COLON, SEMICOLON,            // : ;
     PLUS, MINUS, STAR, SLASH, PERCENT,
