@@ -21,6 +21,7 @@ enum class TokenType {
     // Keywords
     STYLE,
     TEXT,
+    INHERIT,
 
     // Special
     SYMBOL, // For single characters like -, #, etc.

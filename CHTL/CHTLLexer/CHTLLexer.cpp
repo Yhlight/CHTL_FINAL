@@ -7,7 +7,8 @@ namespace CHTL {
 
 static std::unordered_map<std::string, TokenType> keywords = {
     {"style", TokenType::STYLE},
-    {"text", TokenType::TEXT}
+    {"text", TokenType::TEXT},
+    {"inherit", TokenType::INHERIT}
 };
 
 CHTLLexer::CHTLLexer(const std::string& source) : source(source) {}

@@ -5,15 +5,31 @@
 
 int main() {
     std::string source = R"(
+        [Template] @Style BaseStyle {
+            font-family: sans-serif;
+            font-size: 16px;
+        }
+
+        [Template] @Style ChildStyle {
+            @Style BaseStyle; // Inherit from BaseStyle
+            color: green;
+        }
+
+        [Template] @Element BaseElement {
+            p { text { "Base element text." } }
+        }
+
+        [Template] @Element ChildElement {
+            @Element BaseElement; // Inherit from BaseElement
+            p { text { "Child element text." } }
+        }
+
         div {
-            [Origin] @Html {
-                <p>This is some <strong>raw HTML</strong> that should not be parsed.</p>
+            style {
+                @Style ChildStyle;
             }
 
-            // This is a raw style block, treated as a direct child.
-            [Origin] @Style {
-                .raw-style { font-family: "Courier New", monospace; }
-            }
+            @Element ChildElement;
         }
     )";
 

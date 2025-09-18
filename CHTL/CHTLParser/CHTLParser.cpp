@@ -337,17 +337,46 @@ void CHTLParser::parseTemplateDeclaration() {
 
     if (def.type == TemplateType::STYLE) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            std::string key_str;
-            while (!check(TokenType::COLON) && !isAtEnd()) {
-                key_str += advance().lexeme;
+            if (check(TokenType::AT) || check(TokenType::INHERIT)) {
+                // This is an inheritance/composition relationship.
+                // We need to parse the usage and copy the properties.
+                if (check(TokenType::INHERIT)) {
+                    advance(); // consume 'inherit'
+                }
+                consume(TokenType::AT, "Expect '@' for template usage.");
+                Token type = consume(TokenType::IDENTIFIER, "Expect template type.");
+                if (type.lexeme != "Style") {
+                    error(type, "Can only inherit from another @Style template here.");
+                }
+                Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+                consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+
+                if (template_definitions.count(name.lexeme)) {
+                    const auto& base_def = template_definitions.at(name.lexeme);
+                    if (base_def.type != TemplateType::STYLE) {
+                        error(name, "Template '" + name.lexeme + "' is not a Style template.");
+                    }
+                    def.style_properties.insert(def.style_properties.end(),
+                                                base_def.style_properties.begin(),
+                                                base_def.style_properties.end());
+                } else {
+                    error(name, "Base style template '" + name.lexeme + "' not found.");
+                }
+
+            } else {
+                // This is a regular property declaration.
+                std::string key_str;
+                while (!check(TokenType::COLON) && !isAtEnd()) {
+                    key_str += advance().lexeme;
+                }
+                consume(TokenType::COLON, "Expect ':' after style property name.");
+                std::string value_str;
+                while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                    value_str += advance().lexeme;
+                }
+                consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+                def.style_properties.push_back({key_str, value_str});
             }
-            consume(TokenType::COLON, "Expect ':' after style property name.");
-            std::string value_str;
-            while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
-                value_str += advance().lexeme;
-            }
-            consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-            def.style_properties.push_back({key_str, value_str});
         }
     } else if (def.type == TemplateType::ELEMENT) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
