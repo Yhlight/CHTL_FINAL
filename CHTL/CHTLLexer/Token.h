@@ -47,7 +47,7 @@ enum class TokenType {
     REPLACE,
 
     // Special
-    SYMBOL, // For single characters like -, #, etc.
+    SYMBOL,
     END_OF_FILE,
     UNKNOWN
 };
@@ -56,10 +56,9 @@ struct Token {
     TokenType type;
     std::string lexeme;
     int line;
-    int position; // Starting character position of the lexeme in the source string
+    int position;
 };
 
-// Function to convert TokenType to string for debugging
 std::string tokenTypeToString(TokenType type);
 
 } // namespace CHTL

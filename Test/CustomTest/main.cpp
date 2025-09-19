@@ -5,30 +5,42 @@
 #include <iostream>
 
 int main() {
-    std::string entry_point = "Test/CustomTest/main.chtl";
-    std::string source = CHTL::FileSystem::readFile(entry_point);
+    // Create library file
+    CHTL::FileSystem::writeFile("Test/CustomTest/lib.chtl",
+        "[Custom] @Element Card {\n"
+        "    div { class: \"card-header\"; }\n"
+        "    div { class: \"card-body\"; }\n"
+        "    div { class: \"card-footer\"; }\n"
+        "}"
+    );
 
-    if (source.empty()) {
-        std::cerr << "Failed to read entry point file: " << entry_point << std::endl;
-        return 1;
-    }
+    std::string entry_point = "Test/CustomTest/main.chtl";
+    std::string source =
+        "[Import] @Chtl from \"lib.chtl\";\n"
+        "body {\n"
+        "    @Element Card {\n"
+        "        delete div[2];\n"
+        "    }\n"
+        "    hr{}\n"
+        "    @Element Card {\n"
+        "        insert after div[1] {\n"
+        "            p { text: \"Inserted!\"; }\n"
+        "        }\n"
+        "    }\n"
+        "}";
+
+    CHTL::FileSystem::writeFile(entry_point, source);
 
     std::cout << "--- Input CHTL from " << entry_point << " ---\n" << source << "\n------------------\n" << std::endl;
 
     try {
-        // 1. Lexing
         CHTL::CHTLLexer lexer(source);
         std::vector<CHTL::Token> tokens = lexer.scanTokens();
-
-        // 2. Parsing
         CHTL::CHTLParser parser(source, tokens, entry_point);
         std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
-
-        // 3. Generation
         CHTL::CHTLGenerator generator(parser.getTemplateDefinitions());
         CHTL::CompilationResult result = generator.generate(ast.get());
 
-        // 4. Verification
         std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n" << std::endl;
         std::cout << "--- Generated CSS ---\n" << result.css << "\n---------------------\n" << std::endl;
 

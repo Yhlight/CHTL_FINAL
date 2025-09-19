@@ -16,11 +16,7 @@ class ReferenceExpr;
 class ComparisonExpr;
 class LogicalExpr;
 class ConditionalExpr;
-class GroupingExpr; // For future use with parentheses
 
-// The base visitor interface for the expression AST.
-// It uses the "Visitor" design pattern to allow for different operations
-// (like evaluation or printing) to be performed on the expression tree.
 class ExprVisitor {
 public:
     virtual ~ExprVisitor() = default;
@@ -31,10 +27,8 @@ public:
     virtual void visit(ComparisonExpr& expr) = 0;
     virtual void visit(LogicalExpr& expr) = 0;
     virtual void visit(ConditionalExpr& expr) = 0;
-    // virtual void visit(GroupingExpr& expr) = 0; // For future use
 };
 
-// The base class for all expression nodes.
 class Expr {
 public:
     virtual ~Expr() = default;
@@ -42,111 +36,72 @@ public:
     virtual std::unique_ptr<Expr> clone() const = 0;
 };
 
-// Represents a literal value, e.g., "100" and "px".
-// We store the value as a double to handle potential floating point math.
 class LiteralExpr : public Expr {
 public:
-    LiteralExpr(double value, const std::string& unit)
-        : value(value), unit(unit) {}
-
-    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
-    std::unique_ptr<Expr> clone() const override {
-        return std::make_unique<LiteralExpr>(value, unit);
-    }
-
+    LiteralExpr(double value, const std::string& unit) : value(value), unit(unit) {}
+    void accept(ExprVisitor& visitor) override;
+    std::unique_ptr<Expr> clone() const override;
     double value;
     std::string unit;
 };
 
-// Represents a binary operation, e.g., left + right.
 class BinaryExpr : public Expr {
 public:
     BinaryExpr(std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right)
         : left(std::move(left)), op(op), right(std::move(right)) {}
-
-    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
-    std::unique_ptr<Expr> clone() const override {
-        return std::make_unique<BinaryExpr>(left->clone(), op, right->clone());
-    }
-
+    void accept(ExprVisitor& visitor) override;
+    std::unique_ptr<Expr> clone() const override;
     std::unique_ptr<Expr> left;
     Token op;
     std::unique_ptr<Expr> right;
 };
 
-// Represents a variable usage, e.g., ThemeColor(primary)
 class VarExpr : public Expr {
 public:
-    VarExpr(const std::string& group, const std::string& name)
-        : group(group), name(name) {}
-
-    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
-    std::unique_ptr<Expr> clone() const override {
-        return std::make_unique<VarExpr>(group, name);
-    }
-
+    VarExpr(const std::string& group, const std::string& name) : group(group), name(name) {}
+    void accept(ExprVisitor& visitor) override;
+    std::unique_ptr<Expr> clone() const override;
     std::string group;
     std::string name;
 };
 
-// Represents a reference to another property, e.g., box.width
 class ReferenceExpr : public Expr {
 public:
-    ReferenceExpr(Token selector, Token property)
-        : selector(selector), property(property) {}
-
-    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
-    std::unique_ptr<Expr> clone() const override {
-        return std::make_unique<ReferenceExpr>(selector, property);
-    }
-
+    ReferenceExpr(Token selector, Token property) : selector(selector), property(property) {}
+    void accept(ExprVisitor& visitor) override;
+    std::unique_ptr<Expr> clone() const override;
     Token selector;
     Token property;
 };
 
-// Represents a comparison, e.g., left > right
 class ComparisonExpr : public Expr {
 public:
     ComparisonExpr(std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right)
         : left(std::move(left)), op(op), right(std::move(right)) {}
-
-    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
-    std::unique_ptr<Expr> clone() const override {
-        return std::make_unique<ComparisonExpr>(left->clone(), op, right->clone());
-    }
-
+    void accept(ExprVisitor& visitor) override;
+    std::unique_ptr<Expr> clone() const override;
     std::unique_ptr<Expr> left;
     Token op;
     std::unique_ptr<Expr> right;
 };
 
-// Represents a logical operation, e.g., left && right
 class LogicalExpr : public Expr {
 public:
     LogicalExpr(std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right)
         : left(std::move(left)), op(op), right(std::move(right)) {}
-
-    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
-    std::unique_ptr<Expr> clone() const override {
-        return std::make_unique<LogicalExpr>(left->clone(), op, right->clone());
-    }
-
+    void accept(ExprVisitor& visitor) override;
+    std::unique_ptr<Expr> clone() const override;
     std::unique_ptr<Expr> left;
     Token op;
     std::unique_ptr<Expr> right;
 };
 
-// Represents a conditional (ternary) operation, e.g., cond ? then : else
 class ConditionalExpr : public Expr {
 public:
     ConditionalExpr(std::unique_ptr<Expr> condition, std::unique_ptr<Expr> then_branch, std::unique_ptr<Expr> else_branch)
         : condition(std::move(condition)), then_branch(std::move(then_branch)), else_branch(std::move(else_branch)) {}
-
-    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
-    std::unique_ptr<Expr> clone() const override {
-        return std::make_unique<ConditionalExpr>(condition->clone(), then_branch->clone(), else_branch->clone());
-    }
-
+    void accept(ExprVisitor& visitor) override;
+    std::unique_ptr<Expr> clone() const override;
     std::unique_ptr<Expr> condition;
     std::unique_ptr<Expr> then_branch;
     std::unique_ptr<Expr> else_branch;

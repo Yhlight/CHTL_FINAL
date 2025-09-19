@@ -2,13 +2,9 @@
 #define BASE_NODE_H
 
 #include <memory>
+#include "Visitor.h"
 
 namespace CHTL {
-
-// Forward declaration for the Visitor pattern.
-// The Visitor pattern allows us to add new operations to the AST
-// without changing the node classes themselves.
-class Visitor;
 
 class BaseNode {
 public:

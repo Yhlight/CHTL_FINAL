@@ -7,10 +7,7 @@
 
 namespace CHTL {
 
-// Represents a complete CSS rule, like ".my-class { color: blue; }",
-// which is to be placed in a global stylesheet.
-class CssRuleNode {
-public:
+struct CssRuleNode {
     std::string selector;
     std::vector<AttributeNode> properties;
 

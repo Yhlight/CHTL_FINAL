@@ -3,6 +3,8 @@
 
 namespace CHTL {
 
+TextNode::TextNode(const std::string& text) : text(text) {}
+
 void TextNode::accept(Visitor& visitor) {
     visitor.visit(*this);
 }

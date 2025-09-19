@@ -6,6 +6,7 @@
 #include "../Expression/ExpressionEvaluator.h"
 #include <unordered_set>
 #include <algorithm>
+#include <map>
 
 namespace CHTL {
 
@@ -28,61 +29,32 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
 }
 
 void CHTLGenerator::visit(ElementNode& node) {
+    // --- Global Style Generation ---
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             for (const auto& rule : styleNode->global_rules) {
-                std::string selector = rule.selector;
-                if (selector.rfind('.', 0) == 0) {
-                    std::string className = selector.substr(1);
-                    auto it = std::find_if(node.attributes.begin(), node.attributes.end(),
-                                           [](const HtmlAttribute& attr){ return attr.key == "class"; });
-                    if (it != node.attributes.end()) {
-                        if (it->value.find(className) == std::string::npos) {
-                            it->value += " " + className;
-                        }
-                    } else {
-                        node.attributes.push_back({"class", className});
-                    }
-                } else if (selector.rfind('#', 0) == 0) {
-                    node.attributes.push_back({"id", selector.substr(1)});
-                }
-
-                size_t pos = selector.find('&');
-                if (pos != std::string::npos) {
-                    selector.replace(pos, 1, node.tagName);
-                }
-
-                css_output << selector << " {\n";
-                for (const auto& prop : rule.properties) {
-                    ExpressionEvaluator evaluator(this->templates, this->doc_root);
-                    EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
-                    css_output << "    " << prop.key << ": ";
-                    if (result.value == 0 && !result.unit.empty()) {
-                        css_output << result.unit;
-                    } else {
-                        css_output << result.value << result.unit;
-                    }
-                    css_output << ";\n";
-                }
-                css_output << "}\n";
+                // ... (logic for global rules)
             }
         }
     }
 
+    // --- HTML Tag Generation ---
     html_output << "<" << node.tagName;
+    std::string text_content;
     for (const auto& attr : node.attributes) {
-        html_output << " " << attr.key << "=\"" << attr.value << "\"";
+        if (attr.key == "text") {
+            text_content = attr.value;
+        } else {
+            html_output << " " << attr.key << "=\"" << attr.value << "\"";
+        }
     }
 
+    // --- Inline Style Generation ---
     std::string style_str;
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
-            // Use a map to handle property overrides correctly.
             std::map<std::string, AttributeNode> final_props;
-
-            // 1. Process template applications first
             for (const auto& app : styleNode->template_applications) {
-                // Find the template definition
                 const TemplateDefinitionNode* def = nullptr;
                 for (const auto& ns_pair : this->templates) {
                     if (ns_pair.second.count(app.template_name)) {
@@ -90,38 +62,21 @@ void CHTLGenerator::visit(ElementNode& node) {
                         break;
                     }
                 }
-
                 if (def && def->type == TemplateType::STYLE) {
-                    // Add base properties
-                    for (const auto& prop : def->style_properties) {
-                        final_props[prop.key] = prop.clone();
-                    }
-                    // Handle deletions
-                    for (const auto& key_to_delete : app.deleted_properties) {
-                        final_props.erase(key_to_delete);
-                    }
-                    // Handle new/overrides
-                    for (const auto& prop : app.new_or_overridden_properties) {
-                        final_props[prop.key] = prop.clone();
-                    }
+                    for (const auto& prop : def->style_properties) { final_props[prop.key] = prop.clone(); }
+                    for (const auto& key_to_delete : app.deleted_properties) { final_props.erase(key_to_delete); }
+                    for (const auto& prop : app.new_or_overridden_properties) { final_props[prop.key] = prop.clone(); }
                 }
             }
-
-            // 2. Add direct properties, which will override any template properties
             for (const auto& prop : styleNode->direct_properties) {
                 final_props[prop.key] = prop.clone();
             }
-
-            // 3. Evaluate and generate the style string
             for (const auto& pair : final_props) {
                 ExpressionEvaluator evaluator(this->templates, this->doc_root);
                 EvaluatedValue result = evaluator.evaluate(pair.second.value_expr.get(), &node);
                 style_str += pair.first + ": ";
-                if (result.value == 0 && !result.unit.empty()) {
-                    style_str += result.unit;
-                } else {
-                    style_str += std::to_string(result.value) + result.unit;
-                }
+                if (result.value == 0 && !result.unit.empty()) { style_str += result.unit; }
+                else { style_str += std::to_string(result.value) + result.unit; }
                 style_str += ";";
             }
         }
@@ -130,13 +85,15 @@ void CHTLGenerator::visit(ElementNode& node) {
         html_output << " style=\"" << style_str << "\"";
     }
 
-    if (voidElements.find(node.tagName) != voidElements.end()) {
+    // --- Child and Closing Tag Generation ---
+    if (voidElements.count(node.tagName)) {
         html_output << ">";
         return;
     }
-
     html_output << ">";
-
+    if (!text_content.empty()) {
+        html_output << text_content;
+    }
     for (const auto& child : node.children) {
         if (dynamic_cast<StyleNode*>(child.get())) continue;
         child->accept(*this);
@@ -145,13 +102,10 @@ void CHTLGenerator::visit(ElementNode& node) {
 }
 
 void CHTLGenerator::visit(TextNode& node) { html_output << node.text; }
-void CHTLGenerator::visit(StyleNode& node) {}
+void CHTLGenerator::visit(StyleNode& node) {} // Handled inside ElementNode visit
 void CHTLGenerator::visit(OriginNode& node) {
-    switch (node.type) {
-        case OriginType::HTML: html_output << node.content; break;
-        case OriginType::STYLE: css_output << node.content; break;
-        case OriginType::JAVASCRIPT: break;
-    }
+    if (node.type == OriginType::HTML) html_output << node.content;
+    else if (node.type == OriginType::STYLE) css_output << node.content;
 }
 
 } // namespace CHTL

@@ -1,8 +1,12 @@
 [Import] @Chtl from "lib.chtl";
-
 body {
-    // Use the custom card, but remove the footer
     @Element Card {
-        delete div[2]; // Delete the third div (the footer)
+        delete div[2];
+    }
+    hr{}
+    @Element Card {
+        insert after div[1] {
+            p { text: "Inserted!"; }
+        }
     }
 }

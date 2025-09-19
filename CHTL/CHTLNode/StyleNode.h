@@ -6,18 +6,17 @@
 #include "CssRuleNode.h"
 #include "Visitor.h"
 #include <vector>
+#include <string>
 
 namespace CHTL {
 
-// Represents a style { ... } block within an element.
 class StyleNode : public BaseNode {
 public:
     void accept(Visitor& visitor) override;
     std::unique_ptr<BaseNode> clone() const override;
 
-    // Represents the application of a style template with potential customizations.
     struct StyleApplication {
-        std::string template_name; // The name of the @Style template being used.
+        std::string template_name;
         std::vector<std::string> deleted_properties;
         std::vector<AttributeNode> new_or_overridden_properties;
 
@@ -32,11 +31,8 @@ public:
         }
     };
 
-    // A style block can contain direct property definitions and template applications.
     std::vector<AttributeNode> direct_properties;
     std::vector<StyleApplication> template_applications;
-
-    // It also contains a list of full CSS rules for the global stylesheet.
     std::vector<CssRuleNode> global_rules;
 };
 

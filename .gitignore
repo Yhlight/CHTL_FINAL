@@ -1,6 +1,0 @@
-# Build artifacts
-test_lexer
-test_parser
-test_pipeline
-*.o
-*.out

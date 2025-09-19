@@ -2,7 +2,6 @@
 #define ORIGIN_NODE_H
 
 #include "BaseNode.h"
-#include "Visitor.h"
 #include <string>
 
 namespace CHTL {
@@ -13,18 +12,14 @@ enum class OriginType {
     JAVASCRIPT
 };
 
-// Represents a block of raw, un-parsed code to be embedded directly
-// into the output.
 class OriginNode : public BaseNode {
 public:
-    OriginNode(OriginType type, const std::string& content)
-        : type(type), content(content) {}
-
+    OriginNode(const std::string& content, OriginType type);
     void accept(Visitor& visitor) override;
     std::unique_ptr<BaseNode> clone() const override;
 
-    OriginType type;
     std::string content;
+    OriginType type;
 };
 
 } // namespace CHTL

@@ -21,7 +21,16 @@ std::string FileSystem::getDirectory(const std::string& path) {
     if (found != std::string::npos) {
         return path.substr(0, found + 1);
     }
-    return ""; // No directory part
+    return "";
+}
+
+void FileSystem::writeFile(const std::string& path, const std::string& content) {
+    std::ofstream file(path);
+    if (!file.is_open()) {
+        std::cerr << "Could not open file for writing: " << path << std::endl;
+        return;
+    }
+    file << content;
 }
 
 } // namespace CHTL

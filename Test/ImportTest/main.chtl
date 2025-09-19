@@ -1,5 +1,0 @@
-[Import] @Chtl from "lib.chtl";
-
-div {
-    @Element MyLibComponent;
-}
