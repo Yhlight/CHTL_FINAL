@@ -1,0 +1,23 @@
+body {
+    div {
+        id: "animated-box";
+        style {
+            width: 100px;
+            height: 100px;
+            background-color: blue;
+        }
+    }
+
+    script {
+        Animate {
+            target: {{#animated-box}},
+            duration: 1000,
+            begin: {
+                opacity: 0
+            },
+            end: {
+                opacity: 1
+            }
+        }
+    }
+}

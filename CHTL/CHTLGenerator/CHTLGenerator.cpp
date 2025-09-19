@@ -222,7 +222,30 @@ void CHTLGenerator::visit(ScriptNode& node) {
                 js_output << "    if (!startTime) startTime = timestamp;\n";
                 js_output << "    const progress = Math.min((timestamp - startTime) / duration, 1);\n";
                 js_output << "    targets.forEach(target => {\n";
-                // ... (generate style updates based on progress)
+
+                // --- This is a simplified linear interpolation. A full implementation
+                // --- would handle 'when' keyframes and different easing functions.
+                if (!animate_node->begin_state.empty() && !animate_node->end_state.empty()) {
+                    for (const auto& begin_pair : animate_node->begin_state) {
+                        if (animate_node->end_state.count(begin_pair.first)) {
+                            const std::string& prop_name = begin_pair.first;
+                            const std::string& start_val_str = begin_pair.second;
+                            const std::string& end_val_str = animate_node->end_state.at(prop_name);
+                            // Super simplified: assumes values are simple numbers for now.
+                            // A real implementation needs to parse units (px, %, etc.)
+                            try {
+                                double start_val = std::stod(start_val_str);
+                                double end_val = std::stod(end_val_str);
+                                js_output << "      target.style." << prop_name << " = "
+                                          << "(" << start_val << " + (" << end_val << " - " << start_val << ") * progress) + 'px';\n";
+                            } catch(...) {
+                                // Non-numeric property, just set at the end
+                                js_output << "      if(progress === 1) { target.style." << prop_name << " = '" << end_val_str << "'; }\n";
+                            }
+                        }
+                    }
+                }
+
                 js_output << "    });\n";
                 js_output << "    if (progress < 1) {\n";
                 js_output << "      requestAnimationFrame(step);\n";
