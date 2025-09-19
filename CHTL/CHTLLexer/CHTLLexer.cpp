@@ -5,20 +5,8 @@
 
 namespace CHTL {
 
-static std::unordered_map<std::string, TokenType> keywords = {
-    {"style", TokenType::STYLE},
-    {"text", TokenType::TEXT},
-    {"inherit", TokenType::INHERIT},
-    {"from", TokenType::FROM},
-    {"as", TokenType::AS},
-    {"delete", TokenType::DELETE},
-    {"insert", TokenType::INSERT},
-    {"after", TokenType::AFTER},
-    {"before", TokenType::BEFORE},
-    {"replace", TokenType::REPLACE}
-};
-
-CHTLLexer::CHTLLexer(const std::string& source) : source(source) {}
+CHTLLexer::CHTLLexer(const std::string& source, std::shared_ptr<Configuration> config)
+    : source(source), config(config) {}
 
 std::vector<Token> CHTLLexer::scanTokens() {
     while (!isAtEnd()) {
@@ -27,6 +15,13 @@ std::vector<Token> CHTLLexer::scanTokens() {
     }
     tokens.push_back({TokenType::END_OF_FILE, "", line, start});
     return tokens;
+}
+
+void CHTLLexer::reset() {
+    tokens.clear();
+    start = 0;
+    current = 0;
+    line = 1;
 }
 
 bool CHTLLexer::isAtEnd() {
@@ -121,8 +116,8 @@ void CHTLLexer::number() {
 void CHTLLexer::identifier() {
     while (isalnum(peek()) || peek() == '_') advance();
     std::string text = source.substr(start, current - start);
-    auto it = keywords.find(text);
-    addToken(it != keywords.end() ? it->second : TokenType::IDENTIFIER);
+    auto it = config->keyword_map.find(text);
+    addToken(it != config->keyword_map.end() ? it->second : TokenType::IDENTIFIER);
 }
 
 } // namespace CHTL

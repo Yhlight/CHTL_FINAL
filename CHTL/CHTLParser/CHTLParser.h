@@ -6,6 +6,8 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../CHTLNode/ConfigNode.h"
+#include "../CHTLContext/Configuration.h"
 #include "../Expression/Expr.h"
 #include <vector>
 #include <memory>
@@ -15,8 +17,9 @@ namespace CHTL {
 
 class CHTLParser {
 public:
-    explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path);
+    explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path, std::shared_ptr<Configuration> config);
     std::unique_ptr<BaseNode> parse();
+    std::unique_ptr<ConfigNode> preParseConfiguration();
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getTemplateDefinitions() const;
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getMutableTemplateDefinitions();
 
@@ -26,6 +29,9 @@ private:
     const std::string file_path;
     std::string current_namespace;
     int current = 0;
+    std::shared_ptr<Configuration> config;
+
+    std::unique_ptr<ConfigNode> parseConfigurationBlock();
 
     bool isAtEnd();
     Token peek();

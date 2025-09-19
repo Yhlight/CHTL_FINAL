@@ -10,6 +10,7 @@ void ReferenceExpr::accept(ExprVisitor& visitor) { visitor.visit(*this); }
 void ComparisonExpr::accept(ExprVisitor& visitor) { visitor.visit(*this); }
 void LogicalExpr::accept(ExprVisitor& visitor) { visitor.visit(*this); }
 void ConditionalExpr::accept(ExprVisitor& visitor) { visitor.visit(*this); }
+void BoolExpr::accept(ExprVisitor& visitor) { visitor.visit(*this); }
 
 // --- Clone Method Implementations ---
 std::unique_ptr<Expr> LiteralExpr::clone() const {
@@ -32,6 +33,9 @@ std::unique_ptr<Expr> LogicalExpr::clone() const {
 }
 std::unique_ptr<Expr> ConditionalExpr::clone() const {
     return std::make_unique<ConditionalExpr>(condition->clone(), then_branch->clone(), else_branch->clone());
+}
+std::unique_ptr<Expr> BoolExpr::clone() const {
+    return std::make_unique<BoolExpr>(value);
 }
 
 } // namespace CHTL

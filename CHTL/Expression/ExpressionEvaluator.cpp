@@ -140,6 +140,10 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
     throw std::runtime_error("Referenced property '" + expr.property.lexeme + "' not found on element.");
 }
 
+void ExpressionEvaluator::visit(BoolExpr& expr) {
+    result = {expr.value ? 1.0 : 0.0, ""};
+}
+
 void ExpressionEvaluator::visit(ComparisonExpr& expr) {
     EvaluatedValue left = evaluate(expr.left.get(), this->current_element_context);
     EvaluatedValue right = evaluate(expr.right.get(), this->current_element_context);

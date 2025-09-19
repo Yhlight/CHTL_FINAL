@@ -3,6 +3,7 @@
 #include "../CHTLLexer/CHTLLexer.h"
 #include "CHTL/CHTLNode/TextNode.h"
 #include "CHTL/CHTLNode/OriginNode.h"
+#include "CHTL/CHTLNode/ConfigNode.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <stdexcept>
@@ -73,8 +74,8 @@ std::string getFilename(const std::string& path) {
     return filename;
 }
 
-CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path)
-    : source(source), tokens(tokens), file_path(file_path) {
+CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path, std::shared_ptr<Configuration> config)
+    : source(source), tokens(tokens), file_path(file_path), config(config) {
         this->current_namespace = getFilename(file_path);
 }
 
@@ -83,25 +84,45 @@ std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& CHTLParser
 
 
 std::unique_ptr<BaseNode> CHTLParser::parse() {
-    while (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
-        if (peek().type == TokenType::LEFT_BRACKET) {
-            if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Template") {
-                parseSymbolDeclaration(false);
-            } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Custom") {
-                parseSymbolDeclaration(true);
-            } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
-                parseOriginBlock();
-            } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Import") {
-                parseImportStatement();
-            } else { break; }
-        } else { break; }
+    while (peek().type == TokenType::LEFT_BRACKET) {
+        advance(); // Consume '['
+        if (match({TokenType::TEMPLATE})) {
+            parseSymbolDeclaration(false);
+        } else if (match({TokenType::CUSTOM})) {
+            parseSymbolDeclaration(true);
+        } else if (match({TokenType::ORIGIN})) {
+            parseOriginBlock();
+        } else if (match({TokenType::IMPORT})) {
+            parseImportStatement();
+        } else if (match({TokenType::CONFIGURATION})) {
+            parseConfigurationBlock();
+        } else {
+            error(peek(), "Unknown block type inside [].");
+        }
+        if (isAtEnd()) return nullptr; // File can legally end after a block.
     }
-    if (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
-        auto nodes = parseDeclaration();
-        if (nodes.size() == 1) return std::move(nodes[0]);
-        else error(peek(), "Expected a single root element declaration.");
+
+    // After all top-level blocks, we expect a single root element.
+    if (isAtEnd()) return nullptr; // No root element, just declarations.
+
+    auto nodes = parseDeclaration();
+    if (nodes.empty()) {
+        error(peek(), "Expected a root element declaration.");
+        return nullptr;
     }
-    return nullptr;
+    if (nodes.size() > 1) {
+        error(peek(), "Expected only one root element declaration.");
+    }
+
+    if (!isAtEnd()) {
+        // This check might be too strict if whitespace is allowed at the end.
+        // But for now, it's a good sanity check.
+        if (peek().type != TokenType::END_OF_FILE) {
+           error(peek(), "Unexpected tokens after root element.");
+        }
+    }
+
+    return std::move(nodes[0]);
 }
 
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
@@ -307,10 +328,7 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
 }
 
 void CHTLParser::parseSymbolDeclaration(bool is_custom) {
-    consume(TokenType::LEFT_BRACKET, "Expect '[' to start declaration.");
-    Token keyword = consume(TokenType::IDENTIFIER, "Expect 'Template' or 'Custom' keyword.");
-    if (is_custom && keyword.lexeme != "Custom") { error(keyword, "Expected 'Custom' keyword."); }
-    else if (!is_custom && keyword.lexeme != "Template") { error(keyword, "Expected 'Template' keyword."); }
+    // Assumes '[' and 'Template'/'Custom' keyword have been consumed.
     consume(TokenType::RIGHT_BRACKET, "Expect ']' to end keyword.");
     consume(TokenType::AT, "Expect '@' for symbol type.");
     Token typeToken = consume(TokenType::IDENTIFIER, "Expect symbol type.");
@@ -357,8 +375,7 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
 }
 
 void CHTLParser::parseImportStatement() {
-    consume(TokenType::LEFT_BRACKET, "Expect '['.");
-    consume(TokenType::IDENTIFIER, "Expect 'Import'.");
+    // Assumes '[' and 'Import' have been consumed.
     consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
     consume(TokenType::AT, "Expect '@'.");
     Token typeToken = consume(TokenType::IDENTIFIER, "Expect import type.");
@@ -367,9 +384,11 @@ void CHTLParser::parseImportStatement() {
         Token pathToken = consume(TokenType::STRING, "Expect file path.");
         std::string imported_content = CHTLLoader::load(this->file_path, pathToken.lexeme);
         std::string imported_path = FileSystem::getDirectory(this->file_path) + pathToken.lexeme;
-        CHTLLexer sub_lexer(imported_content);
+        // When importing, we use the current configuration for the sub-parser.
+        // A more advanced implementation might have per-file configurations.
+        CHTLLexer sub_lexer(imported_content, this->config);
         std::vector<Token> sub_tokens = sub_lexer.scanTokens();
-        CHTLParser sub_parser(imported_content, sub_tokens, imported_path);
+        CHTLParser sub_parser(imported_content, sub_tokens, imported_path, this->config);
         sub_parser.parse();
         auto& imported_template_map = sub_parser.getMutableTemplateDefinitions();
         std::string import_namespace = getFilename(pathToken.lexeme);
@@ -384,9 +403,7 @@ void CHTLParser::parseImportStatement() {
 }
 
 std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {
-    // Basic implementation, doesn't handle nested braces
-    consume(TokenType::LEFT_BRACKET, "Expect '['.");
-    consume(TokenType::IDENTIFIER, "Expect 'Origin'.");
+    // Assumes '[' and 'Origin' have been consumed.
     consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
     consume(TokenType::AT, "Expect '@'.");
     Token type = consume(TokenType::IDENTIFIER, "Expect origin type.");
@@ -490,6 +507,12 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
     }
     if (match({TokenType::IDENTIFIER})) {
         Token first_part = previous();
+        if (first_part.lexeme == "true") {
+            return std::make_unique<BoolExpr>(true);
+        }
+        if (first_part.lexeme == "false") {
+            return std::make_unique<BoolExpr>(false);
+        }
         if (check(TokenType::DOT)) {
             consume(TokenType::DOT, "Expect '.' after selector.");
             Token property = consume(TokenType::IDENTIFIER, "Expect property name.");
@@ -538,5 +561,114 @@ bool CHTLParser::check(TokenType type) { if (isAtEnd()) return false; return pee
 Token CHTLParser::consume(TokenType type, const std::string& message) { if (check(type)) return advance(); error(peek(), message); throw std::runtime_error(message); }
 bool CHTLParser::match(const std::vector<TokenType>& types) { for (TokenType type : types) { if (check(type)) { advance(); return true; } } return false; }
 void CHTLParser::error(const Token& token, const std::string& message) { std::cerr << "[line " << token.line << "] Error: " << message << std::endl; throw std::runtime_error(message); }
+
+std::unique_ptr<ConfigNode> CHTLParser::preParseConfiguration() {
+    int initial_pos = current;
+    while (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
+        if (peek().type == TokenType::LEFT_BRACKET) {
+            if (tokens.size() > current + 1 && tokens[current + 1].type == TokenType::CONFIGURATION) {
+                // Check if it's an unnamed config block
+                if (tokens.size() > current + 2 && tokens[current + 2].type == TokenType::AT) {
+                    // This is a named config block, skip it for now.
+                    while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) advance();
+                    consume(TokenType::RIGHT_BRACE, "Expect '}' to end named config block.");
+                    continue;
+                }
+                // We need to advance past the `[` and `Configuration` tokens to parse the block
+                advance(); // '['
+                advance(); // 'Configuration'
+                auto configNode = parseConfigurationBlock();
+                current = initial_pos; // Reset for main parse
+                return configNode;
+            }
+        }
+        // If we hit anything that's not a top-level declaration, stop.
+        if (peek().type != TokenType::LEFT_BRACKET) {
+            break;
+        }
+        // Skip other top-level blocks like [Template] to find a [Configuration]
+        advance(); // Consume '['
+        while(peek().type != TokenType::RIGHT_BRACKET && !isAtEnd()) {
+            advance();
+        }
+        consume(TokenType::RIGHT_BRACKET, "Expect ']' to close block header.");
+
+        if (check(TokenType::LEFT_BRACE)) {
+            consume(TokenType::LEFT_BRACE, "Expect '{' to start block body.");
+            int brace_level = 1;
+            while(brace_level > 0 && !isAtEnd()) {
+                if(peek().type == TokenType::LEFT_BRACE) brace_level++;
+                else if(peek().type == TokenType::RIGHT_BRACE) brace_level--;
+                advance();
+            }
+        } else {
+            // It's a declaration without a body, like an import. Just find the semicolon.
+            while(!check(TokenType::SEMICOLON) && !isAtEnd()) advance();
+            consume(TokenType::SEMICOLON, "Expect ';' after declaration.");
+        }
+
+    }
+    current = initial_pos; // Reset for main parse
+    return nullptr;
+}
+
+
+std::unique_ptr<ConfigNode> CHTLParser::parseConfigurationBlock() {
+    // Assumes the [Configuration] part has been consumed.
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end keyword.");
+
+    auto configNode = std::make_unique<ConfigNode>();
+    consume(TokenType::LEFT_BRACE, "Expect '{' to start configuration body.");
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        if (peek().type == TokenType::LEFT_BRACKET && tokens[current + 1].type == TokenType::NAME) {
+            consume(TokenType::LEFT_BRACKET, "Expect '['.");
+            consume(TokenType::NAME, "Expect 'Name'.");
+            consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+            consume(TokenType::LEFT_BRACE, "Expect '{'.");
+            while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                Token name_key = consume(TokenType::IDENTIFIER, "Expect name setting key.");
+                consume(TokenType::EQUAL, "Expect '=' after name setting key.");
+                std::vector<std::string> values;
+                if (match({TokenType::LEFT_BRACKET})) { // Array of values
+                    do {
+                        std::string val;
+                        if(check(TokenType::AT)) val += advance().lexeme;
+                        Token name_val = advance();
+                        if (name_val.type != TokenType::IDENTIFIER && !this->config->keyword_map.count(name_val.lexeme)) {
+                            error(name_val, "Value must be an identifier or a known keyword.");
+                        }
+                        val += name_val.lexeme;
+                        values.push_back(val);
+                    } while(match({TokenType::COMMA}));
+                    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end value list.");
+                } else { // Single value
+                    std::string val;
+                    if(check(TokenType::AT)) val += advance().lexeme;
+                    Token name_val = advance();
+                    if (name_val.type != TokenType::IDENTIFIER && !this->config->keyword_map.count(name_val.lexeme)) {
+                        error(name_val, "Value must be an identifier or a known keyword.");
+                    }
+                    val += name_val.lexeme;
+                    values.push_back(val);
+                }
+                configNode->name_settings[name_key.lexeme] = values;
+                consume(TokenType::SEMICOLON, "Expect ';'.");
+            }
+            consume(TokenType::RIGHT_BRACE, "Expect '}'.");
+        } else {
+            Token key = consume(TokenType::IDENTIFIER, "Expect configuration key.");
+            if (!match({TokenType::EQUAL, TokenType::COLON})) {
+                error(peek(), "Expect '=' or ':' after configuration key.");
+            }
+            auto value = parseExpression();
+            consume(TokenType::SEMICOLON, "Expect ';' after configuration value.");
+            configNode->settings[key.lexeme] = std::move(value);
+        }
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to end configuration body.");
+    return configNode;
+}
 
 } // namespace CHTL

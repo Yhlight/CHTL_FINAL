@@ -1,0 +1,17 @@
+[Configuration] {
+    DISABLE_NAME_GROUP = false;
+    [Name] {
+        KEYWORD_STYLE = css;
+    }
+}
+
+body {
+    div {
+        id: "mydiv";
+        css {
+            color: "purple";
+            font-size: 20px;
+        }
+        text: "This text should be purple.";
+    }
+}

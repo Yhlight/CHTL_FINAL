@@ -2,15 +2,18 @@
 #define CHTL_LEXER_H
 
 #include "Token.h"
+#include "../CHTLContext/Configuration.h"
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace CHTL {
 
 class CHTLLexer {
 public:
-    explicit CHTLLexer(const std::string& source);
+    explicit CHTLLexer(const std::string& source, std::shared_ptr<Configuration> config);
     std::vector<Token> scanTokens();
+    void reset();
 
 private:
     void scanToken();
@@ -26,6 +29,7 @@ private:
     void identifier();
 
     const std::string& source;
+    std::shared_ptr<Configuration> config;
     std::vector<Token> tokens;
     int start = 0;
     int current = 0;

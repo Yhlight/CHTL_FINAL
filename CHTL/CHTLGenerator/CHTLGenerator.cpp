@@ -101,4 +101,8 @@ void CHTLGenerator::visit(OriginNode& node) {
     else if (node.type == OriginType::STYLE) css_output << node.content;
 }
 
+void CHTLGenerator::visit(ConfigNode& node) {
+    // Configuration nodes do not produce any output, they are handled pre-parse.
+}
+
 } // namespace CHTL

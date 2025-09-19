@@ -16,6 +16,7 @@ class ReferenceExpr;
 class ComparisonExpr;
 class LogicalExpr;
 class ConditionalExpr;
+class BoolExpr;
 
 class ExprVisitor {
 public:
@@ -27,6 +28,7 @@ public:
     virtual void visit(ComparisonExpr& expr) = 0;
     virtual void visit(LogicalExpr& expr) = 0;
     virtual void visit(ConditionalExpr& expr) = 0;
+    virtual void visit(BoolExpr& expr) = 0;
 };
 
 class Expr {
@@ -105,6 +107,14 @@ public:
     std::unique_ptr<Expr> condition;
     std::unique_ptr<Expr> then_branch;
     std::unique_ptr<Expr> else_branch;
+};
+
+class BoolExpr : public Expr {
+public:
+    BoolExpr(bool value) : value(value) {}
+    void accept(ExprVisitor& visitor) override;
+    std::unique_ptr<Expr> clone() const override;
+    bool value;
 };
 
 } // namespace CHTL

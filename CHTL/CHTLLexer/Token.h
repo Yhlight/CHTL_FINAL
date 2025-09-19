@@ -46,6 +46,15 @@ enum class TokenType {
     BEFORE,
     REPLACE,
 
+    // Block Keywords
+    TEMPLATE,
+    CUSTOM,
+    ORIGIN,
+    IMPORT,
+    CONFIGURATION,
+    NAMESPACE,
+    NAME, // For [Name] blocks
+
     // Special
     SYMBOL,
     END_OF_FILE,
