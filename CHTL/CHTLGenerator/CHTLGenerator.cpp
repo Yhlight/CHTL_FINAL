@@ -59,6 +59,89 @@ void CHTLGenerator::collectAndGenerateCss(BaseNode* node, ExpressionEvaluator& e
     }
 }
 
+std::map<std::string, AttributeNode> CHTLGenerator::computeFinalStyles(ElementNode& node) {
+    std::map<std::string, AttributeNode> final_props;
+    StyleNode* styleNode = nullptr;
+    for (const auto& child : node.children) {
+        if (StyleNode* sn = dynamic_cast<StyleNode*>(child.get())) {
+            styleNode = sn;
+            break;
+        }
+    }
+
+    if (!styleNode) {
+        return final_props;
+    }
+
+    // Process each @Style application in the style block
+    for (const auto& app : styleNode->template_applications) {
+        std::vector<const TemplateDefinitionNode*> inheritance_chain;
+        std::vector<const TemplateDefinitionNode*> processing_stack;
+
+        // Find the initial template definition
+        const TemplateDefinitionNode* initial_def = nullptr;
+        for (const auto& ns_pair : this->templates) {
+            if (ns_pair.second.count(app.template_name)) {
+                initial_def = &ns_pair.second.at(app.template_name);
+                break;
+            }
+        }
+
+        if (initial_def) {
+            processing_stack.push_back(initial_def);
+        }
+
+        // Build the full inheritance chain (this will be in child-to-parent order)
+        while (!processing_stack.empty()) {
+            const TemplateDefinitionNode* current_def = processing_stack.back();
+            processing_stack.pop_back();
+            inheritance_chain.push_back(current_def);
+
+            for (const auto& inheritance : current_def->inherits) {
+                const TemplateDefinitionNode* parent_def = nullptr;
+                for (const auto& ns_pair : this->templates) {
+                    if (ns_pair.second.count(inheritance.name)) {
+                         parent_def = &ns_pair.second.at(inheritance.name);
+                         break;
+                    }
+                }
+                if (parent_def) {
+                    processing_stack.push_back(parent_def);
+                }
+            }
+        }
+
+        // Reverse the chain to get parent-to-child order for correct application
+        std::reverse(inheritance_chain.begin(), inheritance_chain.end());
+
+        // Apply styles from the inheritance chain
+        for (const auto* def : inheritance_chain) {
+            // First, apply properties from the parent
+            for (const auto& prop : def->style_properties) {
+                final_props[prop.key] = prop.clone();
+            }
+            // Then, process any deletions from this level
+            for (const auto& key_to_delete : def->deleted_properties) {
+                final_props.erase(key_to_delete);
+            }
+        }
+
+        // Apply specializations from the usage site (@Style SpecialBox { ... })
+        for (const auto& key_to_delete : app.deleted_properties) {
+            final_props.erase(key_to_delete);
+        }
+        for (const auto& prop : app.new_or_overridden_properties) {
+            final_props[prop.key] = prop.clone();
+        }
+    }
+
+    // Apply direct properties from the style block, which have the highest precedence
+    for (const auto& prop : styleNode->direct_properties) {
+        final_props[prop.key] = prop.clone();
+    }
+
+    return final_props;
+}
 
 void CHTLGenerator::visit(ElementNode& node) {
     html_output << "<" << node.tagName;
@@ -75,39 +158,16 @@ void CHTLGenerator::visit(ElementNode& node) {
         }
     }
 
-    // Process inline styles
+    // Process inline styles using the new centralized function
     std::string style_str;
-    ExpressionEvaluator evaluator(this->templates, this->doc_root);
-    for (const auto& child : node.children) {
-        if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
-            // This logic for applying templates is simplified and may need review
-            std::map<std::string, AttributeNode> final_props;
-            for (const auto& app : styleNode->template_applications) {
-                const TemplateDefinitionNode* def = nullptr;
-                for (const auto& ns_pair : this->templates) {
-                    if (ns_pair.second.count(app.template_name)) {
-                        def = &ns_pair.second.at(app.template_name);
-                        break;
-                    }
-                }
-                if (def && def->type == TemplateType::STYLE) {
-                    for (const auto& prop : def->style_properties) { final_props[prop.key] = prop.clone(); }
-                    for (const auto& key_to_delete : app.deleted_properties) { final_props.erase(key_to_delete); }
-                    for (const auto& prop : app.new_or_overridden_properties) { final_props[prop.key] = prop.clone(); }
-                }
-            }
-            // Direct properties override any template properties
-            for (const auto& prop : styleNode->direct_properties) {
-                final_props[prop.key] = prop.clone();
-            }
+    std::map<std::string, AttributeNode> final_styles = computeFinalStyles(node);
+    ExpressionEvaluator style_evaluator(this->templates, this->doc_root);
 
-            // Evaluate and append the final properties
-            for (const auto& pair : final_props) {
-                PropertyValue result = evaluator.evaluate(pair.second.value_expr.get(), &node);
-                style_str += pair.first + ": " + result.toString() + ";";
-            }
-        }
+    for (const auto& pair : final_styles) {
+        PropertyValue result = style_evaluator.evaluate(pair.second.value_expr.get(), &node);
+        style_str += pair.first + ": " + result.toString() + ";";
     }
+
     if (!style_str.empty()) {
         html_output << " style=\"" << style_str << "\"";
     }

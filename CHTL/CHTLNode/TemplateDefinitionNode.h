@@ -16,12 +16,19 @@ enum class TemplateType {
     VAR
 };
 
+struct InheritanceInfo {
+    TemplateType type;
+    std::string name;
+};
+
 class TemplateDefinitionNode {
 public:
     TemplateType type;
     std::string name;
     bool is_custom = false;
 
+    std::vector<InheritanceInfo> inherits;
+    std::vector<std::string> deleted_properties; // For [Custom] @Style { delete prop; }
     std::vector<std::unique_ptr<BaseNode>> element_body;
     std::vector<AttributeNode> style_properties;
     std::map<std::string, std::unique_ptr<Expr>> variables;

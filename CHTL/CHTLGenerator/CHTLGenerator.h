@@ -25,6 +25,7 @@ public:
     void visit(TextNode& node) override;
     void visit(StyleNode& node) override;
     void visit(OriginNode& node) override;
+    std::map<std::string, AttributeNode> computeFinalStyles(ElementNode& node);
 
 private:
     void collectAndGenerateCss(BaseNode* node, ExpressionEvaluator& evaluator);

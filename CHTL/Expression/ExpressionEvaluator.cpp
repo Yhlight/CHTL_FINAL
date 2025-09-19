@@ -2,6 +2,7 @@
 #include "Expr.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/StyleNode.h"
+#include "../CHTLGenerator/CHTLGenerator.h" // Include for computeFinalStyles
 #include <iostream>
 #include <cmath>
 #include <stdexcept>
@@ -153,15 +154,31 @@ void ExpressionEvaluator::visit(BinaryExpr& expr) {
 }
 
 void ExpressionEvaluator::visit(VarExpr& expr) {
-    // This is a simplified implementation
-    if (templates.count(expr.group) && templates.at(expr.group).count(expr.name)) {
-        const auto& var_def = templates.at(expr.group).at(expr.name);
-        if (var_def.variables.count(expr.name)) {
-            result = evaluate(var_def.variables.at(expr.name).get(), this->current_context);
-            return;
+    // Look for the variable group in all available namespaces
+    const TemplateDefinitionNode* var_group_def = nullptr;
+    for (const auto& ns_pair : this->templates) {
+        if (ns_pair.second.count(expr.group)) {
+            const auto& potential_def = ns_pair.second.at(expr.group);
+            if (potential_def.type == TemplateType::VAR) {
+                var_group_def = &potential_def;
+                break;
+            }
         }
     }
-    throw std::runtime_error("Variable not found: " + expr.group + "." + expr.name);
+
+    if (!var_group_def) {
+        throw std::runtime_error("Variable group '" + expr.group + "' not found.");
+    }
+
+    // Look for the variable name within the found group
+    if (var_group_def->variables.count(expr.name)) {
+        // The value of a variable is an expression itself, so we evaluate it.
+        // This allows variables to be defined by other variables or complex expressions.
+        result = evaluate(var_group_def->variables.at(expr.name).get(), this->current_context);
+        return;
+    }
+
+    throw std::runtime_error("Variable '" + expr.name + "' not found in group '" + expr.group + "'.");
 }
 
 void ExpressionEvaluator::visit(ReferenceExpr& expr) {
@@ -185,17 +202,19 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
         throw std::runtime_error("Circular property reference detected: " + full_ref_name);
     }
 
-    for (const auto& child : target_element->children) {
-        if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
-            for (const auto& prop : styleNode->direct_properties) {
-                if (prop.key == expr.property.lexeme) {
-                    resolution_stack.insert(full_ref_name);
-                    result = evaluate(prop.value_expr.get(), target_element);
-                    resolution_stack.erase(full_ref_name);
-                    return;
-                }
-            }
-        }
+    // To get the final value of a property, we must compute the target element's
+    // styles, including applying any templates. We can reuse the generator's
+    // logic for this. This is a bit awkward as it requires a temporary generator,
+    // but it's the most reliable way to get the correct, fully-resolved style map.
+    CHTLGenerator temp_generator(this->templates);
+    std::map<std::string, AttributeNode> final_styles = temp_generator.computeFinalStyles(*target_element);
+
+    if (final_styles.count(expr.property.lexeme)) {
+        resolution_stack.insert(full_ref_name);
+        // We evaluate the found property's expression in the context of the *target* element.
+        result = evaluate(final_styles.at(expr.property.lexeme).value_expr.get(), target_element);
+        resolution_stack.erase(full_ref_name);
+        return;
     }
     throw std::runtime_error("Reference property '" + expr.property.lexeme + "' not found in selector '" + expr.selector.lexeme + "'.");
 }

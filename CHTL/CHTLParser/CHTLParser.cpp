@@ -321,9 +321,29 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
     consume(TokenType::LEFT_BRACE, "Expect '{' to start symbol body.");
     if (def.type == TemplateType::STYLE) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            if (check(TokenType::AT) || check(TokenType::INHERIT)) {
-                // ... inheritance logic ...
+            if (match({TokenType::INHERIT})) {
+                consume(TokenType::AT, "Expect '@' after 'inherit'.");
+                Token type = consume(TokenType::IDENTIFIER, "Expect template type, e.g. 'Style'.");
+                Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+                consume(TokenType::SEMICOLON, "Expect ';' after inherit statement.");
+
+                InheritanceInfo info;
+                if (type.lexeme == "Style") info.type = TemplateType::STYLE;
+                else if (type.lexeme == "Element") info.type = TemplateType::ELEMENT;
+                else if (type.lexeme == "Var") info.type = TemplateType::VAR;
+                else error(type, "Unknown template type for inheritance.");
+                info.name = name.lexeme;
+                def.inherits.push_back(info);
+            } else if (match({TokenType::DELETE})) {
+                if (!def.is_custom) {
+                    error(previous(), "'delete' is only allowed in a [Custom] template.");
+                }
+                do {
+                    def.deleted_properties.push_back(consume(TokenType::IDENTIFIER, "Expect property name to delete.").lexeme);
+                } while (match({TokenType::COMMA}));
+                consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
             } else {
+                // If not an inherit or delete statement, it must be a property definition.
                 std::string key_str;
                 while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
                 consume(TokenType::COLON, "Expect ':'.");
@@ -337,6 +357,14 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
             for (auto& node : parseDeclaration()) {
                 def.element_body.push_back(std::move(node));
             }
+        }
+    } else if (def.type == TemplateType::VAR) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            Token key = consume(TokenType::IDENTIFIER, "Expect variable name.");
+            consume(TokenType::COLON, "Expect ':' after variable name.");
+            auto value_expr = parseExpression();
+            consume(TokenType::SEMICOLON, "Expect ';' after variable value.");
+            def.variables[key.lexeme] = std::move(value_expr);
         }
     }
     consume(TokenType::RIGHT_BRACE, "Expect '}' to end symbol body.");
