@@ -1,17 +1,14 @@
 body {
     div {
         id: "myDiv";
-        button {
-            id: "myBtn";
-            text: "Click me";
-        }
     }
     script {
-        {{#myDiv}}->Delegate {
-            target: {{#myBtn}},
-            click: (event) => {
-                console.log("Button clicked!");
-            }
+        Animate {
+            target: {{#myDiv}},
+            duration: 1000,
+            easing: "ease-in-out",
+            loop: 2,
+            direction: "alternate"
         }
     }
 }

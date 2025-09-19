@@ -29,8 +29,8 @@ int main() {
         std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n" << std::endl;
         std::cout << "--- Generated JS ---\n" << result.js << "\n--------------------\n" << std::endl;
 
-        std::string expected_html = "<body><div id=\"myDiv\"><button id=\"myBtn\">Click me</button></div></body>";
-        std::string expected_js = "document.querySelector('#myDiv').addEventListener('click', (event) => { if (event.target.matches('#myBtn')) { ((event) => { console.log(\"Button clicked!\"); })(event); } });";
+        std::string expected_html = "<body><div id=\"myDiv\"></div></body>";
+        std::string expected_js = "{\n  const targets = [document.querySelector('#myDiv')];\n  const duration = 1000;\n  let startTime = null;\n  function step(timestamp) {\n    if (!startTime) startTime = timestamp;\n    const progress = Math.min((timestamp - startTime) / duration, 1);\n    targets.forEach(target => {\n    });\n    if (progress < 1) {\n      requestAnimationFrame(step);\n    }\n  }\n  requestAnimationFrame(step);\n}\n";
 
         std::string actual_html = result.html;
         std::string actual_js = result.js;

@@ -3,6 +3,7 @@
 #include "../CHTLJSNode/ListenNode.h"
 #include "../CHTLJSNode/EventHandlerNode.h"
 #include "../CHTLJSNode/DelegateNode.h"
+#include "../CHTLJSNode/AnimateNode.h"
 #include <stdexcept>
 #include <algorithm>
 
@@ -30,6 +31,10 @@ std::vector<std::unique_ptr<CHTLJSBaseNode>> CHTLJSParser::parse() {
 }
 
 std::unique_ptr<CHTLJSBaseNode> CHTLJSParser::parseStatement() {
+    if (peek().type == TokenType::ANIMATE) {
+        return parseAnimateExpression();
+    }
+
     if (peek().type == TokenType::LEFT_BRACE_BRACE) {
         auto selector = parseEnhancedSelector();
         if (match({TokenType::ARROW})) {
@@ -52,7 +57,7 @@ std::unique_ptr<CHTLJSBaseNode> CHTLJSParser::parseStatement() {
     }
 
     std::string raw_js;
-    while (!isAtEnd() && peek().type != TokenType::LEFT_BRACE_BRACE) {
+    while (!isAtEnd() && peek().type != TokenType::LEFT_BRACE_BRACE && peek().type != TokenType::ANIMATE) {
         raw_js += advance().lexeme;
     }
     return std::make_unique<RawJSNode>(raw_js);
@@ -205,6 +210,92 @@ std::unique_ptr<DelegateNode> CHTLJSParser::parseDelegateExpression(std::unique_
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' after Delegate block.");
     return delegateNode;
+}
+
+std::unique_ptr<AnimateNode> CHTLJSParser::parseAnimateExpression() {
+    consume(TokenType::ANIMATE, "Expect 'Animate' keyword.");
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'Animate'.");
+
+    auto animateNode = std::make_unique<AnimateNode>();
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        Token key = consume(TokenType::IDENTIFIER, "Expect property name.");
+        consume(TokenType::COLON, "Expect ':' after property name.");
+
+        if (key.lexeme == "target") {
+            if (match({TokenType::LEFT_BRACKET})) {
+                do {
+                    animateNode->targets.push_back(parseEnhancedSelector()->parsed_selector);
+                } while (match({TokenType::COMMA}));
+                consume(TokenType::RIGHT_BRACKET, "Expect ']' after target selector list.");
+            } else {
+                animateNode->targets.push_back(parseEnhancedSelector()->parsed_selector);
+            }
+        } else if (key.lexeme == "duration") {
+            animateNode->duration = std::stoi(consume(TokenType::NUMBER, "Expect number.").lexeme);
+        } else if (key.lexeme == "easing") {
+            animateNode->easing = consume(TokenType::STRING, "Expect string.").lexeme;
+        } else if (key.lexeme == "begin" || key.lexeme == "end") {
+            consume(TokenType::LEFT_BRACE, "Expect '{' after 'begin' or 'end'.");
+            std::map<std::string, std::string> state;
+            while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                Token prop_key = consume(TokenType::IDENTIFIER, "Expect property name.");
+                consume(TokenType::COLON, "Expect ':' after property name.");
+                Token prop_val = advance(); // Can be string, number, identifier
+                state[prop_key.lexeme] = prop_val.lexeme;
+                if (match({TokenType::COMMA})) {}
+            }
+            consume(TokenType::RIGHT_BRACE, "Expect '}' after state block.");
+            if (key.lexeme == "begin") animateNode->begin_state = state;
+            else animateNode->end_state = state;
+        } else if (key.lexeme == "when") {
+            consume(TokenType::LEFT_BRACKET, "Expect '[' after 'when'.");
+            do {
+                consume(TokenType::LEFT_BRACE, "Expect '{' for keyframe.");
+                Keyframe kf;
+                consume(TokenType::IDENTIFIER, "Expect 'at'.");
+                consume(TokenType::COLON, "Expect ':'.");
+                kf.at = std::stod(consume(TokenType::NUMBER, "Expect number.").lexeme);
+                 if (match({TokenType::COMMA})) {}
+                while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                     Token prop_key = consume(TokenType::IDENTIFIER, "Expect property name.");
+                    consume(TokenType::COLON, "Expect ':' after property name.");
+                    Token prop_val = advance();
+                    kf.properties[prop_key.lexeme] = prop_val.lexeme;
+                    if (match({TokenType::COMMA})) {}
+                }
+                consume(TokenType::RIGHT_BRACE, "Expect '}' after keyframe.");
+                animateNode->when_keyframes.push_back(kf);
+            } while (match({TokenType::COMMA}));
+            consume(TokenType::RIGHT_BRACKET, "Expect ']' after keyframes.");
+        } else if (key.lexeme == "loop") {
+            animateNode->loop = std::stoi(consume(TokenType::NUMBER, "Expect number.").lexeme);
+        } else if (key.lexeme == "direction") {
+            animateNode->direction = consume(TokenType::STRING, "Expect string.").lexeme;
+        } else if (key.lexeme == "delay") {
+            animateNode->delay = std::stoi(consume(TokenType::NUMBER, "Expect number.").lexeme);
+        } else if (key.lexeme == "callback") {
+            Token start_token = peek();
+            int brace_level = 0;
+            if (check(TokenType::LEFT_BRACE)) brace_level++;
+            while ((brace_level > 0 || (!check(TokenType::COMMA) && !check(TokenType::RIGHT_BRACE))) && !isAtEnd()) {
+                if(peek().type == TokenType::LEFT_BRACE) brace_level++;
+                if(peek().type == TokenType::RIGHT_BRACE) brace_level--;
+                advance();
+            }
+            Token end_token = previous();
+            int start_pos = start_token.position;
+            int end_pos = end_token.position + end_token.lexeme.length();
+            animateNode->callback = trim(source.substr(start_pos, end_pos - start_pos));
+        }
+
+        if (match({TokenType::COMMA})) {
+            // continue
+        }
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after Animate block.");
+    return animateNode;
 }
 
 

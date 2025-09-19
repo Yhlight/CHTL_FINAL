@@ -28,6 +28,7 @@ enum class TokenType {
     // Keywords
     LISTEN,
     DELEGATE,
+    ANIMATE,
 
     // Special
     SYMBOL,

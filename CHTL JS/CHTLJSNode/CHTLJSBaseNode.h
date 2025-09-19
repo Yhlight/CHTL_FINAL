@@ -11,7 +11,8 @@ enum class CHTLJSNodeType {
     EnhancedSelector,
     Listen,
     EventHandler,
-    Delegate
+    Delegate,
+    Animate
 };
 
 class CHTLJSBaseNode {

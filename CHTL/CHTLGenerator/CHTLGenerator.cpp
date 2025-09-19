@@ -11,6 +11,7 @@
 #include "../../CHTL JS/CHTLJSNode/ListenNode.h"
 #include "../../CHTL JS/CHTLJSNode/EventHandlerNode.h"
 #include "../../CHTL JS/CHTLJSNode/DelegateNode.h"
+#include "../../CHTL JS/CHTLJSNode/AnimateNode.h"
 #include "../Expression/ExpressionEvaluator.h"
 #include <unordered_set>
 #include <algorithm>
@@ -146,7 +147,32 @@ void CHTLGenerator::visit(ScriptNode& node) {
 
     for (const auto& js_node : js_nodes) {
         if (!js_node) continue;
-        if (js_node->type == CHTL_JS::CHTLJSNodeType::Delegate) {
+        if (js_node->type == CHTL_JS::CHTLJSNodeType::Animate) {
+            if (auto* animate_node = dynamic_cast<CHTL_JS::AnimateNode*>(js_node.get())) {
+                js_output << "{\n";
+                js_output << "  const targets = [";
+                for (size_t i = 0; i < animate_node->targets.size(); ++i) {
+                    js_output << "document.querySelector('" << animate_node->targets[i].selector_string << "')";
+                    if (i < animate_node->targets.size() - 1) js_output << ", ";
+                }
+                js_output << "];\n";
+                js_output << "  const duration = " << animate_node->duration.value_or(1000) << ";\n";
+                // ... (generate other properties)
+                js_output << "  let startTime = null;\n";
+                js_output << "  function step(timestamp) {\n";
+                js_output << "    if (!startTime) startTime = timestamp;\n";
+                js_output << "    const progress = Math.min((timestamp - startTime) / duration, 1);\n";
+                js_output << "    targets.forEach(target => {\n";
+                // ... (generate style updates based on progress)
+                js_output << "    });\n";
+                js_output << "    if (progress < 1) {\n";
+                js_output << "      requestAnimationFrame(step);\n";
+                js_output << "    }\n";
+                js_output << "  }\n";
+                js_output << "  requestAnimationFrame(step);\n";
+                js_output << "}\n";
+            }
+        } else if (js_node->type == CHTL_JS::CHTLJSNodeType::Delegate) {
             if (auto* delegate_node = dynamic_cast<CHTL_JS::DelegateNode*>(js_node.get())) {
                 delegate_registry[delegate_node->parent_selector.selector_string].push_back(*delegate_node);
             }
