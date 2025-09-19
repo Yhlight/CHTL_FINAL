@@ -228,13 +228,7 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
             if (!match({TokenType::COLON, TokenType::EQUAL})) {
                 error(peek(), "Expect ':' or '=' after style property name.");
             }
-            // Simplified value parsing to handle compound values like "1px solid black"
-            std::string raw_value;
-            while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
-                raw_value += advance().lexeme;
-                if (!check(TokenType::SEMICOLON)) raw_value += " ";
-            }
-            auto value_expr = std::make_unique<LiteralExpr>(0, raw_value);
+            auto value_expr = parseExpression();
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
             styleNode->direct_properties.push_back({key_str, std::move(value_expr)});
         } else {
@@ -247,13 +241,7 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
                 if (!match({TokenType::COLON, TokenType::EQUAL})) {
                     error(peek(), "Expect ':' or '=' after style property name.");
                 }
-                // Simplified value parsing to handle compound values like "1px solid black"
-                std::string raw_value;
-                while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
-                    raw_value += advance().lexeme;
-                    if (!check(TokenType::SEMICOLON)) raw_value += " ";
-                }
-                auto value_expr = std::make_unique<LiteralExpr>(0, raw_value);
+                auto value_expr = parseExpression();
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
                 rule.properties.push_back({key_str, std::move(value_expr)});
             }
@@ -568,7 +556,6 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
         Token number = previous();
         std::string unit = "";
         if (check(TokenType::IDENTIFIER)) { unit = advance().lexeme; }
-        else if (check(TokenType::PERCENT)) { unit = advance().lexeme; }
         try { return std::make_unique<LiteralExpr>(std::stod(number.lexeme), unit); }
         catch (const std::invalid_argument&) { error(number, "Invalid number format."); }
     }

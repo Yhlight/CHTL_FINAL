@@ -35,20 +35,58 @@ void ExpressionEvaluator::visit(LiteralExpr& expr) {
 void ExpressionEvaluator::visit(BinaryExpr& expr) {
     EvaluatedValue left = evaluate(expr.left.get(), this->current_context);
     EvaluatedValue right = evaluate(expr.right.get(), this->current_context);
-    if (!left.unit.empty() && !right.unit.empty() && left.unit != right.unit) {
-        throw std::runtime_error("Mismatched units in expression.");
-    }
-    std::string result_unit = !left.unit.empty() ? left.unit : right.unit;
+
+    std::string result_unit;
     double result_value = 0.0;
+
     switch (expr.op.type) {
-        case TokenType::PLUS: result_value = left.value + right.value; break;
-        case TokenType::MINUS: result_value = left.value - right.value; break;
-        case TokenType::STAR: result_value = left.value * right.value; break;
-        case TokenType::SLASH: result_value = right.value == 0 ? 0 : left.value / right.value; break;
-        case TokenType::PERCENT: result_value = fmod(left.value, right.value); break;
-        case TokenType::STAR_STAR: result_value = pow(left.value, right.value); break;
-        default: throw std::runtime_error("Unknown binary operator.");
+        case TokenType::PLUS:
+        case TokenType::MINUS:
+        case TokenType::PERCENT:
+        case TokenType::STAR_STAR:
+            if (!left.unit.empty() && !right.unit.empty() && left.unit != right.unit) {
+                throw std::runtime_error("Mismatched units for operator '" + expr.op.lexeme + "'.");
+            }
+            result_unit = !left.unit.empty() ? left.unit : right.unit;
+            if (expr.op.type == TokenType::PLUS) result_value = left.value + right.value;
+            else if (expr.op.type == TokenType::MINUS) result_value = left.value - right.value;
+            else if (expr.op.type == TokenType::PERCENT) result_value = fmod(left.value, right.value);
+            else if (expr.op.type == TokenType::STAR_STAR) result_value = pow(left.value, right.value);
+            break;
+
+        case TokenType::STAR:
+            if (!left.unit.empty() && !right.unit.empty()) {
+                throw std::runtime_error("Cannot multiply two values with units.");
+            }
+            result_unit = !left.unit.empty() ? left.unit : right.unit;
+            result_value = left.value * right.value;
+            break;
+
+        case TokenType::SLASH:
+            if (right.value == 0) {
+                result_value = 0;
+                result_unit = left.unit;
+            } else {
+                if (!right.unit.empty() && left.unit.empty()) {
+                    throw std::runtime_error("Cannot divide a unitless value by a value with units.");
+                }
+                if (!left.unit.empty() && !right.unit.empty()) {
+                    if (left.unit == right.unit) {
+                        result_unit = ""; // Units cancel out
+                    } else {
+                        throw std::runtime_error("Mismatched units for division.");
+                    }
+                } else {
+                    result_unit = left.unit;
+                }
+                result_value = left.value / right.value;
+            }
+            break;
+
+        default:
+            throw std::runtime_error("Unknown binary operator.");
     }
+
     result = {result_value, result_unit};
 }
 

@@ -1,0 +1,22 @@
+div {
+    style {
+        // Basic arithmetic
+        width: 100px + 50px;       // 150px
+        height: 200px - 25px;      // 175px
+
+        // Unitless operations
+        padding: 10 * 2;           // 20
+        margin: 100 / 4;           // 25
+
+        // Mixed unit/unitless
+        font-size: 8pt * 2;        // 16pt
+        border-width: 60px / 3;    // 20px
+
+        // Unit cancellation
+        line-height: 24px / 16px;  // 1.5
+
+        // Power and Modulo
+        opacity: 25 % 3;           // 1
+        z-index: 2 ** 10;          // 1024
+    }
+}
