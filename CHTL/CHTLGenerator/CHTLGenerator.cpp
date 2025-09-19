@@ -63,23 +63,10 @@ CompilationResult CHTLGenerator::generate(BaseNode* root, bool use_html5_doctype
         js_output << "});\n";
     }
 
-    if (use_html5_doctype) {
-        std::string final_html = "<!DOCTYPE html>\n<html>\n<head>\n";
-        final_html += "<meta charset=\"UTF-8\">\n";
-        final_html += "<title>CHTL Document</title>\n";
-        if (css_output.tellp() > 0) {
-            final_html += "<style>\n" + css_output.str() + "</style>\n";
-        }
-        final_html += "</head>\n<body>\n";
-        final_html += html_output.str();
-        if (js_output.tellp() > 0) {
-            final_html += "<script>\n" + js_output.str() + "</script>\n";
-        }
-        final_html += "</body>\n</html>";
-        return {final_html, "", ""}; // CSS and JS are now inlined
-    } else {
-        return {html_output.str(), css_output.str(), js_output.str()};
-    }
+    std::string final_html = use_html5_doctype ? "<!DOCTYPE html>\n" : "";
+    final_html += html_output.str();
+
+    return {final_html, css_output.str(), js_output.str()};
 }
 
 void CHTLGenerator::visit(ElementNode& node) {

@@ -39,26 +39,24 @@ int main() {
     // 4. Assert
     std::string expected_html = R"(
         <!DOCTYPE html>
-        <html>
-        <head>
-        <meta charset="UTF-8">
-        <title>CHTL Document</title>
-        <style>
+        <div class="box" style="height: 200px;">Hello World</div>
+    )";
+
+    std::string expected_css = R"(
         .box {
           color: red;
         }
-        </style>
-        </head>
-        <body>
-        <div class="box" style="height: 200px;">Hello World</div>
-        </body>
-        </html>
     )";
 
-    std::string processed_result = remove_whitespace(result.html);
-    std::string processed_expected = remove_whitespace(expected_html);
+    std::string processed_html_result = remove_whitespace(result.html);
+    std::string processed_html_expected = remove_whitespace(expected_html);
+    assert(processed_html_result == processed_html_expected);
 
-    assert(processed_result == processed_expected);
+    std::string processed_css_result = remove_whitespace(result.css);
+    std::string processed_css_expected = remove_whitespace(expected_css);
+    assert(processed_css_result == processed_css_expected);
+
+    assert(result.js.empty());
 
     std::cout << "FullGenTest PASSED!" << std::endl;
 
