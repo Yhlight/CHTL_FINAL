@@ -1,0 +1,9 @@
+[Import] @Chtl from "lib.chtl";
+
+div
+{
+    style
+    {
+        @Style GreenText from MyLib;
+    }
+}

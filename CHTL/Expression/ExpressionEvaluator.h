@@ -14,23 +14,20 @@ namespace CHTL {
 class BaseNode;
 class ElementNode;
 
-struct EvaluatedValue {
-    double value;
-    std::string unit;
-};
-
-class ExpressionEvaluator : public ExprVisitor {
+class ExpressionEvaluator : public ExprVisitorString {
 public:
     ExpressionEvaluator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, BaseNode* doc_root);
-    EvaluatedValue evaluate(Expr* expr, ElementNode* context);
+    std::string evaluate(Expr* expr, ElementNode* context);
 
-    void visit(BinaryExpr& expr) override;
-    void visit(LiteralExpr& expr) override;
-    void visit(VarExpr& expr) override;
-    void visit(ReferenceExpr& expr) override;
-    void visit(ComparisonExpr& expr) override;
-    void visit(LogicalExpr& expr) override;
-    void visit(ConditionalExpr& expr) override;
+    std::string visit(BinaryExpr& expr) override;
+    std::string visit(LiteralExpr& expr) override;
+    std::string visit(VarExpr& expr) override;
+    std::string visit(ReferenceExpr& expr) override;
+    std::string visit(ComparisonExpr& expr) override;
+    std::string visit(LogicalExpr& expr) override;
+    std::string visit(ConditionalExpr& expr) override;
+    std::string visit(GroupingExpr& expr) override;
+
 
 private:
     ElementNode* findElement(BaseNode* context, const std::string& selector);
@@ -38,7 +35,6 @@ private:
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
     BaseNode* doc_root;
     ElementNode* current_context = nullptr;
-    EvaluatedValue result = {0.0, ""};
     std::set<std::string> resolution_stack;
 };
 

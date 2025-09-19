@@ -83,6 +83,7 @@ CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& toke
 const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& CHTLParser::getTemplateDefinitions() const { return template_definitions; }
 std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& CHTLParser::getMutableTemplateDefinitions() { return template_definitions; }
 bool CHTLParser::getUseHtml5Doctype() const { return use_html5_doctype; }
+std::string CHTLParser::getNamespace() const { return current_namespace; }
 
 
 std::unique_ptr<BaseNode> CHTLParser::parse() {
@@ -108,7 +109,10 @@ std::unique_ptr<BaseNode> CHTLParser::parse() {
                 parseImportStatement();
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Configuration") {
                 parseConfigurationBlock();
-            } else { break; }
+            } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Namespace") {
+                parseNamespace();
+            }
+            else { break; }
         } else { break; }
     }
     if (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
@@ -204,12 +208,7 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
             while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
             consume(TokenType::COLON, "Expect ':' after style property name.");
             // Simplified value parsing to handle compound values like "1px solid black"
-            std::string raw_value;
-            while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
-                raw_value += advance().lexeme;
-                if (!check(TokenType::SEMICOLON)) raw_value += " ";
-            }
-            auto value_expr = std::make_unique<LiteralExpr>(0, raw_value);
+            auto value_expr = parseExpression();
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
             styleNode->direct_properties.push_back({key_str, std::move(value_expr)});
         } else {
@@ -220,13 +219,7 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
                 std::string key_str;
                 while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
                 consume(TokenType::COLON, "Expect ':' after style property name.");
-                // Simplified value parsing to handle compound values like "1px solid black"
-                std::string raw_value;
-                while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
-                    raw_value += advance().lexeme;
-                    if (!check(TokenType::SEMICOLON)) raw_value += " ";
-                }
-                auto value_expr = std::make_unique<LiteralExpr>(0, raw_value);
+                auto value_expr = parseExpression();
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
                 rule.properties.push_back({key_str, std::move(value_expr)});
             }
@@ -245,6 +238,11 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
     StyleNode::StyleApplication app;
     app.template_name = name.lexeme;
+
+    if (match({TokenType::FROM})) {
+        app.from_namespace = consume(TokenType::IDENTIFIER, "Expect namespace name.").lexeme;
+    }
+
     if (match({TokenType::LEFT_BRACE})) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
             if (match({TokenType::DELETE})) {
@@ -263,6 +261,8 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
             }
         }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after customization block.");
+        // Semicolon is optional after a customization block
+        match({TokenType::SEMICOLON});
     } else {
         consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
     }
@@ -356,9 +356,16 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
     consume(TokenType::LEFT_BRACE, "Expect '{' to start symbol body.");
     if (def.type == TemplateType::STYLE) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            if (check(TokenType::AT) || check(TokenType::INHERIT)) {
-                // ... inheritance logic ...
-            } else {
+            if (match({TokenType::INHERIT})) {
+                consume(TokenType::AT, "Expect '@' after 'inherit'.");
+                consume(TokenType::IDENTIFIER, "Expect 'Style' keyword."); // Assuming only @Style for now
+                Token parent_name = consume(TokenType::IDENTIFIER, "Expect parent template name.");
+                def.parent_templates.push_back(parent_name.lexeme);
+                consume(TokenType::SEMICOLON, "Expect ';' after inheritance declaration.");
+            } else if (check(TokenType::AT)) {
+                // ... other @ usage ...
+            }
+            else {
                 std::string key_str;
                 while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
                 consume(TokenType::COLON, "Expect ':'.");
@@ -394,10 +401,15 @@ void CHTLParser::parseImportStatement() {
         CHTLParser sub_parser(imported_content, sub_tokens, imported_path, this->config);
         sub_parser.parse();
         auto& imported_template_map = sub_parser.getMutableTemplateDefinitions();
-        std::string import_namespace = getFilename(pathToken.lexeme);
-        auto it = imported_template_map.find(import_namespace);
-        if (it != imported_template_map.end()) {
-            this->template_definitions[import_namespace] = std::move(it->second);
+
+        // Merge the imported templates into the current parser's definitions.
+        // The sub_parser has already handled organizing them by namespace.
+        for (auto& pair : imported_template_map) {
+            const std::string& ns = pair.first;
+            std::map<std::string, TemplateDefinitionNode>& templates_in_ns = pair.second;
+            for (auto& t_pair : templates_in_ns) {
+                this->template_definitions[ns][t_pair.first] = std::move(t_pair.second);
+            }
         }
         consume(TokenType::SEMICOLON, "Expect ';'.");
     } else {
@@ -575,8 +587,8 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
     if (match({TokenType::STRING})) { return std::make_unique<LiteralExpr>(0, previous().lexeme); }
     if (match({TokenType::LEFT_PAREN})) {
         auto expr = parseExpression();
-        consume(TokenType::RIGHT_PAREN, "Expect ')'.");
-        return expr;
+        consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
+        return std::make_unique<GroupingExpr>(std::move(expr));
     }
     error(peek(), "Expect expression.");
     return nullptr;
@@ -661,6 +673,34 @@ std::unique_ptr<ConfigNode> CHTLParser::parseConfigurationBlock() {
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' to end configuration body.");
     return std::make_unique<ConfigNode>();
+}
+
+void CHTLParser::parseNamespace() {
+    consume(TokenType::LEFT_BRACKET, "Expect '['.");
+    consume(TokenType::IDENTIFIER, "Expect 'Namespace'.");
+    consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+    Token name = consume(TokenType::IDENTIFIER, "Expect namespace name.");
+
+    std::string old_namespace = this->current_namespace;
+    this->current_namespace = name.lexeme;
+
+    consume(TokenType::LEFT_BRACE, "Expect '{'.");
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        if (peek().type == TokenType::LEFT_BRACKET) {
+             if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Template") {
+                parseSymbolDeclaration(false);
+            } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Custom") {
+                parseSymbolDeclaration(true);
+            } else {
+                error(peek(), "Only [Template] and [Custom] are allowed inside [Namespace].");
+            }
+        } else {
+            error(peek(), "Only [Template] and [Custom] are allowed inside [Namespace].");
+        }
+    }
+    consume(TokenType::RIGHT_BRACE, "Expect '}'.");
+
+    this->current_namespace = old_namespace;
 }
 
 } // namespace CHTL

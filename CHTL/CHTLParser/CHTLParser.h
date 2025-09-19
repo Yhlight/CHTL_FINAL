@@ -23,6 +23,7 @@ public:
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getTemplateDefinitions() const;
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getMutableTemplateDefinitions();
     bool getUseHtml5Doctype() const;
+    std::string getNamespace() const;
 
 private:
     std::shared_ptr<Configuration> config;
@@ -64,6 +65,7 @@ private:
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>> template_definitions;
     void parseSymbolDeclaration(bool is_custom);
     void parseImportStatement();
+    void parseNamespace();
     void parseStyleTemplateUsage(StyleNode* styleNode);
     std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();
 };

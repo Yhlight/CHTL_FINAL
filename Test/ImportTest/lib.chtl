@@ -1,0 +1,8 @@
+[Namespace] MyLib
+{
+    [Template] @Style GreenText
+    {
+        color: green;
+        font-size: 10px;
+    }
+}

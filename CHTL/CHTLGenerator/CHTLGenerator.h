@@ -9,6 +9,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <set>
 #include "../Config/Configuration.h"
 
 namespace CHTL {
@@ -31,6 +32,8 @@ public:
     void visit(ScriptNode& node) override;
 
 private:
+    void applyTemplate(std::map<std::string, AttributeNode>& props, const std::string& template_name, const std::string& from_namespace, std::set<std::string>& applied_templates);
+
     std::shared_ptr<Configuration> config;
     std::stringstream html_output;
     std::stringstream css_output;

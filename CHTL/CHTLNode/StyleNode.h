@@ -17,12 +17,14 @@ public:
 
     struct StyleApplication {
         std::string template_name;
+        std::string from_namespace;
         std::vector<std::string> deleted_properties;
         std::vector<AttributeNode> new_or_overridden_properties;
 
         StyleApplication clone() const {
             StyleApplication new_app;
             new_app.template_name = template_name;
+            new_app.from_namespace = from_namespace;
             new_app.deleted_properties = deleted_properties;
             for (const auto& prop : new_or_overridden_properties) {
                 new_app.new_or_overridden_properties.push_back(prop.clone());

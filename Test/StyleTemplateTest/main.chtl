@@ -1,0 +1,14 @@
+[Template] @Style BasicText
+{
+    color: blue;
+    font-size: 16px;
+}
+
+div
+{
+    style
+    {
+        @Style BasicText;
+        border: "1px solid black";
+    }
+}

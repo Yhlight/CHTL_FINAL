@@ -17,8 +17,23 @@
 #include <algorithm>
 #include <map>
 #include <sstream>
+#include <set>
 
 namespace CHTL {
+
+bool isArithmetic(const Expr* expr) {
+    if (!expr) return false;
+    if (dynamic_cast<const BinaryExpr*>(expr)) return true;
+
+    if (auto* g = dynamic_cast<const GroupingExpr*>(expr)) {
+        return isArithmetic(g->expression.get());
+    }
+    if (auto* c = dynamic_cast<const ConditionalExpr*>(expr)) {
+        return isArithmetic(c->then_branch.get()) || isArithmetic(c->else_branch.get());
+    }
+    // Other expression types are not considered arithmetic for calc() wrapping
+    return false;
+}
 
 // Helper to format doubles cleanly for CSS output
 std::string format_css_double(double val) {
@@ -113,14 +128,11 @@ void CHTLGenerator::visit(ElementNode& node) {
                 css_output << rule.selector << " {\n";
                 ExpressionEvaluator evaluator(this->templates, this->doc_root);
                 for (const auto& prop : rule.properties) {
-                    EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
-                    css_output << "  " << prop.key << ": ";
-                    if (result.value == 0 && !result.unit.empty()) {
-                        css_output << result.unit;
-                    } else {
-                        css_output << format_css_double(result.value) << result.unit;
+                    std::string result_str = evaluator.evaluate(prop.value_expr.get(), &node);
+                    if (isArithmetic(prop.value_expr.get())) {
+                        result_str = "calc(" + result_str + ")";
                     }
-                    css_output << ";\n";
+                    css_output << "  " << prop.key << ": " << result_str << ";\n";
                 }
                 css_output << "}\n";
             }
@@ -143,30 +155,34 @@ void CHTLGenerator::visit(ElementNode& node) {
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             std::map<std::string, AttributeNode> final_props;
+
+            // First, apply all direct properties, so they can be overridden by templates if needed.
+            // Or maybe templates should be applied first? Let's stick to spec: child overrides parent.
+            // So, templates first, then direct properties.
             for (const auto& app : styleNode->template_applications) {
-                const TemplateDefinitionNode* def = nullptr;
-                for (const auto& ns_pair : this->templates) {
-                    if (ns_pair.second.count(app.template_name)) {
-                        def = &ns_pair.second.at(app.template_name);
-                        break;
-                    }
+                std::set<std::string> applied_templates;
+                applyTemplate(final_props, app.template_name, app.from_namespace, applied_templates);
+
+                // Apply specializations from the usage point
+                for (const auto& prop : app.new_or_overridden_properties) {
+                    final_props[prop.key] = prop.clone();
                 }
-                if (def && def->type == TemplateType::STYLE) {
-                    for (const auto& prop : def->style_properties) { final_props[prop.key] = prop.clone(); }
-                    for (const auto& key_to_delete : app.deleted_properties) { final_props.erase(key_to_delete); }
-                    for (const auto& prop : app.new_or_overridden_properties) { final_props[prop.key] = prop.clone(); }
+                 for (const auto& key_to_delete : app.deleted_properties) {
+                    final_props.erase(key_to_delete);
                 }
             }
+
             for (const auto& prop : styleNode->direct_properties) {
                 final_props[prop.key] = prop.clone();
             }
+
             for (const auto& pair : final_props) {
                 ExpressionEvaluator evaluator(this->templates, this->doc_root);
-                EvaluatedValue result = evaluator.evaluate(pair.second.value_expr.get(), &node);
-                style_str += pair.first + ": ";
-                if (result.value == 0 && !result.unit.empty()) { style_str += result.unit; }
-                else { style_str += format_css_double(result.value) + result.unit; }
-                style_str += ";";
+                std::string result_str = evaluator.evaluate(pair.second.value_expr.get(), &node);
+                 if (isArithmetic(pair.second.value_expr.get())) {
+                    result_str = "calc(" + result_str + ")";
+                }
+                style_str += pair.first + ": " + result_str + ";";
             }
         }
     }
@@ -304,6 +320,47 @@ void CHTLGenerator::visit(ScriptNode& node) {
                 }
             }
         }
+    }
+}
+
+void CHTLGenerator::applyTemplate(std::map<std::string, AttributeNode>& props, const std::string& template_name, const std::string& from_namespace, std::set<std::string>& applied_templates) {
+    std::string qualified_name = from_namespace.empty() ? template_name : from_namespace + "::" + template_name;
+    if (applied_templates.count(qualified_name)) {
+        throw std::runtime_error("Circular template inheritance detected with template: " + qualified_name);
+    }
+    applied_templates.insert(qualified_name);
+
+    const TemplateDefinitionNode* def = nullptr;
+    if (!from_namespace.empty()) {
+        if (this->templates.count(from_namespace) && this->templates.at(from_namespace).count(template_name)) {
+            def = &this->templates.at(from_namespace).at(template_name);
+        }
+    } else {
+        // Search globally if no namespace is provided
+        for (const auto& ns_pair : this->templates) {
+            if (ns_pair.second.count(template_name)) {
+                def = &ns_pair.second.at(template_name);
+                break;
+            }
+        }
+    }
+
+    if (!def) {
+        // It's not an error to not find a template, could be defined in another file not yet loaded.
+        // Or should it be an error? For now, let's silently ignore.
+        return;
+    }
+
+    // Apply parents first (recursively)
+    for (const auto& parent_name : def->parent_templates) {
+        // Parents are assumed to be in the same namespace unless specified otherwise,
+        // which isn't supported yet. So we pass the same `from_namespace`.
+        applyTemplate(props, parent_name, from_namespace, applied_templates);
+    }
+
+    // Apply this template's properties, overriding parents'
+    for (const auto& prop : def->style_properties) {
+        props[prop.key] = prop.clone();
     }
 }
 
