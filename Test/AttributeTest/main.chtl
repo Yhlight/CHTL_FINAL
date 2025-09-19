@@ -1,0 +1,11 @@
+html {
+    body {
+        div {
+            id: "box-" + 1;
+            class: "item " + ("item-" + (10 / 2));
+            dataActive: 2 > 1 ? "true" : "false";
+            dataValue: 100 * 2 + 50;
+            dataText: "Final value is " + (250);
+        }
+    }
+}

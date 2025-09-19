@@ -156,14 +156,11 @@ void CHTLParser::parseAttribute(ElementNode* element) {
     }
     Token key = advance();
     consume(TokenType::COLON, "Expect ':' after attribute name.");
-    Token value_token;
-    if (match({TokenType::STRING, TokenType::IDENTIFIER, TokenType::NUMBER})) {
-        value_token = previous();
-    } else {
-        error(peek(), "Expect attribute value.");
-    }
+
+    auto value_expr = parseExpression();
+
     consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
-    element->addAttribute({key.lexeme, value_token.lexeme});
+    element->addAttribute({key.lexeme, std::move(value_expr)});
 }
 
 std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {

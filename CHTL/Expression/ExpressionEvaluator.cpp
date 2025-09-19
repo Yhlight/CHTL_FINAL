@@ -28,21 +28,29 @@ void findElementsRecursive(BaseNode* context, const std::string& selector, std::
         if (selector_type == '#') {
             std::string id = selector.substr(1);
             for (const auto& attr : element->attributes) {
-                if (attr.key == "id" && attr.value == id) {
-                    match = true;
-                    break;
+                if (attr.key == "id") {
+                    if (auto* literal = dynamic_cast<LiteralExpr*>(attr.value_expr.get())) {
+                        if (literal->is_string && literal->string_value == id) {
+                            match = true;
+                            break;
+                        }
+                    }
                 }
             }
         } else if (selector_type == '.') {
             std::string className = selector.substr(1);
             for (const auto& attr : element->attributes) {
                 if (attr.key == "class") {
-                    std::stringstream ss(attr.value);
-                    std::string item;
-                    while (std::getline(ss, item, ' ')) {
-                        if (item == className) {
-                            match = true;
-                            break;
+                    if (auto* literal = dynamic_cast<LiteralExpr*>(attr.value_expr.get())) {
+                        if (literal->is_string) {
+                            std::stringstream ss(literal->string_value);
+                            std::string item;
+                            while (std::getline(ss, item, ' ')) {
+                                if (item == className) {
+                                    match = true;
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -108,8 +116,17 @@ void ExpressionEvaluator::visit(BinaryExpr& expr) {
     PropertyValue left = evaluate(expr.left.get(), this->current_context);
     PropertyValue right = evaluate(expr.right.get(), this->current_context);
 
+    // Handle string concatenation for '+' operator
+    if (expr.op.type == TokenType::PLUS) {
+        if (left.is_string || right.is_string) {
+            result = {true, 0.0, "", left.toString() + right.toString()};
+            return;
+        }
+    }
+
+    // For other operators, or for two numeric operands with +, ensure both are numeric.
     if (left.is_string || right.is_string) {
-        throw std::runtime_error("Cannot perform arithmetic on string values.");
+        throw std::runtime_error("Binary operator " + expr.op.lexeme + " cannot be applied to string values.");
     }
 
     if (!left.unit.empty() && !right.unit.empty() && left.unit != right.unit) {

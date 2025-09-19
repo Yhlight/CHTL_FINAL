@@ -2,17 +2,21 @@
 #define ELEMENT_NODE_H
 
 #include "BaseNode.h"
+#include "CHTL/Expression/Expr.h" // Include for std::unique_ptr<Expr>
 #include <string>
 #include <vector>
 #include <memory>
 
 namespace CHTL {
 
-// A temporary struct for HTML attributes until they are refactored
-// to handle expressions like style properties.
 struct HtmlAttribute {
     std::string key;
-    std::string value;
+    std::unique_ptr<Expr> value_expr;
+
+    // Add a clone method for deep copying during template instantiation
+    HtmlAttribute clone() const {
+        return {key, value_expr ? value_expr->clone() : nullptr};
+    }
 };
 
 class ElementNode : public BaseNode {
@@ -20,7 +24,7 @@ public:
     explicit ElementNode(const std::string& tagName);
     void accept(Visitor& visitor) override;
     void addChild(std::unique_ptr<BaseNode> child);
-    void addAttribute(const HtmlAttribute& attr);
+    void addAttribute(HtmlAttribute attr); // Pass by value to allow moving
     std::unique_ptr<BaseNode> clone() const override;
 
     std::string tagName;

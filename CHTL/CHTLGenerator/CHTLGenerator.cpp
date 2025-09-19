@@ -65,11 +65,13 @@ void CHTLGenerator::visit(ElementNode& node) {
     std::string text_content;
 
     // Process standard attributes
+    ExpressionEvaluator attr_evaluator(this->templates, this->doc_root);
     for (const auto& attr : node.attributes) {
+        PropertyValue result = attr_evaluator.evaluate(attr.value_expr.get(), &node);
         if (attr.key == "text") {
-            text_content = attr.value;
+            text_content = result.toString();
         } else {
-            html_output << " " << attr.key << "=\"" << attr.value << "\"";
+            html_output << " " << attr.key << "=\"" << result.toString() << "\"";
         }
     }
 
