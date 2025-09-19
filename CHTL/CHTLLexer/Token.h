@@ -15,6 +15,7 @@ enum class TokenType {
     COLON, SEMICOLON,            // : ;
     DOT,                         // .
     QUESTION,                    // ?
+    COMMA,                       // ,
     PLUS, MINUS, STAR, SLASH, PERCENT,
     GREATER, LESS,
 
@@ -39,6 +40,11 @@ enum class TokenType {
     INHERIT,
     FROM,
     AS,
+    DELETE,
+    INSERT,
+    AFTER,
+    BEFORE,
+    REPLACE,
 
     // Special
     SYMBOL, // For single characters like -, #, etc.

@@ -15,8 +15,26 @@ public:
     void accept(Visitor& visitor) override;
     std::unique_ptr<BaseNode> clone() const override;
 
-    // A style block contains a list of simple properties for inline styles.
-    std::vector<AttributeNode> inline_properties;
+    // Represents the application of a style template with potential customizations.
+    struct StyleApplication {
+        std::string template_name; // The name of the @Style template being used.
+        std::vector<std::string> deleted_properties;
+        std::vector<AttributeNode> new_or_overridden_properties;
+
+        StyleApplication clone() const {
+            StyleApplication new_app;
+            new_app.template_name = template_name;
+            new_app.deleted_properties = deleted_properties;
+            for (const auto& prop : new_or_overridden_properties) {
+                new_app.new_or_overridden_properties.push_back(prop.clone());
+            }
+            return new_app;
+        }
+    };
+
+    // A style block can contain direct property definitions and template applications.
+    std::vector<AttributeNode> direct_properties;
+    std::vector<StyleApplication> template_applications;
 
     // It also contains a list of full CSS rules for the global stylesheet.
     std::vector<CssRuleNode> global_rules;

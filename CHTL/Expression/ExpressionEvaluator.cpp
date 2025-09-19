@@ -102,13 +102,39 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
 
     for (const auto& child : target_element->children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
-            for (const auto& prop : styleNode->inline_properties) {
-                if (prop.key == expr.property.lexeme) {
-                    resolution_stack.insert(full_ref_name);
-                    result = evaluate(prop.value_expr.get(), target_element); // Evaluate in the context of the target
-                    resolution_stack.erase(full_ref_name);
-                    return;
+            // This logic is duplicated from CHTLGenerator. Should be refactored.
+            std::map<std::string, AttributeNode> final_props;
+
+            for (const auto& app : styleNode->template_applications) {
+                const TemplateDefinitionNode* def = nullptr;
+                for (const auto& ns_pair : this->templates) {
+                    if (ns_pair.second.count(app.template_name)) {
+                        def = &ns_pair.second.at(app.template_name);
+                        break;
+                    }
                 }
+                if (def && def->type == TemplateType::STYLE) {
+                    for (const auto& prop : def->style_properties) {
+                        final_props[prop.key] = prop.clone();
+                    }
+                    for (const auto& key_to_delete : app.deleted_properties) {
+                        final_props.erase(key_to_delete);
+                    }
+                    for (const auto& prop : app.new_or_overridden_properties) {
+                        final_props[prop.key] = prop.clone();
+                    }
+                }
+            }
+            for (const auto& prop : styleNode->direct_properties) {
+                final_props[prop.key] = prop.clone();
+            }
+
+            // Now look for the property in the computed styles
+            if (final_props.count(expr.property.lexeme)) {
+                resolution_stack.insert(full_ref_name);
+                result = evaluate(final_props.at(expr.property.lexeme).value_expr.get(), target_element);
+                resolution_stack.erase(full_ref_name);
+                return;
             }
         }
     }

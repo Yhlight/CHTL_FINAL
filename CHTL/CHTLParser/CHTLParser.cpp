@@ -165,6 +165,8 @@ std::unique_ptr<BaseNode> CHTLParser::parse() {
                 parseOriginBlock();
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Import") {
                 parseImportStatement();
+            } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Custom") {
+                parseCustomDeclaration();
             } else {
                 // It's not a special block, so it must be the root element.
                 break;
@@ -265,7 +267,7 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
             consume(TokenType::COLON, "Expect ':' after style property name.");
             auto value_expr = parseExpression();
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-            styleNode->inline_properties.push_back({key_str, std::move(value_expr)});
+            styleNode->direct_properties.push_back({key_str, std::move(value_expr)});
         } else {
             CssRuleNode rule;
             while (!check(TokenType::LEFT_BRACE) && !isAtEnd()) { rule.selector += advance().lexeme; }
@@ -345,43 +347,129 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
     Token type = consume(TokenType::IDENTIFIER, "Expect template type.");
     if (type.lexeme != "Style") { error(type, "Expect '@Style' template usage here."); }
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
-    consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 
-    // Simple lookup (no namespace support yet)
-    for (const auto& ns_pair : template_definitions) {
-        if (ns_pair.second.count(name.lexeme)) {
-            const auto& def = ns_pair.second.at(name.lexeme);
-            if (def.type != TemplateType::STYLE) { error(name, "Template '" + name.lexeme + "' is not a Style template."); }
-            for (const auto& prop : def.style_properties) {
-                styleNode->inline_properties.push_back(prop.clone());
+    StyleNode::StyleApplication app;
+    app.template_name = name.lexeme;
+
+    // Check for a customization block
+    if (match({TokenType::LEFT_BRACE})) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            if (match({TokenType::DELETE})) {
+                // Parse 'delete prop1, prop2;'
+                do {
+                    Token prop_to_delete = consume(TokenType::IDENTIFIER, "Expect property name after 'delete'.");
+                    app.deleted_properties.push_back(prop_to_delete.lexeme);
+                } while (match({TokenType::COMMA}));
+                consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
+            } else {
+                // Parse a new/override property
+                std::string key_str;
+                while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
+                consume(TokenType::COLON, "Expect ':' after style property name.");
+                auto value_expr = parseExpression();
+                consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+                app.new_or_overridden_properties.push_back({key_str, std::move(value_expr)});
             }
-            return;
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' after customization block.");
+    } else {
+        consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+    }
+
+    styleNode->template_applications.push_back(std::move(app));
+}
+
+// Helper to find a node by tag name and optional index
+BaseNode* findNode(std::vector<std::unique_ptr<BaseNode>>& nodes, const std::string& tagName, int index) {
+    int count = 0;
+    for (auto& node : nodes) {
+        if (ElementNode* elem = dynamic_cast<ElementNode*>(node.get())) {
+            if (elem->tagName == tagName) {
+                if (count == index) {
+                    return elem;
+                }
+                count++;
+            }
         }
     }
-    error(name, "Style template '" + name.lexeme + "' not found in any namespace.");
+    return nullptr;
 }
+
 
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
     consume(TokenType::AT, "Expect '@' for template usage.");
     Token type = consume(TokenType::IDENTIFIER, "Expect template type.");
     if (type.lexeme != "Element") { error(type, "Expect '@Element' template usage here."); }
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
-    consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 
-    // Simple lookup (no namespace support yet)
+    const TemplateDefinitionNode* def = nullptr;
     for (const auto& ns_pair : template_definitions) {
         if (ns_pair.second.count(name.lexeme)) {
-            const auto& def = ns_pair.second.at(name.lexeme);
-            if (def.type != TemplateType::ELEMENT) { error(name, "Template '" + name.lexeme + "' is not an Element template."); }
-            std::vector<std::unique_ptr<BaseNode>> cloned_nodes;
-            for (const auto& node : def.element_body) {
-                cloned_nodes.push_back(node->clone());
-            }
-            return cloned_nodes;
+            def = &ns_pair.second.at(name.lexeme);
+            break;
         }
     }
-    error(name, "Element template '" + name.lexeme + "' not found in any namespace.");
-    return {};
+
+    if (!def) {
+        error(name, "Element template '" + name.lexeme + "' not found in any namespace.");
+        return {};
+    }
+    if (def->type != TemplateType::ELEMENT) { error(name, "Template '" + name.lexeme + "' is not an Element template."); }
+
+    // Clone the base nodes from the template definition
+    std::vector<std::unique_ptr<BaseNode>> cloned_nodes;
+    for (const auto& node : def->element_body) {
+        cloned_nodes.push_back(node->clone());
+    }
+
+    // Check for a customization block
+    if (match({TokenType::LEFT_BRACE})) {
+        if (!def->is_custom) {
+            error(name, "Cannot specialize a non-custom [Template]. Use [Custom] to define a specializable template.");
+        }
+
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            if (match({TokenType::DELETE})) {
+                // e.g., "delete span;" or "delete div[1];"
+                Token element_to_delete = consume(TokenType::IDENTIFIER, "Expect element tag name after 'delete'.");
+                int index = 0; // default to the first one
+                if (match({TokenType::LEFT_BRACKET})) {
+                    Token index_token = consume(TokenType::NUMBER, "Expect index in brackets.");
+                    index = std::stoi(index_token.lexeme);
+                    consume(TokenType::RIGHT_BRACKET, "Expect ']' after index.");
+                }
+
+                // Find and erase the node. Loop carefully to handle iterator invalidation.
+                bool found = false;
+                for (auto it = cloned_nodes.begin(); it != cloned_nodes.end(); ) {
+                    if (ElementNode* elem = dynamic_cast<ElementNode*>(it->get())) {
+                        if (elem->tagName == element_to_delete.lexeme) {
+                            if (index == 0) {
+                                it = cloned_nodes.erase(it);
+                                found = true;
+                                break;
+                            }
+                            index--;
+                        }
+                    }
+                    ++it;
+                }
+
+                if (!found) {
+                    error(element_to_delete, "Could not find element to delete.");
+                }
+                consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
+            } else {
+                error(peek(), "Unsupported specialization keyword. Only 'delete' is currently supported.");
+            }
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' after customization block.");
+
+    } else {
+        consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+    }
+
+    return cloned_nodes;
 }
 
 void CHTLParser::parseTemplateDeclaration() {
@@ -392,6 +480,72 @@ void CHTLParser::parseTemplateDeclaration() {
     consume(TokenType::AT, "Expect '@' for template type.");
     Token typeToken = consume(TokenType::IDENTIFIER, "Expect template type (e.g., Style, Element).");
     TemplateDefinitionNode def;
+    if (typeToken.lexeme == "Style") { def.type = TemplateType::STYLE; }
+    else if (typeToken.lexeme == "Element") { def.type = TemplateType::ELEMENT; }
+    else if (typeToken.lexeme == "Var") { def.type = TemplateType::VAR; }
+    else { error(typeToken, "Unknown template type."); }
+    def.name = consume(TokenType::IDENTIFIER, "Expect template name.").lexeme;
+    consume(TokenType::LEFT_BRACE, "Expect '{' to start template body.");
+    if (def.type == TemplateType::STYLE) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            if (check(TokenType::AT) || check(TokenType::INHERIT)) {
+                if (check(TokenType::INHERIT)) { advance(); }
+                consume(TokenType::AT, "Expect '@' for template usage.");
+                Token type = consume(TokenType::IDENTIFIER, "Expect template type.");
+                if (type.lexeme != "Style") { error(type, "Can only inherit from another @Style template here."); }
+                Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+                consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+                bool found = false;
+                for (const auto& ns_pair : template_definitions) {
+                    if (ns_pair.second.count(name.lexeme)) {
+                        const auto& base_def = ns_pair.second.at(name.lexeme);
+                        if (base_def.type != TemplateType::STYLE) { error(name, "Template '" + name.lexeme + "' is not a Style template."); }
+                        for (const auto& prop : base_def.style_properties) {
+                            def.style_properties.push_back(prop.clone());
+                        }
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) { error(name, "Base style template '" + name.lexeme + "' not found."); }
+            } else {
+                std::string key_str;
+                while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
+                consume(TokenType::COLON, "Expect ':' after style property name.");
+                auto value_expr = parseExpression();
+                consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+                def.style_properties.push_back({key_str, std::move(value_expr)});
+            }
+        }
+    } else if (def.type == TemplateType::ELEMENT) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            for (auto& node : parseDeclaration()) {
+                def.element_body.push_back(std::move(node));
+            }
+        }
+    } else if (def.type == TemplateType::VAR) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            std::string key_str;
+            while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
+            consume(TokenType::COLON, "Expect ':' after variable name.");
+            auto value_expr = parseExpression();
+            consume(TokenType::SEMICOLON, "Expect ';' after variable value.");
+            def.variables[key_str] = std::move(value_expr);
+        }
+    }
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to end template body.");
+    template_definitions[current_namespace][def.name] = std::move(def);
+}
+
+void CHTLParser::parseCustomDeclaration() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start custom declaration.");
+    Token keyword = consume(TokenType::IDENTIFIER, "Expect 'Custom' keyword.");
+    if (keyword.lexeme != "Custom") { error(keyword, "Expect 'Custom' keyword in declaration."); }
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end custom keyword.");
+    consume(TokenType::AT, "Expect '@' for template type.");
+    Token typeToken = consume(TokenType::IDENTIFIER, "Expect template type (e.g., Style, Element).");
+    TemplateDefinitionNode def;
+    def.is_custom = true; // Mark this as a custom template
     if (typeToken.lexeme == "Style") { def.type = TemplateType::STYLE; }
     else if (typeToken.lexeme == "Element") { def.type = TemplateType::ELEMENT; }
     else if (typeToken.lexeme == "Var") { def.type = TemplateType::VAR; }

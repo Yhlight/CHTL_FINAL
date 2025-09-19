@@ -10,7 +10,12 @@ static std::unordered_map<std::string, TokenType> keywords = {
     {"text", TokenType::TEXT},
     {"inherit", TokenType::INHERIT},
     {"from", TokenType::FROM},
-    {"as", TokenType::AS}
+    {"as", TokenType::AS},
+    {"delete", TokenType::DELETE},
+    {"insert", TokenType::INSERT},
+    {"after", TokenType::AFTER},
+    {"before", TokenType::BEFORE},
+    {"replace", TokenType::REPLACE}
 };
 
 CHTLLexer::CHTLLexer(const std::string& source) : source(source) {}
@@ -40,6 +45,7 @@ void CHTLLexer::scanToken() {
         case ']': addToken(TokenType::RIGHT_BRACKET); break;
         case '@': addToken(TokenType::AT); break;
         case '.': addToken(TokenType::DOT); break;
+        case ',': addToken(TokenType::COMMA); break;
         case ':': addToken(TokenType::COLON); break;
         case ';': addToken(TokenType::SEMICOLON); break;
         case '?': addToken(TokenType::QUESTION); break;

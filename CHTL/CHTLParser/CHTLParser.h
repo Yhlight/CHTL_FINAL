@@ -65,6 +65,7 @@ private:
     // Namespace -> <Template Name, Template Definition>
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>> template_definitions;
     void parseTemplateDeclaration();
+    void parseCustomDeclaration();
     void parseImportStatement();
     void parseStyleTemplateUsage(StyleNode* styleNode);
     std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();

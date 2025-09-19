@@ -23,6 +23,7 @@ class TemplateDefinitionNode {
 public:
     TemplateType type;
     std::string name;
+    bool is_custom = false;
 
     // Used for @Element templates
     std::vector<std::unique_ptr<BaseNode>> element_body;

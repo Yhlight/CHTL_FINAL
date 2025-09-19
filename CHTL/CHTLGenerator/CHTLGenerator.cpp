@@ -77,10 +77,46 @@ void CHTLGenerator::visit(ElementNode& node) {
     std::string style_str;
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
-            for (const auto& prop : styleNode->inline_properties) {
+            // Use a map to handle property overrides correctly.
+            std::map<std::string, AttributeNode> final_props;
+
+            // 1. Process template applications first
+            for (const auto& app : styleNode->template_applications) {
+                // Find the template definition
+                const TemplateDefinitionNode* def = nullptr;
+                for (const auto& ns_pair : this->templates) {
+                    if (ns_pair.second.count(app.template_name)) {
+                        def = &ns_pair.second.at(app.template_name);
+                        break;
+                    }
+                }
+
+                if (def && def->type == TemplateType::STYLE) {
+                    // Add base properties
+                    for (const auto& prop : def->style_properties) {
+                        final_props[prop.key] = prop.clone();
+                    }
+                    // Handle deletions
+                    for (const auto& key_to_delete : app.deleted_properties) {
+                        final_props.erase(key_to_delete);
+                    }
+                    // Handle new/overrides
+                    for (const auto& prop : app.new_or_overridden_properties) {
+                        final_props[prop.key] = prop.clone();
+                    }
+                }
+            }
+
+            // 2. Add direct properties, which will override any template properties
+            for (const auto& prop : styleNode->direct_properties) {
+                final_props[prop.key] = prop.clone();
+            }
+
+            // 3. Evaluate and generate the style string
+            for (const auto& pair : final_props) {
                 ExpressionEvaluator evaluator(this->templates, this->doc_root);
-                EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
-                style_str += prop.key + ": ";
+                EvaluatedValue result = evaluator.evaluate(pair.second.value_expr.get(), &node);
+                style_str += pair.first + ": ";
                 if (result.value == 0 && !result.unit.empty()) {
                     style_str += result.unit;
                 } else {

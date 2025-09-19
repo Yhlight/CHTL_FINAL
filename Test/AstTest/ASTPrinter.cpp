@@ -42,12 +42,30 @@ std::string ASTPrinter::indentString() {
 void ASTPrinter::visit(StyleNode& node) {
     std::cout << indentString() << "<style>" << std::endl;
     indent++;
-    // Print inline properties
-    if (!node.inline_properties.empty()) {
-        std::cout << indentString() << "[Inline Props]" << std::endl;
+    // Print direct properties
+    if (!node.direct_properties.empty()) {
+        std::cout << indentString() << "[Direct Props]" << std::endl;
         indent++;
-        for (const auto& prop : node.inline_properties) {
+        for (const auto& prop : node.direct_properties) {
             std::cout << indentString() << prop.key << ": [expression];" << std::endl;
+        }
+        indent--;
+    }
+    // Print template applications
+    if (!node.template_applications.empty()) {
+        std::cout << indentString() << "[Template Apps]" << std::endl;
+        indent++;
+        for (const auto& app : node.template_applications) {
+            std::cout << indentString() << "@Style " << app.template_name << " {" << std::endl;
+            indent++;
+            if (!app.deleted_properties.empty()) {
+                 std::cout << indentString() << "delete ...;" << std::endl;
+            }
+            if (!app.new_or_overridden_properties.empty()) {
+                 std::cout << indentString() << "...: [expression];" << std::endl;
+            }
+            indent--;
+            std::cout << indentString() << "}" << std::endl;
         }
         indent--;
     }
