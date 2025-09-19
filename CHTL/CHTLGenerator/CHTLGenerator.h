@@ -3,9 +3,11 @@
 
 #include "../CHTLNode/Visitor.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../../CHTL JS/CHTLJSNode/DelegateNode.h"
 #include <string>
 #include <sstream>
 #include <map>
+#include <vector>
 
 namespace CHTL {
 
@@ -32,6 +34,7 @@ private:
     std::stringstream js_output;
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
     BaseNode* doc_root = nullptr;
+    std::map<std::string, std::vector<CHTL_JS::DelegateNode>> delegate_registry;
 };
 
 } // namespace CHTL

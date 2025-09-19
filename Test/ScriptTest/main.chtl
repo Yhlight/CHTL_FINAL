@@ -1,10 +1,17 @@
 body {
     div {
         id: "myDiv";
+        button {
+            id: "myBtn";
+            text: "Click me";
+        }
     }
     script {
-        {{#myDiv}} &-> click, mouseenter: () => {
-            console.log("Event triggered!");
-        };
+        {{#myDiv}}->Delegate {
+            target: {{#myBtn}},
+            click: (event) => {
+                console.log("Button clicked!");
+            }
+        }
     }
 }

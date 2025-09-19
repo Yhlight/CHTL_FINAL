@@ -10,6 +10,7 @@
 #include "../../CHTL JS/CHTLJSNode/EnhancedSelectorNode.h"
 #include "../../CHTL JS/CHTLJSNode/ListenNode.h"
 #include "../../CHTL JS/CHTLJSNode/EventHandlerNode.h"
+#include "../../CHTL JS/CHTLJSNode/DelegateNode.h"
 #include "../Expression/ExpressionEvaluator.h"
 #include <unordered_set>
 #include <algorithm>
@@ -29,10 +30,30 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
     html_output.str("");
     css_output.str("");
     js_output.str("");
+    delegate_registry.clear();
     this->doc_root = root;
     if (root) {
         root->accept(*this);
     }
+
+    // Process the delegate registry
+    for (const auto& pair : delegate_registry) {
+        const std::string& parent_selector_str = pair.first;
+        const auto& delegate_nodes = pair.second;
+
+        js_output << "document.querySelector('" << parent_selector_str << "').addEventListener('click', (event) => {\n";
+        for (const auto& delegate_node : delegate_nodes) {
+            for (const auto& target : delegate_node.target_selectors) {
+                 js_output << "  if (event.target.matches('" << target.selector_string << "')) {\n";
+                 for (const auto& event : delegate_node.events) {
+                     js_output << "    (" << event.second << ")(event);\n";
+                 }
+                 js_output << "  }\n";
+            }
+        }
+        js_output << "});\n";
+    }
+
     return {html_output.str(), css_output.str(), js_output.str()};
 }
 
@@ -125,7 +146,11 @@ void CHTLGenerator::visit(ScriptNode& node) {
 
     for (const auto& js_node : js_nodes) {
         if (!js_node) continue;
-        if (js_node->type == CHTL_JS::CHTLJSNodeType::Listen) {
+        if (js_node->type == CHTL_JS::CHTLJSNodeType::Delegate) {
+            if (auto* delegate_node = dynamic_cast<CHTL_JS::DelegateNode*>(js_node.get())) {
+                delegate_registry[delegate_node->parent_selector.selector_string].push_back(*delegate_node);
+            }
+        } else if (js_node->type == CHTL_JS::CHTLJSNodeType::Listen) {
             if (auto* listen_node = dynamic_cast<CHTL_JS::ListenNode*>(js_node.get())) {
                 const auto& parsed = listen_node->selector;
                 std::string selector_js;

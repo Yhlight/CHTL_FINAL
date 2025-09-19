@@ -6,6 +6,7 @@ namespace CHTL_JS {
 
 static std::unordered_map<std::string, TokenType> keywords = {
     {"Listen", TokenType::LISTEN},
+    {"Delegate", TokenType::DELEGATE},
 };
 
 CHTLJSLexer::CHTLJSLexer(const std::string& source) : source(source) {}

@@ -10,7 +10,8 @@ enum class CHTLJSNodeType {
     RawJS,
     EnhancedSelector,
     Listen,
-    EventHandler
+    EventHandler,
+    Delegate
 };
 
 class CHTLJSBaseNode {

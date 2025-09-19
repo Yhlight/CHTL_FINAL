@@ -2,6 +2,7 @@
 #include "../CHTLJSNode/RawJSNode.h"
 #include "../CHTLJSNode/ListenNode.h"
 #include "../CHTLJSNode/EventHandlerNode.h"
+#include "../CHTLJSNode/DelegateNode.h"
 #include <stdexcept>
 #include <algorithm>
 
@@ -32,8 +33,14 @@ std::unique_ptr<CHTLJSBaseNode> CHTLJSParser::parseStatement() {
     if (peek().type == TokenType::LEFT_BRACE_BRACE) {
         auto selector = parseEnhancedSelector();
         if (match({TokenType::ARROW})) {
-            consume(TokenType::LISTEN, "Expect 'Listen' keyword.");
-            return parseListenBlock(std::move(selector));
+            if (check(TokenType::LISTEN)) {
+                consume(TokenType::LISTEN, "Expect 'Listen' keyword.");
+                return parseListenBlock(std::move(selector));
+            }
+            if (check(TokenType::DELEGATE)) {
+                consume(TokenType::DELEGATE, "Expect 'Delegate' keyword.");
+                return parseDelegateExpression(std::move(selector));
+            }
         }
         if (match({TokenType::AMPERSAND_ARROW})) {
             if (check(TokenType::LEFT_BRACE)) {
@@ -111,7 +118,7 @@ std::unique_ptr<ListenNode> CHTLJSParser::parseListenBlock(std::unique_ptr<Enhan
 
         int start_pos = start_token.position;
         int end_pos = end_token.position + end_token.lexeme.length();
-        listenNode->events[eventName.lexeme] = source.substr(start_pos, end_pos - start_pos);
+        listenNode->events[eventName.lexeme] = trim(source.substr(start_pos, end_pos - start_pos));
 
         if (match({TokenType::COMMA})) {
             // continue
@@ -143,7 +150,7 @@ std::unique_ptr<EventHandlerNode> CHTLJSParser::parseEventHandlerExpression(std:
 
     int start_pos = start_token.position;
     int end_pos = end_token.position + end_token.lexeme.length();
-    std::string handler = source.substr(start_pos, end_pos - start_pos);
+    std::string handler = trim(source.substr(start_pos, end_pos - start_pos));
 
     auto eventHandlerNode = std::make_unique<EventHandlerNode>(selector->parsed_selector, eventNames, handler);
 
@@ -152,6 +159,52 @@ std::unique_ptr<EventHandlerNode> CHTLJSParser::parseEventHandlerExpression(std:
     }
 
     return eventHandlerNode;
+}
+
+std::unique_ptr<DelegateNode> CHTLJSParser::parseDelegateExpression(std::unique_ptr<EnhancedSelectorNode> selector) {
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'Delegate'.");
+    auto delegateNode = std::make_unique<DelegateNode>(selector->parsed_selector);
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        Token key = consume(TokenType::IDENTIFIER, "Expect property name.");
+        consume(TokenType::COLON, "Expect ':' after property name.");
+
+        if (key.lexeme == "target") {
+            if (match({TokenType::LEFT_BRACKET})) {
+                // Parse a list of selectors
+                do {
+                    delegateNode->target_selectors.push_back(parseEnhancedSelector()->parsed_selector);
+                } while (match({TokenType::COMMA}));
+                consume(TokenType::RIGHT_BRACKET, "Expect ']' after target selector list.");
+            } else {
+                // Parse a single selector
+                delegateNode->target_selectors.push_back(parseEnhancedSelector()->parsed_selector);
+            }
+        } else {
+            // It's an event handler
+            Token start_token = peek();
+            int brace_level = 0;
+            if (check(TokenType::LEFT_BRACE)) brace_level++;
+
+            while ((brace_level > 0 || (!check(TokenType::COMMA) && !check(TokenType::RIGHT_BRACE))) && !isAtEnd()) {
+                if(peek().type == TokenType::LEFT_BRACE) brace_level++;
+                if(peek().type == TokenType::RIGHT_BRACE) brace_level--;
+                advance();
+            }
+            Token end_token = previous();
+
+            int start_pos = start_token.position;
+            int end_pos = end_token.position + end_token.lexeme.length();
+            delegateNode->events[key.lexeme] = trim(source.substr(start_pos, end_pos - start_pos));
+        }
+
+        if (match({TokenType::COMMA})) {
+            // continue
+        }
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after Delegate block.");
+    return delegateNode;
 }
 
 
