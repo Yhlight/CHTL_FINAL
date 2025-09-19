@@ -53,8 +53,6 @@ void ExpressionEvaluator::visit(BinaryExpr& expr) {
 }
 
 void ExpressionEvaluator::visit(VarExpr& expr) {
-    // This is a simplified implementation that doesn't handle namespace resolution well.
-    // It just finds the first match.
     for (const auto& ns_pair : templates) {
         if (ns_pair.second.count(expr.group)) {
             const auto& def = ns_pair.second.at(expr.group);

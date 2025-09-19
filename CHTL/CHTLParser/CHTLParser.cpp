@@ -452,8 +452,21 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
         }
     } else if (def->type == TemplateType::ELEMENT) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            for (auto& node : parseDeclaration()) {
-                def->element_body.push_back(std::move(node));
+             if ((peek().type == TokenType::IDENTIFIER || peek().type == TokenType::TEXT) && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
+                Token key = advance();
+                consume(TokenType::COLON, "Expect ':' after attribute name.");
+                Token value_token;
+                if (match({TokenType::STRING, TokenType::IDENTIFIER, TokenType::NUMBER})) {
+                    value_token = previous();
+                } else {
+                    error(peek(), "Expect attribute value.");
+                }
+                consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
+                def->element_attributes.push_back({key.lexeme, value_token.lexeme});
+            } else {
+                for (auto& node : parseDeclaration()) {
+                    def->element_body.push_back(std::move(node));
+                }
             }
         }
     }
@@ -503,8 +516,22 @@ void CHTLParser::parseImportStatement() {
     consume(TokenType::LEFT_BRACKET, "Expect '['.");
     consume(TokenType::IDENTIFIER, "Expect 'Import'.");
     consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+
+    bool is_custom_import = false;
+    bool is_template_import = false;
+
+    if (peek().type == TokenType::LEFT_BRACKET) {
+        advance(); // consume [
+        Token specifier = consume(TokenType::IDENTIFIER, "Expect 'Custom' or 'Template'.");
+        if (specifier.lexeme == "Custom") is_custom_import = true;
+        else if (specifier.lexeme == "Template") is_template_import = true;
+        else error(specifier, "Invalid import specifier.");
+        consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+    }
+
     consume(TokenType::AT, "Expect '@'.");
     Token typeToken = consume(TokenType::IDENTIFIER, "Expect import type.");
+
     if (typeToken.lexeme == "Chtl") {
         consume(TokenType::FROM, "Expect 'from'.");
         Token pathToken = consume(TokenType::STRING, "Expect file path.");
@@ -518,10 +545,59 @@ void CHTLParser::parseImportStatement() {
         for (auto& pair : imported_template_map) {
             this->template_definitions[pair.first] = std::move(pair.second);
         }
-        consume(TokenType::SEMICOLON, "Expect ';'.");
     } else {
-        error(typeToken, "Unsupported import type.");
+        std::vector<std::string> symbols_to_import;
+        if (peek().type != TokenType::FROM) {
+            do {
+                symbols_to_import.push_back(consume(TokenType::IDENTIFIER, "Expect symbol name.").lexeme);
+            } while (match({TokenType::COMMA}));
+        }
+
+        consume(TokenType::FROM, "Expect 'from'.");
+        Token pathToken = consume(TokenType::STRING, "Expect file path.");
+
+        std::string alias;
+        if (match({TokenType::AS})) {
+            alias = consume(TokenType::IDENTIFIER, "Expect alias name.").lexeme;
+            if (symbols_to_import.size() != 1 && !alias.empty()) {
+                error(previous(), "Cannot use 'as' with multiple symbol imports.");
+            }
+        }
+
+        std::string imported_content = CHTLLoader::load(this->file_path, pathToken.lexeme);
+        std::string imported_path = FileSystem::getDirectory(this->file_path) + pathToken.lexeme;
+        CHTLLexer sub_lexer(imported_content, this->config);
+        std::vector<Token> sub_tokens = sub_lexer.scanTokens();
+        CHTLParser sub_parser(imported_content, sub_tokens, imported_path, this->config);
+        sub_parser.parse();
+        auto& source_definitions = sub_parser.getMutableTemplateDefinitions();
+
+        for (auto const& [ns, def_map] : source_definitions) {
+            for (auto const& [name, def] : def_map) {
+                bool type_match = (typeToken.lexeme == "Style" && def->type == TemplateType::STYLE) ||
+                                  (typeToken.lexeme == "Element" && def->type == TemplateType::ELEMENT) ||
+                                  (typeToken.lexeme == "Var" && def->type == TemplateType::VAR);
+                bool custom_match = (is_custom_import && def->is_custom) ||
+                                    (is_template_import && !def->is_custom) ||
+                                    (!is_custom_import && !is_template_import);
+
+                if (type_match && custom_match) {
+                    if (symbols_to_import.empty()) { // Type import
+                        this->template_definitions[ns][name] = def;
+                    } else { // Precise import
+                        for (const auto& sym_name : symbols_to_import) {
+                            if (name == sym_name) {
+                                std::string final_name = alias.empty() ? name : alias;
+                                this->template_definitions[getCurrentNamespace()][final_name] = def;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
+    consume(TokenType::SEMICOLON, "Expect ';' after import statement.");
 }
 
 std::unique_ptr<ScriptNode> CHTLParser::parseScriptBlock() {

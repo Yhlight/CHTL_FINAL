@@ -1,0 +1,36 @@
+[Namespace] LibTheme
+{
+    [Template] @Style Base
+    {
+        font-family: "Helvetica";
+    }
+
+    [Custom] @Style Important
+    {
+        color: "red";
+        font-weight: "bold";
+    }
+}
+
+[Namespace] LibComponents
+{
+    [Template] @Element Button
+    {
+        button
+        {
+            style
+            {
+                padding: "10px";
+                border-radius: "5px";
+            }
+            text: "Default Button";
+        }
+    }
+
+    [Custom] @Element Card
+    {
+        div {
+            class: "card";
+        }
+    }
+}

@@ -1,0 +1,38 @@
+// Precise import with aliasing
+// This imports the 'Button' element from the 'LibComponents' namespace in lib.chtl
+// and makes it available in the current namespace as 'LibButton'.
+[Import] [Template] @Element Button from "lib.chtl" as LibButton;
+
+// Precise import of a custom style
+// This imports the 'Important' style from 'LibTheme' and makes it available.
+[Import] [Custom] @Style Important from "lib.chtl";
+
+// Type import of all Template Styles
+// This imports the 'Base' style from 'LibTheme'.
+[Import] [Template] @Style from "lib.chtl";
+
+html
+{
+    body
+    {
+        // Using the aliased element. It's now in our scope.
+        div
+        {
+            @Element LibButton;
+        }
+
+        // Using the precisely imported custom style.
+        p
+        {
+            style { @Style Important; }
+            text: "Important text!";
+        }
+
+        // Using the type-imported template style.
+        span
+        {
+            style { @Style Base; }
+            text: "Base text.";
+        }
+    }
+}

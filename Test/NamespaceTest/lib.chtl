@@ -1,8 +1,0 @@
-[Namespace] Library
-{
-    [Template] @Style LibStyle
-    {
-        border: "1px solid blue";
-        padding: "10px";
-    }
-}

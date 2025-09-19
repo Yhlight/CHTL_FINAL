@@ -3,6 +3,7 @@
 
 #include "BaseNode.h"
 #include "AttributeNode.h"
+#include "ElementNode.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -22,6 +23,7 @@ public:
     std::string name;
     bool is_custom = false;
 
+    std::vector<HtmlAttribute> element_attributes;
     std::vector<std::unique_ptr<BaseNode>> element_body;
     std::vector<AttributeNode> style_properties;
     std::map<std::string, std::unique_ptr<Expr>> variables;

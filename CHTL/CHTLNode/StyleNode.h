@@ -7,12 +7,11 @@
 #include "Visitor.h"
 #include <vector>
 #include <string>
+#include <memory>
 
 namespace CHTL {
 
-#include <memory>
-
-class TemplateDefinitionNode; // Forward declaration
+class TemplateDefinitionNode;
 
 class StyleNode : public BaseNode {
 public:
@@ -26,7 +25,7 @@ public:
 
         StyleApplication clone() const {
             StyleApplication new_app;
-            new_app.definition = definition; // shared_ptr can be copied
+            new_app.definition = definition;
             new_app.deleted_properties = deleted_properties;
             for (const auto& prop : new_or_overridden_properties) {
                 new_app.new_or_overridden_properties.push_back(prop.clone());

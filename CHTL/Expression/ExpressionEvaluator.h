@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <memory>
 
 namespace CHTL {
 
@@ -18,8 +19,6 @@ struct EvaluatedValue {
     double value;
     std::string unit;
 };
-
-#include <memory>
 
 class ExpressionEvaluator : public ExprVisitor {
 public:

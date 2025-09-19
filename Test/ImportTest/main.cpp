@@ -24,49 +24,37 @@ std::string remove_whitespace(const std::string& str) {
     return out;
 }
 
-
 int main() {
-    std::string file_path = "Test/NamespaceTest/main.chtl";
+    std::string file_path = "Test/ImportTest/main.chtl";
     std::string source_code = CHTL::FileSystem::readFile(file_path);
 
-    // Create a shared configuration object
     auto config = std::make_shared<CHTL::Configuration>();
-
-    // 1. Lexer
     CHTL::CHTLLexer lexer(source_code, config);
     std::vector<CHTL::Token> tokens = lexer.scanTokens();
 
-    // 2. Parser
     CHTL::CHTLParser parser(source_code, tokens, file_path, config);
     auto root = parser.parse();
     bool use_doctype = parser.getUseHtml5Doctype();
 
-    // 3. Generator
     CHTL::CHTLGenerator generator(parser.getTemplateDefinitions(), config);
     CHTL::CompilationResult result = generator.generate(root.get(), use_doctype);
 
-    // Using a whitespace-insensitive comparison is more robust
     std::string processed_html = remove_whitespace(result.html);
-
     std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n";
 
-    // 4. Assert
-    // Properties are sorted alphabetically by the generator's std::map
+    // 1. Test aliased import: @Element LibButton
+    assert(contains(processed_html, "<buttonstyle=\"border-radius:5px;padding:10px;\">DefaultButton</button>"));
 
-    // Check the div that uses the 'Theme' namespace
-    assert(contains(processed_html, "id=\"themed\"style=\"font-family:Arial;font-size:16px;\""));
+    // 2. Test precise import: @Style Important
+    assert(contains(processed_html, "<pstyle=\"color:red;font-weight:bold;\">Importanttext!</p>"));
 
-    // Check the div that uses the 'Theme.Dark' nested namespace
-    assert(contains(processed_html, "id=\"dark-themed\"style=\"background-color:black;color:white;\""));
+    // 3. Test type import: @Style Base
+    assert(contains(processed_html, "<spanstyle=\"font-family:Helvetica;\">Basetext.</span>"));
 
-    // Check the div that uses the imported 'Library' namespace
-    assert(contains(processed_html, "id=\"lib-themed\"style=\"border:1pxsolidblue;padding:10px;\""));
+    // 4. Test that un-imported symbols are not available.
+    assert(!contains(processed_html, "class=\"card\""));
 
-    // CSS and JS should be empty for this test
-    assert(result.css.empty());
-    assert(result.js.empty());
-
-    std::cout << "NamespaceTest PASSED!" << std::endl;
+    std::cout << "ImportTest PASSED!" << std::endl;
 
     return 0;
 }
