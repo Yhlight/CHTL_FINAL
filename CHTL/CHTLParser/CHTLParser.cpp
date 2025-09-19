@@ -124,6 +124,11 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
         nodes.push_back(parseStyleBlock());
         return nodes;
     }
+    if (match({TokenType::SCRIPT})) {
+        std::vector<std::unique_ptr<BaseNode>> nodes;
+        nodes.push_back(parseScriptBlock());
+        return nodes;
+    }
     if (check(TokenType::IDENTIFIER)) {
         std::vector<std::unique_ptr<BaseNode>> nodes;
         nodes.push_back(parseElement());
@@ -371,6 +376,37 @@ void CHTLParser::parseImportStatement() {
     } else {
         error(typeToken, "Unsupported import type.");
     }
+}
+
+std::unique_ptr<ScriptNode> CHTLParser::parseScriptBlock() {
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'script' keyword.");
+
+    if (check(TokenType::RIGHT_BRACE)) { // Empty script block
+        consume(TokenType::RIGHT_BRACE, "Expect '}' after script block.");
+        return std::make_unique<ScriptNode>("");
+    }
+
+    Token start_token = peek();
+    int brace_level = 1;
+    Token end_token = start_token;
+
+    while (brace_level > 0 && !isAtEnd()) {
+        if (peek().type == TokenType::LEFT_BRACE) brace_level++;
+        if (peek().type == TokenType::RIGHT_BRACE) brace_level--;
+
+        if (brace_level == 0) {
+            break;
+        }
+        advance();
+        end_token = previous();
+    }
+
+    int start_pos = start_token.position;
+    int end_pos = end_token.position + end_token.lexeme.length();
+    std::string content = source.substr(start_pos, end_pos - start_pos);
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after script block.");
+    return std::make_unique<ScriptNode>(content);
 }
 
 std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {

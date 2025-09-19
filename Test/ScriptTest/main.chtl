@@ -1,0 +1,10 @@
+body {
+    div {
+        id: "myDiv";
+    }
+    script {
+        const myDiv = document.getElementById("myDiv");
+        const selector = {{#myDiv}};
+        myDiv.innerText = "Hello from script!";
+    }
+}

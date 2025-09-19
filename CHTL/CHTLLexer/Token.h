@@ -28,6 +28,7 @@ enum class TokenType {
 
     // Two-character tokens
     STAR_STAR,
+    LEFT_BRACE_BRACE, RIGHT_BRACE_BRACE, // {{ }}
 
     // Literals.
     IDENTIFIER,
@@ -37,6 +38,7 @@ enum class TokenType {
     // Keywords
     STYLE,
     TEXT,
+    SCRIPT,
     INHERIT,
     FROM,
     AS,

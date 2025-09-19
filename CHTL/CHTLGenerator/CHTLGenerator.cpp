@@ -3,6 +3,10 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
+#include "../CHTLNode/ScriptNode.h"
+#include "../../CHTL JS/CHTLJSParser/CHTLJSParser.h"
+#include "../../CHTL JS/CHTLJSNode/RawJSNode.h"
+#include "../../CHTL JS/CHTLJSNode/EnhancedSelectorNode.h"
 #include "../Expression/ExpressionEvaluator.h"
 #include <unordered_set>
 #include <algorithm>
@@ -21,11 +25,12 @@ CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, T
 CompilationResult CHTLGenerator::generate(BaseNode* root) {
     html_output.str("");
     css_output.str("");
+    js_output.str("");
     this->doc_root = root;
     if (root) {
         root->accept(*this);
     }
-    return {html_output.str(), css_output.str()};
+    return {html_output.str(), css_output.str(), js_output.str()};
 }
 
 void CHTLGenerator::visit(ElementNode& node) {
@@ -106,6 +111,28 @@ void CHTLGenerator::visit(StyleNode& node) {} // Handled inside ElementNode visi
 void CHTLGenerator::visit(OriginNode& node) {
     if (node.type == OriginType::HTML) html_output << node.content;
     else if (node.type == OriginType::STYLE) css_output << node.content;
+    else if (node.type == OriginType::JAVASCRIPT) js_output << node.content;
+}
+
+void CHTLGenerator::visit(ScriptNode& node) {
+    // We don't output the script content directly into the HTML stream.
+    // Instead, we add it to the JS stream to be linked externally or embedded later.
+    CHTL_JS::CHTLJSParser js_parser(node.content);
+    auto js_nodes = js_parser.parse();
+
+    for (const auto& js_node : js_nodes) {
+        if (js_node->type == CHTL_JS::CHTLJSNodeType::RawJS) {
+            if (auto* raw_node = dynamic_cast<CHTL_JS::RawJSNode*>(js_node.get())) {
+                js_output << raw_node->content;
+            }
+        } else if (js_node->type == CHTL_JS::CHTLJSNodeType::EnhancedSelector) {
+            if (auto* selector_node = dynamic_cast<CHTL_JS::EnhancedSelectorNode*>(js_node.get())) {
+                // For now, just output the content. In the future, this will be processed.
+                js_output << "{{" << selector_node->content << "}}";
+            }
+        }
+    }
+    js_output << "\n"; // Add a newline for separation
 }
 
 } // namespace CHTL

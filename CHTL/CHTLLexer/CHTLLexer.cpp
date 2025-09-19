@@ -8,6 +8,7 @@ namespace CHTL {
 static std::unordered_map<std::string, TokenType> keywords = {
     {"style", TokenType::STYLE},
     {"text", TokenType::TEXT},
+    {"script", TokenType::SCRIPT},
     {"inherit", TokenType::INHERIT},
     {"from", TokenType::FROM},
     {"as", TokenType::AS},
@@ -38,8 +39,8 @@ void CHTLLexer::scanToken() {
     switch (c) {
         case '(': addToken(TokenType::LEFT_PAREN); break;
         case ')': addToken(TokenType::RIGHT_PAREN); break;
-        case '{': addToken(TokenType::LEFT_BRACE); break;
-        case '}': addToken(TokenType::RIGHT_BRACE); break;
+        case '{': addToken(match('{') ? TokenType::LEFT_BRACE_BRACE : TokenType::LEFT_BRACE); break;
+        case '}': addToken(match('}') ? TokenType::RIGHT_BRACE_BRACE : TokenType::RIGHT_BRACE); break;
         case '[': addToken(TokenType::LEFT_BRACKET); break;
         case ']': addToken(TokenType::RIGHT_BRACKET); break;
         case '@': addToken(TokenType::AT); break;
