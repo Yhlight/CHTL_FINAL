@@ -30,9 +30,10 @@ private:
     const std::string& source;
     const std::vector<Token>& tokens;
     const std::string file_path;
-    std::string current_namespace;
+    std::vector<std::string> namespace_stack;
     int current = 0;
 
+    std::string getCurrentNamespace();
     bool isAtEnd();
     Token peek();
     Token previous();
@@ -60,6 +61,7 @@ private:
     std::unique_ptr<ScriptNode> parseScriptBlock();
     std::unique_ptr<BaseNode> parseOriginBlock();
     std::unique_ptr<ConfigNode> parseConfigurationBlock();
+    void parseNamespaceStatement();
 
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>> template_definitions;
     void parseSymbolDeclaration(bool is_custom);

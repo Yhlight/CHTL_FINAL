@@ -6,6 +6,7 @@
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <stdexcept>
+#include <numeric>
 
 namespace CHTL {
 
@@ -73,17 +74,22 @@ std::string getFilename(const std::string& path) {
     return filename;
 }
 
-#include "CHTL/CHTLNode/ConfigNode.h"
-
 CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path, std::shared_ptr<Configuration> config)
     : source(source), tokens(tokens), file_path(file_path), config(config) {
-        this->current_namespace = getFilename(file_path);
+        namespace_stack.push_back(getFilename(file_path));
 }
 
 const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& CHTLParser::getTemplateDefinitions() const { return template_definitions; }
 std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& CHTLParser::getMutableTemplateDefinitions() { return template_definitions; }
 bool CHTLParser::getUseHtml5Doctype() const { return use_html5_doctype; }
 
+std::string CHTLParser::getCurrentNamespace() {
+    if (namespace_stack.empty()) return "";
+    return std::accumulate(std::next(namespace_stack.begin()), namespace_stack.end(), namespace_stack[0],
+                           [](const std::string& a, const std::string& b) {
+                               return a + "." + b;
+                           });
+}
 
 std::unique_ptr<BaseNode> CHTLParser::parse() {
     // Check for 'use html5;' directive at the very beginning
@@ -108,6 +114,8 @@ std::unique_ptr<BaseNode> CHTLParser::parse() {
                 parseImportStatement();
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Configuration") {
                 parseConfigurationBlock();
+            } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Namespace") {
+                parseNamespaceStatement();
             } else { break; }
         } else { break; }
     }
@@ -118,6 +126,39 @@ std::unique_ptr<BaseNode> CHTLParser::parse() {
     }
     return nullptr;
 }
+
+void CHTLParser::parseNamespaceStatement() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start [Namespace] block.");
+    consume(TokenType::IDENTIFIER, "Expect 'Namespace' keyword.");
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end keyword.");
+
+    Token name = consume(TokenType::IDENTIFIER, "Expect namespace name.");
+    namespace_stack.push_back(name.lexeme);
+
+    if (match({TokenType::LEFT_BRACE})) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            // Recurse to parse declarations within the namespace
+            if (peek().type == TokenType::LEFT_BRACKET) {
+                 if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Template") {
+                    parseSymbolDeclaration(false);
+                } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Custom") {
+                    parseSymbolDeclaration(true);
+                } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Namespace") {
+                    parseNamespaceStatement(); // Nested namespace
+                } else {
+                     error(peek(), "Unexpected declaration inside namespace.");
+                }
+            } else {
+                error(peek(), "Only declarations are allowed directly inside a namespace block.");
+            }
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' to end namespace block.");
+    }
+    // If no brace, the namespace applies to the rest of the file.
+
+    namespace_stack.pop_back();
+}
+
 
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
     if (check(TokenType::AT)) return parseElementTemplateUsage();
@@ -270,12 +311,41 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
     if (type.lexeme != "Element") { error(type, "Expect '@Element' template usage here."); }
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
     const TemplateDefinitionNode* def = nullptr;
-    for (const auto& ns_pair : template_definitions) {
-        if (ns_pair.second.count(name.lexeme)) {
-            def = &ns_pair.second.at(name.lexeme);
-            break;
+
+    if (match({TokenType::FROM})) {
+        std::string explicit_ns;
+        do {
+            explicit_ns += consume(TokenType::IDENTIFIER, "Expect namespace identifier.").lexeme;
+            if (check(TokenType::DOT)) {
+                explicit_ns += advance().lexeme;
+            } else {
+                break;
+            }
+        } while(true);
+
+        if (template_definitions.count(explicit_ns) && template_definitions.at(explicit_ns).count(name.lexeme)) {
+            def = &template_definitions.at(explicit_ns).at(name.lexeme);
+        }
+
+    } else {
+        // Namespace resolution logic
+        for (int i = namespace_stack.size(); i >= 0; --i) {
+            std::vector<std::string> sub_stack(namespace_stack.begin(), namespace_stack.begin() + i);
+            if (sub_stack.empty()) continue;
+            std::string search_ns = std::accumulate(std::next(sub_stack.begin()), sub_stack.end(), sub_stack[0],
+                               [](const std::string& a, const std::string& b) { return a + "." + b; });
+            if (template_definitions.count(search_ns) && template_definitions.at(search_ns).count(name.lexeme)) {
+                def = &template_definitions.at(search_ns).at(name.lexeme);
+                break;
+            }
+        }
+        // Check global namespace as a last resort
+        if (!def && template_definitions.count("") && template_definitions.at("").count(name.lexeme)) {
+            def = &template_definitions.at("").at(name.lexeme);
         }
     }
+
+
     if (!def) { error(name, "Element template '" + name.lexeme + "' not found."); return {}; }
     if (def->type != TemplateType::ELEMENT) { error(name, "Template '" + name.lexeme + "' is not an Element template."); }
     std::vector<std::unique_ptr<BaseNode>> cloned_nodes;
@@ -396,7 +466,7 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
         }
     }
     consume(TokenType::RIGHT_BRACE, "Expect '}' to end symbol body.");
-    template_definitions[current_namespace][def.name] = std::move(def);
+    template_definitions[getCurrentNamespace()][def.name] = std::move(def);
 }
 
 void CHTLParser::parseImportStatement() {

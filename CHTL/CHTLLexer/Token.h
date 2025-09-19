@@ -48,6 +48,12 @@ enum class TokenType {
     BEFORE,
     REPLACE,
     USE,
+    TEMPLATE,
+    CUSTOM,
+    ORIGIN,
+    IMPORT,
+    CONFIGURATION,
+    NAMESPACE,
 
     // Special
     SYMBOL,
