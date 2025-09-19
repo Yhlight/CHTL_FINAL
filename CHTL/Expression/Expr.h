@@ -16,6 +16,7 @@ class ReferenceExpr;
 class ComparisonExpr;
 class LogicalExpr;
 class ConditionalExpr;
+class ResponsiveValueNode;
 
 class ExprVisitor {
 public:
@@ -27,6 +28,7 @@ public:
     virtual void visit(ComparisonExpr& expr) = 0;
     virtual void visit(LogicalExpr& expr) = 0;
     virtual void visit(ConditionalExpr& expr) = 0;
+    virtual void visit(ResponsiveValueNode& expr) = 0;
 };
 
 class Expr {

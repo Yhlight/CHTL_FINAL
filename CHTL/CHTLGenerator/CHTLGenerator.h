@@ -40,6 +40,13 @@ private:
     const std::map<std::string, std::map<std::string, std::shared_ptr<TemplateDefinitionNode>>>& templates;
     BaseNode* doc_root = nullptr;
     std::map<std::string, std::vector<CHTL_JS::DelegateNode>> delegate_registry;
+
+    struct ReactiveBinding {
+        std::string element_id;
+        std::string attribute_name;
+        std::string variable_name;
+    };
+    std::vector<ReactiveBinding> reactive_bindings;
 };
 
 } // namespace CHTL

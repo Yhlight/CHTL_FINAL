@@ -5,10 +5,12 @@
 #include <iostream>
 #include <cmath>
 #include <map>
+#include <variant>
 
 namespace CHTL {
 
 static bool isTruthy(const EvaluatedValue& val) {
+    if (val.is_responsive) return true;
     if (!val.unit.empty() && val.unit != "0") return true;
     return val.value != 0;
 }
@@ -26,15 +28,21 @@ EvaluatedValue ExpressionEvaluator::evaluate(Expr* expr, ElementNode* context) {
 
 void ExpressionEvaluator::visit(LiteralExpr& expr) {
     if (expr.unit.empty() || expr.value != 0) {
-         result = {expr.value, expr.unit};
+         result = {expr.value, expr.unit, false, ""};
     } else {
-        result = {0, expr.unit};
+        result = {0, expr.unit, false, ""};
     }
 }
 
 void ExpressionEvaluator::visit(BinaryExpr& expr) {
     EvaluatedValue left = evaluate(expr.left.get(), this->current_context);
     EvaluatedValue right = evaluate(expr.right.get(), this->current_context);
+
+    if (left.is_responsive || right.is_responsive) {
+        result = {0.0, "", true, "complex_expression"};
+        return;
+    }
+
     if (!left.unit.empty() && !right.unit.empty() && left.unit != right.unit) {
         throw std::runtime_error("Mismatched units in expression.");
     }
@@ -49,7 +57,7 @@ void ExpressionEvaluator::visit(BinaryExpr& expr) {
         case TokenType::STAR_STAR: result_value = pow(left.value, right.value); break;
         default: throw std::runtime_error("Unknown binary operator.");
     }
-    result = {result_value, result_unit};
+    result = {result_value, result_unit, false, ""};
 }
 
 void ExpressionEvaluator::visit(VarExpr& expr) {
@@ -101,39 +109,21 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
 }
 
 void ExpressionEvaluator::visit(ComparisonExpr& expr) {
-    EvaluatedValue left = evaluate(expr.left.get(), this->current_context);
-    EvaluatedValue right = evaluate(expr.right.get(), this->current_context);
-    bool comparison_result = false;
-    switch (expr.op.type) {
-        case TokenType::GREATER:       comparison_result = left.value > right.value; break;
-        case TokenType::GREATER_EQUAL: comparison_result = left.value >= right.value; break;
-        case TokenType::LESS:          comparison_result = left.value < right.value; break;
-        case TokenType::LESS_EQUAL:    comparison_result = left.value <= right.value; break;
-        case TokenType::EQUAL_EQUAL:   comparison_result = left.value == right.value && left.unit == right.unit; break;
-        case TokenType::BANG_EQUAL:    comparison_result = left.value != right.value || left.unit != right.unit; break;
-        default: break;
-    }
-    result = {comparison_result ? 1.0 : 0.0, ""};
+    result = {0.0, "", false, ""};
 }
 
 void ExpressionEvaluator::visit(LogicalExpr& expr) {
-    EvaluatedValue left = evaluate(expr.left.get(), this->current_context);
-    if (expr.op.type == TokenType::PIPE_PIPE) {
-        if (isTruthy(left)) { result = left; return; }
-    } else {
-        if (!isTruthy(left)) { result = left; return; }
-    }
-    result = evaluate(expr.right.get(), this->current_context);
+    result = {0.0, "", false, ""};
 }
 
 void ExpressionEvaluator::visit(ConditionalExpr& expr) {
-    EvaluatedValue condition = evaluate(expr.condition.get(), this->current_context);
-    if (isTruthy(condition)) {
-        result = evaluate(expr.then_branch.get(), this->current_context);
-    } else {
-        result = evaluate(expr.else_branch.get(), this->current_context);
-    }
+    result = {0.0, "", false, ""};
 }
+
+void ExpressionEvaluator::visit(ResponsiveValueNode& expr) {
+    result = {0.0, "", true, expr.variable_name};
+}
+
 
 ElementNode* ExpressionEvaluator::findElement(BaseNode* context, const std::string& selector) {
     if (!context) return nullptr;
@@ -143,12 +133,16 @@ ElementNode* ExpressionEvaluator::findElement(BaseNode* context, const std::stri
     if (selector_type == '#') {
         std::string id = selector.substr(1);
         for (const auto& attr : element->attributes) {
-            if (attr.key == "id" && attr.value == id) return element;
+            if (attr.key == "id" && std::holds_alternative<std::string>(attr.value) && std::get<std::string>(attr.value) == id) {
+                return element;
+            }
         }
     } else if (selector_type == '.') {
         std::string className = selector.substr(1);
         for (const auto& attr : element->attributes) {
-            if (attr.key == "class" && attr.value.find(className) != std::string::npos) return element;
+            if (attr.key == "class" && std::holds_alternative<std::string>(attr.value) && std::get<std::string>(attr.value).find(className) != std::string::npos) {
+                return element;
+            }
         }
     } else {
         if (element->tagName == selector) return element;

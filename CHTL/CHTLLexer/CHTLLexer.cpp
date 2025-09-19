@@ -53,6 +53,7 @@ void CHTLLexer::scanToken() {
     char c = advance();
     switch (c) {
         case '(': addToken(TokenType::LEFT_PAREN); break;
+        case '$': addToken(TokenType::DOLLAR); break;
         case ')': addToken(TokenType::RIGHT_PAREN); break;
         case '{': addToken(match('{') ? TokenType::LEFT_BRACE_BRACE : TokenType::LEFT_BRACE); break;
         case '}': addToken(match('}') ? TokenType::RIGHT_BRACE_BRACE : TokenType::RIGHT_BRACE); break;

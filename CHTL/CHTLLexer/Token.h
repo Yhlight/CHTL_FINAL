@@ -12,6 +12,7 @@ enum class TokenType {
     LEFT_BRACKET, RIGHT_BRACKET, // [ ]
     LEFT_PAREN, RIGHT_PAREN,     // ( )
     AT,                          // @
+    DOLLAR,                      // $
     COLON, SEMICOLON,            // : ;
     DOT,                         // .
     QUESTION,                    // ?

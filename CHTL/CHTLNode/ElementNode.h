@@ -5,14 +5,15 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <variant>
+#include "../Expression/ResponsiveValueNode.h"
 
 namespace CHTL {
 
-// A temporary struct for HTML attributes until they are refactored
-// to handle expressions like style properties.
+// An attribute can have a static string value or a dynamic responsive value.
 struct HtmlAttribute {
     std::string key;
-    std::string value;
+    std::variant<std::string, ResponsiveValueNode> value;
 };
 
 class ElementNode : public BaseNode {

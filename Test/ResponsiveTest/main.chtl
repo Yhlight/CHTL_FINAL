@@ -1,0 +1,22 @@
+html
+{
+    body
+    {
+        div
+        {
+            class = $myClass$;
+            text: "This div has a reactive class.";
+        }
+    }
+
+    script
+    {
+        // Declare the reactive variable
+        var myClass = "initial-class";
+
+        // After 1 second, change the class
+        setTimeout(() => {
+            myClass = "updated-class";
+        }, 1000);
+    }
+}

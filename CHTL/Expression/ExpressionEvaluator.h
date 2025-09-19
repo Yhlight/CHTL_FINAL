@@ -3,6 +3,7 @@
 
 #include "Expr.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
+#include "ResponsiveValueNode.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -18,6 +19,8 @@ class ElementNode;
 struct EvaluatedValue {
     double value;
     std::string unit;
+    bool is_responsive = false;
+    std::string responsive_var_name;
 };
 
 class ExpressionEvaluator : public ExprVisitor {
@@ -32,6 +35,7 @@ public:
     void visit(ComparisonExpr& expr) override;
     void visit(LogicalExpr& expr) override;
     void visit(ConditionalExpr& expr) override;
+    void visit(ResponsiveValueNode& expr) override;
 
 private:
     ElementNode* findElement(BaseNode* context, const std::string& selector);
