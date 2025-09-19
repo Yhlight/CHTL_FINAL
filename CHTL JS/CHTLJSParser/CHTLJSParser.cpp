@@ -1,5 +1,6 @@
 #include "CHTLJSParser.h"
 #include "../CHTLJSNode/RawJSNode.h"
+#include "../CHTLJSNode/EventHandlerNode.h"
 #include <stdexcept>
 #include <algorithm>
 
@@ -32,6 +33,9 @@ std::unique_ptr<CHTLJSBaseNode> CHTLJSParser::parseStatement() {
         if (match({TokenType::ARROW})) {
             consume(TokenType::LISTEN, "Expect 'Listen' keyword.");
             return parseListenExpression(std::move(selector));
+        }
+        if (match({TokenType::AMPERSAND_ARROW})) {
+            return parseEventHandlerExpression(std::move(selector));
         }
         return selector;
     }
@@ -107,6 +111,34 @@ std::unique_ptr<ListenNode> CHTLJSParser::parseListenExpression(std::unique_ptr<
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' after Listen block.");
     return listenNode;
+}
+
+std::unique_ptr<EventHandlerNode> CHTLJSParser::parseEventHandlerExpression(std::unique_ptr<EnhancedSelectorNode> selector) {
+    Token eventName = consume(TokenType::IDENTIFIER, "Expect event name.");
+    consume(TokenType::COLON, "Expect ':' after event name.");
+
+    Token start_token = peek();
+    int brace_level = 0;
+    if (check(TokenType::LEFT_BRACE)) brace_level++;
+
+    while ((brace_level > 0 || (!check(TokenType::SEMICOLON))) && !isAtEnd()) {
+        if(peek().type == TokenType::LEFT_BRACE) brace_level++;
+        if(peek().type == TokenType::RIGHT_BRACE) brace_level--;
+        advance();
+    }
+    Token end_token = previous();
+
+    int start_pos = start_token.position;
+    int end_pos = end_token.position + end_token.lexeme.length();
+    std::string handler = source.substr(start_pos, end_pos - start_pos);
+
+    auto eventHandlerNode = std::make_unique<EventHandlerNode>(selector->parsed_selector, eventName.lexeme, handler);
+
+    if (match({TokenType::SEMICOLON})) {
+        // continue
+    }
+
+    return eventHandlerNode;
 }
 
 

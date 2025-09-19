@@ -5,6 +5,7 @@
 #include "../CHTLJSNode/CHTLJSBaseNode.h"
 #include "../CHTLJSNode/ListenNode.h"
 #include "../CHTLJSNode/EnhancedSelectorNode.h"
+#include "../CHTLJSNode/EventHandlerNode.h"
 #include <vector>
 #include <memory>
 
@@ -31,6 +32,7 @@ private:
     std::unique_ptr<CHTLJSBaseNode> parseStatement();
     std::unique_ptr<EnhancedSelectorNode> parseEnhancedSelector();
     std::unique_ptr<ListenNode> parseListenExpression(std::unique_ptr<EnhancedSelectorNode> selector);
+    std::unique_ptr<EventHandlerNode> parseEventHandlerExpression(std::unique_ptr<EnhancedSelectorNode> selector);
 };
 
 } // namespace CHTL_JS

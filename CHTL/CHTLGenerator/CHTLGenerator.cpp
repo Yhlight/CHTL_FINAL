@@ -9,6 +9,7 @@
 #include "../../CHTL JS/CHTLJSNode/RawJSNode.h"
 #include "../../CHTL JS/CHTLJSNode/EnhancedSelectorNode.h"
 #include "../../CHTL JS/CHTLJSNode/ListenNode.h"
+#include "../../CHTL JS/CHTLJSNode/EventHandlerNode.h"
 #include "../Expression/ExpressionEvaluator.h"
 #include <unordered_set>
 #include <algorithm>
@@ -147,6 +148,27 @@ void CHTLGenerator::visit(ScriptNode& node) {
                     for (const auto& event : listen_node->events) {
                         js_output << "  el.addEventListener('" << event.first << "', " << event.second << ");\n";
                     }
+                    js_output << "});\n";
+                }
+            }
+        } else if (js_node->type == CHTL_JS::CHTLJSNodeType::EventHandler) {
+            if (auto* handler_node = dynamic_cast<CHTL_JS::EventHandlerNode*>(js_node.get())) {
+                const auto& parsed = handler_node->selector;
+                std::string selector_js;
+                if (parsed.type == CHTL_JS::SelectorType::IndexedQuery) {
+                    selector_js = "document.querySelectorAll('" + parsed.selector_string + "')[" + std::to_string(parsed.index.value_or(0)) + "]";
+                } else {
+                    if (!parsed.selector_string.empty() && parsed.selector_string[0] == '#') {
+                        selector_js = "document.querySelector('" + parsed.selector_string + "')";
+                    } else {
+                        selector_js = "document.querySelectorAll('" + parsed.selector_string + "')";
+                    }
+                }
+                 if (!parsed.selector_string.empty() && parsed.selector_string[0] == '#') {
+                    js_output << selector_js << ".addEventListener('" << handler_node->event_name << "', " << handler_node->handler << ");\n";
+                } else {
+                    js_output << selector_js << ".forEach(el => {\n";
+                    js_output << "  el.addEventListener('" << handler_node->event_name << "', " << handler_node->handler << ");\n";
                     js_output << "});\n";
                 }
             }

@@ -3,10 +3,8 @@ body {
         id: "myDiv";
     }
     script {
-        {{#myDiv}}->Listen {
-            click: () => {
-                console.log("Clicked!");
-            }
-        }
+        {{#myDiv}} &-> click: () => {
+            console.log("Clicked!");
+        };
     }
 }
