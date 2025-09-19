@@ -1,0 +1,62 @@
+[Import] @Chtl from "lib.chtl";
+
+[Namespace] Theme
+{
+    [Template] @Style BaseText
+    {
+        font-family: "Arial";
+        font-size: 16px;
+    }
+
+    [Namespace] Dark
+    {
+        [Template] @Style DarkText
+        {
+            color: "white";
+            background-color: "black";
+        }
+    }
+}
+
+html
+{
+    head
+    {
+        title { text: "Namespace Test"; }
+    }
+    body
+    {
+        // Use template from a specific namespace
+        div
+        {
+            id: "themed";
+            style
+            {
+                @Style BaseText from Theme;
+            }
+            text: "This text uses the base theme.";
+        }
+
+        // Use template from a nested namespace
+        div
+        {
+            id: "dark-themed";
+            style
+            {
+                @Style DarkText from Theme.Dark;
+            }
+            text: "This text uses the dark theme.";
+        }
+
+        // Use template imported from another file's namespace
+        div
+        {
+            id: "lib-themed";
+            style
+            {
+                @Style LibStyle from Library;
+            }
+            text: "This text uses a style from the library.";
+        }
+    }
+}

@@ -4,6 +4,7 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/ScriptNode.h"
+#include "../CHTLNode/NamespaceNode.h"
 #include "../../CHTL JS/CHTLJSLexer/CHTLJSLexer.h"
 #include "../../CHTL JS/CHTLJSParser/CHTLJSParser.h"
 #include "../../CHTL JS/CHTLJSNode/RawJSNode.h"
@@ -32,7 +33,7 @@ const std::unordered_set<std::string> voidElements = {
     "link", "meta", "param", "source", "track", "wbr"
 };
 
-CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, std::shared_ptr<Configuration> config)
+CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, std::shared_ptr<TemplateDefinitionNode>>>& templates, std::shared_ptr<Configuration> config)
     : templates(templates), config(config), doc_root(nullptr) {}
 
 CompilationResult CHTLGenerator::generate(BaseNode* root, bool use_html5_doctype) {
@@ -71,10 +72,8 @@ CompilationResult CHTLGenerator::generate(BaseNode* root, bool use_html5_doctype
 
 void CHTLGenerator::visit(ElementNode& node) {
     // --- Global Style & Auto-Attribute Generation ---
-    // This must happen before tag generation as it can modify attributes.
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
-            // Check if class/id attributes exist before processing rules for this style block
             bool class_attr_exists = std::any_of(node.attributes.begin(), node.attributes.end(),
                                                  [](const HtmlAttribute& attr){ return attr.key == "class"; });
             bool id_attr_exists = std::any_of(node.attributes.begin(), node.attributes.end(),
@@ -87,10 +86,8 @@ void CHTLGenerator::visit(ElementNode& node) {
                 std::string selector = rule.selector;
                 if (selector.empty()) continue;
 
-                // Auto-add class/id attributes based on the *first* rule of its kind
                 if (selector[0] == '.' && !config->disable_style_auto_add_class && !class_attr_exists && !class_added_by_this_block) {
                     std::string class_name = selector.substr(1);
-                    // The parser might leave whitespace, so we trim it.
                     size_t first = class_name.find_first_not_of(" \t\n\r");
                     if (std::string::npos != first) {
                         size_t last = class_name.find_last_not_of(" \t\n\r");
@@ -109,7 +106,6 @@ void CHTLGenerator::visit(ElementNode& node) {
                     id_added_by_this_block = true;
                 }
 
-                // Generate the CSS for the rule and add it to the global CSS output
                 css_output << rule.selector << " {\n";
                 ExpressionEvaluator evaluator(this->templates, this->doc_root);
                 for (const auto& prop : rule.properties) {
@@ -144,14 +140,8 @@ void CHTLGenerator::visit(ElementNode& node) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             std::map<std::string, AttributeNode> final_props;
             for (const auto& app : styleNode->template_applications) {
-                const TemplateDefinitionNode* def = nullptr;
-                for (const auto& ns_pair : this->templates) {
-                    if (ns_pair.second.count(app.template_name)) {
-                        def = &ns_pair.second.at(app.template_name);
-                        break;
-                    }
-                }
-                if (def && def->type == TemplateType::STYLE) {
+                auto def = app.definition;
+                if (def) { // The parser has already validated the type is STYLE
                     for (const auto& prop : def->style_properties) { final_props[prop.key] = prop.clone(); }
                     for (const auto& key_to_delete : app.deleted_properties) { final_props.erase(key_to_delete); }
                     for (const auto& prop : app.new_or_overridden_properties) { final_props[prop.key] = prop.clone(); }
@@ -198,6 +188,12 @@ void CHTLGenerator::visit(OriginNode& node) {
     else if (node.type == OriginType::JAVASCRIPT) js_output << node.content;
 }
 
+void CHTLGenerator::visit(NamespaceNode& node) {
+    for (const auto& child : node.children) {
+        child->accept(*this);
+    }
+}
+
 void CHTLGenerator::visit(ScriptNode& node) {
     CHTL_JS::CHTLJSLexer lexer(node.content);
     std::vector<CHTL_JS::Token> tokens = lexer.scanTokens();
@@ -216,13 +212,11 @@ void CHTLGenerator::visit(ScriptNode& node) {
                 }
                 js_output << "];\n";
                 js_output << "  const duration = " << animate_node->duration.value_or(1000) << ";\n";
-                // ... (generate other properties)
                 js_output << "  let startTime = null;\n";
                 js_output << "  function step(timestamp) {\n";
                 js_output << "    if (!startTime) startTime = timestamp;\n";
                 js_output << "    const progress = Math.min((timestamp - startTime) / duration, 1);\n";
                 js_output << "    targets.forEach(target => {\n";
-                // ... (generate style updates based on progress)
                 js_output << "    });\n";
                 js_output << "    if (progress < 1) {\n";
                 js_output << "      requestAnimationFrame(step);\n";
@@ -299,7 +293,7 @@ void CHTLGenerator::visit(ScriptNode& node) {
                     if (!parsed.selector_string.empty() && parsed.selector_string[0] == '#') {
                         js_output << "document.querySelector('" << parsed.selector_string << "')";
                     } else {
-                        js_output << "document.querySelectorAll('" << parsed.selector_string << "')";
+                        js_output << "document.querySelectorAll('" + parsed.selector_string + "')";
                     }
                 }
             }
@@ -307,4 +301,4 @@ void CHTLGenerator::visit(ScriptNode& node) {
     }
 }
 
-} // namespace CHTL
+}

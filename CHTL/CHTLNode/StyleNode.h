@@ -10,19 +10,23 @@
 
 namespace CHTL {
 
+#include <memory>
+
+class TemplateDefinitionNode; // Forward declaration
+
 class StyleNode : public BaseNode {
 public:
     void accept(Visitor& visitor) override;
     std::unique_ptr<BaseNode> clone() const override;
 
     struct StyleApplication {
-        std::string template_name;
+        std::shared_ptr<const TemplateDefinitionNode> definition = nullptr;
         std::vector<std::string> deleted_properties;
         std::vector<AttributeNode> new_or_overridden_properties;
 
         StyleApplication clone() const {
             StyleApplication new_app;
-            new_app.template_name = template_name;
+            new_app.definition = definition; // shared_ptr can be copied
             new_app.deleted_properties = deleted_properties;
             for (const auto& prop : new_or_overridden_properties) {
                 new_app.new_or_overridden_properties.push_back(prop.clone());

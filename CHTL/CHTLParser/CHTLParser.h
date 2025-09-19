@@ -8,6 +8,7 @@
 #include "../CHTLNode/ScriptNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/ConfigNode.h"
+#include "../CHTLNode/NamespaceNode.h"
 #include "../Config/Configuration.h"
 #include "../Expression/Expr.h"
 #include <vector>
@@ -20,8 +21,8 @@ class CHTLParser {
 public:
     explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path, std::shared_ptr<Configuration> config);
     std::unique_ptr<BaseNode> parse();
-    const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getTemplateDefinitions() const;
-    std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getMutableTemplateDefinitions();
+    const std::map<std::string, std::map<std::string, std::shared_ptr<TemplateDefinitionNode>>>& getTemplateDefinitions() const;
+    std::map<std::string, std::map<std::string, std::shared_ptr<TemplateDefinitionNode>>>& getMutableTemplateDefinitions();
     bool getUseHtml5Doctype() const;
 
 private:
@@ -30,9 +31,10 @@ private:
     const std::string& source;
     const std::vector<Token>& tokens;
     const std::string file_path;
-    std::string current_namespace;
+    std::vector<std::string> namespace_stack;
     int current = 0;
 
+    std::string getCurrentNamespace();
     bool isAtEnd();
     Token peek();
     Token previous();
@@ -60,8 +62,9 @@ private:
     std::unique_ptr<ScriptNode> parseScriptBlock();
     std::unique_ptr<BaseNode> parseOriginBlock();
     std::unique_ptr<ConfigNode> parseConfigurationBlock();
+    std::unique_ptr<NamespaceNode> parseNamespaceBlock();
 
-    std::map<std::string, std::map<std::string, TemplateDefinitionNode>> template_definitions;
+    std::map<std::string, std::map<std::string, std::shared_ptr<TemplateDefinitionNode>>> template_definitions;
     void parseSymbolDeclaration(bool is_custom);
     void parseImportStatement();
     void parseStyleTemplateUsage(StyleNode* styleNode);

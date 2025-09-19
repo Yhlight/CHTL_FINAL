@@ -3,6 +3,7 @@
 
 #include "../CHTLNode/Visitor.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../CHTLNode/NamespaceNode.h"
 #include "../../CHTL JS/CHTLJSNode/DelegateNode.h"
 #include <string>
 #include <sstream>
@@ -21,7 +22,7 @@ struct CompilationResult {
 
 class CHTLGenerator : public Visitor {
 public:
-    explicit CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, std::shared_ptr<Configuration> config);
+    explicit CHTLGenerator(const std::map<std::string, std::map<std::string, std::shared_ptr<TemplateDefinitionNode>>>& templates, std::shared_ptr<Configuration> config);
     CompilationResult generate(BaseNode* root, bool use_html5_doctype);
 
     void visit(ElementNode& node) override;
@@ -29,13 +30,14 @@ public:
     void visit(StyleNode& node) override;
     void visit(OriginNode& node) override;
     void visit(ScriptNode& node) override;
+    void visit(NamespaceNode& node) override;
 
 private:
     std::shared_ptr<Configuration> config;
     std::stringstream html_output;
     std::stringstream css_output;
     std::stringstream js_output;
-    const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
+    const std::map<std::string, std::map<std::string, std::shared_ptr<TemplateDefinitionNode>>>& templates;
     BaseNode* doc_root = nullptr;
     std::map<std::string, std::vector<CHTL_JS::DelegateNode>> delegate_registry;
 };

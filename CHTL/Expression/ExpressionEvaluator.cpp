@@ -13,7 +13,7 @@ static bool isTruthy(const EvaluatedValue& val) {
     return val.value != 0;
 }
 
-ExpressionEvaluator::ExpressionEvaluator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, BaseNode* doc_root)
+ExpressionEvaluator::ExpressionEvaluator(const std::map<std::string, std::map<std::string, std::shared_ptr<TemplateDefinitionNode>>>& templates, BaseNode* doc_root)
     : templates(templates), doc_root(doc_root) {}
 
 EvaluatedValue ExpressionEvaluator::evaluate(Expr* expr, ElementNode* context) {
@@ -53,12 +53,15 @@ void ExpressionEvaluator::visit(BinaryExpr& expr) {
 }
 
 void ExpressionEvaluator::visit(VarExpr& expr) {
-    // This is a simplified implementation
-    if (templates.count(expr.group) && templates.at(expr.group).count(expr.name)) {
-        const auto& var_def = templates.at(expr.group).at(expr.name);
-        if (var_def.variables.count(expr.name)) {
-            result = evaluate(var_def.variables.at(expr.name).get(), this->current_context);
-            return;
+    // This is a simplified implementation that doesn't handle namespace resolution well.
+    // It just finds the first match.
+    for (const auto& ns_pair : templates) {
+        if (ns_pair.second.count(expr.group)) {
+            const auto& def = ns_pair.second.at(expr.group);
+            if (def->type == TemplateType::VAR && def->variables.count(expr.name)) {
+                def->variables.at(expr.name)->accept(*this);
+                return;
+            }
         }
     }
     throw std::runtime_error("Variable not found: " + expr.group + "." + expr.name);
@@ -78,7 +81,12 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             std::map<std::string, AttributeNode> final_props;
             for (const auto& app : styleNode->template_applications) {
-                // ... logic to apply templates ...
+                auto def = app.definition;
+                if (def) {
+                    for (const auto& prop : def->style_properties) { final_props[prop.key] = prop.clone(); }
+                    for (const auto& key_to_delete : app.deleted_properties) { final_props.erase(key_to_delete); }
+                    for (const auto& prop : app.new_or_overridden_properties) { final_props[prop.key] = prop.clone(); }
+                }
             }
             for (const auto& prop : styleNode->direct_properties) {
                 final_props[prop.key] = prop.clone();
