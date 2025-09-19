@@ -1,9 +1,7 @@
 #include "CHTLJSParser.h"
 #include "../CHTLJSNode/RawJSNode.h"
-#include "../CHTLJSNode/EnhancedSelectorNode.h"
-#include <algorithm>
-#include <string>
 #include <stdexcept>
+#include <algorithm>
 
 namespace CHTL_JS {
 
@@ -17,57 +15,108 @@ std::string trim(const std::string& s) {
     return s.substr(first, (last - first + 1));
 }
 
-
-CHTLJSParser::CHTLJSParser(const std::string& source) : source(source) {}
+CHTLJSParser::CHTLJSParser(const std::vector<Token>& tokens, const std::string& source) : tokens(tokens), source(source) {}
 
 std::vector<std::unique_ptr<CHTLJSBaseNode>> CHTLJSParser::parse() {
     std::vector<std::unique_ptr<CHTLJSBaseNode>> nodes;
-    size_t last_pos = 0;
-
-    while (last_pos < source.length()) {
-        size_t start_delim = source.find("{{", last_pos);
-
-        if (start_delim == std::string::npos) {
-            if (last_pos < source.length()) {
-                nodes.push_back(std::make_unique<RawJSNode>(source.substr(last_pos)));
-            }
-            break;
-        }
-
-        if (start_delim > last_pos) {
-            nodes.push_back(std::make_unique<RawJSNode>(source.substr(last_pos, start_delim - last_pos)));
-        }
-
-        size_t end_delim = source.find("}}", start_delim);
-        if (end_delim == std::string::npos) {
-            nodes.push_back(std::make_unique<RawJSNode>(source.substr(start_delim)));
-            break;
-        }
-
-        std::string selector_content = source.substr(start_delim + 2, end_delim - (start_delim + 2));
-        auto selector_node = std::make_unique<EnhancedSelectorNode>(selector_content);
-
-        // Parse the selector content
-        std::string trimmed_content = trim(selector_content);
-        size_t bracket_pos = trimmed_content.find('[');
-        if (bracket_pos != std::string::npos) {
-            selector_node->parsed_selector.type = SelectorType::IndexedQuery;
-            selector_node->parsed_selector.selector_string = trim(trimmed_content.substr(0, bracket_pos));
-            size_t end_bracket_pos = trimmed_content.find(']', bracket_pos);
-            if (end_bracket_pos != std::string::npos) {
-                std::string index_str = trimmed_content.substr(bracket_pos + 1, end_bracket_pos - (bracket_pos + 1));
-                selector_node->parsed_selector.index = std::stoi(index_str);
-            }
-        } else {
-            selector_node->parsed_selector.type = SelectorType::Query;
-            selector_node->parsed_selector.selector_string = trimmed_content;
-        }
-
-        nodes.push_back(std::move(selector_node));
-        last_pos = end_delim + 2;
+    while (!isAtEnd()) {
+        if(peek().type == TokenType::END_OF_FILE) break;
+        nodes.push_back(parseStatement());
     }
-
     return nodes;
 }
+
+std::unique_ptr<CHTLJSBaseNode> CHTLJSParser::parseStatement() {
+    if (peek().type == TokenType::LEFT_BRACE_BRACE) {
+        auto selector = parseEnhancedSelector();
+        if (match({TokenType::ARROW})) {
+            consume(TokenType::LISTEN, "Expect 'Listen' keyword.");
+            return parseListenExpression(std::move(selector));
+        }
+        return selector;
+    }
+
+    std::string raw_js;
+    while (!isAtEnd() && peek().type != TokenType::LEFT_BRACE_BRACE) {
+        raw_js += advance().lexeme;
+    }
+    return std::make_unique<RawJSNode>(raw_js);
+}
+
+std::unique_ptr<EnhancedSelectorNode> CHTLJSParser::parseEnhancedSelector() {
+    consume(TokenType::LEFT_BRACE_BRACE, "Expect '{{' to start enhanced selector.");
+    std::string content;
+    while (!check(TokenType::RIGHT_BRACE_BRACE) && !isAtEnd()) {
+        content += advance().lexeme;
+    }
+    consume(TokenType::RIGHT_BRACE_BRACE, "Expect '}}' to end enhanced selector.");
+
+    auto node = std::make_unique<EnhancedSelectorNode>(content);
+
+    // Parse the selector content
+    std::string trimmed_content = trim(content);
+    size_t bracket_pos = trimmed_content.find('[');
+    if (bracket_pos != std::string::npos) {
+        node->parsed_selector.type = SelectorType::IndexedQuery;
+        node->parsed_selector.selector_string = trim(trimmed_content.substr(0, bracket_pos));
+        size_t end_bracket_pos = trimmed_content.find(']', bracket_pos);
+        if (end_bracket_pos != std::string::npos) {
+            std::string index_str = trimmed_content.substr(bracket_pos + 1, end_bracket_pos - (bracket_pos + 1));
+            try {
+                node->parsed_selector.index = std::stoi(index_str);
+            } catch (const std::invalid_argument& e) {
+                // Handle error: invalid index
+            }
+        }
+    } else {
+        node->parsed_selector.type = SelectorType::Query;
+        node->parsed_selector.selector_string = trimmed_content;
+    }
+
+    return node;
+}
+
+std::unique_ptr<ListenNode> CHTLJSParser::parseListenExpression(std::unique_ptr<EnhancedSelectorNode> selector) {
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'Listen'.");
+
+    auto listenNode = std::make_unique<ListenNode>(selector->parsed_selector);
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        Token eventName = consume(TokenType::IDENTIFIER, "Expect event name.");
+        consume(TokenType::COLON, "Expect ':' after event name.");
+
+        Token start_token = peek();
+        int brace_level = 0;
+        if (check(TokenType::LEFT_BRACE)) brace_level++;
+
+        while ((brace_level > 0 || (!check(TokenType::COMMA) && !check(TokenType::RIGHT_BRACE))) && !isAtEnd()) {
+            if(peek().type == TokenType::LEFT_BRACE) brace_level++;
+            if(peek().type == TokenType::RIGHT_BRACE) brace_level--;
+            advance();
+        }
+        Token end_token = previous();
+
+        int start_pos = start_token.position;
+        int end_pos = end_token.position + end_token.lexeme.length();
+        listenNode->events[eventName.lexeme] = source.substr(start_pos, end_pos - start_pos);
+
+        if (match({TokenType::COMMA})) {
+            // continue
+        }
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after Listen block.");
+    return listenNode;
+}
+
+
+// --- Helper Method Implementations ---
+bool CHTLJSParser::isAtEnd() { return peek().type == TokenType::END_OF_FILE; }
+Token CHTLJSParser::peek() { return tokens[current]; }
+Token CHTLJSParser::previous() { return tokens[current - 1]; }
+Token CHTLJSParser::advance() { if (!isAtEnd()) current++; return previous(); }
+bool CHTLJSParser::check(TokenType type) { if (isAtEnd()) return false; return peek().type == type; }
+Token CHTLJSParser::consume(TokenType type, const std::string& message) { if (check(type)) return advance(); throw std::runtime_error(message); }
+bool CHTLJSParser::match(const std::vector<TokenType>& types) { for (TokenType type : types) { if (check(type)) { advance(); return true; } } return false; }
 
 } // namespace CHTL_JS

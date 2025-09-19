@@ -8,7 +8,8 @@ namespace CHTL_JS {
 
 enum class CHTLJSNodeType {
     RawJS,
-    EnhancedSelector
+    EnhancedSelector,
+    Listen
 };
 
 class CHTLJSBaseNode {

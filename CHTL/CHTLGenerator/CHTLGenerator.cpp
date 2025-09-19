@@ -4,9 +4,11 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/ScriptNode.h"
+#include "../../CHTL JS/CHTLJSLexer/CHTLJSLexer.h"
 #include "../../CHTL JS/CHTLJSParser/CHTLJSParser.h"
 #include "../../CHTL JS/CHTLJSNode/RawJSNode.h"
 #include "../../CHTL JS/CHTLJSNode/EnhancedSelectorNode.h"
+#include "../../CHTL JS/CHTLJSNode/ListenNode.h"
 #include "../Expression/ExpressionEvaluator.h"
 #include <unordered_set>
 #include <algorithm>
@@ -115,22 +117,49 @@ void CHTLGenerator::visit(OriginNode& node) {
 }
 
 void CHTLGenerator::visit(ScriptNode& node) {
-    CHTL_JS::CHTLJSParser js_parser(node.content);
-    auto js_nodes = js_parser.parse();
+    CHTL_JS::CHTLJSLexer lexer(node.content);
+    std::vector<CHTL_JS::Token> tokens = lexer.scanTokens();
+    CHTL_JS::CHTLJSParser parser(tokens, node.content);
+    auto js_nodes = parser.parse();
 
     for (const auto& js_node : js_nodes) {
-        if (js_node->type == CHTL_JS::CHTLJSNodeType::RawJS) {
+        if (!js_node) continue;
+        if (js_node->type == CHTL_JS::CHTLJSNodeType::Listen) {
+            if (auto* listen_node = dynamic_cast<CHTL_JS::ListenNode*>(js_node.get())) {
+                const auto& parsed = listen_node->selector;
+                std::string selector_js;
+                if (parsed.type == CHTL_JS::SelectorType::IndexedQuery) {
+                    selector_js = "document.querySelectorAll('" + parsed.selector_string + "')[" + std::to_string(parsed.index.value_or(0)) + "]";
+                } else {
+                    if (!parsed.selector_string.empty() && parsed.selector_string[0] == '#') {
+                        selector_js = "document.querySelector('" + parsed.selector_string + "')";
+                    } else {
+                        selector_js = "document.querySelectorAll('" + parsed.selector_string + "')";
+                    }
+                }
+
+                if (!parsed.selector_string.empty() && parsed.selector_string[0] == '#') {
+                     for (const auto& event : listen_node->events) {
+                        js_output << selector_js << ".addEventListener('" << event.first << "', " << event.second << ");\n";
+                    }
+                } else {
+                    js_output << selector_js << ".forEach(el => {\n";
+                    for (const auto& event : listen_node->events) {
+                        js_output << "  el.addEventListener('" << event.first << "', " << event.second << ");\n";
+                    }
+                    js_output << "});\n";
+                }
+            }
+        } else if (js_node->type == CHTL_JS::CHTLJSNodeType::RawJS) {
             if (auto* raw_node = dynamic_cast<CHTL_JS::RawJSNode*>(js_node.get())) {
                 js_output << raw_node->content;
             }
         } else if (js_node->type == CHTL_JS::CHTLJSNodeType::EnhancedSelector) {
-            if (auto* selector_node = dynamic_cast<CHTL_JS::EnhancedSelectorNode*>(js_node.get())) {
+             if (auto* selector_node = dynamic_cast<CHTL_JS::EnhancedSelectorNode*>(js_node.get())) {
                 const auto& parsed = selector_node->parsed_selector;
                 if (parsed.type == CHTL_JS::SelectorType::IndexedQuery) {
                     js_output << "document.querySelectorAll('" << parsed.selector_string << "')[" << parsed.index.value_or(0) << "]";
                 } else {
-                    // Simple logic: if it starts with '#', use querySelector, otherwise querySelectorAll.
-                    // This is a simplification. A more robust implementation would parse the selector more deeply.
                     if (!parsed.selector_string.empty() && parsed.selector_string[0] == '#') {
                         js_output << "document.querySelector('" << parsed.selector_string << "')";
                     } else {
@@ -140,7 +169,6 @@ void CHTLGenerator::visit(ScriptNode& node) {
             }
         }
     }
-    js_output << "\n"; // Add a newline for separation
 }
 
 } // namespace CHTL

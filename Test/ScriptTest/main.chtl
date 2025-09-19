@@ -1,12 +1,12 @@
 body {
     div {
         id: "myDiv";
-        class: "myClass";
     }
     script {
-        const myDiv = {{#myDiv}};
-        const myClassElements = {{.myClass}};
-        const firstDiv = {{div[0]}};
-        myDiv.innerText = "Hello from script!";
+        {{#myDiv}}->Listen {
+            click: () => {
+                console.log("Clicked!");
+            }
+        }
     }
 }
