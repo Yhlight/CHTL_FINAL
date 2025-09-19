@@ -38,11 +38,20 @@ public:
 
 class LiteralExpr : public Expr {
 public:
-    LiteralExpr(double value, const std::string& unit) : value(value), unit(unit) {}
+    // Constructor for numeric literals
+    LiteralExpr(double value, const std::string& unit)
+        : is_string(false), numeric_value(value), unit(unit) {}
+    // Constructor for string literals
+    explicit LiteralExpr(const std::string& value)
+        : is_string(true), string_value(value) {}
+
     void accept(ExprVisitor& visitor) override;
     std::unique_ptr<Expr> clone() const override;
-    double value;
+
+    bool is_string;
+    double numeric_value = 0.0;
     std::string unit;
+    std::string string_value;
 };
 
 class BinaryExpr : public Expr {

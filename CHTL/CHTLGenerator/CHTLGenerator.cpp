@@ -23,24 +23,48 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
     css_output.str("");
     this->doc_root = root;
     if (root) {
+        // We use a two-pass approach.
+        // 1. First pass collects all non-inline CSS rules (e.g. from class selectors)
+        //    and generates the global stylesheet. This is necessary because style
+        //    blocks can appear anywhere in the document.
+        ExpressionEvaluator evaluator(this->templates, this->doc_root);
+        collectAndGenerateCss(root, evaluator);
+
+        // 2. Second pass generates the HTML structure and inline styles.
         root->accept(*this);
     }
     return {html_output.str(), css_output.str()};
 }
 
-void CHTLGenerator::visit(ElementNode& node) {
-    // --- Global Style Generation ---
-    for (const auto& child : node.children) {
-        if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
-            for (const auto& rule : styleNode->global_rules) {
-                // ... (logic for global rules)
+void CHTLGenerator::collectAndGenerateCss(BaseNode* node, ExpressionEvaluator& evaluator) {
+    if (!node) return;
+
+    if (StyleNode* styleNode = dynamic_cast<StyleNode*>(node)) {
+        // Process global rules defined in this style block
+        for (const auto& rule : styleNode->global_rules) {
+            css_output << rule.selector << " {\n";
+            for (const auto& prop : rule.properties) {
+                // We pass nullptr for context because global rules can't reference element properties
+                PropertyValue result = evaluator.evaluate(prop.value_expr.get(), nullptr);
+                css_output << "    " << prop.key << ": " << result.toString() << ";\n";
             }
+            css_output << "}\n";
         }
     }
 
-    // --- HTML Tag Generation ---
+    if (ElementNode* elementNode = dynamic_cast<ElementNode*>(node)) {
+        for (const auto& child : elementNode->children) {
+            collectAndGenerateCss(child.get(), evaluator);
+        }
+    }
+}
+
+
+void CHTLGenerator::visit(ElementNode& node) {
     html_output << "<" << node.tagName;
     std::string text_content;
+
+    // Process standard attributes
     for (const auto& attr : node.attributes) {
         if (attr.key == "text") {
             text_content = attr.value;
@@ -49,10 +73,12 @@ void CHTLGenerator::visit(ElementNode& node) {
         }
     }
 
-    // --- Inline Style Generation ---
+    // Process inline styles
     std::string style_str;
+    ExpressionEvaluator evaluator(this->templates, this->doc_root);
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
+            // This logic for applying templates is simplified and may need review
             std::map<std::string, AttributeNode> final_props;
             for (const auto& app : styleNode->template_applications) {
                 const TemplateDefinitionNode* def = nullptr;
@@ -68,16 +94,15 @@ void CHTLGenerator::visit(ElementNode& node) {
                     for (const auto& prop : app.new_or_overridden_properties) { final_props[prop.key] = prop.clone(); }
                 }
             }
+            // Direct properties override any template properties
             for (const auto& prop : styleNode->direct_properties) {
                 final_props[prop.key] = prop.clone();
             }
+
+            // Evaluate and append the final properties
             for (const auto& pair : final_props) {
-                ExpressionEvaluator evaluator(this->templates, this->doc_root);
-                EvaluatedValue result = evaluator.evaluate(pair.second.value_expr.get(), &node);
-                style_str += pair.first + ": ";
-                if (result.value == 0 && !result.unit.empty()) { style_str += result.unit; }
-                else { style_str += std::to_string(result.value) + result.unit; }
-                style_str += ";";
+                PropertyValue result = evaluator.evaluate(pair.second.value_expr.get(), &node);
+                style_str += pair.first + ": " + result.toString() + ";";
             }
         }
     }
@@ -85,27 +110,41 @@ void CHTLGenerator::visit(ElementNode& node) {
         html_output << " style=\"" << style_str << "\"";
     }
 
-    // --- Child and Closing Tag Generation ---
+    // Handle void elements
     if (voidElements.count(node.tagName)) {
         html_output << ">";
         return;
     }
+
+    // Process children and closing tag
     html_output << ">";
     if (!text_content.empty()) {
         html_output << text_content;
     }
     for (const auto& child : node.children) {
+        // Style nodes are processed for CSS, not rendered as HTML
         if (dynamic_cast<StyleNode*>(child.get())) continue;
         child->accept(*this);
     }
     html_output << "</" << node.tagName << ">";
 }
 
-void CHTLGenerator::visit(TextNode& node) { html_output << node.text; }
-void CHTLGenerator::visit(StyleNode& node) {} // Handled inside ElementNode visit
+void CHTLGenerator::visit(TextNode& node) {
+    html_output << node.text;
+}
+
+void CHTLGenerator::visit(StyleNode& node) {
+    // This is now handled by the initial `collectAndGenerateCss` pass.
+    // This visit function is for the HTML-generation pass, where styles are ignored.
+}
+
 void CHTLGenerator::visit(OriginNode& node) {
-    if (node.type == OriginType::HTML) html_output << node.content;
-    else if (node.type == OriginType::STYLE) css_output << node.content;
+    if (node.type == OriginType::HTML) {
+        html_output << node.content;
+    } else if (node.type == OriginType::STYLE) {
+        // Origin CSS is now also collected in the first pass
+        css_output << node.content;
+    }
 }
 
 } // namespace CHTL

@@ -9,6 +9,8 @@
 
 namespace CHTL {
 
+class ExpressionEvaluator; // Forward declaration
+
 struct CompilationResult {
     std::string html;
     std::string css;
@@ -25,6 +27,8 @@ public:
     void visit(OriginNode& node) override;
 
 private:
+    void collectAndGenerateCss(BaseNode* node, ExpressionEvaluator& evaluator);
+
     std::stringstream html_output;
     std::stringstream css_output;
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;

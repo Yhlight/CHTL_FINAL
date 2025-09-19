@@ -14,15 +14,31 @@ namespace CHTL {
 class BaseNode;
 class ElementNode;
 
-struct EvaluatedValue {
-    double value;
+struct PropertyValue {
+    bool is_string = false;
+    double numeric_value = 0.0;
     std::string unit;
+    std::string string_value;
+
+    std::string toString() const {
+        if (is_string) {
+            return string_value;
+        }
+        // Simplified to_string, good enough for CSS values.
+        std::string num_str = std::to_string(numeric_value);
+        // Remove trailing zeros
+        num_str.erase(num_str.find_last_not_of('0') + 1, std::string::npos);
+        if (num_str.back() == '.') {
+            num_str.pop_back();
+        }
+        return num_str + unit;
+    }
 };
 
 class ExpressionEvaluator : public ExprVisitor {
 public:
     ExpressionEvaluator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, BaseNode* doc_root);
-    EvaluatedValue evaluate(Expr* expr, ElementNode* context);
+    PropertyValue evaluate(Expr* expr, ElementNode* context);
 
     void visit(BinaryExpr& expr) override;
     void visit(LiteralExpr& expr) override;
@@ -38,7 +54,7 @@ private:
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
     BaseNode* doc_root;
     ElementNode* current_context = nullptr;
-    EvaluatedValue result = {0.0, ""};
+    PropertyValue result;
     std::set<std::string> resolution_stack;
 };
 

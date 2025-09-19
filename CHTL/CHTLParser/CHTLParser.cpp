@@ -491,24 +491,38 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             consume(TokenType::RIGHT_PAREN, "Expect ')'.");
             return std::make_unique<VarExpr>(first_part.lexeme, key_name);
         } else {
-            return std::make_unique<ReferenceExpr>(Token(), first_part);
+            // A lone identifier in a style expression is treated as an unquoted
+            // string literal (e.g., `color: red`). If it's meant to be a property
+            // of the current element, the evaluator handles it by checking for
+            // an empty selector on the ReferenceExpr.
+            return std::make_unique<LiteralExpr>(first_part.lexeme);
         }
     }
     if (check(TokenType::SYMBOL) && (peek().lexeme == "#" || peek().lexeme == ".")) {
-        Token first_part = advance();
-        if (tokens.size() > current && tokens[current + 1].type == TokenType::DOT) {
-             Token selector_name = consume(TokenType::IDENTIFIER, "Expect selector name.");
-             consume(TokenType::DOT, "Expect '.'.");
-             Token property = consume(TokenType::IDENTIFIER, "Expect property name.");
-             Token full_selector = {first_part.type, first_part.lexeme + selector_name.lexeme, first_part.line, first_part.position};
-             return std::make_unique<ReferenceExpr>(full_selector, property);
+        Token symbol = advance(); // Consume '#' or '.'
+        Token selector_name = consume(TokenType::IDENTIFIER, "Expect selector name after '#' or '.'.");
+
+        Token full_selector_token = {
+            symbol.type,
+            symbol.lexeme + selector_name.lexeme,
+            symbol.line,
+            symbol.position
+        };
+
+        if (match({TokenType::DOT})) {
+            Token property = consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
+            return std::make_unique<ReferenceExpr>(full_selector_token, property);
         } else {
-            std::string value = first_part.lexeme;
-             while(check(TokenType::IDENTIFIER) || check(TokenType::NUMBER)) { value += advance().lexeme; }
-            return std::make_unique<LiteralExpr>(0, value);
+            // This case would be a standalone selector, e.g. `{{#box}}` in CHTL JS
+            // In a style expression, it's not valid on its own.
+            error(peek(), "Standalone selector not valid in property expression.");
+            return nullptr;
         }
     }
-    if (match({TokenType::STRING})) { return std::make_unique<LiteralExpr>(0, previous().lexeme); }
+    if (match({TokenType::STRING})) {
+        // The lexer provides the string content without quotes.
+        return std::make_unique<LiteralExpr>(previous().lexeme);
+    }
     if (match({TokenType::LEFT_PAREN})) {
         auto expr = parseExpression();
         consume(TokenType::RIGHT_PAREN, "Expect ')'.");
