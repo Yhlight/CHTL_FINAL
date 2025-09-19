@@ -3,23 +3,24 @@
 
 #include "../CHTLNode/Visitor.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
-#include "../../CHTL JS/CHTLJSNode/DelegateNode.h"
+#include "../CompilationResult.h"
 #include <string>
 #include <sstream>
 #include <map>
 #include <vector>
+#include <memory>
+
+namespace CHTL_JS {
+    class CHTLJSCompiler;
+    struct DelegateNode;
+}
 
 namespace CHTL {
-
-struct CompilationResult {
-    std::string html;
-    std::string css;
-    std::string js;
-};
 
 class CHTLGenerator : public Visitor {
 public:
     explicit CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates);
+    ~CHTLGenerator();
     CompilationResult generate(BaseNode* root);
 
     void visit(ElementNode& node) override;
@@ -34,6 +35,7 @@ private:
     std::stringstream js_output;
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
     BaseNode* doc_root = nullptr;
+    std::unique_ptr<CHTL_JS::CHTLJSCompiler> js_compiler;
     std::map<std::string, std::vector<CHTL_JS::DelegateNode>> delegate_registry;
 };
 
