@@ -4,6 +4,7 @@
 #include "CHTL/CHTLNode/TextNode.h"
 #include "CHTL/CHTLNode/OriginNode.h"
 #include "CHTL/CHTLNode/DocumentNode.h"
+#include "CHTL/CHTLNode/ScriptNode.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <stdexcept>
@@ -127,6 +128,12 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
     if (match({TokenType::STYLE})) {
         std::vector<std::unique_ptr<BaseNode>> nodes;
         nodes.push_back(parseStyleBlock());
+        return nodes;
+    }
+    if (check(TokenType::IDENTIFIER) && peek().lexeme == "script") {
+        advance(); // Consume the 'script' token
+        std::vector<std::unique_ptr<BaseNode>> nodes;
+        nodes.push_back(parseScriptBlock());
         return nodes;
     }
     if (check(TokenType::IDENTIFIER)) {
@@ -434,6 +441,46 @@ std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {
     if (type.lexeme == "Style") originType = OriginType::STYLE;
     else if (type.lexeme == "JavaScript") originType = OriginType::JAVASCRIPT;
     return std::make_unique<OriginNode>(content, originType);
+}
+
+std::unique_ptr<BaseNode> CHTLParser::parseScriptBlock() {
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'script' keyword.");
+
+    // Check for a single placeholder token from the Unified Scanner
+    if (peek().type == TokenType::IDENTIFIER && previous().type == TokenType::LEFT_BRACE) {
+        const std::string& lexeme = peek().lexeme;
+        if (lexeme.find("__CHTL_JS_PLACEHOLDER_") != std::string::npos) {
+            auto scriptNode = std::make_unique<ScriptNode>("");
+            scriptNode->placeholder_key = lexeme;
+            advance(); // Consume placeholder token
+            consume(TokenType::RIGHT_BRACE, "Expect '}' after placeholder in script block.");
+            return scriptNode;
+        }
+    }
+
+    // This logic is simple and doesn't use the lexer, so it won't handle
+    // comments or strings with braces correctly. Fine for a first pass.
+    int start = current;
+    int brace_level = 1;
+    while(brace_level > 0 && !isAtEnd()) {
+        if(peek().type == TokenType::LEFT_BRACE) brace_level++;
+        else if(peek().type == TokenType::RIGHT_BRACE) brace_level--;
+
+        if (brace_level > 0) advance();
+    }
+    int end = current;
+
+    std::string content;
+    if (end > start) {
+        // Reconstruct the content string from the original source
+        int content_start_pos = tokens[start].position;
+        const auto& end_token = tokens[end - 1];
+        int content_end_pos = end_token.position + end_token.lexeme.length();
+        content = source.substr(content_start_pos, content_end_pos - content_start_pos);
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after script block.");
+    return std::make_unique<ScriptNode>(content);
 }
 
 // --- Expression Parser (Full Implementation) ---

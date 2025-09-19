@@ -51,6 +51,7 @@ private:
     std::unique_ptr<ElementNode> parseElement();
     void parseAttribute(ElementNode* element);
     std::unique_ptr<StyleNode> parseStyleBlock();
+    std::unique_ptr<BaseNode> parseScriptBlock();
     std::unique_ptr<BaseNode> parseOriginBlock();
 
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>> template_definitions;

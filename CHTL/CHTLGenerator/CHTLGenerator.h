@@ -14,6 +14,7 @@ class ExpressionEvaluator; // Forward declaration
 struct CompilationResult {
     std::string html;
     std::string css;
+    std::string js;
 };
 
 class CHTLGenerator : public Visitor {
@@ -26,13 +27,16 @@ public:
     void visit(TextNode& node) override;
     void visit(StyleNode& node) override;
     void visit(OriginNode& node) override;
+    void visit(ScriptNode& node) override;
     std::map<std::string, AttributeNode> computeFinalStyles(ElementNode& node);
 
 private:
     void collectAndGenerateCss(BaseNode* node, ExpressionEvaluator& evaluator);
+    void collectJs(BaseNode* node);
 
     std::stringstream html_output;
     std::stringstream css_output;
+    std::stringstream js_output;
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
     const std::map<std::string, std::string> placeholders;
     BaseNode* doc_root = nullptr;
