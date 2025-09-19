@@ -7,6 +7,8 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/ScriptNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../CHTLNode/ConfigNode.h"
+#include "../Config/Configuration.h"
 #include "../Expression/Expr.h"
 #include <vector>
 #include <memory>
@@ -16,13 +18,14 @@ namespace CHTL {
 
 class CHTLParser {
 public:
-    explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path);
+    explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path, std::shared_ptr<Configuration> config);
     std::unique_ptr<BaseNode> parse();
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getTemplateDefinitions() const;
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getMutableTemplateDefinitions();
     bool getUseHtml5Doctype() const;
 
 private:
+    std::shared_ptr<Configuration> config;
     bool use_html5_doctype = false;
     const std::string& source;
     const std::vector<Token>& tokens;
@@ -56,6 +59,7 @@ private:
     std::unique_ptr<StyleNode> parseStyleBlock();
     std::unique_ptr<ScriptNode> parseScriptBlock();
     std::unique_ptr<BaseNode> parseOriginBlock();
+    std::unique_ptr<ConfigNode> parseConfigurationBlock();
 
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>> template_definitions;
     void parseSymbolDeclaration(bool is_custom);

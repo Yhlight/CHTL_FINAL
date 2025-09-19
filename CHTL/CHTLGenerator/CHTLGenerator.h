@@ -8,6 +8,8 @@
 #include <sstream>
 #include <map>
 #include <vector>
+#include <memory>
+#include "../Config/Configuration.h"
 
 namespace CHTL {
 
@@ -19,7 +21,7 @@ struct CompilationResult {
 
 class CHTLGenerator : public Visitor {
 public:
-    explicit CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates);
+    explicit CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, std::shared_ptr<Configuration> config);
     CompilationResult generate(BaseNode* root, bool use_html5_doctype);
 
     void visit(ElementNode& node) override;
@@ -29,6 +31,7 @@ public:
     void visit(ScriptNode& node) override;
 
 private:
+    std::shared_ptr<Configuration> config;
     std::stringstream html_output;
     std::stringstream css_output;
     std::stringstream js_output;

@@ -32,8 +32,8 @@ const std::unordered_set<std::string> voidElements = {
     "link", "meta", "param", "source", "track", "wbr"
 };
 
-CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates)
-    : templates(templates), doc_root(nullptr) {}
+CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, std::shared_ptr<Configuration> config)
+    : templates(templates), config(config), doc_root(nullptr) {}
 
 CompilationResult CHTLGenerator::generate(BaseNode* root, bool use_html5_doctype) {
     html_output.str("");
@@ -88,7 +88,7 @@ void CHTLGenerator::visit(ElementNode& node) {
                 if (selector.empty()) continue;
 
                 // Auto-add class/id attributes based on the *first* rule of its kind
-                if (selector[0] == '.' && !class_attr_exists && !class_added_by_this_block) {
+                if (selector[0] == '.' && !config->disable_style_auto_add_class && !class_attr_exists && !class_added_by_this_block) {
                     std::string class_name = selector.substr(1);
                     // The parser might leave whitespace, so we trim it.
                     size_t first = class_name.find_first_not_of(" \t\n\r");
@@ -98,7 +98,7 @@ void CHTLGenerator::visit(ElementNode& node) {
                     }
                     node.addAttribute({"class", class_name});
                     class_added_by_this_block = true;
-                } else if (selector[0] == '#' && !id_attr_exists && !id_added_by_this_block) {
+                } else if (selector[0] == '#' && !config->disable_style_auto_add_id && !id_attr_exists && !id_added_by_this_block) {
                     std::string id_name = selector.substr(1);
                     size_t first = id_name.find_first_not_of(" \t\n\r");
                     if (std::string::npos != first) {

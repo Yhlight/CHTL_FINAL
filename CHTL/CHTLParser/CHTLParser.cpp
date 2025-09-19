@@ -73,8 +73,10 @@ std::string getFilename(const std::string& path) {
     return filename;
 }
 
-CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path)
-    : source(source), tokens(tokens), file_path(file_path) {
+#include "CHTL/CHTLNode/ConfigNode.h"
+
+CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path, std::shared_ptr<Configuration> config)
+    : source(source), tokens(tokens), file_path(file_path), config(config) {
         this->current_namespace = getFilename(file_path);
 }
 
@@ -104,6 +106,8 @@ std::unique_ptr<BaseNode> CHTLParser::parse() {
                 parseOriginBlock();
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Import") {
                 parseImportStatement();
+            } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Configuration") {
+                parseConfigurationBlock();
             } else { break; }
         } else { break; }
     }
@@ -199,7 +203,13 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
             std::string key_str;
             while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
             consume(TokenType::COLON, "Expect ':' after style property name.");
-            auto value_expr = parseExpression();
+            // Simplified value parsing to handle compound values like "1px solid black"
+            std::string raw_value;
+            while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                raw_value += advance().lexeme;
+                if (!check(TokenType::SEMICOLON)) raw_value += " ";
+            }
+            auto value_expr = std::make_unique<LiteralExpr>(0, raw_value);
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
             styleNode->direct_properties.push_back({key_str, std::move(value_expr)});
         } else {
@@ -210,7 +220,13 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
                 std::string key_str;
                 while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
                 consume(TokenType::COLON, "Expect ':' after style property name.");
-                auto value_expr = parseExpression();
+                // Simplified value parsing to handle compound values like "1px solid black"
+                std::string raw_value;
+                while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                    raw_value += advance().lexeme;
+                    if (!check(TokenType::SEMICOLON)) raw_value += " ";
+                }
+                auto value_expr = std::make_unique<LiteralExpr>(0, raw_value);
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
                 rule.properties.push_back({key_str, std::move(value_expr)});
             }
@@ -373,9 +389,9 @@ void CHTLParser::parseImportStatement() {
         Token pathToken = consume(TokenType::STRING, "Expect file path.");
         std::string imported_content = CHTLLoader::load(this->file_path, pathToken.lexeme);
         std::string imported_path = FileSystem::getDirectory(this->file_path) + pathToken.lexeme;
-        CHTLLexer sub_lexer(imported_content);
+        CHTLLexer sub_lexer(imported_content, this->config);
         std::vector<Token> sub_tokens = sub_lexer.scanTokens();
-        CHTLParser sub_parser(imported_content, sub_tokens, imported_path);
+        CHTLParser sub_parser(imported_content, sub_tokens, imported_path, this->config);
         sub_parser.parse();
         auto& imported_template_map = sub_parser.getMutableTemplateDefinitions();
         std::string import_namespace = getFilename(pathToken.lexeme);
@@ -576,5 +592,75 @@ bool CHTLParser::check(TokenType type) { if (isAtEnd()) return false; return pee
 Token CHTLParser::consume(TokenType type, const std::string& message) { if (check(type)) return advance(); error(peek(), message); throw std::runtime_error(message); }
 bool CHTLParser::match(const std::vector<TokenType>& types) { for (TokenType type : types) { if (check(type)) { advance(); return true; } } return false; }
 void CHTLParser::error(const Token& token, const std::string& message) { std::cerr << "[line " << token.line << "] Error: " << message << std::endl; throw std::runtime_error(message); }
+
+std::unique_ptr<ConfigNode> CHTLParser::parseConfigurationBlock() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start [Configuration] block.");
+    consume(TokenType::IDENTIFIER, "Expect 'Configuration' keyword.");
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end keyword.");
+
+    consume(TokenType::LEFT_BRACE, "Expect '{' to start configuration body.");
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        if (peek().type == TokenType::LEFT_BRACKET && tokens.size() > current + 1 && tokens[current + 1].lexeme == "Name") {
+            // Parse [Name] sub-block
+            consume(TokenType::LEFT_BRACKET, "Expect '['.");
+            consume(TokenType::IDENTIFIER, "Expect 'Name'.");
+            consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+            consume(TokenType::LEFT_BRACE, "Expect '{'.");
+            while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                Token key = consume(TokenType::IDENTIFIER, "Expect keyword configuration name.");
+                consume(TokenType::EQUAL, "Expect '=' after keyword name.");
+
+                std::vector<std::string> values;
+                if (match({TokenType::LEFT_BRACKET})) {
+                    // It's a group of options
+                    do {
+                        values.push_back(consume(TokenType::IDENTIFIER, "Expect value.").lexeme);
+                    } while (match({TokenType::COMMA}));
+                    consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+                } else {
+                    // It's a single value. The value can be a keyword, so we can't just
+                    // consume an IDENTIFIER. We'll accept any token and use its lexeme.
+                    Token value_token = advance();
+                    values.push_back(value_token.lexeme);
+                }
+                config->keyword_map[key.lexeme] = values;
+                consume(TokenType::SEMICOLON, "Expect ';' after value.");
+            }
+            consume(TokenType::RIGHT_BRACE, "Expect '}'.");
+        } else {
+            // Parse regular key-value pair
+            Token key = consume(TokenType::IDENTIFIER, "Expect configuration key.");
+            consume(TokenType::EQUAL, "Expect '=' after configuration key.");
+            Token value = advance(); // Can be IDENTIFIER (true/false), NUMBER, or STRING
+            consume(TokenType::SEMICOLON, "Expect ';' after configuration value.");
+
+            if (key.lexeme == "INDEX_INITIAL_COUNT") {
+                if (value.type == TokenType::NUMBER) config->index_initial_count = std::stoi(value.lexeme);
+            } else if (key.lexeme == "DEBUG_MODE") {
+                if (value.lexeme == "true") config->debug_mode = true;
+                else if (value.lexeme == "false") config->debug_mode = false;
+            } else if (key.lexeme == "DISABLE_NAME_GROUP") {
+                if (value.lexeme == "true") config->disable_name_group = true;
+                else if (value.lexeme == "false") config->disable_name_group = false;
+            } else if (key.lexeme == "DISABLE_STYLE_AUTO_ADD_CLASS") {
+                if (value.lexeme == "true") config->disable_style_auto_add_class = true;
+                else if (value.lexeme == "false") config->disable_style_auto_add_class = false;
+            } else if (key.lexeme == "DISABLE_STYLE_AUTO_ADD_ID") {
+                if (value.lexeme == "true") config->disable_style_auto_add_id = true;
+                else if (value.lexeme == "false") config->disable_style_auto_add_id = false;
+            } else if (key.lexeme == "DISABLE_DEFAULT_NAMESPACE") {
+                if (value.lexeme == "true") config->disable_default_namespace = true;
+                else if (value.lexeme == "false") config->disable_default_namespace = false;
+            } else if (key.lexeme == "DISABLE_CUSTOM_ORIGIN_TYPE") {
+                if (value.lexeme == "true") config->disable_custom_origin_type = true;
+                else if (value.lexeme == "false") config->disable_custom_origin_type = false;
+            }
+        }
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to end configuration body.");
+    return std::make_unique<ConfigNode>();
+}
 
 } // namespace CHTL

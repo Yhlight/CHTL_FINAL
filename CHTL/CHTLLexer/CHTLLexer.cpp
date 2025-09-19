@@ -5,22 +5,36 @@
 
 namespace CHTL {
 
-static std::unordered_map<std::string, TokenType> keywords = {
-    {"style", TokenType::STYLE},
-    {"text", TokenType::TEXT},
-    {"script", TokenType::SCRIPT},
-    {"inherit", TokenType::INHERIT},
-    {"from", TokenType::FROM},
-    {"as", TokenType::AS},
-    {"delete", TokenType::DELETE},
-    {"insert", TokenType::INSERT},
-    {"after", TokenType::AFTER},
-    {"before", TokenType::BEFORE},
-    {"replace", TokenType::REPLACE},
-    {"use", TokenType::USE}
+// Helper to map the internal config key names to the actual TokenType enum
+static const std::map<std::string, TokenType> internal_keyword_to_token_type = {
+    {"KEYWORD_STYLE", TokenType::STYLE},
+    {"KEYWORD_SCRIPT", TokenType::SCRIPT},
+    {"KEYWORD_TEXT", TokenType::TEXT},
+    {"KEYWORD_USE", TokenType::USE},
+    {"KEYWORD_INHERIT", TokenType::INHERIT},
+    {"KEYWORD_FROM", TokenType::FROM},
+    {"KEYWORD_AS", TokenType::AS},
+    {"KEYWORD_DELETE", TokenType::DELETE},
+    {"KEYWORD_INSERT", TokenType::INSERT},
+    {"KEYWORD_AFTER", TokenType::AFTER},
+    {"KEYWORD_BEFORE", TokenType::BEFORE},
+    {"KEYWORD_REPLACE", TokenType::REPLACE},
+    // Note: Bracketed keywords like [Custom] are handled by the parser, not the lexer.
 };
 
-CHTLLexer::CHTLLexer(const std::string& source) : source(source) {}
+
+CHTLLexer::CHTLLexer(const std::string& source, std::shared_ptr<Configuration> config)
+    : source(source), config(config) {
+    // Build the runtime keyword map from the configuration
+    for (const auto& pair : config->keyword_map) {
+        if (internal_keyword_to_token_type.count(pair.first)) {
+            TokenType token_type = internal_keyword_to_token_type.at(pair.first);
+            for (const std::string& lexeme : pair.second) {
+                this->runtime_keyword_map[lexeme] = token_type;
+            }
+        }
+    }
+}
 
 std::vector<Token> CHTLLexer::scanTokens() {
     while (!isAtEnd()) {
@@ -123,8 +137,8 @@ void CHTLLexer::number() {
 void CHTLLexer::identifier() {
     while (isalnum(peek()) || peek() == '_') advance();
     std::string text = source.substr(start, current - start);
-    auto it = keywords.find(text);
-    addToken(it != keywords.end() ? it->second : TokenType::IDENTIFIER);
+    auto it = runtime_keyword_map.find(text);
+    addToken(it != runtime_keyword_map.end() ? it->second : TokenType::IDENTIFIER);
 }
 
 } // namespace CHTL

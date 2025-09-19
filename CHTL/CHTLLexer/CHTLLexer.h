@@ -4,15 +4,20 @@
 #include "Token.h"
 #include <string>
 #include <vector>
+#include <memory>
+#include <unordered_map>
+#include "../Config/Configuration.h"
 
 namespace CHTL {
 
 class CHTLLexer {
 public:
-    explicit CHTLLexer(const std::string& source);
+    explicit CHTLLexer(const std::string& source, std::shared_ptr<Configuration> config);
     std::vector<Token> scanTokens();
 
 private:
+    std::shared_ptr<Configuration> config;
+    std::unordered_map<std::string, TokenType> runtime_keyword_map;
     void scanToken();
     bool isAtEnd();
     char advance();

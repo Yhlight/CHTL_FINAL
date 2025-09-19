@@ -1,0 +1,20 @@
+[Configuration] {
+    DISABLE_STYLE_AUTO_ADD_CLASS = true;
+
+    [Name] {
+        KEYWORD_STYLE = css;
+    }
+}
+
+div {
+    // This should be parsed as a style block because of the config
+    css {
+        // This should NOT be auto-added to the element's class attribute
+        .configured-box {
+            color: green;
+        }
+
+        // This should be an inline style
+        border: 1px solid black;
+    }
+}

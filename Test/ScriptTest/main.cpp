@@ -19,11 +19,12 @@ int main() {
     std::cout << "--- Input CHTL from " << entry_point << " ---\n" << source << "\n------------------\n" << std::endl;
 
     try {
-        CHTL::CHTLLexer lexer(source);
+        auto config = std::make_shared<CHTL::Configuration>();
+        CHTL::CHTLLexer lexer(source, config);
         std::vector<CHTL::Token> tokens = lexer.scanTokens();
-        CHTL::CHTLParser parser(source, tokens, entry_point);
+        CHTL::CHTLParser parser(source, tokens, entry_point, config);
         std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
-        CHTL::CHTLGenerator generator(parser.getTemplateDefinitions());
+        CHTL::CHTLGenerator generator(parser.getTemplateDefinitions(), config);
         CHTL::CompilationResult result = generator.generate(ast.get(), parser.getUseHtml5Doctype());
 
         std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n" << std::endl;
