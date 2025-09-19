@@ -1,0 +1,12 @@
+div {
+    class: "existing";
+    style {
+        .box {
+            font-size: 16px;
+        }
+        #main-box {
+            font-weight: bold;
+        }
+    }
+    text: "Selector Test";
+}
