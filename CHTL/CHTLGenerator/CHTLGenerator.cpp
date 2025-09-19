@@ -70,6 +70,12 @@ CompilationResult CHTLGenerator::generate(BaseNode* root, bool use_html5_doctype
 }
 
 void CHTLGenerator::visit(ElementNode& node) {
+    if (node.is_virtual) {
+        for (const auto& child : node.children) {
+            child->accept(*this);
+        }
+        return;
+    }
     // --- Global Style & Auto-Attribute Generation ---
     // This must happen before tag generation as it can modify attributes.
     for (const auto& child : node.children) {
@@ -129,13 +135,8 @@ void CHTLGenerator::visit(ElementNode& node) {
 
     // --- HTML Tag Generation ---
     html_output << "<" << node.tagName;
-    std::string text_content;
     for (const auto& attr : node.attributes) {
-        if (attr.key == "text") {
-            text_content = attr.value;
-        } else {
-            html_output << " " << attr.key << "=\"" << attr.value << "\"";
-        }
+        html_output << " " << attr.key << "=\"" << attr.value << "\"";
     }
 
     // --- Inline Style Generation ---
@@ -180,9 +181,6 @@ void CHTLGenerator::visit(ElementNode& node) {
         return;
     }
     html_output << ">";
-    if (!text_content.empty()) {
-        html_output << text_content;
-    }
     for (const auto& child : node.children) {
         if (dynamic_cast<StyleNode*>(child.get())) continue;
         child->accept(*this);
@@ -191,6 +189,9 @@ void CHTLGenerator::visit(ElementNode& node) {
 }
 
 void CHTLGenerator::visit(TextNode& node) { html_output << node.text; }
+void CHTLGenerator::visitCommentNode(CommentNode& node) {
+    html_output << "<!-- " << node.text << " -->";
+}
 void CHTLGenerator::visit(StyleNode& node) {} // Handled inside ElementNode visit
 void CHTLGenerator::visit(OriginNode& node) {
     if (node.type == OriginType::HTML) html_output << node.content;

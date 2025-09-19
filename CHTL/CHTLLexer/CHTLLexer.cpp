@@ -89,6 +89,18 @@ void CHTLLexer::scanToken() {
                 addToken(TokenType::SLASH);
             }
             break;
+        case '#':
+            if (peek() == ' ') {
+                advance(); // Consume the space
+                start = current; // Start of the comment content
+                while (peek() != '\n' && !isAtEnd()) {
+                    advance();
+                }
+                addToken(TokenType::HASH_COMMENT, source.substr(start, current - start));
+            } else {
+                addToken(TokenType::SYMBOL);
+            }
+            break;
         case '"': case '\'': string(c); break;
         default:
             if (isdigit(c)) { number(); }

@@ -3,6 +3,8 @@
 #include "../CHTLLexer/CHTLLexer.h"
 #include "CHTL/CHTLNode/TextNode.h"
 #include "CHTL/CHTLNode/OriginNode.h"
+#include "CHTL/CHTLNode/CommentNode.h"
+#include "CHTL/CHTLNode/TextNode.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <stdexcept>
@@ -96,6 +98,9 @@ std::unique_ptr<BaseNode> CHTLParser::parse() {
         }
     }
 
+    auto virtualRoot = std::make_unique<ElementNode>("");
+    virtualRoot->is_virtual = true;
+
     while (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
         if (peek().type == TokenType::LEFT_BRACKET) {
             if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Template") {
@@ -103,20 +108,26 @@ std::unique_ptr<BaseNode> CHTLParser::parse() {
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Custom") {
                 parseSymbolDeclaration(true);
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
-                parseOriginBlock();
+                // Origin blocks can be top-level declarations
+                 virtualRoot->addChild(parseOriginBlock());
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Import") {
                 parseImportStatement();
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Configuration") {
                 parseConfigurationBlock();
-            } else { break; }
-        } else { break; }
+            } else {
+                // It's likely the start of an element, e.g. [Origin]
+                for (auto& node : parseDeclaration()) {
+                    virtualRoot->addChild(std::move(node));
+                }
+            }
+        } else {
+            for (auto& node : parseDeclaration()) {
+                virtualRoot->addChild(std::move(node));
+            }
+        }
     }
-    if (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
-        auto nodes = parseDeclaration();
-        if (nodes.size() == 1) return std::move(nodes[0]);
-        else error(peek(), "Expected a single root element declaration.");
-    }
-    return nullptr;
+
+    return virtualRoot;
 }
 
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
@@ -124,6 +135,11 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
     if (peek().type == TokenType::LEFT_BRACKET && tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
         std::vector<std::unique_ptr<BaseNode>> nodes;
         nodes.push_back(parseOriginBlock());
+        return nodes;
+    }
+    if (match({TokenType::HASH_COMMENT})) {
+        std::vector<std::unique_ptr<BaseNode>> nodes;
+        nodes.push_back(std::make_unique<CommentNode>(previous().lexeme));
         return nodes;
     }
     if (match({TokenType::TEXT})) {
@@ -183,7 +199,12 @@ void CHTLParser::parseAttribute(ElementNode* element) {
         error(peek(), "Expect attribute value.");
     }
     consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
-    element->addAttribute({key.lexeme, value_token.lexeme});
+
+    if (key.lexeme == "text") {
+        element->addChild(std::make_unique<TextNode>(value_token.lexeme));
+    } else {
+        element->addAttribute({key.lexeme, value_token.lexeme});
+    }
 }
 
 std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {

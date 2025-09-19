@@ -18,6 +18,7 @@ void ElementNode::addAttribute(const HtmlAttribute& attr) {
 
 std::unique_ptr<BaseNode> ElementNode::clone() const {
     auto new_node = std::make_unique<ElementNode>(this->tagName);
+    new_node->is_virtual = this->is_virtual;
     new_node->attributes = this->attributes;
     for (const auto& child : this->children) {
         new_node->addChild(child->clone());

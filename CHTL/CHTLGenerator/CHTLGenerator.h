@@ -3,6 +3,7 @@
 
 #include "../CHTLNode/Visitor.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../CHTLNode/CommentNode.h"
 #include "../../CHTL JS/CHTLJSNode/DelegateNode.h"
 #include <string>
 #include <sstream>
@@ -29,6 +30,7 @@ public:
     void visit(StyleNode& node) override;
     void visit(OriginNode& node) override;
     void visit(ScriptNode& node) override;
+    void visitCommentNode(CommentNode& node) override;
 
 private:
     std::shared_ptr<Configuration> config;

@@ -24,6 +24,7 @@ public:
     std::unique_ptr<BaseNode> clone() const override;
 
     std::string tagName;
+    bool is_virtual = false;
     std::vector<std::unique_ptr<BaseNode>> children;
     std::vector<HtmlAttribute> attributes;
 };

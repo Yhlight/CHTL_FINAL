@@ -50,6 +50,7 @@ enum class TokenType {
     USE,
 
     // Special
+    HASH_COMMENT,
     SYMBOL,
     END_OF_FILE,
     UNKNOWN

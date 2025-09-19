@@ -1,0 +1,8 @@
+# This is a top-level comment.
+
+div {
+    # This is a comment inside a div.
+    text: "Hello, world!";
+}
+
+# This is a final comment.
