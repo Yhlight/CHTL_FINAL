@@ -24,6 +24,7 @@ public:
 
     std::vector<std::unique_ptr<BaseNode>> element_body;
     std::vector<AttributeNode> style_properties;
+    std::vector<std::string> inherited_templates;
     std::map<std::string, std::unique_ptr<Expr>> variables;
 };
 

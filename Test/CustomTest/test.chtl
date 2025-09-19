@@ -1,0 +1,32 @@
+[Template] @Style BaseStyle {
+    border: "1px solid black";
+    padding: 10px;
+}
+
+[Template] @Style BoxStyle {
+    @Style BaseStyle;
+    width: 150px;
+    height: 100px;
+}
+
+body {
+    div {
+        id: "box1";
+        style {
+            @Style BoxStyle;
+            background-color: "blue";
+        }
+        text: "Box 1";
+    }
+
+    div {
+        id: "box2";
+        style {
+            width: #box1.width + 50px;
+            height: #box1.height - 20px;
+            background-color: width > 180px ? "green" : "red";
+            margin-left: 10px;
+        }
+        text: "Box 2";
+    }
+}

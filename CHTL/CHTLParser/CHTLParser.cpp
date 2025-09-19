@@ -324,8 +324,18 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
     consume(TokenType::LEFT_BRACE, "Expect '{' to start symbol body.");
     if (def.type == TemplateType::STYLE) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            if (check(TokenType::AT) || check(TokenType::INHERIT)) {
-                // ... inheritance logic ...
+            // Optional 'inherit' keyword
+            match({TokenType::INHERIT});
+
+            if (check(TokenType::AT)) {
+                consume(TokenType::AT, "Expect '@'.");
+                Token type_token = consume(TokenType::IDENTIFIER, "Expect 'Style' keyword.");
+                if (type_token.lexeme != "Style") {
+                    error(type_token, "Can only inherit from another @Style template.");
+                }
+                Token parent_name = consume(TokenType::IDENTIFIER, "Expect parent template name.");
+                def.inherited_templates.push_back(parent_name.lexeme);
+                consume(TokenType::SEMICOLON, "Expect ';' after inheritance statement.");
             } else {
                 std::string key_str;
                 while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }

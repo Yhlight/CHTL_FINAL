@@ -4,9 +4,11 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../Expression/ExpressionEvaluator.h"
+#include "../Util/StyleResolver.h"
 #include <unordered_set>
 #include <algorithm>
 #include <map>
+#include <vector>
 
 namespace CHTL {
 
@@ -54,30 +56,21 @@ void CHTLGenerator::visit(ElementNode& node) {
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             std::map<std::string, AttributeNode> final_props;
-            for (const auto& app : styleNode->template_applications) {
-                const TemplateDefinitionNode* def = nullptr;
-                for (const auto& ns_pair : this->templates) {
-                    if (ns_pair.second.count(app.template_name)) {
-                        def = &ns_pair.second.at(app.template_name);
-                        break;
-                    }
-                }
-                if (def && def->type == TemplateType::STYLE) {
-                    for (const auto& prop : def->style_properties) { final_props[prop.key] = prop.clone(); }
-                    for (const auto& key_to_delete : app.deleted_properties) { final_props.erase(key_to_delete); }
-                    for (const auto& prop : app.new_or_overridden_properties) { final_props[prop.key] = prop.clone(); }
-                }
-            }
-            for (const auto& prop : styleNode->direct_properties) {
-                final_props[prop.key] = prop.clone();
-            }
+            StyleResolver::resolveStyleNode(styleNode, this->templates, final_props);
+
+            // Evaluate all properties
             for (const auto& pair : final_props) {
-                ExpressionEvaluator evaluator(this->templates, this->doc_root);
+                ExpressionEvaluator evaluator(&final_props, this->templates, this->doc_root);
                 EvaluatedValue result = evaluator.evaluate(pair.second.value_expr.get(), &node);
                 style_str += pair.first + ": ";
-                if (result.value == 0 && !result.unit.empty()) { style_str += result.unit; }
-                else { style_str += std::to_string(result.value) + result.unit; }
-                style_str += ";";
+                if (result.value == 0 && !result.unit.empty() && result.unit != "0") {
+                     style_str += result.unit;
+                } else if (result.value == static_cast<int>(result.value)) {
+                    style_str += std::to_string(static_cast<int>(result.value)) + result.unit;
+                } else {
+                    style_str += std::to_string(result.value) + result.unit;
+                }
+                style_str += "; ";
             }
         }
     }

@@ -21,8 +21,12 @@ struct EvaluatedValue {
 
 class ExpressionEvaluator : public ExprVisitor {
 public:
-    ExpressionEvaluator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, BaseNode* doc_root);
-    EvaluatedValue evaluate(Expr* expr, ElementNode* context);
+    ExpressionEvaluator(
+        const std::map<std::string, AttributeNode>* style_context,
+        const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates,
+        BaseNode* doc_root
+    );
+    EvaluatedValue evaluate(Expr* expr, ElementNode* context_element);
 
     void visit(BinaryExpr& expr) override;
     void visit(LiteralExpr& expr) override;
@@ -34,10 +38,12 @@ public:
 
 private:
     ElementNode* findElement(BaseNode* context, const std::string& selector);
+    EvaluatedValue getPropertyValue(ElementNode* element, const std::string& prop_name);
 
+    const std::map<std::string, AttributeNode>* style_context;
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
     BaseNode* doc_root;
-    ElementNode* current_context = nullptr;
+    ElementNode* current_element_context = nullptr;
     EvaluatedValue result = {0.0, ""};
     std::set<std::string> resolution_stack;
 };

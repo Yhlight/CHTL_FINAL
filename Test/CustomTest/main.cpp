@@ -3,51 +3,40 @@
 #include "../../CHTL/CHTLGenerator/CHTLGenerator.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
+#include <stdexcept>
 
-int main() {
-    // Create library file
-    CHTL::FileSystem::writeFile("Test/CustomTest/lib.chtl",
-        "[Custom] @Element Card {\n"
-        "    div { class: \"card-header\"; }\n"
-        "    div { class: \"card-body\"; }\n"
-        "    div { class: \"card-footer\"; }\n"
-        "}"
-    );
+void runTest(const std::string& test_file) {
+    std::cout << "--- Running test for: " << test_file << " ---\n";
+    std::string source;
+    try {
+        source = CHTL::FileSystem::readFile(test_file);
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Failed to read test file: " << test_file << ". Error: " << e.what() << std::endl;
+        return;
+    }
 
-    std::string entry_point = "Test/CustomTest/main.chtl";
-    std::string source =
-        "[Import] @Chtl from \"lib.chtl\";\n"
-        "body {\n"
-        "    @Element Card {\n"
-        "        delete div[2];\n"
-        "    }\n"
-        "    hr{}\n"
-        "    @Element Card {\n"
-        "        insert after div[1] {\n"
-        "            p { text: \"Inserted!\"; }\n"
-        "        }\n"
-        "    }\n"
-        "}";
-
-    CHTL::FileSystem::writeFile(entry_point, source);
-
-    std::cout << "--- Input CHTL from " << entry_point << " ---\n" << source << "\n------------------\n" << std::endl;
+    std::cout << "--- Input CHTL ---\n" << source << "\n------------------\n" << std::endl;
 
     try {
         CHTL::CHTLLexer lexer(source);
         std::vector<CHTL::Token> tokens = lexer.scanTokens();
-        CHTL::CHTLParser parser(source, tokens, entry_point);
+        CHTL::CHTLParser parser(source, tokens, test_file);
         std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
         CHTL::CHTLGenerator generator(parser.getTemplateDefinitions());
         CHTL::CompilationResult result = generator.generate(ast.get());
 
         std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n" << std::endl;
-        std::cout << "--- Generated CSS ---\n" << result.css << "\n---------------------\n" << std::endl;
+        if (!result.css.empty()) {
+            std::cout << "--- Generated CSS ---\n" << result.css << "\n---------------------\n" << std::endl;
+        }
 
     } catch (const std::runtime_error& e) {
         std::cerr << "Caught a runtime_error exception: " << e.what() << std::endl;
-        return 1;
     }
+     std::cout << "\n--- Test for: " << test_file << " finished ---\n" << std::endl;
+}
 
+int main() {
+    runTest("Test/CustomTest/test.chtl");
     return 0;
 }
