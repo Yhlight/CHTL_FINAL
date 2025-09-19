@@ -47,6 +47,7 @@ enum class TokenType {
     AFTER,
     BEFORE,
     REPLACE,
+    USE,
 
     // Special
     SYMBOL,

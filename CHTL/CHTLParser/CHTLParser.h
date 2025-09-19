@@ -20,8 +20,10 @@ public:
     std::unique_ptr<BaseNode> parse();
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getTemplateDefinitions() const;
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getMutableTemplateDefinitions();
+    bool getUseHtml5Doctype() const;
 
 private:
+    bool use_html5_doctype = false;
     const std::string& source;
     const std::vector<Token>& tokens;
     const std::string file_path;

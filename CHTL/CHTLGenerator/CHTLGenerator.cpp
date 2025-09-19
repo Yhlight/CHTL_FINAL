@@ -16,8 +16,16 @@
 #include <unordered_set>
 #include <algorithm>
 #include <map>
+#include <sstream>
 
 namespace CHTL {
+
+// Helper to format doubles cleanly for CSS output
+std::string format_css_double(double val) {
+    std::ostringstream oss;
+    oss << val;
+    return oss.str();
+}
 
 const std::unordered_set<std::string> voidElements = {
     "area", "base", "br", "col", "embed", "hr", "img", "input",
@@ -27,7 +35,7 @@ const std::unordered_set<std::string> voidElements = {
 CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates)
     : templates(templates), doc_root(nullptr) {}
 
-CompilationResult CHTLGenerator::generate(BaseNode* root) {
+CompilationResult CHTLGenerator::generate(BaseNode* root, bool use_html5_doctype) {
     html_output.str("");
     css_output.str("");
     js_output.str("");
@@ -55,15 +63,79 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
         js_output << "});\n";
     }
 
-    return {html_output.str(), css_output.str(), js_output.str()};
+    if (use_html5_doctype) {
+        std::string final_html = "<!DOCTYPE html>\n<html>\n<head>\n";
+        final_html += "<meta charset=\"UTF-8\">\n";
+        final_html += "<title>CHTL Document</title>\n";
+        if (css_output.tellp() > 0) {
+            final_html += "<style>\n" + css_output.str() + "</style>\n";
+        }
+        final_html += "</head>\n<body>\n";
+        final_html += html_output.str();
+        if (js_output.tellp() > 0) {
+            final_html += "<script>\n" + js_output.str() + "</script>\n";
+        }
+        final_html += "</body>\n</html>";
+        return {final_html, "", ""}; // CSS and JS are now inlined
+    } else {
+        return {html_output.str(), css_output.str(), js_output.str()};
+    }
 }
 
 void CHTLGenerator::visit(ElementNode& node) {
-    // --- Global Style Generation ---
+    // --- Global Style & Auto-Attribute Generation ---
+    // This must happen before tag generation as it can modify attributes.
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
+            // Check if class/id attributes exist before processing rules for this style block
+            bool class_attr_exists = std::any_of(node.attributes.begin(), node.attributes.end(),
+                                                 [](const HtmlAttribute& attr){ return attr.key == "class"; });
+            bool id_attr_exists = std::any_of(node.attributes.begin(), node.attributes.end(),
+                                              [](const HtmlAttribute& attr){ return attr.key == "id"; });
+
+            bool class_added_by_this_block = false;
+            bool id_added_by_this_block = false;
+
             for (const auto& rule : styleNode->global_rules) {
-                // ... (logic for global rules)
+                std::string selector = rule.selector;
+                if (selector.empty()) continue;
+
+                // Auto-add class/id attributes based on the *first* rule of its kind
+                if (selector[0] == '.' && !class_attr_exists && !class_added_by_this_block) {
+                    std::string class_name = selector.substr(1);
+                    // The parser might leave whitespace, so we trim it.
+                    size_t first = class_name.find_first_not_of(" \t\n\r");
+                    if (std::string::npos != first) {
+                        size_t last = class_name.find_last_not_of(" \t\n\r");
+                        class_name = class_name.substr(first, (last - first + 1));
+                    }
+                    node.addAttribute({"class", class_name});
+                    class_added_by_this_block = true;
+                } else if (selector[0] == '#' && !id_attr_exists && !id_added_by_this_block) {
+                    std::string id_name = selector.substr(1);
+                    size_t first = id_name.find_first_not_of(" \t\n\r");
+                    if (std::string::npos != first) {
+                        size_t last = id_name.find_last_not_of(" \t\n\r");
+                        id_name = id_name.substr(first, (last - first + 1));
+                    }
+                    node.addAttribute({"id", id_name});
+                    id_added_by_this_block = true;
+                }
+
+                // Generate the CSS for the rule and add it to the global CSS output
+                css_output << rule.selector << " {\n";
+                ExpressionEvaluator evaluator(this->templates, this->doc_root);
+                for (const auto& prop : rule.properties) {
+                    EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
+                    css_output << "  " << prop.key << ": ";
+                    if (result.value == 0 && !result.unit.empty()) {
+                        css_output << result.unit;
+                    } else {
+                        css_output << format_css_double(result.value) << result.unit;
+                    }
+                    css_output << ";\n";
+                }
+                css_output << "}\n";
             }
         }
     }
@@ -106,7 +178,7 @@ void CHTLGenerator::visit(ElementNode& node) {
                 EvaluatedValue result = evaluator.evaluate(pair.second.value_expr.get(), &node);
                 style_str += pair.first + ": ";
                 if (result.value == 0 && !result.unit.empty()) { style_str += result.unit; }
-                else { style_str += std::to_string(result.value) + result.unit; }
+                else { style_str += format_css_double(result.value) + result.unit; }
                 style_str += ";";
             }
         }

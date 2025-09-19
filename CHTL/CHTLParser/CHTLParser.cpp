@@ -80,9 +80,20 @@ CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& toke
 
 const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& CHTLParser::getTemplateDefinitions() const { return template_definitions; }
 std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& CHTLParser::getMutableTemplateDefinitions() { return template_definitions; }
+bool CHTLParser::getUseHtml5Doctype() const { return use_html5_doctype; }
 
 
 std::unique_ptr<BaseNode> CHTLParser::parse() {
+    // Check for 'use html5;' directive at the very beginning
+    if (check(TokenType::USE)) {
+        if (tokens.size() > current + 2 && tokens[current + 1].type == TokenType::IDENTIFIER && tokens[current + 1].lexeme == "html5" && tokens[current + 2].type == TokenType::SEMICOLON) {
+            this->use_html5_doctype = true;
+            advance(); // consume 'use'
+            advance(); // consume 'html5'
+            advance(); // consume ';'
+        }
+    }
+
     while (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
         if (peek().type == TokenType::LEFT_BRACKET) {
             if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Template") {
@@ -527,7 +538,8 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             consume(TokenType::RIGHT_PAREN, "Expect ')'.");
             return std::make_unique<VarExpr>(first_part.lexeme, key_name);
         } else {
-            return std::make_unique<ReferenceExpr>(Token(), first_part);
+            // Treat standalone identifier as a string literal (e.g., "red", "solid")
+            return std::make_unique<LiteralExpr>(0, first_part.lexeme);
         }
     }
     if (check(TokenType::SYMBOL) && (peek().lexeme == "#" || peek().lexeme == ".")) {

@@ -24,7 +24,7 @@ int main() {
         CHTL::CHTLParser parser(source, tokens, entry_point);
         std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
         CHTL::CHTLGenerator generator(parser.getTemplateDefinitions());
-        CHTL::CompilationResult result = generator.generate(ast.get());
+        CHTL::CompilationResult result = generator.generate(ast.get(), parser.getUseHtml5Doctype());
 
         std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n" << std::endl;
         std::cout << "--- Generated JS ---\n" << result.js << "\n--------------------\n" << std::endl;

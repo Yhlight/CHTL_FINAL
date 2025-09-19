@@ -20,7 +20,7 @@ struct CompilationResult {
 class CHTLGenerator : public Visitor {
 public:
     explicit CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates);
-    CompilationResult generate(BaseNode* root);
+    CompilationResult generate(BaseNode* root, bool use_html5_doctype);
 
     void visit(ElementNode& node) override;
     void visit(TextNode& node) override;

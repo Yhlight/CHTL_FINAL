@@ -16,7 +16,8 @@ static std::unordered_map<std::string, TokenType> keywords = {
     {"insert", TokenType::INSERT},
     {"after", TokenType::AFTER},
     {"before", TokenType::BEFORE},
-    {"replace", TokenType::REPLACE}
+    {"replace", TokenType::REPLACE},
+    {"use", TokenType::USE}
 };
 
 CHTLLexer::CHTLLexer(const std::string& source) : source(source) {}
