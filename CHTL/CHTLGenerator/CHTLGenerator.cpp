@@ -6,6 +6,7 @@
 #include "../CHTLNode/DocumentNode.h"
 #include "../CHTLNode/ScriptNode.h"
 #include "../Expression/ExpressionEvaluator.h"
+#include "../../CHTL_JS/CHTLJSProcessor.h"
 #include <unordered_set>
 #include <algorithm>
 #include <map>
@@ -210,13 +211,18 @@ void CHTLGenerator::visit(StyleNode& node) {
 }
 
 void CHTLGenerator::visit(ScriptNode& node) {
+    std::string raw_js;
     if (!node.placeholder_key.empty()) {
         if (placeholders.count(node.placeholder_key)) {
-            js_output << placeholders.at(node.placeholder_key);
+            raw_js = placeholders.at(node.placeholder_key);
         }
     } else {
-        js_output << node.content;
+        raw_js = node.content;
     }
+
+    // Process the raw JS through the CHTL JS Processor
+    CHTLJSProcessor processor(raw_js);
+    js_output << processor.process();
 }
 
 void CHTLGenerator::visit(OriginNode& node) {
