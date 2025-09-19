@@ -17,7 +17,7 @@ enum class TokenType {
     QUESTION,                    // ?
     COMMA,                       // ,
     PLUS, MINUS, STAR, SLASH, PERCENT,
-    GREATER, LESS,
+    GREATER, LESS, HASH,
 
     // One or two character tokens
     BANG, BANG_EQUAL,            // ! !=

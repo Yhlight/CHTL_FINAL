@@ -530,14 +530,22 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             return std::make_unique<ReferenceExpr>(Token(), first_part);
         }
     }
-    if (check(TokenType::SYMBOL) && (peek().lexeme == "#" || peek().lexeme == ".")) {
+    if (check(TokenType::DOT) || check(TokenType::HASH)) {
         Token first_part = advance();
-        if (tokens.size() > current && tokens[current + 1].type == TokenType::DOT) {
-             Token selector_name = consume(TokenType::IDENTIFIER, "Expect selector name.");
-             consume(TokenType::DOT, "Expect '.'.");
-             Token property = consume(TokenType::IDENTIFIER, "Expect property name.");
-             Token full_selector = {first_part.type, first_part.lexeme + selector_name.lexeme, first_part.line, first_part.position};
-             return std::make_unique<ReferenceExpr>(full_selector, property);
+        if (tokens.size() > current) {
+            Token selector_name = consume(TokenType::IDENTIFIER, "Expect selector name.");
+            std::string full_selector_str = first_part.lexeme + selector_name.lexeme;
+
+            if (match({TokenType::LEFT_BRACKET})) {
+                Token index = consume(TokenType::NUMBER, "Expect index.");
+                consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+                full_selector_str += "[" + index.lexeme + "]";
+            }
+
+            consume(TokenType::DOT, "Expect '.'.");
+            Token property = consume(TokenType::IDENTIFIER, "Expect property name.");
+            Token full_selector = {first_part.type, full_selector_str, first_part.line, first_part.position};
+            return std::make_unique<ReferenceExpr>(full_selector, property);
         } else {
             std::string value = first_part.lexeme;
              while(check(TokenType::IDENTIFIER) || check(TokenType::NUMBER)) { value += advance().lexeme; }

@@ -5,6 +5,8 @@
 #include <iostream>
 #include <cmath>
 #include <map>
+#include <sstream>
+#include <vector>
 
 namespace CHTL {
 
@@ -71,18 +73,40 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
     }
     ElementNode* target_element = findElement(doc_root, expr.selector.lexeme);
     if (!target_element) {
-        throw std::runtime_error("Reference selector not found.");
+        throw std::runtime_error("Reference selector not found: " + expr.selector.lexeme);
     }
 
     for (const auto& child : target_element->children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             std::map<std::string, AttributeNode> final_props;
+
+            // Apply templates
             for (const auto& app : styleNode->template_applications) {
-                // ... logic to apply templates ...
+                const TemplateDefinitionNode* def = nullptr;
+                for (const auto& ns_pair : this->templates) {
+                    if (ns_pair.second.count(app.template_name)) {
+                        def = &ns_pair.second.at(app.template_name);
+                        break;
+                    }
+                }
+                if (def && def->type == TemplateType::STYLE) {
+                    for (const auto& prop : def->style_properties) {
+                        final_props[prop.key] = prop.clone();
+                    }
+                    for (const auto& key_to_delete : app.deleted_properties) {
+                        final_props.erase(key_to_delete);
+                    }
+                    for (const auto& prop : app.new_or_overridden_properties) {
+                        final_props[prop.key] = prop.clone();
+                    }
+                }
             }
+
+            // Apply direct properties
             for (const auto& prop : styleNode->direct_properties) {
                 final_props[prop.key] = prop.clone();
             }
+
             if (final_props.count(expr.property.lexeme)) {
                 resolution_stack.insert(full_ref_name);
                 result = evaluate(final_props.at(expr.property.lexeme).value_expr.get(), target_element);
@@ -91,7 +115,7 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
             }
         }
     }
-    throw std::runtime_error("Reference property not found.");
+    throw std::runtime_error("Reference property not found: " + expr.property.lexeme);
 }
 
 void ExpressionEvaluator::visit(ComparisonExpr& expr) {
@@ -129,28 +153,114 @@ void ExpressionEvaluator::visit(ConditionalExpr& expr) {
     }
 }
 
-ElementNode* ExpressionEvaluator::findElement(BaseNode* context, const std::string& selector) {
-    if (!context) return nullptr;
-    ElementNode* element = dynamic_cast<ElementNode*>(context);
-    if (!element) return nullptr;
-    char selector_type = selector.empty() ? ' ' : selector[0];
+#include <sstream>
+#include <vector>
+
+// Helper function to split string by delimiter
+static std::vector<std::string> split(const std::string& s, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(s);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+static bool elementMatches(ElementNode* element, const std::string& selector) {
+    if (!element) return false;
+
+    std::string sel = selector;
+    int index = -1;
+    size_t bracket_pos = sel.find('[');
+    if (bracket_pos != std::string::npos) {
+        size_t end_bracket_pos = sel.find(']', bracket_pos);
+        if (end_bracket_pos != std::string::npos) {
+            index = std::stoi(sel.substr(bracket_pos + 1, end_bracket_pos - bracket_pos - 1));
+            sel = sel.substr(0, bracket_pos);
+        }
+    }
+
+    char selector_type = sel.empty() ? ' ' : sel[0];
     if (selector_type == '#') {
-        std::string id = selector.substr(1);
+        std::string id = sel.substr(1);
         for (const auto& attr : element->attributes) {
-            if (attr.key == "id" && attr.value == id) return element;
+            if (attr.key == "id" && attr.value == id) return true;
         }
     } else if (selector_type == '.') {
-        std::string className = selector.substr(1);
+        std::string className = sel.substr(1);
         for (const auto& attr : element->attributes) {
-            if (attr.key == "class" && attr.value.find(className) != std::string::npos) return element;
+            if (attr.key == "class") {
+                std::vector<std::string> classes = split(attr.value, ' ');
+                for (const auto& c : classes) {
+                    if (c == className) return true;
+                }
+            }
         }
     } else {
-        if (element->tagName == selector) return element;
+        if (element->tagName == sel) return true;
     }
+    return false;
+}
+
+static void findElementsRecursive(BaseNode* context, const std::string& selector, std::vector<ElementNode*>& found_elements) {
+    if (!context) return;
+    ElementNode* element = dynamic_cast<ElementNode*>(context);
+    if (!element) return;
+
+    if (elementMatches(element, selector)) {
+        found_elements.push_back(element);
+    }
+
     for (const auto& child : element->children) {
-        if (ElementNode* found = findElement(child.get(), selector)) return found;
+        findElementsRecursive(child.get(), selector, found_elements);
     }
-    return nullptr;
+}
+
+
+ElementNode* ExpressionEvaluator::findElement(BaseNode* context, const std::string& selector) {
+    std::vector<std::string> parts = split(selector, ' ');
+    std::vector<ElementNode*> current_elements;
+
+    BaseNode* search_context = context;
+
+    for (size_t i = 0; i < parts.size(); ++i) {
+        std::vector<ElementNode*> next_elements;
+        std::string part = parts[i];
+
+        int index = -1;
+        size_t bracket_pos = part.find('[');
+        if (bracket_pos != std::string::npos) {
+            size_t end_bracket_pos = part.find(']', bracket_pos);
+            if (end_bracket_pos != std::string::npos) {
+                index = std::stoi(part.substr(bracket_pos + 1, end_bracket_pos - bracket_pos - 1));
+                part = part.substr(0, bracket_pos);
+            }
+        }
+
+        if (i == 0) {
+            findElementsRecursive(search_context, part, next_elements);
+        } else {
+            for (ElementNode* el : current_elements) {
+                for (const auto& child : el->children) {
+                    findElementsRecursive(child.get(), part, next_elements);
+                }
+            }
+        }
+
+        current_elements = next_elements;
+        if (current_elements.empty()) return nullptr;
+
+        if (index != -1) {
+            if (index < current_elements.size()) {
+                return current_elements[index];
+            } else {
+                return nullptr;
+            }
+        }
+    }
+
+    return current_elements.empty() ? nullptr : current_elements[0];
 }
 
 } // namespace CHTL

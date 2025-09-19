@@ -1,4 +1,5 @@
 #include "CHTLGenerator.h"
+#include <cmath>
 #include "../../CHTL JS/CHTLJSCompiler.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
@@ -104,7 +105,14 @@ void CHTLGenerator::visit(ElementNode& node) {
                 EvaluatedValue result = evaluator.evaluate(pair.second.value_expr.get(), &node);
                 style_str += pair.first + ": ";
                 if (result.value == 0 && !result.unit.empty()) { style_str += result.unit; }
-                else { style_str += std::to_string(result.value) + result.unit; }
+                else {
+                    double int_part;
+                    if (modf(result.value, &int_part) == 0.0) {
+                        style_str += std::to_string(static_cast<int>(result.value)) + result.unit;
+                    } else {
+                        style_str += std::to_string(result.value) + result.unit;
+                    }
+                }
                 style_str += ";";
             }
         }
