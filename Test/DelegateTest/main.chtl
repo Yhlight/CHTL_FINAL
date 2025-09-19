@@ -1,0 +1,17 @@
+div {
+    id: "parent-container";
+
+    ul {
+        li { text: "Item 1"; }
+        li { text: "Item 2"; }
+    }
+
+    script {
+        {{#parent-container}}->Delegate {
+            target: {{li}},
+            click: (event) => {
+                console.log(event.target.textContent);
+            }
+        }
+    }
+}

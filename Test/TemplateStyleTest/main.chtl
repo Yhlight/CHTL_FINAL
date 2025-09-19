@@ -1,0 +1,12 @@
+[Template] @Style DefaultText {
+    color: red;
+    font-size: 16px;
+}
+
+div {
+    style {
+        @Style DefaultText;
+        background-color: blue;
+    }
+    text: "Hello Template!";
+}

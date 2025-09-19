@@ -1,0 +1,14 @@
+body {
+    div {
+        id: "myDiv";
+    }
+    script {
+        Animate {
+            target: {{#myDiv}},
+            duration: 1000,
+            easing: "ease-in-out",
+            loop: 2,
+            direction: "alternate"
+        }
+    }
+}
