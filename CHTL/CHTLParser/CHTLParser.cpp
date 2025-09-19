@@ -61,6 +61,34 @@ bool findAndInsert(std::vector<std::unique_ptr<BaseNode>>& nodes, const std::str
     return false;
 }
 
+void CHTLParser::parseExceptClause(ElementNode* element) {
+    do {
+        Constraint constraint;
+        if (match({TokenType::LEFT_BRACKET})) {
+            Token type = consume(TokenType::IDENTIFIER, "Expect 'Custom' or 'Template'.");
+            consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+            if (match({TokenType::AT})) { // e.g. [Custom] @Element Box
+                consume(TokenType::IDENTIFIER, "Expect 'Element', 'Style', or 'Var'.");
+                constraint.name = consume(TokenType::IDENTIFIER, "Expect name.").lexeme;
+                constraint.type = (type.lexeme == "Custom") ? ConstraintType::CUSTOM : ConstraintType::TEMPLATE;
+            } else { // e.g. [Custom]
+                constraint.name = type.lexeme;
+                constraint.type = (type.lexeme == "Custom") ? ConstraintType::ANY_CUSTOM : ConstraintType::ANY_TEMPLATE;
+            }
+        } else if (match({TokenType::AT})) { // e.g. @Html
+            Token type = consume(TokenType::IDENTIFIER, "Expect 'Html'.");
+            constraint.name = type.lexeme;
+            constraint.type = ConstraintType::ANY_HTML;
+        } else { // e.g. span
+            Token name = consume(TokenType::IDENTIFIER, "Expect tag name.");
+            constraint.name = name.lexeme;
+            constraint.type = ConstraintType::ELEMENT_TAG;
+        }
+        element->constraints.push_back(constraint);
+    } while (match({TokenType::COMMA}));
+    consume(TokenType::SEMICOLON, "Expect ';' after except clause.");
+}
+
 
 // --- Parser Implementation ---
 std::string getFilename(const std::string& path) {
@@ -133,20 +161,55 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
     return {};
 }
 
+// Helper function for validation
+void checkConstraints(const ElementNode* parent, const BaseNode* child) {
+    if (!parent || !child) return;
+
+    const ElementNode* child_element = dynamic_cast<const ElementNode*>(child);
+
+    for (const auto& constraint : parent->constraints) {
+        if (constraint.type == ConstraintType::ELEMENT_TAG && child_element) {
+            if (child_element->tagName == constraint.name) {
+                throw std::runtime_error("Constraint violation: element <" + child_element->tagName + "> is not allowed here.");
+            }
+        } else if (constraint.type == ConstraintType::ANY_HTML && child_element) {
+            // This is a simplification. A more robust check would involve a list
+            // of all standard HTML tags or checking if the node came from a template.
+            // For now, we assume any ElementNode that isn't from a known template is a raw HTML element.
+            // This logic will need to be improved when template usage tracking is added.
+            throw std::runtime_error("Constraint violation: HTML elements are not allowed here.");
+        }
+    }
+}
+
+
 std::unique_ptr<ElementNode> CHTLParser::parseElement() {
     Token tagName = consume(TokenType::IDENTIFIER, "Expect element name.");
     auto element = std::make_unique<ElementNode>(tagName.lexeme);
+
+    element_context_stack.push_back(element.get());
+
     consume(TokenType::LEFT_BRACE, "Expect '{' after element name.");
+
+    if (match({TokenType::EXCEPT})) {
+        parseExceptClause(element.get());
+    }
+
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
         if ((peek().type == TokenType::IDENTIFIER || peek().type == TokenType::TEXT) && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
             parseAttribute(element.get());
         } else {
-            for (auto& child : parseDeclaration()) {
+            auto children = parseDeclaration();
+            for (auto& child : children) {
+                checkConstraints(element.get(), child.get());
                 element->addChild(std::move(child));
             }
         }
     }
     consume(TokenType::RIGHT_BRACE, "Expect '}' after element block.");
+
+    element_context_stack.pop_back();
+
     return element;
 }
 

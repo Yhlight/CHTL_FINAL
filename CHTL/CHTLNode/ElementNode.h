@@ -8,6 +8,20 @@
 
 namespace CHTL {
 
+enum class ConstraintType {
+    ELEMENT_TAG,
+    TEMPLATE,
+    CUSTOM,
+    ANY_HTML,
+    ANY_TEMPLATE,
+    ANY_CUSTOM
+};
+
+struct Constraint {
+    ConstraintType type;
+    std::string name; // e.g., "span", "Box", "@Html"
+};
+
 // A temporary struct for HTML attributes until they are refactored
 // to handle expressions like style properties.
 struct HtmlAttribute {
@@ -26,6 +40,7 @@ public:
     std::string tagName;
     std::vector<std::unique_ptr<BaseNode>> children;
     std::vector<HtmlAttribute> attributes;
+    std::vector<Constraint> constraints;
 };
 
 } // namespace CHTL

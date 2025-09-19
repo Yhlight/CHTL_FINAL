@@ -54,9 +54,11 @@ private:
     std::unique_ptr<BaseNode> parseOriginBlock();
 
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>> template_definitions;
+    std::vector<ElementNode*> element_context_stack;
     void parseSymbolDeclaration(bool is_custom);
     void parseImportStatement();
     void parseStyleTemplateUsage(StyleNode* styleNode);
+    void parseExceptClause(ElementNode* element);
     std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();
 };
 
