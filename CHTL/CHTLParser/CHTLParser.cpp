@@ -356,14 +356,18 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
     consume(TokenType::LEFT_BRACE, "Expect '{' to start symbol body.");
     if (def.type == TemplateType::STYLE) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            if (check(TokenType::AT) || check(TokenType::INHERIT)) {
-                // ... inheritance logic ...
+            if (check(TokenType::AT) || match({TokenType::INHERIT})) {
+                // TODO: Implement inheritance logic for style templates
+                error(peek(), "Style template inheritance is not yet implemented.");
             } else {
                 std::string key_str;
-                while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
-                consume(TokenType::COLON, "Expect ':'.");
+                while (!check(TokenType::COLON) && !isAtEnd()) {
+                    // Append tokens to form the property name, e.g., "font-size"
+                    key_str += advance().lexeme;
+                }
+                consume(TokenType::COLON, "Expect ':' after style property name.");
                 auto value_expr = parseExpression();
-                consume(TokenType::SEMICOLON, "Expect ';'.");
+                consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
                 def.style_properties.push_back({key_str, std::move(value_expr)});
             }
         }

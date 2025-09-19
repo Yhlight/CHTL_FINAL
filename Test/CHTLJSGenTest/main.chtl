@@ -1,0 +1,3 @@
+{{.myButton}}->Listen {
+    click: () => { console.log("Button clicked!"); }
+}

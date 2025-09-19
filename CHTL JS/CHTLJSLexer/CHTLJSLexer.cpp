@@ -54,6 +54,8 @@ void CHTLJSLexer::scanToken() {
         case '-':
             if (match('>')) {
                 addToken(TokenType::ARROW);
+            } else {
+                addToken(TokenType::MINUS);
             }
             break;
         case '&':

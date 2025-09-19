@@ -1,11 +1,13 @@
-#include "../../CHTL/CHTLLexer/CHTLLexer.h"
-#include "../../CHTL/CHTLParser/CHTLParser.h"
-#include "../../CHTL/CHTLGenerator/CHTLGenerator.h"
+#include "../../Scanner/CHTLUnifiedScanner.h"
+#include "../../CHTL/CompilerDispatcher.h"
+#include "../../CHTL/CodeMerger.h"
+#include "../../CHTL/Config/Configuration.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <cassert>
 #include <string>
 #include <algorithm>
+#include <memory>
 
 // Helper function to remove all whitespace from a string for robust comparison
 std::string remove_whitespace(const std::string& str) {
@@ -26,20 +28,18 @@ int main() {
     // Create a shared configuration object
     auto config = std::make_shared<CHTL::Configuration>();
 
-    // 1. Lexer
-    CHTL::CHTLLexer lexer(source, config);
-    std::vector<CHTL::Token> tokens = lexer.scanTokens();
+    // 1. Scanner
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
 
-    // 2. Parser
-    CHTL::CHTLParser parser(source, tokens, file_path, config);
-    auto root = parser.parse();
-    bool use_doctype = parser.getUseHtml5Doctype();
+    // 2. Dispatcher
+    CHTL::CompilerDispatcher dispatcher(config, file_path);
+    CHTL::FinalCompilationResult result = dispatcher.dispatch(fragments);
 
-    // 3. Generator
-    CHTL::CHTLGenerator generator(parser.getTemplateDefinitions(), config);
-    CHTL::CompilationResult result = generator.generate(root.get(), use_doctype);
+    // 3. Assert
+    // Note: The CodeMerger is not strictly needed for this test, as we want to
+    // verify the separate outputs of the compilation process.
 
-    // 4. Assert
     std::string expected_html = R"(
         <!DOCTYPE html>
         <div class="box" style="height: 200px;">Hello World</div>

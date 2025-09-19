@@ -32,6 +32,7 @@ enum class TokenType {
 
     // Special
     SYMBOL,
+    MINUS,
     END_OF_FILE,
     UNKNOWN
 };
