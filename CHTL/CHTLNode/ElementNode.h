@@ -26,6 +26,7 @@ public:
     std::string tagName;
     std::vector<std::unique_ptr<BaseNode>> children;
     std::vector<HtmlAttribute> attributes;
+    std::vector<std::string> constraints;
 };
 
 } // namespace CHTL

@@ -19,6 +19,7 @@ static const std::map<std::string, TokenType> internal_keyword_to_token_type = {
     {"KEYWORD_AFTER", TokenType::AFTER},
     {"KEYWORD_BEFORE", TokenType::BEFORE},
     {"KEYWORD_REPLACE", TokenType::REPLACE},
+    {"KEYWORD_EXCEPT", TokenType::EXCEPT},
     // Note: Bracketed keywords like [Custom] are handled by the parser, not the lexer.
 };
 

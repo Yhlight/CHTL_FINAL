@@ -54,6 +54,7 @@ enum class TokenType {
     IMPORT,
     CONFIGURATION,
     NAMESPACE,
+    EXCEPT,
 
     // Special
     SYMBOL,

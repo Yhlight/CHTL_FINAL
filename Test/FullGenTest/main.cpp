@@ -36,30 +36,36 @@ int main() {
     CHTL::CompilerDispatcher dispatcher(config, file_path);
     CHTL::FinalCompilationResult result = dispatcher.dispatch(fragments);
 
-    // 3. Assert
-    // Note: The CodeMerger is not strictly needed for this test, as we want to
-    // verify the separate outputs of the compilation process.
+    // 3. Merger
+    std::string final_html = CHTL::CodeMerger::mergeToFinalHtml(result.html, result.css, result.js);
 
-    std::string expected_html = R"(
+    // 4. Assert
+    std::string expected_final_html = R"(
         <!DOCTYPE html>
-        <div class="box" style="height: 200px;">Hello World</div>
+        <html>
+            <head>
+                <title>Full Gen Test</title>
+                <style>
+                    .box {
+                        color: red;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="box" style="height:200px;">Hello World</div>
+            </body>
+        </html>
     )";
 
-    std::string expected_css = R"(
-        .box {
-          color: red;
-        }
-    )";
+    std::string processed_result = remove_whitespace(final_html);
+    std::string processed_expected = remove_whitespace(expected_final_html);
 
-    std::string processed_html_result = remove_whitespace(result.html);
-    std::string processed_html_expected = remove_whitespace(expected_html);
-    assert(processed_html_result == processed_html_expected);
-
-    std::string processed_css_result = remove_whitespace(result.css);
-    std::string processed_css_expected = remove_whitespace(expected_css);
-    assert(processed_css_result == processed_css_expected);
-
-    assert(result.js.empty());
+    if (processed_result != processed_expected) {
+        std::cerr << "FullGenTest FAILED!" << std::endl;
+        std::cerr << "Expected: " << processed_expected << std::endl;
+        std::cerr << "Got:      " << processed_result << std::endl;
+        return 1;
+    }
 
     std::cout << "FullGenTest PASSED!" << std::endl;
 

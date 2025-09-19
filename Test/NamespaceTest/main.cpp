@@ -37,8 +37,16 @@ int main() {
     // 3. Assert
     std::string expected_html = R"(
         <html>
+            <head>
+                <title>Namespace Test</title>
+            </head>
             <body>
-                <div style="width:100px;height:100px;background-color:blue;">This is a box from the 'space' namespace.</div>
+                <div class="ns2-special">
+                    <div class="ns1-box">Box from ns1</div>
+                </div>
+                <div class="unbraced-box">
+                    <div class="ns1-box">Box from ns1</div>
+                </div>
             </body>
         </html>
     )";

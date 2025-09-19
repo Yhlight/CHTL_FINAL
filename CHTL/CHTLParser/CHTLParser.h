@@ -57,6 +57,7 @@ private:
     std::vector<std::unique_ptr<BaseNode>> parseDeclaration();
     std::unique_ptr<ElementNode> parseElement();
     void parseAttribute(ElementNode* element);
+    void parseExceptClause(ElementNode* element);
     std::unique_ptr<StyleNode> parseStyleBlock();
     std::unique_ptr<ScriptNode> parseScriptBlock();
     std::unique_ptr<BaseNode> parseOriginBlock();

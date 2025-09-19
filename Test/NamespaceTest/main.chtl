@@ -1,49 +1,46 @@
-[Namespace] space
-{
-    [Template] @Element Box
-    {
-        div
-        {
-            style
-            {
-                width: 100px;
-                height: 100px;
-                background-color: blue;
-            }
-            text: "This is a box from the 'space' namespace.";
-        }
-    }
-
-    [Namespace] room
-    {
-        [Template] @Element SpecialBox
-        {
-             div
-             {
-                style
-                {
-                    border: 1px solid black;
-                }
-                // This implicitly uses 'Box' from the parent 'space' namespace
-                @Element Box;
-             }
+// A namespace for some basic components
+[Namespace] ns1 {
+    [Template] @Element Box {
+        div {
+            class: "ns1-box";
+            text: "Box from ns1";
         }
     }
 }
 
-html
-{
-    body
-    {
-        // This implicitly uses 'SpecialBox' from the 'space.room' namespace,
-        // which is not correct. This will fail to resolve.
-        // I will remove this for now to make the test pass with the current implementation.
-        // @Element SpecialBox;
-
-        // Let's add a usage inside the namespace to test the lookup
-        [Namespace] space
-        {
-            @Element Box;
+// A nested namespace that uses a component from its parent
+[Namespace] ns1 {
+    [Namespace] ns2 {
+        [Template] @Element SpecialBox {
+            div {
+                class: "ns2-special";
+                // Implicitly uses 'Box' from parent 'ns1'
+                @Element Box;
+            }
         }
+    }
+}
+
+// A separate, un-braced namespace
+[Namespace] unbraced_ns
+
+[Template] @Element UnbracedBox {
+    div {
+        class: "unbraced-box";
+        // Implicitly uses 'Box' from the other namespace 'ns1'
+        @Element Box;
+    }
+}
+
+html {
+    head {
+        title { text: "Namespace Test"; }
+    }
+    body {
+        // Explicitly use a template from a nested namespace
+        @Element SpecialBox from ns1.ns2;
+
+        // Use a template from the un-braced namespace
+        @Element UnbracedBox;
     }
 }

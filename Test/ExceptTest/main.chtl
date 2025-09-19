@@ -1,0 +1,15 @@
+[Template] @Element MyTemplate {
+    div { text:"I am a template"; }
+}
+
+div {
+    except @Html, MyTemplate;
+
+    // This should fail because p is a standard HTML element
+    p {
+        text: "This is not allowed.";
+    }
+
+    // This should also fail because it's an excluded template
+    @Element MyTemplate;
+}

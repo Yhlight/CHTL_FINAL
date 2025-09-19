@@ -1,0 +1,12 @@
+script {
+    // This is plain JS. The scanner should not be confused by the variable name.
+    var Listen = { event: 'click' };
+    console.log(Listen.event);
+
+    // This is a real CHTL JS block that should be identified.
+    Listen {
+        click: () => {
+            console.log("Real listener");
+        }
+    }
+}

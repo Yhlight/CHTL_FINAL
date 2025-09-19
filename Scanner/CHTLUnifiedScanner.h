@@ -18,6 +18,8 @@ namespace CHTL {
     struct CodeFragment {
         std::string content;
         FragmentType type;
+        // Used to link a placeholder to its original code
+        std::string placeholder_id;
     };
 
     class CHTLUnifiedScanner {
@@ -28,8 +30,14 @@ namespace CHTL {
     private:
         std::string m_source;
         size_t m_cursor = 0;
+        int m_placeholder_counter = 0;
 
-        // Helper methods for scanning different parts will be needed here.
+        // Main scanning loop
+        void scanSource();
+        // Specific scanner for script content
+        void scanScriptContent(size_t block_end);
+
+        std::vector<CodeFragment> m_fragments;
     };
 
 } // namespace CHTL
