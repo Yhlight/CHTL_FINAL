@@ -3,6 +3,7 @@
 #include "../CHTLLexer/CHTLLexer.h"
 #include "CHTL/CHTLNode/TextNode.h"
 #include "CHTL/CHTLNode/OriginNode.h"
+#include "CHTL/CHTLNode/DocumentNode.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <stdexcept>
@@ -83,25 +84,29 @@ std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& CHTLParser
 
 
 std::unique_ptr<BaseNode> CHTLParser::parse() {
+    auto docNode = std::make_unique<DocumentNode>();
     while (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
         if (peek().type == TokenType::LEFT_BRACKET) {
-            if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Template") {
-                parseSymbolDeclaration(false);
-            } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Custom") {
-                parseSymbolDeclaration(true);
-            } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
-                parseOriginBlock();
+            if (tokens.size() > current + 1 && (tokens[current + 1].lexeme == "Template" || tokens[current + 1].lexeme == "Custom")) {
+                // Templates modify parser state but don't produce a renderable node in the main tree.
+                parseSymbolDeclaration(tokens[current + 1].lexeme == "Custom");
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Import") {
+                // Imports also modify parser state.
                 parseImportStatement();
-            } else { break; }
-        } else { break; }
+            } else {
+                // For other bracket types like [Origin], treat them as declarations.
+                for (auto& node : parseDeclaration()) {
+                    docNode->addChild(std::move(node));
+                }
+            }
+        } else {
+            // This handles root elements like `body` or `html`, or `style` blocks.
+            for (auto& node : parseDeclaration()) {
+                docNode->addChild(std::move(node));
+            }
+        }
     }
-    if (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
-        auto nodes = parseDeclaration();
-        if (nodes.size() == 1) return std::move(nodes[0]);
-        else error(peek(), "Expected a single root element declaration.");
-    }
-    return nullptr;
+    return docNode;
 }
 
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
@@ -166,6 +171,18 @@ void CHTLParser::parseAttribute(ElementNode* element) {
 std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
     consume(TokenType::LEFT_BRACE, "Expect '{' after 'style' keyword.");
     auto styleNode = std::make_unique<StyleNode>();
+
+    // Check for a single placeholder token from the Unified Scanner
+    if (peek().type == TokenType::IDENTIFIER && previous().type == TokenType::LEFT_BRACE) {
+        const std::string& lexeme = peek().lexeme;
+        if (lexeme.find("__CHTL_CSS_PLACEHOLDER_") != std::string::npos) {
+            styleNode->placeholder_key = lexeme;
+            advance(); // Consume placeholder token
+            consume(TokenType::RIGHT_BRACE, "Expect '}' after placeholder in style block.");
+            return styleNode;
+        }
+    }
+
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
         bool isInlineProp = false;
         int i = 0;
@@ -516,11 +533,10 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             consume(TokenType::RIGHT_PAREN, "Expect ')'.");
             return std::make_unique<VarExpr>(first_part.lexeme, key_name);
         } else {
-            // A lone identifier in a style expression is treated as an unquoted
-            // string literal (e.g., `color: red`). If it's meant to be a property
-            // of the current element, the evaluator handles it by checking for
-            // an empty selector on the ReferenceExpr.
-            return std::make_unique<LiteralExpr>(first_part.lexeme);
+            // A lone identifier is a reference to a property on the current element.
+            // The selector token is default-constructed, which is how the evaluator
+            // identifies a self-reference.
+            return std::make_unique<ReferenceExpr>(Token(), first_part);
         }
     }
     if (check(TokenType::SYMBOL) && (peek().lexeme == "#" || peek().lexeme == ".")) {

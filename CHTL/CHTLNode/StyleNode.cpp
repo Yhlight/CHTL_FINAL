@@ -9,6 +9,7 @@ void StyleNode::accept(Visitor& visitor) {
 
 std::unique_ptr<BaseNode> StyleNode::clone() const {
     auto new_node = std::make_unique<StyleNode>();
+    new_node->placeholder_key = this->placeholder_key;
     for (const auto& prop : this->direct_properties) {
         new_node->direct_properties.push_back(prop.clone());
     }

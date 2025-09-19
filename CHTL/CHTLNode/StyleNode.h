@@ -31,6 +31,7 @@ public:
         }
     };
 
+    std::string placeholder_key; // Used by the Unified Scanner
     std::vector<AttributeNode> direct_properties;
     std::vector<StyleApplication> template_applications;
     std::vector<CssRuleNode> global_rules;

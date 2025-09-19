@@ -18,9 +18,10 @@ struct CompilationResult {
 
 class CHTLGenerator : public Visitor {
 public:
-    explicit CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates);
+    explicit CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, const std::map<std::string, std::string>& placeholders = {});
     CompilationResult generate(BaseNode* root);
 
+    void visit(DocumentNode& node) override;
     void visit(ElementNode& node) override;
     void visit(TextNode& node) override;
     void visit(StyleNode& node) override;
@@ -33,6 +34,7 @@ private:
     std::stringstream html_output;
     std::stringstream css_output;
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
+    const std::map<std::string, std::string> placeholders;
     BaseNode* doc_root = nullptr;
 };
 

@@ -182,41 +182,57 @@ void ExpressionEvaluator::visit(VarExpr& expr) {
 }
 
 void ExpressionEvaluator::visit(ReferenceExpr& expr) {
-    ElementNode* target_element = nullptr;
     bool is_self_reference = expr.selector.lexeme.empty();
 
     if (is_self_reference) {
-        target_element = this->current_context;
-        if (!target_element) {
+        if (!this->current_context) {
             throw std::runtime_error("Cannot self-reference property '" + expr.property.lexeme + "' outside of an element's style block.");
         }
-    } else {
-        target_element = findElement(doc_root, expr.selector.lexeme);
+
+        // For a self-reference, first check for circular dependencies.
+        std::string self_ref_name = "self." + expr.property.lexeme;
+        if (resolution_stack.count(self_ref_name)) {
+            throw std::runtime_error("Circular property reference detected: " + self_ref_name);
+        }
+
+        // Then, compute the styles of the current element to see if the property exists.
+        CHTLGenerator temp_generator(this->templates);
+        std::map<std::string, AttributeNode> final_styles = temp_generator.computeFinalStyles(*this->current_context);
+
+        if (final_styles.count(expr.property.lexeme)) {
+            // It's a real property reference. Evaluate it.
+            resolution_stack.insert(self_ref_name);
+            result = evaluate(final_styles.at(expr.property.lexeme).value_expr.get(), this->current_context);
+            resolution_stack.erase(self_ref_name);
+            return;
+        } else {
+            // The property does not exist, so treat it as an unquoted string literal (e.g., "blue", "solid").
+            result = {true, 0.0, "", expr.property.lexeme};
+            return;
+        }
+
+    } else { // It's a reference to another element
+        ElementNode* target_element = findElement(doc_root, expr.selector.lexeme);
         if (!target_element) {
             throw std::runtime_error("Reference selector '" + expr.selector.lexeme + "' not found.");
         }
-    }
 
-    std::string full_ref_name = (is_self_reference ? "self" : expr.selector.lexeme) + "." + expr.property.lexeme;
-    if (resolution_stack.count(full_ref_name)) {
-        throw std::runtime_error("Circular property reference detected: " + full_ref_name);
-    }
+        std::string full_ref_name = expr.selector.lexeme + "." + expr.property.lexeme;
+        if (resolution_stack.count(full_ref_name)) {
+            throw std::runtime_error("Circular property reference detected: " + full_ref_name);
+        }
 
-    // To get the final value of a property, we must compute the target element's
-    // styles, including applying any templates. We can reuse the generator's
-    // logic for this. This is a bit awkward as it requires a temporary generator,
-    // but it's the most reliable way to get the correct, fully-resolved style map.
-    CHTLGenerator temp_generator(this->templates);
-    std::map<std::string, AttributeNode> final_styles = temp_generator.computeFinalStyles(*target_element);
+        CHTLGenerator temp_generator(this->templates);
+        std::map<std::string, AttributeNode> final_styles = temp_generator.computeFinalStyles(*target_element);
 
-    if (final_styles.count(expr.property.lexeme)) {
-        resolution_stack.insert(full_ref_name);
-        // We evaluate the found property's expression in the context of the *target* element.
-        result = evaluate(final_styles.at(expr.property.lexeme).value_expr.get(), target_element);
-        resolution_stack.erase(full_ref_name);
-        return;
+        if (final_styles.count(expr.property.lexeme)) {
+            resolution_stack.insert(full_ref_name);
+            result = evaluate(final_styles.at(expr.property.lexeme).value_expr.get(), target_element);
+            resolution_stack.erase(full_ref_name);
+            return;
+        }
+        throw std::runtime_error("Reference property '" + expr.property.lexeme + "' not found in selector '" + expr.selector.lexeme + "'.");
     }
-    throw std::runtime_error("Reference property '" + expr.property.lexeme + "' not found in selector '" + expr.selector.lexeme + "'.");
 }
 
 void ExpressionEvaluator::visit(ComparisonExpr& expr) {
@@ -269,70 +285,33 @@ void ExpressionEvaluator::visit(ConditionalExpr& expr) {
     }
 }
 
-ElementNode* ExpressionEvaluator::findElement(BaseNode* root_node, const std::string& full_selector) {
-    std::vector<BaseNode*> search_roots = {root_node};
-    std::vector<ElementNode*> final_results;
-
-    std::stringstream ss(full_selector);
-    std::string selector_part;
-
-    // Process descendant selectors, which are space-separated.
-    while (ss >> selector_part) {
-        std::vector<ElementNode*> part_results;
-        std::string name = selector_part;
-        int index = -1;
-
-        // Check for and parse indexed access, e.g., button[0]
-        size_t bracket_pos = name.find('[');
-        if (bracket_pos != std::string::npos) {
-            size_t end_bracket_pos = name.find(']');
-            if (end_bracket_pos != std::string::npos) {
-                std::string index_str = name.substr(bracket_pos + 1, end_bracket_pos - bracket_pos - 1);
-                try {
-                    index = std::stoi(index_str);
-                } catch (...) {
-                    throw std::runtime_error("Invalid index in selector: " + selector_part);
-                }
-                name = name.substr(0, bracket_pos);
-            }
-        }
-
-        // Search within the roots from the previous part
-        for (BaseNode* root : search_roots) {
-            char selector_type = name.empty() ? ' ' : name[0];
-            if (selector_type != '.' && selector_type != '#') { // Auto-inference: tag -> id -> class
-                // 1. Tag
-                findElementsRecursive(root, name, part_results);
-                // 2. ID
-                if (part_results.empty()) {
-                    findElementsRecursive(root, "#" + name, part_results);
-                }
-                // 3. Class
-                if (part_results.empty()) {
-                    findElementsRecursive(root, "." + name, part_results);
-                }
-            } else { // Direct class or ID search
-                findElementsRecursive(root, name, part_results);
-            }
-        }
-
-        // Filter by index if provided
-        if (index != -1) {
-            if (index >= 0 && index < part_results.size()) {
-                final_results = {part_results[index]};
-            } else {
-                final_results.clear(); // Index out of bounds
-            }
-        } else {
-            final_results = part_results;
-        }
-
-        if (final_results.empty()) return nullptr; // Early exit if any part of the selector fails
-
-        search_roots.assign(final_results.begin(), final_results.end());
+// Note: This findElement implementation is simplified. It does not currently
+// support descendant selectors or indexed access, as the CHTL expression
+// parser does not yet produce ASTs for them. It only supports a single
+// simple selector (e.g., #id, .class, tag).
+ElementNode* ExpressionEvaluator::findElement(BaseNode* root_node, const std::string& selector) {
+    if (selector.empty() || !root_node) {
+        return nullptr;
     }
 
-    return final_results.empty() ? nullptr : final_results[0];
+    std::vector<ElementNode*> results;
+    char selector_type = selector[0];
+
+    // The parser currently only supports simple selectors in expressions.
+    // Auto-inference logic for bare identifiers is included as specified.
+    if (selector_type != '.' && selector_type != '#') { // Auto-inference: tag -> id -> class
+        findElementsRecursive(root_node, selector, results);
+        if (results.empty()) {
+            findElementsRecursive(root_node, "#" + selector, results);
+        }
+        if (results.empty()) {
+            findElementsRecursive(root_node, "." + selector, results);
+        }
+    } else { // Direct class or ID search
+        findElementsRecursive(root_node, selector, results);
+    }
+
+    return results.empty() ? nullptr : results[0];
 }
 
 } // namespace CHTL

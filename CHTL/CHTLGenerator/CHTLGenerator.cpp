@@ -3,6 +3,7 @@
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
+#include "../CHTLNode/DocumentNode.h"
 #include "../Expression/ExpressionEvaluator.h"
 #include <unordered_set>
 #include <algorithm>
@@ -15,40 +16,56 @@ const std::unordered_set<std::string> voidElements = {
     "link", "meta", "param", "source", "track", "wbr"
 };
 
-CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates)
-    : templates(templates), doc_root(nullptr) {}
+CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, const std::map<std::string, std::string>& placeholders)
+    : templates(templates), placeholders(placeholders), doc_root(nullptr) {}
 
 CompilationResult CHTLGenerator::generate(BaseNode* root) {
     html_output.str("");
     css_output.str("");
     this->doc_root = root;
     if (root) {
-        // We use a two-pass approach.
-        // 1. First pass collects all non-inline CSS rules (e.g. from class selectors)
-        //    and generates the global stylesheet. This is necessary because style
-        //    blocks can appear anywhere in the document.
-        ExpressionEvaluator evaluator(this->templates, this->doc_root);
-        collectAndGenerateCss(root, evaluator);
-
-        // 2. Second pass generates the HTML structure and inline styles.
         root->accept(*this);
     }
     return {html_output.str(), css_output.str()};
+}
+
+void CHTLGenerator::visit(DocumentNode& node) {
+    // First pass: generate all global CSS rules
+    ExpressionEvaluator evaluator(this->templates, this->doc_root);
+    for (const auto& child : node.children) {
+        collectAndGenerateCss(child.get(), evaluator);
+    }
+
+    // Second pass: find the root element (e.g. <html>) and generate HTML
+    for (const auto& child : node.children) {
+        if (dynamic_cast<ElementNode*>(child.get())) {
+            child->accept(*this);
+            // Assume the first element node is the root for HTML generation
+            break;
+        }
+    }
 }
 
 void CHTLGenerator::collectAndGenerateCss(BaseNode* node, ExpressionEvaluator& evaluator) {
     if (!node) return;
 
     if (StyleNode* styleNode = dynamic_cast<StyleNode*>(node)) {
-        // Process global rules defined in this style block
-        for (const auto& rule : styleNode->global_rules) {
-            css_output << rule.selector << " {\n";
-            for (const auto& prop : rule.properties) {
-                // We pass nullptr for context because global rules can't reference element properties
-                PropertyValue result = evaluator.evaluate(prop.value_expr.get(), nullptr);
-                css_output << "    " << prop.key << ": " << result.toString() << ";\n";
+        if (!styleNode->placeholder_key.empty()) {
+            // If the node has a placeholder, substitute the original content.
+            if (placeholders.count(styleNode->placeholder_key)) {
+                css_output << placeholders.at(styleNode->placeholder_key);
             }
-            css_output << "}\n";
+        } else {
+            // Otherwise, process the CHTL-defined global rules.
+            for (const auto& rule : styleNode->global_rules) {
+                css_output << rule.selector << " {\n";
+                for (const auto& prop : rule.properties) {
+                    // We pass nullptr for context because global rules can't reference element properties
+                    PropertyValue result = evaluator.evaluate(prop.value_expr.get(), nullptr);
+                    css_output << "    " << prop.key << ": " << result.toString() << ";\n";
+                }
+                css_output << "}\n";
+            }
         }
     }
 

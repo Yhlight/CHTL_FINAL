@@ -1,3 +1,4 @@
+#include "../../CHTL/Scanner/CHTLUnifiedScanner.h"
 #include "../../CHTL/CHTLLexer/CHTLLexer.h"
 #include "../../CHTL/CHTLParser/CHTLParser.h"
 #include "../../CHTL/CHTLGenerator/CHTLGenerator.h"
@@ -24,11 +25,14 @@ int main() {
     std::cout << "--- Input CHTL ---\n" << source << "\n------------------\n" << std::endl;
 
     try {
-        CHTL::CHTLLexer lexer(source);
+        CHTL::CHTLUnifiedScanner scanner(source);
+        CHTL::ScanResult scan_result = scanner.scan();
+
+        CHTL::CHTLLexer lexer(scan_result.sanitized_source);
         std::vector<CHTL::Token> tokens = lexer.scanTokens();
-        CHTL::CHTLParser parser(source, tokens, entry_point);
+        CHTL::CHTLParser parser(scan_result.sanitized_source, tokens, entry_point);
         std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
-        CHTL::CHTLGenerator generator(parser.getTemplateDefinitions());
+        CHTL::CHTLGenerator generator(parser.getTemplateDefinitions(), scan_result.placeholders);
         CHTL::CompilationResult result = generator.generate(ast.get());
 
         std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n" << std::endl;
