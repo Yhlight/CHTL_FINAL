@@ -29,8 +29,8 @@ int main() {
         std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n" << std::endl;
         std::cout << "--- Generated JS ---\n" << result.js << "\n--------------------\n" << std::endl;
 
-        std::string expected_html = "<body><div id=\"myDiv\"></div></body>";
-        std::string expected_js = "const myDiv = document.getElementById(\"myDiv\");const selector = {{#myDiv}};myDiv.innerText = \"Hello from script!\";";
+        std::string expected_html = "<body><div id=\"myDiv\" class=\"myClass\"></div></body>";
+        std::string expected_js = "const myDiv = document.querySelector('#myDiv'); const myClassElements = document.querySelectorAll('.myClass'); const firstDiv = document.querySelectorAll('div')[0]; myDiv.innerText = \"Hello from script!\";";
 
         std::string actual_html = result.html;
         std::string actual_js = result.js;

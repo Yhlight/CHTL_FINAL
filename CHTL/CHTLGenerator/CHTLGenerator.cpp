@@ -115,8 +115,6 @@ void CHTLGenerator::visit(OriginNode& node) {
 }
 
 void CHTLGenerator::visit(ScriptNode& node) {
-    // We don't output the script content directly into the HTML stream.
-    // Instead, we add it to the JS stream to be linked externally or embedded later.
     CHTL_JS::CHTLJSParser js_parser(node.content);
     auto js_nodes = js_parser.parse();
 
@@ -127,8 +125,18 @@ void CHTLGenerator::visit(ScriptNode& node) {
             }
         } else if (js_node->type == CHTL_JS::CHTLJSNodeType::EnhancedSelector) {
             if (auto* selector_node = dynamic_cast<CHTL_JS::EnhancedSelectorNode*>(js_node.get())) {
-                // For now, just output the content. In the future, this will be processed.
-                js_output << "{{" << selector_node->content << "}}";
+                const auto& parsed = selector_node->parsed_selector;
+                if (parsed.type == CHTL_JS::SelectorType::IndexedQuery) {
+                    js_output << "document.querySelectorAll('" << parsed.selector_string << "')[" << parsed.index.value_or(0) << "]";
+                } else {
+                    // Simple logic: if it starts with '#', use querySelector, otherwise querySelectorAll.
+                    // This is a simplification. A more robust implementation would parse the selector more deeply.
+                    if (!parsed.selector_string.empty() && parsed.selector_string[0] == '#') {
+                        js_output << "document.querySelector('" << parsed.selector_string << "')";
+                    } else {
+                        js_output << "document.querySelectorAll('" << parsed.selector_string << "')";
+                    }
+                }
             }
         }
     }
