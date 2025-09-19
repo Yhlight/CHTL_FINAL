@@ -4,18 +4,19 @@
 #include "CHTLJSBaseNode.h"
 #include "EnhancedSelectorNode.h"
 #include <string>
+#include <vector>
 
 namespace CHTL_JS {
 
 class EventHandlerNode : public CHTLJSBaseNode {
 public:
-    EventHandlerNode(const ParsedSelector& selector, const std::string& event_name, const std::string& handler)
-        : selector(selector), event_name(event_name), handler(handler) {
+    EventHandlerNode(const ParsedSelector& selector, const std::vector<std::string>& event_names, const std::string& handler)
+        : selector(selector), event_names(event_names), handler(handler) {
         type = CHTLJSNodeType::EventHandler;
     }
 
     ParsedSelector selector;
-    std::string event_name;
+    std::vector<std::string> event_names;
     std::string handler;
 };
 

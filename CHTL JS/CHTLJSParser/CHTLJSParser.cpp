@@ -1,5 +1,6 @@
 #include "CHTLJSParser.h"
 #include "../CHTLJSNode/RawJSNode.h"
+#include "../CHTLJSNode/ListenNode.h"
 #include "../CHTLJSNode/EventHandlerNode.h"
 #include <stdexcept>
 #include <algorithm>
@@ -32,9 +33,12 @@ std::unique_ptr<CHTLJSBaseNode> CHTLJSParser::parseStatement() {
         auto selector = parseEnhancedSelector();
         if (match({TokenType::ARROW})) {
             consume(TokenType::LISTEN, "Expect 'Listen' keyword.");
-            return parseListenExpression(std::move(selector));
+            return parseListenBlock(std::move(selector));
         }
         if (match({TokenType::AMPERSAND_ARROW})) {
+            if (check(TokenType::LEFT_BRACE)) {
+                return parseListenBlock(std::move(selector));
+            }
             return parseEventHandlerExpression(std::move(selector));
         }
         return selector;
@@ -81,6 +85,11 @@ std::unique_ptr<EnhancedSelectorNode> CHTLJSParser::parseEnhancedSelector() {
 }
 
 std::unique_ptr<ListenNode> CHTLJSParser::parseListenExpression(std::unique_ptr<EnhancedSelectorNode> selector) {
+    consume(TokenType::LISTEN, "Expect 'Listen' keyword.");
+    return parseListenBlock(std::move(selector));
+}
+
+std::unique_ptr<ListenNode> CHTLJSParser::parseListenBlock(std::unique_ptr<EnhancedSelectorNode> selector) {
     consume(TokenType::LEFT_BRACE, "Expect '{' after 'Listen'.");
 
     auto listenNode = std::make_unique<ListenNode>(selector->parsed_selector);
@@ -114,8 +123,12 @@ std::unique_ptr<ListenNode> CHTLJSParser::parseListenExpression(std::unique_ptr<
 }
 
 std::unique_ptr<EventHandlerNode> CHTLJSParser::parseEventHandlerExpression(std::unique_ptr<EnhancedSelectorNode> selector) {
-    Token eventName = consume(TokenType::IDENTIFIER, "Expect event name.");
-    consume(TokenType::COLON, "Expect ':' after event name.");
+    std::vector<std::string> eventNames;
+    do {
+        eventNames.push_back(consume(TokenType::IDENTIFIER, "Expect event name.").lexeme);
+    } while (match({TokenType::COMMA}));
+
+    consume(TokenType::COLON, "Expect ':' after event name(s).");
 
     Token start_token = peek();
     int brace_level = 0;
@@ -132,7 +145,7 @@ std::unique_ptr<EventHandlerNode> CHTLJSParser::parseEventHandlerExpression(std:
     int end_pos = end_token.position + end_token.lexeme.length();
     std::string handler = source.substr(start_pos, end_pos - start_pos);
 
-    auto eventHandlerNode = std::make_unique<EventHandlerNode>(selector->parsed_selector, eventName.lexeme, handler);
+    auto eventHandlerNode = std::make_unique<EventHandlerNode>(selector->parsed_selector, eventNames, handler);
 
     if (match({TokenType::SEMICOLON})) {
         // continue

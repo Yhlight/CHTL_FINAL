@@ -3,8 +3,8 @@ body {
         id: "myDiv";
     }
     script {
-        {{#myDiv}} &-> click: () => {
-            console.log("Clicked!");
+        {{#myDiv}} &-> click, mouseenter: () => {
+            console.log("Event triggered!");
         };
     }
 }

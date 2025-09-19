@@ -165,10 +165,14 @@ void CHTLGenerator::visit(ScriptNode& node) {
                     }
                 }
                  if (!parsed.selector_string.empty() && parsed.selector_string[0] == '#') {
-                    js_output << selector_js << ".addEventListener('" << handler_node->event_name << "', " << handler_node->handler << ");\n";
+                    for (const auto& event_name : handler_node->event_names) {
+                        js_output << selector_js << ".addEventListener('" << event_name << "', " << handler_node->handler << ");\n";
+                    }
                 } else {
                     js_output << selector_js << ".forEach(el => {\n";
-                    js_output << "  el.addEventListener('" << handler_node->event_name << "', " << handler_node->handler << ");\n";
+                    for (const auto& event_name : handler_node->event_names) {
+                        js_output << "  el.addEventListener('" << event_name << "', " << handler_node->handler << ");\n";
+                    }
                     js_output << "});\n";
                 }
             }

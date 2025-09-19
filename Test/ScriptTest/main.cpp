@@ -30,7 +30,7 @@ int main() {
         std::cout << "--- Generated JS ---\n" << result.js << "\n--------------------\n" << std::endl;
 
         std::string expected_html = "<body><div id=\"myDiv\"></div></body>";
-        std::string expected_js = "document.querySelector('#myDiv').addEventListener('click',()=> {console.log(\"Clicked!\");});";
+        std::string expected_js = "document.querySelector('#myDiv').addEventListener('click',()=> {console.log(\"Eventtriggered!\");});document.querySelector('#myDiv').addEventListener('mouseenter',()=> {console.log(\"Eventtriggered!\");});";
 
         std::string actual_html = result.html;
         std::string actual_js = result.js;
