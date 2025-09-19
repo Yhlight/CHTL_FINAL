@@ -1,0 +1,32 @@
+body {
+    div {
+        class: "box";
+        style {
+            &:hover {
+                color: red;
+            }
+            &::before {
+                opacity: 1;
+            }
+        }
+    }
+
+    span {
+        id: "main-span";
+        style {
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    p {
+        class: "para-class";
+        id: "para-id"; // Class should be preferred
+        style {
+            &.active {
+                font-weight: bold;
+            }
+        }
+    }
+}

@@ -28,6 +28,7 @@ public:
     void visit(LiteralExpr& expr) override;
     void visit(VarExpr& expr) override;
     void visit(ReferenceExpr& expr) override;
+    void visit(SelfReferenceExpr& expr) override;
     void visit(ComparisonExpr& expr) override;
     void visit(LogicalExpr& expr) override;
     void visit(ConditionalExpr& expr) override;

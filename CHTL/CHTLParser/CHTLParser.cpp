@@ -172,9 +172,16 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
         bool isInlineProp = false;
         int i = 0;
-        while (tokens.size() > current + i && tokens[current + i].type != TokenType::END_OF_FILE && tokens[current + i].type != TokenType::RIGHT_BRACE) {
-            if (tokens[current + i].type == TokenType::COLON) { isInlineProp = true; break; }
-            if (tokens[current + i].type == TokenType::LEFT_BRACE) { isInlineProp = false; break; }
+        // Scan ahead to see if a '{' or a ';' comes first.
+        while (tokens.size() > current + i && tokens[current + i].type != TokenType::RIGHT_BRACE && tokens[current + i].type != TokenType::END_OF_FILE) {
+            if (tokens[current + i].type == TokenType::SEMICOLON) {
+                isInlineProp = true;
+                break;
+            }
+            if (tokens[current + i].type == TokenType::LEFT_BRACE) {
+                isInlineProp = false;
+                break;
+            }
             i++;
         }
         if (check(TokenType::AT)) {
@@ -491,7 +498,7 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             consume(TokenType::RIGHT_PAREN, "Expect ')'.");
             return std::make_unique<VarExpr>(first_part.lexeme, key_name);
         } else {
-            return std::make_unique<LiteralExpr>(0, first_part.lexeme);
+            return std::make_unique<SelfReferenceExpr>(first_part);
         }
     }
     if (check(TokenType::SYMBOL) && (peek().lexeme == "#" || peek().lexeme == ".")) {

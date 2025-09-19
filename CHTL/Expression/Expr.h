@@ -17,6 +17,8 @@ class ComparisonExpr;
 class LogicalExpr;
 class ConditionalExpr;
 
+class SelfReferenceExpr;
+
 class ExprVisitor {
 public:
     virtual ~ExprVisitor() = default;
@@ -24,6 +26,7 @@ public:
     virtual void visit(LiteralExpr& expr) = 0;
     virtual void visit(VarExpr& expr) = 0;
     virtual void visit(ReferenceExpr& expr) = 0;
+    virtual void visit(SelfReferenceExpr& expr) = 0;
     virtual void visit(ComparisonExpr& expr) = 0;
     virtual void visit(LogicalExpr& expr) = 0;
     virtual void visit(ConditionalExpr& expr) = 0;
@@ -105,6 +108,14 @@ public:
     std::unique_ptr<Expr> condition;
     std::unique_ptr<Expr> then_branch;
     std::unique_ptr<Expr> else_branch;
+};
+
+class SelfReferenceExpr : public Expr {
+public:
+    SelfReferenceExpr(Token name) : name(name) {}
+    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
+    std::unique_ptr<Expr> clone() const override { return std::make_unique<SelfReferenceExpr>(name); }
+    Token name;
 };
 
 } // namespace CHTL

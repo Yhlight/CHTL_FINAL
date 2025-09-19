@@ -1,0 +1,13 @@
+body {
+    div {
+        id: "box1";
+        style {
+            width: 150px;
+        }
+    }
+    span {
+        style {
+            width: #box1.width + 50px;
+        }
+    }
+}

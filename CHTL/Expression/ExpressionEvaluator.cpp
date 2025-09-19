@@ -94,6 +94,33 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
     throw std::runtime_error("Reference property not found.");
 }
 
+void ExpressionEvaluator::visit(SelfReferenceExpr& expr) {
+    if (!current_context) {
+        throw std::runtime_error("Self-reference used outside of an element context.");
+    }
+
+    if (resolution_stack.count(expr.name.lexeme)) {
+        throw std::runtime_error("Circular property reference detected: " + expr.name.lexeme);
+    }
+
+    // Look for the property in the current element's style nodes
+    for (const auto& child : current_context->children) {
+        if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
+            for (const auto& prop : styleNode->direct_properties) {
+                if (prop.key == expr.name.lexeme) {
+                    resolution_stack.insert(expr.name.lexeme);
+                    result = evaluate(prop.value_expr.get(), current_context);
+                    resolution_stack.erase(expr.name.lexeme);
+                    return;
+                }
+            }
+        }
+    }
+
+    // If not found as a property, treat it as a literal string
+    result = {0.0, expr.name.lexeme};
+}
+
 void ExpressionEvaluator::visit(ComparisonExpr& expr) {
     EvaluatedValue left = evaluate(expr.left.get(), this->current_context);
     EvaluatedValue right = evaluate(expr.right.get(), this->current_context);

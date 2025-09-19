@@ -43,7 +43,22 @@ void CHTLGenerator::visit(ElementNode& node) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             // 1. Process global rules for CSS output and collect classes/IDs
             for (const auto& rule : styleNode->global_rules) {
-                css_output << rule.selector << " {";
+                std::string final_selector = rule.selector;
+                if (!rule.selector.empty() && rule.selector[0] == '&') {
+                    std::string primary_selector;
+                    if (attributes.count("class")) {
+                        std::string first_class = attributes["class"].substr(0, attributes["class"].find(" "));
+                        primary_selector = "." + first_class;
+                    } else if (attributes.count("id")) {
+                        primary_selector = "#" + attributes["id"];
+                    }
+
+                    if (!primary_selector.empty()) {
+                        final_selector.replace(0, 1, primary_selector);
+                    }
+                }
+
+                css_output << final_selector << " {";
                 for (const auto& prop : rule.properties) {
                     ExpressionEvaluator evaluator(this->templates, this->doc_root);
                     EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
@@ -51,11 +66,10 @@ void CHTLGenerator::visit(ElementNode& node) {
                      if (result.value == 0 && !result.unit.empty()) {
                         css_output << result.unit;
                     } else {
-                        if (result.value == static_cast<long long>(result.value)) {
-                            css_output << std::to_string(static_cast<long long>(result.value));
-                        } else {
-                            css_output << std::to_string(result.value);
-                        }
+                        // Use a stringstream to format the double without trailing zeros
+                        std::stringstream ss;
+                        ss << result.value;
+                        css_output << ss.str();
                         css_output << result.unit;
                     }
                     css_output << ";";
