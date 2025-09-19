@@ -109,7 +109,8 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
         }
     }
 
-    throw std::runtime_error("Reference error: property '" + expr.property.lexeme + "' not found on element with selector '" + expr.selector.lexeme + "'.");
+    // If the property is not found, treat it as a literal string value (e.g., "red", "solid", "auto").
+    result = {0.0, expr.property.lexeme};
 }
 
 void ExpressionEvaluator::visit(ComparisonExpr& expr) {

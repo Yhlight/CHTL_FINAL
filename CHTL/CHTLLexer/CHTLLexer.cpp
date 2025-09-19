@@ -78,8 +78,8 @@ void CHTLLexer::scanToken() {
                 }
                 addToken(TokenType::HASHTAG_COMMENT, source.substr(start, current - start));
             } else {
-                // Not a valid comment, treat as a symbol
-                addToken(TokenType::SYMBOL);
+                // Not a comment, so it's a HASH for an ID selector.
+                addToken(TokenType::HASH);
             }
             break;
 

@@ -101,6 +101,33 @@ std::unique_ptr<Expr> CHTLParser::parsePower() {
 }
 
 std::unique_ptr<Expr> CHTLParser::parsePrimary() {
+    // Handle ID and Class selectors for property references, e.g., #main.width or .box.height
+    if (check(TokenType::HASH) || check(TokenType::DOT)) {
+        Token selector_start = advance(); // Consume '#' or '.'
+        Token selector_name = consume(TokenType::IDENTIFIER, "Expect selector name after '#' or '.'.");
+
+        // This could be a reference or just a literal value (like a hex code or class name).
+        // A reference *must* be followed by a dot.
+        if (check(TokenType::DOT)) {
+            consume(TokenType::DOT, "Expect '.' after selector to access a property.");
+            Token property = consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
+
+            // Reconstruct the full selector string for the evaluator.
+            std::string full_selector_str = selector_start.lexeme + selector_name.lexeme;
+            Token full_selector_token = {selector_start.type, full_selector_str, selector_start.line, selector_start.position};
+
+            return std::make_unique<ReferenceExpr>(full_selector_token, property);
+        } else {
+            // It's not a reference, so treat it as a literal value.
+            // This is for cases like `color: #fff` or `font-family: .Helvetica`.
+            // The evaluator will treat an unresolved reference as a literal, so we can
+            // create a "fake" reference expression here.
+            std::string literal_value = selector_start.lexeme + selector_name.lexeme;
+            // The property name is the value itself. The selector is empty.
+            return std::make_unique<ReferenceExpr>(Token(), Token{TokenType::IDENTIFIER, literal_value, selector_start.line, selector_start.position});
+        }
+    }
+
     if (match({TokenType::NUMBER})) {
         Token number = previous();
         std::string unit = "";
@@ -323,19 +350,21 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
     auto styleNode = std::make_unique<StyleNode>();
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        bool isInlineProp = false;
+        // Look ahead to see if this is a rule block (contains '{') or an inline property (ends with ';').
+        bool isInlineProp = true;
         int i = 0;
         while (tokens.size() > current + i && tokens[current + i].type != TokenType::END_OF_FILE && tokens[current + i].type != TokenType::RIGHT_BRACE) {
-            if (tokens[current + i].type == TokenType::COLON) {
-                isInlineProp = true;
+            if (tokens[current + i].type == TokenType::LEFT_BRACE) {
+                isInlineProp = false; // Found a '{', so it's a rule block.
                 break;
             }
-            if (tokens[current + i].type == TokenType::LEFT_BRACE) {
-                isInlineProp = false;
+            if (tokens[current + i].type == TokenType::SEMICOLON) {
+                isInlineProp = true; // Found a ';', so it's an inline property.
                 break;
             }
             i++;
         }
+
 
         if (check(TokenType::AT)) {
             parseStyleTemplateUsage(styleNode.get());

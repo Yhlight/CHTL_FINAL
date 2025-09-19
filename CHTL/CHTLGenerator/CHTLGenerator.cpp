@@ -47,12 +47,34 @@ void CHTLGenerator::visit(ElementNode& node) {
                         node.attributes.push_back({"class", className});
                     }
                 } else if (selector.rfind('#', 0) == 0) { // Starts with #
-                    node.attributes.push_back({"id", selector.substr(1)});
+                    // Only add the id if one doesn't already exist.
+                    auto it = std::find_if(node.attributes.begin(), node.attributes.end(),
+                                           [](const HtmlAttribute& attr){ return attr.key == "id"; });
+                    if (it == node.attributes.end()) {
+                        node.attributes.push_back({"id", selector.substr(1)});
+                    }
                 }
 
+                // Handle the '&' selector replacement
                 size_t pos = selector.find('&');
                 if (pos != std::string::npos) {
-                    selector.replace(pos, 1, node.tagName);
+                    std::string replacement;
+                    // Prioritize class, then id, then tag name
+                    auto class_attr = std::find_if(node.attributes.begin(), node.attributes.end(),
+                                                   [](const HtmlAttribute& attr){ return attr.key == "class"; });
+                    auto id_attr = std::find_if(node.attributes.begin(), node.attributes.end(),
+                                                [](const HtmlAttribute& attr){ return attr.key == "id"; });
+
+                    if (class_attr != node.attributes.end() && !class_attr->value.empty()) {
+                        // Use the first class name
+                        std::string first_class = class_attr->value.substr(0, class_attr->value.find(' '));
+                        replacement = "." + first_class;
+                    } else if (id_attr != node.attributes.end()) {
+                        replacement = "#" + id_attr->value;
+                    } else {
+                        replacement = node.tagName;
+                    }
+                    selector.replace(pos, 1, replacement);
                 }
 
                 css_output << selector << " {\n";
