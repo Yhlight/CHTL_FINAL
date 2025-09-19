@@ -1,0 +1,21 @@
+[Template] @Style Base
+{
+    font-family: Arial;
+    color: blue;
+}
+
+[Template] @Style Child
+{
+    inherit @Style Base;
+    color: red; // Override parent color
+    font-size: 20px;
+}
+
+div
+{
+    style
+    {
+        @Style Child;
+        font-weight: bold;
+    }
+}

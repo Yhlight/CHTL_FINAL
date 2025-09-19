@@ -1,0 +1,15 @@
+div {
+    style {
+        // Simple addition for inline style
+        width: 100px + 50px;
+
+        // More complex expression for inline style
+        height: 200% - (10px * 2);
+
+        // Style rule for global CSS
+        .box {
+            font-size: 12pt + 2pt;
+            color: red; // A simple property to make sure it's all working
+        }
+    }
+}

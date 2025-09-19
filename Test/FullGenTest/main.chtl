@@ -1,0 +1,13 @@
+use html5;
+
+div {
+    text: "Hello World";
+
+    style {
+        height: 200px; /* This is an inline style */
+
+        .box {
+            color: red; /* This should become a global style */
+        }
+    }
+}
