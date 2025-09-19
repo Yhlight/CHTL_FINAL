@@ -65,6 +65,13 @@ void ExpressionEvaluator::visit(VarExpr& expr) {
 }
 
 void ExpressionEvaluator::visit(ReferenceExpr& expr) {
+    // HACK: If the selector is empty, the parser likely parsed a bare word like "red".
+    // Treat it as a string literal. This should be fixed in the parser later.
+    if (expr.selector.lexeme.empty()) {
+        result = {0, expr.property.lexeme};
+        return;
+    }
+
     std::string full_ref_name = expr.selector.lexeme + "." + expr.property.lexeme;
     if (resolution_stack.count(full_ref_name)) {
         throw std::runtime_error("Circular property reference detected.");

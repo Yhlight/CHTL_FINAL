@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <cmath> // For modf
 
 namespace CHTL {
 
@@ -17,6 +18,22 @@ class ElementNode;
 struct EvaluatedValue {
     double value;
     std::string unit;
+
+    std::string toString() const {
+        // For string-like values stored in unit (e.g. "red", "auto")
+        if (value == 0 && !unit.empty() && unit.find_first_of("0123456789") == std::string::npos) {
+            return unit;
+        }
+
+        // Check if the double has a fractional part
+        double int_part;
+        if (modf(value, &int_part) == 0.0) {
+            return std::to_string(static_cast<long long>(value)) + unit;
+        }
+
+        // Default to standard float representation
+        return std::to_string(value) + unit;
+    }
 };
 
 class ExpressionEvaluator : public ExprVisitor {

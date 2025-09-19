@@ -3,9 +3,14 @@
 
 #include "../CHTLLexer/Token.h"
 #include "../CHTLNode/BaseNode.h"
+#include "../CHTLNode/RootNode.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/ScriptNode.h"
+#include "../CHTLNode/CommentNode.h"
+#include "../CHTLNode/ImportNode.h"
+#include "../CHTLNode/NamespaceNode.h"
+#include "../CHTLNode/ConfigNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../Expression/Expr.h"
 #include <vector>
@@ -17,7 +22,7 @@ namespace CHTL {
 class CHTLParser {
 public:
     explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path);
-    std::unique_ptr<BaseNode> parse();
+    std::unique_ptr<RootNode> parse();
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getTemplateDefinitions() const;
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getMutableTemplateDefinitions();
 
@@ -25,9 +30,10 @@ private:
     const std::string& source;
     const std::vector<Token>& tokens;
     const std::string file_path;
-    std::string current_namespace;
+    std::vector<std::string> namespace_stack;
     int current = 0;
 
+    std::string getCurrentNamespace();
     bool isAtEnd();
     Token peek();
     Token previous();
@@ -36,7 +42,9 @@ private:
     Token consume(TokenType type, const std::string& message);
     bool match(const std::vector<TokenType>& types);
     void error(const Token& token, const std::string& message);
+    void skipComments();
 
+    // Expression parsing
     std::unique_ptr<Expr> parseExpression();
     std::unique_ptr<Expr> parseConditional();
     std::unique_ptr<Expr> parseLogicalOr();
@@ -48,16 +56,23 @@ private:
     std::unique_ptr<Expr> parsePower();
     std::unique_ptr<Expr> parsePrimary();
 
+    // Declaration parsing
+    std::vector<std::unique_ptr<BaseNode>> parseTopLevelDeclaration();
     std::vector<std::unique_ptr<BaseNode>> parseDeclaration();
     std::unique_ptr<ElementNode> parseElement();
     void parseAttribute(ElementNode* element);
     std::unique_ptr<StyleNode> parseStyleBlock();
+    CssRuleNode parseCssRule();
     std::unique_ptr<ScriptNode> parseScriptBlock();
     std::unique_ptr<BaseNode> parseOriginBlock();
+    std::unique_ptr<CommentNode> parseComment();
+    std::unique_ptr<NamespaceNode> parseNamespace();
+    std::unique_ptr<ConfigNode> parseConfig();
 
+    // Template and Import parsing
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>> template_definitions;
     void parseSymbolDeclaration(bool is_custom);
-    void parseImportStatement();
+    std::unique_ptr<ImportNode> parseImportStatement();
     void parseStyleTemplateUsage(StyleNode* styleNode);
     std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();
 };

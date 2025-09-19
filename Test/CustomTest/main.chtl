@@ -1,12 +1,13 @@
-[Import] @Chtl from "lib.chtl";
-body {
-    @Element Card {
-        delete div[2];
-    }
-    hr{}
-    @Element Card {
-        insert after div[1] {
-            p { text: "Inserted!"; }
+
+        [Namespace] my_ui {
+            [Template] @Element Button {
+                button {
+                    class: "btn";
+                    text: "Click Me";
+                }
+            }
+
+            body {
+                @Element Button;
+            }
         }
-    }
-}

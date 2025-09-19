@@ -24,6 +24,7 @@ private:
     void string(char quote);
     void number();
     void identifier();
+    void scanBlockKeyword();
 
     const std::string& source;
     std::vector<Token> tokens;

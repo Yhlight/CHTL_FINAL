@@ -2,6 +2,16 @@
 #define CHTL_GENERATOR_H
 
 #include "../CHTLNode/Visitor.h"
+#include "../CHTLNode/RootNode.h"
+#include "../CHTLNode/ElementNode.h"
+#include "../CHTLNode/TextNode.h"
+#include "../CHTLNode/StyleNode.h"
+#include "../CHTLNode/OriginNode.h"
+#include "../CHTLNode/ScriptNode.h"
+#include "../CHTLNode/CommentNode.h"
+#include "../CHTLNode/ImportNode.h"
+#include "../CHTLNode/NamespaceNode.h"
+#include "../CHTLNode/ConfigNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../../CHTL JS/CHTLJSNode/DelegateNode.h"
 #include <string>
@@ -20,13 +30,18 @@ struct CompilationResult {
 class CHTLGenerator : public Visitor {
 public:
     explicit CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates);
-    CompilationResult generate(BaseNode* root);
+    CompilationResult generate(RootNode* root);
 
+    void visit(RootNode& node) override;
     void visit(ElementNode& node) override;
     void visit(TextNode& node) override;
     void visit(StyleNode& node) override;
     void visit(OriginNode& node) override;
     void visit(ScriptNode& node) override;
+    void visit(CommentNode& node) override;
+    void visit(ImportNode& node) override;
+    void visit(NamespaceNode& node) override;
+    void visit(ConfigNode& node) override;
 
 private:
     std::stringstream html_output;
