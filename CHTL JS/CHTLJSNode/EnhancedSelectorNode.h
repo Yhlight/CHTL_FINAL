@@ -25,6 +25,10 @@ public:
         type = CHTLJSNodeType::EnhancedSelector;
     }
 
+    void accept(Visitor& visitor) override {
+        visitor.visit(*this);
+    }
+
     std::string raw_content;
     ParsedSelector parsed_selector;
 };

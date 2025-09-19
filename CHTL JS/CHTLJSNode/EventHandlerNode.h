@@ -15,6 +15,10 @@ public:
         type = CHTLJSNodeType::EventHandler;
     }
 
+    void accept(Visitor& visitor) override {
+        visitor.visit(*this);
+    }
+
     ParsedSelector selector;
     std::vector<std::string> event_names;
     std::string handler;

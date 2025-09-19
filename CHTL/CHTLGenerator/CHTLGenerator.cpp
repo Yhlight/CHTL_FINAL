@@ -4,14 +4,7 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/ScriptNode.h"
-#include "../../CHTL JS/CHTLJSLexer/CHTLJSLexer.h"
-#include "../../CHTL JS/CHTLJSParser/CHTLJSParser.h"
-#include "../../CHTL JS/CHTLJSNode/RawJSNode.h"
-#include "../../CHTL JS/CHTLJSNode/EnhancedSelectorNode.h"
-#include "../../CHTL JS/CHTLJSNode/ListenNode.h"
-#include "../../CHTL JS/CHTLJSNode/EventHandlerNode.h"
-#include "../../CHTL JS/CHTLJSNode/DelegateNode.h"
-#include "../../CHTL JS/CHTLJSNode/AnimateNode.h"
+#include "../CHTLNode/PlaceholderNode.h"
 #include "../Expression/ExpressionEvaluator.h"
 #include <unordered_set>
 #include <algorithm>
@@ -31,30 +24,10 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
     html_output.str("");
     css_output.str("");
     js_output.str("");
-    delegate_registry.clear();
     this->doc_root = root;
     if (root) {
         root->accept(*this);
     }
-
-    // Process the delegate registry
-    for (const auto& pair : delegate_registry) {
-        const std::string& parent_selector_str = pair.first;
-        const auto& delegate_nodes = pair.second;
-
-        js_output << "document.querySelector('" << parent_selector_str << "').addEventListener('click', (event) => {\n";
-        for (const auto& delegate_node : delegate_nodes) {
-            for (const auto& target : delegate_node.target_selectors) {
-                 js_output << "  if (event.target.matches('" << target.selector_string << "')) {\n";
-                 for (const auto& event : delegate_node.events) {
-                     js_output << "    (" << event.second << ")(event);\n";
-                 }
-                 js_output << "  }\n";
-            }
-        }
-        js_output << "});\n";
-    }
-
     return {html_output.str(), css_output.str(), js_output.str()};
 }
 
@@ -139,113 +112,15 @@ void CHTLGenerator::visit(OriginNode& node) {
     else if (node.type == OriginType::JAVASCRIPT) js_output << node.content;
 }
 
+void CHTLGenerator::visit(PlaceholderNode& node) {
+    html_output << node.placeholder;
+}
+
 void CHTLGenerator::visit(ScriptNode& node) {
-    CHTL_JS::CHTLJSLexer lexer(node.content);
-    std::vector<CHTL_JS::Token> tokens = lexer.scanTokens();
-    CHTL_JS::CHTLJSParser parser(tokens, node.content);
-    auto js_nodes = parser.parse();
-
-    for (const auto& js_node : js_nodes) {
-        if (!js_node) continue;
-        if (js_node->type == CHTL_JS::CHTLJSNodeType::Animate) {
-            if (auto* animate_node = dynamic_cast<CHTL_JS::AnimateNode*>(js_node.get())) {
-                js_output << "{\n";
-                js_output << "  const targets = [";
-                for (size_t i = 0; i < animate_node->targets.size(); ++i) {
-                    js_output << "document.querySelector('" << animate_node->targets[i].selector_string << "')";
-                    if (i < animate_node->targets.size() - 1) js_output << ", ";
-                }
-                js_output << "];\n";
-                js_output << "  const duration = " << animate_node->duration.value_or(1000) << ";\n";
-                // ... (generate other properties)
-                js_output << "  let startTime = null;\n";
-                js_output << "  function step(timestamp) {\n";
-                js_output << "    if (!startTime) startTime = timestamp;\n";
-                js_output << "    const progress = Math.min((timestamp - startTime) / duration, 1);\n";
-                js_output << "    targets.forEach(target => {\n";
-                // ... (generate style updates based on progress)
-                js_output << "    });\n";
-                js_output << "    if (progress < 1) {\n";
-                js_output << "      requestAnimationFrame(step);\n";
-                js_output << "    }\n";
-                js_output << "  }\n";
-                js_output << "  requestAnimationFrame(step);\n";
-                js_output << "}\n";
-            }
-        } else if (js_node->type == CHTL_JS::CHTLJSNodeType::Delegate) {
-            if (auto* delegate_node = dynamic_cast<CHTL_JS::DelegateNode*>(js_node.get())) {
-                delegate_registry[delegate_node->parent_selector.selector_string].push_back(*delegate_node);
-            }
-        } else if (js_node->type == CHTL_JS::CHTLJSNodeType::Listen) {
-            if (auto* listen_node = dynamic_cast<CHTL_JS::ListenNode*>(js_node.get())) {
-                const auto& parsed = listen_node->selector;
-                std::string selector_js;
-                if (parsed.type == CHTL_JS::SelectorType::IndexedQuery) {
-                    selector_js = "document.querySelectorAll('" + parsed.selector_string + "')[" + std::to_string(parsed.index.value_or(0)) + "]";
-                } else {
-                    if (!parsed.selector_string.empty() && parsed.selector_string[0] == '#') {
-                        selector_js = "document.querySelector('" + parsed.selector_string + "')";
-                    } else {
-                        selector_js = "document.querySelectorAll('" + parsed.selector_string + "')";
-                    }
-                }
-
-                if (!parsed.selector_string.empty() && parsed.selector_string[0] == '#') {
-                     for (const auto& event : listen_node->events) {
-                        js_output << selector_js << ".addEventListener('" << event.first << "', " << event.second << ");\n";
-                    }
-                } else {
-                    js_output << selector_js << ".forEach(el => {\n";
-                    for (const auto& event : listen_node->events) {
-                        js_output << "  el.addEventListener('" << event.first << "', " << event.second << ");\n";
-                    }
-                    js_output << "});\n";
-                }
-            }
-        } else if (js_node->type == CHTL_JS::CHTLJSNodeType::EventHandler) {
-            if (auto* handler_node = dynamic_cast<CHTL_JS::EventHandlerNode*>(js_node.get())) {
-                const auto& parsed = handler_node->selector;
-                std::string selector_js;
-                if (parsed.type == CHTL_JS::SelectorType::IndexedQuery) {
-                    selector_js = "document.querySelectorAll('" + parsed.selector_string + "')[" + std::to_string(parsed.index.value_or(0)) + "]";
-                } else {
-                    if (!parsed.selector_string.empty() && parsed.selector_string[0] == '#') {
-                        selector_js = "document.querySelector('" + parsed.selector_string + "')";
-                    } else {
-                        selector_js = "document.querySelectorAll('" + parsed.selector_string + "')";
-                    }
-                }
-                 if (!parsed.selector_string.empty() && parsed.selector_string[0] == '#') {
-                    for (const auto& event_name : handler_node->event_names) {
-                        js_output << selector_js << ".addEventListener('" << event_name << "', " << handler_node->handler << ");\n";
-                    }
-                } else {
-                    js_output << selector_js << ".forEach(el => {\n";
-                    for (const auto& event_name : handler_node->event_names) {
-                        js_output << "  el.addEventListener('" << event_name << "', " << handler_node->handler << ");\n";
-                    }
-                    js_output << "});\n";
-                }
-            }
-        } else if (js_node->type == CHTL_JS::CHTLJSNodeType::RawJS) {
-            if (auto* raw_node = dynamic_cast<CHTL_JS::RawJSNode*>(js_node.get())) {
-                js_output << raw_node->content;
-            }
-        } else if (js_node->type == CHTL_JS::CHTLJSNodeType::EnhancedSelector) {
-             if (auto* selector_node = dynamic_cast<CHTL_JS::EnhancedSelectorNode*>(js_node.get())) {
-                const auto& parsed = selector_node->parsed_selector;
-                if (parsed.type == CHTL_JS::SelectorType::IndexedQuery) {
-                    js_output << "document.querySelectorAll('" << parsed.selector_string << "')[" << parsed.index.value_or(0) << "]";
-                } else {
-                    if (!parsed.selector_string.empty() && parsed.selector_string[0] == '#') {
-                        js_output << "document.querySelector('" << parsed.selector_string << "')";
-                    } else {
-                        js_output << "document.querySelectorAll('" << parsed.selector_string << "')";
-                    }
-                }
-            }
-        }
-    }
+    // This logic is now moved to CHTLJSGenerator.
+    // This method should ideally not be called if the scanner is working correctly.
+    // If it is called, we can treat the content as raw JS.
+    js_output << node.content;
 }
 
 } // namespace CHTL

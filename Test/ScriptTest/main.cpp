@@ -1,6 +1,6 @@
-#include "../../CHTL/CHTLLexer/CHTLLexer.h"
-#include "../../CHTL/CHTLParser/CHTLParser.h"
-#include "../../CHTL/CHTLGenerator/CHTLGenerator.h"
+#include "../../Scanner/UnifiedScanner.h"
+#include "../../CompilerDispatcher/CompilerDispatcher.h"
+#include "../../CodeMerger/CodeMerger.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <cassert>
@@ -19,12 +19,12 @@ int main() {
     std::cout << "--- Input CHTL from " << entry_point << " ---\n" << source << "\n------------------\n" << std::endl;
 
     try {
-        CHTL::CHTLLexer lexer(source);
-        std::vector<CHTL::Token> tokens = lexer.scanTokens();
-        CHTL::CHTLParser parser(source, tokens, entry_point);
-        std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
-        CHTL::CHTLGenerator generator(parser.getTemplateDefinitions());
-        CHTL::CompilationResult result = generator.generate(ast.get());
+        CHTL::UnifiedScanner scanner(source);
+        CHTL::ScanResult scan_result = scanner.scan();
+        CHTL::CodeMerger merger;
+        CHTL::CompilerDispatcher dispatcher(merger);
+        dispatcher.dispatch(scan_result, entry_point);
+        CHTL::CompilationResult result = merger.getResult();
 
         std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n" << std::endl;
         std::cout << "--- Generated JS ---\n" << result.js << "\n--------------------\n" << std::endl;

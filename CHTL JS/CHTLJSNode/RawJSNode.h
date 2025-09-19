@@ -12,6 +12,10 @@ public:
         type = CHTLJSNodeType::RawJS;
     }
 
+    void accept(Visitor& visitor) override {
+        visitor.visit(*this);
+    }
+
     std::string content;
 };
 

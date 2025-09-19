@@ -35,6 +35,14 @@ bool CHTLLexer::isAtEnd() {
 }
 
 void CHTLLexer::scanToken() {
+    if (source.substr(start, 2) == "__") {
+        size_t end_pos = source.find("__", start + 2);
+        if (end_pos != std::string::npos) {
+            current = end_pos + 2;
+            addToken(TokenType::PLACEHOLDER);
+            return;
+        }
+    }
     char c = advance();
     switch (c) {
         case '(': addToken(TokenType::LEFT_PAREN); break;

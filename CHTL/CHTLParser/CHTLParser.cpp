@@ -3,6 +3,7 @@
 #include "../CHTLLexer/CHTLLexer.h"
 #include "CHTL/CHTLNode/TextNode.h"
 #include "CHTL/CHTLNode/OriginNode.h"
+#include "CHTL/CHTLNode/PlaceholderNode.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <stdexcept>
@@ -105,6 +106,12 @@ std::unique_ptr<BaseNode> CHTLParser::parse() {
 }
 
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
+    if (check(TokenType::PLACEHOLDER)) {
+        Token placeholder_token = advance();
+        std::vector<std::unique_ptr<BaseNode>> nodes;
+        nodes.push_back(std::make_unique<PlaceholderNode>(placeholder_token.lexeme));
+        return nodes;
+    }
     if (check(TokenType::AT)) return parseElementTemplateUsage();
     if (peek().type == TokenType::LEFT_BRACKET && tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
         std::vector<std::unique_ptr<BaseNode>> nodes;

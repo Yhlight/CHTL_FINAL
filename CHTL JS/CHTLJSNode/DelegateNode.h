@@ -16,6 +16,10 @@ public:
         type = CHTLJSNodeType::Delegate;
     }
 
+    void accept(Visitor& visitor) override {
+        visitor.visit(*this);
+    }
+
     ParsedSelector parent_selector;
     std::vector<ParsedSelector> target_selectors;
     std::map<std::string, std::string> events;

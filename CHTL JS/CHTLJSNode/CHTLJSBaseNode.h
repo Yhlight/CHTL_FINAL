@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include "Visitor.h"
 
 namespace CHTL_JS {
 
@@ -18,6 +19,7 @@ enum class CHTLJSNodeType {
 class CHTLJSBaseNode {
 public:
     virtual ~CHTLJSBaseNode() = default;
+    virtual void accept(Visitor& visitor) = 0;
     CHTLJSNodeType type;
 };
 

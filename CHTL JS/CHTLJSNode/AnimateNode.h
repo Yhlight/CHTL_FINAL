@@ -21,6 +21,10 @@ public:
         type = CHTLJSNodeType::Animate;
     }
 
+    void accept(Visitor& visitor) override {
+        visitor.visit(*this);
+    }
+
     std::vector<ParsedSelector> targets;
     std::optional<int> duration;
     std::optional<std::string> easing;

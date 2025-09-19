@@ -50,6 +50,7 @@ enum class TokenType {
 
     // Special
     SYMBOL,
+    PLACEHOLDER,
     END_OF_FILE,
     UNKNOWN
 };

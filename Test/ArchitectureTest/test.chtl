@@ -1,0 +1,11 @@
+body {
+    div {
+        id: "myDiv";
+        text: "Hello from CHTL";
+    }
+    script {
+        {{#myDiv}} -> Listen {
+            click: () => { console.log("Clicked!"); }
+        }
+    }
+}
