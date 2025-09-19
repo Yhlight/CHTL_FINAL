@@ -5,7 +5,12 @@
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/StyleNode.h"
+#include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../CHTLNode/ImportNode.h"
+#include "../CHTLNode/NamespaceNode.h"
+#include "../CHTLNode/ConfigurationNode.h"
+#include "../CHTLNode/ConstraintNode.h"
 #include "../Expression/Expr.h"
 #include <vector>
 #include <memory>
@@ -25,6 +30,7 @@ private:
     const std::vector<Token>& tokens;
     const std::string file_path;
     std::string current_namespace;
+    bool is_parsing_template_definition = false;
     int current = 0;
 
     bool isAtEnd();
@@ -54,8 +60,12 @@ private:
     std::unique_ptr<BaseNode> parseOriginBlock();
 
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>> template_definitions;
+    std::map<std::string, std::map<std::string, std::unique_ptr<OriginNode>>> origin_definitions;
     void parseSymbolDeclaration(bool is_custom);
-    void parseImportStatement();
+    std::unique_ptr<ImportNode> parseImportStatement();
+    std::unique_ptr<NamespaceNode> parseNamespace();
+    std::unique_ptr<ConfigurationNode> parseConfiguration();
+    std::unique_ptr<ConstraintNode> parseConstraint();
     void parseStyleTemplateUsage(StyleNode* styleNode);
     std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();
 };

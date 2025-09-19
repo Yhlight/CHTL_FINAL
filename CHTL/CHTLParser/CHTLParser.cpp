@@ -2,10 +2,12 @@
 #include "../CHTLLoader/CHTLLoader.h"
 #include "../CHTLLexer/CHTLLexer.h"
 #include "CHTL/CHTLNode/TextNode.h"
+#include "CHTL/CHTLNode/TemplateUsageNode.h"
 #include "CHTL/CHTLNode/OriginNode.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <stdexcept>
+#include <algorithm>
 
 namespace CHTL {
 
@@ -83,33 +85,116 @@ std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& CHTLParser
 
 
 std::unique_ptr<BaseNode> CHTLParser::parse() {
-    while (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
-        if (peek().type == TokenType::LEFT_BRACKET) {
-            if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Template") {
-                parseSymbolDeclaration(false);
-            } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Custom") {
-                parseSymbolDeclaration(true);
-            } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
-                parseOriginBlock();
-            } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Import") {
-                parseImportStatement();
-            } else { break; }
-        } else { break; }
-    }
-    if (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
-        auto nodes = parseDeclaration();
-        if (nodes.size() == 1) return std::move(nodes[0]);
-        else error(peek(), "Expected a single root element declaration.");
-    }
-    return nullptr;
+	auto root = std::make_unique<ElementNode>("root");
+	std::vector<std::unique_ptr<BaseNode>> top_level_nodes;
+
+	while (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
+		if (check(TokenType::LEFT_BRACKET)) {
+			if (tokens.size() > current + 1 && tokens[current + 1].type == TokenType::KEYWORD_TEMPLATE) {
+				parseSymbolDeclaration(false);
+			}
+			else if (tokens.size() > current + 1 && tokens[current + 1].type == TokenType::KEYWORD_CUSTOM) {
+				parseSymbolDeclaration(true);
+			}
+			else if (tokens.size() > current + 1 && tokens[current + 1].type == TokenType::KEYWORD_ORIGIN) {
+				top_level_nodes.push_back(parseOriginBlock());
+			}
+			else if (tokens.size() > current + 1 && tokens[current + 1].type == TokenType::KEYWORD_IMPORT) {
+				top_level_nodes.push_back(parseImportStatement());
+			}
+			else if (tokens.size() > current + 1 && tokens[current + 1].type == TokenType::KEYWORD_NAMESPACE) {
+				top_level_nodes.push_back(parseNamespace());
+			}
+			else if (tokens.size() > current + 1 && tokens[current + 1].type == TokenType::KEYWORD_CONFIGURATION) {
+				top_level_nodes.push_back(parseConfiguration());
+			}
+			else {
+				break;
+			}
+		}
+		else if (check(TokenType::IDENTIFIER) || check(TokenType::AT) || check(TokenType::TEXT) || check(TokenType::STYLE)) {
+			for (auto& node : parseDeclaration()) {
+				top_level_nodes.push_back(std::move(node));
+			}
+		}
+		else {
+			break;
+		}
+	}
+
+	if (top_level_nodes.empty()) {
+		return nullptr;
+	}
+
+	if (top_level_nodes.size() == 1 && dynamic_cast<ElementNode*>(top_level_nodes[0].get())) {
+		return std::move(top_level_nodes[0]);
+	}
+
+	for (auto& node : top_level_nodes) {
+		root->addChild(std::move(node));
+	}
+
+	return root;
 }
 
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
-    if (check(TokenType::AT)) return parseElementTemplateUsage();
-    if (peek().type == TokenType::LEFT_BRACKET && tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
-        std::vector<std::unique_ptr<BaseNode>> nodes;
-        nodes.push_back(parseOriginBlock());
-        return nodes;
+    if (check(TokenType::AT)) {
+        if (is_parsing_template_definition) {
+            consume(TokenType::AT, "Expect '@'.");
+            Token type = consume(TokenType::IDENTIFIER, "Expect 'Element' or 'Style'.");
+            if (type.lexeme != "Element") error(type, "Only @Element templates can be nested in this context.");
+            Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+            consume(TokenType::SEMICOLON, "Expect ';'.");
+            std::vector<std::unique_ptr<BaseNode>> nodes;
+            nodes.push_back(std::make_unique<TemplateUsageNode>(TemplateType::ELEMENT, name.lexeme));
+            return nodes;
+        } else {
+            return parseElementTemplateUsage();
+        }
+    }
+    if (peek().type == TokenType::LEFT_BRACKET && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::KEYWORD_ORIGIN) {
+        // This could be a definition or a usage.
+        // Let's peek ahead to see if there's a '{'
+        bool is_definition = false;
+        for (int i = 0; !isAtEnd() && tokens[current + i].type != TokenType::SEMICOLON; ++i) {
+            if (tokens[current + i].type == TokenType::LEFT_BRACE) {
+                is_definition = true;
+                break;
+            }
+        }
+
+        if (is_definition) {
+            auto node = parseOriginBlock();
+            if (node) { // parseOriginBlock returns nullptr for named (defined) blocks
+                std::vector<std::unique_ptr<BaseNode>> nodes;
+                nodes.push_back(std::move(node));
+                return nodes;
+            }
+            return {}; // It was a named block, not part of the tree here.
+        } else {
+            // This is a usage of a named origin block
+            consume(TokenType::LEFT_BRACKET, "Expect '['.");
+            consume(TokenType::KEYWORD_ORIGIN, "Expect 'Origin'.");
+            consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+            consume(TokenType::AT, "Expect '@'.");
+            consume(TokenType::IDENTIFIER, "Expect origin type."); // Type is still needed for lookup
+            Token name = consume(TokenType::IDENTIFIER, "Expect origin block name.");
+            consume(TokenType::SEMICOLON, "Expect ';'.");
+
+            const OriginNode* def = nullptr;
+            for (const auto& ns_pair : origin_definitions) {
+                if (ns_pair.second.count(name.lexeme)) {
+                    def = ns_pair.second.at(name.lexeme).get();
+                    break;
+                }
+            }
+            if (!def) {
+                error(name, "Named origin block '" + name.lexeme + "' not found.");
+            }
+            std::vector<std::unique_ptr<BaseNode>> nodes;
+            nodes.push_back(def->clone());
+            return nodes;
+        }
     }
     if (match({TokenType::TEXT})) {
         consume(TokenType::LEFT_BRACE, "Expect '{' after 'text'.");
@@ -211,15 +296,33 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
     Token type = consume(TokenType::IDENTIFIER, "Expect template type.");
     if (type.lexeme != "Style") { error(type, "Expect '@Style' template usage here."); }
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+
+    if (match({TokenType::FROM})) {
+        std::string target_namespace;
+        while(!check(TokenType::SEMICOLON) && !check(TokenType::LEFT_BRACE)) {
+            target_namespace += advance().lexeme;
+        }
+        // The generator will need to handle the namespaced lookup.
+        // For now, we prepend the namespace to the template name.
+        name.lexeme = target_namespace + "." + name.lexeme;
+    }
+
     StyleNode::StyleApplication app;
     app.template_name = name.lexeme;
     if (match({TokenType::LEFT_BRACE})) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
             if (match({TokenType::DELETE})) {
-                do {
-                    Token prop_to_delete = consume(TokenType::IDENTIFIER, "Expect property name after 'delete'.");
-                    app.deleted_properties.push_back(prop_to_delete.lexeme);
-                } while (match({TokenType::COMMA}));
+                if (check(TokenType::AT)) {
+                    consume(TokenType::AT, "Expect '@'.");
+                    Token type = consume(TokenType::IDENTIFIER, "Expect 'Style' keyword.");
+                    if (type.lexeme != "Style") error(type, "Can only delete @Style templates.");
+                    app.deleted_templates.push_back(consume(TokenType::IDENTIFIER, "Expect template name.").lexeme);
+                } else {
+                    do {
+                        Token prop_to_delete = consume(TokenType::IDENTIFIER, "Expect property name after 'delete'.");
+                        app.deleted_properties.push_back(prop_to_delete.lexeme);
+                    } while (match({TokenType::COMMA}));
+                }
                 consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
             } else {
                 std::string key_str;
@@ -242,11 +345,25 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
     Token type = consume(TokenType::IDENTIFIER, "Expect template type.");
     if (type.lexeme != "Element") { error(type, "Expect '@Element' template usage here."); }
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+
+    std::string target_namespace;
+    if (match({TokenType::FROM})) {
+        while(!check(TokenType::SEMICOLON) && !check(TokenType::LEFT_BRACE)) {
+            target_namespace += advance().lexeme;
+        }
+    }
+
     const TemplateDefinitionNode* def = nullptr;
-    for (const auto& ns_pair : template_definitions) {
-        if (ns_pair.second.count(name.lexeme)) {
-            def = &ns_pair.second.at(name.lexeme);
-            break;
+    if (!target_namespace.empty()) {
+        if (template_definitions.count(target_namespace) && template_definitions.at(target_namespace).count(name.lexeme)) {
+            def = &template_definitions.at(target_namespace).at(name.lexeme);
+        }
+    } else {
+        for (const auto& ns_pair : template_definitions) {
+            if (ns_pair.second.count(name.lexeme)) {
+                def = &ns_pair.second.at(name.lexeme);
+                break;
+            }
         }
     }
     if (!def) { error(name, "Element template '" + name.lexeme + "' not found."); return {}; }
@@ -261,23 +378,46 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
         }
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
             if (match({TokenType::DELETE})) {
-                Token element_to_delete = consume(TokenType::IDENTIFIER, "Expect tag name.");
-                int index = 0;
-                if (match({TokenType::LEFT_BRACKET})) {
-                    Token index_token = consume(TokenType::NUMBER, "Expect index.");
-                    index = std::stoi(index_token.lexeme);
-                    consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
-                }
-                if (!findAndDelete(cloned_nodes, element_to_delete.lexeme, index)) {
-                    error(element_to_delete, "Could not find element to delete.");
+                if (check(TokenType::AT)) {
+                    consume(TokenType::AT, "Expect '@'.");
+                    Token type = consume(TokenType::IDENTIFIER, "Expect 'Element' keyword.");
+                    if (type.lexeme != "Element") error(type, "Can only delete @Element templates.");
+                    Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+                    cloned_nodes.erase(std::remove_if(cloned_nodes.begin(), cloned_nodes.end(),
+                        [&](const std::unique_ptr<BaseNode>& node) {
+                            if (auto* tu = dynamic_cast<TemplateUsageNode*>(node.get())) {
+                                return tu->name == name.lexeme;
+                            }
+                            return false;
+                        }), cloned_nodes.end());
+                } else {
+                    Token element_to_delete = consume(TokenType::IDENTIFIER, "Expect tag name.");
+                    int index = 0;
+                    if (match({TokenType::LEFT_BRACKET})) {
+                        Token index_token = consume(TokenType::NUMBER, "Expect index.");
+                        index = std::stoi(index_token.lexeme);
+                        consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+                    }
+                    if (!findAndDelete(cloned_nodes, element_to_delete.lexeme, index)) {
+                        error(element_to_delete, "Could not find element to delete.");
+                    }
                 }
                 consume(TokenType::SEMICOLON, "Expect ';'.");
             } else if (match({TokenType::INSERT})) {
-                if (!match({TokenType::AFTER, TokenType::BEFORE, TokenType::REPLACE})) {
-                    error(peek(), "Expect 'after', 'before', or 'replace'.");
+                Token position;
+                Token selector;
+                bool is_global_insert = false;
+
+                if (check(TokenType::AT_TOP) || check(TokenType::AT_BOTTOM)) {
+                    position = advance();
+                    is_global_insert = true;
+                } else {
+                    if (!match({TokenType::AFTER, TokenType::BEFORE, TokenType::REPLACE})) {
+                        error(peek(), "Expect 'after', 'before', or 'replace'.");
+                    }
+                    position = previous();
+                    selector = consume(TokenType::IDENTIFIER, "Expect tag name.");
                 }
-                Token position = previous();
-                Token selector = consume(TokenType::IDENTIFIER, "Expect tag name.");
                 int index = 0;
                 if (match({TokenType::LEFT_BRACKET})) {
                     Token index_token = consume(TokenType::NUMBER, "Expect index.");
@@ -292,9 +432,56 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                     }
                 }
                 consume(TokenType::RIGHT_BRACE, "Expect '}'.");
-                if (!findAndInsert(cloned_nodes, selector.lexeme, index, position.type, nodes_to_insert)) {
-                    error(selector, "Could not find target for insert.");
+
+                if (is_global_insert) {
+                    if (position.type == TokenType::AT_TOP) {
+                        cloned_nodes.insert(cloned_nodes.begin(), std::make_move_iterator(nodes_to_insert.begin()), std::make_move_iterator(nodes_to_insert.end()));
+                    } else { // AT_BOTTOM
+                        cloned_nodes.insert(cloned_nodes.end(), std::make_move_iterator(nodes_to_insert.begin()), std::make_move_iterator(nodes_to_insert.end()));
+                    }
+                } else {
+                    if (!findAndInsert(cloned_nodes, selector.lexeme, index, position.type, nodes_to_insert)) {
+                        error(selector, "Could not find target for insert.");
+                    }
                 }
+            } else if (check(TokenType::IDENTIFIER)) {
+                Token selector = consume(TokenType::IDENTIFIER, "Expect tag name.");
+                // For now, find the first element with this tag name in the cloned nodes.
+                ElementNode* target_node = nullptr;
+                for (const auto& node : cloned_nodes) {
+                    if (auto* en = dynamic_cast<ElementNode*>(node.get())) {
+                        if (en->tagName == selector.lexeme) {
+                            target_node = en;
+                            break;
+                        }
+                    }
+                }
+
+                if (target_node) {
+                    consume(TokenType::LEFT_BRACE, "Expect '{' for specialization.");
+                    if (match({TokenType::STYLE})) {
+                        auto new_style_node = parseStyleBlock();
+                        // Find existing style node and merge, or add new one.
+                        StyleNode* existing_style = nullptr;
+                        for (const auto& child : target_node->children) {
+                            if(auto* sn = dynamic_cast<StyleNode*>(child.get())) {
+                                existing_style = sn;
+                                break;
+                            }
+                        }
+                        if (existing_style) {
+                            // Merge properties and rules
+                            existing_style->direct_properties.insert(existing_style->direct_properties.end(), std::make_move_iterator(new_style_node->direct_properties.begin()), std::make_move_iterator(new_style_node->direct_properties.end()));
+                            existing_style->template_applications.insert(existing_style->template_applications.end(), std::make_move_iterator(new_style_node->template_applications.begin()), std::make_move_iterator(new_style_node->template_applications.end()));
+                        } else {
+                            target_node->addChild(std::move(new_style_node));
+                        }
+                    }
+                    consume(TokenType::RIGHT_BRACE, "Expect '}' after specialization.");
+                } else {
+                     error(selector, "Could not find element to specialize.");
+                }
+
             } else {
                 error(peek(), "Unsupported specialization keyword.");
             }
@@ -308,9 +495,11 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
 
 void CHTLParser::parseSymbolDeclaration(bool is_custom) {
     consume(TokenType::LEFT_BRACKET, "Expect '[' to start declaration.");
-    Token keyword = consume(TokenType::IDENTIFIER, "Expect 'Template' or 'Custom' keyword.");
-    if (is_custom && keyword.lexeme != "Custom") { error(keyword, "Expected 'Custom' keyword."); }
-    else if (!is_custom && keyword.lexeme != "Template") { error(keyword, "Expected 'Template' keyword."); }
+    if (is_custom) {
+        consume(TokenType::KEYWORD_CUSTOM, "Expect 'Custom' keyword.");
+    } else {
+        consume(TokenType::KEYWORD_TEMPLATE, "Expect 'Template' keyword.");
+    }
     consume(TokenType::RIGHT_BRACKET, "Expect ']' to end keyword.");
     consume(TokenType::AT, "Expect '@' for symbol type.");
     Token typeToken = consume(TokenType::IDENTIFIER, "Expect symbol type.");
@@ -321,18 +510,39 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
     else if (typeToken.lexeme == "Var") { def.type = TemplateType::VAR; }
     else { error(typeToken, "Unknown symbol type."); }
     def.name = consume(TokenType::IDENTIFIER, "Expect symbol name.").lexeme;
+
+    this->is_parsing_template_definition = true;
     consume(TokenType::LEFT_BRACE, "Expect '{' to start symbol body.");
     if (def.type == TemplateType::STYLE) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            if (check(TokenType::AT) || check(TokenType::INHERIT)) {
-                // ... inheritance logic ...
+            if (match({TokenType::INHERIT})) {
+                consume(TokenType::AT, "Expect '@' after 'inherit'.");
+                Token type = consume(TokenType::IDENTIFIER, "Expect 'Style' keyword.");
+                if (type.lexeme != "Style") error(type, "Can only inherit from @Style templates.");
+                def.inherited_templates.push_back(consume(TokenType::IDENTIFIER, "Expect template name.").lexeme);
+                consume(TokenType::SEMICOLON, "Expect ';' after inheritance.");
+            }
+            else if (check(TokenType::AT)) {
+                consume(TokenType::AT, "Expect '@'.");
+                Token type = consume(TokenType::IDENTIFIER, "Expect 'Style' keyword.");
+                if (type.lexeme != "Style") error(type, "Can only inherit from @Style templates.");
+                def.inherited_templates.push_back(consume(TokenType::IDENTIFIER, "Expect template name.").lexeme);
+                consume(TokenType::SEMICOLON, "Expect ';' after inheritance.");
             } else {
                 std::string key_str;
-                while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
-                consume(TokenType::COLON, "Expect ':'.");
-                auto value_expr = parseExpression();
-                consume(TokenType::SEMICOLON, "Expect ';'.");
-                def.style_properties.push_back({key_str, std::move(value_expr)});
+                while (!check(TokenType::COLON) && !check(TokenType::SEMICOLON) && !isAtEnd()) {
+                    key_str += advance().lexeme;
+                }
+
+                if (is_custom && match({TokenType::SEMICOLON})) {
+                    // Valueless property for [Custom] @Style
+                    def.style_properties.push_back({key_str, nullptr});
+                } else {
+                    consume(TokenType::COLON, "Expect ':'.");
+                    auto value_expr = parseExpression();
+                    consume(TokenType::SEMICOLON, "Expect ';'.");
+                    def.style_properties.push_back({key_str, std::move(value_expr)});
+                }
             }
         }
     } else if (def.type == TemplateType::ELEMENT) {
@@ -342,44 +552,233 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
             }
         }
     }
+    else if (def.type == TemplateType::VAR) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            Token key = consume(TokenType::IDENTIFIER, "Expect variable name.");
+            consume(TokenType::COLON, "Expect ':'.");
+            auto value_expr = parseExpression();
+            consume(TokenType::SEMICOLON, "Expect ';'.");
+            def.variables[key.lexeme] = std::move(value_expr);
+        }
+    }
     consume(TokenType::RIGHT_BRACE, "Expect '}' to end symbol body.");
+    this->is_parsing_template_definition = false;
     template_definitions[current_namespace][def.name] = std::move(def);
 }
 
-void CHTLParser::parseImportStatement() {
-    consume(TokenType::LEFT_BRACKET, "Expect '['.");
-    consume(TokenType::IDENTIFIER, "Expect 'Import'.");
-    consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
-    consume(TokenType::AT, "Expect '@'.");
-    Token typeToken = consume(TokenType::IDENTIFIER, "Expect import type.");
-    if (typeToken.lexeme == "Chtl") {
-        consume(TokenType::FROM, "Expect 'from'.");
-        Token pathToken = consume(TokenType::STRING, "Expect file path.");
-        std::string imported_content = CHTLLoader::load(this->file_path, pathToken.lexeme);
-        std::string imported_path = FileSystem::getDirectory(this->file_path) + pathToken.lexeme;
-        CHTLLexer sub_lexer(imported_content);
-        std::vector<Token> sub_tokens = sub_lexer.scanTokens();
-        CHTLParser sub_parser(imported_content, sub_tokens, imported_path);
-        sub_parser.parse();
-        auto& imported_template_map = sub_parser.getMutableTemplateDefinitions();
-        std::string import_namespace = getFilename(pathToken.lexeme);
-        auto it = imported_template_map.find(import_namespace);
-        if (it != imported_template_map.end()) {
-            this->template_definitions[import_namespace] = std::move(it->second);
+std::unique_ptr<NamespaceNode> CHTLParser::parseNamespace() {
+	consume(TokenType::LEFT_BRACKET, "Expect '['.");
+	consume(TokenType::KEYWORD_NAMESPACE, "Expect 'Namespace'.");
+	consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+	Token name = consume(TokenType::IDENTIFIER, "Expect namespace name.");
+	auto node = std::make_unique<NamespaceNode>();
+	node->name = name.lexeme;
+
+	std::string previous_namespace = this->current_namespace;
+	if (!previous_namespace.empty() && previous_namespace != getFilename(this->file_path)) {
+		this->current_namespace = previous_namespace + "." + name.lexeme;
+	} else {
+		this->current_namespace = name.lexeme;
+	}
+	node->name = this->current_namespace;
+
+
+	if (match({ TokenType::LEFT_BRACE })) {
+		while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+			if (check(TokenType::LEFT_BRACKET)) {
+                if (tokens.size() > current + 1 && tokens[current + 1].type == TokenType::KEYWORD_TEMPLATE) {
+                    parseSymbolDeclaration(false);
+                } else if (tokens.size() > current + 1 && tokens[current + 1].type == TokenType::KEYWORD_CUSTOM) {
+                    parseSymbolDeclaration(true);
+                } else if (tokens.size() > current + 1 && tokens[current + 1].type == TokenType::KEYWORD_NAMESPACE) {
+                    node->children.push_back(parseNamespace());
+                } else {
+                    error(peek(), "Invalid declaration inside namespace.");
+                }
+            } else {
+                error(peek(), "Only declarations are allowed inside a namespace block.");
+            }
+		}
+		consume(TokenType::RIGHT_BRACE, "Expect '}'.");
+	}
+
+	this->current_namespace = previous_namespace;
+
+	return node;
+}
+
+std::unique_ptr<ConfigurationNode> CHTLParser::parseConfiguration() {
+	consume(TokenType::LEFT_BRACKET, "Expect '['.");
+	consume(TokenType::KEYWORD_CONFIGURATION, "Expect 'Configuration'.");
+	consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+	auto node = std::make_unique<ConfigurationNode>();
+	if (check(TokenType::AT)) {
+		advance();
+		node->name = consume(TokenType::IDENTIFIER, "Expect configuration name.").lexeme;
+	}
+
+	consume(TokenType::LEFT_BRACE, "Expect '{' for configuration body.");
+	while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+		if (check(TokenType::LEFT_BRACKET) && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::KEYWORD_NAME) {
+			consume(TokenType::LEFT_BRACKET, "Expect '['.");
+			consume(TokenType::KEYWORD_NAME, "Expect 'Name'.");
+			consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+			consume(TokenType::LEFT_BRACE, "Expect '{' for Name group.");
+			while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+				Token key = consume(TokenType::IDENTIFIER, "Expect keyword variable.");
+				consume(TokenType::EQUAL, "Expect '='.");
+				if (check(TokenType::LEFT_BRACKET)) {
+					consume(TokenType::LEFT_BRACKET, "Expect '[' for group options.");
+					std::vector<std::string> values;
+					do {
+						values.push_back(consume(TokenType::IDENTIFIER, "Expect option.").lexeme);
+					} while (match({ TokenType::COMMA }));
+					consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+					node->name_group[key.lexeme] = values;
+
+				}
+				else {
+					Token value = consume(TokenType::IDENTIFIER, "Expect keyword value.");
+					node->settings[key.lexeme] = value.lexeme;
+				}
+				consume(TokenType::SEMICOLON, "Expect ';'.");
+			}
+			consume(TokenType::RIGHT_BRACE, "Expect '}' for Name group.");
+		}
+		else {
+			Token key = consume(TokenType::IDENTIFIER, "Expect setting name.");
+			consume(TokenType::EQUAL, "Expect '='.");
+			Token value = consume(TokenType::STRING, "Expect setting value.");
+			node->settings[key.lexeme] = value.lexeme;
+			consume(TokenType::SEMICOLON, "Expect ';'.");
+		}
+	}
+	consume(TokenType::RIGHT_BRACE, "Expect '}' for configuration body.");
+
+	return node;
+}
+
+std::unique_ptr<ConstraintNode> CHTLParser::parseConstraint() {
+	consume(TokenType::EXCEPT, "Expect 'except' keyword.");
+	auto node = std::make_unique<ConstraintNode>();
+
+	do {
+		Constraint constraint;
+		if (check(TokenType::AT) || (check(TokenType::LEFT_BRACKET))) {
+			constraint.type = ConstraintType::TYPE;
+			//...
+		}
+		else {
+			constraint.type = ConstraintType::PRECISE;
+			//...
+		}
+		node->constraints.push_back(constraint);
+	} while (match({ TokenType::COMMA }));
+
+	consume(TokenType::SEMICOLON, "Expect ';' after except statement.");
+	return node;
+}
+
+std::unique_ptr<ImportNode> CHTLParser::parseImportStatement() {
+	auto node = std::make_unique<ImportNode>();
+	consume(TokenType::LEFT_BRACKET, "Expect '['.");
+	consume(TokenType::KEYWORD_IMPORT, "Expect 'Import'.");
+	consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+
+	if (match({ TokenType::LEFT_BRACKET })) {
+		if (match({ TokenType::KEYWORD_CUSTOM })) {
+			node->is_custom = true;
+		}
+		else if (match({ TokenType::KEYWORD_TEMPLATE })) {
+			node->is_custom = false;
+		}
+		else {
+			error(peek(), "Expect 'Custom' or 'Template' keyword after '[' in import.");
+		}
+		consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+	}
+
+	consume(TokenType::AT, "Expect '@'.");
+	Token typeToken = consume(TokenType::IDENTIFIER, "Expect import type.");
+
+	if (typeToken.lexeme == "Chtl") node->import_type = ImportType::CHTL;
+	else if (typeToken.lexeme == "Html") node->import_type = ImportType::HTML;
+	else if (typeToken.lexeme == "Style") node->import_type = ImportType::STYLE;
+	else if (typeToken.lexeme == "JavaScript") node->import_type = ImportType::JAVASCRIPT;
+	else if (typeToken.lexeme == "CJmod") node->import_type = ImportType::CJMOD;
+	else if (typeToken.lexeme == "Config") node->import_type = ImportType::CONFIG;
+	else error(typeToken, "Unknown import type.");
+
+	if (node->import_type == ImportType::CHTL && check(TokenType::IDENTIFIER)) {
+		node->item_name = advance().lexeme;
+	}
+
+	consume(TokenType::FROM, "Expect 'from'.");
+	if (check(TokenType::STRING)) {
+		node->path = advance().lexeme;
+	} else if (check(TokenType::IDENTIFIER)) {
+		std::string path_str;
+		do {
+			path_str += advance().lexeme;
+		} while (match({TokenType::DOT, TokenType::SLASH}));
+		node->path = path_str;
+	} else {
+		error(peek(), "Expect file path as string or unquoted literal.");
+	}
+
+	if (match({ TokenType::AS })) {
+		node->alias = consume(TokenType::IDENTIFIER, "Expect alias name.").lexeme;
+	}
+
+	consume(TokenType::SEMICOLON, "Expect ';'.");
+
+
+    if (node->import_type == ImportType::CHTL) {
+        if (node->item_name.empty()) { // Is it a full file import?
+            std::string imported_content = CHTLLoader::load(this->file_path, node->path);
+            std::string imported_path = FileSystem::getDirectory(this->file_path) + node->path;
+            CHTLLexer sub_lexer(imported_content);
+            std::vector<Token> sub_tokens = sub_lexer.scanTokens();
+            CHTLParser sub_parser(imported_content, sub_tokens, imported_path);
+            sub_parser.parse();
+            auto& imported_template_map = sub_parser.getMutableTemplateDefinitions();
+            std::string import_namespace = getFilename(node->path);
+            auto it = imported_template_map.find(import_namespace);
+            if (it != imported_template_map.end()) {
+                this->template_definitions[import_namespace] = std::move(it->second);
+            }
+        } else {
+            // TODO: Handle precise/type/wildcard CHTL imports
         }
-        consume(TokenType::SEMICOLON, "Expect ';'.");
-    } else {
-        error(typeToken, "Unsupported import type.");
+    } else { // HTML, Style, JS
+        if (node->alias.empty()) {
+            error(previous(), "Import of non-CHTL files must use an 'as' alias.");
+        }
+        std::string imported_content = CHTLLoader::load(this->file_path, node->path);
+        OriginType originType = OriginType::HTML;
+        if (node->import_type == ImportType::STYLE) originType = OriginType::STYLE;
+        else if (node->import_type == ImportType::JAVASCRIPT) originType = OriginType::JAVASCRIPT;
+
+        origin_definitions[current_namespace][node->alias] = std::make_unique<OriginNode>(imported_content, originType, node->alias);
     }
+
+	return node;
 }
 
 std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {
-    // Basic implementation, doesn't handle nested braces
     consume(TokenType::LEFT_BRACKET, "Expect '['.");
-    consume(TokenType::IDENTIFIER, "Expect 'Origin'.");
+    consume(TokenType::KEYWORD_ORIGIN, "Expect 'Origin'.");
     consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
     consume(TokenType::AT, "Expect '@'.");
     Token type = consume(TokenType::IDENTIFIER, "Expect origin type.");
+
+    Token name;
+    bool is_named = false;
+    if (check(TokenType::IDENTIFIER)) {
+        name = advance();
+        is_named = true;
+    }
+
     consume(TokenType::LEFT_BRACE, "Expect '{'.");
     int start = current;
     while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
@@ -388,10 +787,17 @@ std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {
     int end = current;
     std::string content = source.substr(tokens[start].position, tokens[end-1].position + tokens[end-1].lexeme.length() - tokens[start].position);
     consume(TokenType::RIGHT_BRACE, "Expect '}'.");
+
     OriginType originType = OriginType::HTML;
     if (type.lexeme == "Style") originType = OriginType::STYLE;
     else if (type.lexeme == "JavaScript") originType = OriginType::JAVASCRIPT;
-    return std::make_unique<OriginNode>(content, originType);
+
+    if (is_named) {
+        origin_definitions[current_namespace][name.lexeme] = std::make_unique<OriginNode>(content, originType, name.lexeme);
+        return nullptr; // Not part of the direct AST
+    } else {
+        return std::make_unique<OriginNode>(content, originType);
+    }
 }
 
 // --- Expression Parser (Full Implementation) ---
@@ -486,10 +892,13 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             return std::make_unique<ReferenceExpr>(first_part, property);
         } else if (check(TokenType::LEFT_PAREN)) {
             consume(TokenType::LEFT_PAREN, "Expect '('.");
-            std::string key_name;
-            while (!check(TokenType::RIGHT_PAREN) && !isAtEnd()) { key_name += advance().lexeme; }
+            Token key = consume(TokenType::IDENTIFIER, "Expect variable name.");
+            std::unique_ptr<Expr> specialization = nullptr;
+            if (match({TokenType::EQUAL})) {
+                specialization = parseExpression();
+            }
             consume(TokenType::RIGHT_PAREN, "Expect ')'.");
-            return std::make_unique<VarExpr>(first_part.lexeme, key_name);
+            return std::make_unique<VarExpr>(first_part.lexeme, key.lexeme, std::move(specialization));
         } else {
             return std::make_unique<ReferenceExpr>(Token(), first_part);
         }

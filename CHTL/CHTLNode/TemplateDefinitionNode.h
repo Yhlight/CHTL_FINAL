@@ -25,6 +25,7 @@ public:
     std::vector<std::unique_ptr<BaseNode>> element_body;
     std::vector<AttributeNode> style_properties;
     std::map<std::string, std::unique_ptr<Expr>> variables;
+    std::vector<std::string> inherited_templates;
 };
 
 } // namespace CHTL

@@ -6,16 +6,44 @@
 namespace CHTL {
 
 static std::unordered_map<std::string, TokenType> keywords = {
-    {"style", TokenType::STYLE},
-    {"text", TokenType::TEXT},
-    {"inherit", TokenType::INHERIT},
-    {"from", TokenType::FROM},
-    {"as", TokenType::AS},
-    {"delete", TokenType::DELETE},
-    {"insert", TokenType::INSERT},
-    {"after", TokenType::AFTER},
-    {"before", TokenType::BEFORE},
-    {"replace", TokenType::REPLACE}
+	{"style", TokenType::STYLE},
+	{"text", TokenType::TEXT},
+	{"inherit", TokenType::INHERIT},
+	{"from", TokenType::FROM},
+	{"as", TokenType::AS},
+	{"delete", TokenType::DELETE},
+	{"insert", TokenType::INSERT},
+	{"after", TokenType::AFTER},
+	{"before", TokenType::BEFORE},
+	{"replace", TokenType::REPLACE},
+	{"use", TokenType::USE},
+	{"except", TokenType::EXCEPT},
+
+	// Bracketed keywords(as identifiers for parser)
+	{"Custom", TokenType::KEYWORD_CUSTOM},
+	{"Template", TokenType::KEYWORD_TEMPLATE},
+	{"Origin", TokenType::KEYWORD_ORIGIN},
+	{"Import", TokenType::KEYWORD_IMPORT},
+	{"Namespace", TokenType::KEYWORD_NAMESPACE},
+	{"Configuration", TokenType::KEYWORD_CONFIGURATION},
+	{"Info", TokenType::KEYWORD_INFO},
+	{"Export", TokenType::KEYWORD_EXPORT},
+	{"Name", TokenType::KEYWORD_NAME},
+	{"OriginType", TokenType::KEYWORD_ORIGIN_TYPE},
+
+	// CHTL JS Keywords
+	{"script", TokenType::KEYWORD_SCRIPT},
+	{"ScriptLoader", TokenType::KEYWORD_SCRIPT_LOADER},
+	{"Listen", TokenType::KEYWORD_LISTEN},
+	{"Delegate", TokenType::KEYWORD_DELEGATE},
+	{"Animate", TokenType::KEYWORD_ANIMATE},
+	{"Vir", TokenType::KEYWORD_VIR},
+	{"Router", TokenType::KEYWORD_ROUTER},
+	{"iNeverAway", TokenType::KEYWORD_I_NEVER_AWAY},
+	{"printMylove", TokenType::KEYWORD_PRINT_MY_LOVE},
+	{"util", TokenType::KEYWORD_UTIL},
+	{"then", TokenType::KEYWORD_THEN},
+	{"change", TokenType::KEYWORD_CHANGE}
 };
 
 CHTLLexer::CHTLLexer(const std::string& source) : source(source) {}
@@ -119,10 +147,33 @@ void CHTLLexer::number() {
 }
 
 void CHTLLexer::identifier() {
-    while (isalnum(peek()) || peek() == '_') advance();
-    std::string text = source.substr(start, current - start);
-    auto it = keywords.find(text);
-    addToken(it != keywords.end() ? it->second : TokenType::IDENTIFIER);
+	while (isalnum(peek()) || peek() == '_') advance();
+	std::string text = source.substr(start, current - start);
+
+	if (text == "at") {
+		int temp_current = current;
+		int line_breaks = 0;
+		while (temp_current < source.length() && (source[temp_current] == ' ' || source[temp_current] == '\t' || source[temp_current] == '\r' || source[temp_current] == '\n')) {
+			if (source[temp_current] == '\n') line_breaks++;
+			temp_current++;
+		}
+
+		if (temp_current + 3 <= source.length() && source.substr(temp_current, 3) == "top") {
+			line += line_breaks;
+			current = temp_current + 3;
+			addToken(TokenType::AT_TOP);
+			return;
+		}
+		else if (temp_current + 6 <= source.length() && source.substr(temp_current, 6) == "bottom") {
+			line += line_breaks;
+			current = temp_current + 6;
+			addToken(TokenType::AT_BOTTOM);
+			return;
+		}
+	}
+
+	auto it = keywords.find(text);
+	addToken(it != keywords.end() ? it->second : TokenType::IDENTIFIER);
 }
 
 } // namespace CHTL
