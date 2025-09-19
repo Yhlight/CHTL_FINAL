@@ -1,0 +1,13 @@
+div {
+    id = "main-box";
+
+    style {
+        width = 100px;
+
+        .sub {
+            color = blue;
+        }
+    }
+
+    text: "Hello";
+}

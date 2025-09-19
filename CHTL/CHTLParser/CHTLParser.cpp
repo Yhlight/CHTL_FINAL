@@ -174,7 +174,7 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
     auto element = std::make_unique<ElementNode>(tagName.lexeme);
     consume(TokenType::LEFT_BRACE, "Expect '{' after element name.");
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        if ((peek().type == TokenType::IDENTIFIER || peek().type == TokenType::TEXT) && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
+        if ((peek().type == TokenType::IDENTIFIER || peek().type == TokenType::TEXT) && tokens.size() > current + 1 && (tokens[current + 1].type == TokenType::COLON || tokens[current + 1].type == TokenType::EQUAL)) {
             parseAttribute(element.get());
         } else {
             for (auto& child : parseDeclaration()) {
@@ -191,7 +191,9 @@ void CHTLParser::parseAttribute(ElementNode* element) {
         error(peek(), "Expect attribute name.");
     }
     Token key = advance();
-    consume(TokenType::COLON, "Expect ':' after attribute name.");
+    if (!match({TokenType::COLON, TokenType::EQUAL})) {
+        error(peek(), "Expect ':' or '=' after attribute name.");
+    }
     Token value_token;
     if (match({TokenType::STRING, TokenType::IDENTIFIER, TokenType::NUMBER})) {
         value_token = previous();
@@ -214,7 +216,7 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
         bool isInlineProp = false;
         int i = 0;
         while (tokens.size() > current + i && tokens[current + i].type != TokenType::END_OF_FILE && tokens[current + i].type != TokenType::RIGHT_BRACE) {
-            if (tokens[current + i].type == TokenType::COLON) { isInlineProp = true; break; }
+            if (tokens[current + i].type == TokenType::COLON || tokens[current + i].type == TokenType::EQUAL) { isInlineProp = true; break; }
             if (tokens[current + i].type == TokenType::LEFT_BRACE) { isInlineProp = false; break; }
             i++;
         }
@@ -222,8 +224,10 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
             parseStyleTemplateUsage(styleNode.get());
         } else if (isInlineProp) {
             std::string key_str;
-            while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
-            consume(TokenType::COLON, "Expect ':' after style property name.");
+            while (!check(TokenType::COLON) && !check(TokenType::EQUAL) && !isAtEnd()) { key_str += advance().lexeme; }
+            if (!match({TokenType::COLON, TokenType::EQUAL})) {
+                error(peek(), "Expect ':' or '=' after style property name.");
+            }
             // Simplified value parsing to handle compound values like "1px solid black"
             std::string raw_value;
             while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
@@ -239,8 +243,10 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
             consume(TokenType::LEFT_BRACE, "Expect '{' after rule selector.");
             while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
                 std::string key_str;
-                while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
-                consume(TokenType::COLON, "Expect ':' after style property name.");
+                while (!check(TokenType::COLON) && !check(TokenType::EQUAL) && !isAtEnd()) { key_str += advance().lexeme; }
+                if (!match({TokenType::COLON, TokenType::EQUAL})) {
+                    error(peek(), "Expect ':' or '=' after style property name.");
+                }
                 // Simplified value parsing to handle compound values like "1px solid black"
                 std::string raw_value;
                 while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
@@ -276,8 +282,10 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
                 consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
             } else {
                 std::string key_str;
-                while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
-                consume(TokenType::COLON, "Expect ':' after style property name.");
+                while (!check(TokenType::COLON) && !check(TokenType::EQUAL) && !isAtEnd()) { key_str += advance().lexeme; }
+                if (!match({TokenType::COLON, TokenType::EQUAL})) {
+                    error(peek(), "Expect ':' or '=' after style property name.");
+                }
                 auto value_expr = parseExpression();
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
                 app.new_or_overridden_properties.push_back({key_str, std::move(value_expr)});
@@ -381,8 +389,10 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
                 // ... inheritance logic ...
             } else {
                 std::string key_str;
-                while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
-                consume(TokenType::COLON, "Expect ':'.");
+                while (!check(TokenType::COLON) && !check(TokenType::EQUAL) && !isAtEnd()) { key_str += advance().lexeme; }
+                if (!match({TokenType::COLON, TokenType::EQUAL})) {
+                    error(peek(), "Expect ':' or '='.");
+                }
                 auto value_expr = parseExpression();
                 consume(TokenType::SEMICOLON, "Expect ';'.");
                 def.style_properties.push_back({key_str, std::move(value_expr)});
