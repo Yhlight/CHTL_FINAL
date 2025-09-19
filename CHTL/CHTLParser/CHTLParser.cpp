@@ -203,13 +203,8 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
             std::string key_str;
             while (!check(TokenType::COLON) && !isAtEnd()) { key_str += advance().lexeme; }
             consume(TokenType::COLON, "Expect ':' after style property name.");
-            // Simplified value parsing to handle compound values like "1px solid black"
-            std::string raw_value;
-            while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
-                raw_value += advance().lexeme;
-                if (!check(TokenType::SEMICOLON)) raw_value += " ";
-            }
-            auto value_expr = std::make_unique<LiteralExpr>(0, raw_value);
+            // This should use the expression parser to handle variables, etc.
+            auto value_expr = parseExpression();
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
             styleNode->direct_properties.push_back({key_str, std::move(value_expr)});
         } else {
@@ -366,7 +361,21 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
                     key_str += advance().lexeme;
                 }
                 consume(TokenType::COLON, "Expect ':' after style property name.");
-                auto value_expr = parseExpression();
+
+                // Use simpler raw value parsing for CSS properties, which can be complex.
+                std::string raw_value;
+                while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                    Token current_token = advance();
+                    raw_value += current_token.lexeme;
+
+                    // Only add a space if the next token is not a semicolon
+                    // and the current token is not a number. This is a hack to avoid "16 px".
+                    if (peek().type != TokenType::SEMICOLON && current_token.type != TokenType::NUMBER) {
+                        raw_value += " ";
+                    }
+                }
+                auto value_expr = std::make_unique<LiteralExpr>(0, raw_value);
+
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
                 def.style_properties.push_back({key_str, std::move(value_expr)});
             }
@@ -376,6 +385,14 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
             for (auto& node : parseDeclaration()) {
                 def.element_body.push_back(std::move(node));
             }
+        }
+    } else if (def.type == TemplateType::VAR) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            Token key_token = consume(TokenType::IDENTIFIER, "Expect variable name.");
+            consume(TokenType::COLON, "Expect ':' after variable name.");
+            auto value_expr = parseExpression();
+            consume(TokenType::SEMICOLON, "Expect ';' after variable value.");
+            def.variables[key_token.lexeme] = std::move(value_expr);
         }
     }
     consume(TokenType::RIGHT_BRACE, "Expect '}' to end symbol body.");

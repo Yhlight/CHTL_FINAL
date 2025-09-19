@@ -1,0 +1,23 @@
+[Custom] @Element Article {
+    header {
+        h1 { text: "Default Title"; }
+    }
+    section {
+        p { text: "Default paragraph 1."; }
+        p { text: "Default paragraph 2."; }
+    }
+}
+
+body {
+    @Element Article {
+        // Delete the second 'p' tag
+        delete p[1];
+
+        // Insert a footer after the section
+        insert after section {
+            footer {
+                text: "Article Footer";
+            }
+        }
+    }
+}

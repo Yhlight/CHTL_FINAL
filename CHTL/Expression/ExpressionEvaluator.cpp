@@ -53,15 +53,28 @@ void ExpressionEvaluator::visit(BinaryExpr& expr) {
 }
 
 void ExpressionEvaluator::visit(VarExpr& expr) {
-    // This is a simplified implementation
-    if (templates.count(expr.group) && templates.at(expr.group).count(expr.name)) {
-        const auto& var_def = templates.at(expr.group).at(expr.name);
-        if (var_def.variables.count(expr.name)) {
-            result = evaluate(var_def.variables.at(expr.name).get(), this->current_context);
+    std::cout << "Visiting VarExpr: " << expr.group << "(" << expr.name << ")" << std::endl;
+    const TemplateDefinitionNode* var_group_def = nullptr;
+    // Find the variable group definition across all namespaces
+    for (const auto& ns_pair : templates) {
+        if (ns_pair.second.count(expr.group)) {
+            var_group_def = &ns_pair.second.at(expr.group);
+            break;
+        }
+    }
+
+    if (var_group_def && var_group_def->type == TemplateType::VAR) {
+        std::cout << "Found var group: " << expr.group << std::endl;
+        // Find the variable within the group
+        if (var_group_def->variables.count(expr.name)) {
+            std::cout << "Found var: " << expr.name << ". Evaluating..." << std::endl;
+            // Evaluate the expression associated with the variable
+            result = evaluate(var_group_def->variables.at(expr.name).get(), this->current_context);
             return;
         }
     }
-    throw std::runtime_error("Variable not found: " + expr.group + "." + expr.name);
+
+    throw std::runtime_error("Variable not found: " + expr.group + "(" + expr.name + ")");
 }
 
 void ExpressionEvaluator::visit(ReferenceExpr& expr) {

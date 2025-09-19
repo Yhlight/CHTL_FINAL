@@ -1,0 +1,11 @@
+[Template] @Var Theme {
+    primaryColor: "blue";
+    baseFontSize: 16px;
+}
+
+div {
+    style {
+        color: Theme(primaryColor);
+        font-size: Theme(baseFontSize) + 2px;
+    }
+}

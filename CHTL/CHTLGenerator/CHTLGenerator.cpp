@@ -161,6 +161,15 @@ void CHTLGenerator::visit(ElementNode& node) {
                 final_props[prop.key] = prop.clone();
             }
             for (const auto& pair : final_props) {
+                // Check if the expression is a simple raw literal. If so, don't evaluate.
+                if (auto* literal = dynamic_cast<LiteralExpr*>(pair.second.value_expr.get())) {
+                    if (literal->value == 0 && !literal->unit.empty()) {
+                        style_str += pair.first + ": " + literal->unit + ";";
+                        continue; // Skip the evaluator for this property
+                    }
+                }
+
+                // For complex expressions, use the evaluator.
                 ExpressionEvaluator evaluator(this->templates, this->doc_root);
                 EvaluatedValue result = evaluator.evaluate(pair.second.value_expr.get(), &node);
                 style_str += pair.first + ": ";
