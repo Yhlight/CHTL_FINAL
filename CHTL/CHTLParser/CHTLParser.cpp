@@ -491,7 +491,7 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             consume(TokenType::RIGHT_PAREN, "Expect ')'.");
             return std::make_unique<VarExpr>(first_part.lexeme, key_name);
         } else {
-            return std::make_unique<ReferenceExpr>(Token(), first_part);
+            return std::make_unique<LiteralExpr>(0, first_part.lexeme);
         }
     }
     if (check(TokenType::SYMBOL) && (peek().lexeme == "#" || peek().lexeme == ".")) {

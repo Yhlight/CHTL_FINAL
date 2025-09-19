@@ -29,32 +29,53 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
 }
 
 void CHTLGenerator::visit(ElementNode& node) {
-    // --- Global Style Generation ---
-    for (const auto& child : node.children) {
-        if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
-            for (const auto& rule : styleNode->global_rules) {
-                // ... (logic for global rules)
-            }
-        }
-    }
-
-    // --- HTML Tag Generation ---
-    html_output << "<" << node.tagName;
-    std::string text_content;
+    // --- Attribute and Style Processing ---
+    std::map<std::string, std::string> attributes;
     for (const auto& attr : node.attributes) {
-        if (attr.key == "text") {
-            text_content = attr.value;
-        } else {
-            html_output << " " << attr.key << "=\"" << attr.value << "\"";
-        }
+        attributes[attr.key] = attr.value;
     }
 
-    // --- Inline Style Generation ---
+    std::vector<std::string> classes_to_add;
+    std::string id_to_add;
     std::string style_str;
+
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
+            // 1. Process global rules for CSS output and collect classes/IDs
+            for (const auto& rule : styleNode->global_rules) {
+                css_output << rule.selector << " {";
+                for (const auto& prop : rule.properties) {
+                    ExpressionEvaluator evaluator(this->templates, this->doc_root);
+                    EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
+                    css_output << prop.key << ":";
+                     if (result.value == 0 && !result.unit.empty()) {
+                        css_output << result.unit;
+                    } else {
+                        if (result.value == static_cast<long long>(result.value)) {
+                            css_output << std::to_string(static_cast<long long>(result.value));
+                        } else {
+                            css_output << std::to_string(result.value);
+                        }
+                        css_output << result.unit;
+                    }
+                    css_output << ";";
+                }
+                css_output << "}";
+
+                if (!rule.selector.empty()) {
+                    if (rule.selector[0] == '.') {
+                        classes_to_add.push_back(rule.selector.substr(1));
+                    } else if (rule.selector[0] == '#') {
+                        if (id_to_add.empty()) {
+                            id_to_add = rule.selector.substr(1);
+                        }
+                    }
+                }
+            }
+
+            // 2. Process inline styles
             std::map<std::string, AttributeNode> final_props;
-            for (const auto& app : styleNode->template_applications) {
+             for (const auto& app : styleNode->template_applications) {
                 const TemplateDefinitionNode* def = nullptr;
                 for (const auto& ns_pair : this->templates) {
                     if (ns_pair.second.count(app.template_name)) {
@@ -74,15 +95,59 @@ void CHTLGenerator::visit(ElementNode& node) {
             for (const auto& pair : final_props) {
                 ExpressionEvaluator evaluator(this->templates, this->doc_root);
                 EvaluatedValue result = evaluator.evaluate(pair.second.value_expr.get(), &node);
-                style_str += pair.first + ": ";
-                if (result.value == 0 && !result.unit.empty()) { style_str += result.unit; }
-                else { style_str += std::to_string(result.value) + result.unit; }
+                style_str += pair.first + ":";
+                if (result.value == 0 && !result.unit.empty()) {
+                    style_str += result.unit;
+                } else {
+                    if (result.value == static_cast<long long>(result.value)) {
+                        style_str += std::to_string(static_cast<long long>(result.value));
+                    } else {
+                        style_str += std::to_string(result.value);
+                    }
+                    style_str += result.unit;
+                }
                 style_str += ";";
             }
         }
     }
+
+    // --- Merge and Finalize Attributes ---
+    if (!id_to_add.empty() && attributes.find("id") == attributes.end()) {
+        attributes["id"] = id_to_add;
+    }
+
+    if (!classes_to_add.empty()) {
+        if (attributes.count("class")) {
+            for (const auto& new_class : classes_to_add) {
+                attributes["class"] += " " + new_class;
+            }
+        } else {
+            std::string class_str;
+            for (size_t i = 0; i < classes_to_add.size(); ++i) {
+                class_str += classes_to_add[i] + (i == classes_to_add.size() - 1 ? "" : " ");
+            }
+            attributes["class"] = class_str;
+        }
+    }
+
     if (!style_str.empty()) {
-        html_output << " style=\"" << style_str << "\"";
+        if (attributes.count("style")) {
+            attributes["style"] += style_str;
+        } else {
+            attributes["style"] = style_str;
+        }
+    }
+
+    // --- HTML Tag Generation ---
+    html_output << "<" << node.tagName;
+    std::string text_content;
+    if (attributes.count("text")) {
+        text_content = attributes["text"];
+        attributes.erase("text");
+    }
+
+    for (const auto& attr_pair : attributes) {
+        html_output << " " << attr_pair.first << "=\"" << attr_pair.second << "\"";
     }
 
     // --- Child and Closing Tag Generation ---
