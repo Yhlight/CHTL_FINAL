@@ -54,7 +54,12 @@ void CHTLGenerator::visit(ElementNode& node) {
                 std::string selector = rule.selector;
                 // Automation: if selector is a simple class or id, inject it.
                 if (selector.rfind('.', 0) == 0) { // Starts with .
-                    std::string className = selector.substr(1);
+                    size_t end = 1;
+                    while (end < selector.length() && isalnum(selector[end])) {
+                        end++;
+                    }
+                    std::string className = selector.substr(1, end - 1);
+
                     auto it = std::find_if(node.attributes.begin(), node.attributes.end(),
                                            [](const HtmlAttribute& attr){ return attr.key == "class"; });
                     if (it != node.attributes.end()) {
@@ -65,12 +70,40 @@ void CHTLGenerator::visit(ElementNode& node) {
                         node.attributes.push_back({"class", className});
                     }
                 } else if (selector.rfind('#', 0) == 0) { // Starts with #
-                    node.attributes.push_back({"id", selector.substr(1)});
+                     size_t end = 1;
+                    while (end < selector.length() && isalnum(selector[end])) {
+                        end++;
+                    }
+                    std::string idName = selector.substr(1, end - 1);
+                    // Overwrite any existing id
+                    auto it = std::find_if(node.attributes.begin(), node.attributes.end(),
+                                           [](const HtmlAttribute& attr){ return attr.key == "id"; });
+                    if (it != node.attributes.end()) {
+                        it->value = idName;
+                    } else {
+                        node.attributes.push_back({"id", idName});
+                    }
                 }
 
                 size_t pos = selector.find('&');
                 if (pos != std::string::npos) {
-                    selector.replace(pos, 1, node.tagName);
+                    std::string primary_selector;
+                    auto id_it = std::find_if(node.attributes.begin(), node.attributes.end(),
+                                              [](const HtmlAttribute& attr){ return attr.key == "id"; });
+                    if (id_it != node.attributes.end()) {
+                        primary_selector = "#" + id_it->value;
+                    } else {
+                        auto class_it = std::find_if(node.attributes.begin(), node.attributes.end(),
+                                                     [](const HtmlAttribute& attr){ return attr.key == "class"; });
+                        if (class_it != node.attributes.end()) {
+                            // Use the first class name
+                            std::string first_class = class_it->value.substr(0, class_it->value.find(' '));
+                            primary_selector = "." + first_class;
+                        } else {
+                            primary_selector = node.tagName;
+                        }
+                    }
+                    selector.replace(pos, 1, primary_selector);
                 }
 
                 css_output << selector << " {\n";
