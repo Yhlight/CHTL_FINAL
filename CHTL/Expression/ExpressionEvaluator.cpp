@@ -3,6 +3,7 @@
 #include "../CHTLNode/StyleNode.h"
 #include <iostream>
 #include <cmath>
+#include <algorithm> // For std::find_if
 
 namespace CHTL {
 
@@ -101,16 +102,17 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
         throw std::runtime_error("Reference error: selector '" + expr.selector.lexeme + "' not found.");
     }
 
-    for (const auto& child : target_element->children) {
-        if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
-            for (const auto& prop : styleNode->inline_properties) {
-                if (prop.key == expr.property.lexeme) {
-                    resolution_stack.insert(full_ref_name);
-                    result = evaluate(prop.value_expr.get(), target_element); // Evaluate in the context of the target
-                    resolution_stack.erase(full_ref_name);
-                    return;
-                }
-            }
+    std::vector<AttributeNode> styles = context.resolveStyles(target_element);
+    auto it = std::find_if(styles.begin(), styles.end(), [&](const AttributeNode& attr) {
+        return attr.key == expr.property.lexeme;
+    });
+
+    if (it != styles.end()) {
+        if (it->value_expr) {
+            resolution_stack.insert(full_ref_name);
+            result = evaluate(it->value_expr.get(), target_element); // Evaluate in the context of the target
+            resolution_stack.erase(full_ref_name);
+            return;
         }
     }
 
@@ -173,8 +175,29 @@ void ExpressionEvaluator::visit(ConditionalExpr& expr) {
     if (isTruthy(condition)) {
         result = evaluate(expr.then_branch.get(), this->current_context);
     } else {
-        result = evaluate(expr.else_branch.get(), this->current_context);
+        if (expr.else_branch) {
+            result = evaluate(expr.else_branch.get(), this->current_context);
+        } else {
+            // No else branch, so this conditional doesn't resolve.
+            // The ExprList visitor will handle this.
+            result = {ValueType::NONE, 0, ""};
+        }
     }
+}
+
+void ExpressionEvaluator::visit(ExprList& expr) {
+    for (const auto& expression : expr.expressions) {
+        EvaluatedValue current_result = evaluate(expression.get(), this->current_context);
+
+        // If the expression was a conditional that resolved, we are done.
+        // If it was a non-conditional (i.e., a literal default value), we are also done.
+        if (current_result.type != ValueType::NONE) {
+            result = current_result;
+            return;
+        }
+    }
+    // If we get here, no condition was met and there was no default value.
+    result = {ValueType::NONE, 0, ""};
 }
 
 ElementNode* ExpressionEvaluator::findElement(BaseNode* context, const std::string& selector) {

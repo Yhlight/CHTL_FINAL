@@ -1,0 +1,27 @@
+[Template] @Style BaseWidth {
+    width: 100px;
+}
+
+div {
+    id: "box";
+    style {
+        @Style BaseWidth;
+    }
+}
+
+div {
+    id: "test-reference";
+    style {
+        height: #box.width; // 1. Test property reference from inherited template
+    }
+}
+
+div {
+    id: "test-conditionals";
+    style {
+        width: 100px;
+        // 2. Test chained and optional-else conditionals
+        color: width > 200px ? "blue", width > 50px ? "red";
+        background-color: width < 50px ? "green" : "yellow";
+    }
+}

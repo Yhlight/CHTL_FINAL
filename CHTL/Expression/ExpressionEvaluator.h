@@ -14,10 +14,10 @@ namespace CHTL {
 class ElementNode; // Forward declaration
 
 // A struct to hold the result of an evaluation.
-enum class ValueType { NUMERIC, STRING, BOOL };
+enum class ValueType { NONE, NUMERIC, STRING, BOOL };
 
 struct EvaluatedValue {
-    ValueType type = ValueType::NUMERIC;
+    ValueType type = ValueType::NONE;
     double numeric_value = 0.0;
     std::string string_value = ""; // For units with numbers, or full string values
 };
@@ -35,6 +35,7 @@ public:
     void visit(ComparisonExpr& expr) override;
     void visit(LogicalExpr& expr) override;
     void visit(ConditionalExpr& expr) override;
+    void visit(ExprList& expr) override;
 
 private:
     ElementNode* findElement(BaseNode* context, const std::string& selector);

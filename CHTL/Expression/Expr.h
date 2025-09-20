@@ -16,6 +16,7 @@ class ReferenceExpr;
 class ComparisonExpr;
 class LogicalExpr;
 class ConditionalExpr;
+class ExprList; // New node for chained expressions
 class GroupingExpr; // For future use with parentheses
 
 // The base visitor interface for the expression AST.
@@ -31,6 +32,7 @@ public:
     virtual void visit(ComparisonExpr& expr) = 0;
     virtual void visit(LogicalExpr& expr) = 0;
     virtual void visit(ConditionalExpr& expr) = 0;
+    virtual void visit(ExprList& expr) = 0; // New visit method
     // virtual void visit(GroupingExpr& expr) = 0; // For future use
 };
 
@@ -162,6 +164,24 @@ public:
     std::unique_ptr<Expr> condition;
     std::unique_ptr<Expr> then_branch;
     std::unique_ptr<Expr> else_branch;
+};
+
+// Represents a comma-separated list of expressions
+class ExprList : public Expr {
+public:
+    explicit ExprList(std::vector<std::unique_ptr<Expr>> expressions)
+        : expressions(std::move(expressions)) {}
+
+    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
+    std::unique_ptr<Expr> clone() const override {
+        std::vector<std::unique_ptr<Expr>> cloned_exprs;
+        for (const auto& expr : expressions) {
+            cloned_exprs.push_back(expr->clone());
+        }
+        return std::make_unique<ExprList>(std::move(cloned_exprs));
+    }
+
+    std::vector<std::unique_ptr<Expr>> expressions;
 };
 
 } // namespace CHTL

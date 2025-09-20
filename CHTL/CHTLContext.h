@@ -7,8 +7,12 @@
 #include "CHTLNode/BaseNode.h"
 #include "CHTLNode/TemplateDefinitionNode.h"
 #include "NamespaceData.h"
+#include "CHTLNode/AttributeNode.h" // For AttributeNode
+#include <vector>
 
 namespace CHTL {
+
+class ElementNode; // Forward declaration
 
 class CHTLContext {
 public:
@@ -20,6 +24,7 @@ public:
 
     void addTemplateDefinition(const TemplateDefinitionNode& def);
     const TemplateDefinitionNode* getTemplateDefinition(const std::string& name, const std::string& from_namespace = "");
+    std::vector<AttributeNode> resolveStyles(ElementNode* element);
 };
 
 } // namespace CHTL

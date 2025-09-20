@@ -53,16 +53,25 @@ int main() {
     if (!runTest(
         "Original Import Test",
         "Test/FullPipelineTest/test.chtl",
-        R"(<div style="color:blue;font-size:16px;border:1px solid black;">This text should be blue.</div>)"
+        R"(<div style="border:1px solid black;color:blue;font-size:16px;">This text should be blue.</div>)"
     )) {
         failed_tests++;
     }
 
-    // Test 2: New Specialization Test
+    // Test 2: Style Specialization Test
     if (!runTest(
         "Style Specialization Test",
         "Test/FullPipelineTest/specialization_test.chtl",
         R"(<body><div id="test-div" style="background-color:red;font-size:16px;font-weight:bold;"></div></body>)"
+    )) {
+        failed_tests++;
+    }
+
+    // Test 3: Style Expressions Test
+    if (!runTest(
+        "Style Expressions Test",
+        "Test/FullPipelineTest/style_expressions.chtl",
+        R"(<div id="box" style="width:100px;"></div><div id="test-reference" style="height:100px;"></div><div id="test-conditionals" style="background-color:yellow;color:red;width:100px;"></div>)"
     )) {
         failed_tests++;
     }
