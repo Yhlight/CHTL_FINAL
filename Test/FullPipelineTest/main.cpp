@@ -11,11 +11,13 @@ int main() {
     try {
         // 1. Compilation (including loading, lexing, parsing, and handling imports)
         CHTL::CHTLCompiler compiler;
-        std::unique_ptr<CHTL::BaseNode> ast = compiler.compile(entry_file);
+        std::unique_ptr<CHTL::CHTLContext> context = compiler.compile(entry_file);
 
         // 2. Generation
-        CHTL::CHTLGenerator generator(compiler.getTemplateDefinitions());
-        CHTL::CompilationResult result = generator.generate(ast.get());
+        // For this test, we generate from the entry file's AST.
+        CHTL::CHTLGenerator generator(*context);
+        CHTL::BaseNode* entry_ast = context->files[entry_file].get();
+        CHTL::CompilationResult result = generator.generate(entry_ast);
 
         // 3. Verification
         std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n" << std::endl;

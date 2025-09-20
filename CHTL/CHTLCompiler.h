@@ -3,7 +3,7 @@
 
 #include "CHTLLoader/CHTLLoader.h"
 #include "CHTLNode/BaseNode.h"
-#include "CHTLNode/TemplateDefinitionNode.h"
+#include "CHTLContext.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -17,14 +17,11 @@ public:
     CHTLCompiler();
 
     // Compiles the CHTL project starting from an entry file.
-    // Returns the root of the final, combined AST.
-    std::unique_ptr<BaseNode> compile(const std::string& entry_path);
-
-    const std::map<std::string, TemplateDefinitionNode>& getTemplateDefinitions() const { return template_definitions; }
+    // Returns the compilation context containing all parsed information.
+    std::unique_ptr<CHTLContext> compile(const std::string& entry_path);
 
 private:
     CHTLLoader loader;
-    std::map<std::string, TemplateDefinitionNode> template_definitions;
     std::set<std::string> parsed_files;
 };
 

@@ -16,7 +16,10 @@ namespace CHTL {
 
 CHTLCompiler::CHTLCompiler() {}
 
-std::unique_ptr<BaseNode> CHTLCompiler::compile(const std::string& entry_path) {
+#include "CHTLContext.h"
+
+std::unique_ptr<CHTLContext> CHTLCompiler::compile(const std::string& entry_path) {
+    auto context = std::make_unique<CHTLContext>();
     std::queue<std::string> files_to_discover;
     std::vector<std::string> ordered_files;
 
@@ -41,12 +44,10 @@ std::unique_ptr<BaseNode> CHTLCompiler::compile(const std::string& entry_path) {
             continue;
         }
 
-        // Only lex the file and manually search for import statements.
-        // This is robust and avoids any parsing errors during discovery.
         CHTLLexer lexer(source);
         auto tokens = lexer.scanTokens();
         for (size_t i = 0; i < tokens.size(); ++i) {
-            if (tokens[i].type == TokenType::LEFT_BRACKET && (i + 5) < tokens.size() &&
+            if (tokens[i].type == TokenType::LEFT_BRACKET && (i + 6) < tokens.size() &&
                 tokens[i+1].type == TokenType::IMPORT &&
                 tokens[i+2].type == TokenType::RIGHT_BRACKET &&
                 tokens[i+3].type == TokenType::AT &&
@@ -67,33 +68,27 @@ std::unique_ptr<BaseNode> CHTLCompiler::compile(const std::string& entry_path) {
         }
     }
 
-    // --- 2. Concatenation and Final Parse Phase ---
-    std::cout << "\n--- Final Parse Phase ---" << std::endl;
-    std::string final_source;
+    // --- 2. Individual Parsing Phase ---
+    std::cout << "\n--- Parsing Phase ---" << std::endl;
     std::reverse(ordered_files.begin(), ordered_files.end());
     for (const auto& path : ordered_files) {
-        std::cout << "Concatenating source from: " << path << std::endl;
-        final_source += loader.load(path) + "\n";
+        std::cout << "Parsing file: " << path << std::endl;
+        std::string source;
+         try {
+            source = loader.load(path);
+        } catch (const std::runtime_error& e) {
+            std::cerr << "Warning: " << e.what() << std::endl;
+            continue;
+        }
+
+        CHTLLexer lexer(source);
+        auto tokens = lexer.scanTokens();
+        CHTLParser parser(source, tokens, *context);
+        auto ast = parser.parse();
+        context->files[path] = std::move(ast);
     }
 
-    CHTLLexer final_lexer(final_source);
-    auto final_tokens = final_lexer.scanTokens();
-    CHTLParser final_parser(final_source, final_tokens, this->template_definitions);
-    auto final_ast = final_parser.parse();
-
-    // Filter out the import nodes from the final AST before generation.
-    if (auto* root = dynamic_cast<ElementNode*>(final_ast.get())) {
-        auto& children = root->children;
-        children.erase(
-            std::remove_if(children.begin(), children.end(),
-                [](const std::unique_ptr<BaseNode>& node) {
-                    return dynamic_cast<ImportNode*>(node.get()) != nullptr;
-                }),
-            children.end()
-        );
-    }
-
-    return final_ast;
+    return context;
 }
 
 } // namespace CHTL

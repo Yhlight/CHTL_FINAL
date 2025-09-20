@@ -13,8 +13,8 @@
 
 namespace CHTL {
 
-CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens, std::map<std::string, TemplateDefinitionNode>& template_definitions)
-    : source(source), tokens(tokens), template_definitions(template_definitions) {}
+CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens, CHTLContext& context)
+    : source(source), tokens(tokens), context(context) {}
 
 // --- Expression Parser Implementation ---
 
@@ -453,12 +453,12 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
     consume(TokenType::STYLE, "Expect 'Style' keyword for style template usage.");
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
 
-    if (!template_definitions.count(name.lexeme)) {
+    if (!context.template_definitions.count(name.lexeme)) {
         error(name, "Style template '" + name.lexeme + "' not found.");
         return;
     }
 
-    const auto& def = template_definitions.at(name.lexeme);
+    const auto& def = context.template_definitions.at(name.lexeme);
     if (def.type != TemplateType::STYLE) {
         error(name, "Template '" + name.lexeme + "' is not a Style template.");
     }
@@ -530,8 +530,8 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
     consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 
-    if (template_definitions.count(name.lexeme)) {
-        const auto& def = template_definitions.at(name.lexeme);
+    if (context.template_definitions.count(name.lexeme)) {
+        const auto& def = context.template_definitions.at(name.lexeme);
         if (def.type != TemplateType::ELEMENT) {
             error(name, "Template '" + name.lexeme + "' is not an Element template.");
         }
@@ -578,8 +578,8 @@ std::unique_ptr<TemplateDeclarationNode> CHTLParser::parseTemplateDeclaration() 
                 Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
                 consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 
-                if (template_definitions.count(name.lexeme)) {
-                    const auto& base_def = template_definitions.at(name.lexeme);
+                if (context.template_definitions.count(name.lexeme)) {
+                    const auto& base_def = context.template_definitions.at(name.lexeme);
                     if (base_def.type != TemplateType::STYLE) {
                         error(name, "Template '" + name.lexeme + "' is not a Style template.");
                     }
@@ -624,7 +624,7 @@ std::unique_ptr<TemplateDeclarationNode> CHTLParser::parseTemplateDeclaration() 
 
     // Clone the definition to store in the parser's map for later lookups.
     auto def_for_map = def->clone();
-    template_definitions[def->name] = std::move(*def_for_map);
+    context.template_definitions[def->name] = std::move(*def_for_map);
 
     // Create the AST node, transferring ownership of the original definition.
     return std::make_unique<TemplateDeclarationNode>(std::move(def));
@@ -663,8 +663,8 @@ std::unique_ptr<CustomDeclarationNode> CHTLParser::parseCustomDeclaration() {
                 Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
                 consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 
-                if (template_definitions.count(name.lexeme)) {
-                    const auto& base_def = template_definitions.at(name.lexeme);
+                if (context.template_definitions.count(name.lexeme)) {
+                    const auto& base_def = context.template_definitions.at(name.lexeme);
                     if (base_def.type != TemplateType::STYLE) {
                         error(name, "Template '" + name.lexeme + "' is not a Style template.");
                     }
@@ -717,7 +717,7 @@ std::unique_ptr<CustomDeclarationNode> CHTLParser::parseCustomDeclaration() {
 
     // Custom definitions are also stored in the same template map.
     auto def_for_map = def->clone();
-    template_definitions[def->name] = std::move(*def_for_map);
+    context.template_definitions[def->name] = std::move(*def_for_map);
 
     return std::make_unique<CustomDeclarationNode>(std::move(def));
 }

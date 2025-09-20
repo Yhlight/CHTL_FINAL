@@ -8,6 +8,7 @@
 #include "../CHTLNode/CustomDeclarationNode.h"
 #include "../CHTLNode/ImportNode.h"
 #include "../CHTLNode/ScriptNode.h"
+#include "../CHTLContext.h"
 #include <vector>
 #include <memory>
 #include <map>
@@ -17,7 +18,7 @@ namespace CHTL {
 // The parser takes a stream of tokens and produces an Abstract Syntax Tree.
 class CHTLParser {
 public:
-    explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, std::map<std::string, TemplateDefinitionNode>& template_definitions);
+    explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, CHTLContext& context);
 
     // The main entry point for parsing.
     std::unique_ptr<BaseNode> parse();
@@ -25,7 +26,7 @@ public:
 private:
     const std::string& source;
     const std::vector<Token>& tokens;
-    std::map<std::string, TemplateDefinitionNode>& template_definitions;
+    CHTLContext& context;
     int current = 0;
 
     // --- Helper Methods ---

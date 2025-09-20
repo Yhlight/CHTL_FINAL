@@ -6,6 +6,7 @@
 #include "../CHTLNode/TemplateDeclarationNode.h"
 #include "../CHTLNode/CustomDeclarationNode.h"
 #include "../Expression/ExpressionEvaluator.h" // Include the new evaluator
+#include "../CHTLContext.h"
 #include <unordered_set>
 #include <algorithm> // For std::find_if
 #include <sstream>   // For std::stringstream
@@ -17,8 +18,8 @@ const std::unordered_set<std::string> voidElements = {
     "link", "meta", "param", "source", "track", "wbr"
 };
 
-CHTLGenerator::CHTLGenerator(const std::map<std::string, TemplateDefinitionNode>& templates)
-    : templates(templates) {}
+CHTLGenerator::CHTLGenerator(CHTLContext& context)
+    : context(context) {}
 
 CompilationResult CHTLGenerator::generate(BaseNode* root) {
     html_output.str("");
@@ -72,7 +73,7 @@ void CHTLGenerator::visit(ElementNode& node) {
 
                 css_output << selector << " {\n";
                 for (const auto& prop : rule.properties) {
-                    ExpressionEvaluator evaluator(this->templates, this->doc_root);
+                    ExpressionEvaluator evaluator(this->context.template_definitions, this->doc_root);
                     EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
                     css_output << "    " << prop.key << ": ";
                     if (result.type == ValueType::STRING) {
@@ -102,7 +103,7 @@ void CHTLGenerator::visit(ElementNode& node) {
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             for (const auto& prop : styleNode->inline_properties) {
-                ExpressionEvaluator evaluator(this->templates, this->doc_root);
+                ExpressionEvaluator evaluator(this->context.template_definitions, this->doc_root);
                 EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
                 style_str += prop.key + ": ";
                 if (result.type == ValueType::STRING) {
