@@ -1,0 +1,26 @@
+div {
+    style {
+        .my-class {
+            color: blue;
+        }
+
+        &:hover {
+            color: red;
+        }
+    }
+    text { "Hover over me!" }
+}
+
+span {
+    id: "my-span";
+    style {
+        & {
+            font-weight: bold;
+        }
+
+        &::before {
+            content: "PREFIX - ";
+        }
+    }
+    text { "I should be bold." }
+}

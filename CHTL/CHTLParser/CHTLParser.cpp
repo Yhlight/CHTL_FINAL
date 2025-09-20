@@ -311,23 +311,33 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
     auto styleNode = std::make_unique<StyleNode>();
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        // Look ahead to distinguish between a property terminated by a semicolon
+        // and a nested rule block opened by a brace.
         bool isInlineProp = false;
+        bool terminatorFound = false;
         int i = 0;
-        while (tokens.size() > current + i && tokens[current + i].type != TokenType::END_OF_FILE && tokens[current + i].type != TokenType::RIGHT_BRACE) {
-            if (tokens[current + i].type == TokenType::COLON) {
+        while (tokens.size() > current + i && tokens[current + i].type != TokenType::RIGHT_BRACE) {
+            if (tokens[current + i].type == TokenType::SEMICOLON) {
                 isInlineProp = true;
+                terminatorFound = true;
                 break;
             }
             if (tokens[current + i].type == TokenType::LEFT_BRACE) {
                 isInlineProp = false;
+                terminatorFound = true;
                 break;
             }
             i++;
+        }
+        // If no terminator is found before the '}', it's not a valid inline prop.
+        if (!terminatorFound) {
+            isInlineProp = false;
         }
 
         if (check(TokenType::AT)) {
             parseStyleTemplateUsage(styleNode.get());
         } else if (isInlineProp) {
+            // It's an inline property like 'width: 100px;'
             std::string key_str;
             while (!check(TokenType::COLON) && !isAtEnd()) {
                 key_str += advance().lexeme;
@@ -337,10 +347,26 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
             styleNode->inline_properties.push_back({key_str, std::move(value_expr)});
         } else {
+            // It's a nested CSS rule like '.class { ... }' or '&:hover { ... }'
             CssRuleNode rule;
+            std::string raw_selector;
+
+            // Manually build the selector string from tokens
             while (!check(TokenType::LEFT_BRACE) && !isAtEnd()) {
-                rule.selector += advance().lexeme;
+                raw_selector += advance().lexeme;
             }
+            rule.selector = raw_selector; // Store the raw selector
+
+            // Check for automatic class/id addition
+            if (styleNode->auto_class.empty() && styleNode->auto_id.empty()) { // Only add the first one found
+                if (raw_selector.rfind(".", 0) == 0) { // Starts with .
+                    styleNode->auto_class = raw_selector.substr(1);
+                } else if (raw_selector.rfind("#", 0) == 0) { // Starts with #
+                    styleNode->auto_id = raw_selector.substr(1);
+                }
+            }
+
+
             consume(TokenType::LEFT_BRACE, "Expect '{' after rule selector.");
             while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
                 std::string key_str;

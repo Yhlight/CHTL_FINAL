@@ -15,6 +15,9 @@ std::unique_ptr<BaseNode> StyleNode::clone() const {
     for (const auto& rule : this->global_rules) {
         new_node->global_rules.push_back(rule.clone());
     }
+    new_node->auto_class = this->auto_class;
+    new_node->auto_id = this->auto_id;
+    // parent_element_id and parent_element_class are not cloned as they are context-specific.
     return new_node;
 }
 

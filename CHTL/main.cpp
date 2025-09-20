@@ -11,6 +11,7 @@ void print_usage(const char* prog_name) {
     std::cerr << "Options:" << std::endl;
     std::cerr << "  -o <output_base>   Set the base name for output files (default: 'output')" << std::endl;
     std::cerr << "  --inline             Output a single HTML file with inlined CSS and JS" << std::endl;
+    std::cerr << "  --inline-css         Output an HTML file with inlined CSS" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -22,6 +23,7 @@ int main(int argc, char* argv[]) {
     std::string input_file;
     std::string output_base = "output";
     bool inline_output = false;
+    bool inline_css = false;
 
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
@@ -34,6 +36,8 @@ int main(int argc, char* argv[]) {
             }
         } else if (arg == "--inline") {
             inline_output = true;
+        } else if (arg == "--inline-css") {
+            inline_css = true;
         } else {
             if (!input_file.empty()) {
                 std::cerr << "Error: More than one input file specified." << std::endl;
@@ -65,6 +69,9 @@ int main(int argc, char* argv[]) {
             out_file << final_html;
             out_file.close();
             std::cout << "Successfully generated " << out_filename << std::endl;
+        } else if (inline_css) {
+            merger.saveCssInlined(output_base);
+            std::cout << "Successfully generated " << output_base << ".html with inlined css." << std::endl;
         } else {
             merger.saveToSeparateFiles(output_base);
             std::cout << "Successfully generated " << output_base << ".html and related files." << std::endl;

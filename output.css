@@ -1,0 +1,12 @@
+.my-class {
+    color: blue;
+}
+.my-class:hover {
+    color: red;
+}
+#my-span {
+    font-weight: bold;
+}
+#my-span::before {
+    content: PREFIX - ;
+}

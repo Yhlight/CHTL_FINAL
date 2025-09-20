@@ -13,8 +13,14 @@ public:
     // Merges everything into a single string (for inline HTML)
     std::string mergeToSingleFile() const;
 
+    // Merges with only CSS inlined
+    std::string mergeCssInline() const;
+
     // Saves the output to separate files (e.g., "output.html", "output.css")
     void saveToSeparateFiles(const std::string& base_filename) const;
+
+    // Saves the output with inlined CSS
+    void saveCssInlined(const std::string& base_filename) const;
 
 private:
     const FinalOutput& output;

@@ -26,7 +26,9 @@ public:
     // Visitor methods for each concrete node type.
     void visit(ElementNode& node) override;
     void visit(TextNode& node) override;
+    // The StyleNode visitor needs context from its parent element.
     void visit(StyleNode& node) override;
+    void visit(StyleNode& node, ElementNode* parent);
     void visit(OriginNode& node) override;
     void visit(TemplateDeclarationNode& node) override;
     void visit(CustomDeclarationNode& node) override;

@@ -44,47 +44,34 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
 }
 
 void CHTLGenerator::visit(ElementNode& node) {
-    // --- Automation and Global CSS Generation ---
+    // --- Pre-computation Step ---
+    // Find any local style blocks and apply their automatic classes/ids to this element *before* rendering.
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
-            for (const auto& rule : styleNode->global_rules) {
-                std::string selector = rule.selector;
-                // Automation: if selector is a simple class or id, inject it.
-                if (selector.rfind('.', 0) == 0) { // Starts with .
-                    std::string className = selector.substr(1);
-                    auto it = std::find_if(node.attributes.begin(), node.attributes.end(),
-                                           [](const HtmlAttribute& attr){ return attr.key == "class"; });
-                    if (it != node.attributes.end()) {
-                        if (it->value.find(className) == std::string::npos) {
-                            it->value += " " + className;
-                        }
-                    } else {
-                        node.attributes.push_back({"class", className});
+            // Automatic class/id injection from the parser's findings
+            if (!styleNode->auto_id.empty()) {
+                auto it = std::find_if(node.attributes.begin(), node.attributes.end(),
+                                       [](const HtmlAttribute& attr){ return attr.key == "id"; });
+                if (it == node.attributes.end()) {
+                    node.attributes.push_back({"id", styleNode->auto_id});
+                }
+            }
+            if (!styleNode->auto_class.empty()) {
+                auto it = std::find_if(node.attributes.begin(), node.attributes.end(),
+                                       [](const HtmlAttribute& attr){ return attr.key == "class"; });
+                if (it != node.attributes.end()) {
+                    if (it->value.find(styleNode->auto_class) == std::string::npos) {
+                        it->value += " " + styleNode->auto_class;
                     }
-                } else if (selector.rfind('#', 0) == 0) { // Starts with #
-                    node.attributes.push_back({"id", selector.substr(1)});
+                } else {
+                    node.attributes.push_back({"class", styleNode->auto_class});
                 }
+            }
 
-                size_t pos = selector.find('&');
-                if (pos != std::string::npos) {
-                    selector.replace(pos, 1, node.tagName);
-                }
-
-                css_output << selector << " {\n";
-                for (const auto& prop : rule.properties) {
-                    ExpressionEvaluator evaluator(this->templates, this->doc_root);
-                    EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
-                    css_output << "    " << prop.key << ": ";
-                    if (result.type == ValueType::STRING) {
-                        css_output << result.string_value;
-                    } else if (result.type == ValueType::NUMERIC) {
-                        std::stringstream ss;
-                        ss << result.numeric_value;
-                        css_output << ss.str() << result.string_value;
-                    }
-                    css_output << ";\n";
-                }
-                css_output << "}\n";
+            // Set parent context on the style node for '&' selector resolution later
+            for(const auto& attr : node.attributes) {
+                if (attr.key == "id") styleNode->parent_element_id = attr.value;
+                if (attr.key == "class") styleNode->parent_element_class = attr.value;
             }
         }
     }
@@ -140,10 +127,14 @@ void CHTLGenerator::visit(ElementNode& node) {
 
     html_output << ">";
 
-    // Process children, skipping style nodes
+    // Process children
     for (const auto& child : node.children) {
-        if (dynamic_cast<StyleNode*>(child.get())) continue;
-        child->accept(*this);
+        if (StyleNode* style_child = dynamic_cast<StyleNode*>(child.get())) {
+            // Use the new visitor that passes the parent context
+            visit(*style_child, &node);
+        } else {
+            child->accept(*this);
+        }
     }
     html_output << "</" << node.tagName << ">";
 }
@@ -153,8 +144,57 @@ void CHTLGenerator::visit(TextNode& node) {
 }
 
 void CHTLGenerator::visit(StyleNode& node) {
-    // This visitor method is intentionally left empty.
-    // StyleNodes are processed specially within visit(ElementNode&).
+    // This overload exists to satisfy the Visitor interface.
+    // The actual work is done in the version that takes the parent context.
+    visit(node, nullptr);
+}
+
+void CHTLGenerator::visit(StyleNode& node, ElementNode* parent) {
+    // This visitor method handles the generation of global CSS rules
+    // that are defined within a local style block.
+    if (!parent) return; // Cannot process a local style block without its parent element.
+
+    for (const auto& rule : node.global_rules) {
+        std::string selector = rule.selector;
+
+        // Determine the parent selector for '&' replacement. ID is preferred.
+        std::string parent_selector;
+        if (!node.parent_element_id.empty()) {
+            parent_selector = "#" + node.parent_element_id;
+        } else if (!node.parent_element_class.empty()) {
+            std::stringstream ss(node.parent_element_class);
+            std::string first_class;
+            ss >> first_class; // Use the first class if multiple exist
+            parent_selector = "." + first_class;
+        } else {
+            // Fallback to the tag name if no id or class is available
+            parent_selector = parent->tagName;
+        }
+
+        // Replace all occurrences of '&'
+        size_t pos = selector.find('&');
+        while (pos != std::string::npos) {
+            selector.replace(pos, 1, parent_selector);
+            pos = selector.find('&', pos + parent_selector.length());
+        }
+
+        css_output << selector << " {\n";
+        for (const auto& prop : rule.properties) {
+            ExpressionEvaluator evaluator(this->templates, this->doc_root);
+            // Pass the parent element node to the evaluator for context
+            EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), parent);
+            css_output << "    " << prop.key << ": ";
+            if (result.type == ValueType::STRING) {
+                css_output << result.string_value;
+            } else if (result.type == ValueType::NUMERIC) {
+                std::stringstream ss;
+                ss << result.numeric_value;
+                css_output << ss.str() << result.string_value;
+            }
+            css_output << ";\n";
+        }
+        css_output << "}\n";
+    }
 }
 
 void CHTLGenerator::visit(OriginNode& node) {
