@@ -110,20 +110,9 @@ std::unique_ptr<ListenNode> CHTLJSParser::parseListenBlock(std::unique_ptr<Enhan
         Token eventName = consume(TokenType::IDENTIFIER, "Expect event name.");
         consume(TokenType::COLON, "Expect ':' after event name.");
 
-        Token start_token = peek();
-        int brace_level = 0;
-        if (check(TokenType::LEFT_BRACE)) brace_level++;
-
-        while ((brace_level > 0 || (!check(TokenType::COMMA) && !check(TokenType::RIGHT_BRACE))) && !isAtEnd()) {
-            if(peek().type == TokenType::LEFT_BRACE) brace_level++;
-            if(peek().type == TokenType::RIGHT_BRACE) brace_level--;
-            advance();
-        }
-        Token end_token = previous();
-
-        int start_pos = start_token.position;
-        int end_pos = end_token.position + end_token.lexeme.length();
-        listenNode->events[eventName.lexeme] = trim(source.substr(start_pos, end_pos - start_pos));
+        // Now we expect a placeholder ID for the JS function
+        Token placeholder = consume(TokenType::IDENTIFIER, "Expect placeholder ID for event handler.");
+        listenNode->events[eventName.lexeme] = placeholder.lexeme;
 
         if (match({TokenType::COMMA})) {
             // continue
@@ -142,22 +131,9 @@ std::unique_ptr<EventHandlerNode> CHTLJSParser::parseEventHandlerExpression(std:
 
     consume(TokenType::COLON, "Expect ':' after event name(s).");
 
-    Token start_token = peek();
-    int brace_level = 0;
-    if (check(TokenType::LEFT_BRACE)) brace_level++;
-
-    while ((brace_level > 0 || (!check(TokenType::SEMICOLON))) && !isAtEnd()) {
-        if(peek().type == TokenType::LEFT_BRACE) brace_level++;
-        if(peek().type == TokenType::RIGHT_BRACE) brace_level--;
-        advance();
-    }
-    Token end_token = previous();
-
-    int start_pos = start_token.position;
-    int end_pos = end_token.position + end_token.lexeme.length();
-    std::string handler = trim(source.substr(start_pos, end_pos - start_pos));
-
-    auto eventHandlerNode = std::make_unique<EventHandlerNode>(selector->parsed_selector, eventNames, handler);
+    // Now we expect a placeholder ID for the JS function
+    Token placeholder = consume(TokenType::IDENTIFIER, "Expect placeholder ID for event handler.");
+    auto eventHandlerNode = std::make_unique<EventHandlerNode>(selector->parsed_selector, eventNames, placeholder.lexeme);
 
     if (match({TokenType::SEMICOLON})) {
         // continue
@@ -186,21 +162,9 @@ std::unique_ptr<DelegateNode> CHTLJSParser::parseDelegateExpression(std::unique_
                 delegateNode->target_selectors.push_back(parseEnhancedSelector()->parsed_selector);
             }
         } else {
-            // It's an event handler
-            Token start_token = peek();
-            int brace_level = 0;
-            if (check(TokenType::LEFT_BRACE)) brace_level++;
-
-            while ((brace_level > 0 || (!check(TokenType::COMMA) && !check(TokenType::RIGHT_BRACE))) && !isAtEnd()) {
-                if(peek().type == TokenType::LEFT_BRACE) brace_level++;
-                if(peek().type == TokenType::RIGHT_BRACE) brace_level--;
-                advance();
-            }
-            Token end_token = previous();
-
-            int start_pos = start_token.position;
-            int end_pos = end_token.position + end_token.lexeme.length();
-            delegateNode->events[key.lexeme] = trim(source.substr(start_pos, end_pos - start_pos));
+            // It's an event handler, we expect a placeholder ID
+            Token placeholder = consume(TokenType::IDENTIFIER, "Expect placeholder ID for event handler.");
+            delegateNode->events[key.lexeme] = placeholder.lexeme;
         }
 
         if (match({TokenType::COMMA})) {
@@ -275,18 +239,9 @@ std::unique_ptr<AnimateNode> CHTLJSParser::parseAnimateExpression() {
         } else if (key.lexeme == "delay") {
             animateNode->delay = std::stoi(consume(TokenType::NUMBER, "Expect number.").lexeme);
         } else if (key.lexeme == "callback") {
-            Token start_token = peek();
-            int brace_level = 0;
-            if (check(TokenType::LEFT_BRACE)) brace_level++;
-            while ((brace_level > 0 || (!check(TokenType::COMMA) && !check(TokenType::RIGHT_BRACE))) && !isAtEnd()) {
-                if(peek().type == TokenType::LEFT_BRACE) brace_level++;
-                if(peek().type == TokenType::RIGHT_BRACE) brace_level--;
-                advance();
-            }
-            Token end_token = previous();
-            int start_pos = start_token.position;
-            int end_pos = end_token.position + end_token.lexeme.length();
-            animateNode->callback = trim(source.substr(start_pos, end_pos - start_pos));
+            // Expect a placeholder ID for the callback function
+            Token placeholder = consume(TokenType::IDENTIFIER, "Expect placeholder ID for callback.");
+            animateNode->callback = placeholder.lexeme;
         }
 
         if (match({TokenType::COMMA})) {

@@ -151,7 +151,14 @@ void CHTLGenerator::visit(ElementNode& node) {
                     // NOTE: Dynamic expressions are NOT handled in global rules.
                     ExpressionEvaluator evaluator(this->templates, this->doc_root);
                     EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
-                    css_output << "  " << prop.key << ": " << format_css_double(result.value) << result.unit << ";\n";
+
+                    bool is_keyword_value = (result.value == 0 && !result.unit.empty() && !isdigit(result.unit[0]));
+
+                    if (is_keyword_value) {
+                        css_output << "  " << prop.key << ": " << result.unit << ";\n";
+                    } else {
+                        css_output << "  " << prop.key << ": " << format_css_double(result.value) << result.unit << ";\n";
+                    }
                 }
                 css_output << "}\n";
             }

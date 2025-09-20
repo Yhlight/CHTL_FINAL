@@ -1,4 +1,4 @@
-html5;
+use html5;
 
 html {
     head {

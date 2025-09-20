@@ -66,9 +66,12 @@ void CHTLJSLexer::scanToken() {
         case ' ': case '\r': case '\t': break;
         case '\n': line++; break;
         case '"': case '\'': string(c); break;
+        case '_':
+            identifier(); // Handles placeholders and other identifiers starting with _
+            break;
         default:
             if (isdigit(c)) { number(); }
-            else if (isalpha(c) || c == '_') { identifier(); }
+            else if (isalpha(c)) { identifier(); }
             else { /* Ignore other characters for now */ }
             break;
     }

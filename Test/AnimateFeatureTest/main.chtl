@@ -1,0 +1,14 @@
+script {
+    Animate {
+        target: {{#box}},
+        duration: 1000,
+        begin: {
+            opacity: '0',
+            width: '100px'
+        },
+        end: {
+            opacity: '1',
+            width: '200px'
+        }
+    };
+}
