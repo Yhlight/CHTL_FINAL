@@ -7,17 +7,22 @@
 namespace CHTL {
 
 enum class FragmentType {
+    // Raw fragments from the scanner
     CHTL,
+    STYLE_BLOCK,
+    SCRIPT_BLOCK,
+    IMPORT_STATEMENT,
+    // Processed fragments
     CSS,
     JS,
     CHTL_JS,
-    CHTL_in_CSS // CHTL syntax found inside a global style block
+    CHTL_in_CSS
 };
 
 struct CodeFragment {
     FragmentType type;
     std::string content;
-    int start_line; // Keep track of original line number for better error messages
+    int start_line;
 };
 
 } // namespace CHTL

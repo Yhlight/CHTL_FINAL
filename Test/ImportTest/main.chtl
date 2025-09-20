@@ -1,0 +1,11 @@
+// This is the main file for the import test.
+
+[Import] @Chtl from "Test/ImportTest/imported.chtl";
+
+body
+{
+    h1 { text: "Main File Content"; }
+
+    // Use the template from the imported file
+    @Element ImportedBox;
+}

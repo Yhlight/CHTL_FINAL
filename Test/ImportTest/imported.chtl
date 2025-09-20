@@ -1,0 +1,11 @@
+// This file is imported by main.chtl
+// It defines a simple template.
+
+[Template] @Element ImportedBox
+{
+    div
+    {
+        class: "imported-box";
+        text: "This content is from an imported file!";
+    }
+}

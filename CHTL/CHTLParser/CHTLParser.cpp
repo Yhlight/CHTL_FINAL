@@ -277,7 +277,7 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
     consume(TokenType::LEFT_BRACE, "Expect '{' after element name.");
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        if (peek().type == TokenType::IDENTIFIER && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
+        if ((peek().type == TokenType::IDENTIFIER || peek().type == TokenType::TEXT) && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
             parseAttribute(element.get());
         } else {
             for (auto& child : parseDeclaration()) {
@@ -291,19 +291,31 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
 }
 
 void CHTLParser::parseAttribute(ElementNode* element) {
-    Token key = consume(TokenType::IDENTIFIER, "Expect attribute name.");
-    consume(TokenType::COLON, "Expect ':' after attribute name.");
+    Token key = advance(); // Consume the token, could be IDENTIFIER or TEXT
 
-    Token value_token;
-    if (match({TokenType::STRING, TokenType::IDENTIFIER, TokenType::NUMBER})) {
-        value_token = previous();
+    if (key.type == TokenType::TEXT && key.lexeme == "text") {
+        consume(TokenType::COLON, "Expect ':' after 'text' attribute.");
+        Token value_token;
+        if (match({TokenType::STRING, TokenType::IDENTIFIER, TokenType::NUMBER})) {
+            value_token = previous();
+        } else {
+            error(peek(), "Expect attribute value (string, identifier, or number) for 'text'.");
+        }
+        consume(TokenType::SEMICOLON, "Expect ';' after text attribute.");
+        element->addChild(std::make_unique<TextNode>(value_token.lexeme));
+    } else if (key.type == TokenType::IDENTIFIER) {
+        consume(TokenType::COLON, "Expect ':' after attribute name.");
+        Token value_token;
+        if (match({TokenType::STRING, TokenType::IDENTIFIER, TokenType::NUMBER})) {
+            value_token = previous();
+        } else {
+            error(peek(), "Expect attribute value (string, identifier, or number).");
+        }
+        consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
+        element->addAttribute({key.lexeme, value_token.lexeme});
     } else {
-        error(peek(), "Expect attribute value (string, identifier, or number).");
+        error(key, "Expect attribute name.");
     }
-
-    consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
-
-    element->addAttribute({key.lexeme, value_token.lexeme});
 }
 
 std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {

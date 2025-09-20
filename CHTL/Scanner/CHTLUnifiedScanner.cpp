@@ -57,9 +57,13 @@ void CHTLUnifiedScanner::scan_toplevel(std::vector<CodeFragment>& fragments) {
             int block_start_line = line; // apx
 
             if (is_style) {
-                process_style_block(fragments, block_start_line);
+                current = brace_pos + 1;
+                std::string content = consume_block_content();
+                fragments.push_back({FragmentType::STYLE_BLOCK, "style {" + content + "}", block_start_line});
             } else { // is_script
-                process_script_block(fragments, block_start_line);
+                current = brace_pos + 1;
+                std::string content = consume_block_content();
+                fragments.push_back({FragmentType::SCRIPT_BLOCK, "script {" + content + "}", block_start_line});
             }
 
             last_pos = current;
