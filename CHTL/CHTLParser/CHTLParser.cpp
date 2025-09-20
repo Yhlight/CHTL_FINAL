@@ -337,7 +337,6 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
         if (check(TokenType::AT)) {
             parseStyleTemplateUsage(styleNode.get());
         } else if (isInlineProp) {
-            // It's an inline property like 'width: 100px;'
             std::string key_str;
             while (!check(TokenType::COLON) && !isAtEnd()) {
                 key_str += advance().lexeme;
@@ -347,15 +346,12 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
             styleNode->inline_properties.push_back({key_str, std::move(value_expr)});
         } else {
-            // It's a nested CSS rule like '.class { ... }' or '&:hover { ... }'
             CssRuleNode rule;
             std::string raw_selector;
-
-            // Manually build the selector string from tokens
             while (!check(TokenType::LEFT_BRACE) && !isAtEnd()) {
                 raw_selector += advance().lexeme;
             }
-            rule.selector = raw_selector; // Store the raw selector
+            rule.selector = raw_selector;
 
             // Check for automatic class/id addition
             if (styleNode->auto_class.empty() && styleNode->auto_id.empty()) { // Only add the first one found
@@ -365,8 +361,6 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
                     styleNode->auto_id = raw_selector.substr(1);
                 }
             }
-
-
             consume(TokenType::LEFT_BRACE, "Expect '{' after rule selector.");
             while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
                 std::string key_str;

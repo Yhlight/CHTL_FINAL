@@ -1,0 +1,14 @@
+div {
+    id: "box";
+    style {
+        width: 200px;
+        height: 100px;
+    }
+}
+
+span {
+    style {
+        width: #box.width / 2;
+        height: #box.height + 50px;
+    }
+}

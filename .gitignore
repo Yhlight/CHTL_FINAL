@@ -1,6 +1,19 @@
 # Build artifacts
+chtl
+run_test
 test_lexer
 test_parser
 test_pipeline
+output.html
+output.css
+output.js
 *.o
+*.obj
 *.out
+
+# Dependencies
+libzip-1.11.4.tar.gz
+miniz-3.0.2 (1).zip
+minizip-ng-4.0.10.zip
+minizip-ng-linux.tar.gz
+minizip-ng-windows.zip
