@@ -1,73 +1,80 @@
 #include "../../CHTL/Scanner/CHTLUnifiedScanner.h"
 #include <iostream>
+#include <vector>
+#include <string>
 #include <fstream>
 #include <sstream>
 #include <cassert>
-#include <vector>
-#include <string>
 
-// Helper function to check if a string contains a substring
-bool contains(const std::string& str, const std::string& substr) {
-    return str.find(substr) != std::string::npos;
+// Helper to convert FragmentType to string for printing
+std::string fragmentTypeToString(CHTL::FragmentType type) {
+    switch (type) {
+        case CHTL::FragmentType::CHTL: return "CHTL";
+        case CHTL::FragmentType::CSS: return "CSS";
+        case CHTL::FragmentType::JS: return "JS";
+        case CHTL::FragmentType::CHTL_JS: return "CHTL_JS";
+        default: return "UNKNOWN";
+    }
 }
 
+void printFragments(const std::vector<CHTL::CodeFragment>& fragments) {
+    std::cout << "--- Scanner Output ---" << std::endl;
+    for (size_t i = 0; i < fragments.size(); ++i) {
+        const auto& fragment = fragments[i];
+        std::cout << "--- Fragment " << i << " ---" << std::endl;
+        std::cout << "Type: " << fragmentTypeToString(fragment.type) << std::endl;
+        std::cout << "Line: " << fragment.start_line << std::endl;
+        std::cout << "Content: <<<" << std::endl << fragment.content << std::endl << ">>>" << std::endl;
+    }
+    std::cout << "--------------------" << std::endl;
+}
+
+
 int main() {
-    std::ifstream file("Test/unified_scanner_test.chtl");
-    if (!file.is_open()) {
-        std::cerr << "Failed to open test file." << std::endl;
+    std::string path = "Test/ScannerTest/test_scanner.chtl";
+    std::ifstream file_stream(path);
+    if (!file_stream) {
+        std::cerr << "Error: Could not open file " << path << std::endl;
         return 1;
     }
     std::stringstream buffer;
-    buffer << file.rdbuf();
+    buffer << file_stream.rdbuf();
     std::string source = buffer.str();
-
-    std::cout << "--- Running Scanner Test ---" << std::endl;
 
     CHTL::CHTLUnifiedScanner scanner(source);
     std::vector<CHTL::CodeFragment> fragments = scanner.scan();
-    const auto& placeholder_map = scanner.getPlaceholderMap();
 
-    // 1. Assertions on Fragments
-    assert(fragments.size() == 4);
-    std::cout << "OK: Correct number of fragments (4)." << std::endl;
+    printFragments(fragments);
 
+    // Basic assertions to verify the scanner's output
+    assert(fragments.size() > 10); // Check that it produced a reasonable number of fragments
+
+    // CHTL -> <style> -> CSS -> </style> -> CHTL -> <script>
     assert(fragments[0].type == CHTL::FragmentType::CHTL);
-    assert(fragments[1].type == CHTL::FragmentType::CSS);
-    assert(fragments[2].type == CHTL::FragmentType::CHTL);
-    assert(fragments[3].type == CHTL::FragmentType::JS);
-    std::cout << "OK: Fragments have correct types (CHTL, CSS, CHTL, JS)." << std::endl;
+    assert(fragments[1].type == CHTL::FragmentType::CHTL); // <style>
+    assert(fragments[1].content.find("<style") != std::string::npos);
+    assert(fragments[2].type == CHTL::FragmentType::CSS);
+    assert(fragments[3].type == CHTL::FragmentType::CHTL); // </style>
+    assert(fragments[4].type == CHTL::FragmentType::CHTL);
+    assert(fragments[5].type == CHTL::FragmentType::CHTL); // <script>
 
-    // 2. Assertions on Style Block
-    const auto& css_content = fragments[1].content;
-    assert(contains(css_content, "/* _PLACEHOLDER_0_ */"));
-    assert(contains(css_content, "/* _PLACEHOLDER_1_ */"));
-    assert(contains(css_content, "font-family: Arial, sans-serif;"));
-    std::cout << "OK: CSS fragment contains style placeholders and preserves pure CSS." << std::endl;
+    // Script content fragments
+    assert(fragments[6].type == CHTL::FragmentType::JS);
+    assert(fragments[7].type == CHTL::FragmentType::CHTL_JS); // {{.box}}
+    assert(fragments[7].content.find("{{.box}}") != std::string::npos);
+    assert(fragments[8].type == CHTL::FragmentType::JS);
+    assert(fragments[9].type == CHTL::FragmentType::CHTL_JS); // Listen {..}
+    assert(fragments[9].content.find("Listen") != std::string::npos);
+    assert(fragments[10].type == CHTL::FragmentType::JS);
+    assert(fragments[11].type == CHTL::FragmentType::CHTL_JS); // $my_class$
+    assert(fragments[11].content.find("$my_class$") != std::string::npos);
+    assert(fragments[12].type == CHTL::FragmentType::JS);
 
-    // 3. Assertions on Script Block
-    const auto& js_content = fragments[3].content;
-    assert(contains(js_content, "_PLACEHOLDER_2_")); // First JS placeholder after the two from style
-    assert(contains(js_content, "{{b}}"));
-    assert(contains(js_content, "Listen {"));
-    assert(contains(js_content, "$someValue$"));
-    std::cout << "OK: JS fragment contains JS placeholders and preserves CHTL-JS." << std::endl;
+    // </script> -> CHTL
+    assert(fragments[13].type == CHTL::FragmentType::CHTL); // </script>
+    assert(fragments[14].type == CHTL::FragmentType::CHTL);
 
-    // 4. Assertions on Placeholder Map
-    // Style block has 2 CHTL lines. Script block has 4 JS sections around 3 CHTL-JS constructs. Total = 2 + 4 = 6 placeholders.
-    assert(placeholder_map.size() == 6);
-    std::cout << "OK: Placeholder map has the correct number of entries (6)." << std::endl;
-
-    // Spot check map content
-    assert(contains(placeholder_map.at("_PLACEHOLDER_0_"), "width: 100px + 50px;"));
-    assert(contains(placeholder_map.at("_PLACEHOLDER_1_"), "color: ThemeColor(primary);"));
-    assert(contains(placeholder_map.at("_PLACEHOLDER_2_"), "function greet(name)"));
-    assert(placeholder_map.at("_PLACEHOLDER_3_") == ";\n    ");
-    assert(contains(placeholder_map.at("_PLACEHOLDER_4_"), "let myVar = "));
-    assert(contains(placeholder_map.at("_PLACEHOLDER_5_"), "console.log(\"Done.\");"));
-    std::cout << "OK: Placeholder map contains correct original code snippets." << std::endl;
-
-
-    std::cout << "\n--- Scanner Test Passed! ---" << std::endl;
+    std::cout << "All basic assertions passed!" << std::endl;
 
     return 0;
 }

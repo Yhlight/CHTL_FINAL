@@ -1,34 +1,36 @@
 #include "../../CHTL/CompilerDispatcher/CompilerDispatcher.h"
+#include "../../CHTL/CodeMerger/CodeMerger.h"
 #include <iostream>
-#include <fstream>
-#include <sstream>
 #include <string>
 
 int main() {
-    std::ifstream file("Test/unified_scanner_test.chtl");
-    if (!file.is_open()) {
-        std::cerr << "Failed to open test file: Test/unified_scanner_test.chtl" << std::endl;
-        return 1;
-    }
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    std::string source = buffer.str();
+    std::string source = R"(
+        div {
+            style {
+                width: $boxWidth$;
+                height: 100px;
+            }
+            text { "Reactive value test" }
+        }
+    )";
 
-    std::cout << "--- Running Full Pipeline Test ---" << std::endl;
+    std::cout << "--- Input CHTL ---\n" << source << "\n------------------\n" << std::endl;
 
     try {
         CHTL::CompilerDispatcher dispatcher(source);
         CHTL::FinalOutput compiled_output = dispatcher.dispatch();
 
-        std::cout << "\n--- Final HTML Output ---\n" << compiled_output.html << "\n-------------------------\n";
-        std::cout << "\n--- Final CSS Output ---\n" << compiled_output.css << "\n------------------------\n";
-        std::cout << "\n--- Final JS Output ---\n" << compiled_output.js << "\n-----------------------\n" << std::endl;
+        std::cout << "\n--- Merging ---" << std::endl;
+        CHTL::CodeMerger merger(compiled_output);
+        std::string final_html = merger.mergeToSingleFile();
+        std::cout << "Merging complete." << std::endl;
 
-    } catch (const std::exception& e) {
-        std::cerr << "Caught an exception: " << e.what() << std::endl;
+        std::cout << "\n--- Final Merged HTML ---\n" << final_html << "\n-------------------------\n" << std::endl;
+
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Caught a runtime_error exception: " << e.what() << std::endl;
         return 1;
     }
 
-    std::cout << "--- Full Pipeline Test Finished ---" << std::endl;
     return 0;
 }

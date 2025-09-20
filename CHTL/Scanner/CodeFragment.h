@@ -10,7 +10,7 @@ enum class FragmentType {
     CHTL,
     CSS,
     JS,
-    CHTL_JS // Reserved for future CHTL JS implementation
+    CHTL_JS
 };
 
 struct CodeFragment {

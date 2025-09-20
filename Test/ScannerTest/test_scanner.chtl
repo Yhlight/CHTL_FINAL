@@ -1,0 +1,47 @@
+// This is a CHTL comment.
+div {
+    id: main_div;
+    text: "Hello CHTL!";
+}
+
+<style type="text/css">
+body {
+    font-family: "Arial", sans-serif;
+    background-color: #f0f0f0;
+}
+.red { color: red; }
+</style>
+
+div {
+    // another CHTL block
+}
+
+<script>
+// This is a plain JavaScript part.
+function greet(name) {
+    console.log("Hello, " + name);
+}
+
+greet("World");
+
+// Now for some CHTL JS
+const my_element = {{.box}};
+
+Listen {
+    click: () => {
+        console.log("Clicked!");
+        my_element->textContent = "New text!";
+    }
+}
+
+let reactive_class = $my_class$;
+
+// Some more plain JS
+for (let i = 0; i < 5; i++) {
+    console.log(i);
+}
+</script>
+
+footer {
+    text: "End of file.";
+}
