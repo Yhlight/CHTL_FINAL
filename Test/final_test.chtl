@@ -1,14 +1,7 @@
-// --- JS Handling Tests ---
-[Origin] @JavaScript
-{
-    console.log("Hello from Origin JS!");
-}
-
+// This script block should remain at the top and be collected.
 script {
     console.log("Hello from script tag!");
 }
-
-// --- Previous tests ---
 
 [Import] @Chtl from "Test/imported.chtl";
 
@@ -54,6 +47,15 @@ div {
         height: width * 2; // Should be 400px
     }
 }
+
+// --- Test for in-place [Origin] block ---
+div { text{"---BEFORE ORIGIN---"} }
+[Origin] @JavaScript
+{
+    RAW_JS_CONTENT_SHOULD_BE_HERE
+}
+div { text{"---AFTER ORIGIN---"} }
+
 span { text { "First span" } }
 span {
     id: "second-span";

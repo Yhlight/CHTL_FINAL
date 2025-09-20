@@ -182,15 +182,14 @@ void CHTLGenerator::visit(StyleNode& node) {
 }
 
 void CHTLGenerator::visit(OriginNode& node) {
+    // Per the user's explicit instruction, all [Origin] block types
+    // dump their raw content directly into the HTML stream at their
+    // source position, with no wrappers or processing.
     switch (node.type) {
         case OriginType::HTML:
-            html_output << node.content;
-            break;
         case OriginType::STYLE:
-            css_output << node.content;
-            break;
         case OriginType::JAVASCRIPT:
-            js_output << node.content;
+            html_output << node.content;
             break;
     }
 }
