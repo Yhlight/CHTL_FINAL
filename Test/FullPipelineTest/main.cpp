@@ -1,53 +1,28 @@
-#include "../../CHTL/CHTLLexer/CHTLLexer.h"
-#include "../../CHTL/CHTLParser/CHTLParser.h"
+#include "../../CHTL/CHTLCompiler.h"
 #include "../../CHTL/CHTLGenerator/CHTLGenerator.h"
 #include <iostream>
 
 int main() {
-    std::string source = R"(
-        // Define a customizable style group with placeholders
-        [Custom] @Style TextSet
-        {
-            color;
-            font-size;
-            line-height: 1.6;
-        }
+    // The entry point to our test project
+    std::string entry_file = "Test/FullPipelineTest/test.chtl";
 
-        div {
-            style {
-                // Use the customizable style and provide values
-                @Style TextSet {
-                    color: "red";
-                    font-size: 20px;
-                    delete line-height;
-                    border: "1px solid blue"; // Add a new property
-                }
-            }
-            text { "Hello Customization!" }
-        }
-    )";
-
-    std::cout << "--- Input CHTL ---\n" << source << "\n------------------\n" << std::endl;
+    std::cout << "--- Starting Compilation from Entry File: " << entry_file << " ---\n" << std::endl;
 
     try {
-        // 1. Lexing
-        CHTL::CHTLLexer lexer(source);
-        std::vector<CHTL::Token> tokens = lexer.scanTokens();
+        // 1. Compilation (including loading, lexing, parsing, and handling imports)
+        CHTL::CHTLCompiler compiler;
+        std::unique_ptr<CHTL::BaseNode> ast = compiler.compile(entry_file);
 
-        // 2. Parsing
-        CHTL::CHTLParser parser(source, tokens);
-        std::unique_ptr<CHTL::BaseNode> ast = parser.parse();
-
-        // 3. Generation
-        CHTL::CHTLGenerator generator(parser.getTemplateDefinitions());
+        // 2. Generation
+        CHTL::CHTLGenerator generator(compiler.getTemplateDefinitions());
         CHTL::CompilationResult result = generator.generate(ast.get());
 
-        // 4. Verification
+        // 3. Verification
         std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n" << std::endl;
         std::cout << "--- Generated CSS ---\n" << result.css << "\n---------------------\n" << std::endl;
 
-    } catch (const std::runtime_error& e) {
-        std::cerr << "Caught a runtime_error exception: " << e.what() << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Caught an exception: " << e.what() << std::endl;
         return 1;
     }
 

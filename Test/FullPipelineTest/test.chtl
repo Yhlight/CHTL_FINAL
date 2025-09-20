@@ -1,0 +1,9 @@
+[Import] @Chtl from "imported.chtl";
+
+div {
+    style {
+        @Style ImportedStyle;
+        border: "1px solid black";
+    }
+    text { "This text should be blue." }
+}

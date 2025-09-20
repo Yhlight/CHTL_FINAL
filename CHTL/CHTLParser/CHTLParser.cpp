@@ -4,6 +4,7 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/TemplateDeclarationNode.h"
+#include "../CHTLNode/ImportNode.h"
 #include "../Expression/Expr.h"
 #include <iostream>
 #include <stdexcept>
@@ -11,8 +12,8 @@
 
 namespace CHTL {
 
-CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens)
-    : source(source), tokens(tokens) {}
+CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens, std::map<std::string, TemplateDefinitionNode>& template_definitions)
+    : source(source), tokens(tokens), template_definitions(template_definitions) {}
 
 // --- Expression Parser Implementation ---
 
@@ -203,8 +204,8 @@ std::unique_ptr<BaseNode> CHTLParser::parseTopLevelDeclaration() {
                     return parseCustomDeclaration();
                 case TokenType::ORIGIN:
                     return parseOriginBlock();
-                // case TokenType::IMPORT:
-                // etc. will be added here later.
+                case TokenType::IMPORT:
+                    return parseImportStatement();
                 default:
                     // If it's not a recognized block keyword, parse as a normal element.
                     break;
@@ -714,5 +715,34 @@ std::unique_ptr<CustomDeclarationNode> CHTLParser::parseCustomDeclaration() {
 
     return std::make_unique<CustomDeclarationNode>(std::move(def));
 }
+
+std::unique_ptr<ImportNode> CHTLParser::parseImportStatement() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start import statement.");
+    consume(TokenType::IMPORT, "Expect 'Import' keyword.");
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end import keyword.");
+
+    auto node = std::make_unique<ImportNode>();
+
+    // For now, we only support simple @Chtl imports
+    consume(TokenType::AT, "Expect '@' for import type.");
+    consume(TokenType::CHTL, "Expect 'Chtl' keyword for import type.");
+    node->type = ImportType::Chtl;
+
+    consume(TokenType::FROM, "Expect 'from' keyword.");
+
+    Token pathToken = consume(TokenType::STRING, "Expect a string literal for the path.");
+    node->path = pathToken.lexeme;
+
+    // Optional 'as' alias
+    if (match({TokenType::AS})) {
+        node->alias = consume(TokenType::IDENTIFIER, "Expect alias name.").lexeme;
+    }
+
+    // Imports should end with a semicolon, but we can make it optional for now.
+    match({TokenType::SEMICOLON});
+
+    return node;
+}
+
 
 } // namespace CHTL

@@ -171,4 +171,9 @@ void CHTLGenerator::visit(CustomDeclarationNode& node) {
     // So, this visitor method is intentionally empty.
 }
 
+void CHTLGenerator::visit(ImportNode& node) {
+    // Import nodes are handled by the CHTLCompiler and do not generate
+    // any direct output themselves, so this visitor is empty.
+}
+
 } // namespace CHTL
