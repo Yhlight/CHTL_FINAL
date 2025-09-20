@@ -17,6 +17,7 @@ class ComparisonExpr;
 class LogicalExpr;
 class ConditionalExpr;
 class ReactiveValueNode;
+class ConcatExpr;
 class GroupingExpr; // For future use with parentheses
 
 // The base visitor interface for the expression AST.
@@ -33,6 +34,7 @@ public:
     virtual void visit(LogicalExpr& expr) = 0;
     virtual void visit(ConditionalExpr& expr) = 0;
     virtual void visit(ReactiveValueNode& expr) = 0;
+    virtual void visit(ConcatExpr& expr) = 0;
     // virtual void visit(GroupingExpr& expr) = 0; // For future use
 };
 
@@ -163,6 +165,21 @@ public:
     std::unique_ptr<Expr> condition;
     std::unique_ptr<Expr> then_branch;
     std::unique_ptr<Expr> else_branch;
+};
+
+// Represents an implicit concatenation of two expressions, e.g., `box container`
+class ConcatExpr : public Expr {
+public:
+    ConcatExpr(std::unique_ptr<Expr> left, std::unique_ptr<Expr> right)
+        : left(std::move(left)), right(std::move(right)) {}
+
+    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
+    std::unique_ptr<Expr> clone() const override {
+        return std::make_unique<ConcatExpr>(left->clone(), right->clone());
+    }
+
+    std::unique_ptr<Expr> left;
+    std::unique_ptr<Expr> right;
 };
 
 } // namespace CHTL

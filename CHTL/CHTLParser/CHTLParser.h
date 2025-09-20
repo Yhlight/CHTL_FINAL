@@ -7,6 +7,8 @@
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/CustomDeclarationNode.h"
 #include "../CHTLNode/ImportNode.h"
+#include "../CHTLNode/NamespaceNode.h"
+#include "../CHTLNode/ConfigurationNode.h"
 #include <vector>
 #include <memory>
 #include <map>
@@ -50,6 +52,7 @@ private:
     std::unique_ptr<Expr> parseLogicalAnd();
     std::unique_ptr<Expr> parseEquality();
     std::unique_ptr<Expr> parseComparison();
+    std::unique_ptr<Expr> parseConcatenation();
     std::unique_ptr<Expr> parseTerm();
     std::unique_ptr<Expr> parseFactor();
     std::unique_ptr<Expr> parsePower();
@@ -61,6 +64,8 @@ private:
     void parseAttribute(ElementNode* element);
     std::unique_ptr<StyleNode> parseStyleBlock();
     std::unique_ptr<ImportNode> parseImportStatement();
+    std::unique_ptr<NamespaceNode> parseNamespaceDeclaration();
+    std::unique_ptr<ConfigurationNode> parseConfigurationDeclaration();
 
     // --- Error Handling ---
     void error(const Token& token, const std::string& message);

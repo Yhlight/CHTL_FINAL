@@ -2,13 +2,15 @@
 #define HTML_ATTRIBUTE_H
 
 #include <string>
+#include <memory>
+#include "../Expression/Expr.h"
 
 namespace CHTL {
 
-// Represents a standard HTML attribute with a simple string value.
+// Represents an HTML attribute, which can have a complex expression as a value.
 struct HtmlAttribute {
     std::string key;
-    std::string value;
+    std::unique_ptr<Expr> value_expr;
 };
 
 } // namespace CHTL

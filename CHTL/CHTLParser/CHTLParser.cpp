@@ -63,12 +63,25 @@ std::unique_ptr<Expr> CHTLParser::parseEquality() {
 }
 
 std::unique_ptr<Expr> CHTLParser::parseComparison() {
-    auto expr = parseTerm();
+    auto expr = parseConcatenation();
     while (match({TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL})) {
         Token op = previous();
-        auto right = parseTerm();
+        auto right = parseConcatenation();
         expr = std::make_unique<ComparisonExpr>(std::move(expr), op, std::move(right));
     }
+    return expr;
+}
+
+std::unique_ptr<Expr> CHTLParser::parseConcatenation() {
+    auto expr = parseTerm();
+
+    // Check for implicit concatenation. This happens if another literal follows
+    // without an operator in between.
+    while (check(TokenType::IDENTIFIER) || check(TokenType::NUMBER) || check(TokenType::STRING)) {
+        auto right = parseTerm();
+        expr = std::make_unique<ConcatExpr>(std::move(expr), std::move(right));
+    }
+
     return expr;
 }
 
@@ -218,6 +231,10 @@ std::unique_ptr<BaseNode> CHTLParser::parseTopLevelDeclaration() {
                     return parseOriginBlock();
                 case TokenType::IMPORT:
                     return parseImportStatement();
+                case TokenType::NAMESPACE:
+                    return parseNamespaceDeclaration();
+                case TokenType::CONFIGURATION:
+                    return parseConfigurationDeclaration();
                 // etc. will be added here later.
                 default:
                     // If it's not a recognized block keyword, parse as a normal element.
@@ -250,9 +267,34 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
     std::vector<std::unique_ptr<BaseNode>> nodes;
     if (match({TokenType::TEXT})) {
         consume(TokenType::LEFT_BRACE, "Expect '{' after 'text'.");
-        Token content = consume(TokenType::STRING, "Expect string literal inside text block.");
+
+        std::string text_content;
+        // If the next token is a single string literal, we can just use that.
+        if (peek().type == TokenType::STRING && tokens[current + 1].type == TokenType::RIGHT_BRACE) {
+            Token content = consume(TokenType::STRING, "Expect string literal inside text block.");
+            text_content = content.lexeme;
+        } else {
+            // Otherwise, we capture the raw string content until the closing brace.
+            int start_pos = peek().position;
+            int end_pos = start_pos;
+            while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                end_pos = peek().position + peek().lexeme.length();
+                advance();
+            }
+            // Trim leading/trailing whitespace from the raw capture.
+            if (end_pos > start_pos) {
+                size_t first = source.find_first_not_of(" \t\n\r", start_pos);
+                if (first == std::string::npos) { // All whitespace
+                    text_content = "";
+                } else {
+                    size_t last = source.find_last_not_of(" \t\n\r", end_pos - 1);
+                    text_content = source.substr(first, last - first + 1);
+                }
+            }
+        }
+
         consume(TokenType::RIGHT_BRACE, "Expect '}' after text block content.");
-        nodes.push_back(std::make_unique<TextNode>(content.lexeme));
+        nodes.push_back(std::make_unique<TextNode>(text_content));
         return nodes;
     }
 
@@ -294,16 +336,11 @@ void CHTLParser::parseAttribute(ElementNode* element) {
     Token key = consume(TokenType::IDENTIFIER, "Expect attribute name.");
     consume(TokenType::COLON, "Expect ':' after attribute name.");
 
-    Token value_token;
-    if (match({TokenType::STRING, TokenType::IDENTIFIER, TokenType::NUMBER})) {
-        value_token = previous();
-    } else {
-        error(peek(), "Expect attribute value (string, identifier, or number).");
-    }
+    auto value = parseExpression();
 
     consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
 
-    element->addAttribute({key.lexeme, value_token.lexeme});
+    element->addAttribute({key.lexeme, std::move(value)});
 }
 
 std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
@@ -763,8 +800,26 @@ std::unique_ptr<ImportNode> CHTLParser::parseImportStatement() {
     consume(TokenType::FROM, "Expect 'from' after import type.");
 
     // The spec allows unquoted literals for paths.
-    Token pathToken = consume(TokenType::STRING, "Expect path string after 'from'.");
-    std::string path = pathToken.lexeme;
+    std::string path;
+    int start_pos = peek().position;
+    int end_pos = start_pos;
+    while (!check(TokenType::AS) && !check(TokenType::SEMICOLON) && !isAtEnd()) {
+        end_pos = peek().position + peek().lexeme.length();
+        advance();
+    }
+    // Trim leading/trailing whitespace from the raw capture.
+    if (end_pos > start_pos) {
+        size_t first = source.find_first_not_of(" \t\n\r", start_pos);
+        if (first != std::string::npos) {
+            size_t last = source.find_last_not_of(" \t\n\r", end_pos - 1);
+            path = source.substr(first, last - first + 1);
+        }
+    }
+
+    // Handle quoted paths by removing the quotes
+    if (path.front() == '"' && path.back() == '"') {
+        path = path.substr(1, path.length() - 2);
+    }
 
     std::string alias = "";
     if (match({TokenType::AS})) {
@@ -801,6 +856,100 @@ std::vector<std::string> CHTLParser::discoverImports() {
 
     current = original_pos; // Restore state
     return paths;
+}
+
+std::unique_ptr<NamespaceNode> CHTLParser::parseNamespaceDeclaration() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start namespace declaration.");
+    consume(TokenType::NAMESPACE, "Expect 'Namespace' keyword.");
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end namespace keyword.");
+
+    Token name = consume(TokenType::IDENTIFIER, "Expect namespace name.");
+    auto namespaceNode = std::make_unique<NamespaceNode>(name.lexeme);
+
+    if (match({TokenType::LEFT_BRACE})) {
+        // Namespace with a body
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            namespaceNode->addChild(parseTopLevelDeclaration());
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' to close namespace body.");
+    }
+    // If there are no braces, it's a file-level namespace directive.
+    // It doesn't contain nodes itself; it affects subsequent nodes.
+    // So we just return the node with an empty body.
+
+    return namespaceNode;
+}
+
+std::unique_ptr<ConfigurationNode> CHTLParser::parseConfigurationDeclaration() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start configuration declaration.");
+    consume(TokenType::CONFIGURATION, "Expect 'Configuration' keyword.");
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end configuration keyword.");
+
+    std::string config_name = "";
+    if (match({TokenType::AT})) {
+        // Named configuration block, e.g., [Configuration] @Config Basic
+        advance(); // Consume the type identifier (e.g., 'Config')
+        config_name = consume(TokenType::IDENTIFIER, "Expect configuration name.").lexeme;
+    }
+
+    auto configNode = std::make_unique<ConfigurationNode>(config_name);
+
+    consume(TokenType::LEFT_BRACE, "Expect '{' to start configuration body.");
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        if (peek().type == TokenType::LEFT_BRACKET && tokens[current + 1].lexeme == "Name") {
+            // Parse [Name] block
+            consume(TokenType::LEFT_BRACKET, "Expect '[' for [Name] block.");
+            consume(TokenType::IDENTIFIER, "Expect 'Name' for [Name] block.");
+            consume(TokenType::RIGHT_BRACKET, "Expect ']' for [Name] block.");
+            consume(TokenType::LEFT_BRACE, "Expect '{' for [Name] block body.");
+            while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                Token key = consume(TokenType::IDENTIFIER, "Expect keyword to configure (e.g., KEYWORD_TEXT).");
+                consume(TokenType::EQUAL, "Expect '=' after keyword name.");
+
+                std::vector<std::string> values;
+                if (match({TokenType::LEFT_BRACKET})) { // Group of options like [@Style, @style]
+                    do {
+                        // Allow any token inside the alias group, as it could be symbols like '@'
+                        values.push_back(advance().lexeme);
+                    } while (match({TokenType::COMMA}));
+                    consume(TokenType::RIGHT_BRACKET, "Expect ']' to close group of options.");
+                } else { // Single option
+                    values.push_back(advance().lexeme);
+                }
+                configNode->name_group[key.lexeme] = values;
+                consume(TokenType::SEMICOLON, "Expect ';' after name configuration.");
+            }
+            consume(TokenType::RIGHT_BRACE, "Expect '}' to close [Name] block body.");
+        } else {
+            // Parse simple key = value;
+            Token key = consume(TokenType::IDENTIFIER, "Expect configuration key.");
+            consume(TokenType::EQUAL, "Expect '=' after configuration key.");
+
+            ConfigValue value;
+            if (peek().type == TokenType::NUMBER) {
+                try {
+                    value = std::stoi(advance().lexeme);
+                } catch (const std::invalid_argument& e) {
+                    error(previous(), "Invalid number format for configuration value.");
+                } catch (const std::out_of_range& e) {
+                    error(previous(), "Number out of range for configuration value.");
+                }
+            } else if (peek().type == TokenType::IDENTIFIER && (peek().lexeme == "true" || peek().lexeme == "false")) {
+                value = (advance().lexeme == "true");
+            } else if (peek().type == TokenType::STRING) {
+                value = advance().lexeme;
+            } else {
+                error(peek(), "Invalid configuration value type. Expected number, boolean, or string.");
+            }
+            configNode->settings[key.lexeme] = value;
+            consume(TokenType::SEMICOLON, "Expect ';' after configuration value.");
+        }
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to end configuration body.");
+
+    return configNode;
 }
 
 } // namespace CHTL

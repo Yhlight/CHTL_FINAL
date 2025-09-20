@@ -111,6 +111,22 @@ void CHTLLexer::scanToken() {
             line++;
             break;
 
+        case '#': {
+            // Generator comment must be followed by a space.
+            if (peek() == ' ') {
+                advance(); // Consume the space.
+                int comment_start = current;
+                while (peek() != '\n' && !isAtEnd()) {
+                    advance();
+                }
+                std::string comment_text = source.substr(comment_start, current - comment_start);
+                addToken(TokenType::GENERATOR_COMMENT, comment_text);
+            } else {
+                // If not '# ', treat '#' as a normal symbol.
+                addToken(TokenType::SYMBOL);
+            }
+            break;
+        }
         case '/':
             if (match('/')) {
                 // A comment goes until the end of the line.

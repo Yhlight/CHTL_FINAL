@@ -64,6 +64,7 @@ enum class TokenType {
 
 
     // Special
+    GENERATOR_COMMENT,
     SYMBOL, // For single characters like -, #, etc.
     DOLLAR, // $
     END_OF_FILE,

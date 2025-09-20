@@ -4,13 +4,14 @@
 
 int main() {
     std::string source = R"(
-        // This is a test of the CHTL lexer
+        # this is a generator comment
+        [Namespace] MyStuff
+        [Configuration] {
+            DEBUG_MODE = true;
+        }
         div {
-            id: 'main_box'; // an id
-            /* This is a
-               multi-line comment */
-            text: "Hello World";
-            width: 100;
+            class: box container;
+            text { unquoted text here }
         }
     )";
 

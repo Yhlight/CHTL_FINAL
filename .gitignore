@@ -1,6 +1,12 @@
+# Ignore Rust toolchain and build artifacts
+.rustup/
+.cargo/
+target/
+
 # Build artifacts
 test_lexer
 test_parser
 test_pipeline
 *.o
 *.out
+token_test_runner
