@@ -138,10 +138,10 @@ bool CHTLUnifiedScanner::is_chtl_in_css_statement(const std::string& statement) 
             return true;
         }
         // Check for arithmetic operators using regex to be more precise
-        // This regex will find +, -, *, / but not inside quotes or calc()
-        std::string cleaned_value = std::regex_replace(value, std::regex("calc\\([^)]*\\)"), "");
-        cleaned_value = std::regex_replace(cleaned_value, std::regex("\"[^\"]*\""), "");
-        cleaned_value = std::regex_replace(cleaned_value, std::regex("'[^']*'"), "");
+        // This regex will find +, -, *, / but not inside quotes or standard CSS functions
+        std::string cleaned_value = std::regex_replace(value, std::regex("calc\\([^)]*\\)"), ""); // remove calc()
+        cleaned_value = std::regex_replace(cleaned_value, std::regex("\"[^\"]*\""), ""); // remove strings
+        cleaned_value = std::regex_replace(cleaned_value, std::regex("'[^']*'"), ""); // remove strings
 
         if (std::regex_search(cleaned_value, std::regex("[\\+\\-\\*\\/]"))) {
             return true;
