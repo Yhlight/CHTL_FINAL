@@ -1,0 +1,38 @@
+// This is a comprehensive test file for the CHTLUnifiedScanner.
+
+# A generator comment
+div
+{
+    class: "main-container";
+
+    style
+    {
+        // This is a CHTL style block
+        width: 100px + 20px; /* CHTL property math */
+        color: #333;
+
+        .sub-class {
+            font-size: 16px;
+        }
+
+        @Style MyCoolTemplate; // CHTL template usage
+    }
+
+    p { text: "Hello World"; }
+}
+
+script {
+    // This is a script block with mixed JS and CHTL JS
+    const element = {{.main-container}};
+
+    element.addEventListener('click', () => {
+        console.log('Clicked!');
+    });
+
+    Listen {
+        mouseenter: () => {
+            console.log("Mouse has entered the building.");
+            element.style.backgroundColor = $newColor$;
+        }
+    }
+}

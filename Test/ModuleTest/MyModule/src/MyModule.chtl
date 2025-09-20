@@ -1,0 +1,8 @@
+// This is the main source file for MyModule.
+
+[Template] @Element MyComponent {
+    div {
+        class: "my-component";
+        text { "This is a component from a CMOD module." }
+    }
+}

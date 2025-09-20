@@ -1,0 +1,7 @@
+// This is the info file for MyModule.
+
+[Info] {
+    name: "MyModule";
+    version: "1.0.0";
+    author: "Jules";
+}
