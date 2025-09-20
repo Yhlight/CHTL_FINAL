@@ -5,18 +5,20 @@
 #include "../CHTLJSNode/CHTLJS_BaseNode.h"
 #include <vector>
 #include <memory>
+#include <string>
 
-namespace CHTL {
+namespace CHTL_JS {
 
 class CHTLJSParser {
 public:
-    explicit CHTLJSParser(const std::vector<CHTLJSToken>& tokens);
+    explicit CHTLJSParser(const std::string& source, const std::vector<Token>& tokens);
     std::unique_ptr<CHTLJS_BaseNode> parse();
 private:
-    const std::vector<CHTLJSToken>& tokens;
+    const std::string& source;
+    const std::vector<Token>& tokens;
     int current = 0;
 };
 
-} // namespace CHTL
+} // namespace CHTL_JS
 
 #endif // CHTLJS_PARSER_H

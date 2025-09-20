@@ -3,16 +3,16 @@
 
 #include <memory>
 
-namespace CHTL {
+namespace CHTL_JS {
 
-class CHTLJS_Visitor; // Forward declaration
+class Visitor; // Forward declaration
 
 class CHTLJS_BaseNode {
 public:
     virtual ~CHTLJS_BaseNode() = default;
-    virtual void accept(CHTLJS_Visitor& visitor) = 0;
+    virtual void accept(Visitor& visitor) = 0;
 };
 
-} // namespace CHTL
+} // namespace CHTL_JS
 
 #endif // CHTLJS_BASE_NODE_H

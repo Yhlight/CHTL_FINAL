@@ -15,63 +15,65 @@ std::vector<CodeFragment> CHTLUnifiedScanner::scan() {
 }
 
 void CHTLUnifiedScanner::scan_toplevel(std::vector<CodeFragment>& fragments) {
-    size_t last_pos = 0;
-    current = 0;
+    std::string chtl_buffer;
 
-    while (current < source.length()) {
-        // Find the next potential block start
-        size_t style_pos = source.find("style", current);
-        size_t script_pos = source.find("script", current);
+    while (!is_at_end()) {
+        size_t loop_start_pos = current;
 
-        size_t next_block_pos = std::min(style_pos, script_pos);
-
-        if (next_block_pos == std::string::npos) {
-            // No more style or script blocks, the rest is CHTL
-            break;
-        }
-
-        bool is_style = (next_block_pos == style_pos);
-
-        // Check if it's a real block (keyword followed by optional whitespace and '{')
-        size_t keyword_end = next_block_pos + (is_style ? 5 : 6);
-        size_t brace_pos = source.find('{', keyword_end);
-
-        bool is_valid_block = false;
-        if (brace_pos != std::string::npos) {
-            is_valid_block = true;
-            for (size_t i = keyword_end; i < brace_pos; ++i) {
-                if (!isspace(source[i])) {
-                    is_valid_block = false;
-                    break;
+        // Check for `style {`
+        if (match_whole_word("style")) {
+            size_t after_keyword = current;
+            skip_whitespace_and_comments();
+            if (peek() == '{') {
+                if (!chtl_buffer.empty()) {
+                    fragments.push_back({FragmentType::CHTL, chtl_buffer, line});
+                    chtl_buffer.clear();
                 }
-            }
-        }
 
-        if (is_valid_block) {
-            // The content before this block is CHTL
-            if (next_block_pos > last_pos) {
-                fragments.push_back({FragmentType::CHTL, source.substr(last_pos, next_block_pos - last_pos), line});
-            }
+                // Rewind to the start of the style block to process it
+                current = loop_start_pos;
+                match_whole_word("style");
+                skip_whitespace_and_comments();
 
-            current = brace_pos;
-            int block_start_line = line; // apx
-
-            if (is_style) {
+                int block_start_line = line;
                 process_style_block(fragments, block_start_line);
-            } else { // is_script
-                process_script_block(fragments, block_start_line);
+                continue;
+            } else {
+                current = loop_start_pos; // Rewind
             }
-
-            last_pos = current;
-        } else {
-            // This wasn't a valid block, so we skip the keyword and continue searching
-            current = next_block_pos + 1;
         }
+
+        // Check for `script {`
+        if (match_whole_word("script")) {
+            size_t after_keyword = current;
+            skip_whitespace_and_comments();
+            if (peek() == '{') {
+                if (!chtl_buffer.empty()) {
+                    fragments.push_back({FragmentType::CHTL, chtl_buffer, line});
+                    chtl_buffer.clear();
+                }
+
+                // Rewind to the start of the script block to process it
+                current = loop_start_pos;
+                match_whole_word("script");
+                skip_whitespace_and_comments();
+
+                int block_start_line = line;
+                process_script_block(fragments, block_start_line);
+                continue;
+            } else {
+                current = loop_start_pos; // Rewind
+            }
+        }
+
+        // If we get here, it's just regular CHTL content.
+        // Add the character at the start of the loop to the buffer and advance.
+        current = loop_start_pos;
+        chtl_buffer += advance();
     }
 
-    // Add any remaining content as a CHTL fragment
-    if (last_pos < source.length()) {
-        fragments.push_back({FragmentType::CHTL, source.substr(last_pos), line});
+    if (!chtl_buffer.empty()) {
+        fragments.push_back({FragmentType::CHTL, chtl_buffer, line});
     }
 }
 
@@ -125,7 +127,6 @@ bool CHTLUnifiedScanner::is_chtl_in_css_statement(const std::string& statement) 
         if (!is_standard) {
             return true; // It's a CHTL @-rule like @Style or @Var
         }
-        // If it IS a standard rule, we should not perform further checks on it.
         return false;
     }
 
@@ -137,13 +138,22 @@ bool CHTLUnifiedScanner::is_chtl_in_css_statement(const std::string& statement) 
         if (value.find('?') != std::string::npos) {
             return true;
         }
-        // Check for arithmetic operators using regex to be more precise
-        // This regex will find +, -, *, / but not inside quotes or calc()
+        // Check for CHTL-specific operators: **, %
+        if (value.find("**") != std::string::npos || value.find('%') != std::string::npos) {
+            return true;
+        }
+
+        // Clean value for safer regex matching
         std::string cleaned_value = std::regex_replace(value, std::regex("calc\\([^)]*\\)"), "");
         cleaned_value = std::regex_replace(cleaned_value, std::regex("\"[^\"]*\""), "");
         cleaned_value = std::regex_replace(cleaned_value, std::regex("'[^']*'"), "");
 
-        if (std::regex_search(cleaned_value, std::regex("[\\+\\-\\*\\/]"))) {
+        // Check for less ambiguous operators +, *, /
+        if (std::regex_search(cleaned_value, std::regex("[\\+\\*\\/]"))) {
+            return true;
+        }
+        // A minus sign is likely arithmetic if it's surrounded by spaces.
+        if (std::regex_search(cleaned_value, std::regex("\\s-\\s"))) {
             return true;
         }
     }
@@ -163,18 +173,15 @@ void CHTLUnifiedScanner::process_style_block(std::vector<CodeFragment>& fragment
         }
 
         size_t statement_end;
-        // Special handling for CHTL comments
         if (content[statement_start] == '#' && statement_start + 1 < content.length() && isspace(content[statement_start + 1])) {
             statement_end = content.find('\n', statement_start);
-            if (statement_end == std::string::npos) {
-                statement_end = content.length();
-            }
+            if (statement_end == std::string::npos) statement_end = content.length();
         } else {
             statement_end = content.find_first_of("};", statement_start);
             if (statement_end == std::string::npos) {
                 statement_end = content.length();
             } else {
-                statement_end++; // Include the terminator
+                statement_end++;
             }
         }
 
@@ -191,12 +198,6 @@ void CHTLUnifiedScanner::process_style_block(std::vector<CodeFragment>& fragment
                 css_buffer.clear();
             }
             fragments.push_back({FragmentType::CHTL_in_CSS, statement, block_start_line});
-            // Also add the pending CSS buffer from the same line if any
-            std::string remaining_line = content.substr(statement_end, content.find('\n', statement_end) - statement_end);
-            if (!remaining_line.empty()) {
-                 css_buffer += remaining_line;
-            }
-
         } else {
             css_buffer += statement;
         }
@@ -216,91 +217,117 @@ void CHTLUnifiedScanner::process_script_block(std::vector<CodeFragment>& fragmen
     }
 
     std::map<std::string, std::string> placeholders;
-    std::string chtl_js_content = scan_script_recursive(content, placeholders);
+    std::string chtl_js_with_placeholders = scan_script_recursive(content, placeholders);
 
-    // Add the main CHTL_JS fragment
-    if (!chtl_js_content.empty()) {
-        fragments.push_back({FragmentType::CHTL_JS, chtl_js_content, block_start_line});
-    }
-
-    // Add all the pure JS fragments that were extracted
-    for (const auto& pair : placeholders) {
-        // The key (placeholder_id) is implicitly linked to the CHTL_JS fragment.
-        // The CodeMerger will need to handle this relationship.
-        // We add the JS content as a fragment.
-        fragments.push_back({FragmentType::JS, pair.second, block_start_line}); // Line number is an approximation
+    if (!chtl_js_with_placeholders.empty()) {
+        // This fragment contains the CHTL JS code, with placeholders for the pure JS parts.
+        // We will also store the map of placeholders within this fragment for the merger to use.
+        CodeFragment fragment = {FragmentType::CHTL_JS, chtl_js_with_placeholders, block_start_line};
+        fragment.js_placeholders = placeholders;
+        fragments.push_back(fragment);
     }
 }
 
 std::string CHTLUnifiedScanner::scan_script_recursive(const std::string& input, std::map<std::string, std::string>& placeholders) {
     std::string output;
-    size_t cursor = 0;
+    size_t local_cursor = 0;
 
-    const std::vector<std::string> patterns = {"{{", "&->", "$"};
+    const std::vector<std::string> simple_patterns = {"{{", "&->", "$"};
+    const std::vector<std::string> block_keywords = {
+        "ScriptLoader", "Listen", "Delegate", "Animate", "Router",
+        "printMylove", "iNeverAway"
+    };
 
-    while (cursor < input.length()) {
+    while (local_cursor < input.length()) {
         size_t next_pos = std::string::npos;
-        std::string found_pattern;
+        std::string found_construct;
+        bool is_block = false;
 
-        // Find the earliest CHTL JS special pattern
-        for (const auto& pattern : patterns) {
-            size_t pos = input.find(pattern, cursor);
+        // Find earliest simple pattern
+        for (const auto& pattern : simple_patterns) {
+            size_t pos = input.find(pattern, local_cursor);
             if (pos != std::string::npos && (pos < next_pos)) {
                 next_pos = pos;
-                found_pattern = pattern;
+                found_construct = pattern;
+                is_block = false;
+            }
+        }
+
+        // Find earliest block keyword
+        for (const auto& keyword : block_keywords) {
+            size_t pos = local_cursor;
+            while ((pos = input.find(keyword, pos)) != std::string::npos) {
+                bool is_prefix_ok = (pos == 0) || !isalnum(input[pos - 1]);
+                bool is_suffix_ok = (pos + keyword.length() >= input.length()) || !isalnum(input[pos + keyword.length()]);
+                if (is_prefix_ok && is_suffix_ok) {
+                    if (pos < next_pos) {
+                        next_pos = pos;
+                        found_construct = keyword;
+                        is_block = true;
+                    }
+                    break;
+                }
+                pos += keyword.length();
             }
         }
 
         if (next_pos == std::string::npos) {
-            // No more CHTL JS patterns, the rest is pure JS
-            if (cursor < input.length()) {
-                std::string js_part = input.substr(cursor);
+            if (local_cursor < input.length()) {
+                std::string js_part = input.substr(local_cursor);
                 if (!js_part.empty()) {
                     std::string placeholder_id = get_next_placeholder_id();
                     placeholders[placeholder_id] = js_part;
                     output += placeholder_id;
                 }
             }
-            break; // Exit loop
+            break;
         }
 
-        // The content before the pattern is pure JS
-        if (next_pos > cursor) {
-            std::string js_part = input.substr(cursor, next_pos - cursor);
-             if (!js_part.empty()) {
+        if (next_pos > local_cursor) {
+            std::string js_part = input.substr(local_cursor, next_pos - local_cursor);
+            if (!js_part.empty()) {
                 std::string placeholder_id = get_next_placeholder_id();
                 placeholders[placeholder_id] = js_part;
                 output += placeholder_id;
             }
         }
 
-        // Process and append the CHTL JS pattern itself
-        size_t pattern_start = next_pos;
-        size_t pattern_end = pattern_start;
+        size_t construct_start = next_pos;
+        size_t construct_end = construct_start;
 
-        if (found_pattern == "{{") {
-            pattern_end = input.find("}}", pattern_start);
-            if (pattern_end != std::string::npos) {
-                pattern_end += 2; // include the "}}"
+        if (is_block) {
+            size_t brace_pos = input.find('{', construct_start + found_construct.length());
+            if (brace_pos != std::string::npos) {
+                int brace_level = 1;
+                size_t content_cursor = brace_pos + 1;
+                while (content_cursor < input.length() && brace_level > 0) {
+                    if (input[content_cursor] == '{') brace_level++;
+                    if (input[content_cursor] == '}') brace_level--;
+                    content_cursor++;
+                }
+                construct_end = content_cursor;
+            } else {
+                construct_end = construct_start + found_construct.length();
             }
-        } else if (found_pattern == "$") {
-            pattern_end = input.find("$", pattern_start + 1);
-            if (pattern_end != std::string::npos) {
-                pattern_end += 1; // include the second "$"
+        } else {
+            if (found_construct == "{{") {
+                construct_end = input.find("}}", construct_start);
+                if (construct_end != std::string::npos) construct_end += 2;
+            } else if (found_construct == "$") {
+                construct_end = input.find("$", construct_start + 1);
+                if (construct_end != std::string::npos) construct_end += 1;
+            } else { // &->
+                construct_end = construct_start + found_construct.length();
             }
-        } else { // &-> or other simple patterns
-            pattern_end = pattern_start + found_pattern.length();
         }
 
-        if (pattern_end == std::string::npos) {
-            // Malformed pattern, treat rest of string as JS
-            pattern_end = input.length();
+        if (construct_end == std::string::npos || construct_end > input.length()) {
+            construct_end = input.length();
         }
 
-        output += input.substr(pattern_start, pattern_end - pattern_start);
-        cursor = pattern_end;
+        output += input.substr(construct_start, construct_end - construct_start);
+        local_cursor = construct_end;
     }
-
     return output;
 }
 
@@ -309,7 +336,6 @@ std::string CHTLUnifiedScanner::scan_script_recursive(const std::string& input, 
 
 std::string CHTLUnifiedScanner::consume_block_content() {
     if (peek() != '{') {
-        // Should not happen if called correctly
         return "";
     }
     advance(); // Consume '{'
@@ -350,6 +376,20 @@ bool CHTLUnifiedScanner::match(const std::string& expected) {
     if (source.rfind(expected, current) == current) {
         current += expected.length();
         return true;
+    }
+    return false;
+}
+
+bool CHTLUnifiedScanner::match_whole_word(const std::string& word) {
+    if (source.rfind(word, current) == current) {
+        if (current + word.length() >= source.length() || !isalnum(source[current + word.length()])) {
+            // It's a whole word. Consume and return true.
+            // We don't consume here, we let the caller do it.
+            // The function is just a predicate. Let's change this.
+            // The caller expects `current` to be advanced.
+            current += word.length();
+            return true;
+        }
     }
     return false;
 }

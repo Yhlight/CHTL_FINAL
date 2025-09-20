@@ -37,6 +37,7 @@ private:
     char advance();
     char peek(size_t offset = 0);
     bool match(const std::string& expected);
+    bool match_whole_word(const std::string& word);
     void skip_whitespace_and_comments();
     std::string consume_block_content();
     std::string get_next_placeholder_id();

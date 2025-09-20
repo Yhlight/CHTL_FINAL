@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 
-namespace CHTL {
+namespace CHTL_JS {
 
 // CHTL JS will have its own set of tokens.
-enum class CHTLJSTokenType {
+enum class TokenType {
     // ... to be defined ...
     ENHANCED_SELECTOR, // {{...}}
     LISTEN_KEYWORD,    // Listen
@@ -16,22 +16,22 @@ enum class CHTLJSTokenType {
     VIR_KEYWORD,       // Vir
     ARROW,             // ->
     EVENT_BIND,        // &->
-    EOF_JS,
+    EOF_TOKEN,
 };
 
-struct CHTLJSToken {
-    CHTLJSTokenType type;
+struct Token {
+    TokenType type;
     std::string lexeme;
     int line;
 };
 
-class CHTLJSLexer {
+class CHTMLJSLexer {
 public:
-    explicit CHTLJSLexer(const std::string& source);
-    std::vector<CHTLJSToken> scanTokens();
+    explicit CHTMLJSLexer(const std::string& source);
+    std::vector<Token> scanTokens();
 private:
     const std::string& source;
-    std::vector<CHTLJSToken> tokens;
+    std::vector<Token> tokens;
     int start = 0;
     int current = 0;
     int line = 1;
