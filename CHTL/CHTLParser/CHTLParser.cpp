@@ -11,6 +11,27 @@
 namespace CHTL {
 
 // --- Recursive Helpers for Specialization ---
+ElementNode* findElementInVec(std::vector<std::unique_ptr<BaseNode>>& nodes, const std::string& tagName, int& index) {
+    for (auto& node : nodes) {
+        if (ElementNode* elem = dynamic_cast<ElementNode*>(node.get())) {
+            if (elem->tagName == tagName) {
+                if (index == 0) {
+                    return elem;
+                }
+                index--;
+            }
+        }
+    }
+    for (auto& node : nodes) {
+        if (ElementNode* elem = dynamic_cast<ElementNode*>(node.get())) {
+            if (ElementNode* found = findElementInVec(elem->children, tagName, index)) {
+                return found;
+            }
+        }
+    }
+    return nullptr;
+}
+
 bool findAndDelete(std::vector<std::unique_ptr<BaseNode>>& nodes, const std::string& tagName, int& index) {
     for (auto it = nodes.begin(); it != nodes.end(); ++it) {
         if (ElementNode* elem = dynamic_cast<ElementNode*>(it->get())) {
@@ -331,8 +352,17 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
             if (match({TokenType::DELETE})) {
                 do {
-                    Token prop_to_delete = consume(TokenType::IDENTIFIER, "Expect property name after 'delete'.");
-                    app.deleted_properties.push_back(prop_to_delete.lexeme);
+                    if (check(TokenType::AT)) {
+                        // Deleting an inherited style, e.g. delete @Style Other
+                        std::string deleted_template = advance().lexeme; // @
+                        deleted_template += consume(TokenType::IDENTIFIER, "Expect Style keyword.").lexeme;
+                        deleted_template += " " + consume(TokenType::IDENTIFIER, "Expect template name.").lexeme;
+                        app.deleted_properties.push_back(deleted_template);
+                    } else {
+                        // Deleting a property
+                        Token prop_to_delete = consume(TokenType::IDENTIFIER, "Expect property name after 'delete'.");
+                        app.deleted_properties.push_back(prop_to_delete.lexeme);
+                    }
                 } while (match({TokenType::COMMA}));
                 consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
             } else {
@@ -426,9 +456,47 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                     error(element_to_delete, "Could not find element to delete.");
                 }
                 consume(TokenType::SEMICOLON, "Expect ';'.");
-            } else if (match({TokenType::INSERT})) {
-                if (!match({TokenType::AFTER, TokenType::BEFORE, TokenType::REPLACE})) {
-                    error(peek(), "Expect 'after', 'before', or 'replace'.");
+            } else if (check(TokenType::IDENTIFIER)) {
+                // This is a targeted styling specialization
+                Token selector = consume(TokenType::IDENTIFIER, "Expect tag name for specialization.");
+                int index = 0;
+                if (match({TokenType::LEFT_BRACKET})) {
+                    Token index_token = consume(TokenType::NUMBER, "Expect index.");
+                    index = std::stoi(index_token.lexeme);
+                    consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+                }
+
+                consume(TokenType::LEFT_BRACE, "Expect '{' for specialization block.");
+                if (!match({TokenType::STYLE})) {
+                    error(peek(), "Only 'style' blocks are currently supported for element specialization.");
+                }
+                auto new_style_node = parseStyleBlock();
+                consume(TokenType::RIGHT_BRACE, "Expect '}' to end specialization block.");
+
+                // Now, find the target node in the cloned tree and merge the styles
+                ElementNode* target_node = findElementInVec(cloned_nodes, selector.lexeme, index);
+                if (target_node) {
+                    StyleNode* existing_style_node = nullptr;
+                    for (auto& child : target_node->children) {
+                        if (StyleNode* sn = dynamic_cast<StyleNode*>(child.get())) {
+                            existing_style_node = sn;
+                            break;
+                        }
+                    }
+                    if (existing_style_node) {
+                        // Merge new style into existing
+                        existing_style_node->direct_properties.insert(existing_style_node->direct_properties.end(),
+                            std::make_move_iterator(new_style_node->direct_properties.begin()),
+                            std::make_move_iterator(new_style_node->direct_properties.end()));
+                        existing_style_node->global_rules.insert(existing_style_node->global_rules.end(),
+                            std::make_move_iterator(new_style_node->global_rules.begin()),
+                            std::make_move_iterator(new_style_node->global_rules.end()));
+                    } else {
+                        // Add new style node
+                        target_node->addChild(std::move(new_style_node));
+                    }
+                } else {
+                    error(selector, "Could not find element to specialize.");
                 }
                 Token position = previous();
                 Token selector = consume(TokenType::IDENTIFIER, "Expect tag name.");
@@ -483,28 +551,28 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
                 error(peek(), "Style template inheritance is not yet implemented.");
             } else {
                 std::string key_str;
-                while (!check(TokenType::COLON) && !isAtEnd()) {
-                    // Append tokens to form the property name, e.g., "font-size"
+                while (peek().type != TokenType::COLON && peek().type != TokenType::SEMICOLON && peek().type != TokenType::COMMA && !isAtEnd()) {
                     key_str += advance().lexeme;
                 }
-                consume(TokenType::COLON, "Expect ':' after style property name.");
 
-                // Use simpler raw value parsing for CSS properties, which can be complex.
-                std::string raw_value;
-                while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
-                    Token current_token = advance();
-                    raw_value += current_token.lexeme;
-
-                    // Only add a space if the next token is not a semicolon
-                    // and the current token is not a number. This is a hack to avoid "16 px".
-                    if (peek().type != TokenType::SEMICOLON && current_token.type != TokenType::NUMBER) {
-                        raw_value += " ";
+                if (match({TokenType::COLON})) {
+                    // This is a regular property with a value
+                    std::string raw_value;
+                     while (!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                        Token current_token = advance();
+                        raw_value += current_token.lexeme;
+                        if (peek().type != TokenType::SEMICOLON) raw_value += " ";
                     }
+                    auto value_expr = std::make_unique<LiteralExpr>(0, raw_value);
+                    consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+                    def.style_properties.push_back({key_str, std::move(value_expr)});
+                } else if (is_custom && (match({TokenType::SEMICOLON}) || match({TokenType::COMMA}))) {
+                    // This is a valueless property, only allowed in [Custom]
+                    def.style_properties.push_back({key_str, nullptr});
+                    if (previous().type == TokenType::COMMA) continue; // Allow multiple on one line
+                } else {
+                    error(peek(), "Expected ':' for property or ',' or ';' for valueless property in [Custom] @Style.");
                 }
-                auto value_expr = std::make_unique<LiteralExpr>(0, raw_value);
-
-                consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-                def.style_properties.push_back({key_str, std::move(value_expr)});
             }
         }
     } else if (def.type == TemplateType::ELEMENT) {
@@ -759,9 +827,17 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
         } else if (check(TokenType::LEFT_PAREN)) {
             consume(TokenType::LEFT_PAREN, "Expect '('.");
             std::string key_name;
-            while (!check(TokenType::RIGHT_PAREN) && !isAtEnd()) { key_name += advance().lexeme; }
+            while (peek().type != TokenType::EQUAL && peek().type != TokenType::RIGHT_PAREN && !isAtEnd()) {
+                key_name += advance().lexeme;
+            }
+
+            std::unique_ptr<Expr> override_expr = nullptr;
+            if (match({TokenType::EQUAL})) {
+                override_expr = parseExpression();
+            }
+
             consume(TokenType::RIGHT_PAREN, "Expect ')'.");
-            return std::make_unique<VarExpr>(first_part.lexeme, key_name);
+            return std::make_unique<VarExpr>(first_part.lexeme, key_name, std::move(override_expr));
         } else {
             // It's a self-referential property (e.g., 'width' in 'width > 100px')
             // We represent this as a ReferenceExpr with an empty selector.

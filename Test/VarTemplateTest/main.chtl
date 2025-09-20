@@ -1,11 +1,23 @@
 [Template] @Var Theme {
     primaryColor: "blue";
-    baseFontSize: 16px;
+    secondaryColor: "grey";
 }
 
-div {
-    style {
-        color: Theme(primaryColor);
-        font-size: Theme(baseFontSize) + 2px;
+html {
+    body {
+        div {
+            // Standard usage
+            style {
+                background-color: Theme(primaryColor);
+                border-color: Theme(secondaryColor);
+            }
+        }
+        div {
+            // Specialized usage
+            style {
+                background-color: Theme(primaryColor = "green");
+                border-color: Theme(secondaryColor);
+            }
+        }
     }
 }

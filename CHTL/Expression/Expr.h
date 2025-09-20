@@ -60,11 +60,13 @@ public:
 
 class VarExpr : public Expr {
 public:
-    VarExpr(const std::string& group, const std::string& name) : group(group), name(name) {}
+    VarExpr(const std::string& group, const std::string& name, std::unique_ptr<Expr> override_value = nullptr)
+        : group(group), name(name), override_value(std::move(override_value)) {}
     void accept(ExprVisitor& visitor) override;
     std::unique_ptr<Expr> clone() const override;
     std::string group;
     std::string name;
+    std::unique_ptr<Expr> override_value;
 };
 
 class ReferenceExpr : public Expr {

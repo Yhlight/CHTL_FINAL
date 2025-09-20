@@ -1,6 +1,5 @@
 #include "../../Scanner/CHTLUnifiedScanner.h"
 #include "../../CHTL/CompilerDispatcher.h"
-#include "../../CHTL/CodeMerger.h"
 #include "../../CHTL/Config/Configuration.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
@@ -8,28 +7,52 @@
 #include <string>
 #include <algorithm>
 #include <memory>
-#include <vector>
 
-// Helper function to check if a string contains a substring
-bool contains(const std::string& str, const std::string& substr) {
-    return str.find(substr) != std::string::npos;
+// Helper function to remove all whitespace from a string for robust comparison
+std::string remove_whitespace(const std::string& str) {
+    std::string out;
+    out.reserve(str.size());
+    for (char c : str) {
+        if (!std::isspace(static_cast<unsigned char>(c))) {
+            out += c;
+        }
+    }
+    return out;
 }
 
 int main() {
     std::string file_path = "Test/VarTemplateTest/main.chtl";
     std::string source = CHTL::FileSystem::readFile(file_path);
+
     auto config = std::make_shared<CHTL::Configuration>();
 
-    std::vector<CHTL::CodeFragment> fragments = {{source, CHTL::FragmentType::CHTL}};
+    // 1. Scanner
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
 
+    // 2. Dispatcher
     CHTL::CompilerDispatcher dispatcher(config, file_path);
     CHTL::FinalCompilationResult result = dispatcher.dispatch(fragments);
 
-    std::cout << "Generated HTML: " << result.html << std::endl;
+    // 3. Assert
+    std::string expected_html = R"(
+        <html>
+            <body>
+                <div style="background-color:blue;border-color:grey;"></div>
+                <div style="background-color:green;border-color:grey;"></div>
+            </body>
+        </html>
+    )";
 
-    // --- Assertions ---
-    assert(contains(result.html, "color: blue;"));
-    assert(contains(result.html, "font-size: 18px;"));
+    std::string processed_html_result = remove_whitespace(result.html);
+    std::string processed_html_expected = remove_whitespace(expected_html);
+
+    if (processed_html_result != processed_html_expected) {
+        std::cerr << "VarTemplateTest FAILED!" << std::endl;
+        std::cerr << "Expected: " << processed_html_expected << std::endl;
+        std::cerr << "Got: " << processed_html_result << std::endl;
+        return 1;
+    }
 
     std::cout << "VarTemplateTest PASSED!" << std::endl;
 

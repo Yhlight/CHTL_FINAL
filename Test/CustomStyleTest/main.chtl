@@ -1,16 +1,36 @@
-[Custom] @Style Button {
-    font-size: 16px;
+[Template] @Style BaseStyle {
     border: 1px solid black;
-    background-color: grey;
     padding: 10px;
+    font-family: Arial;
 }
 
-div {
-    style {
-        @Style Button {
-            delete border;
-            background-color: red;
+[Custom] @Style Text {
+    @Style BaseStyle;
+    color,
+    font-size;
+    delete font-family;
+}
+
+html {
+    body {
+        p {
+            style {
+                @Style Text {
+                    color: blue;
+                    font-size: 20px;
+                    // This should override the one from BaseStyle
+                    border: 2px dotted red;
+                }
+            }
+        }
+
+        span {
+            style {
+                @Style Text {
+                    color: green;
+                    // This should fail, because font-size is not provided
+                }
+            }
         }
     }
-    text: "Click Me";
 }

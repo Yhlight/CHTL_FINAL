@@ -172,26 +172,65 @@ void CHTLGenerator::visit(ElementNode& node) {
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             std::map<std::string, AttributeNode> final_props;
-            // (Template application logic would go here)
+
+            // --- Style Specialization Logic ---
+            // 1. Apply all templates first
+            for (const auto& app : styleNode->template_applications) {
+                const TemplateDefinitionNode* def = nullptr;
+                for (const auto& ns_pair : this->templates) {
+                    if (ns_pair.second.count(app.template_name)) {
+                        def = &ns_pair.second.at(app.template_name);
+                        break;
+                    }
+                }
+                if (def && def->type == TemplateType::STYLE) {
+                    for (const auto& prop : def->style_properties) {
+                        final_props[prop.key] = prop.clone();
+                    }
+                }
+            }
+
+            // 2. Handle deletions and overrides from all applications
+            for (const auto& app : styleNode->template_applications) {
+                 // Delete specified properties
+                for (const auto& key_to_delete : app.deleted_properties) {
+                     // This is a simplification. A real implementation would track the origin
+                     // of each property to correctly delete inherited styles.
+                     // For now, we only delete properties by name.
+                    if (key_to_delete.rfind("@Style", 0) != 0) {
+                        final_props.erase(key_to_delete);
+                    }
+                }
+                // Apply new or overridden properties (fills in valueless props)
+                for (const auto& prop : app.new_or_overridden_properties) {
+                    final_props[prop.key] = prop.clone();
+                }
+            }
+
+            // 3. Apply direct properties from the style block
             for (const auto& prop : styleNode->direct_properties) {
                 final_props[prop.key] = prop.clone();
             }
 
-            for (const auto& pair : final_props) {
+            // 4. Generate CSS from the final property map
+            for (auto const& [key, attr_node] : final_props) {
+                if (attr_node.value_expr == nullptr) {
+                     throw std::runtime_error("Valueless property '" + key + "' was not provided a value.");
+                }
                 try {
                     ExpressionEvaluator evaluator(this->templates, this->doc_root);
-                    EvaluatedValue result = evaluator.evaluate(pair.second.value_expr.get(), &node);
-                    style_str += pair.first + ": " + format_css_double(result.value) + result.unit + ";";
+                    EvaluatedValue result = evaluator.evaluate(attr_node.value_expr.get(), &node);
+                    style_str += key + ": " + format_css_double(result.value) + result.unit + ";";
                 } catch (const std::runtime_error& e) {
                     // This is likely a DynamicReferenceExpr, which can't be evaluated statically.
                     // We need to generate JS for it.
-                    if (ConditionalExpr* cond = dynamic_cast<ConditionalExpr*>(pair.second.value_expr.get())) {
+                    if (ConditionalExpr* cond = dynamic_cast<ConditionalExpr*>(attr_node.value_expr.get())) {
                         if (ComparisonExpr* comp = dynamic_cast<ComparisonExpr*>(cond->condition.get())) {
                             if (DynamicReferenceExpr* dyn_ref = dynamic_cast<DynamicReferenceExpr*>(comp->left.get())) {
                                 std::string target_id = "chtl-dyn-" + std::to_string(dynamic_id_counter++);
                                 node.addAttribute({"id", target_id});
                                 // This is a massive simplification for the demo
-                                js_output << generateDynamicJS(target_id, pair.first, dyn_ref->selector, dyn_ref->property, ">", "2", "100px", "50px");
+                                js_output << generateDynamicJS(target_id, key, dyn_ref->selector, dyn_ref->property, ">", "2", "100px", "50px");
                             }
                         }
                     }

@@ -19,7 +19,7 @@ std::unique_ptr<Expr> BinaryExpr::clone() const {
     return std::make_unique<BinaryExpr>(left->clone(), op, right->clone());
 }
 std::unique_ptr<Expr> VarExpr::clone() const {
-    return std::make_unique<VarExpr>(group, name);
+    return std::make_unique<VarExpr>(group, name, override_value ? override_value->clone() : nullptr);
 }
 std::unique_ptr<Expr> ReferenceExpr::clone() const {
     return std::make_unique<ReferenceExpr>(selector, property);

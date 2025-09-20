@@ -1,22 +1,49 @@
-[Custom] @Element Article {
-    header {
-        h1 { text: "Default Title"; }
-    }
-    section {
-        p { text: "Default paragraph 1."; }
-        p { text: "Default paragraph 2."; }
+[Custom] @Element Card {
+    div {
+        class: "card";
+        h2 {
+            class: "card-title";
+            text: "Default Title";
+        }
+        p {
+            class: "card-body";
+            text: "Default body text.";
+        }
+        div {
+            class: "card-footer";
+        }
     }
 }
 
-body {
-    @Element Article {
-        // Delete the second 'p' tag
-        delete p[1];
+html {
+    body {
+        // Use the Card, but specialize it
+        @Element Card {
+            // 1. Targeted Styling with index
+            div[0] {
+                style {
+                    border: 1px solid #ccc;
+                    border-radius: 8px;
+                }
+            }
 
-        // Insert a footer after the section
-        insert after section {
-            footer {
-                text: "Article Footer";
+            // 2. Change text by replacing the node
+            insert replace h2[0] {
+                h2 {
+                    class: "card-title";
+                    text: "Specialized Title";
+                }
+            }
+
+            // 3. Delete an element
+            delete p[0];
+
+            // 4. Insert a new element
+            insert at bottom div[0] { // at bottom is a simplification, will insert in the footer
+                button {
+                    class: "btn";
+                    text: "Click Me";
+                }
             }
         }
     }

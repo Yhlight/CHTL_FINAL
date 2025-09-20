@@ -104,6 +104,13 @@ void ExpressionEvaluator::visit(BinaryExpr& expr) {
 }
 
 void ExpressionEvaluator::visit(VarExpr& expr) {
+    // If there's an override value, evaluate and return it immediately.
+    if (expr.override_value) {
+        result = evaluate(expr.override_value.get(), this->current_context);
+        return;
+    }
+
+    // Otherwise, look up the variable in the template definitions.
     const TemplateDefinitionNode* var_group_def = nullptr;
     for (const auto& ns_pair : templates) {
         if (ns_pair.second.count(expr.group)) {
