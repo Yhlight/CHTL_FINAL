@@ -1,7 +1,0 @@
-// CMOD Info File for MyTestModule
-
-[Namespace] MyTestModule;
-
-[Export] @Element button from "components/button.chtl";
-[Export] @Var colors from "styles/vars.chtl";
-[Export] @Style main_theme from "styles/theme.chtl";

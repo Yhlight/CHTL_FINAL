@@ -1,0 +1,35 @@
+div {
+    id: "main-content";
+    text {
+        "Hello from CHTL!"
+    }
+}
+
+style {
+    body {
+        font-family: sans-serif;
+    }
+
+    #main-content {
+        color: blue;
+    }
+}
+
+p {
+    text {
+        "This is more CHTL content."
+    }
+}
+
+script {
+    console.log("Hello from JavaScript!");
+
+    function greet() {
+        const element = document.getElementById('main-content');
+        if (element) {
+            element.innerText = 'Hello from JavaScript!';
+        }
+    }
+
+    greet();
+}

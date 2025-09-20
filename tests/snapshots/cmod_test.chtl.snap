@@ -1,7 +1,0 @@
-<body>
-  <div class="container" style="background-color: #f8f9fa; border: 1px; color: #007bff; font-family: sans-serif; ">
-    <button class="my-module-button">
-      Click Me
-    </button>
-  </div>
-</body>

@@ -1,5 +1,0 @@
-[Namespace] components
-
-[Template] @Element Card {
-    div { class: "card"; }
-}
