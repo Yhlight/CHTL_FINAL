@@ -23,6 +23,7 @@ CHTLGenerator::CHTLGenerator(const std::map<std::string, TemplateDefinitionNode>
 CompilationResult CHTLGenerator::generate(BaseNode* root) {
     html_output.str("");
     css_output.str("");
+    js_output.str("");
     this->doc_root = root; // Set the document root context
     if (root) {
         if (ElementNode* root_element = dynamic_cast<ElementNode*>(root)) {
@@ -40,7 +41,7 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
             root->accept(*this);
         }
     }
-    return {html_output.str(), css_output.str()};
+    return {html_output.str(), css_output.str(), js_output.str()};
 }
 
 void CHTLGenerator::visit(ElementNode& node) {
@@ -166,7 +167,7 @@ void CHTLGenerator::visit(OriginNode& node) {
             css_output << node.content;
             break;
         case OriginType::JAVASCRIPT:
-            // Not handled yet, but will be placed in a future JS output.
+            js_output << node.content;
             break;
     }
 }

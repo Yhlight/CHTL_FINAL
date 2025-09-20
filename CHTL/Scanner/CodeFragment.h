@@ -10,6 +10,7 @@ enum class FragmentType {
     CHTL,
     CSS,
     JS,
+    HTML,
     CHTL_JS // Reserved for future CHTL JS implementation
 };
 

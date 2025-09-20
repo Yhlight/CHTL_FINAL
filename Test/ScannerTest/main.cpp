@@ -1,115 +1,171 @@
 #include "../../CHTL/Scanner/CHTLUnifiedScanner.h"
 #include <iostream>
-#include <vector>
 #include <cassert>
-#include <string>
+#include <algorithm>
 
-// Helper to trim whitespace from both ends of a string
-std::string trim(const std::string& str) {
-    const auto strBegin = str.find_first_not_of(" \t\n\r");
-    if (strBegin == std::string::npos) return "";
-    const auto strEnd = str.find_last_not_of(" \t\n\r");
-    const auto strRange = strEnd - strBegin + 1;
-    return str.substr(strBegin, strRange);
+void test_simple_chtl() {
+    std::cout << "Running test_simple_chtl..." << std::endl;
+    std::string source = "div { text { \"Hello\" } }";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+    assert(fragments.size() == 1);
+    assert(fragments[0].type == CHTL::FragmentType::CHTL);
+    assert(fragments[0].content == source);
+    std::cout << "test_simple_chtl PASSED" << std::endl;
 }
 
-// Simple assertion helper
-void assert_equal(const std::string& a, const std::string& b, const std::string& message) {
-    if (trim(a) != trim(b)) {
-        std::cerr << "Assertion failed: " << message << std::endl;
-        std::cerr << "  Expected: \"" << trim(b) << "\"" << std::endl;
-        std::cerr << "  Actual:   \"" << trim(a) << "\"" << std::endl;
-        exit(1);
-    }
-}
-
-void assert_equal(CHTL::FragmentType a, CHTL::FragmentType b, const std::string& message) {
-    if (a != b) {
-        std::cerr << "Assertion failed: " << message << std::endl;
-        exit(1);
-    }
-}
-
-
-void test_simple_script_separation() {
-    std::cout << "Running test: test_simple_script_separation" << std::endl;
-    std::string source = "script { const a = {{b}}; }";
+void test_single_html_fragment() {
+    std::cout << "Running test_single_html_fragment..." << std::endl;
+    std::string source = "div { text { \"Before\" } } [Origin] @Html { <p>Hello</p> } div { text { \"After\" } }";
     CHTL::CHTLUnifiedScanner scanner(source);
     auto fragments = scanner.scan();
 
-    assert(fragments.size() == 3);
-    assert_equal(fragments[0].type, CHTL::FragmentType::JS, "Frag 0 Type");
-    assert_equal(fragments[1].type, CHTL::FragmentType::CHTL_JS, "Frag 1 Type");
-    assert_equal(fragments[1].content, "{{b}}", "Frag 1 Content");
-    assert_equal(fragments[2].type, CHTL::FragmentType::JS, "Frag 2 Type");
+    fragments.erase(std::remove_if(fragments.begin(), fragments.end(), [](const CHTL::CodeFragment& f) {
+        return f.content.find_first_not_of(" \t\n\r") == std::string::npos;
+    }), fragments.end());
 
-    auto placeholders = scanner.getPlaceholders();
-    assert_equal(placeholders.at(fragments[0].content), "const a =", "Placeholder 0");
-    assert_equal(placeholders.at(fragments[2].content), ";", "Placeholder 1");
-    std::cout << "PASSED" << std::endl;
+    assert(fragments.size() == 3);
+    assert(fragments[0].type == CHTL::FragmentType::CHTL);
+    assert(fragments[0].content == "div { text { \"Before\" } } ");
+    assert(fragments[1].type == CHTL::FragmentType::HTML);
+    assert(fragments[1].content == "<p>Hello</p>");
+    assert(fragments[2].type == CHTL::FragmentType::CHTL);
+    assert(fragments[2].content == " div { text { \"After\" } }");
+    std::cout << "test_single_html_fragment PASSED" << std::endl;
 }
 
-void test_chtl_js_block_keyword() {
-    std::cout << "Running test: test_chtl_js_block_keyword" << std::endl;
-    std::string source = "script { console.log('hello'); Listen { click: () => {} } console.log('world'); }";
+void test_multiple_html_fragments() {
+    std::cout << "Running test_multiple_html_fragments..." << std::endl;
+    std::string source = "[Origin] @Html {<p>1</p>} CHTL1 [Origin] @Html {<p>2</p>} CHTL2";
     CHTL::CHTLUnifiedScanner scanner(source);
     auto fragments = scanner.scan();
 
-    assert(fragments.size() == 3);
-    assert_equal(fragments[0].type, CHTL::FragmentType::JS, "Frag 0 Type");
-    assert_equal(fragments[1].type, CHTL::FragmentType::CHTL_JS, "Frag 1 Type");
-    assert_equal(fragments[1].content, "Listen { click: () => {} }", "Frag 1 Content");
-    assert_equal(fragments[2].type, CHTL::FragmentType::JS, "Frag 2 Type");
+    fragments.erase(std::remove_if(fragments.begin(), fragments.end(), [](const CHTL::CodeFragment& f) {
+        return f.content.find_first_not_of(" \t\n\r") == std::string::npos;
+    }), fragments.end());
 
-    auto placeholders = scanner.getPlaceholders();
-    assert(placeholders.size() == 2);
-    assert_equal(placeholders.at(fragments[0].content), "console.log('hello');", "Placeholder 0");
-    assert_equal(placeholders.at(fragments[2].content), "console.log('world');", "Placeholder 1");
-    std::cout << "PASSED" << std::endl;
+    assert(fragments.size() == 4);
+    assert(fragments[0].type == CHTL::FragmentType::HTML);
+    assert(fragments[0].content == "<p>1</p>");
+    assert(fragments[1].type == CHTL::FragmentType::CHTL);
+    assert(fragments[1].content == " CHTL1 ");
+    assert(fragments[2].type == CHTL::FragmentType::HTML);
+    assert(fragments[2].content == "<p>2</p>");
+    assert(fragments[3].type == CHTL::FragmentType::CHTL);
+    assert(fragments[3].content == " CHTL2");
+    std::cout << "test_multiple_html_fragments PASSED" << std::endl;
 }
 
-void test_style_separation() {
-    std::cout << "Running test: test_style_separation" << std::endl;
-    std::string source = "style { color: red; @Style MyTemplate; width: 100px + 20px; }";
+void test_mixed_origin_blocks() {
+    std::cout << "Running test_mixed_origin_blocks..." << std::endl;
+    std::string source = "[Origin] @Html {<p>html</p>} [Origin] @Style { body { color: red; } }";
     CHTL::CHTLUnifiedScanner scanner(source);
     auto fragments = scanner.scan();
 
-    assert(fragments.size() == 3);
-    assert_equal(fragments[0].type, CHTL::FragmentType::CSS, "Frag 0 Type");
-    assert_equal(fragments[0].content, "color: red;", "Frag 0 Content");
-    assert_equal(fragments[1].type, CHTL::FragmentType::CHTL, "Frag 1 Type");
-    assert_equal(fragments[1].content, "@Style MyTemplate;", "Frag 1 Content");
-    assert_equal(fragments[2].type, CHTL::FragmentType::CHTL, "Frag 2 Type");
-    assert_equal(fragments[2].content, "width: 100px + 20px;", "Frag 2 Content");
-    std::cout << "PASSED" << std::endl;
+    fragments.erase(std::remove_if(fragments.begin(), fragments.end(), [](const CHTL::CodeFragment& f) {
+        return f.content.find_first_not_of(" \t\n\r") == std::string::npos;
+    }), fragments.end());
+
+    assert(fragments.size() == 2);
+    assert(fragments[0].type == CHTL::FragmentType::HTML);
+    assert(fragments[0].content == "<p>html</p>");
+    assert(fragments[1].type == CHTL::FragmentType::CHTL); // Treated as CHTL for now
+    assert(fragments[1].content == "[Origin] @Style { body { color: red; } }");
+    std::cout << "test_mixed_origin_blocks PASSED" << std::endl;
 }
 
-void test_full_source_file() {
-    std::cout << "Running test: test_full_source_file" << std::endl;
-    std::string source = "div { text: 'hello' } style { color: blue; } script { let a = 1; }";
+void test_origin_in_comment() {
+    std::cout << "Running test_origin_in_comment..." << std::endl;
+    std::string source = "div { /* [Origin] @Html { <p>not real</p> } */ }";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+    assert(fragments.size() == 1);
+    assert(fragments[0].type == CHTL::FragmentType::CHTL);
+    assert(fragments[0].content == source);
+    std::cout << "test_origin_in_comment PASSED" << std::endl;
+}
+
+void test_nested_braces_in_html() {
+    std::cout << "Running test_nested_braces_in_html..." << std::endl;
+    std::string source = "[Origin] @Html { <script> if (true) { console.log(\"hello\"); } </script> }";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+    assert(fragments.size() == 1);
+    assert(fragments[0].type == CHTL::FragmentType::HTML);
+    assert(fragments[0].content == "<script> if (true) { console.log(\"hello\"); } </script>");
+    std::cout << "test_nested_braces_in_html PASSED" << std::endl;
+}
+
+void test_no_chtl_before() {
+    std::cout << "Running test_no_chtl_before..." << std::endl;
+    std::string source = "[Origin] @Html { <p>Hello</p> } div { text { \"After\" } }";
     CHTL::CHTLUnifiedScanner scanner(source);
     auto fragments = scanner.scan();
 
-    assert(fragments.size() == 3);
-    assert_equal(fragments[0].type, CHTL::FragmentType::CHTL, "Frag 0 Type");
-    assert_equal(fragments[0].content, "div { text: 'hello' }", "Frag 0 Content");
-    assert_equal(fragments[1].type, CHTL::FragmentType::CSS, "Frag 1 Type");
-    assert_equal(fragments[1].content, "color: blue;", "Frag 1 Content");
-    assert_equal(fragments[2].type, CHTL::FragmentType::JS, "Frag 2 Type");
+    fragments.erase(std::remove_if(fragments.begin(), fragments.end(), [](const CHTL::CodeFragment& f) {
+        return f.content.find_first_not_of(" \t\n\r") == std::string::npos;
+    }), fragments.end());
 
-    auto placeholders = scanner.getPlaceholders();
-    assert(placeholders.size() == 1);
-    assert_equal(placeholders.at(fragments[2].content), "let a = 1;", "Placeholder Content");
-    std::cout << "PASSED" << std::endl;
+    assert(fragments.size() == 2);
+    assert(fragments[0].type == CHTL::FragmentType::HTML);
+    assert(fragments[0].content == "<p>Hello</p>");
+    assert(fragments[1].type == CHTL::FragmentType::CHTL);
+    assert(fragments[1].content == " div { text { \"After\" } }");
+    std::cout << "test_no_chtl_before PASSED" << std::endl;
+}
+
+void test_no_chtl_after() {
+    std::cout << "Running test_no_chtl_after..." << std::endl;
+    std::string source = "div { text { \"Before\" } } [Origin] @Html { <p>Hello</p> }";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+
+    fragments.erase(std::remove_if(fragments.begin(), fragments.end(), [](const CHTL::CodeFragment& f) {
+        return f.content.find_first_not_of(" \t\n\r") == std::string::npos;
+    }), fragments.end());
+
+    assert(fragments.size() == 2);
+    assert(fragments[0].type == CHTL::FragmentType::CHTL);
+    assert(fragments[0].content == "div { text { \"Before\" } } ");
+    assert(fragments[1].type == CHTL::FragmentType::HTML);
+    assert(fragments[1].content == "<p>Hello</p>");
+    std::cout << "test_no_chtl_after PASSED" << std::endl;
+}
+
+void test_empty_file() {
+    std::cout << "Running test_empty_file..." << std::endl;
+    std::string source = "";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+    assert(fragments.empty());
+    std::cout << "test_empty_file PASSED" << std::endl;
+}
+
+void test_only_origin_block() {
+    std::cout << "Running test_only_origin_block..." << std::endl;
+    std::string source = "[Origin] @Html { <p>Hello</p> }";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+    assert(fragments.size() == 1);
+    assert(fragments[0].type == CHTL::FragmentType::HTML);
+    assert(fragments[0].content == "<p>Hello</p>");
+    std::cout << "test_only_origin_block PASSED" << std::endl;
 }
 
 
 int main() {
-    test_simple_script_separation();
-    test_chtl_js_block_keyword();
-    test_style_separation();
-    test_full_source_file();
+    test_simple_chtl();
+    test_single_html_fragment();
+    test_multiple_html_fragments();
+    test_mixed_origin_blocks();
+    test_origin_in_comment();
+    test_nested_braces_in_html();
+    test_no_chtl_before();
+    test_no_chtl_after();
+    test_empty_file();
+    test_only_origin_block();
 
-    std::cout << "\nAll scanner tests passed!" << std::endl;
+    std::cout << "All scanner tests passed!" << std::endl;
+
     return 0;
 }

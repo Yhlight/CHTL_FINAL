@@ -1,0 +1,11 @@
+div {
+    text { "This is a CHTL fragment." }
+}
+
+[Origin] @Html {
+    <p>This is a raw HTML fragment.</p>
+}
+
+div {
+    text { "This is another CHTL fragment." }
+}
