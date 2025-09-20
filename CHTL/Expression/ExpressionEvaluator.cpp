@@ -163,8 +163,7 @@ void ExpressionEvaluator::visit(ComparisonExpr& expr) {
         // Could be extended to allow cross-type comparisons.
         comparison_result = false;
     } else if (left.type == ValueType::NUMERIC) {
-        // For comparisons, units must be identical
-        if (left.unit != right.unit) {
+        if (left.unit != right.unit && expr.op.type != TokenType::EQUAL_EQUAL && expr.op.type != TokenType::BANG_EQUAL) {
             throw std::runtime_error("Cannot compare numeric values with different units: '" + left.unit + "' and '" + right.unit + "'.");
         }
         switch (expr.op.type) {
@@ -172,8 +171,8 @@ void ExpressionEvaluator::visit(ComparisonExpr& expr) {
             case TokenType::GREATER_EQUAL: comparison_result = left.numeric_value >= right.numeric_value; break;
             case TokenType::LESS:          comparison_result = left.numeric_value < right.numeric_value; break;
             case TokenType::LESS_EQUAL:    comparison_result = left.numeric_value <= right.numeric_value; break;
-            case TokenType::EQUAL_EQUAL:   comparison_result = left.numeric_value == right.numeric_value; break; // Units are already checked
-            case TokenType::BANG_EQUAL:    comparison_result = left.numeric_value != right.numeric_value; break; // Units are already checked
+            case TokenType::EQUAL_EQUAL:   comparison_result = (left.unit == right.unit) && (left.numeric_value == right.numeric_value); break;
+            case TokenType::BANG_EQUAL:    comparison_result = (left.unit != right.unit) || (left.numeric_value != right.numeric_value); break;
             default: break;
         }
     } else { // STRING
@@ -213,7 +212,12 @@ void ExpressionEvaluator::visit(ConditionalExpr& expr) {
     if (isTruthy(condition)) {
         result = evaluate(expr.then_branch.get(), this->current_context);
     } else {
-        result = evaluate(expr.else_branch.get(), this->current_context);
+        if (expr.else_branch) {
+            result = evaluate(expr.else_branch.get(), this->current_context);
+        } else {
+            // No else branch, so this conditional produces no value.
+            result = {ValueType::EMPTY, 0, "", ""};
+        }
     }
 }
 

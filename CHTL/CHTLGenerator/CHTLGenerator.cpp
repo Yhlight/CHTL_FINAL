@@ -74,15 +74,17 @@ void CHTLGenerator::visit(ElementNode& node) {
                 for (const auto& prop : rule.properties) {
                     ExpressionEvaluator evaluator(this->templates, this->doc_root);
                     EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
-                    css_output << "    " << prop.key << ": ";
-                    if (result.type == ValueType::STRING) {
-                        css_output << result.string_value;
-                    } else if (result.type == ValueType::NUMERIC) {
-                        std::stringstream ss;
-                        ss << result.numeric_value;
-                        css_output << ss.str() << result.unit;
+                    if (result.type != ValueType::EMPTY) {
+                        css_output << "    " << prop.key << ": ";
+                        if (result.type == ValueType::STRING) {
+                            css_output << result.string_value;
+                        } else if (result.type == ValueType::NUMERIC) {
+                            std::stringstream ss;
+                            ss << result.numeric_value;
+                            css_output << ss.str() << result.unit;
+                        }
+                        css_output << ";\n";
                     }
-                    css_output << ";\n";
                 }
                 css_output << "}\n";
             }
@@ -104,16 +106,18 @@ void CHTLGenerator::visit(ElementNode& node) {
             for (const auto& prop : styleNode->inline_properties) {
                 ExpressionEvaluator evaluator(this->templates, this->doc_root);
                 EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
-                style_str += prop.key + ": ";
-                if (result.type == ValueType::STRING) {
-                    style_str += result.string_value;
-                } else if (result.type == ValueType::NUMERIC) {
-                    // Use a stringstream to format the number without trailing zeros
-                    std::stringstream ss;
-                    ss << result.numeric_value;
-                    style_str += ss.str() + result.unit;
+                if (result.type != ValueType::EMPTY) {
+                    style_str += prop.key + ": ";
+                    if (result.type == ValueType::STRING) {
+                        style_str += result.string_value;
+                    } else if (result.type == ValueType::NUMERIC) {
+                        // Use a stringstream to format the number without trailing zeros
+                        std::stringstream ss;
+                        ss << result.numeric_value;
+                        style_str += ss.str() + result.unit;
+                    }
+                    style_str += ";";
                 }
-                style_str += ";";
             }
         }
     }

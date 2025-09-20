@@ -14,10 +14,10 @@ namespace CHTL {
 class ElementNode; // Forward declaration
 
 // A struct to hold the result of an evaluation.
-enum class ValueType { NUMERIC, STRING, BOOL };
+enum class ValueType { NUMERIC, STRING, BOOL, EMPTY };
 
 struct EvaluatedValue {
-    ValueType type = ValueType::STRING;
+    ValueType type = ValueType::EMPTY;
     double numeric_value = 0.0;
     std::string unit = ""; // e.g., "px", "%", "em"
     std::string string_value = ""; // For full string values like "red" or "solid"

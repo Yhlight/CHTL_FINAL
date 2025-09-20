@@ -1,0 +1,31 @@
+// Test for CHTL Conditional Property Expressions
+
+div {
+    id: "test-box";
+    class: "container";
+
+    style {
+        width: 200px;
+        height: 100px;
+
+        // --- Basic Tests ---
+        // Test 1: Condition is true, result is a string
+        background-color: width > 100px ? "red" : "blue"; // Expected: red
+
+        // Test 2: Condition is false, result is a string
+        border-color: height > 150px ? "green" : "black"; // Expected: black
+
+        // Test 3: Condition is true, result is a numeric value
+        padding: width == 200px ? 20px : 10px; // Expected: 20px
+
+        // Test 4: Condition is false, result is a numeric value
+        margin: height < 50px ? 5px : 15px; // Expected: 15px
+
+        // --- Reference Tests ---
+        // Test 5: Referencing another property in the condition
+        outline: padding > margin ? "2px solid red" : "1px solid blue"; // Expected: 2px solid red
+
+        // Test 6: Chained ternary operator
+        font-size: width > 300px ? 24px : width > 150px ? 18px : 12px; // Expected: 18px
+    }
+}

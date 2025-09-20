@@ -26,8 +26,10 @@ std::unique_ptr<Expr> CHTLParser::parseConditional() {
     auto expr = parseLogicalOr();
     if (match({TokenType::QUESTION})) {
         auto then_branch = parseExpression();
-        consume(TokenType::COLON, "Expect ':' after then branch of conditional expression.");
-        auto else_branch = parseConditional();
+        std::unique_ptr<Expr> else_branch = nullptr;
+        if (match({TokenType::COLON})) {
+            else_branch = parseConditional();
+        }
         expr = std::make_unique<ConditionalExpr>(std::move(expr), std::move(then_branch), std::move(else_branch));
     }
     return expr;
