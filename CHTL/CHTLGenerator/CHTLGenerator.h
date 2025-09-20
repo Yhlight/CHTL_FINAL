@@ -30,6 +30,7 @@ public:
     void visit(OriginNode& node) override;
     void visit(TemplateDeclarationNode& node) override;
     void visit(CustomDeclarationNode& node) override;
+    void visit(ImportNode& node) override;
 
 private:
     const std::map<std::string, TemplateDefinitionNode>& templates;

@@ -92,9 +92,15 @@ void CHTLGenerator::visit(ElementNode& node) {
     // --- HTML Tag Generation ---
     html_output << "<" << node.tagName;
 
-    // Append standard HTML attributes
+    // Process attributes, checking for reactive values
     for (const auto& attr : node.attributes) {
-        html_output << " " << attr.key << "=\"" << attr.value << "\"";
+        // This is a simplification. A proper implementation would parse the attribute value as an expression.
+        if (attr.value.rfind("$", 0) == 0) { // Starts with $
+            std::string varName = attr.value.substr(1, attr.value.length() - 2);
+            html_output << " data-chtl-attr-" << attr.key << "=\"" << varName << "\"";
+        } else {
+            html_output << " " << attr.key << "=\"" << attr.value << "\"";
+        }
     }
 
     // Process inline styles by evaluating their expression trees
@@ -104,16 +110,22 @@ void CHTLGenerator::visit(ElementNode& node) {
             for (const auto& prop : styleNode->inline_properties) {
                 ExpressionEvaluator evaluator(this->templates, this->doc_root);
                 EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
-                style_str += prop.key + ": ";
-                if (result.type == ValueType::STRING) {
-                    style_str += result.string_value;
-                } else if (result.type == ValueType::NUMERIC) {
-                    // Use a stringstream to format the number without trailing zeros
-                    std::stringstream ss;
-                    ss << result.numeric_value;
-                    style_str += ss.str() + result.string_value;
+
+                if (result.string_value.rfind("$(", 0) == 0) { // Check for reactive placeholder
+                    std::string varName = result.string_value.substr(2, result.string_value.length() - 3);
+                    html_output << " data-chtl-style-" << prop.key << "=\"" << varName << "\"";
+                } else {
+                    style_str += prop.key + ": ";
+                    if (result.type == ValueType::STRING) {
+                        style_str += result.string_value;
+                    } else if (result.type == ValueType::NUMERIC) {
+                        // Use a stringstream to format the number without trailing zeros
+                        std::stringstream ss;
+                        ss << result.numeric_value;
+                        style_str += ss.str() + result.string_value;
+                    }
+                    style_str += ";";
                 }
-                style_str += ";";
             }
         }
     }
@@ -169,6 +181,10 @@ void CHTLGenerator::visit(CustomDeclarationNode& node) {
     // A custom declaration does not produce any direct output.
     // It's processed by the parser and stored for use elsewhere.
     // So, this visitor method is intentionally empty.
+}
+
+void CHTLGenerator::visit(ImportNode& node) {
+    // Imports are handled by the dispatcher, not the generator.
 }
 
 } // namespace CHTL

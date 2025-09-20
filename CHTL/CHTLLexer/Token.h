@@ -65,6 +65,7 @@ enum class TokenType {
 
     // Special
     SYMBOL, // For single characters like -, #, etc.
+    DOLLAR, // $
     END_OF_FILE,
     UNKNOWN
 };

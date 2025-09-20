@@ -1,6 +1,9 @@
 #include "ExpressionEvaluator.h"
+#include "../CHTLNode/ReactiveValueNode.h"
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/StyleNode.h"
+#include "../../Util/StringUtil/StringUtil.h" // For splitting class names
+#include <algorithm> // For std::any_of
 #include <iostream>
 #include <cmath>
 
@@ -191,7 +194,13 @@ ElementNode* ExpressionEvaluator::findElement(BaseNode* context, const std::stri
     } else if (selector_type == '.') {
         std::string className = selector.substr(1);
         for (const auto& attr : element->attributes) {
-            if (attr.key == "class" && attr.value.find(className) != std::string::npos) return element;
+            if (attr.key == "class") {
+                std::vector<std::string> classes = StringUtil::split(attr.value, ' ');
+                if (std::any_of(classes.begin(), classes.end(),
+                    [&](const std::string& c){ return c == className; })) {
+                    return element;
+                }
+            }
         }
     } else {
         if (element->tagName == selector) return element;
@@ -202,6 +211,13 @@ ElementNode* ExpressionEvaluator::findElement(BaseNode* context, const std::stri
     }
 
     return nullptr;
+}
+
+void ExpressionEvaluator::visit(ReactiveValueNode& expr) {
+    // For now, the evaluator doesn't do anything with reactive values.
+    // The generator will handle them specially.
+    // We can assign a placeholder value.
+    result = {ValueType::STRING, 0, "$(" + expr.variable_name + ")"};
 }
 
 } // namespace CHTL

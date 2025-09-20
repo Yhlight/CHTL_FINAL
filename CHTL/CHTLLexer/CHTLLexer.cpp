@@ -75,6 +75,7 @@ void CHTLLexer::scanToken() {
         case ';': addToken(TokenType::SEMICOLON); break;
         case ',': addToken(TokenType::COMMA); break;
         case '?': addToken(TokenType::QUESTION); break;
+        case '$': addToken(TokenType::DOLLAR); break;
         case '+': addToken(TokenType::PLUS); break;
         case '-': addToken(TokenType::MINUS); break;
         case '%': addToken(TokenType::PERCENT); break;

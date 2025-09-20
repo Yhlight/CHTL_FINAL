@@ -16,6 +16,7 @@ class ReferenceExpr;
 class ComparisonExpr;
 class LogicalExpr;
 class ConditionalExpr;
+class ReactiveValueNode;
 class GroupingExpr; // For future use with parentheses
 
 // The base visitor interface for the expression AST.
@@ -31,6 +32,7 @@ public:
     virtual void visit(ComparisonExpr& expr) = 0;
     virtual void visit(LogicalExpr& expr) = 0;
     virtual void visit(ConditionalExpr& expr) = 0;
+    virtual void visit(ReactiveValueNode& expr) = 0;
     // virtual void visit(GroupingExpr& expr) = 0; // For future use
 };
 

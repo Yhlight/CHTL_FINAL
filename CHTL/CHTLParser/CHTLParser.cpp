@@ -4,6 +4,7 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/TemplateDeclarationNode.h"
+#include "../CHTLNode/ReactiveValueNode.h"
 #include "../Expression/Expr.h"
 #include <iostream>
 #include <stdexcept>
@@ -11,8 +12,8 @@
 
 namespace CHTL {
 
-CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens)
-    : source(source), tokens(tokens) {}
+CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens, std::map<std::string, TemplateDefinitionNode>& templates)
+    : source(source), tokens(tokens), template_definitions(templates) {}
 
 // --- Expression Parser Implementation ---
 
@@ -137,8 +138,8 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             consume(TokenType::RIGHT_PAREN, "Expect ')' after variable key name.");
             return std::make_unique<VarExpr>(first_part.lexeme, key_name);
         } else {
-            // It's an implicit self-reference to a property.
-            return std::make_unique<ReferenceExpr>(Token(), first_part);
+            // It's an unquoted string literal, as per the spec.
+            return std::make_unique<LiteralExpr>(first_part.lexeme);
         }
     }
 
@@ -147,27 +148,39 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
         return std::make_unique<LiteralExpr>(previous().lexeme);
     }
 
-    // Handle selectors like #box.width or .container.height, or hex codes like #fff
-    if (check(TokenType::SYMBOL) && (peek().lexeme == "#" || peek().lexeme == ".")) {
-        Token first_part = advance(); // Consume '#' or '.'
-
-        // To disambiguate, we look ahead for a dot.
-        if (tokens.size() > current + 1 && tokens[current + 1].type == TokenType::DOT) {
-            Token selector_name = consume(TokenType::IDENTIFIER, "Expect selector name.");
+    // Handle selectors like #box.width or hex codes like #fff
+    if (check(TokenType::SYMBOL) && peek().lexeme == "#") {
+        Token hash = advance(); // Consume '#'
+        // Disambiguate by looking for a following IDENTIFIER and then a DOT.
+        if (check(TokenType::IDENTIFIER) && tokens.size() > current + 1 && tokens[current+1].type == TokenType::DOT) {
+            Token selector_name = advance();
             consume(TokenType::DOT, "Expect '.' after selector.");
             Token property = consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
-
-            // Reconstruct the full selector token for the ReferenceExpr
-            Token full_selector = {first_part.type, first_part.lexeme + selector_name.lexeme, first_part.line, first_part.position};
+            Token full_selector = {TokenType::IDENTIFIER, "#" + selector_name.lexeme, hash.line, hash.position};
             return std::make_unique<ReferenceExpr>(full_selector, property);
         } else {
-            // It's not a reference, so treat as a literal (e.g., hex code or unquoted string)
-            std::string value = first_part.lexeme;
-            while(check(TokenType::IDENTIFIER) || check(TokenType::NUMBER)) {
+            // It's a hex code or similar literal
+            std::string value = "#";
+             while (isalnum(peek().lexeme[0])) { // Consume the rest of the hex code
                 value += advance().lexeme;
             }
             return std::make_unique<LiteralExpr>(value);
         }
+    }
+
+    // Handle .class.prop
+    if (match({TokenType::DOT})) {
+        Token selector_name = consume(TokenType::IDENTIFIER, "Expect class name after '.'");
+        consume(TokenType::DOT, "Expect '.' after class name.");
+        Token property = consume(TokenType::IDENTIFIER, "Expect property name after '.'");
+        Token full_selector = {TokenType::IDENTIFIER, "." + selector_name.lexeme, selector_name.line, selector_name.position - 1}; // Reconstruct
+        return std::make_unique<ReferenceExpr>(full_selector, property);
+    }
+
+    if (match({TokenType::DOLLAR})) {
+        Token var_name = consume(TokenType::IDENTIFIER, "Expect variable name after '$'.");
+        consume(TokenType::DOLLAR, "Expect '$' after variable name.");
+        return std::make_unique<ReactiveValueNode>(var_name.lexeme);
     }
 
     if (match({TokenType::LEFT_PAREN})) {
@@ -203,7 +216,8 @@ std::unique_ptr<BaseNode> CHTLParser::parseTopLevelDeclaration() {
                     return parseCustomDeclaration();
                 case TokenType::ORIGIN:
                     return parseOriginBlock();
-                // case TokenType::IMPORT:
+                case TokenType::IMPORT:
+                    return parseImportStatement();
                 // etc. will be added here later.
                 default:
                     // If it's not a recognized block keyword, parse as a normal element.
@@ -447,7 +461,15 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
 
     if (!template_definitions.count(name.lexeme)) {
-        error(name, "Style template '" + name.lexeme + "' not found.");
+        if (!suppress_not_found_errors) {
+            error(name, "Style template '" + name.lexeme + "' not found.");
+        }
+        // If we're suppressing errors, we can't continue parsing this rule,
+        // so we just skip to the end of the statement.
+        while(!check(TokenType::SEMICOLON) && !check(TokenType::LEFT_BRACE) && !isAtEnd()) {
+            advance();
+        }
+        if(check(TokenType::SEMICOLON)) advance();
         return;
     }
 
@@ -534,7 +556,9 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
         }
         return cloned_nodes;
     } else {
-        error(name, "Element template '" + name.lexeme + "' not found.");
+        if (!suppress_not_found_errors) {
+            error(name, "Element template '" + name.lexeme + "' not found.");
+        }
     }
     return {};
 }
@@ -713,6 +737,70 @@ std::unique_ptr<CustomDeclarationNode> CHTLParser::parseCustomDeclaration() {
     template_definitions[def->name] = std::move(*def_for_map);
 
     return std::make_unique<CustomDeclarationNode>(std::move(def));
+}
+
+std::unique_ptr<ImportNode> CHTLParser::parseImportStatement() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start import statement.");
+    consume(TokenType::IMPORT, "Expect 'Import' keyword.");
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end import keyword.");
+
+    consume(TokenType::AT, "Expect '@' for import type.");
+    Token typeToken = advance(); // Should be an identifier now
+
+    ImportType type;
+    if (typeToken.lexeme == "Chtl") {
+        type = ImportType::CHTL;
+    } else if (typeToken.lexeme == "Html") {
+        type = ImportType::HTML;
+    } else if (typeToken.lexeme == "Style") {
+        type = ImportType::STYLE;
+    } else if (typeToken.lexeme == "JavaScript") {
+        type = ImportType::JAVASCRIPT;
+    } else {
+        error(typeToken, "Unsupported import type.");
+    }
+
+    consume(TokenType::FROM, "Expect 'from' after import type.");
+
+    // The spec allows unquoted literals for paths.
+    Token pathToken = consume(TokenType::STRING, "Expect path string after 'from'.");
+    std::string path = pathToken.lexeme;
+
+    std::string alias = "";
+    if (match({TokenType::AS})) {
+        alias = consume(TokenType::IDENTIFIER, "Expect alias name after 'as'.").lexeme;
+    }
+
+    consume(TokenType::SEMICOLON, "Expect ';' after import statement.");
+
+    return std::make_unique<ImportNode>(type, path, alias);
+}
+
+std::vector<std::string> CHTLParser::discoverImports() {
+    std::vector<std::string> paths;
+    int original_pos = current; // Save state
+
+    while (!isAtEnd()) {
+        if (check(TokenType::LEFT_BRACKET) &&
+            tokens.size() > current + 5 && // Ensure enough tokens for a basic import
+            tokens[current + 1].type == TokenType::IMPORT &&
+            tokens[current + 2].type == TokenType::RIGHT_BRACKET &&
+            tokens[current + 3].type == TokenType::AT &&
+            tokens[current + 4].lexeme == "Chtl" &&
+            tokens[current + 5].type == TokenType::FROM &&
+            tokens[current + 6].type == TokenType::STRING)
+        {
+            // Found a valid import statement pattern
+            current += 6; // Move to the STRING token
+            paths.push_back(tokens[current].lexeme);
+            advance(); // Consume the STRING token
+        } else {
+            advance();
+        }
+    }
+
+    current = original_pos; // Restore state
+    return paths;
 }
 
 } // namespace CHTL

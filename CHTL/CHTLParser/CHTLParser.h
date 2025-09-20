@@ -6,6 +6,7 @@
 #include "../CHTLNode/ElementNode.h" // Include full definition for std::unique_ptr
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/CustomDeclarationNode.h"
+#include "../CHTLNode/ImportNode.h"
 #include <vector>
 #include <memory>
 #include <map>
@@ -15,12 +16,16 @@ namespace CHTL {
 // The parser takes a stream of tokens and produces an Abstract Syntax Tree.
 class CHTLParser {
 public:
-    explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens);
+    bool suppress_not_found_errors = false;
+    explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, std::map<std::string, TemplateDefinitionNode>& templates);
 
     // The main entry point for parsing.
     std::unique_ptr<BaseNode> parse();
 
-    const std::map<std::string, TemplateDefinitionNode>& getTemplateDefinitions() const { return template_definitions; }
+    // This performs a lightweight scan to find all import paths.
+    std::vector<std::string> discoverImports();
+
+    std::map<std::string, TemplateDefinitionNode> takeTemplateDefinitions() { return std::move(template_definitions); }
 
 private:
     const std::string& source;
@@ -55,12 +60,13 @@ private:
     std::unique_ptr<ElementNode> parseElement();
     void parseAttribute(ElementNode* element);
     std::unique_ptr<StyleNode> parseStyleBlock();
+    std::unique_ptr<ImportNode> parseImportStatement();
 
     // --- Error Handling ---
     void error(const Token& token, const std::string& message);
 
     // --- Symbol Table for Templates ---
-    std::map<std::string, TemplateDefinitionNode> template_definitions;
+    std::map<std::string, TemplateDefinitionNode>& template_definitions;
     std::unique_ptr<BaseNode> parseTopLevelDeclaration(); // New method
     std::unique_ptr<TemplateDeclarationNode> parseTemplateDeclaration();
     std::unique_ptr<CustomDeclarationNode> parseCustomDeclaration();
