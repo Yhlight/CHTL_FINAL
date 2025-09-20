@@ -1,0 +1,34 @@
+#ifndef COMPILER_DISPATCHER_H
+#define COMPILER_DISPATCHER_H
+
+#include "../Scanner/CHTLUnifiedScanner.h"
+#include "../CHTLNode/TemplateDefinitionNode.h"
+#include <string>
+#include <vector>
+#include <map>
+
+namespace CHTL {
+
+// A simple struct to hold the final compiled outputs
+struct FinalOutput {
+    std::string html;
+    std::string css;
+    std::string js;
+};
+
+class CompilerDispatcher {
+public:
+    explicit CompilerDispatcher(std::string initial_source);
+
+    // The main method to process fragments
+    FinalOutput dispatch();
+
+private:
+    std::string initial_source;
+    std::map<std::string, TemplateDefinitionNode> all_template_definitions;
+    FinalOutput final_output;
+};
+
+} // namespace CHTL
+
+#endif // COMPILER_DISPATCHER_H

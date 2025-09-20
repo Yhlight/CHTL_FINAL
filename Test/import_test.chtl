@@ -1,0 +1,3 @@
+[Template] @Style ImportedStyle {
+    font-size: 100px;
+}
