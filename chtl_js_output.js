@@ -1,0 +1,1 @@
+const my_div = document.querySelector('my-div'); console . log ( "Found the div!" ) ; my_div.addEventListener('click', ( ) = > { console . log ( "Div was clicked!" ) ; )} ;

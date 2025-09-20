@@ -1,0 +1,14 @@
+script {
+    const my_div = {{my-div}};
+    console.log("Found the div!");
+    my_div->Listen {
+        click: () => {
+            console.log("Div was clicked!");
+        }
+    };
+}
+
+div {
+    id: "my-div";
+    text { "Click me" }
+}

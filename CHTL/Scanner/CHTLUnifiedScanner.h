@@ -13,6 +13,7 @@ public:
     std::vector<CodeFragment> scan();
 
 private:
+    void scanScriptContent(const std::string& script_content, std::vector<CodeFragment>& fragments);
     const std::string& source;
     int current = 0;
     int line = 1;

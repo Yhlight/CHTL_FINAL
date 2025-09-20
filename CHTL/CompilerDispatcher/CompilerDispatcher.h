@@ -1,7 +1,7 @@
 #ifndef COMPILER_DISPATCHER_H
 #define COMPILER_DISPATCHER_H
 
-#include "../Scanner/CodeFragment.h"
+#include "../Scanner/CHTLUnifiedScanner.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include <string>
 #include <vector>
@@ -24,8 +24,6 @@ public:
     FinalOutput dispatch();
 
 private:
-    void process_source(const std::string& source, int depth);
-
     std::string initial_source;
     std::map<std::string, TemplateDefinitionNode> all_template_definitions;
     FinalOutput final_output;

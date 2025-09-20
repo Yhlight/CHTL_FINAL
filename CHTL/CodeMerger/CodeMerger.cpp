@@ -30,12 +30,18 @@ void CodeMerger::saveToSeparateFiles(const std::string& base_filename) const {
     if (!html_file.is_open()) {
         throw std::runtime_error("Could not open file to save HTML: " + base_filename + ".html");
     }
-    html_file << "<html>\n<head>\n"
-              << "<link rel=\"stylesheet\" href=\"" << base_filename << ".css\">\n"
-              << "</head>\n<body>\n"
-              << output.html
-              << "<script src=\"" << base_filename << ".js\"></script>\n"
-              << "</body>\n</html>";
+    std::string html_content = "<html>\n<head>\n";
+    if (!output.css.empty()) {
+        html_content += "<link rel=\"stylesheet\" href=\"" + base_filename + ".css\">\n";
+    }
+    html_content += "</head>\n<body>\n";
+    html_content += output.html;
+    if (!output.js.empty()) {
+        html_content += "<script src=\"" + base_filename + ".js\"></script>\n";
+    }
+    html_content += "</body>\n</html>";
+
+    html_file << html_content;
     html_file.close();
 
     // Save CSS

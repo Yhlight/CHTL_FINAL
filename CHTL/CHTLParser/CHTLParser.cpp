@@ -198,10 +198,34 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
 
 std::unique_ptr<BaseNode> CHTLParser::parse() {
     auto root = std::make_unique<ElementNode>("<root>");
+    if (isAtEnd()) {
+        return root;
+    }
     while (!isAtEnd()) {
         root->addChild(parseTopLevelDeclaration());
     }
     return root;
+}
+
+void CHTLParser::discoverTemplates() {
+    while (!isAtEnd()) {
+        if (check(TokenType::LEFT_BRACKET)) {
+            if (tokens.size() > current + 1) {
+                TokenType keywordType = tokens[current + 1].type;
+                if (keywordType == TokenType::TEMPLATE) {
+                    parseTemplateDeclaration();
+                } else if (keywordType == TokenType::CUSTOM) {
+                    parseCustomDeclaration();
+                } else {
+                    advance(); // Not a template, skip
+                }
+            } else {
+                 advance();
+            }
+        } else {
+            advance();
+        }
+    }
 }
 
 std::unique_ptr<BaseNode> CHTLParser::parseTopLevelDeclaration() {
@@ -461,16 +485,7 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
 
     if (!template_definitions.count(name.lexeme)) {
-        if (!suppress_not_found_errors) {
-            error(name, "Style template '" + name.lexeme + "' not found.");
-        }
-        // If we're suppressing errors, we can't continue parsing this rule,
-        // so we just skip to the end of the statement.
-        while(!check(TokenType::SEMICOLON) && !check(TokenType::LEFT_BRACE) && !isAtEnd()) {
-            advance();
-        }
-        if(check(TokenType::SEMICOLON)) advance();
-        return;
+        error(name, "Style template '" + name.lexeme + "' not found.");
     }
 
     const auto& def = template_definitions.at(name.lexeme);
@@ -545,21 +560,18 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
     consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 
-    if (template_definitions.count(name.lexeme)) {
-        const auto& def = template_definitions.at(name.lexeme);
-        if (def.type != TemplateType::ELEMENT) {
-            error(name, "Template '" + name.lexeme + "' is not an Element template.");
-        }
-        std::vector<std::unique_ptr<BaseNode>> cloned_nodes;
-        for (const auto& node : def.element_body) {
-            cloned_nodes.push_back(node->clone());
-        }
-        return cloned_nodes;
-    } else {
-        if (!suppress_not_found_errors) {
-            error(name, "Element template '" + name.lexeme + "' not found.");
-        }
+    if (!template_definitions.count(name.lexeme)) {
+        error(name, "Element template '" + name.lexeme + "' not found.");
     }
+    const auto& def = template_definitions.at(name.lexeme);
+    if (def.type != TemplateType::ELEMENT) {
+        error(name, "Template '" + name.lexeme + "' is not an Element template.");
+    }
+    std::vector<std::unique_ptr<BaseNode>> cloned_nodes;
+    for (const auto& node : def.element_body) {
+        cloned_nodes.push_back(node->clone());
+    }
+    return cloned_nodes;
     return {};
 }
 

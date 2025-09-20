@@ -16,7 +16,6 @@ namespace CHTL {
 // The parser takes a stream of tokens and produces an Abstract Syntax Tree.
 class CHTLParser {
 public:
-    bool suppress_not_found_errors = false;
     explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, std::map<std::string, TemplateDefinitionNode>& templates);
 
     // The main entry point for parsing.
@@ -24,6 +23,9 @@ public:
 
     // This performs a lightweight scan to find all import paths.
     std::vector<std::string> discoverImports();
+
+    // This performs a scan to find and populate all template definitions.
+    void discoverTemplates();
 
     std::map<std::string, TemplateDefinitionNode> takeTemplateDefinitions() { return std::move(template_definitions); }
 

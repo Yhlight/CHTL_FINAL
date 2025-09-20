@@ -1,42 +1,38 @@
 #ifndef CHTLJS_LEXER_H
 #define CHTLJS_LEXER_H
 
+#include "CHTLJSToken.h" // Use the separate token header
 #include <string>
 #include <vector>
+#include <map>
 
-namespace CHTL {
-
-// CHTL JS will have its own set of tokens.
-enum class CHTLJSTokenType {
-    // ... to be defined ...
-    ENHANCED_SELECTOR, // {{...}}
-    LISTEN_KEYWORD,    // Listen
-    DELEGATE_KEYWORD,  // Delegate
-    ANIMATE_KEYWORD,   // Animate
-    VIR_KEYWORD,       // Vir
-    ARROW,             // ->
-    EVENT_BIND,        // &->
-    EOF_JS,
-};
-
-struct CHTLJSToken {
-    CHTLJSTokenType type;
-    std::string lexeme;
-    int line;
-};
+namespace CHTLJS {
 
 class CHTLJSLexer {
 public:
     explicit CHTLJSLexer(const std::string& source);
-    std::vector<CHTLJSToken> scanTokens();
+    std::vector<Token> scanTokens();
+
 private:
+    void scanToken();
+    char advance();
+    void addToken(TokenType type);
+    void addToken(TokenType type, const std::string& literal);
+    bool match(char expected);
+    char peek();
+    char peekNext();
+    void string();
+    void identifier();
+
     const std::string& source;
-    std::vector<CHTLJSToken> tokens;
+    std::vector<Token> tokens;
+    static const std::map<std::string, TokenType> keywords;
+
     int start = 0;
     int current = 0;
     int line = 1;
 };
 
-} // namespace CHTL
+} // namespace CHTLJS
 
 #endif // CHTLJS_LEXER_H

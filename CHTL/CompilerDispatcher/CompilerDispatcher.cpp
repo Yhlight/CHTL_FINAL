@@ -2,7 +2,10 @@
 #include "../CHTLLexer/CHTLLexer.h"
 #include "../CHTLParser/CHTLParser.h"
 #include "../CHTLGenerator/CHTLGenerator.h"
-#include "../CHTLNode/ImportNode.h"
+#include "../Scanner/CHTLUnifiedScanner.h"
+#include "../CHTLJS/CHTLJSLexer/CHTLJSLexer.h"
+#include "../CHTLJS/CHTLJSParser/CHTLJSParser.h"
+#include "../CHTLJS/CHTLJSGenerator/CHTLJSGenerator.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <memory>
@@ -12,13 +15,6 @@
 #include <algorithm>
 
 namespace CHTL {
-
-void resolve_dependencies(
-    const std::string& source,
-    std::map<std::string, TemplateDefinitionNode>& all_templates,
-    std::set<std::string>& processed_files,
-    int depth
-);
 
 CompilerDispatcher::CompilerDispatcher(std::string initial_source)
     : initial_source(std::move(initial_source)) {}
@@ -40,7 +36,7 @@ FinalOutput CompilerDispatcher::dispatch() {
         files_to_process.pop_front();
         processing_order.push_back(current_path);
 
-        std::string current_source = file_contents[current_path];
+        const std::string& current_source = file_contents[current_path];
 
         CHTLLexer lexer(current_source);
         auto tokens = lexer.scanTokens();
@@ -58,31 +54,50 @@ FinalOutput CompilerDispatcher::dispatch() {
     }
 
     // Pass 2: Template Population.
-    // Parse files in reverse order of discovery. This ensures dependencies (which are discovered last)
-    // are parsed first.
     std::reverse(processing_order.begin(), processing_order.end());
     for (const auto& path : processing_order) {
-         std::cout << "--- Parsing for templates: " << path << " ---" << std::endl;
+        std::cout << "--- Discovering templates in: " << path << " ---" << std::endl;
         const std::string& source = file_contents[path];
         CHTLLexer lexer(source);
         auto tokens = lexer.scanTokens();
         CHTLParser parser(source, tokens, this->all_template_definitions);
-        parser.parse(); // This populates the map. Errors will be thrown if syntax is bad.
+        parser.discoverTemplates();
     }
 
+    // Pass 3: Final Generation using the Unified Scanner
+    std::cout << "--- Generating final output from fragments ---" << std::endl;
+    CHTLUnifiedScanner scanner(this->initial_source);
+    auto fragments = scanner.scan();
 
-    // Pass 3: Final Generation
-    std::cout << "--- Generating final output ---" << std::endl;
-    CHTLLexer final_lexer(this->initial_source);
-    auto final_tokens = final_lexer.scanTokens();
-    CHTLParser final_parser(this->initial_source, final_tokens, this->all_template_definitions);
-    auto main_ast = final_parser.parse();
+    for (const auto& fragment : fragments) {
+        if (fragment.type == FragmentType::CHTL) {
+            CHTLLexer lexer(fragment.content);
+            auto tokens = lexer.scanTokens();
+            CHTLParser parser(fragment.content, tokens, this->all_template_definitions);
+            auto ast = parser.parse();
 
-    CHTLGenerator generator(this->all_template_definitions);
-    auto result = generator.generate(main_ast.get());
+            CHTLGenerator generator(this->all_template_definitions);
+            auto result = generator.generate(ast.get());
 
-    this->final_output.html = result.html;
-    this->final_output.css = result.css;
+            this->final_output.html += result.html;
+            // CSS from CHTL fragments (e.g. local style blocks) should also be collected
+            this->final_output.css += result.css;
+
+        } else if (fragment.type == FragmentType::CSS) {
+            this->final_output.css += fragment.content;
+        } else if (fragment.type == FragmentType::JS) {
+            this->final_output.js += fragment.content;
+        } else if (fragment.type == FragmentType::CHTL_JS) {
+            CHTLJS::CHTLJSLexer js_lexer(fragment.content);
+            auto js_tokens = js_lexer.scanTokens();
+
+            CHTLJS::CHTLJSParser js_parser(js_tokens);
+            auto js_ast_nodes = js_parser.parse();
+
+            CHTLJS::CHTLJSGenerator js_generator;
+            this->final_output.js += js_generator.generate(js_ast_nodes);
+        }
+    }
 
     return final_output;
 }
