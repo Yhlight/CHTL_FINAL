@@ -1,0 +1,49 @@
+// Test for CHTL Automatic ID and Class Generation
+
+// Test 1: Simple class injection
+div {
+    style {
+        .box {
+            width: 100px;
+        }
+    }
+}
+
+// Test 2: Simple ID injection
+div {
+    style {
+        #main-content {
+            padding: 10px;
+        }
+    }
+}
+
+// Test 3: Appending to an existing class attribute
+div {
+    class: "existing-class";
+    style {
+        .new-class {
+            color: red;
+        }
+    }
+}
+
+// Test 4: Multiple selectors, first one should be chosen
+div {
+    style {
+        .first-class { color: blue; }
+        .second-class { border: 1px; }
+    }
+}
+
+// Test 5: ID selector should take precedence if element already has an ID.
+// The spec is ambiguous here, but typically an element has only one ID.
+// We'll assume the new ID from the style block overwrites for now.
+div {
+    id: "original-id";
+    style {
+        #new-id {
+            font-size: 16px;
+        }
+    }
+}

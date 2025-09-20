@@ -62,7 +62,14 @@ void CHTLGenerator::visit(ElementNode& node) {
                         node.attributes.push_back({"class", className});
                     }
                 } else if (selector.rfind('#', 0) == 0) { // Starts with #
-                    node.attributes.push_back({"id", selector.substr(1)});
+                    std::string idName = selector.substr(1);
+                    auto it = std::find_if(node.attributes.begin(), node.attributes.end(),
+                                           [](const HtmlAttribute& attr){ return attr.key == "id"; });
+                    if (it != node.attributes.end()) {
+                        it->value = idName; // Replace existing ID
+                    } else {
+                        node.attributes.push_back({"id", idName});
+                    }
                 }
 
                 size_t pos = selector.find('&');

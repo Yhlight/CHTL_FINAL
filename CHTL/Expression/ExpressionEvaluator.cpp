@@ -137,6 +137,7 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
         throw std::runtime_error("Reference error: selector '" + expr.selector.lexeme + "' not found.");
     }
 
+    // Search for the property on the target element
     for (const auto& child : target_element->children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             for (const auto& prop : styleNode->inline_properties) {
@@ -148,6 +149,12 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
                 }
             }
         }
+    }
+
+    // If an implicit self-reference is not found as a property, treat it as a literal string.
+    if (expr.selector.lexeme.empty()) {
+        result = {ValueType::STRING, 0, "", expr.property.lexeme};
+        return;
     }
 
     throw std::runtime_error("Reference error: property '" + expr.property.lexeme + "' not found on element with selector '" + expr.selector.lexeme + "'.");

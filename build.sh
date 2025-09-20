@@ -46,6 +46,10 @@ $CXX $CXX_FLAGS -o arithmetic_test Test/ArithmeticTest/main.cpp $CHTL_SOURCES
 echo "Building conditional_test..."
 $CXX $CXX_FLAGS -o conditional_test Test/ConditionalTest/main.cpp $CHTL_SOURCES
 
+# Build Auto ID/Class Test
+echo "Building auto_id_class_test..."
+$CXX $CXX_FLAGS -o auto_id_class_test Test/AutoIdClassTest/main.cpp $CHTL_SOURCES
+
 
 echo "--- Build Complete ---"
 echo "You can now run tests, for example: ./full_pipeline_test"
