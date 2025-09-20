@@ -80,7 +80,7 @@ void CHTLGenerator::visit(ElementNode& node) {
                     } else if (result.type == ValueType::NUMERIC) {
                         std::stringstream ss;
                         ss << result.numeric_value;
-                        css_output << ss.str() << result.string_value;
+                        css_output << ss.str() << result.unit;
                     }
                     css_output << ";\n";
                 }
@@ -111,7 +111,7 @@ void CHTLGenerator::visit(ElementNode& node) {
                     // Use a stringstream to format the number without trailing zeros
                     std::stringstream ss;
                     ss << result.numeric_value;
-                    style_str += ss.str() + result.string_value;
+                    style_str += ss.str() + result.unit;
                 }
                 style_str += ";";
             }

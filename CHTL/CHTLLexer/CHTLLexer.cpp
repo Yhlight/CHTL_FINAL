@@ -158,12 +158,17 @@ char CHTLLexer::advance() {
 
 void CHTLLexer::addToken(TokenType type) {
     std::string text = source.substr(start, current - start);
-    tokens.push_back({type, text, line, start});
+    tokens.push_back({type, text, line, start, ""});
 }
 
 void CHTLLexer::addToken(TokenType type, const std::string& literal) {
     // This overload is for string literals where the lexeme is different from the raw text
-    tokens.push_back({type, literal, line, start});
+    tokens.push_back({type, literal, line, start, ""});
+}
+
+void CHTLLexer::addToken(TokenType type, const std::string& literal, const std::string& unit) {
+    // This overload is for numeric literals with units
+    tokens.push_back({type, literal, line, start, unit});
 }
 
 bool CHTLLexer::match(char expected) {
@@ -204,17 +209,33 @@ void CHTLLexer::string(char quote) {
 }
 
 void CHTLLexer::number() {
-    while (isdigit(peek())) advance();
+    int num_end = current;
+    while (isdigit(peek())) {
+        advance();
+        num_end = current;
+    }
 
     // Look for a fractional part.
     if (peek() == '.' && isdigit(peekNext())) {
         // Consume the "."
         advance();
 
-        while (isdigit(peek())) advance();
+        while (isdigit(peek())) {
+            advance();
+            num_end = current;
+        }
     }
 
-    addToken(TokenType::NUMBER, source.substr(start, current - start));
+    std::string num_literal = source.substr(start, num_end - start);
+
+    // Look for a unit (e.g., px, em, %)
+    int unit_start = current;
+    while (isalpha(peek()) || peek() == '%') {
+        advance();
+    }
+    std::string unit = source.substr(unit_start, current - unit_start);
+
+    addToken(TokenType::NUMBER, num_literal, unit);
 }
 
 void CHTLLexer::identifier() {

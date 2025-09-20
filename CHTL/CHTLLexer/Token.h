@@ -74,6 +74,7 @@ struct Token {
     std::string lexeme;
     int line;
     int position; // Starting character position of the lexeme in the source string
+    std::string unit; // For number tokens with units like "px", "em", etc.
 };
 
 // Function to convert TokenType to string for debugging

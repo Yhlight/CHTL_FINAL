@@ -26,9 +26,9 @@ EvaluatedValue ExpressionEvaluator::evaluate(Expr* expr, ElementNode* context) {
 
 void ExpressionEvaluator::visit(LiteralExpr& expr) {
     if (expr.type == LiteralType::NUMERIC) {
-        result = {ValueType::NUMERIC, expr.numeric_value, expr.string_value};
+        result = {ValueType::NUMERIC, expr.numeric_value, expr.unit, ""};
     } else { // STRING
-        result = {ValueType::STRING, 0, expr.string_value};
+        result = {ValueType::STRING, 0, "", expr.string_value};
     }
 }
 
@@ -40,30 +40,66 @@ void ExpressionEvaluator::visit(BinaryExpr& expr) {
         throw std::runtime_error("Arithmetic operations can only be performed on numeric values.");
     }
 
-    if (!left.string_value.empty() && !right.string_value.empty() && left.string_value != right.string_value) {
-        throw std::runtime_error("Mismatched units in expression: '" + left.string_value + "' and '" + right.string_value + "'.");
-    }
-
-    std::string result_unit = !left.string_value.empty() ? left.string_value : right.string_value;
     double result_value = 0.0;
+    std::string result_unit = "";
 
     switch (expr.op.type) {
-        case TokenType::PLUS: result_value = left.numeric_value + right.numeric_value; break;
-        case TokenType::MINUS: result_value = left.numeric_value - right.numeric_value; break;
-        case TokenType::STAR: result_value = left.numeric_value * right.numeric_value; break;
+        case TokenType::PLUS:
+        case TokenType::MINUS:
+            if (left.unit != right.unit) {
+                // Allow adding/subtracting a unitless number from a number with a unit
+                if (left.unit.empty()) {
+                    result_unit = right.unit;
+                } else if (right.unit.empty()) {
+                    result_unit = left.unit;
+                } else {
+                    throw std::runtime_error("Mismatched units for + or -: '" + left.unit + "' and '" + right.unit + "'.");
+                }
+            } else {
+                result_unit = left.unit;
+            }
+            result_value = (expr.op.type == TokenType::PLUS) ? (left.numeric_value + right.numeric_value) : (left.numeric_value - right.numeric_value);
+            break;
+
+        case TokenType::STAR:
+            if (!left.unit.empty() && !right.unit.empty()) {
+                throw std::runtime_error("Cannot multiply two values with units.");
+            }
+            result_unit = !left.unit.empty() ? left.unit : right.unit;
+            result_value = left.numeric_value * right.numeric_value;
+            break;
+
         case TokenType::SLASH:
             if (right.numeric_value == 0) throw std::runtime_error("Division by zero.");
+            if (!right.unit.empty()) {
+                throw std::runtime_error("Cannot divide by a value with a unit.");
+            }
+            result_unit = left.unit;
             result_value = left.numeric_value / right.numeric_value;
             break;
+
         case TokenType::PERCENT:
             if (static_cast<int>(right.numeric_value) == 0) throw std::runtime_error("Modulo by zero.");
+             if (!right.unit.empty()) {
+                throw std::runtime_error("Cannot modulo by a value with a unit.");
+            }
+            result_unit = left.unit;
             result_value = fmod(left.numeric_value, right.numeric_value);
             break;
-        case TokenType::STAR_STAR: result_value = pow(left.numeric_value, right.numeric_value); break;
-        default: throw std::runtime_error("Unknown binary operator.");
+
+        case TokenType::STAR_STAR:
+            if (!right.unit.empty()) {
+                 throw std::runtime_error("Cannot use a value with a unit as an exponent.");
+            }
+            result_unit = left.unit;
+            result_value = pow(left.numeric_value, right.numeric_value);
+            break;
+
+        default:
+            throw std::runtime_error("Unknown binary operator.");
     }
 
-    result = {ValueType::NUMERIC, result_value, result_unit};
+    result = {ValueType::NUMERIC, result_value, result_unit, ""};
 }
 
 void ExpressionEvaluator::visit(VarExpr& expr) {
@@ -127,13 +163,17 @@ void ExpressionEvaluator::visit(ComparisonExpr& expr) {
         // Could be extended to allow cross-type comparisons.
         comparison_result = false;
     } else if (left.type == ValueType::NUMERIC) {
+        // For comparisons, units must be identical
+        if (left.unit != right.unit) {
+            throw std::runtime_error("Cannot compare numeric values with different units: '" + left.unit + "' and '" + right.unit + "'.");
+        }
         switch (expr.op.type) {
             case TokenType::GREATER:       comparison_result = left.numeric_value > right.numeric_value; break;
             case TokenType::GREATER_EQUAL: comparison_result = left.numeric_value >= right.numeric_value; break;
             case TokenType::LESS:          comparison_result = left.numeric_value < right.numeric_value; break;
             case TokenType::LESS_EQUAL:    comparison_result = left.numeric_value <= right.numeric_value; break;
-            case TokenType::EQUAL_EQUAL:   comparison_result = left.numeric_value == right.numeric_value && left.string_value == right.string_value; break;
-            case TokenType::BANG_EQUAL:    comparison_result = left.numeric_value != right.numeric_value || left.string_value != right.string_value; break;
+            case TokenType::EQUAL_EQUAL:   comparison_result = left.numeric_value == right.numeric_value; break; // Units are already checked
+            case TokenType::BANG_EQUAL:    comparison_result = left.numeric_value != right.numeric_value; break; // Units are already checked
             default: break;
         }
     } else { // STRING

@@ -1,0 +1,29 @@
+// Test for CHTL Property Arithmetic
+
+div {
+    id: "test-box";
+
+    style {
+        // Simple addition
+        width: 100px + 50px; // Expected: 150px
+
+        // Subtraction
+        height: 200px - 25px; // Expected: 175px
+
+        // Multiplication by scalar
+        padding: 10px * 2; // Expected: 20px
+
+        // Division by scalar
+        margin: 50em / 2; // Expected: 25em
+
+        // Mixed operations with precedence
+        font-size: 10px + 4 * 2; // Expected: 18px
+
+        // Operations with unitless and unit values
+        left: 0 + 25%; // Expected: 25%
+        right: 75% - 0; // Expected: 75%
+
+        // Floating point results
+        opacity: 1 / 2; // Expected: 0.5
+    }
+}

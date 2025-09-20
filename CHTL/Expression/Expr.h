@@ -47,18 +47,18 @@ enum class LiteralType { NUMERIC, STRING };
 // Represents a literal value, e.g., "100px" or "red".
 class LiteralExpr : public Expr {
 public:
-    // Constructor for numeric literals
+    // Constructor for numeric literals with units
     LiteralExpr(double num_val, const std::string& unit_val)
-        : type(LiteralType::NUMERIC), numeric_value(num_val), string_value(unit_val) {}
+        : type(LiteralType::NUMERIC), numeric_value(num_val), unit(unit_val), string_value("") {}
 
     // Constructor for string literals
     explicit LiteralExpr(const std::string& str_val)
-        : type(LiteralType::STRING), numeric_value(0), string_value(str_val) {}
+        : type(LiteralType::STRING), numeric_value(0), unit(""), string_value(str_val) {}
 
     void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
     std::unique_ptr<Expr> clone() const override {
         if (type == LiteralType::NUMERIC) {
-            return std::make_unique<LiteralExpr>(numeric_value, string_value);
+            return std::make_unique<LiteralExpr>(numeric_value, unit);
         } else {
             return std::make_unique<LiteralExpr>(string_value);
         }
@@ -66,7 +66,8 @@ public:
 
     LiteralType type;
     double numeric_value;
-    std::string string_value; // Used for the unit of a number, or the whole string value
+    std::string unit;
+    std::string string_value;
 };
 
 // Represents a binary operation, e.g., left + right.

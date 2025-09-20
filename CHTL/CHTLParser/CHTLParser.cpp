@@ -105,18 +105,12 @@ std::unique_ptr<Expr> CHTLParser::parsePower() {
 
 std::unique_ptr<Expr> CHTLParser::parsePrimary() {
     if (match({TokenType::NUMBER})) {
-        Token number = previous();
-        std::string unit = "";
-        if (check(TokenType::IDENTIFIER)) { // Check for a unit like 'px'
-            unit = advance().lexeme;
-        } else if (check(TokenType::PERCENT)) { // Check for '%' as a unit
-            unit = advance().lexeme;
-        }
+        Token number_token = previous();
         try {
-            // Use the numeric constructor for LiteralExpr
-            return std::make_unique<LiteralExpr>(std::stod(number.lexeme), unit);
+            // The lexer now provides the unit directly.
+            return std::make_unique<LiteralExpr>(std::stod(number_token.lexeme), number_token.unit);
         } catch (const std::invalid_argument& e) {
-            error(number, "Invalid number format.");
+            error(number_token, "Invalid number format.");
         }
     }
 

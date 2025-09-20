@@ -17,9 +17,10 @@ class ElementNode; // Forward declaration
 enum class ValueType { NUMERIC, STRING, BOOL };
 
 struct EvaluatedValue {
-    ValueType type = ValueType::NUMERIC;
+    ValueType type = ValueType::STRING;
     double numeric_value = 0.0;
-    std::string string_value = ""; // For units with numbers, or full string values
+    std::string unit = ""; // e.g., "px", "%", "em"
+    std::string string_value = ""; // For full string values like "red" or "solid"
 };
 
 // This class implements the ExprVisitor pattern to calculate the result of an expression tree.
