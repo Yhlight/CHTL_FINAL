@@ -4,6 +4,7 @@
 #include "CodeFragment.h"
 #include <string>
 #include <vector>
+#include <map>
 
 namespace CHTL {
 
@@ -13,18 +14,32 @@ public:
     std::vector<CodeFragment> scan();
 
 private:
+    // Source and position management
     const std::string& source;
-    int current = 0;
+    size_t current = 0;
     int line = 1;
 
-    // Helper methods for scanning
-    bool isAtEnd();
-    char advance();
-    char peek();
-    void skipWhitespaceAndComments();
+    // State for script processing
+    std::map<std::string, std::string> js_placeholders;
+    int placeholder_id_counter = 0;
 
-    // The core logic to find and extract top-level blocks
-    void findNextBlock(std::vector<CodeFragment>& fragments);
+    // Main scanning loop
+    void scan_toplevel(std::vector<CodeFragment>& fragments);
+
+    // Block-specific processors
+    void process_style_block(std::vector<CodeFragment>& fragments, int block_start_line);
+    bool is_chtl_in_css_statement(const std::string& statement);
+    void process_script_block(std::vector<CodeFragment>& fragments, int block_start_line);
+    std::string scan_script_recursive(const std::string& input, std::map<std::string, std::string>& placeholders);
+
+    // Utility methods
+    bool is_at_end();
+    char advance();
+    char peek(size_t offset = 0);
+    bool match(const std::string& expected);
+    void skip_whitespace_and_comments();
+    std::string consume_block_content();
+    std::string get_next_placeholder_id();
 };
 
 } // namespace CHTL

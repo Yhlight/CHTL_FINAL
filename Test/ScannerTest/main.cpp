@@ -1,89 +1,181 @@
-#include "../../Scanner/UnifiedScanner.h"
+#include "../../CHTL/Scanner/CHTLUnifiedScanner.h"
 #include <iostream>
+#include <vector>
 #include <cassert>
-#include <string>
-#include <map>
 
-// Helper function to print test results
-void run_test(void (*test_function)(), const std::string& test_name) {
-    std::cout << "Running test: " << test_name << "..." << std::endl;
-    test_function();
-    std::cout << test_name << " PASSED." << std::endl << std::endl;
+void print_fragments(const std::vector<CHTL::CodeFragment>& fragments) {
+    for (const auto& fragment : fragments) {
+        std::string type_str;
+        switch (fragment.type) {
+            case CHTL::FragmentType::CHTL: type_str = "CHTL"; break;
+            case CHTL::FragmentType::CSS: type_str = "CSS"; break;
+            case CHTL::FragmentType::JS: type_str = "JS"; break;
+            case CHTL::FragmentType::CHTL_JS: type_str = "CHTL_JS"; break;
+            case CHTL::FragmentType::CHTL_in_CSS: type_str = "CHTL_in_CSS"; break;
+        }
+        std::cout << "--- Fragment ---" << std::endl;
+        std::cout << "Type: " << type_str << std::endl;
+        std::cout << "Content: ```\n" << fragment.content << "\n```" << std::endl;
+    }
 }
 
-void test_simple_js_block() {
-    UnifiedScanner scanner;
-    std::string input = "script { const a = 1; }";
-    std::string result = scanner.scan(input);
-    const auto& map = scanner.getPlaceholderMap();
-    assert(map.size() == 1);
-    assert(map.at("_JS_CODE_PLACEHOLDER_0_") == "const a = 1;");
-    assert(result == "script { _JS_CODE_PLACEHOLDER_0_ }");
+void test_pure_chtl() {
+    std::cout << "\n--- Running Test: Pure CHTL ---\n";
+    std::string source = "div { text: \"Hello\"; }";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+    assert(fragments.size() == 1);
+    assert(fragments[0].type == CHTL::FragmentType::CHTL);
+    assert(fragments[0].content.find("div") != std::string::npos);
+    std::cout << "PASS\n";
 }
 
-void test_simple_chtljs_selector() {
-    UnifiedScanner scanner;
-    std::string input = "script { {{box}} }";
-    std::string result = scanner.scan(input);
-    assert(scanner.getPlaceholderMap().empty());
-    assert(result == "script { {{box}} }");
+void test_top_level_split() {
+    std::cout << "\n--- Running Test: Top Level Split ---\n";
+    std::string source = "div { } style { color: red; } script { let a = 1; }";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+    print_fragments(fragments);
+
+    bool has_chtl = false;
+    bool has_css = false;
+    bool has_chtl_js = false;
+
+    for (const auto& frag : fragments) {
+        if (frag.type == CHTL::FragmentType::CHTL && !frag.content.empty() && frag.content.find("div") != std::string::npos) has_chtl = true;
+        if (frag.type == CHTL::FragmentType::CSS && frag.content.find("red") != std::string::npos) has_css = true;
+        if (frag.type == CHTL::FragmentType::CHTL_JS) has_chtl_js = true;
+    }
+
+    assert(has_chtl && has_css && has_chtl_js);
+    std::cout << "PASS\n";
 }
 
-void test_mixed_js_and_chtljs() {
-    UnifiedScanner scanner;
-    std::string input = "script { const a = {{box}}; }";
-    std::string result = scanner.scan(input);
-    const auto& map = scanner.getPlaceholderMap();
-    assert(map.size() == 2);
-    assert(map.at("_JS_CODE_PLACEHOLDER_0_") == "const a = ");
-    assert(map.at("_JS_CODE_PLACEHOLDER_1_") == ";");
-    assert(result == "script { _JS_CODE_PLACEHOLDER_0_{{box}}_JS_CODE_PLACEHOLDER_1_ }");
+void test_style_block_processing() {
+    std::cout << "\n--- Running Test: Style Block Processing ---\n";
+    std::string source = "style { color: red; @Style Theme; width: 100px; }";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+    print_fragments(fragments);
+    assert(fragments.size() == 3);
+    assert(fragments[0].type == CHTL::FragmentType::CSS);
+    assert(fragments[0].content.find("color: red;") != std::string::npos);
+    assert(fragments[1].type == CHTL::FragmentType::CHTL_in_CSS);
+    assert(fragments[1].content.find("@Style Theme;") != std::string::npos);
+    assert(fragments[2].type == CHTL::FragmentType::CSS);
+    assert(fragments[2].content.find("width: 100px;") != std::string::npos);
+    std::cout << "PASS\n";
 }
 
-void test_chtljs_block() {
-    UnifiedScanner scanner;
-    std::string input = "script { Listen { click: 1 } }";
-    std::string result = scanner.scan(input);
-    const auto& map = scanner.getPlaceholderMap();
-    assert(map.size() == 1);
-    assert(map.at("_JS_CODE_PLACEHOLDER_0_") == "click: 1");
-    assert(result == "script { Listen { _JS_CODE_PLACEHOLDER_0_ } }");
+void test_simple_script_block() {
+    std::cout << "\n--- Running Test: Simple Script Block ---\n";
+    std::string source = "script { const a = 1; {{box}}; const b = 2; }";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+    print_fragments(fragments);
+
+    int chtl_js_count = 0;
+    int js_count = 0;
+    std::string chtl_js_content;
+    for(const auto& f : fragments) {
+        if (f.type == CHTL::FragmentType::CHTL_JS) {
+            chtl_js_count++;
+            chtl_js_content = f.content;
+        } else if (f.type == CHTL::FragmentType::JS) {
+            js_count++;
+        }
+    }
+    assert(chtl_js_count == 1);
+    assert(js_count == 2);
+    assert(chtl_js_content.find("{{box}}") != std::string::npos);
+    assert(chtl_js_content.find("_JS_PLACEHOLDER_") != std::string::npos);
+    std::cout << "PASS\n";
 }
 
-void test_nested_mixed_content() {
-    UnifiedScanner scanner;
-    std::string input = "script { function myFunc() { Listen { action: {{btn}} } } }";
-    std::string result = scanner.scan(input);
-    const auto& map = scanner.getPlaceholderMap();
+void test_nested_script_block() {
+    std::cout << "\n--- Running Test: Nested Script Block (Refactored Logic) ---\n";
+    std::string source = "script { Listen { click: () => { if (true) { {{box}}->show(); } } } }";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+    print_fragments(fragments);
 
-    assert(map.size() == 3);
-    assert(map.at("_JS_CODE_PLACEHOLDER_0_") == "function myFunc() {");
-    assert(map.at("_JS_CODE_PLACEHOLDER_1_") == "action: ");
-    assert(map.at("_JS_CODE_PLACEHOLDER_2_") == "}");
-    assert(result == "script {  _JS_CODE_PLACEHOLDER_0_ Listen {  _JS_CODE_PLACEHOLDER_1_{{btn}}  } _JS_CODE_PLACEHOLDER_2_  }");
+    int chtl_js_count = 0;
+    int js_count = 0;
+    std::string chtl_js_content;
+    std::string js_content_full;
+
+    for(const auto& f : fragments) {
+        if (f.type == CHTL::FragmentType::CHTL_JS) {
+            chtl_js_count++;
+            chtl_js_content = f.content;
+        } else if (f.type == CHTL::FragmentType::JS) {
+            js_count++;
+            js_content_full += f.content;
+        }
+    }
+    assert(chtl_js_count == 1);
+    assert(js_count == 2);
+    // Check that CHTL_JS part is now sparse
+    assert(chtl_js_content.find("{{box}}") != std::string::npos);
+    assert(chtl_js_content.find("Listen") == std::string::npos); // Listen should NOT be in the CHTL_JS part
+
+    // Check that the JS part contains what was removed
+    assert(js_content_full.find("Listen {") != std::string::npos);
+    assert(js_content_full.find("->show();") != std::string::npos);
+
+    std::cout << "PASS\n";
 }
 
-void test_style_origin_block() {
-    UnifiedScanner scanner;
-    std::string input = "style { color: red; [Origin] @Html { <div></div> } font-size: 16px; }";
-    std::string result = scanner.scan(input);
-    const auto& map = scanner.getPlaceholderMap();
-    assert(map.size() == 3);
-    assert(map.count("_CHTL_CODE_PLACEHOLDER_0_"));
-    assert(map.count("_CHTL_CODE_PLACEHOLDER_1_"));
-    assert(map.count("_CHTL_CODE_PLACEHOLDER_2_"));
-    assert(map.at("_CHTL_CODE_PLACEHOLDER_1_").find("[Origin]") != std::string::npos);
+
+void test_advanced_style_features() {
+    std::cout << "\n--- Running Test: Advanced Style Features ---\n";
+    std::string source = "style { \n"
+                         "  width: 100px + 20px; \n" // CHTL
+                         "  div[type=\"button\"] { color: blue; } \n" // CSS
+                         "  @media (min-width: 600px) { font-size: 1rem; } \n" // CSS
+                         "  # a comment \n" // CHTL
+                         "  color: #fff; \n" // CSS
+                         "}";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+    print_fragments(fragments);
+
+    int chtl_in_css_count = 0;
+    int css_count = 0;
+
+    for(const auto& f : fragments) {
+        if (f.type == CHTL::FragmentType::CHTL_in_CSS) {
+            chtl_in_css_count++;
+            // Check that CHTL fragments contain CHTL syntax
+            assert(f.content.find("+") != std::string::npos || f.content.find("# a comment") != std::string::npos);
+        } else if (f.type == CHTL::FragmentType::CSS) {
+            css_count++;
+            // Check that CSS fragments do NOT contain the specific CHTL syntax
+            assert(f.content.find("100px + 20px") == std::string::npos);
+        }
+    }
+
+    assert(chtl_in_css_count == 2);
+    assert(css_count > 0);
+    std::cout << "PASS\n";
 }
 
 
 int main() {
-    run_test(test_simple_js_block, "test_simple_js_block");
-    run_test(test_simple_chtljs_selector, "test_simple_chtljs_selector");
-    run_test(test_mixed_js_and_chtljs, "test_mixed_js_and_chtljs");
-    run_test(test_chtljs_block, "test_chtljs_block");
-    run_test(test_nested_mixed_content, "test_nested_mixed_content");
-    run_test(test_style_origin_block, "test_style_origin_block");
-
-    std::cout << "All scanner tests passed!" << std::endl;
+    try {
+        test_pure_chtl();
+        test_top_level_split();
+        test_style_block_processing();
+        test_simple_script_block();
+        test_nested_script_block();
+        test_advanced_style_features();
+        std::cout << "\nAll scanner tests passed!\n";
+    } catch (const std::exception& e) {
+        std::cerr << "A test failed with exception: " << e.what() << std::endl;
+        return 1;
+    } catch (...) {
+        std::cerr << "A test failed with an unknown exception." << std::endl;
+        return 1;
+    }
     return 0;
 }
