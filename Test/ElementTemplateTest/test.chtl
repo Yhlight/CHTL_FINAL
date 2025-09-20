@@ -1,0 +1,14 @@
+[Template] @Element Box {
+    div {
+        class: "box-title";
+        text { "Template Box" }
+    }
+    p {
+        text { "This content comes from a template." }
+    }
+}
+
+body {
+    h1 { text { "Using a Template" } }
+    @Element Box;
+}

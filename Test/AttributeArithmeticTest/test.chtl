@@ -1,0 +1,17 @@
+div {
+    id: "box1";
+    style {
+        // Simple addition
+        width: 100px + 50px; // 150px
+        // Subtraction
+        height: 10cm - 2cm; // 8cm
+        // Multiplication
+        font-size: 10pt * 2; // 20pt
+        // Division
+        margin: 100% / 5; // 20%
+        // Power
+        padding: 2px ** 3; // 8px
+        // Modulo
+        opacity: 11 % 2; // 1
+    }
+}

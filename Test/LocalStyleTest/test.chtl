@@ -1,0 +1,44 @@
+div {
+    // This style block should generate a class and a global CSS rule.
+    style {
+        .box {
+            width: 100px;
+            background-color: "red";
+        }
+    }
+    text { "This is a red box." }
+}
+
+span {
+    // This should add an id and a global CSS rule.
+    style {
+        #main-span {
+            font-weight: "bold";
+        }
+    }
+    text { "This text should be bold." }
+}
+
+p {
+    class: "existing-class";
+    // This should append the new class to the existing one.
+    style {
+        .new-class {
+            color: blue;
+        }
+    }
+    text { "This text should have two classes." }
+}
+
+button {
+    style {
+        .btn {
+            padding: 10px;
+        }
+
+        &:hover {
+            background-color: lightgray;
+        }
+    }
+    text { "Click Me" }
+}

@@ -109,8 +109,20 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
         std::string unit = "";
         if (check(TokenType::IDENTIFIER)) { // Check for a unit like 'px'
             unit = advance().lexeme;
-        } else if (check(TokenType::PERCENT)) { // Check for '%' as a unit
-            unit = advance().lexeme;
+        } else if (check(TokenType::PERCENT)) {
+            bool is_unit = true;
+            // Look ahead to disambiguate between '%' as a unit and as a modulo operator.
+            if (current + 1 < tokens.size()) {
+                TokenType next_type = tokens[current + 1].type;
+                // If the next token can start a new expression, it's likely an operator.
+                if (next_type == TokenType::NUMBER || next_type == TokenType::IDENTIFIER || next_type == TokenType::LEFT_PAREN) {
+                    is_unit = false;
+                }
+            }
+            if (is_unit) {
+                unit = advance().lexeme; // It's a unit.
+            }
+            // Otherwise, do nothing and let parseFactor handle it as an operator.
         }
         try {
             // Use the numeric constructor for LiteralExpr
@@ -139,8 +151,8 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             consume(TokenType::RIGHT_PAREN, "Expect ')' after variable key name.");
             return std::make_unique<VarExpr>(first_part.lexeme, key_name);
         } else {
-            // It's an implicit self-reference to a property.
-            return std::make_unique<ReferenceExpr>(Token(), first_part);
+            // It's an unquoted literal value, like `red` or `solid`.
+            return std::make_unique<LiteralExpr>(first_part.lexeme);
         }
     }
 
@@ -304,36 +316,16 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
     auto styleNode = std::make_unique<StyleNode>();
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        bool isInlineProp = false;
-        int i = 0;
-        while (tokens.size() > current + i && tokens[current + i].type != TokenType::END_OF_FILE && tokens[current + i].type != TokenType::RIGHT_BRACE) {
-            if (tokens[current + i].type == TokenType::COLON) {
-                isInlineProp = true;
-                break;
-            }
-            if (tokens[current + i].type == TokenType::LEFT_BRACE) {
-                isInlineProp = false;
-                break;
-            }
-            i++;
-        }
-
         if (check(TokenType::AT)) {
             parseStyleTemplateUsage(styleNode.get());
-        } else if (isInlineProp) {
-            std::string key_str;
-            while (!check(TokenType::COLON) && !isAtEnd()) {
-                key_str += advance().lexeme;
-            }
-            consume(TokenType::COLON, "Expect ':' after style property name.");
-            auto value_expr = parseExpression();
-            consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-            styleNode->inline_properties.push_back({key_str, std::move(value_expr)});
-        } else {
+        }
+        // Check for class, ID, or contextual selector (e.g., .class, #id, or &)
+        else if (check(TokenType::DOT) || (check(TokenType::SYMBOL) && peek().lexeme == "#") || check(TokenType::AMPERSAND)) {
             CssRuleNode rule;
             while (!check(TokenType::LEFT_BRACE) && !isAtEnd()) {
                 rule.selector += advance().lexeme;
             }
+
             consume(TokenType::LEFT_BRACE, "Expect '{' after rule selector.");
             while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
                 std::string key_str;
@@ -347,6 +339,17 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
             }
             consume(TokenType::RIGHT_BRACE, "Expect '}' after rule block.");
             styleNode->global_rules.push_back(std::move(rule));
+        }
+        // Fallback to parsing an inline property
+        else {
+            std::string key_str;
+            while (!check(TokenType::COLON) && !isAtEnd()) {
+                key_str += advance().lexeme;
+            }
+            consume(TokenType::COLON, "Expect ':' after style property name.");
+            auto value_expr = parseExpression();
+            consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+            styleNode->inline_properties.push_back({key_str, std::move(value_expr)});
         }
     }
 

@@ -44,13 +44,15 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
 }
 
 void CHTLGenerator::visit(ElementNode& node) {
-    // --- Automation and Global CSS Generation ---
+    std::string primary_selector;
+
+    // --- First Pass: Automation and finding the primary selector for '&' context ---
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             for (const auto& rule : styleNode->global_rules) {
-                std::string selector = rule.selector;
-                // Automation: if selector is a simple class or id, inject it.
+                const std::string& selector = rule.selector;
                 if (selector.rfind('.', 0) == 0) { // Starts with .
+                    if (primary_selector.empty()) primary_selector = selector; // Set context
                     std::string className = selector.substr(1);
                     auto it = std::find_if(node.attributes.begin(), node.attributes.end(),
                                            [](const HtmlAttribute& attr){ return attr.key == "class"; });
@@ -62,15 +64,29 @@ void CHTLGenerator::visit(ElementNode& node) {
                         node.attributes.push_back({"class", className});
                     }
                 } else if (selector.rfind('#', 0) == 0) { // Starts with #
+                    if (primary_selector.empty()) primary_selector = selector; // Set context
                     node.attributes.push_back({"id", selector.substr(1)});
                 }
+            }
+        }
+    }
 
-                size_t pos = selector.find('&');
+    // --- Second Pass: Global CSS Generation with '&' replacement ---
+    for (const auto& child : node.children) {
+        if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
+            for (const auto& rule : styleNode->global_rules) {
+                std::string final_selector = rule.selector;
+                size_t pos = final_selector.find('&');
                 if (pos != std::string::npos) {
-                    selector.replace(pos, 1, node.tagName);
+                    if (!primary_selector.empty()) {
+                        final_selector.replace(pos, 1, primary_selector);
+                    } else {
+                        // Fallback to tag name if no class/id context is available
+                        final_selector.replace(pos, 1, node.tagName);
+                    }
                 }
 
-                css_output << selector << " {\n";
+                css_output << final_selector << " {\n";
                 for (const auto& prop : rule.properties) {
                     ExpressionEvaluator evaluator(this->templates, this->doc_root);
                     EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);

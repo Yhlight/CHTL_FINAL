@@ -1,0 +1,12 @@
+[Template] @Var Theme {
+    primary_color: "blue";
+    base_font_size: 16px;
+}
+
+div {
+    style {
+        color: Theme(primary_color);
+        font-size: Theme(base_font_size) + 2px; // 18px
+    }
+    text { "This text uses variables." }
+}
