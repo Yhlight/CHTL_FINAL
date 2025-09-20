@@ -4,6 +4,7 @@
 #include "CodeFragment.h"
 #include <string>
 #include <vector>
+#include <map>
 
 namespace CHTL {
 
@@ -21,10 +22,12 @@ private:
     bool isAtEnd();
     char advance();
     char peek();
-    void skipWhitespaceAndComments();
+    char peekNext();
+    void skipWhitespace();
 
-    // The core logic to find and extract top-level blocks
-    void findNextBlock(std::vector<CodeFragment>& fragments);
+    // Block processors
+    void process_style_block(std::vector<CodeFragment>& fragments, int content_start, int content_end);
+    void process_script_block(std::vector<CodeFragment>& fragments, int content_start, int content_end);
 };
 
 } // namespace CHTL
