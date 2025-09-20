@@ -1,0 +1,71 @@
+// CHTL content before any special blocks
+div {
+    id: main-container;
+    text: "This is the main container.";
+}
+
+// Global style block with mixed content
+style {
+    // Standard CSS
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+    }
+
+    // CHTL Features that should be extracted by the CHTL compiler
+    .card {
+        padding: 10px + 5px; // Property arithmetic
+        background-color: MyTheme(primaryColor); // Template variable
+        @Style BaseCardStyle; // Template usage
+        border: 1px solid (width > 200px ? 'black' : 'grey'); // Conditional property
+    }
+}
+
+// More CHTL content
+span {
+    class: "info-text";
+    text: "Some info here.";
+
+    // A local style block, which should remain as part of the CHTL fragment
+    style {
+        font-weight: bold;
+    }
+}
+
+// Global script block with mixed JS and CHTL JS
+script {
+    // Standard JavaScript
+    function setupPage() {
+        console.log("Setting up the page...");
+        const element = document.getElementById('main-container');
+        element.addEventListener('click', () => {
+            console.log('Container was clicked!');
+        });
+    }
+
+    // Pure CHTL JS
+    {{.info-text}}->Listen {
+        mouseenter: () => {
+            console.log("Mouse entered info text!");
+        }
+    };
+
+    // Mixed JS and CHTL JS
+    function complexInteraction(items) {
+        for (let i = 0; i < items.length; i++) {
+            if (i % 2 === 0) {
+                // This is CHTL JS inside a JS block
+                {{items[i]}}->highlight();
+            }
+        }
+    }
+
+    // Call the functions
+    setupPage();
+    complexInteraction([1, 2, 3]);
+}
+
+// Final CHTL content
+footer {
+    text: "End of the test file.";
+}

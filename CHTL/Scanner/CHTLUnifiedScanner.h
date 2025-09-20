@@ -13,18 +13,12 @@ public:
     std::vector<CodeFragment> scan();
 
 private:
-    const std::string& source;
-    int current = 0;
+    std::string_view source;
+    size_t current = 0;
     int line = 1;
+    std::vector<CodeFragment> fragments;
 
-    // Helper methods for scanning
-    bool isAtEnd();
-    char advance();
-    char peek();
-    void skipWhitespaceAndComments();
-
-    // The core logic to find and extract top-level blocks
-    void findNextBlock(std::vector<CodeFragment>& fragments);
+    void processScriptBlock(std::string_view content, int start_line, std::vector<CodeFragment>& fragments);
 };
 
 } // namespace CHTL
