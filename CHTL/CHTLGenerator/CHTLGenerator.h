@@ -13,6 +13,7 @@ namespace CHTL {
 struct CompilationResult {
     std::string html;
     std::string css;
+    std::string js;
 };
 
 // The CHTLGenerator traverses the AST using the Visitor pattern
@@ -31,12 +32,14 @@ public:
     void visit(TemplateDeclarationNode& node) override;
     void visit(CustomDeclarationNode& node) override;
     void visit(ImportNode& node) override;
+    void visit(class ScriptNode& node) override;
 
 private:
     const std::map<std::string, TemplateDefinitionNode>& templates;
     BaseNode* doc_root = nullptr; // To provide context for the evaluator
     std::stringstream html_output;
     std::stringstream css_output;
+    std::stringstream js_output;
 };
 
 } // namespace CHTL

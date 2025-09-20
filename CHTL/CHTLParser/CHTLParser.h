@@ -31,6 +31,7 @@ private:
     const std::string& source;
     const std::vector<Token>& tokens;
     int current = 0;
+    bool is_parsing_style_expr = false; // Flag for context-aware parsing
 
     // --- Helper Methods ---
     // These methods provide a clean interface for consuming and looking at tokens.
@@ -60,6 +61,7 @@ private:
     std::unique_ptr<ElementNode> parseElement();
     void parseAttribute(ElementNode* element);
     std::unique_ptr<StyleNode> parseStyleBlock();
+    std::unique_ptr<class ScriptNode> parseScriptBlock();
     std::unique_ptr<ImportNode> parseImportStatement();
 
     // --- Error Handling ---

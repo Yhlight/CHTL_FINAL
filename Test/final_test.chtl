@@ -1,4 +1,25 @@
+// --- JS Handling Tests ---
+[Origin] @JavaScript
+{
+    console.log("Hello from Origin JS!");
+}
+
+script {
+    console.log("Hello from script tag!");
+}
+
+// --- Previous tests ---
+
 [Import] @Chtl from "Test/imported.chtl";
+
+// --- Custom Style for Deletion Test ---
+[Custom] @Style DeletableStyle
+{
+    color: blue;
+    font-size: 12px;
+    border: 1px solid red;
+}
+
 
 div {
     id: "final-test";
@@ -7,4 +28,50 @@ div {
         font-size: 22px;
     }
     text { "Final CLI Test" }
+}
+
+// --- Test for '&' selector resolution (from previous step) ---
+div { id: "id-box"; style { &:hover { border-color: red; } } text { "ID Test Box" } }
+div { class: "class-box"; style { &:hover { border-color: blue; } } text { "Class Test Box" } }
+span { style { &:hover { border-color: green; } } text { "Tag Test Span" } }
+
+
+// --- Tests for Referenced Property Expressions ---
+div {
+    id: "source-box";
+    style { width: 300px; }
+}
+div {
+    id: "basic-ref-test";
+    style {
+        width: #source-box.width / 3; // Should be 100px
+    }
+}
+div {
+    id: "self-ref-test";
+    style {
+        width: 200px;
+        height: width * 2; // Should be 400px
+    }
+}
+span { text { "First span" } }
+span {
+    id: "second-span";
+    style { font-size: 16px; }
+}
+div {
+    id: "tag-index-ref-test";
+    style {
+        font-size: span[2].font-size + 4px; // Should be 20px
+    }
+}
+
+// --- Test for [Custom] @Style Deletion ---
+div {
+    id: "style-delete-test";
+    style {
+        @Style DeletableStyle {
+            delete border, font-size; // Delete two properties
+        }
+    }
 }

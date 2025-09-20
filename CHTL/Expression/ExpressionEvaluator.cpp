@@ -180,37 +180,85 @@ void ExpressionEvaluator::visit(ConditionalExpr& expr) {
     }
 }
 
-ElementNode* ExpressionEvaluator::findElement(BaseNode* context, const std::string& selector) {
-    if (!context) return nullptr;
+// Helper function to find all elements matching a tag name
+void findElementsRecursive(BaseNode* context, const std::string& tag_name, std::vector<ElementNode*>& found_elements) {
+    if (!context) return;
     ElementNode* element = dynamic_cast<ElementNode*>(context);
-    if (!element) return nullptr;
+    if (!element) return;
 
-    char selector_type = selector.empty() ? ' ' : selector[0];
-    if (selector_type == '#') {
-        std::string id = selector.substr(1);
-        for (const auto& attr : element->attributes) {
-            if (attr.key == "id" && attr.value == id) return element;
-        }
-    } else if (selector_type == '.') {
-        std::string className = selector.substr(1);
-        for (const auto& attr : element->attributes) {
-            if (attr.key == "class") {
-                std::vector<std::string> classes = StringUtil::split(attr.value, ' ');
-                if (std::any_of(classes.begin(), classes.end(),
-                    [&](const std::string& c){ return c == className; })) {
-                    return element;
-                }
-            }
-        }
-    } else {
-        if (element->tagName == selector) return element;
+    if (element->tagName == tag_name) {
+        found_elements.push_back(element);
     }
 
     for (const auto& child : element->children) {
-        if (ElementNode* found = findElement(child.get(), selector)) return found;
+        findElementsRecursive(child.get(), tag_name, found_elements);
+    }
+}
+
+
+ElementNode* ExpressionEvaluator::findElement(BaseNode* context, const std::string& selector) {
+    // Handle tag[index] selector
+    size_t bracket_pos = selector.find('[');
+    if (bracket_pos != std::string::npos) {
+        std::string tag_name = selector.substr(0, bracket_pos);
+        size_t end_bracket_pos = selector.find(']');
+        if (end_bracket_pos == std::string::npos) {
+            throw std::runtime_error("Invalid selector format: missing ']' in " + selector);
+        }
+        std::string index_str = selector.substr(bracket_pos + 1, end_bracket_pos - bracket_pos - 1);
+        int index = std::stoi(index_str);
+
+        std::vector<ElementNode*> all_matching_elements;
+        findElementsRecursive(this->doc_root, tag_name, all_matching_elements);
+
+        if (index >= 0 && index < all_matching_elements.size()) {
+            return all_matching_elements[index];
+        }
+        return nullptr; // Index out of bounds
     }
 
-    return nullptr;
+    // Original logic for id, class, and simple tag selectors (non-recursive part)
+    std::vector<BaseNode*> nodes_to_search;
+    nodes_to_search.push_back(this->doc_root);
+
+    while(!nodes_to_search.empty()) {
+        BaseNode* current_node = nodes_to_search.back();
+        nodes_to_search.pop_back();
+
+        ElementNode* element = dynamic_cast<ElementNode*>(current_node);
+        if (!element) continue;
+
+        char selector_type = selector.empty() ? ' ' : selector[0];
+        bool found = false;
+        if (selector_type == '#') {
+            std::string id = selector.substr(1);
+            for (const auto& attr : element->attributes) {
+                if (attr.key == "id" && attr.value == id) found = true;
+            }
+        } else if (selector_type == '.') {
+            std::string className = selector.substr(1);
+            for (const auto& attr : element->attributes) {
+                if (attr.key == "class") {
+                    std::vector<std::string> classes = StringUtil::split(attr.value, ' ');
+                    if (std::any_of(classes.begin(), classes.end(),
+                        [&](const std::string& c){ return c == className; })) {
+                        found = true;
+                    }
+                }
+            }
+        } else { // Simple tag selector
+            if (element->tagName == selector) found = true;
+        }
+
+        if (found) return element;
+
+        // Add children to the search stack (in reverse to maintain document order)
+        for (auto it = element->children.rbegin(); it != element->children.rend(); ++it) {
+            nodes_to_search.push_back(it->get());
+        }
+    }
+
+    return nullptr; // Not found
 }
 
 void ExpressionEvaluator::visit(ReactiveValueNode& expr) {

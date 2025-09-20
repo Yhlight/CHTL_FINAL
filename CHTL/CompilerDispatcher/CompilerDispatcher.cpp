@@ -83,6 +83,7 @@ FinalOutput CompilerDispatcher::dispatch() {
 
     this->final_output.html = result.html;
     this->final_output.css = result.css;
+    this->final_output.js = result.js;
 
     return final_output;
 }

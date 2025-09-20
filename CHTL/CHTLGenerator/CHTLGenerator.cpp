@@ -5,10 +5,12 @@
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/TemplateDeclarationNode.h"
 #include "../CHTLNode/CustomDeclarationNode.h"
+#include "../CHTLNode/ScriptNode.h"
 #include "../Expression/ExpressionEvaluator.h" // Include the new evaluator
 #include <unordered_set>
 #include <algorithm> // For std::find_if
 #include <sstream>   // For std::stringstream
+#include <iostream>  // For std::cout
 
 namespace CHTL {
 
@@ -23,6 +25,7 @@ CHTLGenerator::CHTLGenerator(const std::map<std::string, TemplateDefinitionNode>
 CompilationResult CHTLGenerator::generate(BaseNode* root) {
     html_output.str("");
     css_output.str("");
+    js_output.str("");
     this->doc_root = root; // Set the document root context
     if (root) {
         if (ElementNode* root_element = dynamic_cast<ElementNode*>(root)) {
@@ -40,7 +43,7 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
             root->accept(*this);
         }
     }
-    return {html_output.str(), css_output.str()};
+    return {html_output.str(), css_output.str(), js_output.str()};
 }
 
 void CHTLGenerator::visit(ElementNode& node) {
@@ -67,7 +70,28 @@ void CHTLGenerator::visit(ElementNode& node) {
 
                 size_t pos = selector.find('&');
                 if (pos != std::string::npos) {
-                    selector.replace(pos, 1, node.tagName);
+                    std::string replacement;
+                    // Check for ID first
+                    auto id_it = std::find_if(node.attributes.begin(), node.attributes.end(),
+                                              [](const HtmlAttribute& attr){ return attr.key == "id"; });
+                    if (id_it != node.attributes.end()) {
+                        replacement = "#" + id_it->value;
+                    } else {
+                        // Then check for class
+                        auto class_it = std::find_if(node.attributes.begin(), node.attributes.end(),
+                                                     [](const HtmlAttribute& attr){ return attr.key == "class"; });
+                        if (class_it != node.attributes.end()) {
+                            // Use the first class name
+                            std::stringstream ss(class_it->value);
+                            std::string first_class;
+                            ss >> first_class;
+                            replacement = "." + first_class;
+                        } else {
+                            // Fallback to tag name
+                            replacement = node.tagName;
+                        }
+                    }
+                    selector.replace(pos, 1, replacement);
                 }
 
                 css_output << selector << " {\n";
@@ -166,7 +190,7 @@ void CHTLGenerator::visit(OriginNode& node) {
             css_output << node.content;
             break;
         case OriginType::JAVASCRIPT:
-            // Not handled yet, but will be placed in a future JS output.
+            js_output << node.content;
             break;
     }
 }
@@ -185,6 +209,10 @@ void CHTLGenerator::visit(CustomDeclarationNode& node) {
 
 void CHTLGenerator::visit(ImportNode& node) {
     // Imports are handled by the dispatcher, not the generator.
+}
+
+void CHTLGenerator::visit(ScriptNode& node) {
+    js_output << node.content << "\n";
 }
 
 } // namespace CHTL

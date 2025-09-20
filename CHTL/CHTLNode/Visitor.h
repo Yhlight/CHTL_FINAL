@@ -24,6 +24,7 @@ public:
     virtual void visit(TemplateDeclarationNode& node) = 0;
     virtual void visit(CustomDeclarationNode& node) = 0;
     virtual void visit(ImportNode& node) = 0;
+    virtual void visit(class ScriptNode& node) = 0;
 };
 
 } // namespace CHTL

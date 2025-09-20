@@ -5,6 +5,7 @@
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/TemplateDeclarationNode.h"
 #include "../CHTLNode/ReactiveValueNode.h"
+#include "../CHTLNode/ScriptNode.h"
 #include "../Expression/Expr.h"
 #include <iostream>
 #include <stdexcept>
@@ -122,6 +123,19 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
     if (match({TokenType::IDENTIFIER})) {
         Token first_part = previous();
 
+        if (check(TokenType::LEFT_BRACKET)) { // Indexed selector like tag[0].prop
+            consume(TokenType::LEFT_BRACKET, "Expect '[' for indexed selector.");
+            Token index = consume(TokenType::NUMBER, "Expect index number.");
+            consume(TokenType::RIGHT_BRACKET, "Expect ']' after index.");
+
+            consume(TokenType::DOT, "Expect '.' after indexed selector.");
+            Token property = consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
+
+            std::string selector_str = first_part.lexeme + "[" + index.lexeme + "]";
+            Token full_selector = {TokenType::IDENTIFIER, selector_str, first_part.line, first_part.position};
+            return std::make_unique<ReferenceExpr>(full_selector, property);
+        }
+
         if (check(TokenType::DOT)) { // Reference like box.width
             consume(TokenType::DOT, "Expect '.' after selector.");
             Token property = consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
@@ -138,8 +152,15 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             consume(TokenType::RIGHT_PAREN, "Expect ')' after variable key name.");
             return std::make_unique<VarExpr>(first_part.lexeme, key_name);
         } else {
-            // It's an unquoted string literal, as per the spec.
-            return std::make_unique<LiteralExpr>(first_part.lexeme);
+             if (is_parsing_style_expr) {
+                // It's a self-reference to another property, e.g. `height: width * 2;`
+                // `width` is the property, the selector is the current element (implicit).
+                Token empty_selector = {TokenType::IDENTIFIER, "", first_part.line, first_part.position};
+                return std::make_unique<ReferenceExpr>(empty_selector, first_part);
+            } else {
+                // It's an unquoted string literal, as per the spec.
+                return std::make_unique<LiteralExpr>(first_part.lexeme);
+            }
         }
     }
 
@@ -161,7 +182,7 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
         } else {
             // It's a hex code or similar literal
             std::string value = "#";
-             while (isalnum(peek().lexeme[0])) { // Consume the rest of the hex code
+             while (!isAtEnd() && peek().type != TokenType::SEMICOLON && peek().type != TokenType::RIGHT_BRACE && peek().type != TokenType::QUESTION) {
                 value += advance().lexeme;
             }
             return std::make_unique<LiteralExpr>(value);
@@ -172,7 +193,7 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
     if (match({TokenType::DOT})) {
         Token selector_name = consume(TokenType::IDENTIFIER, "Expect class name after '.'");
         consume(TokenType::DOT, "Expect '.' after class name.");
-        Token property = consume(TokenType::IDENTIFIER, "Expect property name after '.'");
+        Token property = consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
         Token full_selector = {TokenType::IDENTIFIER, "." + selector_name.lexeme, selector_name.line, selector_name.position - 1}; // Reconstruct
         return std::make_unique<ReferenceExpr>(full_selector, property);
     }
@@ -205,49 +226,48 @@ std::unique_ptr<BaseNode> CHTLParser::parse() {
 }
 
 std::unique_ptr<BaseNode> CHTLParser::parseTopLevelDeclaration() {
-    if (check(TokenType::LEFT_BRACKET)) {
-        // Look ahead to see what kind of block it is.
-        if (tokens.size() > current + 1) {
-            TokenType keywordType = tokens[current + 1].type;
-            switch(keywordType) {
-                case TokenType::TEMPLATE:
-                    return parseTemplateDeclaration();
-                case TokenType::CUSTOM:
-                    return parseCustomDeclaration();
-                case TokenType::ORIGIN:
-                    return parseOriginBlock();
-                case TokenType::IMPORT:
-                    return parseImportStatement();
-                // etc. will be added here later.
-                default:
-                    // If it's not a recognized block keyword, parse as a normal element.
-                    break;
-            }
-        }
-    }
-
-    // If it's not a special block, assume it's a standard element declaration
+    // This function is now just a wrapper to ensure we get a single node.
     auto nodes = parseDeclaration();
     if (nodes.size() == 1) {
         return std::move(nodes[0]);
-    } else {
+    } else if (nodes.empty()) {
+        return nullptr;
+    }
+    else {
         error(peek(), "Expected a single top-level declaration.");
         return nullptr; // Should not be reached due to error throw
     }
 }
 
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
+    std::vector<std::unique_ptr<BaseNode>> nodes;
+
     if (check(TokenType::AT)) {
         return parseElementTemplateUsage();
     }
 
-    if (peek().type == TokenType::LEFT_BRACKET && tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
-        std::vector<std::unique_ptr<BaseNode>> nodes;
-        nodes.push_back(parseOriginBlock());
-        return nodes;
+    if (check(TokenType::LEFT_BRACKET)) {
+        if (tokens.size() > current + 1) {
+            TokenType keywordType = tokens[current + 1].type;
+            switch(keywordType) {
+                case TokenType::TEMPLATE:
+                    nodes.push_back(parseTemplateDeclaration());
+                    return nodes;
+                case TokenType::CUSTOM:
+                    nodes.push_back(parseCustomDeclaration());
+                    return nodes;
+                case TokenType::ORIGIN:
+                    nodes.push_back(parseOriginBlock());
+                    return nodes;
+                case TokenType::IMPORT:
+                    nodes.push_back(parseImportStatement());
+                    return nodes;
+                default:
+                    break;
+            }
+        }
     }
 
-    std::vector<std::unique_ptr<BaseNode>> nodes;
     if (match({TokenType::TEXT})) {
         consume(TokenType::LEFT_BRACE, "Expect '{' after 'text'.");
         Token content = consume(TokenType::STRING, "Expect string literal inside text block.");
@@ -261,12 +281,17 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
         return nodes;
     }
 
+    if (match({TokenType::SCRIPT})) {
+        nodes.push_back(parseScriptBlock());
+        return nodes;
+    }
+
     if (check(TokenType::IDENTIFIER)) {
         nodes.push_back(parseElement());
         return nodes;
     }
 
-    error(peek(), "Expect a declaration (element, text, style, or template usage).");
+    error(peek(), "Expect a declaration (element, text, style, script, or [block]).");
     return {};
 }
 
@@ -281,13 +306,35 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
             parseAttribute(element.get());
         } else {
             for (auto& child : parseDeclaration()) {
-                element->addChild(std::move(child));
+                if (child) element->addChild(std::move(child));
             }
         }
     }
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' after element block.");
     return element;
+}
+
+std::unique_ptr<ScriptNode> CHTLParser::parseScriptBlock() {
+    Token open_brace = consume(TokenType::LEFT_BRACE, "Expect '{' after 'script' keyword.");
+
+    int brace_depth = 1;
+    int start_pos = open_brace.position + open_brace.lexeme.length();
+    int end_pos = start_pos;
+
+    while (brace_depth > 0 && !isAtEnd()) {
+        if (peek().type == TokenType::LEFT_BRACE) brace_depth++;
+        else if (peek().type == TokenType::RIGHT_BRACE) brace_depth--;
+
+        if (brace_depth > 0) {
+            end_pos = peek().position + peek().lexeme.length();
+            advance();
+        }
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to end script body.");
+    std::string content = source.substr(start_pos, end_pos - start_pos);
+    return std::make_unique<ScriptNode>(content);
 }
 
 void CHTLParser::parseAttribute(ElementNode* element) {
@@ -311,32 +358,31 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
     auto styleNode = std::make_unique<StyleNode>();
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        bool isInlineProp = false;
+        if (check(TokenType::AT)) {
+            parseStyleTemplateUsage(styleNode.get());
+            continue;
+        }
+
+        // Lookahead to determine if we have a property (ends with ';') or a nested rule (ends with '}').
+        bool isNestedRule = false;
         int i = 0;
-        while (tokens.size() > current + i && tokens[current + i].type != TokenType::END_OF_FILE && tokens[current + i].type != TokenType::RIGHT_BRACE) {
-            if (tokens[current + i].type == TokenType::COLON) {
-                isInlineProp = true;
+        while (true) {
+            if (current + i >= tokens.size() || tokens[current + i].type == TokenType::RIGHT_BRACE) {
+                isNestedRule = false; // End of block, not a rule.
                 break;
             }
             if (tokens[current + i].type == TokenType::LEFT_BRACE) {
-                isInlineProp = false;
+                isNestedRule = true; // Found '{' first, it's a nested rule.
+                break;
+            }
+            if (tokens[current + i].type == TokenType::SEMICOLON) {
+                isNestedRule = false; // Found ';' first, it's a property.
                 break;
             }
             i++;
         }
 
-        if (check(TokenType::AT)) {
-            parseStyleTemplateUsage(styleNode.get());
-        } else if (isInlineProp) {
-            std::string key_str;
-            while (!check(TokenType::COLON) && !isAtEnd()) {
-                key_str += advance().lexeme;
-            }
-            consume(TokenType::COLON, "Expect ':' after style property name.");
-            auto value_expr = parseExpression();
-            consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-            styleNode->inline_properties.push_back({key_str, std::move(value_expr)});
-        } else {
+        if (isNestedRule) {
             CssRuleNode rule;
             while (!check(TokenType::LEFT_BRACE) && !isAtEnd()) {
                 rule.selector += advance().lexeme;
@@ -354,6 +400,20 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
             }
             consume(TokenType::RIGHT_BRACE, "Expect '}' after rule block.");
             styleNode->global_rules.push_back(std::move(rule));
+        } else {
+            // It's an inline property
+            std::string key_str;
+            while (!check(TokenType::COLON) && !isAtEnd()) {
+                key_str += advance().lexeme;
+            }
+            consume(TokenType::COLON, "Expect ':' after style property name.");
+
+            is_parsing_style_expr = true;
+            auto value_expr = parseExpression();
+            is_parsing_style_expr = false;
+
+            consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+            styleNode->inline_properties.push_back({key_str, std::move(value_expr)});
         }
     }
 
@@ -414,29 +474,27 @@ void CHTLParser::error(const Token& token, const std::string& message) {
 
 std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {
     consume(TokenType::LEFT_BRACKET, "Expect '[' to start origin block.");
-    Token keyword = consume(TokenType::IDENTIFIER, "Expect 'Origin' keyword.");
-    if (keyword.lexeme != "Origin") {
-        error(keyword, "Expect 'Origin' keyword.");
-    }
+    consume(TokenType::ORIGIN, "Expect 'Origin' keyword.");
     consume(TokenType::RIGHT_BRACKET, "Expect ']' to end origin keyword.");
 
     consume(TokenType::AT, "Expect '@' for origin type.");
-    Token typeToken = consume(TokenType::IDENTIFIER, "Expect origin type (e.g., Html, Style).");
 
     OriginType type;
-    if (typeToken.lexeme == "Html") {
+    if (match({TokenType::HTML})) {
         type = OriginType::HTML;
-    } else if (typeToken.lexeme == "Style") {
+    } else if (match({TokenType::STYLE})) {
         type = OriginType::STYLE;
-    } else if (typeToken.lexeme == "JavaScript") {
+    } else if (match({TokenType::JAVASCRIPT})) {
         type = OriginType::JAVASCRIPT;
     } else {
-        error(typeToken, "Unknown origin type.");
+        error(peek(), "Unknown origin type. Expected Html, Style, or JavaScript.");
     }
 
     Token open_brace = consume(TokenType::LEFT_BRACE, "Expect '{' to start origin body.");
 
     int brace_depth = 1;
+    std::string content;
+    int start_pos = current;
     while (brace_depth > 0 && !isAtEnd()) {
         if (peek().type == TokenType::LEFT_BRACE) brace_depth++;
         else if (peek().type == TokenType::RIGHT_BRACE) brace_depth--;
@@ -445,12 +503,9 @@ std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {
             advance();
         }
     }
+    content = source.substr(tokens[start_pos].position, peek().position - tokens[start_pos].position);
 
-    Token close_brace = consume(TokenType::RIGHT_BRACE, "Expect '}' to end origin body.");
-
-    int start_pos = open_brace.position + open_brace.lexeme.length();
-    int end_pos = close_brace.position;
-    std::string content = source.substr(start_pos, end_pos - start_pos);
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to end origin body.");
 
     return std::make_unique<OriginNode>(type, content);
 }
@@ -489,14 +544,10 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
             if (match({TokenType::DELETE})) {
                 // Handle 'delete prop1, prop2;'
                 do {
-                    std::string prop_key_to_delete;
-                    while(!check(TokenType::COMMA) && !check(TokenType::SEMICOLON) && !isAtEnd()) {
-                        prop_key_to_delete += advance().lexeme;
-                    }
-
+                    Token prop_to_delete = consume(TokenType::IDENTIFIER, "Expect property name after 'delete'.");
                     final_properties.erase(
                         std::remove_if(final_properties.begin(), final_properties.end(),
-                            [&](const AttributeNode& attr) { return attr.key == prop_key_to_delete; }),
+                            [&](const AttributeNode& attr) { return attr.key == prop_to_delete.lexeme; }),
                         final_properties.end()
                     );
                 } while (match({TokenType::COMMA}));
@@ -509,7 +560,7 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
                 }
                 consume(TokenType::COLON, "Expect ':' after property name.");
                 auto value_expr = parseExpression();
-                consume(TokenType::SEMICOLON, "Expect ';' after property value.");
+                consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
 
                 bool filled = false;
                 for (auto& prop : final_properties) {
@@ -613,7 +664,13 @@ std::unique_ptr<TemplateDeclarationNode> CHTLParser::parseTemplateDeclaration() 
                     key_str += advance().lexeme;
                 }
                 consume(TokenType::COLON, "Expect ':' after style property name.");
-                auto value_expr = parseExpression();
+
+                std::string value_str;
+                while(!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                    value_str += advance().lexeme;
+                }
+                auto value_expr = std::make_unique<LiteralExpr>(value_str);
+
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
                 def->style_properties.push_back({key_str, std::move(value_expr)});
             }
@@ -621,7 +678,7 @@ std::unique_ptr<TemplateDeclarationNode> CHTLParser::parseTemplateDeclaration() 
     } else if (def->type == TemplateType::ELEMENT) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
             for (auto& node : parseDeclaration()) {
-                def->element_body.push_back(std::move(node));
+                if (node) def->element_body.push_back(std::move(node));
             }
         }
     } else if (def->type == TemplateType::VAR) {
@@ -700,7 +757,11 @@ std::unique_ptr<CustomDeclarationNode> CHTLParser::parseCustomDeclaration() {
 
                 if (match({TokenType::COLON})) {
                     // Property with value
-                    auto value_expr = parseExpression();
+                    std::string value_str;
+                    while(!check(TokenType::SEMICOLON) && !isAtEnd()) {
+                        value_str += advance().lexeme;
+                    }
+                    auto value_expr = std::make_unique<LiteralExpr>(value_str);
                     consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
                     def->style_properties.push_back({key_str, std::move(value_expr)});
                 } else if (match({TokenType::SEMICOLON})) {
@@ -714,7 +775,7 @@ std::unique_ptr<CustomDeclarationNode> CHTLParser::parseCustomDeclaration() {
     } else if (def->type == TemplateType::ELEMENT) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
             for (auto& node : parseDeclaration()) {
-                def->element_body.push_back(std::move(node));
+                if (node) def->element_body.push_back(std::move(node));
             }
         }
     } else if (def->type == TemplateType::VAR) {
@@ -745,19 +806,18 @@ std::unique_ptr<ImportNode> CHTLParser::parseImportStatement() {
     consume(TokenType::RIGHT_BRACKET, "Expect ']' to end import keyword.");
 
     consume(TokenType::AT, "Expect '@' for import type.");
-    Token typeToken = advance(); // Should be an identifier now
 
     ImportType type;
-    if (typeToken.lexeme == "Chtl") {
+    if (match({TokenType::CHTL})) {
         type = ImportType::CHTL;
-    } else if (typeToken.lexeme == "Html") {
+    } else if (match({TokenType::HTML})) {
         type = ImportType::HTML;
-    } else if (typeToken.lexeme == "Style") {
+    } else if (match({TokenType::STYLE})) {
         type = ImportType::STYLE;
-    } else if (typeToken.lexeme == "JavaScript") {
+    } else if (match({TokenType::JAVASCRIPT})) {
         type = ImportType::JAVASCRIPT;
     } else {
-        error(typeToken, "Unsupported import type.");
+        error(peek(), "Unsupported import type.");
     }
 
     consume(TokenType::FROM, "Expect 'from' after import type.");
