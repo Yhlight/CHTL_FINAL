@@ -13,8 +13,8 @@ static bool isTruthy(const EvaluatedValue& val) {
     return val.numeric_value != 0;
 }
 
-ExpressionEvaluator::ExpressionEvaluator(const std::map<std::string, TemplateDefinitionNode>& templates, BaseNode* doc_root)
-    : templates(templates), doc_root(doc_root) {}
+ExpressionEvaluator::ExpressionEvaluator(CHTLContext& context, BaseNode* doc_root)
+    : context(context), doc_root(doc_root) {}
 
 EvaluatedValue ExpressionEvaluator::evaluate(Expr* expr, ElementNode* context) {
     this->current_context = context;
@@ -72,11 +72,11 @@ void ExpressionEvaluator::visit(VarExpr& expr) {
         throw std::runtime_error("Circular variable reference detected for: " + full_var_name);
     }
 
-    if (templates.count(expr.group)) {
-        const auto& template_def = templates.at(expr.group);
-        if (template_def.type == TemplateType::VAR && template_def.variables.count(expr.name)) {
+    const TemplateDefinitionNode* template_def = context.getTemplateDefinition(expr.group);
+    if (template_def) {
+        if (template_def->type == TemplateType::VAR && template_def->variables.count(expr.name)) {
             resolution_stack.insert(full_var_name);
-            result = evaluate(template_def.variables.at(expr.name).get(), this->current_context);
+            result = evaluate(template_def->variables.at(expr.name).get(), this->current_context);
             resolution_stack.erase(full_var_name);
             return;
         }

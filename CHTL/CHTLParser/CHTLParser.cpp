@@ -6,6 +6,7 @@
 #include "../CHTLNode/TemplateDeclarationNode.h"
 #include "../CHTLNode/ImportNode.h"
 #include "../CHTLNode/ScriptNode.h"
+#include "../CHTLNode/NamespaceNode.h"
 #include "../Expression/Expr.h"
 #include <iostream>
 #include <stdexcept>
@@ -207,6 +208,8 @@ std::unique_ptr<BaseNode> CHTLParser::parseTopLevelDeclaration() {
                     return parseOriginBlock();
                 case TokenType::IMPORT:
                     return parseImportStatement();
+                case TokenType::NAMESPACE:
+                    return parseNamespaceDeclaration();
                 default:
                     // If it's not a recognized block keyword, parse as a normal element.
                     break;
@@ -328,7 +331,10 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
             consume(TokenType::COLON, "Expect ':' after style property name.");
             auto value_expr = parseExpression();
             consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-            styleNode->inline_properties.push_back({key_str, std::move(value_expr)});
+            AttributeNode attr;
+            attr.key = key_str;
+            attr.value_expr = std::move(value_expr);
+            styleNode->inline_properties.push_back(std::move(attr));
         } else {
             CssRuleNode rule;
             while (!check(TokenType::LEFT_BRACE) && !isAtEnd()) {
@@ -343,7 +349,10 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
                 consume(TokenType::COLON, "Expect ':' after style property name.");
                 auto value_expr = parseExpression();
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-                rule.properties.push_back({key_str, std::move(value_expr)});
+                AttributeNode attr;
+                attr.key = key_str;
+                attr.value_expr = std::move(value_expr);
+                rule.properties.push_back(std::move(attr));
             }
             consume(TokenType::RIGHT_BRACE, "Expect '}' after rule block.");
             styleNode->global_rules.push_back(std::move(rule));
@@ -453,19 +462,18 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
     consume(TokenType::STYLE, "Expect 'Style' keyword for style template usage.");
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
 
-    if (!context.template_definitions.count(name.lexeme)) {
+    const auto* def = context.getTemplateDefinition(name.lexeme);
+    if (!def) {
         error(name, "Style template '" + name.lexeme + "' not found.");
         return;
     }
-
-    const auto& def = context.template_definitions.at(name.lexeme);
-    if (def.type != TemplateType::STYLE) {
+    if (def->type != TemplateType::STYLE) {
         error(name, "Template '" + name.lexeme + "' is not a Style template.");
     }
 
     // Clone the base properties. We will modify this list.
     std::vector<AttributeNode> final_properties;
-    for (const auto& prop : def.style_properties) {
+    for (const auto& prop : def->style_properties) {
         final_properties.push_back(prop.clone());
     }
 
@@ -506,7 +514,10 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
                 }
                 if (!filled) {
                     // If not filling a placeholder, it's a new/override property
-                    final_properties.push_back({key_str, std::move(value_expr)});
+                    AttributeNode attr;
+                    attr.key = key_str;
+                    attr.value_expr = std::move(value_expr);
+                    final_properties.push_back(std::move(attr));
                 }
             }
         }
@@ -530,13 +541,13 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
     consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 
-    if (context.template_definitions.count(name.lexeme)) {
-        const auto& def = context.template_definitions.at(name.lexeme);
-        if (def.type != TemplateType::ELEMENT) {
+    const auto* def = context.getTemplateDefinition(name.lexeme);
+    if (def) {
+        if (def->type != TemplateType::ELEMENT) {
             error(name, "Template '" + name.lexeme + "' is not an Element template.");
         }
         std::vector<std::unique_ptr<BaseNode>> cloned_nodes;
-        for (const auto& node : def.element_body) {
+        for (const auto& node : def->element_body) {
             cloned_nodes.push_back(node->clone());
         }
         return cloned_nodes;
@@ -578,12 +589,12 @@ std::unique_ptr<TemplateDeclarationNode> CHTLParser::parseTemplateDeclaration() 
                 Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
                 consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 
-                if (context.template_definitions.count(name.lexeme)) {
-                    const auto& base_def = context.template_definitions.at(name.lexeme);
-                    if (base_def.type != TemplateType::STYLE) {
+                const auto* base_def = context.getTemplateDefinition(name.lexeme);
+                if (base_def) {
+                    if (base_def->type != TemplateType::STYLE) {
                         error(name, "Template '" + name.lexeme + "' is not a Style template.");
                     }
-                    for (const auto& prop : base_def.style_properties) {
+                    for (const auto& prop : base_def->style_properties) {
                         def->style_properties.push_back(prop.clone());
                     }
                 } else {
@@ -598,7 +609,10 @@ std::unique_ptr<TemplateDeclarationNode> CHTLParser::parseTemplateDeclaration() 
                 consume(TokenType::COLON, "Expect ':' after style property name.");
                 auto value_expr = parseExpression();
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-                def->style_properties.push_back({key_str, std::move(value_expr)});
+                AttributeNode attr;
+                attr.key = key_str;
+                attr.value_expr = std::move(value_expr);
+                def->style_properties.push_back(std::move(attr));
             }
         }
     } else if (def->type == TemplateType::ELEMENT) {
@@ -622,9 +636,8 @@ std::unique_ptr<TemplateDeclarationNode> CHTLParser::parseTemplateDeclaration() 
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' to end template body.");
 
-    // Clone the definition to store in the parser's map for later lookups.
-    auto def_for_map = def->clone();
-    context.template_definitions[def->name] = std::move(*def_for_map);
+    // Add the definition to the current namespace in the context.
+    context.addTemplateDefinition(*def);
 
     // Create the AST node, transferring ownership of the original definition.
     return std::make_unique<TemplateDeclarationNode>(std::move(def));
@@ -663,12 +676,12 @@ std::unique_ptr<CustomDeclarationNode> CHTLParser::parseCustomDeclaration() {
                 Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
                 consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 
-                if (context.template_definitions.count(name.lexeme)) {
-                    const auto& base_def = context.template_definitions.at(name.lexeme);
-                    if (base_def.type != TemplateType::STYLE) {
+                const auto* base_def = context.getTemplateDefinition(name.lexeme);
+                if (base_def) {
+                    if (base_def->type != TemplateType::STYLE) {
                         error(name, "Template '" + name.lexeme + "' is not a Style template.");
                     }
-                    for (const auto& prop : base_def.style_properties) {
+                    for (const auto& prop : base_def->style_properties) {
                         def->style_properties.push_back(prop.clone());
                     }
                 } else {
@@ -685,10 +698,15 @@ std::unique_ptr<CustomDeclarationNode> CHTLParser::parseCustomDeclaration() {
                     // Property with value
                     auto value_expr = parseExpression();
                     consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-                    def->style_properties.push_back({key_str, std::move(value_expr)});
+                    AttributeNode attr;
+                    attr.key = key_str;
+                    attr.value_expr = std::move(value_expr);
+                    def->style_properties.push_back(std::move(attr));
                 } else if (match({TokenType::SEMICOLON})) {
                     // Valueless (placeholder) property
-                    def->style_properties.push_back({key_str, nullptr});
+                    AttributeNode attr;
+                    attr.key = key_str;
+                    def->style_properties.push_back(std::move(attr));
                 } else {
                     error(peek(), "Expect ':' or ';' after style property name.");
                 }
@@ -715,9 +733,8 @@ std::unique_ptr<CustomDeclarationNode> CHTLParser::parseCustomDeclaration() {
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' to end custom body.");
 
-    // Custom definitions are also stored in the same template map.
-    auto def_for_map = def->clone();
-    context.template_definitions[def->name] = std::move(*def_for_map);
+    // Custom definitions are also stored in the context.
+    context.addTemplateDefinition(*def);
 
     return std::make_unique<CustomDeclarationNode>(std::move(def));
 }
@@ -774,5 +791,33 @@ std::unique_ptr<ScriptNode> CHTLParser::parseScriptBlock() {
     return std::make_unique<ScriptNode>(content);
 }
 
+
+#include <string>
+
+std::unique_ptr<NamespaceNode> CHTLParser::parseNamespaceDeclaration() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start namespace declaration.");
+    consume(TokenType::NAMESPACE, "Expect 'Namespace' keyword.");
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end namespace keyword.");
+
+    Token name = consume(TokenType::IDENTIFIER, "Expect namespace name.");
+    auto node = std::make_unique<NamespaceNode>(name.lexeme);
+
+    // Set the current namespace in the context
+    std::string previous_namespace = context.current_namespace;
+    context.current_namespace = name.lexeme;
+
+    consume(TokenType::LEFT_BRACE, "Expect '{' to start namespace body.");
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        node->children.push_back(parseTopLevelDeclaration());
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to end namespace body.");
+
+    // Restore the previous namespace
+    context.current_namespace = previous_namespace;
+
+    return node;
+}
 
 } // namespace CHTL

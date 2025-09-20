@@ -1,0 +1,5 @@
+[Namespace] my_lib {
+    [Template] @Style MyStyle {
+        color: "green";
+    }
+}

@@ -21,6 +21,12 @@ enum class TemplateType {
 // from BaseNode.
 class TemplateDefinitionNode {
 public:
+    TemplateDefinitionNode() = default;
+    TemplateDefinitionNode(const TemplateDefinitionNode& other);
+    TemplateDefinitionNode& operator=(const TemplateDefinitionNode& other);
+    TemplateDefinitionNode(TemplateDefinitionNode&& other) noexcept = default;
+    TemplateDefinitionNode& operator=(TemplateDefinitionNode&& other) noexcept = default;
+
     // Method to create a deep copy of the definition
     std::unique_ptr<TemplateDefinitionNode> clone() const;
 

@@ -5,6 +5,7 @@
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/TemplateDeclarationNode.h"
 #include "../CHTLNode/CustomDeclarationNode.h"
+#include "../CHTLNode/NamespaceNode.h"
 #include "../Expression/ExpressionEvaluator.h" // Include the new evaluator
 #include "../CHTLContext.h"
 #include <unordered_set>
@@ -73,7 +74,7 @@ void CHTLGenerator::visit(ElementNode& node) {
 
                 css_output << selector << " {\n";
                 for (const auto& prop : rule.properties) {
-                    ExpressionEvaluator evaluator(this->context.template_definitions, this->doc_root);
+                    ExpressionEvaluator evaluator(this->context, this->doc_root);
                     EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
                     css_output << "    " << prop.key << ": ";
                     if (result.type == ValueType::STRING) {
@@ -103,7 +104,7 @@ void CHTLGenerator::visit(ElementNode& node) {
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             for (const auto& prop : styleNode->inline_properties) {
-                ExpressionEvaluator evaluator(this->context.template_definitions, this->doc_root);
+                ExpressionEvaluator evaluator(this->context, this->doc_root);
                 EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
                 style_str += prop.key + ": ";
                 if (result.type == ValueType::STRING) {
@@ -180,6 +181,15 @@ void CHTLGenerator::visit(ImportNode& node) {
 void CHTLGenerator::visit(ScriptNode& node) {
     // For now, we do nothing. This content will be passed to the JS compiler.
     // In a future implementation, this might generate a <script> tag if it contains plain JS.
+}
+
+void CHTLGenerator::visit(NamespaceNode& node) {
+    // A namespace declaration does not produce any direct output.
+    // It's processed by the parser and stored for use elsewhere.
+    // The generator might need to handle children if they can exist outside of a root element.
+    for (const auto& child : node.children) {
+        child->accept(*this);
+    }
 }
 
 } // namespace CHTL

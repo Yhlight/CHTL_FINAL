@@ -12,6 +12,7 @@ class TemplateDeclarationNode;
 class CustomDeclarationNode;
 class ImportNode;
 class ScriptNode;
+class NamespaceNode;
 
 // The Visitor interface declares a set of visiting methods that correspond
 // to classes of the concrete nodes.
@@ -26,6 +27,7 @@ public:
     virtual void visit(CustomDeclarationNode& node) = 0;
     virtual void visit(ImportNode& node) = 0;
     virtual void visit(ScriptNode& node) = 0;
+    virtual void visit(NamespaceNode& node) = 0;
 };
 
 } // namespace CHTL

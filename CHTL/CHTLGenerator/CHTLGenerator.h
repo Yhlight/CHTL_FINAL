@@ -32,6 +32,7 @@ public:
     void visit(CustomDeclarationNode& node) override;
     void visit(ImportNode& node) override;
     void visit(ScriptNode& node) override;
+    void visit(NamespaceNode& node) override;
 
 private:
     CHTLContext& context;

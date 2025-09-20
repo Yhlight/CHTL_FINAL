@@ -67,6 +67,7 @@ private:
     std::unique_ptr<TemplateDeclarationNode> parseTemplateDeclaration();
     std::unique_ptr<CustomDeclarationNode> parseCustomDeclaration();
     std::unique_ptr<ImportNode> parseImportStatement();
+    std::unique_ptr<NamespaceNode> parseNamespaceDeclaration();
     void parseStyleTemplateUsage(StyleNode* styleNode);
     std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();
     std::unique_ptr<BaseNode> parseOriginBlock();

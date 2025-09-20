@@ -6,6 +6,7 @@
 #include <memory>
 #include "CHTLNode/BaseNode.h"
 #include "CHTLNode/TemplateDefinitionNode.h"
+#include "NamespaceData.h"
 
 namespace CHTL {
 
@@ -14,7 +15,11 @@ public:
     CHTLContext();
 
     std::map<std::string, std::unique_ptr<BaseNode>> files;
-    std::map<std::string, TemplateDefinitionNode> template_definitions;
+    std::map<std::string, NamespaceData> namespaces;
+    std::string current_namespace;
+
+    void addTemplateDefinition(const TemplateDefinitionNode& def);
+    const TemplateDefinitionNode* getTemplateDefinition(const std::string& name);
 };
 
 } // namespace CHTL

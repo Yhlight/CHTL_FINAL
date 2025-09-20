@@ -18,6 +18,11 @@ public:
     void visit(TextNode& node) override;
     void visit(StyleNode& node) override;
     void visit(OriginNode& node) override;
+    void visit(TemplateDeclarationNode& node) override;
+    void visit(CustomDeclarationNode& node) override;
+    void visit(ImportNode& node) override;
+    void visit(ScriptNode& node) override;
+    void visit(NamespaceNode& node) override;
 
 private:
     std::string indentString();

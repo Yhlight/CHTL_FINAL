@@ -81,6 +81,10 @@ std::unique_ptr<CHTLContext> CHTLCompiler::compile(const std::string& entry_path
             continue;
         }
 
+        // Set default namespace to filename without extension
+        std::filesystem::path p(path);
+        context->current_namespace = p.stem().string();
+
         CHTLLexer lexer(source);
         auto tokens = lexer.scanTokens();
         CHTLParser parser(source, tokens, *context);
