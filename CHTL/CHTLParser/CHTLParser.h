@@ -7,6 +7,7 @@
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/CustomDeclarationNode.h"
 #include "../CHTLNode/ImportNode.h"
+#include "../CHTLNode/ScriptNode.h"
 #include <vector>
 #include <memory>
 #include <map>
@@ -55,6 +56,7 @@ private:
     std::unique_ptr<ElementNode> parseElement();
     void parseAttribute(ElementNode* element);
     std::unique_ptr<StyleNode> parseStyleBlock();
+    std::unique_ptr<ScriptNode> parseScriptBlock();
 
     // --- Error Handling ---
     void error(const Token& token, const std::string& message);

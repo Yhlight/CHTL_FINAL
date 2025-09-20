@@ -5,6 +5,7 @@
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/TemplateDeclarationNode.h"
 #include "../CHTLNode/ImportNode.h"
+#include "../CHTLNode/ScriptNode.h"
 #include "../Expression/Expr.h"
 #include <iostream>
 #include <stdexcept>
@@ -245,6 +246,11 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
 
     if (match({TokenType::STYLE})) {
         nodes.push_back(parseStyleBlock());
+        return nodes;
+    }
+
+    if (match({TokenType::SCRIPT})) {
+        nodes.push_back(parseScriptBlock());
         return nodes;
     }
 
@@ -742,6 +748,30 @@ std::unique_ptr<ImportNode> CHTLParser::parseImportStatement() {
     match({TokenType::SEMICOLON});
 
     return node;
+}
+
+std::unique_ptr<ScriptNode> CHTLParser::parseScriptBlock() {
+    Token open_brace = consume(TokenType::LEFT_BRACE, "Expect '{' to start script body.");
+
+    int brace_depth = 1;
+    int content_start_pos = current;
+
+    while (brace_depth > 0 && !isAtEnd()) {
+        if (peek().type == TokenType::LEFT_BRACE) brace_depth++;
+        else if (peek().type == TokenType::RIGHT_BRACE) brace_depth--;
+
+        if (brace_depth > 0) {
+            advance();
+        }
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to end script body.");
+
+    // Extract the raw string content from the source
+    int content_end_pos = previous().position;
+    std::string content = source.substr(tokens[content_start_pos].position, content_end_pos - tokens[content_start_pos].position);
+
+    return std::make_unique<ScriptNode>(content);
 }
 
 

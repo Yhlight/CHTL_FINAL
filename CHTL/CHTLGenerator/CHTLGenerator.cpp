@@ -176,4 +176,9 @@ void CHTLGenerator::visit(ImportNode& node) {
     // any direct output themselves, so this visitor is empty.
 }
 
+void CHTLGenerator::visit(ScriptNode& node) {
+    // For now, we do nothing. This content will be passed to the JS compiler.
+    // In a future implementation, this might generate a <script> tag if it contains plain JS.
+}
+
 } // namespace CHTL
