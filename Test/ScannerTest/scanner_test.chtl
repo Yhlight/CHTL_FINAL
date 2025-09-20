@@ -1,0 +1,48 @@
+// This is a CHTL comment
+div {
+    id: main_content;
+    text: "Hello CHTL";
+}
+
+style {
+    body {
+        font-family: Arial, sans-serif;
+    }
+
+    .my-class {
+        color: red;
+    }
+}
+
+script {
+    // Standard JS function
+    function sayHello(name) {
+        console.log("Hello, " + name);
+    }
+
+    sayHello("World");
+
+    // Now some CHTL JS
+    {{#main_content}}->Listen {
+        click: () => {
+            console.log("Div was clicked!");
+            {{body}}->style.backgroundColor = "blue";
+        }
+    };
+
+    // More JS
+    let x = 10;
+    if (x > 5) {
+        console.log("x is greater than 5");
+    }
+
+    // A CHTL JS keyword
+    Animate {
+        target: {{#main_content}};
+        duration: 1000;
+    }
+}
+
+footer {
+    text: "End of file";
+}

@@ -4,6 +4,7 @@
 #include "CodeFragment.h"
 #include <string>
 #include <vector>
+#include <map>
 
 namespace CHTL {
 
@@ -11,20 +12,36 @@ class CHTLUnifiedScanner {
 public:
     explicit CHTLUnifiedScanner(const std::string& source);
     std::vector<CodeFragment> scan();
+    const std::map<std::string, std::string>& getPlaceholders() const;
+
 
 private:
-    const std::string& source;
-    int current = 0;
+    std::string source;
+    size_t current = 0;
     int line = 1;
+    std::vector<CodeFragment> fragments;
+    std::map<std::string, std::string> placeholders;
+    int placeholder_counter = 0;
 
-    // Helper methods for scanning
-    bool isAtEnd();
+    void scanSource();
+    void scanStyleBlock();
+    void scanScriptBlock();
+
     char advance();
-    char peek();
-    void skipWhitespaceAndComments();
+    char peek() const;
+    char peekNext() const;
+    bool isAtEnd() const;
+    void skipWhitespace();
 
-    // The core logic to find and extract top-level blocks
-    void findNextBlock(std::vector<CodeFragment>& fragments);
+    bool match(const std::string& expected);
+    std::string generatePlaceholder(const std::string& content);
+
+    // CHTL JS detection
+    bool isChtlJsKeyword();
+    bool isChtlJsEnhanceSelector();
+    void scanChtlJs();
+    void scanJs();
+
 };
 
 } // namespace CHTL
