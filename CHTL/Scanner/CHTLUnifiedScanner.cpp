@@ -1,321 +1,204 @@
 #include "CHTLUnifiedScanner.h"
-#include <stdexcept>
 #include <iostream>
+#include <vector>
+#include <algorithm>
+#include <sstream>
 
 namespace CHTL {
+
+// Helper function to find the position of a matching brace
+size_t find_matching_brace(const std::string& content, size_t start_pos) {
+    if (start_pos >= content.length() || content[start_pos] != '{') {
+        return std::string::npos;
+    }
+    int brace_level = 1;
+    for (size_t i = start_pos + 1; i < content.length(); ++i) {
+        if (content[i] == '{') {
+            brace_level++;
+        } else if (content[i] == '}') {
+            brace_level--;
+            if (brace_level == 0) {
+                return i;
+            }
+        }
+    }
+    return std::string::npos; // Not found
+}
+
 
 CHTLUnifiedScanner::CHTLUnifiedScanner(const std::string& source)
     : source(source) {}
 
-std::vector<CodeFragment> CHTLUnifiedScanner::scan() {
-    while (!isAtEnd()) {
-        scanToken();
+const std::map<std::string, std::string>& CHTLUnifiedScanner::getPlaceholderMap() const {
+    return placeholder_map;
+}
+
+std::string CHTLUnifiedScanner::addPlaceholder(const std::string& content, bool is_style) {
+    if (content.empty()) {
+        return "";
     }
+    std::string key;
+    std::string map_key = "_PLACEHOLDER_" + std::to_string(placeholder_counter) + "_";
+
+    if (is_style) {
+        key = "/* " + map_key + " */";
+    } else {
+        key = map_key;
+    }
+    placeholder_map["_PLACEHOLDER_" + std::to_string(placeholder_counter++) + "_"] = content;
+    return key;
+}
+
+std::string CHTLUnifiedScanner::processScript(const std::string& content) {
+    std::string result;
+    size_t last_pos = 0;
+
+    const std::vector<std::string> keywords = {"Listen", "Delegate", "Animate", "Vir", "Router", "printMylove", "iNeverAway"};
+
+    while (last_pos < content.length()) {
+        size_t next_construct_pos = std::string::npos;
+
+        // 1. Check for '{{'
+        size_t brace_pos = content.find("{{", last_pos);
+        if (brace_pos != std::string::npos) {
+            next_construct_pos = brace_pos;
+        }
+
+        // 2. Check for '$'
+        size_t dollar_pos = content.find('$', last_pos);
+        if (dollar_pos != std::string::npos && (next_construct_pos == std::string::npos || dollar_pos < next_construct_pos)) {
+            next_construct_pos = dollar_pos;
+        }
+
+        // 3. Check for keywords
+        for (const auto& keyword : keywords) {
+            size_t keyword_pos = content.find(keyword, last_pos);
+            if (keyword_pos != std::string::npos && (next_construct_pos == std::string::npos || keyword_pos < next_construct_pos)) {
+                next_construct_pos = keyword_pos;
+            }
+        }
+
+        if (next_construct_pos == std::string::npos) {
+            result += addPlaceholder(content.substr(last_pos), false);
+            break;
+        }
+
+        result += addPlaceholder(content.substr(last_pos, next_construct_pos - last_pos), false);
+
+        size_t construct_len = 0;
+        if (content.substr(next_construct_pos, 2) == "{{") {
+            size_t end_brace = content.find("}}", next_construct_pos);
+            construct_len = (end_brace == std::string::npos) ? content.length() - next_construct_pos : end_brace - next_construct_pos + 2;
+        } else if (content[next_construct_pos] == '$') {
+            size_t end_dollar = content.find('$', next_construct_pos + 1);
+            construct_len = (end_dollar == std::string::npos) ? content.length() - next_construct_pos : end_dollar - next_construct_pos + 1;
+        } else {
+            size_t open_brace = content.find('{', next_construct_pos);
+            size_t end_brace = (open_brace == std::string::npos) ? std::string::npos : find_matching_brace(content, open_brace);
+            construct_len = (end_brace == std::string::npos) ? content.length() - next_construct_pos : end_brace - next_construct_pos + 1;
+        }
+
+        result += content.substr(next_construct_pos, construct_len);
+        last_pos = next_construct_pos + construct_len;
+    }
+
+    return result;
+}
+
+std::string CHTLUnifiedScanner::processStyle(const std::string& content) {
+    std::string result;
+    std::string current_line;
+    std::istringstream stream(content);
+    const std::vector<std::string> triggers = {" + ", " - ", " * ", " / ", " ? ", "@Style", "@Var", "ThemeColor("};
+
+    while (std::getline(stream, current_line)) {
+        bool has_trigger = false;
+        for (const auto& trigger : triggers) {
+            if (current_line.find(trigger) != std::string::npos) {
+                has_trigger = true;
+                break;
+            }
+        }
+
+        if (has_trigger) {
+            result += addPlaceholder(current_line, true) + "\n";
+        } else {
+            result += current_line + "\n";
+        }
+    }
+    return result;
+}
+
+std::vector<CodeFragment> CHTLUnifiedScanner::scan() {
+    std::vector<CodeFragment> fragments;
+    size_t last_pos = 0;
+
+    while (last_pos < source.length()) {
+        size_t script_pos = source.find("script", last_pos);
+        size_t style_pos = source.find("style", last_pos);
+
+        size_t next_block_pos = std::min(script_pos, style_pos);
+
+        if (next_block_pos == std::string::npos) {
+            if (last_pos < source.length()) {
+                std::string final_chunk = source.substr(last_pos);
+                // Trim whitespace from the beginning and end of the final chunk
+                size_t first = final_chunk.find_first_not_of(" \t\n\r");
+                if (std::string::npos != first) {
+                    size_t last = final_chunk.find_last_not_of(" \t\n\r");
+                    std::string trimmed_chunk = final_chunk.substr(first, (last - first + 1));
+                    if (!trimmed_chunk.empty()) {
+                        fragments.push_back({FragmentType::CHTL, trimmed_chunk, line});
+                    }
+                }
+            }
+            break;
+        }
+
+        if (next_block_pos > last_pos) {
+            fragments.push_back({FragmentType::CHTL, source.substr(last_pos, next_block_pos - last_pos), line});
+        }
+
+        size_t brace_open_pos = source.find('{', next_block_pos);
+        if (brace_open_pos == std::string::npos) {
+            fragments.push_back({FragmentType::CHTL, source.substr(next_block_pos), line});
+            break;
+        }
+
+        size_t brace_close_pos = find_matching_brace(source, brace_open_pos);
+        if (brace_close_pos == std::string::npos) {
+            fragments.push_back({FragmentType::CHTL, source.substr(next_block_pos), line});
+            break;
+        }
+
+        std::string content = source.substr(brace_open_pos + 1, brace_close_pos - brace_open_pos - 1);
+
+        if (next_block_pos == script_pos) {
+            fragments.push_back({FragmentType::JS, processScript(content), line});
+        } else {
+            fragments.push_back({FragmentType::CSS, processStyle(content), line});
+        }
+
+        last_pos = brace_close_pos + 1;
+    }
+
     return fragments;
 }
 
-void CHTLUnifiedScanner::scanToken() {
-    switch (state) {
-        case ScannerState::SCANNING_CHTL:
-            scanChtl();
-            break;
-        case ScannerState::SCANNING_SCRIPT:
-            scanScript();
-            break;
-        case ScannerState::SCANNING_CSS:
-            scanStyle();
-            break;
-    }
-}
-
-void CHTLUnifiedScanner::scanChtl() {
-    size_t start = current;
-    while (!isAtEnd()) {
-        if (peek() == '<') { // A simplistic check for tags, could be improved
-            if (match("<style")) {
-                addFragment(FragmentType::CHTL, source.substr(start, current - start - 6));
-                state = ScannerState::SCANNING_CSS;
-                return;
-            } else if (match("<script")) {
-                addFragment(FragmentType::CHTL, source.substr(start, current - start - 7));
-                state = ScannerState::SCANNING_SCRIPT;
-                return;
-            }
-        }
-
-        if(match("style")) {
-             // Lookahead to confirm it's a block and not just a property name
-            int lookahead = current;
-            while(lookahead < source.length() && isspace(source[lookahead])) {
-                lookahead++;
-            }
-            if (lookahead < source.length() && source[lookahead] == '{') {
-                addFragment(FragmentType::CHTL, source.substr(start, current - start - 5));
-                state = ScannerState::SCANNING_CSS;
-                return;
-            }
-        } else if(match("script")) {
-            int lookahead = current;
-            while(lookahead < source.length() && isspace(source[lookahead])) {
-                lookahead++;
-            }
-            if (lookahead < source.length() && source[lookahead] == '{') {
-                addFragment(FragmentType::CHTL, source.substr(start, current - start - 6));
-                state = ScannerState::SCANNING_SCRIPT;
-                return;
-            }
-        }
-
-
-        advance();
-    }
-
-    // Add the final CHTL fragment
-    if (current > start) {
-        addFragment(FragmentType::CHTL, source.substr(start, current - start));
-    }
-}
-
-void CHTLUnifiedScanner::scanScript() {
-    std::string buffer;
-
-    // Find the opening brace of the script block
-    while (!isAtEnd() && peek() != '{') {
-        advance();
-    }
-    if (isAtEnd()) return; // Should not happen with valid syntax
-    advance(); // Consume '{'
-
-    int brace_level = 1;
-
-    while (!isAtEnd() && brace_level > 0) {
-        skipWhitespace();
-
-        // Check for CHTL JS enhanced selector {{...}}
-        if (peek() == '{' && peekNext() == '{') {
-            if (!buffer.empty()) {
-                addFragment(FragmentType::JS, buffer);
-                buffer.clear();
-            }
-
-            size_t cjs_start = current;
-            advance(); advance(); // consume {{
-            while (!isAtEnd() && !(peek() == '}' && peekNext() == '}')) {
-                advance();
-            }
-            advance(); advance(); // consume }}
-
-            // Lookahead for -> operator
-            size_t after_braces = current;
-            skipWhitespace();
-            if (peek() == '-' && peekNext() == '>') {
-                current = after_braces; // backtrack to include whitespace
-                advance(); advance(); // consume ->
-                while(!isAtEnd() && peek() != ';') {
-                    advance();
-                }
-                advance(); // consume ;
-            } else {
-                current = after_braces; // backtrack
-            }
-
-            addFragment(FragmentType::CHTL_JS, source.substr(cjs_start, current - cjs_start));
-            continue;
-        }
-
-        size_t word_start = current;
-        if (isalpha(peek())) {
-            while (isalpha(peek()) || isdigit(peek())) {
-                advance();
-            }
-            std::string word = source.substr(word_start, current - word_start);
-            if (isChtlJsKeyword(word)) {
-                if (!buffer.empty()) {
-                    addFragment(FragmentType::JS, buffer);
-                    buffer.clear();
-                }
-
-                size_t cjs_start = word_start;
-                int inner_brace_level = 0;
-                // Find the opening brace if it exists
-                while(!isAtEnd() && peek() != '{' && peek() != ';') {
-                    advance();
-                }
-
-                if (peek() == '{') { // It's a block
-                    inner_brace_level = 1;
-                    advance();
-                    while(!isAtEnd() && inner_brace_level > 0) {
-                        if(peek() == '{') inner_brace_level++;
-                        if(peek() == '}') inner_brace_level--;
-                        advance();
-                    }
-                    // also consume the trailing ;
-                    if(!isAtEnd() && peek() == ';') advance();
-
-                } else { // It's a single statement
-                     advance(); // consume ;
-                }
-
-                addFragment(FragmentType::CHTL_JS, source.substr(cjs_start, current - cjs_start));
-                continue;
-
-            } else {
-                // It was a normal JS word, put it in the buffer
-                buffer += word;
-            }
-        }
-
-        if (peek() == '{') brace_level++;
-        else if (peek() == '}') brace_level--;
-
-        if (brace_level > 0) {
-            buffer += advance();
-        }
-    }
-
-    // Add any remaining JS content
-    if (!buffer.empty()) {
-        addFragment(FragmentType::JS, buffer);
-    }
-
-    // Consume the final '}'
-    if (!isAtEnd() && peek() == '}') {
-        advance();
-    }
-
-    state = ScannerState::SCANNING_CHTL; // Revert state
-}
-
-void CHTLUnifiedScanner::scanStyle() {
-    size_t start = current;
-    std::string buffer;
-    int brace_level = 0;
-
-    // Ensure we are at the start of the block content
-    while (!isAtEnd() && peek() != '{') {
-        advance();
-    }
-    if (isAtEnd()) return; // Should not happen with valid syntax
-    advance(); // Consume '{'
-
-    size_t content_start = current;
-    int content_brace_level = 1;
-
-    while (!isAtEnd() && content_brace_level > 0) {
-        if (peek() == '@') {
-            // Found a potential CHTL construct. Add preceding content as CSS.
-            if (!buffer.empty()) {
-                addFragment(FragmentType::CSS, buffer);
-                buffer.clear();
-            }
-
-            // Extract the CHTL statement (e.g., "@Style ...;")
-            size_t at_start = current;
-            while (!isAtEnd() && peek() != ';') {
-                advance();
-            }
-            advance(); // Consume ';'
-            addFragment(FragmentType::CHTL, source.substr(at_start, current - at_start));
-        } else {
-            if (peek() == '{') content_brace_level++;
-            else if (peek() == '}') content_brace_level--;
-
-            if (content_brace_level > 0) { // Don't add the final '}' to the buffer
-                buffer += advance();
-            }
-        }
-    }
-
-    // Add any remaining CSS content
-    if (!buffer.empty()) {
-        addFragment(FragmentType::CSS, buffer);
-    }
-
-    // Consume the final '}'
-    if (!isAtEnd() && peek() == '}') {
-        advance();
-    }
-
-    state = ScannerState::SCANNING_CHTL;
-}
-
-
-// Helper methods implementation
+// Helper method implementations (if any are kept)
 bool CHTLUnifiedScanner::isAtEnd() {
     return current >= source.length();
 }
 
 char CHTLUnifiedScanner::advance() {
-    if (!isAtEnd()) {
-        if (source[current] == '\n') line++;
-        current++;
-    }
+    current++;
+    if (source[current - 1] == '\n') line++;
     return source[current - 1];
 }
 
 char CHTLUnifiedScanner::peek() {
     if (isAtEnd()) return '\0';
     return source[current];
-}
-
-char CHTLUnifiedScanner::peekNext() {
-    if (current + 1 >= source.length()) return '\0';
-    return source[current + 1];
-}
-
-void CHTLUnifiedScanner::skipWhitespace() {
-    while (true) {
-        char c = peek();
-        switch (c) {
-            case ' ':
-            case '\r':
-            case '\t':
-                advance();
-                break;
-            case '\n':
-                line++;
-                advance();
-                break;
-            case '/':
-                if (peekNext() == '/') {
-                    while (peek() != '\n' && !isAtEnd()) advance();
-                } else if (peekNext() == '*') {
-                    advance(); advance(); // Consume /*
-                    while(!(peek() == '*' && peekNext() == '/') && !isAtEnd()) {
-                        advance();
-                    }
-                    advance(); advance(); // Consume */
-                }
-                else {
-                    return;
-                }
-                break;
-            default:
-                return;
-        }
-    }
-}
-
-bool CHTLUnifiedScanner::match(const std::string& expected) {
-    if (current + expected.length() > source.length()) {
-        return false;
-    }
-    if (source.substr(current, expected.length()) == expected) {
-        current += expected.length();
-        return true;
-    }
-    return false;
-}
-
-void CHTLUnifiedScanner::addFragment(FragmentType type, const std::string& content) {
-    if (!content.empty()) {
-        fragments.push_back({type, content, line});
-    }
-}
-
-bool CHTLUnifiedScanner::isChtlJsKeyword(const std::string& word) {
-    return chtlJsKeywords.count(word);
 }
 
 } // namespace CHTL

@@ -1,0 +1,45 @@
+// CHTL part 1
+div {
+    id: main_div;
+}
+
+style {
+    // This is pure CSS
+    body {
+        font-family: Arial, sans-serif;
+    }
+
+    // This line has CHTL features
+    .widget {
+        width: 100px + 50px;
+        color: ThemeColor(primary);
+    }
+
+    p {
+        line-height: 1.5;
+    }
+}
+
+// CHTL part 2
+span {
+    class: "text";
+}
+
+script {
+    // This is pure JS
+    function greet(name) {
+        console.log("Hello, " + name);
+    }
+
+    greet("World");
+
+    // Mix of CHTL-JS and JS
+    const a = {{b}};
+    Listen {
+        click: () => {
+            console.log("Clicked!");
+        }
+    };
+    let myVar = $someValue$;
+    console.log("Done.");
+}
