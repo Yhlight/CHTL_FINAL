@@ -22,25 +22,13 @@ const TemplateDefinitionNode* CHTLContext::getTemplateDefinition(const std::stri
         return nullptr; // Not found in the specified namespace
     }
 
-    // 1. Look in the current namespace
-    auto ns_it = namespaces.find(current_namespace);
-    if (ns_it != namespaces.end()) {
-        auto& ns_data = ns_it->second;
+    // If no namespace is specified, search all of them.
+    // This handles the "pseudo-merge" of contexts for imports.
+    for (const auto& ns_pair : namespaces) {
+        const auto& ns_data = ns_pair.second;
         auto def_it = ns_data.template_definitions.find(name);
         if (def_it != ns_data.template_definitions.end()) {
             return &def_it->second;
-        }
-    }
-
-    // 2. Look in the default (global) namespace if we are not already in it
-    if (!current_namespace.empty()) {
-        ns_it = namespaces.find("");
-        if (ns_it != namespaces.end()) {
-            auto& ns_data = ns_it->second;
-            auto def_it = ns_data.template_definitions.find(name);
-            if (def_it != ns_data.template_definitions.end()) {
-                return &def_it->second;
-            }
         }
     }
 

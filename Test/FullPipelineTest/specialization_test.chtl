@@ -1,0 +1,29 @@
+[Template] @Style DeletableStyle {
+    text-decoration: underline;
+}
+
+[Template] @Style BaseStyle {
+    @Style DeletableStyle;
+    color: blue;
+    font-size: 14px;
+}
+
+[Custom] @Style DerivedStyle {
+    @Style BaseStyle;
+    font-weight: bold;
+    background-color;
+}
+
+body {
+    div {
+        id: "test-div";
+        style {
+            @Style DerivedStyle {
+                background-color: red;
+                font-size: 16px;
+                delete color;
+                delete @Style DeletableStyle;
+            }
+        }
+    }
+}

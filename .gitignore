@@ -4,3 +4,4 @@ test_parser
 test_pipeline
 *.o
 *.out
+full_pipeline_test

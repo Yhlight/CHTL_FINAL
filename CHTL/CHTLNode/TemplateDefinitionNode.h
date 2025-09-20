@@ -3,6 +3,7 @@
 
 #include "BaseNode.h"
 #include "AttributeNode.h"
+#include "StyleNode.h" // For StyleTemplateUsage
 #include <string>
 #include <vector>
 #include <memory>
@@ -38,6 +39,7 @@ public:
 
     // Used for @Style templates
     std::vector<AttributeNode> style_properties;
+    std::vector<StyleTemplateUsage> inherited_styles; // To store inheritance hierarchy
 
     // Used for @Var templates
     std::map<std::string, std::unique_ptr<Expr>> variables;

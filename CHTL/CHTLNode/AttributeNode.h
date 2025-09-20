@@ -12,10 +12,11 @@ namespace CHTL {
 struct AttributeNode {
     std::string key;
     std::unique_ptr<Expr> value_expr;
+    std::string origin_template_name; // To track for 'delete @Style'
 
     AttributeNode() = default;
 
-    AttributeNode(const AttributeNode& other) : key(other.key) {
+    AttributeNode(const AttributeNode& other) : key(other.key), origin_template_name(other.origin_template_name) {
         if (other.value_expr) {
             value_expr = other.value_expr->clone();
         }
@@ -26,6 +27,7 @@ struct AttributeNode {
             return *this;
         }
         key = other.key;
+        origin_template_name = other.origin_template_name;
         if (other.value_expr) {
             value_expr = other.value_expr->clone();
         } else {
@@ -39,6 +41,7 @@ struct AttributeNode {
     AttributeNode clone() const {
         AttributeNode new_attr;
         new_attr.key = key;
+        new_attr.origin_template_name = origin_template_name;
         if (value_expr) {
             new_attr.value_expr = value_expr->clone();
         }

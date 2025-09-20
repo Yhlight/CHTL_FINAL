@@ -475,11 +475,54 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
         usage.from_namespace = consume(TokenType::IDENTIFIER, "Expect namespace name after 'from'.").lexeme;
     }
 
-    // For now, we are not handling specialization with 'from'.
-    // We will just add the usage to the style node.
-    styleNode->template_usages.push_back(usage);
+    if (match({TokenType::LEFT_BRACE})) {
+        // This is a specialization block
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            if (match({TokenType::DELETE})) {
+                // Handle deletion
+                if (check(TokenType::AT)) {
+                    // Deleting an inherited template
+                    consume(TokenType::AT, "Expect '@' for template usage.");
+                    consume(TokenType::STYLE, "Expect 'Style' keyword for style template usage.");
+                    Token deleted_name = consume(TokenType::IDENTIFIER, "Expect template name to delete.");
 
-    consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+                    StyleTemplateUsage deleted_usage;
+                    deleted_usage.name = deleted_name.lexeme;
+
+                    // Note: We are not handling 'from' for deleted templates for now.
+
+                    usage.deleted_template_usages.push_back(deleted_usage);
+                    consume(TokenType::SEMICOLON, "Expect ';' after deleted template.");
+
+                } else {
+                    // Deleting properties
+                    do {
+                        usage.deleted_properties.push_back(consume(TokenType::IDENTIFIER, "Expect property name to delete.").lexeme);
+                    } while (match({TokenType::COMMA}));
+                    consume(TokenType::SEMICOLON, "Expect ';' after deleted properties list.");
+                }
+            } else {
+                // Handle property specialization
+                std::string key;
+                while(peek().type != TokenType::COLON) {
+                    key += advance().lexeme;
+                }
+                consume(TokenType::COLON, "Expect ':' after property name.");
+                auto value = parseExpression();
+                consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+
+                AttributeNode attr;
+                attr.key = key;
+                attr.value_expr = std::move(value);
+                usage.specialized_properties.push_back(std::move(attr));
+            }
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' to close specialization block.");
+    } else {
+        consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+    }
+
+    styleNode->template_usages.push_back(std::move(usage));
 }
 
 
@@ -532,17 +575,10 @@ std::unique_ptr<TemplateDeclarationNode> CHTLParser::parseTemplateDeclaration() 
                 Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
                 consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 
-                const auto* base_def = context.getTemplateDefinition(name.lexeme);
-                if (base_def) {
-                    if (base_def->type != TemplateType::STYLE) {
-                        error(name, "Template '" + name.lexeme + "' is not a Style template.");
-                    }
-                    for (const auto& prop : base_def->style_properties) {
-                        def->style_properties.push_back(prop.clone());
-                    }
-                } else {
-                    error(name, "Base style template '" + name.lexeme + "' not found.");
-                }
+                StyleTemplateUsage inheritance;
+                inheritance.name = name.lexeme;
+                // Note: 'from' clause for inheritance is not supported yet.
+                def->inherited_styles.push_back(std::move(inheritance));
             } else {
                 // Regular style property
                 std::string key_str;
@@ -619,17 +655,10 @@ std::unique_ptr<CustomDeclarationNode> CHTLParser::parseCustomDeclaration() {
                 Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
                 consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 
-                const auto* base_def = context.getTemplateDefinition(name.lexeme);
-                if (base_def) {
-                    if (base_def->type != TemplateType::STYLE) {
-                        error(name, "Template '" + name.lexeme + "' is not a Style template.");
-                    }
-                    for (const auto& prop : base_def->style_properties) {
-                        def->style_properties.push_back(prop.clone());
-                    }
-                } else {
-                    error(name, "Base style template '" + name.lexeme + "' not found.");
-                }
+                StyleTemplateUsage inheritance;
+                inheritance.name = name.lexeme;
+                // Note: 'from' clause for inheritance is not supported yet.
+                def->inherited_styles.push_back(std::move(inheritance));
             } else {
                 std::string key_str;
                 // A property key can be a single identifier or multiple (e.g. font-family)

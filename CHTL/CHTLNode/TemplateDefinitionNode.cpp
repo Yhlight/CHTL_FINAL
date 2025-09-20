@@ -12,6 +12,9 @@ TemplateDefinitionNode::TemplateDefinitionNode(const TemplateDefinitionNode& oth
     for (const auto& prop : other.style_properties) {
         style_properties.push_back(prop.clone());
     }
+    for (const auto& usage : other.inherited_styles) {
+        inherited_styles.push_back(usage.clone());
+    }
     for (const auto& pair : other.variables) {
         variables[pair.first] = pair.second->clone();
     }
@@ -27,7 +30,14 @@ TemplateDefinitionNode& TemplateDefinitionNode::operator=(const TemplateDefiniti
     for (const auto& node : other.element_body) {
         element_body.push_back(node->clone());
     }
-    style_properties = other.style_properties;
+    style_properties.clear();
+    for (const auto& prop : other.style_properties) {
+        style_properties.push_back(prop.clone());
+    }
+    inherited_styles.clear();
+    for (const auto& usage : other.inherited_styles) {
+        inherited_styles.push_back(usage.clone());
+    }
     variables.clear();
     for (const auto& pair : other.variables) {
         variables[pair.first] = pair.second->clone();
@@ -48,6 +58,11 @@ std::unique_ptr<TemplateDefinitionNode> TemplateDefinitionNode::clone() const {
     // Clone style properties
     for (const auto& prop : this->style_properties) {
         new_def->style_properties.push_back(prop.clone());
+    }
+
+    // Clone inherited styles
+    for (const auto& usage : this->inherited_styles) {
+        new_def->inherited_styles.push_back(usage.clone());
     }
 
     // Clone variables

@@ -40,6 +40,8 @@ private:
     BaseNode* doc_root = nullptr; // To provide context for the evaluator
     std::stringstream html_output;
     std::stringstream css_output;
+
+    std::vector<AttributeNode> collectAndApplyStyles(const StyleTemplateUsage& usage, ElementNode* context_node);
 };
 
 } // namespace CHTL
