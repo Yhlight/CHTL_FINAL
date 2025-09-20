@@ -1269,13 +1269,13 @@ CHTL JS的函数皆为声明式语法
 对于包含CHTL JS的JS文件，你可以命名为*.cjjs  
 
 ### 脚本加载器
-你可以使用scriptloader {}来导入文件
+你可以使用ScriptLoader {}来导入文件
 CHTL JS实现了AMD风格JavaScript文件加载器  
 目的是让开发者能够无序引入js文件，无需考虑加载顺序，文件依赖等问题  
 支持无序键值对，可选键值对，无修饰字面量  
 
 ```chtl
-你可以使用scriptloader {
+你可以使用ScriptLoader {
     load: ./module.cjjs,
     load: ./module2.cjjs,
     load: ./module3.cjjs,
@@ -1399,7 +1399,7 @@ script
 ```
 
 ### 增强监听器
-你现在可以使用listen来快捷绑定事件监听器  
+你现在可以使用Listen来快捷绑定事件监听器
 支持无序键值对，可选键值对，无修饰字面量  
 
 ```chtl
@@ -1417,7 +1417,7 @@ button
 script
 {
     // 声明式
-    {{box}}->listen {
+    {{box}}->Listen {
         click: () => {
 
         },
@@ -1431,6 +1431,41 @@ script
 }
 ```
 
+### 事件绑定操作符
+你现在可以使用 &-> 快捷为一个DOM对象绑定事件
+支持无序键值对，可选键值对，无修饰字面量
+
+```chtl
+{{box}} &-> click: () => {};
+```
+
+#### 多事件绑定
+你可以使用 , 分隔多个事件，同时为多个事件绑定同一个函数
+
+```chtl
+{{box}} &-> click, mouseenter, mouseleave: () => {};
+```
+
+#### 链式绑定
+事件绑定操作符支持链式绑定，注意使用 , 分隔
+
+```chtl
+{{box}} &-> click: () => {},
+        &-> mouseenter: () => {},
+        &-> mouseleave: () => {};
+```
+
+#### 绑定块
+如果上述用法不适合你，你可以使用绑定块
+
+```chtl
+{{box}} &-> {
+    click: () => {},
+    mouseenter: () => {},
+    mouseleave: () => {}
+}
+```
+
 ### 事件委托
 为了解决SPA页面中元素动态更新导致事件监听丢失的问题，提供了基于事件委托的增强语法  
 通过将事件绑定到不会销毁的父元素，监听冒泡阶段的事件，从而实现稳定的事件绑定  
@@ -1439,7 +1474,7 @@ script
 ```chtl
 script
 {
-    {{父元素选择器}}->delegate {
+    {{父元素选择器}}->Delegate {
         target: {{选择器}} | [{{选择器1}}, {{选择器2}},...], // 要代理的子元素对象 / 子元素对象数组
         click: 函数,  // 绑定的事件类型及对应回调函数
         mouseenter: 函数,
@@ -1457,7 +1492,7 @@ CHTL JS简化了动画的使用，封装了requestAnimationFrame
 ```chtl
 script
 {
-    const anim = animate {
+    const anim = Animate {
         target: {{选择器}} || [{{选择器1}}, {{选择器2}}] || DOM对象
         duration: 100,  // 动画持续时间，ms
         easing: ease-in-out,  // 缓慢函数
@@ -1498,7 +1533,7 @@ script
 支持无序键值对，可选键值对，无修饰字面量  
 
 ```
-vir test = listen {
+Vir test = Listen {
     click: () => {
 
     }
@@ -1512,52 +1547,56 @@ test->click();  // 解析click为函数引用
 test->other;  // 解析other为对象
 ```
 
-vir是CHTL JS层面的语法糖，不涉及JS  
-listen会按原样生成JS代码  
-vir本身就不存在，是编译期间的语法糖  
+Vir是CHTL JS层面的语法糖，不涉及JS
+Listen会按原样生成JS代码
+Vir本身就不存在，是编译期间的语法糖
 
 ```
-vir Test = listen {
+Vir Test = Listen {
     click: ()=>{
 
     }
 };
 ```
-编译器扫描到vir时，会创建一个C++对象，这个C++对象负责vir的解析  
+编译器扫描到Vir时，会创建一个C++对象，这个C++对象负责Vir的解析
 假设这个对象为View  
-View对象需要做两件事情，一件是记录vir虚对象的名称，第二个是解析CHTL JS函数中的键，并创建对应表  
+View对象需要做两件事情，一件是记录Vir虚对象的名称，第二个是解析CHTL JS函数中的键，并创建对应表
 后续在解析时，遇到Test->click;时，会根据键值的类型，转换成不同的内容，比如函数引用，对象，数组等，并且这些结果会缓存在View之中，以便后续的解析  
 
 ### 路由
 你可以使用路由快速创建SPA页面的基本架构  
 支持无序键值对，可选键值对，无修饰字面量  
 
-router {
+```chtl
+Router {  // 1对1的关系
     url: "/home",
     page: {{选择器}},
 }
 
-router {
+Router {  // 1对1的关系
     url: "/home", "/about"
     page: {{选择器1}}, {{选择器2}}
 }
+```
 
-router {
+```chtl
+Router {  // 1对1的关系，对象形式
     page: {"/home", {{选择器}}}
         , {"/about",{{选择器2}}}
 }
 
-router {
+Router {  // 设置根路径 / 设置根容器
     root: "/" || {{选择器}},  // 默认根路径 / 变化元素的根容器，这是二选一形式
 }
 
-router {
+Router {  // 设置根路径的同时设置根容器
     root: {"/", {{选择器}}},  // 也可以是全选，对象的形式
 }
 
-router {
+Router {  // 模式
     mode: "history" || "hash",  // 路由的模式
 }
+```
 
 ### 动态属性条件表达式
 无论是属性条件表达式，还是引用属性条件表达式，其本质都是静态的  
@@ -1878,7 +1917,7 @@ iNeverAway需要与虚对象共用
 支持无序键值对，可选键值对，无修饰字面量  
 
 ```chtl
-vir Test = iNeverAway {
+Vir Test = iNeverAway {
     Void<A>: function(int, int) {
 
     },
@@ -1902,7 +1941,7 @@ Test是虚拟对象，是不存在的对象，这里并没有创建一个对象
 
 实现原理：  
 iNeverAway  ->  创建一组JS全局函数，名称由CHTL编译器统一管理，在调用时才生成对应的JS函数代码  
-vir对象本身不存在，最终转变成相对应的函数的引用  
+Vir对象本身不存在，最终转变成相对应的函数的引用
 
 iNeverAway函数存在的意义其实很迷惑人，这是因为相对于使用iNeverAway，更多人更喜欢使用普通的函数  
 这是当然，毕竟iNeverAway存在的意义本身就不是作为实用功能而存在，然而，iNeverAway其实是CHTL JS的一种新方向  
@@ -2058,7 +2097,7 @@ CHTL(项目文件夹，可以换成src)
 这里有一些可选推荐  ->  ANTLR4，libcss，sassc，V8，QuickJS  
 
 ## 语法边界
-全局样式块仅允许使用以下语法元素：模板变量，自定义变量，自定义变量特例化，模板样式组，自定义样式组，无值样式组，自定义样式组特例化，delete属性，delete继承，样式组间继承，生成器注释，全缀名，任意类型原始嵌入（原始嵌入可在任意位置使用），以及通过命名空间引入模板变量，自定义变量，模板样式组，自定义样式组，无值样式组，即from语法  
+全局样式块仅允许使用以下语法元素：属性运算，属性条件表达式，模板变量，自定义变量，自定义变量特例化，模板样式组，自定义样式组，无值样式组，自定义样式组特例化，delete属性，delete继承，样式组间继承，生成器注释，全缀名，任意类型原始嵌入（原始嵌入可在任意位置使用），以及通过命名空间引入模板变量，自定义变量，模板样式组，自定义样式组，无值样式组，即from语法
 
 除局部script外，其他script禁止使用任何CHTL语法，允许例外的元素为：注释及任意类型原始嵌入(二者为特殊存在，可在任意位置使用)  
 
@@ -2264,7 +2303,7 @@ args[0].fillValue(3);
 CHTL JS函数，用于CJMOD API的接口  
 
 ##### CreateCHTLJSFunction
-封装了原始API构建语法的流程，能够快速构建CHTL JS函数，这些CHTL JS函数天然支持虚对象vir以及无修饰字符串    
+封装了原始API构建语法的流程，能够快速构建CHTL JS函数，这些CHTL JS函数天然支持虚对象Vir以及无修饰字符串
 构建的函数天然支持无序键值对，可选键值对，无修饰字面量  
 
 ```cpp
@@ -2278,17 +2317,17 @@ script
     printMyLove({url: "https://www.baidu.com", mode: "auto"});
 }
 
-天然支持vir  
+天然支持Vir
 script
 {
-    vir test = printMyLove({url: "https://www.baidu.com", mode: "auto"});
+    Vir test = printMyLove({url: "https://www.baidu.com", mode: "auto"});
 }
 ```
 
 ##### bindVirtualObject
-绑定虚对象vir  
+绑定虚对象Vir
 对于不使用CreateCHTLJSFunction创建的，但是符合CHTL JS函数的语法  
-可以使用bindVirtualObject手动绑定虚对象vir，获得虚对象的支持  
+可以使用bindVirtualObject手动绑定虚对象Vir，获得虚对象的支持
 
 ```cpp
 Syntax::isCHTLJSFunction("printMyLove {url: $!_, mode: $?_}");  // 输出-> true
@@ -2305,6 +2344,9 @@ CJMOD的代码总是以片段出现，双指针扫描一开始两个指针同时
 #### 前置截取
 前置截取是另一种扫描方式，传统扫描器无法处理arg ** arg2这样的语法片段，因为关键字是**  
 前面的片段会被扫描并切分到片段之中，前置截取就要截取回来，避免将语法发送给编译器，引发错误  
+
+上述两个扫描机制都是作为CJMOD提供给统一扫描器的辅助，而不是统一扫描器的根本算法
+它们应该类似挂件一样，辅助识别
 
 ## 统一扫描器
 ### 概述
@@ -2388,7 +2430,7 @@ CHTL JS会忽略符号以及占位符，这样就能够完全分离CHTL JS和JS�
 反过来，哪怕CHTL JS内部的JS语法也能够完美分离  
 
 ```chtl
-listen {
+Listen {
     click: _JS_CODE_PLACEHOLDER_ {
 
     };
@@ -2396,7 +2438,7 @@ listen {
 ```
 
 ```chtl
-const anim = animate {
+const anim = Animate {
         target: {{选择器}} || [{{选择器1}}, {{选择器2}}] || DOM对象
         duration: 100,  // 动画持续时间，ms
         easing: ease-in-out,  // 缓慢函数
@@ -2428,7 +2470,7 @@ const anim = animate {
 ```
 
 ```chtl
-_JS_CODE_PLACEHOLDER_ animate { 
+_JS_CODE_PLACEHOLDER_ Animate {
     target: {{选择器}} || [{{选择器1}}, {{选择器2}}] || DOM对象
         duration: 100,  // 动画持续时间，ms
         easing: ease-in-out,  // 缓慢函数
@@ -2474,21 +2516,51 @@ CHTL代码几乎总是以块存在，因此可以收集块来推送给编译器
 而chtl js和js相互混杂，chtl js本身具有特殊性，其提供的函数内部甚至可能具有js代码，因此，要做到严判，以最小单元和占位符机制进行处理    
 在处理完毕chtl，chtl js的代码后，毫无疑问，剩下的就是js代码  
 
+### 作用对象
+统一扫描器并不是为了完全分离CHTL，CSS，CHTL JS，JS而存在的体系
+而是为了从混杂的代码中分离非原生语法
+
+统一扫描器的作用对象只有两个，全局style块和所有script块
+在全局style块中允许使用以下CHTL语法 -> 属性运算，属性条件表达式，模板变量，自定义变量，自定义变量特例化，模板样式组，自定义样式组，无值样式组，自定义样式组特例化，delete属性，delete继承，样式组继承，生成器注释，全缀名，任意类型原始嵌入（原始嵌入可在任意位置使用），以及通过命名空间引入模板变量，自定义变量，模板样式组，自定义样式组，无值样式组，即from语法
+
+显然，这些CHTL功能CSS编译器肯定是无法处理的，为此统一扫描器就要对此进行分离
+
+局部script允许使用模板变量，自定义变量组，变量组特例化，命名空间from，CHTL JS与JS
+也就是说，局部script有可能出现三种语言混合的情况
+统一扫描器就要对此进行分离，分成CHTL，JS，CHTL JS的语法片段
+
+非局部script因为严禁使用CHTL语法，所有只需要处理CHTL JS和JS两种语言
+
+然而，这里面最大的难点还是完全分离CHTL JS和JS代码
+
 ### 统一扫描器效果演示
 #### 预留占位符
 在一些情况下，统一扫描器需要与编译器进行交互
 例如CHTL JS中，很多功能都会内置JS代码，如果只是依靠统一扫描器
 那么CHTL JS编译器肯定是无法处理
+
+例如说
+```chtl
+Listen {
+    click: function() { for }
+}
+
+Listen {
+    click: () => { if }
+}
+```
+开发者无法确定用户将会编写什么代码
+为此让CHTL JS编译器去推测用户会写什么语法简直不现实
 因此我们需要预先在代码实现中添加这些占位符，表示CHTL JS编译器不直接处理的语法
 
 ```chtl
-listen {
+Listen {
     click: _CODE_PLACEHOLDER_ ,  // 在代码实现时，添加占位符，让CHTL JS编译器不直接处理其中的语法，而是跳过这部分代码，让CHTL JS编译器更加智能，避免因为引入JS语法的可能
 }
 ```
 
 ```chtl
-listen {
+Listen {
     click: () => { {{box}}->textContent = "Hello World"; }
 }
 ```
@@ -2496,7 +2568,9 @@ listen {
 在实际实现中，统一扫描器会将() => { {{box}}->textContent = "Hello World"; }
 转换为
 _JS_CODE_PLACEHOLDER_ { {{box}}->_JS_CODE_PLACEHOLDER_ }
-这样，由CHTL JS拿到的内容就是占位符 + CHTL JS代码，由此就无需对JS代码进行解析
+_CODE_PLACEHOLDER_将作为CHTL JS的占位符节点，存储占位符 + 纯CHTL JS
+在代码生成的同时，二次处理_CODE_PLACEHOLDER_，将内部的CHTL JS代码转换为JS代码
+这样，拿到的内容就是最终的JS代码，CHTL JS无需为JS负责，无需试图去解析JS语法
 
 #### 语法边界与符号的忽略
 在JS中，很多功能都是具有语法边界的，例如函数，类，if-else等基本的结构
@@ -2505,7 +2579,7 @@ _JS_CODE_PLACEHOLDER_ { {{box}}->_JS_CODE_PLACEHOLDER_ }
 而不是把所有内容都归为占位符
 
 ```chtl
-listen {
+Listen {
     click: () => { if({{box}}->textContent == "HelloWorld") { console.log({{box}}->textContent) } }
 }
 ```
@@ -2638,9 +2712,19 @@ CHTL提供了两个CLI工具，分别为常规命令行与命令行程序
 
 命令行程序则支持常规命令行很多不支持的功能，例如画面渲染，RGB，背景图，半透明等  
 
+### 默认结构
 注意，默认情况下，CHTL编译器不应该提供默认的结构，而是根据用户写了什么内容，生成什么内容  
 这是因为CHTL编译器必须高度支持SPA页面，SPA页面通常不具有结构，尽管生成的结构会被Web处理器忽略，但提供纯净的内容更适合  
 你可以使用编译器指令--default-struct -> 来输出带有默认结构的HTML代码  
+
+### 内联
+默认情况下，CHTL编译后将得到独立的HTML，CSS，JS文件
+你可以使用--inline指令指示编译器生成内联的HTML文件，而非独立的文件
+--inline指令共有三条
+
+--inline
+--inline-css
+--inline-js
 
 ## VSCode IDE
 CHTL项目推荐使用VSCode IDE  

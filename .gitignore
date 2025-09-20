@@ -1,9 +1,6 @@
 # Build artifacts
-build/
-
-# IDE files
-.vscode/
-
-# Other
-*.swp
-*.swo
+test_lexer
+test_parser
+test_pipeline
+*.o
+*.out
