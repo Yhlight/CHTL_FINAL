@@ -1,0 +1,24 @@
+html {
+    head {
+        title { text: "JS Dynamic Prop Test"; }
+    }
+    body {
+        div {
+            id: "sourceBox";
+            style {
+                width: 150px;
+                // A button could change this property in a real app
+                transition: width 0.5s;
+            }
+        }
+
+        div {
+            // This div's background should change when sourceBox's width changes
+            style {
+                height: 50px;
+                width: 200px;
+                background-color: {{#sourceBox}}->width > 100 ? "green" : "red";
+            }
+        }
+    }
+}

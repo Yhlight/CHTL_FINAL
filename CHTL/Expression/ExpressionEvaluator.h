@@ -31,6 +31,7 @@ public:
     void visit(ComparisonExpr& expr) override;
     void visit(LogicalExpr& expr) override;
     void visit(ConditionalExpr& expr) override;
+    void visit(DynamicReferenceExpr& expr) override;
 
 private:
     ElementNode* findElement(BaseNode* context, const std::string& selector);

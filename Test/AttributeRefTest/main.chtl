@@ -1,0 +1,34 @@
+html {
+    head {}
+    body {
+        div {
+            id: "box1";
+            style {
+                width: 150px;
+            }
+        }
+
+        div {
+            class: "container";
+            div {
+                id: "box2";
+                style {
+                    // Reference property from another element by ID
+                    width: #box1.width;
+
+                    // Reference and perform calculation
+                    height: #box1.width / 2;
+                }
+            }
+        }
+
+        span { text:"first"; }
+        span {
+            id: "second-span";
+            style {
+                // Reference property from an element found by tag and index
+                font-size: span[0].width; // This won't resolve to a value, but should parse
+            }
+        }
+    }
+}

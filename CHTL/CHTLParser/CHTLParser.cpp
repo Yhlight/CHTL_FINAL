@@ -763,8 +763,10 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             consume(TokenType::RIGHT_PAREN, "Expect ')'.");
             return std::make_unique<VarExpr>(first_part.lexeme, key_name);
         } else {
-            // Treat standalone identifier as a string literal (e.g., "red", "solid")
-            return std::make_unique<LiteralExpr>(0, first_part.lexeme);
+            // It's a self-referential property (e.g., 'width' in 'width > 100px')
+            // We represent this as a ReferenceExpr with an empty selector.
+            Token empty_selector = {TokenType::IDENTIFIER, "", first_part.line, first_part.position};
+            return std::make_unique<ReferenceExpr>(empty_selector, first_part);
         }
     }
     if (check(TokenType::SYMBOL) && (peek().lexeme == "#" || peek().lexeme == ".")) {
@@ -786,6 +788,17 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
         auto expr = parseExpression();
         consume(TokenType::RIGHT_PAREN, "Expect ')'.");
         return expr;
+    }
+    if (match({TokenType::LEFT_BRACE_BRACE})) {
+        std::string selector;
+        while (!check(TokenType::RIGHT_BRACE_BRACE) && !isAtEnd()) {
+            selector += advance().lexeme;
+        }
+        consume(TokenType::RIGHT_BRACE_BRACE, "Expect '}}' after selector.");
+        consume(TokenType::MINUS, "Expect '->' after selector.");
+        consume(TokenType::GREATER, "Expect '->' after selector.");
+        Token property = consume(TokenType::IDENTIFIER, "Expect property name.");
+        return std::make_unique<DynamicReferenceExpr>(selector, property.lexeme);
     }
     error(peek(), "Expect expression.");
     return nullptr;

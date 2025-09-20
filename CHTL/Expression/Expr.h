@@ -16,6 +16,7 @@ class ReferenceExpr;
 class ComparisonExpr;
 class LogicalExpr;
 class ConditionalExpr;
+class DynamicReferenceExpr;
 
 class ExprVisitor {
 public:
@@ -27,6 +28,7 @@ public:
     virtual void visit(ComparisonExpr& expr) = 0;
     virtual void visit(LogicalExpr& expr) = 0;
     virtual void visit(ConditionalExpr& expr) = 0;
+    virtual void visit(DynamicReferenceExpr& expr) = 0;
 };
 
 class Expr {
@@ -105,6 +107,16 @@ public:
     std::unique_ptr<Expr> condition;
     std::unique_ptr<Expr> then_branch;
     std::unique_ptr<Expr> else_branch;
+};
+
+class DynamicReferenceExpr : public Expr {
+public:
+    DynamicReferenceExpr(const std::string& selector, const std::string& property)
+        : selector(selector), property(property) {}
+    void accept(ExprVisitor& visitor) override;
+    std::unique_ptr<Expr> clone() const override;
+    std::string selector;
+    std::string property;
 };
 
 } // namespace CHTL

@@ -1,0 +1,19 @@
+html {
+    body {
+        div {
+            style {
+                width: 150px;
+                height: width / 2; // Self-reference
+                background-color: height > 100px ? "red" : "blue"; // Dynamic property
+            }
+        }
+
+        div {
+            style {
+                width: 80px;
+                height: width * 2; // Self-reference
+                background-color: height > 100px && width > 50 ? "green" : "yellow"; // Dynamic property with logic
+            }
+        }
+    }
+}

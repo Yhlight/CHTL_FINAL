@@ -1,0 +1,20 @@
+html {
+    head {
+        title { text: "Style Context Test"; }
+    }
+    body {
+        div {
+            style {
+                .box {
+                    color: red;
+                }
+                &:hover {
+                    color: blue;
+                }
+                &::before {
+                    content: "I am a box.";
+                }
+            }
+        }
+    }
+}

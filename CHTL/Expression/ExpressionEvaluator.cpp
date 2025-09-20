@@ -5,6 +5,8 @@
 #include <iostream>
 #include <cmath>
 #include <map>
+#include <sstream>
+#include <algorithm>
 
 namespace CHTL {
 
@@ -12,6 +14,55 @@ static bool isTruthy(const EvaluatedValue& val) {
     if (!val.unit.empty() && val.unit != "0") return true;
     return val.value != 0;
 }
+
+// --- Helper for findElement ---
+// Recursive helper to collect all nodes matching a simple selector
+void collectNodes(BaseNode* context, const std::string& simple_selector, std::vector<ElementNode*>& found_nodes) {
+    if (!context) return;
+    ElementNode* element = dynamic_cast<ElementNode*>(context);
+    if (!element) return;
+
+    char selector_type = simple_selector.empty() ? ' ' : simple_selector[0];
+    std::string selector_value = simple_selector.substr(1);
+
+    bool match = false;
+    if (selector_type == '#') {
+        for (const auto& attr : element->attributes) {
+            if (attr.key == "id" && attr.value == selector_value) {
+                match = true;
+                break;
+            }
+        }
+    } else if (selector_type == '.') {
+        for (const auto& attr : element->attributes) {
+            if (attr.key == "class") {
+                // Whole word match
+                std::stringstream ss(attr.value);
+                std::string class_name;
+                while (ss >> class_name) {
+                    if (class_name == selector_value) {
+                        match = true;
+                        break;
+                    }
+                }
+            }
+            if (match) break;
+        }
+    } else {
+        if (element->tagName == simple_selector) {
+            match = true;
+        }
+    }
+
+    if (match) {
+        found_nodes.push_back(element);
+    }
+
+    for (const auto& child : element->children) {
+        collectNodes(child.get(), simple_selector, found_nodes);
+    }
+}
+
 
 ExpressionEvaluator::ExpressionEvaluator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, BaseNode* doc_root)
     : templates(templates), doc_root(doc_root) {}
@@ -53,9 +104,7 @@ void ExpressionEvaluator::visit(BinaryExpr& expr) {
 }
 
 void ExpressionEvaluator::visit(VarExpr& expr) {
-    std::cout << "Visiting VarExpr: " << expr.group << "(" << expr.name << ")" << std::endl;
     const TemplateDefinitionNode* var_group_def = nullptr;
-    // Find the variable group definition across all namespaces
     for (const auto& ns_pair : templates) {
         if (ns_pair.second.count(expr.group)) {
             var_group_def = &ns_pair.second.at(expr.group);
@@ -64,11 +113,7 @@ void ExpressionEvaluator::visit(VarExpr& expr) {
     }
 
     if (var_group_def && var_group_def->type == TemplateType::VAR) {
-        std::cout << "Found var group: " << expr.group << std::endl;
-        // Find the variable within the group
         if (var_group_def->variables.count(expr.name)) {
-            std::cout << "Found var: " << expr.name << ". Evaluating..." << std::endl;
-            // Evaluate the expression associated with the variable
             result = evaluate(var_group_def->variables.at(expr.name).get(), this->current_context);
             return;
         }
@@ -78,24 +123,51 @@ void ExpressionEvaluator::visit(VarExpr& expr) {
 }
 
 void ExpressionEvaluator::visit(ReferenceExpr& expr) {
-    std::string full_ref_name = expr.selector.lexeme + "." + expr.property.lexeme;
-    if (resolution_stack.count(full_ref_name)) {
-        throw std::runtime_error("Circular property reference detected.");
-    }
-    ElementNode* target_element = findElement(doc_root, expr.selector.lexeme);
-    if (!target_element) {
-        throw std::runtime_error("Reference selector not found.");
+    ElementNode* target_element = nullptr;
+    if (expr.selector.lexeme.empty()) {
+        // This is a self-reference to the current element's property
+        target_element = this->current_context;
+    } else {
+        // This is a reference to another element
+        target_element = findElement(doc_root, expr.selector.lexeme);
     }
 
+    std::string full_ref_name = expr.selector.lexeme + "." + expr.property.lexeme;
+    if (resolution_stack.count(full_ref_name)) {
+        throw std::runtime_error("Circular property reference detected: " + full_ref_name);
+    }
+
+    if (!target_element) {
+        throw std::runtime_error("Reference selector '" + expr.selector.lexeme + "' not found.");
+    }
+
+    // This logic is duplicated from the main generator, but is necessary here
+    // to correctly calculate the property value of the referenced element.
     for (const auto& child : target_element->children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             std::map<std::string, AttributeNode> final_props;
+
+            // 1. Apply templates
             for (const auto& app : styleNode->template_applications) {
-                // ... logic to apply templates ...
+                const TemplateDefinitionNode* def = nullptr;
+                for (const auto& ns_pair : this->templates) {
+                    if (ns_pair.second.count(app.template_name)) {
+                        def = &ns_pair.second.at(app.template_name);
+                        break;
+                    }
+                }
+                if (def && def->type == TemplateType::STYLE) {
+                    for (const auto& prop : def->style_properties) { final_props[prop.key] = prop.clone(); }
+                    for (const auto& key_to_delete : app.deleted_properties) { final_props.erase(key_to_delete); }
+                    for (const auto& prop : app.new_or_overridden_properties) { final_props[prop.key] = prop.clone(); }
+                }
             }
+            // 2. Apply direct properties
             for (const auto& prop : styleNode->direct_properties) {
                 final_props[prop.key] = prop.clone();
             }
+
+            // 3. Find and evaluate the requested property
             if (final_props.count(expr.property.lexeme)) {
                 resolution_stack.insert(full_ref_name);
                 result = evaluate(final_props.at(expr.property.lexeme).value_expr.get(), target_element);
@@ -104,7 +176,7 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
             }
         }
     }
-    throw std::runtime_error("Reference property not found.");
+    throw std::runtime_error("Reference property '" + expr.property.lexeme + "' not found on element '" + expr.selector.lexeme + "'.");
 }
 
 void ExpressionEvaluator::visit(ComparisonExpr& expr) {
@@ -142,27 +214,51 @@ void ExpressionEvaluator::visit(ConditionalExpr& expr) {
     }
 }
 
+void ExpressionEvaluator::visit(DynamicReferenceExpr& expr) {
+    // This should not be evaluated statically. The generator is responsible for
+    // creating the dynamic JS code. If this is called, it's an error in the
+    // generator's logic.
+    throw std::runtime_error("DynamicReferenceExpr cannot be evaluated statically.");
+}
+
 ElementNode* ExpressionEvaluator::findElement(BaseNode* context, const std::string& selector) {
-    if (!context) return nullptr;
-    ElementNode* element = dynamic_cast<ElementNode*>(context);
-    if (!element) return nullptr;
-    char selector_type = selector.empty() ? ' ' : selector[0];
-    if (selector_type == '#') {
-        std::string id = selector.substr(1);
-        for (const auto& attr : element->attributes) {
-            if (attr.key == "id" && attr.value == id) return element;
+    // Handle indexed selectors like "div[0]"
+    size_t bracket_pos = selector.find('[');
+    std::string base_selector = selector;
+    int index = 0;
+    if (bracket_pos != std::string::npos) {
+        base_selector = selector.substr(0, bracket_pos);
+        size_t end_bracket_pos = selector.find(']', bracket_pos);
+        try {
+            index = std::stoi(selector.substr(bracket_pos + 1, end_bracket_pos - bracket_pos - 1));
+        } catch (...) {
+            throw std::runtime_error("Invalid index in selector: " + selector);
         }
-    } else if (selector_type == '.') {
-        std::string className = selector.substr(1);
-        for (const auto& attr : element->attributes) {
-            if (attr.key == "class" && attr.value.find(className) != std::string::npos) return element;
+    }
+
+    // Handle descendant selectors
+    std::stringstream ss(base_selector);
+    std::string segment;
+    std::vector<std::string> segments;
+    while(ss >> segment) {
+        segments.push_back(segment);
+    }
+
+    std::vector<ElementNode*> current_nodes;
+    collectNodes(context, segments[0], current_nodes);
+
+    for (size_t i = 1; i < segments.size(); ++i) {
+        std::vector<ElementNode*> next_nodes;
+        for (ElementNode* node : current_nodes) {
+            collectNodes(node, segments[i], next_nodes);
         }
-    } else {
-        if (element->tagName == selector) return element;
+        current_nodes = next_nodes;
     }
-    for (const auto& child : element->children) {
-        if (ElementNode* found = findElement(child.get(), selector)) return found;
+
+    if (index < current_nodes.size()) {
+        return current_nodes[index];
     }
+
     return nullptr;
 }
 

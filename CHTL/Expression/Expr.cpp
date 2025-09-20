@@ -34,4 +34,9 @@ std::unique_ptr<Expr> ConditionalExpr::clone() const {
     return std::make_unique<ConditionalExpr>(condition->clone(), then_branch->clone(), else_branch->clone());
 }
 
+void DynamicReferenceExpr::accept(ExprVisitor& visitor) { visitor.visit(*this); }
+std::unique_ptr<Expr> DynamicReferenceExpr::clone() const {
+    return std::make_unique<DynamicReferenceExpr>(selector, property);
+}
+
 } // namespace CHTL
