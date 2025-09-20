@@ -1,102 +1,112 @@
 #include "CHTLUnifiedScanner.h"
-#include <stdexcept>
 #include <iostream>
 
 namespace CHTL {
 
 CHTLUnifiedScanner::CHTLUnifiedScanner(const std::string& source)
-    : source(source) {}
+    : source(source), current(0), line(1) {}
 
-// This is a more robust implementation that correctly handles brace nesting.
+bool CHTLUnifiedScanner::isAtEnd() {
+    return current >= source.length();
+}
+
+char CHTLUnifiedScanner::advance() {
+    if (!isAtEnd()) {
+        if (source[current] == '\n') {
+            line++;
+        }
+        current++;
+    }
+    return source[current - 1];
+}
+
+char CHTLUnifiedScanner::peek() {
+    if (isAtEnd()) return '\0';
+    return source[current];
+}
+
+void CHTLUnifiedScanner::skipWhitespaceAndComments() {
+    while (!isAtEnd()) {
+        char c = peek();
+        if (c == ' ' || c == '\r' || c == '\t' || c == '\n') {
+            advance();
+        } else if (c == '/' && (current + 1 < source.length() && source[current + 1] == '/')) {
+            while (peek() != '\n' && !isAtEnd()) advance();
+        } else if (c == '/' && (current + 1 < source.length() && source[current + 1] == '*')) {
+            advance(); advance(); // Consume /*
+            while (!isAtEnd() && !(peek() == '*' && (current + 1 < source.length() && source[current + 1] == '/'))) {
+                advance();
+            }
+            if (!isAtEnd()) { advance(); advance(); } // Consume */
+        } else {
+            return;
+        }
+    }
+}
+
 std::vector<CodeFragment> CHTLUnifiedScanner::scan() {
     std::vector<CodeFragment> fragments;
-    std::string buffer;
-    int line_start = 1;
+    size_t last_fragment_end = 0;
     int brace_level = 0;
 
-    for (current = 0; current < source.length(); ++current) {
-        // Naive comment skipping for this pass.
-        if (source[current] == '/' && current + 1 < source.length()) {
-            if (source[current + 1] == '/') {
-                buffer += source[current];
-                current++;
-                while(current < source.length() && source[current] != '\n') {
-                    buffer += source[current];
-                    current++;
-                }
-                 if(current < source.length()) buffer += source[current];
-                continue;
+    for (size_t i = 0; i < source.length(); ++i) {
+        if (source[i] == '{') {
+            brace_level++;
+        } else if (source[i] == '}') {
+            if (brace_level > 0) {
+                brace_level--;
             }
-            if (source[current + 1] == '*') {
-                 buffer += source[current];
-                 current++;
-                 buffer += source[current];
-                 current++;
-                 while(current + 1 < source.length() && (source[current] != '*' || source[current+1] != '/')) {
-                     buffer += source[current];
-                     current++;
-                 }
-                 if(current < source.length()) buffer += source[current];
-                 current++;
-                 if(current < source.length()) buffer += source[current];
-                 continue;
+        } else if (brace_level == 0) {
+            // Only check for keywords at the top level
+            bool is_style = (source.substr(i, 5) == "style" && !isalnum(source[i+5]));
+            bool is_script = (source.substr(i, 6) == "script" && !isalnum(source[i+6]));
+
+            if (is_style || is_script) {
+                size_t keyword_end = i + (is_style ? 5 : 6);
+                size_t block_start = source.find('{', keyword_end);
+
+                if (block_start != std::string::npos) {
+                    // Check if there is anything other than whitespace between keyword and brace
+                    bool valid_block = true;
+                    for(size_t j = keyword_end; j < block_start; ++j) {
+                        if (!isspace(source[j])) {
+                            valid_block = false;
+                            break;
+                        }
+                    }
+
+                    if (valid_block) {
+                        // Found a top-level block.
+                        // 1. Add preceding CHTL fragment
+                        if (i > last_fragment_end) {
+                            fragments.push_back({FragmentType::CHTL, source.substr(last_fragment_end, i - last_fragment_end), 0});
+                        }
+
+                        // 2. Find matching brace and add block fragment
+                        int inner_brace_level = 1;
+                        size_t block_content_start = block_start + 1;
+                        size_t block_end = block_content_start;
+                        while (block_end < source.length() && inner_brace_level > 0) {
+                            if (source[block_end] == '{') inner_brace_level++;
+                            else if (source[block_end] == '}') inner_brace_level--;
+                            block_end++;
+                        }
+
+                        if (inner_brace_level == 0) {
+                             std::string content = source.substr(block_content_start, block_end - block_content_start - 1);
+                             fragments.push_back({is_style ? FragmentType::CSS : FragmentType::JS, content, 0});
+                             last_fragment_end = block_end;
+                             i = block_end -1; // continue scan after the block
+                        }
+                    }
+                }
             }
         }
-
-        // Look for top-level style/script blocks
-        if (brace_level == 0) {
-            bool is_style = source.substr(current, 5) == "style";
-            bool is_script = source.substr(current, 6) == "script";
-
-            // Lookahead to confirm it's a block and not just a property name
-            int lookahead = current + (is_style ? 5 : (is_script ? 6 : 0));
-            while(lookahead < source.length() && isspace(source[lookahead])) {
-                lookahead++;
-            }
-
-            if ((is_style || is_script) && lookahead < source.length() && source[lookahead] == '{') {
-                // Found a global block. Finalize the preceding CHTL fragment.
-                if (!buffer.empty()) {
-                    fragments.push_back({FragmentType::CHTL, buffer, line_start});
-                    buffer.clear();
-                }
-
-                // Start of the new special fragment
-                FragmentType type = is_style ? FragmentType::CSS : FragmentType::JS;
-                int content_start = lookahead + 1;
-                int content_line_start = line; // Approximate line
-
-                current = content_start;
-                int inner_brace_level = 1;
-                while(current < source.length() && inner_brace_level > 0) {
-                    if(source[current] == '{') inner_brace_level++;
-                    if(source[current] == '}') inner_brace_level--;
-                    current++;
-                }
-
-                int content_end = current - 1;
-                fragments.push_back({
-                    type,
-                    source.substr(content_start, content_end - content_start),
-                    content_line_start
-                });
-
-                // Reset for the next CHTL fragment
-                current--; // The loop's ++ will put us at the char after '}'
-                line_start = line;
-                continue;
-            }
-        }
-
-        if (source[current] == '{') brace_level++;
-        if (source[current] == '}') brace_level--;
-
-        buffer += source[current];
     }
 
-    // Add the final buffer content as a CHTL fragment
-    if (!buffer.empty()) {
-        fragments.push_back({FragmentType::CHTL, buffer, line_start});
+    // Add the final remaining CHTL fragment
+    if (last_fragment_end < source.length()) {
+        fragments.push_back({FragmentType::CHTL, source.substr(last_fragment_end), 0});
     }
 
     return fragments;

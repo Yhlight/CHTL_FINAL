@@ -18,7 +18,7 @@ int main() {
 
     try {
         CHTL::CompilerDispatcher dispatcher(source);
-        CHTL::FinalOutput compiled_output = dispatcher.dispatch();
+        CHTL::CompilationResult compiled_output = dispatcher.dispatch();
 
         std::cout << "\n--- Merging ---" << std::endl;
         CHTL::CodeMerger merger(compiled_output);

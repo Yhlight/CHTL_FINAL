@@ -40,7 +40,7 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
             root->accept(*this);
         }
     }
-    return {html_output.str(), css_output.str()};
+    return {html_output.str(), css_output.str(), ""};
 }
 
 void CHTLGenerator::visit(ElementNode& node) {

@@ -4,7 +4,7 @@
 
 namespace CHTL {
 
-CodeMerger::CodeMerger(const FinalOutput& output) : output(output) {}
+CodeMerger::CodeMerger(const CompilationResult& output) : output(output) {}
 
 std::string CodeMerger::mergeToSingleFile() const {
     std::string result = "<html>\n<head>\n";

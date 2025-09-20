@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
         std::string source = CHTL::FileSystem::readFile(input_file);
 
         CHTL::CompilerDispatcher dispatcher(source);
-        CHTL::FinalOutput compiled_output = dispatcher.dispatch();
+        CHTL::CompilationResult compiled_output = dispatcher.dispatch();
 
         CHTL::CodeMerger merger(compiled_output);
         if (inline_output) {

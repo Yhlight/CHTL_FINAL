@@ -4,16 +4,12 @@
 #include "../CHTLNode/Visitor.h"
 #include "../CHTLNode/BaseNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../CompilerDispatcher/CompilerDispatcher.h" // For CompilationResult
 #include <string>
 #include <sstream>
 #include <map>
 
 namespace CHTL {
-
-struct CompilationResult {
-    std::string html;
-    std::string css;
-};
 
 // The CHTLGenerator traverses the AST using the Visitor pattern
 // and generates the final HTML and CSS output.

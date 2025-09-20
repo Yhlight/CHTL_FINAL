@@ -1,14 +1,14 @@
 #ifndef CODE_MERGER_H
 #define CODE_MERGER_H
 
-#include "../CompilerDispatcher/CompilerDispatcher.h" // For FinalOutput
+#include "../CompilerDispatcher/CompilerDispatcher.h" // For CompilationResult
 #include <string>
 
 namespace CHTL {
 
 class CodeMerger {
 public:
-    CodeMerger(const FinalOutput& output);
+    CodeMerger(const CompilationResult& output);
 
     // Merges everything into a single string (for inline HTML)
     std::string mergeToSingleFile() const;
@@ -17,7 +17,7 @@ public:
     void saveToSeparateFiles(const std::string& base_filename) const;
 
 private:
-    const FinalOutput& output;
+    const CompilationResult& output;
 };
 
 } // namespace CHTL
