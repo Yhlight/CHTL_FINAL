@@ -3,10 +3,37 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <unordered_set>
 #include <cctype>
 
 namespace CHTL {
+
+// Helper function to check if a string is only whitespace
+static bool is_whitespace(const std::string& s) {
+    return std::all_of(s.begin(), s.end(), isspace);
+}
+
+// Helper function to trim from start (in place)
+static inline void ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+// Helper function to trim from end (in place)
+static inline void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+// Helper function to trim from both ends (in place)
+static inline void trim(std::string &s) {
+    ltrim(s);
+    rtrim(s);
+}
+
 
 // Forward declarations of helper methods
 static std::vector<CodeFragment> processScriptBlock(const std::string& content, int line_start);
@@ -119,42 +146,37 @@ std::vector<CodeFragment> CHTLUnifiedScanner::scan() {
 
 static std::vector<CodeFragment> processStyleBlock(const std::string& content, int line_start) {
     std::vector<CodeFragment> fragments;
-    std::string buffer;
     int current_pos = 0;
     int current_line = line_start;
 
-    while (current_pos < content.length()) {
-        char current_char = content[current_pos];
-        if (current_char == '\n') current_line++;
+    // Removed '-' from operators to prevent mis-classifying CSS properties like 'text-align'
+    const std::string chtl_operators = "?+*/";
 
-        // Look for CHTL-in-CSS syntax triggers
-        // This is a simplified first pass, focusing on @-rules and #-comments
-        if (current_char == '@' || current_char == '#') {
-             if (!buffer.empty()) {
-                fragments.push_back({FragmentType::CSS, buffer, current_line});
-                buffer.clear();
-            }
+    while(current_pos < content.length()) {
+        int statement_start = current_pos;
+        int statement_end = content.find(';', statement_start);
 
-            int chtl_start = current_pos;
-            // Capture until the end of the statement (semicolon)
-            while (current_pos < content.length() && content[current_pos] != ';') {
-                 if (content[current_pos] == '\n') current_line++;
-                 current_pos++;
-            }
-             if (current_pos < content.length()) { // include the semicolon
-                current_pos++;
-            }
-
-            fragments.push_back({FragmentType::CHTL, content.substr(chtl_start, current_pos - chtl_start), current_line});
-            continue;
+        if (statement_end == std::string::npos) {
+            statement_end = content.length();
+        } else {
+            statement_end++; // include the semicolon
         }
 
-        buffer += current_char;
-        current_pos++;
-    }
+        std::string statement = content.substr(statement_start, statement_end - statement_start);
+        trim(statement);
 
-    if (!buffer.empty()) {
-        fragments.push_back({FragmentType::CSS, buffer, current_line});
+        if (!statement.empty()) {
+            bool is_chtl = statement.find('@') != std::string::npos ||
+                           statement.find('#') != std::string::npos ||
+                           statement.find_first_of(chtl_operators) != std::string::npos;
+
+            if (is_chtl) {
+                fragments.push_back({FragmentType::CHTL, statement, current_line});
+            } else {
+                fragments.push_back({FragmentType::CSS, statement, current_line});
+            }
+        }
+        current_pos = statement_end;
     }
 
     if (fragments.empty() && !content.empty()) {
@@ -183,11 +205,19 @@ static std::vector<CodeFragment> processScriptBlock(const std::string& content, 
         "Listen", "Delegate", "Animate", "Vir", "Router", "ScriptLoader", "iNeverAway", "printMylove", "util"
     };
 
+    auto push_js_buffer = [&](std::string& buf) {
+        if (!buf.empty() && !is_whitespace(buf)) {
+            fragments.push_back({FragmentType::JS, buf, current_line});
+        }
+        buf.clear();
+    };
+
     while (current_pos < content.length()) {
         char current_char = content[current_pos];
+        bool chtl_found = false;
+
         if (content[current_pos] == '\n') current_line++;
 
-        // State transition logic
         if (state == ScriptState::NORMAL) {
             if (current_char == '\'' && prev_char != '\\') state = ScriptState::IN_SINGLE_QUOTE_STRING;
             else if (current_char == '"' && prev_char != '\\') state = ScriptState::IN_DOUBLE_QUOTE_STRING;
@@ -200,77 +230,61 @@ static std::vector<CodeFragment> processScriptBlock(const std::string& content, 
             if (current_char == '`' && prev_char != '\\') state = ScriptState::NORMAL;
         }
 
-        // CHTL JS detection logic (only runs in NORMAL state)
         if (state == ScriptState::NORMAL) {
+            int chtl_start = current_pos;
+            int chtl_end = -1;
+
             if (content.substr(current_pos, 2) == "{{") {
-                if (!buffer.empty()) fragments.push_back({FragmentType::JS, buffer, current_line});
-                buffer.clear();
+                chtl_end = current_pos + 2;
+                while (chtl_end + 1 < content.length() && content.substr(chtl_end, 2) != "}}") chtl_end++;
+                chtl_end += 2;
+            } else if (content.substr(current_pos, 3) == "&->") {
+                chtl_end = current_pos + 3;
+            } else if (current_char == '$' && current_pos + 1 < content.length() && isalpha(content[current_pos + 1])) {
+                chtl_end = current_pos + 1;
+                while (chtl_end < content.length() && content[chtl_end] != '$') chtl_end++;
+                chtl_end++;
+            } else {
+                 for (const auto& keyword : chtl_js_keywords) {
+                    if (content.substr(current_pos, keyword.length()) == keyword) {
+                        if (current_pos > 0 && isalnum(content[current_pos-1])) continue;
+                        if (current_pos + keyword.length() < content.length() && isalnum(content[current_pos + keyword.length()])) continue;
 
-                int chtl_start = current_pos;
-                current_pos += 2;
-                while (current_pos + 1 < content.length() && content.substr(current_pos, 2) != "}}") {
-                    if (content[current_pos] == '\n') current_line++;
-                    current_pos++;
-                }
-                current_pos += 2;
-                fragments.push_back({FragmentType::CHTL_JS, content.substr(chtl_start, current_pos - chtl_start), current_line});
-                prev_char = '\0';
-                continue;
-            }
-
-            bool keyword_found = false;
-            for (const auto& keyword : chtl_js_keywords) {
-                if (content.substr(current_pos, keyword.length()) == keyword) {
-                    if (current_pos > 0 && isalnum(content[current_pos-1])) continue;
-                    if (current_pos + keyword.length() < content.length() && isalnum(content[current_pos + keyword.length()])) continue;
-
-                    if (!buffer.empty()) fragments.push_back({FragmentType::JS, buffer, current_line});
-                    buffer.clear();
-
-                    int chtl_start = current_pos;
-                    int lookahead = current_pos + keyword.length();
-                    while (lookahead < content.length() && isspace(content[lookahead])) {
-                        if (content[lookahead] == '\n') current_line++;
-                        lookahead++;
-                    }
-
-                    if (lookahead < content.length() && content[lookahead] == '{') {
-                        int brace_level = 1;
-                        lookahead++;
-                        while (lookahead < content.length() && brace_level > 0) {
-                            if (content[lookahead] == '\n') current_line++;
-                            else if (content[lookahead] == '{') brace_level++;
-                            else if (content[lookahead] == '}') brace_level--;
-                            lookahead++;
+                        chtl_end = current_pos + keyword.length();
+                        while (chtl_end < content.length() && isspace(content[chtl_end])) chtl_end++;
+                        if (chtl_end < content.length() && content[chtl_end] == '{') {
+                            int brace_level = 1;
+                            chtl_end++;
+                            while (chtl_end < content.length() && brace_level > 0) {
+                                if (content[chtl_end] == '{') brace_level++;
+                                else if (content[chtl_end] == '}') brace_level--;
+                                chtl_end++;
+                            }
+                        } else {
+                            while (chtl_end < content.length() && chtl_end != '\n' && content[chtl_end] != ';') chtl_end++;
                         }
-                        current_pos = lookahead;
-                    } else {
-                        while (current_pos < content.length() && content[current_pos] != ';' && content[current_pos] != '\n') {
-                            current_pos++;
-                        }
+                        break;
                     }
-
-                    fragments.push_back({FragmentType::CHTL_JS, content.substr(chtl_start, current_pos - chtl_start), current_line});
-                    keyword_found = true;
-                    prev_char = '\0';
-                    break;
                 }
             }
-            if (keyword_found) continue;
+
+            if (chtl_end != -1) {
+                push_js_buffer(buffer);
+                fragments.push_back({FragmentType::CHTL_JS, content.substr(chtl_start, chtl_end - chtl_start), current_line});
+                current_pos = chtl_end - 1;
+                chtl_found = true;
+            }
         }
 
-        buffer += current_char;
+        if (!chtl_found) {
+            buffer += current_char;
+        }
+
         prev_char = current_char;
         current_pos++;
     }
 
-    if (!buffer.empty()) {
-        fragments.push_back({FragmentType::JS, buffer, current_line});
-    }
-
-    if (fragments.empty() && !content.empty()) {
-        return {{FragmentType::JS, content, line_start}};
-    }
+    push_js_buffer(buffer);
 
     if (fragments.empty() && !content.empty()) {
         return {{FragmentType::JS, content, line_start}};
