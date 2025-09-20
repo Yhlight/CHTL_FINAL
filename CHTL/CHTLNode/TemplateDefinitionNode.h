@@ -13,7 +13,8 @@ namespace CHTL {
 enum class TemplateType {
     ELEMENT,
     STYLE,
-    VAR
+    VAR,
+    CHTL
 };
 
 class TemplateDefinitionNode {

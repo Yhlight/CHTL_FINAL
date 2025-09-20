@@ -36,6 +36,10 @@ namespace CHTL {
         void scanSource();
         // Specific scanner for script content
         void scanScriptContent(size_t block_end);
+        // Specific scanner for style content
+        void scanStyleContent(size_t block_end);
+        // Helper to sanitize CHTL JS blocks by replacing JS functions with placeholders
+        std::string sanitizeCHTLJSBlock(const std::string& block_content);
 
         std::vector<CodeFragment> m_fragments;
     };

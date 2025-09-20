@@ -1,0 +1,25 @@
+head {
+    title { text: "Scanner Fix Test"; }
+}
+
+body {
+    div {
+        id: "test-div";
+        text: "Hello World";
+    }
+}
+
+style {
+    body {
+        font-family: sans-serif;
+    }
+}
+
+script {
+    const myDiv = {{#test-div}};
+    myDiv->Listen {
+        click: () => {
+            console.log("Clicked!");
+        }
+    };
+}
