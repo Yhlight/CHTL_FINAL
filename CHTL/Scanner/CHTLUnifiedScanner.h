@@ -4,6 +4,7 @@
 #include "CodeFragment.h"
 #include <string>
 #include <vector>
+#include <set>
 
 namespace CHTL {
 
@@ -14,17 +15,41 @@ public:
 
 private:
     const std::string& source;
-    int current = 0;
+    size_t current = 0;
     int line = 1;
 
-    // Helper methods for scanning
-    bool isAtEnd();
-    char advance();
-    char peek();
-    void skipWhitespaceAndComments();
+    // --- State Management ---
+    std::vector<CodeFragment> fragments;
+    std::string buffer;
+    int line_start = 1;
 
-    // The core logic to find and extract top-level blocks
-    void findNextBlock(std::vector<CodeFragment>& fragments);
+    // --- Core Scanning Logic ---
+    void scanNextFragment();
+    void finalizeCurrentFragment(FragmentType type);
+
+    // --- Block Handlers ---
+    void handleStyleBlock();
+    void handleScriptBlock();
+    void scanJsAndChtlJs(const std::string& script_source);
+
+    // --- Helper Methods ---
+    bool isAtEnd() const;
+    char advance();
+    char peek() const;
+    char peekNext() const;
+    bool match(const std::string& expected);
+    void skipWhitespace();
+    void skipLineComment();
+    void skipBlockComment();
+    void skipStringLiteral();
+    bool isChtlJsKeyword();
+
+    // --- CHTL JS Keyword Recognition ---
+    // Using a set for efficient lookup of CHTL JS keywords.
+    const std::set<std::string> CHTL_JS_KEYWORDS = {
+        "Listen", "Delegate", "Animate", "Vir", "Router", "ScriptLoader", "util"
+    };
+    const std::string JS_PLACEHOLDER = "_JS_CODE_PLACEHOLDER_";
 };
 
 } // namespace CHTL
