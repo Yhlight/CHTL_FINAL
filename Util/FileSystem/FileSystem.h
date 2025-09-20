@@ -10,6 +10,7 @@ public:
     static std::string readFile(const std::string& path);
     static void writeFile(const std::string& path, const std::string& content);
     static std::string getDirectory(const std::string& path);
+    static bool fileExists(const std::string& path);
 };
 
 } // namespace CHTL

@@ -21,7 +21,7 @@ struct CompilationResult {
 
 class CHTLGenerator : public Visitor {
 public:
-    explicit CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, std::shared_ptr<Configuration> config);
+    explicit CHTLGenerator(const std::map<std::string, std::map<std::string, std::unique_ptr<TemplateDefinitionNode>>>& templates, std::shared_ptr<Configuration> config);
     CompilationResult generate(BaseNode* root, bool use_html5_doctype);
 
     void visit(ElementNode& node) override;
@@ -35,7 +35,7 @@ private:
     std::stringstream html_output;
     std::stringstream css_output;
     std::stringstream js_output;
-    const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
+    const std::map<std::string, std::map<std::string, std::unique_ptr<TemplateDefinitionNode>>>& templates;
     BaseNode* doc_root = nullptr;
     std::map<std::string, std::vector<CHTL_JS::DelegateNode>> delegate_registry;
 };

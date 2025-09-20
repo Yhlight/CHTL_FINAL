@@ -64,7 +64,7 @@ std::string generateDynamicJS(
 }
 
 
-CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, std::shared_ptr<Configuration> config)
+CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, std::unique_ptr<TemplateDefinitionNode>>>& templates, std::shared_ptr<Configuration> config)
     : templates(templates), config(config), doc_root(nullptr) {}
 
 CompilationResult CHTLGenerator::generate(BaseNode* root, bool use_html5_doctype) {
@@ -179,7 +179,7 @@ void CHTLGenerator::visit(ElementNode& node) {
                 const TemplateDefinitionNode* def = nullptr;
                 for (const auto& ns_pair : this->templates) {
                     if (ns_pair.second.count(app.template_name)) {
-                        def = &ns_pair.second.at(app.template_name);
+                        def = ns_pair.second.at(app.template_name).get();
                         break;
                     }
                 }

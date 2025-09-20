@@ -3,84 +3,48 @@
 #include "CHTLParser/CHTLParser.h"
 #include "CHTLLexer/CHTLLexer.h"
 #include "CHTLGenerator/CHTLGenerator.h"
-#include "Config/Configuration.h"
+#include "CHTLNode/Visitor.h"
+#include "CHTLNode/StyleNode.h"
+#include "CHTLNode/ScriptNode.h"
+#include "ScriptContentProcessor.h"
 
-// CHTL JS Includes
+// CHTL JS Includes (will be needed by the walker)
 #include "../CHTL JS/CHTLJSLexer/CHTLJSLexer.h"
 #include "../CHTL JS/CHTLJSParser/CHTLJSParser.h"
 #include "../CHTL JS/CHTLJSGenerator/CHTLJSGenerator.h"
-
 
 namespace CHTL {
 
     CompilerDispatcher::CompilerDispatcher(std::shared_ptr<Configuration> config, const std::string& filePath)
         : m_config(config), m_filePath(filePath) {}
 
-    FinalCompilationResult CompilerDispatcher::dispatch(const std::vector<CodeFragment>& fragments) {
-        FinalCompilationResult combinedResult;
-        std::string chtl_content;
-        std::string css_content;
-        std::string chtl_js_content_with_placeholders;
-        std::map<std::string, std::string> plain_js_fragments;
+    FinalCompilationResult CompilerDispatcher::dispatch(const std::string& source) {
+        // Step 1: Lex the source code into tokens.
+        CHTLLexer lexer(source, m_config);
+        auto tokens = lexer.scanTokens();
 
-        // Step 1: Separate all fragments into their respective buckets.
-        for (const auto& fragment : fragments) {
-            switch (fragment.type) {
-                case FragmentType::CHTL:
-                    chtl_content += fragment.content;
-                    break;
-                case FragmentType::CSS:
-                    css_content += fragment.content;
-                    break;
-                case FragmentType::CHTL_JS:
-                    chtl_js_content_with_placeholders += fragment.content;
-                    break;
-                case FragmentType::JS:
-                    plain_js_fragments[fragment.placeholder_id] = fragment.content;
-                    break;
-                case FragmentType::UNKNOWN:
-                    break;
-            }
-        }
+        // Step 2: Parse the tokens into an Abstract Syntax Tree (AST).
+        CHTLParser parser(source, tokens, m_filePath, m_config);
+        auto root = parser.parse();
+        bool use_doctype = parser.getUseHtml5Doctype();
 
-        // Step 2: Compile the concatenated CHTL content.
-        if (!chtl_content.empty()) {
-            CHTLLexer lexer(chtl_content, m_config);
-            auto tokens = lexer.scanTokens();
-            CHTLParser parser(chtl_content, tokens, m_filePath, m_config);
-            auto root = parser.parse();
-            bool use_doctype = parser.getUseHtml5Doctype();
-            CHTLGenerator generator(parser.getTemplateDefinitions(), m_config);
-            CompilationResult result = generator.generate(root.get(), use_doctype);
+        // Step 3: Generate code from the AST.
+        CHTLGenerator generator(parser.getMutableTemplateDefinitions(), m_config);
+        CompilationResult chtl_result = generator.generate(root.get(), use_doctype);
 
-            combinedResult.html = result.html;
-            combinedResult.css = result.css + css_content;
-            // JS from CHTL generator (e.g. from inside script nodes) needs to be handled
-            // This generated JS might itself contain CHTL_JS that needs processing.
-            // For now, we assume script blocks are handled by the scanner and we add the generator's JS.
-            combinedResult.js = result.js;
+        FinalCompilationResult result;
+        result.html = chtl_result.html;
+        result.css = chtl_result.css;
+
+        // Step 4: Process the collected JavaScript content.
+        if (!chtl_result.js.empty()) {
+            ScriptContentProcessor processor(m_config);
+            result.js = processor.process(chtl_result.js);
         } else {
-            combinedResult.css = css_content;
+            result.js = "";
         }
 
-        // Step 3: Compile the CHTL_JS content.
-        std::string generated_js_with_placeholders;
-        if (!chtl_js_content_with_placeholders.empty()) {
-            CHTL_JS::CHTLJSLexer lexer(chtl_js_content_with_placeholders);
-            auto tokens = lexer.scanTokens();
-            CHTL_JS::CHTLJSParser parser(tokens, chtl_js_content_with_placeholders);
-            auto ast_nodes = parser.parse();
-            CHTL_JS::CHTLJSGenerator generator;
-            for(const auto& node : ast_nodes) {
-                generated_js_with_placeholders += generator.generate(node.get());
-            }
-        }
-
-        // Step 4: Merge the plain JS with the compiled CHTL_JS
-        std::string merged_js = CodeMerger::mergeJavaScript(generated_js_with_placeholders, plain_js_fragments);
-        combinedResult.js += merged_js;
-
-        return combinedResult;
+        return result;
     }
 
 } // namespace CHTL

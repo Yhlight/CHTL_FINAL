@@ -1,0 +1,6 @@
+[Import] @Chtl from "lib.chtl";
+
+body
+{
+    @Element Box;
+}

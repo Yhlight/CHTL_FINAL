@@ -1,7 +1,6 @@
 #ifndef CHTL_CODE_MERGER_H
 #define CHTL_CODE_MERGER_H
 
-#include "../Scanner/CHTLUnifiedScanner.h" // For CodeFragment
 #include <string>
 #include <vector>
 #include <map>

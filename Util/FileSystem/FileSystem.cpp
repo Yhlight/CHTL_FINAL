@@ -33,4 +33,9 @@ void FileSystem::writeFile(const std::string& path, const std::string& content) 
     file << content;
 }
 
+bool FileSystem::fileExists(const std::string& path) {
+    std::ifstream file(path);
+    return file.good();
+}
+
 } // namespace CHTL

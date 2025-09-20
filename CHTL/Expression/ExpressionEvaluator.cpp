@@ -64,7 +64,7 @@ void collectNodes(BaseNode* context, const std::string& simple_selector, std::ve
 }
 
 
-ExpressionEvaluator::ExpressionEvaluator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, BaseNode* doc_root)
+ExpressionEvaluator::ExpressionEvaluator(const std::map<std::string, std::map<std::string, std::unique_ptr<TemplateDefinitionNode>>>& templates, BaseNode* doc_root)
     : templates(templates), doc_root(doc_root) {}
 
 EvaluatedValue ExpressionEvaluator::evaluate(Expr* expr, ElementNode* context) {
@@ -114,7 +114,7 @@ void ExpressionEvaluator::visit(VarExpr& expr) {
     const TemplateDefinitionNode* var_group_def = nullptr;
     for (const auto& ns_pair : templates) {
         if (ns_pair.second.count(expr.group)) {
-            var_group_def = &ns_pair.second.at(expr.group);
+            var_group_def = ns_pair.second.at(expr.group).get();
             break;
         }
     }
@@ -159,7 +159,7 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
                 const TemplateDefinitionNode* def = nullptr;
                 for (const auto& ns_pair : this->templates) {
                     if (ns_pair.second.count(app.template_name)) {
-                        def = &ns_pair.second.at(app.template_name);
+                        def = ns_pair.second.at(app.template_name).get();
                         break;
                     }
                 }

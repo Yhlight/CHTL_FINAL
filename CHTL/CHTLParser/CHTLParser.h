@@ -16,16 +16,20 @@
 
 namespace CHTL {
 
+class Loader; // Forward declaration
+
 class CHTLParser {
 public:
     explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path, std::shared_ptr<Configuration> config);
+    ~CHTLParser(); // Destructor
     std::unique_ptr<BaseNode> parse();
-    const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getTemplateDefinitions() const;
-    std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getMutableTemplateDefinitions();
+    const std::map<std::string, std::map<std::string, std::unique_ptr<TemplateDefinitionNode>>>& getTemplateDefinitions() const;
+    std::map<std::string, std::map<std::string, std::unique_ptr<TemplateDefinitionNode>>>& getMutableTemplateDefinitions();
     bool getUseHtml5Doctype() const;
 
 private:
     std::shared_ptr<Configuration> config;
+    std::unique_ptr<Loader> loader;
     bool use_html5_doctype = false;
     const std::string& source;
     const std::vector<Token>& tokens;
@@ -64,7 +68,7 @@ private:
     std::unique_ptr<ConfigNode> parseConfigurationBlock();
     void parseNamespaceStatement();
 
-    std::map<std::string, std::map<std::string, TemplateDefinitionNode>> template_definitions;
+    std::map<std::string, std::map<std::string, std::unique_ptr<TemplateDefinitionNode>>> template_definitions;
     void parseSymbolDeclaration(bool is_custom);
     void parseImportStatement();
     void parseStyleTemplateUsage(StyleNode* styleNode);

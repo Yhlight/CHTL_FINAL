@@ -11,6 +11,7 @@ static const std::map<std::string, TokenType> internal_keyword_to_token_type = {
     {"KEYWORD_SCRIPT", TokenType::SCRIPT},
     {"KEYWORD_TEXT", TokenType::TEXT},
     {"KEYWORD_USE", TokenType::USE},
+    {"KEYWORD_HTML5", TokenType::HTML5},
     {"KEYWORD_INHERIT", TokenType::INHERIT},
     {"KEYWORD_FROM", TokenType::FROM},
     {"KEYWORD_AS", TokenType::AS},
@@ -19,10 +20,18 @@ static const std::map<std::string, TokenType> internal_keyword_to_token_type = {
     {"KEYWORD_AFTER", TokenType::AFTER},
     {"KEYWORD_BEFORE", TokenType::BEFORE},
     {"KEYWORD_REPLACE", TokenType::REPLACE},
+    {"KEYWORD_ATTOP", TokenType::AT_TOP},
+    {"KEYWORD_ATBOTTOM", TokenType::AT_BOTTOM},
     {"KEYWORD_EXCEPT", TokenType::EXCEPT},
-    // Note: Bracketed keywords like [Custom] are handled by the parser, not the lexer.
+    {"KEYWORD_CUSTOM", TokenType::CUSTOM},
+    {"KEYWORD_TEMPLATE", TokenType::TEMPLATE},
+    {"KEYWORD_ORIGIN", TokenType::ORIGIN},
+    {"KEYWORD_IMPORT", TokenType::IMPORT},
+    {"KEYWORD_NAMESPACE", TokenType::NAMESPACE},
+    {"KEYWORD_CONFIGURATION", TokenType::CONFIGURATION},
+    {"NAME_GROUP", TokenType::NAME_GROUP},
+    {"ORIGIN_TYPE_GROUP", TokenType::ORIGIN_TYPE_GROUP},
 };
-
 
 CHTLLexer::CHTLLexer(const std::string& source, std::shared_ptr<Configuration> config)
     : source(source), config(config) {
@@ -66,26 +75,40 @@ void CHTLLexer::scanToken() {
         case ';': addToken(TokenType::SEMICOLON); break;
         case '?': addToken(TokenType::QUESTION); break;
         case '+': addToken(TokenType::PLUS); break;
-        case '-': addToken(TokenType::MINUS); break;
         case '%': addToken(TokenType::PERCENT); break;
         case '*': addToken(match('*') ? TokenType::STAR_STAR : TokenType::STAR); break;
         case '!': addToken(match('=') ? TokenType::BANG_EQUAL : TokenType::BANG); break;
         case '=': addToken(match('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL); break;
         case '<': addToken(match('=') ? TokenType::LESS_EQUAL : TokenType::LESS); break;
         case '>': addToken(match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER); break;
-        case '&': addToken(match('&') ? TokenType::AMPERSAND_AMPERSAND : TokenType::AMPERSAND); break;
         case '|': addToken(match('|') ? TokenType::PIPE_PIPE : TokenType::PIPE); break;
+        case '$': addToken(TokenType::DOLLAR); break;
+        case '#':
+            while (peek() != '\n' && !isAtEnd()) advance();
+            addToken(TokenType::COMMENT);
+            break;
+        case '-':
+            if (match('>')) addToken(TokenType::ARROW);
+            else addToken(TokenType::MINUS);
+            break;
+        case '&':
+            if (match('-') && match('>')) addToken(TokenType::EVENT_BIND);
+            else if (match('&')) addToken(TokenType::AMPERSAND_AMPERSAND);
+            else addToken(TokenType::AMPERSAND);
+            break;
         case ' ': case '\r': case '\t': break;
         case '\n': line++; break;
         case '/':
             if (match('/')) {
                 while (peek() != '\n' && !isAtEnd()) advance();
+                addToken(TokenType::COMMENT);
             } else if (match('*')) {
                 while (!(peek() == '*' && peekNext() == '/') && !isAtEnd()) {
                     if (peek() == '\n') line++;
                     advance();
                 }
                 if (!isAtEnd()) { advance(); advance(); } // Consume the */
+                addToken(TokenType::COMMENT);
             } else {
                 addToken(TokenType::SLASH);
             }
@@ -94,15 +117,14 @@ void CHTLLexer::scanToken() {
         default:
             if (isdigit(c)) { number(); }
             else if (isalpha(c) || c == '_') { identifier(); }
-            else { addToken(TokenType::SYMBOL); }
+            else { addToken(TokenType::UNKNOWN); }
             break;
     }
 }
 
 char CHTLLexer::advance() { return source[current++]; }
 void CHTLLexer::addToken(TokenType type) {
-    std::string text = source.substr(start, current - start);
-    tokens.push_back({type, text, line, start});
+    addToken(type, source.substr(start, current - start));
 }
 void CHTLLexer::addToken(TokenType type, const std::string& literal) {
     tokens.push_back({type, literal, line, start});
@@ -137,9 +159,30 @@ void CHTLLexer::number() {
 
 void CHTLLexer::identifier() {
     while (isalnum(peek()) || peek() == '_') advance();
+
+    // Check for multi-word keywords
+    if (isspace(peek())) {
+        int temp_current = current;
+        while(isspace(source[temp_current])) temp_current++;
+
+        int next_word_start = temp_current;
+        while(isalnum(source[temp_current]) || source[temp_current] == '_') temp_current++;
+
+        std::string first_word = source.substr(start, current - start);
+        std::string second_word = source.substr(next_word_start, temp_current - next_word_start);
+        std::string full_lexeme = first_word + " " + second_word;
+
+        auto it = runtime_keyword_map.find(full_lexeme);
+        if (it != runtime_keyword_map.end()) {
+            current = temp_current;
+            addToken(it->second, full_lexeme);
+            return;
+        }
+    }
+
     std::string text = source.substr(start, current - start);
     auto it = runtime_keyword_map.find(text);
-    addToken(it != runtime_keyword_map.end() ? it->second : TokenType::IDENTIFIER);
+    addToken(it != runtime_keyword_map.end() ? it->second : TokenType::IDENTIFIER, text);
 }
 
 } // namespace CHTL
