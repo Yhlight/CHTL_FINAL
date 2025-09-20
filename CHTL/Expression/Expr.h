@@ -88,16 +88,17 @@ public:
 // Represents a variable usage, e.g., ThemeColor(primary)
 class VarExpr : public Expr {
 public:
-    VarExpr(const std::string& group, const std::string& name)
-        : group(group), name(name) {}
+    VarExpr(const std::string& group, const std::string& name, const std::string& from = "")
+        : group(group), name(name), from_namespace(from) {}
 
     void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
     std::unique_ptr<Expr> clone() const override {
-        return std::make_unique<VarExpr>(group, name);
+        return std::make_unique<VarExpr>(group, name, from_namespace);
     }
 
     std::string group;
     std::string name;
+    std::string from_namespace;
 };
 
 // Represents a reference to another property, e.g., box.width

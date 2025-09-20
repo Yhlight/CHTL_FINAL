@@ -15,6 +15,7 @@ std::unique_ptr<BaseNode> StyleNode::clone() const {
     for (const auto& rule : this->global_rules) {
         new_node->global_rules.push_back(rule.clone());
     }
+    new_node->template_usages = this->template_usages;
     return new_node;
 }
 

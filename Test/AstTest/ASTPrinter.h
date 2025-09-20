@@ -23,6 +23,7 @@ public:
     void visit(ImportNode& node) override;
     void visit(ScriptNode& node) override;
     void visit(NamespaceNode& node) override;
+    void visit(TemplateUsageNode& node) override;
 
 private:
     std::string indentString();

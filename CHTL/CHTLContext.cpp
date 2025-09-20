@@ -8,7 +8,20 @@ void CHTLContext::addTemplateDefinition(const TemplateDefinitionNode& def) {
     namespaces[current_namespace].template_definitions[def.name] = def;
 }
 
-const TemplateDefinitionNode* CHTLContext::getTemplateDefinition(const std::string& name) {
+const TemplateDefinitionNode* CHTLContext::getTemplateDefinition(const std::string& name, const std::string& from_namespace) {
+    // If a specific namespace is requested, only look there.
+    if (!from_namespace.empty()) {
+        auto ns_it = namespaces.find(from_namespace);
+        if (ns_it != namespaces.end()) {
+            auto& ns_data = ns_it->second;
+            auto def_it = ns_data.template_definitions.find(name);
+            if (def_it != ns_data.template_definitions.end()) {
+                return &def_it->second;
+            }
+        }
+        return nullptr; // Not found in the specified namespace
+    }
+
     // 1. Look in the current namespace
     auto ns_it = namespaces.find(current_namespace);
     if (ns_it != namespaces.end()) {

@@ -1,9 +1,0 @@
-[Import] @Chtl from "ns_imported.chtl";
-
-// For now, we can't use the imported style because 'from' is not implemented.
-// The test will verify that the compiler can parse this and that the
-// template is correctly stored in the 'my_lib' namespace.
-
-div {
-    text { "This is a namespace test." }
-}

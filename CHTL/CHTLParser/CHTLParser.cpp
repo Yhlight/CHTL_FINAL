@@ -7,6 +7,7 @@
 #include "../CHTLNode/ImportNode.h"
 #include "../CHTLNode/ScriptNode.h"
 #include "../CHTLNode/NamespaceNode.h"
+#include "../CHTLNode/TemplateUsageNode.h"
 #include "../Expression/Expr.h"
 #include <iostream>
 #include <stdexcept>
@@ -138,7 +139,13 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             }
 
             consume(TokenType::RIGHT_PAREN, "Expect ')' after variable key name.");
-            return std::make_unique<VarExpr>(first_part.lexeme, key_name);
+
+            std::string from_namespace;
+            if (match({TokenType::FROM})) {
+                from_namespace = consume(TokenType::IDENTIFIER, "Expect namespace name after 'from'.").lexeme;
+            }
+
+            return std::make_unique<VarExpr>(first_part.lexeme, key_name, from_namespace);
         } else {
             // It's an implicit self-reference to a property.
             return std::make_unique<ReferenceExpr>(Token(), first_part);
@@ -462,99 +469,36 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
     consume(TokenType::STYLE, "Expect 'Style' keyword for style template usage.");
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
 
-    const auto* def = context.getTemplateDefinition(name.lexeme);
-    if (!def) {
-        error(name, "Style template '" + name.lexeme + "' not found.");
-        return;
-    }
-    if (def->type != TemplateType::STYLE) {
-        error(name, "Template '" + name.lexeme + "' is not a Style template.");
+    StyleTemplateUsage usage;
+    usage.name = name.lexeme;
+
+    if (match({TokenType::FROM})) {
+        usage.from_namespace = consume(TokenType::IDENTIFIER, "Expect namespace name after 'from'.").lexeme;
     }
 
-    // Clone the base properties. We will modify this list.
-    std::vector<AttributeNode> final_properties;
-    for (const auto& prop : def->style_properties) {
-        final_properties.push_back(prop.clone());
-    }
+    // For now, we are not handling specialization with 'from'.
+    // We will just add the usage to the style node.
+    styleNode->template_usages.push_back(usage);
 
-    if (match({TokenType::LEFT_BRACE})) { // Specialization block
-        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            if (match({TokenType::DELETE})) {
-                // Handle 'delete prop1, prop2;'
-                do {
-                    std::string prop_key_to_delete;
-                    while(!check(TokenType::COMMA) && !check(TokenType::SEMICOLON) && !isAtEnd()) {
-                        prop_key_to_delete += advance().lexeme;
-                    }
-
-                    final_properties.erase(
-                        std::remove_if(final_properties.begin(), final_properties.end(),
-                            [&](const AttributeNode& attr) { return attr.key == prop_key_to_delete; }),
-                        final_properties.end()
-                    );
-                } while (match({TokenType::COMMA}));
-                consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
-            } else {
-                // Handle 'prop: value;' to fill in placeholders
-                std::string key_str;
-                while (!check(TokenType::COLON) && !isAtEnd()) {
-                    key_str += advance().lexeme;
-                }
-                consume(TokenType::COLON, "Expect ':' after property name.");
-                auto value_expr = parseExpression();
-                consume(TokenType::SEMICOLON, "Expect ';' after property value.");
-
-                bool filled = false;
-                for (auto& prop : final_properties) {
-                    if (prop.key == key_str && prop.value_expr == nullptr) {
-                        prop.value_expr = std::move(value_expr);
-                        filled = true;
-                        break;
-                    }
-                }
-                if (!filled) {
-                    // If not filling a placeholder, it's a new/override property
-                    AttributeNode attr;
-                    attr.key = key_str;
-                    attr.value_expr = std::move(value_expr);
-                    final_properties.push_back(std::move(attr));
-                }
-            }
-        }
-        consume(TokenType::RIGHT_BRACE, "Expect '}' after specialization block.");
-    } else {
-        consume(TokenType::SEMICOLON, "Expect ';' or specialization block after template usage.");
-    }
-
-    // Add the final, specialized properties to the style node.
-    for (auto& prop : final_properties) {
-        if (prop.value_expr == nullptr) {
-            error(name, "Property '" + prop.key + "' was not given a value in the specialization of '" + name.lexeme + "'.");
-        }
-        styleNode->inline_properties.push_back(std::move(prop));
-    }
+    consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 }
+
 
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
     consume(TokenType::AT, "Expect '@' for template usage.");
     consume(TokenType::ELEMENT, "Expect 'Element' keyword for element template usage.");
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+
+    std::string from_namespace;
+    if (match({TokenType::FROM})) {
+        from_namespace = consume(TokenType::IDENTIFIER, "Expect namespace name after 'from'.").lexeme;
+    }
+
     consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 
-    const auto* def = context.getTemplateDefinition(name.lexeme);
-    if (def) {
-        if (def->type != TemplateType::ELEMENT) {
-            error(name, "Template '" + name.lexeme + "' is not an Element template.");
-        }
-        std::vector<std::unique_ptr<BaseNode>> cloned_nodes;
-        for (const auto& node : def->element_body) {
-            cloned_nodes.push_back(node->clone());
-        }
-        return cloned_nodes;
-    } else {
-        error(name, "Element template '" + name.lexeme + "' not found.");
-    }
-    return {};
+    std::vector<std::unique_ptr<BaseNode>> nodes;
+    nodes.push_back(std::make_unique<TemplateUsageNode>(name.lexeme, from_namespace));
+    return nodes;
 }
 
 std::unique_ptr<TemplateDeclarationNode> CHTLParser::parseTemplateDeclaration() {

@@ -8,6 +8,7 @@
 #include "../../CHTL/CHTLNode/ImportNode.h"
 #include "../../CHTL/CHTLNode/ScriptNode.h"
 #include "../../CHTL/CHTLNode/NamespaceNode.h"
+#include "../../CHTL/CHTLNode/TemplateUsageNode.h"
 #include "../../CHTL/CHTLNode/CssRuleNode.h" // Include new node type
 #include <iostream>
 
@@ -109,6 +110,14 @@ void ASTPrinter::visit(NamespaceNode& node) {
     }
     indent--;
     std::cout << indentString() << "}" << std::endl;
+}
+
+void ASTPrinter::visit(TemplateUsageNode& node) {
+    std::cout << indentString() << "@Element " << node.template_name;
+    if (!node.from_namespace.empty()) {
+        std::cout << " from " << node.from_namespace;
+    }
+    std::cout << ";" << std::endl;
 }
 
 } // namespace CHTL

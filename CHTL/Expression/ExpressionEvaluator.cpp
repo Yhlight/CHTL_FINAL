@@ -72,7 +72,7 @@ void ExpressionEvaluator::visit(VarExpr& expr) {
         throw std::runtime_error("Circular variable reference detected for: " + full_var_name);
     }
 
-    const TemplateDefinitionNode* template_def = context.getTemplateDefinition(expr.group);
+    const TemplateDefinitionNode* template_def = context.getTemplateDefinition(expr.group, expr.from_namespace);
     if (template_def) {
         if (template_def->type == TemplateType::VAR && template_def->variables.count(expr.name)) {
             resolution_stack.insert(full_var_name);

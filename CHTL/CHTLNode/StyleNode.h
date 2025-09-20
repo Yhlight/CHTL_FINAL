@@ -6,8 +6,15 @@
 #include "CssRuleNode.h"
 #include "Visitor.h"
 #include <vector>
+#include <string>
 
 namespace CHTL {
+
+struct StyleTemplateUsage {
+    std::string name;
+    std::string from_namespace;
+    // Plus any specialization info in the future
+};
 
 // Represents a style { ... } block within an element.
 class StyleNode : public BaseNode {
@@ -20,6 +27,9 @@ public:
 
     // It also contains a list of full CSS rules for the global stylesheet.
     std::vector<CssRuleNode> global_rules;
+
+    // Store template usages
+    std::vector<StyleTemplateUsage> template_usages;
 };
 
 } // namespace CHTL

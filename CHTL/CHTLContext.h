@@ -19,7 +19,7 @@ public:
     std::string current_namespace;
 
     void addTemplateDefinition(const TemplateDefinitionNode& def);
-    const TemplateDefinitionNode* getTemplateDefinition(const std::string& name);
+    const TemplateDefinitionNode* getTemplateDefinition(const std::string& name, const std::string& from_namespace = "");
 };
 
 } // namespace CHTL

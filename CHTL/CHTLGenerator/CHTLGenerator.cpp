@@ -6,6 +6,7 @@
 #include "../CHTLNode/TemplateDeclarationNode.h"
 #include "../CHTLNode/CustomDeclarationNode.h"
 #include "../CHTLNode/NamespaceNode.h"
+#include "../CHTLNode/TemplateUsageNode.h"
 #include "../Expression/ExpressionEvaluator.h" // Include the new evaluator
 #include "../CHTLContext.h"
 #include <unordered_set>
@@ -103,6 +104,26 @@ void CHTLGenerator::visit(ElementNode& node) {
     std::string style_str;
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
+            // Process template usages first
+            for (const auto& usage : styleNode->template_usages) {
+                const TemplateDefinitionNode* def = context.getTemplateDefinition(usage.name, usage.from_namespace);
+                if (def) {
+                    for (const auto& prop : def->style_properties) {
+                        ExpressionEvaluator evaluator(this->context, this->doc_root);
+                        EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
+                        style_str += prop.key + ": ";
+                        if (result.type == ValueType::STRING) {
+                            style_str += result.string_value;
+                        } else if (result.type == ValueType::NUMERIC) {
+                            std::stringstream ss;
+                            ss << result.numeric_value;
+                            style_str += ss.str() + result.string_value;
+                        }
+                        style_str += ";";
+                    }
+                }
+            }
+
             for (const auto& prop : styleNode->inline_properties) {
                 ExpressionEvaluator evaluator(this->context, this->doc_root);
                 EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
@@ -190,6 +211,16 @@ void CHTLGenerator::visit(NamespaceNode& node) {
     for (const auto& child : node.children) {
         child->accept(*this);
     }
+}
+
+void CHTLGenerator::visit(TemplateUsageNode& node) {
+    const TemplateDefinitionNode* def = context.getTemplateDefinition(node.template_name, node.from_namespace);
+    if (def) {
+        for (const auto& child : def->element_body) {
+            child->accept(*this);
+        }
+    }
+    // Note: Error handling for not found templates should be in the generator or a linking phase.
 }
 
 } // namespace CHTL
