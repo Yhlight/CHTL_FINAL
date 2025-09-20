@@ -1,0 +1,4 @@
+[Template] @Style FinalStyle {
+    color: green;
+    border: "1px solid black";
+}
