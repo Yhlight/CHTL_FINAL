@@ -1,80 +1,115 @@
 #include "../../CHTL/Scanner/CHTLUnifiedScanner.h"
 #include <iostream>
 #include <vector>
-#include <string>
-#include <fstream>
-#include <sstream>
 #include <cassert>
+#include <string>
 
-// Helper to convert FragmentType to string for printing
-std::string fragmentTypeToString(CHTL::FragmentType type) {
-    switch (type) {
-        case CHTL::FragmentType::CHTL: return "CHTL";
-        case CHTL::FragmentType::CSS: return "CSS";
-        case CHTL::FragmentType::JS: return "JS";
-        case CHTL::FragmentType::CHTL_JS: return "CHTL_JS";
-        default: return "UNKNOWN";
+// Helper to trim whitespace from both ends of a string
+std::string trim(const std::string& str) {
+    const auto strBegin = str.find_first_not_of(" \t\n\r");
+    if (strBegin == std::string::npos) return "";
+    const auto strEnd = str.find_last_not_of(" \t\n\r");
+    const auto strRange = strEnd - strBegin + 1;
+    return str.substr(strBegin, strRange);
+}
+
+// Simple assertion helper
+void assert_equal(const std::string& a, const std::string& b, const std::string& message) {
+    if (trim(a) != trim(b)) {
+        std::cerr << "Assertion failed: " << message << std::endl;
+        std::cerr << "  Expected: \"" << trim(b) << "\"" << std::endl;
+        std::cerr << "  Actual:   \"" << trim(a) << "\"" << std::endl;
+        exit(1);
     }
 }
 
-void printFragments(const std::vector<CHTL::CodeFragment>& fragments) {
-    std::cout << "--- Scanner Output ---" << std::endl;
-    for (size_t i = 0; i < fragments.size(); ++i) {
-        const auto& fragment = fragments[i];
-        std::cout << "--- Fragment " << i << " ---" << std::endl;
-        std::cout << "Type: " << fragmentTypeToString(fragment.type) << std::endl;
-        std::cout << "Line: " << fragment.start_line << std::endl;
-        std::cout << "Content: <<<" << std::endl << fragment.content << std::endl << ">>>" << std::endl;
+void assert_equal(CHTL::FragmentType a, CHTL::FragmentType b, const std::string& message) {
+    if (a != b) {
+        std::cerr << "Assertion failed: " << message << std::endl;
+        exit(1);
     }
-    std::cout << "--------------------" << std::endl;
+}
+
+
+void test_simple_script_separation() {
+    std::cout << "Running test: test_simple_script_separation" << std::endl;
+    std::string source = "script { const a = {{b}}; }";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+
+    assert(fragments.size() == 3);
+    assert_equal(fragments[0].type, CHTL::FragmentType::JS, "Frag 0 Type");
+    assert_equal(fragments[1].type, CHTL::FragmentType::CHTL_JS, "Frag 1 Type");
+    assert_equal(fragments[1].content, "{{b}}", "Frag 1 Content");
+    assert_equal(fragments[2].type, CHTL::FragmentType::JS, "Frag 2 Type");
+
+    auto placeholders = scanner.getPlaceholders();
+    assert_equal(placeholders.at(fragments[0].content), "const a =", "Placeholder 0");
+    assert_equal(placeholders.at(fragments[2].content), ";", "Placeholder 1");
+    std::cout << "PASSED" << std::endl;
+}
+
+void test_chtl_js_block_keyword() {
+    std::cout << "Running test: test_chtl_js_block_keyword" << std::endl;
+    std::string source = "script { console.log('hello'); Listen { click: () => {} } console.log('world'); }";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+
+    assert(fragments.size() == 3);
+    assert_equal(fragments[0].type, CHTL::FragmentType::JS, "Frag 0 Type");
+    assert_equal(fragments[1].type, CHTL::FragmentType::CHTL_JS, "Frag 1 Type");
+    assert_equal(fragments[1].content, "Listen { click: () => {} }", "Frag 1 Content");
+    assert_equal(fragments[2].type, CHTL::FragmentType::JS, "Frag 2 Type");
+
+    auto placeholders = scanner.getPlaceholders();
+    assert(placeholders.size() == 2);
+    assert_equal(placeholders.at(fragments[0].content), "console.log('hello');", "Placeholder 0");
+    assert_equal(placeholders.at(fragments[2].content), "console.log('world');", "Placeholder 1");
+    std::cout << "PASSED" << std::endl;
+}
+
+void test_style_separation() {
+    std::cout << "Running test: test_style_separation" << std::endl;
+    std::string source = "style { color: red; @Style MyTemplate; width: 100px + 20px; }";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+
+    assert(fragments.size() == 3);
+    assert_equal(fragments[0].type, CHTL::FragmentType::CSS, "Frag 0 Type");
+    assert_equal(fragments[0].content, "color: red;", "Frag 0 Content");
+    assert_equal(fragments[1].type, CHTL::FragmentType::CHTL, "Frag 1 Type");
+    assert_equal(fragments[1].content, "@Style MyTemplate;", "Frag 1 Content");
+    assert_equal(fragments[2].type, CHTL::FragmentType::CHTL, "Frag 2 Type");
+    assert_equal(fragments[2].content, "width: 100px + 20px;", "Frag 2 Content");
+    std::cout << "PASSED" << std::endl;
+}
+
+void test_full_source_file() {
+    std::cout << "Running test: test_full_source_file" << std::endl;
+    std::string source = "div { text: 'hello' } style { color: blue; } script { let a = 1; }";
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+
+    assert(fragments.size() == 3);
+    assert_equal(fragments[0].type, CHTL::FragmentType::CHTL, "Frag 0 Type");
+    assert_equal(fragments[0].content, "div { text: 'hello' }", "Frag 0 Content");
+    assert_equal(fragments[1].type, CHTL::FragmentType::CSS, "Frag 1 Type");
+    assert_equal(fragments[1].content, "color: blue;", "Frag 1 Content");
+    assert_equal(fragments[2].type, CHTL::FragmentType::JS, "Frag 2 Type");
+
+    auto placeholders = scanner.getPlaceholders();
+    assert(placeholders.size() == 1);
+    assert_equal(placeholders.at(fragments[2].content), "let a = 1;", "Placeholder Content");
+    std::cout << "PASSED" << std::endl;
 }
 
 
 int main() {
-    std::string path = "Test/ScannerTest/test_scanner.chtl";
-    std::ifstream file_stream(path);
-    if (!file_stream) {
-        std::cerr << "Error: Could not open file " << path << std::endl;
-        return 1;
-    }
-    std::stringstream buffer;
-    buffer << file_stream.rdbuf();
-    std::string source = buffer.str();
+    test_simple_script_separation();
+    test_chtl_js_block_keyword();
+    test_style_separation();
+    test_full_source_file();
 
-    CHTL::CHTLUnifiedScanner scanner(source);
-    std::vector<CHTL::CodeFragment> fragments = scanner.scan();
-
-    printFragments(fragments);
-
-    // Basic assertions to verify the scanner's output
-    assert(fragments.size() > 10); // Check that it produced a reasonable number of fragments
-
-    // CHTL -> <style> -> CSS -> </style> -> CHTL -> <script>
-    assert(fragments[0].type == CHTL::FragmentType::CHTL);
-    assert(fragments[1].type == CHTL::FragmentType::CHTL); // <style>
-    assert(fragments[1].content.find("<style") != std::string::npos);
-    assert(fragments[2].type == CHTL::FragmentType::CSS);
-    assert(fragments[3].type == CHTL::FragmentType::CHTL); // </style>
-    assert(fragments[4].type == CHTL::FragmentType::CHTL);
-    assert(fragments[5].type == CHTL::FragmentType::CHTL); // <script>
-
-    // Script content fragments
-    assert(fragments[6].type == CHTL::FragmentType::JS);
-    assert(fragments[7].type == CHTL::FragmentType::CHTL_JS); // {{.box}}
-    assert(fragments[7].content.find("{{.box}}") != std::string::npos);
-    assert(fragments[8].type == CHTL::FragmentType::JS);
-    assert(fragments[9].type == CHTL::FragmentType::CHTL_JS); // Listen {..}
-    assert(fragments[9].content.find("Listen") != std::string::npos);
-    assert(fragments[10].type == CHTL::FragmentType::JS);
-    assert(fragments[11].type == CHTL::FragmentType::CHTL_JS); // $my_class$
-    assert(fragments[11].content.find("$my_class$") != std::string::npos);
-    assert(fragments[12].type == CHTL::FragmentType::JS);
-
-    // </script> -> CHTL
-    assert(fragments[13].type == CHTL::FragmentType::CHTL); // </script>
-    assert(fragments[14].type == CHTL::FragmentType::CHTL);
-
-    std::cout << "All basic assertions passed!" << std::endl;
-
+    std::cout << "\nAll scanner tests passed!" << std::endl;
     return 0;
 }
