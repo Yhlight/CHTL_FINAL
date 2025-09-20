@@ -153,85 +153,69 @@ std::string CHTLUnifiedScanner::scan_script_recursive(const std::string& input, 
     std::string output;
     size_t cursor = 0;
 
-    const std::vector<std::string> keywords = {"Listen", "Delegate", "Animate", "Router", "Vir", "iNeverAway", "util"};
     const std::vector<std::string> patterns = {"{{", "&->", "$"};
 
     while (cursor < input.length()) {
         size_t next_pos = std::string::npos;
-        std::string found_token;
+        std::string found_pattern;
 
-        // Find the earliest CHTL JS token (keyword or pattern)
-        // 1. Keywords
-        for (const auto& keyword : keywords) {
-            size_t pos = input.find(keyword, cursor);
-            if (pos != std::string::npos && (pos < next_pos)) {
-                 if ((pos == 0 || !isalnum(input[pos-1])) && (pos + keyword.length() == input.length() || !isalnum(input[pos + keyword.length()]))) {
-                    next_pos = pos;
-                    found_token = keyword;
-                 }
-            }
-        }
-        // 2. Patterns
+        // Find the earliest CHTL JS special pattern
         for (const auto& pattern : patterns) {
             size_t pos = input.find(pattern, cursor);
             if (pos != std::string::npos && (pos < next_pos)) {
                 next_pos = pos;
-                found_token = pattern;
+                found_pattern = pattern;
             }
         }
 
         if (next_pos == std::string::npos) {
-            // No more CHTL JS, the rest is pure JS
+            // No more CHTL JS patterns, the rest is pure JS
             if (cursor < input.length()) {
                 std::string js_part = input.substr(cursor);
+                if (!js_part.empty()) {
+                    std::string placeholder_id = get_next_placeholder_id();
+                    placeholders[placeholder_id] = js_part;
+                    output += placeholder_id;
+                }
+            }
+            break; // Exit loop
+        }
+
+        // The content before the pattern is pure JS
+        if (next_pos > cursor) {
+            std::string js_part = input.substr(cursor, next_pos - cursor);
+             if (!js_part.empty()) {
                 std::string placeholder_id = get_next_placeholder_id();
                 placeholders[placeholder_id] = js_part;
                 output += placeholder_id;
             }
-            break;
         }
 
-        // The content before the token is pure JS
-        if (next_pos > cursor) {
-            std::string js_part = input.substr(cursor, next_pos - cursor);
-            std::string placeholder_id = get_next_placeholder_id();
-            placeholders[placeholder_id] = js_part;
-            output += placeholder_id;
-        }
+        // Process and append the CHTL JS pattern itself
+        size_t pattern_start = next_pos;
+        size_t pattern_end = pattern_start;
 
-        // Process the CHTL JS token
-        size_t token_start = next_pos;
-        size_t token_end = token_start + found_token.length();
-
-        if (found_token == "{{") {
-            token_end = input.find("}}", token_start);
-            if (token_end != std::string::npos) token_end += 2;
-        } else if (found_token == "$") {
-            token_end = input.find("$", token_start + 1);
-            if (token_end != std::string::npos) token_end += 1;
-        } else { // Keyword expecting a block
-            size_t block_start = input.find('{', token_start);
-            if (block_start != std::string::npos) {
-                int brace_level = 1;
-                size_t content_start = block_start + 1;
-                token_end = content_start;
-                 while(token_end < input.length() && brace_level > 0) {
-                    if (input[token_end] == '{') brace_level++;
-                    if (input[token_end] == '}') brace_level--;
-                    token_end++;
-                }
-                size_t content_end = token_end - 1;
-                std::string inner_content = input.substr(content_start, content_end - content_start);
-                std::string processed_inner = scan_script_recursive(inner_content, placeholders);
-                output += input.substr(token_start, content_start - token_start) + processed_inner + "}";
-                cursor = token_end;
-                continue;
+        if (found_pattern == "{{") {
+            pattern_end = input.find("}}", pattern_start);
+            if (pattern_end != std::string::npos) {
+                pattern_end += 2; // include the "}}"
             }
+        } else if (found_pattern == "$") {
+            pattern_end = input.find("$", pattern_start + 1);
+            if (pattern_end != std::string::npos) {
+                pattern_end += 1; // include the second "$"
+            }
+        } else { // &-> or other simple patterns
+            pattern_end = pattern_start + found_pattern.length();
         }
 
-        if (token_end == std::string::npos) token_end = input.length();
-        output += input.substr(token_start, token_end - token_start);
-        cursor = token_end;
+        if (pattern_end == std::string::npos) {
+            // Malformed pattern, treat rest of string as JS
+            pattern_end = input.length();
+        }
+
+        output += input.substr(pattern_start, pattern_end - pattern_start);
+        cursor = pattern_end;
     }
 
     return output;

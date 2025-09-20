@@ -93,7 +93,7 @@ void test_simple_script_block() {
 }
 
 void test_nested_script_block() {
-    std::cout << "\n--- Running Test: Nested Script Block ---\n";
+    std::cout << "\n--- Running Test: Nested Script Block (Refactored Logic) ---\n";
     std::string source = "script { Listen { click: () => { if (true) { {{box}}->show(); } } } }";
     CHTL::CHTLUnifiedScanner scanner(source);
     auto fragments = scanner.scan();
@@ -102,19 +102,27 @@ void test_nested_script_block() {
     int chtl_js_count = 0;
     int js_count = 0;
     std::string chtl_js_content;
-     for(const auto& f : fragments) {
+    std::string js_content_full;
+
+    for(const auto& f : fragments) {
         if (f.type == CHTL::FragmentType::CHTL_JS) {
             chtl_js_count++;
             chtl_js_content = f.content;
         } else if (f.type == CHTL::FragmentType::JS) {
             js_count++;
+            js_content_full += f.content;
         }
     }
     assert(chtl_js_count == 1);
-    assert(js_count > 1); // Expecting multiple JS parts to be extracted
-    assert(chtl_js_content.find("Listen") != std::string::npos);
+    assert(js_count == 2);
+    // Check that CHTL_JS part is now sparse
     assert(chtl_js_content.find("{{box}}") != std::string::npos);
-    assert(chtl_js_content.find("click:") == std::string::npos); // The JS part should be in a placeholder
+    assert(chtl_js_content.find("Listen") == std::string::npos); // Listen should NOT be in the CHTL_JS part
+
+    // Check that the JS part contains what was removed
+    assert(js_content_full.find("Listen {") != std::string::npos);
+    assert(js_content_full.find("->show();") != std::string::npos);
+
     std::cout << "PASS\n";
 }
 
