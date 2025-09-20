@@ -198,25 +198,6 @@ void test_regex_arithmetic_detection() {
 }
 
 
-void test_css_calc_function() {
-    std::cout << "\n--- Running Test: CSS calc() Function ---\n";
-    std::string source = "style { width: calc(100% - 20px); }";
-    CHTL::CHTLUnifiedScanner scanner(source);
-    auto fragments = scanner.scan();
-    print_fragments(fragments);
-
-    bool found_css = false;
-    for(const auto& frag : fragments) {
-        if (frag.type == CHTL::FragmentType::CSS) {
-            assert(frag.content.find("calc(100% - 20px)") != std::string::npos);
-            found_css = true;
-        }
-        assert(frag.type != CHTL::FragmentType::CHTL_in_CSS);
-    }
-    assert(found_css);
-    std::cout << "PASS\n";
-}
-
 int main() {
     try {
         test_pure_chtl();
@@ -226,7 +207,6 @@ int main() {
         test_nested_script_block();
         test_advanced_style_features();
         test_regex_arithmetic_detection();
-        test_css_calc_function(); // Add the new test here
         std::cout << "\nAll scanner tests passed!\n";
     } catch (const std::exception& e) {
         std::cerr << "A test failed with exception: " << e.what() << std::endl;

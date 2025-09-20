@@ -3,21 +3,17 @@
 #include <iostream>
 #include <cassert>
 
-void test_import_functionality() {
-    std::cout << "\n--- Running Test: Import Functionality ---\n";
+void test_text_attribute() {
+    std::cout << "\n--- Running Test: Text Attribute Functionality ---\n";
     try {
-        std::string source = CHTL::FileSystem::readFile("Test/ImportTest/main.chtl");
+        std::string source = CHTL::FileSystem::readFile("Test/TextAttrTest/test.chtl");
         CHTL::CompilerDispatcher dispatcher(source);
         CHTL::FinalOutput result = dispatcher.dispatch();
 
         std::cout << "--- Generated HTML ---\n" << result.html << "\n----------------------\n";
 
-        // Check that the content from the imported template is present
-        assert(result.html.find("This content is from an imported file!") != std::string::npos);
-        assert(result.html.find("imported-box") != std::string::npos);
-
-        // Check that content from the main file is also present
-        assert(result.html.find("Main File Content") != std::string::npos);
+        // Check that the div contains the correct text from the attribute.
+        assert(result.html.find("<div>hello from attribute</div>") != std::string::npos);
 
         std::cout << "PASS\n";
 
@@ -29,8 +25,8 @@ void test_import_functionality() {
 
 int main() {
     try {
-        test_import_functionality();
-        std::cout << "\nAll import tests passed!\n";
+        test_text_attribute();
+        std::cout << "\nAll text attribute tests passed!\n";
     } catch (...) {
         std::cerr << "An unknown exception occurred." << std::endl;
         return 1;

@@ -57,13 +57,9 @@ void CHTLUnifiedScanner::scan_toplevel(std::vector<CodeFragment>& fragments) {
             int block_start_line = line; // apx
 
             if (is_style) {
-                current = brace_pos + 1;
-                std::string content = consume_block_content();
-                fragments.push_back({FragmentType::STYLE_BLOCK, "style {" + content + "}", block_start_line});
+                process_style_block(fragments, block_start_line);
             } else { // is_script
-                current = brace_pos + 1;
-                std::string content = consume_block_content();
-                fragments.push_back({FragmentType::SCRIPT_BLOCK, "script {" + content + "}", block_start_line});
+                process_script_block(fragments, block_start_line);
             }
 
             last_pos = current;
@@ -142,10 +138,10 @@ bool CHTLUnifiedScanner::is_chtl_in_css_statement(const std::string& statement) 
             return true;
         }
         // Check for arithmetic operators using regex to be more precise
-        // This regex will find +, -, *, / but not inside quotes or standard CSS functions
-        std::string cleaned_value = std::regex_replace(value, std::regex("calc\\([^)]*\\)"), ""); // remove calc()
-        cleaned_value = std::regex_replace(cleaned_value, std::regex("\"[^\"]*\""), ""); // remove strings
-        cleaned_value = std::regex_replace(cleaned_value, std::regex("'[^']*'"), ""); // remove strings
+        // This regex will find +, -, *, / but not inside quotes or calc()
+        std::string cleaned_value = std::regex_replace(value, std::regex("calc\\([^)]*\\)"), "");
+        cleaned_value = std::regex_replace(cleaned_value, std::regex("\"[^\"]*\""), "");
+        cleaned_value = std::regex_replace(cleaned_value, std::regex("'[^']*'"), "");
 
         if (std::regex_search(cleaned_value, std::regex("[\\+\\-\\*\\/]"))) {
             return true;
