@@ -1,0 +1,10 @@
+[Import] @Chtl from "Test/imported.chtl";
+
+div {
+    id: "final-test";
+    style {
+        @Style FinalStyle;
+        font-size: 22px;
+    }
+    text { "Final CLI Test" }
+}
