@@ -1,6 +1,7 @@
 #include "CHTLUnifiedScanner.h"
 #include <stdexcept>
 #include <iostream>
+#include <regex>
 
 namespace CHTL {
 
@@ -136,12 +137,13 @@ bool CHTLUnifiedScanner::is_chtl_in_css_statement(const std::string& statement) 
         if (value.find('?') != std::string::npos) {
             return true;
         }
-        // Check for arithmetic operators
-        if (value.find('+') != std::string::npos || value.find('-') != std::string::npos ||
-            value.find('*') != std::string::npos || value.find('/') != std::string::npos) {
-            // This is still a heuristic, as operators can appear inside strings or url().
-            // A full implementation would need a proper value tokenizer.
-            // For this project's scope, this is a significant improvement.
+        // Check for arithmetic operators using regex to be more precise
+        // This regex will find +, -, *, / but not inside quotes or calc()
+        std::string cleaned_value = std::regex_replace(value, std::regex("calc\\([^)]*\\)"), "");
+        cleaned_value = std::regex_replace(cleaned_value, std::regex("\"[^\"]*\""), "");
+        cleaned_value = std::regex_replace(cleaned_value, std::regex("'[^']*'"), "");
+
+        if (std::regex_search(cleaned_value, std::regex("[\\+\\-\\*\\/]"))) {
             return true;
         }
     }
