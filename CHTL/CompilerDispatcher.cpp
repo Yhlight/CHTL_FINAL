@@ -50,7 +50,7 @@ namespace CHTL {
             CHTLParser parser(chtl_content, tokens, m_filePath, m_config);
             auto root = parser.parse();
             bool use_doctype = parser.getUseHtml5Doctype();
-            CHTLGenerator generator(parser.getTemplateDefinitions(), m_config);
+            CHTLGenerator generator(parser.getTemplateDefinitions(), parser.getNamedOrigins(), m_config);
             CompilationResult result = generator.generate(root.get(), use_doctype);
 
             combinedResult.html = result.html;

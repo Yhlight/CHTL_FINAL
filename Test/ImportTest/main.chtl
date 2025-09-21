@@ -1,0 +1,16 @@
+[Import] @Style from "styles.css" as myStyles;
+[Import] @Chtl from "lib.chtl";
+
+html {
+    head {
+        title { text: "Import Test"; }
+        // Use the imported stylesheet
+        [Origin] @Style myStyles;
+    }
+    body {
+        h1 { text: "Main Content"; }
+
+        // Use the imported template
+        @Element ImportedBox;
+    }
+}

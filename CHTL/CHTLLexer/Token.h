@@ -55,9 +55,6 @@ enum class TokenType {
     CONFIGURATION,
     NAMESPACE,
     EXCEPT,
-    IF,
-    ELSE,
-    CONDITION,
 
     // Special
     SYMBOL,

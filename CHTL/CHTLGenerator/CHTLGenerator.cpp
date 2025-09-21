@@ -4,7 +4,6 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/ScriptNode.h"
-#include "../CHTLNode/IfNode.h"
 #include "../../CHTL JS/CHTLJSLexer/CHTLJSLexer.h"
 #include "../../CHTL JS/CHTLJSParser/CHTLJSParser.h"
 #include "../../CHTL JS/CHTLJSNode/RawJSNode.h"
@@ -16,7 +15,7 @@
 #include "../Expression/ExpressionEvaluator.h"
 #include <unordered_set>
 #include <algorithm>
-#include <iomanip>
+#include <iostream>
 #include <map>
 #include <sstream>
 
@@ -27,29 +26,6 @@ std::string format_css_double(double val) {
     std::ostringstream oss;
     oss << val;
     return oss.str();
-}
-
-// Helper to escape strings for use in JavaScript literals
-std::string escape_js_string(const std::string& s) {
-    std::ostringstream o;
-    for (auto c = s.cbegin(); c != s.cend(); c++) {
-        switch (*c) {
-            case '"': o << "\\\""; break;
-            case '\\': o << "\\\\"; break;
-            case '\b': o << "\\b"; break;
-            case '\f': o << "\\f"; break;
-            case '\n': o << "\\n"; break;
-            case '\r': o << "\\r"; break;
-            case '\t': o << "\\t"; break;
-            default:
-                if ('\x00' <= *c && *c <= '\x1f') {
-                    o << "\\u" << std::hex << std::setw(4) << std::setfill('0') << static_cast<int>(*c);
-                } else {
-                    o << *c;
-                }
-        }
-    }
-    return o.str();
 }
 
 const std::unordered_set<std::string> voidElements = {
@@ -89,8 +65,8 @@ std::string generateDynamicJS(
 }
 
 
-CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, std::shared_ptr<Configuration> config)
-    : templates(templates), config(config), doc_root(nullptr) {}
+CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, const std::map<std::string, std::unique_ptr<OriginNode>>& named_origins, std::shared_ptr<Configuration> config)
+    : templates(templates), named_origins(named_origins), config(config), doc_root(nullptr) {}
 
 CompilationResult CHTLGenerator::generate(BaseNode* root, bool use_html5_doctype) {
     html_output.str("");
@@ -290,84 +266,12 @@ void CHTLGenerator::visit(ScriptNode& node) {
     js_output << node.content;
 }
 
-std::string CHTLGenerator::renderBranch(const std::vector<std::unique_ptr<BaseNode>>& branch) {
-    // Save the current html_output stream by swapping it with a temporary one.
-    std::stringstream temp_stream;
-    std::swap(this->html_output, temp_stream);
-
-    // Now this->html_output is empty. We can render the branch into it.
-    for (const auto& node : branch) {
-        node->accept(*this);
-    }
-
-    // Capture the generated HTML for the branch.
-    std::string result = this->html_output.str();
-
-    // Restore the original html_output stream.
-    std::swap(this->html_output, temp_stream);
-
-    // The original content is now back in html_output, and we have the branch content in `result`.
-    return result;
-}
-
-
-void CHTLGenerator::visit(IfNode& node) {
-    if (!node.condition->isDynamic()) {
-        // --- Static Evaluation Logic ---
-        ExpressionEvaluator evaluator(this->templates, this->doc_root);
-        EvaluatedValue condition_result = evaluator.evaluate(node.condition.get(), nullptr);
-
-        if (evaluator.isTruthy(condition_result)) {
-            for (const auto& child : node.then_branch) {
-                child->accept(*this);
-            }
-        } else {
-            if (node.else_if_branch) {
-                node.else_if_branch->accept(*this);
-            } else if (!node.else_branch.empty()) {
-                for (const auto& child : node.else_branch) {
-                    child->accept(*this);
-                }
-            }
-        }
+void CHTLGenerator::visit(OriginUsageNode& node) {
+    auto it = named_origins.find(node.name);
+    if (it != named_origins.end()) {
+        it->second->accept(*this);
     } else {
-        // --- Dynamic JS Generation Logic ---
-        JSExpressionGenerator js_expr_gen;
-        std::string js_condition = js_expr_gen.generate(node.condition.get());
-
-        std::string then_html = renderBranch(node.then_branch);
-        std::string else_html = "";
-
-        if (node.else_if_branch) {
-            std::vector<std::unique_ptr<BaseNode>> else_if_wrapper;
-            else_if_wrapper.push_back(node.else_if_branch->clone());
-            else_html = renderBranch(else_if_wrapper);
-        } else if (!node.else_branch.empty()) {
-            else_html = renderBranch(node.else_branch);
-        }
-
-        std::string placeholder_id = "chtl-if-" + std::to_string(dynamic_if_counter++);
-        html_output << "<div id=\"" << placeholder_id << "\"></div>";
-
-        // This is a highly simplified listener. A real implementation would need
-        // to parse the expression, find all dynamic sources, and attach listeners
-        // (e.g., MutationObservers) to them. For now, we'll just check on a timer.
-        js_output << "(function() {\n";
-        js_output << "  const placeholder = document.getElementById('"<< placeholder_id << "');\n";
-        js_output << "  const then_content = \"" << escape_js_string(then_html) << "\";\n";
-        js_output << "  const else_content = \"" << escape_js_string(else_html) << "\";\n";
-        js_output << "  const update = () => {\n";
-        js_output << "    try {\n";
-        js_output << "      if (" << js_condition << ") {\n";
-        js_output << "        placeholder.innerHTML = then_content;\n";
-        js_output << "      } else {\n";
-        js_output << "        placeholder.innerHTML = else_content;\n";
-        js_output << "      }\n";
-        js_output << "    } catch (e) { /* Do nothing if selector is not found yet */ }\n";
-        js_output << "  };\n";
-        js_output << "  setInterval(update, 200); // Simple polling for demo purposes\n";
-        js_output << "  update(); // Initial call\n";
-        js_output << "})();\n";
+        std::cerr << "Warning: Named origin '" << node.name << "' not found." << std::endl;
     }
 }
 

@@ -10,6 +10,11 @@
 
 namespace CHTL {
 
+static bool isTruthy(const EvaluatedValue& val) {
+    if (!val.unit.empty() && val.unit != "0") return true;
+    return val.value != 0;
+}
+
 // --- Helper for findElement ---
 // Recursive helper to collect all nodes matching a simple selector
 void collectNodes(BaseNode* context, const std::string& simple_selector, std::vector<ElementNode*>& found_nodes) {

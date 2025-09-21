@@ -3,8 +3,9 @@
 
 #include "../CHTLNode/Visitor.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../CHTLNode/OriginNode.h"
+#include "../CHTLNode/OriginUsageNode.h"
 #include "../../CHTL JS/CHTLJSNode/DelegateNode.h"
-#include "../Expression/JSExpressionGenerator.h"
 #include <string>
 #include <sstream>
 #include <map>
@@ -22,7 +23,7 @@ struct CompilationResult {
 
 class CHTLGenerator : public Visitor {
 public:
-    explicit CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, std::shared_ptr<Configuration> config);
+    explicit CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, const std::map<std::string, std::unique_ptr<OriginNode>>& named_origins, std::shared_ptr<Configuration> config);
     CompilationResult generate(BaseNode* root, bool use_html5_doctype);
 
     void visit(ElementNode& node) override;
@@ -30,7 +31,7 @@ public:
     void visit(StyleNode& node) override;
     void visit(OriginNode& node) override;
     void visit(ScriptNode& node) override;
-    void visit(IfNode& node) override;
+    void visit(OriginUsageNode& node) override;
 
 private:
     std::shared_ptr<Configuration> config;
@@ -38,11 +39,9 @@ private:
     std::stringstream css_output;
     std::stringstream js_output;
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
+    const std::map<std::string, std::unique_ptr<OriginNode>>& named_origins;
     BaseNode* doc_root = nullptr;
     std::map<std::string, std::vector<CHTL_JS::DelegateNode>> delegate_registry;
-    int dynamic_if_counter = 0;
-
-    std::string renderBranch(const std::vector<std::unique_ptr<BaseNode>>& branch);
 };
 
 } // namespace CHTL

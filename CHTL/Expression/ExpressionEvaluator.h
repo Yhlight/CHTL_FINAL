@@ -24,11 +24,6 @@ public:
     ExpressionEvaluator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, BaseNode* doc_root);
     EvaluatedValue evaluate(Expr* expr, ElementNode* context);
 
-    bool isTruthy(const EvaluatedValue& val) {
-        if (!val.unit.empty() && val.unit != "0") return true;
-        return val.value != 0;
-    }
-
     void visit(BinaryExpr& expr) override;
     void visit(LiteralExpr& expr) override;
     void visit(VarExpr& expr) override;

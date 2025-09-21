@@ -8,6 +8,7 @@
 #include "../CHTLNode/ScriptNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/ConfigNode.h"
+#include "../CHTLNode/OriginNode.h"
 #include "../Config/Configuration.h"
 #include "../Expression/Expr.h"
 #include <vector>
@@ -22,7 +23,9 @@ public:
     std::unique_ptr<BaseNode> parse();
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getTemplateDefinitions() const;
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getMutableTemplateDefinitions();
+    const std::map<std::string, std::unique_ptr<OriginNode>>& getNamedOrigins() const;
     bool getUseHtml5Doctype() const;
+    void addNamedOrigin(const std::string& name, std::unique_ptr<OriginNode> node);
 
 private:
     std::shared_ptr<Configuration> config;
@@ -61,11 +64,11 @@ private:
     std::unique_ptr<StyleNode> parseStyleBlock();
     std::unique_ptr<ScriptNode> parseScriptBlock();
     std::unique_ptr<BaseNode> parseOriginBlock();
-    std::unique_ptr<BaseNode> parseIfStatement();
     std::unique_ptr<ConfigNode> parseConfigurationBlock();
     void parseNamespaceStatement();
 
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>> template_definitions;
+    std::map<std::string, std::unique_ptr<OriginNode>> named_origins;
     void parseSymbolDeclaration(bool is_custom);
     void parseImportStatement();
     void parseStyleTemplateUsage(StyleNode* styleNode);

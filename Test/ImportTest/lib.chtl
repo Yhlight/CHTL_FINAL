@@ -1,0 +1,8 @@
+// This is a library file with a template definition.
+
+[Template] @Element ImportedBox {
+    div {
+        class: "box imported-box";
+        text: "This box was imported from lib.chtl";
+    }
+}
