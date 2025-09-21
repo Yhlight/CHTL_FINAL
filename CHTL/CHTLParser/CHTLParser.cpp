@@ -7,6 +7,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <numeric>
+#include <optional>
 
 namespace CHTL {
 
@@ -113,8 +114,12 @@ std::string CHTLParser::getCurrentNamespace() {
 }
 
 std::unique_ptr<BaseNode> CHTLParser::parse() {
-    // Check for 'use html5;' directive at the very beginning
-    if (check(TokenType::USE)) {
+    // Check for 'html5;' directive at the very beginning
+    if (peek().type == TokenType::IDENTIFIER && peek().lexeme == "html5" && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::SEMICOLON) {
+        this->use_html5_doctype = true;
+        advance(); // consume 'html5'
+        advance(); // consume ';'
+    } else if (check(TokenType::USE)) { // Also support 'use html5;'
         if (tokens.size() > current + 2 && tokens[current + 1].type == TokenType::IDENTIFIER && tokens[current + 1].lexeme == "html5" && tokens[current + 2].type == TokenType::SEMICOLON) {
             this->use_html5_doctype = true;
             advance(); // consume 'use'
@@ -329,7 +334,7 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
                     raw_value += advance().lexeme;
                     if (!check(TokenType::SEMICOLON)) raw_value += " ";
                 }
-                auto value_expr = std::make_unique<LiteralExpr>(0, raw_value);
+                auto value_expr = std::make_unique<LiteralExpr>(0, raw_value, LiteralExpr::LiteralType::STRING);
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
                 rule.properties.push_back({key_str, std::move(value_expr)});
             }
@@ -498,7 +503,11 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                 } else {
                     error(selector, "Could not find element to specialize.");
                 }
-                Token position = previous();
+            } else if (match({TokenType::INSERT})) {
+                Token position = advance(); // after, before, replace
+                if (position.type != TokenType::AFTER && position.type != TokenType::BEFORE && position.type != TokenType::REPLACE) {
+                    error(position, "Expected 'after', 'before', or 'replace' for insert operation.");
+                }
                 Token selector = consume(TokenType::IDENTIFIER, "Expect tag name.");
                 int index = 0;
                 if (match({TokenType::LEFT_BRACKET})) {
@@ -602,7 +611,7 @@ void CHTLParser::parseImportStatement() {
     // --- State for the import ---
     bool is_custom_import = false;
     bool is_template_import = false;
-    TemplateType import_item_type = TemplateType::NONE;
+    std::optional<TemplateType> import_item_type;
     std::string import_item_name; // For precise imports
     std::string alias;
 
@@ -661,7 +670,7 @@ void CHTLParser::parseImportStatement() {
             TemplateDefinitionNode& def_to_import = source_definitions.at(import_item_name);
             // Check if types match
             bool type_match = (is_custom_import && def_to_import.is_custom) || (is_template_import && !def_to_import.is_custom);
-            if (type_match && def_to_import.type == import_item_type) {
+            if (type_match && import_item_type.has_value() && def_to_import.type == import_item_type.value()) {
                 std::string final_name = alias.empty() ? import_item_name : alias;
                 this->template_definitions[getCurrentNamespace()][final_name] = std::move(def_to_import);
             } else {
@@ -673,7 +682,7 @@ void CHTLParser::parseImportStatement() {
     } else if (typeToken.lexeme != "Chtl") { // Type/Wildcard Import
          for (auto& [name, def] : source_definitions) {
             bool type_match = (is_custom_import && def.is_custom) || (is_template_import && !def.is_custom) || (!is_custom_import && !is_template_import);
-             if (type_match && def.type == import_item_type) {
+             if (type_match && import_item_type.has_value() && def.type == import_item_type.value()) {
                  this->template_definitions[getCurrentNamespace()][name] = std::move(def);
              }
          }
@@ -815,7 +824,7 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
         std::string unit = "";
         if (check(TokenType::IDENTIFIER)) { unit = advance().lexeme; }
         else if (check(TokenType::PERCENT)) { unit = advance().lexeme; }
-        try { return std::make_unique<LiteralExpr>(std::stod(number.lexeme), unit); }
+        try { return std::make_unique<LiteralExpr>(std::stod(number.lexeme), unit, LiteralExpr::LiteralType::NUMBER); }
         catch (const std::invalid_argument&) { error(number, "Invalid number format."); }
     }
     if (match({TokenType::IDENTIFIER})) {
@@ -839,10 +848,8 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             consume(TokenType::RIGHT_PAREN, "Expect ')'.");
             return std::make_unique<VarExpr>(first_part.lexeme, key_name, std::move(override_expr));
         } else {
-            // It's a self-referential property (e.g., 'width' in 'width > 100px')
-            // We represent this as a ReferenceExpr with an empty selector.
-            Token empty_selector = {TokenType::IDENTIFIER, "", first_part.line, first_part.position};
-            return std::make_unique<ReferenceExpr>(empty_selector, first_part);
+            // This is a string-like literal (e.g. "red", "solid")
+            return std::make_unique<LiteralExpr>(0, first_part.lexeme, LiteralExpr::LiteralType::STRING);
         }
     }
     if (check(TokenType::SYMBOL) && (peek().lexeme == "#" || peek().lexeme == ".")) {
@@ -856,10 +863,10 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
         } else {
             std::string value = first_part.lexeme;
              while(check(TokenType::IDENTIFIER) || check(TokenType::NUMBER)) { value += advance().lexeme; }
-            return std::make_unique<LiteralExpr>(0, value);
+            return std::make_unique<LiteralExpr>(0, value, LiteralExpr::LiteralType::STRING);
         }
     }
-    if (match({TokenType::STRING})) { return std::make_unique<LiteralExpr>(0, previous().lexeme); }
+    if (match({TokenType::STRING})) { return std::make_unique<LiteralExpr>(0, previous().lexeme, LiteralExpr::LiteralType::STRING); }
     if (match({TokenType::LEFT_PAREN})) {
         auto expr = parseExpression();
         consume(TokenType::RIGHT_PAREN, "Expect ')'.");

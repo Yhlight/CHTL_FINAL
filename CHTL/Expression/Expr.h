@@ -40,11 +40,13 @@ public:
 
 class LiteralExpr : public Expr {
 public:
-    LiteralExpr(double value, const std::string& unit) : value(value), unit(unit) {}
+    enum class LiteralType { NUMBER, STRING };
+    LiteralExpr(double value, const std::string& unit, LiteralType type = LiteralType::NUMBER) : value(value), unit(unit), type(type) {}
     void accept(ExprVisitor& visitor) override;
     std::unique_ptr<Expr> clone() const override;
     double value;
     std::string unit;
+    LiteralType type;
 };
 
 class BinaryExpr : public Expr {

@@ -151,7 +151,11 @@ void CHTLGenerator::visit(ElementNode& node) {
                     // NOTE: Dynamic expressions are NOT handled in global rules.
                     ExpressionEvaluator evaluator(this->templates, this->doc_root);
                     EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
-                    css_output << "  " << prop.key << ": " << format_css_double(result.value) << result.unit << ";\n";
+                    if (result.type == EvaluatedType::STRING) {
+                        css_output << "  " << prop.key << ": " << result.unit << ";\n";
+                    } else {
+                        css_output << "  " << prop.key << ": " << format_css_double(result.value) << result.unit << ";\n";
+                    }
                 }
                 css_output << "}\n";
             }
@@ -220,7 +224,11 @@ void CHTLGenerator::visit(ElementNode& node) {
                 try {
                     ExpressionEvaluator evaluator(this->templates, this->doc_root);
                     EvaluatedValue result = evaluator.evaluate(attr_node.value_expr.get(), &node);
-                    style_str += key + ": " + format_css_double(result.value) + result.unit + ";";
+                    if (result.type == EvaluatedType::STRING) {
+                        style_str += key + ": " + result.unit + ";";
+                    } else {
+                        style_str += key + ": " + format_css_double(result.value) + result.unit + ";";
+                    }
                 } catch (const std::runtime_error& e) {
                     // This is likely a DynamicReferenceExpr, which can't be evaluated statically.
                     // We need to generate JS for it.

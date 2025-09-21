@@ -1,0 +1,30 @@
+// This is a test file for the CHTLUnifiedScanner
+
+style {
+    .body {
+        font-family: "Arial";
+    }
+}
+
+div {
+    id: myDiv;
+    class: $myClass$;
+
+    script {
+        let a = 1;
+        let b = 2;
+
+        const myObj = {{myDiv}};
+        console.log(myObj->textContent);
+
+        if (a > b) {
+            console.log("a is greater");
+        }
+
+        myObj &-> click: () => {
+            console.log("Clicked!");
+        };
+
+        let myClass = "dynamic-class";
+    }
+}
