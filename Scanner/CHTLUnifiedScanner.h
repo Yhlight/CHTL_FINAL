@@ -36,6 +36,9 @@ namespace CHTL {
         void scanSource();
         // Specific scanner for script content
         void scanScriptContent(size_t block_end);
+        void scanScriptAndSubscript(size_t block_end, std::string& chtl_js_buffer);
+        // Specific scanner for style content
+        void scanStyleContent(size_t block_end);
 
         std::vector<CodeFragment> m_fragments;
     };

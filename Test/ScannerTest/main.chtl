@@ -1,0 +1,41 @@
+// Test file for CHTLUnifiedScanner
+
+div {
+    // This is a standard CHTL block.
+    // The scanner should treat all of this as a single CHTL fragment
+    // until it hits the global style block.
+    p { text: "Hello"; }
+}
+
+style {
+    // This is a global style block.
+    body {
+        font-family: "Arial", sans-serif;
+        margin: 0;
+    }
+
+    @Style CustomStyles; // This should be a CHTL fragment.
+
+    .card {
+        padding: 10px + 2px; // This should be a CHTL fragment.
+        border: 1px solid #ccc;
+    }
+}
+
+main {
+    // Another CHTL block.
+    script {
+        // This is a script block with mixed content.
+        console.log("Starting script"); // JS
+
+        const element = {{.card}}; // CHTL JS
+
+        element->Listen { // CHTL JS
+            click: () => { // The '() => { ... }' part is JS
+                console.log("Card clicked!"); // JS
+            }
+        };
+
+        let x = 1; // JS
+    }
+}
