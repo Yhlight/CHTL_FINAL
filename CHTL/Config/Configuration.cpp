@@ -57,6 +57,9 @@ void Configuration::setDefaultKeywords() {
     keyword_map["KEYWORD_EXCEPT"] = {"except"};
     keyword_map["KEYWORD_USE"] = {"use"};
     keyword_map["KEYWORD_HTML5"] = {"html5"};
+    keyword_map["KEYWORD_IF"] = {"if"};
+    keyword_map["KEYWORD_ELSE"] = {"else"};
+    keyword_map["KEYWORD_CONDITION"] = {"condition"};
 
     keyword_map["KEYWORD_TEXT"] = {"text"};
     keyword_map["KEYWORD_STYLE"] = {"style"};

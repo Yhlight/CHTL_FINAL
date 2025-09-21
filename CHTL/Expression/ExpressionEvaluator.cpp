@@ -67,8 +67,9 @@ void collectNodes(BaseNode* context, const std::string& simple_selector, std::ve
 ExpressionEvaluator::ExpressionEvaluator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, BaseNode* doc_root)
     : templates(templates), doc_root(doc_root) {}
 
-EvaluatedValue ExpressionEvaluator::evaluate(Expr* expr, ElementNode* context) {
+EvaluatedValue ExpressionEvaluator::evaluate(Expr* expr, ElementNode* context, const std::map<std::string, EvaluatedValue>& static_props) {
     this->current_context = context;
+    this->current_static_props = static_props;
     if (expr) {
         expr->accept(*this);
     }
@@ -133,6 +134,10 @@ void ExpressionEvaluator::visit(ReferenceExpr& expr) {
     ElementNode* target_element = nullptr;
     if (expr.selector.lexeme.empty()) {
         // This is a self-reference to the current element's property
+        if (current_static_props.count(expr.property.lexeme)) {
+            result = current_static_props.at(expr.property.lexeme);
+            return;
+        }
         target_element = this->current_context;
     } else {
         // This is a reference to another element

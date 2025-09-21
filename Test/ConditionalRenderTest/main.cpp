@@ -8,7 +8,6 @@
 #include <string>
 #include <algorithm>
 #include <memory>
-#include <vector>
 
 // Helper function to remove all whitespace from a string for robust comparison
 std::string remove_whitespace(const std::string& str) {
@@ -22,29 +21,35 @@ std::string remove_whitespace(const std::string& str) {
     return out;
 }
 
+// Helper function to check if a string contains a substring
+bool contains(const std::string& str, const std::string& substr) {
+    return str.find(substr) != std::string::npos;
+}
+
 int main() {
-    std::string file_path = "Test/DelegateTest/main.chtl";
+    std::string file_path = "Test/ConditionalRenderTest/main.chtl";
     std::string source = CHTL::FileSystem::readFile(file_path);
     auto config = std::make_shared<CHTL::Configuration>();
 
-    std::vector<CHTL::CodeFragment> fragments = {{source, CHTL::FragmentType::CHTL}};
+    // 1. Scanner
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
 
+    // 2. Dispatcher
     CHTL::CompilerDispatcher dispatcher(config, file_path);
     CHTL::FinalCompilationResult result = dispatcher.dispatch(fragments);
 
-    std::string expected_js = R"(
-        document.querySelector('#parent-container').addEventListener('click', (event) => {
-            if (event.target.matches('li')) {
-                ((event) => { console.log(event.target.textContent); })(event);
-            }
-        });
-    )";
+    std::string processed_html = remove_whitespace(result.html);
 
-    std::cout << "Generated JS: " << result.js << std::endl;
+    std::cout << "Generated HTML: " << result.html << std::endl;
 
-    assert(remove_whitespace(result.js) == remove_whitespace(expected_js));
+    // 3. Assert
+    assert(contains(result.html, "id=\"test-box\"") && contains(result.html, "color: red;"));
+    assert(contains(result.html, "id=\"test-box-2\"") && contains(result.html, "color: orange;"));
+    assert(contains(result.html, "id=\"test-box-3\"") && contains(result.html, "color: black;"));
 
-    std::cout << "DelegateTest PASSED!" << std::endl;
+
+    std::cout << "ConditionalRenderTest PASSED!" << std::endl;
 
     return 0;
 }

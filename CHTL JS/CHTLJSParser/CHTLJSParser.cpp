@@ -209,12 +209,6 @@ std::unique_ptr<DelegateNode> CHTLJSParser::parseDelegateExpression(std::unique_
     }
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' after Delegate block.");
-
-    // Optionally consume a trailing semicolon
-    if (match({TokenType::SEMICOLON})) {
-        // expression statement is over
-    }
-
     return delegateNode;
 }
 

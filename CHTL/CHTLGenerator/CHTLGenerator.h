@@ -29,6 +29,7 @@ public:
     void visit(StyleNode& node) override;
     void visit(OriginNode& node) override;
     void visit(ScriptNode& node) override;
+    void visit(ConditionalNode& node) override;
 
 private:
     std::shared_ptr<Configuration> config;

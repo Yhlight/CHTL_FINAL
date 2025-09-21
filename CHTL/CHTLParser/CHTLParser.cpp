@@ -223,6 +223,8 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
             parseExceptClause(element.get());
         } else if ((peek().type == TokenType::IDENTIFIER || peek().type == TokenType::TEXT) && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
             parseAttribute(element.get());
+        } else if (match({TokenType::IF})) {
+            element->addChild(parseConditionalBlock());
         } else {
             // --- Child Parsing with Constraint Checking ---
             // Peek at the next token to determine the type of the child.
@@ -498,12 +500,17 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                 } else {
                     error(selector, "Could not find element to specialize.");
                 }
-                Token position = previous();
-                Token selector = consume(TokenType::IDENTIFIER, "Expect tag name.");
-                int index = 0;
+            } else if (match({TokenType::INSERT})) {
+                 if (!match({TokenType::AFTER, TokenType::BEFORE, TokenType::REPLACE})) {
+                    error(peek(), "Expect 'after', 'before', or 'replace' after 'insert'.");
+                }
+                Token insert_pos_token = previous();
+
+                Token selector_token = consume(TokenType::IDENTIFIER, "Expect tag name.");
+                int index_val = 0;
                 if (match({TokenType::LEFT_BRACKET})) {
                     Token index_token = consume(TokenType::NUMBER, "Expect index.");
-                    index = std::stoi(index_token.lexeme);
+                    index_val = std::stoi(index_token.lexeme);
                     consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
                 }
                 consume(TokenType::LEFT_BRACE, "Expect '{'.");
@@ -514,8 +521,8 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                     }
                 }
                 consume(TokenType::RIGHT_BRACE, "Expect '}'.");
-                if (!findAndInsert(cloned_nodes, selector.lexeme, index, position.type, nodes_to_insert)) {
-                    error(selector, "Could not find target for insert.");
+                if (!findAndInsert(cloned_nodes, selector_token.lexeme, index_val, insert_pos_token.type, nodes_to_insert)) {
+                    error(selector_token, "Could not find target for insert.");
                 }
             } else {
                 error(peek(), "Unsupported specialization keyword.");
@@ -602,7 +609,7 @@ void CHTLParser::parseImportStatement() {
     // --- State for the import ---
     bool is_custom_import = false;
     bool is_template_import = false;
-    TemplateType import_item_type = TemplateType::NONE;
+    TemplateType import_item_type = TemplateType::ELEMENT;
     std::string import_item_name; // For precise imports
     std::string alias;
 
@@ -959,6 +966,53 @@ std::unique_ptr<ConfigNode> CHTLParser::parseConfigurationBlock() {
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' to end configuration body.");
     return std::make_unique<ConfigNode>();
+}
+
+std::unique_ptr<ConditionalNode> CHTLParser::parseConditionalBlock() {
+    // Assumes the 'if' token has already been matched
+    auto conditionalNode = std::make_unique<ConditionalNode>();
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'if'.");
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        Token key = advance(); // Grabs 'condition' or a style property
+        if (key.type != TokenType::IDENTIFIER && key.type != TokenType::CONDITION) {
+            error(key, "Expect property name or 'condition' in if-block.");
+        }
+        consume(TokenType::COLON, "Expect ':' after property name.");
+        auto value_expr = parseExpression();
+
+        // Allow optional comma or required semicolon
+        if (peek().type == TokenType::COMMA) advance();
+        else consume(TokenType::SEMICOLON, "Expect ';' or ',' after property value.");
+
+        conditionalNode->properties.push_back({key.lexeme, std::move(value_expr)});
+    }
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after if-block body.");
+
+    if (match({TokenType::ELSE})) {
+        if (match({TokenType::IF})) {
+            // 'else if' chain
+            conditionalNode->else_branch = parseConditionalBlock();
+        } else {
+            // final 'else' block
+            auto elseNode = std::make_unique<ConditionalNode>(); // No condition means it's the else
+            consume(TokenType::LEFT_BRACE, "Expect '{' after 'else'.");
+            while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                Token key = consume(TokenType::IDENTIFIER, "Expect property name in else-block.");
+                consume(TokenType::COLON, "Expect ':' after property name.");
+                auto value_expr = parseExpression();
+
+                if (peek().type == TokenType::COMMA) advance();
+                else consume(TokenType::SEMICOLON, "Expect ';' or ',' after property value.");
+
+                elseNode->properties.push_back({key.lexeme, std::move(value_expr)});
+            }
+            consume(TokenType::RIGHT_BRACE, "Expect '}' after else-block body.");
+            conditionalNode->else_branch = std::move(elseNode);
+        }
+    }
+
+    return conditionalNode;
 }
 
 } // namespace CHTL

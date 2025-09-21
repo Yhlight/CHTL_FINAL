@@ -4,6 +4,7 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/ScriptNode.h"
+#include "../CHTLNode/ConditionalNode.h"
 #include "../../CHTL JS/CHTLJSLexer/CHTLJSLexer.h"
 #include "../../CHTL JS/CHTLJSParser/CHTLJSParser.h"
 #include "../../CHTL JS/CHTLJSNode/RawJSNode.h"
@@ -238,6 +239,80 @@ void CHTLGenerator::visit(ElementNode& node) {
             }
         }
     }
+    // --- Pre-calculate all static styles for this element ---
+    std::map<std::string, EvaluatedValue> static_style_props;
+    for (const auto& child : node.children) {
+        if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
+             std::map<std::string, AttributeNode> final_props;
+             for (const auto& app : styleNode->template_applications) {
+                const TemplateDefinitionNode* def = nullptr;
+                for (const auto& ns_pair : this->templates) { if (ns_pair.second.count(app.template_name)) { def = &ns_pair.second.at(app.template_name); break; } }
+                if (def && def->type == TemplateType::STYLE) {
+                    for (const auto& prop : def->style_properties) { final_props[prop.key] = prop.clone(); }
+                    for (const auto& key_to_delete : app.deleted_properties) { if (key_to_delete.rfind("@Style", 0) != 0) { final_props.erase(key_to_delete); } }
+                    for (const auto& prop : app.new_or_overridden_properties) { final_props[prop.key] = prop.clone(); }
+                }
+            }
+            for (const auto& prop : styleNode->direct_properties) { final_props[prop.key] = prop.clone(); }
+            for (auto const& [key, attr_node] : final_props) {
+                 if (attr_node.value_expr != nullptr) {
+                    try {
+                        ExpressionEvaluator static_evaluator(this->templates, this->doc_root);
+                        static_style_props[key] = static_evaluator.evaluate(attr_node.value_expr.get(), &node);
+                    } catch (const std::runtime_error& e) { /* Ignore dynamic */ }
+                 }
+            }
+        }
+    }
+    // Apply the calculated static styles
+    for(const auto& [key, val] : static_style_props) {
+        std::string final_value;
+        bool is_alpha_literal = !val.unit.empty() && std::all_of(val.unit.begin(), val.unit.end(), [](char c){ return std::isalpha(static_cast<unsigned char>(c)); });
+        if (val.value == 0.0 && is_alpha_literal) { final_value = val.unit; }
+        else { final_value = format_css_double(val.value) + val.unit; }
+        style_str += key + ": " + final_value + ";";
+    }
+
+    // --- Conditional Block Processing ---
+    for (const auto& child : node.children) {
+        if (ConditionalNode* cond_node = dynamic_cast<ConditionalNode*>(child.get())) {
+            ConditionalNode* current_cond = cond_node;
+            while(current_cond) {
+                const AttributeNode* condition_attr = nullptr;
+                for (const auto& prop : current_cond->properties) {
+                    if (prop.key == "condition") { condition_attr = &prop; break; }
+                }
+                bool condition_met = false;
+                if (condition_attr) {
+                    ExpressionEvaluator evaluator(this->templates, this->doc_root);
+                    EvaluatedValue result = evaluator.evaluate(condition_attr->value_expr.get(), &node, static_style_props);
+                    if (result.value != 0.0) { condition_met = true; }
+                } else {
+                    condition_met = true; // final 'else'
+                }
+                if (condition_met) {
+                    for (const auto& prop : current_cond->properties) {
+                        if (prop.key == "condition") continue;
+                        ExpressionEvaluator evaluator(this->templates, this->doc_root);
+                        EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node, static_style_props);
+                        std::string final_value;
+                        bool is_alpha_literal = !result.unit.empty() && std::all_of(result.unit.begin(), result.unit.end(), [](char c){ return std::isalpha(static_cast<unsigned char>(c)); });
+                        if (result.value == 0.0 && is_alpha_literal) { final_value = result.unit; }
+                        else { final_value = format_css_double(result.value) + result.unit; }
+                        style_str += prop.key + ": " + final_value + ";";
+                    }
+                    break;
+                }
+                if (current_cond->else_branch) {
+                     current_cond = dynamic_cast<ConditionalNode*>(current_cond->else_branch.get());
+                } else {
+                    current_cond = nullptr;
+                }
+            }
+            break;
+        }
+    }
+
     if (!style_str.empty()) {
         html_output << " style=\"" << style_str << "\"";
     }
@@ -254,6 +329,7 @@ void CHTLGenerator::visit(ElementNode& node) {
 
 void CHTLGenerator::visit(TextNode& node) { html_output << node.text; }
 void CHTLGenerator::visit(StyleNode& node) {}
+void CHTLGenerator::visit(ConditionalNode& node) {}
 void CHTLGenerator::visit(OriginNode& node) {
     if (node.type == OriginType::HTML) html_output << node.content;
     else if (node.type == OriginType::STYLE) css_output << node.content;

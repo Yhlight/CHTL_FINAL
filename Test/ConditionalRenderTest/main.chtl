@@ -1,0 +1,55 @@
+body {
+    div {
+        id: "test-box";
+        style {
+            width: 100px;
+            height: 100px;
+        }
+
+        // First condition should be true
+        if {
+            condition: width > 50px;
+            color: "red";
+        } else {
+            color: "blue";
+        }
+    }
+
+    div {
+        id: "test-box-2";
+        style {
+            width: 100px;
+            height: 200px;
+        }
+
+        // Second condition (else if) should be true
+        if {
+            condition: width > 200px;
+            color: "green";
+        } else if {
+            condition: height > 150px;
+            color: "orange";
+        } else {
+            color: "purple";
+        }
+    }
+
+    div {
+        id: "test-box-3";
+        style {
+            width: 10px;
+            height: 10px;
+        }
+
+        // Fallback (else) condition should be true
+        if {
+            condition: width > 200px;
+            color: "yellow";
+        } else if {
+            condition: height > 150px;
+            color: "pink";
+        } else {
+            color: "black";
+        }
+    }
+}

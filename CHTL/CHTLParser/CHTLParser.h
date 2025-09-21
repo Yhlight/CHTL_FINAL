@@ -8,6 +8,7 @@
 #include "../CHTLNode/ScriptNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/ConfigNode.h"
+#include "../CHTLNode/ConditionalNode.h"
 #include "../Config/Configuration.h"
 #include "../Expression/Expr.h"
 #include <vector>
@@ -69,6 +70,7 @@ private:
     void parseImportStatement();
     void parseStyleTemplateUsage(StyleNode* styleNode);
     std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();
+    std::unique_ptr<ConditionalNode> parseConditionalBlock();
 };
 
 } // namespace CHTL
