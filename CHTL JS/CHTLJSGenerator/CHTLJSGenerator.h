@@ -4,33 +4,31 @@
 #include <string>
 #include <memory>
 #include "../CHTLJSNode/CHTLJSBaseNode.h"
+#include <vector>
+
 // Forward declarations for CHTL JS Nodes to avoid circular dependencies
-// We will need to include the actual node headers in the .cpp file.
 namespace CHTL_JS {
     class CHTLJSBaseNode;
     class ListenNode;
     class EnhancedSelectorNode;
-    // ... other node types
+    class DelegateNode; // Forward-declare DelegateNode
+    class RawJSNode;
+    class EventHandlerNode;
+    class AnimateNode;
 }
 
 namespace CHTL_JS {
 
-    class CHTLJSGenerator {
-    public:
-        CHTLJSGenerator();
+class CHTLJSGenerator {
+public:
+    CHTLJSGenerator();
 
-        std::string generate(CHTLJSBaseNode* root);
+    std::string generate(const std::vector<std::unique_ptr<CHTLJSBaseNode>>& nodes);
 
-        // Visitor methods for each node type
-        // void visit(ListenNode* node);
-        // void visit(EnhancedSelectorNode* node);
-        // ...
-
-    private:
-        std::string m_output;
-
-        void visit(CHTLJSBaseNode* node);
-    };
+private:
+    std::string m_output;
+    void visit(CHTLJSBaseNode* node);
+};
 
 } // namespace CHTL_JS
 

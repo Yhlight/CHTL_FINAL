@@ -11,7 +11,6 @@
 namespace CHTL {
 
 enum class TemplateType {
-    NONE,
     ELEMENT,
     STYLE,
     VAR

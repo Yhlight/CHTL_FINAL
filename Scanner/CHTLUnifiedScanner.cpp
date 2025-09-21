@@ -91,26 +91,15 @@ void CHTLUnifiedScanner::scanScriptContent(size_t block_end) {
 
         // Check for {{ ... }}
         if (m_source.substr(m_cursor, 2) == "{{") {
-            size_t end_brace_pos = m_source.find("}}", m_cursor);
-            if (end_brace_pos != std::string::npos) {
-                // Potential CHTL JS construct found. Let's look ahead.
-                size_t lookahead_pos = end_brace_pos + 2;
-                while (lookahead_pos < block_end && std::isspace(m_source[lookahead_pos])) {
-                    lookahead_pos++;
-                }
-
-                if (m_source.substr(lookahead_pos, 2) == "->") {
-                    // It's a chain like {{box}}->Listen, consume the whole thing
-                    finalize_js_buffer();
-                    chtl_js_buffer += m_source.substr(m_cursor, lookahead_pos + 2 - m_cursor);
-                    m_cursor = lookahead_pos + 2;
-                    is_chtl_js_construct = true;
-                }
+            finalize_js_buffer();
+            size_t end_pos = m_source.find("}}", m_cursor);
+            if (end_pos != std::string::npos) {
+                chtl_js_buffer += m_source.substr(m_cursor, end_pos + 2 - m_cursor);
+                m_cursor = end_pos + 2;
+                is_chtl_js_construct = true;
             }
-        }
-
-        if (!is_chtl_js_construct) {
-            // Check for standalone CHTL JS keywords
+        } else {
+            // Check for CHTL JS keywords
             for (const auto& keyword : CHTLJS_KEYWORDS) {
                 if (m_source.substr(m_cursor, keyword.length()) == keyword) {
                     // Check for standalone word

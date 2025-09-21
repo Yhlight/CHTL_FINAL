@@ -1,17 +1,9 @@
-div {
-    id: "parent-container";
+{{#parent-container}}->Delegate {
+    target: {{.child-button}},
+    click: (e) => { console.log('Button clicked:', e.target.textContent); }
+};
 
-    ul {
-        li { text: "Item 1"; }
-        li { text: "Item 2"; }
-    }
-
-    script {
-        {{#parent-container}}->Delegate {
-            target: {{li}},
-            click: (event) => {
-                console.log(event.target.textContent);
-            }
-        }
-    }
-}
+{{#parent-container}}->Delegate {
+    target: [{{.child-span}}],
+    mouseover: (e) => { e.target.style.color = 'red'; }
+};

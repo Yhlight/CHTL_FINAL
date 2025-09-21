@@ -498,13 +498,12 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                 } else {
                     error(selector, "Could not find element to specialize.");
                 }
-            } else if (match({TokenType::INSERT})) {
-                Token position = consume(TokenType::IDENTIFIER, "Expect insert position (e.g., 'after').");
-                Token insert_selector = consume(TokenType::IDENTIFIER, "Expect tag name.");
-                int insert_index = 0;
+                Token position = previous();
+                Token selector = consume(TokenType::IDENTIFIER, "Expect tag name.");
+                int index = 0;
                 if (match({TokenType::LEFT_BRACKET})) {
                     Token index_token = consume(TokenType::NUMBER, "Expect index.");
-                    insert_index = std::stoi(index_token.lexeme);
+                    index = std::stoi(index_token.lexeme);
                     consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
                 }
                 consume(TokenType::LEFT_BRACE, "Expect '{'.");
@@ -515,11 +514,10 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                     }
                 }
                 consume(TokenType::RIGHT_BRACE, "Expect '}'.");
-                if (!findAndInsert(cloned_nodes, insert_selector.lexeme, insert_index, position.type, nodes_to_insert)) {
-                    error(insert_selector, "Could not find target for insert.");
+                if (!findAndInsert(cloned_nodes, selector.lexeme, index, position.type, nodes_to_insert)) {
+                    error(selector, "Could not find target for insert.");
                 }
-            }
-            else {
+            } else {
                 error(peek(), "Unsupported specialization keyword.");
             }
         }
