@@ -9,7 +9,6 @@ class TextNode;
 class StyleNode;
 class OriginNode;
 class ScriptNode;
-class OriginUsageNode;
 
 // The Visitor interface declares a set of visiting methods that correspond
 // to classes of the concrete nodes.
@@ -21,7 +20,6 @@ public:
     virtual void visit(StyleNode& node) = 0;
     virtual void visit(OriginNode& node) = 0;
     virtual void visit(ScriptNode& node) = 0;
-    virtual void visit(OriginUsageNode& node) = 0;
 };
 
 } // namespace CHTL

@@ -1,0 +1,19 @@
+html {
+    body {
+        button {
+            id: "myButton";
+            text: "Click Me";
+        }
+
+        script {
+            {{#myButton}}->Listen {
+                click: () => {
+                    console.log("Button was clicked!");
+                },
+                mouseover: () => {
+                    console.log("Mouse over button!");
+                }
+            }
+        }
+    }
+}

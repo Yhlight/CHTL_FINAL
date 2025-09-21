@@ -3,7 +3,6 @@
 #include "../CHTLLexer/CHTLLexer.h"
 #include "CHTL/CHTLNode/TextNode.h"
 #include "CHTL/CHTLNode/OriginNode.h"
-#include "CHTL/CHTLNode/OriginUsageNode.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <stdexcept>
@@ -103,8 +102,6 @@ CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& toke
 
 const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& CHTLParser::getTemplateDefinitions() const { return template_definitions; }
 std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& CHTLParser::getMutableTemplateDefinitions() { return template_definitions; }
-const std::map<std::string, std::unique_ptr<OriginNode>>& CHTLParser::getNamedOrigins() const { return named_origins; }
-void CHTLParser::addNamedOrigin(const std::string& name, std::unique_ptr<OriginNode> node) { named_origins[name] = std::move(node); }
 bool CHTLParser::getUseHtml5Doctype() const { return use_html5_doctype; }
 
 std::string CHTLParser::getCurrentNamespace() {
@@ -604,52 +601,86 @@ void CHTLParser::parseImportStatement() {
     consume(TokenType::IDENTIFIER, "Expect 'Import'.");
     consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
 
-    bool is_non_chtl_import = false;
-    OriginType non_chtl_type = OriginType::HTML;
+    // --- State for the import ---
+    bool is_custom_import = false;
+    bool is_template_import = false;
+    TemplateType import_item_type = TemplateType::NONE;
+    std::string import_item_name; // For precise imports
+    std::string alias;
+
+    // --- Parse Import Specifiers ---
+    if (peek().type == TokenType::LEFT_BRACKET) {
+        advance(); // consume [
+        Token specifier = consume(TokenType::IDENTIFIER, "Expect 'Custom' or 'Template'.");
+        if (specifier.lexeme == "Custom") is_custom_import = true;
+        else if (specifier.lexeme == "Template") is_template_import = true;
+        else error(specifier, "Invalid import specifier.");
+        consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+    }
 
     consume(TokenType::AT, "Expect '@'.");
-    Token typeToken = consume(TokenType::IDENTIFIER, "Expect import type.");
+    Token typeToken = consume(TokenType::IDENTIFIER, "Expect import type (Element, Style, Var, Chtl).");
 
-    if (typeToken.lexeme == "Html") { is_non_chtl_import = true; non_chtl_type = OriginType::HTML; }
-    else if (typeToken.lexeme == "Style") { is_non_chtl_import = true; non_chtl_type = OriginType::STYLE; }
-    else if (typeToken.lexeme == "JavaScript") { is_non_chtl_import = true; non_chtl_type = OriginType::JAVASCRIPT; }
-    else if (typeToken.lexeme != "Chtl") {
-        error(typeToken, "Unsupported import type: " + typeToken.lexeme + ". Only @Chtl, @Html, @Style, @JavaScript are currently supported.");
+    if (typeToken.lexeme == "Element") import_item_type = TemplateType::ELEMENT;
+    else if (typeToken.lexeme == "Style") import_item_type = TemplateType::STYLE;
+    else if (typeToken.lexeme == "Var") import_item_type = TemplateType::VAR;
+    else if (typeToken.lexeme != "Chtl") error(typeToken, "Unknown import type.");
+
+    // If not a full CHTL import, we might have a specific item name
+    if (typeToken.lexeme != "Chtl") {
+        if (check(TokenType::IDENTIFIER)) {
+            import_item_name = advance().lexeme; // This is a precise import
+        }
     }
 
     consume(TokenType::FROM, "Expect 'from'.");
     Token pathToken = consume(TokenType::STRING, "Expect file path.");
 
-    std::string alias;
     if (match({TokenType::AS})) {
         alias = consume(TokenType::IDENTIFIER, "Expect alias name.").lexeme;
     }
 
     consume(TokenType::SEMICOLON, "Expect ';' after import statement.");
 
+    // --- Execute Import ---
     std::string imported_content = CHTLLoader::load(this->file_path, pathToken.lexeme);
+    std::string imported_path = FileSystem::getDirectory(this->file_path) + pathToken.lexeme;
+    CHTLLexer sub_lexer(imported_content, this->config);
+    std::vector<Token> sub_tokens = sub_lexer.scanTokens();
+    // Create a temporary parser just to analyze the file's definitions
+    CHTLParser sub_parser(imported_content, sub_tokens, imported_path, this->config);
+    sub_parser.parse();
+    auto& imported_template_map = sub_parser.getMutableTemplateDefinitions();
 
-    if (is_non_chtl_import) {
-        if (alias.empty()) {
-            error(pathToken, "Import of non-CHTL files requires an 'as' alias.");
-        }
-        addNamedOrigin(alias, std::make_unique<OriginNode>(imported_content, non_chtl_type));
-    } else {
-        std::string imported_path = FileSystem::getDirectory(this->file_path) + pathToken.lexeme;
-        CHTLLexer sub_lexer(imported_content, this->config);
-        auto sub_tokens = sub_lexer.scanTokens();
-        CHTLParser sub_parser(imported_content, sub_tokens, imported_path, this->config);
-        sub_parser.parse();
+    std::string source_namespace = getFilename(pathToken.lexeme);
+    if (!imported_template_map.count(source_namespace)) return; // Nothing to import
 
-        auto& source_defs_by_ns = sub_parser.getMutableTemplateDefinitions();
-        auto& dest_defs_by_ns = this->getMutableTemplateDefinitions();
+    auto& source_definitions = imported_template_map.at(source_namespace);
 
-        for (auto& [ns, def_map] : source_defs_by_ns) {
-            for (auto& [name, def] : def_map) {
-                // Simplified logic: merge everything into the imported file's namespace.
-                dest_defs_by_ns[ns][name] = std::move(def);
+    // --- Logic for selective import ---
+    if (!import_item_name.empty()) { // Precise import
+        if (source_definitions.count(import_item_name)) {
+            TemplateDefinitionNode& def_to_import = source_definitions.at(import_item_name);
+            // Check if types match
+            bool type_match = (is_custom_import && def_to_import.is_custom) || (is_template_import && !def_to_import.is_custom);
+            if (type_match && def_to_import.type == import_item_type) {
+                std::string final_name = alias.empty() ? import_item_name : alias;
+                this->template_definitions[getCurrentNamespace()][final_name] = std::move(def_to_import);
+            } else {
+                error(pathToken, "Imported item '" + import_item_name + "' does not match specified type.");
             }
+        } else {
+            error(pathToken, "Item '" + import_item_name + "' not found in module '" + pathToken.lexeme + "'.");
         }
+    } else if (typeToken.lexeme != "Chtl") { // Type/Wildcard Import
+         for (auto& [name, def] : source_definitions) {
+            bool type_match = (is_custom_import && def.is_custom) || (is_template_import && !def.is_custom) || (!is_custom_import && !is_template_import);
+             if (type_match && def.type == import_item_type) {
+                 this->template_definitions[getCurrentNamespace()][name] = std::move(def);
+             }
+         }
+    } else { // Full CHTL import
+        this->template_definitions[source_namespace] = std::move(source_definitions);
     }
 }
 
@@ -685,31 +716,24 @@ std::unique_ptr<ScriptNode> CHTLParser::parseScriptBlock() {
 }
 
 std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {
+    // Basic implementation, doesn't handle nested braces
     consume(TokenType::LEFT_BRACKET, "Expect '['.");
     consume(TokenType::IDENTIFIER, "Expect 'Origin'.");
     consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
     consume(TokenType::AT, "Expect '@'.");
     Token type = consume(TokenType::IDENTIFIER, "Expect origin type.");
-
-    if (check(TokenType::LEFT_BRACE)) {
-        consume(TokenType::LEFT_BRACE, "Expect '{'.");
-        int start = current;
-        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            advance();
-        }
-        int end = current;
-        std::string content = source.substr(tokens[start].position, tokens[end - 1].position + tokens[end - 1].lexeme.length() - tokens[start].position);
-        consume(TokenType::RIGHT_BRACE, "Expect '}'.");
-
-        OriginType originType = OriginType::HTML;
-        if (type.lexeme == "Style") originType = OriginType::STYLE;
-        else if (type.lexeme == "JavaScript") originType = OriginType::JAVASCRIPT;
-        return std::make_unique<OriginNode>(content, originType);
-    } else {
-        Token name = consume(TokenType::IDENTIFIER, "Expect name for origin usage.");
-        consume(TokenType::SEMICOLON, "Expect ';' after origin usage.");
-        return std::make_unique<OriginUsageNode>(name.lexeme);
+    consume(TokenType::LEFT_BRACE, "Expect '{'.");
+    int start = current;
+    while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        advance();
     }
+    int end = current;
+    std::string content = source.substr(tokens[start].position, tokens[end-1].position + tokens[end-1].lexeme.length() - tokens[start].position);
+    consume(TokenType::RIGHT_BRACE, "Expect '}'.");
+    OriginType originType = OriginType::HTML;
+    if (type.lexeme == "Style") originType = OriginType::STYLE;
+    else if (type.lexeme == "JavaScript") originType = OriginType::JAVASCRIPT;
+    return std::make_unique<OriginNode>(content, originType);
 }
 
 // --- Expression Parser (Full Implementation) ---

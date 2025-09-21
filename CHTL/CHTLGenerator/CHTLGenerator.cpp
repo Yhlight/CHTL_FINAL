@@ -2,6 +2,7 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
+#include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/ScriptNode.h"
 #include "../../CHTL JS/CHTLJSLexer/CHTLJSLexer.h"
 #include "../../CHTL JS/CHTLJSParser/CHTLJSParser.h"
@@ -14,7 +15,6 @@
 #include "../Expression/ExpressionEvaluator.h"
 #include <unordered_set>
 #include <algorithm>
-#include <iostream>
 #include <map>
 #include <sstream>
 
@@ -64,8 +64,8 @@ std::string generateDynamicJS(
 }
 
 
-CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, const std::map<std::string, std::unique_ptr<OriginNode>>& named_origins, std::shared_ptr<Configuration> config)
-    : templates(templates), named_origins(named_origins), config(config), doc_root(nullptr) {}
+CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, std::shared_ptr<Configuration> config)
+    : templates(templates), config(config), doc_root(nullptr) {}
 
 CompilationResult CHTLGenerator::generate(BaseNode* root, bool use_html5_doctype) {
     html_output.str("");
@@ -263,15 +263,6 @@ void CHTLGenerator::visit(OriginNode& node) {
 void CHTLGenerator::visit(ScriptNode& node) {
     // This logic is now handled by the dispatcher and scanner
     js_output << node.content;
-}
-
-void CHTLGenerator::visit(OriginUsageNode& node) {
-    auto it = named_origins.find(node.name);
-    if (it != named_origins.end()) {
-        it->second->accept(*this);
-    } else {
-        std::cerr << "Warning: Named origin '" << node.name << "' not found." << std::endl;
-    }
 }
 
 } // namespace CHTL
