@@ -523,16 +523,17 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
                 auto value_expr = parseExpression();
                 consume(TokenType::SEMICOLON, "Expect ';' after property value.");
 
-                bool filled = false;
+                bool replaced = false;
+                // Check if we are overriding an existing property
                 for (auto& prop : final_properties) {
-                    if (prop.key == key_str && prop.value_expr == nullptr) {
+                    if (prop.key == key_str) {
                         prop.value_expr = std::move(value_expr);
-                        filled = true;
+                        replaced = true;
                         break;
                     }
                 }
-                if (!filled) {
-                    // If not filling a placeholder, it's a new/override property
+                if (!replaced) {
+                    // If not overriding, it's a new property
                     final_properties.push_back({key_str, std::move(value_expr)});
                 }
             }
@@ -541,6 +542,22 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
     } else {
         consume(TokenType::SEMICOLON, "Expect ';' or specialization block after template usage.");
     }
+
+    // Filter out deleted properties from the base template
+    if (template_definitions.count(def.name)) {
+        const auto& custom_def = template_definitions.at(def.name);
+        const auto& deleted_keys = custom_def.deleted_properties;
+        if (!deleted_keys.empty()) {
+            final_properties.erase(
+                std::remove_if(final_properties.begin(), final_properties.end(),
+                    [&](const AttributeNode& attr) {
+                        return std::find(deleted_keys.begin(), deleted_keys.end(), attr.key) != deleted_keys.end();
+                    }),
+                final_properties.end()
+            );
+        }
+    }
+
 
     // Add the final, specialized properties to the style node.
     for (auto& prop : final_properties) {
@@ -681,11 +698,19 @@ std::unique_ptr<CustomDeclarationNode> CHTLParser::parseCustomDeclaration() {
     def->name = consume(TokenType::IDENTIFIER, "Expect custom name.").lexeme;
     consume(TokenType::LEFT_BRACE, "Expect '{' to start custom body.");
 
-    // NOTE: For now, the body parsing is identical to templates.
-    // Specialization logic will be added here later.
     if (def->type == TemplateType::STYLE) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            if (check(TokenType::AT) || check(TokenType::INHERIT)) {
+            if (match({TokenType::DELETE})) {
+                do {
+                    std::string prop_key_to_delete = consume(TokenType::IDENTIFIER, "Expect property name after 'delete'.").lexeme;
+                    while (match({TokenType::MINUS})) {
+                        prop_key_to_delete += "-";
+                        prop_key_to_delete += consume(TokenType::IDENTIFIER, "Expect identifier after '-' in property name.").lexeme;
+                    }
+                    def->deleted_properties.push_back(prop_key_to_delete);
+                } while (match({TokenType::COMMA}));
+                consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
+            } else if (check(TokenType::AT) || check(TokenType::INHERIT)) {
                 if (check(TokenType::INHERIT)) advance();
                 consume(TokenType::AT, "Expect '@' for template usage.");
                 consume(TokenType::STYLE, "Can only inherit from another @Style template here.");
@@ -711,10 +736,21 @@ std::unique_ptr<CustomDeclarationNode> CHTLParser::parseCustomDeclaration() {
                 }
 
                 if (match({TokenType::COLON})) {
-                    // Property with value
                     auto value_expr = parseExpression();
                     consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-                    def->style_properties.push_back({key_str, std::move(value_expr)});
+
+                    // Check if we are overriding an existing property
+                    bool replaced = false;
+                    for (auto& prop : def->style_properties) {
+                        if (prop.key == key_str) {
+                            prop.value_expr = std::move(value_expr);
+                            replaced = true;
+                            break;
+                        }
+                    }
+                    if (!replaced) {
+                        def->style_properties.push_back({key_str, std::move(value_expr)});
+                    }
                 } else if (match({TokenType::SEMICOLON})) {
                     // Valueless (placeholder) property
                     def->style_properties.push_back({key_str, nullptr});

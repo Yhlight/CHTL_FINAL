@@ -35,6 +35,9 @@ public:
 
     // Used for @Var templates
     std::map<std::string, std::unique_ptr<Expr>> variables;
+
+    // Used for @Style specialization
+    std::vector<std::string> deleted_properties;
 };
 
 } // namespace CHTL

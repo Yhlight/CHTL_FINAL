@@ -23,6 +23,9 @@ std::unique_ptr<TemplateDefinitionNode> TemplateDefinitionNode::clone() const {
         new_def->variables[pair.first] = pair.second->clone();
     }
 
+    // Clone deleted properties
+    new_def->deleted_properties = this->deleted_properties;
+
     return new_def;
 }
 

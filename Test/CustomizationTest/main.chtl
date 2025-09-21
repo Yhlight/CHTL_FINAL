@@ -1,0 +1,27 @@
+// Base template with three properties
+[Template] @Style BaseStyle
+{
+    color: "blue";
+    font-size: 16px;
+    font-weight: "bold";
+}
+
+// Custom style that inherits from BaseStyle
+// It overrides 'color' and deletes 'font-weight'
+[Custom] @Style CustomStyle
+{
+    @Style BaseStyle;
+    delete font-weight;
+    color: "red";
+}
+
+// Element that uses the custom style
+div
+{
+    id: "test-div";
+    style
+    {
+        @Style CustomStyle;
+    }
+    text: "Hello Customization!";
+}
