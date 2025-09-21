@@ -1,0 +1,15 @@
+[Template] @Var Theme {
+    primaryColor: "blue";
+    secondaryColor: "white";
+    baseFontSize: 16px;
+}
+
+div {
+    class: "container";
+    style {
+        background-color: Theme(primaryColor);
+        color: Theme(secondaryColor);
+        font-size: Theme(baseFontSize) * 1.2;
+    }
+    text { "This text uses variables from a template." }
+}

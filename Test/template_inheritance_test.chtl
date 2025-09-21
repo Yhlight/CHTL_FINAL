@@ -1,0 +1,50 @@
+// Style Template Inheritance
+[Template] @Style BaseStyle {
+    font-family: "Arial";
+    font-size: 16px;
+}
+
+[Template] @Style DerivedStyle {
+    @Style BaseStyle;
+    color: "red";
+}
+
+// Element Template Inheritance
+[Template] @Element BaseElement {
+    p { text: "Base element content."; }
+}
+
+[Template] @Element DerivedElement {
+    inherit @Element BaseElement;
+    h1 { text: "Derived element content."; }
+}
+
+// Var Template Inheritance
+[Template] @Var BaseVars {
+    var1: "value1";
+}
+
+[Template] @Var DerivedVars {
+    inherit @Var BaseVars;
+    var2: "value2";
+}
+
+
+// --- Usage ---
+div {
+    style {
+        @Style DerivedStyle;
+    }
+    text: "This text should be red and Arial.";
+}
+
+div {
+    @Element DerivedElement;
+}
+
+div {
+    style {
+        color: DerivedVars(var1);
+        background-color: DerivedVars(var2);
+    }
+}

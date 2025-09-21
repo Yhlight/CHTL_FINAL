@@ -277,7 +277,8 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
     consume(TokenType::LEFT_BRACE, "Expect '{' after element name.");
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        if (peek().type == TokenType::IDENTIFIER && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
+        if ((peek().type == TokenType::IDENTIFIER || peek().type == TokenType::TEXT) &&
+            tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
             parseAttribute(element.get());
         } else {
             for (auto& child : parseDeclaration()) {
@@ -291,7 +292,11 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
 }
 
 void CHTLParser::parseAttribute(ElementNode* element) {
-    Token key = consume(TokenType::IDENTIFIER, "Expect attribute name.");
+    Token key = advance(); // Consume the attribute key
+    if (key.type != TokenType::IDENTIFIER && key.type != TokenType::TEXT) {
+        error(key, "Expect attribute name.");
+    }
+
     consume(TokenType::COLON, "Expect ':' after attribute name.");
 
     Token value_token;
@@ -303,7 +308,11 @@ void CHTLParser::parseAttribute(ElementNode* element) {
 
     consume(TokenType::SEMICOLON, "Expect ';' after attribute value.");
 
-    element->addAttribute({key.lexeme, value_token.lexeme});
+    if (key.type == TokenType::TEXT || key.lexeme == "text") {
+        element->addChild(std::make_unique<TextNode>(value_token.lexeme));
+    } else {
+        element->addAttribute({key.lexeme, value_token.lexeme});
+    }
 }
 
 std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
@@ -605,47 +614,65 @@ std::unique_ptr<TemplateDeclarationNode> CHTLParser::parseTemplateDeclaration() 
     def->name = consume(TokenType::IDENTIFIER, "Expect template name.").lexeme;
     consume(TokenType::LEFT_BRACE, "Expect '{' to start template body.");
 
-    if (def->type == TemplateType::STYLE) {
-        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            if (check(TokenType::AT) || check(TokenType::INHERIT)) {
-                // Style template inheritance
-                if (check(TokenType::INHERIT)) advance();
-                consume(TokenType::AT, "Expect '@' for template usage.");
-                consume(TokenType::STYLE, "Can only inherit from another @Style template here.");
-                Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
-                consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        if (check(TokenType::AT) || check(TokenType::INHERIT)) {
+            // --- Template Inheritance ---
+            if (check(TokenType::INHERIT)) advance();
+            consume(TokenType::AT, "Expect '@' for template usage.");
 
-                if (template_definitions.count(name.lexeme)) {
-                    const auto& base_def = template_definitions.at(name.lexeme);
-                    if (base_def.type != TemplateType::STYLE) {
-                        error(name, "Template '" + name.lexeme + "' is not a Style template.");
-                    }
+            Token type_token = advance();
+            TemplateType base_type;
+            if (type_token.type == TokenType::STYLE) base_type = TemplateType::STYLE;
+            else if (type_token.type == TokenType::ELEMENT) base_type = TemplateType::ELEMENT;
+            else if (type_token.type == TokenType::VAR) base_type = TemplateType::VAR;
+            else error(type_token, "Invalid template type for inheritance.");
+
+            if (base_type != def->type) {
+                error(type_token, "Template inheritance must be of the same type.");
+            }
+
+            Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+            consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
+
+            if (template_definitions.count(name.lexeme)) {
+                const auto& base_def = template_definitions.at(name.lexeme);
+                if (base_def.type != def->type) {
+                     error(name, "Template '" + name.lexeme + "' is not of the correct type for inheritance.");
+                }
+                // Copy inherited properties/nodes/vars
+                if (def->type == TemplateType::STYLE) {
                     for (const auto& prop : base_def.style_properties) {
                         def->style_properties.push_back(prop.clone());
                     }
-                } else {
-                    error(name, "Base style template '" + name.lexeme + "' not found.");
+                } else if (def->type == TemplateType::ELEMENT) {
+                    for (const auto& node : base_def.element_body) {
+                        def->element_body.push_back(node->clone());
+                    }
+                } else if (def->type == TemplateType::VAR) {
+                    for (const auto& pair : base_def.variables) {
+                        def->variables[pair.first] = pair.second->clone();
+                    }
                 }
             } else {
-                // Regular style property
-                std::string key_str;
-                while (!check(TokenType::COLON) && !isAtEnd()) {
-                    key_str += advance().lexeme;
-                }
-                consume(TokenType::COLON, "Expect ':' after style property name.");
-                auto value_expr = parseExpression();
-                consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
-                def->style_properties.push_back({key_str, std::move(value_expr)});
+                error(name, "Base template '" + name.lexeme + "' not found.");
             }
-        }
-    } else if (def->type == TemplateType::ELEMENT) {
-        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        } else if (def->type == TemplateType::STYLE) {
+            // Regular style property
+            std::string key_str;
+            while (!check(TokenType::COLON) && !isAtEnd()) {
+                key_str += advance().lexeme;
+            }
+            consume(TokenType::COLON, "Expect ':' after style property name.");
+            auto value_expr = parseExpression();
+            consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
+            def->style_properties.push_back({key_str, std::move(value_expr)});
+
+        } else if (def->type == TemplateType::ELEMENT) {
             for (auto& node : parseDeclaration()) {
                 def->element_body.push_back(std::move(node));
             }
-        }
-    } else if (def->type == TemplateType::VAR) {
-        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+
+        } else if (def->type == TemplateType::VAR) {
             std::string key_str;
             while (!check(TokenType::COLON) && !isAtEnd()) {
                 key_str += advance().lexeme;

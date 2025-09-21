@@ -1,0 +1,19 @@
+[Template] @Element MyCard {
+    div {
+        class: "card";
+        h2 {
+            text: "Card Title";
+        }
+        p {
+            text: "This is the content of the card.";
+        }
+    }
+}
+
+body {
+    h1 {
+        text: "Using Element Templates";
+    }
+
+    @Element MyCard;
+}
