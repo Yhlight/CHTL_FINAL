@@ -142,4 +142,67 @@ void CHTLLexer::identifier() {
     addToken(it != runtime_keyword_map.end() ? it->second : TokenType::IDENTIFIER);
 }
 
+std::string tokenTypeToString(TokenType type) {
+    switch (type) {
+        case TokenType::LEFT_BRACE: return "LEFT_BRACE";
+        case TokenType::RIGHT_BRACE: return "RIGHT_BRACE";
+        case TokenType::LEFT_BRACKET: return "LEFT_BRACKET";
+        case TokenType::RIGHT_BRACKET: return "RIGHT_BRACKET";
+        case TokenType::LEFT_PAREN: return "LEFT_PAREN";
+        case TokenType::RIGHT_PAREN: return "RIGHT_PAREN";
+        case TokenType::AT: return "AT";
+        case TokenType::COLON: return "COLON";
+        case TokenType::SEMICOLON: return "SEMICOLON";
+        case TokenType::DOT: return "DOT";
+        case TokenType::QUESTION: return "QUESTION";
+        case TokenType::COMMA: return "COMMA";
+        case TokenType::PLUS: return "PLUS";
+        case TokenType::MINUS: return "MINUS";
+        case TokenType::STAR: return "STAR";
+        case TokenType::SLASH: return "SLASH";
+        case TokenType::PERCENT: return "PERCENT";
+        case TokenType::GREATER: return "GREATER";
+        case TokenType::LESS: return "LESS";
+        case TokenType::BANG: return "BANG";
+        case TokenType::BANG_EQUAL: return "BANG_EQUAL";
+        case TokenType::EQUAL: return "EQUAL";
+        case TokenType::EQUAL_EQUAL: return "EQUAL_EQUAL";
+        case TokenType::GREATER_EQUAL: return "GREATER_EQUAL";
+        case TokenType::LESS_EQUAL: return "LESS_EQUAL";
+        case TokenType::AMPERSAND: return "AMPERSAND";
+        case TokenType::AMPERSAND_AMPERSAND: return "AMPERSAND_AMPERSAND";
+        case TokenType::PIPE: return "PIPE";
+        case TokenType::PIPE_PIPE: return "PIPE_PIPE";
+        case TokenType::STAR_STAR: return "STAR_STAR";
+        case TokenType::LEFT_BRACE_BRACE: return "LEFT_BRACE_BRACE";
+        case TokenType::RIGHT_BRACE_BRACE: return "RIGHT_BRACE_BRACE";
+        case TokenType::IDENTIFIER: return "IDENTIFIER";
+        case TokenType::STRING: return "STRING";
+        case TokenType::NUMBER: return "NUMBER";
+        case TokenType::STYLE: return "STYLE";
+        case TokenType::TEXT: return "TEXT";
+        case TokenType::SCRIPT: return "SCRIPT";
+        case TokenType::INHERIT: return "INHERIT";
+        case TokenType::FROM: return "FROM";
+        case TokenType::AS: return "AS";
+        case TokenType::DELETE: return "DELETE";
+        case TokenType::INSERT: return "INSERT";
+        case TokenType::AFTER: return "AFTER";
+        case TokenType::BEFORE: return "BEFORE";
+        case TokenType::REPLACE: return "REPLACE";
+        case TokenType::USE: return "USE";
+        case TokenType::TEMPLATE: return "TEMPLATE";
+        case TokenType::CUSTOM: return "CUSTOM";
+        case TokenType::ORIGIN: return "ORIGIN";
+        case TokenType::IMPORT: return "IMPORT";
+        case TokenType::CONFIGURATION: return "CONFIGURATION";
+        case TokenType::NAMESPACE: return "NAMESPACE";
+        case TokenType::EXCEPT: return "EXCEPT";
+        case TokenType::SYMBOL: return "SYMBOL";
+        case TokenType::END_OF_FILE: return "END_OF_FILE";
+        case TokenType::UNKNOWN: return "UNKNOWN";
+        default: return "UNKNOWN_TOKEN";
+    }
+}
+
 } // namespace CHTL

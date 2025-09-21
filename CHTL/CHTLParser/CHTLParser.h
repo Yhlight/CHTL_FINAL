@@ -18,7 +18,7 @@ namespace CHTL {
 
 class CHTLParser {
 public:
-    explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path, std::shared_ptr<Configuration> config);
+    CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path, std::shared_ptr<Configuration> config, bool is_sub_parse = false);
     std::unique_ptr<BaseNode> parse();
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getTemplateDefinitions() const;
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getMutableTemplateDefinitions();
@@ -32,6 +32,7 @@ private:
     const std::string file_path;
     std::vector<std::string> namespace_stack;
     int current = 0;
+    bool is_sub_parse;
 
     std::string getCurrentNamespace();
     bool isAtEnd();

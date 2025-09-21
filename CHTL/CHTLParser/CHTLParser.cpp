@@ -107,8 +107,8 @@ std::string getFilename(const std::string& path) {
     return filename;
 }
 
-CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path, std::shared_ptr<Configuration> config)
-    : source(source), tokens(tokens), file_path(file_path), config(config) {
+CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens, const std::string& file_path, std::shared_ptr<Configuration> config, bool is_sub_parse)
+    : source(source), tokens(tokens), file_path(file_path), config(config), is_sub_parse(is_sub_parse) {
         namespace_stack.push_back(getFilename(file_path));
 }
 
@@ -170,6 +170,12 @@ void CHTLParser::parseNamespaceStatement() {
     consume(TokenType::RIGHT_BRACKET, "Expect ']' to end keyword.");
 
     Token name = consume(TokenType::IDENTIFIER, "Expect namespace name.");
+
+    // For a sub-parser, we clear the default namespace (from filename)
+    // and use the one defined in the file.
+    if (is_sub_parse) {
+        namespace_stack.clear();
+    }
     namespace_stack.push_back(name.lexeme);
 
     if (match({TokenType::LEFT_BRACE})) {
@@ -362,6 +368,21 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
     Token type = consume(TokenType::IDENTIFIER, "Expect template type.");
     if (type.lexeme != "Style") { error(type, "Expect '@Style' template usage here."); }
     Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+
+    if (match({TokenType::FROM})) {
+        // We don't need to do anything with the namespace here, as the generator
+        // will handle the lookup. But we need to parse it.
+        std::string explicit_ns;
+        do {
+            explicit_ns += consume(TokenType::IDENTIFIER, "Expect namespace identifier.").lexeme;
+            if (check(TokenType::DOT)) {
+                explicit_ns += advance().lexeme;
+            } else {
+                break;
+            }
+        } while(true);
+    }
+
     StyleNode::StyleApplication app;
     app.template_name = name.lexeme;
     if (match({TokenType::LEFT_BRACE})) {
@@ -681,39 +702,34 @@ void CHTLParser::parseImportStatement() {
     CHTLLexer sub_lexer(imported_content, this->config);
     std::vector<Token> sub_tokens = sub_lexer.scanTokens();
     // Create a temporary parser just to analyze the file's definitions
-    CHTLParser sub_parser(imported_content, sub_tokens, imported_path, this->config);
+    CHTLParser sub_parser(imported_content, sub_tokens, imported_path, this->config, true);
     sub_parser.parse();
     auto& imported_template_map = sub_parser.getMutableTemplateDefinitions();
 
-    std::string source_namespace = getFilename(pathToken.lexeme);
-    if (!imported_template_map.count(source_namespace)) return; // Nothing to import
-
-    auto& source_definitions = imported_template_map.at(source_namespace);
-
-    // --- Logic for selective import ---
-    if (!import_item_name.empty()) { // Precise import
-        if (source_definitions.count(import_item_name)) {
-            TemplateDefinitionNode& def_to_import = source_definitions.at(import_item_name);
-            // Check if types match
-            bool type_match = (is_custom_import && def_to_import.is_custom) || (is_template_import && !def_to_import.is_custom);
-            if (type_match && import_item_type.has_value() && def_to_import.type == import_item_type.value()) {
-                std::string final_name = alias.empty() ? import_item_name : alias;
-                this->template_definitions[getCurrentNamespace()][final_name] = std::move(def_to_import);
-            } else {
-                error(pathToken, "Imported item '" + import_item_name + "' does not match specified type.");
+    for (auto& [ns, defs] : imported_template_map) {
+        // For now, we merge all namespaces from the imported file.
+        // A more advanced implementation might handle namespace aliasing.
+        if (typeToken.lexeme == "Chtl") { // Full import
+            this->template_definitions[ns] = std::move(defs);
+        } else { // Selective import
+            if (!import_item_name.empty()) { // Precise import
+                if (defs.count(import_item_name)) {
+                    TemplateDefinitionNode& def_to_import = defs.at(import_item_name);
+                    bool type_match = (is_custom_import && def_to_import.is_custom) || (is_template_import && !def_to_import.is_custom);
+                    if (type_match && import_item_type.has_value() && def_to_import.type == import_item_type.value()) {
+                        std::string final_name = alias.empty() ? import_item_name : alias;
+                        this->template_definitions[getCurrentNamespace()][final_name] = std::move(def_to_import);
+                    }
+                }
+            } else { // Type/Wildcard import
+                for (auto& [name, def] : defs) {
+                    bool type_match = (is_custom_import && def.is_custom) || (is_template_import && !def.is_custom) || (!is_custom_import && !is_template_import);
+                    if (type_match && import_item_type.has_value() && def.type == import_item_type.value()) {
+                        this->template_definitions[getCurrentNamespace()][name] = std::move(def);
+                    }
+                }
             }
-        } else {
-            error(pathToken, "Item '" + import_item_name + "' not found in module '" + pathToken.lexeme + "'.");
         }
-    } else if (typeToken.lexeme != "Chtl") { // Type/Wildcard Import
-         for (auto& [name, def] : source_definitions) {
-            bool type_match = (is_custom_import && def.is_custom) || (is_template_import && !def.is_custom) || (!is_custom_import && !is_template_import);
-             if (type_match && import_item_type.has_value() && def.type == import_item_type.value()) {
-                 this->template_definitions[getCurrentNamespace()][name] = std::move(def);
-             }
-         }
-    } else { // Full CHTL import
-        this->template_definitions[source_namespace] = std::move(source_definitions);
     }
 }
 
@@ -872,7 +888,20 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             }
 
             consume(TokenType::RIGHT_PAREN, "Expect ')'.");
-            return std::make_unique<VarExpr>(first_part.lexeme, key_name, std::move(override_expr));
+
+            std::string from_ns;
+            if (match({TokenType::FROM})) {
+                do {
+                    from_ns += consume(TokenType::IDENTIFIER, "Expect namespace identifier.").lexeme;
+                    if (check(TokenType::DOT)) {
+                        from_ns += advance().lexeme;
+                    } else {
+                        break;
+                    }
+                } while(true);
+            }
+
+            return std::make_unique<VarExpr>(first_part.lexeme, key_name, std::move(override_expr), from_ns);
         } else {
             // This is a string-like literal (e.g. "red", "solid")
             return std::make_unique<LiteralExpr>(0, first_part.lexeme, LiteralExpr::LiteralType::STRING);

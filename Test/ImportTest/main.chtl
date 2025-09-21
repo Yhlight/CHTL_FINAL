@@ -1,0 +1,7 @@
+[Import] @Chtl from "lib.chtl";
+
+html {
+    body {
+        @Element MyButton from MyLib;
+    }
+}

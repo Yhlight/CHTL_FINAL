@@ -1,0 +1,8 @@
+[Namespace] MyLib
+
+[Template] @Element MyButton {
+    button {
+        class: "my-button";
+        text: "Click Me";
+    }
+}

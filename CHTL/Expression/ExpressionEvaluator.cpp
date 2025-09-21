@@ -114,10 +114,18 @@ void ExpressionEvaluator::visit(VarExpr& expr) {
 
     // Otherwise, look up the variable in the template definitions.
     const TemplateDefinitionNode* var_group_def = nullptr;
-    for (const auto& ns_pair : templates) {
-        if (ns_pair.second.count(expr.group)) {
-            var_group_def = &ns_pair.second.at(expr.group);
-            break;
+    if (!expr.from_namespace.empty()) {
+        // Targeted lookup
+        if (templates.count(expr.from_namespace) && templates.at(expr.from_namespace).count(expr.group)) {
+            var_group_def = &templates.at(expr.from_namespace).at(expr.group);
+        }
+    } else {
+        // Broad lookup across all namespaces
+        for (const auto& ns_pair : templates) {
+            if (ns_pair.second.count(expr.group)) {
+                var_group_def = &ns_pair.second.at(expr.group);
+                break;
+            }
         }
     }
 

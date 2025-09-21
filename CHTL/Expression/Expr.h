@@ -62,13 +62,14 @@ public:
 
 class VarExpr : public Expr {
 public:
-    VarExpr(const std::string& group, const std::string& name, std::unique_ptr<Expr> override_value = nullptr)
-        : group(group), name(name), override_value(std::move(override_value)) {}
+    VarExpr(const std::string& group, const std::string& name, std::unique_ptr<Expr> override_value = nullptr, const std::string& from_namespace = "")
+        : group(group), name(name), override_value(std::move(override_value)), from_namespace(from_namespace) {}
     void accept(ExprVisitor& visitor) override;
     std::unique_ptr<Expr> clone() const override;
     std::string group;
     std::string name;
     std::unique_ptr<Expr> override_value;
+    std::string from_namespace;
 };
 
 class ReferenceExpr : public Expr {
