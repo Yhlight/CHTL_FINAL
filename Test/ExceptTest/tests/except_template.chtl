@@ -1,0 +1,9 @@
+[Template] @Element MyTemplate {
+    div { text:"I am a template"; }
+}
+
+div {
+    except MyTemplate;
+
+    @Element MyTemplate;
+}

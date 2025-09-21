@@ -1,0 +1,5 @@
+div {
+    except @Html;
+
+    p { text: "This is not allowed."; }
+}

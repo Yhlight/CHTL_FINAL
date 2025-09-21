@@ -1,0 +1,24 @@
+[Template] @Style BaseStyle {
+    color: "blue";
+    font-size: 16px;
+    padding: 10px;
+    border: "1px solid black";
+}
+
+[Custom] @Style CustomStyle {
+    @Style BaseStyle; // Inherit
+    font-size: 20px; // Override
+}
+
+html {
+    body {
+        div {
+            class: "test-div";
+            style {
+                @Style CustomStyle {
+                    delete padding, border, font-size;
+                }
+            }
+        }
+    }
+}

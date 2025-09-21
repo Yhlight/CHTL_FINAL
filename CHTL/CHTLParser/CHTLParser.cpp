@@ -124,6 +124,42 @@ std::string CHTLParser::getCurrentNamespace() {
                            });
 }
 
+CHTLParser::DeclarationInfo CHTLParser::peekDeclarationType() {
+    int peek_current = current;
+    if (tokens[peek_current].type == TokenType::AT) {
+        peek_current++; // @
+        if (tokens.size() > peek_current + 1) {
+            std::string type_str = tokens[peek_current].lexeme;
+            std::string name_str = tokens[peek_current + 1].lexeme;
+
+            const TemplateDefinitionNode* def = nullptr;
+            // Simplified namespace search for peeking
+            for (const auto& ns_pair : template_definitions) {
+                if (ns_pair.second.count(name_str)) {
+                    def = &ns_pair.second.at(name_str);
+                    break;
+                }
+            }
+
+            if (def) {
+                return {def->is_custom ? false : true, def->is_custom, def->type, name_str};
+            }
+
+            // If not found, it might be a new template type not yet parsed.
+            // This is a limitation of single-pass parsing for this feature.
+            // We return a default that will likely pass constraints.
+            if (type_str == "Element") return {true, false, TemplateType::ELEMENT, name_str};
+            if (type_str == "Style") return {true, false, TemplateType::STYLE, name_str};
+            if (type_str == "Var") return {true, false, TemplateType::VAR, name_str};
+        }
+    }
+    else if (tokens[peek_current].type == TokenType::IDENTIFIER) {
+         // It's a standard HTML element, not a template or custom element.
+         return {false, false, TemplateType::ELEMENT, tokens[peek_current].lexeme};
+    }
+    return {};
+}
+
 std::unique_ptr<BaseNode> CHTLParser::parse() {
     // Check for 'html5;' directive at the very beginning
     if (peek().type == TokenType::IDENTIFIER && peek().lexeme == "html5" && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::SEMICOLON) {
@@ -246,26 +282,23 @@ std::unique_ptr<ElementNode> CHTLParser::parseElement() {
         } else if ((peek().type == TokenType::IDENTIFIER || peek().type == TokenType::TEXT) && tokens.size() > current + 1 && tokens[current + 1].type == TokenType::COLON) {
             parseAttribute(element.get());
         } else {
-            // --- Child Parsing with Constraint Checking ---
-            // Peek at the next token to determine the type of the child.
-            std::string child_type_for_check;
-            if (check(TokenType::IDENTIFIER)) { // e.g. div {}
-                child_type_for_check = peek().lexeme;
-            } else if (check(TokenType::AT)) { // e.g. @Element Box
-                if (tokens.size() > current + 2) {
-                    // This is a simplification. We're just grabbing the name.
-                    // A full check would involve looking up the template definition.
-                    child_type_for_check = tokens[current + 2].lexeme;
-                }
-            }
-
-            // Check constraints before parsing the child
+            // --- Constraint Checking ---
+            DeclarationInfo child_info = peekDeclarationType();
             for (const auto& constraint : element->constraints) {
-                if (constraint == "@Html" && check(TokenType::IDENTIFIER)) {
+                if (constraint == "@Html" && !child_info.is_custom && !child_info.is_template) {
                      error(peek(), "HTML elements are not allowed inside <" + element->tagName + "> due to 'except @Html' constraint.");
                 }
-                if (child_type_for_check == constraint) {
-                    error(peek(), "Element <" + child_type_for_check + "> is not allowed inside <" + element->tagName + "> due to 'except' constraint.");
+                if (constraint == child_info.name) {
+                    error(peek(), "Element <" + child_info.name + "> is not allowed inside <" + element->tagName + "> due to 'except' constraint.");
+                }
+                if (constraint == "[Custom]" && child_info.is_custom) {
+                    error(peek(), "Custom elements are not allowed inside <" + element->tagName + "> due to 'except [Custom]' constraint.");
+                }
+                if (constraint == "[Template]" && child_info.is_template) {
+                    error(peek(), "Template elements are not allowed inside <" + element->tagName + "> due to 'except [Template]' constraint.");
+                }
+                 if (constraint == "[Template] @Var" && child_info.is_template && child_info.type == TemplateType::VAR) {
+                    error(peek(), "Var templates are not allowed inside <" + element->tagName + "> due to 'except [Template] @Var' constraint.");
                 }
             }
 
@@ -289,6 +322,10 @@ void CHTLParser::parseExceptClause(ElementNode* element) {
             std::string constraint;
             constraint += advance().lexeme; // consume [
             constraint += consume(TokenType::IDENTIFIER, "Expect keyword in brackets.").lexeme;
+            if (match({TokenType::AT})) {
+                 constraint += " @";
+                 constraint += consume(TokenType::IDENTIFIER, "Expect type.").lexeme;
+            }
             constraint += consume(TokenType::RIGHT_BRACKET, "Expect ']'.").lexeme;
             element->constraints.push_back(constraint);
         } else {
@@ -397,8 +434,14 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
                         app.deleted_properties.push_back(deleted_template);
                     } else {
                         // Deleting a property
-                        Token prop_to_delete = consume(TokenType::IDENTIFIER, "Expect property name after 'delete'.");
-                        app.deleted_properties.push_back(prop_to_delete.lexeme);
+                        std::string prop_to_delete;
+                        while(peek().type == TokenType::IDENTIFIER || peek().type == TokenType::MINUS) {
+                            prop_to_delete += advance().lexeme;
+                        }
+                        if (prop_to_delete.empty()) {
+                            error(peek(), "Expect property name after 'delete'.");
+                        }
+                        app.deleted_properties.push_back(prop_to_delete);
                     }
                 } while (match({TokenType::COMMA}));
                 consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");

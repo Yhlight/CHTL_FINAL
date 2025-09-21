@@ -1,0 +1,60 @@
+#include "../../CHTL/CompilerDispatcher.h"
+#include "../../CHTL/CodeMerger.h"
+#include "../../CHTL/Config/Configuration.h"
+#include "../../Scanner/CHTLUnifiedScanner.h"
+#include "../../Util/FileSystem/FileSystem.h"
+#include <iostream>
+#include <cassert>
+#include <string>
+#include <algorithm>
+#include <memory>
+
+// Helper function to remove all whitespace from a string for robust comparison
+std::string remove_whitespace(std::string str) {
+    str.erase(std::remove_if(str.begin(), str.end(), ::isspace), str.end());
+    return str;
+}
+
+// Helper function to check if a string contains a substring
+bool contains(const std::string& str, const std::string& sub) {
+    return str.find(sub) != std::string::npos;
+}
+
+// Helper function to check if a string does NOT contain a substring
+bool not_contains(const std::string& str, const std::string& sub) {
+    return str.find(sub) == std::string::npos;
+}
+
+int main() {
+    std::string file_path = "Test/CustomStyleDeleteTest/main.chtl";
+    std::string source = CHTL::FileSystem::readFile(file_path);
+
+    auto config = std::make_shared<CHTL::Configuration>();
+
+    // 1. Scanner
+    CHTL::CHTLUnifiedScanner scanner(source);
+    auto fragments = scanner.scan();
+
+    // 2. Dispatcher
+    CHTL::CompilerDispatcher dispatcher(config, file_path);
+    CHTL::FinalCompilationResult result = dispatcher.dispatch(fragments);
+
+    // 3. Assert HTML Output
+    std::string processed_html = remove_whitespace(result.html);
+
+    // Check that the final style attribute is correct
+    assert(contains(processed_html, "style=\""));
+
+    // Check that the final properties are present
+    assert(contains(processed_html, "color:blue;"));
+
+    // Check that the deleted properties are NOT present
+    assert(not_contains(processed_html, "padding"));
+    assert(not_contains(processed_html, "border"));
+    assert(not_contains(processed_html, "font-size"));
+
+
+    std::cout << "CustomStyleDeleteTest PASSED!" << std::endl;
+
+    return 0;
+}

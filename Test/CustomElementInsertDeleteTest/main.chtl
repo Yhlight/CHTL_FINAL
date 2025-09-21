@@ -1,0 +1,37 @@
+[Custom] @Element MyList {
+    ul {
+        li { text: "Item 1"; }
+        li { text: "Item 2"; }
+        li { text: "Item 3"; }
+    }
+}
+
+html {
+    body {
+        // Test delete
+        @Element MyList {
+            delete li[1]; // delete "Item 2"
+        };
+
+        // Test insert after
+        @Element MyList {
+            insert after li[0] {
+                li { text: "Item 1.5"; }
+            }
+        };
+
+        // Test insert before
+        @Element MyList {
+            insert before li[0] {
+                li { text: "Item 0.5"; }
+            }
+        };
+
+        // Test replace
+        @Element MyList {
+            insert replace li[2] {
+                li { text: "Item 3 was replaced"; }
+            }
+        };
+    }
+}

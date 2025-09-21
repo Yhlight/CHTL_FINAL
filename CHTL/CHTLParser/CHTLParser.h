@@ -34,6 +34,14 @@ private:
     int current = 0;
     bool is_sub_parse;
 
+    struct DeclarationInfo {
+        bool is_template = false;
+        bool is_custom = false;
+        TemplateType type;
+        std::string name;
+    };
+    DeclarationInfo peekDeclarationType();
+
     std::string getCurrentNamespace();
     bool isAtEnd();
     Token peek();

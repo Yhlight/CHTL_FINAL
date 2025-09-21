@@ -1,0 +1,9 @@
+[Custom] @Element MyCustom {
+    div { text:"I am a custom element"; }
+}
+
+div {
+    except [Custom];
+
+    @Element MyCustom;
+}

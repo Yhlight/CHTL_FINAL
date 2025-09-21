@@ -1,0 +1,11 @@
+[Template] @Var MyVars {
+    myVar: "hello";
+}
+
+div {
+    except [Template] @Var;
+
+    style {
+        color: MyVars(myVar);
+    }
+}
