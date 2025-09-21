@@ -61,6 +61,30 @@ void Configuration::setDefaultKeywords() {
     keyword_map["KEYWORD_TEXT"] = {"text"};
     keyword_map["KEYWORD_STYLE"] = {"style"};
     keyword_map["KEYWORD_SCRIPT"] = {"script"};
+
+    // Core CHTL JS Keywords
+    keyword_map["CHTLJS_LISTEN"] = {"Listen"};
+    keyword_map["CHTLJS_DELEGATE"] = {"Delegate"};
+    keyword_map["CHTLJS_ANIMATE"] = {"Animate"};
+    keyword_map["CHTLJS_ROUTER"] = {"Router"};
+    keyword_map["CHTLJS_VIR"] = {"Vir"};
+    keyword_map["CHTLJS_SCRIPTLOADER"] = {"ScriptLoader"};
+}
+
+std::vector<std::string> Configuration::getCHTLJSKeywords() const {
+    std::vector<std::string> keywords;
+    const std::vector<std::string> chtl_js_keys = {
+        "CHTLJS_LISTEN", "CHTLJS_DELEGATE", "CHTLJS_ANIMATE",
+        "CHTLJS_ROUTER", "CHTLJS_VIR", "CHTLJS_SCRIPTLOADER"
+    };
+
+    for (const auto& key : chtl_js_keys) {
+        if (keyword_map.count(key)) {
+            const auto& values = keyword_map.at(key);
+            keywords.insert(keywords.end(), values.begin(), values.end());
+        }
+    }
+    return keywords;
 }
 
 } // namespace CHTL

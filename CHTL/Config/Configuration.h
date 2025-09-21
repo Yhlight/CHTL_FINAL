@@ -30,6 +30,10 @@ public:
     // Custom Origin Types from [OriginType] block
     std::map<std::string, std::string> origin_type_map;
 
+public:
+    // Method to get all CHTL JS keywords
+    std::vector<std::string> getCHTLJSKeywords() const;
+
 private:
     void setDefaultKeywords();
 };

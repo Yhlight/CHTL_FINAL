@@ -4,8 +4,11 @@
 #include <string>
 #include <vector>
 #include <variant>
+#include <memory>
 
 namespace CHTL {
+
+    class Configuration; // Forward declaration
 
     enum class FragmentType {
         CHTL,
@@ -24,16 +27,19 @@ namespace CHTL {
 
     class CHTLUnifiedScanner {
     public:
-        CHTLUnifiedScanner(const std::string& source);
+        CHTLUnifiedScanner(const std::string& source, std::shared_ptr<Configuration> config);
         std::vector<CodeFragment> scan();
 
     private:
         std::string m_source;
+        std::shared_ptr<Configuration> m_config;
         size_t m_cursor = 0;
         int m_placeholder_counter = 0;
 
         // Main scanning loop
         void scanSource();
+        // Specific scanner for style content
+        void scanStyleContent(size_t block_end);
         // Specific scanner for script content
         void scanScriptContent(size_t block_end);
 
