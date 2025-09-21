@@ -1,0 +1,112 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "CHTL",
+    "scopeName": "source.chtl",
+    "patterns": [
+        { "include": "#comments" },
+        { "include": "#strings" },
+        { "include": "#keywords" },
+        { "include": "#entities" },
+        { "include": "#blocks" }
+    ],
+    "repository": {
+        "comments": {
+            "patterns": [
+                {
+                    "name": "comment.line.double-slash.chtl",
+                    "match": "//.*"
+                },
+                {
+                    "name": "comment.block.chtl",
+                    "begin": "/\\*",
+                    "end": "\\*/"
+                },
+                {
+                    "name": "comment.line.documentation.chtl",
+                    "match": "#\\s.*"
+                }
+            ]
+        },
+        "strings": {
+            "patterns": [
+                {
+                    "name": "string.quoted.double.chtl",
+                    "begin": "\"",
+                    "end": "\"",
+                    "patterns": [
+                        { "name": "constant.character.escape.chtl", "match": "\\\\." }
+                    ]
+                },
+                {
+                    "name": "string.quoted.single.chtl",
+                    "begin": "'",
+                    "end": "'",
+                    "patterns": [
+                        { "name": "constant.character.escape.chtl", "match": "\\\\." }
+                    ]
+                }
+            ]
+        },
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.control.chtl",
+                    "match": "\\b(if|text|style|script|use|html5|except|from|as|insert|after|before|replace|delete|inherit)\\b"
+                },
+                {
+                    "name": "keyword.operator.chtl",
+                    "match": "(:|=|>|<|\\||&|\\?|\\+|-|\\*|/|%)"
+                }
+            ]
+        },
+        "entities": {
+            "patterns": [
+                {
+                    "name": "entity.name.tag.chtl",
+                    "match": "^\\s*([a-zA-Z0-9]+)(?=\\s*\\{)"
+                },
+                {
+                    "name": "variable.other.property.chtl",
+                    "match": "([a-zA-Z-]+)(?=\\s*:)"
+                },
+                {
+                    "name": "support.type.chtl",
+                    "match": "(@(Style|Element|Var|Chtl|Html|JavaScript|CJmod|Config))\\b"
+                },
+                {
+                    "name": "entity.name.function.special.chtl",
+                    "match": "(\\[(Template|Custom|Origin|Import|Namespace|Configuration)\\])"
+                }
+            ]
+        },
+        "blocks": {
+            "patterns": [
+                {
+                    "name": "meta.block.chtl-js.chtl",
+                    "begin": "{{",
+                    "end": "}}",
+                    "patterns": [
+                        { "include": "source.js" }
+                    ]
+                },
+                {
+                    "name": "meta.block.script.chtl",
+                    "begin": "(script)\\s*(\\{)",
+                    "beginCaptures": {
+                        "1": { "name": "keyword.control.chtl" },
+                        "2": { "name": "punctuation.definition.block.begin.chtl" }
+                    },
+                    "end": "\\}",
+                    "endCaptures": {
+                        "0": { "name": "punctuation.definition.block.end.chtl" }
+                    },
+                    "patterns": [
+                        { "include": "#comments" },
+                        { "include": "#blocks" },
+                        { "include": "source.js" }
+                    ]
+                }
+            ]
+        }
+    }
+}

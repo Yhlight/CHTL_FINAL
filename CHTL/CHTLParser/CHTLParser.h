@@ -6,6 +6,7 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/ScriptNode.h"
+#include "../CHTLNode/IfNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/ConfigNode.h"
 #include "../Config/Configuration.h"
@@ -60,6 +61,7 @@ private:
     void parseExceptClause(ElementNode* element);
     std::unique_ptr<StyleNode> parseStyleBlock();
     std::unique_ptr<ScriptNode> parseScriptBlock();
+    std::unique_ptr<IfNode> parseIfBlock();
     std::unique_ptr<BaseNode> parseOriginBlock();
     std::unique_ptr<ConfigNode> parseConfigurationBlock();
     void parseNamespaceStatement();

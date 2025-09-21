@@ -76,10 +76,10 @@ EvaluatedValue ExpressionEvaluator::evaluate(Expr* expr, ElementNode* context) {
 }
 
 void ExpressionEvaluator::visit(LiteralExpr& expr) {
-    if (expr.unit.empty() || expr.value != 0) {
-         result = {expr.value, expr.unit};
+    if (expr.is_string_literal) {
+        result = {0, expr.unit, ValueType::STRING};
     } else {
-        result = {0, expr.unit};
+        result = {expr.value, expr.unit, ValueType::NUMERIC};
     }
 }
 

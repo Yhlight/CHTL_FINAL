@@ -71,9 +71,7 @@ namespace CHTL {
             CHTL_JS::CHTLJSParser parser(tokens, chtl_js_content_with_placeholders);
             auto ast_nodes = parser.parse();
             CHTL_JS::CHTLJSGenerator generator;
-            for(const auto& node : ast_nodes) {
-                generated_js_with_placeholders += generator.generate(node.get());
-            }
+            generated_js_with_placeholders += generator.generate(ast_nodes);
         }
 
         // Step 4: Merge the plain JS with the compiled CHTL_JS

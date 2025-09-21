@@ -1,0 +1,34 @@
+Building conditional_render_test...
+cc1plus: fatal error: JS/CHTLJSParser/CHTLJSParser.cpp: No such file or directory
+compilation terminated.
+cc1plus: fatal error: JS/CHTLJSLexer/CHTLJSLexer.cpp: No such file or directory
+compilation terminated.
+cc1plus: fatal error: JS/CHTLJSGenerator/CHTLJSGenerator.cpp: No such file or directory
+compilation terminated.
+Building dynamic_conditional_render_test...
+cc1plus: fatal error: JS/CHTLJSParser/CHTLJSParser.cpp: No such file or directory
+compilation terminated.
+cc1plus: fatal error: JS/CHTLJSLexer/CHTLJSLexer.cpp: No such file or directory
+compilation terminated.
+cc1plus: fatal error: JS/CHTLJSGenerator/CHTLJSGenerator.cpp: No such file or directory
+compilation terminated.
+Building import_test...
+cc1plus: fatal error: JS/CHTLJSParser/CHTLJSParser.cpp: No such file or directory
+compilation terminated.
+cc1plus: fatal error: JS/CHTLJSLexer/CHTLJSLexer.cpp: No such file or directory
+compilation terminated.
+cc1plus: fatal error: JS/CHTLJSGenerator/CHTLJSGenerator.cpp: No such file or directory
+compilation terminated.
+Building listen_test...
+cc1plus: fatal error: JS/CHTLJSParser/CHTLJSParser.cpp: No such file or directory
+compilation terminated.
+cc1plus: fatal error: JS/CHTLJSLexer/CHTLJSLexer.cpp: No such file or directory
+compilation terminated.
+cc1plus: fatal error: JS/CHTLJSGenerator/CHTLJSGenerator.cpp: No such file or directory
+compilation terminated.
+All tests built. Running...
+ConditionalRenderTest PASSED!
+DynamicConditionalRenderTest PASSED!
+ImportTest PASSED!
+ListenTest PASSED!
+ALL TESTS FINISHED

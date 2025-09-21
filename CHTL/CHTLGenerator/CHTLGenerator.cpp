@@ -4,6 +4,7 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/ScriptNode.h"
+#include "../CHTLNode/IfNode.h"
 #include "../../CHTL JS/CHTLJSLexer/CHTLJSLexer.h"
 #include "../../CHTL JS/CHTLJSParser/CHTLJSParser.h"
 #include "../../CHTL JS/CHTLJSNode/RawJSNode.h"
@@ -19,6 +20,23 @@
 #include <sstream>
 
 namespace CHTL {
+
+// Helper function to convert kebab-case to camelCase
+std::string toCamelCase(const std::string& s) {
+    std::string result;
+    bool upper = false;
+    for (char c : s) {
+        if (c == '-') {
+            upper = true;
+        } else if (upper) {
+            result += std::toupper(c);
+            upper = false;
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
 
 // Helper to format doubles cleanly for CSS output
 std::string format_css_double(double val) {
@@ -167,14 +185,12 @@ void CHTLGenerator::visit(ElementNode& node) {
     }
 
     // --- Inline Style Generation ---
-    std::string style_str;
-    int dynamic_id_counter = 0;
+    std::map<std::string, AttributeNode> final_props;
+
+    // 1. Process StyleNode children to populate final_props
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
-            std::map<std::string, AttributeNode> final_props;
-
-            // --- Style Specialization Logic ---
-            // 1. Apply all templates first
+            // 1.1 Apply all templates first
             for (const auto& app : styleNode->template_applications) {
                 const TemplateDefinitionNode* def = nullptr;
                 for (const auto& ns_pair : this->templates) {
@@ -190,49 +206,117 @@ void CHTLGenerator::visit(ElementNode& node) {
                 }
             }
 
-            // 2. Handle deletions and overrides from all applications
+            // 1.2 Handle deletions and overrides from all applications
             for (const auto& app : styleNode->template_applications) {
-                 // Delete specified properties
                 for (const auto& key_to_delete : app.deleted_properties) {
-                     // This is a simplification. A real implementation would track the origin
-                     // of each property to correctly delete inherited styles.
-                     // For now, we only delete properties by name.
                     if (key_to_delete.rfind("@Style", 0) != 0) {
                         final_props.erase(key_to_delete);
                     }
                 }
-                // Apply new or overridden properties (fills in valueless props)
                 for (const auto& prop : app.new_or_overridden_properties) {
                     final_props[prop.key] = prop.clone();
                 }
             }
 
-            // 3. Apply direct properties from the style block
+            // 1.3 Apply direct properties from the style block
             for (const auto& prop : styleNode->direct_properties) {
                 final_props[prop.key] = prop.clone();
             }
+        }
+    }
 
-            // 4. Generate CSS from the final property map
-            for (auto const& [key, attr_node] : final_props) {
-                if (attr_node.value_expr == nullptr) {
-                     throw std::runtime_error("Valueless property '" + key + "' was not provided a value.");
+    // 2. Process IfNode children
+    for (const auto& child : node.children) {
+        if (IfNode* ifNode = dynamic_cast<IfNode*>(child.get())) {
+            bool is_dynamic = false;
+            if (auto* comp = dynamic_cast<ComparisonExpr*>(ifNode->condition.get())) {
+                if (dynamic_cast<DynamicReferenceExpr*>(comp->left.get()) || dynamic_cast<DynamicReferenceExpr*>(comp->right.get())) {
+                    is_dynamic = true;
                 }
-                try {
-                    ExpressionEvaluator evaluator(this->templates, this->doc_root);
-                    EvaluatedValue result = evaluator.evaluate(attr_node.value_expr.get(), &node);
-                    style_str += key + ": " + format_css_double(result.value) + result.unit + ";";
-                } catch (const std::runtime_error& e) {
-                    // This is likely a DynamicReferenceExpr, which can't be evaluated statically.
-                    // We need to generate JS for it.
-                    if (ConditionalExpr* cond = dynamic_cast<ConditionalExpr*>(attr_node.value_expr.get())) {
-                        if (ComparisonExpr* comp = dynamic_cast<ComparisonExpr*>(cond->condition.get())) {
-                            if (DynamicReferenceExpr* dyn_ref = dynamic_cast<DynamicReferenceExpr*>(comp->left.get())) {
-                                std::string target_id = "chtl-dyn-" + std::to_string(dynamic_id_counter++);
-                                node.addAttribute({"id", target_id});
-                                // This is a massive simplification for the demo
-                                js_output << generateDynamicJS(target_id, key, dyn_ref->selector, dyn_ref->property, ">", "2", "100px", "50px");
-                            }
+            }
+
+            if (is_dynamic) {
+                static int dynamic_if_counter = 0;
+                ComparisonExpr* comp = dynamic_cast<ComparisonExpr*>(ifNode->condition.get());
+                DynamicReferenceExpr* dyn_ref = dynamic_cast<DynamicReferenceExpr*>(comp->left.get());
+                LiteralExpr* literal = dynamic_cast<LiteralExpr*>(comp->right.get());
+
+                if (!dyn_ref) {
+                    dyn_ref = dynamic_cast<DynamicReferenceExpr*>(comp->right.get());
+                    literal = dynamic_cast<LiteralExpr*>(comp->left.get());
+                }
+
+                if (dyn_ref && literal) {
+                    std::string parent_id;
+                    for (const auto& attr : node.attributes) {
+                        if (attr.key == "id") {
+                            parent_id = attr.value;
+                            break;
                         }
+                    }
+                    if (parent_id.empty()) {
+                        parent_id = "chtl-dyn-if-parent-" + std::to_string(dynamic_if_counter++);
+                        node.addAttribute({"id", parent_id});
+                    }
+
+                    std::string style_key_to_toggle;
+                    std::string style_value_to_toggle;
+                    if (!ifNode->body.empty()) {
+                        const auto& prop = ifNode->body[0];
+                        style_key_to_toggle = prop.key;
+                        if (auto* val_literal = dynamic_cast<LiteralExpr*>(prop.value_expr.get())) {
+                            style_value_to_toggle = val_literal->unit;
+                        }
+                    }
+
+                    if (!style_key_to_toggle.empty()) {
+                        js_output << "{\n";
+                        js_output << "  const parentEl = document.getElementById('" << parent_id << "');\n";
+                        js_output << "  const sourceEl = document.querySelector('" << dyn_ref->selector << "');\n";
+                        js_output << "  const observer = new MutationObserver(() => {\n";
+                        js_output << "    const sourceValue = parseFloat(window.getComputedStyle(sourceEl)." << dyn_ref->property << ");\n";
+                        js_output << "    const condition = sourceValue " << comp->op.lexeme << " " << literal->value << ";\n";
+                        js_output << "    parentEl.style." << toCamelCase(style_key_to_toggle) << " = condition ? '" << style_value_to_toggle << "' : '';\n";
+                        js_output << "  });\n";
+                        js_output << "  observer.observe(sourceEl, { attributes: true, subtree: true });\n";
+                        js_output << "  if (sourceEl) { observer.takeRecords(); var initialCheck = () => { const sourceValue = parseFloat(window.getComputedStyle(sourceEl)." << dyn_ref->property << "); const condition = sourceValue " << comp->op.lexeme << " " << literal->value << "; parentEl.style." << toCamelCase(style_key_to_toggle) << " = condition ? '" << style_value_to_toggle << "' : ''; }; initialCheck(); }\n";
+                        js_output << "}\n";
+                    }
+                }
+            } else {
+                ExpressionEvaluator evaluator(this->templates, this->doc_root);
+                EvaluatedValue result = evaluator.evaluate(ifNode->condition.get(), &node);
+                if (result.value != 0) {
+                    for (const auto& prop : ifNode->body) {
+                        final_props[prop.key] = prop.clone();
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. Generate CSS from the final property map
+    std::string style_str;
+    int dynamic_id_counter = 0;
+    for (auto const& [key, attr_node] : final_props) {
+        if (attr_node.value_expr == nullptr) {
+             throw std::runtime_error("Valueless property '" + key + "' was not provided a value.");
+        }
+        try {
+            ExpressionEvaluator evaluator(this->templates, this->doc_root);
+            EvaluatedValue result = evaluator.evaluate(attr_node.value_expr.get(), &node);
+            if (result.type == ValueType::STRING) {
+                style_str += key + ": " + result.unit + ";";
+            } else {
+                style_str += key + ": " + format_css_double(result.value) + result.unit + ";";
+            }
+        } catch (const std::runtime_error& e) {
+            if (ConditionalExpr* cond = dynamic_cast<ConditionalExpr*>(attr_node.value_expr.get())) {
+                if (ComparisonExpr* comp = dynamic_cast<ComparisonExpr*>(cond->condition.get())) {
+                    if (DynamicReferenceExpr* dyn_ref = dynamic_cast<DynamicReferenceExpr*>(comp->left.get())) {
+                        std::string target_id = "chtl-dyn-" + std::to_string(dynamic_id_counter++);
+                        node.addAttribute({"id", target_id});
+                        js_output << generateDynamicJS(target_id, key, dyn_ref->selector, dyn_ref->property, ">", "2", "100px", "50px");
                     }
                 }
             }
@@ -263,6 +347,10 @@ void CHTLGenerator::visit(OriginNode& node) {
 void CHTLGenerator::visit(ScriptNode& node) {
     // This logic is now handled by the dispatcher and scanner
     js_output << node.content;
+}
+
+void CHTLGenerator::visit(IfNode& node) {
+    // Handled by the parent ElementNode visitor
 }
 
 } // namespace CHTL

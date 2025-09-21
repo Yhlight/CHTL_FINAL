@@ -1,0 +1,9 @@
+[Import] @Chtl from "lib.chtl";
+[Import] @Chtl from "module_lib.chtl";
+
+html {
+    body {
+        @Element LibBox from lib;
+        @Element ModuleBox from module_lib;
+    }
+}

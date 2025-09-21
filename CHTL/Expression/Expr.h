@@ -40,11 +40,13 @@ public:
 
 class LiteralExpr : public Expr {
 public:
-    LiteralExpr(double value, const std::string& unit) : value(value), unit(unit) {}
+    LiteralExpr(double value, const std::string& unit, bool is_string_literal = false)
+        : value(value), unit(unit), is_string_literal(is_string_literal) {}
     void accept(ExprVisitor& visitor) override;
     std::unique_ptr<Expr> clone() const override;
     double value;
     std::string unit;
+    bool is_string_literal;
 };
 
 class BinaryExpr : public Expr {

@@ -1,0 +1,16 @@
+html {
+    body {
+        button { id: "my-button"; text: "Click Me"; }
+
+        script {
+            {{#my-button}}->Listen {
+                click: () => {
+                    document.querySelector('#my-button').textContent = "Clicked!";
+                },
+                mouseenter: function() {
+                    console.log("Mouse entered!");
+                }
+            };
+        }
+    }
+}

@@ -210,6 +210,11 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
         nodes.push_back(parseElement());
         return nodes;
     }
+    if (match({TokenType::IF})) {
+        std::vector<std::unique_ptr<BaseNode>> nodes;
+        nodes.push_back(parseIfBlock());
+        return nodes;
+    }
     error(peek(), "Expect a declaration.");
     return {};
 }
@@ -329,7 +334,7 @@ std::unique_ptr<StyleNode> CHTLParser::parseStyleBlock() {
                     raw_value += advance().lexeme;
                     if (!check(TokenType::SEMICOLON)) raw_value += " ";
                 }
-                auto value_expr = std::make_unique<LiteralExpr>(0, raw_value);
+                auto value_expr = std::make_unique<LiteralExpr>(0, raw_value, true);
                 consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
                 rule.properties.push_back({key_str, std::move(value_expr)});
             }
@@ -498,6 +503,7 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                 } else {
                     error(selector, "Could not find element to specialize.");
                 }
+                /* BUGGY CODE - Redeclaration of 'selector' and 'index'
                 Token position = previous();
                 Token selector = consume(TokenType::IDENTIFIER, "Expect tag name.");
                 int index = 0;
@@ -517,6 +523,7 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                 if (!findAndInsert(cloned_nodes, selector.lexeme, index, position.type, nodes_to_insert)) {
                     error(selector, "Could not find target for insert.");
                 }
+                */
             } else {
                 error(peek(), "Unsupported specialization keyword.");
             }
@@ -713,6 +720,45 @@ std::unique_ptr<ScriptNode> CHTLParser::parseScriptBlock() {
     return std::make_unique<ScriptNode>(content);
 }
 
+std::unique_ptr<IfNode> CHTLParser::parseIfBlock() {
+    // an if block is already consumed by match({TokenType::IF})
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'if'.");
+
+    auto ifNode = std::make_unique<IfNode>();
+
+    if (check(TokenType::RIGHT_BRACE)) {
+        error(peek(), "If block cannot be empty.");
+    }
+
+    // The first property must be the condition.
+    std::string condition_key_str;
+    while (!check(TokenType::COLON) && !isAtEnd()) {
+        condition_key_str += advance().lexeme;
+    }
+    if (condition_key_str != "condition") {
+        error(peek(), "First property in 'if' block must be 'condition'.");
+    }
+    consume(TokenType::COLON, "Expect ':' after 'condition'.");
+    ifNode->condition = parseExpression();
+
+    // Subsequent properties form the body of the if statement.
+    while (match({TokenType::COMMA})) {
+        if (check(TokenType::RIGHT_BRACE)) break; // Optional trailing comma
+
+        std::string key_str;
+        while (!check(TokenType::COLON) && !isAtEnd()) {
+            key_str += advance().lexeme;
+        }
+        consume(TokenType::COLON, "Expect ':' after property name.");
+        auto value_expr = parseExpression();
+        ifNode->body.push_back({key_str, std::move(value_expr)});
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after if block.");
+
+    return ifNode;
+}
+
 std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {
     // Basic implementation, doesn't handle nested braces
     consume(TokenType::LEFT_BRACKET, "Expect '['.");
@@ -859,7 +905,7 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             return std::make_unique<LiteralExpr>(0, value);
         }
     }
-    if (match({TokenType::STRING})) { return std::make_unique<LiteralExpr>(0, previous().lexeme); }
+    if (match({TokenType::STRING})) { return std::make_unique<LiteralExpr>(0, previous().lexeme, true); }
     if (match({TokenType::LEFT_PAREN})) {
         auto expr = parseExpression();
         consume(TokenType::RIGHT_PAREN, "Expect ')'.");
@@ -871,8 +917,10 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             selector += advance().lexeme;
         }
         consume(TokenType::RIGHT_BRACE_BRACE, "Expect '}}' after selector.");
-        consume(TokenType::MINUS, "Expect '->' after selector.");
-        consume(TokenType::GREATER, "Expect '->' after selector.");
+        if (!match({TokenType::DOT})) {
+            consume(TokenType::MINUS, "Expect '->' or '.' after selector.");
+            consume(TokenType::GREATER, "Expect '->' after selector.");
+        }
         Token property = consume(TokenType::IDENTIFIER, "Expect property name.");
         return std::make_unique<DynamicReferenceExpr>(selector, property.lexeme);
     }

@@ -14,9 +14,12 @@ namespace CHTL {
 class BaseNode;
 class ElementNode;
 
+enum class ValueType { NUMERIC, STRING };
+
 struct EvaluatedValue {
     double value;
     std::string unit;
+    ValueType type = ValueType::NUMERIC;
 };
 
 class ExpressionEvaluator : public ExprVisitor {

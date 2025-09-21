@@ -1,0 +1,19 @@
+html {
+    body {
+        div {
+            id: "test-box";
+            style {
+                width: 600px;
+                height: 100px;
+            }
+            if {
+                condition: width > 500px,
+                background-color: "green"
+            }
+            if {
+                condition: width < 500px,
+                background-color: "red"
+            }
+        }
+    }
+}

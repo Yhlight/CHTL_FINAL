@@ -87,55 +87,71 @@ void CHTLUnifiedScanner::scanScriptContent(size_t block_end) {
     };
 
     while (m_cursor < block_end) {
-        bool is_chtl_js_construct = false;
+        size_t start_pos = m_cursor;
 
-        // Check for {{ ... }}
+        // Find the start of a potential CHTL JS construct
+        size_t next_open_brace = m_source.find("{{", m_cursor);
+        size_t next_arrow = m_source.find("->", m_cursor);
+        size_t next_amp_arrow = m_source.find("&->", m_cursor);
+
+        size_t next_construct_pos = std::string::npos;
+        if (next_open_brace != std::string::npos) next_construct_pos = std::min(next_construct_pos, next_open_brace);
+        if (next_arrow != std::string::npos) next_construct_pos = std::min(next_construct_pos, next_arrow);
+        if (next_amp_arrow != std::string::npos) next_construct_pos = std::min(next_construct_pos, next_amp_arrow);
+
+        if (next_construct_pos == std::string::npos) {
+            // No more CHTL JS constructs in this block, the rest is JS
+            js_buffer += m_source.substr(m_cursor, block_end - m_cursor);
+            m_cursor = block_end;
+            break;
+        }
+
+        // The part before the construct is JS
+        if (next_construct_pos > m_cursor) {
+            js_buffer += m_source.substr(m_cursor, next_construct_pos - m_cursor);
+        }
+
+        // Finalize the JS buffer before processing the CHTL JS construct
+        finalize_js_buffer();
+
+        // Process the CHTL JS construct
+        m_cursor = next_construct_pos;
+        size_t construct_start = m_cursor;
+
         if (m_source.substr(m_cursor, 2) == "{{") {
-            finalize_js_buffer();
             size_t end_pos = m_source.find("}}", m_cursor);
             if (end_pos != std::string::npos) {
-                chtl_js_buffer += m_source.substr(m_cursor, end_pos + 2 - m_cursor);
                 m_cursor = end_pos + 2;
-                is_chtl_js_construct = true;
             }
-        } else {
-            // Check for CHTL JS keywords
-            for (const auto& keyword : CHTLJS_KEYWORDS) {
-                if (m_source.substr(m_cursor, keyword.length()) == keyword) {
-                    // Check for standalone word
-                    bool is_standalone = (m_cursor == 0 || !std::isalnum(m_source[m_cursor - 1]));
-                    if (is_standalone && m_cursor + keyword.length() < m_source.length() && !std::isalnum(m_source[m_cursor + keyword.length()])) {
+        } else if (m_source.substr(m_cursor, 3) == "&->") {
+            m_cursor += 3;
+        } else if (m_source.substr(m_cursor, 2) == "->") {
+            m_cursor += 2;
+        }
 
-                        size_t search_pos = m_cursor + keyword.length();
-                        while(search_pos < block_end && std::isspace(m_source[search_pos])) {
-                            search_pos++;
-                        }
+        // After a prefix, check for a keyword and its block
+        while(m_cursor < block_end && std::isspace(m_source[m_cursor])) m_cursor++;
 
-                        if (search_pos < block_end && m_source[search_pos] == '{') {
-                            finalize_js_buffer();
-                            int brace_count = 1;
-                            size_t end_scan = search_pos + 1;
-                            while(end_scan < block_end && brace_count > 0) {
-                                if (m_source[end_scan] == '{') brace_count++;
-                                else if (m_source[end_scan] == '}') brace_count--;
-                                end_scan++;
-                            }
-                            if (brace_count == 0) {
-                                chtl_js_buffer += m_source.substr(m_cursor, end_scan - m_cursor);
-                                m_cursor = end_scan;
-                                is_chtl_js_construct = true;
-                                break; // Exit keyword loop
-                            }
-                        }
+        bool keyword_found = false;
+        for (const auto& keyword : CHTLJS_KEYWORDS) {
+            if (m_source.substr(m_cursor, keyword.length()) == keyword) {
+                m_cursor += keyword.length();
+                while(m_cursor < block_end && std::isspace(m_source[m_cursor])) m_cursor++;
+                if (m_cursor < block_end && m_source[m_cursor] == '{') {
+                    int brace_count = 1;
+                    m_cursor++;
+                    while(m_cursor < block_end && brace_count > 0) {
+                        if (m_source[m_cursor] == '{') brace_count++;
+                        else if (m_source[m_cursor] == '}') brace_count--;
+                        m_cursor++;
                     }
                 }
+                keyword_found = true;
+                break;
             }
         }
 
-        if (!is_chtl_js_construct) {
-            js_buffer += m_source[m_cursor];
-            m_cursor++;
-        }
+        chtl_js_buffer += m_source.substr(construct_start, m_cursor - construct_start);
     }
 
     finalize_js_buffer(); // Add any remaining JS
