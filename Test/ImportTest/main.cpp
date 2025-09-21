@@ -43,6 +43,8 @@ int main() {
     CHTL::CompilerDispatcher dispatcher(config, file_path);
     CHTL::FinalCompilationResult result = dispatcher.dispatch(fragments);
 
+    std::string final_html = CHTL::CodeMerger::mergeToFinalHtml(result.html, result.css, result.js);
+
     std::string expected_html_part = R"(<div class="box imported-box">This box was imported from lib.chtl</div>)";
     std::string expected_css_part = R"(.imported-style {
     font-family: "Comic Sans MS", cursive, sans-serif;
@@ -57,7 +59,6 @@ int main() {
         pass = false;
     }
 
-    // The merger adds newlines, so we check the raw CSS output from the generator
     if (remove_whitespace(result.css) != remove_whitespace(expected_css_part)) {
         std::cerr << "TEST FAILED: CSS output does not contain imported CSS content.\n";
         pass = false;

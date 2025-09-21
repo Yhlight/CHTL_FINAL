@@ -646,6 +646,7 @@ void CHTLParser::parseImportStatement() {
 
         for (auto& [ns, def_map] : source_defs_by_ns) {
             for (auto& [name, def] : def_map) {
+                // Simplified logic: merge everything into the imported file's namespace.
                 dest_defs_by_ns[ns][name] = std::move(def);
             }
         }

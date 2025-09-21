@@ -2,7 +2,6 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/TextNode.h"
 #include "../CHTLNode/StyleNode.h"
-#include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/ScriptNode.h"
 #include "../../CHTL JS/CHTLJSLexer/CHTLJSLexer.h"
 #include "../../CHTL JS/CHTLJSParser/CHTLJSParser.h"

@@ -10,7 +10,7 @@ html {
     body {
         h1 { text: "Main Content"; }
 
-        // Use the imported template
-        @Element ImportedBox;
+        // Use the imported template. The namespace is the filename "lib"
+        @Element ImportedBox from lib;
     }
 }
