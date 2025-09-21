@@ -1,0 +1,23 @@
+[Template] @Style BaseStyle {
+    color: "black";
+    font-size: 16px;
+    padding: 10px;
+}
+
+[Template] @Style InheritedStyle {
+    @Style BaseStyle;
+    font-size: 20px; // Override base style
+    background-color: "lightgray"; // Add new style
+}
+
+html {
+    body {
+        div {
+            class: "test-div";
+            style {
+                @Style InheritedStyle;
+                border: 1px solid black; // Add another style directly
+            }
+        }
+    }
+}

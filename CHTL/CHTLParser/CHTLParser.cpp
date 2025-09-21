@@ -12,10 +12,21 @@
 namespace CHTL {
 
 // --- Recursive Helpers for Specialization ---
-ElementNode* findElementInVec(std::vector<std::unique_ptr<BaseNode>>& nodes, const std::string& tagName, int& index) {
+ElementNode* findElementInVec(std::vector<std::unique_ptr<BaseNode>>& nodes, const std::string& tagName, const std::string& className, int& index) {
     for (auto& node : nodes) {
         if (ElementNode* elem = dynamic_cast<ElementNode*>(node.get())) {
-            if (elem->tagName == tagName) {
+            bool tagMatch = (elem->tagName == tagName);
+            bool classMatch = className.empty();
+            if (!className.empty()) {
+                for (const auto& attr : elem->attributes) {
+                    if (attr.key == "class" && attr.value == className) {
+                        classMatch = true;
+                        break;
+                    }
+                }
+            }
+
+            if (tagMatch && classMatch) {
                 if (index == 0) {
                     return elem;
                 }
@@ -25,7 +36,7 @@ ElementNode* findElementInVec(std::vector<std::unique_ptr<BaseNode>>& nodes, con
     }
     for (auto& node : nodes) {
         if (ElementNode* elem = dynamic_cast<ElementNode*>(node.get())) {
-            if (ElementNode* found = findElementInVec(elem->children, tagName, index)) {
+            if (ElementNode* found = findElementInVec(elem->children, tagName, className, index)) {
                 return found;
             }
         }
@@ -463,7 +474,12 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                 consume(TokenType::SEMICOLON, "Expect ';'.");
             } else if (check(TokenType::IDENTIFIER)) {
                 // This is a targeted styling specialization
-                Token selector = consume(TokenType::IDENTIFIER, "Expect tag name for specialization.");
+                Token tagName = consume(TokenType::IDENTIFIER, "Expect tag name for specialization.");
+                std::string className;
+                if (match({TokenType::DOT})) {
+                    className = consume(TokenType::IDENTIFIER, "Expect class name.").lexeme;
+                }
+
                 int index = 0;
                 if (match({TokenType::LEFT_BRACKET})) {
                     Token index_token = consume(TokenType::NUMBER, "Expect index.");
@@ -479,7 +495,7 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                 consume(TokenType::RIGHT_BRACE, "Expect '}' to end specialization block.");
 
                 // Now, find the target node in the cloned tree and merge the styles
-                ElementNode* target_node = findElementInVec(cloned_nodes, selector.lexeme, index);
+                ElementNode* target_node = findElementInVec(cloned_nodes, tagName.lexeme, className, index);
                 if (target_node) {
                     StyleNode* existing_style_node = nullptr;
                     for (auto& child : target_node->children) {
@@ -501,7 +517,7 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                         target_node->addChild(std::move(new_style_node));
                     }
                 } else {
-                    error(selector, "Could not find element to specialize.");
+                    error(tagName, "Could not find element to specialize.");
                 }
             } else if (match({TokenType::INSERT})) {
                 Token position = advance(); // after, before, replace
@@ -531,6 +547,7 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
             }
         }
         consume(TokenType::RIGHT_BRACE, "Expect '}'.");
+        match({TokenType::SEMICOLON}); // Optional semicolon
     } else {
         consume(TokenType::SEMICOLON, "Expect ';'.");
     }
@@ -555,10 +572,19 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
     consume(TokenType::LEFT_BRACE, "Expect '{' to start symbol body.");
     if (def.type == TemplateType::STYLE) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            if (check(TokenType::AT) || match({TokenType::INHERIT})) {
-                // TODO: Implement inheritance logic for style templates
-                error(peek(), "Style template inheritance is not yet implemented.");
-            } else {
+            if (match({TokenType::INHERIT})) {
+                consume(TokenType::AT, "Expect '@' after 'inherit'.");
+                consume(TokenType::IDENTIFIER, "Expect 'Style' keyword.");
+                def.inherited_style_templates.push_back(consume(TokenType::IDENTIFIER, "Expect template name.").lexeme);
+                consume(TokenType::SEMICOLON, "Expect ';'.");
+            }
+            else if (check(TokenType::AT)) {
+                advance(); // consume @
+                consume(TokenType::IDENTIFIER, "Expect 'Style' keyword.");
+                def.inherited_style_templates.push_back(consume(TokenType::IDENTIFIER, "Expect template name.").lexeme);
+                consume(TokenType::SEMICOLON, "Expect ';'.");
+            }
+            else {
                 std::string key_str;
                 while (peek().type != TokenType::COLON && peek().type != TokenType::SEMICOLON && peek().type != TokenType::COMMA && !isAtEnd()) {
                     key_str += advance().lexeme;
@@ -572,7 +598,7 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
                         raw_value += current_token.lexeme;
                         if (peek().type != TokenType::SEMICOLON) raw_value += " ";
                     }
-                    auto value_expr = std::make_unique<LiteralExpr>(0, raw_value);
+                    auto value_expr = std::make_unique<LiteralExpr>(0, raw_value, LiteralExpr::LiteralType::STRING);
                     consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
                     def.style_properties.push_back({key_str, std::move(value_expr)});
                 } else if (is_custom && (match({TokenType::SEMICOLON}) || match({TokenType::COMMA}))) {

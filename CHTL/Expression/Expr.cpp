@@ -13,7 +13,7 @@ void ConditionalExpr::accept(ExprVisitor& visitor) { visitor.visit(*this); }
 
 // --- Clone Method Implementations ---
 std::unique_ptr<Expr> LiteralExpr::clone() const {
-    return std::make_unique<LiteralExpr>(value, unit);
+    return std::make_unique<LiteralExpr>(value, unit, type);
 }
 std::unique_ptr<Expr> BinaryExpr::clone() const {
     return std::make_unique<BinaryExpr>(left->clone(), op, right->clone());

@@ -1,0 +1,23 @@
+[Custom] @Element MyComponent {
+    div {
+        class: "title";
+        text: "Default Title";
+    }
+    div {
+        class: "content";
+        text: "Default content.";
+    }
+}
+
+html {
+    body {
+        @Element MyComponent {
+            div.title {
+                style {
+                    color: "red";
+                    font-size: 24px;
+                }
+            }
+        };
+    }
+}

@@ -3,6 +3,7 @@
 
 #include "../CHTLNode/Visitor.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
+#include "../CHTLNode/StyleNode.h"
 #include "../../CHTL JS/CHTLJSNode/DelegateNode.h"
 #include <string>
 #include <sstream>
@@ -31,6 +32,9 @@ public:
     void visit(ScriptNode& node) override;
 
 private:
+    // Helper to recursively resolve style templates and their inheritance
+    std::map<std::string, AttributeNode> resolveStyleTemplate(const StyleNode::StyleApplication& app);
+
     std::shared_ptr<Configuration> config;
     std::stringstream html_output;
     std::stringstream css_output;

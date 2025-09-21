@@ -15,6 +15,7 @@
 #include "../Expression/ExpressionEvaluator.h"
 #include <unordered_set>
 #include <algorithm>
+#include <iostream>
 #include <map>
 #include <sstream>
 
@@ -63,6 +64,47 @@ std::string generateDynamicJS(
     return js.str();
 }
 
+std::map<std::string, AttributeNode> CHTLGenerator::resolveStyleTemplate(const StyleNode::StyleApplication& app) {
+    std::map<std::string, AttributeNode> resolved_props;
+
+    // 1. Find the definition for the current application
+    const TemplateDefinitionNode* def = nullptr;
+    for (const auto& ns_pair : this->templates) {
+        if (ns_pair.second.count(app.template_name)) {
+            def = &ns_pair.second.at(app.template_name);
+            break;
+        }
+    }
+
+    if (!def || def->type != TemplateType::STYLE) {
+        return resolved_props;
+    }
+
+    // 2. Recursively resolve inherited templates
+    for (const auto& inherited_template_name : def->inherited_style_templates) {
+        StyleNode::StyleApplication inherited_app;
+        inherited_app.template_name = inherited_template_name;
+        std::map<std::string, AttributeNode> inherited_props = resolveStyleTemplate(inherited_app);
+        for (auto const& [key, val] : inherited_props) {
+            resolved_props[key] = val.clone();
+        }
+    }
+
+    // 3. Add properties from the current template definition (will override inherited)
+    for (const auto& prop : def->style_properties) {
+        resolved_props[prop.key] = prop.clone();
+    }
+
+    // 4. Apply specializations from the application site
+    for (const auto& key_to_delete : app.deleted_properties) {
+        resolved_props.erase(key_to_delete);
+    }
+    for (const auto& prop : app.new_or_overridden_properties) {
+        resolved_props[prop.key] = prop.clone();
+    }
+
+    return resolved_props;
+}
 
 CHTLGenerator::CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, std::shared_ptr<Configuration> config)
     : templates(templates), config(config), doc_root(nullptr) {}
@@ -77,7 +119,6 @@ CompilationResult CHTLGenerator::generate(BaseNode* root, bool use_html5_doctype
         root->accept(*this);
     }
 
-    // Process the delegate registry
     for (const auto& pair : delegate_registry) {
         const std::string& parent_selector_str = pair.first;
         const auto& delegate_nodes = pair.second;
@@ -102,7 +143,6 @@ CompilationResult CHTLGenerator::generate(BaseNode* root, bool use_html5_doctype
 }
 
 void CHTLGenerator::visit(ElementNode& node) {
-    // --- Global Style & Auto-Attribute Generation ---
     std::string primary_selector_for_ampersand;
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
@@ -148,7 +188,6 @@ void CHTLGenerator::visit(ElementNode& node) {
                 }
                 css_output << final_selector << " {\n";
                 for (const auto& prop : rule.properties) {
-                    // NOTE: Dynamic expressions are NOT handled in global rules.
                     ExpressionEvaluator evaluator(this->templates, this->doc_root);
                     EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
                     if (result.type == EvaluatedType::STRING) {
@@ -162,7 +201,6 @@ void CHTLGenerator::visit(ElementNode& node) {
         }
     }
 
-    // --- HTML Tag Generation ---
     html_output << "<" << node.tagName;
     std::string text_content;
     for (const auto& attr : node.attributes) {
@@ -170,53 +208,23 @@ void CHTLGenerator::visit(ElementNode& node) {
         else { html_output << " " << attr.key << "=\"" << attr.value << "\""; }
     }
 
-    // --- Inline Style Generation ---
     std::string style_str;
     int dynamic_id_counter = 0;
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
             std::map<std::string, AttributeNode> final_props;
 
-            // --- Style Specialization Logic ---
-            // 1. Apply all templates first
             for (const auto& app : styleNode->template_applications) {
-                const TemplateDefinitionNode* def = nullptr;
-                for (const auto& ns_pair : this->templates) {
-                    if (ns_pair.second.count(app.template_name)) {
-                        def = &ns_pair.second.at(app.template_name);
-                        break;
-                    }
-                }
-                if (def && def->type == TemplateType::STYLE) {
-                    for (const auto& prop : def->style_properties) {
-                        final_props[prop.key] = prop.clone();
-                    }
-                }
+                 std::map<std::string, AttributeNode> props_from_template = resolveStyleTemplate(app);
+                 for (auto const& [key, val] : props_from_template) {
+                     final_props[key] = val.clone();
+                 }
             }
 
-            // 2. Handle deletions and overrides from all applications
-            for (const auto& app : styleNode->template_applications) {
-                 // Delete specified properties
-                for (const auto& key_to_delete : app.deleted_properties) {
-                     // This is a simplification. A real implementation would track the origin
-                     // of each property to correctly delete inherited styles.
-                     // For now, we only delete properties by name.
-                    if (key_to_delete.rfind("@Style", 0) != 0) {
-                        final_props.erase(key_to_delete);
-                    }
-                }
-                // Apply new or overridden properties (fills in valueless props)
-                for (const auto& prop : app.new_or_overridden_properties) {
-                    final_props[prop.key] = prop.clone();
-                }
-            }
-
-            // 3. Apply direct properties from the style block
             for (const auto& prop : styleNode->direct_properties) {
                 final_props[prop.key] = prop.clone();
             }
 
-            // 4. Generate CSS from the final property map
             for (auto const& [key, attr_node] : final_props) {
                 if (attr_node.value_expr == nullptr) {
                      throw std::runtime_error("Valueless property '" + key + "' was not provided a value.");
@@ -230,14 +238,11 @@ void CHTLGenerator::visit(ElementNode& node) {
                         style_str += key + ": " + format_css_double(result.value) + result.unit + ";";
                     }
                 } catch (const std::runtime_error& e) {
-                    // This is likely a DynamicReferenceExpr, which can't be evaluated statically.
-                    // We need to generate JS for it.
                     if (ConditionalExpr* cond = dynamic_cast<ConditionalExpr*>(attr_node.value_expr.get())) {
                         if (ComparisonExpr* comp = dynamic_cast<ComparisonExpr*>(cond->condition.get())) {
                             if (DynamicReferenceExpr* dyn_ref = dynamic_cast<DynamicReferenceExpr*>(comp->left.get())) {
                                 std::string target_id = "chtl-dyn-" + std::to_string(dynamic_id_counter++);
                                 node.addAttribute({"id", target_id});
-                                // This is a massive simplification for the demo
                                 js_output << generateDynamicJS(target_id, key, dyn_ref->selector, dyn_ref->property, ">", "2", "100px", "50px");
                             }
                         }
@@ -269,7 +274,6 @@ void CHTLGenerator::visit(OriginNode& node) {
 }
 
 void CHTLGenerator::visit(ScriptNode& node) {
-    // This logic is now handled by the dispatcher and scanner
     js_output << node.content;
 }
 
