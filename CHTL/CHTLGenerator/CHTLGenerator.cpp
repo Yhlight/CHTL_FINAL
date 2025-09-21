@@ -4,6 +4,7 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/ScriptNode.h"
+#include "../CHTLNode/IfNode.h"
 #include "../../CHTL JS/CHTLJSLexer/CHTLJSLexer.h"
 #include "../../CHTL JS/CHTLJSParser/CHTLJSParser.h"
 #include "../../CHTL JS/CHTLJSNode/RawJSNode.h"
@@ -263,6 +264,29 @@ void CHTLGenerator::visit(OriginNode& node) {
 void CHTLGenerator::visit(ScriptNode& node) {
     // This logic is now handled by the dispatcher and scanner
     js_output << node.content;
+}
+
+void CHTLGenerator::visit(IfNode& node) {
+    ExpressionEvaluator evaluator(this->templates, this->doc_root);
+    // Note: The context for evaluation is the document root. This might need to be
+    // more specific if 'if' conditions need to reference local element properties.
+    EvaluatedValue condition_result = evaluator.evaluate(node.condition.get(), nullptr);
+
+    if (evaluator.isTruthy(condition_result)) {
+        for (const auto& child : node.then_branch) {
+            child->accept(*this);
+        }
+    } else {
+        if (node.else_if_branch) {
+            // It's an 'else if', which is just another IfNode.
+            node.else_if_branch->accept(*this);
+        } else if (!node.else_branch.empty()) {
+            // It's a final 'else'.
+            for (const auto& child : node.else_branch) {
+                child->accept(*this);
+            }
+        }
+    }
 }
 
 } // namespace CHTL

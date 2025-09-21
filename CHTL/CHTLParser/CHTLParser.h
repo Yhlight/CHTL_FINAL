@@ -61,6 +61,7 @@ private:
     std::unique_ptr<StyleNode> parseStyleBlock();
     std::unique_ptr<ScriptNode> parseScriptBlock();
     std::unique_ptr<BaseNode> parseOriginBlock();
+    std::unique_ptr<BaseNode> parseIfStatement();
     std::unique_ptr<ConfigNode> parseConfigurationBlock();
     void parseNamespaceStatement();
 

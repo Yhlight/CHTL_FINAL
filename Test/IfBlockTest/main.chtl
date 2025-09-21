@@ -1,0 +1,67 @@
+html {
+    head {
+        title { text: "If Block Test"; }
+    }
+    body {
+        // Test 1: Simple 'if' that should be true
+        if {
+            condition: 10 < 20,
+            div {
+                id: "test1";
+                text: "Test 1 Passed";
+            }
+        }
+
+        // Test 2: Simple 'if' that should be false
+        if {
+            condition: 10 > 20,
+            div {
+                id: "test2";
+                text: "Test 2 Failed";
+            }
+        }
+
+        // Test 3: if-else, where else should be taken
+        if {
+            condition: "hello" == "world",
+            div {
+                id: "test3-if";
+                text: "Test 3 Failed";
+            }
+        } else {
+            div {
+                id: "test3-else";
+                text: "Test 3 Passed";
+            }
+        }
+
+        // Test 4: if-else if-else, where 'else if' should be taken
+        if {
+            condition: 1 == 0,
+            div { text: "Test 4 Failed"; }
+        } else if {
+            condition: 5 * 2 == 10,
+            div {
+                id: "test4-elseif";
+                text: "Test 4 Passed";
+            }
+        } else {
+            div { text: "Test 4 Failed"; }
+        }
+
+        // Test 5: Nested if
+        if {
+            condition: 100 > 10,
+            div {
+                id: "test5-outer";
+                if {
+                    condition: 2 > 1,
+                    span {
+                        id: "test5-inner";
+                        text: "Test 5 Passed";
+                    }
+                }
+            }
+        }
+    }
+}

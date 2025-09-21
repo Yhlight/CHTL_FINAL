@@ -3,6 +3,7 @@
 #include "../CHTLLexer/CHTLLexer.h"
 #include "CHTL/CHTLNode/TextNode.h"
 #include "CHTL/CHTLNode/OriginNode.h"
+#include "CHTL/CHTLNode/IfNode.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <stdexcept>
@@ -208,6 +209,11 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
     if (check(TokenType::IDENTIFIER)) {
         std::vector<std::unique_ptr<BaseNode>> nodes;
         nodes.push_back(parseElement());
+        return nodes;
+    }
+    if (match({TokenType::IF})) {
+        std::vector<std::unique_ptr<BaseNode>> nodes;
+        nodes.push_back(parseIfStatement());
         return nodes;
     }
     error(peek(), "Expect a declaration.");
@@ -498,12 +504,13 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                 } else {
                     error(selector, "Could not find element to specialize.");
                 }
-                Token position = previous();
-                Token selector = consume(TokenType::IDENTIFIER, "Expect tag name.");
-                int index = 0;
+            } else if (match({TokenType::INSERT})) {
+                Token position = consume(TokenType::IDENTIFIER, "Expect insert position (e.g., 'after').");
+                Token insert_selector = consume(TokenType::IDENTIFIER, "Expect tag name.");
+                int insert_index = 0;
                 if (match({TokenType::LEFT_BRACKET})) {
                     Token index_token = consume(TokenType::NUMBER, "Expect index.");
-                    index = std::stoi(index_token.lexeme);
+                    insert_index = std::stoi(index_token.lexeme);
                     consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
                 }
                 consume(TokenType::LEFT_BRACE, "Expect '{'.");
@@ -514,10 +521,11 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                     }
                 }
                 consume(TokenType::RIGHT_BRACE, "Expect '}'.");
-                if (!findAndInsert(cloned_nodes, selector.lexeme, index, position.type, nodes_to_insert)) {
-                    error(selector, "Could not find target for insert.");
+                if (!findAndInsert(cloned_nodes, insert_selector.lexeme, insert_index, position.type, nodes_to_insert)) {
+                    error(insert_selector, "Could not find target for insert.");
                 }
-            } else {
+            }
+            else {
                 error(peek(), "Unsupported specialization keyword.");
             }
         }
@@ -959,6 +967,46 @@ std::unique_ptr<ConfigNode> CHTLParser::parseConfigurationBlock() {
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' to end configuration body.");
     return std::make_unique<ConfigNode>();
+}
+
+std::unique_ptr<BaseNode> CHTLParser::parseIfStatement() {
+    // Assumes 'if' token has already been matched and consumed.
+    auto if_node = std::make_unique<IfNode>();
+
+    consume(TokenType::LEFT_BRACE, "Expect '{' after 'if'.");
+
+    // Parse condition
+    consume(TokenType::CONDITION, "Expect 'condition' keyword in if block.");
+    consume(TokenType::COLON, "Expect ':' after 'condition'.");
+    if_node->condition = parseExpression();
+    consume(TokenType::COMMA, "Expect ',' after condition expression.");
+
+    // Parse 'then' branch
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        for (auto& child : parseDeclaration()) {
+            if_node->then_branch.push_back(std::move(child));
+        }
+    }
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to close if block.");
+
+    // Handle 'else if' and 'else'
+    if (match({TokenType::ELSE})) {
+        if (match({TokenType::IF})) {
+            // It's an 'else if'
+            if_node->else_if_branch = parseIfStatement();
+        } else {
+            // It's an 'else'
+            consume(TokenType::LEFT_BRACE, "Expect '{' after 'else'.");
+            while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                for (auto& child : parseDeclaration()) {
+                    if_node->else_branch.push_back(std::move(child));
+                }
+            }
+            consume(TokenType::RIGHT_BRACE, "Expect '}' to close else block.");
+        }
+    }
+
+    return if_node;
 }
 
 } // namespace CHTL
