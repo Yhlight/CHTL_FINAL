@@ -36,6 +36,7 @@ public:
     virtual ~Expr() = default;
     virtual void accept(ExprVisitor& visitor) = 0;
     virtual std::unique_ptr<Expr> clone() const = 0;
+    virtual bool isDynamic() const = 0;
 };
 
 class LiteralExpr : public Expr {
@@ -43,6 +44,7 @@ public:
     LiteralExpr(double value, const std::string& unit) : value(value), unit(unit) {}
     void accept(ExprVisitor& visitor) override;
     std::unique_ptr<Expr> clone() const override;
+    bool isDynamic() const override;
     double value;
     std::string unit;
 };
@@ -53,6 +55,7 @@ public:
         : left(std::move(left)), op(op), right(std::move(right)) {}
     void accept(ExprVisitor& visitor) override;
     std::unique_ptr<Expr> clone() const override;
+    bool isDynamic() const override;
     std::unique_ptr<Expr> left;
     Token op;
     std::unique_ptr<Expr> right;
@@ -64,6 +67,7 @@ public:
         : group(group), name(name), override_value(std::move(override_value)) {}
     void accept(ExprVisitor& visitor) override;
     std::unique_ptr<Expr> clone() const override;
+    bool isDynamic() const override;
     std::string group;
     std::string name;
     std::unique_ptr<Expr> override_value;
@@ -74,6 +78,7 @@ public:
     ReferenceExpr(Token selector, Token property) : selector(selector), property(property) {}
     void accept(ExprVisitor& visitor) override;
     std::unique_ptr<Expr> clone() const override;
+    bool isDynamic() const override;
     Token selector;
     Token property;
 };
@@ -84,6 +89,7 @@ public:
         : left(std::move(left)), op(op), right(std::move(right)) {}
     void accept(ExprVisitor& visitor) override;
     std::unique_ptr<Expr> clone() const override;
+    bool isDynamic() const override;
     std::unique_ptr<Expr> left;
     Token op;
     std::unique_ptr<Expr> right;
@@ -95,6 +101,7 @@ public:
         : left(std::move(left)), op(op), right(std::move(right)) {}
     void accept(ExprVisitor& visitor) override;
     std::unique_ptr<Expr> clone() const override;
+    bool isDynamic() const override;
     std::unique_ptr<Expr> left;
     Token op;
     std::unique_ptr<Expr> right;
@@ -106,6 +113,7 @@ public:
         : condition(std::move(condition)), then_branch(std::move(then_branch)), else_branch(std::move(else_branch)) {}
     void accept(ExprVisitor& visitor) override;
     std::unique_ptr<Expr> clone() const override;
+    bool isDynamic() const override;
     std::unique_ptr<Expr> condition;
     std::unique_ptr<Expr> then_branch;
     std::unique_ptr<Expr> else_branch;
@@ -117,6 +125,7 @@ public:
         : selector(selector), property(property) {}
     void accept(ExprVisitor& visitor) override;
     std::unique_ptr<Expr> clone() const override;
+    bool isDynamic() const override;
     std::string selector;
     std::string property;
 };

@@ -39,4 +39,15 @@ std::unique_ptr<Expr> DynamicReferenceExpr::clone() const {
     return std::make_unique<DynamicReferenceExpr>(selector, property);
 }
 
+// --- isDynamic Method Implementations ---
+bool LiteralExpr::isDynamic() const { return false; }
+bool ReferenceExpr::isDynamic() const { return false; }
+bool DynamicReferenceExpr::isDynamic() const { return true; }
+bool BinaryExpr::isDynamic() const { return left->isDynamic() || right->isDynamic(); }
+bool ComparisonExpr::isDynamic() const { return left->isDynamic() || right->isDynamic(); }
+bool LogicalExpr::isDynamic() const { return left->isDynamic() || right->isDynamic(); }
+bool VarExpr::isDynamic() const { return override_value ? override_value->isDynamic() : false; }
+bool ConditionalExpr::isDynamic() const { return condition->isDynamic() || then_branch->isDynamic() || else_branch->isDynamic(); }
+
+
 } // namespace CHTL

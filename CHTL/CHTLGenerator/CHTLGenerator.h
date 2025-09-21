@@ -4,6 +4,7 @@
 #include "../CHTLNode/Visitor.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../../CHTL JS/CHTLJSNode/DelegateNode.h"
+#include "../Expression/JSExpressionGenerator.h"
 #include <string>
 #include <sstream>
 #include <map>
@@ -39,6 +40,9 @@ private:
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
     BaseNode* doc_root = nullptr;
     std::map<std::string, std::vector<CHTL_JS::DelegateNode>> delegate_registry;
+    int dynamic_if_counter = 0;
+
+    std::string renderBranch(const std::vector<std::unique_ptr<BaseNode>>& branch);
 };
 
 } // namespace CHTL
