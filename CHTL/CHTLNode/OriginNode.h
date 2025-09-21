@@ -6,20 +6,15 @@
 
 namespace CHTL {
 
-enum class OriginType {
-    HTML,
-    STYLE,
-    JAVASCRIPT
-};
-
 class OriginNode : public BaseNode {
 public:
-    OriginNode(const std::string& content, OriginType type);
+    OriginNode(std::string type, std::string content, std::string name = "");
     void accept(Visitor& visitor) override;
     std::unique_ptr<BaseNode> clone() const override;
 
+    std::string type;
     std::string content;
-    OriginType type;
+    std::string name; // Optional name for the block
 };
 
 } // namespace CHTL

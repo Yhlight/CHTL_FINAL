@@ -6,6 +6,7 @@
 #include "../CHTLNode/ElementNode.h"
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/ScriptNode.h"
+#include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/ConfigNode.h"
 #include "../Config/Configuration.h"
@@ -65,6 +66,7 @@ private:
     void parseNamespaceStatement();
 
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>> template_definitions;
+    std::map<std::string, std::unique_ptr<OriginNode>> named_origin_blocks;
     void parseSymbolDeclaration(bool is_custom);
     void parseImportStatement();
     void parseStyleTemplateUsage(StyleNode* styleNode);

@@ -1,0 +1,33 @@
+// Test file for [Origin] blocks
+
+[Origin] @Style {
+    .raw-css { color: purple; }
+}
+
+[Origin] @JavaScript {
+    function raw_js() {
+        if (true) { console.log("raw js with braces"); }
+    }
+}
+
+[Origin] @Vue myVueBlock {
+    <div id="app">{{ message }}</div>
+}
+
+html {
+    head {
+        // The raw style block should be added to the CSS output
+        // The raw javascript block should be added to the JS output
+    }
+    body {
+        div {
+            text: "Content";
+        }
+
+        [Origin] @Html {
+            <p>This is some raw HTML.</p>
+        }
+
+        [Origin] @Vue myVueBlock;
+    }
+}

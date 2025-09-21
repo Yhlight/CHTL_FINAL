@@ -3,6 +3,7 @@
 #include "../CHTLLexer/CHTLLexer.h"
 #include "CHTL/CHTLNode/TextNode.h"
 #include "CHTL/CHTLNode/OriginNode.h"
+#include "CHTL/CHTLNode/RootNode.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <stdexcept>
@@ -113,39 +114,49 @@ std::string CHTLParser::getCurrentNamespace() {
 }
 
 std::unique_ptr<BaseNode> CHTLParser::parse() {
-    // Check for 'use html5;' directive at the very beginning
+    auto root = std::make_unique<RootNode>();
+
     if (check(TokenType::USE)) {
         if (tokens.size() > current + 2 && tokens[current + 1].type == TokenType::IDENTIFIER && tokens[current + 1].lexeme == "html5" && tokens[current + 2].type == TokenType::SEMICOLON) {
             this->use_html5_doctype = true;
-            advance(); // consume 'use'
-            advance(); // consume 'html5'
-            advance(); // consume ';'
+            advance(); advance(); advance();
         }
     }
 
     while (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
         if (peek().type == TokenType::LEFT_BRACKET) {
             if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Template") {
-                parseSymbolDeclaration(false);
+                parseSymbolDeclaration(false); // Does not produce a node for the tree
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Custom") {
-                parseSymbolDeclaration(true);
+                parseSymbolDeclaration(true); // Does not produce a node for the tree
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
-                parseOriginBlock();
+                auto origin_node = parseOriginBlock();
+                if (origin_node) { // Only add to tree if it's not a named definition
+                    root->addChild(std::move(origin_node));
+                }
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Import") {
-                parseImportStatement();
+                parseImportStatement(); // Does not produce a node for the tree
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Configuration") {
-                parseConfigurationBlock();
+                parseConfigurationBlock(); // Does not produce a node for the tree
             } else if (tokens.size() > current + 1 && tokens[current + 1].lexeme == "Namespace") {
-                parseNamespaceStatement();
-            } else { break; }
-        } else { break; }
+                parseNamespaceStatement(); // Does not produce a node for the tree
+            } else {
+                // Likely an element, which is not a top-level declaration
+                break;
+            }
+        } else if (check(TokenType::IDENTIFIER)) {
+             // This is the start of the actual root element like `html`
+            auto nodes = parseDeclaration();
+            for (auto& node : nodes) {
+                root->addChild(std::move(node));
+            }
+        } else {
+            // Something else, break and let it be handled (or error) outside
+            break;
+        }
     }
-    if (!isAtEnd() && peek().type != TokenType::END_OF_FILE) {
-        auto nodes = parseDeclaration();
-        if (nodes.size() == 1) return std::move(nodes[0]);
-        else error(peek(), "Expected a single root element declaration.");
-    }
-    return nullptr;
+
+    return root;
 }
 
 void CHTLParser::parseNamespaceStatement() {
@@ -457,65 +468,67 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
                 }
                 consume(TokenType::SEMICOLON, "Expect ';'.");
             } else if (check(TokenType::IDENTIFIER)) {
-                // This is a targeted styling specialization
-                Token selector = consume(TokenType::IDENTIFIER, "Expect tag name for specialization.");
-                int index = 0;
-                if (match({TokenType::LEFT_BRACKET})) {
-                    Token index_token = consume(TokenType::NUMBER, "Expect index.");
-                    index = std::stoi(index_token.lexeme);
-                    consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
-                }
+                if (match({TokenType::STYLE})) {
+                    // This is a targeted styling specialization
+                     Token selector = consume(TokenType::IDENTIFIER, "Expect tag name for specialization.");
+                    int index = 0;
+                    if (match({TokenType::LEFT_BRACKET})) {
+                        Token index_token = consume(TokenType::NUMBER, "Expect index.");
+                        index = std::stoi(index_token.lexeme);
+                        consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+                    }
 
-                consume(TokenType::LEFT_BRACE, "Expect '{' for specialization block.");
-                if (!match({TokenType::STYLE})) {
-                    error(peek(), "Only 'style' blocks are currently supported for element specialization.");
-                }
-                auto new_style_node = parseStyleBlock();
-                consume(TokenType::RIGHT_BRACE, "Expect '}' to end specialization block.");
+                    consume(TokenType::LEFT_BRACE, "Expect '{' for specialization block.");
+                    auto new_style_node = parseStyleBlock();
+                    consume(TokenType::RIGHT_BRACE, "Expect '}' to end specialization block.");
 
-                // Now, find the target node in the cloned tree and merge the styles
-                ElementNode* target_node = findElementInVec(cloned_nodes, selector.lexeme, index);
-                if (target_node) {
-                    StyleNode* existing_style_node = nullptr;
-                    for (auto& child : target_node->children) {
-                        if (StyleNode* sn = dynamic_cast<StyleNode*>(child.get())) {
-                            existing_style_node = sn;
-                            break;
+                    // Now, find the target node in the cloned tree and merge the styles
+                    ElementNode* target_node = findElementInVec(cloned_nodes, selector.lexeme, index);
+                    if (target_node) {
+                        StyleNode* existing_style_node = nullptr;
+                        for (auto& child : target_node->children) {
+                            if (StyleNode* sn = dynamic_cast<StyleNode*>(child.get())) {
+                                existing_style_node = sn;
+                                break;
+                            }
+                        }
+                        if (existing_style_node) {
+                            // Merge new style into existing
+                            existing_style_node->direct_properties.insert(existing_style_node->direct_properties.end(),
+                                std::make_move_iterator(new_style_node->direct_properties.begin()),
+                                std::make_move_iterator(new_style_node->direct_properties.end()));
+                            existing_style_node->global_rules.insert(existing_style_node->global_rules.end(),
+                                std::make_move_iterator(new_style_node->global_rules.begin()),
+                                std::make_move_iterator(new_style_node->global_rules.end()));
+                        } else {
+                            // Add new style node
+                            target_node->addChild(std::move(new_style_node));
+                        }
+                    } else {
+                        error(selector, "Could not find element to specialize.");
+                    }
+                } else if (match({TokenType::INSERT})) {
+                    Token position = previous();
+                    Token selector = consume(TokenType::IDENTIFIER, "Expect tag name.");
+                    int index = 0;
+                    if (match({TokenType::LEFT_BRACKET})) {
+                        Token index_token = consume(TokenType::NUMBER, "Expect index.");
+                        index = std::stoi(index_token.lexeme);
+                        consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+                    }
+                    consume(TokenType::LEFT_BRACE, "Expect '{'.");
+                    std::vector<std::unique_ptr<BaseNode>> nodes_to_insert;
+                    while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+                        for (auto& node : parseDeclaration()) {
+                            nodes_to_insert.push_back(std::move(node));
                         }
                     }
-                    if (existing_style_node) {
-                        // Merge new style into existing
-                        existing_style_node->direct_properties.insert(existing_style_node->direct_properties.end(),
-                            std::make_move_iterator(new_style_node->direct_properties.begin()),
-                            std::make_move_iterator(new_style_node->direct_properties.end()));
-                        existing_style_node->global_rules.insert(existing_style_node->global_rules.end(),
-                            std::make_move_iterator(new_style_node->global_rules.begin()),
-                            std::make_move_iterator(new_style_node->global_rules.end()));
-                    } else {
-                        // Add new style node
-                        target_node->addChild(std::move(new_style_node));
+                    consume(TokenType::RIGHT_BRACE, "Expect '}'.");
+                    if (!findAndInsert(cloned_nodes, selector.lexeme, index, position.type, nodes_to_insert)) {
+                        error(selector, "Could not find target for insert.");
                     }
                 } else {
-                    error(selector, "Could not find element to specialize.");
-                }
-                Token position = previous();
-                Token selector = consume(TokenType::IDENTIFIER, "Expect tag name.");
-                int index = 0;
-                if (match({TokenType::LEFT_BRACKET})) {
-                    Token index_token = consume(TokenType::NUMBER, "Expect index.");
-                    index = std::stoi(index_token.lexeme);
-                    consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
-                }
-                consume(TokenType::LEFT_BRACE, "Expect '{'.");
-                std::vector<std::unique_ptr<BaseNode>> nodes_to_insert;
-                while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-                    for (auto& node : parseDeclaration()) {
-                        nodes_to_insert.push_back(std::move(node));
-                    }
-                }
-                consume(TokenType::RIGHT_BRACE, "Expect '}'.");
-                if (!findAndInsert(cloned_nodes, selector.lexeme, index, position.type, nodes_to_insert)) {
-                    error(selector, "Could not find target for insert.");
+                     error(peek(), "Only 'style' and 'insert' are currently supported for element specialization.");
                 }
             } else {
                 error(peek(), "Unsupported specialization keyword.");
@@ -714,24 +727,79 @@ std::unique_ptr<ScriptNode> CHTLParser::parseScriptBlock() {
 }
 
 std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {
-    // Basic implementation, doesn't handle nested braces
-    consume(TokenType::LEFT_BRACKET, "Expect '['.");
-    consume(TokenType::IDENTIFIER, "Expect 'Origin'.");
-    consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
-    consume(TokenType::AT, "Expect '@'.");
-    Token type = consume(TokenType::IDENTIFIER, "Expect origin type.");
-    consume(TokenType::LEFT_BRACE, "Expect '{'.");
-    int start = current;
-    while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-        advance();
+    consume(TokenType::LEFT_BRACKET, "Expect '[' for [Origin] block.");
+    consume(TokenType::IDENTIFIER, "Expect 'Origin' keyword.");
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to close keyword.");
+    consume(TokenType::AT, "Expect '@' for type specifier.");
+    Token type = consume(TokenType::IDENTIFIER, "Expect origin type (e.g., Html, Style, Vue).");
+
+    // Check for an optional name for the block
+    std::string block_name;
+    if (check(TokenType::IDENTIFIER)) {
+        block_name = advance().lexeme;
     }
-    int end = current;
-    std::string content = source.substr(tokens[start].position, tokens[end-1].position + tokens[end-1].lexeme.length() - tokens[start].position);
-    consume(TokenType::RIGHT_BRACE, "Expect '}'.");
-    OriginType originType = OriginType::HTML;
-    if (type.lexeme == "Style") originType = OriginType::STYLE;
-    else if (type.lexeme == "JavaScript") originType = OriginType::JAVASCRIPT;
-    return std::make_unique<OriginNode>(content, originType);
+
+    // If there is no opening brace, it's a usage of a named block
+    if (!check(TokenType::LEFT_BRACE)) {
+        consume(TokenType::SEMICOLON, "Expect ';' after named [Origin] usage.");
+        if (block_name.empty()) {
+            error(type, "Unnamed [Origin] usage must have a body.");
+        }
+        if (named_origin_blocks.find(block_name) == named_origin_blocks.end()) {
+            error(type, "Named [Origin] block '" + block_name + "' not defined.");
+        }
+        // Return a clone of the stored named block
+        return named_origin_blocks.at(block_name)->clone();
+    }
+
+    // --- This is a block definition ---
+    consume(TokenType::LEFT_BRACE, "Expect '{' to start origin block body.");
+
+    if (check(TokenType::RIGHT_BRACE)) { // Empty block
+        consume(TokenType::RIGHT_BRACE, "Expect '}' to close empty block.");
+        if (!block_name.empty()) {
+            named_origin_blocks[block_name] = std::make_unique<OriginNode>(type.lexeme, "", block_name);
+            return nullptr; // A named definition does not get added to the tree here
+        }
+        return std::make_unique<OriginNode>(type.lexeme, "", block_name);
+    }
+
+    // Correctly parse content with nested braces
+    Token start_token = peek();
+    int brace_level = 1;
+    std::string content;
+
+    // This logic is complex because we need to reconstruct the string from tokens
+    // to correctly handle spacing and special characters.
+    int content_start_pos = start_token.position;
+    int content_end_pos = content_start_pos;
+
+    while (brace_level > 0 && !isAtEnd()) {
+        if (peek().type == TokenType::LEFT_BRACE) brace_level++;
+        if (peek().type == TokenType::RIGHT_BRACE) brace_level--;
+
+        if (brace_level == 0) {
+            break; // We found the matching brace, don't consume it yet
+        }
+
+        Token current_token = advance();
+        content_end_pos = current_token.position + current_token.lexeme.length();
+    }
+
+    content = source.substr(content_start_pos, content_end_pos - content_start_pos);
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' to close origin block.");
+
+    auto node = std::make_unique<OriginNode>(type.lexeme, content, block_name);
+
+    // If it's a named block, store it and return nullptr so it's not added to the tree
+    if (!block_name.empty()) {
+        named_origin_blocks[block_name] = std::make_unique<OriginNode>(type.lexeme, content, block_name);
+        return nullptr;
+    }
+
+    // Otherwise, it's an anonymous block, return it to be added to the tree
+    return node;
 }
 
 // --- Expression Parser (Full Implementation) ---

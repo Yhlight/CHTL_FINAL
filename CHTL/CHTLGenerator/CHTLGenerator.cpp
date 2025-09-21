@@ -4,6 +4,7 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/ScriptNode.h"
+#include "../CHTLNode/RootNode.h"
 #include "../../CHTL JS/CHTLJSLexer/CHTLJSLexer.h"
 #include "../../CHTL JS/CHTLJSParser/CHTLJSParser.h"
 #include "../../CHTL JS/CHTLJSNode/RawJSNode.h"
@@ -255,9 +256,22 @@ void CHTLGenerator::visit(ElementNode& node) {
 void CHTLGenerator::visit(TextNode& node) { html_output << node.text; }
 void CHTLGenerator::visit(StyleNode& node) {}
 void CHTLGenerator::visit(OriginNode& node) {
-    if (node.type == OriginType::HTML) html_output << node.content;
-    else if (node.type == OriginType::STYLE) css_output << node.content;
-    else if (node.type == OriginType::JAVASCRIPT) js_output << node.content;
+    if (node.type == "Html") {
+        html_output << node.content;
+    } else if (node.type == "Style") {
+        css_output << node.content;
+    } else if (node.type == "JavaScript") {
+        js_output << node.content;
+    } else {
+        // For custom types like @Vue, the default behavior is to output to HTML.
+        html_output << node.content;
+    }
+}
+
+void CHTLGenerator::visit(RootNode& node) {
+    for (const auto& child : node.children) {
+        child->accept(*this);
+    }
 }
 
 void CHTLGenerator::visit(ScriptNode& node) {

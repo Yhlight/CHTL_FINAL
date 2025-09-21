@@ -24,6 +24,7 @@ public:
     explicit CHTLGenerator(const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates, std::shared_ptr<Configuration> config);
     CompilationResult generate(BaseNode* root, bool use_html5_doctype);
 
+    void visit(RootNode& node) override;
     void visit(ElementNode& node) override;
     void visit(TextNode& node) override;
     void visit(StyleNode& node) override;
