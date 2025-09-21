@@ -1,0 +1,6 @@
+// Defines a template with no explicit namespace.
+// Its default namespace should be "alias_imported".
+
+[Template] @Style AliasedStyle {
+    color: purple;
+}

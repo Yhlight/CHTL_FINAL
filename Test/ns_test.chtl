@@ -1,0 +1,12 @@
+// Imports a file with a namespace and uses the template from it.
+[Import] @Chtl from Test/ns_imported.chtl;
+
+body {
+    p {
+        style {
+            @Style NamespacedStyle from my_ns;
+            text-decoration: underline;
+        }
+        text { "This text should be blue, bold, and underlined." }
+    }
+}

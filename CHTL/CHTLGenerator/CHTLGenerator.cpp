@@ -5,6 +5,8 @@
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/TemplateDeclarationNode.h"
 #include "../CHTLNode/CustomDeclarationNode.h"
+#include "../CHTLNode/NamespaceNode.h" // Add include for NamespaceNode
+#include "../CHTLNode/ImportNode.h" // Add include for ImportNode
 #include "../Expression/ExpressionEvaluator.h" // Include the new evaluator
 #include <unordered_set>
 #include <algorithm> // For std::find_if
@@ -17,10 +19,10 @@ const std::unordered_set<std::string> voidElements = {
     "link", "meta", "param", "source", "track", "wbr"
 };
 
-CHTLGenerator::CHTLGenerator(const std::map<std::string, TemplateDefinitionNode>& templates)
-    : templates(templates) {}
+CHTLGenerator::CHTLGenerator(const std::map<std::string, TemplateDefinitionNode>& templates, const std::map<std::string, std::string>& html_snippets)
+    : templates(templates), named_html_snippets(html_snippets) {}
 
-CompilationResult CHTLGenerator::generate(BaseNode* root) {
+void CHTLGenerator::generate(BaseNode* root) {
     html_output.str("");
     css_output.str("");
     this->doc_root = root; // Set the document root context
@@ -40,7 +42,6 @@ CompilationResult CHTLGenerator::generate(BaseNode* root) {
             root->accept(*this);
         }
     }
-    return {html_output.str(), css_output.str()};
 }
 
 void CHTLGenerator::visit(ElementNode& node) {
@@ -184,7 +185,21 @@ void CHTLGenerator::visit(CustomDeclarationNode& node) {
 }
 
 void CHTLGenerator::visit(ImportNode& node) {
-    // Imports are handled by the dispatcher, not the generator.
+    // CHTL, Style, and JS imports are handled by the dispatcher/merger.
+    // The generator only needs to handle named HTML imports, which are like raw includes.
+    if (node.type == ImportType::HTML && !node.alias.empty()) {
+        if (named_html_snippets.count(node.alias)) {
+            html_output << named_html_snippets.at(node.alias);
+        }
+    }
+}
+
+void CHTLGenerator::visit(NamespaceNode& node) {
+    // Namespaces are a compile-time construct for organization.
+    // The generator just processes the children within it.
+    for (const auto& child : node.children) {
+        child->accept(*this);
+    }
 }
 
 } // namespace CHTL

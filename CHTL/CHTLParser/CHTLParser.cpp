@@ -4,6 +4,7 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/TemplateDeclarationNode.h"
+#include "../CHTLNode/NamespaceNode.h"
 #include "../CHTLNode/ReactiveValueNode.h"
 #include "../Expression/Expr.h"
 #include <iostream>
@@ -12,8 +13,8 @@
 
 namespace CHTL {
 
-CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens, std::map<std::string, TemplateDefinitionNode>& templates)
-    : source(source), tokens(tokens), template_definitions(templates) {}
+CHTLParser::CHTLParser(const std::string& source, const std::vector<Token>& tokens, std::map<std::string, TemplateDefinitionNode>& templates, std::string default_namespace_alias)
+    : source(source), tokens(tokens), template_definitions(templates), default_namespace_alias(std::move(default_namespace_alias)) {}
 
 // --- Expression Parser Implementation ---
 
@@ -127,7 +128,15 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             Token property = consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
             return std::make_unique<ReferenceExpr>(first_part, property);
 
-        } else if (check(TokenType::LEFT_PAREN)) { // Variable usage like Group(key)
+        } else if (match({TokenType::COLON_COLON})) { // Namespace::Group(key)
+            Token groupToken = consume(TokenType::IDENTIFIER, "Expect group name after '::'.");
+            consume(TokenType::LEFT_PAREN, "Expect '(' after variable group name.");
+            std::string key_name;
+            while (!check(TokenType::RIGHT_PAREN) && !isAtEnd()) { key_name += advance().lexeme; }
+            consume(TokenType::RIGHT_PAREN, "Expect ')' after variable key name.");
+            return std::make_unique<VarExpr>(groupToken.lexeme, key_name, first_part.lexeme);
+        }
+        else if (check(TokenType::LEFT_PAREN)) { // Variable usage like Group(key)
             consume(TokenType::LEFT_PAREN, "Expect '(' after variable group name.");
 
             std::string key_name;
@@ -136,7 +145,7 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             }
 
             consume(TokenType::RIGHT_PAREN, "Expect ')' after variable key name.");
-            return std::make_unique<VarExpr>(first_part.lexeme, key_name);
+            return std::make_unique<VarExpr>(first_part.lexeme, key_name, ""); // No namespace
         } else {
             // It's an unquoted string literal, as per the spec.
             return std::make_unique<LiteralExpr>(first_part.lexeme);
@@ -218,6 +227,8 @@ std::unique_ptr<BaseNode> CHTLParser::parseTopLevelDeclaration() {
                     return parseOriginBlock();
                 case TokenType::IMPORT:
                     return parseImportStatement();
+                case TokenType::NAMESPACE:
+                    return parseNamespace();
                 // etc. will be added here later.
                 default:
                     // If it's not a recognized block keyword, parse as a normal element.
@@ -236,15 +247,51 @@ std::unique_ptr<BaseNode> CHTLParser::parseTopLevelDeclaration() {
     }
 }
 
+std::unique_ptr<NamespaceNode> CHTLParser::parseNamespace() {
+    consume(TokenType::LEFT_BRACKET, "Expect '[' to start namespace statement.");
+    consume(TokenType::NAMESPACE, "Expect 'Namespace' keyword.");
+    consume(TokenType::RIGHT_BRACKET, "Expect ']' to end namespace keyword.");
+
+    Token name = consume(TokenType::IDENTIFIER, "Expect namespace name.");
+    auto namespaceNode = std::make_unique<NamespaceNode>(name.lexeme);
+
+    std::string previous_namespace = current_namespace;
+    current_namespace = current_namespace.empty() ? name.lexeme : current_namespace + "::" + name.lexeme;
+
+    if (match({TokenType::LEFT_BRACE})) {
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            namespaceNode->addChild(parseTopLevelDeclaration());
+        }
+        consume(TokenType::RIGHT_BRACE, "Expect '}' after namespace body.");
+    } else {
+        // Namespace without braces, applies to the rest of the file
+        // This is tricky, we'll assume it doesn't contain other top-level namespaces for now.
+        while (!isAtEnd()) {
+            namespaceNode->addChild(parseTopLevelDeclaration());
+        }
+    }
+
+    current_namespace = previous_namespace; // Restore namespace
+
+    return namespaceNode;
+}
+
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
     if (check(TokenType::AT)) {
         return parseElementTemplateUsage();
     }
 
-    if (peek().type == TokenType::LEFT_BRACKET && tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
-        std::vector<std::unique_ptr<BaseNode>> nodes;
-        nodes.push_back(parseOriginBlock());
-        return nodes;
+    if (peek().type == TokenType::LEFT_BRACKET && tokens.size() > current + 1) {
+        if (tokens[current + 1].lexeme == "Origin") {
+             std::vector<std::unique_ptr<BaseNode>> nodes;
+            nodes.push_back(parseOriginBlock());
+            return nodes;
+        }
+        if (tokens[current + 1].type == TokenType::IMPORT) {
+             std::vector<std::unique_ptr<BaseNode>> nodes;
+            nodes.push_back(parseImportStatement());
+            return nodes;
+        }
     }
 
     std::vector<std::unique_ptr<BaseNode>> nodes;
@@ -458,11 +505,29 @@ std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {
 void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
     consume(TokenType::AT, "Expect '@' for template usage.");
     consume(TokenType::STYLE, "Expect 'Style' keyword for style template usage.");
-    Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+    Token nameToken = consume(TokenType::IDENTIFIER, "Expect template name.");
+    std::string name = nameToken.lexeme;
 
-    if (!template_definitions.count(name.lexeme)) {
-        if (!suppress_not_found_errors) {
-            error(name, "Style template '" + name.lexeme + "' not found.");
+    if(match({TokenType::FROM})) {
+        Token ns = consume(TokenType::IDENTIFIER, "Expect namespace name after 'from'.");
+        name = ns.lexeme + "::" + name;
+    }
+
+    if (!template_definitions.count(name)) {
+        // If not found, try to find a unique match in any namespace
+        std::string found_name = "";
+        for (const auto& pair : template_definitions) {
+            if (pair.first.find("::" + name) != std::string::npos) {
+                if (!found_name.empty()) {
+                    error(nameToken, "Ambiguous template reference: '" + name + "'. Please specify a namespace using 'from'.");
+                }
+                found_name = pair.first;
+            }
+        }
+        if (!found_name.empty()) {
+            name = found_name;
+        } else if (!suppress_not_found_errors) {
+            error(nameToken, "Style template '" + name + "' not found.");
         }
         // If we're suppressing errors, we can't continue parsing this rule,
         // so we just skip to the end of the statement.
@@ -473,9 +538,9 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
         return;
     }
 
-    const auto& def = template_definitions.at(name.lexeme);
+    const auto& def = template_definitions.at(name);
     if (def.type != TemplateType::STYLE) {
-        error(name, "Template '" + name.lexeme + "' is not a Style template.");
+        error(nameToken, "Template '" + name + "' is not a Style template.");
     }
 
     // Clone the base properties. We will modify this list.
@@ -533,7 +598,7 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
     // Add the final, specialized properties to the style node.
     for (auto& prop : final_properties) {
         if (prop.value_expr == nullptr) {
-            error(name, "Property '" + prop.key + "' was not given a value in the specialization of '" + name.lexeme + "'.");
+            error(nameToken, "Property '" + prop.key + "' was not given a value in the specialization of '" + name + "'.");
         }
         styleNode->inline_properties.push_back(std::move(prop));
     }
@@ -542,13 +607,36 @@ void CHTLParser::parseStyleTemplateUsage(StyleNode* styleNode) {
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
     consume(TokenType::AT, "Expect '@' for template usage.");
     consume(TokenType::ELEMENT, "Expect 'Element' keyword for element template usage.");
-    Token name = consume(TokenType::IDENTIFIER, "Expect template name.");
+    Token nameToken = consume(TokenType::IDENTIFIER, "Expect template name.");
+    std::string name = nameToken.lexeme;
+
+    if(match({TokenType::FROM})) {
+        Token ns = consume(TokenType::IDENTIFIER, "Expect namespace name after 'from'.");
+        name = ns.lexeme + "::" + name;
+    }
+
     consume(TokenType::SEMICOLON, "Expect ';' after template usage.");
 
-    if (template_definitions.count(name.lexeme)) {
-        const auto& def = template_definitions.at(name.lexeme);
+    if (!template_definitions.count(name)) {
+        // If not found, try to find a unique match in any namespace
+        std::string found_name = "";
+        for (const auto& pair : template_definitions) {
+            if (pair.first.find("::" + name) != std::string::npos) {
+                if (!found_name.empty()) {
+                    error(nameToken, "Ambiguous template reference: '" + name + "'. Please specify a namespace using 'from'.");
+                }
+                found_name = pair.first;
+            }
+        }
+        if (!found_name.empty()) {
+            name = found_name;
+        }
+    }
+
+    if (template_definitions.count(name)) {
+        const auto& def = template_definitions.at(name);
         if (def.type != TemplateType::ELEMENT) {
-            error(name, "Template '" + name.lexeme + "' is not an Element template.");
+            error(nameToken, "Template '" + name + "' is not an Element template.");
         }
         std::vector<std::unique_ptr<BaseNode>> cloned_nodes;
         for (const auto& node : def.element_body) {
@@ -557,7 +645,7 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseElementTemplateUsage() {
         return cloned_nodes;
     } else {
         if (!suppress_not_found_errors) {
-            error(name, "Element template '" + name.lexeme + "' not found.");
+            error(nameToken, "Element template '" + name + "' not found.");
         }
     }
     return {};
@@ -582,7 +670,15 @@ std::unique_ptr<TemplateDeclarationNode> CHTLParser::parseTemplateDeclaration() 
         error(typeToken, "Unknown template type. Expected Style, Element, or Var.");
     }
 
-    def->name = consume(TokenType::IDENTIFIER, "Expect template name.").lexeme;
+    std::string tpl_name = consume(TokenType::IDENTIFIER, "Expect template name.").lexeme;
+    if (!current_namespace.empty()) {
+        def->name = current_namespace + "::" + tpl_name;
+    } else if (!default_namespace_alias.empty()) {
+        def->name = default_namespace_alias + "::" + tpl_name;
+    }
+    else {
+        def->name = tpl_name;
+    }
     consume(TokenType::LEFT_BRACE, "Expect '{' to start template body.");
 
     if (def->type == TemplateType::STYLE) {
@@ -666,7 +762,14 @@ std::unique_ptr<CustomDeclarationNode> CHTLParser::parseCustomDeclaration() {
         error(typeToken, "Unknown custom type. Expected Style, Element, or Var.");
     }
 
-    def->name = consume(TokenType::IDENTIFIER, "Expect custom name.").lexeme;
+    std::string custom_name = consume(TokenType::IDENTIFIER, "Expect custom name.").lexeme;
+    if (!current_namespace.empty()) {
+        def->name = current_namespace + "::" + custom_name;
+    } else if (!default_namespace_alias.empty()) {
+        def->name = default_namespace_alias + "::" + custom_name;
+    } else {
+        def->name = custom_name;
+    }
     consume(TokenType::LEFT_BRACE, "Expect '{' to start custom body.");
 
     // NOTE: For now, the body parsing is identical to templates.
@@ -762,9 +865,21 @@ std::unique_ptr<ImportNode> CHTLParser::parseImportStatement() {
 
     consume(TokenType::FROM, "Expect 'from' after import type.");
 
-    // The spec allows unquoted literals for paths.
-    Token pathToken = consume(TokenType::STRING, "Expect path string after 'from'.");
-    std::string path = pathToken.lexeme;
+    // The spec allows unquoted literals for paths, which can be a single identifier
+    // or a path-like sequence of identifiers, dots, and slashes.
+    std::string path;
+    if (match({TokenType::STRING})) {
+        path = previous().lexeme;
+    } else {
+        // Handle unquoted paths
+        while (!check(TokenType::AS) && !check(TokenType::SEMICOLON) && !isAtEnd()) {
+            path += advance().lexeme;
+        }
+    }
+
+    if (path.empty()) {
+        error(peek(), "Expect path string or literal after 'from'.");
+    }
 
     std::string alias = "";
     if (match({TokenType::AS})) {
@@ -776,31 +891,33 @@ std::unique_ptr<ImportNode> CHTLParser::parseImportStatement() {
     return std::make_unique<ImportNode>(type, path, alias);
 }
 
-std::vector<std::string> CHTLParser::discoverImports() {
-    std::vector<std::string> paths;
+std::vector<std::unique_ptr<ImportNode>> CHTLParser::discoverImports() {
+    std::vector<std::unique_ptr<ImportNode>> imports;
     int original_pos = current; // Save state
 
     while (!isAtEnd()) {
         if (check(TokenType::LEFT_BRACKET) &&
-            tokens.size() > current + 5 && // Ensure enough tokens for a basic import
-            tokens[current + 1].type == TokenType::IMPORT &&
-            tokens[current + 2].type == TokenType::RIGHT_BRACKET &&
-            tokens[current + 3].type == TokenType::AT &&
-            tokens[current + 4].lexeme == "Chtl" &&
-            tokens[current + 5].type == TokenType::FROM &&
-            tokens[current + 6].type == TokenType::STRING)
+            tokens.size() > current + 1 &&
+            tokens[current + 1].type == TokenType::IMPORT)
         {
-            // Found a valid import statement pattern
-            current += 6; // Move to the STRING token
-            paths.push_back(tokens[current].lexeme);
-            advance(); // Consume the STRING token
+            // We have a potential import, let's parse it fully.
+            int temp_pos = current;
+            try {
+                auto import_node = parseImportStatement();
+                imports.push_back(std::move(import_node));
+            } catch (const std::runtime_error& e) {
+                // If parsing fails, it's not a valid import statement, so we just skip.
+                // We need to recover the parser state to where it was before we tried.
+                current = temp_pos;
+                advance(); // Advance past the initial '[' to avoid an infinite loop.
+            }
         } else {
             advance();
         }
     }
 
     current = original_pos; // Restore state
-    return paths;
+    return imports;
 }
 
 } // namespace CHTL

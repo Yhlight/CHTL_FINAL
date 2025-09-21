@@ -14,11 +14,16 @@ struct FinalOutput {
     std::string html;
     std::string css;
     std::string js;
+    std::string imported_css;
+    std::string imported_js;
+    std::map<std::string, std::string> named_html_snippets;
 };
 
 class CompilerDispatcher {
 public:
-    explicit CompilerDispatcher(std::string initial_source);
+    // New constructor for loader integration
+    explicit CompilerDispatcher(std::string root_path, std::map<std::string, TemplateDefinitionNode>& templates);
+
 
     // The main method to process fragments
     FinalOutput dispatch();
@@ -26,8 +31,9 @@ public:
 private:
     void process_source(const std::string& source, int depth);
 
-    std::string initial_source;
-    std::map<std::string, TemplateDefinitionNode> all_template_definitions;
+    std::string root_path;
+    // Changed to a reference to use the map from the loader
+    std::map<std::string, TemplateDefinitionNode>& all_template_definitions;
     FinalOutput final_output;
 };
 

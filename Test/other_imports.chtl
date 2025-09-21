@@ -1,0 +1,13 @@
+[Import] @Style from Test/imported.css;
+[Import] @JavaScript from Test/imported.js;
+[Import] @Html from Test/imported.html as imported_html;
+
+body {
+    div {
+        class: "imported-class"; // This class is defined in the imported CSS
+        text { "This div should have a light blue background." }
+    }
+
+    // This should insert the content of imported.html
+    [Import] @Html from imported_html;
+}

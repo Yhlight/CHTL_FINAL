@@ -1,0 +1,13 @@
+// Imports a file and gives it an alias.
+[Import] @Chtl from Test/alias_imported.chtl as my_alias;
+
+body {
+    h1 {
+        style {
+            // Use the template via the alias
+            @Style AliasedStyle from my_alias;
+            font-size: 30px;
+        }
+        text { "This text should be purple and 30px." }
+    }
+}

@@ -70,13 +70,15 @@ void ExpressionEvaluator::visit(BinaryExpr& expr) {
 }
 
 void ExpressionEvaluator::visit(VarExpr& expr) {
-    std::string full_var_name = expr.group + "." + expr.name;
+    std::string group_name = expr.ns.empty() ? expr.group : expr.ns + "::" + expr.group;
+    std::string full_var_name = group_name + "." + expr.name;
+
     if (resolution_stack.count(full_var_name)) {
         throw std::runtime_error("Circular variable reference detected for: " + full_var_name);
     }
 
-    if (templates.count(expr.group)) {
-        const auto& template_def = templates.at(expr.group);
+    if (templates.count(group_name)) {
+        const auto& template_def = templates.at(group_name);
         if (template_def.type == TemplateType::VAR && template_def.variables.count(expr.name)) {
             resolution_stack.insert(full_var_name);
             result = evaluate(template_def.variables.at(expr.name).get(), this->current_context);

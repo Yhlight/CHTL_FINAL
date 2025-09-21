@@ -27,6 +27,7 @@ enum class TokenType {
 
     // Two-character tokens
     STAR_STAR,
+    COLON_COLON,
 
     // Literals.
     IDENTIFIER,

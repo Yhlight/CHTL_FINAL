@@ -1,3 +1,13 @@
-[Template] @Style ImportedStyle {
-    font-size: 100px;
+// Main file for testing imports
+
+[Import] @Chtl from Test/imported.chtl;
+
+body {
+    div {
+        style {
+            @Style FinalStyle; // Use the style from the imported file
+            font-size: 24px;
+        }
+        text { "This text should be styled by an imported template." }
+    }
 }

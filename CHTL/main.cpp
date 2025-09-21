@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <map>
 
 void print_usage(const char* prog_name) {
     std::cerr << "Usage: " << prog_name << " <input_file.chtl> [options]" << std::endl;
@@ -52,9 +53,12 @@ int main(int argc, char* argv[]) {
 
     try {
         std::cout << "Compiling " << input_file << "..." << std::endl;
-        std::string source = CHTL::FileSystem::readFile(input_file);
 
-        CHTL::CompilerDispatcher dispatcher(source);
+        // Create the map for templates here, so it can be shared.
+        std::map<std::string, CHTL::TemplateDefinitionNode> template_definitions;
+
+        // Pass the root file path and the template map to the dispatcher.
+        CHTL::CompilerDispatcher dispatcher(input_file, template_definitions);
         CHTL::FinalOutput compiled_output = dispatcher.dispatch();
 
         CHTL::CodeMerger merger(compiled_output);

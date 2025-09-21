@@ -87,19 +87,20 @@ public:
     std::unique_ptr<Expr> right;
 };
 
-// Represents a variable usage, e.g., ThemeColor(primary)
+// Represents a variable usage, e.g., ThemeColor(primary) or space::ThemeColor(primary)
 class VarExpr : public Expr {
 public:
-    VarExpr(const std::string& group, const std::string& name)
-        : group(group), name(name) {}
+    VarExpr(const std::string& group, const std::string& name, const std::string& ns = "")
+        : group(group), name(name), ns(ns) {}
 
     void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
     std::unique_ptr<Expr> clone() const override {
-        return std::make_unique<VarExpr>(group, name);
+        return std::make_unique<VarExpr>(group, name, ns);
     }
 
     std::string group;
     std::string name;
+    std::string ns; // Optional namespace
 };
 
 // Represents a reference to another property, e.g., box.width

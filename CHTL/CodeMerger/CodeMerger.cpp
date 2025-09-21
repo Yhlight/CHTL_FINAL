@@ -9,15 +9,17 @@ CodeMerger::CodeMerger(const FinalOutput& output) : output(output) {}
 std::string CodeMerger::mergeToSingleFile() const {
     std::string result = "<html>\n<head>\n";
 
-    if (!output.css.empty()) {
-        result += "<style>\n" + output.css + "\n</style>\n";
+    std::string final_css = output.imported_css + "\n" + output.css;
+    if (!final_css.empty()) {
+        result += "<style>\n" + final_css + "\n</style>\n";
     }
 
     result += "</head>\n<body>\n";
     result += output.html;
 
-    if (!output.js.empty()) {
-        result += "<script>\n" + output.js + "\n</script>\n";
+    std::string final_js = output.js + "\n" + output.imported_js;
+    if (!final_js.empty()) {
+        result += "<script>\n" + final_js + "\n</script>\n";
     }
 
     result += "</body>\n</html>";
@@ -39,22 +41,24 @@ void CodeMerger::saveToSeparateFiles(const std::string& base_filename) const {
     html_file.close();
 
     // Save CSS
-    if (!output.css.empty()) {
+    std::string final_css = output.imported_css + "\n" + output.css;
+    if (!final_css.empty()) {
         std::ofstream css_file(base_filename + ".css");
         if (!css_file.is_open()) {
             throw std::runtime_error("Could not open file to save CSS: " + base_filename + ".css");
         }
-        css_file << output.css;
+        css_file << final_css;
         css_file.close();
     }
 
     // Save JS
-    if (!output.js.empty()) {
+    std::string final_js = output.js + "\n" + output.imported_js;
+    if (!final_js.empty()) {
         std::ofstream js_file(base_filename + ".js");
         if (!js_file.is_open()) {
             throw std::runtime_error("Could not open file to save JS: " + base_filename + ".js");
         }
-        js_file << output.js;
+        js_file << final_js;
         js_file.close();
     }
 }

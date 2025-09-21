@@ -13,4 +13,17 @@ std::vector<std::string> StringUtil::split(const std::string& s, char delimiter)
     return tokens;
 }
 
+std::string StringUtil::getFilename(const std::string& path) {
+    size_t last_slash_idx = path.find_last_of("/\\");
+    if (std::string::npos != last_slash_idx) {
+        std::string filename = path.substr(last_slash_idx + 1);
+        size_t dot_idx = filename.find_last_of('.');
+        if (std::string::npos != dot_idx) {
+            return filename.substr(0, dot_idx);
+        }
+        return filename;
+    }
+    return "";
+}
+
 } // namespace CHTL

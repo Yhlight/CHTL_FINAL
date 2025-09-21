@@ -1,0 +1,4 @@
+// Test for circular imports, part 1
+[Import] @Chtl from Test/circ2.chtl;
+
+text { "This is circ1." }

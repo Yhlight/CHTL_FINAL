@@ -17,13 +17,13 @@ namespace CHTL {
 class CHTLParser {
 public:
     bool suppress_not_found_errors = false;
-    explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, std::map<std::string, TemplateDefinitionNode>& templates);
+    explicit CHTLParser(const std::string& source, const std::vector<Token>& tokens, std::map<std::string, TemplateDefinitionNode>& templates, std::string default_namespace_alias = "");
 
     // The main entry point for parsing.
     std::unique_ptr<BaseNode> parse();
 
-    // This performs a lightweight scan to find all import paths.
-    std::vector<std::string> discoverImports();
+    // This performs a lightweight scan to find all import paths and their aliases.
+    std::vector<std::unique_ptr<ImportNode>> discoverImports();
 
     std::map<std::string, TemplateDefinitionNode> takeTemplateDefinitions() { return std::move(template_definitions); }
 
@@ -31,6 +31,8 @@ private:
     const std::string& source;
     const std::vector<Token>& tokens;
     int current = 0;
+    std::string current_namespace = "";
+    std::string default_namespace_alias = "";
 
     // --- Helper Methods ---
     // These methods provide a clean interface for consuming and looking at tokens.
@@ -70,6 +72,7 @@ private:
     std::unique_ptr<BaseNode> parseTopLevelDeclaration(); // New method
     std::unique_ptr<TemplateDeclarationNode> parseTemplateDeclaration();
     std::unique_ptr<CustomDeclarationNode> parseCustomDeclaration();
+    std::unique_ptr<NamespaceNode> parseNamespace();
     void parseStyleTemplateUsage(StyleNode* styleNode);
     std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();
     std::unique_ptr<BaseNode> parseOriginBlock();
