@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(CHTL_Project CXX)
+project(CHTL_Project C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,11 +16,15 @@ file(GLOB_RECURSE CHTL_SOURCES
     "Scanner/*.cpp"
     "Util/*.cpp"
     "Util/*/*.cpp"
-    "miniz.c"
 )
 
 # Create a static library from the source files
 add_library(chtl_lib STATIC ${CHTL_SOURCES})
+
+# Add miniz.c as a separate object file and link it
+add_library(miniz_lib STATIC miniz.c)
+set_target_properties(miniz_lib PROPERTIES LINKER_LANGUAGE C)
+target_link_libraries(chtl_lib PRIVATE miniz_lib)
 
 # --- Define the Main CLI Executable ---
 add_executable(chtl CLI/main.cpp)

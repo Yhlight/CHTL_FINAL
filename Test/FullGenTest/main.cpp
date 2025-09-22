@@ -39,6 +39,11 @@ int main() {
     // 3. Merger
     std::string final_html = CHTL::CodeMerger::mergeToFinalHtml(result.html, result.css, result.js);
 
+    // Debug output
+    std::cout << "HTML: " << result.html << std::endl;
+    std::cout << "CSS: " << result.css << std::endl;
+    std::cout << "JS: " << result.js << std::endl;
+
     // 4. Assert
     std::string expected_final_html = R"(
         <!DOCTYPE html>

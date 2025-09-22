@@ -18,7 +18,13 @@ void ElementNode::addAttribute(const HtmlAttribute& attr) {
 
 std::unique_ptr<BaseNode> ElementNode::clone() const {
     auto new_node = std::make_unique<ElementNode>(this->tagName);
-    new_node->attributes = this->attributes;
+    for (const auto& attr : this->attributes) {
+        HtmlAttribute new_attr;
+        new_attr.key = attr.key;
+        new_attr.value = attr.value;
+        new_attr.value_expr = attr.value_expr ? attr.value_expr->clone() : nullptr;
+        new_node->attributes.push_back(new_attr);
+    }
     for (const auto& child : this->children) {
         new_node->addChild(child->clone());
     }

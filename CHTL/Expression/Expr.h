@@ -30,6 +30,7 @@ public:
     virtual void visit(LogicalExpr& expr) = 0;
     virtual void visit(ConditionalExpr& expr) = 0;
     virtual void visit(DynamicReferenceExpr& expr) = 0;
+    virtual void visit(ReactiveVarExpr& expr) = 0;
 };
 
 class Expr {
