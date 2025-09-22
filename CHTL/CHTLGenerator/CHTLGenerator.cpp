@@ -23,6 +23,23 @@
 
 namespace CHTL {
 
+// Helper function to convert kebab-case to camelCase
+std::string toCamelCase(const std::string& s) {
+    std::string result;
+    bool upper = false;
+    for (char c : s) {
+        if (c == '-') {
+            upper = true;
+        } else if (upper) {
+            result += std::toupper(c);
+            upper = false;
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
+
 // --- Helper to generate JS for a reactive attribute ---
 void CHTLGenerator::generateReactiveAttributeJS(ElementNode& node, const std::string& attr_key, Expr* expr) {
     static int reactive_id_counter = 0;
@@ -87,23 +104,6 @@ void CHTLGenerator::generateReactiveStyleJS(ElementNode& node, const std::string
     }
 }
 
-// Helper function to convert kebab-case to camelCase
-std::string toCamelCase(const std::string& s) {
-    std::string result;
-    bool upper = false;
-    for (char c : s) {
-        if (c == '-') {
-            upper = true;
-        } else if (upper) {
-            result += std::toupper(c);
-            upper = false;
-        } else {
-            result += c;
-        }
-    }
-    return result;
-}
-
 // Helper to format doubles cleanly for CSS output
 std::string format_css_double(double val) {
     std::ostringstream oss;
@@ -156,9 +156,10 @@ CompilationResult CHTLGenerator::generate(BaseNode* root, bool use_html5_doctype
     css_output.str("");
     js_output.str("");
     delegate_registry.clear();
+    defined_reactive_vars.clear();
     this->doc_root = root;
     if (root) {
-        root->accept(*this);
+        root->accept(static_cast<Visitor&>(*this));
     }
 
     // Process the delegate registry
@@ -407,7 +408,7 @@ void CHTLGenerator::visit(ElementNode& node) {
                         void visit(ReactiveVarExpr& expr) override { found_vars.insert(expr.name); }
                     };
                     VarFinder finder(reactive_vars_in_cond);
-                    finder.check(ifNode->condition.get());
+                    ifNode->condition->accept(finder);
 
                     js_output << "{\n";
                     js_output << "  const template = document.getElementById('" << template_id << "');\n";

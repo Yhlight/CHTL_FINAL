@@ -20,7 +20,7 @@ void printUsage() {
 // --- CMOD Packaging Logic ---
 void packageCmod(const std::string& dir_path, const std::string& output_file) {
     // 1. Validate structure
-    if (!CHTL::Util::FileSystem::isDirectory(dir_path + "/src") || !CHTL::Util::FileSystem::isDirectory(dir_path + "/info")) {
+    if (!CHTL::FileSystem::isDirectory(dir_path + "/src") || !CHTL::FileSystem::isDirectory(dir_path + "/info")) {
         std::cerr << "Error: CMOD directory must contain 'src' and 'info' subdirectories." << std::endl;
         exit(1);
     }

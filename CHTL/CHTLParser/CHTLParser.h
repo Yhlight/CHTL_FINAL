@@ -9,6 +9,7 @@
 #include "../CHTLNode/IfNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/ConfigNode.h"
+#include "../CHTLNode/OriginNode.h"
 #include "../Config/Configuration.h"
 #include "../Expression/Expr.h"
 #include <vector>

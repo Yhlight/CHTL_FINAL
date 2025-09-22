@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <variant>
 
 namespace CHTL {
 
@@ -38,6 +37,14 @@ namespace CHTL {
         void scanStyleContent(size_t block_end);
         // Specific scanner for script content
         void scanScriptContent(size_t block_end);
+
+        // Helper functions
+        size_t findNextKeyword(const std::string& keyword, size_t start_pos);
+        size_t findMatchingBrace(size_t open_pos);
+        size_t findNextCHTLFeature(size_t start_pos, size_t end_pos, const std::vector<std::string>& features);
+        size_t findNextCHTLJSConstruct(size_t start_pos, size_t end_pos);
+        size_t findEndOfCHTLFeature(size_t start_pos, size_t end_pos);
+        size_t findEndOfCHTLJSConstruct(size_t start_pos, size_t end_pos);
 
         std::vector<CodeFragment> m_fragments;
     };

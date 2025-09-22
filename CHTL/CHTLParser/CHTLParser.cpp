@@ -1,8 +1,8 @@
 #include "CHTLParser.h"
 #include "../CHTLLoader/CHTLLoader.h"
 #include "../CHTLLexer/CHTLLexer.h"
-#include "CHTL/CHTLNode/TextNode.h"
-#include "CHTL/CHTLNode/OriginNode.h"
+#include "../CHTLNode/TextNode.h"
+#include "../CHTLNode/OriginNode.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <stdexcept>
@@ -673,8 +673,7 @@ void CHTLParser::parseImportStatement() {
         if (typeToken.lexeme == "Style") origin_type = OriginType::STYLE;
         else if (typeToken.lexeme == "JavaScript") origin_type = OriginType::JAVASCRIPT;
 
-        auto origin_node = std::make_unique<OriginNode>(imported_content, origin_type);
-        origin_node->name = alias;
+        auto origin_node = std::make_unique<OriginNode>(imported_content, origin_type, alias);
         this->origin_definitions[getCurrentNamespace()][alias] = std::move(origin_node);
 
     } else {

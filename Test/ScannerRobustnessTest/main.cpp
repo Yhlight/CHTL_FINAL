@@ -1,4 +1,5 @@
 #include "../../Scanner/CHTLUnifiedScanner.h"
+#include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <cassert>
 #include <string>
