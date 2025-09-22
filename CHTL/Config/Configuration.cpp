@@ -61,6 +61,9 @@ void Configuration::setDefaultKeywords() {
     keyword_map["KEYWORD_TEXT"] = {"text"};
     keyword_map["KEYWORD_STYLE"] = {"style"};
     keyword_map["KEYWORD_SCRIPT"] = {"script"};
+
+    // CHTL JS Functions that act as keywords for the scanner
+    keyword_map["CHTLJS_FUNCTIONS"] = {"Listen", "Delegate", "Animate", "Router", "Vir", "printMylove", "iNeverAway", "util"};
 }
 
 } // namespace CHTL

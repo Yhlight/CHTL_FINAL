@@ -1,0 +1,22 @@
+use html5;
+
+[Origin] @Html nav_bar
+{
+    <nav>This is raw HTML</nav>
+}
+
+body
+{
+    style {
+        color: red;
+        width: 100px / 2; /* CHTL in style */
+    }
+
+    script {
+        let a = 1;
+        {{&}}->Listen {
+            click: () => { console.log("clicked"); }
+        }
+        console.log('done');
+    }
+}

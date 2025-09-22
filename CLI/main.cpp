@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Compiling " << input_file << "..." << std::endl;
 
-    CHTL::CHTLUnifiedScanner scanner(source);
+    CHTL::CHTLUnifiedScanner scanner(source, config);
     auto fragments = scanner.scan();
 
     CHTL::CompilerDispatcher dispatcher(config, input_file);

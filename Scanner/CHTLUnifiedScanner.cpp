@@ -2,19 +2,40 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <functional>
 
 namespace CHTL {
 
-// List of CHTL JS keywords that signify the start of a CHTL JS block
-const std::vector<std::string> CHTLJS_KEYWORDS = {"Listen", "Delegate", "Animate", "Router", "Vir", "printMylove", "iNeverAway"};
-
-CHTLUnifiedScanner::CHTLUnifiedScanner(const std::string& source)
-    : m_source(source) {}
+CHTLUnifiedScanner::CHTLUnifiedScanner(const std::string& source, std::shared_ptr<Configuration> config)
+    : m_source(source), m_config(config) {}
 
 std::vector<CodeFragment> CHTLUnifiedScanner::scan() {
     m_fragments.clear();
     m_cursor = 0;
     m_placeholder_counter = 0;
+
+    // Handle 'use' statements at the beginning of the file
+    while (m_cursor < m_source.length()) {
+        // Skip leading whitespace
+        while (m_cursor < m_source.length() && std::isspace(m_source[m_cursor])) {
+            m_cursor++;
+        }
+
+        if (m_source.substr(m_cursor, 3) == "use") {
+            size_t line_end = m_source.find(';', m_cursor);
+            if (line_end != std::string::npos) {
+                std::string directive = m_source.substr(m_cursor, line_end - m_cursor + 1);
+                m_fragments.push_back({directive, FragmentType::DIRECTIVE});
+                m_cursor = line_end + 1;
+            } else {
+                // No semicolon found, stop processing directives
+                break;
+            }
+        } else {
+            // Not a 'use' statement, break to main scanning
+            break;
+        }
+    }
 
     while (m_cursor < m_source.length()) {
         scanSource();
@@ -26,11 +47,40 @@ std::vector<CodeFragment> CHTLUnifiedScanner::scan() {
 void CHTLUnifiedScanner::scanSource() {
     size_t last_pos = m_cursor;
 
-    // Look for the next script block
-    size_t script_keyword_pos = m_source.find("script", m_cursor);
+    // Define the block types we're looking for
+    struct BlockType {
+        std::string keyword;
+        size_t position;
+        // Handler now accepts the block header content
+        std::function<void(CHTLUnifiedScanner*, size_t, const std::string&)> handler;
+    };
 
-    if (script_keyword_pos == std::string::npos) {
-        // No more script blocks, the rest is CHTL
+    std::vector<BlockType> block_types;
+    // Populate block_types from configuration
+    for (const auto& keyword : m_config->keyword_map["KEYWORD_SCRIPT"]) {
+        block_types.push_back(BlockType{keyword, std::string::npos, &CHTLUnifiedScanner::scanScriptContent});
+    }
+    for (const auto& keyword : m_config->keyword_map["KEYWORD_STYLE"]) {
+        block_types.push_back(BlockType{keyword, std::string::npos, &CHTLUnifiedScanner::scanStyleContent});
+    }
+    for (const auto& keyword : m_config->keyword_map["KEYWORD_ORIGIN"]) {
+        block_types.push_back(BlockType{keyword, std::string::npos, &CHTLUnifiedScanner::scanOriginContent});
+    }
+
+
+    // Find the earliest occurrence of any block type
+    BlockType* next_block = nullptr;
+    for (auto& type : block_types) {
+        type.position = m_source.find(type.keyword, m_cursor);
+        if (type.position != std::string::npos) {
+            if (next_block == nullptr || type.position < next_block->position) {
+                next_block = &type;
+            }
+        }
+    }
+
+    if (next_block == nullptr) {
+        // No more blocks, the rest is CHTL
         if (last_pos < m_source.length()) {
             m_fragments.push_back({m_source.substr(last_pos), FragmentType::CHTL});
         }
@@ -38,19 +88,27 @@ void CHTLUnifiedScanner::scanSource() {
         return;
     }
 
-    // Found a script keyword. Find its block.
-    size_t opening_brace = m_source.find('{', script_keyword_pos);
+    // Found a keyword. Find its block.
+    size_t opening_brace = m_source.find('{', next_block->position);
     if (opening_brace == std::string::npos) {
-        m_cursor = script_keyword_pos + 1;
+        // Malformed block, skip the keyword and continue
+        m_cursor = next_block->position + next_block->keyword.length();
         return;
     }
 
-    // Add the CHTL part before the script block
-    if (opening_brace > last_pos) {
-        m_fragments.push_back({m_source.substr(last_pos, opening_brace + 1 - last_pos), FragmentType::CHTL});
+    // Add the CHTL part before the block keyword
+    if (next_block->position > last_pos) {
+        m_fragments.push_back({m_source.substr(last_pos, next_block->position - last_pos), FragmentType::CHTL});
     }
 
-    // Find the matching closing brace for the script block
+    // The part from the keyword to the brace is now considered part of the block's definition,
+    // not raw CHTL. We will capture this "header" and pass it to the handler.
+    // We push the keyword and header as a single CHTL fragment for now.
+    m_fragments.push_back({m_source.substr(next_block->position, opening_brace - next_block->position), FragmentType::CHTL});
+    m_fragments.push_back({m_source.substr(opening_brace, 1), FragmentType::CHTL});
+
+
+    // Find the matching closing brace for the block.
     int brace_count = 1;
     size_t block_scan_pos = opening_brace + 1;
     while (block_scan_pos < m_source.length() && brace_count > 0) {
@@ -60,20 +118,63 @@ void CHTLUnifiedScanner::scanSource() {
     }
 
     if (brace_count == 0) {
-        // We found the end of the script block.
-        size_t block_end = block_scan_pos -1;
+        // We found the end of the block.
+        size_t block_end = block_scan_pos - 1;
+
+        // The "header" is the part between the keyword and the opening brace
+        size_t header_start = next_block->position + next_block->keyword.length();
+        std::string header = m_source.substr(header_start, opening_brace - header_start);
+
         m_cursor = opening_brace + 1;
-        scanScriptContent(block_end); // Scan the content for mixed JS and CHTL JS
+
+        // Call the handler for the specific block type, passing the header
+        next_block->handler(this, block_end, header);
+
         m_fragments.push_back({m_source.substr(block_end, 1), FragmentType::CHTL}); // Add the closing brace
         m_cursor = block_end + 1;
     } else {
-        // Unmatched brace, treat the rest as CHTL
+        // Unmatched brace, treat from last_pos to end as CHTL
         m_fragments.push_back({m_source.substr(last_pos), FragmentType::CHTL});
         m_cursor = m_source.length();
     }
 }
 
-void CHTLUnifiedScanner::scanScriptContent(size_t block_end) {
+void CHTLUnifiedScanner::scanStyleContent(size_t block_end, const std::string& header) {
+    if (m_cursor < block_end) {
+        // Style content is treated as CHTL for the CHTL compiler to process.
+        std::string content = m_source.substr(m_cursor, block_end - m_cursor);
+        m_fragments.push_back({content, FragmentType::CHTL});
+        m_cursor = block_end;
+    }
+}
+
+void CHTLUnifiedScanner::scanOriginContent(size_t block_end, const std::string& header) {
+    FragmentType type = FragmentType::UNKNOWN;
+    std::string trimmed_header = header;
+    // Basic trim
+    size_t first = trimmed_header.find_first_not_of(" \t\n\r");
+    if (std::string::npos == first) {
+        trimmed_header = "";
+    }
+    size_t last = trimmed_header.find_last_not_of(" \t\n\r");
+    trimmed_header = trimmed_header.substr(first, (last - first + 1));
+
+    if (trimmed_header.rfind("@Html", 0) == 0) { // check starts with
+        type = FragmentType::HTML;
+    } else if (trimmed_header.rfind("@Style", 0) == 0) {
+        type = FragmentType::CSS;
+    } else if (trimmed_header.rfind("@JavaScript", 0) == 0) {
+        type = FragmentType::JS;
+    }
+
+    if (m_cursor < block_end) {
+        std::string content = m_source.substr(m_cursor, block_end - m_cursor);
+        m_fragments.push_back({content, type});
+        m_cursor = block_end;
+    }
+}
+
+void CHTLUnifiedScanner::scanScriptContent(size_t block_end, const std::string& header) {
     std::string js_buffer;
     std::string chtl_js_buffer;
 
@@ -133,22 +234,33 @@ void CHTLUnifiedScanner::scanScriptContent(size_t block_end) {
         while(m_cursor < block_end && std::isspace(m_source[m_cursor])) m_cursor++;
 
         bool keyword_found = false;
-        for (const auto& keyword : CHTLJS_KEYWORDS) {
-            if (m_source.substr(m_cursor, keyword.length()) == keyword) {
-                m_cursor += keyword.length();
-                while(m_cursor < block_end && std::isspace(m_source[m_cursor])) m_cursor++;
-                if (m_cursor < block_end && m_source[m_cursor] == '{') {
-                    int brace_count = 1;
-                    m_cursor++;
-                    while(m_cursor < block_end && brace_count > 0) {
-                        if (m_source[m_cursor] == '{') brace_count++;
-                        else if (m_source[m_cursor] == '}') brace_count--;
+        if (m_config && m_config->keyword_map.count("CHTLJS_FUNCTIONS")) {
+            for (const auto& keyword : m_config->keyword_map.at("CHTLJS_FUNCTIONS")) {
+                if (m_source.rfind(keyword, m_cursor) == m_cursor) { // check starts with
+                    m_cursor += keyword.length();
+                    while(m_cursor < block_end && std::isspace(m_source[m_cursor])) m_cursor++;
+                    if (m_cursor < block_end && m_source[m_cursor] == '{') {
+                        int brace_count = 1;
                         m_cursor++;
+                        while(m_cursor < block_end && brace_count > 0) {
+                            if (m_source[m_cursor] == '{') brace_count++;
+                            else if (m_source[m_cursor] == '}') brace_count--;
+                            m_cursor++;
+                        }
                     }
+                    keyword_found = true;
+                    break;
                 }
-                keyword_found = true;
-                break;
             }
+        }
+
+        if (!keyword_found) {
+            // If it wasn't a recognized CHTL JS keyword construct, it might be something else.
+            // For now, we just consume the initial part and continue. This part of the
+            // scanner is still basic and needs improvement based on the spec's placeholder mechanism.
+            if (m_source.substr(construct_start, 2) == "{{") m_cursor = construct_start + 2;
+            else if (m_source.substr(construct_start, 3) == "&->") m_cursor = construct_start + 3;
+            else if (m_source.substr(construct_start, 2) == "->") m_cursor = construct_start + 2;
         }
 
         chtl_js_buffer += m_source.substr(construct_start, m_cursor - construct_start);
