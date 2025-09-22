@@ -1,0 +1,8 @@
+html {
+    body {
+        text { "Hello from CHTL!" }
+        div {
+            text { "This is a nested element." }
+        }
+    }
+}
