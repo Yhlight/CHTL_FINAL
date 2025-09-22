@@ -201,15 +201,17 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
     }
     if (match({TokenType::TEXT})) {
         consume(TokenType::LEFT_BRACE, "Expect '{' after 'text'.");
-        Token content;
-        if (match({TokenType::STRING, TokenType::IDENTIFIER, TokenType::SYMBOL})) {
-            content = previous();
-        } else {
-            error(peek(), "Expect string literal or unquoted literal.");
+        // Collect raw content until the matching '}' to support unquoted UTF-8 text
+        std::string collected;
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            Token t = advance();
+            if (t.type == TokenType::END_OF_FILE) break;
+            // STRING tokens already exclude quotes; others keep their lexeme bytes
+            collected += t.lexeme;
         }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after text block.");
         std::vector<std::unique_ptr<BaseNode>> nodes;
-        nodes.push_back(std::make_unique<TextNode>(content.lexeme));
+        nodes.push_back(std::make_unique<TextNode>(collected));
         return nodes;
     }
     if (match({TokenType::STYLE})) {
