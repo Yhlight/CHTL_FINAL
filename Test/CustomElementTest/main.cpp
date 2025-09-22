@@ -27,7 +27,7 @@ int main() {
     auto config = std::make_shared<CHTL::Configuration>();
 
     // 1. Scanner
-    CHTL::CHTLUnifiedScanner scanner(source);
+    CHTL::CHTLUnifiedScanner scanner(source, config);
     auto fragments = scanner.scan();
 
     // 2. Dispatcher
