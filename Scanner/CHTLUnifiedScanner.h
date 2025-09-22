@@ -34,6 +34,8 @@ namespace CHTL {
 
         // Main scanning loop
         void scanSource();
+        // Specific scanner for style content
+        void scanStyleContent(size_t block_end);
         // Specific scanner for script content
         void scanScriptContent(size_t block_end);
 

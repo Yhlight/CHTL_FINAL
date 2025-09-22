@@ -1,0 +1,28 @@
+div {
+    text: "This is outside the style block";
+}
+
+style {
+    body {
+        font-family: "Arial", sans-serif;
+        margin: 0;
+    }
+
+    .container {
+        padding: 10px;
+        border: 1px solid #ccc;
+        width: 100% + 20px; /* CHTL in parent rule */
+        background-color: #f0f0f0;
+    }
+
+    @media (min-width: 600px) {
+        .container {
+            @Style BoxStyle; /* CHTL in nested rule */
+            border-color: #999;
+        }
+    }
+}
+
+p {
+    text: "This is after the style block";
+}
