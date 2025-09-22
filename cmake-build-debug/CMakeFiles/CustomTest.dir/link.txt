@@ -1,0 +1,1 @@
+/usr/bin/c++ -Xlinker --dependency-file=CMakeFiles/CustomTest.dir/link.d CMakeFiles/CustomTest.dir/Test/CustomTest/main.cpp.o -o build/CustomTest  libchtl_lib.a

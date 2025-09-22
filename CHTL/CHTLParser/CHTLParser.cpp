@@ -1,8 +1,8 @@
 #include "CHTLParser.h"
 #include "../CHTLLoader/CHTLLoader.h"
 #include "../CHTLLexer/CHTLLexer.h"
-#include "CHTL/CHTLNode/TextNode.h"
-#include "CHTL/CHTLNode/OriginNode.h"
+#include "../CHTLNode/TextNode.h"
+#include "../CHTLNode/OriginNode.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <stdexcept>
@@ -201,10 +201,17 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
     }
     if (match({TokenType::TEXT})) {
         consume(TokenType::LEFT_BRACE, "Expect '{' after 'text'.");
-        Token content = consume(TokenType::STRING, "Expect string literal.");
+        // Collect raw content until the matching '}' to support unquoted UTF-8 text
+        std::string collected;
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            Token t = advance();
+            if (t.type == TokenType::END_OF_FILE) break;
+            // STRING tokens already exclude quotes; others keep their lexeme bytes
+            collected += t.lexeme;
+        }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after text block.");
         std::vector<std::unique_ptr<BaseNode>> nodes;
-        nodes.push_back(std::make_unique<TextNode>(content.lexeme));
+        nodes.push_back(std::make_unique<TextNode>(collected));
         return nodes;
     }
     if (match({TokenType::STYLE})) {

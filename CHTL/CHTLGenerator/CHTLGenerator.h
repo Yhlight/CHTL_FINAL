@@ -9,6 +9,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <set>
 #include "../Config/Configuration.h"
 
 namespace CHTL {
