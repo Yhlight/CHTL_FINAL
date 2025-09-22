@@ -7,7 +7,6 @@
 #include <string>
 #include <algorithm>
 #include <memory>
-#include <stdexcept>
 
 // Helper function to remove all whitespace from a string for robust comparison
 std::string remove_whitespace(const std::string& str) {
@@ -22,7 +21,7 @@ std::string remove_whitespace(const std::string& str) {
 }
 
 int main() {
-    std::string file_path = "Test/CustomStyleTest/main.chtl";
+    std::string file_path = "Test/StyleTemplateTest/main.chtl";
     std::string source = CHTL::FileSystem::readFile(file_path);
     auto config = std::make_shared<CHTL::Configuration>();
 
@@ -39,24 +38,21 @@ int main() {
 
     std::string html_no_space = remove_whitespace(result.html);
 
-    // Assertions for the <p> tag
-    assert(html_no_space.find("<pstyle=") != std::string::npos);
-    assert(html_no_space.find("border:2pxdottedred;") != std::string::npos);
-    assert(html_no_space.find("padding:10px;") != std::string::npos);
-    assert(html_no_space.find("color:blue;") != std::string::npos);
-    assert(html_no_space.find("font-size:20px;") != std::string::npos);
+    // Test 1: Basic Inheritance
+    std::string expected1 = R"(<buttonid="btn1"style="font-size:16px;padding:10px20px;border:1pxsolidblack;background-color:red;color:white;"></button>)";
+    assert(html_no_space.find(remove_whitespace(expected1)) != std::string::npos);
 
-    // Assertions for the <span> tag
-    assert(html_no_space.find("<spanstyle=") != std::string::npos);
-    assert(html_no_space.find("border:1pxsolidblack;") != std::string::npos);
-    assert(html_no_space.find("padding:10px;") != std::string::npos);
-    assert(html_no_space.find("color:green;") != std::string::npos);
-    assert(html_no_space.find("font-size:10px;") != std::string::npos);
+    // Test 2: Specialization (Override)
+    std::string expected2 = R"(<buttonid="btn2"style="font-size:16px;padding:10px20px;border:1pxsolidblack;background-color:darkred;color:white;"></button>)";
+    assert(html_no_space.find(remove_whitespace(expected2)) != std::string::npos);
 
-    // Check that font-family was correctly deleted and does not appear
-    assert(html_no_space.find("font-family:Arial") == std::string::npos);
+    // Test 3: Specialization (Delete)
+    std::string expected3_present = R"(<buttonid="btn3"style="font-size:16px;padding:10px20px;background-color:red;color:white;border-radius:5px;"></button>)";
+    std::string expected3_absent = "border:1pxsolidblack;";
+    assert(html_no_space.find(remove_whitespace(expected3_present)) != std::string::npos);
+    assert(html_no_space.find(remove_whitespace(expected3_absent)) == std::string::npos);
 
-    std::cout << "CustomStyleTest PASSED!" << std::endl;
+    std::cout << "StyleTemplateTest PASSED!" << std::endl;
 
     return 0;
 }

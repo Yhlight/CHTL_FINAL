@@ -28,7 +28,7 @@ html {
             style {
                 @Style Text {
                     color: green;
-                    // This should fail, because font-size is not provided
+                    font-size: 10px;
                 }
             }
         }

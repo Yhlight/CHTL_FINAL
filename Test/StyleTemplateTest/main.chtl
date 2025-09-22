@@ -1,0 +1,48 @@
+[Template] @Style BaseButton
+{
+    font-size: 16px;
+    padding: "10px 20px";
+    border: "1px solid black";
+}
+
+[Template] @Style RedButton
+{
+    @Style BaseButton;
+    background-color: red;
+    color: white;
+}
+
+[Custom] @Style CustomButton
+{
+    @Style RedButton;
+    border-radius: 5px;
+}
+
+
+body {
+    // Test basic inheritance
+    button {
+        id: "btn1";
+        style { @Style RedButton; }
+    }
+
+    // Test specialization (override)
+    button {
+        id: "btn2";
+        style {
+            @Style RedButton {
+                background-color: darkred;
+            }
+        }
+    }
+
+    // Test specialization (delete)
+    button {
+        id: "btn3";
+        style {
+            @Style CustomButton {
+                delete border;
+            }
+        }
+    }
+}

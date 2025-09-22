@@ -553,9 +553,22 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
     consume(TokenType::LEFT_BRACE, "Expect '{' to start symbol body.");
     if (def.type == TemplateType::STYLE) {
         while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
-            if (check(TokenType::AT) || match({TokenType::INHERIT})) {
-                // TODO: Implement inheritance logic for style templates
-                error(peek(), "Style template inheritance is not yet implemented.");
+            if (match({TokenType::INHERIT})) {
+                // Explicit `inherit @Style Other;`
+                consume(TokenType::AT, "Expect '@' after 'inherit'.");
+                consume(TokenType::IDENTIFIER, "Expect 'Style' keyword.");
+                def.inherited_templates.push_back(consume(TokenType::IDENTIFIER, "Expect template name.").lexeme);
+                consume(TokenType::SEMICOLON, "Expect ';' after inherited template.");
+            } else if (check(TokenType::AT)) {
+                // Implicit `@Style Other;`
+                consume(TokenType::AT, "Expect '@'.");
+                consume(TokenType::IDENTIFIER, "Expect 'Style' keyword.");
+                def.inherited_templates.push_back(consume(TokenType::IDENTIFIER, "Expect template name.").lexeme);
+                consume(TokenType::SEMICOLON, "Expect ';' after inherited template.");
+            }
+            else if (match({TokenType::DELETE})) {
+                def.deleted_properties.push_back(consume(TokenType::IDENTIFIER, "Expect property name to delete.").lexeme);
+                consume(TokenType::SEMICOLON, "Expect ';' after delete statement.");
             } else {
                 std::string key_str;
                 while (peek().type != TokenType::COLON && peek().type != TokenType::SEMICOLON && peek().type != TokenType::COMMA && !isAtEnd()) {
@@ -570,7 +583,11 @@ void CHTLParser::parseSymbolDeclaration(bool is_custom) {
                         raw_value += current_token.lexeme;
                         if (peek().type != TokenType::SEMICOLON) raw_value += " ";
                     }
-                    auto value_expr = std::make_unique<LiteralExpr>(0, raw_value);
+                    // Trim trailing space
+                    if (!raw_value.empty() && raw_value.back() == ' ') {
+                        raw_value.pop_back();
+                    }
+                    auto value_expr = std::make_unique<LiteralExpr>(0, raw_value, true);
                     consume(TokenType::SEMICOLON, "Expect ';' after style property value.");
                     def.style_properties.push_back({key_str, std::move(value_expr)});
                 } else if (is_custom && (match({TokenType::SEMICOLON}) || match({TokenType::COMMA}))) {
@@ -855,7 +872,47 @@ std::unique_ptr<Expr> CHTLParser::parsePower() {
     }
     return expr;
 }
+// Helper to check if the next token is an operator that would end a compound literal
+bool isCompoundLiteralEnd(const Token& token) {
+    switch(token.type) {
+        case TokenType::SEMICOLON:
+        case TokenType::RIGHT_PAREN:
+        case TokenType::RIGHT_BRACE:
+        case TokenType::COMMA:
+        case TokenType::QUESTION:
+        case TokenType::COLON:
+        case TokenType::PLUS:
+        case TokenType::MINUS:
+        case TokenType::STAR:
+        case TokenType::SLASH:
+        case TokenType::EQUAL_EQUAL:
+        case TokenType::BANG_EQUAL:
+        case TokenType::GREATER:
+        case TokenType::GREATER_EQUAL:
+        case TokenType::LESS:
+        case TokenType::LESS_EQUAL:
+        case TokenType::PIPE_PIPE:
+        case TokenType::AMPERSAND_AMPERSAND:
+            return true;
+        default:
+            return false;
+    }
+}
+
 std::unique_ptr<Expr> CHTLParser::parsePrimary() {
+    // Check if the upcoming expression is a compound literal value
+    if ((check(TokenType::NUMBER) || check(TokenType::IDENTIFIER)) && !isCompoundLiteralEnd(tokens[current + 1])) {
+        std::string raw_value;
+        while (!isAtEnd() && !isCompoundLiteralEnd(peek())) {
+            raw_value += advance().lexeme + " ";
+        }
+        if (!raw_value.empty()) { // trim trailing space
+            raw_value.pop_back();
+        }
+        return std::make_unique<LiteralExpr>(0, raw_value, true);
+    }
+
+
     if (match({TokenType::NUMBER})) {
         Token number = previous();
         std::string unit = "";
@@ -885,7 +942,8 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             consume(TokenType::RIGHT_PAREN, "Expect ')'.");
             return std::make_unique<VarExpr>(first_part.lexeme, key_name, std::move(override_expr));
         } else {
-            // It's an undecorated string literal
+            // This case should now only handle single-word self-referencing properties
+            // like `width` in `width > 100px`. The compound literal case is handled above.
             return std::make_unique<LiteralExpr>(0, first_part.lexeme, true);
         }
     }

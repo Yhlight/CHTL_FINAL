@@ -137,7 +137,7 @@ void CHTLLexer::number() {
 }
 
 void CHTLLexer::identifier() {
-    while (isalnum(peek()) || peek() == '_') advance();
+    while (isalnum(peek()) || peek() == '_' || peek() == '-') advance();
     std::string text = source.substr(start, current - start);
     auto it = runtime_keyword_map.find(text);
     addToken(it != runtime_keyword_map.end() ? it->second : TokenType::IDENTIFIER);

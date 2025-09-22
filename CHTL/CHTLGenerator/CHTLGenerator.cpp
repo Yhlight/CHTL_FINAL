@@ -18,8 +18,45 @@
 #include <algorithm>
 #include <map>
 #include <sstream>
+#include <iostream>
 
 namespace CHTL {
+
+// --- Recursive Style Application Helper ---
+void applyStyleTemplate(
+    const std::string& template_name,
+    const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& all_templates,
+    std::map<std::string, AttributeNode>& final_props,
+    std::unordered_set<std::string>& applied_templates
+) {
+    if (applied_templates.count(template_name)) {
+        return; // Avoid circular dependencies
+    }
+    applied_templates.insert(template_name);
+
+    const TemplateDefinitionNode* def = nullptr;
+    for (const auto& ns_pair : all_templates) {
+        if (ns_pair.second.count(template_name)) {
+            def = &ns_pair.second.at(template_name);
+            break;
+        }
+    }
+
+    if (def && def->type == TemplateType::STYLE) {
+        // 1. Recursively apply inherited templates first (base styles)
+        for (const auto& inherited_name : def->inherited_templates) {
+            applyStyleTemplate(inherited_name, all_templates, final_props, applied_templates);
+        }
+        // 2. Apply properties from the current template
+        for (const auto& prop : def->style_properties) {
+            final_props[prop.key] = prop.clone();
+        }
+        // 3. Apply deletions from the current template
+        for (const auto& prop_to_delete : def->deleted_properties) {
+            final_props.erase(prop_to_delete);
+        }
+    }
+}
 
 // Helper function to convert kebab-case to camelCase
 std::string toCamelCase(const std::string& s) {
@@ -184,30 +221,20 @@ void CHTLGenerator::visit(ElementNode& node) {
         else { html_output << " " << attr.key << "=\"" << attr.value << "\""; }
     }
 
+
     // --- Inline Style Generation ---
     std::map<std::string, AttributeNode> final_props;
 
     // 1. Process StyleNode children to populate final_props
     for (const auto& child : node.children) {
         if (StyleNode* styleNode = dynamic_cast<StyleNode*>(child.get())) {
-            // 1.1 Apply all templates first
-            for (const auto& app : styleNode->template_applications) {
-                const TemplateDefinitionNode* def = nullptr;
-                for (const auto& ns_pair : this->templates) {
-                    if (ns_pair.second.count(app.template_name)) {
-                        def = &ns_pair.second.at(app.template_name);
-                        break;
-                    }
-                }
-                if (def && def->type == TemplateType::STYLE) {
-                    for (const auto& prop : def->style_properties) {
-                        final_props[prop.key] = prop.clone();
-                    }
-                }
-            }
 
-            // 1.2 Handle deletions and overrides from all applications
+            // Apply templates sequentially
             for (const auto& app : styleNode->template_applications) {
+                std::unordered_set<std::string> applied_templates;
+                applyStyleTemplate(app.template_name, this->templates, final_props, applied_templates);
+
+                // Handle deletions and overrides for this specific application
                 for (const auto& key_to_delete : app.deleted_properties) {
                     if (key_to_delete.rfind("@Style", 0) != 0) {
                         final_props.erase(key_to_delete);
@@ -218,7 +245,7 @@ void CHTLGenerator::visit(ElementNode& node) {
                 }
             }
 
-            // 1.3 Apply direct properties from the style block
+            // Apply direct properties from the style block at the end (highest precedence)
             for (const auto& prop : styleNode->direct_properties) {
                 final_props[prop.key] = prop.clone();
             }
