@@ -1,0 +1,29 @@
+use html5;
+
+html
+{
+    head
+    {
+        title
+        {
+            text
+            {
+                CHTL测试页面
+            }
+        }
+    }
+
+    body
+    {
+        div
+        {
+            id: main-container;
+            class: container;
+            
+            text
+            {
+                欢迎使用CHTL！
+            }
+        }
+    }
+}

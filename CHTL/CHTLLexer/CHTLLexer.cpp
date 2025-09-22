@@ -77,6 +77,10 @@ void CHTLLexer::scanToken() {
         case '&': addToken(match('&') ? TokenType::AMPERSAND_AMPERSAND : TokenType::AMPERSAND); break;
         case '|': addToken(match('|') ? TokenType::PIPE_PIPE : TokenType::PIPE); break;
         case '$': scanReactiveVar(); break;
+        case '#': 
+            // Handle # comments (generator comments)
+            while (peek() != '\n' && !isAtEnd()) advance();
+            break;
         case ' ': case '\r': case '\t': break;
         case '\n': line++; break;
         case '/':
@@ -138,7 +142,23 @@ void CHTLLexer::number() {
 }
 
 void CHTLLexer::identifier() {
-    while (isalnum(peek()) || peek() == '_') advance();
+    while (isalnum(peek()) || peek() == '_' || peek() == '-' || (peek() & 0x80)) {
+        // For UTF-8 characters, consume all bytes of the character
+        if (peek() & 0x80) {
+            char first_byte = peek();
+            int bytes_to_consume = 0;
+            if ((first_byte & 0xE0) == 0xC0) bytes_to_consume = 2; // 2-byte UTF-8
+            else if ((first_byte & 0xF0) == 0xE0) bytes_to_consume = 3; // 3-byte UTF-8
+            else if ((first_byte & 0xF8) == 0xF0) bytes_to_consume = 4; // 4-byte UTF-8
+            else advance(); // Invalid UTF-8, consume one byte
+            
+            for (int i = 0; i < bytes_to_consume && !isAtEnd(); i++) {
+                advance();
+            }
+        } else {
+            advance();
+        }
+    }
     std::string text = source.substr(start, current - start);
     auto it = runtime_keyword_map.find(text);
     addToken(it != runtime_keyword_map.end() ? it->second : TokenType::IDENTIFIER);

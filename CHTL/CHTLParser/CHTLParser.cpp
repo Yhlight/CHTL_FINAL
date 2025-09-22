@@ -201,7 +201,12 @@ std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
     }
     if (match({TokenType::TEXT})) {
         consume(TokenType::LEFT_BRACE, "Expect '{' after 'text'.");
-        Token content = consume(TokenType::STRING, "Expect string literal.");
+        Token content;
+        if (match({TokenType::STRING, TokenType::IDENTIFIER, TokenType::SYMBOL})) {
+            content = previous();
+        } else {
+            error(peek(), "Expect string literal or unquoted literal.");
+        }
         consume(TokenType::RIGHT_BRACE, "Expect '}' after text block.");
         std::vector<std::unique_ptr<BaseNode>> nodes;
         nodes.push_back(std::make_unique<TextNode>(content.lexeme));

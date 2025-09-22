@@ -1,0 +1,12 @@
+use html5;
+
+html
+{
+    body
+    {
+        div
+        {
+            text: "Hello World";
+        }
+    }
+}
