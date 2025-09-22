@@ -1,0 +1,6 @@
+# Build artifacts
+/build/
+/cmake-build/
+
+# Log files
+*.log

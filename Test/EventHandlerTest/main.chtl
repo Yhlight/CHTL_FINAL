@@ -1,0 +1,35 @@
+body {
+    button {
+        id: "myBtn";
+        text: "Click Me";
+    }
+
+    div {
+        class: "box";
+        text: "Hover over me";
+    }
+
+    span {
+        id: "multi-event-span";
+        text: "Mouse Enter/Leave";
+    }
+
+    script {
+        // Test 1: Listen {} block
+        {{#myBtn}} -> Listen {
+            click: () => {
+                console.log("Button clicked!");
+            }
+        };
+
+        // Test 2: Single event handler operator
+        {{.box}} &-> mouseover: function() {
+            console.log("Box hovered!");
+        };
+
+        // Test 3: Multi-event binding
+        {{#multi-event-span}} &-> mouseenter, mouseleave: (e) => {
+            console.log(`Event ${e.type} on span!`);
+        };
+    }
+}
