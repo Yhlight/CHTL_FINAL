@@ -1,10 +1,12 @@
 #include "ZipUtil.h"
 #include "../FileSystem/FileSystem.h"
-#include "../../miniz.h"
+#include <zip.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <memory>
+#include <filesystem>
+#include <cstring>
 
 namespace CHTL {
 namespace Util {
@@ -28,10 +30,11 @@ bool ZipUtil::packDirectory(const std::string& directory_path, const std::string
     // We pass directory_path as the base_path to make all archived paths relative
     listFilesRecursive(directory_path, files_to_add, directory_path);
 
-    mz_zip_archive zip_archive = {};
-    mz_bool status = mz_zip_writer_init_file(&zip_archive, zip_path.c_str(), 0);
-    if (!status) {
-        std::cerr << "Error: Could not initialize zip archive '" << zip_path << "'." << std::endl;
+    int error = 0;
+    zip_t* zip_archive = zip_open(zip_path.c_str(), ZIP_CREATE | ZIP_TRUNCATE, &error);
+    
+    if (!zip_archive) {
+        std::cerr << "Error: Could not create zip archive '" << zip_path << "'." << std::endl;
         return false;
     }
 
@@ -39,55 +42,64 @@ bool ZipUtil::packDirectory(const std::string& directory_path, const std::string
         std::string full_path = directory_path + "/" + relative_path;
         std::string file_content = FileSystem::readFile(full_path);
         if (!file_content.empty()) {
-            status = mz_zip_writer_add_mem(&zip_archive, relative_path.c_str(), file_content.c_str(), file_content.length(), MZ_DEFAULT_COMPRESSION);
-            if (!status) {
+            zip_source_t* source = zip_source_buffer(zip_archive, file_content.c_str(), file_content.length(), 0);
+            if (!source) {
+                std::cerr << "Error: Could not create zip source for '" << relative_path << "'." << std::endl;
+                zip_close(zip_archive);
+                return false;
+            }
+            
+            if (zip_file_add(zip_archive, relative_path.c_str(), source, ZIP_FL_OVERWRITE) < 0) {
                 std::cerr << "Error: Could not add file '" << relative_path << "' to zip." << std::endl;
-                mz_zip_writer_end(&zip_archive);
+                zip_source_free(source);
+                zip_close(zip_archive);
                 return false;
             }
         }
     }
 
-    mz_zip_writer_finalize_archive(&zip_archive);
-    mz_zip_writer_end(&zip_archive);
+    zip_close(zip_archive);
     return true;
 }
 
 
 // --- unpackToMemory Implementation ---
 std::map<std::string, std::string> ZipUtil::unpackToMemory(const std::string& zip_path) {
-    std::map<std::string, std::string> file_contents;
-    mz_zip_archive zip_archive = {};
-
-    mz_bool status = mz_zip_reader_init_file(&zip_archive, zip_path.c_str(), 0);
-    if (!status) {
+    std::map<std::string, std::string> result;
+    
+    int error = 0;
+    zip_t* zip_archive = zip_open(zip_path.c_str(), ZIP_RDONLY, &error);
+    
+    if (!zip_archive) {
         std::cerr << "Error: Could not open zip archive '" << zip_path << "'." << std::endl;
-        return file_contents;
+        return result;
     }
 
-    int file_count = mz_zip_reader_get_num_files(&zip_archive);
-    for (int i = 0; i < file_count; ++i) {
-        mz_zip_archive_file_stat file_stat;
-        if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat)) {
-            continue;
-        }
-
-        if (mz_zip_reader_is_file_a_directory(&zip_archive, i)) {
-            continue; // Skip directories
-        }
-
-        size_t uncompressed_size = file_stat.m_uncomp_size;
-        std::unique_ptr<char[]> buffer(new char[uncompressed_size]);
-
-        if (mz_zip_reader_extract_to_mem(&zip_archive, i, buffer.get(), uncompressed_size, 0)) {
-            file_contents[file_stat.m_filename] = std::string(buffer.get(), uncompressed_size);
+    zip_int64_t num_entries = zip_get_num_entries(zip_archive, 0);
+    
+    for (zip_int64_t i = 0; i < num_entries; i++) {
+        zip_stat_t stat;
+        if (zip_stat_index(zip_archive, i, 0, &stat) == 0) {
+            // Skip directories
+            if (stat.name[strlen(stat.name) - 1] == '/') {
+                continue;
+            }
+            
+            zip_file_t* file = zip_fopen_index(zip_archive, i, 0);
+            if (file) {
+                std::vector<char> buffer(stat.size);
+                zip_int64_t bytes_read = zip_fread(file, buffer.data(), stat.size);
+                if (bytes_read == stat.size) {
+                    result[stat.name] = std::string(buffer.data(), buffer.size());
+                }
+                zip_fclose(file);
+            }
         }
     }
-
-    mz_zip_reader_end(&zip_archive);
-    return file_contents;
+    
+    zip_close(zip_archive);
+    return result;
 }
-
 
 } // namespace Util
 } // namespace CHTL

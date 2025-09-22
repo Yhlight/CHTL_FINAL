@@ -23,13 +23,24 @@ file(GLOB_RECURSE CHTL_SOURCES
 )
 
 # Add miniz.c explicitly since it's a C file in the root directory
-list(APPEND CHTL_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/miniz.c")
+# list(APPEND CHTL_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/miniz.c")
 
 # Create a static library from the source files
 add_library(chtl_lib STATIC ${CHTL_SOURCES})
+target_include_directories(chtl_lib PRIVATE ${LIBZIP_INCLUDE_DIRS})
+target_link_libraries(chtl_lib PRIVATE ${LIBZIP_LIBRARIES})
 
 # Add compile definitions for miniz
 # Don't define MINIZ_NO_ARCHIVE_APIS to enable ZIP archive APIs
+
+# Find and link libzip
+set(CMAKE_PREFIX_PATH "/workspace/libzip-install" ${CMAKE_PREFIX_PATH})
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBZIP REQUIRED libzip)
+
+# Add libzip include directories
+include_directories(${LIBZIP_INCLUDE_DIRS})
+link_directories(${LIBZIP_LIBRARY_DIRS})
 
 # --- Define the Main CLI Executable ---
 add_executable(chtl CLI/main.cpp)
