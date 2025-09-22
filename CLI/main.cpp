@@ -70,7 +70,30 @@ int main(int argc, char* argv[]) {
     }
 
     auto config = std::make_shared<CHTL::Configuration>();
-    // TODO: Load configuration from a file if specified
+
+    // Pre-scan for a configuration block and parse it.
+    const std::string config_keyword = "[Configuration]";
+    size_t config_pos = source.find(config_keyword);
+    if (config_pos != std::string::npos) {
+        size_t opening_brace = source.find('{', config_pos);
+        if (opening_brace != std::string::npos) {
+            int brace_count = 1;
+            size_t closing_brace = opening_brace + 1;
+            while(closing_brace < source.length() && brace_count > 0) {
+                if (source[closing_brace] == '{') brace_count++;
+                else if (source[closing_brace] == '}') brace_count--;
+                closing_brace++;
+            }
+            if (brace_count == 0) {
+                std::string config_content = source.substr(opening_brace + 1, closing_brace - opening_brace - 2);
+                config->parseFromString(config_content);
+                std::cout << "Custom configuration loaded." << std::endl;
+                // We should also remove the configuration block from the source
+                // so the main parser doesn't see it.
+                source.erase(config_pos, closing_brace - config_pos);
+            }
+        }
+    }
 
     std::cout << "Compiling " << input_file << "..." << std::endl;
 

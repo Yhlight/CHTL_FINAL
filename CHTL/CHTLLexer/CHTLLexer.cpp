@@ -76,6 +76,7 @@ void CHTLLexer::scanToken() {
         case '>': addToken(match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER); break;
         case '&': addToken(match('&') ? TokenType::AMPERSAND_AMPERSAND : TokenType::AMPERSAND); break;
         case '|': addToken(match('|') ? TokenType::PIPE_PIPE : TokenType::PIPE); break;
+        case '$': scanReactiveVar(); break;
         case ' ': case '\r': case '\t': break;
         case '\n': line++; break;
         case '/':
@@ -141,6 +142,26 @@ void CHTLLexer::identifier() {
     std::string text = source.substr(start, current - start);
     auto it = runtime_keyword_map.find(text);
     addToken(it != runtime_keyword_map.end() ? it->second : TokenType::IDENTIFIER);
+}
+
+void CHTLLexer::scanReactiveVar() {
+    // Assumes the first '$' has already been consumed by advance()
+    while (peek() != '$' && !isAtEnd()) {
+        if (peek() == '\n') line++; // Allow multi-line, though unlikely
+        advance();
+    }
+
+    if (isAtEnd()) {
+        // Unterminated reactive variable
+        return;
+    }
+
+    // Consume the closing '$'
+    advance();
+
+    // Extract the variable name (without the enclosing '$')
+    std::string value = source.substr(start + 1, current - start - 2);
+    addToken(TokenType::REACTIVE_VAR, value);
 }
 
 } // namespace CHTL

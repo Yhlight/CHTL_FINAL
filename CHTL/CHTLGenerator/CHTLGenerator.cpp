@@ -14,12 +14,78 @@
 #include "../../CHTL JS/CHTLJSNode/DelegateNode.h"
 #include "../../CHTL JS/CHTLJSNode/AnimateNode.h"
 #include "../Expression/ExpressionEvaluator.h"
+#include "../Expression/ExprVisitors.h"
+#include "../Expression/JSExprGenerator.h"
 #include <unordered_set>
 #include <algorithm>
 #include <map>
 #include <sstream>
 
 namespace CHTL {
+
+// --- Helper to generate JS for a reactive attribute ---
+void CHTLGenerator::generateReactiveAttributeJS(ElementNode& node, const std::string& attr_key, Expr* expr) {
+    static int reactive_id_counter = 0;
+    std::string element_id;
+    for(const auto& attr : node.attributes) { if (attr.key == "id") { element_id = attr.value; break; } }
+    if (element_id.empty()) {
+        element_id = "chtl-reactive-" + std::to_string(reactive_id_counter++);
+        node.addAttribute({"id", element_id});
+    }
+
+    if (auto* rv = dynamic_cast<ReactiveVarExpr*>(expr)) {
+        std::string var_name = rv->name;
+        if (defined_reactive_vars.find(var_name) == defined_reactive_vars.end()) {
+            js_output << "{\n";
+            js_output << "  let value = '';\n";
+            js_output << "  const subscribers = new Map();\n";
+            js_output << "  Object.defineProperty(window, '" << var_name << "', {\n";
+            js_output << "    get() { return value; },\n";
+            js_output << "    set(newValue) { value = newValue; subscribers.forEach(cb => cb(newValue)); },\n";
+            js_output << "    configurable: true\n";
+            js_output << "  });\n";
+            js_output << "  window.subscribe_" << var_name << " = (id, cb) => { subscribers.set(id, cb); };\n";
+            js_output << "}\n";
+            defined_reactive_vars.insert(var_name);
+        }
+        js_output << "window.subscribe_" << var_name << "('" << element_id << "_" << attr_key << "', (newValue) => {\n";
+        js_output << "  const el = document.getElementById('" << element_id << "');\n";
+        js_output << "  if (el) el.setAttribute('" << attr_key << "', newValue);\n";
+        js_output << "});\n";
+    }
+}
+
+// --- Helper to generate JS for a reactive style property ---
+void CHTLGenerator::generateReactiveStyleJS(ElementNode& node, const std::string& style_property, Expr* expr) {
+    static int reactive_id_counter = 0;
+    std::string element_id;
+    for(const auto& attr : node.attributes) { if (attr.key == "id") { element_id = attr.value; break; } }
+    if (element_id.empty()) {
+        element_id = "chtl-reactive-" + std::to_string(reactive_id_counter++);
+        node.addAttribute({"id", element_id});
+    }
+
+    if (auto* rv = dynamic_cast<ReactiveVarExpr*>(expr)) {
+        std::string var_name = rv->name;
+        if (defined_reactive_vars.find(var_name) == defined_reactive_vars.end()) {
+            js_output << "{\n";
+            js_output << "  let value = '';\n";
+            js_output << "  const subscribers = new Map();\n";
+            js_output << "  Object.defineProperty(window, '" << var_name << "', {\n";
+            js_output << "    get() { return value; },\n";
+            js_output << "    set(newValue) { value = newValue; subscribers.forEach(cb => cb(newValue)); },\n";
+            js_output << "    configurable: true\n";
+            js_output << "  });\n";
+            js_output << "  window.subscribe_" << var_name << " = (id, cb) => { subscribers.set(id, cb); };\n";
+            js_output << "}\n";
+            defined_reactive_vars.insert(var_name);
+        }
+        js_output << "window.subscribe_" << var_name << "('" << element_id << "_" << style_property << "', (newValue) => {\n";
+        js_output << "  const el = document.getElementById('" << element_id << "');\n";
+        js_output << "  if (el) el.style." << toCamelCase(style_property) << " = newValue;\n";
+        js_output << "});\n";
+    }
+}
 
 // Helper function to convert kebab-case to camelCase
 std::string toCamelCase(const std::string& s) {
@@ -179,9 +245,26 @@ void CHTLGenerator::visit(ElementNode& node) {
     // --- HTML Tag Generation ---
     html_output << "<" << node.tagName;
     std::string text_content;
+
+    // --- Process Attributes (including reactive ones) ---
     for (const auto& attr : node.attributes) {
-        if (attr.key == "text") { text_content = attr.value; }
-        else { html_output << " " << attr.key << "=\"" << attr.value << "\""; }
+        if (attr.key == "text") {
+            text_content = attr.value;
+        } else if (attr.value_expr) {
+             ReactivityChecker checker;
+             if (checker.check(attr.value_expr.get())) {
+                generateReactiveAttributeJS(node, attr.key, attr.value_expr.get());
+                html_output << " " << attr.key << "=\"\""; // Set initial empty value
+             } else {
+                // Statically evaluate the attribute expression
+                ExpressionEvaluator evaluator(this->templates, this->doc_root);
+                EvaluatedValue result = evaluator.evaluate(attr.value_expr.get(), &node);
+                html_output << " " << attr.key << "=\"" << (result.type == ValueType::STRING ? result.unit : format_css_double(result.value)) << "\"";
+             }
+        } else {
+            // Simple static attribute
+            html_output << " " << attr.key << "=\"" << attr.value << "\"";
+        }
     }
 
     // --- Inline Style Generation ---
@@ -225,69 +308,20 @@ void CHTLGenerator::visit(ElementNode& node) {
         }
     }
 
-    // 2. Process IfNode children
+    // This helper is needed to interpret the result of the expression evaluator.
+    auto isTruthy = [](const EvaluatedValue& val) {
+        if (val.type == ValueType::STRING) return !val.unit.empty();
+        return val.value != 0;
+    };
+
+    // 2. Process IfNode children for conditional properties
     for (const auto& child : node.children) {
         if (IfNode* ifNode = dynamic_cast<IfNode*>(child.get())) {
-            bool is_dynamic = false;
-            if (auto* comp = dynamic_cast<ComparisonExpr*>(ifNode->condition.get())) {
-                if (dynamic_cast<DynamicReferenceExpr*>(comp->left.get()) || dynamic_cast<DynamicReferenceExpr*>(comp->right.get())) {
-                    is_dynamic = true;
-                }
-            }
-
-            if (is_dynamic) {
-                static int dynamic_if_counter = 0;
-                ComparisonExpr* comp = dynamic_cast<ComparisonExpr*>(ifNode->condition.get());
-                DynamicReferenceExpr* dyn_ref = dynamic_cast<DynamicReferenceExpr*>(comp->left.get());
-                LiteralExpr* literal = dynamic_cast<LiteralExpr*>(comp->right.get());
-
-                if (!dyn_ref) {
-                    dyn_ref = dynamic_cast<DynamicReferenceExpr*>(comp->right.get());
-                    literal = dynamic_cast<LiteralExpr*>(comp->left.get());
-                }
-
-                if (dyn_ref && literal) {
-                    std::string parent_id;
-                    for (const auto& attr : node.attributes) {
-                        if (attr.key == "id") {
-                            parent_id = attr.value;
-                            break;
-                        }
-                    }
-                    if (parent_id.empty()) {
-                        parent_id = "chtl-dyn-if-parent-" + std::to_string(dynamic_if_counter++);
-                        node.addAttribute({"id", parent_id});
-                    }
-
-                    std::string style_key_to_toggle;
-                    std::string style_value_to_toggle;
-                    if (!ifNode->body.empty()) {
-                        const auto& prop = ifNode->body[0];
-                        style_key_to_toggle = prop.key;
-                        if (auto* val_literal = dynamic_cast<LiteralExpr*>(prop.value_expr.get())) {
-                            style_value_to_toggle = val_literal->unit;
-                        }
-                    }
-
-                    if (!style_key_to_toggle.empty()) {
-                        js_output << "{\n";
-                        js_output << "  const parentEl = document.getElementById('" << parent_id << "');\n";
-                        js_output << "  const sourceEl = document.querySelector('" << dyn_ref->selector << "');\n";
-                        js_output << "  const observer = new MutationObserver(() => {\n";
-                        js_output << "    const sourceValue = parseFloat(window.getComputedStyle(sourceEl)." << dyn_ref->property << ");\n";
-                        js_output << "    const condition = sourceValue " << comp->op.lexeme << " " << literal->value << ";\n";
-                        js_output << "    parentEl.style." << toCamelCase(style_key_to_toggle) << " = condition ? '" << style_value_to_toggle << "' : '';\n";
-                        js_output << "  });\n";
-                        js_output << "  observer.observe(sourceEl, { attributes: true, subtree: true });\n";
-                        js_output << "  if (sourceEl) { observer.takeRecords(); var initialCheck = () => { const sourceValue = parseFloat(window.getComputedStyle(sourceEl)." << dyn_ref->property << "); const condition = sourceValue " << comp->op.lexeme << " " << literal->value << "; parentEl.style." << toCamelCase(style_key_to_toggle) << " = condition ? '" << style_value_to_toggle << "' : ''; }; initialCheck(); }\n";
-                        js_output << "}\n";
-                    }
-                }
-            } else {
+            // We only process conditional properties here. Conditional rendering is handled later.
+            if (!ifNode->properties.empty()) {
                 ExpressionEvaluator evaluator(this->templates, this->doc_root);
-                EvaluatedValue result = evaluator.evaluate(ifNode->condition.get(), &node);
-                if (result.value != 0) {
-                    for (const auto& prop : ifNode->body) {
+                if (isTruthy(evaluator.evaluate(ifNode->condition.get(), &node))) {
+                    for (const auto& prop : ifNode->properties) {
                         final_props[prop.key] = prop.clone();
                     }
                 }
@@ -297,28 +331,26 @@ void CHTLGenerator::visit(ElementNode& node) {
 
     // 3. Generate CSS from the final property map
     std::string style_str;
-    int dynamic_id_counter = 0;
     for (auto const& [key, attr_node] : final_props) {
         if (attr_node.value_expr == nullptr) {
              throw std::runtime_error("Valueless property '" + key + "' was not provided a value.");
         }
-        try {
-            ExpressionEvaluator evaluator(this->templates, this->doc_root);
-            EvaluatedValue result = evaluator.evaluate(attr_node.value_expr.get(), &node);
-            if (result.type == ValueType::STRING) {
-                style_str += key + ": " + result.unit + ";";
-            } else {
-                style_str += key + ": " + format_css_double(result.value) + result.unit + ";";
-            }
-        } catch (const std::runtime_error& e) {
-            if (ConditionalExpr* cond = dynamic_cast<ConditionalExpr*>(attr_node.value_expr.get())) {
-                if (ComparisonExpr* comp = dynamic_cast<ComparisonExpr*>(cond->condition.get())) {
-                    if (DynamicReferenceExpr* dyn_ref = dynamic_cast<DynamicReferenceExpr*>(comp->left.get())) {
-                        std::string target_id = "chtl-dyn-" + std::to_string(dynamic_id_counter++);
-                        node.addAttribute({"id", target_id});
-                        js_output << generateDynamicJS(target_id, key, dyn_ref->selector, dyn_ref->property, ">", "2", "100px", "50px");
-                    }
+
+        ReactivityChecker checker;
+        if (checker.check(attr_node.value_expr.get())) {
+            generateReactiveStyleJS(node, key, attr_node.value_expr.get());
+        } else {
+            try {
+                ExpressionEvaluator evaluator(this->templates, this->doc_root);
+                EvaluatedValue result = evaluator.evaluate(attr_node.value_expr.get(), &node);
+                if (result.type == ValueType::STRING) {
+                    style_str += key + ": " + result.unit + ";";
+                } else {
+                    style_str += key + ": " + format_css_double(result.value) + result.unit + ";";
                 }
+            } catch (const std::runtime_error& e) {
+                // Static evaluation failed, this could be a dynamic expression we don't fully support yet.
+                // For now, we silently ignore the error.
             }
         }
     }
@@ -329,9 +361,104 @@ void CHTLGenerator::visit(ElementNode& node) {
     if (voidElements.count(node.tagName)) { html_output << ">"; return; }
     html_output << ">";
     if (!text_content.empty()) { html_output << text_content; }
+
+    // --- Child Node Rendering ---
     for (const auto& child : node.children) {
-        if (dynamic_cast<StyleNode*>(child.get())) continue;
-        child->accept(*this);
+        if (dynamic_cast<StyleNode*>(child.get())) {
+            continue; // Already processed
+        }
+
+        if (IfNode* ifNode = dynamic_cast<IfNode*>(child.get())) {
+            // This is an 'if' for conditional rendering
+            if (!ifNode->children.empty()) {
+                ReactivityChecker checker;
+                if (checker.check(ifNode->condition.get())) {
+                    // --- DYNAMIC/REACTIVE CONDITIONAL RENDERING ---
+                    static int template_id_counter = 0;
+                    std::string template_id = "chtl-if-template-" + std::to_string(template_id_counter++);
+                    std::string anchor_id = "chtl-if-anchor-" + std::to_string(template_id_counter++);
+
+                    // Render the content inside a <template> tag
+                    html_output << "<template id=\"" << template_id << "\">";
+                    for (const auto& if_child : ifNode->children) {
+                        if_child->accept(*this);
+                    }
+                    html_output << "</template>";
+                    // Add a script anchor so we know where to insert the content
+                    html_output << "<script type=\"text/chtl-anchor\" id=\"" << anchor_id << "\"></script>";
+
+                    JSExprGenerator js_gen;
+                    std::string js_condition = js_gen.generate(ifNode->condition.get());
+
+                    // Find all reactive vars used in the condition
+                    std::set<std::string> reactive_vars_in_cond;
+                    class VarFinder : public ExprVisitor {
+                    public:
+                        std::set<std::string>& found_vars;
+                        VarFinder(std::set<std::string>& vars) : found_vars(vars) {}
+                        void visit(BinaryExpr& expr) override { expr.left->accept(*this); expr.right->accept(*this); }
+                        void visit(LiteralExpr& expr) override {}
+                        void visit(VarExpr& expr) override {}
+                        void visit(ReferenceExpr& expr) override {}
+                        void visit(ComparisonExpr& expr) override { expr.left->accept(*this); expr.right->accept(*this); }
+                        void visit(LogicalExpr& expr) override { expr.left->accept(*this); expr.right->accept(*this); }
+                        void visit(ConditionalExpr& expr) override { expr.condition->accept(*this); expr.then_branch->accept(*this); expr.else_branch->accept(*this); }
+                        void visit(DynamicReferenceExpr& expr) override {}
+                        void visit(ReactiveVarExpr& expr) override { found_vars.insert(expr.name); }
+                    };
+                    VarFinder finder(reactive_vars_in_cond);
+                    finder.check(ifNode->condition.get());
+
+                    js_output << "{\n";
+                    js_output << "  const template = document.getElementById('" << template_id << "');\n";
+                    js_output << "  const anchor = document.getElementById('" << anchor_id << "');\n";
+                    js_output << "  let is_rendered = false;\n";
+                    js_output << "  const updateDOM = () => {\n";
+                    js_output << "    const condition = " << js_condition << ";\n";
+                    js_output << "    if (condition && !is_rendered) {\n";
+                    js_output << "      const content = template.content.cloneNode(true);\n";
+                    js_output << "      anchor.parentNode.insertBefore(content, anchor.nextSibling);\n";
+                    js_output << "      is_rendered = true;\n";
+                    js_output << "    } else if (!condition && is_rendered) {\n";
+                    js_output << "      let next = anchor.nextSibling;\n";
+                    js_output << "      while(next && next.nodeName !== 'SCRIPT') { const to_remove = next; next = next.nextSibling; to_remove.remove(); }\n";
+                    js_output << "      is_rendered = false;\n";
+                    js_output << "    }\n";
+                    js_output << "  };\n";
+
+                    for (const auto& var_name : reactive_vars_in_cond) {
+                        // Ensure the reactive var is defined
+                        if (defined_reactive_vars.find(var_name) == defined_reactive_vars.end()) {
+                            js_output << "  let value = '';\n";
+                            js_output << "  const subscribers = new Map();\n";
+                            js_output << "  Object.defineProperty(window, '" << var_name << "', {\n";
+                            js_output << "    get() { return value; },\n";
+                            js_output << "    set(newValue) { value = newValue; subscribers.forEach(cb => cb(newValue)); },\n";
+                            js_output << "    configurable: true\n";
+                            js_output << "  });\n";
+                            js_output << "  window.subscribe_" << var_name << " = (id, cb) => { subscribers.set(id, cb); };\n";
+                            defined_reactive_vars.insert(var_name);
+                        }
+                        js_output << "  window.subscribe_" << var_name << "('if_" << anchor_id << "', updateDOM);\n";
+                    }
+                    js_output << "  updateDOM(); // Initial check\n";
+                    js_output << "}\n";
+
+                } else {
+                    // --- STATIC CONDITIONAL RENDERING ---
+                    ExpressionEvaluator evaluator(this->templates, this->doc_root);
+                    if (isTruthy(evaluator.evaluate(ifNode->condition.get(), &node))) {
+                        for (const auto& if_child : ifNode->children) {
+                            if_child->accept(*this);
+                        }
+                    }
+                }
+            }
+            // 'if' for properties was handled above, so we do nothing here for that case.
+        } else {
+            // It's a regular node
+            child->accept(*this);
+        }
     }
     html_output << "</" << node.tagName << ">";
 }

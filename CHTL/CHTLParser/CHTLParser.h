@@ -24,6 +24,8 @@ public:
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getTemplateDefinitions() const;
     std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& getMutableTemplateDefinitions();
     bool getUseHtml5Doctype() const;
+    // Map: Namespace -> {OriginName -> Node}
+    std::map<std::string, std::map<std::string, std::unique_ptr<OriginNode>>> origin_definitions;
 
 private:
     std::shared_ptr<Configuration> config;
@@ -71,6 +73,7 @@ private:
     void parseImportStatement();
     void parseStyleTemplateUsage(StyleNode* styleNode);
     std::vector<std::unique_ptr<BaseNode>> parseElementTemplateUsage();
+    std::vector<std::unique_ptr<BaseNode>> parseNamedOriginUsage();
 };
 
 } // namespace CHTL

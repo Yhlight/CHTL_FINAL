@@ -34,6 +34,7 @@ enum class TokenType {
     IDENTIFIER,
     STRING,
     NUMBER,
+    REACTIVE_VAR, // $var$
 
     // Keywords
     STYLE,

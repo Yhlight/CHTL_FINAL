@@ -17,6 +17,7 @@ class ComparisonExpr;
 class LogicalExpr;
 class ConditionalExpr;
 class DynamicReferenceExpr;
+struct ReactiveVarExpr;
 
 class ExprVisitor {
 public:
@@ -121,6 +122,15 @@ public:
     std::unique_ptr<Expr> clone() const override;
     std::string selector;
     std::string property;
+};
+
+struct ReactiveVarExpr : public Expr {
+    ReactiveVarExpr(const std::string& name) : name(name) {}
+    void accept(ExprVisitor& visitor) override { visitor.visit(*this); }
+    std::unique_ptr<Expr> clone() const override {
+        return std::make_unique<ReactiveVarExpr>(name);
+    }
+    std::string name;
 };
 
 } // namespace CHTL

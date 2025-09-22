@@ -35,6 +35,7 @@ public:
     void visit(LogicalExpr& expr) override;
     void visit(ConditionalExpr& expr) override;
     void visit(DynamicReferenceExpr& expr) override;
+    void visit(ReactiveVarExpr& expr) override;
 
 private:
     ElementNode* findElement(BaseNode* context, const std::string& selector);

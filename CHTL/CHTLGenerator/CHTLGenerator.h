@@ -32,6 +32,9 @@ public:
     void visit(IfNode& node) override;
 
 private:
+    void generateReactiveStyleJS(ElementNode& node, const std::string& style_property, Expr* expr);
+    void generateReactiveAttributeJS(ElementNode& node, const std::string& attr_key, Expr* expr);
+
     std::shared_ptr<Configuration> config;
     std::stringstream html_output;
     std::stringstream css_output;
@@ -39,6 +42,7 @@ private:
     const std::map<std::string, std::map<std::string, TemplateDefinitionNode>>& templates;
     BaseNode* doc_root = nullptr;
     std::map<std::string, std::vector<CHTL_JS::DelegateNode>> delegate_registry;
+    std::set<std::string> defined_reactive_vars;
 };
 
 } // namespace CHTL

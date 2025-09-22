@@ -11,8 +11,11 @@ std::unique_ptr<BaseNode> IfNode::clone() const {
     if (condition) {
         new_node->condition = condition->clone();
     }
-    for (const auto& attr : body) {
-        new_node->body.push_back(attr.clone());
+    for (const auto& child : children) {
+        new_node->children.push_back(child->clone());
+    }
+    for (const auto& prop : properties) {
+        new_node->properties.push_back(prop.clone());
     }
     return new_node;
 }

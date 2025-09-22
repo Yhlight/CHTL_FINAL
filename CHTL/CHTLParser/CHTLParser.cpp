@@ -183,9 +183,21 @@ void CHTLParser::parseNamespaceStatement() {
 std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseDeclaration() {
     if (check(TokenType::AT)) return parseElementTemplateUsage();
     if (peek().type == TokenType::LEFT_BRACKET && tokens.size() > current + 1 && tokens[current + 1].lexeme == "Origin") {
-        std::vector<std::unique_ptr<BaseNode>> nodes;
-        nodes.push_back(parseOriginBlock());
-        return nodes;
+        // This could be an inline block OR a usage of a named origin block
+        // We can peek ahead to see if there's a '{' or a ';'
+        int lookahead = current + 2;
+        while(lookahead < tokens.size() && tokens[lookahead].type != TokenType::LEFT_BRACE && tokens[lookahead].type != TokenType::SEMICOLON) {
+            lookahead++;
+        }
+        if (lookahead < tokens.size() && tokens[lookahead].type == TokenType::SEMICOLON) {
+            // It's a usage, not an inline block
+            return parseNamedOriginUsage();
+        } else {
+            // It's an inline block
+            std::vector<std::unique_ptr<BaseNode>> nodes;
+            nodes.push_back(parseOriginBlock());
+            return nodes;
+        }
     }
     if (match({TokenType::TEXT})) {
         consume(TokenType::LEFT_BRACE, "Expect '{' after 'text'.");
@@ -624,17 +636,21 @@ void CHTLParser::parseImportStatement() {
     }
 
     consume(TokenType::AT, "Expect '@'.");
-    Token typeToken = consume(TokenType::IDENTIFIER, "Expect import type (Element, Style, Var, Chtl).");
+    Token typeToken = consume(TokenType::IDENTIFIER, "Expect import type (Element, Style, Var, Chtl, Html, JavaScript).");
 
-    if (typeToken.lexeme == "Element") import_item_type = TemplateType::ELEMENT;
-    else if (typeToken.lexeme == "Style") import_item_type = TemplateType::STYLE;
-    else if (typeToken.lexeme == "Var") import_item_type = TemplateType::VAR;
-    else if (typeToken.lexeme != "Chtl") error(typeToken, "Unknown import type.");
+    bool is_asset_import = (typeToken.lexeme == "Html" || typeToken.lexeme == "Style" || typeToken.lexeme == "JavaScript");
 
-    // If not a full CHTL import, we might have a specific item name
-    if (typeToken.lexeme != "Chtl") {
-        if (check(TokenType::IDENTIFIER)) {
-            import_item_name = advance().lexeme; // This is a precise import
+    if (!is_asset_import) {
+        if (typeToken.lexeme == "Element") import_item_type = TemplateType::ELEMENT;
+        else if (typeToken.lexeme == "Style") import_item_type = TemplateType::STYLE;
+        else if (typeToken.lexeme == "Var") import_item_type = TemplateType::VAR;
+        else if (typeToken.lexeme != "Chtl") error(typeToken, "Unknown import type.");
+
+        // If not a full CHTL import, we might have a specific item name
+        if (typeToken.lexeme != "Chtl") {
+            if (check(TokenType::IDENTIFIER)) {
+                import_item_name = advance().lexeme; // This is a precise import
+            }
         }
     }
 
@@ -648,44 +664,59 @@ void CHTLParser::parseImportStatement() {
     consume(TokenType::SEMICOLON, "Expect ';' after import statement.");
 
     // --- Execute Import ---
-    std::string imported_content = CHTLLoader::load(this->file_path, pathToken.lexeme);
-    std::string imported_path = FileSystem::getDirectory(this->file_path) + pathToken.lexeme;
-    CHTLLexer sub_lexer(imported_content, this->config);
-    std::vector<Token> sub_tokens = sub_lexer.scanTokens();
-    // Create a temporary parser just to analyze the file's definitions
-    CHTLParser sub_parser(imported_content, sub_tokens, imported_path, this->config);
-    sub_parser.parse();
-    auto& imported_template_map = sub_parser.getMutableTemplateDefinitions();
-
-    std::string source_namespace = getFilename(pathToken.lexeme);
-    if (!imported_template_map.count(source_namespace)) return; // Nothing to import
-
-    auto& source_definitions = imported_template_map.at(source_namespace);
-
-    // --- Logic for selective import ---
-    if (!import_item_name.empty()) { // Precise import
-        if (source_definitions.count(import_item_name)) {
-            TemplateDefinitionNode& def_to_import = source_definitions.at(import_item_name);
-            // Check if types match
-            bool type_match = (is_custom_import && def_to_import.is_custom) || (is_template_import && !def_to_import.is_custom);
-            if (type_match && def_to_import.type == import_item_type) {
-                std::string final_name = alias.empty() ? import_item_name : alias;
-                this->template_definitions[getCurrentNamespace()][final_name] = std::move(def_to_import);
-            } else {
-                error(pathToken, "Imported item '" + import_item_name + "' does not match specified type.");
-            }
-        } else {
-            error(pathToken, "Item '" + import_item_name + "' not found in module '" + pathToken.lexeme + "'.");
+    if (is_asset_import) {
+        if (alias.empty()) {
+            error(pathToken, "Asset imports (@Html, @Style, @JavaScript) require an 'as' alias.");
         }
-    } else if (typeToken.lexeme != "Chtl") { // Type/Wildcard Import
-         for (auto& [name, def] : source_definitions) {
-            bool type_match = (is_custom_import && def.is_custom) || (is_template_import && !def.is_custom) || (!is_custom_import && !is_template_import);
-             if (type_match && def.type == import_item_type) {
-                 this->template_definitions[getCurrentNamespace()][name] = std::move(def);
+        std::string imported_content = CHTLLoader::load(this->file_path, pathToken.lexeme);
+        OriginType origin_type = OriginType::HTML;
+        if (typeToken.lexeme == "Style") origin_type = OriginType::STYLE;
+        else if (typeToken.lexeme == "JavaScript") origin_type = OriginType::JAVASCRIPT;
+
+        auto origin_node = std::make_unique<OriginNode>(imported_content, origin_type);
+        origin_node->name = alias;
+        this->origin_definitions[getCurrentNamespace()][alias] = std::move(origin_node);
+
+    } else {
+        std::string imported_content = CHTLLoader::load(this->file_path, pathToken.lexeme);
+        std::string imported_path = FileSystem::getDirectory(this->file_path) + pathToken.lexeme;
+        CHTLLexer sub_lexer(imported_content, this->config);
+        std::vector<Token> sub_tokens = sub_lexer.scanTokens();
+        // Create a temporary parser just to analyze the file's definitions
+        CHTLParser sub_parser(imported_content, sub_tokens, imported_path, this->config);
+        sub_parser.parse();
+        auto& imported_template_map = sub_parser.getMutableTemplateDefinitions();
+
+        std::string source_namespace = getFilename(pathToken.lexeme);
+        if (!imported_template_map.count(source_namespace)) return; // Nothing to import
+
+        auto& source_definitions = imported_template_map.at(source_namespace);
+
+        // --- Logic for selective import ---
+        if (!import_item_name.empty()) { // Precise import
+            if (source_definitions.count(import_item_name)) {
+                TemplateDefinitionNode& def_to_import = source_definitions.at(import_item_name);
+                // Check if types match
+                bool type_match = (is_custom_import && def_to_import.is_custom) || (is_template_import && !def_to_import.is_custom);
+                if (type_match && def_to_import.type == import_item_type) {
+                    std::string final_name = alias.empty() ? import_item_name : alias;
+                    this->template_definitions[getCurrentNamespace()][final_name] = std::move(def_to_import);
+                } else {
+                    error(pathToken, "Imported item '" + import_item_name + "' does not match specified type.");
+                }
+            } else {
+                error(pathToken, "Item '" + import_item_name + "' not found in module '" + pathToken.lexeme + "'.");
+            }
+        } else if (typeToken.lexeme != "Chtl") { // Type/Wildcard Import
+             for (auto& [name, def] : source_definitions) {
+                bool type_match = (is_custom_import && def.is_custom) || (is_template_import && !def.is_custom) || (!is_custom_import && !is_template_import);
+                 if (type_match && def.type == import_item_type) {
+                     this->template_definitions[getCurrentNamespace()][name] = std::move(def);
+                 }
              }
-         }
-    } else { // Full CHTL import
-        this->template_definitions[source_namespace] = std::move(source_definitions);
+        } else { // Full CHTL import
+            this->template_definitions[source_namespace] = std::move(source_definitions);
+        }
     }
 }
 
@@ -730,28 +761,35 @@ std::unique_ptr<IfNode> CHTLParser::parseIfBlock() {
         error(peek(), "If block cannot be empty.");
     }
 
-    // The first property must be the condition.
-    std::string condition_key_str;
-    while (!check(TokenType::COLON) && !isAtEnd()) {
-        condition_key_str += advance().lexeme;
-    }
-    if (condition_key_str != "condition") {
-        error(peek(), "First property in 'if' block must be 'condition'.");
+    // The first item must be the condition.
+    Token condition_keyword = consume(TokenType::IDENTIFIER, "Expect 'condition' keyword.");
+    if (condition_keyword.lexeme != "condition") {
+        error(condition_keyword, "First property in 'if' block must be 'condition'.");
     }
     consume(TokenType::COLON, "Expect ':' after 'condition'.");
     ifNode->condition = parseExpression();
 
-    // Subsequent properties form the body of the if statement.
-    while (match({TokenType::COMMA})) {
-        if (check(TokenType::RIGHT_BRACE)) break; // Optional trailing comma
+    // Now, determine if the body contains properties or child elements.
+    if (match({TokenType::COMMA})) {
+        // This must be a property block
+        do {
+            if (check(TokenType::RIGHT_BRACE)) break; // Optional trailing comma
+            std::string key_str;
+            while (!check(TokenType::COLON) && !isAtEnd()) {
+                key_str += advance().lexeme;
+            }
+            consume(TokenType::COLON, "Expect ':' after property name.");
+            auto value_expr = parseExpression();
+            ifNode->properties.push_back({key_str, std::move(value_expr)});
+        } while (match({TokenType::COMMA}));
 
-        std::string key_str;
-        while (!check(TokenType::COLON) && !isAtEnd()) {
-            key_str += advance().lexeme;
+    } else {
+        // This must be a block of child elements
+        while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+            for (auto& child : parseDeclaration()) {
+                ifNode->children.push_back(std::move(child));
+            }
         }
-        consume(TokenType::COLON, "Expect ':' after property name.");
-        auto value_expr = parseExpression();
-        ifNode->body.push_back({key_str, std::move(value_expr)});
     }
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' after if block.");
@@ -778,6 +816,27 @@ std::unique_ptr<BaseNode> CHTLParser::parseOriginBlock() {
     if (type.lexeme == "Style") originType = OriginType::STYLE;
     else if (type.lexeme == "JavaScript") originType = OriginType::JAVASCRIPT;
     return std::make_unique<OriginNode>(content, originType);
+}
+
+std::vector<std::unique_ptr<BaseNode>> CHTLParser::parseNamedOriginUsage() {
+    consume(TokenType::LEFT_BRACKET, "Expect '['.");
+    consume(TokenType::IDENTIFIER, "Expect 'Origin'.");
+    consume(TokenType::RIGHT_BRACKET, "Expect ']'.");
+    consume(TokenType::AT, "Expect '@'.");
+    Token type = consume(TokenType::IDENTIFIER, "Expect origin type.");
+    Token name = consume(TokenType::IDENTIFIER, "Expect origin block name.");
+    consume(TokenType::SEMICOLON, "Expect ';'.");
+
+    // For now, we only look in the current namespace. A full implementation would be more complex.
+    std::string current_ns = getCurrentNamespace();
+    if (origin_definitions.count(current_ns) && origin_definitions[current_ns].count(name.lexeme)) {
+        std::vector<std::unique_ptr<BaseNode>> nodes;
+        nodes.push_back(origin_definitions[current_ns][name.lexeme]->clone());
+        return nodes;
+    }
+
+    error(name, "Named origin block '" + name.lexeme + "' not found.");
+    return {};
 }
 
 // --- Expression Parser (Full Implementation) ---
@@ -906,6 +965,9 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
         }
     }
     if (match({TokenType::STRING})) { return std::make_unique<LiteralExpr>(0, previous().lexeme, true); }
+    if (match({TokenType::REACTIVE_VAR})) {
+        return std::make_unique<ReactiveVarExpr>(previous().lexeme);
+    }
     if (match({TokenType::LEFT_PAREN})) {
         auto expr = parseExpression();
         consume(TokenType::RIGHT_PAREN, "Expect ')'.");

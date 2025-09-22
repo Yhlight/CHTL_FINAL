@@ -30,6 +30,9 @@ public:
     // Custom Origin Types from [OriginType] block
     std::map<std::string, std::string> origin_type_map;
 
+public:
+    void parseFromString(const std::string& content);
+
 private:
     void setDefaultKeywords();
 };

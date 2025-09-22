@@ -16,7 +16,8 @@ public:
     std::unique_ptr<BaseNode> clone() const override;
 
     std::unique_ptr<Expr> condition;
-    std::vector<AttributeNode> body;
+    std::vector<std::unique_ptr<BaseNode>> children; // Can hold elements for conditional rendering
+    std::vector<AttributeNode> properties; // Can hold properties for conditional styling
 };
 
 } // namespace CHTL

@@ -228,6 +228,12 @@ void ExpressionEvaluator::visit(DynamicReferenceExpr& expr) {
     throw std::runtime_error("DynamicReferenceExpr cannot be evaluated statically.");
 }
 
+void ExpressionEvaluator::visit(ReactiveVarExpr& expr) {
+    // This also cannot be evaluated statically. Its presence in an expression
+    // tree is a signal to the generator to create reactive JS code.
+    throw std::runtime_error("ReactiveVarExpr cannot be evaluated statically.");
+}
+
 ElementNode* ExpressionEvaluator::findElement(BaseNode* context, const std::string& selector) {
     // Handle indexed selectors like "div[0]"
     size_t bracket_pos = selector.find('[');
