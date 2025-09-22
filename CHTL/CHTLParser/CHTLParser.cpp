@@ -885,10 +885,8 @@ std::unique_ptr<Expr> CHTLParser::parsePrimary() {
             consume(TokenType::RIGHT_PAREN, "Expect ')'.");
             return std::make_unique<VarExpr>(first_part.lexeme, key_name, std::move(override_expr));
         } else {
-            // It's a self-referential property (e.g., 'width' in 'width > 100px')
-            // We represent this as a ReferenceExpr with an empty selector.
-            Token empty_selector = {TokenType::IDENTIFIER, "", first_part.line, first_part.position};
-            return std::make_unique<ReferenceExpr>(empty_selector, first_part);
+            // It's an undecorated string literal
+            return std::make_unique<LiteralExpr>(0, first_part.lexeme, true);
         }
     }
     if (check(TokenType::SYMBOL) && (peek().lexeme == "#" || peek().lexeme == ".")) {

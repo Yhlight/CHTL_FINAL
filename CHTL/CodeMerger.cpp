@@ -10,10 +10,17 @@ namespace CHTL {
     ) {
         std::string result = js_with_placeholders;
 
-        for(auto const& [id, content] : js_fragments) {
-            size_t pos = result.find(id);
-            if (pos != std::string::npos) {
-                result.replace(pos, id.length(), content);
+        // Iterate to handle cases where placeholders might be generated inside other placeholders
+        // or multiple times. A single pass is not sufficient.
+        bool replaced_in_pass = true;
+        while(replaced_in_pass) {
+            replaced_in_pass = false;
+            for(auto const& [id, content] : js_fragments) {
+                size_t pos = result.find(id);
+                if (pos != std::string::npos) {
+                    result.replace(pos, id.length(), content);
+                    replaced_in_pass = true;
+                }
             }
         }
 

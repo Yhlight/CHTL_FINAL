@@ -26,6 +26,7 @@ namespace CHTL {
         // Step 1: Separate all fragments into their respective buckets.
         for (const auto& fragment : fragments) {
             switch (fragment.type) {
+                case FragmentType::DIRECTIVE:
                 case FragmentType::CHTL:
                     chtl_content += fragment.content;
                     break;
@@ -36,7 +37,14 @@ namespace CHTL {
                     chtl_js_content_with_placeholders += fragment.content;
                     break;
                 case FragmentType::JS:
-                    plain_js_fragments[fragment.placeholder_id] = fragment.content;
+                    if (!fragment.placeholder_id.empty()) {
+                        plain_js_fragments[fragment.placeholder_id] = fragment.content;
+                    }
+                    break;
+                case FragmentType::HTML: // Raw HTML from [Origin] blocks
+                    // For now, we assume [Origin] @Html is handled by the CHTL parser and generator
+                    // A future improvement would be to pass this directly to the final output.
+                    chtl_content += fragment.content;
                     break;
                 case FragmentType::UNKNOWN:
                     break;

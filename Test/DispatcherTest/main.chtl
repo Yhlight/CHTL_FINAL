@@ -1,0 +1,8 @@
+use html5;
+
+body {
+    style {
+        color: blue;
+    }
+    text: "Hello Dispatcher";
+}
