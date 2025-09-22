@@ -2,6 +2,14 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <vector>
+#include <sys/stat.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dirent.h>
+#endif
 
 namespace CHTL {
 
@@ -36,6 +44,49 @@ void FileSystem::writeFile(const std::string& path, const std::string& content) 
 bool FileSystem::fileExists(const std::string& path) {
     std::ifstream file(path);
     return file.good();
+}
+
+bool FileSystem::isDirectory(const std::string& path) {
+    struct stat info;
+    if (stat(path.c_str(), &info) != 0) {
+        return false;
+    }
+    return (info.st_mode & S_IFDIR) != 0;
+}
+
+std::vector<std::string> FileSystem::listDirectory(const std::string& path) {
+    std::vector<std::string> files;
+#ifdef _WIN32
+    std::string search_path = path + "/*.*";
+    WIN32_FIND_DATA fd;
+    HANDLE hFind = ::FindFirstFile(search_path.c_str(), &fd);
+    if (hFind != INVALID_HANDLE_VALUE) {
+        do {
+            if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+                files.push_back(fd.cFileName);
+            } else {
+                 // Also add directories, but ignore '.' and '..'
+                if (strcmp(fd.cFileName, ".") != 0 && strcmp(fd.cFileName, "..") != 0) {
+                    files.push_back(fd.cFileName);
+                }
+            }
+        } while (::FindNextFile(hFind, &fd));
+        ::FindClose(hFind);
+    }
+#else
+    DIR *dir;
+    struct dirent *ent;
+    if ((dir = opendir(path.c_str())) != NULL) {
+        while ((ent = readdir(dir)) != NULL) {
+            std::string file_name = ent->d_name;
+            if (file_name != "." && file_name != "..") {
+                files.push_back(file_name);
+            }
+        }
+        closedir(dir);
+    }
+#endif
+    return files;
 }
 
 } // namespace CHTL

@@ -6,18 +6,52 @@
 #include <vector>
 #include <string>
 
+#include "../Util/ZipUtil/ZipUtil.h"
+
 void printUsage() {
     std::cout << "Usage: chtl <input_file> [options]\n";
+    std::cout << "       chtl --pack-cmod <dir_path> -o <output.cmod>\n";
     std::cout << "Options:\n";
     std::cout << "  --inline        Embed CSS and JS into the HTML file.\n";
     std::cout << "  --default-struct  Wrap the output in a basic html5 document structure.\n";
     std::cout << "  -o <output_file>  Specify the base name for output files.\n";
 }
 
+// --- CMOD Packaging Logic ---
+void packageCmod(const std::string& dir_path, const std::string& output_file) {
+    // 1. Validate structure
+    if (!CHTL::Util::FileSystem::isDirectory(dir_path + "/src") || !CHTL::Util::FileSystem::isDirectory(dir_path + "/info")) {
+        std::cerr << "Error: CMOD directory must contain 'src' and 'info' subdirectories." << std::endl;
+        exit(1);
+    }
+
+    // 2. Pack using ZipUtil
+    std::cout << "Packaging CMOD module from '" << dir_path << "'..." << std::endl;
+    if (CHTL::Util::ZipUtil::packDirectory(dir_path, output_file)) {
+        std::cout << "Successfully created CMOD module: " << output_file << std::endl;
+    } else {
+        std::cerr << "Error: Failed to create CMOD module." << std::endl;
+        exit(1);
+    }
+}
+
+
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         printUsage();
         return 1;
+    }
+
+    // --- Argument Parsing ---
+    if (std::string(argv[1]) == "--pack-cmod") {
+        if (argc != 5 || std::string(argv[3]) != "-o") {
+            printUsage();
+            return 1;
+        }
+        std::string dir_path = argv[2];
+        std::string output_file = argv[4];
+        packageCmod(dir_path, output_file);
+        return 0; // Exit after packaging
     }
 
     std::string input_file;

@@ -2,6 +2,7 @@
 #define FILE_SYSTEM_H
 
 #include <string>
+#include <vector>
 
 namespace CHTL {
 
@@ -11,6 +12,8 @@ public:
     static void writeFile(const std::string& path, const std::string& content);
     static std::string getDirectory(const std::string& path);
     static bool fileExists(const std::string& path);
+    static bool isDirectory(const std::string& path);
+    static std::vector<std::string> listDirectory(const std::string& path);
 };
 
 } // namespace CHTL
