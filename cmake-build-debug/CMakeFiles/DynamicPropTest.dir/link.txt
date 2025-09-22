@@ -1,0 +1,1 @@
+/usr/bin/c++ -Xlinker --dependency-file=CMakeFiles/DynamicPropTest.dir/link.d CMakeFiles/DynamicPropTest.dir/Test/DynamicPropTest/main.cpp.o -o build/DynamicPropTest  libchtl_lib.a

@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
-project(CHTL_Project CXX)
+project(CHTL_Project C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Set C standard
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # --- Define the CHTL Library ---
 # Gather all source files for the library (excluding test and CLI main files)
@@ -16,15 +20,21 @@ file(GLOB_RECURSE CHTL_SOURCES
     "Scanner/*.cpp"
     "Util/*.cpp"
     "Util/*/*.cpp"
-    "miniz.c"
 )
+
+# Add miniz.c explicitly since it's a C file in the root directory
+list(APPEND CHTL_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/miniz.c")
 
 # Create a static library from the source files
 add_library(chtl_lib STATIC ${CHTL_SOURCES})
 
+# Add compile definitions for miniz
+# Don't define MINIZ_NO_ARCHIVE_APIS to enable ZIP archive APIs
+
 # --- Define the Main CLI Executable ---
 add_executable(chtl CLI/main.cpp)
 target_link_libraries(chtl PRIVATE chtl_lib)
+# Don't define MINIZ_NO_ARCHIVE_APIS to enable ZIP archive APIs
 set_target_properties(chtl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build")
 
 # --- Define the Test Executables ---

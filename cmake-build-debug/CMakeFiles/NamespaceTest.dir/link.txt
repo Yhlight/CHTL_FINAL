@@ -1,0 +1,1 @@
+/usr/bin/c++ -Xlinker --dependency-file=CMakeFiles/NamespaceTest.dir/link.d CMakeFiles/NamespaceTest.dir/Test/NamespaceTest/main.cpp.o -o build/NamespaceTest  libchtl_lib.a

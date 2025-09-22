@@ -1,0 +1,1 @@
+/usr/bin/c++ -Xlinker --dependency-file=CMakeFiles/ScriptTest.dir/link.d CMakeFiles/ScriptTest.dir/Test/ScriptTest/main.cpp.o -o build/ScriptTest  libchtl_lib.a

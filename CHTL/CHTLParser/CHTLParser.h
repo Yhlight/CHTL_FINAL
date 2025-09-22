@@ -7,6 +7,7 @@
 #include "../CHTLNode/StyleNode.h"
 #include "../CHTLNode/ScriptNode.h"
 #include "../CHTLNode/IfNode.h"
+#include "../CHTLNode/OriginNode.h"
 #include "../CHTLNode/TemplateDefinitionNode.h"
 #include "../CHTLNode/ConfigNode.h"
 #include "../Config/Configuration.h"

@@ -1,0 +1,1 @@
+/usr/bin/c++ -Xlinker --dependency-file=CMakeFiles/TemplateStyleTest.dir/link.d CMakeFiles/TemplateStyleTest.dir/Test/TemplateStyleTest/main.cpp.o -o build/TemplateStyleTest  libchtl_lib.a

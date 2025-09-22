@@ -23,6 +23,23 @@
 
 namespace CHTL {
 
+// Helper function to convert kebab-case to camelCase
+std::string toCamelCase(const std::string& s) {
+    std::string result;
+    bool upper = false;
+    for (char c : s) {
+        if (c == '-') {
+            upper = true;
+        } else if (upper) {
+            result += std::toupper(c);
+            upper = false;
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
+
 // --- Helper to generate JS for a reactive attribute ---
 void CHTLGenerator::generateReactiveAttributeJS(ElementNode& node, const std::string& attr_key, Expr* expr) {
     static int reactive_id_counter = 0;
@@ -85,23 +102,6 @@ void CHTLGenerator::generateReactiveStyleJS(ElementNode& node, const std::string
         js_output << "  if (el) el.style." << toCamelCase(style_property) << " = newValue;\n";
         js_output << "});\n";
     }
-}
-
-// Helper function to convert kebab-case to camelCase
-std::string toCamelCase(const std::string& s) {
-    std::string result;
-    bool upper = false;
-    for (char c : s) {
-        if (c == '-') {
-            upper = true;
-        } else if (upper) {
-            result += std::toupper(c);
-            upper = false;
-        } else {
-            result += c;
-        }
-    }
-    return result;
 }
 
 // Helper to format doubles cleanly for CSS output
@@ -396,6 +396,11 @@ void CHTLGenerator::visit(ElementNode& node) {
                     public:
                         std::set<std::string>& found_vars;
                         VarFinder(std::set<std::string>& vars) : found_vars(vars) {}
+                        void check(Expr* expr) {
+                            if (expr) {
+                                expr->accept(*this);
+                            }
+                        }
                         void visit(BinaryExpr& expr) override { expr.left->accept(*this); expr.right->accept(*this); }
                         void visit(LiteralExpr& expr) override {}
                         void visit(VarExpr& expr) override {}

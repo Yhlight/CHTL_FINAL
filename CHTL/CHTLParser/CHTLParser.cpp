@@ -1,8 +1,8 @@
 #include "CHTLParser.h"
 #include "../CHTLLoader/CHTLLoader.h"
 #include "../CHTLLexer/CHTLLexer.h"
-#include "CHTL/CHTLNode/TextNode.h"
-#include "CHTL/CHTLNode/OriginNode.h"
+#include "../CHTLNode/TextNode.h"
+#include "../CHTLNode/OriginNode.h"
 #include "../../Util/FileSystem/FileSystem.h"
 #include <iostream>
 #include <stdexcept>

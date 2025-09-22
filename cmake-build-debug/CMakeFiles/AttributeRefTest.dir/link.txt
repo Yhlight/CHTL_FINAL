@@ -1,0 +1,1 @@
+/usr/bin/c++ -Xlinker --dependency-file=CMakeFiles/AttributeRefTest.dir/link.d CMakeFiles/AttributeRefTest.dir/Test/AttributeRefTest/main.cpp.o -o build/AttributeRefTest  libchtl_lib.a
