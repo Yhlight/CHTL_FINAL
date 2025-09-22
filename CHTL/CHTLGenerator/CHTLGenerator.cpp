@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <map>
 #include <sstream>
+#include <iostream>
 
 namespace CHTL {
 
@@ -234,9 +235,17 @@ void CHTLGenerator::visit(ElementNode& node) {
                 css_output << final_selector << " {\n";
                 for (const auto& prop : rule.properties) {
                     // NOTE: Dynamic expressions are NOT handled in global rules.
-                    ExpressionEvaluator evaluator(this->templates, this->doc_root);
-                    EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
-                    css_output << "  " << prop.key << ": " << format_css_double(result.value) << result.unit << ";\n";
+                    try {
+                        ExpressionEvaluator evaluator(this->templates, this->doc_root);
+                        EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), &node);
+                        if (result.type == ValueType::STRING) {
+                            css_output << "  " << prop.key << ": " << result.unit << ";\n";
+                        } else {
+                            css_output << "  " << prop.key << ": " << format_css_double(result.value) << result.unit << ";\n";
+                        }
+                    } catch (const std::runtime_error& e) {
+                        css_output << "  " << prop.key << ": " << "/* error: " << e.what() << " */" << ";\n";
+                    }
                 }
                 css_output << "}\n";
             }
@@ -465,7 +474,53 @@ void CHTLGenerator::visit(ElementNode& node) {
 }
 
 void CHTLGenerator::visit(TextNode& node) { html_output << node.text; }
-void CHTLGenerator::visit(StyleNode& node) {}
+void CHTLGenerator::visit(StyleNode& node) {
+    // Process local style block according to CHTL.md specification
+    // 1. Inline styles go to element's style attribute
+    // 2. Class/ID selectors go to global style block
+    // 3. Auto-add class/id attributes to element
+    
+    // Process direct properties (inline styles)
+    for (const auto& prop : node.direct_properties) {
+        // These would be added to the element's style attribute
+        // For now, we'll add them to global CSS as a placeholder
+        if (prop.value_expr) {
+            // Evaluate the expression to get the value
+            // For now, just output the key
+            css_output << prop.key << ": " << "/* value */" << "; ";
+        }
+    }
+    
+    // Process global rules (class/ID selectors)
+    for (const auto& rule : node.global_rules) {
+        // These go to the global style block
+        css_output << rule.selector << " { ";
+        for (const auto& prop : rule.properties) {
+            if (prop.value_expr) {
+                // Evaluate the expression to get the value
+                try {
+                    ExpressionEvaluator evaluator(this->templates, this->doc_root);
+                    EvaluatedValue result = evaluator.evaluate(prop.value_expr.get(), nullptr);
+                    if (result.type == ValueType::STRING) {
+                        css_output << prop.key << ": " << result.unit << "; ";
+                    } else {
+                        css_output << prop.key << ": " << format_css_double(result.value) << result.unit << "; ";
+                    }
+                } catch (const std::runtime_error& e) {
+                    // If evaluation fails, use placeholder
+                    css_output << prop.key << ": " << "/* error: " << e.what() << " */" << "; ";
+                }
+            }
+        }
+        css_output << "} ";
+    }
+    
+    // Process template applications
+    for (const auto& app : node.template_applications) {
+        // Handle template applications
+        // This would involve template resolution and property merging
+    }
+}
 void CHTLGenerator::visit(OriginNode& node) {
     if (node.type == OriginType::HTML) html_output << node.content;
     else if (node.type == OriginType::STYLE) css_output << node.content;
